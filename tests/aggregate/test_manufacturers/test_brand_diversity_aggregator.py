@@ -29,10 +29,10 @@ class TestBrandDiversityAggregator:
         # Should preserve full brand names
         assert result[0]["maker"] == "Stirling Soap Co."  # 3 unique soaps, first alphabetically
         assert result[0]["unique_soaps"] == 3
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["maker"] == "Barrister and Mann"  # 2 unique soaps
         assert result[1]["unique_soaps"] == 2
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_empty_data(self):
         """Test with empty data."""
@@ -62,7 +62,7 @@ class TestBrandDiversityAggregator:
         assert len(result) == 1
         assert result[0]["maker"] == "Single Soap Brand"
         assert result[0]["unique_soaps"] == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
 
     def test_soap_names_without_delimiter(self):
         """Test soap names that don't have the ' - ' delimiter."""

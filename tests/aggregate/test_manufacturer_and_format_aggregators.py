@@ -19,11 +19,11 @@ def test_aggregate_razor_manufacturers():
     assert result[0]["brand"] == "Gillette"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["brand"] == "Fatip"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_blade_manufacturers():
@@ -37,11 +37,11 @@ def test_aggregate_blade_manufacturers():
     assert result[0]["brand"] == "Gillette"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["brand"] == "Personna"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_soap_makers():
@@ -55,11 +55,11 @@ def test_aggregate_soap_makers():
     assert result[0]["maker"] == "Grooming Dept"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["maker"] == "Declaration Grooming"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_razor_formats_basic():
@@ -74,11 +74,11 @@ def test_aggregate_razor_formats_basic():
     assert result[0]["format"] == "DE"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["format"] == "Straight"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_razor_formats_shavette_ac():
