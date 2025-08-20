@@ -17,7 +17,11 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor-blade combination data from aggregated data."""
         data = self.data.get("razor_blade_combinations", [])
-        return self._validate_data_records(data, "razor_blade_combinations", ["name", "shaves"])
+        # Filter for combinations with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(
+            filtered_data, "razor_blade_combinations", ["name", "shaves"]
+        )
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -32,6 +36,10 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
         config["name"]["display_name"] = "Razor + Blade"
         return config
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all combinations with 5+ shaves."""
+        return False
+
 
 class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDeltaMixin):
     """Table generator for highest use count per blade in the hardware report."""
@@ -39,8 +47,10 @@ class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDel
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get highest use count per blade data from aggregated data."""
         data = self.data.get("highest_use_count_per_blade", [])
+        # Filter for entries with 5+ uses (as requested by user)
+        filtered_data = [item for item in data if item.get("uses", 0) >= 5]
         valid_data = self._validate_data_records(
-            data, "highest_use_count_per_blade", ["user", "blade", "uses"]
+            filtered_data, "highest_use_count_per_blade", ["user", "blade", "uses"]
         )
 
         # Add a name field for delta calculations (combine user and blade)
@@ -58,6 +68,10 @@ class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDel
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the highest use count per blade table."""
         return STANDARD_USE_COUNT_COLUMNS
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all entries with 5+ uses."""
+        return False
 
 
 # Factory method alternatives for simplified table creation

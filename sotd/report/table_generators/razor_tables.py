@@ -9,7 +9,9 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor format data from aggregated data."""
         data = self.data.get("razor_formats", [])
-        return self._validate_data_records(data, "razor_formats", ["format", "shaves"])
+        # Filter for formats with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "razor_formats", ["format", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -35,6 +37,10 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all formats with 5+ shaves."""
+        return False
+
 
 class RazorsTableGenerator(StandardProductTableGenerator):
     """Table generator for individual razors in the hardware report."""
@@ -42,7 +48,9 @@ class RazorsTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razors data from aggregated data."""
         data = self.data.get("razors", [])
-        return self._validate_data_records(data, "razors", ["name", "shaves"])
+        # Filter for razors with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "razors", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -61,6 +69,10 @@ class RazorsTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all razors with 5+ shaves."""
+        return False
+
 
 class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     """Table generator for razor manufacturers in the hardware report."""
@@ -68,7 +80,11 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor manufacturer data from aggregated data."""
         data = self.data.get("razor_manufacturers", [])
-        return self._validate_data_records(data, "razor_manufacturers", ["brand", "shaves"])
+        # Filter for manufacturers with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(
+            filtered_data, "razor_manufacturers", ["brand", "shaves"]
+        )
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -93,6 +109,10 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
                 "decimals": 2,
             },
         }
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all manufacturers with 5+ shaves."""
+        return False
 
 
 # Factory method alternatives for simplified table creation

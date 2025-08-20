@@ -12,7 +12,9 @@ class BrushesTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get brushes data from aggregated data."""
         data = self.data.get("brushes", [])
-        return self._validate_data_records(data, "brushes", ["name", "shaves"])
+        # Filter for brushes with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "brushes", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -31,6 +33,10 @@ class BrushesTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all brushes with 5+ shaves."""
+        return False
+
 
 class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
     """Table generator for brush handle makers in the hardware report."""
@@ -38,7 +44,11 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get brush handle maker data from aggregated data."""
         data = self.data.get("brush_handle_makers", [])
-        return self._validate_data_records(data, "brush_handle_makers", ["handle_maker", "shaves"])
+        # Filter for makers with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(
+            filtered_data, "brush_handle_makers", ["handle_maker", "shaves"]
+        )
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -61,6 +71,10 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all makers with 5+ shaves."""
+        return False
+
 
 class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
     """Table generator for brush knot makers in the hardware report."""
@@ -68,7 +82,9 @@ class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get brush knot maker data from aggregated data."""
         data = self.data.get("brush_knot_makers", [])
-        return self._validate_data_records(data, "brush_knot_makers", ["brand", "shaves"])
+        # Filter for makers with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "brush_knot_makers", ["brand", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -91,6 +107,10 @@ class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all makers with 5+ shaves."""
+        return False
+
 
 class BrushFibersTableGenerator(StandardProductTableGenerator):
     """Table generator for brush fibers in the hardware report."""
@@ -98,7 +118,9 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get brush fiber data from aggregated data."""
         data = self.data.get("brush_fibers", [])
-        valid_data = self._validate_data_records(data, "brush_fibers", ["fiber", "shaves"])
+        # Filter for fibers with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(filtered_data, "brush_fibers", ["fiber", "shaves"])
 
         # Normalize fiber names and merge duplicates
         fiber_counts = {}  # Track normalized fiber names and their counts
@@ -155,6 +177,10 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all fibers with 5+ shaves."""
+        return False
+
 
 class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     """Table generator for brush knot sizes in the hardware report."""
@@ -162,8 +188,10 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get brush knot size data from aggregated data."""
         data = self.data.get("brush_knot_sizes", [])
+        # Filter for sizes with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
         valid_data = self._validate_data_records(
-            data, "brush_knot_sizes", ["knot_size_mm", "shaves"]
+            filtered_data, "brush_knot_sizes", ["knot_size_mm", "shaves"]
         )
 
         # Filter invalid sizes
@@ -218,6 +246,10 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
                 "decimals": 2,
             },
         }
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all sizes with 5+ shaves."""
+        return False
 
 
 # Factory method alternatives for simplified table creation

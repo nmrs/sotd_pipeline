@@ -3,7 +3,12 @@
 
 from typing import Any
 
-from .base import BaseTableGenerator, StandardProductTableGenerator, ManufacturerTableGenerator
+from .base import (
+    BaseTableGenerator,
+    DataValidationMixin,
+    ManufacturerTableGenerator,
+    StandardProductTableGenerator,
+)
 
 
 class BladesTableGenerator(StandardProductTableGenerator):
@@ -12,7 +17,9 @@ class BladesTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get blades data from aggregated data."""
         data = self.data.get("blades", [])
-        return self._validate_data_records(data, "blades", ["name", "shaves"])
+        # Filter for blades with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "blades", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -31,6 +38,10 @@ class BladesTableGenerator(StandardProductTableGenerator):
             },
         }
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all blades with 5+ shaves."""
+        return False
+
 
 class BladeManufacturersTableGenerator(ManufacturerTableGenerator):
     """Table generator for blade manufacturers in the hardware report."""
@@ -38,11 +49,58 @@ class BladeManufacturersTableGenerator(ManufacturerTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get blade manufacturer data from aggregated data."""
         data = self.data.get("blade_manufacturers", [])
-        return self._validate_data_records(data, "blade_manufacturers", ["brand", "shaves"])
+        # Filter for manufacturers with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(
+            filtered_data, "blade_manufacturers", ["brand", "shaves"]
+        )
 
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Blade Manufacturers"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all manufacturers with 5+ shaves."""
+        return False
+
+
+class BladeUsageDistributionTableGenerator(BaseTableGenerator, DataValidationMixin):
+    """Generates a table of blade usage distribution statistics."""
+
+    def get_table_data(self) -> list[dict[str, Any]]:
+        """Get blade usage distribution data from aggregated data."""
+        data = self.data.get("blade_usage_distribution", [])
+        return self._validate_data_records(
+            data, "blade_usage_distribution", ["use_count", "shaves"]
+        )
+
+    def get_table_title(self) -> str:
+        """Return the table title."""
+        return "Blade Usage Distribution"
+
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for blade usage distribution table."""
+        return {
+            "use_count": {
+                "display_name": "Uses per Blade",
+                "format": "number",
+                "sort_order": "asc",
+            },
+            "shaves": {
+                "display_name": "Total Shaves",
+                "format": "number",
+                "sort_order": "desc",
+            },
+            "unique_users": {
+                "display_name": "Unique Users",
+                "format": "number",
+                "sort_order": "desc",
+            },
+        }
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all usage levels."""
+        return False
 
 
 # Factory method alternatives for simplified table creation

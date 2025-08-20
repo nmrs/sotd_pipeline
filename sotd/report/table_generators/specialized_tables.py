@@ -154,7 +154,11 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Blackbird plates data from aggregated data."""
         data = self.data.get("blackbird_plates", [])
-        valid_data = self._validate_data_records(data, "blackbird_plates", ["plate", "shaves"])
+        # Filter for plates with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "blackbird_plates", ["plate", "shaves"]
+        )
 
         # Map plate to plate field (no transformation needed, just validation)
         result = []
@@ -183,6 +187,10 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
 
     def _get_target_field(self) -> str:
         return "plate"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all plates with 5+ shaves."""
+        return False
 
 
 class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
@@ -219,8 +227,10 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Christopher Bradley plates data from aggregated data."""
         data = self.data.get("christopher_bradley_plates", [])
+        # Filter for plates with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
         valid_data = self._validate_data_records(
-            data, "christopher_bradley_plates", ["plate_type", "plate_level", "shaves"]
+            filtered_data, "christopher_bradley_plates", ["plate_type", "plate_level", "shaves"]
         )
 
         # Use unified transformation method
@@ -244,6 +254,10 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
 
     def _get_target_field(self) -> str:
         return "plate"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all plates with 5+ shaves."""
+        return False
 
     def _transform_historical_data_for_deltas(
         self, historical_data: list[dict[str, Any]], source_field: str, target_field: str
@@ -273,7 +287,11 @@ class GameChangerPlatesTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Game Changer plates data from aggregated data."""
         data = self.data.get("game_changer_plates", [])
-        valid_data = self._validate_data_records(data, "game_changer_plates", ["gap", "shaves"])
+        # Filter for plates with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "game_changer_plates", ["gap", "shaves"]
+        )
 
         # Map gap to plate field
         result = []
@@ -306,6 +324,10 @@ class GameChangerPlatesTableGenerator(DataTransformingTableGenerator):
     def _get_target_field(self) -> str:
         return "plate"
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all plates with 5+ shaves."""
+        return False
+
 
 class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
     """Table generator for Super Speed tips in the hardware report."""
@@ -313,7 +335,11 @@ class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Super Speed tips data from aggregated data."""
         data = self.data.get("super_speed_tips", [])
-        valid_data = self._validate_data_records(data, "super_speed_tips", ["tip", "shaves"])
+        # Filter for tips with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "super_speed_tips", ["tip", "shaves"]
+        )
 
         # Map tip to plate field
         result = []
@@ -346,6 +372,10 @@ class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
     def _get_target_field(self) -> str:
         return "plate"
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all tips with 5+ shaves."""
+        return False
+
 
 class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     """Table generator for straight razor widths in the hardware report."""
@@ -353,7 +383,11 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor widths data from aggregated data."""
         data = self.data.get("straight_widths", [])
-        valid_data = self._validate_data_records(data, "straight_widths", ["width", "shaves"])
+        # Filter for widths with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "straight_widths", ["width", "shaves"]
+        )
 
         # Map width to width field (no transformation needed, just validation)
         result = []
@@ -396,6 +430,10 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     def _get_target_field(self) -> str:
         return "width"
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all widths with 5+ shaves."""
+        return False
+
 
 class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     """Table generator for straight razor grinds in the hardware report."""
@@ -403,7 +441,11 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor grinds data from aggregated data."""
         data = self.data.get("straight_grinds", [])
-        valid_data = self._validate_data_records(data, "straight_grinds", ["grind", "shaves"])
+        # Filter for grinds with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "straight_grinds", ["grind", "shaves"]
+        )
 
         # Map grind to grind field (no transformation needed, just validation)
         result = []
@@ -446,6 +488,10 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     def _get_target_field(self) -> str:
         return "grind"
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all grinds with 5+ shaves."""
+        return False
+
 
 class StraightPointsTableGenerator(DataTransformingTableGenerator):
     """Table generator for straight razor points in the hardware report."""
@@ -453,7 +499,11 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor points data from aggregated data."""
         data = self.data.get("straight_points", [])
-        valid_data = self._validate_data_records(data, "straight_points", ["point", "shaves"])
+        # Filter for points with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        valid_data = self._validate_data_records(
+            filtered_data, "straight_points", ["point", "shaves"]
+        )
 
         # Map point to point field (no transformation needed, just validation)
         result = []
@@ -495,6 +545,10 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
 
     def _get_target_field(self) -> str:
         return "point"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all points with 5+ shaves."""
+        return False
 
 
 # Factory method alternatives for simplified table creation
