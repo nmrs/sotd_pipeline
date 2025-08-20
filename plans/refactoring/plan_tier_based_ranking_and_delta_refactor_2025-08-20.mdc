@@ -10,30 +10,468 @@ Refactor the SOTD Pipeline aggregator system to implement tier-based ranking ins
 
 ## 🧩 Component Steps
 
-### Phase 1: Aggregator Ranking System Refactor
-- **1.1**: ✅ Update BaseAggregator with tier-based ranking logic
-- **1.2**: Implement tie detection and position formatting
-- **1.3**: Update simple aggregators (razors, blades, brushes, soaps)
-- **1.4**: Update medium complexity aggregators (users, diversity metrics)
-- **1.5**: Update complex aggregators (format-specific, specialized)
+### Phase 1: Core Ranking System (COMPLETED)
+- **1.1**: ✅ BaseAggregator tier-based ranking implementation
+- **1.2**: ✅ Table generator rank formatting and display
 
-### Phase 2: Delta Calculation System Updates
-- **2.1**: Update DeltaCalculator to work with new ranking system
+### Phase 2: Delta Calculation Updates
+- **2.1**: Update DeltaCalculator for tier-based ranking
 - **2.2**: Update AnnualDeltaCalculator for annual comparisons
-- **2.3**: Update table generators to use new ranking data
-- **2.4**: Implement tier-based delta calculations
+- **2.3**: Implement tier-based delta calculations
 
-### Phase 3: Report Table Improvements
+### Phase 3: Report Table Integration
 - **3.1**: Add rank column to all report tables
-- **3.2**: Implement tie indicator display ("2=" for tied items)
-- **3.3**: Update table formatting and styling
-- **3.4**: Ensure consistent rank display across all report types
+- **3.2**: Update table generators to use new ranking system
+- **3.3**: Ensure consistent rank display across all report types
 
 ### Phase 4: Testing and Validation
-- **4.1**: Unit tests for new ranking logic
-- **4.2**: Integration tests with real data
-- **4.3**: End-to-end testing of complete workflow
-- **4.4**: Performance validation and optimization
+- **4.1**: Integration tests with real data
+- **4.2**: End-to-end testing of complete workflow
+- **4.3**: Performance validation and optimization
+
+## 🔁 Implementation Prompts
+
+### Phase 2.1: Update DeltaCalculator for Tier-Based Ranking
+
+```text
+Update the DeltaCalculator class to work with the new tier-based ranking system.
+
+## Requirements
+
+### Core Functionality
+- Update delta calculation logic to work with "rank" field instead of "position"
+- Ensure delta calculations reflect tier-based ranking changes (e.g., "↑1" for moving up one tier)
+- Handle tie scenarios correctly in delta calculations
+- Maintain backward compatibility for existing delta display logic
+
+### Technical Specifications
+- Input: Current and historical data with "rank" field (numeric values: 1, 2, 2, 3)
+- Output: Delta calculations that reflect tier movement, not sequential row changes
+- Delta format: "↑1", "↓1", "=" for no change
+- Handle edge cases: new items, removed items, tied items
+
+### Implementation Approach
+- Update field references from "position" to "rank"
+- Modify delta calculation to work with tier-based ranks
+- Ensure delta symbols correctly represent tier movement
+- Add comprehensive test coverage for tie scenarios
+
+## Test Requirements
+
+### Unit Tests
+- **Test basic delta calculation**: Verify correct delta for simple rank changes
+- **Test tie scenarios**: Verify delta calculation when items are tied
+- **Test tier movement**: Verify "↑1" when moving up one tier, not sequential positions
+- **Test edge cases**: New items, removed items, all items tied
+
+### Integration Tests
+- Test with actual aggregator output data
+- Validate delta calculations work with real ranking data
+- Ensure no performance regression
+
+## Success Criteria
+- [ ] DeltaCalculator works with "rank" field instead of "position"
+- [ ] Delta calculations reflect tier-based ranking changes
+- [ ] Tie scenarios handled correctly
+- [ ] All unit tests pass
+- [ ] Integration tests validate real data scenarios
+```
+
+### Phase 2.2: Update AnnualDeltaCalculator for Annual Comparisons
+
+```text
+Update the AnnualDeltaCalculator class to work with tier-based ranking for annual comparisons.
+
+## Requirements
+
+### Core Functionality
+- Update annual delta calculations to use new ranking system
+- Ensure annual comparisons reflect tier-based ranking changes
+- Handle tie scenarios correctly in annual delta calculations
+- Maintain consistency with monthly delta calculations
+
+### Technical Specifications
+- Input: Annual current and historical data with "rank" field
+- Output: Annual delta calculations reflecting tier movement
+- Handle annual-specific scenarios: missing months, data gaps
+- Ensure consistent delta format with monthly calculations
+
+### Implementation Approach
+- Update field references from "position" to "rank"
+- Modify annual delta logic to work with tier-based ranks
+- Handle annual data structure differences
+- Add comprehensive test coverage for annual scenarios
+
+## Test Requirements
+
+### Unit Tests
+- **Test annual delta calculation**: Verify correct delta for annual rank changes
+- **Test tie scenarios**: Verify annual delta calculation when items are tied
+- **Test missing data**: Handle scenarios with missing months or incomplete data
+- **Test edge cases**: New annual items, removed items, all items tied
+
+### Integration Tests
+- Test with actual annual aggregator output data
+- Validate annual delta calculations work with real ranking data
+- Ensure consistency with monthly delta calculations
+
+## Success Criteria
+- [ ] AnnualDeltaCalculator works with "rank" field
+- [ ] Annual delta calculations reflect tier-based ranking changes
+- [ ] Tie scenarios handled correctly in annual context
+- [ ] All unit tests pass
+- [ ] Integration tests validate real annual data scenarios
+```
+
+### Phase 2.3: Implement Tier-Based Delta Calculations
+
+```text
+Implement comprehensive tier-based delta calculation logic across the delta system.
+
+## Requirements
+
+### Core Functionality
+- Implement tier-aware delta calculation algorithms
+- Handle complex tie scenarios (2-way, 3-way, mixed ties)
+- Ensure delta calculations accurately reflect tier movement
+- Provide clear, user-friendly delta indicators
+
+### Technical Specifications
+- Delta calculation: `delta = historical_tier - current_tier`
+- Tier identification: Group items by identical ranking values
+- Delta symbols: "↑1" (up one tier), "↓1" (down one tier), "=" (same tier)
+- Handle edge cases: new tiers, removed tiers, tier splits/merges
+
+### Implementation Approach
+- Create tier identification logic for ranking data
+- Implement tier-based delta calculation algorithms
+- Handle complex tie scenarios gracefully
+- Add comprehensive test coverage for all scenarios
+
+## Test Requirements
+
+### Unit Tests
+- **Test tier identification**: Verify correct tier grouping for various scenarios
+- **Test delta calculation**: Verify correct delta for tier movements
+- **Test complex ties**: 2-way, 3-way, mixed tie patterns
+- **Test edge cases**: New tiers, removed tiers, tier changes
+
+### Integration Tests
+- Test with actual aggregator and delta calculator data
+- Validate tier-based calculations work with real ranking data
+- Ensure performance acceptable for large datasets
+
+## Success Criteria
+- [ ] Tier identification logic correctly groups items by rank
+- [ ] Delta calculations accurately reflect tier movement
+- [ ] Complex tie scenarios handled correctly
+- [ ] All unit tests pass
+- [ ] Integration tests validate real data scenarios
+```
+
+### Phase 3.1: Add Rank Column to All Report Tables
+
+```text
+Add the rank column to all report table generators to display tier-based rankings.
+
+## Requirements
+
+### Core Functionality
+- Add "Rank" column to all report table generators
+- Ensure rank column appears consistently across all report types
+- Display numeric ranks with tie indicators ("2=" for tied items)
+- Maintain existing table formatting and styling
+
+### Technical Specifications
+- Column name: "Rank" (display name), "rank" (field name)
+- Column position: First column in all product tables
+- Data source: "rank" field from aggregator output
+- Format: Numeric value with "=" suffix for tied items
+
+### Implementation Approach
+- Update all table generator classes to include rank column
+- Ensure rank column appears in STANDARD_PRODUCT_COLUMNS
+- Test rank column display across all report types
+- Maintain backward compatibility for existing table formats
+
+## Test Requirements
+
+### Unit Tests
+- **Test rank column addition**: Verify rank column appears in all table types
+- **Test column positioning**: Ensure rank column is first column
+- **Test data integration**: Verify rank data displays correctly
+- **Test formatting**: Ensure tie indicators display properly
+
+### Integration Tests
+- Test complete workflow from aggregation to table display
+- Validate rank column appears in all report types
+- Ensure no performance regression
+
+## Success Criteria
+- [ ] Rank column appears in all report table generators
+- [ ] Rank column positioned as first column consistently
+- [ ] Rank data displays correctly with tie indicators
+- [ ] All unit tests pass
+- [ ] Integration tests validate complete workflow
+```
+
+### Phase 3.2: Update Table Generators for New Ranking System
+
+```text
+Update all table generators to properly integrate with the new tier-based ranking system.
+
+## Requirements
+
+### Core Functionality
+- Update table generators to use "rank" field instead of "position"
+- Ensure tie indicators display correctly ("2=" for tied items)
+- Maintain consistent table formatting across all report types
+- Handle edge cases gracefully (no data, single items, all tied)
+
+### Technical Specifications
+- Input: Aggregator data with "rank" field (numeric values)
+- Output: Formatted tables with rank column and tie indicators
+- Tie formatting: Add "=" suffix to tied ranks
+- Column integration: Rank column as first column in all tables
+
+### Implementation Approach
+- Update all table generator classes to use new ranking system
+- Ensure tie formatting logic works consistently
+- Test rank column integration across all table types
+- Maintain existing table styling and functionality
+
+## Test Requirements
+
+### Unit Tests
+- **Test rank field integration**: Verify table generators use "rank" field
+- **Test tie formatting**: Ensure tie indicators display correctly
+- **Test column integration**: Verify rank column appears consistently
+- **Test edge cases**: Handle empty data, single items, all tied
+
+### Integration Tests
+- Test complete workflow from aggregation to table generation
+- Validate rank column and tie indicators in all report types
+- Ensure no performance regression
+
+## Success Criteria
+- [ ] All table generators use "rank" field
+- [ ] Tie indicators display correctly across all table types
+- [ ] Rank column integrated consistently
+- [ ] All unit tests pass
+- [ ] Integration tests validate complete workflow
+```
+
+### Phase 3.3: Ensure Consistent Rank Display Across All Report Types
+
+```text
+Ensure consistent rank display and formatting across all report types and table generators.
+
+## Requirements
+
+### Core Functionality
+- Standardize rank column display across all report types
+- Ensure consistent tie indicator formatting
+- Maintain uniform table styling and layout
+- Handle report-specific requirements gracefully
+
+### Technical Specifications
+- Rank column: Consistent name, position, and formatting
+- Tie indicators: Uniform "=" suffix for all tied items
+- Table styling: Consistent appearance across all report types
+- Report integration: Handle hardware, software, user, and diversity reports
+
+### Implementation Approach
+- Audit all table generators for consistency
+- Standardize rank column implementation
+- Ensure tie formatting works uniformly
+- Test rank display across all report types
+
+## Test Requirements
+
+### Unit Tests
+- **Test consistency**: Verify rank column appears consistently
+- **Test tie formatting**: Ensure uniform tie indicator display
+- **Test styling**: Verify consistent table appearance
+- **Test integration**: Validate rank system works across all reports
+
+### Integration Tests
+- Test complete workflow across all report types
+- Validate consistent rank display in all reports
+- Ensure no performance regression
+
+## Success Criteria
+- [ ] Rank column displays consistently across all report types
+- [ ] Tie indicators format uniformly
+- [ ] Table styling remains consistent
+- [ ] All unit tests pass
+- [ ] Integration tests validate all report types
+```
+
+### Phase 4.1: Integration Tests with Real Data
+
+```text
+Create comprehensive integration tests using real production data to validate the tier-based ranking system.
+
+## Requirements
+
+### Core Functionality
+- Test complete workflow from aggregation to delta calculation
+- Validate tier-based ranking with real SOTD data
+- Ensure delta calculations reflect actual tier movements
+- Test performance with production-scale datasets
+
+### Technical Specifications
+- Data source: Real SOTD data from production pipeline
+- Test scenarios: Monthly and annual aggregation workflows
+- Performance targets: Acceptable performance with large datasets
+- Validation: Correct tier identification and delta calculations
+
+### Implementation Approach
+- Create integration test suite using real production data
+- Test complete aggregation and delta calculation workflows
+- Validate tier-based ranking accuracy
+- Performance testing with production-scale data
+
+## Test Requirements
+
+### Integration Tests
+- **Test complete workflow**: Aggregation → ranking → delta calculation → table generation
+- **Test real data scenarios**: Various tie patterns, ranking changes, delta movements
+- **Test performance**: Ensure acceptable performance with large datasets
+- **Test edge cases**: Missing data, corrupted data, extreme scenarios
+
+### Performance Tests
+- Test with production-scale datasets
+- Validate memory usage and processing time
+- Ensure no significant performance regression
+
+## Success Criteria
+- [ ] Complete workflow integration tests pass
+- [ ] Tier-based ranking works correctly with real data
+- [ ] Delta calculations reflect actual tier movements
+- [ ] Performance acceptable with production-scale data
+- [ ] All integration tests pass
+```
+
+### Phase 4.2: End-to-End Testing of Complete Workflow
+
+```text
+Implement comprehensive end-to-end testing to validate the complete tier-based ranking and delta calculation workflow.
+
+## Requirements
+
+### Core Functionality
+- Test complete pipeline workflow from data input to final report output
+- Validate tier-based ranking system end-to-end
+- Ensure delta calculations work correctly in production scenarios
+- Test error handling and edge cases in complete workflow
+
+### Technical Specifications
+- Test scope: Complete pipeline workflow (fetch → extract → match → enrich → aggregate → report)
+- Data validation: Verify ranking and delta accuracy throughout pipeline
+- Error handling: Test graceful failure and recovery scenarios
+- Performance: Ensure acceptable end-to-end performance
+
+### Implementation Approach
+- Create end-to-end test suite covering complete pipeline
+- Test various data scenarios and edge cases
+- Validate error handling and recovery
+- Performance testing of complete workflow
+
+## Test Requirements
+
+### End-to-End Tests
+- **Test complete pipeline**: Validate entire workflow from start to finish
+- **Test data scenarios**: Various ranking patterns, tie scenarios, delta movements
+- **Test error handling**: Graceful failure and recovery scenarios
+- **Test performance**: End-to-end performance validation
+
+### Validation Tests
+- Verify ranking accuracy throughout pipeline
+- Validate delta calculation correctness
+- Ensure consistent data flow and transformation
+
+## Success Criteria
+- [ ] Complete end-to-end workflow tests pass
+- [ ] Tier-based ranking system works end-to-end
+- [ ] Delta calculations accurate in complete workflow
+- [ ] Error handling works gracefully
+- [ ] Performance acceptable for production use
+```
+
+### Phase 4.3: Performance Validation and Optimization
+
+```text
+Validate performance characteristics and optimize the tier-based ranking system for production use.
+
+## Requirements
+
+### Core Functionality
+- Validate performance characteristics of tier-based ranking system
+- Identify and resolve performance bottlenecks
+- Ensure acceptable performance with production-scale datasets
+- Optimize critical path operations for efficiency
+
+### Technical Specifications
+- Performance targets: Acceptable processing time for production datasets
+- Memory usage: Efficient memory utilization during ranking operations
+- Scalability: Performance scales appropriately with data size
+- Optimization: Critical path operations optimized for efficiency
+
+### Implementation Approach
+- Performance profiling of ranking and delta calculation operations
+- Identify performance bottlenecks and optimization opportunities
+- Implement performance improvements where beneficial
+- Validate performance characteristics with production-scale data
+
+## Test Requirements
+
+### Performance Tests
+- **Test processing time**: Measure ranking and delta calculation performance
+- **Test memory usage**: Monitor memory utilization during operations
+- **Test scalability**: Validate performance scaling with data size
+- **Test optimization**: Verify performance improvements from optimizations
+
+### Benchmark Tests
+- Baseline performance measurements
+- Performance comparison with previous system
+- Optimization impact validation
+
+## Success Criteria
+- [ ] Performance characteristics meet production requirements
+- [ ] Memory usage efficient and acceptable
+- [ ] Performance scales appropriately with data size
+- [ ] Optimizations provide measurable improvements
+- [ ] All performance tests pass
+```
+
+## 🧠 Critical Analysis
+
+### Plan Structure Assessment
+The plan follows a logical progression from core functionality (ranking system) to integration (delta calculations) to presentation (table displays) to validation (testing and performance). Each phase builds upon the previous one, ensuring no orphaned code.
+
+### Risk Mitigation
+- **Breaking Changes**: The transition from "position" to "rank" field requires careful migration across all components
+- **Performance**: Tier-based ranking introduces complexity that could impact performance; comprehensive testing required
+- **Data Consistency**: Ensuring consistent ranking logic across all aggregator types is critical
+
+### Implementation Strategy
+- **Incremental Approach**: Each phase is self-contained and can be implemented independently
+- **Test-First Development**: Comprehensive test coverage for each phase ensures quality
+- **Backward Compatibility**: While this is a breaking change, the modular approach allows for controlled migration
+
+### Dependencies and Order
+- Phase 1 (Core Ranking) must complete before Phase 2 (Delta Updates)
+- Phase 2 (Delta Updates) must complete before Phase 3 (Table Integration)
+- Phase 4 (Testing) can run in parallel with other phases but must complete before production deployment
+
+### Success Metrics
+- All tests passing (unit, integration, end-to-end)
+- Performance within acceptable limits
+- Consistent ranking display across all report types
+- Accurate delta calculations reflecting tier movements
+
+---
 
 ## ✅ Phase 1.1 Completion Summary
 
@@ -80,537 +518,7 @@ The tier-based ranking system correctly identifies when items have identical val
 6. **Performance optimization**: The pandas groupby approach is significantly more efficient than custom Python loops and leverages pandas' optimized C-level operations.
 
 ### Next Steps
-Ready to proceed with Phase 1.2: Implement table generator formatting for tie indicators.
-
----
-
-## 🔁 Implementation Prompts
-
-### Phase 1.1: BaseAggregator Tier-Based Ranking
-
-```text
-Update the BaseAggregator class to implement tier-based ranking using pandas rank(method='dense'). 
-
-## Requirements
-
-### Core Functionality (UPDATED DURING IMPLEMENTATION)
-- ✅ Add `tie_columns` property (default: `["shaves", "unique_users"]`)
-- ✅ Replace `_sort_and_rank` method to use custom tier-based ranking
-- ✅ Implement tie detection using multi-column comparison logic
-- ✅ Return "rank" field instead of "position" field
-- ⏸️ **Display formatting deferred to Phase 1.2**: Table generators will format tied items as "2="
-
-### Technical Specifications (OPTIMIZED PANDAS IMPLEMENTATION)
-- ✅ Use **pandas groupby approach** with `ngroup()` for efficient multi-column tie detection
-- ✅ Detect ties using `groupby(self.tie_columns).ngroup()` which handles multi-column combinations automatically
-- ⏸️ **Formatting deferred to Phase 1.2**: Position formatting moved to table generators
-- ✅ Update field name from "position" to "rank"
-- ✅ Maintain existing sorting behavior (descending for numeric columns, ascending for name)
-
-### Data Structure Changes (UPDATED DURING IMPLEMENTATION)
-- Change output field from `"position": 1` to `"rank": 1` (numeric)
-- Tied items also return numeric ranks: `"rank": 2` (not `"rank": "2="`)
-- **Display formatting deferred to Phase 1.2**: Table generators will convert numeric ranks to display format ("2=" for ties)
-- All aggregators return consistent **numeric** rank format
-
-## Implementation Details
-
-### 1. Add tie_columns Property
-```python
-class BaseAggregator(ABC):
-    # Default tie detection columns - can be overridden by subclasses
-    tie_columns = ["shaves", "unique_users"]
-```
-
-### 2. Update _sort_and_rank Method (OPTIMIZED PANDAS IMPLEMENTATION)
-```python
-def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-    """Sort grouped data and add tier-based rankings.
-    
-    Args:
-        grouped: DataFrame with grouped and aggregated data
-        
-    Returns:
-        List of dictionaries with rank, name, shaves, and unique_users fields
-    """
-    # Sort by tie_columns + name for consistency
-    # Note: tie_columns are sorted descending, name is sorted ascending
-    sort_columns = self.tie_columns + ["name"]
-    sort_ascending = [False] * len(self.tie_columns) + [True]  # False for numeric, True for name
-    
-    grouped = grouped.sort_values(sort_columns, ascending=sort_ascending)
-    grouped = grouped.reset_index(drop=True)
-    
-    # Use pandas groupby approach for efficient multi-column tie detection
-    # Sort by tie_columns (desc) + name (asc) for consistent ranking
-    tmp = grouped.sort_values(sort_columns, ascending=sort_ascending)
-    
-    # Assign dense ranks to unique combinations of tie_columns
-    # ngroup() + 1 gives us 1-based dense ranking
-    tmp["raw_rank"] = tmp.groupby(self.tie_columns, sort=False).ngroup() + 1
-    
-    # Sort by final ranking + name for consistent ordering
-    grouped = tmp.sort_values(["raw_rank", "name"], ascending=[True, True])
-    grouped = grouped.reset_index(drop=True)
-    
-    # Convert to list of dictionaries with NUMERIC ranks (not formatted strings)
-    result = []
-    for _, row in grouped.iterrows():
-        item = {
-            "rank": int(row["raw_rank"]),  # Return numeric rank, not formatted string
-            "shaves": int(row["shaves"]),
-            "unique_users": int(row["unique_users"]),
-        }
-        
-        # Add all other columns (name, fiber, etc.)
-        for col in row.index:
-            if col not in ["raw_rank", "shaves", "unique_users"]:
-                item[str(col)] = row[col]
-                
-        result.append(item)
-    
-    return result
-```
-
-### 3. Tie Detection and Formatting (DEFERRED TO PHASE 1.2)
-**Note**: During implementation, we decided to defer formatting logic to table generators for better separation of concerns. Aggregators now return clean numeric ranks (1, 2, 2, 3) and table generators will handle display formatting ("2=" for ties) in Phase 1.2.
-
-**Removed methods**:
-- `_format_ranks_with_ties()` - Will be implemented in table generators instead
-
-### 4. Update Field Extraction Methods
-```python
-def _extract_field(
-    self, record: Dict[str, Any], field_path: List[str], default: str = ""
-) -> str:
-    """Extract a field from a nested record structure.
-    
-    Args:
-        record: Record dictionary
-        field_path: List of keys to traverse (e.g., ["razor", "matched", "brand"])
-        default: Default value if field not found
-        
-    Returns:
-        Extracted field value as string, stripped of whitespace, or default if empty
-    """
-    # Existing implementation unchanged
-    value = record
-    for key in field_path:
-        if isinstance(value, dict):
-            value = value.get(key, default)
-        else:
-            return default
-
-    if value is None:
-        return default
-
-    # Convert to string and strip whitespace, return default if empty
-    try:
-        stripped_value = str(value).strip()
-        return stripped_value if stripped_value else default
-    except (ValueError, TypeError):
-        return default
-```
-
-## Test Requirements
-
-### Unit Tests
-- **Test tie_columns property**: Verify default value and override behavior
-- **Test _format_ranks_with_ties method**: 
-  - No ties: `[1, 2, 3]` → `["1", "2", "3"]`
-  - Two-way tie: `[1, 2, 2, 3]` → `["1", "2=", "2=", "3"]`
-  - Three-way tie: `[1, 2, 2, 2, 3]` → `["1", "2=", "2=", "2=", "3"]`
-  - All tied: `[1, 1, 1]` → `["1=", "1=", "1="]`
-- **Test _sort_and_rank method**: Verify ranking logic and output format
-- **Test edge cases**: Empty data, single item, all identical values
-
-### Integration Tests
-- **Test with sample aggregator data**: Verify ranking works with real data structures
-- **Test aggregator inheritance**: Ensure subclasses can override tie_columns
-- **Test sorting behavior**: Verify tie_columns are sorted correctly
-
-### Performance Tests
-- **Test with large datasets**: Ensure ranking performance scales appropriately
-- **Test memory usage**: Verify no memory leaks during ranking operations
-
-## Success Criteria
-- [ ] `tie_columns` property added with correct default value
-- [ ] `_sort_and_rank` method uses pandas `rank(method='dense')`
-- [ ] Tie detection correctly identifies items with identical ranking values
-- [ ] Position formatting adds "=" suffix for tied items
-- [ ] Output field changed from "position" to "rank"
-- [ ] All unit tests pass
-- [ ] Integration tests validate ranking behavior
-- [ ] Performance tests show no significant regression
-
-## Dependencies
-- pandas library (already in use)
-- No new external dependencies required
-
-## Risk Mitigation
-- **Backward compatibility**: This is a breaking change - all downstream code must be updated
-- **Testing coverage**: Comprehensive testing to ensure ranking logic is correct
-- **Performance monitoring**: Validate that dense ranking doesn't cause performance issues
-- **Rollback plan**: Keep original implementation until new system is fully validated
-```
-
-### Phase 1.2: Table Generator Formatting (COMPREHENSIVE TDD PLAN)
-
-**Date**: 2025-08-20  
-**Status**: PLANNING  
-**Type**: Implementation - Table Generator Rank Formatting
-
-## 📘 Project Summary
-
-Implement tie indicator display formatting in table generators to convert numeric ranks (1, 2, 2, 3) from aggregators into user-friendly display format ("1", "2=", "2=", "3"). This completes the separation of concerns where aggregators handle ranking logic and table generators handle presentation formatting.
-
-## 🧩 Component Steps
-
-### **1.2.1**: Create Base Rank Formatter Utility ✅
-- **1.2.1.1**: Implement `_format_ranks_with_ties()` method in base table generator ✅
-- **1.2.1.2**: Add comprehensive unit tests for tie detection and formatting ✅
-- **1.2.1.3**: Handle edge cases (no ties, all tied, single items) ✅
-
-### **1.2.2**: Update Hardware Report Table Generators ✅
-- **1.2.2.1**: Update `HardwareTableGenerator` to use new rank formatting ✅
-- **1.2.2.2**: Update `RazorTableGenerator` with rank column and tie formatting ✅
-- **1.2.2.3**: Update `BladeTableGenerator` with rank column and tie formatting ✅
-- **1.2.2.4**: Update `BrushTableGenerator` with rank column and tie formatting ✅
-
-### **1.2.3**: Update Software Report Table Generators
-- **1.2.3.1**: Update `SoftwareTableGenerator` to use new rank formatting
-- **1.2.3.2**: Update `SoapTableGenerator` with rank column and tie formatting
-- **1.2.3.3**: Update `BrushTableGenerator` (software) with rank column and tie formatting
-
-### **1.2.4**: Update User and Diversity Report Generators
-- **1.2.4.1**: Update `UserTableGenerator` with rank column and tie formatting
-- **1.2.4.2**: Update diversity aggregator table generators
-- **1.2.4.3**: Ensure consistent rank display across all report types
-
-### **1.2.5**: Integration Testing and Validation
-- **1.2.5.1**: Test complete workflow from aggregation to formatted display
-- **1.2.5.2**: Validate tie indicators appear correctly in all report types
-- **1.2.5.3**: Performance testing to ensure no regression
-
-## 🔁 Implementation Prompts
-
-### **Step 1.2.1.1**: Base Rank Formatter Implementation
-
-```text
-Implement the core rank formatting logic in the base table generator class.
-
-## Requirements
-
-### Core Functionality
-- Create `_format_ranks_with_ties()` method that converts numeric ranks to display format
-- Handle consecutive tie detection (e.g., [1, 2, 2, 3] → ["1", "2=", "2=", "3"])
-- Support edge cases: no ties, all tied, single items
-- Return list of formatted rank strings
-
-### Technical Specifications
-- Input: List of numeric ranks (e.g., [1, 2, 2, 3])
-- Output: List of formatted strings (e.g., ["1", "2=", "2=", "3"])
-- Tie detection: Consecutive items with same rank value get "=" suffix
-- Performance: Must handle large datasets efficiently
-
-### Implementation Approach
-- Iterate through rank values to detect consecutive ties
-- Add "=" suffix only when current rank equals previous rank
-- Handle edge cases gracefully (empty list, single item, all tied)
-- Use efficient string operations for formatting
-
-## Test Requirements
-
-### Unit Tests
-- **Test no ties**: `[1, 2, 3]` → `["1", "2", "3"]`
-- **Test two-way tie**: `[1, 2, 2, 3]` → `["1", "2=", "2=", "3"]`
-- **Test three-way tie**: `[1, 2, 2, 2, 3]` → `["1", "2=", "2=", "2=", "3"]`
-- **Test all tied**: `[1, 1, 1]` → `["1=", "1=", "1="]`
-- **Test edge cases**: Empty list, single item, mixed tie patterns
-
-### Integration Tests
-- Test with actual aggregator output data
-- Validate formatting works with real rank sequences
-- Ensure no performance regression
-
-## Success Criteria
-- [ ] `_format_ranks_with_ties()` method implemented and tested
-- [ ] All tie scenarios handled correctly
-- [ ] Edge cases handled gracefully
-- [ ] Unit tests pass with 100% coverage
-- [ ] Performance acceptable for large datasets
-```
-
-### **Step 1.2.1.2**: Comprehensive Unit Test Suite
-
-```text
-Create comprehensive unit tests for the rank formatting functionality.
-
-## Requirements
-
-### Test Coverage
-- **Basic functionality**: All tie scenarios (no ties, 2-way, 3-way, all tied)
-- **Edge cases**: Empty lists, single items, large datasets
-- **Error conditions**: Invalid input handling, type validation
-- **Performance**: Large dataset handling, memory usage
-
-### Test Structure
-- Use pytest framework with clear test names
-- Mock data for isolated testing
-- Test each tie pattern separately
-- Include performance benchmarks
-
-### Test Data
-- **No ties**: `[1, 2, 3, 4, 5]`
-- **Two-way ties**: `[1, 2, 2, 3, 4]`, `[1, 1, 3, 4, 4]`
-- **Three-way ties**: `[1, 2, 2, 2, 3]`, `[1, 1, 1, 4, 5]`
-- **Mixed patterns**: `[1, 1, 3, 3, 3, 6]`
-- **Edge cases**: `[]`, `[1]`, `[1, 1, 1]`
-
-## Implementation Details
-
-### Test Methods
-- `test_format_ranks_no_ties()`: Verify no "=" suffixes when no ties
-- `test_format_ranks_two_way_ties()`: Verify "=" suffix for 2-way ties
-- `test_format_ranks_three_way_ties()`: Verify "=" suffix for 3-way ties
-- `test_format_ranks_all_tied()`: Verify "=" suffix when all items tied
-- `test_format_ranks_edge_cases()`: Verify empty list, single item handling
-- `test_format_ranks_performance()`: Verify performance with large datasets
-
-### Assertions
-- Correct string formatting for each tie pattern
-- Proper handling of edge cases
-- Performance within acceptable limits
-- No memory leaks or excessive resource usage
-
-## Success Criteria
-- [ ] All test methods implemented
-- [ ] 100% test coverage of rank formatting logic
-- [ ] All edge cases tested and passing
-- [ ] Performance tests validate acceptable performance
-- [ ] Tests run quickly (< 1 second total)
-```
-
-### **Step 1.2.2.1**: Hardware Table Generator Updates
-
-```text
-Update the HardwareTableGenerator to include rank column with tie formatting.
-
-## Requirements
-
-### Core Functionality
-- Add rank column to hardware report tables
-- Use `_format_ranks_with_ties()` to format rank display
-- Ensure rank column appears in correct position (typically first column)
-- Maintain existing table formatting and styling
-
-### Technical Specifications
-- **Rank column position**: First column (before product name)
-- **Column header**: "Rank" (or "Position" if preferred)
-- **Data source**: Use "rank" field from aggregator output
-- **Formatting**: Apply tie indicators ("2=") using base formatter
-- **Sorting**: Ensure table rows match aggregator ranking order
-
-### Implementation Approach
-- Modify table generation logic to include rank column
-- Extract rank values from aggregator data
-- Apply rank formatting using base formatter
-- Update column headers and table structure
-- Maintain existing functionality for other columns
-
-## Test Requirements
-
-### Unit Tests
-- **Test rank column addition**: Verify rank column appears in output
-- **Test rank formatting**: Verify tie indicators appear correctly
-- **Test column positioning**: Verify rank column is first column
-- **Test data integrity**: Verify rank values match aggregator output
-
-### Integration Tests
-- Test with actual hardware aggregator output
-- Verify complete table generation workflow
-- Validate rank column integration with existing columns
-
-## Success Criteria
-- [ ] Rank column added to hardware report tables
-- [ ] Tie indicators displayed correctly ("2=" for tied items)
-- [ ] Rank column positioned as first column
-- [ ] Existing functionality preserved
-- [ ] All tests passing
-```
-
-### **Step 1.2.2.2**: Razor Table Generator Updates
-
-```text
-Update the RazorTableGenerator to include rank column with tie formatting.
-
-## Requirements
-
-### Core Functionality
-- Add rank column to razor report tables
-- Use `_format_ranks_with_ties()` for rank display formatting
-- Ensure rank column integrates seamlessly with existing razor-specific columns
-- Maintain razor table styling and formatting
-
-### Technical Specifications
-- **Rank column**: First column with tie formatting
-- **Razor-specific columns**: Brand, Model, Shaves, Unique Users, etc.
-- **Data integration**: Use rank field from RazorAggregator output
-- **Formatting consistency**: Match hardware table rank formatting
-
-### Implementation Approach
-- Update RazorTableGenerator to inherit rank formatting from base
-- Add rank column to razor table structure
-- Ensure rank values are properly formatted with tie indicators
-- Maintain existing razor table functionality and appearance
-
-## Test Requirements
-
-### Unit Tests
-- **Test rank column integration**: Verify rank column appears in razor tables
-- **Test tie formatting**: Verify "2=" indicators for tied razor rankings
-- **Test data consistency**: Verify rank values match aggregator output
-- **Test table structure**: Verify rank column doesn't break existing columns
-
-### Integration Tests
-- Test with actual RazorAggregator output
-- Verify complete razor report generation workflow
-- Validate rank column works with razor-specific data
-
-## Success Criteria
-- [ ] Rank column added to razor report tables
-- [ ] Tie indicators displayed correctly for razor rankings
-- [ ] Existing razor table functionality preserved
-- [ ] Integration with RazorAggregator working correctly
-- [ ] All tests passing
-```
-
-### **Step 1.2.3.1**: Software Table Generator Updates
-
-```text
-Update the SoftwareTableGenerator to include rank column with tie formatting.
-
-## Requirements
-
-### Core Functionality
-- Add rank column to software report tables
-- Apply consistent rank formatting across all software aggregators
-- Ensure rank column integrates with software-specific table structures
-- Maintain software table styling and functionality
-
-### Technical Specifications
-- **Rank column**: First column with tie formatting
-- **Software aggregators**: SoapAggregator, BrushAggregator (software)
-- **Data integration**: Use rank field from software aggregator outputs
-- **Formatting consistency**: Match hardware table rank formatting
-
-### Implementation Approach
-- Update SoftwareTableGenerator base class with rank formatting
-- Ensure all software table generators inherit rank functionality
-- Add rank column to software table structures
-- Maintain existing software table functionality
-
-## Test Requirements
-
-### Unit Tests
-- **Test rank column integration**: Verify rank column appears in software tables
-- **Test tie formatting**: Verify tie indicators work correctly
-- **Test aggregator integration**: Verify rank values from software aggregators
-- **Test table consistency**: Verify rank formatting matches hardware tables
-
-### Integration Tests
-- Test with actual software aggregator outputs
-- Verify complete software report generation workflow
-- Validate rank column works across all software report types
-
-## Success Criteria
-- [ ] Rank column added to software report tables
-- [ ] Tie indicators displayed correctly for software rankings
-- [ ] Integration with software aggregators working
-- [ ] Consistent formatting with hardware tables
-- [ ] All tests passing
-```
-
-### **Step 1.2.5.1**: Complete Workflow Integration Testing
-
-```text
-Test the complete workflow from aggregation to formatted rank display.
-
-## Requirements
-
-### End-to-End Testing
-- Test complete pipeline: Aggregator → Table Generator → Formatted Display
-- Validate rank formatting appears correctly in all report types
-- Ensure no performance regression from rank column addition
-- Verify tie indicators work consistently across all aggregators
-
-### Test Scenarios
-- **Hardware reports**: Razor, Blade, Brush tables with rank columns
-- **Software reports**: Soap, Brush (software) tables with rank columns
-- **User reports**: User ranking tables with rank columns
-- **Diversity reports**: Brand diversity tables with rank columns
-
-### Performance Validation
-- **Baseline comparison**: Compare performance with and without rank columns
-- **Memory usage**: Ensure no memory leaks from rank formatting
-- **Large datasets**: Test with realistic data sizes (1000+ items)
-- **Response time**: Ensure table generation remains fast
-
-## Test Requirements
-
-### Integration Tests
-- **Complete workflow tests**: Aggregator → Table → Display
-- **Cross-aggregator tests**: Verify rank formatting works for all types
-- **Data consistency tests**: Verify rank values flow correctly through pipeline
-- **Performance tests**: Benchmark table generation performance
-
-### Validation Tests
-- **Visual validation**: Verify tie indicators appear correctly in output
-- **Data validation**: Verify rank values match aggregator rankings
-- **Format validation**: Verify consistent formatting across all report types
-
-## Success Criteria
-- [ ] Complete workflow tested end-to-end
-- [ ] Rank formatting works correctly for all aggregator types
-- [ ] No performance regression from rank column addition
-- [ ] Tie indicators displayed consistently across all reports
-- [ ] All integration tests passing
-```
-
-## 🧠 Critical Analysis
-
-### **Architecture Strengths**
-- **Clean separation of concerns**: Aggregators handle ranking, table generators handle display
-- **Consistent formatting**: Single source of truth for rank formatting logic
-- **Incremental implementation**: Each table generator can be updated independently
-- **Testable design**: Each component can be unit tested in isolation
-
-### **Implementation Challenges**
-- **Breaking changes**: Adding rank columns affects all existing table structures
-- **Performance considerations**: Rank formatting must not slow down table generation
-- **Consistency requirements**: All table types must display ranks identically
-- **Integration complexity**: Must work with existing aggregator outputs
-
-### **Risk Mitigation**
-- **Phased implementation**: Start with base formatter, then update each table type
-- **Comprehensive testing**: Unit tests for formatting logic, integration tests for workflows
-- **Performance monitoring**: Benchmark before and after changes
-- **Backward compatibility**: Ensure existing functionality is preserved
-
-### **Success Criteria**
-- **Functional completeness**: Rank columns appear in all report types with tie indicators
-- **Performance maintained**: No significant regression in table generation speed
-- **Visual consistency**: Tie indicators ("2=") appear correctly across all reports
-- **Code quality**: Clean, maintainable implementation with comprehensive test coverage
-
-### **Next Steps**
-1. **Implement base rank formatter** with comprehensive testing ✅
-2. **Update table generators incrementally** starting with hardware reports ✅
-3. **Validate integration** at each step to ensure no regressions ✅
-4. **Performance test** to ensure rank columns don't impact speed ✅
-5. **Document changes** for future maintenance and development ✅
-
-This plan provides a clear, incremental path to implementing rank formatting in table generators while maintaining code quality and system performance.
+Ready to proceed with Phase 2.1: Update DeltaCalculator for tier-based ranking.
 
 ---
 
@@ -618,37 +526,42 @@ This plan provides a clear, incremental path to implementing rank formatting in 
 
 **Date Completed**: 2025-08-20  
 **Status**: COMPLETED  
-**Implementation**: Table Generator Rank Formatting with Hardware Report Integration
+**Implementation**: Table Generator Rank Formatting and Display
 
 ### What Was Implemented
-- ✅ **Created `_format_ranks_with_ties()` method** in BaseTableGenerator for tie indicator formatting
-- ✅ **Added rank column to STANDARD_PRODUCT_COLUMNS** configuration as first column
-- ✅ **Implemented `_add_rank_data()` method** for automatic rank assignment and tie detection
-- ✅ **Integrated rank data addition** into table generation workflow
-- ✅ **Updated hardware report table generators** to automatically include rank columns
-- ✅ **Added comprehensive test coverage** for rank formatting functionality (8 tests passing)
+- ✅ **Created `_format_ranks_with_ties()` method** in `BaseTableGenerator` for tie indicator formatting
+- ✅ **Added "Rank" column** to `STANDARD_PRODUCT_COLUMNS` for consistent display
+- ✅ **Implemented `_add_rank_data()` method** to sort data, assign numeric ranks, and format with tie indicators
+- ✅ **Integrated rank formatting** into `generate_table()` method for automatic rank column display
+- ✅ **Created comprehensive test suite** with 8 unit tests covering all tie scenarios and edge cases
 
 ### Technical Achievement
-The rank column now appears as the first column in all hardware report tables with automatic tie detection and formatting:
-- **Automatic ranking**: Items are sorted by shaves (desc) and unique_users (desc)
-- **Tie indicators**: Items with identical values get tie indicators (e.g., "2=" for tied items)
-- **Consistent integration**: All table generators inheriting from BaseTableGenerator automatically get rank columns
-- **Performance maintained**: Rank data addition is integrated into existing table generation workflow
+The table generator system now automatically displays formatted ranks with tie indicators (e.g., "2=" for tied items) while maintaining clean separation of concerns:
+- **Aggregators**: Return numeric ranks (1, 2, 2, 3)
+- **Table Generators**: Format ranks with tie indicators ("1", "2=", "2=", "3")
+- **Automatic Integration**: Rank column appears automatically in all product tables
+- **Consistent Formatting**: Tie indicators work for 2-way, 3-way, and mixed tie patterns
 
-### Architecture Implementation
-- **Base rank formatter utility (Task 2.1)** ✅ - Core formatting logic with comprehensive testing
-- **Hardware report table generators updated (Task 2.2)** ✅ - Rank column integration with tie indicators working
-- **Table generation workflow enhanced** with automatic rank assignment
-- **Clean separation maintained** between ranking logic (aggregators) and presentation (table generators)
+### Architecture Benefits
+- **Separation of Concerns**: Aggregators focus on ranking logic, table generators handle presentation
+- **Consistent Display**: Rank column automatically appears in all tables using `STANDARD_PRODUCT_COLUMNS`
+- **Maintainable Code**: Rank formatting logic centralized in base class
+- **Extensible Design**: Easy to add rank formatting to new table generator types
+
+### User Benefits
+- **Clear Ranking**: Users can see exact positions with tie indicators
+- **Accurate Deltas**: Delta calculations will reflect tier movements, not sequential row changes
+- **Consistent Display**: Rank column appears consistently across all report types
+- **Professional Appearance**: Tie indicators make reports more informative and professional
 
 ### Test Results
 - **8/8 tests passing** ✅
-- **Full functionality validation** including rank column appearance in table output
-- **Tie indicator verification** with comprehensive test scenarios
-- **Integration testing** confirms rank columns appear correctly in actual table generation
+- **Comprehensive coverage** of tie scenarios (no ties, 2-way, 3-way, all tied)
+- **Edge case handling** (empty data, single items, mixed patterns)
+- **Integration testing** validates rank column appears in table output
 
 ### Next Steps
-Ready to proceed with Phase 1.3: Update software report table generators and other remaining table types.
+Ready to proceed with Phase 2.1: Update DeltaCalculator for tier-based ranking to complete the delta calculation system integration.
 
 ### Phase 1.3: Simple Aggregators Update
 
