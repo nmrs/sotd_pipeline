@@ -75,18 +75,18 @@ class SoapMatcher(BaseMatcher):
     def _compile_patterns(self):
         scent_compiled = []
         brand_compiled = []
-        for maker, entry in self.catalog.items():
+        for brand, entry in self.catalog.items():
             # Scent-level patterns
             scents = entry.get("scents", {})
             for scent, scent_data in scents.items():
                 for pattern in scent_data.get("patterns", []):
                     context = create_context_dict(
-                        file_path="data/soaps.yaml", maker=maker, scent=scent
+                        file_path="data/soaps.yaml", brand=brand, scent=scent
                     )
                     compiled_regex = compile_regex_with_context(pattern, context)
                     scent_compiled.append(
                         {
-                            "maker": maker,
+                            "brand": brand,
                             "scent": scent,
                             "pattern": pattern,
                             "regex": compiled_regex,
@@ -94,11 +94,11 @@ class SoapMatcher(BaseMatcher):
                     )
             # Brand-level patterns
             for pattern in entry.get("patterns", []):
-                context = create_context_dict(file_path="data/soaps.yaml", maker=maker)
+                context = create_context_dict(file_path="data/soaps.yaml", brand=brand)
                 compiled_regex = compile_regex_with_context(pattern, context)
                 brand_compiled.append(
                     {
-                        "maker": maker,
+                        "brand": brand,
                         "pattern": pattern,
                         "regex": compiled_regex,
                     }
@@ -192,7 +192,7 @@ class SoapMatcher(BaseMatcher):
             if pattern_info["regex"].search(normalized):
                 return {
                     "original": original,
-                    "matched": {"maker": pattern_info["maker"], "scent": pattern_info["scent"]},
+                    "matched": {"brand": pattern_info["brand"], "scent": pattern_info["scent"]},
                     "pattern": pattern_info["pattern"],
                     "match_type": MatchType.REGEX,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
@@ -211,7 +211,7 @@ class SoapMatcher(BaseMatcher):
                 remainder = self._remove_sample_marker(remainder)
                 return {
                     "original": original,
-                    "matched": {"maker": pattern_info["maker"], "scent": remainder},
+                    "matched": {"brand": pattern_info["brand"], "scent": remainder},
                     "pattern": pattern_info["pattern"],
                     "match_type": MatchType.BRAND,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
@@ -227,7 +227,7 @@ class SoapMatcher(BaseMatcher):
             if brand_guess and scent_guess:
                 return {
                     "original": original,
-                    "matched": {"maker": brand_guess, "scent": scent_guess},
+                    "matched": {"brand": brand_guess, "scent": scent_guess},
                     "pattern": None,
                     "match_type": MatchType.ALIAS,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
@@ -276,7 +276,7 @@ class SoapMatcher(BaseMatcher):
     ) -> MatchResult:
         """
         Main orchestration method for soap matching.
-        Ensures 'maker' and 'scent' are always present in the 'matched' dict for all match types.
+        Ensures 'brand' and 'scent' are always present in the 'matched' dict for all match types.
 
         Args:
             value: Normalized text string for matching
@@ -307,8 +307,8 @@ class SoapMatcher(BaseMatcher):
                 )
                 # Ensure required fields are present
                 if result and result.matched:
-                    if "maker" not in result.matched:
-                        result.matched["maker"] = None
+                    if "brand" not in result.matched:
+                        result.matched["brand"] = None
                     if "scent" not in result.matched:
                         result.matched["scent"] = None
                 return result
@@ -316,8 +316,8 @@ class SoapMatcher(BaseMatcher):
         # Fall back to regex/brand/alias matching
         result = self._match_with_regex(normalized_text, original_text)
         if result and result.matched:
-            if "maker" not in result.matched:
-                result.matched["maker"] = None
+            if "brand" not in result.matched:
+                result.matched["brand"] = None
             if "scent" not in result.matched:
                 result.matched["scent"] = None
         return result
@@ -345,11 +345,11 @@ class SoapMatcher(BaseMatcher):
         if "soap" in self.correct_matches:
             correct_matches_data = self.correct_matches["soap"]
 
-        for maker, maker_data in correct_matches_data.items():
-            if not isinstance(maker_data, dict):
+        for brand, brand_data in correct_matches_data.items():
+            if not isinstance(brand_data, dict):
                 continue
 
-            for scent, strings in maker_data.items():
+            for scent, strings in brand_data.items():
                 if not isinstance(strings, list):
                     continue
 
@@ -358,7 +358,7 @@ class SoapMatcher(BaseMatcher):
                     normalized_correct = self._normalize_common_text(correct_string).lower()
                     if normalized_correct == normalized_value.lower():
                         # Return match data in the expected format for soaps
-                        result = {"maker": maker, "scent": scent}
+                        result = {"brand": brand, "scent": scent}
                         if hasattr(self, "_match_cache"):
                             self._match_cache[cache_key] = result
                         return result
@@ -373,7 +373,7 @@ def analyze_soap_matches(
 ):
     """
     Analyzes a list of soap match results and identifies likely duplicates due to typos.
-    Groups results by maker and scent and flags similar entries.
+    Groups results by brand and scent and flags similar entries.
 
     Args:
         matches (list): List of dictionaries returned by SoapMatcher.match().
@@ -387,17 +387,17 @@ def analyze_soap_matches(
         m = match.get("matched")
         if not m:
             continue
-        key = (m["maker"].strip().lower(), m["scent"].strip().lower())
+        key = (m["brand"].strip().lower(), m["scent"].strip().lower())
         grouped[key].append(match)
 
     keys = list(grouped.keys())
     console = Console()
     table = Table(title="🔍 Potential Duplicate Soap Matches")
-    table.add_column("Maker 1", style="cyan")
-    table.add_column("Maker 2", style="cyan")
+    table.add_column("Brand 1", style="cyan")
+    table.add_column("Brand 2", style="cyan")
     table.add_column("Scent 1", style="magenta")
     table.add_column("Scent 2", style="magenta")
-    table.add_column("Maker Sim", justify="right", style="green")
+    table.add_column("Brand Sim", justify="right", style="green")
     table.add_column("Scent Sim", justify="right", style="green")
     table.add_column("Original", style="dim")
 
@@ -433,19 +433,19 @@ def analyze_soap_matches(
                 # match_type_2 = grouped[key2][0].get("match_type")
 
                 # If the brands match exactly,
-                # skip calculating maker_sim and set values as specified
-                maker_sim = 1.0
-                maker_1 = maker_2 = f"{key1[0]}"
+                # skip calculating brand_sim and set values as specified
+                brand_sim = 1.0
+                brand_1 = brand_2 = f"{key1[0]}"
                 if key1[0] != key2[0]:
-                    maker_sim = difflib.SequenceMatcher(None, key1[0], key2[0]).ratio()
-                    maker_1 = (
+                    brand_sim = difflib.SequenceMatcher(None, key1[0], key2[0]).ratio()
+                    brand_1 = (
                         f"[yellow]{key1[0]}[/yellow]"
-                        if maker_sim < 1.0
+                        if brand_sim < 1.0
                         else f"[dim]{key1[0]}[/dim]"
                     )
-                    maker_2 = (
+                    brand_2 = (
                         f"[yellow]{key2[0]}[/yellow]"
-                        if maker_sim < 1.0
+                        if brand_sim < 1.0
                         else f"[dim]{key2[0]}[/dim]"
                     )
 
@@ -466,17 +466,17 @@ def analyze_soap_matches(
                         else f"[dim]{key2[1]}[/dim]"
                     )
 
-                maker_sim_str = f"{maker_sim:.2f}"
+                brand_sim_str = f"{brand_sim:.2f}"
                 scent_sim_str = f"{scent_sim:.2f}"
 
                 original_1 = grouped[key1][0]["original"]
                 original_2 = grouped[key2][0]["original"]
                 table.add_row(
-                    maker_1,
-                    maker_2,
+                    brand_1,
+                    brand_2,
                     scent_1,
                     scent_2,
-                    maker_sim_str,
+                    brand_sim_str,
                     scent_sim_str,
                     f"{original_1} / {original_2}",
                 )

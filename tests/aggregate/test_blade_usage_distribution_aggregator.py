@@ -17,7 +17,7 @@ class TestBladeUsageDistributionAggregator:
         """Test with records that don't have blade data."""
         records = [
             {"author": "user1", "razor": {"matched": {"brand": "Gillette"}}},
-            {"author": "user2", "soap": {"matched": {"maker": "B&M"}}},
+            {"author": "user2", "soap": {"matched": {"brand": "B&M"}}},
         ]
         result = aggregate_blade_usage_distribution(records)
         assert result == []

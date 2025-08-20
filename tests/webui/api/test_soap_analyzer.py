@@ -63,35 +63,35 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "abc123",
                     "soap": {
                         "original": "Noble Otter - Jacl",
-                        "matched": {"maker": "Noble Otter", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jacl"},
                     },
                 },
                 {
                     "comment_id": "def456",
                     "soap": {
                         "original": "Noble Otter - Jack",
-                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jack"},
                     },
                 },
                 {
                     "comment_id": "ghi789",
                     "soap": {
                         "original": "Noble Otter - Jock",
-                        "matched": {"maker": "Noble Otter", "scent": "Jock"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jock"},
                     },
                 },
                 {
                     "comment_id": "jkl012",
                     "soap": {
                         "original": "Noble Otterr - Jacl",
-                        "matched": {"maker": "Noble Otterr", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otterr", "scent": "Jacl"},
                     },
                 },
                 {
                     "comment_id": "mno345",
                     "soap": {
                         "original": "Noble Otterrr - Jack",
-                        "matched": {"maker": "Noble Otterrr", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otterrr", "scent": "Jack"},
                     },
                 },
             ]
@@ -159,14 +159,14 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "abc123",
                     "soap": {
                         "original": "Noble Otter - Jacl",
-                        "matched": {"maker": "Noble Otter", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jacl"},
                     },
                 },
                 {
                     "comment_id": "def456",
                     "soap": {
                         "original": "Noble Otter - Jack",
-                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jack"},
                     },
                 },
             ]
@@ -216,28 +216,28 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "abc123",
                     "soap": {
                         "original": "Noble Otter - Jacl",
-                        "matched": {"maker": "Noble Otter", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jacl"},
                     },
                 },
                 {
                     "comment_id": "def456",
                     "soap": {
                         "original": "Barrister & Mann - Seville",
-                        "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                        "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                     },
                 },
                 {
                     "comment_id": "ghi789",
                     "soap": {
                         "original": "Noble Otter - Jack",
-                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jack"},
                     },
                 },
                 {
                     "comment_id": "jkl012",
                     "soap": {
                         "original": "Barrister & Mann - Sevill",
-                        "matched": {"maker": "Barrister & Mann", "scent": "Sevill"},
+                        "matched": {"brand": "Barrister & Mann", "scent": "Sevill"},
                     },
                 },
             ]
@@ -288,21 +288,21 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "abc123",
                     "soap": {
                         "original": "Noble Otter - Jacl",
-                        "matched": {"maker": "Noble Otter", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jacl"},
                     },
                 },
                 {
                     "comment_id": "def456",
                     "soap": {
                         "original": "Noble Otter - Jack",
-                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jack"},
                     },
                 },
                 {
                     "comment_id": "ghi789",
                     "soap": {
                         "original": "Noble Otter - Jock",
-                        "matched": {"maker": "Noble Otter", "scent": "Jock"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jock"},
                     },
                 },
             ]
@@ -385,7 +385,7 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "abc123",
                     "soap": {
                         "original": "Noble Otter - Jacl",
-                        "matched": {"maker": "Noble Otter", "scent": "Jacl"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jacl"},
                     },
                 },
             ]
@@ -398,7 +398,7 @@ class TestSoapAnalyzerAPI:
                     "comment_id": "def456",
                     "soap": {
                         "original": "Noble Otter - Jack",
-                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                        "matched": {"brand": "Noble Otter", "scent": "Jack"},
                     },
                 },
             ]

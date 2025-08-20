@@ -23,31 +23,31 @@ class SoapAggregator(BaseAggregator):
             matched = soap.get("matched", {})
 
             # Skip if no matched soap data
-            if not matched or not matched.get("maker") or not matched.get("scent"):
+            if not matched or not matched.get("brand") or not matched.get("scent"):
                 continue
 
-            maker = matched.get("maker", "").strip()
+            brand = matched.get("brand", "").strip()
             scent = matched.get("scent", "").strip()
             author = record.get("author", "").strip()
 
-            if maker and scent and author:
-                soap_data.append({"maker": maker, "scent": scent, "author": author})
+            if brand and scent and author:
+                soap_data.append({"brand": brand, "scent": scent, "author": author})
 
         return soap_data
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
-        """Create composite name from maker and scent.
+        """Create composite name from brand and scent.
 
         Args:
             df: DataFrame with extracted soap data
 
         Returns:
-            Series with composite names in "Maker - Scent" format
+            Series with composite names in "Brand - Scent" format
         """
         # Handle None values by converting to empty strings
-        maker = df["maker"].fillna("")
+        brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-        return maker + " - " + scent
+        return brand + " - " + scent
 
 
 # Legacy function interface for backward compatibility

@@ -46,9 +46,9 @@ def test_aggregate_blade_manufacturers():
 
 def test_aggregate_soap_makers():
     records = [
-        {"author": "user1", "soap": {"matched": {"maker": "Grooming Dept"}}},
-        {"author": "user2", "soap": {"matched": {"maker": "Grooming Dept"}}},
-        {"author": "user1", "soap": {"matched": {"maker": "Declaration Grooming"}}},
+        {"author": "user1", "soap": {"matched": {"brand": "Grooming Dept"}}},
+        {"author": "user2", "soap": {"matched": {"brand": "Grooming Dept"}}},
+        {"author": "user1", "soap": {"matched": {"brand": "Declaration Grooming"}}},
     ]
     result = aggregate_soap_makers(records)
     assert len(result) == 2

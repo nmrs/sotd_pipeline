@@ -105,7 +105,7 @@ class TestMismatchAnalyzer:
     def test_get_matched_text(self):
         """Test matched text extraction."""
         # Test soap field
-        soap_matched = {"maker": "Barrister", "scent": "Seville"}
+        soap_matched = {"brand": "Barrister", "scent": "Seville"}
         assert self.analyzer._get_matched_text("soap", soap_matched) == "Barrister Seville"
 
         # Test razor field
@@ -161,7 +161,7 @@ class TestMismatchAnalyzer:
     def test_get_product_key(self):
         """Test product key generation."""
         # Test soap product key
-        soap_pattern_info = {"maker": "Barrister", "scent": "Seville", "pattern": "test"}
+        soap_pattern_info = {"brand": "Barrister", "scent": "Seville", "pattern": "test"}
         key = self.analyzer._get_product_key(soap_pattern_info, "soap")
         assert key == "Barrister|Seville"
 

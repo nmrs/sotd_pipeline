@@ -189,15 +189,15 @@ class TestSoapAggregator:
         records = [
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Grooming Dept", "scent": "Laundry II"}},
+                "soap": {"matched": {"brand": "Grooming Dept", "scent": "Laundry II"}},
             },
             {
                 "author": "user2",
-                "soap": {"matched": {"maker": "Grooming Dept", "scent": "Laundry II"}},
+                "soap": {"matched": {"brand": "Grooming Dept", "scent": "Laundry II"}},
             },
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Persephone"}},
+                "soap": {"matched": {"brand": "Declaration Grooming", "scent": "Persephone"}},
             },
         ]
 

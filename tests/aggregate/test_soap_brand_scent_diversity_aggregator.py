@@ -16,13 +16,13 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -50,7 +50,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -68,13 +68,13 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming"},
+                    "matched": {"brand": "Declaration Grooming"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -96,7 +96,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -117,7 +117,7 @@ class TestSoapBrandScentDiversityAggregator:
 
         df = pd.DataFrame(
             {
-                "maker": ["Declaration Grooming", "Barrister & Mann"],
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
                 "scent": ["B2", "Seville"],
             }
         )
@@ -133,25 +133,25 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]
@@ -161,14 +161,14 @@ class TestSoapBrandScentDiversityAggregator:
         assert len(result) == 2
 
         # Check first result (user1 with 3 unique combinations, 3 total shaves)
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_combinations"] == 3
         assert result[0]["total_shaves"] == 3
         assert result[0]["unique_users"] == 1
 
         # Check second result (user2 with 1 unique combination, 1 total shave)
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["unique_combinations"] == 1
         assert result[1]["total_shaves"] == 1
@@ -185,7 +185,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming"},
+                    "matched": {"brand": "Declaration Grooming"},
                 },
             },
         ]
@@ -199,25 +199,25 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Noble Otter", "scent": "Lonestar"},
+                    "matched": {"brand": "Noble Otter", "scent": "Lonestar"},
                 },
             },
         ]
@@ -225,7 +225,7 @@ class TestSoapBrandScentDiversityAggregator:
         result = aggregate_soap_brand_scent_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_combinations"] == 4
         assert result[0]["total_shaves"] == 4
@@ -237,19 +237,19 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B4"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B4"},
                 },
             },
         ]
@@ -257,7 +257,7 @@ class TestSoapBrandScentDiversityAggregator:
         result = aggregate_soap_brand_scent_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_combinations"] == 3
         assert result[0]["total_shaves"] == 3

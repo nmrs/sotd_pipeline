@@ -83,8 +83,8 @@ class TestSoapMakersTableGenerator:
         """Test with valid data."""
         sample_data = {
             "soap_makers": [
-                {"maker": "Declaration Grooming", "shaves": 70, "unique_users": 35},
-                {"maker": "Stirling", "shaves": 55, "unique_users": 28},
+                {"brand": "Declaration Grooming", "shaves": 70, "unique_users": 35},
+                {"brand": "Stirling", "shaves": 55, "unique_users": 28},
             ]
         }
         generator = SoapMakersTableGenerator(sample_data, debug=False)
@@ -97,8 +97,8 @@ class TestSoapMakersTableGenerator:
         """Test with missing required fields."""
         sample_data = {
             "soap_makers": [
-                {"maker": "Declaration Grooming"},  # Missing shaves
-                {"maker": "Stirling", "shaves": 55, "unique_users": 28},  # Valid
+                {"brand": "Declaration Grooming"},  # Missing shaves
+                {"brand": "Stirling", "shaves": 55, "unique_users": 28},  # Valid
             ]
         }
         generator = SoapMakersTableGenerator(sample_data, debug=False)
@@ -138,8 +138,8 @@ class TestBrandDiversityTableGenerator:
         """Test with valid data."""
         sample_data = {
             "brand_diversity": [
-                {"maker": "Declaration Grooming", "unique_soaps": 5, "position": 1},
-                {"maker": "Stirling Soap Co.", "unique_soaps": 6, "position": 2},
+                {"brand": "Declaration Grooming", "unique_soaps": 5, "position": 1},
+                {"brand": "Stirling Soap Co.", "unique_soaps": 6, "position": 2},
             ]
         }
         generator = BrandDiversityTableGenerator(sample_data, debug=False)
@@ -154,8 +154,8 @@ class TestBrandDiversityTableGenerator:
         """Test with missing required fields."""
         sample_data = {
             "brand_diversity": [
-                {"maker": "", "unique_soaps": 5},  # Empty maker but field present
-                {"maker": "Stirling Soap Co.", "unique_soaps": 6},  # Valid
+                {"brand": "", "unique_soaps": 5},  # Empty maker but field present
+                {"brand": "Stirling Soap Co.", "unique_soaps": 6},  # Valid
             ]
         }
         generator = BrandDiversityTableGenerator(sample_data, debug=False)

@@ -157,12 +157,12 @@ class TestReportIntegration:
                 {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
             ],
             "soap_makers": [
-                {"maker": "Declaration Grooming", "shaves": 20, "unique_users": 10},
-                {"maker": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
+                {"brand": "Declaration Grooming", "shaves": 20, "unique_users": 10},
+                {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
             ],
             "brand_diversity": [
-                {"maker": "Declaration Grooming", "unique_soaps": 5},
-                {"maker": "Stirling Soap Co", "unique_soaps": 5},
+                {"brand": "Declaration Grooming", "unique_soaps": 5},
+                {"brand": "Stirling Soap Co", "unique_soaps": 5},
             ],
             "users": [
                 {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},

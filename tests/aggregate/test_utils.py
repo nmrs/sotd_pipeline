@@ -214,15 +214,15 @@ class TestMetrics:
         records = [
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Sellout"}},
+                "soap": {"matched": {"brand": "Declaration Grooming", "scent": "Sellout"}},
             },
             {
                 "author": "user2",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Sellout"}},
+                "soap": {"matched": {"brand": "Declaration Grooming", "scent": "Sellout"}},
             },
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Stirling", "scent": "Executive Man"}},
+                "soap": {"matched": {"brand": "Stirling", "scent": "Executive Man"}},
             },
         ]
 
@@ -235,7 +235,7 @@ class TestMetrics:
             {"author": "user1", "soap": {"original": "Unknown Soap"}},
             {
                 "author": "user2",
-                "soap": {"matched": {"maker": "Declaration Grooming"}},
+                "soap": {"matched": {"brand": "Declaration Grooming"}},
             },  # Missing scent
         ]
 
@@ -252,15 +252,15 @@ class TestMetrics:
         records = [
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Sellout"}},
+                "soap": {"matched": {"brand": "Declaration Grooming", "scent": "Sellout"}},
             },
             {
                 "author": "user2",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Darkfall"}},
+                "soap": {"matched": {"brand": "Declaration Grooming", "scent": "Darkfall"}},
             },
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Stirling", "scent": "Executive Man"}},
+                "soap": {"matched": {"brand": "Stirling", "scent": "Executive Man"}},
             },
         ]
 
@@ -323,13 +323,13 @@ class TestMetrics:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "Persephone"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "Persephone"},
                 },
             },
         ]
@@ -363,7 +363,7 @@ class TestMetrics:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
                 "razor": {
                     "matched": {"brand": "Gillette", "model": "Super Speed"},
@@ -378,7 +378,7 @@ class TestMetrics:
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
                 "razor": {
                     "matched": {"brand": "Merkur", "model": "34C"},

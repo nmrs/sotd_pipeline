@@ -12,8 +12,8 @@ class TestBrandDiversityAggregator:
     def test_basic_functionality(self):
         """Test basic brand diversity aggregation."""
         soap_makers = [
-            {"maker": "Barrister and Mann", "shaves": 172, "unique_users": 86},
-            {"maker": "Stirling Soap Co.", "shaves": 145, "unique_users": 76},
+            {"brand": "Barrister and Mann", "shaves": 172, "unique_users": 86},
+            {"brand": "Stirling Soap Co.", "shaves": 145, "unique_users": 76},
         ]
         soaps = [
             {"name": "Barrister and Mann - Fougère Angelique"},
@@ -39,7 +39,7 @@ class TestBrandDiversityAggregator:
         result = aggregate_brand_diversity([], [])
         assert result == []
 
-        result = aggregate_brand_diversity([{"maker": "Test"}], [])
+        result = aggregate_brand_diversity([{"brand": "Test"}], [])
         assert result == []
 
         result = aggregate_brand_diversity([], [{"name": "Test"}])
@@ -47,7 +47,7 @@ class TestBrandDiversityAggregator:
 
     def test_no_matching_brands(self):
         """Test when soap names don't match any brands in soap_makers."""
-        soap_makers = [{"maker": "Barrister and Mann", "shaves": 172, "unique_users": 86}]
+        soap_makers = [{"brand": "Barrister and Mann", "shaves": 172, "unique_users": 86}]
         soaps = [{"name": "Unknown Brand - Scent"}]
 
         result = aggregate_brand_diversity(soap_makers, soaps)
@@ -55,7 +55,7 @@ class TestBrandDiversityAggregator:
 
     def test_single_soap_per_brand(self):
         """Test brands with only one unique soap."""
-        soap_makers = [{"maker": "Single Soap Brand", "shaves": 50, "unique_users": 25}]
+        soap_makers = [{"brand": "Single Soap Brand", "shaves": 50, "unique_users": 25}]
         soaps = [{"name": "Single Soap Brand - Only Scent"}]
 
         result = aggregate_brand_diversity(soap_makers, soaps)
@@ -66,7 +66,7 @@ class TestBrandDiversityAggregator:
 
     def test_soap_names_without_delimiter(self):
         """Test soap names that don't have the ' - ' delimiter."""
-        soap_makers = [{"maker": "Simple Brand", "shaves": 100, "unique_users": 50}]
+        soap_makers = [{"brand": "Simple Brand", "shaves": 100, "unique_users": 50}]
         soaps = [{"name": "Simple Brand"}]
 
         result = aggregate_brand_diversity(soap_makers, soaps)

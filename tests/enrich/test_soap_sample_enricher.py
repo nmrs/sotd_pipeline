@@ -15,7 +15,7 @@ class TestSoapSampleEnricher:
 
     def test_applies_to_with_soap(self, enricher):
         """Test applies_to when record has a soap field."""
-        record = {"soap": {"matched": {"maker": "B&M", "scent": "Seville"}}}
+        record = {"soap": {"matched": {"brand": "B&M", "scent": "Seville"}}}
         assert enricher.applies_to(record) is True
 
     def test_applies_to_without_soap(self, enricher):
@@ -33,7 +33,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville (sample)",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (sample)"
 
@@ -50,7 +50,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "Stirling Bay Rum (sample #23)",
             "normalized": "Stirling Bay Rum",
-            "matched": {"maker": "Stirling", "scent": "Bay Rum"},
+            "matched": {"brand": "Stirling", "scent": "Bay Rum"},
         }
         original_comment = "Stirling Bay Rum (sample #23)"
 
@@ -67,7 +67,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "Declaration Grooming (sample 5 of 10)",
             "normalized": "Declaration Grooming",
-            "matched": {"maker": "Declaration Grooming", "scent": "Unknown"},
+            "matched": {"brand": "Declaration Grooming", "scent": "Unknown"},
         }
         original_comment = "Declaration Grooming (sample 5 of 10)"
 
@@ -84,7 +84,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "Zingari Man (sample 3/15)",
             "normalized": "Zingari Man",
-            "matched": {"maker": "Zingari Man", "scent": "Unknown"},
+            "matched": {"brand": "Zingari Man", "scent": "Unknown"},
         }
         original_comment = "Zingari Man (sample 3/15)"
 
@@ -101,7 +101,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "H&M - Seville - sample",
             "normalized": "H&M - Seville",
-            "matched": {"maker": "H&M", "scent": "Seville"},
+            "matched": {"brand": "H&M", "scent": "Seville"},
         }
         original_comment = "H&M - Seville - sample"
 
@@ -118,7 +118,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "Zingari Man (tester)",
             "normalized": "Zingari Man",
-            "matched": {"maker": "Zingari Man", "scent": "Unknown"},
+            "matched": {"brand": "Zingari Man", "scent": "Unknown"},
         }
         original_comment = "Zingari Man (tester)"
 
@@ -135,7 +135,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville (samp)",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (samp)"
 
@@ -152,7 +152,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville"
 
@@ -168,7 +168,7 @@ class TestSoapSampleEnricher:
         """Test when original field is missing."""
         field_data = {
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville"
 
@@ -180,7 +180,7 @@ class TestSoapSampleEnricher:
         """Test when normalized field is missing."""
         field_data = {
             "original": "B&M Seville (sample)",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (sample)"
 
@@ -193,7 +193,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville"
 
@@ -206,7 +206,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville (sample)",
             "normalized": "",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (sample)"
 
@@ -219,7 +219,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville (SAMPLE)",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (SAMPLE)"
 
@@ -234,7 +234,7 @@ class TestSoapSampleEnricher:
         field_data = {
             "original": "B&M Seville ( sample )",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville ( sample )"
 

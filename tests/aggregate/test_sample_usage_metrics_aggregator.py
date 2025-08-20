@@ -28,14 +28,14 @@ class TestSampleUsageMetricsAggregator:
                 "author": "user1",
                 "soap": {
                     "enriched": {},
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
                     "enriched": {},
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]
@@ -55,21 +55,21 @@ class TestSampleUsageMetricsAggregator:
                 "author": "user1",
                 "soap": {
                     "enriched": {"sample_type": "sample"},
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
                     "enriched": {"sample_type": "tester"},
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user3",
                 "soap": {
                     "enriched": {"sample_type": "sample"},
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
         ]
@@ -102,7 +102,7 @@ class TestSampleUsageMetricsAggregator:
                 "author": "user2",
                 "soap": {
                     "enriched": {"sample_type": "sample"},
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
         ]
@@ -122,14 +122,14 @@ class TestSampleUsageMetricsAggregator:
             {
                 "soap": {
                     "enriched": {"sample_type": "sample"},
-                    "matched": {"maker": "B&M", "scent": "Seville"},
+                    "matched": {"brand": "B&M", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
                     "enriched": {"sample_type": "sample"},
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]

@@ -66,7 +66,7 @@ class TestAggregateIntegration:
                 },
                 "soap": {
                     "matched": {
-                        "maker": "Declaration Grooming",
+                        "brand": "Declaration Grooming",
                         "scent": "Sellout",
                         "match_type": "exact",
                     }
@@ -115,7 +115,7 @@ class TestAggregateIntegration:
                 },
                 "soap": {
                     "matched": {
-                        "maker": "Barrister and Mann",
+                        "brand": "Barrister and Mann",
                         "scent": "Seville",
                         "match_type": "exact",
                     }
@@ -164,7 +164,7 @@ class TestAggregateIntegration:
                 },
                 "soap": {
                     "matched": {
-                        "maker": "Declaration Grooming",
+                        "brand": "Declaration Grooming",
                         "scent": "Sellout",
                         "match_type": "exact",
                     }
@@ -340,7 +340,7 @@ class TestAggregateIntegration:
                 "razor": {"matched": {"brand": "Test", "model": "Test", "format": "DE"}},
                 "blade": {"matched": {"brand": "Test", "model": "Test", "format": "DE"}},
                 "brush": {"matched": {"brand": "Test", "model": "Test", "fiber": "Synthetic"}},
-                "soap": {"matched": {"maker": "Test", "scent": "Test"}},
+                "soap": {"matched": {"brand": "Test", "scent": "Test"}},
             }
         ]
 

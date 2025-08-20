@@ -21,7 +21,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 1,
                         "total_samples": 5,
                     },
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
@@ -32,7 +32,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 2,
                         "total_samples": 5,
                     },
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]
@@ -51,7 +51,7 @@ class TestSoapSampleBrandAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
@@ -62,7 +62,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 1,
                         "total_samples": 5,
                     },
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -105,7 +105,7 @@ class TestSoapSampleBrandAggregator:
         df = pd.DataFrame(
             {
                 "sample_type": ["Sample", "Sample"],
-                "maker": ["Declaration Grooming", "Barrister & Mann"],
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
             }
         )
 
@@ -124,7 +124,7 @@ class TestSoapSampleBrandAggregator:
         df = pd.DataFrame(
             {
                 "sample_type": ["Sample", "Sample"],
-                "maker": ["", ""],
+                "brand": ["", ""],
             }
         )
 
@@ -144,7 +144,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 1,
                         "total_samples": 5,
                     },
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
@@ -155,7 +155,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 2,
                         "total_samples": 5,
                     },
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
@@ -166,7 +166,7 @@ class TestSoapSampleBrandAggregator:
                         "sample_number": 1,
                         "total_samples": 3,
                     },
-                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -198,7 +198,7 @@ class TestSoapSampleBrandAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]

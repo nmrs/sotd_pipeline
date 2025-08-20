@@ -91,26 +91,28 @@ class SoapBrandDiversityAggregator(BaseAggregator):
         return grouped
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add position rankings.
+        """Sort grouped data and add rank rankings.
 
         Args:
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with position, user, unique_brands, total_shaves,
+            List of dictionaries with rank, user, unique_brands, total_shaves,
             and unique_users fields
         """
         # Sort by unique_brands desc, total_shaves desc
         grouped = grouped.sort_values(["unique_brands", "total_shaves"], ascending=[False, False])
 
-        # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        # Add rank field (1-based rank)
+        grouped = grouped.reset_index(drop=True).assign(
+            rank=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []
         for _, row in grouped.iterrows():
             item = {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_brands": int(row["unique_brands"]),
                 "total_shaves": int(row["total_shaves"]),
@@ -139,13 +141,13 @@ def aggregate_soap_brand_diversity(records: List[Dict[str, Any]]) -> List[Dict[s
     """Aggregate soap brand diversity by user from enriched records.
 
     Returns a list of soap brand diversity aggregations sorted by unique_brands desc,
-    total_shaves desc. Each item includes position field for delta calculations.
+    total_shaves desc. Each item includes rank field for delta calculations.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of soap brand diversity aggregations with position, user, unique_brands,
+        List of soap brand diversity aggregations with rank, user, unique_brands,
         total_shaves, and unique_users fields
     """
     aggregator = SoapBrandDiversityAggregator()

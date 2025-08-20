@@ -61,7 +61,7 @@ class TestSoapSampleEnricherIntegration:
             "soap": {
                 "original": "B&M Seville (sample)",
                 "normalized": "B&M Seville",
-                "matched": {"maker": "B&M", "scent": "Seville"},
+                "matched": {"brand": "B&M", "scent": "Seville"},
             }
         }
 
@@ -109,7 +109,7 @@ class TestSoapSampleEnricherIntegration:
         field_data = {
             "original": "B&M Seville (sample)",
             "normalized": "B&M Seville",
-            "matched": {"maker": "B&M", "scent": "Seville"},
+            "matched": {"brand": "B&M", "scent": "Seville"},
         }
         original_comment = "B&M Seville (sample)"
 
