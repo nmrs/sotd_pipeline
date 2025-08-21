@@ -234,6 +234,37 @@ class BaseTableGenerator(ABC):
 
         return formatted
 
+    def _format_existing_ranks_with_ties(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Format existing numeric ranks with tie indicators.
+
+        Args:
+            data: List of items with existing numeric rank fields
+
+        Returns:
+            List of items with formatted rank fields (e.g., "1", "2=", "2=", "4")
+        """
+        if not data:
+            return data
+
+        # Extract numeric ranks for tie detection
+        numeric_ranks = []
+        for item in data:
+            rank = item.get("rank")
+            if isinstance(rank, (int, str)) and str(rank).isdigit():
+                numeric_ranks.append(int(rank))
+            else:
+                # If rank is not numeric, skip formatting
+                return data
+
+        # Use the rank formatter to get formatted ranks with tie indicators
+        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
+
+        # Update rank data in each item
+        for i, item in enumerate(data):
+            item["rank"] = formatted_ranks[i]
+
+        return data
+
     @classmethod
     def create_standard_product_table(
         cls,
@@ -410,6 +441,8 @@ class BaseTableGenerator(ABC):
             else:
                 if self.debug:
                     print(f"[DEBUG] {self.get_table_title()}: Preserving existing ranks")
+                # If ranks already exist, format them with tie indicators
+                table_data = self._format_existing_ranks_with_ties(table_data)
         else:
             # For delta calculations, use numeric ranks that can be used for calculations
             table_data = self._add_ranks(table_data)
