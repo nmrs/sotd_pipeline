@@ -64,10 +64,11 @@ def _determine_razor_format(razor_matched: Dict[str, Any], blade_matched: Dict[s
 
 
 def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Aggregate razor format data from enriched records using sophisticated format detection.
+    """Aggregate razor format data from enriched records.
 
-    This implementation mirrors the old RazorFormatExtractor logic to determine formats
-    by combining razor and blade information, especially for shavettes.
+    This implementation uses the format that was already determined during the enrich phase,
+    rather than re-determining it. This ensures consistency with the enrich phase and
+    prevents format changes or double-counting during aggregation.
 
     Returns a list of razor format aggregations sorted by shaves desc, unique_users desc.
     Each item includes rank field for delta calculations.
@@ -81,25 +82,24 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
     if not records:
         return []
 
-    # Extract razor format data from records using sophisticated format detection
+    # Extract razor format data from records using the already-determined format
     format_data = []
     for record in records:
         razor = record.get("razor", {})
-        blade = record.get("blade", {})
-
+        
+        # Use the format that was already determined during the enrich phase
+        # This ensures consistency and prevents format changes during aggregation
         razor_matched = razor.get("matched", {}) if razor else {}
-        blade_matched = blade.get("matched", {}) if blade else {}
-
-        # Skip if no matched razor data (but allow empty matched dict for fallback logic)
-        if razor_matched is None:
+        razor_format = razor_matched.get("format", "") if razor_matched else ""
+        
+        # Skip if no format determined
+        if not razor_format:
             continue
-
-        # Determine format using the sophisticated logic
-        format_type = _determine_razor_format(razor_matched, blade_matched)
+            
         author = record.get("author", "").strip()
 
-        if format_type and author:
-            format_data.append({"format": format_type, "author": author})
+        if razor_format and author:
+            format_data.append({"format": razor_format, "author": author})
 
     if not format_data:
         return []
