@@ -54,11 +54,8 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get soap makers data from aggregated data."""
         data = self.data.get("soap_makers", [])
-        # Filter for brands with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        validated_data = self._validate_data_records(
-            filtered_data, "soap_makers", ["brand", "shaves"]
-        )
+        # No filtering - show all makers as template doesn't specify limits
+        validated_data = self._validate_data_records(data, "soap_makers", ["brand", "shaves"])
 
         # Transform maker field to brand field to work with STANDARD_MANUFACTURER_COLUMNS
         transformed_data = []
@@ -101,28 +98,36 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
         return False
 
 
-class SoapsTableGenerator(StandardProductTableGenerator):
-    """Generates a table of soaps with usage statistics."""
+class SoapBrandsTableGenerator(StandardProductTableGenerator):
+    """Table generator for soap brands in the software report."""
 
-    def get_table_data(self) -> List[Dict[str, Any]]:
+    def get_table_data(self) -> list[dict[str, Any]]:
+        """Get soap brands data from aggregated data."""
+        data = self.data.get("soap_brand_diversity", [])
+        # No filtering - show all brands as template doesn't specify limits
+        return self._validate_data_records(data, "soap_brand_diversity", ["brand", "unique_soaps"])
+
+    def get_table_title(self) -> str:
+        """Return the table title."""
+        return "Brand Diversity"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all brands."""
+        return False
+
+
+class SoapsTableGenerator(StandardProductTableGenerator):
+    """Table generator for individual soaps in the software report."""
+
+    def get_table_data(self) -> list[dict[str, Any]]:
         """Get soaps data from aggregated data."""
         data = self.data.get("soaps", [])
-        # Filter for soaps with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(filtered_data, "soaps", ["name", "shaves"])
+        # No filtering - show all soaps as template doesn't specify limits
+        return self._validate_data_records(data, "soaps", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Soaps"
-
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Return column configuration for soaps table."""
-        from .base import STANDARD_PRODUCT_COLUMNS
-
-        # Override to use "Soap" instead of "Razor"
-        config = STANDARD_PRODUCT_COLUMNS.copy()
-        config["name"]["display_name"] = "Soap"
-        return config
 
     def should_limit_rows(self) -> bool:
         """Disable row limiting to show all soaps."""
@@ -135,11 +140,8 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get brand diversity data from aggregated data."""
         data = self.data.get("brand_diversity", [])
-        # Filter for brands with 5+ unique soaps (as requested by user)
-        filtered_data = [item for item in data if item.get("unique_soaps", 0) >= 5]
-        return self._validate_data_records(
-            filtered_data, "brand_diversity", ["brand", "unique_soaps"]
-        )
+        # No filtering - show all brands as template doesn't specify limits
+        return self._validate_data_records(data, "brand_diversity", ["brand", "unique_soaps"])
 
     def get_table_title(self) -> str:
         """Return the table title."""

@@ -7,46 +7,40 @@ from .base import (
     STANDARD_USE_COUNT_COLUMNS,
     BaseTableGenerator,
     NoDeltaMixin,
-    StandardProductTableGenerator,
     UseCountTableFactory,
 )
+from .specialized_tables import DataTransformingTableGenerator
 
 
-class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDeltaMixin):
+class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator):
     """Table generator for razor-blade combinations in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
-        """Get razor-blade combination data from aggregated data."""
-        # Handle both full structure and extracted data section
-        # Full structure: data['data']['razor_blade_combinations']
-        # Extracted data: data['razor_blade_combinations']
-        if "data" in self.data and "razor_blade_combinations" in self.data["data"]:
-            # Full structure (when called directly)
-            data = self.data["data"]["razor_blade_combinations"]
-        else:
-            # Extracted data section (when called via TableGenerator)
-            data = self.data.get("razor_blade_combinations", [])
-
-        if not data:
-            raise ValueError(
-                "No razor-blade combinations data found. "
-                "This may indicate the data was not properly aggregated or "
-                "the field name has changed."
-            )
-
-        # Filter for combinations with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-
-        if not filtered_data:
-            raise ValueError(
-                "No razor-blade combinations found with 5+ shaves. "
-                "This may indicate the data structure has changed or "
-                "the filtering criteria are too strict."
-            )
-
-        return self._validate_data_records(
-            filtered_data, "razor_blade_combinations", ["name", "shaves"]
+        """Get razor-blade combinations data from aggregated data."""
+        data = self.data.get("razor_blade_combinations", [])
+        # No filtering - show all combinations as template doesn't specify limits
+        valid_data = self._validate_data_records(
+            data, "razor_blade_combinations", ["razor", "blade", "shaves"]
         )
+
+        # Map razor and blade to plate field
+        result = []
+        for record in valid_data:
+            razor = record.get("razor")
+            blade = record.get("blade")
+            if razor and blade:
+                result.append(
+                    {
+                        "plate": f"{razor} + {blade}",
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid razor-blade combination records")
+
+        return result
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -91,10 +85,9 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
 
             trace_ranks("HighestUseCountPerBladeTableGenerator.input", data)
 
-        # Filter for entries with 5+ uses (as requested by user)
-        filtered_data = [item for item in data if item.get("uses", 0) >= 5]
+        # No filtering - show all entries as template doesn't specify limits
         valid_data = self._validate_data_records(
-            filtered_data, "highest_use_count_per_blade", ["rank", "user", "blade", "uses"]
+            data, "highest_use_count_per_blade", ["rank", "user", "blade", "uses"]
         )
 
         # Trace ranks after validation

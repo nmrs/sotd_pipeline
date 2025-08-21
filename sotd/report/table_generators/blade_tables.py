@@ -17,30 +17,15 @@ class BladesTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get blades data from aggregated data."""
         data = self.data.get("blades", [])
-        # Filter for blades with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(filtered_data, "blades", ["name", "shaves"])
+        # No filtering - show all blades as template doesn't specify limits
+        return self._validate_data_records(data, "blades", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Blades"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return custom column configuration with 'Blade' instead of 'Name'."""
-        return {
-            "rank": {"display_name": "Rank"},
-            "name": {"display_name": "Blade"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
     def should_limit_rows(self) -> bool:
-        """Disable row limiting to show all blades with 5+ shaves."""
+        """Disable row limiting to show all blades."""
         return False
 
 
@@ -50,18 +35,15 @@ class BladeManufacturersTableGenerator(ManufacturerTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get blade manufacturer data from aggregated data."""
         data = self.data.get("blade_manufacturers", [])
-        # Filter for manufacturers with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(
-            filtered_data, "blade_manufacturers", ["brand", "shaves"]
-        )
+        # No filtering - show all manufacturers as template doesn't specify limits
+        return self._validate_data_records(data, "blade_manufacturers", ["brand", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Blade Manufacturers"
 
     def should_limit_rows(self) -> bool:
-        """Disable row limiting to show all manufacturers with 5+ shaves."""
+        """Disable row limiting to show all manufacturers."""
         return False
 
 
