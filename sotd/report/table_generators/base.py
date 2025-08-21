@@ -265,6 +265,59 @@ class BaseTableGenerator(ABC):
 
         return data
 
+    def _format_existing_ranks_with_proper_ties(
+        self, data: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format existing ranks with proper tie detection based on data values.
+
+        This method preserves existing rank values but detects ties based on the
+        actual data values (shaves, unique_users) rather than just the rank numbers.
+
+        Args:
+            data: List of items with existing numeric rank fields
+
+        Returns:
+            List of items with properly formatted rank fields including tie indicators
+        """
+        if not data:
+            return data
+
+        # Sort data by shaves (desc) and unique_users (desc) for consistent tie detection
+        sorted_data = sorted(
+            data, key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)), reverse=True
+        )
+
+        # Detect ties based on actual data values, not just rank numbers
+        numeric_ranks = []
+        current_rank = 1
+
+        for i, item in enumerate(sorted_data):
+            if i > 0:
+                prev_item = sorted_data[i - 1]
+                # Check if this item is tied with the previous one
+                if item.get("shaves", 0) == prev_item.get("shaves", 0) and item.get(
+                    "unique_users", 0
+                ) == prev_item.get("unique_users", 0):
+                    # Tied with previous - use same rank
+                    numeric_ranks.append(numeric_ranks[-1])
+                else:
+                    # New rank - account for ties by using position + 1
+                    current_rank = i + 1
+                    numeric_ranks.append(current_rank)
+            else:
+                # First item gets rank 1
+                numeric_ranks.append(1)
+
+        # Use the rank formatter to get formatted ranks with tie indicators
+        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
+
+        # Update rank data in each item, preserving the original order
+        for i, item in enumerate(sorted_data):
+            item["rank"] = formatted_ranks[i]
+
+        # Return data in original order (not sorted order)
+        return data
+
     @classmethod
     def create_standard_product_table(
         cls,
@@ -421,31 +474,11 @@ class BaseTableGenerator(ABC):
         # Add avg shaves per user calculation
         table_data = self._add_avg_shaves_per_user(table_data)
 
-        # Add rank data for display (only if not doing delta calculations)
-        if not include_delta:
-            # Debug: check what rank fields we have
-            if self.debug:
-                print(f"[DEBUG] {self.get_table_title()}: Checking rank fields")
-                for i, item in enumerate(table_data[:3]):  # Show first 3 items
-                    print(f"  Item {i}: rank field = {item.get('rank', 'MISSING')}")
-
-            # Only add ranks if they don't already exist (preserve aggregator ranks)
-            has_rank = any("rank" in item for item in table_data)
-            if self.debug:
-                print(f"[DEBUG] {self.get_table_title()}: Has rank field = {has_rank}")
-
-            if not has_rank:
-                if self.debug:
-                    print(f"[DEBUG] {self.get_table_title()}: Adding rank data")
-                table_data = self._add_rank_data(table_data)
-            else:
-                if self.debug:
-                    print(f"[DEBUG] {self.get_table_title()}: Preserving existing ranks")
-                # If ranks already exist, format them with tie indicators
-                table_data = self._format_existing_ranks_with_ties(table_data)
-        else:
-            # For delta calculations, use numeric ranks that can be used for calculations
-            table_data = self._add_ranks(table_data)
+        # Always format ranks with tie indicators (regardless of delta calculations)
+        if self.debug:
+            print(f"[DEBUG] {self.get_table_title()}: Formatting existing ranks with proper ties")
+        # Always use proper tie detection logic while preserving existing rank values
+        table_data = self._format_existing_ranks_with_proper_ties(table_data)
 
         # Calculate deltas if requested
         if include_delta and comparison_data:
@@ -584,6 +617,14 @@ class BaseTableGenerator(ABC):
                     if col in df:
                         df[col] = (
                             df[col].astype(object).apply(lambda x: str(x) if pd.notna(x) else "n/a")
+                        )
+                elif config.get("format") == "mm_suffix":
+                    # Add mm suffix to numeric values
+                    if col in df:
+                        df[col] = (
+                            df[col]
+                            .astype(object)
+                            .apply(lambda x: f"{x}mm" if pd.notna(x) and x is not None else "")
                         )
 
         # Generate markdown table
@@ -833,8 +874,8 @@ class BaseTableGenerator(ABC):
                     # Tied with previous - use same rank
                     numeric_ranks.append(numeric_ranks[-1])
                 else:
-                    # New rank
-                    current_rank += 1
+                    # New rank - account for ties by using position + 1
+                    current_rank = i + 1
                     numeric_ranks.append(current_rank)
             else:
                 # First item gets rank 1

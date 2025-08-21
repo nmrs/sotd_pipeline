@@ -175,7 +175,7 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
         """Return column configuration with custom knot size formatting."""
         return {
             "rank": {"display_name": "Rank"},
-            "knot_size_mm": {"display_name": "Size", "format": "smart_decimal", "decimals": 1},
+            "knot_size_mm": {"display_name": "Size", "format": "mm_suffix"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
