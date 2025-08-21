@@ -207,10 +207,10 @@ describe('CommentList', () => {
     expect(screen.getByText('abc123')).toBeInTheDocument();
     expect(screen.getByText('def456')).toBeInTheDocument();
     expect(screen.getByText('ghi789')).toBeInTheDocument();
-    
+
     // Should not show the 4th comment initially
     expect(screen.queryByText('jkl012')).not.toBeInTheDocument();
-    
+
     // Should show "+1 more" link
     const expandLink = screen.getByText('+1 more');
     expect(expandLink).toBeInTheDocument();
@@ -241,7 +241,7 @@ describe('CommentList', () => {
     // Should now show all comments
     expect(screen.getByText('jkl012')).toBeInTheDocument();
     expect(screen.getByText('mno345')).toBeInTheDocument();
-    
+
     // Should show "Show less" link
     expect(screen.getByText('Show less')).toBeInTheDocument();
     expect(screen.queryByText('+2 more')).not.toBeInTheDocument();
@@ -287,13 +287,13 @@ describe('CommentList', () => {
     );
 
     const expandLink = screen.getByText('+1 more');
-    
+
     // Should have proper styling
     expect(expandLink).toHaveClass('text-blue-600', 'hover:text-blue-800', 'hover:bg-blue-50');
-    
+
     // Should have proper ARIA label
     expect(expandLink).toHaveAttribute('aria-label', 'Show 1 more comments');
-    
+
     // Should be clickable
     expect(expandLink.tagName).toBe('BUTTON');
   });

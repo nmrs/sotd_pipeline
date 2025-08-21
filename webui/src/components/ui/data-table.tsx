@@ -378,7 +378,7 @@ export function DataTable<TData, TValue>({
       return visibleColumns.map(col => {
         const columnId = col.id || (col as any).accessorKey;
         if (!columnId) return '';
-        
+
         const cellValue = row.getValue(columnId);
         // Convert cell value to string, handling null/undefined
         if (cellValue == null) return '';
@@ -395,9 +395,9 @@ export function DataTable<TData, TValue>({
 
     // Combine headers and data
     const csvRows = [headers, ...dataRows];
-    
+
     // Convert to CSV format (handle commas and quotes properly)
-    return csvRows.map(row => 
+    return csvRows.map(row =>
       row.map(cell => {
         const cellStr = String(cell);
         // If cell contains comma, quote, or newline, wrap in quotes and escape internal quotes
@@ -534,7 +534,7 @@ export function DataTable<TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        
+
         {showCsvDownload && (
           <Button
             variant='outline'
@@ -615,8 +615,8 @@ export function DataTable<TData, TValue>({
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
                     className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
-                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                        : ''
+                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                      : ''
                       }`}
                   >
                     {row.getVisibleCells().map(cell => (

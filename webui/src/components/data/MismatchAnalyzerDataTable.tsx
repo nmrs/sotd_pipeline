@@ -794,7 +794,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               commentIds={commentIds}
               onCommentClick={onCommentClick || (() => {})}
               commentLoading={commentLoading}
-              maxDisplay={3}
               aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
             />
           );

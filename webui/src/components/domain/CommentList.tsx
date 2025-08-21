@@ -60,7 +60,7 @@ export const CommentList: React.FC<CommentListProps> = ({
           {commentId}
         </button>
       ))}
-      
+
       {/* Expand/Collapse controls */}
       {canExpand && (
         <button
@@ -71,7 +71,7 @@ export const CommentList: React.FC<CommentListProps> = ({
           +{remainingCount} more
         </button>
       )}
-      
+
       {isExpanded && remainingCount > 0 && (
         <button
           onClick={handleCollapseClick}

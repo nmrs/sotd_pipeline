@@ -27,6 +27,12 @@ def _determine_razor_format(razor_matched: Dict[str, Any], blade_matched: Dict[s
     DE = "DE"
     HALF_DE = "Half DE"
     SHAVETTE = "Shavette"
+    CARTRIDGE_DISPOSABLE = "Cartridge/Disposable"
+
+    # CRITICAL FIX: Cartridge/Disposable razors should always remain Cartridge/Disposable
+    # regardless of blade type - this is the user's choice of razor format
+    if razor_format == CARTRIDGE_DISPOSABLE:
+        return CARTRIDGE_DISPOSABLE
 
     # Check if razor format matches "shavette (.*)" pattern
     if razor_format and re.match(r"shavette (.*)", razor_format, re.IGNORECASE):
@@ -45,7 +51,7 @@ def _determine_razor_format(razor_matched: Dict[str, Any], blade_matched: Dict[s
     if razor_format and razor_format.startswith(HALF_DE):
         return razor_format
 
-    # Handle Half DE detection
+    # Handle Half DE detection (only when razor format is not already determined)
     if blade_format == DE:
         return DE
     elif blade_format:

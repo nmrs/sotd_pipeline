@@ -123,7 +123,6 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
                   logPerformance('comment click', startTime);
                 }}
                 commentLoading={commentLoading}
-                maxDisplay={3}
                 aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
               />
             );
