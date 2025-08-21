@@ -78,21 +78,26 @@ class TestHighestUseCountPerBladeTableGenerator:
 
     def test_valid_data(self):
         """Test with valid data."""
+        # Use the correct data structure that matches production
         sample_data = {
-            "highest_use_count_per_blade": [
-                {
-                    "user": "user1",
-                    "blade": "Gillette Nacet",
-                    "format": "DE",
-                    "uses": 15,
-                },
-                {
-                    "user": "user2",
-                    "blade": "Personna Lab Blue",
-                    "format": "DE",
-                    "uses": 12,
-                },
-            ]
+            "data": {
+                "highest_use_count_per_blade": [
+                    {
+                        "rank": 1,
+                        "user": "user1",
+                        "blade": "Gillette Nacet",
+                        "format": "DE",
+                        "uses": 15,
+                    },
+                    {
+                        "rank": 2,
+                        "user": "user2",
+                        "blade": "Personna Lab Blue",
+                        "format": "DE",
+                        "uses": 12,
+                    },
+                ]
+            }
         }
         generator = HighestUseCountPerBladeTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
@@ -100,19 +105,24 @@ class TestHighestUseCountPerBladeTableGenerator:
         assert data[0]["user"] == "u/user1"
         assert data[0]["blade"] == "Gillette Nacet"
         assert data[0]["uses"] == 15
+        assert data[0]["rank"] == 1
+        assert data[1]["rank"] == 2
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
-            "highest_use_count_per_blade": [
-                {"user": "user1"},  # Missing blade and uses
-                {
-                    "user": "user2",
-                    "blade": "Personna Lab Blue",
-                    "format": "DE",
-                    "uses": 12,
-                },  # Valid
-            ]
+            "data": {
+                "highest_use_count_per_blade": [
+                    {"user": "user1"},  # Missing rank, blade, and uses
+                    {
+                        "rank": 1,
+                        "user": "user2",
+                        "blade": "Personna Lab Blue",
+                        "format": "DE",
+                        "uses": 12,
+                    },  # Valid
+                ]
+            }
         }
         generator = HighestUseCountPerBladeTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
