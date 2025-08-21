@@ -130,9 +130,20 @@ class BaseAggregator(ABC):
         # Get the first grouping column for sorting (could be "name", "handle_maker", etc.)
         first_group_column = self._get_group_columns(grouped)[0]
 
-        # Assign competition ranks to the entire dataset by shaves (descending)
+        # Assign competition ranks to the entire dataset by tie_columns (all descending)
         # This gives us 1, 2, 2, 4, 5... style ranking where ties get same rank
-        grouped["raw_rank"] = grouped["shaves"].rank(method="min", ascending=False)
+        # Sort by tie_columns first (desc), then assign ranks
+        ascending_list = [False] * len(self.tie_columns)
+        grouped = grouped.sort_values(self.tie_columns, ascending=ascending_list)
+        grouped = grouped.reset_index(drop=True)
+        
+        # Create a composite key for ranking that preserves the order
+        # Use sequential ranks, then group by tie_columns to get same rank for ties
+        grouped["temp_rank"] = range(1, len(grouped) + 1)
+        grouped["raw_rank"] = (
+            grouped.groupby(self.tie_columns, sort=False)["temp_rank"].transform("min")
+        )
+        grouped = grouped.drop("temp_rank", axis=1)
 
         # Sort by ranking first, then by name for consistent ordering of tied entries
         grouped = grouped.sort_values(["raw_rank", first_group_column], ascending=[True, True])
