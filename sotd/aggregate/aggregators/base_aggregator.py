@@ -14,6 +14,14 @@ class BaseAggregator(ABC):
     # Default tie detection columns - can be overridden by subclasses
     tie_columns = ["shaves", "unique_users"]
 
+    def __init__(self, debug: bool = False):
+        """Initialize the aggregator.
+
+        Args:
+            debug: Enable debug output
+        """
+        self.debug = debug
+
     def aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Aggregate data from enriched records.
 
@@ -122,25 +130,12 @@ class BaseAggregator(ABC):
         # Get the first grouping column for sorting (could be "name", "handle_maker", etc.)
         first_group_column = self._get_group_columns(grouped)[0]
 
-        # Sort by tie_columns + first_group_column for consistency
-        # Note: tie_columns are sorted descending, first_group_column is sorted ascending
-        sort_columns = self.tie_columns + [first_group_column]
-        # False for numeric, True for first_group_column
-        sort_ascending = [False] * len(self.tie_columns) + [True]
+        # Assign competition ranks to the entire dataset by shaves (descending)
+        # This gives us 1, 2, 2, 4, 5... style ranking where ties get same rank
+        grouped["raw_rank"] = grouped["shaves"].rank(method="min", ascending=False)
 
-        grouped = grouped.sort_values(sort_columns, ascending=sort_ascending)
-        grouped = grouped.reset_index(drop=True)
-
-        # Use pandas groupby approach for efficient multi-column tie detection
-        # Sort by tie_columns (desc) + first_group_column (asc) for consistent ranking
-        tmp = grouped.sort_values(sort_columns, ascending=sort_ascending)
-
-        # Assign dense ranks to unique combinations of tie_columns
-        # ngroup() + 1 gives us 1-based dense ranking
-        tmp["raw_rank"] = tmp.groupby(self.tie_columns, sort=False).ngroup() + 1
-
-        # Sort by final ranking + first_group_column for consistent ordering
-        grouped = tmp.sort_values(["raw_rank", first_group_column], ascending=[True, True])
+        # Sort by ranking first, then by name for consistent ordering of tied entries
+        grouped = grouped.sort_values(["raw_rank", first_group_column], ascending=[True, True])
         grouped = grouped.reset_index(drop=True)
 
         # Convert to list of dictionaries
