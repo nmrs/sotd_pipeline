@@ -404,6 +404,12 @@ class BaseTableGenerator(ABC):
         # Convert to DataFrame
         df = pd.DataFrame(table_data)
 
+        # Debug: show data order before any processing
+        if self.debug and "rank" in df.columns:
+            print(f"[DEBUG] Initial data order for {self.get_table_title()}:")
+            for i, row in df.head(10).iterrows():
+                print(f"  {row['rank']}: {row.get('name', 'N/A')}")
+
         if df.empty:
             if self.debug:
                 print(f"[DEBUG] Empty DataFrame for table: {self.get_table_title()}")
@@ -444,25 +450,29 @@ class BaseTableGenerator(ABC):
         }
         df = df.rename(columns=column_renames)  # pyright: ignore[reportCallIssue]
 
-        # Sort by shaves desc, then unique_users desc for consistent table ordering
-        numeric_columns = list(df.select_dtypes(include=["number"]).columns)
-        if len(numeric_columns) > 0:
-            # Sort by shaves first, then unique_users as tie-breaker
-            sort_columns = []
-            if "shaves" in df.columns:
-                sort_columns.append("shaves")
-            if "unique_users" in df.columns and len(sort_columns) > 0:
-                sort_columns.append("unique_users")
+        # Data is already correctly sorted by the aggregator, no need to re-sort
+        if self.debug:
+            print(f"[DEBUG] Using pre-sorted data from aggregator for {self.get_table_title()}")
 
-            if sort_columns:
-                df = df.sort_values(by=sort_columns, ascending=[False] * len(sort_columns))
-                if self.debug:
-                    print(f"[DEBUG] Applied sorting by {sort_columns} for {self.get_table_title()}")
+        # Get numeric columns for tie-breaking logic
+        numeric_columns = list(df.select_dtypes(include=["number"]).columns)
 
         # Handle tie-breaking for max_rows
         if len(df) > max_rows:
             # Get the value at the cutoff point
-            if len(numeric_columns) > 0:
+            if "Rank" in df.columns:
+                # Use rank for tie-breaking to preserve the correct order
+                cutoff_rank = df.iloc[max_rows - 1]["Rank"]
+
+                # Include all rows with the same rank as the cutoff
+                df = df[df["Rank"] <= cutoff_rank]
+
+                if self.debug:
+                    print(
+                        f"[DEBUG] Tie-breaking by rank: included {len(df)} rows "
+                        f"(cutoff rank: {cutoff_rank})"
+                    )
+            elif len(numeric_columns) > 0:
                 sort_column = numeric_columns[0]
                 cutoff_value = df.iloc[max_rows - 1][sort_column]
 
@@ -470,7 +480,10 @@ class BaseTableGenerator(ABC):
                 df = df[df[sort_column] >= cutoff_value]
 
                 if self.debug:
-                    print(f"[DEBUG] Tie-breaking: included {len(df)} rows (cutoff: {cutoff_value})")
+                    print(
+                        f"[DEBUG] Tie-breaking by {sort_column}: included {len(df)} rows "
+                        f"(cutoff: {cutoff_value})"
+                    )
             else:
                 # If no numeric columns, just take the first max_rows
                 df = df.head(max_rows)
