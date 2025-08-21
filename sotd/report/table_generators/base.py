@@ -100,6 +100,7 @@ STANDARD_PRODUCT_COLUMNS = {
 }
 
 STANDARD_MANUFACTURER_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "brand": {"display_name": "Manufacturer"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
@@ -111,6 +112,7 @@ STANDARD_MANUFACTURER_COLUMNS = {
 }
 
 STANDARD_SPECIALIZED_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "plate": {"display_name": "Plate", "format": "text"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
@@ -122,17 +124,20 @@ STANDARD_SPECIALIZED_COLUMNS = {
 }
 
 STANDARD_USER_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "user_display": {"display_name": "User", "format": "text"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "missed_days": {"display_name": "missed days", "format": "number"},
 }
 
 STANDARD_DIVERSITY_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "brand": {"display_name": "Brand"},
     "unique_soaps": {"display_name": "unique soaps", "format": "number"},
 }
 
 STANDARD_USE_COUNT_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "user": {"display_name": "User"},
     "blade": {"display_name": "Blade"},
     "format": {"display_name": "Format"},

@@ -411,6 +411,7 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with width field mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "width": {"display_name": "Width", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -469,6 +470,7 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with grind field mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "grind": {"display_name": "Grind", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -527,6 +529,7 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with point field mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "point": {"display_name": "Point", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},

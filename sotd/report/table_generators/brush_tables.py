@@ -23,6 +23,7 @@ class BrushesTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return custom column configuration with 'Brush' instead of 'Name'."""
         return {
+            "rank": {"display_name": "Rank"},
             "name": {"display_name": "Brush"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -61,6 +62,7 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with handle_maker mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "handle_maker": {"display_name": "Maker"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -97,6 +99,7 @@ class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with brand mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "brand": {"display_name": "Maker"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -237,6 +240,7 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with custom knot size formatting."""
         return {
+            "rank": {"display_name": "Rank"},
             "knot_size_mm": {"display_name": "Size", "format": "smart_decimal", "decimals": 1},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},

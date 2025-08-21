@@ -28,6 +28,7 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
         Override to use 'format' field instead of 'name' field.
         """
         return {
+            "rank": {"display_name": "Rank"},
             "format": {"display_name": "Format"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -61,6 +62,7 @@ class RazorsTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return custom column configuration with 'Razor' instead of 'Name'."""
         return {
+            "rank": {"display_name": "Rank"},
             "name": {"display_name": "Razor"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -101,6 +103,7 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
         Override to use 'brand' field instead of 'name' field.
         """
         return {
+            "rank": {"display_name": "Rank"},
             "brand": {"display_name": "Manufacturer"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},

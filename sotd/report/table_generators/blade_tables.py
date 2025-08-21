@@ -28,6 +28,7 @@ class BladesTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return custom column configuration with 'Blade' instead of 'Name'."""
         return {
+            "rank": {"display_name": "Rank"},
             "name": {"display_name": "Blade"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
@@ -81,6 +82,7 @@ class BladeUsageDistributionTableGenerator(BaseTableGenerator, DataValidationMix
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for blade usage distribution table."""
         return {
+            "rank": {"display_name": "Rank"},
             "use_count": {
                 "display_name": "Uses per Blade",
                 "format": "number",
