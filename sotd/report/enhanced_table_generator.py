@@ -43,6 +43,7 @@ class EnhancedTableGenerator:
 
         # Trace ranks at input
         from .utils.rank_tracer import trace_ranks
+
         trace_ranks("EnhancedTableGenerator.input", data)
 
         # Validate parameters

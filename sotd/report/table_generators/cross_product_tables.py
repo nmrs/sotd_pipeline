@@ -17,9 +17,33 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor-blade combination data from aggregated data."""
-        data = self.data.get("razor_blade_combinations", [])
+        # Handle both full structure and extracted data section
+        # Full structure: data['data']['razor_blade_combinations']
+        # Extracted data: data['razor_blade_combinations']
+        if "data" in self.data and "razor_blade_combinations" in self.data["data"]:
+            # Full structure (when called directly)
+            data = self.data["data"]["razor_blade_combinations"]
+        else:
+            # Extracted data section (when called via TableGenerator)
+            data = self.data.get("razor_blade_combinations", [])
+
+        if not data:
+            raise ValueError(
+                "No razor-blade combinations data found. "
+                "This may indicate the data was not properly aggregated or "
+                "the field name has changed."
+            )
+
         # Filter for combinations with 5+ shaves (as requested by user)
         filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+
+        if not filtered_data:
+            raise ValueError(
+                "No razor-blade combinations found with 5+ shaves. "
+                "This may indicate the data structure has changed or "
+                "the filtering criteria are too strict."
+            )
+
         return self._validate_data_records(
             filtered_data, "razor_blade_combinations", ["name", "shaves"]
         )
@@ -64,7 +88,8 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
         # Trace ranks at input
         if self.debug:
             from ..utils.rank_tracer import trace_ranks
-            trace_ranks("HighestUseCountPerBladeTableGenerator.input", self.data, data_key="data")
+
+            trace_ranks("HighestUseCountPerBladeTableGenerator.input", data)
 
         # Filter for entries with 5+ uses (as requested by user)
         filtered_data = [item for item in data if item.get("uses", 0) >= 5]
@@ -75,6 +100,7 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
         # Trace ranks after validation
         if self.debug:
             from ..utils.rank_tracer import trace_ranks
+
             trace_ranks("HighestUseCountPerBladeTableGenerator.after_validation", valid_data)
 
         # Transform data for table display
@@ -89,6 +115,7 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
         # Trace ranks at output
         if self.debug:
             from ..utils.rank_tracer import trace_ranks
+
             trace_ranks("HighestUseCountPerBladeTableGenerator.output", valid_data)
 
         return valid_data

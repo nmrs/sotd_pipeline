@@ -15,21 +15,17 @@ class RankTracer:
 
     def __init__(self, enabled: bool = True):
         """Initialize the rank tracer.
-        
+
         Args:
             enabled: Whether rank tracing is enabled
         """
         self.enabled = enabled
 
     def trace_ranks(
-        self, 
-        step_name: str, 
-        data: Any, 
-        data_key: str = "data",
-        max_ranks: int = 5
+        self, step_name: str, data: Any, data_key: str = "data", max_ranks: int = 5
     ) -> None:
         """Trace rank values at a specific pipeline step.
-        
+
         Args:
             step_name: Name of the pipeline step
             data: Data to trace ranks from
@@ -48,11 +44,15 @@ class RankTracer:
                 # Handle direct list of items
                 rank_data = data
             else:
-                logger.warning(f"[RANK_TRACE] {step_name}: Unable to extract rank data from {type(data)}")
+                logger.warning(
+                    f"[RANK_TRACE] {step_name}: Unable to extract rank data from {type(data)}"
+                )
                 return
 
             if not isinstance(rank_data, list):
-                logger.warning(f"[RANK_TRACE] {step_name}: Rank data is not a list: {type(rank_data)}")
+                logger.warning(
+                    f"[RANK_TRACE] {step_name}: Rank data is not a list: {type(rank_data)}"
+                )
                 return
 
             # Extract ranks from the data
@@ -72,7 +72,7 @@ class RankTracer:
                     f"Total items: {total_items}, "
                     f"First {len(first_ranks)} ranks: {first_ranks}"
                 )
-                
+
                 # Check for rank corruption patterns
                 if len(set(ranks)) == 1 and ranks[0] != "N/A":
                     logger.warning(
@@ -96,10 +96,10 @@ class RankTracer:
         input_data: List[Dict[str, Any]],
         output_data: List[Dict[str, Any]],
         input_key: str = "data",
-        output_key: str = "data"
+        output_key: str = "data",
     ) -> None:
         """Trace rank transformation between input and output data.
-        
+
         Args:
             step_name: Name of the transformation step
             input_data: Input data before transformation
@@ -137,11 +137,11 @@ class RankTracer:
 
     def _extract_ranks(self, data: Any, data_key: str) -> List[Any]:
         """Extract ranks from data structure.
-        
+
         Args:
             data: Data to extract ranks from
             data_key: Key to use when data is nested
-            
+
         Returns:
             List of rank values
         """
@@ -169,13 +169,10 @@ class RankTracer:
             return []
 
     def trace_markdown_ranks(
-        self, 
-        step_name: str, 
-        markdown_content: str,
-        table_name: str = "highest-use-count-per-blade"
+        self, step_name: str, markdown_content: str, table_name: str = "highest-use-count-per-blade"
     ) -> None:
         """Trace ranks from markdown table content.
-        
+
         Args:
             step_name: Name of the pipeline step
             markdown_content: Markdown table content to parse
@@ -186,34 +183,34 @@ class RankTracer:
 
         try:
             # Parse markdown table to extract rank numbers from first column
-            
+
             # Look for rank patterns in markdown table
             # Pattern: | 1 | u/user | Blade | Format | uses |
             # We want to match the first column (rank) specifically
-            lines = markdown_content.strip().split('\n')
+            lines = markdown_content.strip().split("\n")
             ranks = []
-            
+
             for line in lines:
-                if line.startswith('|') and '|' in line[1:]:
+                if line.startswith("|") and "|" in line[1:]:
                     # Split by | and get the first data column (index 1, since index 0 is empty)
-                    parts = line.split('|')
+                    parts = line.split("|")
                     if len(parts) >= 2:
                         first_col = parts[1].strip()
                         if first_col.isdigit():
                             ranks.append(first_col)
-            
+
             if ranks:
                 # Convert to integers
                 rank_numbers = [int(r) for r in ranks]
                 first_ranks = rank_numbers[:5]
                 total_items = len(rank_numbers)
-                
+
                 logger.info(
                     f"[RANK_TRACE] {step_name} (Markdown): "
                     f"Total items: {total_items}, "
                     f"First {len(first_ranks)} ranks: {first_ranks}"
                 )
-                
+
                 # Check for rank corruption in markdown
                 if len(set(rank_numbers)) == 1:
                     logger.warning(
@@ -226,7 +223,9 @@ class RankTracer:
                         f"Ranks are not sequential: {rank_numbers[:5]}..."
                     )
             else:
-                logger.warning(f"[RANK_TRACE] {step_name} (Markdown): No rank data found in markdown")
+                logger.warning(
+                    f"[RANK_TRACE] {step_name} (Markdown): No rank data found in markdown"
+                )
 
         except Exception as e:
             logger.error(f"[RANK_TRACE] {step_name} (Markdown): Error tracing markdown ranks: {e}")

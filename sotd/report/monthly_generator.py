@@ -142,11 +142,11 @@ class MonthlyReportGenerator(BaseReportGenerator):
         # Generate only the tables that are actually used in the template (basic tables)
         # This prevents enhanced tables from being overwritten by basic table generation
         tables = {}
-        
+
         # Extract basic table placeholders from the template
-        basic_pattern = r'\{\{tables\.([^|}]+)\}\}'
+        basic_pattern = r"\{\{tables\.([^|}]+)\}\}"
         basic_matches = re.findall(basic_pattern, template_content)
-        
+
         # Only generate tables that have basic placeholders in the template
         for table_name in basic_matches:
             if table_name in table_generator.get_available_table_names():
@@ -155,7 +155,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     # Create placeholder format for template substitution
                     placeholder = f"{{{{tables.{table_name}}}}}"
                     tables[placeholder] = table_content
-                    
+
                     if self.debug:
                         print(
                             f"[DEBUG] MonthlyReport({self.report_type}): "
