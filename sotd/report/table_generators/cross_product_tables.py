@@ -50,7 +50,7 @@ class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDel
         # Filter for entries with 5+ uses (as requested by user)
         filtered_data = [item for item in data if item.get("uses", 0) >= 5]
         valid_data = self._validate_data_records(
-            filtered_data, "highest_use_count_per_blade", ["user", "blade", "uses"]
+            filtered_data, "highest_use_count_per_blade", ["rank", "user", "blade", "uses"]
         )
 
         # Add a name field for delta calculations (combine user and blade)
