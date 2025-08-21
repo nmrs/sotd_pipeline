@@ -133,6 +133,126 @@ The following table placeholders are available for both monthly and annual repor
 
 **Note**: The same table placeholders work identically in both monthly and annual reports. The system automatically generates the appropriate data based on the time period being reported.
 
+## Enhanced Table Syntax
+
+The template system now supports advanced table configuration through parameter-based syntax. This allows you to control table size, apply data filters, and manage tie handling without modifying the code.
+
+### Basic Syntax
+
+```markdown
+{{tables.table_name|parameter:value|parameter:value}}
+```
+
+### Available Parameters
+
+#### **Data Field Limits (Bottom Cutoffs)**
+These parameters limit tables to items above numerical thresholds, respecting the existing table sorting:
+
+```markdown
+|shaves:N                # Must have >= N shaves (primary sort for most tables)
+|unique_users:N          # Must have >= N unique users (secondary sort for most tables)
+|missed_days:N           # Must have <= N missed days (secondary sort for users table)
+|uses:N                  # Must have >= N uses (primary sort for highest use count table)
+|unique_blades:N         # Must have >= N unique blades (primary sort for blade diversity)
+|unique_brushes:N        # Must have >= N unique brushes (primary sort for brush diversity)
+|unique_soaps:N          # Must have >= N unique soaps (primary sort for soap diversity)
+|unique_combinations:N   # Must have >= N unique combinations (primary sort for soap brand scent diversity)
+|unique_razors:N         # Must have >= N unique razors (primary sort for razor diversity)
+|total_shaves:N          # Must have >= N total shaves (secondary sort for diversity tables)
+|format:N                # Must have >= N format (primary sort for razor format users)
+|fiber:N                 # Must have >= N fiber (primary sort for brush fiber users)
+```
+
+**Important**: Only columns involved in table sorting are available for limits. This ensures limits work as bottom cutoffs that respect the existing table order.
+
+#### **Table Size Limits**
+```markdown
+|rows:N                  # Maximum N rows
+|ranks:N                 # Maximum N ranks
+```
+
+### How Limits Work
+
+#### **Bottom Cutoff Behavior**
+- Limits are applied **after** the table is sorted
+- Only items **above** the threshold are included
+- This works naturally with existing table sorting (e.g., `shaves:5` for tables sorted by shaves descending)
+
+#### **Tie Handling**
+- **Ties are never broken** - complete ties are always included
+- If including a tie would exceed row/rank limits, the table stops **before** the tie
+- This ensures data integrity while respecting size constraints
+
+#### **Processing Order**
+1. **Apply data field limits** - Remove items below thresholds
+2. **Apply size limits** - Respect row/rank constraints
+3. **Handle ties** - Include complete ties when possible
+
+### Template Examples
+
+#### **Basic Usage**
+```markdown
+## Top 20 razors with 5+ shaves
+{{tables.razors|shaves:5|rows:20}}
+
+## Top 15 ranks, only popular items
+{{tables.razors|unique_users:3|ranks:15}}
+
+## Top 25 blades with 3+ shaves
+{{tables.blades|shaves:3|rows:25}}
+```
+
+#### **Advanced Usage**
+```markdown
+## Top razors with 5+ shaves, max 20 rows
+{{tables.razors|shaves:5|rows:20}}
+
+## Top 15 ranks, only popular items
+{{tables.razors|unique_users:3|ranks:15}}
+
+## Top shavers (only active participants)
+{{tables.top-shavers|shaves:20|missed_days:2|rows:10}}
+
+## Only popular brush fibers
+{{tables.brush-fibers|shaves:10|rows:25}}
+```
+
+### Available Limits by Table Type
+
+#### **Standard Product Tables (Razors, Blades, Brushes, Soaps)**
+- **Primary sort:** `shaves` (descending) → `|shaves:N`
+- **Secondary sort:** `unique_users` (descending) → `|unique_users:N`
+
+#### **User Tables (Top Shavers)**
+- **Primary sort:** `shaves` (descending) → `|shaves:N`
+- **Secondary sort:** `missed_days` (ascending) → `|missed_days:N`
+
+#### **Diversity Tables**
+- **Primary sort:** `unique_brushes`, `unique_blades`, `unique_soaps` (descending) → `|unique_brushes:N`, `|unique_blades:N`, `|unique_soaps:N`
+- **Secondary sort:** `total_shaves` (descending) → `|total_shaves:N`
+
+#### **Specialized User Tables**
+- **Primary sort:** `format` or `fiber` (ascending) → `|format:N`, `|fiber:N`
+- **Secondary sort:** `shaves` (descending) → `|shaves:N`
+
+#### **Cross-Product Tables**
+- **Primary sort:** `uses` (descending) → `|uses:N`
+
+### Best Practices
+
+1. **Use limits for quality control** - `|shaves:5` ensures only meaningful data is shown
+2. **Control table size** - `|rows:20` prevents tables from becoming too long
+3. **Respect sorting** - limits work with existing table order, not against it
+4. **Combine limits thoughtfully** - `|shaves:5|rows:20` gives you quality + size control
+5. **Test your limits** - verify that limits produce the expected results
+
+### Error Handling
+
+- **Invalid column names** will throw clear error messages
+- **Non-sorting columns** cannot be used for limits (prevents confusion)
+- **Invalid parameter values** will fall back to defaults
+- **Conflicting parameters** will use priority order (data limits > size limits)
+
 ## How to Customize Templates
 
 1. **Edit the template files**: Open the appropriate template file in `data/report_templates/` in your preferred text editor

@@ -98,7 +98,10 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
-        mock_processor.process_template.return_value = "Generated hardware report"
+        mock_processor.get_template.return_value = (
+            "# Hardware Report\n\n{{tables.razors}}\n\n{{tables.blades}}"
+        )
+        mock_processor.process_template.return_value = "Generated report"
         mock_template_processor_class.return_value = mock_processor
 
         # Test data
@@ -145,12 +148,12 @@ class TestMonthlyReportGenerator:
                 "sample_brands": "0",
             },
             {
-                "razors": "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-                "blades": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
+                "{{tables.razors}}": "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
+                "{{tables.blades}}": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
             },
         )
 
-        assert result == "Generated hardware report"
+        assert result == "Generated report"
 
     @patch("sotd.report.monthly_generator.TemplateProcessor")
     @patch("sotd.report.monthly_generator.TableGenerator")
@@ -168,6 +171,9 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
+        mock_processor.get_template.return_value = (
+            "# Software Report\n\n{{tables.soaps}}\n\n{{tables.scents}}"
+        )
         mock_processor.process_template.return_value = "Generated software report"
         mock_template_processor_class.return_value = mock_processor
 
@@ -214,8 +220,8 @@ class TestMonthlyReportGenerator:
                 "sample_brands": "8",
             },
             {
-                "soaps": "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
-                "scents": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
+                "{{tables.soaps}}": "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
+                "{{tables.scents}}": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
             },
         )
 
@@ -233,6 +239,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
+        mock_processor.get_template.return_value = "# Custom Report\n\nNo tables"
         mock_processor.process_template.return_value = "Generated report"
         mock_template_processor_class.return_value = mock_processor
 
@@ -264,6 +271,9 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
+        mock_processor.get_template.return_value = (
+            "# Hardware Report\n\n{{tables.razors}}\n\n{{tables.blades}}"
+        )
         mock_processor.process_template.return_value = "Generated report"
         mock_template_processor_class.return_value = mock_processor
 
@@ -281,9 +291,12 @@ class TestMonthlyReportGenerator:
         mock_processor.process_template.assert_called_once()
         call_args = mock_processor.process_template.call_args[0]
         tables = call_args[2]
-        assert "razors" in tables
-        assert "blades" in tables
-        assert tables["blades"] == "*Error generating table blades: Table generation failed*"
+        assert "{{tables.razors}}" in tables
+        assert "{{tables.blades}}" in tables
+        assert (
+            tables["{{tables.blades}}"]
+            == "*Error generating table blades: Table generation failed*"
+        )
 
     def test_month_parsing_valid_format(self):
         """Test month parsing with valid YYYY-MM format."""
@@ -295,6 +308,7 @@ class TestMonthlyReportGenerator:
         # Access the month parsing logic through generate_notes_and_caveats
         with patch("sotd.report.monthly_generator.TemplateProcessor") as mock_processor_class:
             mock_processor = Mock()
+            mock_processor.get_template.return_value = "# Hardware Report\n\nNo tables"
             mock_processor.process_template.return_value = "Generated report"
             mock_processor_class.return_value = mock_processor
 
@@ -322,6 +336,7 @@ class TestMonthlyReportGenerator:
         # Access the month parsing logic through generate_notes_and_caveats
         with patch("sotd.report.monthly_generator.TemplateProcessor") as mock_processor_class:
             mock_processor = Mock()
+            mock_processor.get_template.return_value = "# Hardware Report\n\nNo tables"
             mock_processor.process_template.return_value = "Generated report"
             mock_processor_class.return_value = mock_processor
 
@@ -350,6 +365,7 @@ class TestMonthlyReportGenerator:
         # and checking what variables are passed to the template processor
         with patch("sotd.report.monthly_generator.TemplateProcessor") as mock_processor_class:
             mock_processor = Mock()
+            mock_processor.get_template.return_value = "# Hardware Report\n\nNo tables"
             mock_processor.process_template.return_value = "Generated report"
             mock_processor_class.return_value = mock_processor
 
@@ -379,6 +395,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
+        mock_processor.get_template.return_value = "# Hardware Report\n\nNo tables"
         mock_processor.process_template.return_value = "Generated report"
         mock_template_processor_class.return_value = mock_processor
 
@@ -409,6 +426,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
+        mock_processor.get_template.return_value = "# Hardware Report\n\nNo tables"
         mock_processor.process_template.return_value = "Generated report"
         mock_template_processor_class.return_value = mock_processor
 

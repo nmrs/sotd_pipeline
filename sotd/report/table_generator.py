@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, Optional
 
+from .enhanced_table_generator import EnhancedTableGenerator
 from .table_generators.blade_tables import (
     BladeManufacturersTableGenerator,
     BladesTableGenerator,
@@ -118,6 +119,9 @@ class TableGenerator:
             "brand-diversity": BrandDiversityTableGenerator,
         }
 
+        # Initialize enhanced table generator for parameter support
+        self.enhanced_table_generator = EnhancedTableGenerator()
+
     def generate_table_by_name(self, table_name: str) -> str:
         """Generate a table by its placeholder name.
 
@@ -173,6 +177,73 @@ class TableGenerator:
         # If the table is empty, return a "No data available" message
         if not table_content:
             return f"*No data available for {table_name}*"
+
+        return table_content
+
+    def generate_table_with_parameters(self, table_name: str, parameters: Dict[str, Any]) -> str:
+        """Generate a table with enhanced parameters using the EnhancedTableGenerator.
+
+        Args:
+            table_name: Name of the table (e.g., 'razors', 'blades')
+            parameters: Dictionary of parameters to apply (e.g., {'shaves': 5, 'rows': 20})
+
+        Returns:
+            Generated table content as markdown string
+
+        Raises:
+            ValueError: If table name is not recognized or parameters are invalid
+        """
+        if table_name not in self.table_generators:
+            raise ValueError(f"Unknown table name: {table_name}")
+
+        # Get the raw table data from the generator
+        generator_class = self.table_generators[table_name]
+        generator = generator_class(self.data, self.debug)
+
+        # Get the raw table data (before any formatting or row limiting)
+        raw_data = generator.get_table_data()
+
+        if not raw_data:
+            return f"*No data available for {table_name}*"
+
+        # Apply enhanced parameters using the EnhancedTableGenerator
+        processed_data = self.enhanced_table_generator.generate_table(
+            table_name, raw_data, parameters
+        )
+
+        if not processed_data:
+            return f"*No data available for {table_name} with specified parameters*"
+
+        # Now generate the formatted table using the original generator
+        # but with the processed data
+        # We need to temporarily replace the generator's data to use our processed version
+
+        # Store original data
+        original_data = generator.data
+
+        # Create a temporary data structure with our processed data
+        # The generator expects data in the same format as the original
+        temp_data = {table_name: processed_data}
+
+        # Temporarily replace the generator's data
+        generator.data = temp_data
+
+        try:
+            # Generate the table with the processed data
+            # Use a high max_rows since we've already applied our own limits
+            table_content = generator.generate_table(
+                max_rows=len(processed_data),
+                include_delta=False,  # Disable delta for enhanced tables for now
+                comparison_data=None,
+                include_header=False,
+            )
+        finally:
+            # Restore original data
+            generator.data = original_data
+
+        # If the table is empty, return a "No data available" message
+        if not table_content:
+            return f"*No data available for {table_name} with specified parameters*"
 
         return table_content
 

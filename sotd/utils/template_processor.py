@@ -123,9 +123,14 @@ class TemplateProcessor:
         Returns:
             Content with table placeholders substituted
         """
-        for key, value in tables.items():
-            placeholder = f"{{{{tables.{key}}}}}"
+        # Sort tables by length (longest first) to ensure enhanced placeholders
+        # are replaced before basic ones, preventing partial replacements
+        sorted_tables = sorted(tables.items(), key=lambda x: len(x[0]), reverse=True)
+
+        for placeholder, value in sorted_tables:
+            # Replace the exact placeholder string
             content = content.replace(placeholder, value)
+
         return content
 
     def list_templates(self) -> list[str]:
