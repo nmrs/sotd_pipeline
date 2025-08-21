@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MismatchAnalyzer from '../MismatchAnalyzer';
+import MatchAnalyzer from '../MatchAnalyzer';
 import * as api from '@/services/api';
 
 // Mock the API module
@@ -85,7 +85,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
   describe('Display Mode Removal', () => {
     it('should not include split_brushes in display mode options', async () => {
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Check that split_brushes button is not present
@@ -95,7 +95,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
 
     it('should not have split_brushes in display mode state', async () => {
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // The display mode should not include split_brushes option
@@ -111,7 +111,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       mockApi.analyzeMismatch.mockResolvedValue(mockMismatchAnalysisResult);
 
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Select brush field
@@ -130,7 +130,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       });
 
       // Verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
 
       // The actual filtering logic would be tested in integration tests
@@ -154,7 +154,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       mockApi.analyzeMismatch.mockResolvedValue(dataWithoutSplitBrush);
 
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Select brush field
@@ -173,7 +173,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       });
 
       // Verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
 
       // The actual data handling would be tested in integration tests
@@ -186,7 +186,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       const user = userEvent.setup();
 
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Select brush field
@@ -205,7 +205,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       });
 
       // Verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
 
       // The actual counting logic would be tested in integration tests
@@ -218,7 +218,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       const user = userEvent.setup();
 
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Select brush field
@@ -237,7 +237,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       });
 
       // Verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
 
       // The actual filtering logic would be tested in integration tests
@@ -245,7 +245,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
 
       // Since we're not actually running the analysis in this test,
       // we just verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
     });
   });
@@ -257,7 +257,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       mockApi.analyzeMismatch.mockRejectedValue(new Error('API Error'));
 
       await act(async () => {
-        render(<MismatchAnalyzer />);
+        render(<MatchAnalyzer />);
       });
 
       // Select brush field
@@ -276,7 +276,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       });
 
       // Verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
 
       // The actual error handling would be tested in integration tests
@@ -284,7 +284,7 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
 
       // Since we're not actually running the analysis in this test,
       // we just verify that the component renders without errors
-      expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+      expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
       expect(screen.getByText(/confirmed matches for brush/i)).toBeInTheDocument();
     });
   });

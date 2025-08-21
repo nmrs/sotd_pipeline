@@ -80,7 +80,9 @@ describe('DataTable Pagination', () => {
 
   test('should handle filtering with pagination', async () => {
     await act(async () => {
-      render(<DataTable columns={columns} data={mockData} searchKey='name' showPagination={true} />);
+      render(
+        <DataTable columns={columns} data={mockData} searchKey='name' showPagination={true} />
+      );
     });
 
     // Find the search input
@@ -118,7 +120,9 @@ describe('DataTable Pagination', () => {
 
   test('should maintain column width consistency between header and body', async () => {
     await act(async () => {
-      render(<DataTable columns={columns} data={mockData} showPagination={true} resizable={true} />);
+      render(
+        <DataTable columns={columns} data={mockData} showPagination={true} resizable={true} />
+      );
     });
 
     // Check that header and body cells have consistent styling
@@ -142,7 +146,7 @@ describe('DataTable Pagination', () => {
           columns={columns}
           data={mockData}
           showPagination={true}
-        // No height or itemSize props - these should be removed
+          // No height or itemSize props - these should be removed
         />
       );
     });

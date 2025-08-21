@@ -136,14 +136,15 @@ const Dashboard: React.FC = () => {
                   <p className='text-gray-600 mb-4'>{card.description}</p>
                   <Link
                     to={card.path}
-                    className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${card.color === 'blue'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : card.color === 'green'
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : card.color === 'purple'
-                          ? 'bg-purple-600 text-white hover:bg-purple-700'
-                          : 'bg-gray-600 text-white hover:bg-gray-700'
-                      }`}
+                    className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      card.color === 'blue'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : card.color === 'green'
+                          ? 'bg-green-600 text-white hover:bg-green-700'
+                          : card.color === 'purple'
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-gray-600 text-white hover:bg-gray-700'
+                    }`}
                   >
                     Open Tool
                     <svg

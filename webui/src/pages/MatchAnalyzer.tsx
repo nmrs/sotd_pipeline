@@ -24,13 +24,19 @@ import BrushSplitModal from '@/components/forms/BrushSplitModal';
 import { BrushSplit } from '@/types/brushSplit';
 import { structureBrushDataForAPI } from '@/utils/brushDataUtils';
 
-const MismatchAnalyzer: React.FC = () => {
+const MatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
-    'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched' | 'complete_brushes'
+    | 'mismatches'
+    | 'all'
+    | 'unconfirmed'
+    | 'regex'
+    | 'intentionally_unmatched'
+    | 'complete_brushes'
+    | 'matches'
   >('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +113,7 @@ const MismatchAnalyzer: React.FC = () => {
         months: selectedMonths, // Pass full months array instead of just first month
         threshold,
         use_enriched_data: useEnrichedData,
+        display_mode: displayMode,
       });
 
       setResults(result);
@@ -231,7 +238,10 @@ const MismatchAnalyzer: React.FC = () => {
 
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
-    if ((item as any).is_split_brush && ((item as any).handle_component || (item as any).knot_component)) {
+    if (
+      (item as any).is_split_brush &&
+      ((item as any).handle_component || (item as any).knot_component)
+    ) {
       existingSplit = {
         original: item.original,
         handle: (item as any).handle_component || null,
@@ -543,6 +553,62 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
+  const handleMarkAsIncorrect = async () => {
+    if (selectedItems.size === 0) {
+      setError('Please select items to mark as incorrect');
+      return;
+    }
+
+    if (!results?.mismatch_items) return;
+
+    try {
+      // Send the complete match data directly
+      const matches = results.mismatch_items
+        .filter(item => {
+          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+          return selectedItems.has(itemKey);
+        })
+        .map(item => {
+          // For brush field, use the shared utility to structure data correctly
+          if (selectedField === 'brush' && item.matched) {
+            const { data } = structureBrushDataForAPI(item.matched);
+            return {
+              original: item.original,
+              matched: data,
+            };
+          }
+
+          // For non-brush fields, return as-is
+          return {
+            original: item.original,
+            matched: item.matched,
+          };
+        });
+
+      const response = await removeMatchesFromCorrect({
+        field: selectedField,
+        matches,
+        force: true,
+      });
+
+      if (response.success) {
+        // Reload correct matches and re-analyze to get fresh data
+        await loadCorrectMatches();
+        setSelectedItems(new Set());
+        setError(null);
+
+        // Re-run analysis to get updated mismatch data
+        if (selectedMonths.length > 0) {
+          await handleAnalyze();
+        }
+      } else {
+        setError(`Failed to mark items as incorrect: ${response.message}`);
+      }
+    } catch (err: unknown) {
+      setError(handleApiError(err));
+    }
+  };
+
   const isItemConfirmed = useCallback((item: MismatchAnalysisResult['mismatch_items'][0]) => {
     // Use the is_confirmed field from the backend
     return item.is_confirmed || false;
@@ -587,6 +653,10 @@ const MismatchAnalyzer: React.FC = () => {
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
         return results.mismatch_items.filter(item => (item as any).is_complete_brush === true);
+
+      case 'matches':
+        // Show only confirmed matches (exact and manually confirmed)
+        return results.mismatch_items.filter(item => isItemConfirmed(item));
 
       default:
         return results.mismatch_items;
@@ -686,6 +756,7 @@ const MismatchAnalyzer: React.FC = () => {
         unconfirmed: 0,
         regex: 0,
         intentionally_unmatched: 0,
+        matches: 0,
 
         complete_brushes: 0,
       };
@@ -708,8 +779,10 @@ const MismatchAnalyzer: React.FC = () => {
       intentionally_unmatched: returnedItems.filter(
         item => item.mismatch_type === 'intentionally_unmatched'
       ).length,
+      matches: returnedItems.filter(item => isItemConfirmed(item)).length,
 
-      complete_brushes: returnedItems.filter(item => (item as any).is_complete_brush === true).length,
+      complete_brushes: returnedItems.filter(item => (item as any).is_complete_brush === true)
+        .length,
     };
   };
 
@@ -768,9 +841,10 @@ const MismatchAnalyzer: React.FC = () => {
     <div ref={containerRef} className='w-full p-4 max-w-full overflow-x-hidden'>
       {/* Controls and Header */}
       <div className='mb-4'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>Mismatch Analyzer</h1>
+        <h1 className='text-3xl font-bold text-gray-900 mb-2'>Match Analyzer</h1>
         <p className='text-gray-600 mb-4'>
-          Analyze mismatched items to identify potential catalog conflicts and inconsistencies.
+          Analyze and manage all matches to identify potential catalog conflicts, view confirmed
+          entries, and maintain data quality.
         </p>
 
         {/* Correct Matches Summary */}
@@ -834,7 +908,12 @@ const MismatchAnalyzer: React.FC = () => {
           {/* First row - Basic controls */}
           <div className='flex flex-wrap gap-4 items-end'>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label htmlFor='field-select' className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
+              <label
+                htmlFor='field-select'
+                className='block text-sm font-medium text-gray-700 mb-1'
+              >
+                Field
+              </label>
               <select
                 id='field-select'
                 value={selectedField}
@@ -848,7 +927,12 @@ const MismatchAnalyzer: React.FC = () => {
               </select>
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label htmlFor='month-selector' className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
+              <label
+                htmlFor='month-selector'
+                className='block text-sm font-medium text-gray-700 mb-1'
+              >
+                Month
+              </label>
               <MonthSelector
                 selectedMonths={selectedMonths}
                 onMonthsChange={handleMonthChange}
@@ -857,7 +941,10 @@ const MismatchAnalyzer: React.FC = () => {
               />
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label htmlFor='levenshtein-threshold' className='block text-sm font-medium text-gray-700 mb-1'>
+              <label
+                htmlFor='levenshtein-threshold'
+                className='block text-sm font-medium text-gray-700 mb-1'
+              >
                 Levenshtein Threshold
               </label>
               <input
@@ -937,8 +1024,9 @@ const MismatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -955,10 +1043,11 @@ const MismatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'mismatches'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -975,10 +1064,11 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'unconfirmed'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -995,8 +1085,9 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -1013,15 +1104,38 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'intentionally_unmatched'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
                 <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
                   Show only intentionally unmatched items
+                </span>
+              </Button>
+              {/* Matches filter - show confirmed entries */}
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('matches')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'matches' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only confirmed matches (exact and manually confirmed)'
+              >
+                <Filter className='h-4 w-4' />
+                Matches
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'matches'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {getDisplayModeCounts().matches}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only confirmed matches (exact and manually confirmed)
                 </span>
               </Button>
               {/* Complete Brushes filter - only show when field is brush */}
@@ -1035,10 +1149,11 @@ const MismatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                      displayMode === 'complete_brushes'
+                        ? 'bg-white text-blue-600'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>
@@ -1078,7 +1193,8 @@ const MismatchAnalyzer: React.FC = () => {
                     Field: <span className='font-medium'>{results.field}</span>
                   </span>
                   <span className='whitespace-nowrap'>
-                    Month{results.months.length > 1 ? 's' : ''}: <span className='font-medium'>{results.months.join(', ')}</span>
+                    Month{results.months.length > 1 ? 's' : ''}:{' '}
+                    <span className='font-medium'>{results.months.join(', ')}</span>
                   </span>
                   <span className='whitespace-nowrap'>
                     Total Matches:{' '}
@@ -1142,6 +1258,16 @@ const MismatchAnalyzer: React.FC = () => {
                   >
                     {updatingFiltered ? 'Updating...' : getUnmatchedButtonText}
                   </button>
+                  {/* Only show Mark as Incorrect when viewing confirmed matches */}
+                  {displayMode === 'matches' && (
+                    <button
+                      onClick={handleMarkAsIncorrect}
+                      disabled={selectedItems.size === 0}
+                      className='px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap'
+                    >
+                      Mark {visibleSelectedCount} as Incorrect
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1166,7 +1292,7 @@ const MismatchAnalyzer: React.FC = () => {
           <div className='p-6'>
             {filteredResults.length > 0 ? (
               <MismatchAnalyzerDataTable
-                key={`mismatch-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
+                key={`match-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
                 data={filteredResults}
                 field={selectedField}
                 onCommentClick={handleCommentClick}
@@ -1198,7 +1324,7 @@ const MismatchAnalyzer: React.FC = () => {
             <div className='text-gray-400 text-6xl mb-4'>🔍</div>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>Ready to Analyze</h3>
             <p className='text-gray-600'>
-              Select a month and field, then click &quot;Analyze&quot; to begin.
+              Select a month and field, then click &quot;Analyze&quot; to begin match analysis.
             </p>
           </div>
         </div>
@@ -1231,4 +1357,4 @@ const MismatchAnalyzer: React.FC = () => {
   );
 };
 
-export default MismatchAnalyzer;
+export default MatchAnalyzer;

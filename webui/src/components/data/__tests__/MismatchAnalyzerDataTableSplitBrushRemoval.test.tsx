@@ -115,7 +115,9 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
 
       // Verify that brush information is displayed correctly
       // The component renders the full matched data string
-      expect(screen.getByText('Declaration Grooming - B2 - Declaration Grooming')).toBeInTheDocument();
+      expect(
+        screen.getByText('Declaration Grooming - B2 - Declaration Grooming')
+      ).toBeInTheDocument();
       expect(screen.getByText('Alpha - Amber - Alpha')).toBeInTheDocument();
     });
   });

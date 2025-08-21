@@ -141,7 +141,7 @@ describe('BrushValidation', () => {
         // New backend filtering parameters (intentional improvement)
         strategyCount: undefined,
         showSingleStrategy: undefined,
-        showMultipleStrategy: undefined
+        showMultipleStrategy: undefined,
       });
     });
 
@@ -183,7 +183,7 @@ describe('BrushValidation', () => {
         // New backend filtering parameters (intentional improvement)
         strategyCount: undefined,
         showSingleStrategy: undefined,
-        showMultipleStrategy: undefined
+        showMultipleStrategy: undefined,
       });
     });
 
@@ -235,7 +235,7 @@ describe('BrushValidation', () => {
         // New backend filtering parameters (intentional improvement)
         strategyCount: undefined,
         showSingleStrategy: undefined,
-        showMultipleStrategy: undefined
+        showMultipleStrategy: undefined,
       });
     });
 

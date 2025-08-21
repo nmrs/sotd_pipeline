@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import MismatchAnalyzer from '../MismatchAnalyzer';
+import MatchAnalyzer from '../MatchAnalyzer';
 import * as api from '@/services/api';
 
 // Mock the API module
@@ -135,11 +135,11 @@ describe('MismatchAnalyzer - Split Brush Confirmation', () => {
 
     // Render the component
     await act(async () => {
-      render(<MismatchAnalyzer />);
+      render(<MatchAnalyzer />);
     });
 
     // Check that the component renders without errors
-    expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
+    expect(screen.getByText('Match Analyzer')).toBeInTheDocument();
     expect(screen.getByText('Ready to Analyze')).toBeInTheDocument();
   });
 });

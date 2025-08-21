@@ -56,6 +56,13 @@ class MismatchAnalysisRequest(BaseModel):
     use_enriched_data: bool = Field(
         default=False, description="Use enriched data instead of matched data"
     )
+    display_mode: Optional[str] = Field(
+        default="mismatches", 
+        description=(
+            "Display mode: 'mismatches' (default), 'matches' (confirmed matches only), "
+            "or 'all'"
+        )
+    )
 
 
 class MatchPhaseRequest(BaseModel):
@@ -697,6 +704,43 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Process all mismatch categories from analyzer
         for mismatch_type, items in mismatches.items():
             logger.info(f"Processing category '{mismatch_type}' with {len(items)} items")
+            
+            # Skip certain categories based on display mode if specified
+            if hasattr(request, 'display_mode') and request.display_mode:
+                if request.display_mode == 'matches':
+                    # For matches mode, only show confirmed matches
+                    if mismatch_type not in ['exact_matches', 'good_matches']:
+                        continue
+                    # Only include items that are confirmed
+                    items = [item for item in items if item.get('is_confirmed', False)]
+                    if not items:
+                        continue
+                elif request.display_mode == 'mismatches':
+                    # For mismatches mode, exclude confirmed matches
+                    if mismatch_type in ['exact_matches', 'good_matches']:
+                        continue
+                elif request.display_mode == 'unconfirmed':
+                    # For unconfirmed mode, only show unconfirmed items
+                    if mismatch_type in ['exact_matches', 'good_matches']:
+                        continue
+                    items = [item for item in items if not item.get('is_confirmed', False)]
+                    if not items:
+                        continue
+                elif request.display_mode == 'regex':
+                    # For regex mode, only show regex-related mismatches
+                    if mismatch_type not in ['multiple_patterns']:
+                        continue
+                elif request.display_mode == 'intentionally_unmatched':
+                    # For intentionally unmatched mode, only show those items
+                    if mismatch_type != 'intentionally_unmatched':
+                        continue
+                elif request.display_mode == 'complete_brushes':
+                    # For complete brushes mode, only show split brush items
+                    items = [item for item in items if item.get('is_split_brush', False)]
+                    if not items:
+                        continue
+                # 'all' mode shows everything, so no filtering needed
+            
             for item in items:
                 record = item["record"]
                 field_data = record.get(request.field, {})
@@ -809,7 +853,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             processing_time=0.0,
             partial_results=False,
             error=None,
-            matched_data_map=data.get("matched_data_map") if request.use_enriched_data else None,  # type: ignore
+            matched_data_map=(
+                data.get("matched_data_map") if request.use_enriched_data else None
+            ),  # type: ignore
         )
 
     except HTTPException:
@@ -1010,37 +1056,9 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
                     errors.append(f"Invalid match data: {match}")
                     continue
 
-                # Create match key and remove from correct matches
-                match_key = manager.create_match_key(request.field, original, matched)
-
-                # Check if the match exists in correct matches
-                if manager.is_match_correct(match_key):
-                    # Remove the match from correct matches
-                    # We need to modify the manager to support removal
-                    # For now, we'll clear the entire field and re-add everything except this match
-                    # This is a temporary solution - ideally the manager would have a remove method
-                    field_data = manager._correct_matches_data.get(request.field, {})
-
-                    # Find and remove the specific entry
-                    for brand, brand_data in field_data.items():
-                        if isinstance(brand_data, dict):
-                            for model, strings in brand_data.items():
-                                if isinstance(strings, list):
-                                    # Remove the specific original string
-                                    if original in strings:
-                                        strings.remove(original)
-                                        removed_count += 1
-                                        # If this was the last string for this model, clean up
-                                        if not strings:
-                                            del brand_data[model]
-                                        # If this was the last model for this brand, clean up
-                                        if not brand_data:
-                                            del field_data[brand]
-                                        break
-
-                    # Update the manager's internal data
-                    manager._correct_matches_data[request.field] = field_data
-
+                # Use the manager's remove_match method
+                if manager.remove_match(request.field, original, matched):
+                    removed_count += 1
                 else:
                     errors.append(f"Match not found in correct matches: {original}")
 

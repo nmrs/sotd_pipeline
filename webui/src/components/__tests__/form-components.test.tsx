@@ -36,7 +36,7 @@ describe('Form Components', () => {
   test('should render MonthSelector component with basic props', async () => {
     // Test that MonthSelector component renders correctly
     await act(async () => {
-      render(<MonthSelector selectedMonths={[]} onMonthsChange={() => { }} multiple={true} />);
+      render(<MonthSelector selectedMonths={[]} onMonthsChange={() => {}} multiple={true} />);
     });
 
     // Verify basic month selector structure
@@ -50,7 +50,7 @@ describe('Form Components', () => {
         itemName='test-item'
         commentIds={['123']}
         isFiltered={false}
-        onStatusChange={() => { }}
+        onStatusChange={() => {}}
         uniqueId='test'
       />
     );

@@ -16,6 +16,8 @@ from .aggregators.annual_aggregator import (
     aggregate_annual_brushes,
     aggregate_annual_razors,
     aggregate_annual_soaps,
+    aggregate_annual_razor_blade_combinations,
+    aggregate_annual_highest_use_count_per_blade,
 )
 from .aggregators.brush_specialized import (
     aggregate_fibers,
@@ -205,6 +207,18 @@ class AnnualAggregationEngine:
         """
         return self._aggregate_specialized_brush_category(monthly_data, "brush_knot_makers")
 
+    def aggregate_razor_blade_combinations(
+        self, monthly_data: Dict[str, Dict]
+    ) -> List[Dict[str, Any]]:
+        """Aggregate annual razor-blade combinations from monthly data."""
+        return aggregate_annual_razor_blade_combinations(monthly_data)
+
+    def aggregate_highest_use_count_per_blade(
+        self, monthly_data: Dict[str, Dict]
+    ) -> List[Dict[str, Any]]:
+        """Aggregate annual highest use count per blade from monthly data."""
+        return aggregate_annual_highest_use_count_per_blade(monthly_data)
+
     def _aggregate_specialized_brush_category(
         self, monthly_data: Dict[str, Dict], category: str
     ) -> List[Dict[str, Any]]:
@@ -352,6 +366,8 @@ class AnnualAggregationEngine:
             "brush_knot_sizes": self.aggregate_brush_knot_sizes(monthly_data),
             "brush_handle_makers": self.aggregate_brush_handle_makers(monthly_data),
             "brush_knot_makers": self.aggregate_brush_knot_makers(monthly_data),
+            "razor_blade_combinations": self.aggregate_razor_blade_combinations(monthly_data),
+            "highest_use_count_per_blade": self.aggregate_highest_use_count_per_blade(monthly_data),
         }
 
 

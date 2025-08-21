@@ -128,7 +128,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-            'Only available data is shown.'
+              'Only available data is shown.'
           );
         }
 
@@ -532,10 +532,11 @@ const UnmatchedAnalyzer: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
-                    ? 'bg-gray-600 text-white hover:bg-gray-700'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    viewState.showFiltered
+                      ? 'bg-gray-600 text-white hover:bg-gray-700'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -552,11 +553,18 @@ const UnmatchedAnalyzer: React.FC = () => {
                   <strong>Two-Phase Matching:</strong> Soap matching uses a two-phase approach:
                 </p>
                 <ul className='list-disc list-inside ml-4 space-y-1'>
-                  <li><strong>Phase 1:</strong> Full soap matching (maker + scent) using exact patterns and regex</li>
-                  <li><strong>Phase 2:</strong> Brand fallback matching (maker only) when scent patterns fail</li>
+                  <li>
+                    <strong>Phase 1:</strong> Full soap matching (maker + scent) using exact
+                    patterns and regex
+                  </li>
+                  <li>
+                    <strong>Phase 2:</strong> Brand fallback matching (maker only) when scent
+                    patterns fail
+                  </li>
                 </ul>
                 <p className='mt-2'>
-                  <strong>Tip:</strong> Use "Soap Brand" field to analyze only brand-level matches and fallbacks.
+                  <strong>Tip:</strong> Use "Soap Brand" field to analyze only brand-level matches
+                  and fallbacks.
                 </p>
               </div>
             </div>
@@ -576,7 +584,8 @@ const UnmatchedAnalyzer: React.FC = () => {
                   <li>May need scent pattern additions to the catalog</li>
                 </ul>
                 <p className='mt-2'>
-                  <strong>Use Case:</strong> Identify soaps that need scent pattern improvements in the catalog.
+                  <strong>Use Case:</strong> Identify soaps that need scent pattern improvements in
+                  the catalog.
                 </p>
               </div>
             </div>
@@ -635,12 +644,13 @@ const UnmatchedAnalyzer: React.FC = () => {
                         Top Unmatched Items ({searchSort.searchResultsCount} of{' '}
                         {results.total_unmatched || results.unmatched_items?.length || 0})
                       </h3>
-                      {results.total_unmatched && results.total_unmatched > results.unmatched_items?.length && (
-                        <p className='text-sm text-gray-600 mt-1'>
-                          Showing top {results.unmatched_items?.length || 0} items.
-                          Use the limit control above to see more items.
-                        </p>
-                      )}
+                      {results.total_unmatched &&
+                        results.total_unmatched > results.unmatched_items?.length && (
+                          <p className='text-sm text-gray-600 mt-1'>
+                            Showing top {results.unmatched_items?.length || 0} items. Use the limit
+                            control above to see more items.
+                          </p>
+                        )}
                     </div>
                   </div>
                   <div className='flex items-center space-x-2'>
@@ -666,10 +676,11 @@ const UnmatchedAnalyzer: React.FC = () => {
                           <button
                             onClick={handleApplyFilteredChanges}
                             disabled={loading || visibleChangesCount === 0}
-                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
-                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                              }`}
+                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
+                              loading || visibleChangesCount === 0
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                            }`}
                           >
                             {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                           </button>

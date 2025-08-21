@@ -109,7 +109,7 @@ describe('DataTable Virtualization Layout Issues', () => {
             <input
               data-testid={`input-${row.original.id}`}
               defaultValue={row.original.name}
-              onChange={() => { }}
+              onChange={() => {}}
             />
           ),
         },

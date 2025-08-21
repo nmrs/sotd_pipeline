@@ -166,6 +166,14 @@ export interface MismatchAnalysisRequest {
   months: string[]; // Changed from month: string to months: string[]
   threshold?: number;
   use_enriched_data?: boolean;
+  display_mode?:
+    | 'mismatches'
+    | 'all'
+    | 'unconfirmed'
+    | 'regex'
+    | 'intentionally_unmatched'
+    | 'complete_brushes'
+    | 'matches';
 }
 
 export interface MismatchItem {
@@ -686,10 +694,14 @@ export const getBrushValidationData = async (
     if (options.pageSize) params.append('page_size', options.pageSize.toString());
 
     // Add new filter parameters
-    if (options.strategyCount !== undefined) params.append('strategy_count', options.strategyCount.toString());
-    if (options.showValidated !== undefined) params.append('show_validated', options.showValidated.toString());
-    if (options.showSingleStrategy !== undefined) params.append('show_single_strategy', options.showSingleStrategy.toString());
-    if (options.showMultipleStrategy !== undefined) params.append('show_multiple_strategy', options.showMultipleStrategy.toString());
+    if (options.strategyCount !== undefined)
+      params.append('strategy_count', options.strategyCount.toString());
+    if (options.showValidated !== undefined)
+      params.append('show_validated', options.showValidated.toString());
+    if (options.showSingleStrategy !== undefined)
+      params.append('show_single_strategy', options.showSingleStrategy.toString());
+    if (options.showMultipleStrategy !== undefined)
+      params.append('show_multiple_strategy', options.showMultipleStrategy.toString());
 
     const response = await api.get(`/brush-validation/data/${month}/${system}?${params}`);
     return response.data;

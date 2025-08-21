@@ -12,7 +12,7 @@ from .base import (
 from .specialized_tables import DataTransformingTableGenerator
 
 
-class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator):
+class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator, NoDeltaMixin):
     """Table generator for razor-blade combinations in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:

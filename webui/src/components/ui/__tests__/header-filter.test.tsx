@@ -23,14 +23,14 @@ describe('HeaderFilter', () => {
   });
 
   test('renders filter button with title', () => {
-    render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
     expect(screen.getByText('Match Type')).toBeInTheDocument();
   });
 
   test('shows dropdown when clicked', async () => {
     const user = userEvent.setup();
-    render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
     const filterButton = screen.getByTitle('Filter Match Type');
     await act(async () => {
@@ -43,7 +43,7 @@ describe('HeaderFilter', () => {
 
   test('displays all options in dropdown', async () => {
     const user = userEvent.setup();
-    render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
     const filterButton = screen.getByTitle('Filter Match Type');
     await act(async () => {
@@ -58,7 +58,7 @@ describe('HeaderFilter', () => {
 
   test('shows counts for each option', async () => {
     const user = userEvent.setup();
-    render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
     const filterButton = screen.getByTitle('Filter Match Type');
     await act(async () => {
@@ -96,7 +96,7 @@ describe('HeaderFilter', () => {
     const user = userEvent.setup();
     const mockOnSelectionChange = jest.fn();
     render(
-      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
     );
 
     const filterButton = screen.getByTitle('Filter Match Type');
@@ -131,7 +131,7 @@ describe('HeaderFilter', () => {
         {...defaultProps}
         selectedValues={selectedValues}
         onSelectionChange={mockOnSelectionChange}
-        onSort={() => { }}
+        onSort={() => {}}
       />
     );
 
@@ -152,7 +152,7 @@ describe('HeaderFilter', () => {
     const user = userEvent.setup();
     const mockOnSelectionChange = jest.fn();
     render(
-      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
     );
 
     const filterButton = screen.getByTitle('Filter Match Type');
@@ -174,7 +174,7 @@ describe('HeaderFilter', () => {
     const user = userEvent.setup();
     const mockOnSelectionChange = jest.fn();
     render(
-      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
     );
 
     const filterButton = screen.getByTitle('Filter Match Type');
@@ -201,9 +201,7 @@ describe('HeaderFilter', () => {
   test('calls onSort when title is clicked', async () => {
     const user = userEvent.setup();
     const mockOnSort = jest.fn();
-    render(
-      <HeaderFilter {...defaultProps} onSelectionChange={() => { }} onSort={mockOnSort} />
-    );
+    render(<HeaderFilter {...defaultProps} onSelectionChange={() => {}} onSort={mockOnSort} />);
 
     // The sort functionality is triggered by clicking on the title text
     const titleElement = screen.getByText('Match Type');

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import BrushSplitValidator from './pages/BrushSplitValidator';
@@ -8,7 +9,7 @@ import Header from './components/layout/Header';
 import MessageDisplay from './components/feedback/MessageDisplay';
 import { useMessaging } from './hooks/useMessaging';
 import './App.css';
-import MismatchAnalyzer from './pages/MismatchAnalyzer';
+import MatchAnalyzer from './pages/MatchAnalyzer';
 import CatalogValidator from './pages/CatalogValidator';
 import SoapAnalyzer from './pages/SoapAnalyzer';
 
@@ -26,7 +27,7 @@ function App() {
             <Route path='/brush-validation' element={<BrushValidation />} />
             <Route path='/unmatched-analyzer' element={<UnmatchedAnalyzer />} />
             <Route path='/performance-test' element={<PerformanceTest />} />
-            <Route path='/mismatch' element={<MismatchAnalyzer />} />
+            <Route path='/mismatch' element={<MatchAnalyzer />} />
             <Route path='/catalog-validator' element={<CatalogValidator />} />
             <Route path='/soap-analyzer' element={<SoapAnalyzer />} />
           </Routes>

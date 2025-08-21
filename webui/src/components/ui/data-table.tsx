@@ -95,7 +95,9 @@ export function DataTable<TData, TValue>({
   totalCount,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
-  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(new Set(['original', 'mismatch_type', 'match_type', 'pattern']));
+  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(
+    new Set(['original', 'mismatch_type', 'match_type', 'pattern'])
+  );
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -156,17 +158,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-        // When using external selection, we need to call onSelectionChange directly
-        // since the table's internal state won't be updated
-        const newSelection =
-          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-        if (onSelectionChange) {
-          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-          onSelectionChange(selectedRows);
+          // When using external selection, we need to call onSelectionChange directly
+          // since the table's internal state won't be updated
+          const newSelection =
+            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+          if (onSelectionChange) {
+            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+            onSelectionChange(selectedRows);
+          }
+          // Also update the internal state so the UI reflects the change immediately
+          setRowSelection(newSelection);
         }
-        // Also update the internal state so the UI reflects the change immediately
-        setRowSelection(newSelection);
-      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -210,7 +212,9 @@ export function DataTable<TData, TValue>({
         }
         if (value && typeof value === 'object') {
           // Search in nested objects (like matched data)
-          for (const [_nestedKey, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+          for (const [_nestedKey, nestedValue] of Object.entries(
+            value as Record<string, unknown>
+          )) {
             if (String(nestedValue).toLowerCase().includes(searchTerm)) {
               return true;
             }
@@ -372,7 +376,12 @@ export function DataTable<TData, TValue>({
               stroke='currentColor'
               viewBox='0 0 24 24'
             >
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M19 9l-7 7-7-7'
+              />
             </svg>
           </SecondaryButton>
 
@@ -390,13 +399,15 @@ export function DataTable<TData, TValue>({
 
                 <div className='space-y-1'>
                   {columns.map(column => {
-                    const columnId = column.id || (column as any).accessorKey as string;
+                    const columnId = column.id || ((column as any).accessorKey as string);
                     if (!columnId) return null;
 
                     const isSelected = selectedSearchColumns.has(columnId);
-                    const columnName = column.header ?
-                      (typeof column.header === 'string' ? column.header : columnId) :
-                      columnId;
+                    const columnName = column.header
+                      ? typeof column.header === 'string'
+                        ? column.header
+                        : columnId
+                      : columnId;
 
                     return (
                       <label
@@ -405,7 +416,7 @@ export function DataTable<TData, TValue>({
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             setSelectedSearchColumns(prev => {
                               const newSet = new Set(prev);
                               if (checked) {
@@ -475,8 +486,9 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                                }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
+                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                              }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -519,10 +531,11 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
-                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                      : ''
-                      }`}
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
+                      keyboardNavigationEnabled && activeRowIndex === index
+                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                        : ''
+                    }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell
@@ -559,10 +572,7 @@ interface DataTablePaginationProps<TData> {
   totalCount?: number; // Total count from backend for external pagination
 }
 
-export function DataTablePagination<TData>({
-  table,
-  totalCount,
-}: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({ table, totalCount }: DataTablePaginationProps<TData>) {
   return (
     <div className='flex items-center justify-between px-2'>
       <div className='flex-1 text-sm text-muted-foreground'>

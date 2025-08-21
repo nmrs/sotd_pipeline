@@ -74,7 +74,7 @@ class CorrectMatchesManager:
                                             for model, strings in brand_data.items():
                                                 if isinstance(strings, list):
                                                     for original in strings:
-                                                        # Use consistent normalization for key generation
+                                                        # Normalize for consistent key generation
                                                         match_key = self.create_match_key(
                                                             field,
                                                             original,
@@ -454,6 +454,42 @@ class CorrectMatchesManager:
         """Mark a match as correct."""
         self._correct_matches.add(match_key)
         self._correct_matches_data[match_key] = match_data
+
+    def remove_match(self, field: str, original: str, matched: Dict) -> bool:
+        """
+        Remove a match from correct matches.
+        
+        Args:
+            field: The field name (e.g., 'brush', 'razor')
+            original: The original text that was matched
+            matched: The matched data dictionary
+            
+        Returns:
+            True if the match was found and removed, False otherwise
+        """
+        match_key = self.create_match_key(field, original, matched)
+        
+        if match_key in self._correct_matches:
+            self._correct_matches.discard(match_key)
+            self._correct_matches_data.pop(match_key, None)
+            return True
+        return False
+
+    def remove_match_by_key(self, match_key: str) -> bool:
+        """
+        Remove a match from correct matches by its key.
+        
+        Args:
+            match_key: The match key to remove
+            
+        Returns:
+            True if the match was found and removed, False otherwise
+        """
+        if match_key in self._correct_matches:
+            self._correct_matches.discard(match_key)
+            self._correct_matches_data.pop(match_key, None)
+            return True
+        return False
 
     def create_match_key(self, field: str, original: str, matched: Dict) -> str:
         """Create a unique key for a match based on field and original text."""

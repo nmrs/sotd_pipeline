@@ -137,6 +137,16 @@ def create_annual_soap_aggregator() -> AnnualAggregator:
     return AnnualAggregator("soaps")
 
 
+def create_annual_razor_blade_combinations_aggregator() -> AnnualAggregator:
+    """Create annual aggregator for razor-blade combinations."""
+    return AnnualAggregator("razor_blade_combinations")
+
+
+def create_annual_highest_use_count_per_blade_aggregator() -> AnnualAggregator:
+    """Create annual aggregator for highest use count per blade."""
+    return AnnualAggregator("highest_use_count_per_blade")
+
+
 # Legacy function interfaces for backward compatibility
 def aggregate_annual_razors(monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
     """Aggregate annual razor data from monthly data.
@@ -178,13 +188,22 @@ def aggregate_annual_brushes(monthly_data: Dict[str, Dict]) -> List[Dict[str, An
 
 
 def aggregate_annual_soaps(monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
-    """Aggregate annual soap data from monthly data.
-
-    Args:
-        monthly_data: Dictionary of monthly data keyed by month
-
-    Returns:
-        List of aggregated soap data sorted by shaves desc, unique_users desc
-    """
+    """Aggregate annual soaps from monthly data."""
     aggregator = create_annual_soap_aggregator()
+    return aggregator.aggregate_from_monthly_data(monthly_data)
+
+
+def aggregate_annual_razor_blade_combinations(
+    monthly_data: Dict[str, Dict],
+) -> List[Dict[str, Any]]:
+    """Aggregate annual razor-blade combinations from monthly data."""
+    aggregator = create_annual_razor_blade_combinations_aggregator()
+    return aggregator.aggregate_from_monthly_data(monthly_data)
+
+
+def aggregate_annual_highest_use_count_per_blade(
+    monthly_data: Dict[str, Dict],
+) -> List[Dict[str, Any]]:
+    """Aggregate annual highest use count per blade from monthly data."""
+    aggregator = create_annual_highest_use_count_per_blade_aggregator()
     return aggregator.aggregate_from_monthly_data(monthly_data)
