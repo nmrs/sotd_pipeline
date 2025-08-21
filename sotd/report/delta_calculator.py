@@ -84,9 +84,19 @@ class DeltaCalculator:
 
             # Calculate delta
             if historical_rank is not None:
-                delta = historical_rank - current_rank
-                delta_symbol = self._get_delta_symbol(delta)
-                delta_text = delta_symbol  # Use symbol only, not +/- format
+                # Convert ranks to integers for calculation (handle string ranks like "2=")
+                try:
+                    hist_rank_int = int(str(historical_rank).split("=")[0])
+                    curr_rank_int = int(str(current_rank).split("=")[0])
+                    delta = hist_rank_int - curr_rank_int
+                except (ValueError, AttributeError):
+                    # If conversion fails, skip delta calculation
+                    delta = None
+                    delta_symbol = "n/a"
+                    delta_text = "n/a"
+                else:
+                    delta_symbol = self._get_delta_symbol(delta)
+                    delta_text = delta_symbol  # Use symbol only, not +/- format
             else:
                 delta = None
                 delta_symbol = "n/a"
@@ -156,7 +166,14 @@ class DeltaCalculator:
             if name in tier_analysis["tier_changes"]:
                 hist_rank, curr_rank = tier_analysis["tier_changes"][name]
                 enhanced_item["tier_change"] = (hist_rank, curr_rank)
-                enhanced_item["tier_movement"] = hist_rank - curr_rank
+                # Convert ranks to integers for calculation (handle string ranks like "2=")
+                try:
+                    hist_rank_int = int(str(hist_rank).split("=")[0])
+                    curr_rank_int = int(str(curr_rank).split("=")[0])
+                    enhanced_item["tier_movement"] = hist_rank_int - curr_rank_int
+                except (ValueError, AttributeError):
+                    # If conversion fails, skip tier movement calculation
+                    enhanced_item["tier_movement"] = None
 
             # Add tier structure information
             enhanced_item["tier_structure_changed"] = tier_analysis["structure_changed"]
