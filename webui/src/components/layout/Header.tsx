@@ -36,7 +36,7 @@ const Header: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '🏠' },
     { path: '/unmatched-analyzer', label: 'Unmatched', icon: '🔍' },
-    { path: '/mismatch', label: 'Mismatch', icon: '⚠️' },
+    { path: '/mismatch', label: 'Match Analyzer', icon: '📊' },
     { path: '/catalog-validator', label: 'Catalog Validator', icon: '✅' },
     { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
     { path: '/brush-validation', label: 'Brush Validation', icon: '🖊️' },
