@@ -20,18 +20,18 @@ class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator):
         data = self.data.get("razor_blade_combinations", [])
         # No filtering - show all combinations as template doesn't specify limits
         valid_data = self._validate_data_records(
-            data, "razor_blade_combinations", ["razor", "blade", "shaves"]
+            data, "razor_blade_combinations", ["name", "shaves", "rank"]
         )
 
-        # Map razor and blade to plate field
+        # Map name field directly (already contains "Razor + Blade" format)
         result = []
         for record in valid_data:
-            razor = record.get("razor")
-            blade = record.get("blade")
-            if razor and blade:
+            name = record.get("name")
+            if name:
                 result.append(
                     {
-                        "plate": f"{razor} + {blade}",
+                        "rank": record.get("rank", 0),
+                        "name": name,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
