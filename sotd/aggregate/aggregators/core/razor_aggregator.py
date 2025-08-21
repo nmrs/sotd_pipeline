@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_fields, get_field_value
 
 
 class RazorAggregator(BaseAggregator):
@@ -22,16 +23,17 @@ class RazorAggregator(BaseAggregator):
             razor = record.get("razor") or {}
             matched = razor.get("matched", {})
 
-            # Skip if no matched razor data
-            if not matched or not matched.get("brand") or not matched.get("model"):
+            # Skip if no matched razor data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not matched or not has_required_fields(matched, "brand", "model"):
                 continue
 
-            brand = matched.get("brand", "").strip()
-            model = matched.get("model", "").strip()
-            format_type = matched.get("format", "").strip()
-            author = record.get("author", "").strip()
+            brand = get_field_value(matched, "brand")
+            model = get_field_value(matched, "model")
+            format_type = get_field_value(matched, "format")
+            author = get_field_value(record, "author")
 
-            if brand and model and author:
+            if brand and author:  # model can be empty string, which is valid
                 razor_data.append(
                     {"brand": brand, "model": model, "format": format_type, "author": author}
                 )

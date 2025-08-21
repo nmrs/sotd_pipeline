@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_fields, get_field_value
 
 
 class SoapAggregator(BaseAggregator):
@@ -22,15 +23,16 @@ class SoapAggregator(BaseAggregator):
             soap = record.get("soap") or {}
             matched = soap.get("matched", {})
 
-            # Skip if no matched soap data
-            if not matched or not matched.get("brand") or not matched.get("scent"):
+            # Skip if no matched soap data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not matched or not has_required_fields(matched, "brand", "scent"):
                 continue
 
-            brand = matched.get("brand", "").strip()
-            scent = matched.get("scent", "").strip()
-            author = record.get("author", "").strip()
+            brand = get_field_value(matched, "brand")
+            scent = get_field_value(matched, "scent")
+            author = get_field_value(record, "author")
 
-            if brand and scent and author:
+            if brand and author:  # scent can be empty string, which is valid
                 soap_data.append({"brand": brand, "scent": scent, "author": author})
 
         return soap_data
@@ -47,7 +49,11 @@ class SoapAggregator(BaseAggregator):
         # Handle None values by converting to empty strings
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-        return brand + " - " + scent
+
+        if scent:  # Only add dash if scent exists
+            return brand + " - " + scent
+        else:
+            return brand
 
 
 # Legacy function interface for backward compatibility

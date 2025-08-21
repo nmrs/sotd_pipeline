@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_fields, get_field_value
 
 
 class BrushAggregator(BaseAggregator):
@@ -19,64 +20,20 @@ class BrushAggregator(BaseAggregator):
         """
         brush_data = []
         for record in records:
-            brush = record.get("brush")
-
-            # Skip if no brush data or brush is None
-            if not brush:
-                continue
-
+            brush = record.get("brush") or {}
             matched = brush.get("matched", {})
 
-            # Skip if no matched brush data
-            if not matched:
+            # Skip if no matched brush data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not matched or not has_required_fields(matched, "brand", "model"):
                 continue
 
-            # Get brush info from new format
-            brand = matched.get("brand")  # Top-level brand (null for composite brushes)
-            model = matched.get("model")  # Top-level model (null for composite brushes)
+            brand = get_field_value(matched, "brand")
+            model = get_field_value(matched, "model")
+            fiber = get_field_value(matched, "fiber")
+            author = get_field_value(record, "author")
 
-            # For composite brushes, try to get info from handle/knot sections
-            if not brand or not model:
-                handle_section = matched.get("handle", {})
-                knot_section = matched.get("knot", {})
-
-                if handle_section and isinstance(handle_section, dict):
-                    handle_brand = handle_section.get("brand")
-                    handle_model = handle_section.get("model")
-
-                    if knot_section and isinstance(knot_section, dict):
-                        knot_brand = knot_section.get("brand")
-                        knot_model = knot_section.get("model")
-
-                        # For composite brushes, use handle brand + knot model or vice versa
-                        if handle_brand and knot_model:
-                            brand = handle_brand
-                            model = knot_model
-                        elif knot_brand and handle_model:
-                            brand = knot_brand
-                            model = handle_model
-                        elif handle_brand and handle_model:
-                            brand = handle_brand
-                            model = handle_model
-                        elif knot_brand and knot_model:
-                            brand = knot_brand
-                            model = knot_model
-
-            # Get fiber from knot section (all brushes have consistent handle/knot sections)
-            fiber = ""
-            knot_section = matched.get("knot", {})
-            if knot_section and isinstance(knot_section, dict):
-                fiber = knot_section.get("fiber", "")
-
-            author = record.get("author", "")
-
-            # Handle None values and strip strings
-            brand = brand.strip() if brand else ""
-            model = model.strip() if model else ""
-            fiber = fiber.strip() if fiber else ""
-            author = author.strip() if author and author is not None else ""
-
-            if brand and model and fiber and author:
+            if brand and author:  # model and fiber can be empty strings, which is valid
                 brush_data.append(
                     {"brand": brand, "model": model, "fiber": fiber, "author": author}
                 )
@@ -120,7 +77,7 @@ def aggregate_brushes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         records: List of enriched comment records
 
     Returns:
-        List of brush aggregations with position, name, fiber, shaves, and unique_users fields
+        List of brush aggregations with position, name, shaves, and unique_users fields
     """
     aggregator = BrushAggregator()
     return aggregator.aggregate(records)
