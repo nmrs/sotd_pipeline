@@ -53,6 +53,7 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string;
   showColumnVisibility?: boolean;
   showPagination?: boolean;
+  showCsvDownload?: boolean;
   resizable?: boolean;
   sortable?: boolean;
   onColumnResize?: (columnId: string, width: number) => void;
@@ -77,6 +78,7 @@ export function DataTable<TData, TValue>({
   data,
   showColumnVisibility = true,
   showPagination = false,
+  showCsvDownload = true,
   resizable = false,
   sortable = true,
   onColumnResize,
@@ -93,6 +95,7 @@ export function DataTable<TData, TValue>({
   keyboardNavigationEnabled = false,
   externalRowSelection,
   totalCount,
+  field,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
   const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(() => {
@@ -160,17 +163,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-          // When using external selection, we need to call onSelectionChange directly
-          // since the table's internal state won't be updated
-          const newSelection =
-            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-          if (onSelectionChange) {
-            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-            onSelectionChange(selectedRows);
-          }
-          // Also update the internal state so the UI reflects the change immediately
-          setRowSelection(newSelection);
+        // When using external selection, we need to call onSelectionChange directly
+        // since the table's internal state won't be updated
+        const newSelection =
+          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+        if (onSelectionChange) {
+          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+          onSelectionChange(selectedRows);
         }
+        // Also update the internal state so the UI reflects the change immediately
+        setRowSelection(newSelection);
+      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -355,6 +358,70 @@ export function DataTable<TData, TValue>({
     }
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
+  // CSV export helper functions
+  const generateCSV = (rows: Row<TData>[], columns: ColumnDef<TData, TValue>[]) => {
+    // Get visible columns only
+    const visibleColumns = columns.filter(col => {
+      const columnId = col.id || (col as any).accessorKey;
+      return columnId && table.getColumn(columnId)?.getIsVisible() !== false;
+    });
+
+    // Generate header row
+    const headers = visibleColumns.map(col => {
+      const columnId = col.id || (col as any).accessorKey;
+      const header = col.header;
+      return typeof header === 'string' ? header : columnId;
+    });
+
+    // Generate data rows
+    const dataRows = rows.map(row => {
+      return visibleColumns.map(col => {
+        const columnId = col.id || (col as any).accessorKey;
+        if (!columnId) return '';
+        
+        const cellValue = row.getValue(columnId);
+        // Convert cell value to string, handling null/undefined
+        if (cellValue == null) return '';
+        if (typeof cellValue === 'object') {
+          // For complex objects, try to get a meaningful string representation
+          if (cellValue.hasOwnProperty('toString')) {
+            return cellValue.toString();
+          }
+          return JSON.stringify(cellValue);
+        }
+        return String(cellValue);
+      });
+    });
+
+    // Combine headers and data
+    const csvRows = [headers, ...dataRows];
+    
+    // Convert to CSV format (handle commas and quotes properly)
+    return csvRows.map(row => 
+      row.map(cell => {
+        const cellStr = String(cell);
+        // If cell contains comma, quote, or newline, wrap in quotes and escape internal quotes
+        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+          return `"${cellStr.replace(/"/g, '""')}"`;
+        }
+        return cellStr;
+      }).join(',')
+    ).join('\n');
+  };
+
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className='w-full space-y-4'>
       <div className='flex items-center py-4'>
@@ -467,6 +534,21 @@ export function DataTable<TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        
+        {showCsvDownload && (
+          <Button
+            variant='outline'
+            onClick={() => {
+              const csvContent = generateCSV(table.getFilteredRowModel().rows, columns);
+              const filename = field ? `${field}-data.csv` : 'table-data.csv';
+              downloadCSV(csvContent, filename);
+            }}
+            className='ml-2'
+            title='Download data as CSV'
+          >
+            📥 CSV
+          </Button>
+        )}
       </div>
       <div ref={tableRef} className='rounded-md border overflow-x-auto max-w-full'>
         <Table data-table>
@@ -488,9 +570,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -533,11 +614,10 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
-                      keyboardNavigationEnabled && activeRowIndex === index
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
                         ? 'bg-blue-50 border-l-4 border-l-blue-500'
                         : ''
-                    }`}
+                      }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell
