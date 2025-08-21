@@ -8,6 +8,7 @@ from .base import (
     BaseTableGenerator,
     NoDeltaMixin,
     StandardProductTableGenerator,
+    UseCountTableFactory,
 )
 
 
@@ -41,23 +42,54 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
         return False
 
 
-class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDeltaMixin):
+class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
     """Table generator for highest use count per blade in the hardware report."""
+
+    def __init__(self, data: dict[str, Any], debug: bool = False):
+        """Initialize the table generator."""
+        super().__init__(data, "highest_use_count_per_blade", "Highest Use Count per Blade", debug)
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get highest use count per blade data from aggregated data."""
-        data = self.data.get("highest_use_count_per_blade", [])
+        # Handle both full structure and extracted data section
+        # Full structure: data['data']['highest_use_count_per_blade']
+        # Extracted data: data['highest_use_count_per_blade']
+        if "data" in self.data and "highest_use_count_per_blade" in self.data["data"]:
+            # Full structure (when called directly)
+            data = self.data["data"]["highest_use_count_per_blade"]
+        else:
+            # Extracted data section (when called via TableGenerator)
+            data = self.data.get("highest_use_count_per_blade", [])
+
+        # Trace ranks at input
+        if self.debug:
+            from ..utils.rank_tracer import trace_ranks
+            trace_ranks("HighestUseCountPerBladeTableGenerator.input", self.data, data_key="data")
+
         # Filter for entries with 5+ uses (as requested by user)
         filtered_data = [item for item in data if item.get("uses", 0) >= 5]
         valid_data = self._validate_data_records(
             filtered_data, "highest_use_count_per_blade", ["rank", "user", "blade", "uses"]
         )
 
-        # Add a name field for delta calculations (combine user and blade)
+        # Trace ranks after validation
+        if self.debug:
+            from ..utils.rank_tracer import trace_ranks
+            trace_ranks("HighestUseCountPerBladeTableGenerator.after_validation", valid_data)
+
+        # Transform data for table display
         for record in valid_data:
-            record["name"] = f"{record['user']} - {record['blade']}"
-            # Add u/ prefix to username for Reddit formatting
-            record["user"] = f"u/{record['user']}"
+            # Add u/ prefix to username for Reddit formatting (only if not already present)
+            if not record["user"].startswith("u/"):
+                record["user"] = f"u/{record['user']}"
+            # Ensure rank is preserved from aggregator data
+            if "rank" not in record:
+                record["rank"] = 0  # Fallback if rank is missing
+
+        # Trace ranks at output
+        if self.debug:
+            from ..utils.rank_tracer import trace_ranks
+            trace_ranks("HighestUseCountPerBladeTableGenerator.output", valid_data)
 
         return valid_data
 

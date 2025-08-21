@@ -41,6 +41,10 @@ class EnhancedTableGenerator:
         if not data:
             return data
 
+        # Trace ranks at input
+        from .utils.rank_tracer import trace_ranks
+        trace_ranks("EnhancedTableGenerator.input", data)
+
         # Validate parameters
         validation_result = self.parameter_validator.validate_parameters(table_name, parameters)
         if not validation_result.is_valid:
@@ -55,6 +59,9 @@ class EnhancedTableGenerator:
 
         # Apply size limits
         data = self.table_size_limiter.apply_size_limits(data, parameters)
+
+        # Trace ranks at output
+        trace_ranks("EnhancedTableGenerator.output", data)
 
         return data
 
