@@ -65,8 +65,8 @@ class TestRealCatalogIntegration:
             (brush_matcher, "Declaration B15", "brand", "Declaration Grooming"),
             (brush_matcher, "Omega 10048", "brand", "Omega"),
             # Soap patterns
-            (soap_matcher, "Barrister and Mann Seville", "maker", "Barrister and Mann"),
-            (soap_matcher, "Declaration Grooming Bandwagon", "maker", "Declaration Grooming"),
+            (soap_matcher, "Barrister and Mann Seville", "brand", "Barrister and Mann"),
+            (soap_matcher, "Declaration Grooming Bandwagon", "brand", "Declaration Grooming"),
             # Razor patterns
             (razor_matcher, "Karve Christopher Bradley", "brand", "Karve"),
             (razor_matcher, "Gillette Tech", "brand", "Gillette"),

@@ -150,7 +150,7 @@ soap:
     assert first_record["brush"]["matched"]["knot"]["model"] == "Chubby 2"
 
     assert first_record["soap"]["match_type"] == "exact"
-    assert first_record["soap"]["matched"]["maker"] == "Barrister and Mann"
+    assert first_record["soap"]["matched"]["brand"] == "Barrister and Mann"
     assert first_record["soap"]["matched"]["scent"] == "Seville"
 
     # Second record should also have exact matches
@@ -170,7 +170,7 @@ soap:
     assert second_record["brush"]["matched"]["knot"]["model"] == "B3"
 
     assert second_record["soap"]["match_type"] == "exact"
-    assert second_record["soap"]["matched"]["maker"] == "House of Mammoth"
+    assert second_record["soap"]["matched"]["brand"] == "House of Mammoth"
     assert second_record["soap"]["matched"]["scent"] == "Alive"
 
     # Third record should have no matches (unmatched)

@@ -64,21 +64,21 @@ class TestBladeUsageDistributionAggregator:
         assert level_1["use_count"] == 1
         assert level_1["shaves"] == 2  # user1 and user4
         assert level_1["unique_users"] == 2
-        assert level_1["position"] == 1
+        assert level_1["rank"] == 1
 
         # Check second usage level (2 uses)
         level_2 = result[1]
         assert level_2["use_count"] == 2
         assert level_2["shaves"] == 1  # user2
         assert level_2["unique_users"] == 1
-        assert level_2["position"] == 2
+        assert level_2["rank"] == 2
 
         # Check third usage level (3 uses)
         level_3 = result[2]
         assert level_3["use_count"] == 3
         assert level_3["shaves"] == 1  # user3
         assert level_3["unique_users"] == 1
-        assert level_3["position"] == 3
+        assert level_3["rank"] == 3
 
     def test_missing_enriched_data_defaults_to_one(self):
         """Test that missing enriched data defaults to use_count of 1."""

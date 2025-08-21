@@ -1047,9 +1047,9 @@ class MismatchAnalyzer(AnalysisTool):
     def _get_product_key(self, pattern_info: Dict, field: str) -> str:
         """Create a unique key for a product based on its identifying information."""
         if field == "soap":
-            maker = pattern_info.get("maker", "")
+            brand = pattern_info.get("brand", "")
             scent = pattern_info.get("scent", "")
-            return f"{maker}|{scent}"
+            return f"{brand}|{scent}"
         else:
             brand = pattern_info.get("brand", "")
             model = pattern_info.get("model", "")
@@ -1191,9 +1191,9 @@ class MismatchAnalyzer(AnalysisTool):
             return ""
 
         if field == "soap":
-            maker = matched.get("maker", "")
+            brand = matched.get("brand", "")
             scent = matched.get("scent", "")
-            return f"{maker} {scent}".strip()
+            return f"{brand} {scent}".strip()
         elif field == "razor":
             brand = matched.get("brand", "")
             model = matched.get("model", "")

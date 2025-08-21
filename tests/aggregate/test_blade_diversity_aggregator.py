@@ -161,14 +161,14 @@ class TestBladeDiversityAggregator:
         assert len(result) == 2
 
         # Check first result (user1 with 2 unique blades, 3 total shaves)
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_blades"] == 2
         assert result[0]["total_shaves"] == 3
         assert result[0]["unique_users"] == 1
 
         # Check second result (user2 with 1 unique blade, 1 total shave)
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["unique_blades"] == 1
         assert result[1]["total_shaves"] == 1
@@ -219,7 +219,7 @@ class TestBladeDiversityAggregator:
         result = aggregate_blade_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_blades"] == 3
         assert result[0]["total_shaves"] == 3
@@ -251,7 +251,7 @@ class TestBladeDiversityAggregator:
         result = aggregate_blade_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_blades"] == 1
         assert result[0]["total_shaves"] == 3
