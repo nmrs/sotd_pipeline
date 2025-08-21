@@ -3,33 +3,51 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_field, get_field_value
 
 
 class SuperSpeedTipAggregator(BaseAggregator):
     """Aggregator for Super Speed tip data from enriched records."""
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Extract Super Speed tip data from records."""
+        """Extract Super Speed tip data from records for aggregation.
+
+        Args:
+            records: List of enriched comment records
+
+        Returns:
+            List of dictionaries with extracted Super Speed tip data fields
+        """
         tip_data = []
         for record in records:
-            razor = record.get("razor", {})
+            razor = record.get("razor") or {}
             enriched = razor.get("enriched", {})
 
-            # Skip if no enriched razor data or no super_speed_tip
-            if not enriched or not enriched.get("super_speed_tip"):
+            # Skip if no enriched razor data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not enriched or not has_required_field(enriched, "super_speed_tip"):
                 continue
 
-            super_speed_tip = enriched.get("super_speed_tip", "").strip()
-            author = record.get("author", "").strip()
+            tip = get_field_value(enriched, "super_speed_tip")
+            author = get_field_value(record, "author")
 
-            if super_speed_tip and author:
-                tip_data.append({"super_speed_tip": super_speed_tip, "author": author})
+            if tip and author:  # tip can be empty string, which is valid
+                tip_data.append({"super_speed_tip": tip, "author": author})
 
         return tip_data
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
-        """Create composite name from super_speed_tip data."""
-        return df["super_speed_tip"]
+        """Create composite name from super_speed_tip.
+
+        Args:
+            df: DataFrame with extracted Super Speed tip data
+
+        Returns:
+            Series with super_speed_tip values
+        """
+        # Handle None values by converting to empty strings
+        tip = df["super_speed_tip"].fillna("")
+        return tip
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
@@ -38,6 +56,17 @@ class SuperSpeedTipAggregator(BaseAggregator):
 
 # Legacy function interface for backward compatibility
 def aggregate_super_speed_tips(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Legacy function interface for backward compatibility."""
+    """Aggregate Super Speed tip data from enriched records.
+
+    Returns a list of Super Speed tip aggregations sorted by shaves desc,
+    unique_users desc. Each item includes position field for delta calculations.
+
+    Args:
+        records: List of enriched comment records
+
+    Returns:
+        List of Super Speed tip aggregations with position, super_speed_tip, shaves, and
+        unique_users fields
+    """
     aggregator = SuperSpeedTipAggregator()
     return aggregator.aggregate(records)
