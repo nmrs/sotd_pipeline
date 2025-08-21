@@ -43,27 +43,27 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Razors
 
-{{tables.razors}}
+{{tables.razors|ranks:50}}
 
 ## Razor Manufacturers
 
-{{tables.razor-manufacturers}}
+{{tables.razor-manufacturers|ranks:30}}
 
 ## Blades
 
-{{tables.blades}}
+{{tables.blades|ranks:50}}
 
 ## Brushes
 
-{{tables.brushes}}
+{{tables.brushes|ranks:50}}
 
 ## Brush Handle Makers
 
-{{tables.brush-handle-makers}}
+{{tables.brush-handle-makers|ranks:30}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers}}
+{{tables.brush-knot-makers|ranks:30}}
 
 ## Knot Fibers
 
@@ -111,4 +111,4 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Top Shavers
 
-{{tables.top-shavers}}
+{{tables.top-shavers|missed_days:2}}

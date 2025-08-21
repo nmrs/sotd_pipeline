@@ -149,13 +149,12 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 placeholder = f"{{{{tables.{table_name}}}}}"
                 tables[placeholder] = table_content
             except Exception as e:
-                if self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
-                        f"Error generating table {table_name}: {e}"
-                    )
-                placeholder = f"{{{{tables.{table_name}}}}}"
-                tables[placeholder] = f"*Error generating table {table_name}: {e}*"
+                # Fail fast with descriptive error message
+                error_msg = (
+                    f"Table generation error in template '{self.report_type}': "
+                    f"Failed to generate table '{table_name}' - {e}"
+                )
+                raise ValueError(error_msg) from e
 
         # Merge enhanced tables with basic tables
         tables.update(enhanced_tables)
@@ -227,15 +226,14 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                 except Exception as e:
-                    if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Error processing enhanced table {match}: {e}"
-                        )
-                    # Use error message as table content
-                    enhanced_tables[full_placeholder] = (
-                        f"*Error generating enhanced table {match}: {e}*"
+                    # Fail fast with descriptive error message
+                    error_msg = (
+                        f"Enhanced table syntax error in template '{self.report_type}': "
+                        f"Failed to process '{{tables.{match}}}' - {e}. "
+                        f"Please check the template syntax and ensure parameters use ':' format "
+                        f"(e.g., '{{tables.table_name|param:value}}')"
                     )
+                    raise ValueError(error_msg) from e
 
         return enhanced_tables
 
