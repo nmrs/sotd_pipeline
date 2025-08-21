@@ -49,14 +49,13 @@ class TestSoapAnalyzerAPI:
         assert response.status_code == 400
         assert "Invalid mode" in response.json()["detail"]
 
-    @patch("pathlib.Path.exists")
-    def test_neighbor_similarity_brands_mode_success(self, mock_exists):
+    def test_neighbor_similarity_brands_mode_success(self, tmp_path):
         """Test successful brands-only neighbor similarity analysis."""
-        # Mock file existence
-        mock_exists.return_value = True
+        # Create isolated test data in temporary directory
+        matched_dir = tmp_path / "data" / "matched"
+        matched_dir.mkdir(parents=True)
 
-        # Mock file content with soap data
-        mock_data = {
+        test_data = {
             "data": [
                 {
                     "comment_id": "abc123",
@@ -96,50 +95,53 @@ class TestSoapAnalyzerAPI:
             ]
         }
 
-        # Create a temporary file with the mock data
-        temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-        json.dump(mock_data, temp_file)
-        temp_file.close()
-        temp_file_path = temp_file.name
+        test_file = matched_dir / "2025-01.json"
+        with test_file.open("w") as f:
+            json.dump(test_data, f)
+
+        # Use environment variable to override data directory
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
 
         try:
-            # Mock the file opening to return our test data
-            with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get(
-                    "/soap-analyzer/neighbor-similarity"
-                    "?months=2025-01&mode=brands&similarity_threshold=0.3"
-                )
-
-                assert response.status_code == 200
-                data = response.json()
-
-                assert "results" in data
-                assert "mode" in data
-                assert data["mode"] == "brands"
-                assert len(data["results"]) > 0
-
-                # Check that we have similarity data between adjacent entries
-                for result in data["results"]:
-                    assert "entry" in result
-                    assert "similarity_to_next" in result
-                    assert "next_entry" in result
-                    assert "count" in result
-                    # similarity_to_next can be None for the last entry (no next entry)
-                    if result["similarity_to_next"] is not None:
-                        assert isinstance(result["similarity_to_next"], (int, float))
-
+            response = client.get(
+                "/soap-analyzer/neighbor-similarity"
+                "?months=2025-01&mode=brands&similarity_threshold=0.3"
+            )
         finally:
-            # Clean up temporary file
-            Path(temp_file_path).unlink(missing_ok=True)
+            # Restore original environment
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
 
-    @patch("pathlib.Path.exists")
-    def test_neighbor_similarity_brand_scent_mode_success(self, mock_exists):
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "results" in data
+        assert "mode" in data
+        assert data["mode"] == "brands"
+        assert len(data["results"]) > 0
+
+        # Check that we have similarity data between adjacent entries
+        for result in data["results"]:
+            assert "entry" in result
+            assert "similarity_to_next" in result
+            assert "next_entry" in result
+            assert "count" in result
+            # similarity_to_next can be None for the last entry (no next entry)
+            if result["similarity_to_next"] is not None:
+                assert isinstance(result["similarity_to_next"], (int, float))
+
+    def test_neighbor_similarity_brand_scent_mode_success(self, tmp_path):
         """Test successful brand-scent neighbor similarity analysis."""
-        # Mock file existence
-        mock_exists.return_value = True
+        # Create isolated test data in temporary directory
+        matched_dir = tmp_path / "data" / "matched"
+        matched_dir.mkdir(parents=True)
 
-        # Mock file content with soap data
-        mock_data = {
+        test_data = {
             "data": [
                 {
                     "comment_id": "abc123",
@@ -158,45 +160,49 @@ class TestSoapAnalyzerAPI:
             ]
         }
 
-        # Create a temporary file with the mock data
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(mock_data, f)
-            temp_file_path = f.name
+        test_file = matched_dir / "2025-01.json"
+        with test_file.open("w") as f:
+            json.dump(test_data, f)
+
+        # Use environment variable to override data directory
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
 
         try:
-            # Mock the file opening to return our test data
-            with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get(
-                    "/soap-analyzer/neighbor-similarity?months=2025-01&mode=brand_scent"
-                )
-
-                assert response.status_code == 200
-                data = response.json()
-
-                assert "results" in data
-                assert "mode" in data
-                assert data["mode"] == "brand_scent"
-                assert len(data["results"]) > 0
-
-                # Check that we have similarity data between adjacent entries
-                for result in data["results"]:
-                    assert "entry" in result
-                    assert "similarity_to_next" in result
-                    assert "next_entry" in result
-                    assert "count" in result
-
+            response = client.get(
+                "/soap-analyzer/neighbor-similarity?months=2025-01&mode=brand_scent"
+            )
         finally:
-            # Clean up temporary file
-            Path(temp_file_path).unlink(missing_ok=True)
+            # Restore original environment
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
 
-    @patch("pathlib.Path.exists")
-    def test_neighbor_similarity_scents_mode_success(self, mock_exists):
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "results" in data
+        assert "mode" in data
+        assert data["mode"] == "brand_scent"
+        assert len(data["results"]) > 0
+
+        # Check that we have similarity data between adjacent entries
+        for result in data["results"]:
+            assert "entry" in result
+            assert "similarity_to_next" in result
+            assert "next_entry" in result
+            assert "count" in result
+
+    def test_neighbor_similarity_scents_mode_success(self, tmp_path):
         """Test successful scents-only neighbor similarity analysis."""
-        # Mock file existence
-        mock_exists.return_value = True
+        # Create isolated test data in temporary directory
+        matched_dir = tmp_path / "data" / "matched"
+        matched_dir.mkdir(parents=True)
 
-        # Mock file content with soap data
-        mock_data = {
+        test_data = {
             "data": [
                 {
                     "comment_id": "abc123",
@@ -229,37 +235,42 @@ class TestSoapAnalyzerAPI:
             ]
         }
 
-        # Create a temporary file with the mock data
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(mock_data, f)
-            temp_file_path = f.name
+        test_file = matched_dir / "2025-01.json"
+        with test_file.open("w") as f:
+            json.dump(test_data, f)
+
+        # Use environment variable to override data directory
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
 
         try:
-            # Mock the file opening to return our test data
-            with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get(
-                    "/soap-analyzer/neighbor-similarity"
-                    "?months=2025-01&mode=scents&similarity_threshold=0.3"
-                )
-
-                assert response.status_code == 200
-                data = response.json()
-
-                assert "results" in data
-                assert "mode" in data
-                assert data["mode"] == "scents"
-                assert len(data["results"]) > 0
-
-                # Check that we have similarity data between adjacent entries
-                for result in data["results"]:
-                    assert "entry" in result
-                    assert "similarity_to_next" in result
-                    assert "next_entry" in result
-                    assert "count" in result
-
+            response = client.get(
+                "/soap-analyzer/neighbor-similarity"
+                "?months=2025-01&mode=scents&similarity_threshold=0.3"
+            )
         finally:
-            # Clean up temporary file
-            Path(temp_file_path).unlink(missing_ok=True)
+            # Restore original environment
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "results" in data
+        assert "mode" in data
+        assert data["mode"] == "scents"
+        assert len(data["results"]) > 0
+
+        # Check that we have similarity data between adjacent entries
+        for result in data["results"]:
+            assert "entry" in result
+            assert "similarity_to_next" in result
+            assert "next_entry" in result
+            assert "count" in result
 
     @patch("pathlib.Path.exists")
     def test_neighbor_similarity_with_limit(self, mock_exists):

@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Optional
@@ -59,7 +60,12 @@ async def get_soap_duplicates(
 
         # Load data from all specified months
         all_matches = []
-        data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
+        # Allow override of data directory via environment variable for testing
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir) / "data" / "matched"
+        else:
+            data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
 
         for month in month_list:
             month_file = data_dir / f"{month}.json"
@@ -118,7 +124,12 @@ async def get_soap_pattern_suggestions(
 
         # Load data from all specified months
         all_matches = []
-        data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
+        # Allow override of data directory via environment variable for testing
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir) / "data" / "matched"
+        else:
+            data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
 
         for month in month_list:
             month_file = data_dir / f"{month}.json"
@@ -200,7 +211,12 @@ async def get_soap_neighbor_similarity(
 
         # Load data from all specified months
         all_matches = []
-        data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
+        # Allow override of data directory via environment variable for testing
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir) / "data" / "matched"
+        else:
+            data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
 
         for month in month_list:
             month_file = data_dir / f"{month}.json"
@@ -431,25 +447,25 @@ def analyze_soap_neighbor_similarity_web(
     for match in matches:
         # Handle both direct fields and nested matched fields
         if "matched" in match and match["matched"]:
-            maker = match["matched"].get("maker", "")
+            brand = match["matched"].get("brand", "")
             scent = match["matched"].get("scent", "")
         else:
-            maker = match.get("maker", "")
+            brand = match.get("brand", "")
             scent = match.get("scent", "")
 
-        if maker and scent:  # Only add if both fields exist
+        if brand and scent:  # Only add if both fields exist
             comment_id = match.get("comment_id", "")
             entry = ""
             normalized = ""
 
             if mode == "brands":
-                entry = maker
-                normalized = maker.lower().strip()
+                entry = brand
+                normalized = brand.lower().strip()
             elif mode == "brand_scent":
-                entry = f"{maker} - {scent}"
-                maker_lower = maker.lower().strip()
+                entry = f"{brand} - {scent}"
+                brand_lower = brand.lower().strip()
                 scent_lower = scent.lower().strip()
-                normalized = f"{maker_lower} - {scent_lower}"
+                normalized = f"{brand_lower} - {scent_lower}"
             elif mode == "scents":
                 entry = scent
                 normalized = scent.lower().strip()
