@@ -619,12 +619,12 @@ class BaseTableGenerator(ABC):
                             df[col].astype(object).apply(lambda x: str(x) if pd.notna(x) else "n/a")
                         )
                 elif config.get("format") == "mm_suffix":
-                    # Add mm suffix to numeric values
+                    # Add mm suffix to numeric values (no decimal for whole numbers)
                     if col in df:
                         df[col] = (
                             df[col]
                             .astype(object)
-                            .apply(lambda x: f"{x}mm" if pd.notna(x) and x is not None else "")
+                            .apply(lambda x: f"{x:g}mm" if pd.notna(x) and x is not None else "")
                         )
 
         # Generate markdown table
