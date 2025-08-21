@@ -102,35 +102,18 @@ class TableSizeLimiter:
         if not data or max_ranks <= 0:
             return []
 
-        if len(data) <= max_ranks:
+        # Count unique ranks in the data
+        unique_ranks = set()
+        for item in data:
+            unique_ranks.add(item["rank"])
+        
+        # If we have fewer unique ranks than the limit, return all data
+        if len(unique_ranks) <= max_ranks:
             return data
 
-        # Find the cutoff point that respects ties
-        cutoff_rank = data[max_ranks - 1]["rank"]
-
-        # Check if including the tie would exceed the limit
-        tie_count = 0
-        for item in data:
-            if item["rank"] == cutoff_rank:
-                tie_count += 1
-
-        # If including the tie would exceed the limit, stop before it
-        if tie_count > 1:
-            # Count how many items we would have if we included the tie
-            items_up_to_cutoff = 0
-            for item in data:
-                if item["rank"] <= cutoff_rank:
-                    items_up_to_cutoff += 1
-                else:
-                    break
-
-            # If including the tie would exceed the limit, stop before it
-            if items_up_to_cutoff > max_ranks:
-                # Find the rank before the tie
-                for i in range(max_ranks - 1, -1, -1):
-                    if data[i]["rank"] < cutoff_rank:
-                        cutoff_rank = data[i]["rank"]
-                        break
+        # Sort unique ranks to find the cutoff rank
+        sorted_ranks = sorted(unique_ranks)
+        cutoff_rank = sorted_ranks[max_ranks - 1]
 
         # Include all items up to and including the cutoff rank
         result = []
