@@ -152,11 +152,12 @@ class TableGenerator:
             if NoDeltaMixin in type(generator).__mro__:
                 include_delta = False
 
-        # Determine max_rows based on table generator preference
+        # For enhanced templating, let the enhanced system handle all limits
+        # Only apply default limits for basic table generation
         if hasattr(generator, "should_limit_rows") and not generator.should_limit_rows():
             max_rows = 10000  # Effectively unlimited
         else:
-            max_rows = 20  # Default limit
+            max_rows = 10000  # Effectively unlimited for enhanced templating
 
         # Generate the table (without header since template provides section headers)
         if self.comparison_data:
@@ -221,9 +222,33 @@ class TableGenerator:
         # Store original data
         original_data = generator.data
 
-        # Create a temporary data structure with our processed data
+        # Create a temporary data structure that preserves the original structure
         # The generator expects data in the same format as the original
-        temp_data = {table_name: processed_data}
+        temp_data = {}
+        
+        # Copy all original data keys
+        for key in original_data:
+            temp_data[key] = original_data[key]
+        
+        # Find the key that the table generator actually uses for its data
+        # by checking what get_table_data() accesses
+        if hasattr(generator, 'get_table_data'):
+            # For now, use a simple mapping approach
+            # This could be made more sophisticated by analyzing the generator's
+            # data access patterns
+            if table_name == "top-shavers":
+                temp_data["users"] = processed_data
+            elif table_name == "razors":
+                temp_data["razors"] = processed_data
+            elif table_name == "blades":
+                temp_data["blades"] = processed_data
+            elif table_name == "brushes":
+                temp_data["brushes"] = processed_data
+            elif table_name == "soaps":
+                temp_data["soaps"] = processed_data
+            else:
+                # For unknown tables, try using the table name as the key
+                temp_data[table_name] = processed_data
 
         # Temporarily replace the generator's data
         generator.data = temp_data

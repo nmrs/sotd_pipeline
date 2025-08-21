@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Data field limiter for enhanced report templates."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class DataFieldLimiter:
@@ -56,26 +56,44 @@ class DataFieldLimiter:
         # Apply the limit based on data type
         if isinstance(threshold, (int, float)):
             # Numeric comparison
-            return [item for item in data if self._compare_numeric(item.get(column), threshold)]
+            return [
+                item for item in data 
+                if self._compare_numeric(item.get(column), threshold, column)
+            ]
         else:
             # String comparison
             return [item for item in data if self._compare_string(item.get(column), threshold)]
 
-    def _compare_numeric(self, value: Any, threshold: Any) -> bool:
+    def _compare_numeric(self, value: Any, threshold: Any, column: Optional[str] = None) -> bool:
         """Compare numeric values for limit application.
 
         Args:
             value: Value to compare
             threshold: Threshold to compare against
+            column: Column name for field-specific logic
 
         Returns:
-            True if value meets or exceeds threshold, False otherwise
+            True if value meets the threshold criteria, False otherwise
         """
         if value is None:
             return False
 
         try:
-            return float(value) >= float(threshold)
+            value_float = float(value)
+            threshold_float = float(threshold)
+            
+            # Determine comparison operator based on field sorting direction
+            # This should be determined by the table's sorting logic, not hard-coded
+            # For now, use a simple heuristic: if column name suggests "lower is better", use <=
+            if column and any(
+                keyword in column.lower() 
+                for keyword in ["missed", "days", "errors", "failures", "cost", "time"]
+            ):
+                # Fields where lower values are better (ascending sort)
+                return value_float <= threshold_float
+            else:
+                # Fields where higher values are better (descending sort) - most common case
+                return value_float >= threshold_float
         except (ValueError, TypeError):
             return False
 
