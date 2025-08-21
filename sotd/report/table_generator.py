@@ -139,6 +139,15 @@ class TableGenerator:
         # Check if we have comparison data for delta calculations
         include_delta = bool(self.comparison_data)
 
+        # Check if this table generator supports delta calculations
+        # Tables with NoDeltaMixin should not show delta columns
+        if include_delta and hasattr(generator, "generate_table"):
+            # Check if the generator is a NoDeltaMixin by looking at its MRO
+            from .table_generators.base import NoDeltaMixin
+
+            if NoDeltaMixin in type(generator).__mro__:
+                include_delta = False
+
         # Determine max_rows based on table generator preference
         if hasattr(generator, "should_limit_rows") and not generator.should_limit_rows():
             max_rows = 10000  # Effectively unlimited

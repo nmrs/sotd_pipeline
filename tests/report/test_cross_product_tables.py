@@ -127,7 +127,20 @@ class TestHighestUseCountPerBladeTableGenerator:
         """Test column configuration."""
         generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
         config = generator.get_column_config()
+        assert "rank" in config
         assert "user" in config
         assert "blade" in config
         assert "format" in config
         assert "uses" in config
+
+    def test_no_delta_mixin_inheritance(self):
+        """Test that the table generator correctly inherits from NoDeltaMixin."""
+        generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
+
+        # Should inherit from NoDeltaMixin to disable delta columns
+        from sotd.report.table_generators.base import NoDeltaMixin
+
+        assert isinstance(generator, NoDeltaMixin)
+
+        # The generate_table method should override include_delta to False
+        # This is tested by the NoDeltaMixin's generate_table method
