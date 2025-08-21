@@ -136,12 +136,12 @@ class BaseAggregator(ABC):
         ascending_list = [False] * len(self.tie_columns)
         grouped = grouped.sort_values(self.tie_columns, ascending=ascending_list)
         grouped = grouped.reset_index(drop=True)
-        
+
         # Create a composite key for ranking that preserves the order
         # Use sequential ranks, then group by tie_columns to get same rank for ties
         grouped["temp_rank"] = range(1, len(grouped) + 1)
-        grouped["raw_rank"] = (
-            grouped.groupby(self.tie_columns, sort=False)["temp_rank"].transform("min")
+        grouped["raw_rank"] = grouped.groupby(self.tie_columns, sort=False)["temp_rank"].transform(
+            "min"
         )
         grouped = grouped.drop("temp_rank", axis=1)
 

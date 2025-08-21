@@ -145,8 +145,22 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     # Sort by shaves desc, missed_days asc
     result_df = result_df.sort_values(["shaves", "missed_days"], ascending=[False, True])
 
-    # Add rank field (1-based rank)
-    result_df["rank"] = range(1, len(result_df) + 1)
+    # Add competition ranking based on both shaves and missed_days
+    # Users with same shaves AND same missed_days get tied ranks
+    # Users with different shaves or different missed_days get different ranks
+    result_df = result_df.reset_index(drop=True)
+
+    # Create a composite key for ranking that preserves the order
+    # Use sequential ranks, then group by shaves+missed_days to get same rank for ties
+    result_df["temp_rank"] = range(1, len(result_df) + 1)
+    result_df["rank"] = result_df.groupby(["shaves", "missed_days"], sort=False)[
+        "temp_rank"
+    ].transform("min")
+    result_df = result_df.drop("temp_rank", axis=1)
+
+    # Sort by ranking first, then by author for consistent ordering of tied entries
+    result_df = result_df.sort_values(["rank", "author"], ascending=[True, True])
+    result_df = result_df.reset_index(drop=True)
 
     # Convert to list of dictionaries
     final_results = []
