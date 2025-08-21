@@ -90,11 +90,11 @@ class TestRankingIntegration:
             "highest-use-count-per-blade", table_data, {"rows": 30}
         )
 
-                # Enhanced processing should preserve all data when rows:30 is specified
+        # Enhanced processing should preserve all data when rows:30 is specified
         assert (
             len(enhanced_data) == 5
         ), f"Enhanced processing should preserve all data, got {len(enhanced_data)} items"
-        
+
         # Verify ranks are still correct after enhanced processing
         for i, item in enumerate(enhanced_data):
             expected_rank = i + 1
@@ -108,7 +108,13 @@ class TestRankingIntegration:
         aggregated_data = {
             "data": {
                 "highest_use_count_per_blade": [
-                    {"rank": 1, "user": "user1", "blade": "Gillette Nacet", "format": "DE", "uses": 15},
+                    {
+                        "rank": 1,
+                        "user": "user1",
+                        "blade": "Gillette Nacet",
+                        "format": "DE",
+                        "uses": 15,
+                    },
                     {
                         "rank": 2,
                         "user": "user2",
@@ -130,10 +136,10 @@ class TestRankingIntegration:
         # Test the table generator directly to get raw data
         table_generator = HighestUseCountPerBladeTableGenerator(aggregated_data, debug=False)
         basic_table = table_generator.get_table_data()
-        
+
         # Basic table should preserve ranks
         assert len(basic_table) == 3, f"Basic table should have 3 items, got {len(basic_table)}"
-        
+
         # Verify ranks are preserved
         for i, item in enumerate(basic_table):
             expected_rank = i + 1
@@ -147,7 +153,13 @@ class TestRankingIntegration:
         aggregated_data = {
             "data": {
                 "highest_use_count_per_blade": [
-                    {"rank": 1, "user": "user1", "blade": "Gillette Nacet", "format": "DE", "uses": 15},
+                    {
+                        "rank": 1,
+                        "user": "user1",
+                        "blade": "Gillette Nacet",
+                        "format": "DE",
+                        "uses": 15,
+                    },
                     {
                         "rank": 2,
                         "user": "user2",
@@ -169,18 +181,18 @@ class TestRankingIntegration:
         # Test the table generator directly to get raw data
         table_generator = HighestUseCountPerBladeTableGenerator(aggregated_data, debug=False)
         raw_data = table_generator.get_table_data()
-        
+
         # Test enhanced table processing
         enhanced_generator = EnhancedTableGenerator()
         enhanced_data = enhanced_generator.generate_table(
             "highest-use-count-per-blade", raw_data, {"rows": 30}
         )
-        
+
         # Enhanced table should preserve all data when rows:30 is specified
         assert (
             len(enhanced_data) == 3
         ), f"Enhanced table with rows:30 should have 3 items, got {len(enhanced_data)}"
-        
+
         # Verify ranks are preserved
         for i, item in enumerate(enhanced_data):
             expected_rank = i + 1
