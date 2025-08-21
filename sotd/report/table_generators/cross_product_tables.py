@@ -59,6 +59,18 @@ class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator):
         """Disable row limiting to show all combinations with 5+ shaves."""
         return False
 
+    def _get_category_name(self) -> str:
+        """Get the category name for this table generator."""
+        return "razor_blade_combinations"
+
+    def _get_source_field(self) -> str:
+        """Get the source field name in historical data."""
+        return "name"
+
+    def _get_target_field(self) -> str:
+        """Get the target field name in current data."""
+        return "name"
+
 
 class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
     """Table generator for highest use count per blade in the hardware report."""

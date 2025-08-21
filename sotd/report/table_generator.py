@@ -265,10 +265,22 @@ class TableGenerator:
         try:
             # Generate the table with the processed data
             # Use a high max_rows since we've already applied our own limits
+            # Check if we have comparison data for delta calculations
+            include_delta = bool(self.comparison_data)
+
+            # Check if this table generator supports delta calculations
+            # Tables with NoDeltaMixin should not show delta columns
+            if include_delta and hasattr(generator, "generate_table"):
+                # Check if the generator is a NoDeltaMixin by looking at its MRO
+                from .table_generators.base import NoDeltaMixin
+
+                if NoDeltaMixin in type(generator).__mro__:
+                    include_delta = False
+
             table_content = generator.generate_table(
                 max_rows=len(processed_data),
-                include_delta=False,  # Disable delta for enhanced tables for now
-                comparison_data=None,
+                include_delta=include_delta,
+                comparison_data=self.comparison_data,
                 include_header=False,
             )
         finally:

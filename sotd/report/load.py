@@ -114,29 +114,51 @@ def get_comparison_periods(year: int, month: int) -> List[Tuple[int, int, str]]:
     if prev_month == 0:
         prev_month = 12
         prev_year = year - 1
-    periods.append((prev_year, prev_month, "previous month"))
+
+    # Format previous month name
+    prev_month_name = _get_month_name(prev_month)
+    periods.append((prev_year, prev_month, f"{prev_month_name} {prev_year}"))
 
     # Previous year same month
     prev_year_month = year - 1, month
-    periods.append((prev_year_month[0], prev_year_month[1], "previous year"))
+    current_month_name = _get_month_name(month)
+    periods.append(
+        (prev_year_month[0], prev_year_month[1], f"{current_month_name} {prev_year_month[0]}")
+    )
 
     # 5 years ago same month
     five_years_ago = year - 5, month
-    periods.append((five_years_ago[0], five_years_ago[1], "5 years ago"))
-
-    # Specific periods for hardware report (if current month is May 2025)
-    if year == 2025 and month == 5:
-        periods = [
-            (2025, 4, "Apr 2025"),  # Previous month
-            (2024, 5, "May 2024"),  # Previous year
-            (
-                2020,
-                4,
-                "Apr 2020",
-            ),  # Use April 2020 instead of May 2020 (since May 2020 doesn't exist)
-        ]
+    periods.append(
+        (five_years_ago[0], five_years_ago[1], f"{current_month_name} {five_years_ago[0]}")
+    )
 
     return periods
+
+
+def _get_month_name(month: int) -> str:
+    """Get month name abbreviation for a given month number.
+
+    Args:
+        month: Month number (1-12)
+
+    Returns:
+        Three-letter month abbreviation
+    """
+    month_names = {
+        1: "Jan",
+        2: "Feb",
+        3: "Mar",
+        4: "Apr",
+        5: "May",
+        6: "Jun",
+        7: "Jul",
+        8: "Aug",
+        9: "Sep",
+        10: "Oct",
+        11: "Nov",
+        12: "Dec",
+    }
+    return month_names.get(month, "Unknown")
 
 
 def load_comparison_data(

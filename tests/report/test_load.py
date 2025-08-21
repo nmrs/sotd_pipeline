@@ -190,13 +190,13 @@ class TestComparisonPeriods:
         assert len(periods) == 3
 
         # Previous month (February 2025)
-        assert periods[0] == (2025, 2, "previous month")
+        assert periods[0] == (2025, 2, "Feb 2025")
 
         # Previous year same month (March 2024)
-        assert periods[1] == (2024, 3, "previous year")
+        assert periods[1] == (2024, 3, "Mar 2024")
 
         # 5 years ago same month (March 2020)
-        assert periods[2] == (2020, 3, "5 years ago")
+        assert periods[2] == (2020, 3, "Mar 2020")
 
     def test_get_comparison_periods_january(self) -> None:
         """Test getting comparison periods for January (month rollover)."""
@@ -204,13 +204,13 @@ class TestComparisonPeriods:
         assert len(periods) == 3
 
         # Previous month (December 2024)
-        assert periods[0] == (2024, 12, "previous month")
+        assert periods[0] == (2024, 12, "Dec 2024")
 
         # Previous year same month (January 2024)
-        assert periods[1] == (2024, 1, "previous year")
+        assert periods[1] == (2024, 1, "Jan 2024")
 
         # 5 years ago same month (January 2020)
-        assert periods[2] == (2020, 1, "5 years ago")
+        assert periods[2] == (2020, 1, "Jan 2020")
 
     def test_get_comparison_periods_december(self) -> None:
         """Test getting comparison periods for December."""
@@ -218,13 +218,13 @@ class TestComparisonPeriods:
         assert len(periods) == 3
 
         # Previous month (November 2025)
-        assert periods[0] == (2025, 11, "previous month")
+        assert periods[0] == (2025, 11, "Nov 2025")
 
         # Previous year same month (December 2024)
-        assert periods[1] == (2024, 12, "previous year")
+        assert periods[1] == (2024, 12, "Dec 2024")
 
         # 5 years ago same month (December 2020)
-        assert periods[2] == (2020, 12, "5 years ago")
+        assert periods[2] == (2020, 12, "Dec 2020")
 
 
 class TestComparisonDataLoading:
