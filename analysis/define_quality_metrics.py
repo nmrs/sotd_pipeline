@@ -419,11 +419,11 @@ def generate_implementation_scoring_formulas() -> Dict[str, Any]:
 def generate_quality_metrics_specification(analysis_results: Dict[str, Any]) -> str:
     """Generate comprehensive quality metrics specification."""
 
-    findings = analysis_results["research_findings"]
+    # findings = analysis_results["research_findings"]  # Unused variable
     hierarchy = analysis_results["quality_hierarchy"]
     modifiers = analysis_results["quality_modifiers"]
     confidence = analysis_results["confidence_indicators"]
-    formulas = analysis_results["scoring_formulas"]
+    # formulas = analysis_results["scoring_formulas"]  # Unused variable
 
     report = f"""# Phase 4.1 Step 5: Quality Metrics Specification
 

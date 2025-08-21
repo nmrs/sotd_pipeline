@@ -15,7 +15,7 @@ def analyze_differences():
     exact_matches = 0
     brand_differences = 0
     model_differences = 0
-    structure_differences = 0
+    # structure_differences = 0  # Unused variable
     unmatched_differences = 0
 
     print("🔍 Detailed Analysis of All Differences...")
