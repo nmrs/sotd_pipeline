@@ -204,14 +204,15 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
             data, "christopher_bradley_plates", ["plate_level", "shaves"]
         )
 
-        # Map plate_level to plate field
+        # Map plate_level and plate_type to combined plate field
         result = []
         for record in valid_data:
             plate_level = record.get("plate_level")
-            if plate_level:
+            plate_type = record.get("plate_type")
+            if plate_level and plate_type:
                 result.append(
                     {
-                        "plate": plate_level,
+                        "plate": f"{plate_level} {plate_type}",
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
@@ -249,10 +250,11 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
         transformed_data = []
         for record in historical_data:
             plate_level = record.get("plate_level")
-            if plate_level:
+            plate_type = record.get("plate_type")
+            if plate_level and plate_type:
                 transformed_data.append(
                     {
-                        "plate": plate_level,
+                        "plate": f"{plate_level} {plate_type}",
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
