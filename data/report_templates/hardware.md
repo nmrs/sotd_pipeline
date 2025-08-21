@@ -99,11 +99,11 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Most Used Blades in Most Used Razors
 
-{{tables.razor-blade-combinations|rows:30}}
+{{tables.razor-blade-combinations|shaves:20}}
 
 ## Highest Use Count per Blade
 
-{{tables.highest-use-count-per-blade|rows:30}}
+{{tables.highest-use-count-per-blade|uses:20}}
 
 ## Top Shavers
 
