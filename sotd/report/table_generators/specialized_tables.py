@@ -368,14 +368,14 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
         # No filtering - show all widths as template doesn't specify limits
         valid_data = self._validate_data_records(data, "straight_widths", ["width", "shaves"])
 
-        # Map width to plate field
+        # Map width to width field (not plate)
         result = []
         for record in valid_data:
             width = record.get("width")
             if width:
                 result.append(
                     {
-                        "plate": width,
+                        "width": width,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
@@ -427,14 +427,14 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
         # No filtering - show all grinds as template doesn't specify limits
         valid_data = self._validate_data_records(data, "straight_grinds", ["grind", "shaves"])
 
-        # Map grind to plate field
+        # Map grind to grind field (not plate)
         result = []
         for record in valid_data:
             grind = record.get("grind")
             if grind:
                 result.append(
                     {
-                        "plate": grind,
+                        "grind": grind,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
@@ -486,14 +486,14 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
         # No filtering - show all points as template doesn't specify limits
         valid_data = self._validate_data_records(data, "straight_points", ["point", "shaves"])
 
-        # Map point to plate field
+        # Map point to point field (not plate)
         result = []
         for record in valid_data:
             point = record.get("point")
             if point:
                 result.append(
                     {
-                        "plate": point,
+                        "point": point,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
