@@ -388,11 +388,11 @@ class TestBaseAggregator:
         aggregator = TestAggregator()
         result = aggregator.aggregate(records)
 
-        # Check tier-based ranking
-        assert result[0]["rank"] == 1  # Brand1 Model1: 3 shaves, 3 users
-        assert result[1]["rank"] == 2  # Brand2 Model2: 2 shaves, 2 users (tied)
-        assert result[2]["rank"] == 2  # Brand3 Model3: 2 shaves, 2 users (tied)
-        assert result[3]["rank"] == 3  # Brand4 Model4: 1 shave, 1 user
+        # Check competition ranking (1, 2, 2, 4)
+        assert result[0]["rank"] == 1  # Brand1 Model1: 10 shaves, 3 users
+        assert result[1]["rank"] == 2  # Brand2 Model2: 8 shaves, 2 users (tied)
+        assert result[2]["rank"] == 2  # Brand3 Model3: 8 shaves, 2 users (tied)
+        assert result[3]["rank"] == 4  # Brand4 Model4: 8 shaves, 1 user (skipping 3)
 
     def test_tier_based_ranking_all_tied(self):
         """Test tier-based ranking when all items have identical values."""
@@ -476,3 +476,102 @@ class TestBaseAggregator:
         assert result[0]["rank"] == 1  # Brand3 Model3: 3 shaves
         assert result[1]["rank"] == 2  # Brand1 Model1: 1 shave (tied)
         assert result[2]["rank"] == 2  # Brand2 Model2: 1 shave (tied)
+
+    def test_competition_ranking_1224_style(self):
+        """Test that competition ranking follows 1,2,2,4,5... pattern."""
+        records = [
+            # Brand1 Model1: 5 shaves, 3 users (rank 1)
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user3",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user2",
+            },
+            # Brand2 Model2: 3 shaves, 2 users (rank 2, tied)
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user1",
+            },
+            # Brand3 Model3: 3 shaves, 2 users (rank 2, tied)
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user3",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user1",
+            },
+            # Brand4 Model4: 2 shaves, 1 user (rank 4)
+            {
+                "test_product": {"matched": {"brand": "Brand4", "model": "Model4"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand4", "model": "Model4"}},
+                "author": "user1",
+            },
+            # Brand5 Model5: 1 shave, 1 user (rank 5)
+            {
+                "test_product": {"matched": {"brand": "Brand5", "model": "Model5"}},
+                "author": "user1",
+            },
+        ]
+
+        aggregator = TestAggregator()
+        result = aggregator.aggregate(records)
+
+        # Check competition ranking: 1, 2, 2, 4, 5
+        # Brand1 Model1: 5 shaves, 3 users -> rank 1
+        assert result[0]["rank"] == 1
+        assert result[0]["name"] == "Brand1 Model1"
+        assert result[0]["shaves"] == 5
+
+        # Brand2 Model2: 3 shaves, 2 users -> rank 2 (tied)
+        assert result[1]["rank"] == 2
+        assert result[1]["name"] == "Brand2 Model2"
+        assert result[1]["shaves"] == 3
+
+        # Brand3 Model3: 3 shaves, 2 users -> rank 2 (tied)
+        assert result[2]["rank"] == 2
+        assert result[2]["name"] == "Brand3 Model3"
+        assert result[2]["shaves"] == 3
+
+        # Brand4 Model4: 2 shaves, 1 user -> rank 4 (skipping 3)
+        assert result[3]["rank"] == 4
+        assert result[3]["name"] == "Brand4 Model4"
+        assert result[3]["shaves"] == 2
+
+        # Brand5 Model5: 1 shave, 1 user -> rank 5 (skipping 3)
+        assert result[4]["rank"] == 5
+        assert result[4]["name"] == "Brand5 Model5"
+        assert result[4]["shaves"] == 1
+
+        # Verify that ranks follow competition ranking pattern
+        ranks = [item["rank"] for item in result]
+        assert ranks == [1, 2, 2, 4, 5], f"Expected [1, 2, 2, 4, 5], got {ranks}"
