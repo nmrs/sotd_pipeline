@@ -53,11 +53,9 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
         
-        if scent:  # Only add dash if scent exists
-            # Use pandas string concatenation to avoid Series ambiguity
-            return brand.astype(str) + " - " + scent.astype(str)
-        else:
-            return brand.astype(str)
+        # Use pandas string concatenation to avoid Series ambiguity
+        # Always concatenate with dash - empty scents will just show as "Brand - "
+        return brand.astype(str) + " - " + scent.astype(str)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
