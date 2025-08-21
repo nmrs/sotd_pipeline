@@ -139,22 +139,41 @@ class MonthlyReportGenerator(BaseReportGenerator):
         if has_enhanced_syntax:
             enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
 
-        # Generate ALL available tables for the template (basic tables)
-        # Templates can choose which ones to use
+        # Generate only the tables that are actually used in the template (basic tables)
+        # This prevents enhanced tables from being overwritten by basic table generation
         tables = {}
-        for table_name in table_generator.get_available_table_names():
-            try:
-                table_content = table_generator.generate_table_by_name(table_name)
-                # Create placeholder format for template substitution
-                placeholder = f"{{{{tables.{table_name}}}}}"
-                tables[placeholder] = table_content
-            except Exception as e:
-                # Fail fast with descriptive error message
-                error_msg = (
-                    f"Table generation error in template '{self.report_type}': "
-                    f"Failed to generate table '{table_name}' - {e}"
-                )
-                raise ValueError(error_msg) from e
+        
+        # Extract basic table placeholders from the template
+        basic_pattern = r'\{\{tables\.([^|}]+)\}\}'
+        basic_matches = re.findall(basic_pattern, template_content)
+        
+        # Only generate tables that have basic placeholders in the template
+        for table_name in basic_matches:
+            if table_name in table_generator.get_available_table_names():
+                try:
+                    table_content = table_generator.generate_table_by_name(table_name)
+                    # Create placeholder format for template substitution
+                    placeholder = f"{{{{tables.{table_name}}}}}"
+                    tables[placeholder] = table_content
+                    
+                    if self.debug:
+                        print(
+                            f"[DEBUG] MonthlyReport({self.report_type}): "
+                            f"Generated basic table: {table_name}"
+                        )
+                except Exception as e:
+                    # Fail fast with descriptive error message
+                    error_msg = (
+                        f"Table generation error in template '{self.report_type}': "
+                        f"Failed to generate table '{table_name}' - {e}"
+                    )
+                    raise ValueError(error_msg) from e
+            else:
+                if self.debug:
+                    print(
+                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                        f"Table '{table_name}' not available in table generator"
+                    )
 
         # Merge enhanced tables with basic tables
         tables.update(enhanced_tables)
