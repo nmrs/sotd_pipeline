@@ -106,7 +106,7 @@ class TableSizeLimiter:
         unique_ranks = set()
         for item in data:
             unique_ranks.add(item["rank"])
-        
+
         # If we have fewer unique ranks than the limit, return all data
         if len(unique_ranks) <= max_ranks:
             return data

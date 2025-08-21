@@ -35,6 +35,7 @@ class ParameterValidator:
         "highest-use-count-per-blade": ["uses"],
         "razor-format-users": ["format", "shaves"],
         "brush-fiber-users": ["fiber", "shaves"],
+        "razor-blade-combinations": ["shaves", "unique_users"],
         "test_table": ["shaves", "unique_users"],  # For testing purposes
     }
 

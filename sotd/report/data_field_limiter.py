@@ -57,8 +57,7 @@ class DataFieldLimiter:
         if isinstance(threshold, (int, float)):
             # Numeric comparison
             return [
-                item for item in data 
-                if self._compare_numeric(item.get(column), threshold, column)
+                item for item in data if self._compare_numeric(item.get(column), threshold, column)
             ]
         else:
             # String comparison
@@ -81,12 +80,12 @@ class DataFieldLimiter:
         try:
             value_float = float(value)
             threshold_float = float(threshold)
-            
+
             # Determine comparison operator based on field sorting direction
             # This should be determined by the table's sorting logic, not hard-coded
             # For now, use a simple heuristic: if column name suggests "lower is better", use <=
             if column and any(
-                keyword in column.lower() 
+                keyword in column.lower()
                 for keyword in ["missed", "days", "errors", "failures", "cost", "time"]
             ):
                 # Fields where lower values are better (ascending sort)

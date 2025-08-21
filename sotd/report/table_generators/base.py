@@ -392,7 +392,24 @@ class BaseTableGenerator(ABC):
 
         # Add rank data for display (only if not doing delta calculations)
         if not include_delta:
-            table_data = self._add_rank_data(table_data)
+            # Debug: check what rank fields we have
+            if self.debug:
+                print(f"[DEBUG] {self.get_table_title()}: Checking rank fields")
+                for i, item in enumerate(table_data[:3]):  # Show first 3 items
+                    print(f"  Item {i}: rank field = {item.get('rank', 'MISSING')}")
+
+            # Only add ranks if they don't already exist (preserve aggregator ranks)
+            has_rank = any("rank" in item for item in table_data)
+            if self.debug:
+                print(f"[DEBUG] {self.get_table_title()}: Has rank field = {has_rank}")
+
+            if not has_rank:
+                if self.debug:
+                    print(f"[DEBUG] {self.get_table_title()}: Adding rank data")
+                table_data = self._add_rank_data(table_data)
+            else:
+                if self.debug:
+                    print(f"[DEBUG] {self.get_table_title()}: Preserving existing ranks")
         else:
             # For delta calculations, use numeric ranks that can be used for calculations
             table_data = self._add_ranks(table_data)

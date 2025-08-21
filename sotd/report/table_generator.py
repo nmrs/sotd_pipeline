@@ -225,30 +225,39 @@ class TableGenerator:
         # Create a temporary data structure that preserves the original structure
         # The generator expects data in the same format as the original
         temp_data = {}
-        
+
         # Copy all original data keys
         for key in original_data:
             temp_data[key] = original_data[key]
-        
+
         # Find the key that the table generator actually uses for its data
         # by checking what get_table_data() accesses
-        if hasattr(generator, 'get_table_data'):
-            # For now, use a simple mapping approach
-            # This could be made more sophisticated by analyzing the generator's
-            # data access patterns
-            if table_name == "top-shavers":
-                temp_data["users"] = processed_data
-            elif table_name == "razors":
-                temp_data["razors"] = processed_data
-            elif table_name == "blades":
-                temp_data["blades"] = processed_data
-            elif table_name == "brushes":
-                temp_data["brushes"] = processed_data
-            elif table_name == "soaps":
-                temp_data["soaps"] = processed_data
-            else:
-                # For unknown tables, try using the table name as the key
-                temp_data[table_name] = processed_data
+        if hasattr(generator, "get_table_data"):
+            # Map table names to their expected data keys
+            table_data_key_mapping = {
+                "top-shavers": "users",
+                "razors": "razors",
+                "blades": "blades",
+                "brushes": "brushes",
+                "soaps": "soaps",
+                "razor-blade-combinations": "razor_blade_combinations",
+                "highest-use-count-per-blade": "highest_use_count_per_blade",
+                "razor-manufacturers": "razor_manufacturers",
+                "razor-formats": "razor_formats",
+                "blade-manufacturers": "blade_manufacturers",
+                "blade-usage-distribution": "blade_usage_distribution",
+                "brush-handle-makers": "brush_handle_makers",
+                "brush-knot-makers": "brush_knot_makers",
+                "knot-fibers": "knot_fibers",
+                "knot-sizes": "knot_sizes",
+                "soap-makers": "soap_makers",
+                "top-sampled-soaps": "top_sampled_soaps",
+                "brand-diversity": "brand_diversity",
+            }
+
+            # Get the correct data key for this table
+            data_key = table_data_key_mapping.get(table_name, table_name)
+            temp_data[data_key] = processed_data
 
         # Temporarily replace the generator's data
         generator.data = temp_data

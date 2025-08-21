@@ -75,9 +75,11 @@ def _process_month(
                 report_type, metadata, data, comparison_data, debug
             )
         except Exception as e:
+            # Fail fast: re-raise the exception with clear context
+            error_msg = f"Failed to generate {report_type} report for {month_str}: {e}"
             if debug:
-                print(f"  {month_str} {report_type}: failed to generate content: {e}")
-            continue
+                print(f"[DEBUG] {error_msg}")
+            raise RuntimeError(error_msg) from e
 
         # Save report to file
         if debug:
@@ -90,9 +92,11 @@ def _process_month(
                 print(f"  {month_str} {report_type}: {output_path.name}")
             reports_generated += 1
         except Exception as e:
+            # Fail fast: re-raise the exception with clear context
+            error_msg = f"Failed to save {report_type} report for {month_str}: {e}"
             if debug:
-                print(f"  {month_str} {report_type}: failed to save: {e}")
-            continue
+                print(f"[DEBUG] {error_msg}")
+            raise RuntimeError(error_msg) from e
 
     return {"month": month_str, "status": "success", "reports_generated": reports_generated}
 
