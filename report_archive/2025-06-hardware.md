@@ -74,54 +74,55 @@ Welcome to your SOTD Hardware Report for June 2025
 |:-------|:-----------------------------------------|---------:|---------------:|----------------------:|:---------------:|:---------------:|:---------------:|
 | 1      | RazoRock Game Changer                    |      125 |             15 |                  8.33 |       ↑1        |       ↑3        |       ↑8        |
 | 2      | Karve Christopher Bradley                |      117 |             21 |                  5.57 |       ↑3        |       ↓1        |       ↓1        |
-| 3      | Schick Injector                          |      100 |             27 |                   3.7 |       ↑4        |       ↑4        |       ↑13       |
-| 4      | Blackland Blackbird                      |       93 |             31 |                     3 |        =        |       ↓1        |       ↑15       |
+| 3      | Schick Injector                          |      100 |             27 |                   3.7 |       ↑4        |       ↑4        |       ↑15       |
+| 4      | Blackland Blackbird                      |       93 |             31 |                     3 |        =        |       ↓1        |       ↑17       |
 | 5      | Gillette Super Speed                     |       87 |             26 |                  3.35 |       ↓4        |       ↑1        |        =        |
 | 6      | Gillette Tech                            |       81 |             35 |                  2.31 |       ↑9        |       ↓4        |       ↓4        |
 | 7      | Henson AL13                              |       64 |             16 |                     4 |       ↑2        |       ↑3        |       n/a       |
-| 8      | Gillette Slim                            |       57 |             29 |                  1.97 |       ↑10       |       ↓3        |       ↑2        |
-| 9      | EldrormR Industries MM24                 |       57 |             25 |                  2.28 |       ↓1        |       ↓1        |       n/a       |
-| 10     | Wolfman WR2                              |       52 |             16 |                  3.25 |       ↑4        |       ↑6        |       ↓2        |
-| 11     | RazoRock Lupo                            |       48 |             10 |                   4.8 |       ↓5        |       ↑7        |       ↑3        |
-| 12     | Koraat Moarteen (r/Wetshaving exclusive) |       46 |             24 |                  1.92 |       ↓9        |       n/a       |       n/a       |
-| 13     | Chiseled Face Legacy                     |       44 |             15 |                  2.93 |       ↓2        |       ↑1        |       n/a       |
-| 14     | Blackland Vector                         |       43 |             15 |                  2.87 |       ↑20       |       ↑34       |       ↑16       |
-| 15     | Merkur 34C                               |       40 |             17 |                  2.35 |       ↑14       |       ↓3        |       ↓9        |
-| 16     | Karve Overlander                         |       34 |              8 |                  4.25 |       ↑1        |       ↑1        |       n/a       |
-| 17     | RazoRock Superslant                      |       33 |              2 |                  16.5 |       ↑37       |      ↑137       |       n/a       |
-| 18     | Gillette King C. Gillette                |       30 |              7 |                  4.29 |       ↑87       |       ↑2        |       ↑6        |
-| 19     | Van Der Hagen Razor                      |       30 |              2 |                    15 |       n/a       |       ↓6        |       ↑12       |
-| 20     | Tatara Muramasa                          |       29 |              2 |                  14.5 |       ↓7        |       ↑51       |       n/a       |
-| 21     | Weck Sextoblade                          |       28 |             15 |                  1.87 |       ↑34       |       ↑4        |      ↑114       |
-| 22     | GEM Micromatic Open Comb                 |       27 |             12 |                  2.25 |       ↑46       |       ↑5        |       ↑35       |
-| 23     | Wolfman Guerilla                         |       26 |              6 |                  4.33 |       ↑12       |       ↑18       |       ↑21       |
-| 24     | Karve Bison                              |       25 |              5 |                     5 |       ↑23       |       ↑77       |       n/a       |
-| 25     | Charcoal Goods Lvl 2                     |       24 |              7 |                  3.43 |       ↓9        |       ↑18       |       ↓12       |
-| 26     | Merkur Futur                             |       24 |              2 |                    12 |       ↓5        |       ↑82       |       ↑66       |
-| 27     | Wade & Butcher Straight                  |       20 |             10 |                     2 |       ↑51       |       ↑20       |       ↑32       |
-| 28     | Carbon Cx                                |       20 |              7 |                  2.86 |       ↓6        |       ↑65       |       ↑87       |
-| 29     | Gillette Fatboy                          |       19 |             10 |                   1.9 |       ↓6        |       ↑3        |       ↑10       |
-| 30     | GEM Clog Pruf                            |       19 |              7 |                  2.71 |       ↑15       |       ↑42       |       ↑93       |
-| 31     | Edwin Jagger DE89                        |       19 |              6 |                  3.17 |       ↑39       |       ↓2        |       ↓13       |
-| 32     | Ralf Aust Straight                       |       18 |              8 |                  2.25 |       ↑18       |       ↑30       |       ↑8        |
-| 33     | Maggard V3                               |       18 |              7 |                  2.57 |       ↑45       |       ↓24       |       ↓30       |
-| 34     | Ever-Ready Streamline                    |       18 |              5 |                   3.6 |       ↑64       |       ↑32       |      ↑135       |
-| 35     | Aylsworth Drakkant                       |       17 |              6 |                  2.83 |       ↑43       |       ↓12       |       n/a       |
-| 36=    | Gillette Old Type                        |       16 |              8 |                     2 |       ↑21       |       ↑28       |       ↓8        |
-| 36=    | Timeless Razor                           |       16 |              8 |                     2 |       ↑9        |       ↑8        |       ↓25       |
-| 38     | RazoRock Mamba                           |       16 |              3 |                  5.33 |       ↓18       |       ↓14       |       ↑15       |
-| 39     | Gillette Super Adjustable                |       15 |              9 |                  1.67 |       ↑66       |       ↑3        |       ↓5        |
-| 40     | Tatara Masamune                          |       15 |              3 |                     5 |       ↓1        |       ↑93       |       ↓23       |
-| 41     | Feather Shavette                         |       14 |              7 |                     2 |       ↓10       |       ↑9        |       ↑74       |
-| 42     | GEM G-Bar                                |       14 |              5 |                   2.8 |       ↓5        |       ↑3        |       ↑73       |
-| 43     | Ever-Ready 1912                          |       13 |              6 |                  2.17 |       ↑10       |       ↓15       |       ↑58       |
-| 44     | Rockwell 6S                              |       13 |              4 |                  3.25 |       ↓5        |       ↓8        |       ↓40       |
-| 45=    | Rockwell 6C                              |       13 |              2 |                   6.5 |       ↓16       |       ↓19       |       ↓38       |
-| 45=    | Yates Winning                            |       13 |              2 |                   6.5 |       ↑6        |       ↓30       |       n/a       |
-| 47=    | Gillette NEW                             |       12 |              7 |                  1.71 |       ↓15       |       ↓17       |       ↓35       |
-| 47=    | Mühle R41                                |       12 |              7 |                  1.71 |       ↑58       |       ↓13       |       ↓12       |
-| 49     | Böker Straight                           |       12 |              5 |                   2.4 |       ↑11       |       ↑2        |       ↑13       |
-| 50     | Henson Ti22                              |       11 |              6 |                  1.83 |       ↓9        |       ↓15       |       n/a       |
+| 8=     | Cartridge/Disposable                     |       57 |             29 |                  1.97 |       ↑50       |       ↑8        |       ↑6        |
+| 8=     | Gillette Slim                            |       57 |             29 |                  1.97 |       ↑10       |       ↓3        |       ↑2        |
+| 10     | EldrormR Industries MM24                 |       57 |             25 |                  2.28 |       ↓2        |       ↓2        |       n/a       |
+| 11     | Wolfman WR2                              |       52 |             16 |                  3.25 |       ↑3        |       ↑6        |       ↓3        |
+| 12     | RazoRock Lupo                            |       48 |             10 |                   4.8 |       ↓6        |       ↑7        |       ↑3        |
+| 13     | Koraat Moarteen (r/Wetshaving exclusive) |       46 |             24 |                  1.92 |       ↓10       |       n/a       |       n/a       |
+| 14     | Chiseled Face Legacy                     |       44 |             15 |                  2.93 |       ↓3        |        =        |       n/a       |
+| 15     | Blackland Vector                         |       43 |             15 |                  2.87 |       ↑19       |       ↑35       |       ↑17       |
+| 16     | Merkur 34C                               |       40 |             17 |                  2.35 |       ↑13       |       ↓4        |       ↓10       |
+| 17     | Karve Overlander                         |       34 |              8 |                  4.25 |        =        |       ↑1        |       n/a       |
+| 18     | RazoRock Superslant                      |       33 |              2 |                  16.5 |       ↑36       |      ↑142       |       n/a       |
+| 19     | Gillette King C. Gillette                |       30 |              7 |                  4.29 |       ↑91       |       ↑2        |       ↑7        |
+| 20     | Van Der Hagen Razor                      |       30 |              2 |                    15 |       n/a       |       ↓7        |       ↑13       |
+| 21     | Tatara Muramasa                          |       29 |              2 |                  14.5 |       ↓8        |       ↑53       |       n/a       |
+| 22     | Weck Sextoblade                          |       28 |             15 |                  1.87 |       ↑33       |       ↑5        |      ↑120       |
+| 23     | GEM Micromatic Open Comb                 |       27 |             12 |                  2.25 |       ↑48       |       ↑6        |       ↑37       |
+| 24     | Wolfman Guerilla                         |       26 |              6 |                  4.33 |       ↑11       |       ↑19       |       ↑22       |
+| 25     | Karve Bison                              |       25 |              5 |                     5 |       ↑22       |       ↑80       |       n/a       |
+| 26     | Charcoal Goods Lvl 2                     |       24 |              7 |                  3.43 |       ↓10       |       ↑19       |       ↓13       |
+| 27     | Merkur Futur                             |       24 |              2 |                    12 |       ↓6        |       ↑85       |       ↑69       |
+| 28     | Wade & Butcher Straight                  |       20 |             10 |                     2 |       ↑54       |       ↑21       |       ↑34       |
+| 29     | Carbon Cx                                |       20 |              7 |                  2.86 |       ↓7        |       ↑68       |       ↑92       |
+| 30     | Gillette Fatboy                          |       19 |             10 |                   1.9 |       ↓7        |       ↑4        |       ↑11       |
+| 31     | GEM Clog Pruf                            |       19 |              7 |                  2.71 |       ↑14       |       ↑44       |       ↑99       |
+| 32     | Edwin Jagger DE89                        |       19 |              6 |                  3.17 |       ↑42       |       ↓1        |       ↓12       |
+| 33     | Ralf Aust Straight                       |       18 |              8 |                  2.25 |       ↑17       |       ↑32       |       ↑9        |
+| 34     | Maggard V3                               |       18 |              7 |                  2.57 |       ↑48       |       ↓25       |       ↓31       |
+| 35     | Ever-Ready Streamline                    |       18 |              5 |                   3.6 |       ↑68       |       ↑34       |      ↑141       |
+| 36     | Aylsworth Drakkant                       |       17 |              6 |                  2.83 |       ↑46       |       ↓11       |       n/a       |
+| 37=    | Gillette Old Type                        |       16 |              8 |                     2 |       ↑20       |       ↑30       |       ↓7        |
+| 37=    | Timeless Razor                           |       16 |              8 |                     2 |       ↑8        |       ↑9        |       ↓26       |
+| 39     | RazoRock Mamba                           |       16 |              3 |                  5.33 |       ↓19       |       ↓13       |       ↑17       |
+| 40     | Other Straight Razor                     |       15 |             12 |                  1.25 |       ↑31       |       ↓16       |       ↓24       |
+| 41     | Gillette Super Adjustable                |       15 |              9 |                  1.67 |       ↑69       |       ↑3        |       ↓5        |
+| 42     | Tatara Masamune                          |       15 |              3 |                     5 |       ↓3        |       ↑96       |       ↓23       |
+| 43     | Feather Shavette                         |       14 |              7 |                     2 |       ↓12       |       ↑9        |       ↑78       |
+| 44     | GEM G-Bar                                |       14 |              5 |                   2.8 |       ↓7        |       ↑3        |       ↑77       |
+| 45     | Ever-Ready 1912                          |       13 |              6 |                  2.17 |       ↑8        |       ↓15       |       ↑60       |
+| 46     | Rockwell 6S                              |       13 |              4 |                  3.25 |       ↓7        |       ↓8        |       ↓42       |
+| 47=    | Rockwell 6C                              |       13 |              2 |                   6.5 |       ↓18       |       ↓19       |       ↓40       |
+| 47=    | Yates Winning                            |       13 |              2 |                   6.5 |       ↑4        |       ↓32       |       n/a       |
+| 49=    | Gillette NEW                             |       12 |              7 |                  1.71 |       ↓17       |       ↓17       |       ↓37       |
+| 49=    | Mühle R41                                |       12 |              7 |                  1.71 |       ↑61       |       ↓13       |       ↓12       |
+| 49=    | Other Shavette                           |       12 |              7 |                  1.71 |       ↑38       |       ↑9        |       ↓1        |
 
 
 ## Razor Manufacturers
@@ -220,57 +221,56 @@ Welcome to your SOTD Hardware Report for June 2025
 
 | Rank   | Brush                                     |   shaves |   unique users |   avg shaves per user |  Δ vs May 2025  |  Δ vs Jun 2024  |  Δ vs Jun 2020  |
 |:-------|:------------------------------------------|---------:|---------------:|----------------------:|:---------------:|:---------------:|:---------------:|
-| 1      | AP Shave Co G5C                           |       83 |             14 |                  5.93 |       ↑2        |       ↑3        |       n/a       |
-| 2      | Zenith r/wetshaving MOAR BOAR             |       71 |             33 |                  2.15 |       ↓1        |        =        |       n/a       |
-| 3      | AP Shave Co Synbad                        |       55 |             11 |                     5 |       ↑2        |       ↑9        |       ↑23       |
-| 4      | Maggard Synthetic                         |       43 |             14 |                  3.07 |       ↑3        |       ↓1        |       ↓3        |
-| 5      | Yaqi Synthetic                            |       41 |             17 |                  2.41 |       ↓1        |       ↓4        |       ↓3        |
-| 6      | Dogwood Handcrafts Badger                 |       41 |              8 |                  5.12 |       ↑20       |        =        |       ↑2        |
-| 7      | Semogue SOC Boar                          |       36 |             13 |                  2.77 |       ↑5        |       ↑17       |       ↑65       |
-| 8      | Chisel & Hound v21                        |       35 |              3 |                 11.67 |       ↓6        |       ↑19       |       n/a       |
-| 9      | Prometheus Handcrafts Synthetic           |       31 |              3 |                 10.33 |      ↑186       |       ↑9        |       ↑22       |
-| 10     | Mühle STF                                 |       30 |              2 |                    15 |       ↓4        |      ↑164       |       ↑53       |
-| 11     | Maggard Timberwolf                        |       27 |              3 |                     9 |        =        |       ↑4        |       ↑7        |
-| 12     | Oumo Badger                               |       26 |              9 |                  2.89 |       ↑65       |       ↓5        |       ↑92       |
-| 13     | Semogue SOC Mixed Badger/Boar             |       25 |             10 |                   2.5 |        =        |       ↑58       |      ↑142       |
-| 14     | Stirling Synthetic                        |       24 |              6 |                     4 |       ↓5        |       ↓1        |       ↑3        |
-| 15     | Chisel & Hound G5C                        |       24 |              1 |                    24 |       ↓5        |       n/a       |       n/a       |
-| 16     | AP Shave Co G5A                           |       23 |              4 |                  5.75 |       n/a       |       ↑6        |       n/a       |
-| 17     | Yaqi Ferrari                              |       23 |              1 |                    23 |       n/a       |       ↑18       |      ↑212       |
-| 18     | Omega 10049                               |       22 |             12 |                  1.83 |       ↑98       |       ↑2        |       ↓2        |
-| 19     | Omega Boar                                |       22 |              9 |                  2.44 |      ↑134       |       ↑19       |       ↑1        |
-| 20     | Wald A1                                   |       21 |              9 |                  2.33 |       ↓2        |       ↑16       |       n/a       |
-| 21     | Chisel & Hound v27                        |       21 |              6 |                   3.5 |       ↓7        |       n/a       |       n/a       |
-| 22     | Zenith Boar                               |       20 |             13 |                  1.54 |       ↑73       |       ↓6        |       ↑81       |
-| 23     | Rad Dinosaur Creations Raptor             |       18 |              7 |                  2.57 |       ↑93       |       n/a       |       n/a       |
-| 24     | Mühle Travel                              |       18 |              5 |                   3.6 |       n/a       |      ↑106       |       n/a       |
-| 25     | AP Shave Co Synthetic                     |       17 |             10 |                   1.7 |       ↑41       |       ↑26       |       ↑13       |
-| 26     | Wolf Whiskers Badger                      |       17 |              6 |                  2.83 |       ↑22       |       ↑78       |       ↓13       |
-| 27     | Chisel & Hound v23                        |       16 |              8 |                     2 |       ↓2        |       ↑16       |       n/a       |
-| 28     | Chisel & Hound v24                        |       16 |              6 |                  2.67 |       ↑22       |       ↑96       |       n/a       |
-| 29     | Wolf Whiskers Synthetic                   |       16 |              3 |                  5.33 |       ↓21       |       ↑48       |      ↑126       |
-| 30     | Dogwood Handcrafts Synthetic              |       15 |              6 |                   2.5 |       ↑19       |       ↓20       |       ↑36       |
-| 31=    | Chisel & Hound v26                        |       14 |              5 |                   2.8 |       ↑10       |       n/a       |       n/a       |
-| 31=    | Maggard Badger                            |       14 |              5 |                   2.8 |       ↑64       |       ↑21       |       ↓26       |
-| 33     | Semogue 830                               |       14 |              4 |                   3.5 |       ↑8        |       ↑1        |       ↑40       |
-| 34     | CaYuen Timberwolf                         |       14 |              1 |                    14 |       ↓11       |       ↓11       |       n/a       |
-| 35     | Declaration Grooming B3                   |       13 |              6 |                  2.17 |       ↓18       |       ↑36       |       ↓13       |
-| 36     | Frank Shaving Synthetic                   |       13 |              3 |                  4.33 |       n/a       |       ↑54       |       ↑87       |
-| 37     | Semogue 1305                              |       13 |              2 |                   6.5 |       ↑7        |      ↑116       |       ↑98       |
-| 38=    | Chisel & Hound Badger                     |       12 |              8 |                   1.5 |       ↓1        |       ↓21       |       n/a       |
-| 38=    | Omega 11047                               |       12 |              8 |                   1.5 |      ↑157       |       ↑1        |       ↑80       |
-| 40=    | Chisel & Hound v20                        |       12 |              6 |                     2 |       ↑76       |       ↓19       |       n/a       |
-| 40=    | Omega 10048                               |       12 |              6 |                     2 |       ↑29       |        =        |      ↑189       |
-| 42=    | AP Shave Co Gelousy                       |       12 |              4 |                     3 |       ↓3        |       ↓17       |      ↑105       |
-| 42=    | Rad Dinosaur Creations Synthetic          |       12 |              4 |                     3 |       ↓3        |      ↑222       |       n/a       |
-| 42=    | Stirling 2-Band Synthetic                 |       12 |              4 |                     3 |       ↑40       |       ↓37       |       ↓14       |
-| 45     | Semogue 2000                              |       12 |              3 |                     4 |       ↓24       |       ↑3        |       ↑88       |
-| 46     | Mountain Hare Shaving Badger              |       12 |              1 |                    12 |       ↓30       |      ↑218       |       n/a       |
-| 47     | Stirling/Zenith 31mmx50mm Boar (510SE-XL) |       11 |              6 |                  1.83 |       ↓19       |       ↑24       |       n/a       |
-| 48     | AP Shave Co Pure Bliss                    |       11 |              5 |                   2.2 |       ↑28       |       n/a       |       n/a       |
-| 49     | Rad Dinosaur Creations G5C                |       11 |              4 |                  2.75 |       ↓14       |       n/a       |       n/a       |
-| 50=    | Mistic Synthetic                          |       11 |              1 |                    11 |       ↓28       |       ↑28       |       n/a       |
-| 50=    | Muninn Woodworks MiG                      |       11 |              1 |                    11 |      ↑145       |       ↑10       |       n/a       |
+| 1      | Zenith r/wetshaving MOAR BOAR             |       71 |             33 |                  2.15 |        =        |       ↑2        |       n/a       |
+| 2      | Stirling 2-Band Synthetic                 |       50 |              6 |                  8.33 |       ↑17       |        =        |       ↑3        |
+| 3      | Yaqi Synthetic                            |       49 |             17 |                  2.88 |        =        |       ↓2        |       ↓1        |
+| 4      | Semogue SOC Boar                          |       36 |             13 |                  2.77 |       ↑3        |       ↑10       |       ↑34       |
+| 5      | Chisel & Hound v21                        |       35 |              3 |                 11.67 |       ↓3        |       ↑11       |       n/a       |
+| 6      | Maggard Synthetic                         |       34 |             12 |                  2.83 |       ↓1        |       ↓2        |       ↓5        |
+| 7      | Prometheus Handcrafts Synthetic           |       28 |              1 |                    28 |      ↑104       |       ↑24       |       ↑14       |
+| 8      | Maggard Timberwolf                        |       26 |              2 |                    13 |       ↓2        |       ↑2        |       ↑3        |
+| 9      | Semogue SOC Mixed Badger/Boar             |       25 |             10 |                   2.5 |       ↓1        |       ↑35       |       ↑77       |
+| 10     | West Coast Shaving Synthetic              |       25 |              4 |                  6.25 |       ↓6        |       ↑56       |       ↑6        |
+| 11     | AP Shave Co G5C                           |       23 |              4 |                  5.75 |       ↑24       |       ↑10       |       n/a       |
+| 12     | Yaqi Ferrari                              |       23 |              1 |                    23 |       n/a       |       ↑12       |      ↑124       |
+| 13     | Omega 10049                               |       22 |             12 |                  1.83 |       ↑53       |       ↓1        |       ↓3        |
+| 14     | AP Shave Co G5A                           |       22 |              3 |                  7.33 |       n/a       |       ↑16       |       n/a       |
+| 15     | Wald A1                                   |       21 |              9 |                  2.33 |       ↓4        |       ↑10       |       n/a       |
+| 16     | Chisel & Hound v27                        |       21 |              6 |                   3.5 |       ↓7        |       n/a       |       n/a       |
+| 17     | AP Shave Co Synbad                        |       19 |              5 |                   3.8 |       ↑17       |       ↓8        |        =        |
+| 18     | Mühle Travel                              |       18 |              5 |                   3.6 |       n/a       |       ↑61       |       n/a       |
+| 19     | Rad Dinosaur Creations Raptor             |       17 |              6 |                  2.83 |       ↑47       |       n/a       |       n/a       |
+| 20     | Oumo Badger                               |       17 |              5 |                   3.4 |       ↑71       |       ↓12       |       ↑39       |
+| 21     | Chisel & Hound v23                        |       16 |              8 |                     2 |       ↓6        |       ↑11       |       n/a       |
+| 22     | Chisel & Hound v24                        |       16 |              6 |                  2.67 |       ↑6        |       ↑53       |       n/a       |
+| 23=    | Chisel & Hound Badger                     |       15 |              6 |                   2.5 |       ↑18       |       ↓3        |       n/a       |
+| 23=    | Omega Boar                                |       15 |              6 |                   2.5 |       ↑88       |       ↑42       |       ↓9        |
+| 25     | Chisel & Hound v26                        |       14 |              5 |                   2.8 |       ↓3        |       n/a       |       n/a       |
+| 26     | Semogue 830                               |       14 |              4 |                   3.5 |       ↓4        |       ↓3        |       ↑13       |
+| 27     | Declaration Grooming B3                   |       13 |              6 |                  2.17 |       ↓17       |       ↑17       |       ↓14       |
+| 28     | Semogue 1305                              |       13 |              2 |                   6.5 |       ↓3        |       ↑64       |       ↑45       |
+| 29     | Omega 11047                               |       12 |              8 |                   1.5 |       ↑82       |       ↓2        |       ↑34       |
+| 30=    | Chisel & Hound v20                        |       12 |              6 |                     2 |       ↑36       |       ↓17       |       n/a       |
+| 30=    | Omega 10048                               |       12 |              6 |                     2 |       ↑13       |       ↓1        |      ↑106       |
+| 32     | Semogue 2000                              |       12 |              3 |                     4 |       ↓19       |       ↑1        |       ↑39       |
+| 33     | Stirling/Zenith 31mmx50mm Boar (510SE-XL) |       11 |              6 |                  1.83 |       ↓17       |       ↑11       |       n/a       |
+| 34     | Wolf Whiskers Badger                      |       11 |              5 |                   2.2 |       ↑32       |       ↑51       |       ↓4        |
+| 35     | Maggard Badger                            |       11 |              3 |                  3.67 |       ↑56       |       ↑25       |       ↓31       |
+| 36     | Mistic Synthetic                          |       11 |              1 |                    11 |       ↓22       |       ↑13       |       n/a       |
+| 37     | Chisel & Hound v25                        |       10 |              6 |                  1.67 |       ↑10       |       n/a       |       n/a       |
+| 38     | Omega Hi-Brush Synthetic                  |       10 |              4 |                   2.5 |       ↑28       |       ↓16       |       ↓3        |
+| 39=    | Frank Shaving Synthetic                   |       10 |              3 |                  3.33 |       n/a       |       ↑29       |       ↑39       |
+| 39=    | Semogue 610                               |       10 |              3 |                  3.33 |       ↓11       |       ↓34       |       ↓24       |
+| 41=    | AP Shave Co Synthetic                     |        9 |              6 |                   1.5 |       ↑11       |       ↑18       |       ↑51       |
+| 41=    | Zenith Boar                               |        9 |              6 |                   1.5 |       ↑11       |       ↓30       |       ↑22       |
+| 43     | Simpson Chubby 2                          |        9 |              5 |                   1.8 |       ↓15       |       ↑9        |       ↓14       |
+| 44     | Omega 10065                               |        9 |              3 |                     3 |       ↑5        |       ↓9        |       n/a       |
+| 45=    | Omega 46206                               |        9 |              1 |                     9 |       ↓28       |       ↓9        |       n/a       |
+| 45=    | Simpson Classic 1 Synthetic               |        9 |              1 |                     9 |       n/a       |       n/a       |       n/a       |
+| 47     | Semogue Torga C5 Boar                     |        8 |              4 |                     2 |       ↓25       |       ↑21       |       ↑54       |
+| 48     | AP Shave Co MiG                           |        8 |              3 |                  2.67 |       ↓11       |       n/a       |       n/a       |
+| 49=    | Boti Synthetic                            |        8 |              2 |                     4 |       n/a       |       ↑23       |       n/a       |
+| 49=    | Omega Proraso Professional                |        8 |              2 |                     4 |       ↓31       |       ↓30       |       ↑9        |
 
 
 ## Brush Handle Makers
@@ -559,3 +559,4 @@ Welcome to your SOTD Hardware Report for June 2025
 | 8=     | u/solongamerica        |       30 | 0             |       ↑60       |       ↓1        |       n/a       |
 | 8=     | u/teeraymcfly          |       30 | 0             |       ↑81       |       n/a       |       n/a       |
 | 8=     | u/throwa-waaaay        |       30 | 0             |       n/a       |       ↓1        |       n/a       |
+
