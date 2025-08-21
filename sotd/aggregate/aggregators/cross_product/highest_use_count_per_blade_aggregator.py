@@ -101,8 +101,21 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
     # Sort by uses desc
     blade_max_usage = blade_max_usage.sort_values("uses", ascending=False)
 
-    # Add rank field (1-based rank)
-    blade_max_usage["rank"] = range(1, len(blade_max_usage) + 1)
+    # Add competition ranking based on uses
+    # Items with same uses get tied ranks
+    blade_max_usage = blade_max_usage.reset_index(drop=True)
+
+    # Create a composite key for ranking that preserves the order
+    # Use sequential ranks, then group by uses to get same rank for ties
+    blade_max_usage["temp_rank"] = range(1, len(blade_max_usage) + 1)
+    blade_max_usage["rank"] = (
+        blade_max_usage.groupby("uses", sort=False)["temp_rank"].transform("min")
+    )
+    blade_max_usage = blade_max_usage.drop("temp_rank", axis=1)
+
+    # Sort by ranking first, then by blade_name for consistent ordering of tied entries
+    blade_max_usage = blade_max_usage.sort_values(["rank", "blade_name"], ascending=[True, True])
+    blade_max_usage = blade_max_usage.reset_index(drop=True)
 
     # Convert to list of dictionaries
     result = []
