@@ -45,7 +45,7 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
         """Get brush handle maker data from aggregated data."""
         data = self.data.get("brush_handle_makers", [])
         # No filtering - show all makers as template doesn't specify limits
-        return self._validate_data_records(data, "brush_handle_makers", ["brand", "shaves"])
+        return self._validate_data_records(data, "brush_handle_makers", ["handle_maker", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -134,6 +134,7 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with fiber mapped to name."""
         return {
+            "rank": {"display_name": "Rank"},
             "fiber": {"display_name": "Fiber"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
