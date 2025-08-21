@@ -1,0 +1,211 @@
+# TDD Plan: Ranking Bug Integration Fix
+
+## 📘 Project Summary
+
+**Problem**: The `highest-use-count-per-blade` table shows all ranks as `1=` in the final report, but individual components (aggregator, table generator, enhanced table processor) all work correctly when tested in isolation. This indicates an integration bug where rank corruption occurs during the report generation pipeline.
+
+**Root Cause**: Table generators should preserve ranks from aggregators (single source of truth), not recalculate them. The individual components respect this principle, but integration corrupts the data.
+
+**Goal**: Use TDD to systematically trace the exact data flow through report generation and identify where rank corruption occurs, then fix the integration bug.
+
+**Success Criteria**: 
+- `{{tables.highest-use-count-per-blade|rows:30}}` shows sequential ranks (1, 2, 3...) instead of all `1=`
+- All table generators preserve aggregator ranks without recalculation
+- Integration tests verify end-to-end rank preservation
+
+## 🧩 Component Steps
+
+1. **Create Integration Test Suite** - Test the full report generation pipeline with rank verification ✅
+2. **Add Data Flow Tracing** - Instrument the pipeline to trace rank data through each step ✅
+3. **Identify Corruption Point** - Use tracing to pinpoint where ranks get corrupted ✅
+4. **Investigate Alternative Bug Sources** - Since table generation pipeline is working, investigate other components
+5. **Fix Integration Bug** - Apply targeted fix at the actual corruption point
+6. **Verify End-to-End** - Ensure fix works across all table types and scenarios
+
+## 🔍 Discovered Issues (New Tasks)
+
+During quality checks, several related issues were discovered that need investigation:
+
+1. **`HighestUseCountPerBladeTableGenerator` Data Issue** - Tests show `get_table_data()` returns empty list when it should return expected data ✅ RESOLVED
+2. **Tier-Based Ranking Integration Failures** - Multiple ranking integration tests failing, indicating ranking system issues ✅ RESOLVED  
+3. **Enhanced Table Generation Problems** - Some enhanced table functionality not working properly ✅ RESOLVED
+
+### New Discoveries from Investigation
+
+4. **Bug Location Misdiagnosis** - Originally suspected ranking bug was in table generation pipeline
+   - **Investigation**: Comprehensive testing with rank tracing reveals table generation pipeline works correctly
+   - **Findings**: 
+     - HighestUseCountPerBladeTableGenerator preserves ranks correctly
+     - EnhancedTableGenerator preserves ranks correctly  
+     - TableGenerator wrapper generates correct markdown with proper ranks
+     - All ranks (1-30) preserved through entire pipeline
+   - **Status**: 🔍 INVESTIGATING - Need to find actual source of ranking bug
+   - **Next Steps**: Investigate report template processing, markdown rendering, or data loading components
+
+5. **Rank Tracer Data Structure Issue** - Minor logging issue with nested data structures
+   - **Impact**: Minor logging issue, doesn't affect functionality
+   - **Status**: 🔧 MINOR - Can be fixed in future iteration
+
+**Key Insight**: The ranking bug is NOT in the table generation pipeline as originally suspected. We need to investigate other components.
+
+## 🔁 Implementation Prompts
+
+### Step 1: Create Integration Test Suite
+
+```text
+Create a comprehensive integration test suite that tests the full report generation pipeline for rank preservation. The test should:
+
+1. **Test Structure**: Create `tests/report/test_ranking_integration.py`
+2. **Test Scope**: Test the complete flow from aggregated data → report generation → final markdown
+3. **Verification Points**: 
+   - Verify aggregated data has correct ranks (1, 2, 3...)
+   - Verify final report markdown has correct ranks (1, 2, 3...)
+   - Test both basic and enhanced table syntax
+4. **Test Data**: Use real 2025-06 aggregated data for `highest-use-count-per-blade`
+5. **Assertions**: 
+   - Extract rank values from final report markdown
+   - Assert ranks are sequential (1, 2, 3...) not all `1=`
+   - Compare first 10 entries between aggregated data and final report
+
+This integration test will fail initially (exposing the bug) and pass after we fix it.
+
+Requirements:
+- Use pytest framework
+- Test both `{{tables.highest-use-count-per-blade}}` and `{{tables.highest-use-count-per-blade|rows:30}}`
+- Include meaningful error messages that show expected vs actual ranks
+- Test with real 2025-06 data file
+```
+
+### Step 2: Add Data Flow Tracing
+
+```text
+Add comprehensive data flow tracing to the report generation pipeline to track rank data through each processing step. Instrument these key points:
+
+1. **Aggregated Data Input**: Log ranks from `data['data']['highest_use_count_per_blade']`
+2. **Table Generator Input**: Log ranks when `HighestUseCountPerBladeTableGenerator.get_table_data()` is called
+3. **Enhanced Table Processing**: Log ranks before and after `EnhancedTableGenerator.generate_table()`
+4. **Template Processing**: Log ranks before and after template substitution
+5. **Final Output**: Log ranks in the final markdown content
+
+Implementation:
+- Add debug logging at each step with consistent format: `[RANK_TRACE] Step: {step_name}, First 5 ranks: {ranks[:5]}`
+- Create a `RankTracer` utility class to standardize logging
+- Modify report generation to accept a `trace_ranks=True` parameter
+- Log both the data structure and the actual rank values
+
+This will help us identify exactly where in the pipeline the ranks get corrupted from [1, 2, 3, 4, 5] to [1, 1, 1, 1, 1].
+```
+
+### Step 3: Identify Corruption Point
+
+```text
+Use the data flow tracing to systematically identify where rank corruption occurs in the report generation pipeline.
+
+1. **Run Integration Test with Tracing**: Execute the failing integration test with `trace_ranks=True`
+2. **Analyze Trace Output**: Compare rank values at each pipeline step
+3. **Pinpoint Corruption**: Identify the exact step where ranks change from [1, 2, 3...] to [1, 1, 1...]
+4. **Root Cause Analysis**: 
+   - Examine the specific code responsible for the corruption
+   - Determine if it's data transformation, template processing, or table generation
+   - Identify why the corruption only happens in integration, not isolation
+
+5. **Document Findings**: Create detailed analysis of:
+   - Which pipeline step corrupts the ranks
+   - What specific operation causes the corruption
+   - Why isolation tests pass but integration fails
+   - Proposed fix strategy
+
+This step is purely investigative - no code changes, just analysis and documentation of the exact failure point.
+```
+
+### Step 4: Fix Integration Bug
+
+```text
+Apply targeted fix at the identified corruption point to preserve rank data integrity throughout the report generation pipeline.
+
+Based on the corruption point identified in Step 3, implement the appropriate fix:
+
+**If corruption is in template processing**:
+- Fix template substitution order or placeholder handling
+- Ensure enhanced tables override basic tables correctly
+
+**If corruption is in data flow**:
+- Fix data structure preservation between pipeline steps
+- Ensure rank data isn't lost in transformations
+
+**If corruption is in table generation integration**:
+- Fix how basic and enhanced table generation interact
+- Ensure consistent data format expectations
+
+**Implementation Requirements**:
+1. **Minimal Change**: Fix only the identified corruption point, don't refactor unrelated code
+2. **Preserve Architecture**: Maintain the principle that aggregators calculate ranks, table generators preserve them
+3. **Test-Driven**: Ensure the integration test passes after the fix
+4. **Backward Compatibility**: Don't break existing functionality
+
+**Validation**:
+- Run the integration test - it should now pass
+- Verify all individual component tests still pass
+- Test with multiple months of data to ensure robustness
+```
+
+### Step 5: Verify End-to-End
+
+```text
+Comprehensive verification that the ranking fix works across all scenarios and doesn't introduce regressions.
+
+1. **Extended Integration Tests**:
+   - Test all table types that use ranking (not just highest-use-count-per-blade)
+   - Test both monthly and annual reports
+   - Test various enhanced table parameters (rows, ranks, etc.)
+
+2. **Real Data Validation**:
+   - Generate reports for multiple months (2025-05, 2025-06, 2024-06)
+   - Manually verify ranking sequences in generated reports
+   - Compare ranking with direct aggregator output
+
+3. **Edge Case Testing**:
+   - Test with tied rankings (should show "2=" for ties)
+   - Test with empty data
+   - Test with single entry
+   - Test with large datasets
+
+4. **Performance Impact**:
+   - Ensure fix doesn't degrade report generation performance
+   - Verify memory usage remains acceptable
+
+5. **Documentation Update**:
+   - Update relevant documentation about ranking preservation
+   - Add comments explaining the fix in the code
+   - Document the lesson learned for future reference
+
+**Success Criteria**: All tests pass, reports show correct ranking, no performance regressions, clear documentation of the fix.
+```
+
+## 🧠 Critical Analysis
+
+**Plan Strengths**:
+- **Systematic Approach**: Traces the exact failure point instead of guessing
+- **Test-First**: Creates failing integration test before fixing
+- **Minimal Impact**: Targets specific corruption point rather than broad refactoring
+- **Comprehensive Validation**: Ensures fix works across all scenarios
+
+**Potential Risks**:
+- **Debugging Complexity**: The integration bug might be subtle and hard to trace
+- **Multiple Corruption Points**: There might be more than one place where ranks get corrupted
+- **Template Processing Complexity**: The template system has multiple layers that could interfere
+
+**Mitigation Strategies**:
+- **Incremental Tracing**: Add tracing one step at a time if needed
+- **Comparison Testing**: Compare working isolation tests with failing integration
+- **Rollback Plan**: Keep changes minimal so they're easy to revert if needed
+
+**Why This Approach Works**:
+- **Data-Driven**: Uses actual tracing data to identify the problem
+- **Reproducible**: Integration test provides consistent failure/success criteria
+- **Focused**: Addresses the specific integration bug without over-engineering
+- **Maintainable**: Results in clean fix with good test coverage
+
+This plan should systematically resolve the ranking bug by identifying exactly where the integration corrupts the data and applying a targeted fix.
+
+Model: Claude-4-Sonnet
