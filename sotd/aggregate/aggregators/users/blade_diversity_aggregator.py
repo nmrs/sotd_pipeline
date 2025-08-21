@@ -6,46 +6,45 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_fields, get_field_value
 
 
 class BladeDiversityAggregator(BaseAggregator):
-    """Aggregator for blade diversity grouped by user from enriched records."""
+    """Aggregator for blade diversity data from enriched records."""
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Extract blade brand+model data from records for aggregation.
+        """Extract blade diversity data from records for aggregation.
 
         Args:
             records: List of enriched comment records
 
         Returns:
-            List of dictionaries with extracted blade brand+model data fields
+            List of dictionaries with extracted blade diversity data fields
         """
-        blade_data = []
+        diversity_data = []
         for record in records:
-            blade = record.get("blade", {})
+            blade = record.get("blade") or {}
             matched = blade.get("matched", {})
 
-            # Skip if no matched blade data or no brand/model
-            if not matched or not matched.get("brand") or not matched.get("model"):
+            # Skip if no matched blade data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not matched or not has_required_fields(matched, "brand", "model"):
                 continue
 
-            brand = matched.get("brand") or ""
-            brand = brand.strip() if brand else ""
-            model = matched.get("model") or ""
-            model = model.strip() if model else ""
-            author = record.get("author") or ""
-            author = author.strip() if author else ""
+            brand = get_field_value(matched, "brand")
+            model = get_field_value(matched, "model")
+            author = get_field_value(record, "author")
 
-            if brand and model and author:
-                blade_data.append({"brand": brand, "model": model, "author": author})
+            if brand and author:  # model can be empty string, which is valid
+                diversity_data.append({"brand": brand, "model": model, "author": author})
 
-        return blade_data
+        return diversity_data
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from brand and model.
 
         Args:
-            df: DataFrame with extracted blade brand+model data
+            df: DataFrame with extracted blade diversity data
 
         Returns:
             Series with composite names in "Brand Model" format
@@ -128,31 +127,23 @@ class BladeDiversityAggregator(BaseAggregator):
         return result
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
-        """Get columns to use for grouping.
-
-        Args:
-            df: DataFrame with extracted data
-
-        Returns:
-            List of column names for grouping
-        """
-        # Group by author for user-focused analysis
-        return ["author"]
+        """Get columns to use for grouping."""
+        return ["brand", "model"]
 
 
 # Legacy function interface for backward compatibility
 def aggregate_blade_diversity(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Aggregate blade diversity by user from enriched records.
+    """Aggregate blade diversity data from enriched records.
 
-    Returns a list of blade diversity aggregations sorted by unique_blades desc,
-    total_shaves desc. Each item includes rank field for delta calculations.
+    Returns a list of blade diversity aggregations sorted by shaves desc,
+    unique_users desc. Each item includes position field for delta calculations.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of blade diversity aggregations with rank, user, unique_blades,
-        total_shaves, and unique_users fields
+        List of blade diversity aggregations with position, name, shaves, and
+        unique_users fields
     """
     aggregator = BladeDiversityAggregator()
     return aggregator.aggregate(records)

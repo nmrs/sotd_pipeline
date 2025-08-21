@@ -6,55 +6,51 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
+from ...utils.field_validation import has_required_field, get_field_value
 
 
 class SoapBrandDiversityAggregator(BaseAggregator):
-    """Aggregator for soap brand diversity grouped by user from enriched records."""
+    """Aggregator for soap brand diversity data from enriched records."""
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Extract soap brand data from records for aggregation.
+        """Extract soap brand diversity data from records for aggregation.
 
         Args:
             records: List of enriched comment records
 
         Returns:
-            List of dictionaries with extracted soap brand data fields
+            List of dictionaries with extracted soap brand diversity data fields
         """
-        soap_data = []
+        diversity_data = []
         for record in records:
-            soap = record.get("soap", {})
+            soap = record.get("soap") or {}
             matched = soap.get("matched", {})
 
-            # Skip if no matched soap data or no brand
-            if not matched or not matched.get("brand"):
+            # Skip if no matched soap data or missing required fields
+            # Note: Empty strings are valid values, only None is invalid
+            if not matched or not has_required_field(matched, "brand"):
                 continue
 
-            brand = matched.get("brand") or ""
-            brand = brand.strip() if brand else ""
-            author = record.get("author") or ""
-            author = author.strip() if author else ""
+            brand = get_field_value(matched, "brand")
+            author = get_field_value(record, "author")
 
-            if brand and author:
-                soap_data.append({"brand": brand, "author": author})
+            if brand and author:  # brand can be empty string, which is valid
+                diversity_data.append({"brand": brand, "author": author})
 
-        return soap_data
+        return diversity_data
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from brand.
 
         Args:
-            df: DataFrame with extracted soap brand data
+            df: DataFrame with extracted soap brand diversity data
 
         Returns:
             Series with brand names
         """
         # Handle None values by converting to empty strings
-        result = df["brand"].fillna("")
-        # Ensure we return a Series
-        if isinstance(result, pd.Series):
-            return result
-        else:
-            return pd.Series(result, index=df.index)
+        brand = df["brand"].fillna("")
+        return brand
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
@@ -122,31 +118,23 @@ class SoapBrandDiversityAggregator(BaseAggregator):
         return result
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
-        """Get columns to use for grouping.
-
-        Args:
-            df: DataFrame with extracted data
-
-        Returns:
-            List of column names for grouping
-        """
-        # Group by author for user-focused analysis
-        return ["author"]
+        """Get columns to use for grouping."""
+        return ["brand"]
 
 
 # Legacy function interface for backward compatibility
 def aggregate_soap_brand_diversity(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Aggregate soap brand diversity by user from enriched records.
+    """Aggregate soap brand diversity data from enriched records.
 
-    Returns a list of soap brand diversity aggregations sorted by unique_brands desc,
-    total_shaves desc. Each item includes rank field for delta calculations.
+    Returns a list of soap brand diversity aggregations sorted by shaves desc,
+    unique_users desc. Each item includes position field for delta calculations.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of soap brand diversity aggregations with rank, user, unique_brands,
-        total_shaves, and unique_users fields
+        List of soap brand diversity aggregations with position, brand, shaves, and
+        unique_users fields
     """
     aggregator = SoapBrandDiversityAggregator()
     return aggregator.aggregate(records)
