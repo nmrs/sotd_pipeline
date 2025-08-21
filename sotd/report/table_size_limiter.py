@@ -102,18 +102,15 @@ class TableSizeLimiter:
         if not data or max_ranks <= 0:
             return []
 
-        # Count unique ranks in the data
-        unique_ranks = set()
-        for item in data:
-            unique_ranks.add(item["rank"])
+        # Find the highest rank in the data
+        max_rank_in_data = max(item["rank"] for item in data)
 
-        # If we have fewer unique ranks than the limit, return all data
-        if len(unique_ranks) <= max_ranks:
+        # If the highest rank is already within the limit, return all data
+        if max_rank_in_data <= max_ranks:
             return data
 
-        # Sort unique ranks to find the cutoff rank
-        sorted_ranks = sorted(unique_ranks)
-        cutoff_rank = sorted_ranks[max_ranks - 1]
+        # Find the cutoff rank - include all items with rank <= max_ranks
+        cutoff_rank = max_ranks
 
         # Include all items up to and including the cutoff rank
         result = []
