@@ -85,10 +85,6 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 {{tables.game-changer-plates}}
 
-## Super Speed Tips
-
-{{tables.super-speed-tips}}
-
 ## Straight Widths
 
 {{tables.straight-widths}}
