@@ -154,13 +154,10 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Blackbird plates data from aggregated data."""
         data = self.data.get("blackbird_plates", [])
-        # Filter for plates with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        valid_data = self._validate_data_records(
-            filtered_data, "blackbird_plates", ["plate", "shaves"]
-        )
+        # No filtering - show all plates as template doesn't specify limits
+        valid_data = self._validate_data_records(data, "blackbird_plates", ["plate", "shaves"])
 
-        # Map plate to plate field (no transformation needed, just validation)
+        # Map plate to plate field (no transformation needed)
         result = []
         for record in valid_data:
             plate = record.get("plate")
@@ -172,6 +169,9 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
                         "unique_users": record.get("unique_users", 0),
                     }
                 )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid Blackbird plates records")
 
         return result
 
@@ -196,49 +196,29 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
 class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
     """Table generator for Christopher Bradley plates in the hardware report."""
 
-    def _transform_plate_data(self, record: dict[str, Any]) -> dict[str, Any]:
-        """Transform plate data by combining plate_type + plate_level into plate field.
-
-        This method ensures consistent data transformation for both current and
-        historical data. For SB plates, shows just the plate level (e.g., "D", "C",
-        "B", "AA"). For OC plates, shows "OC-[plate]" format (e.g., "OC-F").
-        """
-        plate_type = record.get("plate_type")
-        plate_level = record.get("plate_level")
-        if plate_type and plate_level:
-            # Format plate name based on type
-            if plate_type == "SB":
-                # For SB plates, show just the plate level
-                plate_name = plate_level
-            elif plate_type == "OC":
-                # For OC plates, show "OC-[plate]" format
-                plate_name = f"OC-{plate_level}"
-            else:
-                # Fallback for any other plate types
-                plate_name = f"{plate_type}{plate_level}"
-
-            return {
-                "plate": plate_name,
-                "shaves": record.get("shaves", 0),
-                "unique_users": record.get("unique_users", 0),
-            }
-        return {}
-
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Christopher Bradley plates data from aggregated data."""
         data = self.data.get("christopher_bradley_plates", [])
-        # Filter for plates with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        # No filtering - show all plates as template doesn't specify limits
         valid_data = self._validate_data_records(
-            filtered_data, "christopher_bradley_plates", ["plate_type", "plate_level", "shaves"]
+            data, "christopher_bradley_plates", ["plate_level", "shaves"]
         )
 
-        # Use unified transformation method
+        # Map plate_level to plate field
         result = []
         for record in valid_data:
-            transformed_record = self._transform_plate_data(record)
-            if transformed_record:
-                result.append(transformed_record)
+            plate_level = record.get("plate_level")
+            if plate_level:
+                result.append(
+                    {
+                        "plate": plate_level,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid Christopher Bradley plates records")
 
         return result
 
@@ -268,9 +248,15 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
         """
         transformed_data = []
         for record in historical_data:
-            transformed_record = self._transform_plate_data(record)
-            if transformed_record:
-                transformed_data.append(transformed_record)
+            plate_level = record.get("plate_level")
+            if plate_level:
+                transformed_data.append(
+                    {
+                        "plate": plate_level,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
 
         if self.debug:
             print(
@@ -287,11 +273,8 @@ class GameChangerPlatesTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Game Changer plates data from aggregated data."""
         data = self.data.get("game_changer_plates", [])
-        # Filter for plates with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        valid_data = self._validate_data_records(
-            filtered_data, "game_changer_plates", ["gap", "shaves"]
-        )
+        # No filtering - show all plates as template doesn't specify limits
+        valid_data = self._validate_data_records(data, "game_changer_plates", ["gap", "shaves"])
 
         # Map gap to plate field
         result = []
@@ -335,16 +318,15 @@ class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Super Speed tips data from aggregated data."""
         data = self.data.get("super_speed_tips", [])
-        # Filter for tips with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        # No filtering - show all tips as template doesn't specify limits
         valid_data = self._validate_data_records(
-            filtered_data, "super_speed_tips", ["tip", "shaves"]
+            data, "super_speed_tips", ["super_speed_tip", "shaves"]
         )
 
         # Map tip to plate field
         result = []
         for record in valid_data:
-            tip = record.get("tip")
+            tip = record.get("super_speed_tip")
             if tip:
                 result.append(
                     {
@@ -367,7 +349,7 @@ class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
         return "super_speed_tips"
 
     def _get_source_field(self) -> str:
-        return "tip"
+        return "super_speed_tip"
 
     def _get_target_field(self) -> str:
         return "plate"
@@ -383,24 +365,24 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor widths data from aggregated data."""
         data = self.data.get("straight_widths", [])
-        # Filter for widths with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        valid_data = self._validate_data_records(
-            filtered_data, "straight_widths", ["width", "shaves"]
-        )
+        # No filtering - show all widths as template doesn't specify limits
+        valid_data = self._validate_data_records(data, "straight_widths", ["width", "shaves"])
 
-        # Map width to width field (no transformation needed, just validation)
+        # Map width to plate field
         result = []
         for record in valid_data:
             width = record.get("width")
             if width:
                 result.append(
                     {
-                        "width": width,
+                        "plate": width,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
                 )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid straight razor widths records")
 
         return result
 
@@ -442,24 +424,24 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor grinds data from aggregated data."""
         data = self.data.get("straight_grinds", [])
-        # Filter for grinds with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        valid_data = self._validate_data_records(
-            filtered_data, "straight_grinds", ["grind", "shaves"]
-        )
+        # No filtering - show all grinds as template doesn't specify limits
+        valid_data = self._validate_data_records(data, "straight_grinds", ["grind", "shaves"])
 
-        # Map grind to grind field (no transformation needed, just validation)
+        # Map grind to plate field
         result = []
         for record in valid_data:
             grind = record.get("grind")
             if grind:
                 result.append(
                     {
-                        "grind": grind,
+                        "plate": grind,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
                 )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid straight razor grinds records")
 
         return result
 
@@ -501,24 +483,24 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get straight razor points data from aggregated data."""
         data = self.data.get("straight_points", [])
-        # Filter for points with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        valid_data = self._validate_data_records(
-            filtered_data, "straight_points", ["point", "shaves"]
-        )
+        # No filtering - show all points as template doesn't specify limits
+        valid_data = self._validate_data_records(data, "straight_points", ["point", "shaves"])
 
-        # Map point to point field (no transformation needed, just validation)
+        # Map point to plate field
         result = []
         for record in valid_data:
             point = record.get("point")
             if point:
                 result.append(
                     {
-                        "point": point,
+                        "plate": point,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
                     }
                 )
+
+        if self.debug:
+            print(f"[DEBUG] Found {len(result)} valid straight razor points records")
 
         return result
 

@@ -638,9 +638,9 @@ class TestDeltaCalculator:
         # Current month data (June 2025)
         current_data = {
             "super_speed_tips": [
-                {"tip": "Regular", "shaves": 25, "unique_users": 8},
-                {"tip": "Long", "shaves": 15, "unique_users": 5},
-                {"tip": "Short", "shaves": 8, "unique_users": 3},
+                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8},
+                {"super_speed_tip": "Long", "shaves": 15, "unique_users": 5},
+                {"super_speed_tip": "Short", "shaves": 8, "unique_users": 3},
             ]
         }
 
@@ -650,9 +650,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "super_speed_tips": [
-                        {"tip": "Regular", "shaves": 22, "unique_users": 7},
-                        {"tip": "Long", "shaves": 18, "unique_users": 6},
-                        {"tip": "Short", "shaves": 10, "unique_users": 4},
+                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7},
+                        {"super_speed_tip": "Long", "shaves": 18, "unique_users": 6},
+                        {"super_speed_tip": "Short", "shaves": 10, "unique_users": 4},
                     ]
                 },
             )
