@@ -95,9 +95,11 @@ export function DataTable<TData, TValue>({
   totalCount,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
-  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(
-    new Set(['original', 'mismatch_type', 'match_type', 'pattern'])
-  );
+  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(() => {
+    // Default to all columns for search instead of hardcoded specific columns
+    const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
+    return new Set(allColumnIds);
+  });
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef<HTMLDivElement>(null);
 
