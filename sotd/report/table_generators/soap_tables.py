@@ -57,7 +57,7 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
         # Filter for brands with 5+ shaves (as requested by user)
         filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
         validated_data = self._validate_data_records(
-            filtered_data, "soap_makers", ["maker", "shaves"]
+            filtered_data, "soap_makers", ["brand", "shaves"]
         )
 
         # Transform maker field to brand field to work with STANDARD_MANUFACTURER_COLUMNS
@@ -138,7 +138,7 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
         # Filter for brands with 5+ unique soaps (as requested by user)
         filtered_data = [item for item in data if item.get("unique_soaps", 0) >= 5]
         return self._validate_data_records(
-            filtered_data, "brand_diversity", ["maker", "unique_soaps"]
+            filtered_data, "brand_diversity", ["brand", "unique_soaps"]
         )
 
     def get_table_title(self) -> str:
@@ -149,14 +149,12 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
         """Return column configuration for the brand diversity table."""
         from .base import STANDARD_DIVERSITY_COLUMNS
 
-        # Override to use "Brand" instead of "Maker"
-        config = STANDARD_DIVERSITY_COLUMNS.copy()
-        config["maker"]["display_name"] = "Brand"
-        return config
+        # No override needed since STANDARD_DIVERSITY_COLUMNS now uses "brand" field
+        return STANDARD_DIVERSITY_COLUMNS.copy()
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
-        return "maker"
+        return "brand"
 
     def get_category_name(self) -> str:
         """Get the category name for this table generator."""
@@ -168,11 +166,11 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
 
     def _get_source_field(self) -> str:
         """Get the source field name in historical data."""
-        return "maker"
+        return "brand"
 
     def _get_target_field(self) -> str:
         """Get the target field name in current data."""
-        return "maker"
+        return "brand"
 
     def should_limit_rows(self) -> bool:
         """Disable row limiting since we want to show all brands that meet the 5+ threshold."""

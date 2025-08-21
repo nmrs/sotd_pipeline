@@ -64,7 +64,7 @@ def aggregate_sample_usage_metrics(records: List[Dict[str, Any]]) -> Dict[str, A
             if author:
                 sample_users.add(author)
 
-            brand = matched.get("maker", "")
+            brand = matched.get("brand", "")
             if brand:
                 sample_brands.add(brand)
 

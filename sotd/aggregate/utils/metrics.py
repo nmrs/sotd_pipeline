@@ -67,14 +67,14 @@ def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
         matched = soap.get("matched", {})
 
         # Skip if no matched soap data
-        if not matched or not matched.get("maker") or not matched.get("scent"):
+        if not matched or not matched.get("brand") or not matched.get("scent"):
             continue
 
-        maker = matched.get("maker", "").strip()
+        brand = matched.get("brand", "").strip()
         scent = matched.get("scent", "").strip()
 
-        if maker and scent:
-            soap_name = f"{maker} - {scent}"
+        if brand and scent:
+            soap_name = f"{brand} - {scent}"
             soaps.add(soap_name)
 
     return len(soaps)
@@ -89,14 +89,14 @@ def calculate_unique_brands(records: List[Dict[str, Any]]) -> int:
             continue
         matched = soap.get("matched", {})
 
-        # Skip if no matched soap data or no maker
-        if not matched or not matched.get("maker"):
+        # Skip if no matched soap data or no brand
+        if not matched or not matched.get("brand"):
             continue
 
-        maker = matched.get("maker", "").strip()
+        brand = matched.get("brand", "").strip()
 
-        if maker:
-            brands.add(maker)
+        if brand:
+            brands.add(brand)
 
     return len(brands)
 

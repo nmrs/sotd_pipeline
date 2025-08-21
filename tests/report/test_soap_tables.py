@@ -90,7 +90,7 @@ class TestSoapMakersTableGenerator:
         generator = SoapMakersTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
-        assert data[0]["maker"] == "Declaration Grooming"
+        assert data[0]["brand"] == "Declaration Grooming"
         assert data[0]["shaves"] == 70
 
     def test_missing_required_fields(self):
@@ -106,7 +106,7 @@ class TestSoapMakersTableGenerator:
         # SoapMakersTableGenerator now filters missing fields, so only valid record
         # should be included
         assert len(data) == 1
-        assert data[0]["maker"] == "Stirling"
+        assert data[0]["brand"] == "Stirling"
 
     def test_table_title(self):
         """Test table title."""
@@ -145,9 +145,9 @@ class TestBrandDiversityTableGenerator:
         generator = BrandDiversityTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
-        assert data[0]["maker"] == "Declaration Grooming"
+        assert data[0]["brand"] == "Declaration Grooming"
         assert data[0]["unique_soaps"] == 5
-        assert data[1]["maker"] == "Stirling Soap Co."
+        assert data[1]["brand"] == "Stirling Soap Co."
         assert data[1]["unique_soaps"] == 6
 
     def test_missing_required_fields(self):
@@ -162,8 +162,8 @@ class TestBrandDiversityTableGenerator:
         data = generator.get_table_data()
         # Both records should be included since they have required fields
         assert len(data) == 2
-        assert data[0]["maker"] == ""
-        assert data[1]["maker"] == "Stirling Soap Co."
+        assert data[0]["brand"] == ""
+        assert data[1]["brand"] == "Stirling Soap Co."
 
     def test_table_title(self):
         """Test table title."""
@@ -174,5 +174,5 @@ class TestBrandDiversityTableGenerator:
         """Test column configuration."""
         generator = BrandDiversityTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "maker" in config
+        assert "brand" in config
         assert "unique_soaps" in config

@@ -128,7 +128,7 @@ STANDARD_USER_COLUMNS = {
 }
 
 STANDARD_DIVERSITY_COLUMNS = {
-    "maker": {"display_name": "Maker"},
+    "brand": {"display_name": "Brand"},
     "unique_soaps": {"display_name": "unique soaps", "format": "number"},
 }
 

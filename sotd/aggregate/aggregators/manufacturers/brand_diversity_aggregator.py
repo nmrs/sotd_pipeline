@@ -31,9 +31,9 @@ def aggregate_brand_diversity(
     # Extract brand names from soap_makers (which have full names like "Barrister and Mann")
     brand_names = set()
     for maker_data in soap_makers:
-        maker = maker_data.get("maker", "").strip()
-        if maker:
-            brand_names.add(maker)
+        brand = maker_data.get("brand", "").strip()
+        if brand:
+            brand_names.add(brand)
 
     if not brand_names:
         return []
@@ -62,7 +62,7 @@ def aggregate_brand_diversity(
     diversity_data = []
     for brand, soap_names in brand_soap_counts.items():
         unique_soap_count = len(soap_names)
-        diversity_data.append({"maker": brand, "unique_soaps": unique_soap_count})
+        diversity_data.append({"brand": brand, "unique_soaps": unique_soap_count})
 
     if not diversity_data:
         return []
@@ -70,8 +70,8 @@ def aggregate_brand_diversity(
     # Convert to DataFrame for efficient sorting
     df = pd.DataFrame(diversity_data)
 
-    # Sort by unique_soaps desc, then by maker name asc for tie-breaking
-    df = df.sort_values(["unique_soaps", "maker"], ascending=[False, True])
+    # Sort by unique_soaps desc, then by brand name asc for tie-breaking
+    df = df.sort_values(["unique_soaps", "brand"], ascending=[False, True])
 
     # Add rank field (1-based rank)
     df["rank"] = range(1, len(df) + 1)
@@ -82,7 +82,7 @@ def aggregate_brand_diversity(
         result.append(
             {
                 "rank": int(row["rank"]),
-                "maker": row["maker"],
+                "brand": row["brand"],
                 "unique_soaps": int(row["unique_soaps"]),
             }
         )

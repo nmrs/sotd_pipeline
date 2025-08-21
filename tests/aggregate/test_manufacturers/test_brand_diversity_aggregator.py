@@ -27,10 +27,10 @@ class TestBrandDiversityAggregator:
 
         assert len(result) == 2
         # Should preserve full brand names
-        assert result[0]["maker"] == "Stirling Soap Co."  # 3 unique soaps, first alphabetically
+        assert result[0]["brand"] == "Stirling Soap Co."  # 3 unique soaps, first alphabetically
         assert result[0]["unique_soaps"] == 3
         assert result[0]["rank"] == 1
-        assert result[1]["maker"] == "Barrister and Mann"  # 2 unique soaps
+        assert result[1]["brand"] == "Barrister and Mann"  # 2 unique soaps
         assert result[1]["unique_soaps"] == 2
         assert result[1]["rank"] == 2
 
@@ -60,7 +60,7 @@ class TestBrandDiversityAggregator:
 
         result = aggregate_brand_diversity(soap_makers, soaps)
         assert len(result) == 1
-        assert result[0]["maker"] == "Single Soap Brand"
+        assert result[0]["brand"] == "Single Soap Brand"
         assert result[0]["unique_soaps"] == 1
         assert result[0]["rank"] == 1
 
@@ -71,5 +71,5 @@ class TestBrandDiversityAggregator:
 
         result = aggregate_brand_diversity(soap_makers, soaps)
         assert len(result) == 1
-        assert result[0]["maker"] == "Simple Brand"
+        assert result[0]["brand"] == "Simple Brand"
         assert result[0]["unique_soaps"] == 1

@@ -15,11 +15,11 @@ class SoapMakerAggregator(BaseAggregator):
             soap = record.get("soap", {})
             matched = soap.get("matched", {})
 
-            # Skip if no matched soap data or no maker
-            if not matched or not matched.get("maker"):
+            # Skip if no matched soap data or no brand
+            if not matched or not matched.get("brand"):
                 continue
 
-            maker = matched.get("maker", "").strip()
+            maker = matched.get("brand", "").strip()
             author = record.get("author", "").strip()
 
             if maker and author:
