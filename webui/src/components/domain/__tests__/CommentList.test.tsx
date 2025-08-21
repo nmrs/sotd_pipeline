@@ -190,8 +190,111 @@ describe('CommentList', () => {
       />
     );
 
+    expect(screen.queryByText(/\+.*more/)).not.toBeInTheDocument();
+  });
+
+  test('shows expandable "+X more" link when comments exceed maxDisplay', () => {
+    const mockOnCommentClick = jest.fn();
+    render(
+      <CommentList
+        commentIds={['abc123', 'def456', 'ghi789', 'jkl012']}
+        onCommentClick={mockOnCommentClick}
+        maxDisplay={3}
+      />
+    );
+
+    // Should show first 3 comments
     expect(screen.getByText('abc123')).toBeInTheDocument();
     expect(screen.getByText('def456')).toBeInTheDocument();
-    expect(screen.queryByText(/\+.*more/)).not.toBeInTheDocument();
+    expect(screen.getByText('ghi789')).toBeInTheDocument();
+    
+    // Should not show the 4th comment initially
+    expect(screen.queryByText('jkl012')).not.toBeInTheDocument();
+    
+    // Should show "+1 more" link
+    const expandLink = screen.getByText('+1 more');
+    expect(expandLink).toBeInTheDocument();
+    expect(expandLink).toHaveClass('text-blue-600');
+  });
+
+  test('expands to show all comments when "+X more" is clicked', async () => {
+    const mockOnCommentClick = jest.fn();
+    render(
+      <CommentList
+        commentIds={['abc123', 'def456', 'ghi789', 'jkl012', 'mno345']}
+        onCommentClick={mockOnCommentClick}
+        maxDisplay={3}
+      />
+    );
+
+    // Initially show only 3 comments
+    expect(screen.getByText('abc123')).toBeInTheDocument();
+    expect(screen.getByText('def456')).toBeInTheDocument();
+    expect(screen.getByText('ghi789')).toBeInTheDocument();
+    expect(screen.queryByText('jkl012')).not.toBeInTheDocument();
+    expect(screen.queryByText('mno345')).not.toBeInTheDocument();
+
+    // Click the "+2 more" link
+    const expandLink = screen.getByText('+2 more');
+    fireEvent.click(expandLink);
+
+    // Should now show all comments
+    expect(screen.getByText('jkl012')).toBeInTheDocument();
+    expect(screen.getByText('mno345')).toBeInTheDocument();
+    
+    // Should show "Show less" link
+    expect(screen.getByText('Show less')).toBeInTheDocument();
+    expect(screen.queryByText('+2 more')).not.toBeInTheDocument();
+  });
+
+  test('collapses back to limited view when "Show less" is clicked', async () => {
+    const mockOnCommentClick = jest.fn();
+    render(
+      <CommentList
+        commentIds={['abc123', 'def456', 'ghi789', 'jkl012', 'mno345']}
+        onCommentClick={mockOnCommentClick}
+        maxDisplay={3}
+      />
+    );
+
+    // Expand first
+    const expandLink = screen.getByText('+2 more');
+    fireEvent.click(expandLink);
+
+    // Verify expanded
+    expect(screen.getByText('jkl012')).toBeInTheDocument();
+    expect(screen.getByText('mno345')).toBeInTheDocument();
+
+    // Click "Show less"
+    const collapseLink = screen.getByText('Show less');
+    fireEvent.click(collapseLink);
+
+    // Should collapse back to showing only 3
+    expect(screen.queryByText('jkl012')).not.toBeInTheDocument();
+    expect(screen.queryByText('mno345')).not.toBeInTheDocument();
+    expect(screen.getByText('+2 more')).toBeInTheDocument();
+    expect(screen.queryByText('Show less')).not.toBeInTheDocument();
+  });
+
+  test('expand/collapse buttons have proper styling and accessibility', () => {
+    const mockOnCommentClick = jest.fn();
+    render(
+      <CommentList
+        commentIds={['abc123', 'def456', 'ghi789', 'jkl012']}
+        onCommentClick={mockOnCommentClick}
+        maxDisplay={3}
+      />
+    );
+
+    const expandLink = screen.getByText('+1 more');
+    
+    // Should have proper styling
+    expect(expandLink).toHaveClass('text-blue-600', 'hover:text-blue-800', 'hover:bg-blue-50');
+    
+    // Should have proper ARIA label
+    expect(expandLink).toHaveAttribute('aria-label', 'Show 1 more comments');
+    
+    // Should be clickable
+    expect(expandLink.tagName).toBe('BUTTON');
   });
 });

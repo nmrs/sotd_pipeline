@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface CommentListProps {
   commentIds: string[];
@@ -12,9 +12,11 @@ export const CommentList: React.FC<CommentListProps> = ({
   commentIds = [],
   onCommentClick,
   commentLoading = false,
-  maxDisplay = 3,
+  maxDisplay = 3, // Show 3 by default, but allow expansion
   'aria-label': ariaLabel,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Handle empty state
   if (!commentIds || commentIds.length === 0) {
     return <span className='text-sm text-gray-500'>No comments</span>;
@@ -28,9 +30,22 @@ export const CommentList: React.FC<CommentListProps> = ({
   }
 
   // Determine which comments to show
-  const displayCount = Math.min(maxDisplay, validCommentIds.length);
+  const displayCount = isExpanded ? validCommentIds.length : Math.min(maxDisplay, validCommentIds.length);
   const displayComments = validCommentIds.slice(0, displayCount);
-  const remainingCount = validCommentIds.length - displayCount;
+  const remainingCount = validCommentIds.length - maxDisplay;
+  const canExpand = !isExpanded && remainingCount > 0;
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(true);
+  };
+
+  const handleCollapseClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(false);
+  };
 
   return (
     <div className='space-y-1' aria-label={ariaLabel}>
@@ -45,7 +60,27 @@ export const CommentList: React.FC<CommentListProps> = ({
           {commentId}
         </button>
       ))}
-      {remainingCount > 0 && <span className='text-xs text-gray-500'>+{remainingCount} more</span>}
+      
+      {/* Expand/Collapse controls */}
+      {canExpand && (
+        <button
+          onClick={handleExpandClick}
+          className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded border-0 bg-transparent cursor-pointer'
+          aria-label={`Show ${remainingCount} more comments`}
+        >
+          +{remainingCount} more
+        </button>
+      )}
+      
+      {isExpanded && remainingCount > 0 && (
+        <button
+          onClick={handleCollapseClick}
+          className='block w-full text-left text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 px-2 py-1 rounded border-0 bg-transparent cursor-pointer'
+          aria-label='Show fewer comments'
+        >
+          Show less
+        </button>
+      )}
     </div>
   );
 };
