@@ -49,14 +49,15 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Brand - Scent" format
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-
+        
         if scent:  # Only add dash if scent exists
-            return brand + " - " + scent
+            # Use pandas string concatenation to avoid Series ambiguity
+            return brand.astype(str) + " - " + scent.astype(str)
         else:
-            return brand
+            return brand.astype(str)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
@@ -83,7 +84,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
 
         # Count unique brand+scent combinations per user
         # Create composite key for uniqueness counting
-        df["brand_scent_key"] = df["brand"] + " - " + df["scent"]
+        df["brand_scent_key"] = df["brand"].astype(str) + " - " + df["scent"].astype(str)
         brand_scent_counts = df.groupby("author")["brand_scent_key"].nunique().reset_index()
         brand_scent_counts.columns = ["author", "unique_combinations"]
 
@@ -115,7 +116,9 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         )
 
         # Add rank field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            rank=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []

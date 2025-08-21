@@ -49,10 +49,11 @@ class RazorAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Brand Model" format
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         model = df["model"].fillna("")
-        return brand + " " + model
+        # Use pandas string concatenation to avoid Series ambiguity
+        return brand.astype(str) + " " + model.astype(str)
 
 
 # Legacy function interface for backward compatibility

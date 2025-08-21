@@ -45,9 +45,10 @@ class SuperSpeedTipAggregator(BaseAggregator):
         Returns:
             Series with super_speed_tip values
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         tip = df["super_speed_tip"].fillna("")
-        return tip
+        # Use pandas string conversion to avoid Series ambiguity
+        return tip.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

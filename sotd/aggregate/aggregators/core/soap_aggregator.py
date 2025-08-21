@@ -46,14 +46,15 @@ class SoapAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Brand - Scent" format
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-
+        
         if scent:  # Only add dash if scent exists
-            return brand + " - " + scent
+            # Use pandas string concatenation to avoid Series ambiguity
+            return brand.astype(str) + " - " + scent.astype(str)
         else:
-            return brand
+            return brand.astype(str)
 
 
 # Legacy function interface for backward compatibility

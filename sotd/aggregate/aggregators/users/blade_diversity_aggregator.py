@@ -49,10 +49,11 @@ class BladeDiversityAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Brand Model" format
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         model = df["model"].fillna("")
-        return brand + " " + model
+        # Use pandas string concatenation to avoid Series ambiguity
+        return brand.astype(str) + " " + model.astype(str)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
@@ -79,7 +80,7 @@ class BladeDiversityAggregator(BaseAggregator):
 
         # Count unique brand+model combinations per user
         # Create composite key for uniqueness counting
-        df["blade_key"] = df["brand"] + " " + df["model"]
+        df["blade_key"] = df["brand"].astype(str) + " " + df["model"].astype(str)
         blade_counts = df.groupby("author")["blade_key"].nunique().reset_index()
         blade_counts.columns = ["author", "unique_blades"]
 
@@ -109,7 +110,9 @@ class BladeDiversityAggregator(BaseAggregator):
         grouped = grouped.sort_values(["unique_blades", "total_shaves"], ascending=[False, False])
 
         # Add rank field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            rank=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []

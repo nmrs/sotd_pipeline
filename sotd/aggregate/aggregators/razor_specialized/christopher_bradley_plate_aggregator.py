@@ -39,7 +39,10 @@ class ChristopherBradleyPlateAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from plate_type and plate_level data."""
-        return df["plate_type"] + " " + df["plate_level"]
+        # Use pandas string concatenation to avoid Series ambiguity
+        plate_type = df["plate_type"].fillna("")
+        plate_level = df["plate_level"].fillna("")
+        return plate_type.astype(str) + " " + plate_level.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

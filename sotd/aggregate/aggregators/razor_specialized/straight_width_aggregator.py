@@ -45,9 +45,10 @@ class StraightWidthAggregator(BaseAggregator):
         Returns:
             Series with width values
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         width = df["width"].fillna("")
-        return width
+        # Use pandas string conversion to avoid Series ambiguity
+        return width.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

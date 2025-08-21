@@ -45,9 +45,10 @@ class StraightPointAggregator(BaseAggregator):
         Returns:
             Series with point values
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         point = df["point"].fillna("")
-        return point
+        # Use pandas string conversion to avoid Series ambiguity
+        return point.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

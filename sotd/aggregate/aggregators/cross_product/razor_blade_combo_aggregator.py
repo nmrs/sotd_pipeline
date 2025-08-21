@@ -70,7 +70,10 @@ class RazorBladeComboAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from razor and blade data."""
-        return df["razor_name"] + " + " + df["blade_name"]
+        # Use pandas string concatenation to avoid Series ambiguity
+        razor_name = df["razor_name"].fillna("")
+        blade_name = df["blade_name"].fillna("")
+        return razor_name.astype(str) + " + " + blade_name.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

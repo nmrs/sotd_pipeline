@@ -45,9 +45,10 @@ class StraightGrindAggregator(BaseAggregator):
         Returns:
             Series with grind values
         """
-        # Handle None values by converting to empty strings
+        # Handle None values by converting to empty strings and concatenate properly
         grind = df["grind"].fillna("")
-        return grind
+        # Use pandas string conversion to avoid Series ambiguity
+        return grind.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
