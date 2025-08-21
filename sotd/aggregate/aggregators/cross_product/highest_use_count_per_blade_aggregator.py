@@ -108,8 +108,8 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
     # Create a composite key for ranking that preserves the order
     # Use sequential ranks, then group by uses to get same rank for ties
     blade_max_usage["temp_rank"] = range(1, len(blade_max_usage) + 1)
-    blade_max_usage["rank"] = (
-        blade_max_usage.groupby("uses", sort=False)["temp_rank"].transform("min")
+    blade_max_usage["rank"] = blade_max_usage.groupby("uses", sort=False)["temp_rank"].transform(
+        "min"
     )
     blade_max_usage = blade_max_usage.drop("temp_rank", axis=1)
 
