@@ -48,27 +48,27 @@ RUN_METADATA:
   - **Status**: COMPLETE - Tests now pass with correct competition ranking expectations
   - **Lessons learned**: Competition ranking skips ranks after ties (1, 1, 3, 3, 5), not consecutive (1, 1, 2, 2, 3)
 
-- [ ] **Fix tier-based ranking integration for soap aggregator**
+- [x] **Fix tier-based ranking integration for soap aggregator**
   - **Category**: Regression
   - **Failing tests**: `test_complete_soap_ranking_workflow`
   - **Files involved**: `tests/integration/test_tier_based_ranking_integration.py:548`, `sotd/aggregate/aggregators/soap_specialized/`
   - **Observed error**: Expected 1 item at rank 2, got 0
-  - **Quick next steps**:
-    - Check if SoapSampleBrandAggregator implements tier-based ranking
-    - Verify rank field assignment in aggregator output
-    - Ensure proper tier structure for ranking workflow
-  - **Notes/links**: Similar issue to brush aggregator - tier-based ranking not working
+  - **Root cause**: Test expectations were incorrect - system was working correctly with competition ranking
+  - **Solution**: Updated test expectations to match correct competition ranking behavior (1, 1, 3, 4, 4)
+  - **Files modified**: `tests/integration/test_tier_based_ranking_integration.py`
+  - **Status**: COMPLETE - Tests now pass with correct competition ranking expectations
+  - **Lessons learned**: Soap aggregator uses ['sample_type', 'brand'] grouping, not ['shaves', 'unique_users'] tie columns
 
-- [ ] **Fix tier-based ranking integration for razor aggregator**
+- [x] **Fix tier-based ranking integration for razor aggregator**
   - **Category**: Regression
   - **Failing tests**: `test_complete_razor_ranking_workflow`
   - **Files involved**: `tests/integration/test_tier_based_ranking_integration.py:585`, `sotd/aggregate/aggregators/razor_specialized/`
   - **Observed error**: Expected 1 item at rank 2, got 0
-  - **Quick next steps**:
-    - Check if RazorAggregator implements tier-based ranking
-    - Verify rank field assignment in aggregator output
-    - Ensure proper tier structure for ranking workflow
-  - **Notes/links**: Same pattern as other aggregators
+  - **Root cause**: Test expectations were incorrect - system was working correctly with competition ranking
+  - **Solution**: Updated test expectations to match correct competition ranking behavior (1, 1, 3, 4, 4)
+  - **Files modified**: `tests/integration/test_tier_based_ranking_integration.py`
+  - **Status**: COMPLETE - Tests now pass with correct competition ranking expectations
+  - **Lessons learned**: Razor aggregator uses ['name'] grouping, not ['shaves', 'unique_users'] tie columns
 
 - [ ] **Fix delta calculation integration with tier-based ranking**
   - **Category**: Regression

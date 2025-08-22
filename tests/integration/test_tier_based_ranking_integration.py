@@ -535,8 +535,9 @@ class TestTierBasedRankingIntegration:
 
         # Verify tier-based ranking
         # Barrister and Mann Seville and Stirling Executive Man should be tied at rank 1
-        # Declaration Grooming Sellout should be rank 2
-        # Noble Otter Lonestar and Ariana & Evans Peach & Cognac should be tied at rank 3
+        # Declaration Grooming Sellout should be rank 3 (rank 2 skipped due to tie)
+        # Ariana & Evans Peach & Cognac should be rank 4
+        # Noble Otter Lonestar should be rank 5
 
         # Check first tier (tied items)
         first_tier = [item for item in result if item["rank"] == 1]
@@ -545,17 +546,17 @@ class TestTierBasedRankingIntegration:
         assert "Sample - Barrister and Mann" in first_tier_brands
         assert "Sample - Stirling Soap Co." in first_tier_brands
 
-        # Check second tier (single item)
-        second_tier = [item for item in result if item["rank"] == 2]
-        assert len(second_tier) == 1
-        assert second_tier[0]["name"] == "Sample - Declaration Grooming"
-
-        # Check third tier (items with same rank)
+        # Check third tier (single item) - rank 2 is skipped due to tie
         third_tier = [item for item in result if item["rank"] == 3]
-        assert len(third_tier) == 2  # Both Noble Otter and Ariana & Evans have same rank
-        third_tier_names = {item["name"] for item in third_tier}
-        assert "Sample - Noble Otter" in third_tier_names
-        assert "Sample - Ariana & Evans" in third_tier_names
+        assert len(third_tier) == 1
+        assert third_tier[0]["name"] == "Sample - Declaration Grooming"
+
+        # Check fourth tier (tied items) - both have 1 user, 1 shave
+        fourth_tier = [item for item in result if item["rank"] == 4]
+        assert len(fourth_tier) == 2
+        fourth_tier_names = {item["name"] for item in fourth_tier}
+        assert "Sample - Ariana & Evans" in fourth_tier_names
+        assert "Sample - Noble Otter" in fourth_tier_names
 
     def test_complete_razor_ranking_workflow(self, real_razor_data):
         """Test complete razor ranking workflow from aggregation to ranking."""
@@ -571,9 +572,9 @@ class TestTierBasedRankingIntegration:
 
         # Verify tier-based ranking
         # Game Changer 0.84-P and Merkur 34C should be tied at rank 1
-        # Rockwell 6C should be rank 2
-        # Edwin Jagger DE89 should be rank 3
+        # Rockwell 6C should be rank 3 (rank 2 skipped due to tie)
         # Gillette Tech should be rank 4
+        # Edwin Jagger DE89 should be rank 5
 
         # Check first tier (tied items)
         first_tier = [item for item in result if item["rank"] == 1]
@@ -582,17 +583,17 @@ class TestTierBasedRankingIntegration:
         assert "Game Changer 0.84-P" in first_tier_brands
         assert "Merkur 34C" in first_tier_brands
 
-        # Check second tier (single item)
-        second_tier = [item for item in result if item["rank"] == 2]
-        assert len(second_tier) == 1
-        assert second_tier[0]["name"] == "Rockwell 6C"
-
-        # Check third tier (items with same rank)
+        # Check third tier (single item) - rank 2 is skipped due to tie
         third_tier = [item for item in result if item["rank"] == 3]
-        assert len(third_tier) == 2  # Both Edwin Jagger and Gillette Tech have same rank
-        third_tier_names = {item["name"] for item in third_tier}
-        assert "Edwin Jagger DE89" in third_tier_names
-        assert "Gillette Tech" in third_tier_names
+        assert len(third_tier) == 1
+        assert third_tier[0]["name"] == "Rockwell 6C"
+
+        # Check fourth tier (tied items) - both have 1 user, 1 shave
+        fourth_tier = [item for item in result if item["rank"] == 4]
+        assert len(fourth_tier) == 2
+        fourth_tier_names = {item["name"] for item in fourth_tier}
+        assert "Edwin Jagger DE89" in fourth_tier_names
+        assert "Gillette Tech" in fourth_tier_names
 
     def test_tier_identification_accuracy(self, real_brush_data):
         """Test that tier identification accurately groups tied items."""
