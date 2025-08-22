@@ -149,8 +149,12 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             logger.error(f"Error loading enriched data for {month}: {e}")
             raise HTTPException(status_code=500, detail="Error loading enriched data")
         
+        # Debug logging
+        logger.debug(f"Enriched data type: {type(enriched_data)}")
+        logger.debug(f"Enriched data keys: {list(enriched_data.keys()) if isinstance(enriched_data, dict) else 'Not a dict'}")
+        
         # Use existing user aggregation logic
-        user_aggregations = aggregate_users(enriched_data)
+        user_aggregations = aggregate_users(enriched_data["data"])
         
         # Find the specific user
         user_analysis = None
