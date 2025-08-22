@@ -30,10 +30,10 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "format": {"display_name": "Format"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -64,10 +64,10 @@ class RazorsTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "name": {"display_name": "Razor"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -105,10 +105,10 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "brand": {"display_name": "Manufacturer"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },

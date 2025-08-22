@@ -399,10 +399,10 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "width": {"display_name": "Width", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -459,10 +459,10 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "grind": {"display_name": "Grind", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -519,10 +519,10 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "point": {"display_name": "Point", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },

@@ -29,6 +29,7 @@ from .table_generators.soap_tables import (
     SoapMakersTableGenerator,
     SoapsTableGenerator,
     TopSampledSoapsTableGenerator,
+    SoapBrandsTableGenerator,
 )
 from .table_generators.specialized_tables import (
     BlackbirdPlatesTableGenerator,
@@ -114,6 +115,7 @@ class TableGenerator:
             "top-shavers": TopShaversTableGenerator,
             # Software tables
             "soap-makers": SoapMakersTableGenerator,
+            "soap-brands": SoapBrandsTableGenerator,
             "soaps": SoapsTableGenerator,
             "top-sampled-soaps": TopSampledSoapsTableGenerator,
             "brand-diversity": BrandDiversityTableGenerator,

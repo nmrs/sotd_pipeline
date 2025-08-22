@@ -105,13 +105,30 @@ class SoapBrandsTableGenerator(StandardProductTableGenerator):
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get soap brands data from aggregated data."""
-        data = self.data.get("soap_brand_diversity", [])
+        data = self.data.get("soap_makers", [])
         # No filtering - show all brands as template doesn't specify limits
-        return self._validate_data_records(data, "soap_brand_diversity", ["brand", "unique_soaps"])
+        return self._validate_data_records(data, "soap_makers", ["brand", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
-        return "Brand Diversity"
+        return "Soap Brands"
+
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for soap brands table."""
+        from .base import STANDARD_MANUFACTURER_COLUMNS
+
+        # Create a copy and override the brand column display name
+        config = STANDARD_MANUFACTURER_COLUMNS.copy()
+        config["brand"]["display_name"] = "Brand"
+        return config
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "brand"
+
+    def get_category_name(self) -> str:
+        """Get the category name for this table generator."""
+        return "soap_makers"
 
     def should_limit_rows(self) -> bool:
         """Disable row limiting to show all brands."""
@@ -130,6 +147,15 @@ class SoapsTableGenerator(StandardProductTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Soaps"
+
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for soaps table."""
+        from .base import STANDARD_PRODUCT_COLUMNS
+
+        # Create a copy and override the name column display name
+        config = STANDARD_PRODUCT_COLUMNS.copy()
+        config["name"]["display_name"] = "Soap"
+        return config
 
     def should_limit_rows(self) -> bool:
         """Disable row limiting to show all soaps."""

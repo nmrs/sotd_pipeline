@@ -90,10 +90,10 @@ class NoDeltaMixin:
 STANDARD_PRODUCT_COLUMNS = {
     "rank": {"display_name": "Rank"},
     "name": {"display_name": "Name"},
-    "shaves": {"display_name": "shaves", "format": "number"},
-    "unique_users": {"display_name": "unique users", "format": "number"},
+    "shaves": {"display_name": "Shaves", "format": "number"},
+    "unique_users": {"display_name": "Unique Users", "format": "number"},
     "avg_shaves_per_user": {
-        "display_name": "avg shaves per user",
+        "display_name": "Avg Shaves Per User",
         "format": "decimal",
         "decimals": 2,
     },
@@ -102,10 +102,10 @@ STANDARD_PRODUCT_COLUMNS = {
 STANDARD_MANUFACTURER_COLUMNS = {
     "rank": {"display_name": "Rank"},
     "brand": {"display_name": "Manufacturer"},
-    "shaves": {"display_name": "shaves", "format": "number"},
-    "unique_users": {"display_name": "unique users", "format": "number"},
+    "shaves": {"display_name": "Shaves", "format": "number"},
+    "unique_users": {"display_name": "Unique Users", "format": "number"},
     "avg_shaves_per_user": {
-        "display_name": "avg shaves per user",
+        "display_name": "Avg Shaves Per User",
         "format": "decimal",
         "decimals": 2,
     },
@@ -114,10 +114,10 @@ STANDARD_MANUFACTURER_COLUMNS = {
 STANDARD_SPECIALIZED_COLUMNS = {
     "rank": {"display_name": "Rank"},
     "plate": {"display_name": "Plate", "format": "text"},
-    "shaves": {"display_name": "shaves", "format": "number"},
-    "unique_users": {"display_name": "unique users", "format": "number"},
+    "shaves": {"display_name": "Shaves", "format": "number"},
+    "unique_users": {"display_name": "Unique Users", "format": "number"},
     "avg_shaves_per_user": {
-        "display_name": "avg shaves per user",
+        "display_name": "Avg Shaves Per User",
         "format": "decimal",
         "decimals": 2,
     },
@@ -126,14 +126,14 @@ STANDARD_SPECIALIZED_COLUMNS = {
 STANDARD_USER_COLUMNS = {
     "rank": {"display_name": "Rank"},
     "user_display": {"display_name": "User", "format": "text"},
-    "shaves": {"display_name": "shaves", "format": "number"},
-    "missed_days": {"display_name": "missed days", "format": "number"},
+    "shaves": {"display_name": "Shaves", "format": "number"},
+    "missed_days": {"display_name": "Missed Days", "format": "number"},
 }
 
 STANDARD_DIVERSITY_COLUMNS = {
     "rank": {"display_name": "Rank"},
     "brand": {"display_name": "Brand"},
-    "unique_soaps": {"display_name": "unique soaps", "format": "number"},
+    "unique_soaps": {"display_name": "Unique Soaps", "format": "number"},
 }
 
 STANDARD_USE_COUNT_COLUMNS = {
@@ -141,7 +141,7 @@ STANDARD_USE_COUNT_COLUMNS = {
     "user": {"display_name": "User"},
     "blade": {"display_name": "Blade"},
     "format": {"display_name": "Format"},
-    "uses": {"display_name": "uses", "format": "number"},
+    "uses": {"display_name": "Uses", "format": "number"},
 }
 
 
@@ -633,7 +633,14 @@ class BaseTableGenerator(ABC):
             # Set alignment based on column type
             if config.get("format") == "delta":
                 align_map[col] = "center"
-            elif col in ["shaves", "unique users", "avg shaves per user"]:
+            elif col in [
+                "Shaves",
+                "Unique Users",
+                "Avg Shaves Per User",
+                "shaves",
+                "unique users",
+                "avg shaves per user",
+            ]:
                 align_map[col] = "right"
             else:
                 align_map[col] = "left"

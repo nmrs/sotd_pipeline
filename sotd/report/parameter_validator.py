@@ -52,6 +52,7 @@ class ParameterValidator:
         "razor-format-users": ["format", "shaves"],
         "brush-fiber-users": ["fiber", "shaves"],
         # Software tables
+        "soap-brands": ["shaves", "unique_users"],
         "top-sampled-soaps": ["shaves", "unique_users"],
         # Testing
         "test_table": ["shaves", "unique_users"],  # For testing purposes

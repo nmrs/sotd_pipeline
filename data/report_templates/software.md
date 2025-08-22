@@ -5,7 +5,7 @@
 
 Welcome to your SOTD Lather Log for {{month_year}}
 
-* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands. {{total_samples}} of those shaves were marked (sample).
 
 ## Observations
 
@@ -21,18 +21,18 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
-## Soap Makers
+## Soap Brands
 
-{{tables.soap-makers}}
+{{tables.soap-brands|ranks:50}}
 
 ## Soaps
 
-{{tables.soaps}}
+{{tables.soaps|ranks:50}}
 
 ## Brand Diversity
 
-{{tables.brand-diversity}}
+{{tables.brand-diversity|rows:30}}
 
 ## Top Shavers
 
-{{tables.top-shavers}}
+{{tables.top-shavers|rows:50}}

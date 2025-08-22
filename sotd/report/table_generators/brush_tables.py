@@ -24,10 +24,10 @@ class BrushesTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "name": {"display_name": "Brush"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -60,10 +60,10 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "handle_maker": {"display_name": "Maker"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -96,10 +96,10 @@ class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "brand": {"display_name": "Maker"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -136,10 +136,10 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "fiber": {"display_name": "Fiber"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -176,10 +176,10 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
         return {
             "rank": {"display_name": "Rank"},
             "knot_size_mm": {"display_name": "Size", "format": "mm_suffix"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
+            "shaves": {"display_name": "Shaves", "format": "number"},
+            "unique_users": {"display_name": "Unique Users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
+                "display_name": "Avg Shaves Per User",
                 "format": "decimal",
                 "decimals": 2,
             },
