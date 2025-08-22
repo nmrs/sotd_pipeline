@@ -41,6 +41,7 @@ const Header: React.FC = () => {
     { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
     { path: '/brush-validation', label: 'Brush Validation', icon: '🖊️' },
     { path: '/soap-analyzer', label: 'Soap Analyzer', icon: '🧼' },
+    { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },
     { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
   ];
 

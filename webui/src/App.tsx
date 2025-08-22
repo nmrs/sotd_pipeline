@@ -12,6 +12,7 @@ import './App.css';
 import MatchAnalyzer from './pages/MatchAnalyzer';
 import CatalogValidator from './pages/CatalogValidator';
 import SoapAnalyzer from './pages/SoapAnalyzer';
+import MonthlyUserPosts from './pages/MonthlyUserPosts';
 
 function App() {
   const messaging = useMessaging();
@@ -30,6 +31,7 @@ function App() {
             <Route path='/mismatch' element={<MatchAnalyzer />} />
             <Route path='/catalog-validator' element={<CatalogValidator />} />
             <Route path='/soap-analyzer' element={<SoapAnalyzer />} />
+            <Route path='/monthly-user-posts' element={<MonthlyUserPosts />} />
           </Routes>
         </main>
         <MessageDisplay messages={messaging.messages} onRemoveMessage={messaging.removeMessage} />
