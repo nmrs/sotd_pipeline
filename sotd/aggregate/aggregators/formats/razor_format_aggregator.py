@@ -82,20 +82,22 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
     if not records:
         return []
 
-    # Extract razor format data from records using the already-determined format
+    # Extract razor format data from records and determine final format
     format_data = []
     for record in records:
         razor = record.get("razor", {})
-        
-        # Use the format that was already determined during the enrich phase
-        # This ensures consistency and prevents format changes during aggregation
+        blade = record.get("blade", {})
+
         razor_matched = razor.get("matched", {}) if razor else {}
-        razor_format = razor_matched.get("format", "") if razor_matched else ""
-        
+        blade_matched = blade.get("matched", {}) if blade else {}
+
+        # Determine the final razor format using the format determination logic
+        razor_format = _determine_razor_format(razor_matched, blade_matched)
+
         # Skip if no format determined
         if not razor_format:
             continue
-            
+
         author = record.get("author", "").strip()
 
         if razor_format and author:
