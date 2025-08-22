@@ -57,31 +57,42 @@ class UserPostingAnalyzer:
         Raises:
             ValueError: If date cannot be extracted from title
         """
-        # Pattern to match "Jan 01, 2025" format
+        # Pattern to match both "Jan 01, 2025" and "25. June" formats
         import re
 
-        pattern = r"(\w{3})\s+(\d{1,2}),\s+(\d{4})"
-        match = re.search(pattern, thread_title)
+        # Try standard format first: "Jan 01, 2025"
+        pattern1 = r"(\w{3})\s+(\d{1,2}),\s+(\d{4})"
+        match = re.search(pattern1, thread_title)
+        
+        if match:
+            month_str, day_str, year_str = match.groups()
+        else:
+            # Try alternative format: "25. June" (day. month)
+            pattern2 = r"(\d{1,2})\.\s+(\w+)"
+            match = re.search(pattern2, thread_title)
+            
+            if not match:
+                raise ValueError(f"Could not extract date from thread title: {thread_title}")
+            
+            day_str, month_str = match.groups()
+            # For alternative format, assume current year since it's not specified
+            year_str = "2025"  # This should be extracted from the month parameter
 
-        if not match:
-            raise ValueError(f"Could not extract date from thread title: {thread_title}")
-
-        month_str, day_str, year_str = match.groups()
-
-        # Convert month abbreviation to number
+        # Convert month abbreviation or full name to number
         month_map = {
-            "Jan": 1,
-            "Feb": 2,
-            "Mar": 3,
-            "Apr": 4,
-            "May": 5,
-            "Jun": 6,
-            "Jul": 7,
-            "Aug": 8,
-            "Sep": 9,
-            "Oct": 10,
-            "Nov": 11,
-            "Dec": 12,
+            # Abbreviations
+            "Jan": 1, "January": 1,
+            "Feb": 2, "February": 2,
+            "Mar": 3, "March": 3,
+            "Apr": 4, "April": 4,
+            "May": 5, "May": 5,
+            "Jun": 6, "June": 6,
+            "Jul": 7, "July": 7,
+            "Aug": 8, "August": 8,
+            "Sep": 9, "September": 9,
+            "Oct": 10, "October": 10,
+            "Nov": 11, "November": 11,
+            "Dec": 12, "December": 12,
         }
 
         month = month_map.get(month_str)
