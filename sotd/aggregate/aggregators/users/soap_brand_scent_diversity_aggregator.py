@@ -52,7 +52,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-        
+
         # Use pandas string concatenation to avoid Series ambiguity
         # Always concatenate with dash - empty scents will just show as "Brand - "
         return brand.astype(str) + " - " + scent.astype(str)
@@ -114,9 +114,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         )
 
         # Add rank field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(
-            rank=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # Convert to list of dictionaries
         result = []

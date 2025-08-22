@@ -96,7 +96,7 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
         # Skip records with no razor match at all
         if razor_matched is None:
             continue
-            
+
         # Determine the final razor format using the format determination logic
         razor_format = _determine_razor_format(razor_matched, blade_matched)
 

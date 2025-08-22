@@ -110,9 +110,7 @@ class BladeDiversityAggregator(BaseAggregator):
         grouped = grouped.sort_values(["unique_blades", "total_shaves"], ascending=[False, False])
 
         # Add rank field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(
-            rank=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # Convert to list of dictionaries
         result = []

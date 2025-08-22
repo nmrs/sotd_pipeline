@@ -218,15 +218,15 @@ class TableGenerator:
         # The processed_data is already in the correct format for display
         # We don't need to call get_table_data() again or replace the generator's data
         # Just use the processed data directly to generate the table
-        
+
         # Create a temporary generator instance with the processed data
         # This avoids the circular data transformation issue
         temp_generator = generator_class({"temp_data": processed_data}, self.debug)
-        
+
         # Override the get_table_data method to return our processed data directly
         def get_processed_data():
             return processed_data
-        
+
         temp_generator.get_table_data = get_processed_data
 
         try:

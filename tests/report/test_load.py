@@ -271,11 +271,11 @@ class TestComparisonDataLoading:
         prev_month_key = next(key for key in comparison_data.keys() if "Feb 2025" in key)
         prev_year_key = next(key for key in comparison_data.keys() if "Mar 2024" in key)
         five_years_key = next(key for key in comparison_data.keys() if "Mar 2020" in key)
-        
+
         prev_month_meta, prev_month_data = comparison_data[prev_month_key]
         prev_year_meta, prev_year_data = comparison_data[prev_year_key]
         five_years_meta, five_years_data = comparison_data[five_years_key]
-        
+
         assert prev_month_meta["month"] == "2025-02"
         assert prev_year_meta["month"] == "2024-03"
         assert five_years_meta["month"] == "2020-03"

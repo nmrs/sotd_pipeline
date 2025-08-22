@@ -118,9 +118,9 @@ class TestTemplateProcessor:
 
         processor = TemplateProcessor(template_dir)
         result = processor.process_template(
-            "test", 
-            {}, 
-            {"{{tables.summary}}": "Summary table", "{{tables.details}}": "Details table"}
+            "test",
+            {},
+            {"{{tables.summary}}": "Summary table", "{{tables.details}}": "Details table"},
         )
         assert result == "Report:\n\nSummary table\n\nDetails table"
 

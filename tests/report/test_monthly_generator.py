@@ -286,11 +286,11 @@ class TestMonthlyReportGenerator:
 
         # Test that error handling follows fail-fast approach
         with pytest.raises(
-            ValueError, 
+            ValueError,
             match=(
                 "Table generation error in template 'hardware': "
                 "Failed to generate table 'blades' - Table generation failed"
-            )
+            ),
         ):
             generator.generate_notes_and_caveats()
 

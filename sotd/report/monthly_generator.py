@@ -253,7 +253,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                             f"'{{tables.{match}}}' - {e}. "
                             f"Falling back to basic table generation."
                         )
-                    
+
                     # Don't add this placeholder to enhanced_tables - let it be processed as basic table
                     # This allows the template processor to handle it normally
                     continue

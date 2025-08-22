@@ -49,7 +49,7 @@ class SoapAggregator(BaseAggregator):
         # Handle None values by converting to empty strings and concatenate properly
         brand = df["brand"].fillna("")
         scent = df["scent"].fillna("")
-        
+
         # Use pandas string concatenation to avoid Series ambiguity
         # Always concatenate with dash - empty scents will just show as "Brand - "
         return brand.astype(str) + " - " + scent.astype(str)
