@@ -134,8 +134,8 @@ class TestRankFormatter:
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
 
-    def test_add_rank_data(self):
-        """Test that _add_rank_data correctly adds rank information with tie indicators."""
+    def test_format_existing_ranks_with_ties(self):
+        """Test that _format_existing_ranks_with_proper_ties correctly formats existing ranks with tie indicators."""
 
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
@@ -149,28 +149,28 @@ class TestRankFormatter:
 
         generator = ConcreteTableGenerator({})
 
-        # Test data with ties
+        # Test data with EXISTING ranks (from aggregators) - generators don't assign ranks
         test_data = [
-            {"name": "Item A", "shaves": 10, "unique_users": 3},
-            {"name": "Item B", "shaves": 8, "unique_users": 2},
-            {"name": "Item C", "shaves": 8, "unique_users": 2},  # Tied with Item B
-            {"name": "Item D", "shaves": 6, "unique_users": 1},
+            {"name": "Item A", "shaves": 10, "unique_users": 3, "rank": 1},
+            {"name": "Item B", "shaves": 8, "unique_users": 2, "rank": 2},
+            {"name": "Item C", "shaves": 8, "unique_users": 2, "rank": 2},  # Tied with Item B
+            {"name": "Item D", "shaves": 6, "unique_users": 1, "rank": 3},
         ]
 
-        result = generator._add_rank_data(test_data)
+        result = generator._format_existing_ranks_with_proper_ties(test_data)
 
-        # Check that rank data was added
+        # Check that ranks are formatted with tie indicators (not assigned)
         assert len(result) == 4
-        assert result[0]["rank"] == "1"  # Item A: 10 shaves, 3 users
-        assert result[1]["rank"] == "2="  # Item B: 8 shaves, 2 users (tied)
-        assert result[2]["rank"] == "2="  # Item C: 8 shaves, 2 users (tied)
-        assert result[3]["rank"] == "3"  # Item D: 6 shaves, 1 user
+        assert result[0]["rank"] == "1"  # Item A: rank 1
+        assert result[1]["rank"] == "2="  # Item B: rank 2 (tied)
+        assert result[2]["rank"] == "2="  # Item C: rank 2 (tied)
+        assert result[3]["rank"] == "3"  # Item D: rank 3
 
-        # Check that data is sorted by shaves desc, then unique_users desc
-        assert result[0]["shaves"] == 10
-        assert result[1]["shaves"] == 8
-        assert result[2]["shaves"] == 8
-        assert result[3]["shaves"] == 6
+        # Check that data order is preserved (generators don't sort)
+        assert result[0]["name"] == "Item A"
+        assert result[1]["name"] == "Item B"
+        assert result[2]["name"] == "Item C"
+        assert result[3]["name"] == "Item D"
 
     def test_rank_column_in_table_output(self):
         """Test that the rank column appears in the actual table output."""
