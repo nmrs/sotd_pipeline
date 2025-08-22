@@ -190,7 +190,7 @@ class TestReportIntegration:
 
         # Verify that tables are generated
         assert "| Brand" in report_content  # Soap Makers table header
-        assert "| Soap" in report_content  # Soaps table header
+        assert "| Name" in report_content  # Soaps table header
         assert "| Brand" in report_content  # Brand Diversity table header
         assert "Declaration Grooming" in report_content
         assert "Stirling Soap Co" in report_content

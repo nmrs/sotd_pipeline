@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from unittest.mock import Mock, patch
+import pytest
 
 from sotd.report.monthly_generator import MonthlyReportGenerator
 
@@ -283,20 +284,15 @@ class TestMonthlyReportGenerator:
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
-        result = generator.generate_notes_and_caveats()
-
-        # Verify error was handled gracefully
-        assert result == "Generated report"
-        # Verify the error table was created
-        mock_processor.process_template.assert_called_once()
-        call_args = mock_processor.process_template.call_args[0]
-        tables = call_args[2]
-        assert "{{tables.razors}}" in tables
-        assert "{{tables.blades}}" in tables
-        assert (
-            tables["{{tables.blades}}"]
-            == "*Error generating table blades: Table generation failed*"
-        )
+        # Test that error handling follows fail-fast approach
+        with pytest.raises(
+            ValueError, 
+            match=(
+                "Table generation error in template 'hardware': "
+                "Failed to generate table 'blades' - Table generation failed"
+            )
+        ):
+            generator.generate_notes_and_caveats()
 
     def test_month_parsing_valid_format(self):
         """Test month parsing with valid YYYY-MM format."""
