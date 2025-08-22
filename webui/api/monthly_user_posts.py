@@ -108,7 +108,7 @@ async def get_users_for_month(
             return []
 
         # Use existing user aggregation logic
-        user_aggregations = aggregate_users(enriched_data)
+        user_aggregations = aggregate_users(enriched_data["data"])
         
         # Convert to our expected format
         users = [
