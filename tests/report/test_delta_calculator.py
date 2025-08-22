@@ -358,12 +358,12 @@ class TestDeltaCalculator:
             ChristopherBradleyPlatesTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "christopher_bradley_plates": [
-                {"plate_type": "S", "plate_level": "BC", "shaves": 22, "unique_users": 8},
-                {"plate_type": "S", "plate_level": "BD", "shaves": 31, "unique_users": 6},
-                {"plate_type": "OC", "plate_level": "F", "shaves": 9, "unique_users": 1},
+                {"plate_type": "S", "plate_level": "BC", "shaves": 22, "unique_users": 8, "rank": 2},
+                {"plate_type": "S", "plate_level": "BD", "shaves": 31, "unique_users": 6, "rank": 1},
+                {"plate_type": "OC", "plate_level": "F", "shaves": 9, "unique_users": 1, "rank": 3},
             ]
         }
 
@@ -373,9 +373,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 1625, "unique_shavers": 110},
                 {
                     "christopher_bradley_plates": [
-                        {"plate_type": "S", "plate_level": "BC", "shaves": 23, "unique_users": 3},
-                        {"plate_type": "S", "plate_level": "BD", "shaves": 23, "unique_users": 3},
-                        {"plate_type": "OC", "plate_level": "F", "shaves": 3, "unique_users": 1},
+                        {"plate_type": "S", "plate_level": "BC", "shaves": 23, "unique_users": 3, "rank": 1},
+                        {"plate_type": "S", "plate_level": "BD", "shaves": 23, "unique_users": 3, "rank": 1},
+                        {"plate_type": "OC", "plate_level": "F", "shaves": 3, "unique_users": 1, "rank": 3},
                     ]
                 },
             )
@@ -415,12 +415,12 @@ class TestDeltaCalculator:
             StraightGrindsTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_grinds": [
-                {"grind": "Full Hollow", "shaves": 71, "unique_users": 18},
-                {"grind": "Hollow", "shaves": 32, "unique_users": 12},
-                {"grind": "Extra Hollow", "shaves": 8, "unique_users": 6},
+                {"grind": "Full Hollow", "shaves": 71, "unique_users": 18, "rank": 1},
+                {"grind": "Hollow", "shaves": 32, "unique_users": 12, "rank": 2},
+                {"grind": "Extra Hollow", "shaves": 8, "unique_users": 6, "rank": 3},
             ]
         }
 
@@ -430,9 +430,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_grinds": [
-                        {"grind": "Full Hollow", "shaves": 65, "unique_users": 16},
-                        {"grind": "Hollow", "shaves": 35, "unique_users": 14},
-                        {"grind": "Extra Hollow", "shaves": 10, "unique_users": 5},
+                        {"grind": "Full Hollow", "shaves": 65, "unique_users": 16, "rank": 1},
+                        {"grind": "Hollow", "shaves": 35, "unique_users": 14, "rank": 2},
+                        {"grind": "Extra Hollow", "shaves": 10, "unique_users": 5, "rank": 3},
                     ]
                 },
             )
@@ -472,12 +472,12 @@ class TestDeltaCalculator:
             StraightPointsTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_points": [
-                {"point": "Square", "shaves": 44, "unique_users": 15},
-                {"point": "Round", "shaves": 32, "unique_users": 11},
-                {"point": "Barber's Notch", "shaves": 10, "unique_users": 6},
+                {"point": "Square", "shaves": 44, "unique_users": 15, "rank": 1},
+                {"point": "Round", "shaves": 32, "unique_users": 11, "rank": 2},
+                {"point": "Barber's Notch", "shaves": 10, "unique_users": 6, "rank": 3},
             ]
         }
 
@@ -487,9 +487,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_points": [
-                        {"point": "Square", "shaves": 40, "unique_users": 14},
-                        {"point": "Round", "shaves": 35, "unique_users": 12},
-                        {"point": "Barber's Notch", "shaves": 12, "unique_users": 5},
+                        {"point": "Square", "shaves": 40, "unique_users": 14, "rank": 1},
+                        {"point": "Round", "shaves": 35, "unique_users": 12, "rank": 2},
+                        {"point": "Barber's Notch", "shaves": 12, "unique_users": 5, "rank": 3},
                     ]
                 },
             )
@@ -524,12 +524,12 @@ class TestDeltaCalculator:
             StraightWidthsTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_widths": [
-                {"width": "5/8", "shaves": 45, "unique_users": 12},
-                {"width": "6/8", "shaves": 38, "unique_users": 10},
-                {"width": "4/8", "shaves": 22, "unique_users": 8},
+                {"width": "5/8", "shaves": 45, "unique_users": 12, "rank": 1},
+                {"width": "6/8", "shaves": 38, "unique_users": 10, "rank": 2},
+                {"width": "4/8", "shaves": 22, "unique_users": 8, "rank": 3},
             ]
         }
 
@@ -539,9 +539,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_widths": [
-                        {"width": "5/8", "shaves": 42, "unique_users": 11},
-                        {"width": "6/8", "shaves": 40, "unique_users": 12},
-                        {"width": "4/8", "shaves": 25, "unique_users": 9},
+                        {"width": "5/8", "shaves": 42, "unique_users": 11, "rank": 1},
+                        {"width": "6/8", "shaves": 40, "unique_users": 12, "rank": 2},
+                        {"width": "4/8", "shaves": 25, "unique_users": 9, "rank": 3},
                     ]
                 },
             )
@@ -577,12 +577,12 @@ class TestDeltaCalculator:
             GameChangerPlatesTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "game_changer_plates": [
-                {"gap": ".84", "shaves": 71, "unique_users": 10},
-                {"gap": ".68", "shaves": 1, "unique_users": 1},
-                {"gap": ".76", "shaves": 1, "unique_users": 1},
+                {"gap": ".84", "shaves": 71, "unique_users": 10, "rank": 1},
+                {"gap": ".68", "shaves": 1, "unique_users": 1, "rank": 2},
+                {"gap": ".76", "shaves": 1, "unique_users": 1, "rank": 3},
             ]
         }
 
@@ -592,9 +592,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "game_changer_plates": [
-                        {"gap": ".84", "shaves": 65, "unique_users": 8},
-                        {"gap": ".68", "shaves": 3, "unique_users": 2},
-                        {"gap": ".76", "shaves": 2, "unique_users": 1},
+                        {"gap": ".84", "shaves": 65, "unique_users": 8, "rank": 1},
+                        {"gap": ".68", "shaves": 3, "unique_users": 2, "rank": 2},
+                        {"gap": ".76", "shaves": 2, "unique_users": 1, "rank": 3},
                     ]
                 },
             )
@@ -635,12 +635,12 @@ class TestDeltaCalculator:
             SuperSpeedTipsTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "super_speed_tips": [
-                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8},
-                {"super_speed_tip": "Long", "shaves": 15, "unique_users": 5},
-                {"super_speed_tip": "Short", "shaves": 8, "unique_users": 3},
+                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8, "rank": 1},
+                {"super_speed_tip": "Long", "shaves": 15, "unique_users": 5, "rank": 2},
+                {"super_speed_tip": "Short", "shaves": 8, "unique_users": 3, "rank": 3},
             ]
         }
 
@@ -650,9 +650,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "super_speed_tips": [
-                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7},
-                        {"super_speed_tip": "Long", "shaves": 18, "unique_users": 6},
-                        {"super_speed_tip": "Short", "shaves": 10, "unique_users": 4},
+                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7, "rank": 1},
+                        {"super_speed_tip": "Long", "shaves": 18, "unique_users": 6, "rank": 2},
+                        {"super_speed_tip": "Short", "shaves": 10, "unique_users": 4, "rank": 3},
                     ]
                 },
             )
@@ -693,12 +693,12 @@ class TestDeltaCalculator:
             BlackbirdPlatesTableGenerator,
         )
 
-        # Current month data (June 2025)
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "blackbird_plates": [
-                {"plate": "OC", "shaves": 45, "unique_users": 12},
-                {"plate": "SB", "shaves": 38, "unique_users": 10},
-                {"plate": "OC-SB", "shaves": 22, "unique_users": 8},
+                {"plate": "OC", "shaves": 45, "unique_users": 12, "rank": 1},
+                {"plate": "SB", "shaves": 38, "unique_users": 10, "rank": 2},
+                {"plate": "OC-SB", "shaves": 22, "unique_users": 8, "rank": 3},
             ]
         }
 
@@ -708,9 +708,9 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "blackbird_plates": [
-                        {"plate": "OC", "shaves": 42, "unique_users": 11},
-                        {"plate": "SB", "shaves": 40, "unique_users": 12},
-                        {"plate": "OC-SB", "shaves": 25, "unique_users": 9},
+                        {"plate": "OC", "shaves": 42, "unique_users": 11, "rank": 1},
+                        {"plate": "SB", "shaves": 40, "unique_users": 12, "rank": 2},
+                        {"plate": "OC-SB", "shaves": 25, "unique_users": 9, "rank": 3},
                     ]
                 },
             )

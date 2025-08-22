@@ -36,8 +36,8 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 1000},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
                 ]
             },
         }
@@ -46,8 +46,8 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 900},
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "position": 1},
-                    {"name": "Razor A", "shaves": 85, "position": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1},
+                    {"name": "Razor A", "shaves": 85, "rank": 2},
                 ]
             },
         }
@@ -92,7 +92,7 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 1000},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -101,7 +101,7 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 900},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
                 ]
             },
         }
