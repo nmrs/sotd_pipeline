@@ -118,7 +118,9 @@ class TestTemplateProcessor:
 
         processor = TemplateProcessor(template_dir)
         result = processor.process_template(
-            "test", {}, {"summary": "Summary table", "details": "Details table"}
+            "test", 
+            {}, 
+            {"{{tables.summary}}": "Summary table", "{{tables.details}}": "Details table"}
         )
         assert result == "Report:\n\nSummary table\n\nDetails table"
 
@@ -132,7 +134,7 @@ class TestTemplateProcessor:
 
         processor = TemplateProcessor(template_dir)
         result = processor.process_template(
-            "test", {"month": "January"}, {"summary": "Monthly summary"}
+            "test", {"month": "January"}, {"{{tables.summary}}": "Monthly summary"}
         )
         assert result == "Report for January:\n\nMonthly summary"
 
