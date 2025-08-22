@@ -45,7 +45,7 @@ async def get_available_months() -> List[MonthData]:
         # Get project root directory (3 levels up from this file)
         project_root = Path(__file__).parent.parent.parent
         enriched_dir = project_root / "data" / "enriched"
-        
+
         if not enriched_dir.exists():
             return []
 
@@ -87,18 +87,10 @@ async def get_users_for_month(
 ) -> List[Dict[str, Any]]:
     """Get list of users who posted in a specific month."""
     try:
-        logger.info(f"Getting users for month: {month}")
         analyzer = UserPostingAnalyzer()
         enriched_data = analyzer.load_enriched_data(month)
-        logger.info(f"Loaded {len(enriched_data)} enriched records for month {month}")
-        
-        # Debug: Check first few records
-        if enriched_data:
-            logger.info(f"First record keys: {list(enriched_data[0].keys())}")
-            logger.info(f"First record author: {enriched_data[0].get('author')}")
 
         if not enriched_data:
-            logger.warning(f"No enriched data found for month {month}")
             return []
 
         # Get unique users with post counts
@@ -107,25 +99,20 @@ async def get_users_for_month(
             author = record.get("author")
             if author:
                 user_counts[author] = user_counts.get(author, 0) + 1
-        
-        logger.info(f"Found {len(user_counts)} unique users with posts")
-        logger.info(f"Sample users: {list(user_counts.items())[:5]}")
 
         # Convert to list and sort by post count (descending)
         users = [
             {"username": username, "post_count": count} for username, count in user_counts.items()
         ]
         users.sort(key=lambda x: x["post_count"], reverse=True)
-        
-        logger.info(f"Returning {len(users)} users")
 
         # Apply search filter if provided
         if search:
             search_lower = search.lower()
             users = [user for user in users if search_lower in user["username"].lower()]
 
-        # Limit to top 20 results for performance
-        return users[:20]
+        # Return more users for better coverage (limit to top 50 instead of 20)
+        return users[:50]
 
     except Exception as e:
         logger.error(f"Error getting users for month {month}: {e}")
