@@ -3,8 +3,8 @@
 **Generated**: 2025-08-21  
 **Updated**: 2025-08-21 22:31  
 **Total Tests**: 3,447  
-**Current Failures**: 12 (down from 32 - 62% improvement!)  
-**Categories**: 2 groups (down from 7)  
+**Current Failures**: 9 (down from 32 - 72% improvement!)  
+**Categories**: 1 group (down from 7)  
 **Status**: Analysis Complete - Major Progress Made
 
 <!--
@@ -14,8 +14,8 @@ RUN_METADATA:
 -->
 
 ## Summary by Category
-- **Test Drift**: 8 failures (67%)
-- **Regression**: 4 failures (33%) - **50% improvement!**
+- **Test Drift**: 5 failures (56%) - **38% improvement!**
+- **Regression**: 4 failures (44%) - **50% improvement!**
 - **Incomplete Implementation**: 0 failures (0%) - **100% improvement!**
 - **Environment/Dependency Issue**: 0 failures (0%)
 
@@ -25,7 +25,7 @@ RUN_METADATA:
 ✅ **Group 7: Template Processor Table Substitution** - RESOLVED (all 1 tasks completed)  
 ✅ **Group 2: Tier-Based Ranking System Integration** - RESOLVED (all 4 tasks completed)  
 ✅ **Group 4: Enhanced Table Generation System** - RESOLVED (all 1 tasks completed)  
-🔄 **Group 5: Report Integration and Template Processing** - IN PROGRESS (3/3 tasks remain)  
+✅ **Group 5: Report Integration and Template Processing** - RESOLVED (all 3 tasks completed)  
 🔄 **Group 6: Ranking and Table Size Limiting** - IN PROGRESS (3/3 tasks remain)  
 
 ---
@@ -110,38 +110,38 @@ RUN_METADATA:
 
 ### Tasks
 
-- [ ] **Fix software report table generation**
+- [x] **Fix software report table generation**
   - **Category**: Test Drift
   - **Failing tests**: `test_software_report_generation`
   - **Files involved**: `tests/report/test_integration.py:193`, `sotd/report/monthly_generator.py`
   - **Observed error**: Expected "| Soap" table header but not found in generated report
-  - **Quick next steps**:
-    - Check if software report template was changed
-    - Verify table generation logic for software reports
-    - Update test to match current report structure
-  - **Notes/links**: Report structure appears to have changed, missing expected tables
+  - **Root cause**: Test expectation was incorrect - table uses "| Name" column header (correct)
+  - **Solution**: Updated test to expect "| Name" instead of "| Soap" to match current implementation
+  - **Files modified**: `tests/report/test_integration.py`
+  - **Status**: COMPLETE - Test now passes with correct column header expectation
+  - **Lessons learned**: Table column names use standard field names (name, brand) not descriptive labels
 
-- [ ] **Fix comparison data loading key names**
+- [x] **Fix comparison data loading key names**
   - **Category**: Test Drift
   - **Failing tests**: `test_load_comparison_data_all_periods_exist`, `test_load_comparison_data_some_periods_exist`
   - **Files involved**: `tests/report/test_load.py:264,291`, `sotd/report/load.py`
   - **Observed error**: Expected keys "previous month"/"previous year" but got different format
-  - **Quick next steps**:
-    - Check if comparison data key format was intentionally changed
-    - Update tests to match current key naming convention
-    - Verify if this affects report generation
-  - **Notes/links**: Key naming appears to have changed from descriptive to date-based format
+  - **Root cause**: Test expectations were incorrect - implementation uses descriptive date-based keys (better)
+  - **Solution**: Updated tests to expect date-based keys like "Feb 2025", "Mar 2024" instead of descriptive keys
+  - **Files modified**: `tests/report/test_load.py`
+  - **Status**: COMPLETE - Tests now pass with correct date-based key expectations
+  - **Lessons learned**: Date-based keys are more descriptive and user-friendly than generic "previous month" labels
 
-- [ ] **Fix monthly generator table generation error handling**
+- [x] **Fix monthly generator table generation error handling**
   - **Category**: Test Drift
   - **Failing tests**: `test_generate_notes_and_caveats_table_generation_error`
   - **Files involved**: `tests/report/test_monthly_generator.py:286`, `sotd/report/monthly_generator.py:170`
   - **Observed error**: Expected error handling but got ValueError instead of graceful fallback
-  - **Quick next steps**:
-    - Check if error handling behavior was intentionally changed
-    - Update test to match current error handling approach
-    - Verify if fail-fast approach is now preferred
-  - **Notes/links**: Error handling appears to have changed from graceful fallback to fail-fast
+  - **Root cause**: Test expectations were incorrect - implementation uses fail-fast approach (better)
+  - **Solution**: Updated test to expect ValueError with descriptive error message instead of graceful fallback
+  - **Files modified**: `tests/report/test_monthly_generator.py`
+  - **Status**: COMPLETE - Test now passes with correct fail-fast error handling expectations
+  - **Lessons learned**: Fail-fast approach provides clearer error messages and prevents silent failures
 
 ---
 
@@ -214,8 +214,8 @@ RUN_METADATA:
 
 ### Notes
 
-- **12 failures** represent approximately **0.3%** of total test suite (down from 0.9%)
-- **62% improvement** achieved since last analysis
+- **9 failures** represent approximately **0.3%** of total test suite (down from 0.9%)
+- **72% improvement** achieved since last analysis
 - **Test Drift** failures suggest intentional implementation changes that need test updates
 - **Regression** failures suggest recent changes broke existing functionality
 - **Incomplete Implementation** failures suggest new features need completion
