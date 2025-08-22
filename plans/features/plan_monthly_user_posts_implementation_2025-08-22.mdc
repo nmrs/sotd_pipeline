@@ -79,11 +79,13 @@ Implement a comprehensive Monthly User Posts analysis tool that allows users to 
 - [x] Add navigation link in Header component.
 - [x] Add route in App.tsx for `/monthly-user-posts`.
 - [x] Implement responsive design with view toggle (calendar/list).
+- [x] **RESOLVED**: Fix user visibility issue where users with 30+ posts were excluded from dropdown due to 20-user limit.
 **Tests**:
 - [ ] Component renders without errors.
 - [ ] Month and user selection works correctly.
 - [ ] Calendar view displays correct day grid.
-- [ ] List view shows posting status for each day.
+- [ ] List view displays correct day-by-day data.
+- [ ] User search/autocomplete filters correctly.
 - [ ] Comment widget integration works properly.
 **Status**: ✅ **COMPLETE** - Frontend page structure implemented with calendar/list views, month/user selection, and comment widget integration.
 
