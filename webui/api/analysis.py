@@ -57,11 +57,10 @@ class MismatchAnalysisRequest(BaseModel):
         default=False, description="Use enriched data instead of matched data"
     )
     display_mode: Optional[str] = Field(
-        default="mismatches", 
+        default="mismatches",
         description=(
-            "Display mode: 'mismatches' (default), 'matches' (confirmed matches only), "
-            "or 'all'"
-        )
+            "Display mode: 'mismatches' (default), 'matches' (confirmed matches only), or 'all'"
+        ),
     )
 
 
@@ -704,43 +703,43 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Process all mismatch categories from analyzer
         for mismatch_type, items in mismatches.items():
             logger.info(f"Processing category '{mismatch_type}' with {len(items)} items")
-            
+
             # Skip certain categories based on display mode if specified
-            if hasattr(request, 'display_mode') and request.display_mode:
-                if request.display_mode == 'matches':
+            if hasattr(request, "display_mode") and request.display_mode:
+                if request.display_mode == "matches":
                     # For matches mode, only show confirmed matches
-                    if mismatch_type not in ['exact_matches', 'good_matches']:
+                    if mismatch_type not in ["exact_matches", "good_matches"]:
                         continue
                     # Only include items that are confirmed
-                    items = [item for item in items if item.get('is_confirmed', False)]
+                    items = [item for item in items if item.get("is_confirmed", False)]
                     if not items:
                         continue
-                elif request.display_mode == 'mismatches':
+                elif request.display_mode == "mismatches":
                     # For mismatches mode, exclude confirmed matches
-                    if mismatch_type in ['exact_matches', 'good_matches']:
+                    if mismatch_type in ["exact_matches", "good_matches"]:
                         continue
-                elif request.display_mode == 'unconfirmed':
+                elif request.display_mode == "unconfirmed":
                     # For unconfirmed mode, only show unconfirmed items
-                    if mismatch_type in ['exact_matches', 'good_matches']:
+                    if mismatch_type in ["exact_matches", "good_matches"]:
                         continue
-                    items = [item for item in items if not item.get('is_confirmed', False)]
+                    items = [item for item in items if not item.get("is_confirmed", False)]
                     if not items:
                         continue
-                elif request.display_mode == 'regex':
+                elif request.display_mode == "regex":
                     # For regex mode, only show regex-related mismatches
-                    if mismatch_type not in ['multiple_patterns']:
+                    if mismatch_type not in ["multiple_patterns"]:
                         continue
-                elif request.display_mode == 'intentionally_unmatched':
+                elif request.display_mode == "intentionally_unmatched":
                     # For intentionally unmatched mode, only show those items
-                    if mismatch_type != 'intentionally_unmatched':
+                    if mismatch_type != "intentionally_unmatched":
                         continue
-                elif request.display_mode == 'complete_brushes':
+                elif request.display_mode == "complete_brushes":
                     # For complete brushes mode, only show split brush items
-                    items = [item for item in items if item.get('is_split_brush', False)]
+                    items = [item for item in items if item.get("is_split_brush", False)]
                     if not items:
                         continue
                 # 'all' mode shows everything, so no filtering needed
-            
+
             for item in items:
                 record = item["record"]
                 field_data = record.get(request.field, {})
@@ -853,9 +852,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             processing_time=0.0,
             partial_results=False,
             error=None,
-            matched_data_map=(
-                data.get("matched_data_map") if request.use_enriched_data else None
-            ),  # type: ignore
+            matched_data_map=(data.get("matched_data_map") if request.use_enriched_data else None),  # type: ignore
         )
 
     except HTTPException:
