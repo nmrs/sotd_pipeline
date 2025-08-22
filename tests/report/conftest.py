@@ -1,8 +1,21 @@
 """Shared fixtures for report tests."""
 
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
+
+
+@pytest.fixture(autouse=True)
+def reset_rank_tracer():
+    """Reset rank tracer state between tests to prevent global state issues."""
+    from sotd.report.utils.rank_tracer import disable_rank_tracing
+
+    # Ensure rank tracing is disabled before each test
+    disable_rank_tracing()
+    yield
+    # Ensure rank tracing is disabled after each test
+    disable_rank_tracing()
 
 
 @pytest.fixture(scope="session")

@@ -889,8 +889,10 @@ class BaseTableGenerator(ABC):
         Returns:
             Updated column configuration with delta columns for multiple periods
         """
-        # Create a copy to avoid modifying the original
-        updated_config = column_config.copy()
+        import copy
+        
+        # Create a deep copy to avoid modifying the original
+        updated_config = copy.deepcopy(column_config)
 
         # Always add delta column configuration for each period, even if historical data is empty
         for period in comparison_data.keys():

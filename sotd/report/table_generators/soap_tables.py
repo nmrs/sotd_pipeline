@@ -26,9 +26,11 @@ class TopSampledSoapsTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Return column configuration for top sampled soaps table."""
         from .base import STANDARD_PRODUCT_COLUMNS
+        import copy
 
         # Override to use "Sampled Soap" instead of "Name"
-        config = STANDARD_PRODUCT_COLUMNS.copy()
+        # Use deep copy to avoid modifying the global configuration
+        config = copy.deepcopy(STANDARD_PRODUCT_COLUMNS)
         config["name"]["display_name"] = "Sampled Soap"
         return config
 
