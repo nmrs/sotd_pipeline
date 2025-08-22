@@ -1,0 +1,222 @@
+# Universal Table Generator - Clean Slate Implementation Plan
+
+**Date**: 2025-08-22  
+**Status**: PLANNING  
+**Type**: Feature Implementation  
+**Approach**: TDD Clean Slate  
+
+## 📘 Project Summary
+
+Replace the complex, legacy table generation system with a simple, pandas-first universal table generator. The current system has become unwieldy with complex inheritance hierarchies, abstract base classes, and conflicting processing paths. We will start fresh with a clean architecture that prioritizes simplicity and maintainability.
+
+**Goal**: Create a universal table generator that can handle `{{tables.aggregator-name|ranks:50}}` syntax with clean, pandas-based implementation.
+
+## 🧩 Component Steps
+
+1. **Legacy Migration** - Move existing table generation code to legacy directory
+2. **Simple Universal Generator** - Create basic `UniversalTableGenerator` with `df.to_markdown()`
+3. **Basic Parameter Support** - Add `ranks:N` and `rows:N` parameter processing
+4. **Template Integration** - Integrate with existing template system
+5. **Testing & Validation** - Ensure end-to-end functionality works correctly
+
+## 🔁 Implementation Prompts
+
+### Step 1: Legacy Migration
+
+```text
+Move all existing table generation code to legacy directory to create a clean starting point.
+
+Context: We have complex table generation logic in sotd/report/table_generators/ that conflicts with our new approach. We need to preserve this code but move it out of the way.
+
+Requirements:
+- Create directory: sotd/report/table_generators/legacy/
+- Move existing files: base.py, soap_tables.py, and any other table generators
+- Update any import statements that reference these files
+- Ensure the system can still import and run (even if table generation doesn't work yet)
+- Use git mv to preserve file history
+
+Files to move:
+- sotd/report/table_generators/base.py → sotd/report/table_generators/legacy/base.py
+- sotd/report/table_generators/soap_tables.py → sotd/report/table_generators/legacy/soap_tables.py
+- Any other existing table generator files
+
+Test: Verify that the system can still start up without errors, even if table generation is broken.
+```
+
+### Step 2: Simple Universal Generator
+
+```text
+Create a new, simple UniversalTableGenerator class that takes data and outputs markdown tables.
+
+Context: We need a clean, simple table generator that follows pandas-first philosophy. No inheritance, no abstract methods, just pure functionality.
+
+Requirements:
+- Create: sotd/report/table_generators/universal.py
+- Class: UniversalTableGenerator
+- Constructor: Takes data dictionary and category name
+- Method: generate_table() that converts data to pandas DataFrame and calls to_markdown()
+- No filtering, no parameters, no complex logic - just data → DataFrame → markdown
+- Include proper type hints and docstrings
+- Follow project coding standards (snake_case, 100 char line limit, etc.)
+
+Example usage:
+```python
+generator = UniversalTableGenerator(data, 'soap_makers')
+table = generator.generate_table()
+# Returns markdown table string
+```
+
+Test: Create unit tests that verify the generator can take data and output valid markdown tables.
+```
+
+### Step 3: Basic Parameter Support
+
+```text
+Add basic parameter support to the UniversalTableGenerator for ranks and rows filtering.
+
+Context: We need to support template syntax like {{tables.soap-makers|ranks:50}} and {{tables.users|rows:30}}.
+
+Requirements:
+- Extend generate_table() to accept parameters: generate_table(ranks=None, rows=None)
+- Implement ranks filtering: df[df['rank'] <= ranks] using pandas (inclusive with ties)
+- Implement rows limiting: df.head(rows) using pandas
+- When both parameters used: apply both filters, stop at whichever limit is hit first
+- Handle edge cases: empty data (return empty table), invalid parameters (fail fast), missing rank columns (fail fast)
+- Maintain pandas-first approach - no manual list comprehensions
+- Add parameter validation: ranks > 0, rows > 0
+
+Example usage:
+```python
+generator = UniversalTableGenerator(data, 'soap_makers')
+table = generator.generate_table(ranks=50, rows=30)
+# Returns table with max rank 50, max 30 rows, stopping at whichever limit is hit first
+```
+
+Test: Create tests for parameter filtering, edge cases, and error conditions using real data scenarios from 2025-06.json.
+```
+
+### Step 4: Template Integration
+
+```text
+Integrate the UniversalTableGenerator with the existing template system.
+
+Context: We need to replace the old table generation system with our new universal generator in the template processing pipeline.
+
+Requirements:
+- Update sotd/utils/template_processor.py to use UniversalTableGenerator
+- Ensure {{tables.aggregator-name|ranks:50}} syntax works correctly
+- Handle parameter parsing and validation (ranks:N, rows:N)
+- Convert aggregator names: replace "-" with "_" for lookup (e.g., "soap-makers" → "soap_makers")
+- Implement fail-fast approach: throw clear exception if aggregator not found
+- Maintain backward compatibility for basic {{tables.aggregator-name}} syntax
+- Update any import statements and class references
+- Ensure error handling works properly (no fallbacks - fail fast)
+
+Test: Verify that template processing works end-to-end with real templates and data, including error cases for unknown aggregators.
+```
+
+### Step 5: Testing & Validation
+
+```text
+Comprehensive testing and validation of the new universal table generator system.
+
+Context: We need to ensure the entire system works correctly with real data and templates.
+
+Requirements:
+- Test with real aggregated data from the pipeline (copy scenarios from 2025-06.json)
+- Verify parameter filtering works correctly (ranks:50, rows:30, both parameters together)
+- Test template processing with real templates
+- Validate markdown output format and correctness
+- Performance testing with realistic data sizes (10-15 records per aggregator type)
+- Integration testing with the full report generation pipeline
+- Test edge cases: empty data, invalid parameters, missing rank columns
+
+Test: End-to-end testing with real data scenarios, ensuring:
+- {{tables.soap-makers|ranks:50}} produces all rows up to rank 50, including ties (so it could be 50+ rows if there are ties at rank 50)
+- {{tables.users|rows:30}} produces 30 rows unless rows 30+ are tied, then including all rows for that rank
+- {{tables.razors|ranks:30|rows:50}} stops at whichever limit is hit first
+- Error cases fail fast with clear messages (unknown aggregators, invalid parameters)
+```
+
+## 🧠 Critical Analysis
+
+**Prompt Sequence Structure**: The plan follows a logical progression from cleanup to implementation to integration. Each step builds on the previous one and can be tested independently.
+
+**Risk Assessment**: 
+- **Low Risk**: Steps 1-2 are safe cleanup and basic implementation
+- **Medium Risk**: Step 3 involves parameter logic that needs careful testing
+- **Low Risk**: Step 4 template integration - fail fast approach with clear error handling
+- **Low Risk**: Step 5 comprehensive testing with real data scenarios
+
+**Dependencies**: Each step depends on the previous one being complete and tested. The legacy migration must be done first to avoid conflicts.
+
+**Testing Strategy**: Each step includes specific testing requirements to ensure we don't introduce regressions. The incremental approach allows us to catch issues early.
+
+**Success Criteria**: The final system should handle:
+- `{{tables.soap-makers|ranks:50}}` correctly, producing all rows up to rank 50, including ties (so it could be 50+ rows if there are ties at rank 50)
+- `{{tables.users|rows:30}}` correctly, producing 30 rows unless rows 30+ are tied, then including all rows for that rank
+- `{{tables.razors|ranks:30|rows:50}}` correctly, stopping at whichever limit is hit first
+
+We never cut off a table in the middle of a rank or tie group.
+
+## 🔧 Resolved Critical Issues
+
+### ✅ Rank Handling Strategy
+**Business Rule**: Inclusive with ties - Include all products up to rank N, including all products tied at rank N (could result in N+ rows)
+
+**Implementation**: Use pandas logic: `df[df['rank'] <= ranks]` to include all products up to the specified rank, including ties.
+
+### ✅ Data Structure Understanding
+**Confirmed Structure**: All aggregators include a `rank` column and follow consistent pattern:
+- **Razors**: `rank`, `shaves`, `unique_users`, `name`
+- **Soap Makers**: `rank`, `shaves`, `unique_users`, `brand`
+- **Users**: `rank`, `shaves`, `unique_users`, `user`
+
+**Implementation**: No rank calculation needed - use existing `rank` column directly.
+
+### ✅ Column Name Standardization
+**Business Rule**: Use column names from aggregators as-is (no standardization)
+
+**Implementation**: Preserve original column names for each aggregator type, maintaining natural table structure.
+
+### ✅ Template Integration Risk Assessment
+**Processing Flow**: `{{tables.aggregator-name}}` looks up aggregator with name conversion (`-` → `_`)
+**Risk Level**: **LOW** - Fail fast philosophy with clear error messages
+**Implementation**: Simple lookup with exception handling for unknown aggregators
+
+### ✅ Parameter Parsing Logic
+**Template Syntax**: `{{tables.soap-makers|ranks:30|rows:50}}`
+**Parameter Logic**: When both used, stop at whichever limit is hit first
+**Examples**: 
+- 49 tied at rank 1, 10 tied at rank 2 → Show 59 rows (ranks limit hit first)
+- No ties, ranks 1-30 → Show 30 rows (ranks limit hit first)
+
+### ✅ Edge Case Handling
+**Empty Data**: Return empty table (no error)
+**Invalid Parameters**: Hard exception, fail fast (ranks ≤ 0, rows ≤ 0)
+**Missing Rank Column**: Hard exception, fail fast (data structure validation)
+**Parameter Conflicts**: Stop at whichever limit is hit first naturally
+
+### ✅ Testing Strategy
+**Test Data Source**: Copy real scenarios from `data/aggregated/2025-06.json`
+**Approach**: Extract 10-15 representative records from each aggregator type
+**Benefits**: Realistic test scenarios without full production dataset complexity
+
+### ✅ Implementation Strategy
+**Approach**: Direct replacement with clean slate
+**Legacy Handling**: Move old code to `legacy/` folder, implement fresh
+**Risk Mitigation**: Clean slate eliminates conflicts, legacy preserved for rollback
+**Cleanup**: Delete legacy code once new system is proven working
+
+## 📋 Next Steps
+
+1. **Review this plan** - Ensure the approach aligns with project goals
+2. **Approve implementation** - Give go-ahead to start with Step 1
+3. **Execute incrementally** - Complete each step with full testing before proceeding
+4. **Validate results** - Ensure each step meets its requirements before moving to the next
+
+**Estimated Timeline**: 2-3 development sessions to complete all steps with proper testing.
+description:
+globs:
+alwaysApply: false
+---

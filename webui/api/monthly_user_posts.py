@@ -15,7 +15,8 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
-    aggregate_users, _extract_date_from_thread_title
+    aggregate_users,
+    _extract_date_from_thread_title,
 )
 
 logger = logging.getLogger(__name__)
@@ -96,24 +97,23 @@ async def get_users_for_month(
             # Get project root directory (3 levels up from this file)
             project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
-            
+
             if not enriched_file.exists():
                 return []
-            
+
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
-                
+
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
             return []
 
         # Use existing user aggregation logic
         user_aggregations = aggregate_users(enriched_data["data"])
-        
+
         # Convert to our expected format
         users = [
-            {"username": user["user"], "post_count": user["shaves"]} 
-            for user in user_aggregations
+            {"username": user["user"], "post_count": user["shaves"]} for user in user_aggregations
         ]
 
         # Apply search filter if provided
@@ -138,65 +138,70 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             # Get project root directory (3 levels up from this file)
             project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
-            
+
             if not enriched_file.exists():
                 raise HTTPException(status_code=404, detail=f"No data available for {month}")
-            
+
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
-                
+
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
             raise HTTPException(status_code=500, detail="Error loading enriched data")
-        
+
         # Debug logging
         logger.debug(f"Enriched data type: {type(enriched_data)}")
-        logger.debug(f"Enriched data keys: {list(enriched_data.keys()) if isinstance(enriched_data, dict) else 'Not a dict'}")
-        
+        logger.debug(
+            f"Enriched data keys: {list(enriched_data.keys()) if isinstance(enriched_data, dict) else 'Not a dict'}"
+        )
+
         # Use existing user aggregation logic
         user_aggregations = aggregate_users(enriched_data["data"])
-        
+
         # Find the specific user
         user_analysis = None
         for user in user_aggregations:
             if user["user"] == username:
                 user_analysis = user
                 break
-        
+
         if not user_analysis:
-            raise HTTPException(status_code=404, detail=f"User {username} not found in month {month}")
-        
+            raise HTTPException(
+                status_code=404, detail=f"User {username} not found in month {month}"
+            )
+
         # Calculate posted dates and comment IDs for the specific user
         user_records = [
-            record for record in enriched_data.get("data", [])
-            if record.get("author") == username
+            record for record in enriched_data.get("data", []) if record.get("author") == username
         ]
-        
+
         # Extract posted dates and comment IDs
         posted_dates = []
         comment_ids = []
         comments_by_date = {}
-        
+
         for record in user_records:
             thread_title = record.get("thread_title", "")
             comment_id = record.get("id", "")
-            
+
             if thread_title and comment_id:
                 try:
                     posted_date = _extract_date_from_thread_title(thread_title)
                     date_str = posted_date.strftime("%Y-%m-%d")
-                    
+
                     if date_str not in comments_by_date:
                         comments_by_date[date_str] = []
                         posted_dates.append(date_str)
-                    
+
                     comments_by_date[date_str].append(comment_id)
                     comment_ids.append(comment_id)
-                    
+
                 except Exception as e:
-                    logger.warning(f"Could not extract date from thread title: {thread_title} - {e}")
+                    logger.warning(
+                        f"Could not extract date from thread title: {thread_title} - {e}"
+                    )
                     continue
-        
+
         # Convert to our expected format
         analysis = {
             "user": user_analysis["user"],
@@ -204,9 +209,9 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             "missed_days": user_analysis["missed_days"],
             "posted_dates": sorted(posted_dates),
             "comment_ids": comment_ids,
-            "comments_by_date": comments_by_date
+            "comments_by_date": comments_by_date,
         }
-        
+
         return UserPostingAnalysis(**analysis)
 
     except HTTPException:

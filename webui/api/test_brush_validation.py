@@ -449,9 +449,9 @@ class TestBrushValidationAPI:
         field_type = manager._determine_field_type(dual_component_result)
 
         # This should return "split_brush" to indicate it needs special handling
-        assert (
-            field_type == "split_brush"
-        ), f"Expected dual-component brush to return 'split_brush', but got '{field_type}'"
+        assert field_type == "split_brush", (
+            f"Expected dual-component brush to return 'split_brush', but got '{field_type}'"
+        )
 
         # Now test that the CorrectMatchesUpdater properly handles split_brush
         # by storing components in the correct sections
@@ -488,9 +488,9 @@ class TestBrushValidationAPI:
         # Instead, it should have the handle component stored under handle section
         assert "handle" in saved_data, "Handle section should exist"
         assert "Alpha" in saved_data["handle"], "Alpha brand should exist in handle section"
-        assert (
-            "Outlaw" in saved_data["handle"]["Alpha"]
-        ), "Outlaw model should exist under Alpha handle"
+        assert "Outlaw" in saved_data["handle"]["Alpha"], (
+            "Outlaw model should exist under Alpha handle"
+        )
 
         # And the knot component stored under knot section
         assert "knot" in saved_data, "Knot section should exist"
@@ -501,12 +501,12 @@ class TestBrushValidationAPI:
         handle_entries = saved_data["handle"]["Alpha"]["Outlaw"]
         knot_entries = saved_data["knot"]["Alpha"]["G5"]
 
-        assert (
-            "alpha shaving works outlaw 28mm g5" in handle_entries
-        ), "Dual-component brush text should be stored in handle section"
-        assert (
-            "alpha shaving works outlaw 28mm g5" in knot_entries
-        ), "Dual-component brush text should be stored in knot section"
+        assert "alpha shaving works outlaw 28mm g5" in handle_entries, (
+            "Dual-component brush text should be stored in handle section"
+        )
+        assert "alpha shaving works outlaw 28mm g5" in knot_entries, (
+            "Dual-component brush text should be stored in knot section"
+        )
 
         # Restore original method
         updater.save_correct_matches = original_save

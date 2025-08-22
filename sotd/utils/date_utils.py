@@ -26,9 +26,7 @@ _DAY_MONTH_YEAR_RX = re.compile(
 )
 
 # Accept: "25. June" (day. month format without year)
-_DAY_MONTH_RX = re.compile(
-    r"\b(?P<day>\d{1,2})\.\s+(?P<month>\w{3,9})\b"
-)
+_DAY_MONTH_RX = re.compile(r"\b(?P<day>\d{1,2})\.\s+(?P<month>\w{3,9})\b")
 
 # ------------------------------------------------------------------ #
 # Helper to safely build a date                                      #

@@ -170,9 +170,9 @@ class CorrectMatchesValidator:
                     if entry_type == "split_brush":
                         # Add user_intent to split_brush entry
                         if "user_intent" not in enhanced_matches["split_brush"][brush_string]:
-                            enhanced_matches["split_brush"][brush_string][
-                                "user_intent"
-                            ] = user_intent
+                            enhanced_matches["split_brush"][brush_string]["user_intent"] = (
+                                user_intent
+                            )
                             enhanced_entries.append(f"{entry_type}: {brush_string}")
 
                     elif entry_type == "handle_knot_section":
@@ -181,9 +181,9 @@ class CorrectMatchesValidator:
                             "user_intent"
                             not in enhanced_matches["handle_knot_section"][brush_string]
                         ):
-                            enhanced_matches["handle_knot_section"][brush_string][
-                                "user_intent"
-                            ] = user_intent
+                            enhanced_matches["handle_knot_section"][brush_string]["user_intent"] = (
+                                user_intent
+                            )
                             enhanced_entries.append(f"{entry_type}: {brush_string}")
 
                 # For simple brushes (brush section), remove any existing user_intent

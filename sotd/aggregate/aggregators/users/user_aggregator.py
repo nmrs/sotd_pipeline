@@ -11,14 +11,14 @@ import pandas as pd
 def _extract_date_from_thread_title(thread_title: str) -> date:
     """Extract date from thread title using the same utility as fetch phase."""
     from sotd.utils import parse_thread_date
-    
+
     # Use the same date parsing utility that the fetch phase uses
     # This ensures consistency across all pipeline phases
     parsed_date = parse_thread_date(thread_title, 2025)  # Use 2025 as year hint
-    
+
     if parsed_date is None:
         raise ValueError(f"Could not extract date from thread title: {thread_title}")
-    
+
     return parsed_date
 
 
