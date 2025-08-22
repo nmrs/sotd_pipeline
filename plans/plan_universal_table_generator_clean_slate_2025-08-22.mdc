@@ -14,9 +14,9 @@ Replace the complex, legacy table generation system with a simple, pandas-first 
 ## 🧩 Component Steps
 
 1. **✅ Legacy Migration** - Move existing table generation code to legacy directory
-2. **☐ Simple Universal Generator** - Create basic `UniversalTableGenerator` with `df.to_markdown()`
-3. **☐ Basic Parameter Support** - Add `ranks:N` and `rows:N` parameter processing
-4. **☐ Template Integration** - Integrate with existing template system
+2. **✅ Simple Universal Generator** - Create basic `UniversalTableGenerator` with `df.to_markdown()`
+3. **✅ Basic Parameter Support** - Add `ranks:N` and `rows:N` parameter processing
+4. **🔄 Template Integration** - Integrate with existing template system
 5. **☐ Testing & Validation** - Ensure end-to-end functionality works correctly
 
 ## 🔁 Implementation Prompts
@@ -131,7 +131,7 @@ Test: Create tests for parameter filtering, edge cases, and error conditions usi
 - `rows=30`: Limits to first 30 rows
 - `ranks=30, rows=50`: Stops at whichever limit is hit first naturally
 
-### Step 4: Template Integration ☐ TODO
+### Step 4: Template Integration 🔄 IN_PROGRESS
 
 ```text
 Integrate the UniversalTableGenerator with the existing template system.
@@ -150,6 +150,15 @@ Requirements:
 
 Test: Verify that template processing works end-to-end with real templates and data, including error cases for unknown aggregators.
 ```
+
+**Implementation Details:**
+- ✅ Updated `sotd/report/monthly_generator.py` to use new `TableGenerator`
+- ✅ Replaced old `generate_table_by_name` calls with new `generate_table` interface
+- ✅ Updated enhanced table syntax processing to use `ranks` and `rows` parameters
+- ✅ Maintained backward compatibility for existing template processing
+- ✅ Fixed method calls to match new universal generator interface
+- ✅ Both imports work successfully (TableGenerator and MonthlyReportGenerator)
+- ⚠️ Some linter warnings remain (line length issues) but functionality is intact
 
 ### Step 5: Testing & Validation ☐ TODO
 
@@ -181,7 +190,7 @@ Test: End-to-end testing with real data scenarios, ensuring:
 **Risk Assessment**: 
 - **✅ Low Risk**: Steps 1-2 are safe cleanup and basic implementation
 - **✅ Low Risk**: Step 3 involves parameter logic that has been thoroughly tested
-- **☐ Medium Risk**: Step 4 template integration - need to ensure existing templates still work
+- **🔄 Medium Risk**: Step 4 template integration - need to ensure existing templates still work
 - **☐ Low Risk**: Step 5 comprehensive testing with real data scenarios
 
 **Dependencies**: Each step depends on the previous one being complete and tested. The legacy migration and universal generator implementation are complete.
@@ -247,7 +256,7 @@ We never cut off a table in the middle of a rank or tie group.
 ## 📋 Next Steps
 
 1. **✅ Steps 1-3 Complete** - Legacy migration, universal generator, and parameter support implemented
-2. **☐ Step 4: Template Integration** - Integrate with existing template system
+2. **🔄 Step 4: Template Integration** - Integrate with existing template system
 3. **☐ Step 5: Testing & Validation** - End-to-end testing with real data
 4. **☐ Final Integration** - Replace old system completely
 
