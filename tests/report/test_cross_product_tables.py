@@ -20,11 +20,13 @@ class TestRazorBladeCombinationsTableGenerator:
         sample_data = {
             "razor_blade_combinations": [
                 {
+                    "rank": 1,
                     "name": "Gillette Super Speed + Gillette Nacet",
                     "shaves": 25,
                     "unique_users": 12,
                 },
                 {
+                    "rank": 2,
                     "name": "Karve CB + Personna Lab Blue",
                     "shaves": 18,
                     "unique_users": 8,
@@ -43,6 +45,7 @@ class TestRazorBladeCombinationsTableGenerator:
             "razor_blade_combinations": [
                 {"name": "Gillette Super Speed + Gillette Nacet"},  # Missing shaves
                 {
+                    "rank": 1,
                     "name": "Karve CB + Personna Lab Blue",
                     "shaves": 18,
                     "unique_users": 8,
