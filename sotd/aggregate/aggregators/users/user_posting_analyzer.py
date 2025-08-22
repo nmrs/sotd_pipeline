@@ -31,7 +31,7 @@ class UserPostingAnalyzer:
             # Get project root directory (4 levels up from this file)
             project_root = Path(__file__).parent.parent.parent.parent.parent
             data_path = project_root / "data" / "enriched" / f"{month}.json"
-            
+
             if not data_path.exists():
                 logger.warning(f"Enriched data file not found: {data_path}")
                 return []
