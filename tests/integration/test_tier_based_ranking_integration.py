@@ -672,17 +672,17 @@ class TestTierBasedRankingIntegration:
         zenith_delta = next(d for d in deltas if d["name"] == "Zenith B2")
         assert zenith_delta["delta_symbol"] == "="
 
-        # Dogwood: rank 1 → 2 = "↓1" (worsened by 1 tier)
+        # Dogwood: rank 1 → 3 = "↓2" (worsened by 2 tiers due to competition ranking)
         dogwood_delta = next(d for d in deltas if d["name"] == "Dogwood Handcrafts B2")
-        assert dogwood_delta["delta_symbol"] == "↓1"
+        assert dogwood_delta["delta_symbol"] == "↓2"
 
-        # Mozingo: rank 3 → 2 = "↑1" (improved by 1 tier)
+        # Mozingo: rank 3 → 3 = "=" (same tier)
         mozingo_delta = next(d for d in deltas if d["name"] == "Mozingo B2")
-        assert mozingo_delta["delta_symbol"] == "↑1"
+        assert mozingo_delta["delta_symbol"] == "="
 
-        # Simpson: rank 4 → 3 = "↑1" (improved by 1 tier)
+        # Simpson: rank 4 → 5 = "↓1" (worsened by 1 tier due to competition ranking)
         simpson_delta = next(d for d in deltas if d["name"] == "Simpson Chubby 2")
-        assert simpson_delta["delta_symbol"] == "↑1"
+        assert simpson_delta["delta_symbol"] == "↓1"
 
     def test_annual_delta_calculation_integration(self, real_brush_data):
         """Test annual delta calculation integration with tier-based ranking."""
@@ -736,17 +736,17 @@ class TestTierBasedRankingIntegration:
         zenith_delta = next(d for d in brush_deltas if d["name"] == "Zenith B2")
         assert zenith_delta["delta"] == 1  # Positive delta means improvement
 
-        # Dogwood: rank 1 → 2 = "↓1" (worsened by 1 tier)
+        # Dogwood: rank 1 → 3 = "↓2" (worsened by 2 tiers due to competition ranking)
         dogwood_delta = next(d for d in brush_deltas if d["name"] == "Dogwood Handcrafts B2")
-        assert dogwood_delta["delta"] == -1  # Negative delta means worsening
+        assert dogwood_delta["delta"] == -2  # Negative delta means worsening
 
-        # Mozingo: rank 1 → 2 = "↓1" (worsened by 1 tier)
+        # Mozingo: rank 1 → 3 = "↓2" (worsened by 2 tiers due to competition ranking)
         mozingo_delta = next(d for d in brush_deltas if d["name"] == "Mozingo B2")
-        assert mozingo_delta["delta"] == -1  # Negative delta means worsening
+        assert mozingo_delta["delta"] == -2  # Negative delta means worsening
 
-        # Simpson: rank 4 → 3 = "↑1" (improved by 1 tier)
+        # Simpson: rank 4 → 5 = "↓1" (worsened by 1 tier due to competition ranking)
         simpson_delta = next(d for d in brush_deltas if d["name"] == "Simpson Chubby 2")
-        assert simpson_delta["delta"] == 1  # Positive delta means improvement
+        assert simpson_delta["delta"] == -1  # Negative delta means worsening
 
     def test_performance_with_real_data(self, real_brush_data):
         """Test performance characteristics with real production data."""
@@ -869,14 +869,14 @@ class TestTierBasedRankingIntegration:
         zenith_delta = next(d for d in deltas if d["name"] == "Zenith B2")
         assert zenith_delta["delta_symbol"] == "↑1"
 
-        # Dogwood: rank 1 → 2 = "↓1" (worsened by 1 tier)
+        # Dogwood: rank 1 → 3 = "↓2" (worsened by 2 tiers due to competition ranking)
         dogwood_delta = next(d for d in deltas if d["name"] == "Dogwood Handcrafts B2")
-        assert dogwood_delta["delta_symbol"] == "↓1"
+        assert dogwood_delta["delta_symbol"] == "↓2"
 
-        # Mozingo: rank 1 → 2 = "↓1" (worsened by 1 tier)
+        # Mozingo: rank 1 → 3 = "↓2" (worsened by 2 tiers due to competition ranking)
         mozingo_delta = next(d for d in deltas if d["name"] == "Mozingo B2")
-        assert mozingo_delta["delta_symbol"] == "↓1"
+        assert mozingo_delta["delta_symbol"] == "↓2"
 
-        # Simpson: rank 3 → 3 = "=" (same tier)
+        # Simpson: rank 3 → 5 = "↓2" (worsened by 2 tiers due to competition ranking)
         simpson_delta = next(d for d in deltas if d["name"] == "Simpson Chubby 2")
-        assert simpson_delta["delta_symbol"] == "="
+        assert simpson_delta["delta_symbol"] == "↓2"
