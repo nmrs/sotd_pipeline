@@ -3520,6 +3520,9 @@ Wooly Wash Soapery:
     Tranquil:
       patterns:
         - wool+y.*tranq
+    Tropi-Cool:
+      patterns:
+        - wool+y.*tropi
 Xabons Xavieiro:
   patterns:
     - xabons xavieiro
