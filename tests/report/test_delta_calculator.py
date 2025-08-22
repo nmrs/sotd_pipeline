@@ -361,8 +361,20 @@ class TestDeltaCalculator:
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "christopher_bradley_plates": [
-                {"plate_type": "S", "plate_level": "BC", "shaves": 22, "unique_users": 8, "rank": 2},
-                {"plate_type": "S", "plate_level": "BD", "shaves": 31, "unique_users": 6, "rank": 1},
+                {
+                    "plate_type": "S",
+                    "plate_level": "BC",
+                    "shaves": 22,
+                    "unique_users": 8,
+                    "rank": 2,
+                },
+                {
+                    "plate_type": "S",
+                    "plate_level": "BD",
+                    "shaves": 31,
+                    "unique_users": 6,
+                    "rank": 1,
+                },
                 {"plate_type": "OC", "plate_level": "F", "shaves": 9, "unique_users": 1, "rank": 3},
             ]
         }
@@ -373,9 +385,27 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 1625, "unique_shavers": 110},
                 {
                     "christopher_bradley_plates": [
-                        {"plate_type": "S", "plate_level": "BC", "shaves": 23, "unique_users": 3, "rank": 1},
-                        {"plate_type": "S", "plate_level": "BD", "shaves": 23, "unique_users": 3, "rank": 1},
-                        {"plate_type": "OC", "plate_level": "F", "shaves": 3, "unique_users": 1, "rank": 3},
+                        {
+                            "plate_type": "S",
+                            "plate_level": "BC",
+                            "shaves": 23,
+                            "unique_users": 3,
+                            "rank": 1,
+                        },
+                        {
+                            "plate_type": "S",
+                            "plate_level": "BD",
+                            "shaves": 23,
+                            "unique_users": 3,
+                            "rank": 1,
+                        },
+                        {
+                            "plate_type": "OC",
+                            "plate_level": "F",
+                            "shaves": 3,
+                            "unique_users": 1,
+                            "rank": 3,
+                        },
                     ]
                 },
             )

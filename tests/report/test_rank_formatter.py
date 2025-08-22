@@ -180,7 +180,12 @@ class TestRankFormatter:
                 return [
                     {"name": "Item A", "shaves": 10, "unique_users": 3, "rank": 1},
                     {"name": "Item B", "shaves": 8, "unique_users": 2, "rank": 2},
-                    {"name": "Item C", "shaves": 8, "unique_users": 2, "rank": 2},  # Tied with Item B
+                    {
+                        "name": "Item C",
+                        "shaves": 8,
+                        "unique_users": 2,
+                        "rank": 2,
+                    },  # Tied with Item B
                     {"name": "Item D", "shaves": 6, "unique_users": 1, "rank": 4},
                 ]
 
