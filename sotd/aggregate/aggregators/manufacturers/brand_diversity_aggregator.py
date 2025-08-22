@@ -73,8 +73,9 @@ def aggregate_brand_diversity(
     # Sort by unique_soaps desc, then by brand name asc for tie-breaking
     df = df.sort_values(["unique_soaps", "brand"], ascending=[False, True])
 
-    # Add rank field (1-based rank)
-    df["rank"] = range(1, len(df) + 1)
+    # Add rank field with proper tie handling (dense ranking)
+    # Use pandas rank method with method='dense' to handle ties correctly
+    df["rank"] = df["unique_soaps"].rank(method="dense", ascending=False).astype(int)
 
     # Convert to list of dictionaries
     result = []
