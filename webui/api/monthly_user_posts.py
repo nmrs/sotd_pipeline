@@ -130,7 +130,7 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             raise HTTPException(status_code=404, detail=f"No data available for {month}")
 
         # Analyze user posting
-        analysis = analyzer.analyze_user_posting(username, enriched_data)
+        analysis = analyzer.analyze_user_posting(username, enriched_data, month)
 
         # Convert dates to strings for JSON serialization
         analysis["posted_dates"] = [d.isoformat() for d in analysis["posted_dates"]]

@@ -6,7 +6,7 @@ import logging
 from calendar import monthrange
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -110,13 +110,15 @@ class UserPostingAnalyzer:
         return dates
 
     def analyze_user_posting(
-        self, username: str, enriched_data: List[Dict[str, Any]]
+        self, username: str, enriched_data: List[Dict[str, Any]], 
+        requested_month: Optional[str] = None
     ) -> Dict[str, Any]:
         """Analyze posting patterns for a specific user.
 
         Args:
             username: Username to analyze
             enriched_data: List of enriched comment records
+            requested_month: Month to analyze in YYYY-MM format (optional)
 
         Returns:
             Dictionary with posting analysis results
@@ -159,14 +161,17 @@ class UserPostingAnalyzer:
                 )
                 continue
 
-        # Determine month from first posted date
-        if posted_dates:
+        # Determine month to analyze
+        if requested_month:
+            # Use the requested month from the API call
+            year, month = map(int, requested_month.split('-'))
+        elif posted_dates:
+            # Fallback to first posted date if no month specified
             first_date = min(posted_dates)
             year, month = first_date.year, first_date.month
         else:
             # Default to current month if no dates found
             from datetime import datetime
-
             now = datetime.now()
             year, month = now.year, now.month
 
