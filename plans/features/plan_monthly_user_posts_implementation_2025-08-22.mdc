@@ -1,0 +1,424 @@
+# Monthly User Posts Implementation - TDD Implementation Plan
+
+## 📘 Project Summary
+
+**Date**: 2025-08-22  
+**Status**: ⏳ PENDING  
+**Approach**: Strict TDD - One test at a time, minimal implementation  
+**Process**: Follow TDD Task Driven Loop in plans/prompts.mdc for this implementation
+
+Implement a comprehensive Monthly User Posts analysis tool that allows users to analyze individual user posting patterns for any month. The tool will show a calendar view with green/red day indicators and integrate with existing comment widgets, plus provide a list view alternative. Built using ShadCN UI components and following DRY principles by reusing existing user aggregation logic.
+
+## 🧩 Component Steps
+
+### Step 1: Backend API Endpoints
+**Goal**: Create API endpoints for fetching user posting data and available users
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for API endpoint functions
+- Integration tests for data fetching from enriched files
+- Error handling tests for missing data scenarios
+- Performance tests for large datasets
+
+**Implementation Details**:
+- Create `/api/monthly-user-posts/users` endpoint for user list
+- Create `/api/monthly-user-posts/data` endpoint for posting data
+- Reuse existing `_extract_date_from_thread_title()` logic from `user_aggregator.py`
+- Implement proper error handling and logging
+
+### Step 2: Core Data Processing Logic
+**Goal**: Implement the data processing engine for user posting analysis
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for date extraction and missed days calculation
+- Unit tests for user posting aggregation
+- Edge case tests for months with no data
+- Performance tests for data processing
+
+**Implementation Details**:
+- Create `UserPostingAnalyzer` class
+- Reuse existing missed days calculation logic from `user_aggregator.py`
+- Implement posting data aggregation by user and date
+- Handle edge cases (no posts, invalid dates, etc.)
+
+### Step 3: Custom Calendar Component
+**Goal**: Create the custom posting calendar component extending ShadCN Calendar
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for calendar rendering with posting data
+- Unit tests for day cell customization (green/red backgrounds)
+- Integration tests with comment widget
+- Responsive behavior tests
+
+**Implementation Details**:
+- Extend ShadCN Calendar component with custom day rendering
+- Implement green/red day backgrounds for posted/missed days
+- Integrate comment widget for posted days
+- Handle multiple posts per day with existing comment widget logic
+
+### Step 4: List View Component
+**Goal**: Create the alternative list view for posting data
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for list view rendering
+- Unit tests for status column display
+- Integration tests with comment widget
+- Responsive behavior tests
+
+**Implementation Details**:
+- Create grid-based list view with Day | Status | Comment IDs columns
+- Implement color-coded status display (green Posted, red Missed)
+- Integrate comment widget for comment IDs
+- Handle responsive behavior for small screens
+
+### Step 5: User Search and Selection
+**Goal**: Implement user search and autocomplete functionality
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for user search filtering
+- Unit tests for autocomplete dropdown
+- Integration tests with user data
+- Performance tests for large user lists
+
+**Implementation Details**:
+- Create combobox-style user search component
+- Implement filtering by post count (descending order)
+- Show up to 10 users with "+n more" indicator
+- Integrate with existing month picker
+
+### Step 6: View Toggle and Layout
+**Goal**: Implement view switching and overall page layout
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for view toggle functionality
+- Unit tests for responsive layout behavior
+- Integration tests for view switching
+- Accessibility tests for toggle controls
+
+**Implementation Details**:
+- Create segmented control for Calendar/List view toggle
+- Implement responsive layout (calendar for large screens, list for small)
+- Position summary information above view toggle
+- Handle layout changes based on screen size
+
+### Step 7: Summary and Statistics Display
+**Goal**: Implement posting summary and statistics
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for summary calculation
+- Unit tests for statistics display
+- Integration tests with posting data
+- Edge case tests for zero posts
+
+**Implementation Details**:
+- Display "Posted: X days, Missed: Y days" summary
+- Position summary above both calendar and list views
+- Calculate statistics from user posting data
+- Handle edge cases (no posts, partial months)
+
+### Step 8: Navigation and Month Handling
+**Goal**: Implement month navigation and data availability handling
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Unit tests for month navigation
+- Unit tests for data availability checks
+- Integration tests for month switching
+- Error handling tests for missing months
+
+**Implementation Details**:
+- Add previous/next month navigation arrows
+- Disable arrows for months without data
+- Handle month switching with proper data loading
+- Show appropriate error messages for missing data
+
+### Step 9: Integration and Page Assembly
+**Goal**: Assemble all components into the complete page
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Integration tests for complete page functionality
+- End-to-end tests for user workflows
+- Performance tests for page load and interactions
+- Accessibility tests for complete page
+
+**Implementation Details**:
+- Create main page component integrating all features
+- Implement proper routing and navigation
+- Add page metadata and titles
+- Ensure responsive behavior across all screen sizes
+
+### Step 10: Testing and Quality Assurance
+**Goal**: Comprehensive testing and final quality checks
+
+**Status**: PENDING
+
+**Test Requirements**:
+- Full test suite execution
+- Performance validation
+- Accessibility verification
+- Cross-browser compatibility (Safari focus)
+
+**Implementation Details**:
+- Run complete test suite
+- Validate performance metrics
+- Check accessibility compliance
+- Verify responsive behavior
+
+## 🔁 Implementation Prompts
+
+### Step 1: Backend API Endpoints
+
+```text
+Create the backend API endpoints for the Monthly User Posts feature. 
+
+Requirements:
+- Create `/api/monthly-user-posts/users` endpoint that returns list of users who posted in a given month
+- Create `/api/monthly-user-posts/data` endpoint that returns posting data for a specific user and month
+- Reuse existing `_extract_date_from_thread_title()` logic from `sotd/aggregate/aggregators/users/user_aggregator.py`
+- Implement proper error handling for missing data files and parsing errors
+- Add comprehensive logging for debugging and monitoring
+
+The endpoints should:
+- Accept month parameter (YYYY-MM format)
+- Accept optional user parameter for data endpoint
+- Return data in consistent JSON format
+- Handle edge cases gracefully (no data, invalid months, etc.)
+- Follow existing API patterns in the webui
+
+Start with the users endpoint test, then implement minimal functionality to make it pass.
+```
+
+### Step 2: Core Data Processing Logic
+
+```text
+Implement the core data processing logic for user posting analysis.
+
+Requirements:
+- Create `UserPostingAnalyzer` class that processes enriched data
+- Reuse existing missed days calculation logic from `user_aggregator.py`
+- Implement posting data aggregation by user and date
+- Handle edge cases (no posts, invalid dates, corrupted data)
+
+The analyzer should:
+- Extract dates from thread titles using existing logic
+- Calculate posted vs. missed days for each user
+- Aggregate comment IDs by date for posted days
+- Handle multiple posts per day gracefully
+- Provide clean data structure for frontend consumption
+
+Start with basic data loading test, then implement minimal functionality to make it pass.
+```
+
+### Step 3: Custom Calendar Component
+
+```text
+Create the custom posting calendar component extending ShadCN Calendar.
+
+Requirements:
+- Extend ShadCN Calendar component with custom day rendering
+- Implement green/red day backgrounds for posted/missed days
+- Integrate comment widget for posted days
+- Handle multiple posts per day with existing comment widget logic
+
+The calendar should:
+- Show green backgrounds for days with posts
+- Show red backgrounds for missed days
+- Display comment widget in posted day cells
+- Handle day number rendering automatically (ShadCN handles this)
+- Support month navigation with proper data loading
+
+Start with basic calendar rendering test, then implement minimal functionality to make it pass.
+```
+
+### Step 4: List View Component
+
+```text
+Create the alternative list view component for posting data.
+
+Requirements:
+- Create grid-based list view with Day | Status | Comment IDs columns
+- Implement color-coded status display (green Posted, red Missed)
+- Integrate comment widget for comment IDs
+- Handle responsive behavior for small screens
+
+The list view should:
+- Display days 1-31 (or 28-31 as needed) in a grid
+- Show status with color coding (green for Posted, red for Missed)
+- Use existing comment widget for comment IDs
+- Handle multiple posts per day gracefully
+- Be responsive and mobile-friendly
+
+Start with basic list rendering test, then implement minimal functionality to make it pass.
+```
+
+### Step 5: User Search and Selection
+
+```text
+Implement user search and autocomplete functionality.
+
+Requirements:
+- Create combobox-style user search component
+- Implement filtering by post count (descending order)
+- Show up to 10 users with "+n more" indicator
+- Integrate with existing month picker
+
+The search component should:
+- Allow typing to filter users
+- Show dropdown with filtered results
+- Sort users by post count (descending)
+- Display post counts for each user
+- Handle large user lists efficiently
+
+Start with basic search input test, then implement minimal functionality to make it pass.
+```
+
+### Step 6: View Toggle and Layout
+
+```text
+Implement view switching and overall page layout.
+
+Requirements:
+- Create segmented control for Calendar/List view toggle
+- Implement responsive layout (calendar for large screens, list for small)
+- Position summary information above view toggle
+- Handle layout changes based on screen size
+
+The layout should:
+- Show month picker and user search at top
+- Display summary information below controls
+- Provide view toggle between Calendar and List views
+- Automatically switch to list view on small screens
+- Maintain consistent spacing and alignment
+
+Start with basic layout test, then implement minimal functionality to make it pass.
+```
+
+### Step 7: Summary and Statistics Display
+
+```text
+Implement posting summary and statistics display.
+
+Requirements:
+- Display "Posted: X days, Missed: Y days" summary
+- Position summary above both calendar and list views
+- Calculate statistics from user posting data
+- Handle edge cases (no posts, partial months)
+
+The summary should:
+- Show clear count of posted vs. missed days
+- Update dynamically when user or month changes
+- Handle edge cases gracefully
+- Be positioned prominently above content
+- Use consistent styling with the rest of the page
+
+Start with basic summary display test, then implement minimal functionality to make it pass.
+```
+
+### Step 8: Navigation and Month Handling
+
+```text
+Implement month navigation and data availability handling.
+
+Requirements:
+- Add previous/next month navigation arrows
+- Disable arrows for months without data
+- Handle month switching with proper data loading
+- Show appropriate error messages for missing data
+
+The navigation should:
+- Provide intuitive month switching
+- Disable navigation for unavailable months
+- Handle data loading during month switches
+- Show clear feedback for navigation actions
+- Maintain user selection when switching months
+
+Start with basic navigation test, then implement minimal functionality to make it pass.
+```
+
+### Step 9: Integration and Page Assembly
+
+```text
+Assemble all components into the complete page.
+
+Requirements:
+- Create main page component integrating all features
+- Implement proper routing and navigation
+- Add page metadata and titles
+- Ensure responsive behavior across all screen sizes
+
+The page should:
+- Integrate all components seamlessly
+- Handle routing and navigation properly
+- Display appropriate page titles and metadata
+- Be fully responsive across all devices
+- Follow existing page patterns in the webui
+
+Start with basic page integration test, then implement minimal functionality to make it pass.
+```
+
+### Step 10: Testing and Quality Assurance
+
+```text
+Complete comprehensive testing and final quality checks.
+
+Requirements:
+- Run full test suite execution
+- Validate performance metrics
+- Check accessibility compliance
+- Verify responsive behavior
+
+The testing should:
+- Ensure all tests pass
+- Validate performance requirements
+- Check accessibility standards
+- Verify responsive behavior
+- Confirm integration with existing systems
+
+Start with test execution, then address any failures systematically.
+```
+
+## 🧠 Critical Analysis
+
+### **Prompt Sequence Structure**
+The implementation plan follows a logical progression from backend to frontend, ensuring each step builds upon the previous one. The sequence moves from data processing to UI components to integration, which is the correct approach for a data-driven application.
+
+### **Test Coverage Requirements**
+Each step includes comprehensive testing requirements covering unit tests, integration tests, and edge cases. This ensures the feature is robust and maintainable from the start.
+
+### **DRY Principle Compliance**
+The plan explicitly calls for reusing existing logic from `user_aggregator.py`, which prevents code duplication and maintains consistency with the existing system.
+
+### **ShadCN Integration**
+The plan leverages existing ShadCN components and extends them appropriately, following the established design system guidelines.
+
+### **Incremental Implementation**
+Each step is small enough to implement safely but large enough to show meaningful progress. The test-first approach ensures quality at each step.
+
+### **Risk Assessment**
+The plan identifies potential challenges (data processing, calendar customization, responsive design) and addresses them systematically. The reuse of existing logic reduces implementation risk.
+
+### **Integration Points**
+The plan clearly defines how the new feature integrates with existing systems (API patterns, comment widgets, month picker) ensuring seamless operation.
+
+This plan provides a solid foundation for implementing the Monthly User Posts feature using TDD principles while maintaining code quality and system integration.
+description:
+globs:
+alwaysApply: false
+---
