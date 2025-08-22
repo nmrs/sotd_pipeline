@@ -24,6 +24,12 @@ class BladesTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Blades"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration with blade-specific display names."""
+        config = super().get_column_config()
+        config["name"]["display_name"] = "Blade"
+        return config
+
     def should_limit_rows(self) -> bool:
         """Disable row limiting to show all blades."""
         return False
