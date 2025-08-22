@@ -25,6 +25,11 @@ _DAY_MONTH_YEAR_RX = re.compile(
     r"\(?\s*(?P<day>\d{1,2})\s+(?P<month>\w{3,9})\.?,?\s+(?P<year>\d{4})\s*\)?"
 )
 
+# Accept: "25. June" (day. month format without year)
+_DAY_MONTH_RX = re.compile(
+    r"\b(?P<day>\d{1,2})\.\s+(?P<month>\w{3,9})\b"
+)
+
 # ------------------------------------------------------------------ #
 # Helper to safely build a date                                      #
 # ------------------------------------------------------------------ #
@@ -83,5 +88,15 @@ def parse_thread_date(title: str, year_hint: int) -> Optional[_date]:
             return None
         year = int(m.group("year"))
         return _build_date(day, month_num, year)
+
+    # -------- day month format (without year) ------------ #
+    if m := _DAY_MONTH_RX.search(title_l):
+        day = int(m.group("day"))
+        month_token = m.group("month").lower().rstrip(".")
+        month_num = _MONTH_LOOKUP.get(month_token)
+        if not month_num or not (1 <= day <= 31):
+            return None
+        # Use year_hint since no year is specified in the title
+        return _build_date(day, month_num, year_hint)
 
     return None

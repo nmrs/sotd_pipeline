@@ -14,7 +14,9 @@ from pydantic import BaseModel
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.aggregate.aggregators.users.user_aggregator import aggregate_users  # noqa: E402
+from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
+    aggregate_users, _extract_date_from_thread_title
+)
 
 logger = logging.getLogger(__name__)
 
@@ -160,14 +162,45 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
         if not user_analysis:
             raise HTTPException(status_code=404, detail=f"User {username} not found in month {month}")
         
+        # Calculate posted dates and comment IDs for the specific user
+        user_records = [
+            record for record in enriched_data.get("data", [])
+            if record.get("author") == username
+        ]
+        
+        # Extract posted dates and comment IDs
+        posted_dates = []
+        comment_ids = []
+        comments_by_date = {}
+        
+        for record in user_records:
+            thread_title = record.get("thread_title", "")
+            comment_id = record.get("id", "")
+            
+            if thread_title and comment_id:
+                try:
+                    posted_date = _extract_date_from_thread_title(thread_title)
+                    date_str = posted_date.strftime("%Y-%m-%d")
+                    
+                    if date_str not in comments_by_date:
+                        comments_by_date[date_str] = []
+                        posted_dates.append(date_str)
+                    
+                    comments_by_date[date_str].append(comment_id)
+                    comment_ids.append(comment_id)
+                    
+                except Exception as e:
+                    logger.warning(f"Could not extract date from thread title: {thread_title} - {e}")
+                    continue
+        
         # Convert to our expected format
         analysis = {
             "user": user_analysis["user"],
             "posted_days": user_analysis["shaves"],
             "missed_days": user_analysis["missed_days"],
-            "posted_dates": [],  # TODO: calculate this
-            "comment_ids": [],   # TODO: calculate this
-            "comments_by_date": {}  # TODO: calculate this
+            "posted_dates": sorted(posted_dates),
+            "comment_ids": comment_ids,
+            "comments_by_date": comments_by_date
         }
         
         return UserPostingAnalysis(**analysis)
