@@ -67,20 +67,28 @@ describe('MismatchAnalyzerDataTable', () => {
     commentLoading: false,
   };
 
-  describe('MismatchAnalyzerDataTable with CommentList Integration', () => {
-    test('renders CommentList component in comments column', () => {
+  describe('MismatchAnalyzerDataTable with CommentDisplay Integration', () => {
+    test('renders CommentDisplay component in comments column', () => {
       render(<MismatchAnalyzerDataTable {...defaultProps} />);
 
-      const commentLists = screen.getAllByTestId('comment-list');
-      expect(commentLists).toHaveLength(2);
+      // Look for comment buttons - first item has 2 comments, second has 1
+      const commentButtons = screen.getAllByText('123');
+      expect(commentButtons).toHaveLength(1);
+
+      const commentButtons456 = screen.getAllByText('456');
+      expect(commentButtons456).toHaveLength(1);
+
+      const commentButtons789 = screen.getAllByText('789');
+      expect(commentButtons789).toHaveLength(1);
     });
 
-    test('passes correct props to CommentList component', () => {
+    test('passes correct props to CommentDisplay component', () => {
       render(<MismatchAnalyzerDataTable {...defaultProps} />);
 
-      const commentLists = screen.getAllByTestId('comment-list');
-      expect(commentLists[0]).toHaveAttribute('aria-label', '2 comments available');
-      expect(commentLists[1]).toHaveAttribute('aria-label', '1 comment available');
+      // Verify comment buttons are rendered correctly
+      expect(screen.getByText('123')).toBeInTheDocument();
+      expect(screen.getByText('456')).toBeInTheDocument();
+      expect(screen.getByText('789')).toBeInTheDocument();
     });
 
     test('handles empty comment_ids array', () => {
@@ -88,16 +96,16 @@ describe('MismatchAnalyzerDataTable', () => {
 
       render(<MismatchAnalyzerDataTable {...defaultProps} data={dataWithEmptyComments} />);
 
-      const commentList = screen.getByTestId('comment-list');
-      expect(commentList).toHaveAttribute('aria-label', '0 comments available');
+      // Should show "-" for empty comments
+      expect(screen.getByText('-')).toBeInTheDocument();
     });
 
-    test('passes commentLoading prop to CommentList', () => {
+    test('passes commentLoading prop to CommentDisplay', () => {
       render(<MismatchAnalyzerDataTable {...defaultProps} commentLoading={true} />);
 
-      const commentLists = screen.getAllByTestId('comment-list');
-      const buttons = commentLists[0].querySelectorAll('button');
-      buttons.forEach(button => {
+      // All comment buttons should be disabled when loading
+      const commentButtons = screen.getAllByText('123');
+      commentButtons.forEach(button => {
         expect(button).toBeDisabled();
       });
     });
