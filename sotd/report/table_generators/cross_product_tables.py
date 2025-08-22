@@ -125,6 +125,49 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
 
         return valid_data
 
+    def _format_existing_ranks_with_proper_ties(
+        self, data: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Format existing ranks with proper tie detection for use count tables.
+
+        This method overrides the base class method to handle the 'uses' field
+        instead of 'shaves' and 'unique_users' fields.
+        """
+        if not data:
+            return data
+
+        # Sort data by uses (desc) for consistent tie detection
+        sorted_data = sorted(data, key=lambda x: x.get("uses", 0), reverse=True)
+
+        # Detect ties based on actual uses values, not just rank numbers
+        numeric_ranks = []
+        current_rank = 1
+
+        for i, item in enumerate(sorted_data):
+            if i > 0:
+                prev_item = sorted_data[i - 1]
+                # Check if this item is tied with the previous one based on uses
+                if item.get("uses", 0) == prev_item.get("uses", 0):
+                    # Tied with previous - use same rank
+                    numeric_ranks.append(numeric_ranks[-1])
+                else:
+                    # New rank - account for ties by using position + 1
+                    current_rank = i + 1
+                    numeric_ranks.append(current_rank)
+            else:
+                # First item gets rank 1
+                numeric_ranks.append(1)
+
+        # Use the rank formatter to get formatted ranks with tie indicators
+        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
+
+        # Update rank data in each item, preserving the original order
+        for i, item in enumerate(sorted_data):
+            item["rank"] = formatted_ranks[i]
+
+        # Return data in original order (not sorted order)
+        return data
+
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Highest Use Count per Blade"
