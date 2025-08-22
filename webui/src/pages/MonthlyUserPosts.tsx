@@ -25,6 +25,7 @@ interface UserPostingAnalysis {
     missed_days: number;
     posted_dates: string[];
     comment_ids: string[];
+    comments_by_date: Record<string, string[]>;
 }
 
 const MonthlyUserPosts: React.FC = () => {
@@ -128,10 +129,10 @@ const MonthlyUserPosts: React.FC = () => {
         // Create array of dates for the month
         const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-        // Convert posted dates to day numbers for easy lookup
+                // Convert posted dates to day numbers for easy lookup
         const postedDays = new Set(
             userAnalysis.posted_dates.map(dateStr => {
-                const date = new Date(dateStr);
+                const date = new Date(dateStr + 'T00:00:00');  // Add time to avoid timezone issues
                 return date.getDate();
             })
         );
@@ -166,19 +167,22 @@ const MonthlyUserPosts: React.FC = () => {
                     {/* Month days */}
                     {dates.map(day => {
                         const isPosted = postedDays.has(day);
+                        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
+                        
                         return (
                             <div
                                 key={day}
                                 className={`p-2 text-center border rounded-md min-h-[60px] flex flex-col items-center justify-center ${isPosted
-                                        ? 'bg-green-100 border-green-300 text-green-800'
-                                        : 'bg-red-100 border-red-300 text-red-800'
+                                    ? 'bg-green-100 border-green-300 text-green-800'
+                                    : 'bg-red-100 border-red-300 text-red-800'
                                     }`}
                             >
                                 <span className="text-sm font-medium">{day}</span>
-                                {isPosted && (
+                                {isPosted && dayCommentIds.length > 0 && (
                                     <div className="mt-1">
                                         <CommentDisplay
-                                            commentIds={userAnalysis.comment_ids}
+                                            commentIds={dayCommentIds}
                                             onCommentClick={(commentId) => console.log('Comment clicked:', commentId)}
                                         />
                                     </div>
@@ -204,7 +208,7 @@ const MonthlyUserPosts: React.FC = () => {
         const daysInMonth = new Date(year, month, 0).getDate();
         const postedDays = new Set(
             userAnalysis.posted_dates.map(dateStr => {
-                const date = new Date(dateStr);
+                const date = new Date(dateStr + 'T00:00:00');  // Add time to avoid timezone issues
                 return date.getDate();
             })
         );
@@ -227,12 +231,15 @@ const MonthlyUserPosts: React.FC = () => {
                     {Array.from({ length: daysInMonth }, (_, i) => {
                         const day = i + 1;
                         const isPosted = postedDays.has(day);
+                        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
+                        
                         return (
                             <div
                                 key={day}
                                 className={`flex items-center justify-between p-3 border rounded-lg ${isPosted
-                                        ? 'bg-green-50 border-green-200'
-                                        : 'bg-red-50 border-red-200'
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-red-50 border-red-200'
                                     }`}
                             >
                                 <div className="flex items-center space-x-3">
@@ -244,10 +251,10 @@ const MonthlyUserPosts: React.FC = () => {
                                         {isPosted ? 'Posted' : 'Missed'}
                                     </Badge>
                                 </div>
-                                {isPosted && (
+                                {isPosted && dayCommentIds.length > 0 && (
                                     <div className="text-sm text-muted-foreground">
                                         <CommentDisplay
-                                            commentIds={userAnalysis.comment_ids}
+                                            commentIds={dayCommentIds}
                                             onCommentClick={(commentId) => console.log('Comment clicked:', commentId)}
                                         />
                                     </div>

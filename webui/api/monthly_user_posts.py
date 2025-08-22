@@ -28,6 +28,7 @@ class UserPostingAnalysis(BaseModel):
     missed_days: int
     posted_dates: List[str]
     comment_ids: List[str]
+    comments_by_date: Dict[str, List[str]]
 
 
 class MonthData(BaseModel):

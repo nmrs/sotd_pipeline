@@ -110,8 +110,10 @@ class UserPostingAnalyzer:
         return dates
 
     def analyze_user_posting(
-        self, username: str, enriched_data: List[Dict[str, Any]], 
-        requested_month: Optional[str] = None
+        self,
+        username: str,
+        enriched_data: List[Dict[str, Any]],
+        requested_month: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Analyze posting patterns for a specific user.
 
@@ -131,6 +133,7 @@ class UserPostingAnalyzer:
                 "missed_days": 30,  # Default to 30 days
                 "posted_dates": [],
                 "comment_ids": [],
+                "comments_by_date": {},
             }
 
         # Filter data for this user
@@ -144,17 +147,25 @@ class UserPostingAnalyzer:
                 "missed_days": 30,  # Default to 30 days
                 "posted_dates": [],
                 "comment_ids": [],
+                "comments_by_date": {},
             }
 
-        # Extract posted dates and comment IDs
+        # Extract posted dates and comment IDs, grouped by date
         posted_dates = set()
         comment_ids = []
+        comments_by_date = {}
 
         for record in user_data:
             try:
                 posted_date = self._extract_date_from_thread_title(record["thread_title"])
                 posted_dates.add(posted_date)
                 comment_ids.append(record["id"])
+                
+                # Group comment IDs by date
+                date_str = posted_date.isoformat()
+                if date_str not in comments_by_date:
+                    comments_by_date[date_str] = []
+                comments_by_date[date_str].append(record["id"])
             except ValueError as e:
                 logger.warning(
                     f"Could not extract date from thread title: {record['thread_title']} - {e}"
@@ -164,7 +175,7 @@ class UserPostingAnalyzer:
         # Determine month to analyze
         if requested_month:
             # Use the requested month from the API call
-            year, month = map(int, requested_month.split('-'))
+            year, month = map(int, requested_month.split("-"))
         elif posted_dates:
             # Fallback to first posted date if no month specified
             first_date = min(posted_dates)
@@ -172,6 +183,7 @@ class UserPostingAnalyzer:
         else:
             # Default to current month if no dates found
             from datetime import datetime
+
             now = datetime.now()
             year, month = now.year, now.month
 
@@ -187,4 +199,5 @@ class UserPostingAnalyzer:
             "missed_days": len(missed_dates),
             "posted_dates": sorted(list(posted_dates)),
             "comment_ids": comment_ids,
+            "comments_by_date": comments_by_date,
         }
