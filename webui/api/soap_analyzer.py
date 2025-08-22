@@ -589,7 +589,7 @@ def analyze_soap_neighbor_similarity_web(
         matched_data = None
         if "matched" in first_match and first_match["matched"]:
             matched_data = {
-                "maker": first_match["matched"].get("maker", ""),
+                "brand": first_match["matched"].get("brand", ""),  # Use "brand" consistently
                 "scent": first_match["matched"].get("scent", ""),
             }
 
