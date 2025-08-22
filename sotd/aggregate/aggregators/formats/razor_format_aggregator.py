@@ -1,10 +1,12 @@
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
 
-def _determine_razor_format(razor_matched: Dict[str, Any], blade_matched: Dict[str, Any]) -> str:
+def _determine_razor_format(
+    razor_matched: Optional[Dict[str, Any]], blade_matched: Optional[Dict[str, Any]]
+) -> str:
     """Determine the final razor format using the old implementation logic.
 
     This function mirrors the logic from the old RazorFormatExtractor.get_name() method:
@@ -88,9 +90,13 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
         razor = record.get("razor", {})
         blade = record.get("blade", {})
 
-        razor_matched = razor.get("matched", {}) if razor else {}
-        blade_matched = blade.get("matched", {}) if blade else {}
+        razor_matched = razor.get("matched") if razor else None
+        blade_matched = blade.get("matched") if blade else None
 
+        # Skip records with no razor match at all
+        if razor_matched is None:
+            continue
+            
         # Determine the final razor format using the format determination logic
         razor_format = _determine_razor_format(razor_matched, blade_matched)
 
