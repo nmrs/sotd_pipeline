@@ -52,11 +52,11 @@ def test_aggregate_soap_makers():
     ]
     result = aggregate_soap_makers(records)
     assert len(result) == 2
-    assert result[0]["maker"] == "Grooming Dept"
+    assert result[0]["brand"] == "Grooming Dept"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
     assert result[0]["rank"] == 1
-    assert result[1]["maker"] == "Declaration Grooming"
+    assert result[1]["brand"] == "Declaration Grooming"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
     assert result[1]["rank"] == 2
