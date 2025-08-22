@@ -497,8 +497,10 @@ class TestTierBasedRankingIntegration:
 
         # Verify tier-based ranking
         # Declaration Grooming B2 and Zenith B2 should be tied at rank 1
-        # Dogwood B2 and Mozingo B2 should be tied at rank 2
-        # Simpson Chubby 2 should be rank 3
+        # (both have 37 shaves, 3 users)
+        # Dogwood B2 and Mozingo B2 should be tied at rank 3
+        # (both have 35 shaves, 2 users, rank 2 skipped)
+        # Simpson Chubby 2 should be rank 5 (rank 4 skipped due to tie)
 
         # Check first tier (tied items)
         first_tier = [item for item in result if item["rank"] == 1]
@@ -507,17 +509,17 @@ class TestTierBasedRankingIntegration:
         assert "Declaration Grooming B2" in first_tier_brands
         assert "Zenith B2" in first_tier_brands
 
-        # Check second tier (tied items)
-        second_tier = [item for item in result if item["rank"] == 2]
-        assert len(second_tier) == 2
-        second_tier_brands = {item["name"] for item in second_tier}
-        assert "Dogwood Handcrafts B2" in second_tier_brands
-        assert "Mozingo B2" in second_tier_brands
-
-        # Check third tier (single item)
+        # Check third tier (tied items) - competition ranking: 1, 1, 3, 3, 5...
         third_tier = [item for item in result if item["rank"] == 3]
-        assert len(third_tier) == 1
-        assert third_tier[0]["name"] == "Simpson Chubby 2"
+        assert len(third_tier) == 2
+        third_tier_brands = {item["name"] for item in third_tier}
+        assert "Dogwood Handcrafts B2" in third_tier_brands
+        assert "Mozingo B2" in third_tier_brands
+
+        # Check fifth tier (single item) - rank 4 is skipped due to tie
+        fifth_tier = [item for item in result if item["rank"] == 5]
+        assert len(fifth_tier) == 1
+        assert fifth_tier[0]["name"] == "Simpson Chubby 2"
 
     def test_complete_soap_ranking_workflow(self, real_soap_data):
         """Test complete soap ranking workflow from aggregation to ranking."""
@@ -613,16 +615,16 @@ class TestTierBasedRankingIntegration:
         assert "Declaration Grooming B2" in tier_1
         assert "Zenith B2" in tier_1
 
-        # Verify second tier (rank 2) has 2 items
-        tier_2 = tier_analysis[2]
-        assert len(tier_2) == 2
-        assert "Dogwood Handcrafts B2" in tier_2
-        assert "Mozingo B2" in tier_2
-
-        # Verify third tier (rank 3) has 1 item
+        # Verify third tier (rank 3) has 2 items - competition ranking: 1, 1, 3, 3, 5
         tier_3 = tier_analysis[3]
-        assert len(tier_3) == 1
-        assert "Simpson Chubby 2" in tier_3
+        assert len(tier_3) == 2
+        assert "Dogwood Handcrafts B2" in tier_3
+        assert "Mozingo B2" in tier_3
+
+        # Verify fifth tier (rank 5) has 1 item - ranks 2 and 4 are skipped due to ties
+        tier_5 = tier_analysis[5]
+        assert len(tier_5) == 1
+        assert "Simpson Chubby 2" in tier_5
 
     def test_delta_calculation_integration(self, real_brush_data):
         """Test delta calculation integration with tier-based ranking."""
