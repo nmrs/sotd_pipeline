@@ -245,14 +245,18 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                 except Exception as e:
-                    # Fail fast with descriptive error message
-                    error_msg = (
-                        f"Enhanced table syntax error in template '{self.report_type}': "
-                        f"Failed to process '{{tables.{match}}}' - {e}. "
-                        f"Please check the template syntax and ensure parameters use ':' format "
-                        f"(e.g., '{{tables.table_name|param:value}}')"
-                    )
-                    raise ValueError(error_msg) from e
+                    # Handle enhanced table syntax errors gracefully by falling back to basic table generation
+                    if self.debug:
+                        print(
+                            f"[DEBUG] MonthlyReport({self.report_type}): "
+                            f"Enhanced table syntax error for "
+                            f"'{{tables.{match}}}' - {e}. "
+                            f"Falling back to basic table generation."
+                        )
+                    
+                    # Don't add this placeholder to enhanced_tables - let it be processed as basic table
+                    # This allows the template processor to handle it normally
+                    continue
 
         return enhanced_tables
 
