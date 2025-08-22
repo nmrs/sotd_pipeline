@@ -115,7 +115,9 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
                 record["user"] = f"u/{record['user']}"
             # Ensure rank is preserved from aggregator data
             if "rank" not in record:
-                record["rank"] = 0  # Fallback if rank is missing
+                if self.debug:
+                    print("[DEBUG] Missing rank in record - aggregator should assign ranks")
+                # Do not assign fallback rank - aggregator must provide proper ranks
 
         # Trace ranks at output
         if self.debug:
@@ -136,36 +138,26 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
         if not data:
             return data
 
-        # Sort data by uses (desc) for consistent tie detection
-        sorted_data = sorted(data, key=lambda x: x.get("uses", 0), reverse=True)
-
-        # Detect ties based on actual uses values, not just rank numbers
-        numeric_ranks = []
-        current_rank = 1
-
-        for i, item in enumerate(sorted_data):
-            if i > 0:
-                prev_item = sorted_data[i - 1]
-                # Check if this item is tied with the previous one based on uses
-                if item.get("uses", 0) == prev_item.get("uses", 0):
-                    # Tied with previous - use same rank
-                    numeric_ranks.append(numeric_ranks[-1])
-                else:
-                    # New rank - account for ties by using position + 1
-                    current_rank = i + 1
-                    numeric_ranks.append(current_rank)
-            else:
-                # First item gets rank 1
-                numeric_ranks.append(1)
-
+        # RANKS MUST COME FROM AGGREGATORS - DO NOT ASSIGN RANKS HERE
+        # This method should only format existing ranks with tie indicators
+        # The aggregator should have already assigned proper ranks based on business logic
+        
+        # Check if data already has ranks
+        if not any("rank" in item for item in data):
+            if self.debug:
+                print("[DEBUG] No ranks found in data - aggregator should assign ranks")
+            return data
+        
+        # Extract existing ranks for tie formatting only
+        ranks = [item.get("rank", 0) for item in data]
+        
         # Use the rank formatter to get formatted ranks with tie indicators
-        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
-
-        # Update rank data in each item, preserving the original order
-        for i, item in enumerate(sorted_data):
+        formatted_ranks = self._format_ranks_with_ties(ranks)
+        
+        # Update rank data in each item with formatted ranks (preserving original order)
+        for i, item in enumerate(data):
             item["rank"] = formatted_ranks[i]
-
-        # Return data in original order (not sorted order)
+        
         return data
 
     def get_table_title(self) -> str:

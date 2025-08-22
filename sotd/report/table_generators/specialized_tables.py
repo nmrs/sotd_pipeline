@@ -86,16 +86,12 @@ class DataTransformingTableGenerator(SpecializedTableGenerator):
                 historical_category_data, self._get_source_field(), self._get_target_field()
             )
 
-            # Add ranks to transformed historical data if not present
+            # Historical data must have ranks for delta calculations
             if not any("rank" in item for item in transformed_historical_data):
-                transformed_historical_data = self._add_ranks(
-                    transformed_historical_data, self._get_target_field()
+                raise ValueError(
+                    f"Historical data missing ranks for {self._get_category_name()} - "
+                    f"aggregator must assign ranks before delta calculations for period {period}"
                 )
-                if self.debug:
-                    print("[DEBUG] Added ranks to transformed historical data")
-            else:
-                if self.debug:
-                    print("[DEBUG] Ranks already exist in transformed historical data")
 
             # Calculate deltas for this period using transformed data
             deltas = self.delta_calculator.calculate_deltas(
@@ -167,6 +163,7 @@ class BlackbirdPlatesTableGenerator(DataTransformingTableGenerator):
                         "plate": plate,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -215,6 +212,7 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
                         "plate": f"{plate_level} {plate_type}",
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -257,6 +255,7 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
                         "plate": f"{plate_level} {plate_type}",
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -288,6 +287,7 @@ class GameChangerPlatesTableGenerator(DataTransformingTableGenerator):
                         "plate": gap,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -335,6 +335,7 @@ class SuperSpeedTipsTableGenerator(DataTransformingTableGenerator):
                         "plate": tip,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -380,6 +381,7 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
                         "width": width,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -439,6 +441,7 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
                         "grind": grind,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 
@@ -498,6 +501,7 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
                         "point": point,
                         "shaves": record.get("shaves", 0),
                         "unique_users": record.get("unique_users", 0),
+                        "rank": record.get("rank"),  # Preserve rank from aggregator
                     }
                 )
 

@@ -215,52 +215,19 @@ class TableGenerator:
         if not processed_data:
             return f"*No data available for {table_name} with specified parameters*"
 
-        # Now generate the formatted table using the original generator
-        # but with the processed data
-        # We need to temporarily replace the generator's data to use our processed version
-
-        # Store original data
-        original_data = generator.data
-
-        # Create a temporary data structure that preserves the original structure
-        # The generator expects data in the same format as the original
-        temp_data = {}
-
-        # Copy all original data keys
-        for key in original_data:
-            temp_data[key] = original_data[key]
-
-        # Find the key that the table generator actually uses for its data
-        # by checking what get_table_data() accesses
-        if hasattr(generator, "get_table_data"):
-            # Map table names to their expected data keys
-            table_data_key_mapping = {
-                "top-shavers": "users",
-                "razors": "razors",
-                "blades": "blades",
-                "brushes": "brushes",
-                "soaps": "soaps",
-                "razor-blade-combinations": "razor_blade_combinations",
-                "highest-use-count-per-blade": "highest_use_count_per_blade",
-                "razor-manufacturers": "razor_manufacturers",
-                "razor-formats": "razor_formats",
-                "blade-manufacturers": "blade_manufacturers",
-                "blade-usage-distribution": "blade_usage_distribution",
-                "brush-handle-makers": "brush_handle_makers",
-                "brush-knot-makers": "brush_knot_makers",
-                "knot-fibers": "knot_fibers",
-                "knot-sizes": "knot_sizes",
-                "soap-makers": "soap_makers",
-                "top-sampled-soaps": "top_sampled_soaps",
-                "brand-diversity": "brand_diversity",
-            }
-
-            # Get the correct data key for this table
-            data_key = table_data_key_mapping.get(table_name, table_name)
-            temp_data[data_key] = processed_data
-
-        # Temporarily replace the generator's data
-        generator.data = temp_data
+        # The processed_data is already in the correct format for display
+        # We don't need to call get_table_data() again or replace the generator's data
+        # Just use the processed data directly to generate the table
+        
+        # Create a temporary generator instance with the processed data
+        # This avoids the circular data transformation issue
+        temp_generator = generator_class({"temp_data": processed_data}, self.debug)
+        
+        # Override the get_table_data method to return our processed data directly
+        def get_processed_data():
+            return processed_data
+        
+        temp_generator.get_table_data = get_processed_data
 
         try:
             # Generate the table with the processed data
@@ -270,22 +237,22 @@ class TableGenerator:
 
             # Check if this table generator supports delta calculations
             # Tables with NoDeltaMixin should not show delta columns
-            if include_delta and hasattr(generator, "generate_table"):
+            if include_delta and hasattr(temp_generator, "generate_table"):
                 # Check if the generator is a NoDeltaMixin by looking at its MRO
                 from .table_generators.base import NoDeltaMixin
 
-                if NoDeltaMixin in type(generator).__mro__:
+                if NoDeltaMixin in type(temp_generator).__mro__:
                     include_delta = False
 
-            table_content = generator.generate_table(
+            table_content = temp_generator.generate_table(
                 max_rows=len(processed_data),
                 include_delta=include_delta,
                 comparison_data=self.comparison_data,
                 include_header=False,
             )
         finally:
-            # Restore original data
-            generator.data = original_data
+            # No need to restore data since we used a temporary generator
+            pass
 
         # If the table is empty, return a "No data available" message
         if not table_content:

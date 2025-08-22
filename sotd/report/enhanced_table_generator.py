@@ -54,9 +54,8 @@ class EnhancedTableGenerator:
         # Apply data field limits first
         data = self.data_field_limiter.apply_limits(data, parameters)
 
-        # Sort data by rank before applying size limits
-        if data and "rank" in data[0]:
-            data = sorted(data, key=lambda x: x.get("rank", 0))
+        # Data should already be sorted by rank from the aggregator
+        # Generators do not modify data order - they only format and limit
 
         # Apply size limits
         data = self.table_size_limiter.apply_size_limits(data, parameters)

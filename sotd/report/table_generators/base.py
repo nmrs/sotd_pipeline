@@ -234,19 +234,25 @@ class BaseTableGenerator(ABC):
 
         return formatted
 
-    def _format_existing_ranks_with_ties(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Format existing numeric ranks with tie indicators.
+    def _format_existing_ranks_with_proper_ties(
+        self, data: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Format existing ranks with proper tie indicators.
+
+        This method ONLY formats existing ranks with tie indicators.
+        It does NOT sort, re-rank, or modify the rank values.
+        All ranking logic must be handled by aggregators.
 
         Args:
             data: List of items with existing numeric rank fields
 
         Returns:
-            List of items with formatted rank fields (e.g., "1", "2=", "2=", "4")
+            List of items with properly formatted rank fields including tie indicators
         """
         if not data:
             return data
 
-        # Extract numeric ranks for tie detection
+        # Extract existing numeric ranks for tie formatting only
         numeric_ranks = []
         for item in data:
             rank = item.get("rank")
@@ -259,63 +265,10 @@ class BaseTableGenerator(ABC):
         # Use the rank formatter to get formatted ranks with tie indicators
         formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
 
-        # Update rank data in each item
+        # Update rank data in each item with formatted ranks (preserving original order)
         for i, item in enumerate(data):
             item["rank"] = formatted_ranks[i]
 
-        return data
-
-    def _format_existing_ranks_with_proper_ties(
-        self, data: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
-        """Format existing ranks with proper tie detection based on data values.
-
-        This method preserves existing rank values but detects ties based on the
-        actual data values (shaves, unique_users) rather than just the rank numbers.
-
-        Args:
-            data: List of items with existing numeric rank fields
-
-        Returns:
-            List of items with properly formatted rank fields including tie indicators
-        """
-        if not data:
-            return data
-
-        # Sort data by shaves (desc) and unique_users (desc) for consistent tie detection
-        sorted_data = sorted(
-            data, key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)), reverse=True
-        )
-
-        # Detect ties based on actual data values, not just rank numbers
-        numeric_ranks = []
-        current_rank = 1
-
-        for i, item in enumerate(sorted_data):
-            if i > 0:
-                prev_item = sorted_data[i - 1]
-                # Check if this item is tied with the previous one
-                if item.get("shaves", 0) == prev_item.get("shaves", 0) and item.get(
-                    "unique_users", 0
-                ) == prev_item.get("unique_users", 0):
-                    # Tied with previous - use same rank
-                    numeric_ranks.append(numeric_ranks[-1])
-                else:
-                    # New rank - account for ties by using position + 1
-                    current_rank = i + 1
-                    numeric_ranks.append(current_rank)
-            else:
-                # First item gets rank 1
-                numeric_ranks.append(1)
-
-        # Use the rank formatter to get formatted ranks with tie indicators
-        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
-
-        # Update rank data in each item, preserving the original order
-        for i, item in enumerate(sorted_data):
-            item["rank"] = formatted_ranks[i]
-
-        # Return data in original order (not sorted order)
         return data
 
     @classmethod
@@ -699,41 +652,6 @@ class BaseTableGenerator(ABC):
             return ""
         return table_str
 
-    def _add_ranks(
-        self, data: List[Dict[str, Any]], name_field: str = "name"
-    ) -> List[Dict[str, Any]]:
-        """Add rank information to data for delta calculations.
-
-        Args:
-            data: List of data items
-            name_field: Field name to use for identifying items in debug output
-
-        Returns:
-            Data with rank information added
-        """
-        if not data:
-            return data
-
-        # Check if ranks already exist
-        if any("rank" in item for item in data):
-            if self.debug:
-                print("[DEBUG] Ranks already exist in data, skipping rank addition")
-            return data
-
-        # Add ranks based on shaves (descending order)
-        sorted_data = sorted(data, key=lambda x: x.get("shaves", 0), reverse=True)
-        for i, item in enumerate(sorted_data):
-            item["rank"] = i + 1
-
-        if self.debug:
-            print(f"[DEBUG] Added ranks to {len(data)} items")
-            assignments = [
-                (item.get(name_field, "unknown"), item.get("rank")) for item in sorted_data
-            ]
-            print(f"[DEBUG] Rank assignments: {assignments}")
-
-        return data
-
     def _calculate_deltas(
         self,
         current_data: List[Dict[str, Any]],
@@ -764,9 +682,12 @@ class BaseTableGenerator(ABC):
                 print(f"[DEBUG] No historical data found for category: {category_name}")
             return current_data
 
-        # Add ranks to historical data if not present
+        # Historical data must have ranks for delta calculations
         if not any("rank" in item for item in historical_data):
-            historical_data = self._add_ranks(historical_data)
+            raise ValueError(
+                f"Historical data missing ranks for {category_name} - "
+                f"aggregator must assign ranks before delta calculations"
+            )
 
         # Calculate deltas
         try:
@@ -843,53 +764,6 @@ class BaseTableGenerator(ABC):
 
         return data
 
-    def _add_rank_data(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Add rank data to the table data.
-
-        Args:
-            data: List of data items
-
-        Returns:
-            Data with rank field added
-        """
-        if not data:
-            return data
-
-        # Sort data by shaves (desc) and unique_users (desc) for consistent ranking
-        sorted_data = sorted(
-            data, key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)), reverse=True
-        )
-
-        # Extract numeric ranks for tie detection
-        numeric_ranks = []
-        current_rank = 1
-
-        for i, item in enumerate(sorted_data):
-            if i > 0:
-                prev_item = sorted_data[i - 1]
-                # Check if this item is tied with the previous one
-                if item.get("shaves", 0) == prev_item.get("shaves", 0) and item.get(
-                    "unique_users", 0
-                ) == prev_item.get("unique_users", 0):
-                    # Tied with previous - use same rank
-                    numeric_ranks.append(numeric_ranks[-1])
-                else:
-                    # New rank - account for ties by using position + 1
-                    current_rank = i + 1
-                    numeric_ranks.append(current_rank)
-            else:
-                # First item gets rank 1
-                numeric_ranks.append(1)
-
-        # Use the rank formatter to get formatted ranks with tie indicators
-        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
-
-        # Add rank data to each item
-        for i, item in enumerate(sorted_data):
-            item["rank"] = formatted_ranks[i]
-
-        return sorted_data
-
     def _calculate_multi_period_deltas(
         self,
         current_data: List[Dict[str, Any]],
@@ -940,9 +814,12 @@ class BaseTableGenerator(ABC):
                     f"historical records for category: {category_name}"
                 )
 
-            # Add ranks to historical data if not present
+            # Historical data must have ranks for delta calculations
             if not any("rank" in item for item in historical_category_data):
-                historical_category_data = self._add_ranks(historical_category_data)
+                raise ValueError(
+                    f"Historical data missing ranks for {category_name} - "
+                    f"aggregator must assign ranks before delta calculations for period {period}"
+                )
 
             # Calculate deltas for this period
             try:

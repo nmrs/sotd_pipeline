@@ -18,24 +18,42 @@ class ParameterValidator:
 
     # Mapping of table names to their available sorting columns
     TABLE_SORTING_COLUMNS = {
+        # Core product tables
         "razors": ["shaves", "unique_users"],
         "blades": ["shaves", "unique_users"],
         "brushes": ["shaves", "unique_users"],
         "soaps": ["shaves", "unique_users"],
+        # Manufacturer tables
         "razor-manufacturers": ["shaves", "unique_users"],
         "blade-manufacturers": ["shaves", "unique_users"],
         "brush-handle-makers": ["shaves", "unique_users"],
         "brush-knot-makers": ["shaves", "unique_users"],
         "soap-makers": ["shaves", "unique_users"],
-        "top-shavers": ["shaves", "missed_days"],
+        # Diversity tables
         "brush-diversity": ["unique_brushes", "total_shaves"],
         "blade-diversity": ["unique_blades", "total_shaves"],
         "soap-diversity": ["unique_soaps", "total_shaves"],
         "razor-diversity": ["unique_razors", "total_shaves"],
+        "brand-diversity": ["unique_soaps", "total_shaves"],
+        # Specialized tables
+        "blackbird-plates": ["shaves", "unique_users"],
+        "christopher-bradley-plates": ["shaves", "unique_users"],
+        "game-changer-plates": ["shaves", "unique_users"],
+        "super-speed-tips": ["shaves", "unique_users"],
+        "straight-widths": ["shaves", "unique_users"],
+        "straight-grinds": ["shaves", "unique_users"],
+        "straight-points": ["shaves", "unique_users"],
+        # Cross-product tables
+        "razor-blade-combinations": ["shaves", "unique_users"],
         "highest-use-count-per-blade": ["uses"],
+        # User tables
+        "top-shavers": ["shaves", "missed_days"],
+        # Format and fiber tables
         "razor-format-users": ["format", "shaves"],
         "brush-fiber-users": ["fiber", "shaves"],
-        "razor-blade-combinations": ["shaves", "unique_users"],
+        # Software tables
+        "top-sampled-soaps": ["shaves", "unique_users"],
+        # Testing
         "test_table": ["shaves", "unique_users"],  # For testing purposes
     }
 

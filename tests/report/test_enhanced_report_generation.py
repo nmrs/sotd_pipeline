@@ -509,20 +509,20 @@ class TestEnhancedReportGeneration:
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "soaps": [
-                {"name": "Popular Soap", "shaves": 20, "unique_users": 10},
-                {"name": "Medium Soap", "shaves": 8, "unique_users": 4},
-                {"name": "Unpopular Soap", "shaves": 3, "unique_users": 2},
+                {"name": "Popular Soap", "shaves": 20, "unique_users": 10, "rank": 1},
+                {"name": "Medium Soap", "shaves": 8, "unique_users": 4, "rank": 2},
+                {"name": "Unpopular Soap", "shaves": 3, "unique_users": 2, "rank": 3},
             ],
-            "soap-makers": [
-                {"brand": "Popular Brand", "shaves": 25, "unique_users": 8},
-                {"brand": "Medium Brand", "shaves": 15, "unique_users": 6},
-                {"brand": "Small Brand", "shaves": 10, "unique_users": 3},
+            "soap_makers": [
+                {"brand": "Popular Brand", "shaves": 25, "unique_users": 8, "rank": 1},
+                {"brand": "Medium Brand", "shaves": 15, "unique_users": 6, "rank": 2},
+                {"brand": "Small Brand", "shaves": 10, "unique_users": 3, "rank": 3},
             ],
-            "brand-diversity": [
-                {"brand": "Brand A", "unique_soaps": 5},
-                {"brand": "Brand B", "unique_soaps": 4},
-                {"brand": "Brand C", "unique_soaps": 3},
-                {"brand": "Brand D", "unique_soaps": 2},
+            "brand_diversity": [
+                {"brand": "Brand A", "unique_soaps": 5, "rank": 1},
+                {"brand": "Brand B", "unique_soaps": 4, "rank": 2},
+                {"brand": "Brand C", "unique_soaps": 3, "rank": 3},
+                {"brand": "Brand D", "unique_soaps": 2, "rank": 4},
             ],
         }
 
@@ -547,11 +547,14 @@ class TestEnhancedReportGeneration:
         assert "Medium Brand" in report_content
         assert "Small Brand" not in report_content  # Below unique_users threshold
 
-        # Verify row limits
-        assert "Brand A" in report_content
-        assert "Brand B" in report_content
-        assert "Brand C" in report_content
-        assert "Brand D" not in report_content  # Exceeds row limit
+        # Verify row limits - check Brand Diversity section specifically
+        brand_diversity_section = ""
+        if "## Brand Diversity" in report_content:
+            brand_diversity_section = report_content.split("## Brand Diversity")[1].split("##")[0]
+        assert "Brand A" in brand_diversity_section
+        assert "Brand B" in brand_diversity_section
+        assert "Brand C" in brand_diversity_section
+        assert "Brand D" not in brand_diversity_section  # Exceeds row limit
 
     def test_enhanced_table_user_tables(self, tmp_path):
         """Test enhanced table functionality with user tables."""
@@ -605,14 +608,14 @@ class TestEnhancedReportGeneration:
         # Sample specialized data
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "blackbird-plates": [
-                {"plate": "OC", "shaves": 10, "unique_users": 5},
-                {"plate": "SB", "shaves": 3, "unique_users": 2},
+            "blackbird_plates": [
+                {"plate": "OC", "shaves": 10, "unique_users": 5, "rank": 1},
+                {"plate": "SB", "shaves": 3, "unique_users": 2, "rank": 2},
             ],
-            "game-changer-plates": [
-                {"plate": "0.84-P", "shaves": 15, "unique_users": 8},
-                {"plate": "0.68-P", "shaves": 12, "unique_users": 6},
-                {"plate": "0.76-P", "shaves": 10, "unique_users": 5},
+            "game_changer_plates": [
+                {"gap": "0.84-P", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"gap": "0.68-P", "shaves": 12, "unique_users": 6, "rank": 2},
+                {"gap": "0.76-P", "shaves": 10, "unique_users": 5, "rank": 3},
             ],
         }
 
@@ -639,8 +642,8 @@ class TestEnhancedReportGeneration:
         """Test enhanced table functionality with cross-product tables."""
         template_content = """# Cross-Product Report
 
-## Razor-Blade Combinations (10+ uses)
-{{tables.razor-blade-combinations|uses:10}}
+## Razor-Blade Combinations (10+ shaves)
+{{tables.razor-blade-combinations|shaves:10}}
 
 ## Highest Use Count Per Blade (max 3 rows)
 {{tables.highest-use-count-per-blade|rows:3}}
@@ -651,16 +654,16 @@ class TestEnhancedReportGeneration:
         # Sample cross-product data
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "razor-blade-combinations": [
-                {"razor": "Razor A", "blade": "Blade X", "uses": 15},
-                {"razor": "Razor B", "blade": "Blade Y", "uses": 8},
-                {"razor": "Razor C", "blade": "Blade Z", "uses": 3},
+            "razor_blade_combinations": [
+                {"name": "Razor A + Blade X", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"name": "Razor B + Blade Y", "shaves": 8, "unique_users": 4, "rank": 2},
+                {"name": "Razor C + Blade Z", "shaves": 3, "unique_users": 2, "rank": 3},
             ],
-            "highest-use-count-per-blade": [
-                {"blade": "Blade A", "max_uses": 20, "razor": "Razor 1"},
-                {"blade": "Blade B", "max_uses": 18, "razor": "Razor 2"},
-                {"blade": "Blade C", "max_uses": 15, "razor": "Razor 3"},
-                {"blade": "Blade D", "max_uses": 12, "razor": "Razor 4"},
+            "highest_use_count_per_blade": [
+                {"blade": "Blade A", "uses": 20, "user": "User1", "rank": 1},
+                {"blade": "Blade B", "uses": 18, "user": "User2", "rank": 2},
+                {"blade": "Blade C", "uses": 15, "user": "User3", "rank": 3},
+                {"blade": "Blade D", "uses": 12, "user": "User4", "rank": 4},
             ],
         }
 
@@ -671,15 +674,13 @@ class TestEnhancedReportGeneration:
 
         # Verify cross-product table enhanced functionality
         assert "# Cross-Product Report" in report_content
-        assert "## Razor-Blade Combinations (10+ uses)" in report_content
+        assert "## Razor-Blade Combinations (10+ shaves)" in report_content
         assert "## Highest Use Count Per Blade (max 3 rows)" in report_content
 
-        # Verify filtering works
-        assert "Razor A" in report_content and "Blade X" in report_content
-        # Below uses threshold
-        assert "Razor B" not in report_content or "Blade Y" not in report_content
-        # Below uses threshold
-        assert "Razor C" not in report_content or "Blade Z" not in report_content
+        # Verify filtering works (10+ shaves threshold)
+        assert "Razor A + Blade X" in report_content  # 15 shaves - above threshold
+        assert "Razor B + Blade Y" not in report_content  # 8 shaves - below threshold
+        assert "Razor C + Blade Z" not in report_content  # 3 shaves - below threshold
 
         # Verify row limits work
         assert "Blade A" in report_content
