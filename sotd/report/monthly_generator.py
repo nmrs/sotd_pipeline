@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 from sotd.utils.template_processor import TemplateProcessor
 
 from .base import BaseReportGenerator
-from .table_generator import TableGenerator
+from .table_generators.table_generator import TableGenerator
 
 
 class MonthlyReportGenerator(BaseReportGenerator):
@@ -98,19 +98,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
             "sample_brands": str(sample_brands),
         }
 
-        # Create table generator for table placeholders
-        if self.debug:
-            print(f"[DEBUG] MonthlyReport({self.report_type}): Creating TableGenerator")
-            print(
-                f"[DEBUG] MonthlyReport({self.report_type}): "
-                f"self.data keys: {list(self.data.keys())}"
-            )
-            print(
-                f"[DEBUG] MonthlyReport({self.report_type}): self.comparison_data keys: "
-                f"{list(self.comparison_data.keys()) if self.comparison_data else 'None'}"
-            )
-
-        table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
+        # Initialize table generator with the new universal approach
+        table_generator = TableGenerator(self.data)
 
         # Get the template content to detect enhanced table syntax
         if self.template_path:
@@ -121,59 +110,29 @@ class MonthlyReportGenerator(BaseReportGenerator):
         template_name = self.report_type
         template_content = processor.get_template(template_name)
 
-        # Check if template contains enhanced table syntax before processing
-        # Look specifically for pipe characters within {{tables.}} placeholders
-        # Use regex to check for actual enhanced table placeholders
-        enhanced_pattern = r"\{\{tables\.[^}]*\|[^}]*\}\}"
-        has_enhanced_syntax = bool(re.search(enhanced_pattern, template_content))
-
-        if self.debug:
-            print(
-                f"[DEBUG] Template content contains '{{tables.': {'{{tables.' in template_content}"
-            )
-            print(f"[DEBUG] Template content contains '|': {'|' in template_content}")
-            print(f"[DEBUG] Has enhanced syntax: {has_enhanced_syntax}")
-
-        # Detect enhanced table syntax and process them only if they exist
-        enhanced_tables = {}
-        if has_enhanced_syntax:
-            enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
-
-        # Generate only the tables that are actually used in the template (basic tables)
-        # This prevents enhanced tables from being overwritten by basic table generation
+        # Generate basic tables for all available aggregators
         tables = {}
-
-        # Extract basic table placeholders from the template
-        basic_pattern = r"\{\{tables\.([^|}]+)\}\}"
-        basic_matches = re.findall(basic_pattern, template_content)
-
-        # Only generate tables that have basic placeholders in the template
-        for table_name in basic_matches:
-            if table_name in table_generator.get_available_table_names():
-                try:
-                    table_content = table_generator.generate_table_by_name(table_name)
-                    # Create placeholder format for template substitution
-                    placeholder = f"{{{{tables.{table_name}}}}}"
-                    tables[placeholder] = table_content
-
-                    if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Generated basic table: {table_name}"
-                        )
-                except Exception as e:
-                    # Fail fast with descriptive error message
-                    error_msg = (
-                        f"Table generation error in template '{self.report_type}': "
-                        f"Failed to generate table '{table_name}' - {e}"
+        for table_name in table_generator.get_available_table_names():
+            try:
+                table_content = table_generator.generate_table(table_name)
+                if table_content:
+                    tables[f"{{{{tables.{table_name}}}}}"] = table_content
+                elif self.debug:
+                    print(
+                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                        f"Table '{table_name}' generated empty content"
                     )
-                    raise ValueError(error_msg) from e
-            else:
+            except Exception as e:
                 if self.debug:
                     print(
                         f"[DEBUG] MonthlyReport({self.report_type}): "
-                        f"Table '{table_name}' not available in table generator"
+                        f"Error generating table '{table_name}': {e}"
                     )
+
+        # Process enhanced table syntax with parameters
+        enhanced_tables = self._process_enhanced_table_syntax(
+            template_content, table_generator
+        )
 
         # Merge enhanced tables with basic tables
         tables.update(enhanced_tables)
@@ -231,8 +190,10 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                     # Generate the table with parameters
-                    table_content = table_generator.generate_table_with_parameters(
-                        table_name, parameters
+                    table_content = table_generator.generate_table(
+                        table_name,
+                        ranks=parameters.get("ranks"),
+                        rows=parameters.get("rows")
                     )
 
                     # Use the full placeholder as the key for replacement
