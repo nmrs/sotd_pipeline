@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import { CommentList } from '../domain/CommentList';
+import { CommentDisplay } from '../domain/CommentDisplay';
 import { MismatchItem } from '../../services/api';
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
@@ -409,63 +409,63 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                // Since backend groups by case-insensitive original text, use that as the key
-                const itemKey = `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              // Since backend groups by case-insensitive original text, use that as the key
+              const itemKey = `${field}:${item.original.toLowerCase()}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
@@ -654,9 +654,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${
-                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {brushType.type}
               </span>
@@ -790,11 +789,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const commentIds = item.comment_ids || [];
 
           return (
-            <CommentList
+            <CommentDisplay
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => {})}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
-              aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
             />
           );
         },

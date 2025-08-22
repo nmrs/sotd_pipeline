@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CommentList } from '../domain/CommentList';
+import { CommentDisplay } from '../domain/CommentDisplay';
 
 interface UnmatchedItem {
   item: string;
@@ -115,15 +115,14 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
             const commentIds = item.comment_ids || [];
 
             return (
-              <CommentList
+              <CommentDisplay
                 commentIds={commentIds}
-                onCommentClick={(commentId, allCommentIds) => {
+                onCommentClick={(commentId) => {
                   const startTime = performance.now();
-                  onCommentClick(commentId, allCommentIds);
+                  onCommentClick(commentId, commentIds);
                   logPerformance('comment click', startTime);
                 }}
                 commentLoading={commentLoading}
-                aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
               />
             );
           },

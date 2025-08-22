@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CommentList } from '../domain/CommentList';
+import { CommentDisplay } from '../domain/CommentDisplay';
 
 export interface BrushTableProps {
   items: BrushData[];
@@ -215,12 +215,11 @@ const BrushTable: React.FC<BrushTableProps> = ({
           if (isMain && commentIds && commentIds.length > 0) {
             return (
               <div className={isParentFiltered ? 'text-gray-400' : ''}>
-                <CommentList
+                <CommentDisplay
                   commentIds={commentIds}
                   onCommentClick={onCommentClick}
                   commentLoading={commentLoading}
                   maxDisplay={3}
-                  aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
                 />
               </div>
             );
