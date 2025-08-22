@@ -229,8 +229,8 @@ class TestReportIntegration:
 
         data = {
             "razors": [
-                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "position": 1},
-                {"name": "Karve CB", "shaves": 18, "unique_users": 8, "position": 2},
+                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
+                {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
             ],
         }
 
@@ -239,12 +239,12 @@ class TestReportIntegration:
                 {"month": "2024-12"},  # metadata
                 {  # data
                     "razors": [
-                        {"name": "Karve CB", "shaves": 20, "unique_users": 10, "position": 1},
+                        {"name": "Karve CB", "shaves": 20, "unique_users": 10, "rank": 1},
                         {
                             "name": "Gillette Super Speed",
                             "shaves": 15,
                             "unique_users": 8,
-                            "position": 2,
+                            "rank": 2,
                         },
                     ],
                 },

@@ -178,10 +178,10 @@ class TestRankFormatter:
         class TestTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return [
-                    {"name": "Item A", "shaves": 10, "unique_users": 3},
-                    {"name": "Item B", "shaves": 8, "unique_users": 2},
-                    {"name": "Item C", "shaves": 8, "unique_users": 2},  # Tied with Item B
-                    {"name": "Item D", "shaves": 6, "unique_users": 1},
+                    {"name": "Item A", "shaves": 10, "unique_users": 3, "rank": 1},
+                    {"name": "Item B", "shaves": 8, "unique_users": 2, "rank": 2},
+                    {"name": "Item C", "shaves": 8, "unique_users": 2, "rank": 2},  # Tied with Item B
+                    {"name": "Item D", "shaves": 6, "unique_users": 1, "rank": 4},
                 ]
 
             def get_table_title(self):
