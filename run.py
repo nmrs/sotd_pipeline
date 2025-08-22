@@ -121,26 +121,53 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
         module = __import__(module_name, fromlist=["main"])
 
         # Filter arguments based on phase requirements
-        # Delta arguments are needed for data processing phases and aggregate phase
-        # Only report phase doesn't need delta arguments (it processes the months
-        # specified in date args)
-        if phase in ["fetch", "extract", "match", "enrich", "aggregate"]:
-            # Data processing phases and aggregate phase get all arguments including delta
-            phase_args = args
-        else:
-            # Report phase doesn't need delta arguments
-            # It processes the months specified in the date arguments
-            # Filter out --delta-months flag and its value
-            phase_args = []
-            skip_next = False
-            for arg in args:
-                if skip_next:
-                    skip_next = False
-                    continue
-                if arg.startswith("--delta-months"):
-                    skip_next = True  # Skip the next argument (the delta months value)
-                    continue
-                phase_args.append(arg)
+        # Each phase has different argument support, so we need to filter appropriately
+        phase_args = []
+        i = 0
+
+        while i < len(args):
+            arg = args[i]
+
+            # Handle arguments that take values
+            if arg.startswith("--delta-months"):
+                # Only pass delta-months to phases that support it
+                if phase in ["extract", "match", "enrich", "aggregate"]:
+                    phase_args.append(arg)
+                    # Add the value too (next argument)
+                    if i + 1 < len(args):
+                        phase_args.append(args[i + 1])
+                        i += 1  # Skip the value in next iteration
+                # If phase doesn't support it, skip both flag and value
+                i += 1
+                continue
+
+            elif arg.startswith("--max-workers"):
+                # Only pass max-workers to phases that support parallel processing
+                if phase in ["extract", "match", "enrich", "aggregate", "report"]:
+                    phase_args.append(arg)
+                    # Add the value too (next argument)
+                    if i + 1 < len(args):
+                        phase_args.append(args[i + 1])
+                        i += 1  # Skip the value in next iteration
+                # If phase doesn't support it, skip both flag and value
+                i += 1
+                continue
+
+            elif arg.startswith("--type"):
+                # Only pass type to report phase
+                if phase == "report":
+                    phase_args.append(arg)
+                    # Add the value too (next argument)
+                    if i + 1 < len(args):
+                        phase_args.append(args[i + 1])
+                        i += 1  # Skip the value in next iteration
+                # If phase doesn't support it, skip both flag and value
+                i += 1
+                continue
+
+            # Pass through all other arguments (date args, out-dir, debug, force)
+            phase_args.append(arg)
+            i += 1
 
         # Debug output to see what arguments are being passed
         if debug:
@@ -374,6 +401,12 @@ Examples:
         action="store_true",
         help=("Process delta months: current month(s) + 1 month ago, 1 year ago, and 5 years ago"),
     )
+    # Report-specific arguments
+    parser.add_argument(
+        "--type",
+        choices=["hardware", "software", "all"],
+        help="Report type: hardware, software, or all (only applies to report phase)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -446,6 +479,8 @@ Examples:
             common_args.append("--force")
         if args.max_workers:
             common_args.extend(["--max-workers", str(args.max_workers)])
+        if args.type:
+            common_args.extend(["--type", args.type])
 
         return run_pipeline(phases, common_args, debug=args.debug)
 
