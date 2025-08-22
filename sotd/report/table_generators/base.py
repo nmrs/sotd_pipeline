@@ -890,7 +890,7 @@ class BaseTableGenerator(ABC):
             Updated column configuration with delta columns for multiple periods
         """
         import copy
-        
+
         # Create a deep copy to avoid modifying the original
         updated_config = copy.deepcopy(column_config)
 

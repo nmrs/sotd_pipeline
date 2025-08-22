@@ -49,9 +49,10 @@ class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator, NoDel
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor-blade combinations table."""
         from .base import STANDARD_PRODUCT_COLUMNS
+        import copy
 
         # Override the name column to show "Razor + Blade"
-        config = STANDARD_PRODUCT_COLUMNS.copy()
+        config = copy.deepcopy(STANDARD_PRODUCT_COLUMNS)
         config["name"]["display_name"] = "Razor + Blade"
         return config
 
@@ -141,23 +142,23 @@ class HighestUseCountPerBladeTableGenerator(UseCountTableFactory, NoDeltaMixin):
         # RANKS MUST COME FROM AGGREGATORS - DO NOT ASSIGN RANKS HERE
         # This method should only format existing ranks with tie indicators
         # The aggregator should have already assigned proper ranks based on business logic
-        
+
         # Check if data already has ranks
         if not any("rank" in item for item in data):
             if self.debug:
                 print("[DEBUG] No ranks found in data - aggregator should assign ranks")
             return data
-        
+
         # Extract existing ranks for tie formatting only
         ranks = [item.get("rank", 0) for item in data]
-        
+
         # Use the rank formatter to get formatted ranks with tie indicators
         formatted_ranks = self._format_ranks_with_ties(ranks)
-        
+
         # Update rank data in each item with formatted ranks (preserving original order)
         for i, item in enumerate(data):
             item["rank"] = formatted_ranks[i]
-        
+
         return data
 
     def get_table_title(self) -> str:
