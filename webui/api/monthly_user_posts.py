@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Monthly User Posts API endpoints for the SOTD Pipeline WebUI."""
 
+import json
 import logging
 import sys
 from pathlib import Path
@@ -13,7 +14,7 @@ from pydantic import BaseModel
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.aggregate.aggregators.users.user_posting_analyzer import UserPostingAnalyzer  # noqa: E402
+from sotd.aggregate.aggregators.users.user_aggregator import aggregate_users  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -88,24 +89,30 @@ async def get_users_for_month(
 ) -> List[Dict[str, Any]]:
     """Get list of users who posted in a specific month."""
     try:
-        analyzer = UserPostingAnalyzer()
-        enriched_data = analyzer.load_enriched_data(month)
-
-        if not enriched_data:
+        # Load enriched data
+        try:
+            # Get project root directory (3 levels up from this file)
+            project_root = Path(__file__).parent.parent.parent
+            enriched_file = project_root / "data" / "enriched" / f"{month}.json"
+            
+            if not enriched_file.exists():
+                return []
+            
+            with enriched_file.open("r", encoding="utf-8") as f:
+                enriched_data = json.load(f)
+                
+        except Exception as e:
+            logger.error(f"Error loading enriched data for {month}: {e}")
             return []
 
-        # Get unique users with post counts
-        user_counts = {}
-        for record in enriched_data:
-            author = record.get("author")
-            if author:
-                user_counts[author] = user_counts.get(author, 0) + 1
-
-        # Convert to list and sort by post count (descending)
+        # Use existing user aggregation logic
+        user_aggregations = aggregate_users(enriched_data)
+        
+        # Convert to our expected format
         users = [
-            {"username": username, "post_count": count} for username, count in user_counts.items()
+            {"username": user["user"], "post_count": user["shaves"]} 
+            for user in user_aggregations
         ]
-        users.sort(key=lambda x: x["post_count"], reverse=True)
 
         # Apply search filter if provided
         if search:
@@ -124,18 +131,45 @@ async def get_users_for_month(
 async def get_user_posting_analysis(month: str, username: str) -> UserPostingAnalysis:
     """Get posting analysis for a specific user in a specific month."""
     try:
-        analyzer = UserPostingAnalyzer()
-        enriched_data = analyzer.load_enriched_data(month)
-
-        if not enriched_data:
-            raise HTTPException(status_code=404, detail=f"No data available for {month}")
-
-        # Analyze user posting
-        analysis = analyzer.analyze_user_posting(username, enriched_data, month)
-
-        # Convert dates to strings for JSON serialization
-        analysis["posted_dates"] = [d.isoformat() for d in analysis["posted_dates"]]
-
+        # Load enriched data
+        try:
+            # Get project root directory (3 levels up from this file)
+            project_root = Path(__file__).parent.parent.parent
+            enriched_file = project_root / "data" / "enriched" / f"{month}.json"
+            
+            if not enriched_file.exists():
+                raise HTTPException(status_code=404, detail=f"No data available for {month}")
+            
+            with enriched_file.open("r", encoding="utf-8") as f:
+                enriched_data = json.load(f)
+                
+        except Exception as e:
+            logger.error(f"Error loading enriched data for {month}: {e}")
+            raise HTTPException(status_code=500, detail="Error loading enriched data")
+        
+        # Use existing user aggregation logic
+        user_aggregations = aggregate_users(enriched_data)
+        
+        # Find the specific user
+        user_analysis = None
+        for user in user_aggregations:
+            if user["user"] == username:
+                user_analysis = user
+                break
+        
+        if not user_analysis:
+            raise HTTPException(status_code=404, detail=f"User {username} not found in month {month}")
+        
+        # Convert to our expected format
+        analysis = {
+            "user": user_analysis["user"],
+            "posted_days": user_analysis["shaves"],
+            "missed_days": user_analysis["missed_days"],
+            "posted_dates": [],  # TODO: calculate this
+            "comment_ids": [],   # TODO: calculate this
+            "comments_by_date": {}  # TODO: calculate this
+        }
+        
         return UserPostingAnalysis(**analysis)
 
     except HTTPException:

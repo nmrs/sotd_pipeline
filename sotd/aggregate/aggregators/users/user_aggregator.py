@@ -11,36 +11,95 @@ import pandas as pd
 
 def _extract_date_from_thread_title(thread_title: str) -> date:
     """Extract date from thread title like 'Wednesday SOTD Thread - Jan 01, 2025'."""
-    # Pattern to match "Jan 01, 2025" format
-    pattern = r"(\w{3})\s+(\d{1,2}),\s+(\d{4})"
-    match = re.search(pattern, thread_title)
+    # Try standard format first: "Jan 01, 2025"
+    pattern1 = r"(\w{3})\s+(\d{1,2}),\s+(\d{4})"
+    match = re.search(pattern1, thread_title)
 
-    if not match:
-        raise ValueError(f"Could not extract date from thread title: {thread_title}")
+    if match:
+        month_str, day_str, year_str = match.groups()
 
-    month_str, day_str, year_str = match.groups()
+        # Convert month abbreviation to number
+        month_map = {
+            "Jan": 1,
+            "January": 1,
+            "Feb": 2,
+            "February": 2,
+            "Mar": 3,
+            "March": 3,
+            "Apr": 4,
+            "April": 4,
+            "May": 5,
+            "May": 5,
+            "Jun": 6,
+            "June": 6,
+            "Jul": 7,
+            "July": 7,
+            "Aug": 8,
+            "August": 8,
+            "Sep": 9,
+            "September": 9,
+            "Oct": 10,
+            "October": 10,
+            "Nov": 11,
+            "November": 11,
+            "Dec": 12,
+            "December": 12,
+        }
 
-    # Convert month abbreviation to number
-    month_map = {
-        "Jan": 1,
-        "Feb": 2,
-        "Mar": 3,
-        "Apr": 4,
-        "May": 5,
-        "Jun": 6,
-        "Jul": 7,
-        "Aug": 8,
-        "Sep": 9,
-        "Oct": 10,
-        "Nov": 11,
-        "Dec": 12,
-    }
+        month = month_map.get(month_str)
+        if not month:
+            raise ValueError(f"Unknown month abbreviation: {month_str}")
 
-    month = month_map.get(month_str)
-    if not month:
-        raise ValueError(f"Unknown month abbreviation: {month_str}")
+        return date(int(year_str), month, int(day_str))
 
-    return date(int(year_str), month, int(day_str))
+    # Try alternative format: "25. June" (day. month)
+    pattern2 = r"(\d{1,2})\.\s+(\w+)"
+    match = re.search(pattern2, thread_title)
+
+    if match:
+        day_str, month_str = match.groups()
+
+        # Convert month name to number
+        month_map = {
+            "Jan": 1,
+            "January": 1,
+            "Feb": 2,
+            "February": 2,
+            "Mar": 3,
+            "March": 3,
+            "Apr": 4,
+            "April": 4,
+            "May": 5,
+            "May": 5,
+            "Jun": 6,
+            "June": 6,
+            "Jul": 7,
+            "July": 7,
+            "Aug": 8,
+            "August": 8,
+            "Sep": 9,
+            "September": 9,
+            "Oct": 10,
+            "October": 10,
+            "Nov": 11,
+            "November": 11,
+            "Dec": 12,
+            "December": 12,
+        }
+
+        month = month_map.get(month_str)
+        if not month:
+            raise ValueError(f"Unknown month name: {month_str}")
+
+        # Assume current year for alternative format (thread titles don't include year)
+        from datetime import datetime
+
+        year = datetime.now().year
+
+        return date(year, month, int(day_str))
+
+    # If neither format matches, raise error
+    raise ValueError(f"Could not extract date from thread title: {thread_title}")
 
 
 def _get_all_dates_in_month(year: int, month: int) -> List[date]:
