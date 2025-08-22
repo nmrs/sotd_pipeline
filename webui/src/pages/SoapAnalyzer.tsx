@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 
 import MonthSelector from '../components/forms/MonthSelector';
 import CommentModal from '../components/domain/CommentModal';
+import { CommentDisplay } from '../components/domain/CommentDisplay';
 import { getCommentDetail, CommentDetail } from '../services/api';
 
 interface SoapDuplicateResult {
@@ -669,22 +670,11 @@ const SoapAnalyzer: React.FC = () => {
                               {result.pattern || '-'}
                             </td>
                             <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
-                              {result.comment_ids ? (
-                                <div className='space-y-1'>
-                                  {result.comment_ids.map((commentId, idIndex) => (
-                                    <button
-                                      key={idIndex}
-                                      onClick={() => handleCommentClick(commentId)}
-                                      className='block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left'
-                                      disabled={commentLoading}
-                                    >
-                                      {commentId}
-                                    </button>
-                                  ))}
-                                </div>
-                              ) : (
-                                '-'
-                              )}
+                              <CommentDisplay
+                                commentIds={result.comment_ids}
+                                onCommentClick={handleCommentClick}
+                                commentLoading={commentLoading}
+                              />
                             </td>
                           </tr>
                         ))}
@@ -793,15 +783,15 @@ const SoapAnalyzer: React.FC = () => {
                       </thead>
                       <tbody>
                         {filteredNeighborResults.map((result, index) => {
-                          // Parse brand and scent from the entry
+                          // Parse maker and scent from the entry
                           const parts = result.entry.split(' - ');
-                          const brand = parts[0] || '';
+                          const maker = parts[0] || '';
                           const scent = parts.slice(1).join(' - ') || '';
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
                               <td className='border border-gray-300 px-3 py-2 font-medium'>
-                                {brand}
+                                {maker}
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>{scent}</td>
                               <td className='border border-gray-300 px-3 py-2'>
@@ -837,22 +827,11 @@ const SoapAnalyzer: React.FC = () => {
                                 {result.pattern || '-'}
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-sm text-gray-600'>
-                                {result.comment_ids ? (
-                                  <div className='space-y-1'>
-                                    {result.comment_ids.map((commentId, idIndex) => (
-                                      <button
-                                        key={idIndex}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        className='block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left'
-                                        disabled={commentLoading}
-                                      >
-                                        {commentId}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  '-'
-                                )}
+                                <CommentDisplay
+                                  commentIds={result.comment_ids}
+                                  onCommentClick={handleCommentClick}
+                                  commentLoading={commentLoading}
+                                />
                               </td>
                             </tr>
                           );
@@ -962,14 +941,14 @@ const SoapAnalyzer: React.FC = () => {
                       </thead>
                       <tbody>
                         {filteredNeighborResults.map((result, index) => {
-                          // Use the matched data directly - no parsing needed
-                          const brand = result.matched?.maker || '-';
+                          // Use the matched data from the API (maker and scent are already parsed)
+                          const maker = result.matched?.maker || '-';
                           const scent = result.matched?.scent || result.entry;
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
                               <td className='border border-gray-300 px-3 py-2 font-medium'>
-                                {brand}
+                                {maker}
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>{scent}</td>
                               <td className='border border-gray-300 px-3 py-2'>
@@ -1005,22 +984,11 @@ const SoapAnalyzer: React.FC = () => {
                                 {result.pattern || '-'}
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
-                                {result.comment_ids ? (
-                                  <div className='space-y-1'>
-                                    {result.comment_ids.map((commentId, idIndex) => (
-                                      <button
-                                        key={idIndex}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        className='block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left'
-                                        disabled={commentLoading}
-                                      >
-                                        {commentId}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  '-'
-                                )}
+                                <CommentDisplay
+                                  commentIds={result.comment_ids}
+                                  onCommentClick={handleCommentClick}
+                                  commentLoading={commentLoading}
+                                />
                               </td>
                             </tr>
                           );
@@ -1049,7 +1017,7 @@ const SoapAnalyzer: React.FC = () => {
           onClose={handleCloseCommentModal}
           comments={[selectedComment]}
           currentIndex={0}
-          onNavigate={async () => {}} // No navigation needed for single comment
+          onNavigate={async () => { }} // No navigation needed for single comment
           remainingCommentIds={[]}
         />
       )}
