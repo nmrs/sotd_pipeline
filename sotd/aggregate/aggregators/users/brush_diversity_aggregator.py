@@ -126,16 +126,16 @@ class BrushDiversityAggregator(BaseAggregator):
         grouped = grouped.sort_values(["unique_brushes", "shaves"], ascending=[False, False])
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
-        result = []
-        for _, row in grouped.iterrows():
-            item = {
-                "rank": int(row["rank"]),
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
-                "unique_brushes": int(row["unique_brushes"]),
-                "shaves": int(row["shaves"]),
-                "avg_shaves_per_brush": float(row["avg_shaves_per_brush"]),
-            }
-            result.append(item)
+        # Convert to list of dictionaries using vectorized operations
+        result = grouped.to_dict("records")
+
+        # Update field names to match expected output
+        for item in result:
+            item["user"] = item.pop("author")
+            item["rank"] = int(item["rank"])
+            item["unique_brushes"] = int(item["unique_brushes"])
+            item["shaves"] = int(item["shaves"])
+            item["avg_shaves_per_brush"] = float(item["avg_shaves_per_brush"])
 
         return result
 

@@ -112,32 +112,20 @@ class BladeDiversityAggregator(BaseAggregator):
         return grouped
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add rank rankings.
-
-        Args:
-            grouped: DataFrame with grouped and aggregated data
-
-        Returns:
-            List of dictionaries with rank, user, unique_blades, and shaves fields
-        """
-        # Sort by unique_blades desc, shaves desc
+        """Sort grouped data and add rank rankings."""
         grouped = grouped.sort_values(["unique_blades", "shaves"], ascending=[False, False])
-
-        # Add rank field (1-based rank)
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
-        # Convert to list of dictionaries
-        result = []
-        for _, row in grouped.iterrows():
-            item = {
-                "rank": int(row["rank"]),
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
-                "unique_blades": int(row["unique_blades"]),
-                "shaves": int(row["shaves"]),
-                "avg_shaves_per_blade": float(row["avg_shaves_per_blade"]),
-            }
+        # Convert to list of dictionaries using vectorized operations
+        result = grouped.to_dict("records")
 
-            result.append(item)
+        # Update field names to match expected output
+        for item in result:
+            item["user"] = item.pop("author")
+            item["rank"] = int(item["rank"])
+            item["unique_blades"] = int(item["unique_blades"])
+            item["shaves"] = int(item["shaves"])
+            item["avg_shaves_per_blade"] = float(item["avg_shaves_per_blade"])
 
         return result
 
