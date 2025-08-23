@@ -47,25 +47,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
     def generate_notes_and_caveats(self) -> str:
         """Generate the complete monthly report content using the templating system."""
-        # Get all available data collection statistics
-        total_shaves = self.metadata.get("total_shaves", 0)
-        unique_shavers = self.metadata.get("unique_shavers", 0)
-        avg_shaves_per_user = self.metadata.get("avg_shaves_per_user", 0)
-        median_shaves_per_user = self.metadata.get("median_shaves_per_user", 0)
-
-        # Hardware-specific metrics
-        unique_razors = self.metadata.get("unique_razors", 0)
-        unique_blades = self.metadata.get("unique_blades", 0)
-        unique_brushes = self.metadata.get("unique_brushes", 0)
-
-        # Software-specific metrics
-        unique_soaps = self.metadata.get("unique_soaps", 0)
-        unique_brands = self.metadata.get("unique_brands", 0)
-        total_samples = self.metadata.get("total_samples", 0)
-        sample_percentage = self.metadata.get("sample_percentage", 0)
-        sample_users = self.metadata.get("sample_users", 0)
-        sample_brands = self.metadata.get("sample_brands", 0)
-
+        # Get month for display formatting
         month = self.metadata.get("month", "Unknown")
 
         # Parse month for display
@@ -77,26 +59,26 @@ class MonthlyReportGenerator(BaseReportGenerator):
         except (ValueError, TypeError):
             month_year = month
 
-        # Prepare ALL available variables for template
-        # Templates can choose which ones to use
-        variables = {
-            "month_year": month_year,
-            "total_shaves": f"{total_shaves:,}",
-            "unique_shavers": str(unique_shavers),
-            "avg_shaves_per_user": f"{avg_shaves_per_user:.1f}",
-            "median_shaves_per_user": f"{median_shaves_per_user:.1f}",
-            # Hardware variables
-            "unique_razors": str(unique_razors),
-            "unique_blades": str(unique_blades),
-            "unique_brushes": str(unique_brushes),
-            # Software variables
-            "unique_soaps": str(unique_soaps),
-            "unique_brands": str(unique_brands),
-            "total_samples": str(total_samples),
-            "sample_percentage": f"{sample_percentage:.1f}%",
-            "sample_users": str(sample_users),
-            "sample_brands": str(sample_brands),
-        }
+        # Prepare variables dynamically from metadata
+        # Start with month_year for display formatting
+        variables = {"month_year": month_year}
+
+        # Dynamically add all metadata fields with appropriate formatting
+        for key, value in self.metadata.items():
+            if key == "month":
+                continue  # Skip month as we handle it separately with month_year
+            elif key == "avg_shaves_per_user" or key == "median_shaves_per_user":
+                # Format decimal numbers
+                variables[key] = f"{value:.1f}"
+            elif key == "total_shaves":
+                # Format large numbers with commas
+                variables[key] = f"{value:,}"
+            elif key == "sample_percentage":
+                # Format percentage
+                variables[key] = f"{value:.1f}%"
+            else:
+                # Convert everything else to string
+                variables[key] = str(value)
 
         # Initialize table generator with the new universal approach
         table_generator = TableGenerator(
@@ -182,7 +164,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                     # Generate the table with parameters
-                    # Extract numeric limits (any parameter that's not ranks, rows, columns, or deltas)
+                    # Extract numeric limits (any parameter that's not ranks, rows,
+                    # columns, or deltas)
                     numeric_limits = {}
                     for key, value in parameters.items():
                         if key not in ["ranks", "rows", "columns", "deltas"]:
