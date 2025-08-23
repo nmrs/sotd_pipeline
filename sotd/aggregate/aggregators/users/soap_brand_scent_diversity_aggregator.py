@@ -59,7 +59,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
                     {
                         "brand": brand,
                         "scent": scent,
-                        "author": f"u/{author}",  # Prepend "u/" for Reddit user tagging
+                        "author": author,  # Keep username clean, add "u/" in report phase
                     }
                 )
 

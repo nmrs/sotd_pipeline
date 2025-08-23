@@ -101,7 +101,7 @@ class BrushFiberUserAggregator(BaseAggregator):
             item = {
                 "position": current_position,
                 "fiber": fiber_type,
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
+                "user": row["author"],  # Keep clean, add "u/" in report
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

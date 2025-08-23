@@ -99,7 +99,7 @@ class RazorFormatUserAggregator(BaseAggregator):
             item = {
                 "rank": current_position,
                 "format": format_type,
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
+                "user": row["author"],  # Keep clean, add "u/" in report
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

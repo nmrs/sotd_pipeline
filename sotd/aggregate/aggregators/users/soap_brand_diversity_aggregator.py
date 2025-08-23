@@ -57,7 +57,7 @@ class SoapBrandDiversityAggregator(BaseAggregator, UserDiversityMixin):
                 diversity_data.append(
                     {
                         "brand": brand,
-                        "author": f"u/{author}",  # Prepend "u/" for Reddit user tagging
+                        "author": author,  # Keep username clean, add "u/" in report phase
                     }
                 )
 

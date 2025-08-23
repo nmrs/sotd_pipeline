@@ -142,7 +142,7 @@ class SoapSampleUserAggregator(BaseAggregator):
         for _, row in grouped.iterrows():
             item = {
                 "position": int(row["position"]),
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
+                "user": row["author"],  # Keep clean, add "u/" in report
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }
