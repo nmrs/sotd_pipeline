@@ -69,6 +69,7 @@ class TableGenerator:
             "d",
             "f",  # Plate types
             "vs",  # Keep "vs" lowercase in delta column names
+            "per",  # Keep "per" lowercase in column names like "Avg Shaves Per Soap"
         }
 
         formatted_columns = {}
