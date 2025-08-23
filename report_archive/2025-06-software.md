@@ -5,7 +5,7 @@
 
 Welcome to your SOTD Lather Log for June 2025
 
-* 2,562 shave reports from 126 distinct shavers during the month of June 2025 were analyzed to produce this report. Collectively, these shavers used 1106 distinct soaps from 328 distinct brands. 27 of those shaves were marked (sample).
+* 2,562 shave reports from 126 distinct shavers during the month of June 2025 were analyzed to produce this report. Collectively, these shavers used 1106 distinct soaps from 328 distinct brands. 27 of those shaves used samples of {{unique_sample_soaps}} unique soaps.
 
 ## Observations
 

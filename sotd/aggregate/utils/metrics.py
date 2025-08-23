@@ -157,8 +157,13 @@ def calculate_unique_sample_soaps(records: List[Dict[str, Any]]) -> int:
         enriched = soap.get("enriched", {})
         matched = soap.get("matched", {})
 
-        # Skip if no sample data
+        # Skip if no sample data OR if sample_type is None/empty (not actually used)
         if not enriched or "sample_type" not in enriched:
+            continue
+
+        # Check if sample_type actually has a value (not None or empty string)
+        sample_type = enriched.get("sample_type")
+        if not sample_type:  # This catches None, "", and other falsy values
             continue
 
         # Skip if no matched soap data

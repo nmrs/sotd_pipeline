@@ -291,10 +291,10 @@ class TestMonthlyReportGenerator:
         # Test that error handling follows graceful approach (current implementation)
         # The current implementation catches exceptions and continues, doesn't raise them
         result = generator.generate_notes_and_caveats()
-        
+
         # Verify that the report was generated despite the error
         assert result == "Generated report"
-        
+
         # Verify that the error was handled gracefully (table generation continues)
         mock_table_generator.generate_table.assert_called()
 
@@ -411,7 +411,7 @@ class TestMonthlyReportGenerator:
 
             # Verify that the report was generated
             assert mock_print.call_count >= 0  # Debug output is minimal in current implementation
-            
+
             # The current implementation only produces debug output in specific scenarios
             # (like enhanced table syntax processing), not in basic table generation
             # So we just verify the report was generated successfully
