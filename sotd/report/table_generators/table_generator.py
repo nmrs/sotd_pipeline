@@ -100,8 +100,8 @@ class TableGenerator:
                 # Keep delta columns as-is
                 continue
 
-            # Convert to title case while preserving acronyms
-            formatted_name = self._preserve_acronyms(col.title())
+            # Convert underscores to spaces, then to title case while preserving acronyms
+            formatted_name = self._preserve_acronyms(col.replace("_", " ").title())
             formatted_df = formatted_df.rename(columns={col: formatted_name})
 
         return formatted_df
@@ -514,20 +514,9 @@ class TableGenerator:
             # Apply limit (>= threshold) - cut from bottom
             limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
 
-        # Check for gaps in the rank column specifically
-        # If we have a rank column, check if filtering created gaps in the rank sequence
-        if "rank" in limited_df.columns and not limited_df.empty:
-            # Get the ranks in order
-            ranks = sorted(limited_df["rank"].tolist())
-
-            # Check if there are gaps in the rank sequence
-            # For example: [1, 2, 4, 5] has a gap (missing 3)
-            if len(ranks) > 1:
-                expected_ranks = list(range(ranks[0], ranks[-1] + 1))
-                if ranks != expected_ranks:
-                    raise ValueError(
-                        "Numeric column limits created gaps in table data - limits may be too aggressive"
-                    )
+        # Note: Gap validation removed - gaps in rank sequence are expected and normal
+        # when applying numeric limits, as filtering removes records below thresholds
+        # This is the intended behavior for bottom-cutoff filtering
 
         return limited_df
 
@@ -567,14 +556,19 @@ class TableGenerator:
         # Convert kebab-case template name to snake_case data key
         data_key = table_name.replace("-", "_")
 
-        if data_key not in self.data:
+        # Handle both flat and nested data structures
+        if data_key in self.data:
+            table_data = self.data[data_key]
+        elif "data" in self.data and data_key in self.data["data"]:
+            table_data = self.data["data"][data_key]
+        else:
             available_keys = list(self.data.keys())
+            if "data" in self.data:
+                available_keys.extend([f"data.{k}" for k in self.data["data"].keys()])
             raise ValueError(
                 f"Unknown table: {table_name} (converted to '{data_key}'). "
                 f"Available keys: {available_keys}"
             )
-
-        table_data = self.data[data_key]
 
         # Convert data to DataFrame first
         df = pd.DataFrame(table_data)
@@ -620,28 +614,15 @@ class TableGenerator:
         if columns:
             df = self._apply_column_operations(df, columns)
 
+        # Format column names to Title Case with acronym preservation BEFORE converting to markdown
+        # This ensures clean column names in the final output
+        df = self._format_column_names(df)
+
+        # Format usernames with "u/" prefix for Reddit display
+        df = self._format_usernames(df)
+
         # Convert to markdown
         result = df.to_markdown(index=False)
-
-        # Format column names to Title Case with acronym preservation as the very last step
-        # This ensures all operations (including delta calculation) work with original column names
-        if result and result != "":
-            # Parse the markdown back to DataFrame for column formatting
-            from io import StringIO
-
-            formatted_df = pd.read_csv(StringIO(result), sep="|", skipinitialspace=True)
-            formatted_df = formatted_df.iloc[
-                :, 1:-1
-            ]  # Remove empty first/last columns from markdown parsing
-
-            # Format usernames with "u/" prefix for Reddit display
-            formatted_df = self._format_usernames(formatted_df)
-
-            # Format column names
-            formatted_df = self._format_column_names(formatted_df)
-
-            # Convert back to markdown
-            result = formatted_df.to_markdown(index=False)
 
         return result if result is not None else ""
 

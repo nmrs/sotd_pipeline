@@ -63,8 +63,18 @@ class MonthlyReportGenerator(BaseReportGenerator):
         # Start with month_year for display formatting
         variables = {"month_year": month_year}
 
+        # Get metadata from the data structure
+        # For CLI calls, self.data is just the data section, so we need to get metadata
+        # from the metadata parameter that was passed to the constructor
+        if "meta" in self.data:
+            # Direct call with full structure
+            data_metadata = self.data["meta"]
+        else:
+            # CLI call - use the metadata passed to constructor
+            data_metadata = self.metadata
+
         # Dynamically add all metadata fields with appropriate formatting
-        for key, value in self.metadata.items():
+        for key, value in data_metadata.items():
             if key == "month":
                 continue  # Skip month as we handle it separately with month_year
             elif key == "avg_shaves_per_user" or key == "median_shaves_per_user":
@@ -81,6 +91,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 variables[key] = str(value)
 
         # Initialize table generator with the new universal approach
+        # self.data is already the data section (not the entire JSON structure)
         table_generator = TableGenerator(
             self.data,
             self.comparison_data,
