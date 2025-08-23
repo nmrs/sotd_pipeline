@@ -88,7 +88,7 @@ class TableGenerator:
                 # Special handling for specific words that should stay lowercase
                 # Handle "per" within column names
                 formatted_col = formatted_col.replace("Per", "per")
-                
+
                 # Special handling for delta columns: preserve "vs" as lowercase
                 if "Δ" in col and "vs" in col.lower():
                     formatted_col = formatted_col.replace("Vs", "vs")
