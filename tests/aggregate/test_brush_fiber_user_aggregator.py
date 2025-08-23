@@ -150,29 +150,29 @@ class TestBrushFiberUserAggregator:
         # Check badger fiber (alphabetically first)
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["shaves"] == 5
 
         assert result[1]["fiber"] == "badger"
         assert result[1]["position"] == 2
-        assert result[1]["user"] == "user2"
+        assert result[1]["user"] == "u/user2"
         assert result[1]["shaves"] == 3
 
         # Check boar fiber
         assert result[2]["fiber"] == "boar"
         assert result[2]["position"] == 1
-        assert result[2]["user"] == "user1"
+        assert result[2]["user"] == "u/user1"
         assert result[2]["shaves"] == 8
 
         assert result[3]["fiber"] == "boar"
         assert result[3]["position"] == 2
-        assert result[3]["user"] == "user3"
+        assert result[3]["user"] == "u/user3"
         assert result[3]["shaves"] == 2
 
         # Check synthetic fiber
         assert result[4]["fiber"] == "synthetic"
         assert result[4]["position"] == 1
-        assert result[4]["user"] == "user4"
+        assert result[4]["user"] == "u/user4"
         assert result[4]["shaves"] == 1
 
     def test_aggregate_brush_fiber_users(self):
@@ -217,26 +217,26 @@ class TestBrushFiberUserAggregator:
         # Check badger fiber (alphabetically first)
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
 
         assert result[1]["fiber"] == "badger"
         assert result[1]["position"] == 2
-        assert result[1]["user"] == "user2"
+        assert result[1]["user"] == "u/user2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
 
         # Check synthetic fiber
         assert result[2]["fiber"] == "synthetic"
         assert result[2]["position"] == 1
-        assert result[2]["user"] == "user1"
+        assert result[2]["user"] == "u/user1"
         assert result[2]["shaves"] == 1
         assert result[2]["unique_users"] == 1
 
         assert result[3]["fiber"] == "synthetic"
         assert result[3]["position"] == 2
-        assert result[3]["user"] == "user3"
+        assert result[3]["user"] == "u/user3"
         assert result[3]["shaves"] == 1
         assert result[3]["unique_users"] == 1
 
@@ -287,15 +287,15 @@ class TestBrushFiberUserAggregator:
         assert len(result) == 3
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["shaves"] == 1
         assert result[1]["fiber"] == "badger"
         assert result[1]["position"] == 2
-        assert result[1]["user"] == "user2"
+        assert result[1]["user"] == "u/user2"
         assert result[1]["shaves"] == 1
         assert result[2]["fiber"] == "badger"
         assert result[2]["position"] == 3
-        assert result[2]["user"] == "user3"
+        assert result[2]["user"] == "u/user3"
         assert result[2]["shaves"] == 1
 
     def test_aggregate_same_user_same_fiber_multiple_shaves(self):
@@ -326,7 +326,7 @@ class TestBrushFiberUserAggregator:
         assert len(result) == 1
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["shaves"] == 3
         assert result[0]["unique_users"] == 1
 

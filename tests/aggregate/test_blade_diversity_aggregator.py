@@ -162,17 +162,17 @@ class TestBladeDiversityAggregator:
 
         # Check first result (user1 with 2 unique blades, 3 total shaves)
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["unique_blades"] == 2
-        assert result[0]["total_shaves"] == 3
-        assert result[0]["unique_users"] == 1
+        assert result[0]["shaves"] == 3
+        assert result[0]["avg_shaves_per_blade"] == 1.5
 
         # Check second result (user2 with 1 unique blade, 1 total shave)
         assert result[1]["rank"] == 2
-        assert result[1]["user"] == "user2"
+        assert result[1]["user"] == "u/user2"
         assert result[1]["unique_blades"] == 1
-        assert result[1]["total_shaves"] == 1
-        assert result[1]["unique_users"] == 1
+        assert result[1]["shaves"] == 1
+        assert result[1]["avg_shaves_per_blade"] == 1.0
 
     def test_aggregate_empty_records(self):
         """Test aggregation with empty records."""
@@ -220,10 +220,10 @@ class TestBladeDiversityAggregator:
 
         assert len(result) == 1
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["unique_blades"] == 3
-        assert result[0]["total_shaves"] == 3
-        assert result[0]["unique_users"] == 1
+        assert result[0]["shaves"] == 3
+        assert result[0]["avg_shaves_per_blade"] == 1.0
 
     def test_aggregate_same_brand_different_models(self):
         """Test aggregation for same brand with different models."""
@@ -252,7 +252,7 @@ class TestBladeDiversityAggregator:
 
         assert len(result) == 1
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["unique_blades"] == 1
-        assert result[0]["total_shaves"] == 3
-        assert result[0]["unique_users"] == 1
+        assert result[0]["shaves"] == 3
+        assert result[0]["avg_shaves_per_blade"] == 3.0

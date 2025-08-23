@@ -195,13 +195,13 @@ class TestSoapSampleUserAggregator:
 
         # Check first result (user1 with 2 sample shaves)
         assert result[0]["position"] == 1
-        assert result[0]["user"] == "user1"
+        assert result[0]["user"] == "u/user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
 
         # Check second result (user2 with 1 sample shave)
         assert result[1]["position"] == 2
-        assert result[1]["user"] == "user2"
+        assert result[1]["user"] == "u/user2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
 
