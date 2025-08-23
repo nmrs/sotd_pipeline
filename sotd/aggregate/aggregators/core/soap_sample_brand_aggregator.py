@@ -113,11 +113,13 @@ class SoapSampleBrandAggregator(BaseAggregator):
         # Flatten column names
         grouped.columns = ["sample_type", "brand", "shaves", "unique_users"]
 
-        # Create composite name for consistent interface
-        grouped["name"] = grouped.apply(
-            lambda row: self._create_single_composite_name(row["sample_type"], row["brand"]),
-            axis=1,
-        )
+        # Create composite name for consistent interface using vectorized operations
+        # Instead of apply with axis=1, use vectorized string operations
+        grouped["name"] = grouped["sample_type"].astype(str) + " - " + grouped["brand"].astype(str)
+        # Handle empty brand case
+        grouped.loc[grouped["brand"] == "", "name"] = grouped.loc[
+            grouped["brand"] == "", "sample_type"
+        ]
 
         return grouped
 
