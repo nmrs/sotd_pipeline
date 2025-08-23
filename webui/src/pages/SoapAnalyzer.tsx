@@ -284,7 +284,7 @@ const SoapAnalyzer: React.FC = () => {
       results = results.filter(
         result =>
           result.entry.toLowerCase().includes(searchTerm) ||
-          (result.matched?.maker && result.matched.maker.toLowerCase().includes(searchTerm)) ||
+          (result.matched?.brand && result.matched.brand.toLowerCase().includes(searchTerm)) ||
           (result.matched?.scent && result.matched.scent.toLowerCase().includes(searchTerm)) ||
           (result.normalized_string &&
             result.normalized_string.toLowerCase().includes(searchTerm)) ||
@@ -941,14 +941,14 @@ const SoapAnalyzer: React.FC = () => {
                       </thead>
                       <tbody>
                         {filteredNeighborResults.map((result, index) => {
-                          // Use the matched data from the API (maker and scent are already parsed)
-                          const maker = result.matched?.maker || '-';
+                          // Use the matched data from the API (brand and scent are already parsed)
+                          const brand = result.matched?.brand || '-';
                           const scent = result.matched?.scent || result.entry;
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
                               <td className='border border-gray-300 px-3 py-2 font-medium'>
-                                {maker}
+                                {brand}
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>{scent}</td>
                               <td className='border border-gray-300 px-3 py-2'>
