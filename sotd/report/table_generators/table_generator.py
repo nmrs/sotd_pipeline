@@ -14,17 +14,30 @@ class TableGenerator:
     to data keys.
     """
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        comparison_data: Optional[Dict[str, Any]] = None,
+        debug: bool = False,
+    ):
         """Initialize the table generator.
 
         Args:
-            data: Dictionary containing aggregated data with keys like 'soap_makers', 'razors', etc.
+            data: Dictionary containing aggregated data with keys like 'soap_makers',
+                  'razors', etc.
+            comparison_data: Historical data for delta calculations (not yet supported
+                           in new system)
+            debug: Enable debug logging (not yet supported in new system)
         """
         # Extract data section if full structure is passed (meta + data)
         if "meta" in data and "data" in data:
             self.data = data["data"]
         else:
             self.data = data
+
+        # Store comparison data for future delta support (not yet implemented)
+        self.comparison_data = comparison_data or {}
+        self.debug = debug
 
         # Map template names to data keys (convert hyphens to underscores)
         self.table_mappings = {
@@ -52,7 +65,7 @@ class TableGenerator:
             "razor-blade-combinations": "razor_blade_combinations",
             "highest-use-count-per-blade": "highest_use_count_per_blade",
             # User tables
-            "top-shavers": "top_shavers",
+            "top-shavers": "users",
             # Software tables
             "soap-makers": "soap_makers",
             "soap-brands": "soap_brands",
@@ -124,3 +137,17 @@ class TableGenerator:
             List of available table names
         """
         return list(self.table_mappings.keys())
+
+    def generate_table_by_name(self, table_name: str) -> str:
+        """Generate a table by its placeholder name (backward compatibility).
+
+        Args:
+            table_name: Name of the table (e.g., 'razors', 'blades')
+
+        Returns:
+            Generated table content as markdown string
+
+        Raises:
+            ValueError: If table name is not recognized or parameters are invalid
+        """
+        return self.generate_table(table_name)
