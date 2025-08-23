@@ -80,7 +80,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
             elif key == "avg_shaves_per_user" or key == "median_shaves_per_user":
                 # Format decimal numbers
                 variables[key] = f"{value:.1f}"
-            elif key == "total_shaves":
+            elif key in ["total_shaves", "unique_soaps", "unique_brands", "total_samples", "unique_shavers", "sample_users", "sample_brands"]:
                 # Format large numbers with commas
                 variables[key] = f"{value:,}"
             elif key == "sample_percentage":

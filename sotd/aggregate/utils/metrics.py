@@ -74,7 +74,8 @@ def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
         scent = matched.get("scent", "").strip()
 
         if brand and scent:
-            soap_name = f"{brand} - {scent}"
+            # Use case-insensitive deduplication
+            soap_name = f"{brand} - {scent}".lower()
             soaps.add(soap_name)
 
     return len(soaps)

@@ -48,9 +48,71 @@ class SoapAggregator(BaseAggregator):
             author = get_field_value(record, "author")
 
             if brand and author:  # scent can be empty string, which is valid
-                soap_data.append({"brand": brand, "scent": scent, "author": author})
+                # Preserve original case for display, create normalized versions for grouping
+                original_brand = brand.strip()
+                original_scent = scent.strip()
+
+                soap_data.append(
+                    {
+                        "brand": original_brand,
+                        "scent": original_scent,
+                        "author": author,
+                        # Add normalized versions for case-insensitive grouping
+                        "brand_normalized": original_brand.lower(),
+                        "scent_normalized": original_scent.lower(),
+                    }
+                )
 
         return soap_data
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns to use for grouping.
+
+        Use normalized brand+scent for case-insensitive grouping while preserving
+        original display format.
+
+        Args:
+            df: DataFrame with extracted soap data
+
+        Returns:
+            List of column names for grouping
+        """
+        # Group by normalized brand+scent for case-insensitive counting
+        # but preserve original brand+scent for display
+        return ["brand_normalized", "scent_normalized"]
+
+    def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Group data and calculate aggregation metrics.
+
+        Override to handle case-insensitive grouping while preserving original display values.
+
+        Args:
+            df: DataFrame with extracted data and composite name
+
+        Returns:
+            DataFrame with grouped and aggregated data
+        """
+        # Group by normalized fields for case-insensitive counting
+        group_columns = self._get_group_columns(df)
+
+        # Group by normalized brand+scent and aggregate
+        grouped = (
+            df.groupby(group_columns)
+            .agg(
+                {
+                    "author": ["count", "nunique"],
+                    "brand": "first",  # Keep first occurrence of original case
+                    "scent": "first",  # Keep first occurrence of original case
+                    "name": "first",  # Keep the composite name for display
+                }
+            )
+            .reset_index()
+        )
+
+        # Flatten column names
+        grouped.columns = list(group_columns) + ["shaves", "unique_users", "brand", "scent", "name"]
+
+        return grouped
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from brand and scent.
