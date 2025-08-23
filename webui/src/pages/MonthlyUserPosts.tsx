@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarIcon, List as ListIcon, Loader2 } from 'lucide-react';
 import { CommentDisplay } from '@/components/domain/CommentDisplay';
+import CommentModal from '@/components/domain/CommentModal';
+import { getCommentDetail, CommentDetail } from '@/services/api';
 import axios from 'axios';
 
 interface MonthData {
@@ -26,6 +28,38 @@ interface UserPostingAnalysis {
     posted_dates: string[];
     comment_ids: string[];
     comments_by_date: Record<string, string[]>;
+    // Product usage data
+    razors: Array<{
+        key: string;
+        brand: string;
+        model: string;
+        count: number;
+        comment_ids: string[];
+    }>;
+    blades: Array<{
+        key: string;
+        brand: string;
+        model: string;
+        count: number;
+        comment_ids: string[];
+    }>;
+    brushes: Array<{
+        key: string;
+        brand: string;
+        model: string;
+        handle_brand: string;
+        knot_brand: string;
+        knot_model: string;
+        count: number;
+        comment_ids: string[];
+    }>;
+    soaps: Array<{
+        key: string;
+        brand: string;
+        model: string;
+        count: number;
+        comment_ids: string[];
+    }>;
 }
 
 const MonthlyUserPosts: React.FC = () => {
@@ -38,10 +72,25 @@ const MonthlyUserPosts: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
+    // Comment modal state
+    const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
+    const [commentModalOpen, setCommentModalOpen] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
+    const [allComments, setAllComments] = useState<CommentDetail[]>([]);
+    const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
+    const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
+
     // Fetch available months on component mount
     useEffect(() => {
         fetchAvailableMonths();
     }, []);
+
+    // Fetch users when selected month changes
+    useEffect(() => {
+        if (selectedMonth) {
+            fetchUsersForMonth(selectedMonth);
+        }
+    }, [selectedMonth]);
 
     const fetchAvailableMonths = async () => {
         try {
@@ -81,6 +130,70 @@ const MonthlyUserPosts: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Comment modal handlers
+    const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
+        try {
+            setCommentLoading(true);
+
+            // Always load just the clicked comment initially for fast response
+            const comment = await getCommentDetail(commentId, [selectedMonth]);
+            setSelectedComment(comment);
+            setCurrentCommentIndex(0);
+            setCommentModalOpen(true);
+
+            // Store the comment IDs for potential future loading
+            if (allCommentIds && allCommentIds.length > 1) {
+                setAllComments([comment]); // Start with just the first comment
+                // Store the remaining IDs for lazy loading
+                setRemainingCommentIds(allCommentIds.filter(id => id !== commentId));
+            } else {
+                setAllComments([comment]);
+                setRemainingCommentIds([]);
+            }
+        } catch (err: unknown) {
+            console.error('Error loading comment detail:', err);
+            setError('Failed to load comment details');
+        } finally {
+            setCommentLoading(false);
+        }
+    };
+
+    const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+        if (direction === 'prev' && currentCommentIndex > 0) {
+            setCurrentCommentIndex(currentCommentIndex - 1);
+            setSelectedComment(allComments[currentCommentIndex - 1]);
+        } else if (direction === 'next') {
+            if (currentCommentIndex < allComments.length - 1) {
+                setCurrentCommentIndex(currentCommentIndex + 1);
+                setSelectedComment(allComments[currentCommentIndex + 1]);
+            } else if (remainingCommentIds.length > 0) {
+                // Load next comment from remaining IDs
+                const nextCommentId = remainingCommentIds[0];
+                try {
+                    setCommentLoading(true);
+                    const nextComment = await getCommentDetail(nextCommentId, [selectedMonth]);
+                    setAllComments([...allComments, nextComment]);
+                    setRemainingCommentIds(remainingCommentIds.slice(1));
+                    setCurrentCommentIndex(allComments.length);
+                    setSelectedComment(nextComment);
+                } catch (err: unknown) {
+                    console.error('Error loading next comment:', err);
+                    setError('Failed to load next comment');
+                } finally {
+                    setCommentLoading(false);
+                }
+            }
+        }
+    };
+
+    const handleCloseCommentModal = () => {
+        setCommentModalOpen(false);
+        setSelectedComment(null);
+        setAllComments([]);
+        setCurrentCommentIndex(0);
+        setRemainingCommentIds([]);
     };
 
     const handleMonthChange = (month: string) => {
@@ -129,7 +242,7 @@ const MonthlyUserPosts: React.FC = () => {
         // Create array of dates for the month
         const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-                // Convert posted dates to day numbers for easy lookup
+        // Convert posted dates to day numbers for easy lookup
         const postedDays = new Set(
             userAnalysis.posted_dates.map(dateStr => {
                 const date = new Date(dateStr + 'T00:00:00');  // Add time to avoid timezone issues
@@ -169,7 +282,7 @@ const MonthlyUserPosts: React.FC = () => {
                         const isPosted = postedDays.has(day);
                         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
-                        
+
                         return (
                             <div
                                 key={day}
@@ -183,7 +296,7 @@ const MonthlyUserPosts: React.FC = () => {
                                     <div className="mt-1">
                                         <CommentDisplay
                                             commentIds={dayCommentIds}
-                                            onCommentClick={(commentId) => console.log('Comment clicked:', commentId)}
+                                            onCommentClick={(commentId) => handleCommentClick(commentId, dayCommentIds)}
                                         />
                                     </div>
                                 )}
@@ -233,7 +346,7 @@ const MonthlyUserPosts: React.FC = () => {
                         const isPosted = postedDays.has(day);
                         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
-                        
+
                         return (
                             <div
                                 key={day}
@@ -255,7 +368,7 @@ const MonthlyUserPosts: React.FC = () => {
                                     <div className="text-sm text-muted-foreground">
                                         <CommentDisplay
                                             commentIds={dayCommentIds}
-                                            onCommentClick={(commentId) => console.log('Comment clicked:', commentId)}
+                                            onCommentClick={(commentId) => handleCommentClick(commentId, dayCommentIds)}
                                         />
                                     </div>
                                 )}
@@ -400,6 +513,202 @@ const MonthlyUserPosts: React.FC = () => {
                     </CardContent>
                 </Card>
             )}
+
+            {/* Product Usage Tables */}
+            {userAnalysis && (
+                <div className="space-y-6">
+                    {/* Razors Table */}
+                    {userAnalysis.razors.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Razors Used</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse border border-border">
+                                        <thead>
+                                            <tr className="bg-muted">
+                                                <th className="border border-border p-2 text-center">#</th>
+                                                <th className="border border-border p-2 text-left">Brand</th>
+                                                <th className="border border-border p-2 text-left">Model</th>
+                                                <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Comment IDs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {userAnalysis.razors.map((razor, index) => (
+                                                <tr key={razor.key} className="hover:bg-muted/50">
+                                                    <td className="border border-border p-2 text-center font-medium">{index + 1}</td>
+                                                    <td className="border border-border p-2">{razor.brand}</td>
+                                                    <td className="border border-border p-2">{razor.model}</td>
+                                                    <td className="border border-border p-2 text-center">{razor.count}</td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={razor.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, razor.comment_ids)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Blades Table */}
+                    {userAnalysis.blades.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Blades Used</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse border border-border">
+                                        <thead>
+                                            <tr className="bg-muted">
+                                                <th className="border border-border p-2 text-center">#</th>
+                                                <th className="border border-border p-2 text-left">Brand</th>
+                                                <th className="border border-border p-2 text-left">Model</th>
+                                                <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Comment IDs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {userAnalysis.blades.map((blade, index) => (
+                                                <tr key={blade.key} className="hover:bg-muted/50">
+                                                    <td className="border border-border p-2 text-center font-medium">{index + 1}</td>
+                                                    <td className="border border-border p-2">{blade.brand}</td>
+                                                    <td className="border border-border p-2">{blade.model}</td>
+                                                    <td className="border border-border p-2 text-center">{blade.count}</td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={blade.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, blade.comment_ids)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Brushes Table */}
+                    {userAnalysis.brushes.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Brushes Used</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse border border-border">
+                                        <thead>
+                                            <tr className="bg-muted">
+                                                <th className="border border-border p-2 text-center">#</th>
+                                                <th className="border border-border p-2 text-left">Brand</th>
+                                                <th className="border border-border p-2 text-left">Model</th>
+                                                <th className="border border-border p-2 text-left">Handle Brand</th>
+                                                <th className="border border-border p-2 text-left">Knot Brand</th>
+                                                <th className="border border-border p-2 text-left">Knot Model</th>
+                                                <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Comment IDs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {userAnalysis.brushes.map((brush, index) => (
+                                                <tr key={brush.key} className="hover:bg-muted/50">
+                                                    <td className="border border-border p-2 text-center font-medium">{index + 1}</td>
+                                                    <td className="border border-border p-2">{brush.brand}</td>
+                                                    <td className="border border-border p-2">{brush.model}</td>
+                                                    <td className="border border-border p-2">{brush.handle_brand || '-'}</td>
+                                                    <td className="border border-border p-2">{brush.knot_brand || '-'}</td>
+                                                    <td className="border border-border p-2">{brush.knot_model || '-'}</td>
+                                                    <td className="border border-border p-2 text-center">{brush.count}</td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={brush.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, brush.comment_ids)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Soaps Table */}
+                    {userAnalysis.soaps.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Soaps Used</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse border border-border">
+                                        <thead>
+                                            <tr className="bg-muted">
+                                                <th className="border border-border p-2 text-center">#</th>
+                                                <th className="border border-border p-2 text-left">Brand</th>
+                                                <th className="border border-border p-2 text-left">Scent</th>
+                                                <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Comment IDs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {userAnalysis.soaps.map((soap, index) => (
+                                                <tr key={soap.key} className="hover:bg-muted/50">
+                                                    <td className="border border-border p-2 text-center font-medium">{index + 1}</td>
+                                                    <td className="border border-border p-2">{soap.brand}</td>
+                                                    <td className="border border-border p-2">{soap.model}</td>
+                                                    <td className="border border-border p-2 text-center">{soap.count}</td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={soap.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, soap.comment_ids)}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* No Products Message */}
+                    {userAnalysis.razors.length === 0 &&
+                        userAnalysis.blades.length === 0 &&
+                        userAnalysis.brushes.length === 0 &&
+                        userAnalysis.soaps.length === 0 && (
+                            <Card>
+                                <CardContent className="pt-6">
+                                    <div className="text-center text-muted-foreground">
+                                        No product data available for this user in this month.
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                </div>
+            )}
+
+            {/* Comment Modal */}
+            <CommentModal
+                comment={selectedComment}
+                isOpen={commentModalOpen}
+                onClose={handleCloseCommentModal}
+                comments={allComments}
+                currentIndex={currentCommentIndex}
+                onNavigate={handleCommentNavigation}
+                remainingCommentIds={remainingCommentIds}
+            />
         </div>
     );
 };

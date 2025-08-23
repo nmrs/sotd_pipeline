@@ -33,6 +33,11 @@ class UserPostingAnalysis(BaseModel):
     posted_dates: List[str]
     comment_ids: List[str]
     comments_by_date: Dict[str, List[str]]
+    # Product usage data
+    razors: List[Dict[str, Any]]
+    blades: List[Dict[str, Any]]
+    brushes: List[Dict[str, Any]]
+    soaps: List[Dict[str, Any]]
 
 
 class MonthData(BaseModel):
@@ -202,6 +207,112 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
                     )
                     continue
 
+        # Extract product usage data
+        razors = []
+        blades = []
+        brushes = []
+        soaps = []
+
+        for record in user_records:
+            comment_id = record.get("id", "")
+
+            # Extract razor data
+            if "razor" in record and record["razor"]:
+                razor = record["razor"]
+                matched = razor.get("matched", {})
+                if matched and matched.get("brand") and matched.get("model"):
+                    razor_key = f"{matched['brand']}|{matched['model']}"
+                    existing = next((r for r in razors if r["key"] == razor_key), None)
+                    if existing:
+                        existing["count"] += 1
+                        existing["comment_ids"].append(comment_id)
+                    else:
+                        razors.append(
+                            {
+                                "key": razor_key,
+                                "brand": matched["brand"],
+                                "model": matched["model"],
+                                "count": 1,
+                                "comment_ids": [comment_id],
+                            }
+                        )
+
+            # Extract blade data
+            if "blade" in record and record["blade"]:
+                blade = record["blade"]
+                matched = blade.get("matched", {})
+                if matched and matched.get("brand") and matched.get("model"):
+                    blade_key = f"{matched['brand']}|{matched['model']}"
+                    existing = next((b for b in blades if b["key"] == blade_key), None)
+                    if existing:
+                        existing["count"] += 1
+                        existing["comment_ids"].append(comment_id)
+                    else:
+                        blades.append(
+                            {
+                                "key": blade_key,
+                                "brand": matched["brand"],
+                                "model": matched["model"],
+                                "count": 1,
+                                "comment_ids": [comment_id],
+                            }
+                        )
+
+            # Extract brush data
+            if "brush" in record and record["brush"]:
+                brush = record["brush"]
+                matched = brush.get("matched", {})
+                if matched and matched.get("brand") and matched.get("model"):
+                    # Get handle and knot info
+                    handle = matched.get("handle", {})
+                    knot = matched.get("knot", {})
+                    handle_brand = handle.get("brand", "") if handle else ""
+                    knot_brand = knot.get("brand", "") if knot else ""
+                    knot_model = knot.get("model", "") if knot else ""
+
+                    brush_key = (
+                        f"{matched['brand']}|{matched['model']}|"
+                        f"{handle_brand}|{knot_brand}|{knot_model}"
+                    )
+                    existing = next((b for b in brushes if b["key"] == brush_key), None)
+                    if existing:
+                        existing["count"] += 1
+                        existing["comment_ids"].append(comment_id)
+                    else:
+                        brushes.append(
+                            {
+                                "key": brush_key,
+                                "brand": matched["brand"],
+                                "model": matched["model"],
+                                "handle_brand": handle_brand,
+                                "knot_brand": knot_brand,
+                                "knot_model": knot_model,
+                                "count": 1,
+                                "comment_ids": [comment_id],
+                            }
+                        )
+
+            # Extract soap data
+            if "soap" in record and record["soap"]:
+                soap = record["soap"]
+                matched = soap.get("matched", {})
+                if matched and matched.get("brand") and matched.get("scent"):
+                    soap_key = f"{matched['brand']}|{matched['scent']}"
+                    existing = next((s for s in soaps if s["key"] == soap_key), None)
+                    if existing:
+                        existing["count"] += 1
+                        existing["comment_ids"].append(comment_id)
+                    else:
+                        soaps.append(
+                            {
+                                "key": soap_key,
+                                "brand": matched["brand"],
+                                "model": matched["scent"],
+                                "count": 1,
+                                "comment_ids": [comment_id],
+                            }
+                        )
+
         # Convert to our expected format
         analysis = {
             "user": user_analysis["user"],
@@ -210,6 +321,10 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             "posted_dates": sorted(posted_dates),
             "comment_ids": comment_ids,
             "comments_by_date": comments_by_date,
+            "razors": razors,
+            "blades": blades,
+            "brushes": brushes,
+            "soaps": soaps,
         }
 
         return UserPostingAnalysis(**analysis)
