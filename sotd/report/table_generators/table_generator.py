@@ -74,8 +74,120 @@ class TableGenerator:
             "brand-diversity": "brand_diversity",
         }
 
+    def _format_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format column names to Title Case while preserving acronyms.
+        
+        Args:
+            df: DataFrame with original column names
+            
+        Returns:
+            DataFrame with formatted column names
+        """
+        # Define common acronyms that should stay uppercase
+        acronyms = {
+            'de', 'ac', 'oc', 'sb', 'aa', 'b', 'c', 'd', 'f',  # Razor formats
+            'mm', 'ptfe', 'gem', 'weck', 'valet', 'rolls',  # Brand/model acronyms
+            'oc', 'lite', 'standard', 'sb', 'aa', 'b', 'c', 'd', 'f'  # Plate types
+        }
+        
+        formatted_columns = {}
+        for col in df.columns:
+            if col.lower() in acronyms:
+                # Preserve acronyms in uppercase
+                formatted_columns[col] = col.upper()
+            else:
+                # Convert snake_case to Title Case
+                formatted_col = col.replace('_', ' ').title()
+                formatted_columns[col] = formatted_col
+        
+        # Rename columns
+        df = df.rename(columns=formatted_columns)
+        return df
+
+    def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
+        """Parse the columns parameter specification.
+        
+        Args:
+            columns_spec: String like "rank, name=soap, shaves, unique_users"
+            
+        Returns:
+            Tuple of (column_order, rename_mapping)
+            
+        Raises:
+            ValueError: If syntax is invalid
+        """
+        if not columns_spec.strip():
+            raise ValueError("Columns parameter cannot be empty")
+        
+        column_order = []
+        rename_mapping = {}
+        
+        for part in columns_spec.split(','):
+            part = part.strip()
+            if not part:
+                continue
+                
+            if '=' in part:
+                # Handle renaming: "name=soap"
+                if part.count('=') != 1:
+                    raise ValueError(f"Invalid rename syntax: {part}")
+                original, alias = part.split('=', 1)
+                original = original.strip()
+                alias = alias.strip()
+                
+                if not original or not alias:
+                    raise ValueError(f"Invalid rename syntax: {part}")
+                    
+                column_order.append(original)
+                rename_mapping[original] = alias
+            else:
+                # Simple column name
+                column_order.append(part)
+        
+        if not column_order:
+            raise ValueError("No valid columns specified")
+            
+        return column_order, rename_mapping
+
+    def _apply_column_operations(self, df: pd.DataFrame, columns_spec: Optional[str] = None) -> pd.DataFrame:
+        """Apply column reordering and renaming operations.
+        
+        Args:
+            df: DataFrame to modify
+            columns_spec: Optional columns specification string
+            
+        Returns:
+            Modified DataFrame
+        """
+        if not columns_spec:
+            return df
+            
+        try:
+            column_order, rename_mapping = self._parse_columns_parameter(columns_spec)
+        except ValueError as e:
+            raise ValueError(f"Invalid columns parameter: {e}")
+        
+        # Validate that specified columns exist
+        missing_columns = [col for col in column_order if col not in df.columns]
+        if missing_columns:
+            # Silently omit missing columns as per requirements
+            column_order = [col for col in column_order if col in df.columns]
+            if not column_order:
+                raise ValueError("No valid columns found in data")
+        
+        # Reorder and rename columns
+        df = df[column_order].copy()
+        if rename_mapping:
+            df = df.rename(columns=rename_mapping)
+            
+        return df
+
     def generate_table(
-        self, table_name: str, ranks: Optional[int] = None, rows: Optional[int] = None
+        self, 
+        table_name: str, 
+        ranks: Optional[int] = None, 
+        rows: Optional[int] = None,
+        columns: Optional[str] = None
     ) -> str:
         """Generate a markdown table by table name.
 
@@ -83,13 +195,14 @@ class TableGenerator:
             table_name: Name of the table (e.g., 'soap-makers', 'razors')
             ranks: Maximum rank to include (inclusive with ties)
             rows: Maximum number of rows to include
+            columns: Optional column specification (e.g., "rank, name=soap, shaves")
 
         Returns:
             Markdown table string
 
         Raises:
             ValueError: If table name is not recognized, parameters are invalid,
-                      or rank column is missing
+                      rank column is missing, or columns parameter is invalid
         """
         if table_name not in self.table_mappings:
             raise ValueError(f"Unknown table name: {table_name}")
@@ -125,6 +238,13 @@ class TableGenerator:
         # Apply rows limit if specified
         if rows is not None:
             df = df.head(rows)
+
+        # Apply column operations if specified
+        if columns:
+            df = self._apply_column_operations(df, columns)
+
+        # Format column names to Title Case with acronym preservation
+        df = self._format_column_names(df)
 
         # Convert to markdown
         result = df.to_markdown(index=False)

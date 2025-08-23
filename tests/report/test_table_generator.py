@@ -160,3 +160,245 @@ class TestTableGenerator:
         assert "razors" in table_names
         assert "soap-makers" in table_names
         assert "test-category" not in table_names  # Only mapped names
+
+    def test_column_name_formatting(self):
+        """Test that column names are automatically formatted to Title Case."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", rows=2)
+        
+        # Check that column names are formatted
+        assert "|   Rank |   Shaves |   Unique Users | Maker" in result
+        assert "|-------:|---------:|---------------:|:--------" in result
+        
+        # Verify no snake_case remains
+        assert "unique_users" not in result
+        assert "Unique Users" in result
+
+    def test_acronym_preservation(self):
+        """Test that acronyms are preserved in uppercase."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+                {"rank": 3, "format": "AC", "shaves": 60, "unique_users": 30},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table("razor-formats", rows=3)
+        
+        # Check that acronyms are preserved
+        assert "|   Rank | Format   |   Shaves |   Unique Users |" in result
+        assert "|      1 | DE       |" in result
+        assert "|      2 | GEM      |" in result
+        assert "|      3 | AC       |" in result
+        
+        # Verify acronyms are not converted to title case
+        assert "|      1 | De       |" not in result
+        assert "|      2 | Gem      |" not in result
+
+    def test_column_reordering(self):
+        """Test column reordering functionality."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns="shaves, rank, unique_users"
+        )
+        
+        # Check that columns are reordered
+        assert "|   Shaves |   Rank |   Unique Users |" in result
+        assert "|      100 |      1 |             50 |" in result
+        
+        # Verify original order is not present
+        assert "|   Rank |   Shaves |   Unique Users |" not in result
+
+    def test_column_renaming(self):
+        """Test column renaming functionality."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns="rank, maker=soap, shaves"
+        )
+        
+        # Check that column is renamed
+        assert "|   Rank | Soap    |   Shaves |" in result
+        assert "|      1 | Brand A |      100 |" in result
+        
+        # Verify original name is not present
+        assert "|   Rank | Maker   |   Shaves |" not in result
+
+    def test_column_reordering_and_renaming(self):
+        """Test combined column reordering and renaming."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns="shaves, maker=soap, rank"
+        )
+        
+        # Check that columns are reordered and renamed
+        assert "|   Shaves | Soap    |   Rank |" in result
+        assert "|      100 | Brand A |      1 |" in result
+
+    def test_columns_with_ranks_parameter(self):
+        """Test columns parameter combined with ranks parameter."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            ranks=3, 
+            columns="rank, maker=soap"
+        )
+        
+        # Check that both parameters work together
+        assert "|   Rank | Soap    |" in result
+        assert "|      1 | Brand A |" in result
+        assert "|      2 | Brand B |" in result
+        assert "|      3 | Brand C |" in result
+
+    def test_columns_with_rows_parameter(self):
+        """Test columns parameter combined with rows parameter."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns="rank, maker=soap"
+        )
+        
+        # Check that both parameters work together
+        assert "|   Rank | Soap    |" in result
+        assert "|      1 | Brand A |" in result
+        assert "|      2 | Brand B |" in result
+        
+        # Verify we don't see rank 3
+        assert "|      3 | Brand C |" not in result
+
+    def test_missing_columns_handling(self):
+        """Test that missing columns are silently omitted."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns="rank, nonexistent_column, shaves"
+        )
+        
+        # Check that only existing columns are shown
+        assert "|   Rank |   Shaves |" in result
+        assert "|      1 |      100 |" in result
+        
+        # Verify missing column is not present
+        assert "nonexistent_column" not in result
+
+    def test_empty_columns_parameter(self):
+        """Test that empty columns parameter shows all columns."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            rows=2, 
+            columns=""
+        )
+        
+        # Should show all columns in original order
+        assert "|   Rank |   Shaves |   Unique Users | Maker" in result
+
+    def test_invalid_columns_syntax(self):
+        """Test that invalid columns syntax raises appropriate errors."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        
+        # Test invalid rename syntax
+        with pytest.raises(ValueError, match="Invalid rename syntax"):
+            generator.generate_table(
+                "soap-makers", 
+                rows=2, 
+                columns="rank, name=soap=alias"
+            )
+        
+        # Test empty columns
+        with pytest.raises(ValueError, match="Columns parameter cannot be empty"):
+            generator.generate_table(
+                "soap-makers", 
+                rows=2, 
+                columns="   "
+            )
+
+    def test_no_valid_columns_after_filtering(self):
+        """Test error when no valid columns remain after filtering."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        
+        with pytest.raises(ValueError, match="No valid columns found in data"):
+            generator.generate_table(
+                "soap-makers", 
+                rows=2, 
+                columns="nonexistent1, nonexistent2"
+            )
