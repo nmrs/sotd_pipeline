@@ -39,63 +39,63 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Razor Formats
 
-{{tables.razor-formats}}
+{{tables.razor-formats|deltas:true}}
 
 ## Razors
 
-{{tables.razors|ranks:50}}
+{{tables.razors|ranks:50|deltas:true}}
 
 ## Razor Manufacturers
 
-{{tables.razor-manufacturers|ranks:30}}
+{{tables.razor-manufacturers|ranks:30|deltas:true}}
 
 ## Blades
 
-{{tables.blades|ranks:50}}
+{{tables.blades|ranks:50|deltas:true}}
 
 ## Brushes
 
-{{tables.brushes|ranks:50}}
+{{tables.brushes|ranks:50|deltas:true}}
 
 ## Brush Handle Makers
 
-{{tables.brush-handle-makers|ranks:30}}
+{{tables.brush-handle-makers|ranks:30|deltas:true}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers|ranks:30}}
+{{tables.brush-knot-makers|ranks:30|deltas:true}}
 
 ## Knot Fibers
 
-{{tables.knot-fibers}}
+{{tables.knot-fibers|deltas:true}}
 
 ## Knot Sizes
 
-{{tables.knot-sizes}}
+{{tables.knot-sizes|deltas:true}}
 
 ## Blackbird Plates
 
-{{tables.blackbird-plates}}
+{{tables.blackbird-plates|deltas:true}}
 
 ## Christopher Bradley Plates
 
-{{tables.christopher-bradley-plates}}
+{{tables.christopher-bradley-plates|deltas:true}}
 
 ## Game Changer Plates
 
-{{tables.game-changer-plates}}
+{{tables.game-changer-plates|deltas:true}}
 
 ## Straight Widths
 
-{{tables.straight-widths}}
+{{tables.straight-widths|deltas:true}}
 
 ## Straight Grinds
 
-{{tables.straight-grinds}}
+{{tables.straight-grinds|deltas:true}}
 
 ## Straight Points
 
-{{tables.straight-points}}
+{{tables.straight-points|deltas:true}}
 
 ## Most Used Blades in Most Used Razors
 
@@ -107,4 +107,4 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Top Shavers
 
-{{tables.top-shavers|rows:50}}
+{{tables.top-shavers|rows:50|deltas:true}}

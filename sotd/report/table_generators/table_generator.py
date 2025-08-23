@@ -31,40 +31,7 @@ class TableGenerator:
         self.comparison_data = comparison_data or {}
         self.debug = debug
 
-        # Map template names to data keys (convert hyphens to underscores)
-        self.table_mappings = {
-            # Hardware tables
-            "razors": "razors",
-            "razor-manufacturers": "razor_manufacturers",
-            "razor-formats": "razor_formats",
-            "blades": "blades",
-            "blade-manufacturers": "blade_manufacturers",
-            "blade-usage-distribution": "blade_usage_distribution",
-            "brushes": "brushes",
-            "brush-handle-makers": "brush_handle_makers",
-            "brush-knot-makers": "brush_knot_makers",
-            "knot-fibers": "brush_fibers",
-            "knot-sizes": "brush_knot_sizes",
-            # Specialized tables
-            "blackbird-plates": "blackbird_plates",
-            "christopher-bradley-plates": "christopher_bradley_plates",
-            "game-changer-plates": "game_changer_plates",
-            "super-speed-tips": "super_speed_tips",
-            "straight-widths": "straight_widths",
-            "straight-grinds": "straight_grinds",
-            "straight-points": "straight_points",
-            # Cross-product tables
-            "razor-blade-combinations": "razor_blade_combinations",
-            "highest-use-count-per-blade": "highest_use_count_per_blade",
-            # User tables
-            "top-shavers": "users",
-            # Software tables
-            "soap-makers": "soap_makers",
-            "soap-brands": "soap_brands",
-            "soaps": "soaps",
-            "top-sampled-soaps": "top_sampled_soaps",
-            "brand-diversity": "brand_diversity",
-        }
+        # No more hardcoded mappings - we'll convert kebab-case to snake_case dynamically
 
     def _format_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format column names to Title Case while preserving acronyms.
@@ -294,22 +261,34 @@ class TableGenerator:
 
             # Calculate rank changes
             for idx, row in df.iterrows():
-                current_format = row.get("format", row.get("brand", row.get("maker", "")))
-                if not current_format:
+                # Get all string columns for comparison
+                string_columns = self._get_string_columns(df.columns)
+
+                if not string_columns:
                     if self.debug:
-                        print(f"[DEBUG] No format/brand/maker found for row {idx}")
+                        print(f"[DEBUG] No string columns found for table {table_name}")
                     continue
 
-                if self.debug:
-                    print(f"[DEBUG] Looking for format: {current_format}")
+                # Try to find a match using any of the string columns
+                comparison_row = pd.DataFrame()
+                matched_column = None
 
-                # Find matching record in comparison data
-                comparison_row = comparison_df[
-                    comparison_df.get(
-                        "format", comparison_df.get("brand", comparison_df.get("maker", ""))
+                for col in string_columns:
+                    if col in row and col in comparison_df.columns:
+                        current_identifier = row[col]
+                        if current_identifier:
+                            matches = comparison_df[comparison_df[col] == current_identifier]
+                            if not matches.empty:
+                                comparison_row = matches
+                                matched_column = col
+                                break
+
+                if self.debug and not comparison_row.empty:
+                    print(
+                        f"[DEBUG] Found match using column {matched_column}: {row[matched_column]}"
                     )
-                    == current_format
-                ]
+                elif self.debug:
+                    print(f"[DEBUG] No match found for row {idx} using columns: {string_columns}")
 
                 if not comparison_row.empty:
                     current_rank = row["rank"]
@@ -317,7 +296,7 @@ class TableGenerator:
 
                     if self.debug:
                         print(
-                            f"[DEBUG] Found match: {current_format}, current_rank: {current_rank}, comparison_rank: {comparison_rank}"
+                            f"[DEBUG] Found match: {current_identifier}, current_rank: {current_rank}, comparison_rank: {comparison_rank}"
                         )
 
                     if current_rank == comparison_rank:
@@ -339,9 +318,24 @@ class TableGenerator:
                         df.at[idx, "Δ vs 5 Years Ago"] = delta_value
                 else:
                     if self.debug:
-                        print(f"[DEBUG] No match found for format: {current_format}")
+                        print(f"[DEBUG] No match found for identifier: {current_identifier}")
 
         return df
+
+    def _get_string_columns(self, columns: list) -> list[str]:
+        """Get all string columns from the DataFrame for comparison.
+
+        Args:
+            columns: List of available columns in the DataFrame
+
+        Returns:
+            List of string column names
+        """
+        # Define numeric columns that are not string identifiers
+        numeric_columns = {"rank", "shaves", "unique_users", "missed_days"}
+
+        # Return all non-numeric columns
+        return [col for col in columns if col not in numeric_columns]
 
     def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
         """Parse the columns parameter specification.
@@ -510,26 +504,23 @@ class TableGenerator:
                       rank column is missing, columns parameter is invalid,
                       or numeric limits create gaps in data
         """
-        if table_name not in self.table_mappings:
-            raise ValueError(f"Unknown table name: {table_name}")
-
         # Validate parameters
         if ranks is not None and ranks <= 0:
             raise ValueError("ranks must be greater than 0")
         if rows is not None and rows <= 0:
             raise ValueError("rows must be greater than 0")
 
-        # Get the data for this table
-        aggregator_name = self.table_mappings[table_name]
+        # Convert kebab-case template name to snake_case data key
+        data_key = table_name.replace('-', '_')
 
-        if aggregator_name not in self.data:
+        if data_key not in self.data:
             available_keys = list(self.data.keys())
             raise ValueError(
-                f"Data for table '{table_name}' (mapped to '{aggregator_name}') "
-                f"not found in aggregated data. Available keys: {available_keys}"
+                f"Unknown table: {table_name} (converted to '{data_key}'). "
+                f"Available keys: {available_keys}"
             )
 
-        table_data = self.data[aggregator_name]
+        table_data = self.data[data_key]
 
         # Convert data to DataFrame first
         df = pd.DataFrame(table_data)
@@ -567,7 +558,7 @@ class TableGenerator:
                 )
 
             # Use the data key (with underscore) for delta calculation, not the table name (with hyphen)
-            data_key = self.table_mappings.get(table_name, table_name)
+            data_key = table_name.replace('-', '_')
             df = self._calculate_deltas(df, data_key, current_month)
 
             if self.debug:
@@ -614,7 +605,8 @@ class TableGenerator:
         Returns:
             List of available table names
         """
-        return list(self.table_mappings.keys())
+        # Return all available data keys (these are the table names)
+        return list(self.data.keys())
 
     def generate_table_by_name(self, table_name: str) -> str:
         """Generate a table by its placeholder name (backward compatibility).

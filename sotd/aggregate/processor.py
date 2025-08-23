@@ -215,9 +215,9 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     )
 
     # Soap diversity aggregations
-    aggregated_data["data"]["soap_brand_diversity"] = aggregate_soap_brand_diversity(records)
-    aggregated_data["data"]["soap_brand_scent_diversity"] = aggregate_soap_brand_scent_diversity(
-        records
+    aggregated_data["data"]["user_soap_brand_diversity"] = aggregate_soap_brand_diversity(records)
+    aggregated_data["data"]["user_soap_brand_scent_diversity"] = (
+        aggregate_soap_brand_scent_diversity(records)
     )
 
     # Format aggregations
@@ -245,9 +245,9 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
 
     # User diversity aggregations
     aggregated_data["data"]["soap_sample_users"] = aggregate_soap_sample_users(records)
-    aggregated_data["data"]["razor_diversity"] = aggregate_razor_diversity(records)
-    aggregated_data["data"]["blade_diversity"] = aggregate_blade_diversity(records)
-    aggregated_data["data"]["brush_diversity"] = aggregate_brush_diversity(records)
+    aggregated_data["data"]["user_razor_diversity"] = aggregate_razor_diversity(records)
+    aggregated_data["data"]["user_blade_diversity"] = aggregate_blade_diversity(records)
+    aggregated_data["data"]["user_brush_diversity"] = aggregate_brush_diversity(records)
     aggregated_data["data"]["razor_format_users"] = aggregate_razor_format_users(records)
     aggregated_data["data"]["brush_fiber_users"] = aggregate_brush_fiber_users(records)
 

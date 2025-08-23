@@ -99,7 +99,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
         }
 
         # Initialize table generator with the new universal approach
-        table_generator = TableGenerator(self.data, self.comparison_data)
+        table_generator = TableGenerator(self.data, self.comparison_data, debug=self.debug)
 
         # Get the template content to detect enhanced table syntax
         if self.template_path:
