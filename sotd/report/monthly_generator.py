@@ -206,7 +206,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                 except Exception as e:
-                    # Handle enhanced table syntax errors gracefully by falling back to basic table generation
+                    # Handle enhanced table syntax errors gracefully by falling back to basic table
+                    # generation
                     if self.debug:
                         print(
                             f"[DEBUG] MonthlyReport({self.report_type}): "
@@ -215,7 +216,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                             f"Falling back to basic table generation."
                         )
 
-                    # Don't add this placeholder to enhanced_tables - let it be processed as basic table
+                    # Don't add this placeholder to enhanced_tables - let it be processed as basic
+                    # table
                     # This allows the template processor to handle it normally
                     continue
 
