@@ -55,7 +55,11 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
             author = get_field_value(record, "author")
 
             if brand and author:  # scent can be empty string, which is valid
-                diversity_data.append({"brand": brand, "scent": scent, "author": author})
+                diversity_data.append({
+                    "brand": brand, 
+                    "scent": scent, 
+                    "author": f"u/{author}"  # Prepend "u/" for Reddit user tagging
+                })
 
         return diversity_data
 
