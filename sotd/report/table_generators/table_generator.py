@@ -75,8 +75,12 @@ class TableGenerator:
         formatted_columns = {}
         for col in df.columns:
             if col.lower() in acronyms:
-                # Preserve acronyms in uppercase
-                formatted_columns[col] = col.upper()
+                # Handle special cases for words that should stay lowercase
+                if col.lower() == "per":
+                    formatted_columns[col] = col.lower()  # Keep "per" lowercase
+                else:
+                    # Preserve other acronyms in uppercase
+                    formatted_columns[col] = col.upper()
             else:
                 # Convert snake_case to Title Case
                 formatted_col = col.replace("_", " ").title()
