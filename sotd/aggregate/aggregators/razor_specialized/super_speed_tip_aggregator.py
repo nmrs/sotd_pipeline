@@ -24,8 +24,6 @@ class SuperSpeedTipAggregator(BaseAggregator):
         """Fields used for sorting/ranking."""
         return ["shaves", "unique_users"]
 
-
-
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract Super Speed tip data from records for aggregation.
 

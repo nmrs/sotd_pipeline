@@ -26,8 +26,6 @@ class AnnualAggregator(BaseAggregator):
         """Fields used for sorting/ranking."""
         return ["shaves", "unique_users"]
 
-
-
     def __init__(self, category: str):
         """Initialize annual aggregator for a specific category.
 

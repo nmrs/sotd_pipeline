@@ -24,8 +24,6 @@ class StraightPointAggregator(BaseAggregator):
         """Fields used for sorting/ranking."""
         return ["shaves", "unique_users"]
 
-
-
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract straight razor point data from records for aggregation.
 

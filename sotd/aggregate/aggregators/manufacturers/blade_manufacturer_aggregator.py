@@ -24,8 +24,6 @@ class BladeManufacturerAggregator(BaseAggregator):
         """Fields used for sorting/ranking."""
         return ["shaves", "unique_users"]
 
-
-
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract blade manufacturer data from records for aggregation.
 
