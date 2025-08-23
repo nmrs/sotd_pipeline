@@ -147,7 +147,61 @@ Welcome to your SOTD Lather Log for June 2025
 
 ## Brand Diversity
 
-{{tables.brand-diversity|unique_soaps:5|deltas:true}}
+| Rank   | Brand                      |   Unique Soaps | Δ vs May 2025   | Δ vs Jun 2024   | Δ vs Jun 2020   |
+|:-------|:---------------------------|---------------:|:----------------|:----------------|:----------------|
+| 1      | Stirling Soap Co.          |             63 | =               | =               | =               |
+| 2      | Barrister and Mann         |             48 | =               | =               | ↑1              |
+| 3      | Catie's Bubbles            |             45 | =               | ↑1              | ↑2              |
+| 4      | Declaration Grooming       |             35 | ↑3              | ↓1              | ↓2              |
+| 5=     | Ariana & Evans             |             28 | ↓1              | ↑1              | ↑3              |
+| 5=     | House of Mammoth           |             28 | =               | ↑4              | ↑5              |
+| 6      | Zingari Man                |             26 | ↑2              | ↑2              | ↑7              |
+| 7      | Talent Soap Factory        |             25 | ↓1              | ↓2              | ↑25             |
+| 8      | Wholly Kaw                 |             24 | ↑6              | ↓1              | ↓2              |
+| 9      | Noble Otter                |             23 | ↓1              | ↑2              | ↑1              |
+| 10     | Chicago Grooming Co.       |             21 | ↑3              | ↑2              | ↓6              |
+| 11     | Summer Break Soaps         |             19 | ↓2              | ↓1              | ↑5              |
+| 12     | Southern Witchcrafts       |             17 | ↓1              | ↑2              | ↓3              |
+| 13=    | Chiseled Face              |             16 | ↑2              | ↑1              | ↓6              |
+| 13=    | MacDuff's Soap Co.         |             16 | ↓3              | =               | n/a             |
+| 14     | Gentleman's Nod            |             14 | ↑6              | ↑10             | ↑13             |
+| 15=    | Dr. Jon's                  |             12 | ↑1              | ↑1              | ↑2              |
+| 15=    | Mike's Natural Soaps       |             12 | ↓2              | ↑10             | ↑12             |
+| 15=    | Spearhead Shaving Co.      |             12 | ↓3              | ↑3              | ↑6              |
+| 16     | Black Ship Grooming        |             11 | ↑4              | ↑1              | ↓4              |
+| 17=    | Henri et Victoria          |             10 | ↑2              | ↑1              | ↑10             |
+| 17=    | Los Jabones de Joserra     |             10 | ↑1              | ↑8              | n/a             |
+| 17=    | RazoRock                   |             10 | ↑3              | ↑4              | ↓1              |
+| 18     | Strike Gold Shave          |              9 | ↓1              | ↑9              | ↑10             |
+| 19=    | Abbate Y La Mantia         |              8 | =               | ↑5              | ↑7              |
+| 19=    | Hendrix Classics & Co.     |              8 | ↓1              | ↑4              | n/a             |
+| 19=    | Martin de Candre           |              8 | =               | ↑4              | ↑9              |
+| 19=    | Tallow + Steel             |              8 | =               | ↑2              | ↓8              |
+| 20=    | D.R. Harris                |              7 | ↑2              | ↑2              | ↑4              |
+| 20=    | Eleven                     |              7 | =               | ↓5              | ↑9              |
+| 20=    | First Line Shave           |              7 | n/a             | ↑5              | ↑8              |
+| 20=    | Maggard Razors             |              7 | ↓1              | ↓4              | ↑1              |
+| 20=    | Master Creations           |              7 | ↑2              | ↑4              | n/a             |
+| 20=    | Murphy & McNeil            |              7 | ↓1              | ↓2              | ↓5              |
+| 20=    | Taylor of Old Bond Street  |              7 | ↑1              | ↓1              | ↓5              |
+| 21=    | 345 Soap Co.               |              6 | =               | ↑1              | n/a             |
+| 21=    | Aion Skincare              |              6 | ↑1              | n/a             | ↑10             |
+| 21=    | Australian Private Reserve |              6 | ↓3              | ↓4              | ↓8              |
+| 21=    | Captain's Choice           |              6 | =               | ↑4              | ↑7              |
+| 21=    | Grooming Dept              |              6 | n/a             | ↑1              | ↓3              |
+| 21=    | HAGS                       |              6 | n/a             | ↓6              | n/a             |
+| 21=    | Hoffman's                  |              6 | ↓1              | ↑4              | n/a             |
+| 21=    | Red House Farm             |              6 | =               | =               | n/a             |
+| 21=    | Saponificio Varesino       |              6 | ↓5              | ↑1              | ↑1              |
+| 22=    | Areffa Soap                |              5 | n/a             | ↓2              | n/a             |
+| 22=    | Crown & Crane              |              5 | ↓2              | ↑2              | ↑10             |
+| 22=    | Fanzine Saponifications    |              5 | =               | n/a             | n/a             |
+| 22=    | Jordan's                   |              5 | ↓1              | ↑1              | n/a             |
+| 22=    | Moon Soap                  |              5 | ↓7              | ↓1              | ↑10             |
+| 22=    | Oaken Lab                  |              5 | =               | ↑5              | ↑8              |
+| 22=    | Shannon's Soaps            |              5 | =               | ↓4              | ↑7              |
+| 22=    | The Goodfellas Smile       |              5 | ↓1              | ↑4              | ↑6              |
+| 22=    | WestMan Shaving            |              5 | =               | ↑1              | n/a             |
 
 ### Soap Diversity by User
 

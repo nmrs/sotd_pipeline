@@ -33,7 +33,7 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 {{tables.brand-diversity|unique_soaps:5|deltas:true}}
 
-### Soap Diversity by User
+## Soap Diversity by User
 
 {{tables.user-soap-brand-scent-diversity|ranks:40|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
 
