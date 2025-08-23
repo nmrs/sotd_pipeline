@@ -8,6 +8,23 @@ from ..base_aggregator import BaseAggregator
 class KnotSizeAggregator(BaseAggregator):
     """Aggregator for brush knot size data from enriched records."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["knot_size_mm"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
+
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract knot size data from records."""
         knot_size_data = []

@@ -8,6 +8,23 @@ from ..base_aggregator import BaseAggregator
 class HandleMakerAggregator(BaseAggregator):
     """Aggregator for brush handle maker data from enriched records."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["handle_maker"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
+
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract handle maker data from records."""
         maker_data = []
