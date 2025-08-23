@@ -200,7 +200,7 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         final_results.append(
             {
                 "rank": int(row["rank"]),
-                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit user tagging
+                "user": row["author"],  # Report generation handles Reddit user tagging
                 "shaves": int(row["shaves"]),
                 "missed_days": int(row["missed_days"]),
                 "missed_dates": row["missed_dates"],
