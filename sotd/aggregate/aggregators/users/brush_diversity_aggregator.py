@@ -98,7 +98,7 @@ class BrushDiversityAggregator(BaseAggregator):
         grouped.columns = ["author", "unique_brushes"]
 
         # Get total shaves per user
-        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
+        shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
         grouped = grouped.merge(shave_counts, on="author")
 
 
@@ -107,7 +107,7 @@ class BrushDiversityAggregator(BaseAggregator):
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add rank rankings."""
-        grouped = grouped.sort_values(["unique_brushes", "total_shaves"], ascending=[False, False])
+        grouped = grouped.sort_values(["unique_brushes", "shaves"], ascending=[False, False])
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         result = []
@@ -116,7 +116,7 @@ class BrushDiversityAggregator(BaseAggregator):
                 "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_brushes": int(row["unique_brushes"]),
-                "total_shaves": int(row["total_shaves"]),
+                "shaves": int(row["shaves"]),
 
             }
             result.append(item)

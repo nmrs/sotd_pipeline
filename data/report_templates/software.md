@@ -39,6 +39,3 @@ Welcome to your SOTD Lather Log for {{month_year}}
 ## Top Shavers
 
 {{tables.users|rows:50|deltas:true}}
-
-### Soap Brand Diversity by User
-{{tables.user-soap-brand-diversity|rows:50}}

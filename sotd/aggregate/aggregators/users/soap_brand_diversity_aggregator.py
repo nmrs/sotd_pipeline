@@ -76,7 +76,7 @@ class SoapBrandDiversityAggregator(BaseAggregator):
         grouped.columns = ["author", "unique_brands"]
 
         # Count total shaves per user
-        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
+        shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
 
         # Merge the data
         grouped = grouped.merge(shave_counts, on="author")
@@ -92,11 +92,10 @@ class SoapBrandDiversityAggregator(BaseAggregator):
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with rank, user, unique_brands, total_shaves,
-            and unique_users fields
+            List of dictionaries with rank, user, unique_brands, and shaves fields
         """
-        # Sort by unique_brands desc, total_shaves desc
-        grouped = grouped.sort_values(["unique_brands", "total_shaves"], ascending=[False, False])
+        # Sort by unique_brands desc, shaves desc
+        grouped = grouped.sort_values(["unique_brands", "shaves"], ascending=[False, False])
 
         # Add rank field (1-based rank)
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
@@ -108,7 +107,7 @@ class SoapBrandDiversityAggregator(BaseAggregator):
                 "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_brands": int(row["unique_brands"]),
-                "total_shaves": int(row["total_shaves"]),
+                "shaves": int(row["shaves"]),
 
             }
 

@@ -85,7 +85,7 @@ class BladeDiversityAggregator(BaseAggregator):
         blade_counts.columns = ["author", "unique_blades"]
 
         # Count total shaves per user
-        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
+        shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
 
         # Merge all the data
         grouped = grouped.merge(blade_counts, on="author")
@@ -102,11 +102,10 @@ class BladeDiversityAggregator(BaseAggregator):
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with rank, user, unique_blades, total_shaves,
-            and unique_users fields
+            List of dictionaries with rank, user, unique_blades, and shaves fields
         """
-        # Sort by unique_blades desc, total_shaves desc
-        grouped = grouped.sort_values(["unique_blades", "total_shaves"], ascending=[False, False])
+        # Sort by unique_blades desc, shaves desc
+        grouped = grouped.sort_values(["unique_blades", "shaves"], ascending=[False, False])
 
         # Add rank field (1-based rank)
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
@@ -118,7 +117,7 @@ class BladeDiversityAggregator(BaseAggregator):
                 "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_blades": int(row["unique_blades"]),
-                "total_shaves": int(row["total_shaves"]),
+                "shaves": int(row["shaves"]),
 
             }
 

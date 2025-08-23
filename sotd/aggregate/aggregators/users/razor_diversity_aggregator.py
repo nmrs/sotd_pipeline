@@ -85,7 +85,7 @@ class RazorDiversityAggregator(BaseAggregator):
         razor_counts.columns = ["author", "unique_razors"]
 
         # Count total shaves per user
-        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
+        shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
 
         # Merge all the data
         grouped = grouped.merge(razor_counts, on="author")
@@ -100,11 +100,11 @@ class RazorDiversityAggregator(BaseAggregator):
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with rank, user, unique_razors, and total_shaves fields
+            List of dictionaries with rank, user, unique_razors, and shaves fields
         """
-        # Sort by unique_razors desc, total_shaves desc
+        # Sort by unique_razors desc, shaves desc
         grouped = grouped.sort_values(
-            ["unique_razors", "total_shaves"], ascending=[False, False]
+            ["unique_razors", "shaves"], ascending=[False, False]
         )
 
         # Add rank field (1-based rank)
@@ -117,7 +117,7 @@ class RazorDiversityAggregator(BaseAggregator):
                 "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_razors": int(row["unique_razors"]),
-                "total_shaves": int(row["total_shaves"]),
+                "shaves": int(row["shaves"]),
             }
 
             result.append(item)
