@@ -131,19 +131,17 @@ class TestSoapBrandDiversityAggregator:
 
         assert len(result) == 2
 
-        # Check first result (user1 with 2 unique brands, 3 total shaves)
+        # Check first result (user1 with 2 unique brands, 3 shaves)
         assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_brands"] == 2
-        assert result[0]["total_shaves"] == 3
-        assert result[0]["unique_users"] == 1
+        assert result[0]["shaves"] == 3
 
-        # Check second result (user2 with 1 unique brand, 1 total shave)
+        # Check second result (user2 with 1 unique brand, 1 shave)
         assert result[1]["rank"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["unique_brands"] == 1
-        assert result[1]["total_shaves"] == 1
-        assert result[1]["unique_users"] == 1
+        assert result[1]["shaves"] == 1
 
     def test_aggregate_empty_records(self):
         """Test aggregation with empty records."""
@@ -193,5 +191,4 @@ class TestSoapBrandDiversityAggregator:
         assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_brands"] == 3
-        assert result[0]["total_shaves"] == 3
-        assert result[0]["unique_users"] == 1
+        assert result[0]["shaves"] == 3

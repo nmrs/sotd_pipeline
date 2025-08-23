@@ -9,6 +9,21 @@ from ...utils.field_validation import has_required_fields, get_field_value
 class RazorAggregator(BaseAggregator):
     """Aggregator for razor data from enriched records."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["name"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract razor data from records for aggregation.
 
@@ -54,6 +69,14 @@ class RazorAggregator(BaseAggregator):
         model = df["model"].fillna("")
         # Use pandas string concatenation to avoid Series ambiguity
         return brand.astype(str) + " " + model.astype(str)
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns to use for grouping."""
+        return ["name"]
+
+    def _call_base_aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Call the base class aggregate method."""
+        return super().aggregate(records)
 
 
 # Legacy function interface for backward compatibility
