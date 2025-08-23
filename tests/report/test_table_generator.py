@@ -169,14 +169,14 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table("soap-makers", rows=2)
-        
+
         # Check that column names are formatted
         assert "|   Rank |   Shaves |   Unique Users | Maker" in result
         assert "|-------:|---------:|---------------:|:--------" in result
-        
+
         # Verify no snake_case remains
         assert "unique_users" not in result
         assert "Unique Users" in result
@@ -190,16 +190,16 @@ class TestTableGenerator:
                 {"rank": 3, "format": "AC", "shaves": 60, "unique_users": 30},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table("razor-formats", rows=3)
-        
+
         # Check that acronyms are preserved
         assert "|   Rank | Format   |   Shaves |   Unique Users |" in result
         assert "|      1 | DE       |" in result
         assert "|      2 | GEM      |" in result
         assert "|      3 | AC       |" in result
-        
+
         # Verify acronyms are not converted to title case
         assert "|      1 | De       |" not in result
         assert "|      2 | Gem      |" not in result
@@ -212,18 +212,16 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns="shaves, rank, unique_users"
+            "soap-makers", rows=2, columns="shaves, rank, unique_users"
         )
-        
+
         # Check that columns are reordered
         assert "|   Shaves |   Rank |   Unique Users |" in result
         assert "|      100 |      1 |             50 |" in result
-        
+
         # Verify original order is not present
         assert "|   Rank |   Shaves |   Unique Users |" not in result
 
@@ -235,18 +233,14 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns="rank, maker=soap, shaves"
-        )
-        
+        result = generator.generate_table("soap-makers", rows=2, columns="rank, maker=soap, shaves")
+
         # Check that column is renamed
         assert "|   Rank | Soap    |   Shaves |" in result
         assert "|      1 | Brand A |      100 |" in result
-        
+
         # Verify original name is not present
         assert "|   Rank | Maker   |   Shaves |" not in result
 
@@ -258,14 +252,10 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns="shaves, maker=soap, rank"
-        )
-        
+        result = generator.generate_table("soap-makers", rows=2, columns="shaves, maker=soap, rank")
+
         # Check that columns are reordered and renamed
         assert "|   Shaves | Soap    |   Rank |" in result
         assert "|      100 | Brand A |      1 |" in result
@@ -279,14 +269,10 @@ class TestTableGenerator:
                 {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        result = generator.generate_table(
-            "soap-makers", 
-            ranks=3, 
-            columns="rank, maker=soap"
-        )
-        
+        result = generator.generate_table("soap-makers", ranks=3, columns="rank, maker=soap")
+
         # Check that both parameters work together
         assert "|   Rank | Soap    |" in result
         assert "|      1 | Brand A |" in result
@@ -302,19 +288,15 @@ class TestTableGenerator:
                 {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns="rank, maker=soap"
-        )
-        
+        result = generator.generate_table("soap-makers", rows=2, columns="rank, maker=soap")
+
         # Check that both parameters work together
         assert "|   Rank | Soap    |" in result
         assert "|      1 | Brand A |" in result
         assert "|      2 | Brand B |" in result
-        
+
         # Verify we don't see rank 3
         assert "|      3 | Brand C |" not in result
 
@@ -326,18 +308,16 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns="rank, nonexistent_column, shaves"
+            "soap-makers", rows=2, columns="rank, nonexistent_column, shaves"
         )
-        
+
         # Check that only existing columns are shown
         assert "|   Rank |   Shaves |" in result
         assert "|      1 |      100 |" in result
-        
+
         # Verify missing column is not present
         assert "nonexistent_column" not in result
 
@@ -349,14 +329,10 @@ class TestTableGenerator:
                 {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        result = generator.generate_table(
-            "soap-makers", 
-            rows=2, 
-            columns=""
-        )
-        
+        result = generator.generate_table("soap-makers", rows=2, columns="")
+
         # Should show all columns in original order
         assert "|   Rank |   Shaves |   Unique Users | Maker" in result
 
@@ -367,24 +343,16 @@ class TestTableGenerator:
                 {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
             ]
         }
-        
+
         generator = TableGenerator(data)
-        
+
         # Test invalid rename syntax
         with pytest.raises(ValueError, match="Invalid rename syntax"):
-            generator.generate_table(
-                "soap-makers", 
-                rows=2, 
-                columns="rank, name=soap=alias"
-            )
-        
+            generator.generate_table("soap-makers", rows=2, columns="rank, name=soap=alias")
+
         # Test empty columns
         with pytest.raises(ValueError, match="Columns parameter cannot be empty"):
-            generator.generate_table(
-                "soap-makers", 
-                rows=2, 
-                columns="   "
-            )
+            generator.generate_table("soap-makers", rows=2, columns="   ")
 
     def test_no_valid_columns_after_filtering(self):
         """Test error when no valid columns remain after filtering."""
@@ -393,12 +361,105 @@ class TestTableGenerator:
                 {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
             ]
         }
+
+        generator = TableGenerator(data)
+
+        with pytest.raises(ValueError, match="No valid columns found in data"):
+            generator.generate_table("soap-makers", rows=2, columns="nonexistent1, nonexistent2")
+
+    def test_rank_column_formatting_equal_ranks(self):
+        """Test that equal ranks are formatted as N= in the rank column."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand C"},
+                {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand D"},
+                {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand E"},
+                {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand F"},
+            ]
+        }
         
         generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", rows=6)
         
-        with pytest.raises(ValueError, match="No valid columns found in data"):
-            generator.generate_table(
-                "soap-makers", 
-                rows=2, 
-                columns="nonexistent1, nonexistent2"
-            )
+        # Check that equal ranks are formatted as N=
+        assert "| 1      |" in result  # Single rank 1
+        assert "| 2=     |" in result  # Equal rank 2 (should appear twice)
+        assert "| 4=     |" in result  # Equal rank 4 (should appear three times)
+        
+        # Verify no plain equal ranks remain
+        assert "| 2      |" not in result
+        assert "| 4      |" not in result
+
+    def test_rank_column_formatting_single_ranks(self):
+        """Test that single ranks (no ties) are formatted normally."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", rows=3)
+        
+        # Check that single ranks are formatted normally (numeric format, 
+        # no rank formatting applied)
+        assert "|      1 |" in result  # Single rank 1 (6 spaces, pandas numeric format)
+        assert "|      2 |" in result  # Single rank 2 (6 spaces, pandas numeric format)
+        assert "|      3 |" in result  # Single rank 3 (6 spaces, pandas numeric format)
+        
+        # Verify no N= formatting for single ranks
+        assert "| 1=     |" not in result
+        assert "| 2=     |" not in result
+        assert "| 3=     |" not in result
+
+    def test_rank_column_formatting_mixed_ranks(self):
+        """Test mixed scenario with both single and equal ranks."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand C"},
+                {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand D"},
+                {"rank": 5, "shaves": 50, "unique_users": 25, "maker": "Brand E"},
+                {"rank": 5, "shaves": 50, "unique_users": 25, "maker": "Brand F"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", rows=6)
+        
+        # Check mixed formatting
+        assert "| 1      |" in result  # Single rank 1 (2 spaces, pandas string format)
+        assert "| 2=     |" in result  # Equal rank 2 (2 spaces, pandas string format)
+        assert "| 4      |" in result  # Single rank 4 (2 spaces, pandas string format)
+        assert "| 5=     |" in result  # Equal rank 5 (2 spaces, pandas string format)
+
+    def test_rank_column_formatting_with_parameters(self):
+        """Test rank formatting works with ranks and columns parameters."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "maker": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand B"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "maker": "Brand C"},
+                {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand D"},
+            ]
+        }
+        
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "soap-makers", 
+            ranks=3, 
+            columns="rank, maker=soap, shaves"
+        )
+        
+        # Check that rank formatting works with custom columns
+        assert "| 1      |" in result  # Single rank 1 (2 spaces, pandas string format)
+        assert "| 2=     |" in result  # Equal rank 2 (2 spaces, pandas string format)
+        
+        # Verify custom columns are working
+        assert "| Soap    |" in result
+        assert "|   Shaves |" in result

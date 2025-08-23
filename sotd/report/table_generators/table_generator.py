@@ -104,6 +104,35 @@ class TableGenerator:
         df = df.rename(columns=formatted_columns)
         return df
 
+    def _format_rank_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format rank column to show equal ranks as N=.
+        
+        Args:
+            df: DataFrame with rank column
+            
+        Returns:
+            DataFrame with formatted rank column
+        """
+        if "rank" not in df.columns:
+            return df
+            
+        # Create a copy to avoid modifying the original
+        df = df.copy()
+        
+        # Count occurrences of each rank
+        rank_counts = df["rank"].value_counts().to_dict()
+        
+        # Format ranks: add = for equal ranks, space for single ranks
+        def format_rank(rank):
+            if rank_counts.get(rank, 1) > 1:
+                return f"{rank}="
+            return f"{rank} "  # Add space to force string formatting
+        
+        # Apply formatting to rank column
+        df["rank"] = df["rank"].apply(format_rank)
+        
+        return df
+
     def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
         """Parse the columns parameter specification.
         
@@ -242,6 +271,10 @@ class TableGenerator:
         # Apply column operations if specified
         if columns:
             df = self._apply_column_operations(df, columns)
+
+        # Format rank column to show equal ranks as N= (only if there are equal ranks)
+        if "rank" in df.columns and df["rank"].duplicated().any():
+            df = self._format_rank_column(df)
 
         # Format column names to Title Case with acronym preservation
         df = self._format_column_names(df)
