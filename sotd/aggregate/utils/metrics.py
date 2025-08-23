@@ -147,6 +147,34 @@ def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
     return len(sample_brands)
 
 
+def calculate_unique_sample_soaps(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique sample soaps from records."""
+    sample_soaps = set()
+    for record in records:
+        soap = record.get("soap")
+        if soap is None:
+            continue
+        enriched = soap.get("enriched", {})
+        matched = soap.get("matched", {})
+
+        # Skip if no sample data
+        if not enriched or "sample_type" not in enriched:
+            continue
+
+        # Skip if no matched soap data
+        if not matched or not matched.get("brand") or not matched.get("scent"):
+            continue
+
+        brand = matched.get("brand", "").strip()
+        scent = matched.get("scent", "").strip()
+
+        if brand and scent:
+            soap_name = f"{brand} - {scent}"
+            sample_soaps.add(soap_name)
+
+    return len(sample_soaps)
+
+
 def calculate_unique_razors(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique razors from records."""
     razors = set()
@@ -233,8 +261,8 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
     Returns:
         Dictionary containing metadata with month, total_shaves, unique_shavers,
         avg_shaves_per_user, median_shaves_per_user, unique_soaps, unique_brands,
-        total_samples, sample_users, sample_brands, unique_razors, unique_blades,
-        and unique_brushes
+        total_samples, sample_users, sample_brands, unique_sample_soaps,
+        unique_razors, unique_blades, and unique_brushes
     """
     total_shaves = calculate_shaves(records)
 
@@ -254,6 +282,8 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     sample_brands = calculate_sample_brands(records)
 
+    unique_sample_soaps = calculate_unique_sample_soaps(records)
+
     unique_razors = calculate_unique_razors(records)
 
     unique_blades = calculate_unique_blades(records)
@@ -271,6 +301,7 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         "total_samples": total_samples,
         "sample_users": sample_users,
         "sample_brands": sample_brands,
+        "unique_sample_soaps": unique_sample_soaps,
         "unique_razors": unique_razors,
         "unique_blades": unique_blades,
         "unique_brushes": unique_brushes,

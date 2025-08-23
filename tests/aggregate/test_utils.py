@@ -5,6 +5,7 @@ from sotd.aggregate.utils.metrics import (
     calculate_unique_soaps,
     calculate_unique_brands,
     calculate_total_samples,
+    calculate_unique_sample_soaps,
     calculate_unique_razors,
     calculate_unique_blades,
     calculate_unique_brushes,
@@ -32,6 +33,7 @@ class TestMetrics:
         assert meta["unique_soaps"] == 0  # No soap data in these records
         assert meta["unique_brands"] == 0  # No soap data in these records
         assert meta["total_samples"] == 0  # No sample data in these records
+        assert meta["unique_sample_soaps"] == 0  # No sample data in these records
         assert meta["unique_razors"] == 0  # No razor data in these records
         assert meta["unique_blades"] == 0  # No blade data in these records
         assert meta["unique_brushes"] == 0  # No brush data in these records
@@ -47,6 +49,7 @@ class TestMetrics:
         assert meta["unique_soaps"] == 0
         assert meta["unique_brands"] == 0
         assert meta["total_samples"] == 0
+        assert meta["unique_sample_soaps"] == 0
         assert meta["unique_razors"] == 0
         assert meta["unique_blades"] == 0
         assert meta["unique_brushes"] == 0
@@ -67,6 +70,7 @@ class TestMetrics:
         assert meta["unique_soaps"] == 0
         assert meta["unique_brands"] == 0
         assert meta["total_samples"] == 0
+        assert meta["unique_sample_soaps"] == 0
         assert meta["unique_razors"] == 0
         assert meta["unique_blades"] == 0
         assert meta["unique_brushes"] == 0
@@ -356,6 +360,85 @@ class TestMetrics:
 
         total_samples = calculate_total_samples(records)
         assert total_samples == 1  # Only the second record has sample data
+
+    def test_calculate_unique_sample_soaps_basic(self):
+        """Test basic unique sample soaps calculation."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "Sellout"},
+                },
+            },
+            {
+                "author": "user2",
+                "soap": {
+                    "enriched": {"sample_type": "tester"},
+                    "matched": {"brand": "Stirling", "scent": "Executive Man"},
+                },
+            },
+            {
+                "author": "user3",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "Sellout"},
+                },
+            },
+            {
+                "author": "user4",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "Leviathan"},
+                },
+            },
+        ]
+
+        unique_sample_soaps = calculate_unique_sample_soaps(records)
+        assert unique_sample_soaps == 3  # 3 unique brand+scent combinations
+
+    def test_calculate_unique_sample_soaps_no_matches(self):
+        """Test unique sample soaps calculation with no matched data."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                    # No matched section
+                },
+            },
+            {
+                "author": "user2",
+                "soap": {
+                    "enriched": {"sample_type": "tester"},
+                    "matched": {},  # Empty matched section
+                },
+            },
+        ]
+
+        unique_sample_soaps = calculate_unique_sample_soaps(records)
+        assert unique_sample_soaps == 0
+
+    def test_calculate_unique_sample_soaps_empty_records(self):
+        """Test unique sample soaps calculation with empty records."""
+        unique_sample_soaps = calculate_unique_sample_soaps([])
+        assert unique_sample_soaps == 0
+
+    def test_calculate_unique_sample_soaps_missing_soap(self):
+        """Test unique sample soaps calculation with records missing soap data."""
+        records = [
+            {"author": "user1"},  # No soap section
+            {
+                "author": "user2",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                    "matched": {"brand": "Declaration Grooming", "scent": "Sellout"},
+                },
+            },
+        ]
+
+        unique_sample_soaps = calculate_unique_sample_soaps(records)
+        assert unique_sample_soaps == 1  # Only the second record has valid sample data
 
     def test_calculate_metadata_with_hardware_data(self):
         """Test metadata calculation with hardware data."""
