@@ -130,9 +130,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     )
 
         # Process enhanced table syntax with parameters
-        enhanced_tables = self._process_enhanced_table_syntax(
-            template_content, table_generator
-        )
+        enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
 
         # Merge enhanced tables with basic tables
         tables.update(enhanced_tables)
@@ -191,9 +189,10 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
                     # Generate the table with parameters
                     table_content = table_generator.generate_table(
-                        table_name,
-                        ranks=parameters.get("ranks"),
-                        rows=parameters.get("rows")
+                        table_name, 
+                        ranks=parameters.get("ranks"), 
+                        rows=parameters.get("rows"),
+                        columns=parameters.get("columns")
                     )
 
                     # Use the full placeholder as the key for replacement
