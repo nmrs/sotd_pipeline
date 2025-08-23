@@ -204,6 +204,28 @@ class TestTableGenerator:
         assert "| 1        | De          |" not in result
         assert "| 2        | Gem         |" not in result
 
+    def test_per_acronym_preservation(self):
+        """Test that 'per' is preserved as lowercase in column names."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "avg_shaves_per_soap": 5.2, "shaves": 100, "brand": "Brand A"},
+                {"rank": 2, "avg_shaves_per_soap": 4.8, "shaves": 80, "brand": "Brand B"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", rows=2)
+
+        # Check that 'per' is preserved as lowercase in column name
+        # The column name should be "Avg Shaves Per Soap" with "per" lowercase
+        assert "| Avg Shaves per Soap     |" in result
+        assert "| 5.2                     |" in result
+        assert "| 4.8                     |" in result
+
+        # Verify 'per' is not converted to 'Per' or 'PER'
+        assert "| Avg Shaves Per Soap     |" not in result
+        assert "| Avg Shaves PER Soap     |" not in result
+
     def test_column_reordering(self):
         """Test column reordering functionality."""
         data = {
