@@ -174,8 +174,8 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", rows=2)
 
         # Check that column names are formatted
-        assert "|   Rank |   Shaves |   Unique Users | Maker" in result
-        assert "|-------:|---------:|---------------:|:--------" in result
+        assert "| Rank     | Shaves     | Unique Users     | Maker      |" in result
+        assert "|:---------|:-----------|:-----------------|:-----------|" in result
 
         # Verify no snake_case remains
         assert "unique_users" not in result
@@ -195,14 +195,14 @@ class TestTableGenerator:
         result = generator.generate_table("razor-formats", rows=3)
 
         # Check that acronyms are preserved
-        assert "|   Rank | Format   |   Shaves |   Unique Users |" in result
-        assert "|      1 | DE       |" in result
-        assert "|      2 | GEM      |" in result
-        assert "|      3 | AC       |" in result
+        assert "| Rank     | Format      | Shaves     | Unique Users     |" in result
+        assert "| 1        | DE          |" in result
+        assert "| 2        | GEM         |" in result
+        assert "| 3        | AC          |" in result
 
         # Verify acronyms are not converted to title case
-        assert "|      1 | De       |" not in result
-        assert "|      2 | Gem      |" not in result
+        assert "| 1        | De          |" not in result
+        assert "| 2        | Gem         |" not in result
 
     def test_column_reordering(self):
         """Test column reordering functionality."""
@@ -219,11 +219,11 @@ class TestTableGenerator:
         )
 
         # Check that columns are reordered
-        assert "|   Shaves |   Rank |   Unique Users |" in result
-        assert "|      100 |      1 |             50 |" in result
+        assert "| Shaves     | Rank     | Unique Users     |" in result
+        assert "| 100        | 1        | 50               |" in result
 
         # Verify original order is not present
-        assert "|   Rank |   Shaves |   Unique Users |" not in result
+        assert "| Rank     | Shaves     | Unique Users     |" not in result
 
     def test_column_renaming(self):
         """Test column renaming functionality."""
@@ -238,11 +238,11 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", rows=2, columns="rank, maker=soap, shaves")
 
         # Check that column is renamed
-        assert "|   Rank | Soap    |   Shaves |" in result
-        assert "|      1 | Brand A |      100 |" in result
+        assert "| Rank     | Soap       | Shaves     |" in result
+        assert "| 1        | Brand A    | 100        |" in result
 
         # Verify original name is not present
-        assert "|   Rank | Maker   |   Shaves |" not in result
+        assert "| Rank     | Maker      | Shaves     |" not in result
 
     def test_column_reordering_and_renaming(self):
         """Test combined column reordering and renaming."""
@@ -257,8 +257,8 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", rows=2, columns="shaves, maker=soap, rank")
 
         # Check that columns are reordered and renamed
-        assert "|   Shaves | Soap    |   Rank |" in result
-        assert "|      100 | Brand A |      1 |" in result
+        assert "| Shaves     | Soap       | Rank     |" in result
+        assert "| 100        | Brand A    | 1        |" in result
 
     def test_columns_with_ranks_parameter(self):
         """Test columns parameter combined with ranks parameter."""
@@ -274,10 +274,10 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", ranks=3, columns="rank, maker=soap")
 
         # Check that both parameters work together
-        assert "|   Rank | Soap    |" in result
-        assert "|      1 | Brand A |" in result
-        assert "|      2 | Brand B |" in result
-        assert "|      3 | Brand C |" in result
+        assert "| Rank     | Soap       |" in result
+        assert "| 1        | Brand A    |" in result
+        assert "| 2        | Brand B    |" in result
+        assert "| 3        | Brand C    |" in result
 
     def test_columns_with_rows_parameter(self):
         """Test columns parameter combined with rows parameter."""
@@ -293,12 +293,12 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", rows=2, columns="rank, maker=soap")
 
         # Check that both parameters work together
-        assert "|   Rank | Soap    |" in result
-        assert "|      1 | Brand A |" in result
-        assert "|      2 | Brand B |" in result
+        assert "| Rank     | Soap       |" in result
+        assert "| 1        | Brand A    |" in result
+        assert "| 2        | Brand B    |" in result
 
         # Verify we don't see rank 3
-        assert "|      3 | Brand C |" not in result
+        assert "| 3        | Brand C    |" not in result
 
     def test_missing_columns_handling(self):
         """Test that missing columns are silently omitted."""
@@ -315,8 +315,8 @@ class TestTableGenerator:
         )
 
         # Check that only existing columns are shown
-        assert "|   Rank |   Shaves |" in result
-        assert "|      1 |      100 |" in result
+        assert "| Rank     | Shaves     |" in result
+        assert "| 1        | 100        |" in result
 
         # Verify missing column is not present
         assert "nonexistent_column" not in result
@@ -334,7 +334,7 @@ class TestTableGenerator:
         result = generator.generate_table("soap-makers", rows=2, columns="")
 
         # Should show all columns in original order
-        assert "|   Rank |   Shaves |   Unique Users | Maker" in result
+        assert "| Rank     | Shaves     | Unique Users     | Maker      |" in result
 
     def test_invalid_columns_syntax(self):
         """Test that invalid columns syntax raises appropriate errors."""
@@ -379,18 +379,18 @@ class TestTableGenerator:
                 {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand F"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table("soap-makers", rows=6)
-        
+
         # Check that equal ranks are formatted as N=
-        assert "| 1      |" in result  # Single rank 1
-        assert "| 2=     |" in result  # Equal rank 2 (should appear twice)
-        assert "| 4=     |" in result  # Equal rank 4 (should appear three times)
-        
+        assert "| 1         |" in result  # Single rank 1
+        assert "| 2=        |" in result  # Equal rank 2 (should appear twice)
+        assert "| 4=        |" in result  # Equal rank 4 (should appear three times)
+
         # Verify no plain equal ranks remain
-        assert "| 2      |" not in result
-        assert "| 4      |" not in result
+        assert "| 2         |" not in result
+        assert "| 4         |" not in result
 
     def test_rank_column_formatting_single_ranks(self):
         """Test that single ranks (no ties) are formatted normally."""
@@ -401,20 +401,20 @@ class TestTableGenerator:
                 {"rank": 3, "shaves": 60, "unique_users": 30, "maker": "Brand C"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table("soap-makers", rows=3)
-        
-        # Check that single ranks are formatted normally (numeric format, 
+
+        # Check that single ranks are formatted normally (numeric format,
         # no rank formatting applied)
-        assert "|      1 |" in result  # Single rank 1 (6 spaces, pandas numeric format)
-        assert "|      2 |" in result  # Single rank 2 (6 spaces, pandas numeric format)
-        assert "|      3 |" in result  # Single rank 3 (6 spaces, pandas numeric format)
-        
+        assert "| 1        |" in result  # Single rank 1 (pandas format)
+        assert "| 2        |" in result  # Single rank 2 (pandas format)
+        assert "| 3        |" in result  # Single rank 3 (pandas format)
+
         # Verify no N= formatting for single ranks
-        assert "| 1=     |" not in result
-        assert "| 2=     |" not in result
-        assert "| 3=     |" not in result
+        assert "| 1=       |" not in result
+        assert "| 2=       |" not in result
+        assert "| 3=       |" not in result
 
     def test_rank_column_formatting_mixed_ranks(self):
         """Test mixed scenario with both single and equal ranks."""
@@ -428,15 +428,15 @@ class TestTableGenerator:
                 {"rank": 5, "shaves": 50, "unique_users": 25, "maker": "Brand F"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table("soap-makers", rows=6)
-        
+
         # Check mixed formatting
-        assert "| 1      |" in result  # Single rank 1 (2 spaces, pandas string format)
-        assert "| 2=     |" in result  # Equal rank 2 (2 spaces, pandas string format)
-        assert "| 4      |" in result  # Single rank 4 (2 spaces, pandas string format)
-        assert "| 5=     |" in result  # Equal rank 5 (2 spaces, pandas string format)
+        assert "| 1         |" in result  # Single rank 1 (pandas format)
+        assert "| 2=        |" in result  # Equal rank 2 (pandas format)
+        assert "| 4         |" in result  # Single rank 4 (pandas format)
+        assert "| 5=        |" in result  # Equal rank 5 (pandas format)
 
     def test_rank_column_formatting_with_parameters(self):
         """Test rank formatting works with ranks and columns parameters."""
@@ -448,18 +448,363 @@ class TestTableGenerator:
                 {"rank": 4, "shaves": 60, "unique_users": 30, "maker": "Brand D"},
             ]
         }
-        
+
         generator = TableGenerator(data)
         result = generator.generate_table(
-            "soap-makers", 
-            ranks=3, 
-            columns="rank, maker=soap, shaves"
+            "soap-makers", ranks=3, columns="rank, maker=soap, shaves"
         )
-        
+
         # Check that rank formatting works with custom columns
-        assert "| 1      |" in result  # Single rank 1 (2 spaces, pandas string format)
-        assert "| 2=     |" in result  # Equal rank 2 (2 spaces, pandas string format)
-        
+        assert "| 1         |" in result  # Single rank 1 (pandas format)
+        assert "| 2=        |" in result  # Equal rank 2 (pandas format)
+
         # Verify custom columns are working
-        assert "| Soap    |" in result
-        assert "|   Shaves |" in result
+        assert "| Soap       |" in result
+        assert "| Shaves     |" in result
+
+    def test_delta_columns_basic_functionality(self):
+        """Test basic delta columns functionality with comparison data."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+                {"rank": 3, "format": "AC", "shaves": 60, "unique_users": 30},
+            ]
+        }
+
+        # Mock comparison data for previous month, previous year, 5 years ago
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {
+                        "rank": 3,
+                        "format": "GEM",
+                        "shaves": 85,
+                        "unique_users": 42,
+                    },  # GEM was rank 3
+                    {"rank": 2, "format": "AC", "shaves": 70, "unique_users": 35},  # AC was rank 2
+                ]
+            },
+            "2024-06": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 95, "unique_users": 48},
+                    {"rank": 2, "format": "AC", "shaves": 75, "unique_users": 38},  # AC was rank 2
+                    {
+                        "rank": 3,
+                        "format": "GEM",
+                        "shaves": 65,
+                        "unique_users": 32,
+                    },  # GEM was rank 3
+                ]
+            },
+            "2020-06": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 85, "unique_users": 40},
+                    {
+                        "rank": 2,
+                        "format": "GEM",
+                        "shaves": 70,
+                        "unique_users": 35,
+                    },  # GEM was rank 2
+                    {"rank": 3, "format": "AC", "shaves": 55, "unique_users": 25},  # AC was rank 3
+                ]
+            },
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", deltas=True)
+
+        # Check that delta columns are added at the end
+        assert "| Δ vs May 2025" in result
+        assert "| Δ vs Jun 2024" in result
+        assert "| Δ vs Jun 2020" in result
+
+        # Check delta values for rank changes
+        # DE: rank 1 in all periods = "="
+        assert "| =                  |" in result
+        # GEM: rank 2 → rank 3 (previous month: ↓1), rank 3 → rank 2 (previous year: ↑1)
+        # AC: rank 3 → rank 2 (previous month: ↑1), rank 2 → rank 3 (previous year: ↓1)
+
+    def test_delta_columns_with_ranks_parameter(self):
+        """Test delta columns work with ranks parameter."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+            ]
+        }
+
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 2, "format": "GEM", "shaves": 85, "unique_users": 42},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", ranks=2, deltas=True)
+
+        # Should show only top 2 ranks with deltas
+        assert "| =                  |" in result  # DE stayed rank 1
+        assert "| =                  |" in result  # GEM stayed rank 2
+
+    def test_delta_columns_with_rows_parameter(self):
+        """Test delta columns work with rows parameter."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+                {"rank": 3, "format": "AC", "shaves": 60, "unique_users": 30},
+            ]
+        }
+
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 2, "format": "GEM", "shaves": 85, "unique_users": 42},
+                    {"rank": 3, "format": "AC", "shaves": 70, "unique_users": 35},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", rows=2, deltas=True)
+
+        # Should show only top 2 rows with deltas
+        assert "| =                  |" in result  # DE stayed rank 1
+        assert "| =                  |" in result  # GEM stayed rank 2
+        # AC should not appear due to rows=2
+
+    def test_delta_columns_with_columns_parameter(self):
+        """Test delta columns work with columns parameter but are not affected by it."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+            ]
+        }
+
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 2, "format": "GEM", "shaves": 85, "unique_users": 42},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", columns="format, shaves", deltas=True)
+
+        # Should show only format and shaves columns, then delta columns
+        assert "| Format      | Shaves     |" in result
+        assert "| Δ vs May 2025" in result
+        # Rank and unique_users should not appear due to columns parameter
+
+    def test_delta_columns_missing_comparison_data(self):
+        """Test delta columns handle missing comparison data gracefully."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+            ]
+        }
+
+        # No comparison data
+        generator = TableGenerator(data)
+        result = generator.generate_table("razor-formats", deltas=True)
+
+        # Should show n/a for all delta columns
+        assert "| n/a                |" in result
+
+    def test_delta_columns_partial_comparison_data(self):
+        """Test delta columns handle partial comparison data."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+            ]
+        }
+
+        # Only previous month data available
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 2, "format": "GEM", "shaves": 85, "unique_users": 42},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", deltas=True)
+
+        # Should show actual delta for previous month, n/a for others
+        assert "| =                  |" in result  # Previous month
+        assert "| n/a                |" in result  # Previous year
+        assert "| n/a                |" in result  # 5 years ago
+
+    def test_delta_columns_rank_changes(self):
+        """Test delta columns show correct rank change indicators."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+                {"rank": 3, "format": "AC", "shaves": 60, "unique_users": 30},
+            ]
+        }
+
+        # Previous month: GEM moved up 1 rank, AC moved down 1 rank
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 3, "format": "GEM", "shaves": 85, "unique_users": 42},
+                    {"rank": 2, "format": "AC", "shaves": 70, "unique_users": 35},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", deltas=True)
+
+        # Check rank change indicators
+        assert "| =                  |" in result  # DE stayed rank 1
+        assert "| ↑1                 |" in result  # GEM moved up 1 rank
+        assert "| ↓1                 |" in result  # AC moved down 1 rank
+
+    def test_delta_columns_no_deltas_parameter(self):
+        """Test that delta columns are not added when deltas parameter is False or None."""
+        data = {
+            "razor_formats": [
+                {"rank": 1, "format": "DE", "shaves": 100, "unique_users": 50},
+                {"rank": 2, "format": "GEM", "shaves": 80, "unique_users": 40},
+            ]
+        }
+
+        comparison_data = {
+            "2025-05": {
+                "razor_formats": [
+                    {"rank": 1, "format": "DE", "shaves": 90, "unique_users": 45},
+                    {"rank": 2, "format": "GEM", "shaves": 85, "unique_users": 42},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table("razor-formats", deltas=False)
+
+        # Should not show delta columns
+        assert "| Δ vs May 2025 |" not in result
+        assert "| Δ vs Jun 2024 |" not in result
+        assert "| Δ vs Jun 2020 |" not in result
+
+    def test_numeric_column_limits_basic(self):
+        """Test basic numeric column filtering."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
+                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"},
+                {"rank": 4, "shaves": 40, "unique_users": 20, "brand": "Brand D"},
+                {"rank": 5, "shaves": 20, "unique_users": 10, "brand": "Brand E"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", shaves=50)
+
+        # Should include rows where shaves >= 50
+        assert "Brand A" in result  # shaves: 100
+        assert "Brand B" in result  # shaves: 80
+        assert "Brand C" in result  # shaves: 60
+        assert "Brand D" not in result  # shaves: 40
+        assert "Brand E" not in result  # shaves: 20
+
+    def test_numeric_column_limits_single_limit_only(self):
+        """Test that only one numeric column limit is allowed per table."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+
+        # Should fail when multiple numeric limits are specified
+        with pytest.raises(ValueError, match="Only one numeric column limit allowed per table"):
+            generator.generate_table("soap-makers", shaves=50, unique_users=25)
+
+    def test_numeric_column_limits_with_existing_parameters(self):
+        """Test numeric column limits with ranks and rows parameters."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
+                {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
+                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"},
+                {"rank": 4, "shaves": 40, "unique_users": 20, "brand": "Brand D"},
+                {"rank": 5, "shaves": 20, "unique_users": 10, "brand": "Brand E"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers", ranks=3, shaves=50)
+
+        # Should apply both filters: ranks <= 3 AND shaves >= 50
+        assert "Brand A" in result  # rank: 1, shaves: 100
+        assert "Brand B" in result  # rank: 2, shaves: 80
+        assert "Brand C" in result  # rank: 3, shaves: 60
+        assert "Brand D" not in result  # rank: 4, shaves: 40
+        assert "Brand E" not in result  # rank: 5, shaves: 20
+
+    def test_numeric_column_limits_gap_detection(self):
+        """Test that numeric column filtering fails if it creates gaps in the table."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
+                {"rank": 2, "shaves": 90, "unique_users": 45, "brand": "Brand B"},
+                {"rank": 3, "shaves": 50, "unique_users": 25, "brand": "Brand C"},
+                {"rank": 4, "shaves": 80, "unique_users": 40, "brand": "Brand D"},
+                {"rank": 5, "shaves": 20, "unique_users": 10, "brand": "Brand E"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+
+        # This filter should create gaps by keeping ranks 1, 2, 4 (shaves >= 70)
+        # which creates a gap in the rank sequence (missing rank 3)
+        with pytest.raises(ValueError, match="Numeric column limits created gaps in table data"):
+            generator.generate_table("soap-makers", shaves=70)
+
+    def test_numeric_column_limits_invalid_column(self):
+        """Test error when numeric column doesn't exist."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand B"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+
+        with pytest.raises(ValueError, match="Column 'nonexistent_column' not found in table data"):
+            generator.generate_table("soap-makers", nonexistent_column=10)
+
+    def test_numeric_column_limits_invalid_threshold(self):
+        """Test error when threshold value is not numeric."""
+        data = {
+            "soap_makers": [
+                {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand B"},
+            ]
+        }
+
+        generator = TableGenerator(data)
+
+        with pytest.raises(
+            ValueError, match="Invalid threshold value 'abc' for column 'shaves' - must be numeric"
+        ):
+            generator.generate_table("soap-makers", shaves="abc")

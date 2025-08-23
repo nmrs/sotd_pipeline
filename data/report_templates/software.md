@@ -23,16 +23,16 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Soap Brands
 
-{{tables.soap-brands|ranks:50}}
+{{tables.soap-makers|ranks:50|deltas:true}}
 
 ## Soaps
 
-{{tables.soaps|ranks:50}}
+{{tables.soaps|ranks:50|columns:rank, name=soap, shaves, unique_users}}
 
 ## Brand Diversity
 
-{{tables.brand-diversity|rows:30}}
+{{tables.brand-diversity|rows:30|deltas:true}}
 
 ## Top Shavers
 
-{{tables.top-shavers|rows:50}}
+{{tables.top-shavers|rows:50|columns:rank, user, shaves, missed_days}}

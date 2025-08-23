@@ -9,7 +9,7 @@ from sotd.utils.template_processor import TemplateProcessor
 
 from . import annual_load
 from .base import BaseReportGenerator
-from .table_generator import TableGenerator
+from .table_generators.table_generator import TableGenerator
 
 logger = logging.getLogger(__name__)
 

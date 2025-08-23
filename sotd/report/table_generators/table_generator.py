@@ -17,25 +17,17 @@ class TableGenerator:
     def __init__(
         self,
         data: Dict[str, Any],
-        comparison_data: Optional[Dict[str, Any]] = None,
+        comparison_data: Optional[Dict[str, Dict[str, Any]]] = None,
         debug: bool = False,
     ):
         """Initialize the table generator.
 
         Args:
-            data: Dictionary containing aggregated data with keys like 'soap_makers',
-                  'razors', etc.
-            comparison_data: Historical data for delta calculations (not yet supported
-                           in new system)
-            debug: Enable debug logging (not yet supported in new system)
+            data: Dictionary containing aggregated data for each aggregator
+            comparison_data: Optional dictionary of historical data for delta calculations
+            debug: Enable debug output
         """
-        # Extract data section if full structure is passed (meta + data)
-        if "meta" in data and "data" in data:
-            self.data = data["data"]
-        else:
-            self.data = data
-
-        # Store comparison data for future delta support (not yet implemented)
+        self.data = data
         self.comparison_data = comparison_data or {}
         self.debug = debug
 
@@ -76,20 +68,42 @@ class TableGenerator:
 
     def _format_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format column names to Title Case while preserving acronyms.
-        
+
         Args:
             df: DataFrame with original column names
-            
+
         Returns:
             DataFrame with formatted column names
         """
         # Define common acronyms that should stay uppercase
         acronyms = {
-            'de', 'ac', 'oc', 'sb', 'aa', 'b', 'c', 'd', 'f',  # Razor formats
-            'mm', 'ptfe', 'gem', 'weck', 'valet', 'rolls',  # Brand/model acronyms
-            'oc', 'lite', 'standard', 'sb', 'aa', 'b', 'c', 'd', 'f'  # Plate types
+            "de",
+            "ac",
+            "oc",
+            "sb",
+            "aa",
+            "b",
+            "c",
+            "d",
+            "f",  # Razor formats
+            "mm",
+            "ptfe",
+            "gem",
+            "weck",
+            "valet",
+            "rolls",  # Brand/model acronyms
+            "oc",
+            "lite",
+            "standard",
+            "sb",
+            "aa",
+            "b",
+            "c",
+            "d",
+            "f",  # Plate types
+            "vs",  # Keep "vs" lowercase in delta column names
         }
-        
+
         formatted_columns = {}
         for col in df.columns:
             if col.lower() in acronyms:
@@ -97,105 +111,303 @@ class TableGenerator:
                 formatted_columns[col] = col.upper()
             else:
                 # Convert snake_case to Title Case
-                formatted_col = col.replace('_', ' ').title()
+                formatted_col = col.replace("_", " ").title()
+
+                # Special handling for delta columns: preserve "vs" as lowercase
+                if "Δ" in col and "vs" in col.lower():
+                    formatted_col = formatted_col.replace("Vs", "vs")
+
                 formatted_columns[col] = formatted_col
-        
+
         # Rename columns
         df = df.rename(columns=formatted_columns)
         return df
 
     def _format_rank_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format rank column to show equal ranks as N=.
-        
+
         Args:
             df: DataFrame with rank column
-            
+
         Returns:
             DataFrame with formatted rank column
         """
         if "rank" not in df.columns:
             return df
-            
+
         # Create a copy to avoid modifying the original
         df = df.copy()
-        
+
         # Count occurrences of each rank
         rank_counts = df["rank"].value_counts().to_dict()
-        
+
         # Format ranks: add = for equal ranks, space for single ranks
         def format_rank(rank):
             if rank_counts.get(rank, 1) > 1:
                 return f"{rank}="
             return f"{rank} "  # Add space to force string formatting
-        
+
         # Apply formatting to rank column
         df["rank"] = df["rank"].apply(format_rank)
-        
+
+        return df
+
+    def _get_comparison_periods(self, current_month: str) -> List[str]:
+        """Get comparison periods for delta calculations.
+
+        Args:
+            current_month: Current month in YYYY-MM format
+
+        Returns:
+            List of comparison periods: [previous_month, previous_year, five_years_ago]
+        """
+        from datetime import datetime
+
+        # Parse current month
+        current_date = datetime.strptime(current_month, "%Y-%m")
+
+        # Previous month
+        if current_date.month == 1:
+            prev_month = current_date.replace(year=current_date.year - 1, month=12)
+        else:
+            prev_month = current_date.replace(month=current_date.month - 1)
+
+        # Previous year (same month)
+        prev_year = current_date.replace(year=current_date.year - 1)
+
+        # Five years ago (same month)
+        five_years_ago = current_date.replace(year=current_date.year - 5)
+
+        # Format periods to match the keys used in comparison_data
+        month_names = {
+            1: "Jan",
+            2: "Feb",
+            3: "Mar",
+            4: "Apr",
+            5: "May",
+            6: "Jun",
+            7: "Jul",
+            8: "Aug",
+            9: "Sep",
+            10: "Oct",
+            11: "Nov",
+            12: "Dec",
+        }
+
+        return [
+            f"{month_names[prev_month.month]} {prev_month.year}",
+            f"{month_names[current_date.month]} {prev_year.year}",
+            f"{month_names[current_date.month]} {five_years_ago.year}",
+        ]
+
+    def _format_delta_column_names(self, current_month: str) -> Dict[str, str]:
+        """Format delta column names based on current month.
+
+        Args:
+            current_month: Current month in YYYY-MM format
+
+        Returns:
+            Dictionary mapping internal names to display names
+        """
+        from datetime import datetime
+
+        current_date = datetime.strptime(current_month, "%Y-%m")
+
+        # Previous month
+        if current_date.month == 1:
+            prev_month = current_date.replace(year=current_date.year - 1, month=12)
+        else:
+            prev_month = current_date.replace(month=current_date.month - 1)
+
+        # Previous year (same month)
+        prev_year = current_date.replace(year=current_date.year - 1)
+
+        # Five years ago (same month)
+        five_years_ago = current_date.replace(year=current_date.year - 5)
+
+        return {
+            "Δ vs Previous Month": f"Δ vs {prev_month.strftime('%b %Y')}",
+            "Δ vs Previous Year": f"Δ vs {prev_year.strftime('%b %Y')}",
+            "Δ vs 5 Years Ago": f"Δ vs {five_years_ago.strftime('%b %Y')}",
+        }
+
+    def _calculate_deltas(
+        self, df: pd.DataFrame, table_name: str, current_month: str
+    ) -> pd.DataFrame:
+        """Calculate delta columns for rank changes.
+
+        Args:
+            df: DataFrame with current data
+            table_name: Name of the table being processed
+            current_month: Current month in YYYY-MM format
+
+        Returns:
+            DataFrame with delta columns added
+        """
+        if not self.comparison_data:
+            # No comparison data available
+            df = df.copy()
+            df["Δ vs Previous Month"] = "n/a"
+            df["Δ vs Previous Year"] = "n/a"
+            df["Δ vs 5 Years Ago"] = "n/a"
+            return df
+
+        comparison_periods = self._get_comparison_periods(current_month)
+        df = df.copy()
+
+        # Initialize delta columns with proper names
+        df["Δ vs Previous Month"] = "n/a"
+        df["Δ vs Previous Year"] = "n/a"
+        df["Δ vs 5 Years Ago"] = "n/a"
+
+        if self.debug:
+            print(f"[DEBUG] Delta calculation - comparison_periods: {comparison_periods}")
+            print(f"[DEBUG] Delta calculation - table_name: {table_name}")
+            print(f"[DEBUG] Delta calculation - df columns: {list(df.columns)}")
+
+        # Calculate deltas for each comparison period
+        for i, period in enumerate(comparison_periods):
+            if period not in self.comparison_data:
+                if self.debug:
+                    print(f"[DEBUG] Period {period} not in comparison_data")
+                continue
+
+            # Get the data part of the (metadata, data) tuple
+            period_data = self.comparison_data[period][1]
+            if table_name not in period_data:
+                if self.debug:
+                    print(f"[DEBUG] Table {table_name} not in period {period}")
+                continue
+
+            # Get comparison data for this table
+            comparison_df = pd.DataFrame(period_data[table_name])
+            if comparison_df.empty:
+                if self.debug:
+                    print(f"[DEBUG] Period {period} table {table_name} is empty")
+                continue
+
+            if self.debug:
+                print(
+                    f"[DEBUG] Processing period {period}, comparison_df shape: {comparison_df.shape}"
+                )
+                print(f"[DEBUG] Comparison_df columns: {list(comparison_df.columns)}")
+
+            # Calculate rank changes
+            for idx, row in df.iterrows():
+                current_format = row.get("format", row.get("brand", row.get("maker", "")))
+                if not current_format:
+                    if self.debug:
+                        print(f"[DEBUG] No format/brand/maker found for row {idx}")
+                    continue
+
+                if self.debug:
+                    print(f"[DEBUG] Looking for format: {current_format}")
+
+                # Find matching record in comparison data
+                comparison_row = comparison_df[
+                    comparison_df.get(
+                        "format", comparison_df.get("brand", comparison_df.get("maker", ""))
+                    )
+                    == current_format
+                ]
+
+                if not comparison_row.empty:
+                    current_rank = row["rank"]
+                    comparison_rank = comparison_row.iloc[0]["rank"]
+
+                    if self.debug:
+                        print(
+                            f"[DEBUG] Found match: {current_format}, current_rank: {current_rank}, comparison_rank: {comparison_rank}"
+                        )
+
+                    if current_rank == comparison_rank:
+                        delta_value = "="
+                    elif current_rank < comparison_rank:
+                        delta_value = f"↑{comparison_rank - current_rank}"
+                    else:
+                        delta_value = f"↓{current_rank - comparison_rank}"
+
+                    if self.debug:
+                        print(f"[DEBUG] Delta value: {delta_value}")
+
+                    # Set delta value in appropriate column
+                    if i == 0:  # Previous month
+                        df.at[idx, "Δ vs Previous Month"] = delta_value
+                    elif i == 1:  # Previous year
+                        df.at[idx, "Δ vs Previous Year"] = delta_value
+                    elif i == 2:  # 5 years ago
+                        df.at[idx, "Δ vs 5 Years Ago"] = delta_value
+                else:
+                    if self.debug:
+                        print(f"[DEBUG] No match found for format: {current_format}")
+
         return df
 
     def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
         """Parse the columns parameter specification.
-        
+
         Args:
             columns_spec: String like "rank, name=soap, shaves, unique_users"
-            
+
         Returns:
             Tuple of (column_order, rename_mapping)
-            
+
         Raises:
             ValueError: If syntax is invalid
         """
         if not columns_spec.strip():
             raise ValueError("Columns parameter cannot be empty")
-        
+
         column_order = []
         rename_mapping = {}
-        
-        for part in columns_spec.split(','):
+
+        for part in columns_spec.split(","):
             part = part.strip()
             if not part:
                 continue
-                
-            if '=' in part:
+
+            if "=" in part:
                 # Handle renaming: "name=soap"
-                if part.count('=') != 1:
+                if part.count("=") != 1:
                     raise ValueError(f"Invalid rename syntax: {part}")
-                original, alias = part.split('=', 1)
+                original, alias = part.split("=", 1)
                 original = original.strip()
                 alias = alias.strip()
-                
+
                 if not original or not alias:
                     raise ValueError(f"Invalid rename syntax: {part}")
-                    
+
                 column_order.append(original)
                 rename_mapping[original] = alias
             else:
                 # Simple column name
                 column_order.append(part)
-        
+
         if not column_order:
             raise ValueError("No valid columns specified")
-            
+
         return column_order, rename_mapping
 
-    def _apply_column_operations(self, df: pd.DataFrame, columns_spec: Optional[str] = None) -> pd.DataFrame:
+    def _apply_column_operations(
+        self, df: pd.DataFrame, columns_spec: Optional[str] = None
+    ) -> pd.DataFrame:
         """Apply column reordering and renaming operations.
-        
+
         Args:
             df: DataFrame to modify
             columns_spec: Optional columns specification string
-            
+
         Returns:
             Modified DataFrame
         """
         if not columns_spec:
             return df
-            
+
         try:
             column_order, rename_mapping = self._parse_columns_parameter(columns_spec)
         except ValueError as e:
             raise ValueError(f"Invalid columns parameter: {e}")
-        
+
         # Validate that specified columns exist
         missing_columns = [col for col in column_order if col not in df.columns]
         if missing_columns:
@@ -203,20 +415,82 @@ class TableGenerator:
             column_order = [col for col in column_order if col in df.columns]
             if not column_order:
                 raise ValueError("No valid columns found in data")
-        
-        # Reorder and rename columns
-        df = df[column_order].copy()
+
+        # Identify delta columns (they should always be preserved at the end)
+        delta_columns = [col for col in df.columns if col.startswith("Δ")]
+
+        # Reorder specified columns, then add delta columns at the end
+        final_columns = column_order + delta_columns
+        df = df[final_columns].copy()
+
         if rename_mapping:
             df = df.rename(columns=rename_mapping)
-            
+
         return df
 
+    def _apply_numeric_limits(self, df: pd.DataFrame, numeric_limits: dict) -> pd.DataFrame:
+        """Apply numeric column limits to the DataFrame.
+
+        Args:
+            df: DataFrame to limit
+            numeric_limits: Dictionary of column_name: threshold pairs (should contain only one limit)
+
+        Returns:
+            Limited DataFrame
+
+        Raises:
+            ValueError: If multiple limits specified, column doesn't exist, threshold is invalid, or limits create gaps
+        """
+        # Only allow one numeric column limit per table
+        if len(numeric_limits) > 1:
+            limit_names = list(numeric_limits.keys())
+            raise ValueError(
+                f"Only one numeric column limit allowed per table, got: {', '.join(limit_names)}"
+            )
+
+        limited_df = df.copy()
+
+        for column_name, threshold in numeric_limits.items():
+            # Validate column exists
+            if column_name not in limited_df.columns:
+                raise ValueError(f"Column '{column_name}' not found in table data")
+
+            # Validate threshold is numeric
+            try:
+                numeric_threshold = float(threshold)
+            except (ValueError, TypeError):
+                raise ValueError(
+                    f"Invalid threshold value '{threshold}' for column '{column_name}' - must be numeric"
+                )
+
+            # Apply limit (>= threshold) - cut from bottom
+            limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
+
+        # Check for gaps in the rank column specifically
+        # If we have a rank column, check if filtering created gaps in the rank sequence
+        if "rank" in limited_df.columns and not limited_df.empty:
+            # Get the ranks in order
+            ranks = sorted(limited_df["rank"].tolist())
+
+            # Check if there are gaps in the rank sequence
+            # For example: [1, 2, 4, 5] has a gap (missing 3)
+            if len(ranks) > 1:
+                expected_ranks = list(range(ranks[0], ranks[-1] + 1))
+                if ranks != expected_ranks:
+                    raise ValueError(
+                        "Numeric column limits created gaps in table data - limits may be too aggressive"
+                    )
+
+        return limited_df
+
     def generate_table(
-        self, 
-        table_name: str, 
-        ranks: Optional[int] = None, 
+        self,
+        table_name: str,
+        ranks: Optional[int] = None,
         rows: Optional[int] = None,
-        columns: Optional[str] = None
+        columns: Optional[str] = None,
+        deltas: bool = False,
+        **numeric_limits,
     ) -> str:
         """Generate a markdown table by table name.
 
@@ -225,13 +499,16 @@ class TableGenerator:
             ranks: Maximum rank to include (inclusive with ties)
             rows: Maximum number of rows to include
             columns: Optional column specification (e.g., "rank, name=soap, shaves")
+            deltas: Whether to include delta calculations
+            **numeric_limits: Single numeric column limit (e.g., shaves=50)
 
         Returns:
             Markdown table string
 
         Raises:
             ValueError: If table name is not recognized, parameters are invalid,
-                      rank column is missing, or columns parameter is invalid
+                      rank column is missing, columns parameter is invalid,
+                      or numeric limits create gaps in data
         """
         if table_name not in self.table_mappings:
             raise ValueError(f"Unknown table name: {table_name}")
@@ -246,7 +523,11 @@ class TableGenerator:
         aggregator_name = self.table_mappings[table_name]
 
         if aggregator_name not in self.data:
-            return f"*No data available for {table_name}*"
+            available_keys = list(self.data.keys())
+            raise ValueError(
+                f"Data for table '{table_name}' (mapped to '{aggregator_name}') "
+                f"not found in aggregated data. Available keys: {available_keys}"
+            )
 
         table_data = self.data[aggregator_name]
 
@@ -268,19 +549,63 @@ class TableGenerator:
         if rows is not None:
             df = df.head(rows)
 
-        # Apply column operations if specified
-        if columns:
-            df = self._apply_column_operations(df, columns)
+        # Apply numeric column limits if specified
+        if numeric_limits:
+            df = self._apply_numeric_limits(df, numeric_limits)
 
-        # Format rank column to show equal ranks as N= (only if there are equal ranks)
+        # Add delta columns if requested (BEFORE rank formatting so numeric ranks are available)
+        if deltas:
+            # Determine current month from data (this is a simplified approach)
+            # In practice, this should come from the report context
+            current_month = "2025-06"  # TODO: Make this configurable
+
+            if self.debug:
+                print(f"[DEBUG] Before delta calculation - df shape: {df.shape}")
+                print(f"[DEBUG] Before delta calculation - df columns: {list(df.columns)}")
+                print(
+                    f"[DEBUG] Before delta calculation - comparison_data keys: {list(self.comparison_data.keys())}"
+                )
+
+            # Use the data key (with underscore) for delta calculation, not the table name (with hyphen)
+            data_key = self.table_mappings.get(table_name, table_name)
+            df = self._calculate_deltas(df, data_key, current_month)
+
+            if self.debug:
+                print(f"[DEBUG] After delta calculation - df shape: {df.shape}")
+                print(f"[DEBUG] After delta calculation - df columns: {list(df.columns)}")
+
+            # Format delta column names
+            delta_name_mapping = self._format_delta_column_names(current_month)
+            df = df.rename(columns=delta_name_mapping)
+
+        # Apply rank formatting AFTER delta calculation (so deltas use numeric ranks)
         if "rank" in df.columns and df["rank"].duplicated().any():
             df = self._format_rank_column(df)
 
-        # Format column names to Title Case with acronym preservation
-        df = self._format_column_names(df)
+        # Apply column operations AFTER delta calculation (so rank column is available for deltas)
+        if columns:
+            df = self._apply_column_operations(df, columns)
 
         # Convert to markdown
         result = df.to_markdown(index=False)
+
+        # Format column names to Title Case with acronym preservation as the very last step
+        # This ensures all operations (including delta calculation) work with original column names
+        if result and result != "":
+            # Parse the markdown back to DataFrame for column formatting
+            from io import StringIO
+
+            formatted_df = pd.read_csv(StringIO(result), sep="|", skipinitialspace=True)
+            formatted_df = formatted_df.iloc[
+                :, 1:-1
+            ]  # Remove empty first/last columns from markdown parsing
+
+            # Format column names
+            formatted_df = self._format_column_names(formatted_df)
+
+            # Convert back to markdown
+            result = formatted_df.to_markdown(index=False)
+
         return result if result is not None else ""
 
     def get_available_table_names(self) -> List[str]:

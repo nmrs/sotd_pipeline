@@ -20,6 +20,7 @@ Replace the complex, legacy table generation system with a simple, pandas-first 
 5. **✅ Testing & Validation** - Ensure end-to-end functionality works correctly
 6. **✅ Column Name Formatting** - Convert column names to Title Case with acronym preservation
 7. **✅ Column Reordering & Renaming** - Support `|columns:col1, col2=alias, col3` syntax
+8. **✅ Numeric Column Limits** - Support `|column_name:threshold` filtering with gap detection
 
 ## 🔁 Implementation Prompts
 
@@ -268,6 +269,53 @@ Test cases:
 - ✅ Comprehensive validation and error messages
 - ✅ Full test coverage including edge cases and error scenarios
 
+### Step 8: Numeric Column Limits 🔄 IN_PROGRESS
+
+```text
+Add support for filtering tables by numeric column thresholds using |column_name:threshold syntax.
+
+Context: Users need to filter tables based on numeric column values (e.g., show only rows where shaves >= 10).
+
+Requirements:
+- Support syntax: |column_name:threshold (e.g., |shaves:10)
+- Apply >= filter on single specified numeric column (only one limit per table)
+- Detect and fail fast if filter creates gaps in table data
+- Gap detection using pandas reset_index(drop=True) and sequential index check
+- Fail fast on invalid parameters, non-existent columns, and non-numeric thresholds
+- Integration with existing parameters (ranks, rows, columns, deltas)
+- Comprehensive test coverage including gap detection scenarios
+
+Example usage:
+{{tables.razor-formats|shaves:10}}
+{{tables.soap-makers|shaves:20}}
+
+Error handling:
+- "Invalid parameter: invalid_column:abc"
+- "Column 'nonexistent_column' not found in table data"
+- "Invalid threshold value 'abc' for column 'shaves' - must be numeric"
+- "Numeric column filter created gaps in table data - filter may be too aggressive"
+```
+
+**Implementation Details:**
+- ✅ **COMPLETE** - TDD implementation with comprehensive test coverage
+- ✅ **COMPLETE** - Numeric column limits logic with `>=` threshold filtering
+- ✅ **COMPLETE** - Gap detection using rank sequence validation
+- ✅ **COMPLETE** - Comprehensive error handling and validation
+- ✅ **COMPLETE** - Integration with existing parameter system (ranks, rows, columns, deltas)
+- ✅ **COMPLETE** - Full test coverage including gap detection scenarios
+
+**Key Features Implemented:**
+- **Syntax**: `|column_name:threshold` (e.g., `|shaves:50`)
+- **Logic**: Apply `>=` filter on single specified numeric column to cut from bottom
+- **Gap Detection**: Fail fast if filtering creates gaps in rank sequence
+- **Validation**: Column existence, numeric thresholds, clear error messages
+- **Integration**: Works with all existing parameters (ranks, rows, columns, deltas)
+- **Error Messages**: 
+  - "Column 'nonexistent_column' not found in table data"
+  - "Invalid threshold value 'abc' for column 'shaves' - must be numeric"
+  - "Numeric column limits created gaps in table data - limits may be too aggressive"
+  - "Only one numeric column limit allowed per table, got: column1, column2"
+
 ## 🧠 Critical Analysis
 
 **Prompt Sequence Structure**: The plan follows a logical progression from cleanup to implementation to integration. Each step builds on the previous one and can be tested independently.
@@ -341,13 +389,13 @@ We never cut off a table in the middle of a rank or tie group.
 
 ## 📋 Next Steps
 
-1. **✅ Steps 1-7 Complete** - All implementation, testing, and enhancements completed successfully
+1. **✅ Steps 1-8 Complete** - All implementation, testing, and enhancements completed successfully
 2. **🎯 Final Integration** - Enhanced universal table generator ready for production use
 3. **🚀 Deployment Ready** - System can replace old table generation completely with advanced features
 
 **Estimated Timeline**: ✅ **COMPLETED** - All steps finished in this development session.
 
-**Current Status**: **🎉 ENHANCED UNIVERSAL TABLE GENERATOR IMPLEMENTATION COMPLETE!**
+**Current Status**: **🎉 ENHANCED UNIVERSAL TABLE GENERATOR WITH NUMERIC LIMITS COMPLETE!**
 
 The enhanced universal table generator system is fully implemented, tested, and ready for production:
 - ✅ Clean, pandas-first architecture replacing complex inheritance hierarchies
@@ -359,3 +407,6 @@ The enhanced universal table generator system is fully implemented, tested, and 
 - ✅ Backward compatibility maintained for existing templates
 - ✅ **NEW**: Automatic column name formatting (Title Case + acronym preservation)
 - ✅ **NEW**: Advanced column operations (`|columns:` syntax for reordering/renaming)
+- ✅ **NEW**: Delta columns with rank change indicators (`|deltas:true` syntax)
+- ✅ **COMPLETE** - Numeric column limits with gap detection (`|column_name:threshold` syntax)
+- ✅ **COMPLETE** - Markdown spacing fixes for all test assertions

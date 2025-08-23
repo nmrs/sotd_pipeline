@@ -99,7 +99,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
         }
 
         # Initialize table generator with the new universal approach
-        table_generator = TableGenerator(self.data)
+        table_generator = TableGenerator(self.data, self.comparison_data)
 
         # Get the template content to detect enhanced table syntax
         if self.template_path:
@@ -188,11 +188,19 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         )
 
                     # Generate the table with parameters
+                    # Extract numeric limits (any parameter that's not ranks, rows, columns, or deltas)
+                    numeric_limits = {}
+                    for key, value in parameters.items():
+                        if key not in ["ranks", "rows", "columns", "deltas"]:
+                            numeric_limits[key] = value
+
                     table_content = table_generator.generate_table(
-                        table_name, 
-                        ranks=parameters.get("ranks"), 
+                        table_name,
+                        ranks=parameters.get("ranks"),
                         rows=parameters.get("rows"),
-                        columns=parameters.get("columns")
+                        columns=parameters.get("columns"),
+                        deltas=parameters.get("deltas") == "true",
+                        **numeric_limits,
                     )
 
                     # Use the full placeholder as the key for replacement
