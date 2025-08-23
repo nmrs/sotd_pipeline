@@ -99,7 +99,12 @@ class MonthlyReportGenerator(BaseReportGenerator):
         }
 
         # Initialize table generator with the new universal approach
-        table_generator = TableGenerator(self.data, self.comparison_data, debug=self.debug)
+        table_generator = TableGenerator(
+            self.data,
+            self.comparison_data,
+            current_month=self.metadata.get("month"),
+            debug=self.debug,
+        )
 
         # Get the template content to detect enhanced table syntax
         if self.template_path:
@@ -114,14 +119,9 @@ class MonthlyReportGenerator(BaseReportGenerator):
         tables = {}
         for table_name in table_generator.get_available_table_names():
             try:
-                table_content = table_generator.generate_table(table_name)
+                table_content = table_generator.generate_table(table_name, deltas=True)
                 if table_content:
                     tables[f"{{{{tables.{table_name}}}}}"] = table_content
-                elif self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
-                        f"Table '{table_name}' generated empty content"
-                    )
             except Exception as e:
                 if self.debug:
                     print(
@@ -134,13 +134,6 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
         # Merge enhanced tables with basic tables
         tables.update(enhanced_tables)
-
-        if self.debug:
-            print(
-                f"[DEBUG] MonthlyReport({self.report_type}): Processing template: {template_name}"
-            )
-            print(f"[DEBUG] MonthlyReport({self.report_type}): Variables: {variables}")
-            print(f"[DEBUG] MonthlyReport({self.report_type}): Tables: {list(tables.keys())}")
 
         return processor.process_template(template_name, variables, tables)
 
@@ -184,7 +177,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     if self.debug:
                         print(
                             f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Processing enhanced table: {table_name} with parameters: {parameters}"
+                            f"Processing enhanced table: {table_name} "
+                            f"with parameters: {parameters}"
                         )
 
                     # Generate the table with parameters
@@ -220,7 +214,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                             f"[DEBUG] MonthlyReport({self.report_type}): "
                             f"Enhanced table syntax error for "
                             f"'{{tables.{match}}}' - {e}. "
-                            f"Falling back to basic table generation."
+                            "Falling back to basic table generation."
                         )
 
                     # Don't add this placeholder to enhanced_tables - let it be processed as basic

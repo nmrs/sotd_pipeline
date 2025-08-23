@@ -18,6 +18,7 @@ class TableGenerator:
         self,
         data: Dict[str, Any],
         comparison_data: Optional[Dict[str, Dict[str, Any]]] = None,
+        current_month: Optional[str] = None,
         debug: bool = False,
     ):
         """Initialize the table generator.
@@ -25,22 +26,24 @@ class TableGenerator:
         Args:
             data: Dictionary containing aggregated data for each aggregator
             comparison_data: Optional dictionary of historical data for delta calculations
+            current_month: Current month in YYYY-MM format for delta calculations
             debug: Enable debug output
         """
         self.data = data
         self.comparison_data = comparison_data or {}
+        self.current_month = current_month
         self.debug = debug
 
         # No more hardcoded mappings - we'll convert kebab-case to snake_case dynamically
 
-    def _format_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Format column names to Title Case while preserving acronyms.
+    def _preserve_acronyms(self, text: str) -> str:
+        """Preserve acronyms while converting text to title case.
 
         Args:
-            df: DataFrame with original column names
+            text: Text to format
 
         Returns:
-            DataFrame with formatted column names
+            Formatted text with preserved acronyms
         """
         # Define common acronyms that should stay uppercase
         acronyms = {
@@ -59,45 +62,72 @@ class TableGenerator:
             "weck",
             "valet",
             "rolls",  # Brand/model acronyms
-            "oc",
             "lite",
             "standard",
-            "sb",
-            "aa",
-            "b",
-            "c",
-            "d",
-            "f",  # Plate types
-            "vs",  # Keep "vs" lowercase in delta column names
-            "per",  # Keep "per" lowercase in column names like "Avg Shaves Per Soap"
+            "vs",  # Special cases
         }
 
-        formatted_columns = {}
-        for col in df.columns:
-            if col.lower() in acronyms:
-                # Handle special cases for words that should stay lowercase
-                if col.lower() == "per":
-                    formatted_columns[col] = col.lower()  # Keep "per" lowercase
-                else:
-                    # Preserve other acronyms in uppercase
-                    formatted_columns[col] = col.upper()
+        # Convert to title case while preserving acronyms
+        words = text.split()
+        formatted_words = []
+
+        for word in words:
+            if word.lower() in acronyms:
+                # Keep acronyms in uppercase
+                formatted_words.append(word.upper())
+            elif word.lower() == "per":
+                # Keep "per" lowercase
+                formatted_words.append(word.lower())
             else:
-                # Convert snake_case to Title Case
-                formatted_col = col.replace("_", " ").title()
+                # Convert to title case
+                formatted_words.append(word.title())
 
-                # Special handling for specific words that should stay lowercase
-                # Handle "per" within column names
-                formatted_col = formatted_col.replace("Per", "per")
+        return " ".join(formatted_words)
 
-                # Special handling for delta columns: preserve "vs" as lowercase
-                if "Δ" in col and "vs" in col.lower():
-                    formatted_col = formatted_col.replace("Vs", "vs")
+    def _format_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format column names to Title Case with acronym preservation.
 
-                formatted_columns[col] = formatted_col
+        Args:
+            df: DataFrame to format
 
-        # Rename columns
-        df = df.rename(columns=formatted_columns)
-        return df
+        Returns:
+            DataFrame with formatted column names
+        """
+        formatted_df = df.copy()
+
+        for col in formatted_df.columns:
+            if col.startswith("Δ"):
+                # Keep delta columns as-is
+                continue
+
+            # Convert to title case while preserving acronyms
+            formatted_name = self._preserve_acronyms(col.title())
+            formatted_df = formatted_df.rename(columns={col: formatted_name})
+
+        return formatted_df
+
+    def _format_usernames(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format usernames with "u/" prefix for Reddit display.
+
+        Args:
+            df: DataFrame to format
+
+        Returns:
+            DataFrame with formatted usernames
+        """
+        formatted_df = df.copy()
+
+        # Check if this table has user-related columns
+        user_columns = [col for col in formatted_df.columns if col.lower() in ["user", "author"]]
+
+        for col in user_columns:
+            if col in formatted_df.columns:
+                # Add "u/" prefix to usernames that don't already have it
+                formatted_df[col] = formatted_df[col].apply(
+                    lambda x: f"u/{x}" if x and not str(x).startswith("u/") else x
+                )
+
+        return formatted_df
 
     def _format_rank_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format rank column to show equal ranks as N=.
@@ -210,7 +240,7 @@ class TableGenerator:
     def _calculate_deltas(
         self, df: pd.DataFrame, table_name: str, current_month: str
     ) -> pd.DataFrame:
-        """Calculate delta columns for rank changes.
+        """Calculate delta columns for rank changes using vectorized operations.
 
         Args:
             df: DataFrame with current data
@@ -236,98 +266,65 @@ class TableGenerator:
         df["Δ vs Previous Year"] = "n/a"
         df["Δ vs 5 Years Ago"] = "n/a"
 
-        if self.debug:
-            print(f"[DEBUG] Delta calculation - comparison_periods: {comparison_periods}")
-            print(f"[DEBUG] Delta calculation - table_name: {table_name}")
-            print(f"[DEBUG] Delta calculation - df columns: {list(df.columns)}")
+        # Get identifier columns for matching
+        string_columns = self._get_string_columns(df.columns, table_name)
+        if not string_columns:
+            return df
 
         # Calculate deltas for each comparison period
         for i, period in enumerate(comparison_periods):
             if period not in self.comparison_data:
-                if self.debug:
-                    print(f"[DEBUG] Period {period} not in comparison_data")
                 continue
 
             # Get the data part of the (metadata, data) tuple
             period_data = self.comparison_data[period][1]
             if table_name not in period_data:
-                if self.debug:
-                    print(f"[DEBUG] Table {table_name} not in period {period}")
                 continue
 
             # Get comparison data for this table
             comparison_df = pd.DataFrame(period_data[table_name])
             if comparison_df.empty:
-                if self.debug:
-                    print(f"[DEBUG] Period {period} table {table_name} is empty")
                 continue
 
-            if self.debug:
-                print(
-                    f"[DEBUG] Processing period {period}, comparison_df shape: {comparison_df.shape}"
-                )
-                print(f"[DEBUG] Comparison_df columns: {list(comparison_df.columns)}")
+            # Use vectorized operations for matching
+            # Find the best matching column between current and comparison data
+            matching_column = None
+            for col in string_columns:
+                if col in df.columns and col in comparison_df.columns:
+                    matching_column = col
+                    break
 
-            # Calculate rank changes
-            for idx, row in df.iterrows():
-                # Get all string columns for comparison
-                string_columns = self._get_string_columns(df.columns, table_name)
+            if not matching_column:
+                continue
 
-                if not string_columns:
-                    if self.debug:
-                        print(f"[DEBUG] No string columns found for table {table_name}")
-                    continue
+            # Create a mapping from identifier to rank for fast lookup
+            rank_mapping = comparison_df.set_index(matching_column)["rank"].to_dict()
 
-                # Try to find a match using any of the string columns
-                comparison_row = pd.DataFrame()
-                matched_column = None
+            # Vectorized delta calculation
+            def calculate_delta(identifier, current_rank):
+                if identifier not in rank_mapping:
+                    return "n/a"
 
-                for col in string_columns:
-                    if col in row and col in comparison_df.columns:
-                        current_identifier = row[col]
-                        if current_identifier:
-                            matches = comparison_df[comparison_df[col] == current_identifier]
-                            if not matches.empty:
-                                comparison_row = matches
-                                matched_column = col
-                                break
-
-                if self.debug and not comparison_row.empty:
-                    print(
-                        f"[DEBUG] Found match using column {matched_column}: {row[matched_column]}"
-                    )
-                elif self.debug:
-                    print(f"[DEBUG] No match found for row {idx} using columns: {string_columns}")
-
-                if not comparison_row.empty:
-                    current_rank = row["rank"]
-                    comparison_rank = comparison_row.iloc[0]["rank"]
-
-                    if self.debug:
-                        print(
-                            f"[DEBUG] Found match: {current_identifier}, current_rank: {current_rank}, comparison_rank: {comparison_rank}"
-                        )
-
-                    if current_rank == comparison_rank:
-                        delta_value = "="
-                    elif current_rank < comparison_rank:
-                        delta_value = f"↑{comparison_rank - current_rank}"
-                    else:
-                        delta_value = f"↓{current_rank - comparison_rank}"
-
-                    if self.debug:
-                        print(f"[DEBUG] Delta value: {delta_value}")
-
-                    # Set delta value in appropriate column
-                    if i == 0:  # Previous month
-                        df.at[idx, "Δ vs Previous Month"] = delta_value
-                    elif i == 1:  # Previous year
-                        df.at[idx, "Δ vs Previous Year"] = delta_value
-                    elif i == 2:  # 5 years ago
-                        df.at[idx, "Δ vs 5 Years Ago"] = delta_value
+                comparison_rank = rank_mapping[identifier]
+                if current_rank == comparison_rank:
+                    return "="
+                elif current_rank < comparison_rank:
+                    return f"↑{comparison_rank - current_rank}"
                 else:
-                    if self.debug:
-                        print(f"[DEBUG] No match found for identifier: {current_identifier}")
+                    return f"↓{current_rank - comparison_rank}"
+
+            # Apply vectorized function
+            deltas = df.apply(
+                lambda row: calculate_delta(row[matching_column], row["rank"]), axis=1
+            )
+
+            # Set delta values in appropriate column
+            if i == 0:  # Previous month
+                df["Δ vs Previous Month"] = deltas
+            elif i == 1:  # Previous year
+                df["Δ vs Previous Year"] = deltas
+            elif i == 2:  # 5 years ago
+                df["Δ vs 5 Years Ago"] = deltas
 
         return df
 
@@ -605,22 +602,11 @@ class TableGenerator:
         if deltas:
             # Determine current month from data (this is a simplified approach)
             # In practice, this should come from the report context
-            current_month = "2025-06"  # TODO: Make this configurable
-
-            if self.debug:
-                print(f"[DEBUG] Before delta calculation - df shape: {df.shape}")
-                print(f"[DEBUG] Before delta calculation - df columns: {list(df.columns)}")
-                print(
-                    f"[DEBUG] Before delta calculation - comparison_data keys: {list(self.comparison_data.keys())}"
-                )
+            current_month = self.current_month or "2025-06"  # TODO: Make this configurable
 
             # Use the data key (with underscore) for delta calculation, not the table name (with hyphen)
             data_key = table_name.replace("-", "_")
             df = self._calculate_deltas(df, data_key, current_month)
-
-            if self.debug:
-                print(f"[DEBUG] After delta calculation - df shape: {df.shape}")
-                print(f"[DEBUG] After delta calculation - df columns: {list(df.columns)}")
 
             # Format delta column names
             delta_name_mapping = self._format_delta_column_names(current_month)
@@ -647,6 +633,9 @@ class TableGenerator:
             formatted_df = formatted_df.iloc[
                 :, 1:-1
             ]  # Remove empty first/last columns from markdown parsing
+
+            # Format usernames with "u/" prefix for Reddit display
+            formatted_df = self._format_usernames(formatted_df)
 
             # Format column names
             formatted_df = self._format_column_names(formatted_df)
