@@ -91,8 +91,7 @@ class BladeDiversityAggregator(BaseAggregator):
         grouped = grouped.merge(blade_counts, on="author")
         grouped = grouped.merge(shave_counts, on="author")
 
-        # Add unique_users field (always 1 for user aggregators)
-        grouped["unique_users"] = 1
+
 
         return grouped
 
@@ -120,7 +119,7 @@ class BladeDiversityAggregator(BaseAggregator):
                 "user": str(row["author"]),
                 "unique_blades": int(row["unique_blades"]),
                 "total_shaves": int(row["total_shaves"]),
-                "unique_users": int(row["unique_users"]),
+
             }
 
             result.append(item)

@@ -33,23 +33,12 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 {{tables.brand-diversity|rows:30|deltas:true}}
 
+### Soap Diversity by User
+{{tables.user-soap-brand-scent-diversity|rows:50}}
+
 ## Top Shavers
 
-{{tables.top-shavers|rows:50|columns:rank, user, shaves, missed_days}}
-
-## User Diversity Analysis
-
-### Razor Diversity by User
-{{tables.user-razor-diversity|ranks:20}}
-
-### Blade Diversity by User  
-{{tables.user-blade-diversity|ranks:20}}
-
-### Brush Diversity by User
-{{tables.user-brush-diversity|ranks:20}}
+{{tables.users|rows:50|deltas:true}}
 
 ### Soap Brand Diversity by User
-{{tables.user-soap-brand-diversity|ranks:20}}
-
-### Soap Brand+Scent Diversity by User
-{{tables.user-soap-brand-scent-diversity|ranks:20}}
+{{tables.user-soap-brand-diversity|rows:50}}

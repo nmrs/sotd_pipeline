@@ -101,8 +101,7 @@ class BrushDiversityAggregator(BaseAggregator):
         shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
         grouped = grouped.merge(shave_counts, on="author")
 
-        # Add unique_users field (always 1 for user aggregators)
-        grouped["unique_users"] = 1
+
 
         return grouped
 
@@ -118,7 +117,7 @@ class BrushDiversityAggregator(BaseAggregator):
                 "user": str(row["author"]),
                 "unique_brushes": int(row["unique_brushes"]),
                 "total_shaves": int(row["total_shaves"]),
-                "unique_users": int(row["unique_users"]),
+
             }
             result.append(item)
 

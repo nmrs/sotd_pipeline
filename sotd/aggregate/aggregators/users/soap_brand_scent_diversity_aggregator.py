@@ -93,8 +93,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         grouped = grouped.merge(brand_scent_counts, on="author")
         grouped = grouped.merge(shave_counts, on="author")
 
-        # Add unique_users field (always 1 for user aggregators)
-        grouped["unique_users"] = 1
+
 
         return grouped
 
@@ -124,7 +123,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
                 "user": str(row["author"]),
                 "unique_combinations": int(row["unique_combinations"]),
                 "total_shaves": int(row["total_shaves"]),
-                "unique_users": int(row["unique_users"]),
+
             }
 
             result.append(item)
