@@ -11,6 +11,21 @@ from ..base_aggregator import BaseAggregator
 class SoapSampleUserAggregator(BaseAggregator):
     """Aggregator for soap sample data grouped by user from enriched records."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract soap sample data from records for aggregation.
 
@@ -127,7 +142,7 @@ class SoapSampleUserAggregator(BaseAggregator):
         for _, row in grouped.iterrows():
             item = {
                 "position": int(row["position"]),
-                "user": str(row["author"]),
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

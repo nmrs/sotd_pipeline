@@ -7,6 +7,8 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ..base_aggregator import BaseAggregator
+
 
 def _extract_date_from_thread_title(thread_title: str) -> date:
     """Extract date from thread title using the same utility as fetch phase."""
@@ -32,6 +34,57 @@ def _get_all_dates_in_month(year: int, month: int) -> List[date]:
         dates.append(date(year, month, day))
 
     return dates
+
+
+class UserAggregator(BaseAggregator):
+    """Aggregator for user data from enriched records."""
+
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "missed_days", "missed_dates"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "missed_days"]
+
+    def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract user data from records for aggregation."""
+        user_data = []
+        for record in records:
+            author = record.get("author", "").strip()
+            thread_title = record.get("thread_title", "")
+
+            # Skip if no author or thread title
+            if not author or not thread_title:
+                continue
+
+            try:
+                posted_date = _extract_date_from_thread_title(thread_title)
+                user_data.append({"author": author, "posted_date": posted_date})
+            except (ValueError, KeyError):
+                # Skip records with invalid thread titles
+                continue
+
+        return user_data
+
+    def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
+        """Create composite name from user data."""
+        return df["author"]
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns to use for grouping."""
+        return ["name"]
+
+    def _call_base_aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Call the base class aggregate method."""
+        return super().aggregate(records)
 
 
 def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -147,7 +200,7 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         final_results.append(
             {
                 "rank": int(row["rank"]),
-                "user": row["author"],
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit user tagging
                 "shaves": int(row["shaves"]),
                 "missed_days": int(row["missed_days"]),
                 "missed_dates": row["missed_dates"],

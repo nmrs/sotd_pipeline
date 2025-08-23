@@ -81,6 +81,45 @@ class BaseAggregator(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping (e.g., user, brand, name, model).
+
+        These fields are used by the table generator to determine
+        which columns should be used for delta calculation matching.
+
+        Returns:
+            List of field names that serve as identifiers
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields (e.g., counts, averages, totals).
+
+        These fields are excluded from delta calculation matching
+        as they are derived values, not identifiers.
+
+        Returns:
+            List of field names that are calculated metrics
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking the results.
+
+        These fields determine the order of results in the
+        aggregated output.
+
+        Returns:
+            List of field names used for sorting
+        """
+        pass
+
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
 
@@ -125,7 +164,7 @@ class BaseAggregator(ABC):
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with rank, name, shaves, and unique_users fields
+            List of dictionaries with rank field and all original columns preserved
         """
         # Get the first grouping column for sorting (could be "name", "handle_maker", etc.)
         first_group_column = self._get_group_columns(grouped)[0]
@@ -154,13 +193,11 @@ class BaseAggregator(ABC):
         for _, row in grouped.iterrows():
             item = {
                 "rank": int(row["raw_rank"]),
-                "shaves": int(row["shaves"]),
-                "unique_users": int(row["unique_users"]),
             }
 
-            # Add all other columns (name, fiber, etc.)
+            # Add all columns from the input DataFrame (name, shaves, unique_users, etc.)
             for col in row.index:
-                if col not in ["raw_rank", "shaves", "unique_users"]:
+                if col != "raw_rank":
                     item[str(col)] = row[col]  # type: ignore
 
             result.append(item)

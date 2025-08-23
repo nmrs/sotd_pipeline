@@ -9,7 +9,22 @@ from ..base_aggregator import BaseAggregator
 
 
 class BrushDiversityAggregator(BaseAggregator):
-    """Aggregator for tracking user brush diversity across multiple brush components."""
+    """Aggregator for brush diversity data from enriched records."""
+
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["unique_brushes", "shaves", "avg_shaves_per_brush"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["unique_brushes", "shaves"]
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract brush data from enriched records."""
@@ -101,7 +116,8 @@ class BrushDiversityAggregator(BaseAggregator):
         shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
         grouped = grouped.merge(shave_counts, on="author")
 
-
+        # Calculate average shaves per brush for each user
+        grouped["avg_shaves_per_brush"] = (grouped["shaves"] / grouped["unique_brushes"]).round(1)
 
         return grouped
 
@@ -114,10 +130,10 @@ class BrushDiversityAggregator(BaseAggregator):
         for _, row in grouped.iterrows():
             item = {
                 "rank": int(row["rank"]),
-                "user": str(row["author"]),
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
                 "unique_brushes": int(row["unique_brushes"]),
                 "shaves": int(row["shaves"]),
-
+                "avg_shaves_per_brush": float(row["avg_shaves_per_brush"]),
             }
             result.append(item)
 

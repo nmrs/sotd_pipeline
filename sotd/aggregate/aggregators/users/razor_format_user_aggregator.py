@@ -11,6 +11,21 @@ from ..base_aggregator import BaseAggregator
 class RazorFormatUserAggregator(BaseAggregator):
     """Aggregator for tracking top users within each razor format category."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["format", "user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract razor format data from enriched records."""
         extracted = []
@@ -84,7 +99,7 @@ class RazorFormatUserAggregator(BaseAggregator):
             item = {
                 "rank": current_position,
                 "format": format_type,
-                "user": str(row["author"]),
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

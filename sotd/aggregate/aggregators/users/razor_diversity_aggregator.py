@@ -5,12 +5,27 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ...utils.field_validation import get_field_value, has_required_fields
 from ..base_aggregator import BaseAggregator
-from ...utils.field_validation import has_required_fields, get_field_value
 
 
 class RazorDiversityAggregator(BaseAggregator):
     """Aggregator for razor diversity data from enriched records."""
+
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["unique_razors", "shaves", "avg_shaves_per_razor"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["unique_razors", "shaves"]
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract razor diversity data from records for aggregation.
@@ -91,6 +106,9 @@ class RazorDiversityAggregator(BaseAggregator):
         grouped = grouped.merge(razor_counts, on="author")
         grouped = grouped.merge(shave_counts, on="author")
 
+        # Calculate average shaves per razor for each user
+        grouped["avg_shaves_per_razor"] = (grouped["shaves"] / grouped["unique_razors"]).round(1)
+
         return grouped
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
@@ -103,9 +121,7 @@ class RazorDiversityAggregator(BaseAggregator):
             List of dictionaries with rank, user, unique_razors, and shaves fields
         """
         # Sort by unique_razors desc, shaves desc
-        grouped = grouped.sort_values(
-            ["unique_razors", "shaves"], ascending=[False, False]
-        )
+        grouped = grouped.sort_values(["unique_razors", "shaves"], ascending=[False, False])
 
         # Add rank field (1-based rank)
         grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
@@ -115,9 +131,10 @@ class RazorDiversityAggregator(BaseAggregator):
         for _, row in grouped.iterrows():
             item = {
                 "rank": int(row["rank"]),
-                "user": str(row["author"]),
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
                 "unique_razors": int(row["unique_razors"]),
                 "shaves": int(row["shaves"]),
+                "avg_shaves_per_razor": float(row["avg_shaves_per_razor"]),
             }
 
             result.append(item)

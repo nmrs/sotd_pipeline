@@ -262,7 +262,7 @@ class TableGenerator:
             # Calculate rank changes
             for idx, row in df.iterrows():
                 # Get all string columns for comparison
-                string_columns = self._get_string_columns(df.columns)
+                string_columns = self._get_string_columns(df.columns, table_name)
 
                 if not string_columns:
                     if self.debug:
@@ -322,20 +322,68 @@ class TableGenerator:
 
         return df
 
-    def _get_string_columns(self, columns: list) -> list[str]:
-        """Get all string columns from the DataFrame for comparison.
+    def _get_string_columns(self, columns: list, table_name: str = None) -> list[str]:
+        """Get columns suitable for user/entity matching using dynamic field discovery.
 
         Args:
             columns: List of available columns in the DataFrame
+            table_name: Optional table name for aggregator-specific field discovery
 
         Returns:
-            List of string column names
+            List of column names that are suitable for user/entity matching
         """
-        # Define numeric columns that are not string identifiers
-        numeric_columns = {"rank", "shaves", "unique_users", "missed_days"}
 
-        # Return all non-numeric columns
-        return [col for col in columns if col not in numeric_columns]
+        # Try to discover field metadata from aggregator classes
+        if table_name:
+            aggregator_class = self._get_aggregator_class(table_name)
+            if aggregator_class and hasattr(aggregator_class, "IDENTIFIER_FIELDS"):
+                # Use aggregator's own field classification
+                return [col for col in columns if col in aggregator_class.IDENTIFIER_FIELDS]
+
+        # Fallback to dynamic classification for unknown tables
+        return self._fallback_field_classification(columns)
+
+    def _get_aggregator_class(self, table_name: str):
+        """Get the aggregator class for a given table name."""
+        try:
+            # Convert table name to module path
+            # e.g., "user_razor_diversity" -> "sotd.aggregate.aggregators.users.razor_diversity_aggregator.RazorDiversityAggregator"
+            module_name = f"sotd.aggregate.aggregators.users.{table_name}_aggregator"
+            class_name = f"{table_name.replace('_', ' ').title().replace(' ', '')}Aggregator"
+
+            module = __import__(module_name, fromlist=[class_name])
+            return getattr(module, class_name)
+        except (ImportError, AttributeError):
+            # Return None if aggregator class can't be found
+            return None
+
+    def _fallback_field_classification(self, columns: list) -> list[str]:
+        """Fallback field classification for tables without explicit metadata."""
+
+        def is_identifier_column(col: str) -> bool:
+            """Dynamically classify whether a column is suitable for user/entity matching."""
+
+            # Exclude columns that are clearly not identifiers
+            if col.startswith("avg_"):  # All average fields (avg_shaves_per_*)
+                return False
+            if col.startswith("unique_"):  # All unique count fields (unique_*)
+                return False
+            if col in ["rank", "shaves", "missed_days", "missed_dates"]:  # Known non-identifiers
+                return False
+            if col.startswith("Δ"):  # Delta columns
+                return False
+            if col in ["date", "timestamp"]:  # Date/time fields
+                return False
+
+            # Include columns that are likely identifiers
+            if col in ["user", "author", "brand", "name", "model", "maker"]:
+                return True
+
+            # Default: include if it looks like a string identifier
+            # This handles future fields we haven't explicitly classified
+            return True
+
+        return [col for col in columns if is_identifier_column(col)]
 
     def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
         """Parse the columns parameter specification.
@@ -511,7 +559,7 @@ class TableGenerator:
             raise ValueError("rows must be greater than 0")
 
         # Convert kebab-case template name to snake_case data key
-        data_key = table_name.replace('-', '_')
+        data_key = table_name.replace("-", "_")
 
         if data_key not in self.data:
             available_keys = list(self.data.keys())
@@ -558,7 +606,7 @@ class TableGenerator:
                 )
 
             # Use the data key (with underscore) for delta calculation, not the table name (with hyphen)
-            data_key = table_name.replace('-', '_')
+            data_key = table_name.replace("-", "_")
             df = self._calculate_deltas(df, data_key, current_month)
 
             if self.debug:

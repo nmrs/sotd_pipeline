@@ -5,12 +5,31 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ...utils.field_validation import get_field_value, has_required_fields
 from ..base_aggregator import BaseAggregator
-from ...utils.field_validation import has_required_fields, get_field_value
+from .user_diversity_mixin import UserDiversityMixin
 
 
-class SoapBrandScentDiversityAggregator(BaseAggregator):
+class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
     """Aggregator for soap brand scent diversity data from enriched records."""
+
+    # Override tie_columns for tier-based ranking
+    tie_columns = ["unique_combinations", "shaves"]
+
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["user"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["unique_combinations", "shaves", "avg_shaves_per_combination"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["unique_combinations", "shaves"]
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract soap brand scent diversity data from records for aggregation.
@@ -93,45 +112,34 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         grouped = grouped.merge(brand_scent_counts, on="author")
         grouped = grouped.merge(shave_counts, on="author")
 
+        # Calculate average shaves per combination
+        grouped["avg_shaves_per_combination"] = (
+            grouped["shaves"] / grouped["unique_combinations"]
+        ).round(2)
 
+        # Use mixin to prepare for base class ranking
+        grouped = self._prepare_for_base_ranking(grouped)
 
         return grouped
 
-    def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add rank rankings.
-
-        Args:
-            grouped: DataFrame with grouped and aggregated data
-
-        Returns:
-            List of dictionaries with rank, user, unique_combinations, and shaves fields
-        """
-        # Sort by unique_combinations desc, shaves desc
-        grouped = grouped.sort_values(
-            ["unique_combinations", "shaves"], ascending=[False, False]
-        )
-
-        # Add rank field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
-
-        # Convert to list of dictionaries
-        result = []
-        for _, row in grouped.iterrows():
-            item = {
-                "rank": int(row["rank"]),
-                "user": str(row["author"]),
-                "unique_combinations": int(row["unique_combinations"]),
-                "shaves": int(row["shaves"]),
-
-            }
-
-            result.append(item)
-
-        return result
-
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
-        return ["brand", "scent"]
+        return ["name"]
+
+    def _call_base_aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Call the base class aggregate method."""
+        return super().aggregate(records)
+
+    def aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Aggregate data using tier-based ranking with custom output format."""
+        return self.aggregate_with_tier_ranking(
+            records,
+            {
+                "unique_combinations": "unique_combinations",
+                "shaves": "shaves",
+                "avg_shaves_per_combination": "avg_shaves_per_combination",
+            },
+        )
 
 
 # Legacy function interface for backward compatibility

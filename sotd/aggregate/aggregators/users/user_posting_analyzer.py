@@ -90,7 +90,6 @@ class UserPostingAnalyzer:
             "Apr": 4,
             "April": 4,
             "May": 5,
-            "May": 5,
             "Jun": 6,
             "June": 6,
             "Jul": 7,

@@ -123,7 +123,7 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
         result.append(
             {
                 "rank": int(row["rank"]),
-                "user": row["author"],
+                "user": f"u/{row['author']}",  # Prepend "u/" for Reddit tagging
                 "blade": row["blade_name"],
                 "format": row["blade_format"],
                 "uses": int(row["uses"]),
