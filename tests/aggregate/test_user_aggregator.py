@@ -27,10 +27,10 @@ class TestUserAggregator:
         result = aggregate_users(records)
 
         assert len(result) == 2
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         assert result[0]["rank"] == 1
-        assert result[1]["user"] == "u/user2"
+        assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
         assert result[1]["rank"] == 2
 
@@ -92,25 +92,25 @@ class TestUserAggregator:
         # Check competition ranking: 1, 1, 3, 4 (user1, user3, user2, user4)
         # User1: 3 shaves, 28 missed days -> rank 1
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 3
         assert result[0]["missed_days"] == 28
 
         # User3: 3 shaves, 28 missed days -> rank 1 (tied with user1, alphabetically second)
         assert result[1]["rank"] == 1
-        assert result[1]["user"] == "u/user3"
+        assert result[1]["user"] == "user3"
         assert result[1]["shaves"] == 3
         assert result[1]["missed_days"] == 28
 
         # User2: 3 shaves, 29 missed days -> rank 3 (different missed_days)
         assert result[2]["rank"] == 3
-        assert result[2]["user"] == "u/user2"
+        assert result[2]["user"] == "user2"
         assert result[2]["shaves"] == 3
         assert result[2]["missed_days"] == 29
 
         # User4: 2 shaves, 29 missed days -> rank 4 (different shaves)
         assert result[3]["rank"] == 4
-        assert result[3]["user"] == "u/user4"
+        assert result[3]["user"] == "user4"
         assert result[3]["shaves"] == 2
         assert result[3]["missed_days"] == 29
 
@@ -134,7 +134,7 @@ class TestUserAggregator:
         result = aggregate_users(records)
 
         assert len(result) == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         # January 2025 has 31 days, so missed_days should be 29
         assert result[0]["missed_days"] == 29
