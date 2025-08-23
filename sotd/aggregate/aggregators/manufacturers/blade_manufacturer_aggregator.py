@@ -9,6 +9,23 @@ from ...utils.field_validation import has_required_field, get_field_value
 class BladeManufacturerAggregator(BaseAggregator):
     """Aggregator for blade manufacturer data from enriched records."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> List[str]:
+        """Fields used for matching/grouping."""
+        return ["brand"]
+
+    @property
+    def METRIC_FIELDS(self) -> List[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> List[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
+
+
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract blade manufacturer data from records for aggregation.
 
