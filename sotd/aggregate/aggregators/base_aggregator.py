@@ -176,31 +176,32 @@ class BaseAggregator(ABC):
         grouped = grouped.sort_values(self.tie_columns, ascending=ascending_list)
         grouped = grouped.reset_index(drop=True)
 
+        # Use original ranking logic to maintain exact same ranking behavior
         # Create a composite key for ranking that preserves the order
         # Use sequential ranks, then group by tie_columns to get same rank for ties
         grouped["temp_rank"] = range(1, len(grouped) + 1)
-        grouped["raw_rank"] = grouped.groupby(self.tie_columns, sort=False)["temp_rank"].transform(
+        grouped["rank"] = grouped.groupby(self.tie_columns, sort=False)["temp_rank"].transform(
             "min"
         )
         grouped = grouped.drop("temp_rank", axis=1)
 
         # Sort by ranking first, then by name for consistent ordering of tied entries
-        grouped = grouped.sort_values(["raw_rank", first_group_column], ascending=[True, True])
+        grouped = grouped.sort_values(["rank", first_group_column], ascending=[True, True])
         grouped = grouped.reset_index(drop=True)
 
-        # Convert to list of dictionaries
+        # OPTIMIZED: Use pandas to_dict instead of manual loop conversion
+        # This is more efficient and cleaner than manual iteration
+        result = grouped.to_dict("records")
+
+        # Convert Hashable keys to strings for type compatibility and ensure rank appears first
         result = []
-        for _, row in grouped.iterrows():
-            item = {
-                "rank": int(row["raw_rank"]),
-            }
-
-            # Add all columns from the input DataFrame (name, shaves, unique_users, etc.)
-            for col in row.index:
-                if col != "raw_rank":
-                    item[str(col)] = row[col]  # type: ignore
-
-            result.append(item)
+        for item in grouped.to_dict("records"):
+            # Ensure rank field appears first for consistency with original output
+            new_item = {"rank": int(item["rank"])}
+            for k, v in item.items():
+                if k != "rank":
+                    new_item[str(k)] = v
+            result.append(new_item)
 
         return result
 
