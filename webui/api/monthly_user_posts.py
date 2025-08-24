@@ -273,30 +273,29 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
                 knot_brand = knot.get("brand", "") if knot else ""
                 knot_model = knot.get("model", "") if knot else ""
                 
-                # Only process if we have some brand information at the top level
-                if brush_brand or brush_model:
-                    # Use actual top-level values, don't fill with fallbacks
-                    brush_key = (
-                        f"{brush_brand or ''}|{brush_model or ''}|"
-                        f"{handle_brand}|{knot_brand}|{knot_model}"
+                # Process all brushes, even those without top-level brand/model
+                # Use actual top-level values, don't fill with fallbacks
+                brush_key = (
+                    f"{brush_brand or ''}|{brush_model or ''}|"
+                    f"{handle_brand}|{knot_brand}|{knot_model}"
+                )
+                existing = next((b for b in brushes if b["key"] == brush_key), None)
+                if existing:
+                    existing["count"] += 1
+                    existing["comment_ids"].append(comment_id)
+                else:
+                    brushes.append(
+                        {
+                            "key": brush_key,
+                            "brand": brush_brand or "",
+                            "model": brush_model or "",
+                            "handle_brand": handle_brand,
+                            "knot_brand": knot_brand,
+                            "knot_model": knot_model,
+                            "count": 1,
+                            "comment_ids": [comment_id],
+                        }
                     )
-                    existing = next((b for b in brushes if b["key"] == brush_key), None)
-                    if existing:
-                        existing["count"] += 1
-                        existing["comment_ids"].append(comment_id)
-                    else:
-                        brushes.append(
-                            {
-                                "key": brush_key,
-                                "brand": brush_brand or "",
-                                "model": brush_model or "",
-                                "handle_brand": handle_brand,
-                                "knot_brand": knot_brand,
-                                "knot_model": knot_model,
-                                "count": 1,
-                                "comment_ids": [comment_id],
-                            }
-                        )
 
             # Extract soap data
             if "soap" in record and record["soap"]:
