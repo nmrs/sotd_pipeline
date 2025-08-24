@@ -156,11 +156,7 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
 
         # Debug logging
         logger.debug(f"Enriched data type: {type(enriched_data)}")
-        data_keys = (
-            list(enriched_data.keys()) 
-            if isinstance(enriched_data, dict) 
-            else 'Not a dict'
-        )
+        data_keys = list(enriched_data.keys()) if isinstance(enriched_data, dict) else "Not a dict"
         logger.debug(f"Enriched data keys: {data_keys}")
 
         # Use existing user aggregation logic
@@ -270,44 +266,18 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
                 brush_brand = matched.get("brand")
                 brush_model = matched.get("model")
                 
-                # If top-level brand/model are null, try to get from handle or knot
-                if not brush_brand or not brush_model:
-                    handle = matched.get("handle", {})
-                    knot = matched.get("knot", {})
-                    
-                    # Prefer handle brand/model if top-level is null
-                    if not brush_brand and handle.get("brand"):
-                        brush_brand = handle["brand"]
-                    if not brush_model and handle.get("model"):
-                        brush_model = handle["model"]
-                    
-                    # If still no brand/model, try knot
-                    if not brush_brand and knot.get("brand"):
-                        brush_brand = knot["brand"]
-                    if not brush_model and knot.get("model"):
-                        brush_model = knot["model"]
+                # Get handle and knot info for display purposes
+                handle = matched.get("handle", {})
+                knot = matched.get("knot", {})
+                handle_brand = handle.get("brand", "") if handle else ""
+                knot_brand = knot.get("brand", "") if knot else ""
+                knot_model = knot.get("model", "") if knot else ""
                 
-                # Only process if we have some brand information
+                # Only process if we have some brand information at the top level
                 if brush_brand or brush_model:
-                    # Get handle and knot info
-                    handle = matched.get("handle", {})
-                    knot = matched.get("knot", {})
-                    handle_brand = handle.get("brand", "") if handle else ""
-                    knot_brand = knot.get("brand", "") if knot else ""
-                    knot_model = knot.get("model", "") if knot else ""
-                    
-                    # Use fallback values if main brand/model are null
-                    if not brush_brand:
-                        brush_brand = handle_brand or knot_brand or "Unknown"
-                    if not brush_model:
-                        brush_model = (
-                            handle.get("model") or 
-                            knot.get("model") or 
-                            "Unknown"
-                        )
-                    
+                    # Use actual top-level values, don't fill with fallbacks
                     brush_key = (
-                        f"{brush_brand}|{brush_model}|"
+                        f"{brush_brand or ''}|{brush_model or ''}|"
                         f"{handle_brand}|{knot_brand}|{knot_model}"
                     )
                     existing = next((b for b in brushes if b["key"] == brush_key), None)
@@ -318,8 +288,8 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
                         brushes.append(
                             {
                                 "key": brush_key,
-                                "brand": brush_brand,
-                                "model": brush_model,
+                                "brand": brush_brand or "",
+                                "model": brush_model or "",
                                 "handle_brand": handle_brand,
                                 "knot_brand": knot_brand,
                                 "knot_model": knot_model,

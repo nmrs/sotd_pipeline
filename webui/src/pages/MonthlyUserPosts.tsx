@@ -666,8 +666,8 @@ const MonthlyUserPosts: React.FC = () => {
                                             {userAnalysis.brushes.map((brush, index) => (
                                                 <tr key={brush.key} className="hover:bg-muted/50">
                                                     <td className="border border-border p-2 text-center font-medium">{index + 1}</td>
-                                                    <td className="border border-border p-2">{brush.brand}</td>
-                                                    <td className="border border-border p-2">{brush.model}</td>
+                                                    <td className="border border-border p-2">{brush.brand || '-'}</td>
+                                                    <td className="border border-border p-2">{brush.model || '-'}</td>
                                                     <td className="border border-border p-2">{brush.handle_brand || '-'}</td>
                                                     <td className="border border-border p-2">{brush.knot_brand || '-'}</td>
                                                     <td className="border border-border p-2">{brush.knot_model || '-'}</td>
