@@ -44,7 +44,7 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
   - Maintained exact output compatibility - baseline validation passes
 - **Performance**: Improved efficiency for large datasets while preserving functionality
 - **Baseline Validation**: ✅ All comparisons pass - no functional changes introduced
-- **Next Step**: Integration testing (Task 14)
+- **Next Step**: Integration testing (Task 14) or Fetch phase optimization (Task 15)
 
 **Ranking Logic Analysis Results:**
 - **Discovery**: Current ranking logic already uses optimal pandas operations (groupby().transform('min'))
@@ -64,6 +64,11 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
 12. **Utility Function Optimization** - Optimize utility functions and helpers ✅
 13. **Baseline Validation #4** - Verify utility function optimizations don't change output ✅
 14. **Integration Testing** - Verify all optimizations work correctly together
+15. **Fetch Phase Optimization** - Optimize Reddit data processing and thread handling
+16. **Baseline Validation #5** - Verify fetch phase optimizations don't change output
+17. **Enrich Phase Optimization** - Optimize pattern matching and data enrichment
+18. **Baseline Validation #6** - Verify enrich phase optimizations don't change output
+19. **Final Integration Testing** - Verify all phases work together with pandas optimizations
 
 ## 📋 File Review Findings
 
@@ -1123,8 +1128,8 @@ This plan follows a systematic approach to pandas optimization based on comprehe
    - **Handle Patterns**: Combined 4 patterns into 1 optimized regex
    - **Razor Use Count Patterns**: Combined 8 patterns into 1 optimized regex
    - **Soap-Related Patterns**: Combined 6 patterns into 3 optimized regexes
-   - **Standalone Sample Patterns**: Combined 2 patterns into 1 optimized regex
-   - **Condition Patterns**: Combined 4 patterns into 1 optimized regex
+   - **Standalone Sample Patterns**: Combined 2 patterns into 1 combined regex
+   - **Condition Patterns**: Combined 4 patterns into 1 combined regex
    - **Performance**: Reduced regex compilation overhead and improved matching speed
 
 3. **Validation Utils**:
@@ -1141,7 +1146,112 @@ This plan follows a systematic approach to pandas optimization based on comprehe
 
 **Baseline Validation**: ✅ All comparisons pass - no functional changes
 
+## **🎯 BASELINE COMMIT - SAFE REVERT POINT**
+
+**Commit**: `45037009` - "feat: complete pandas optimization baseline - all phases optimized"
+
+**Safe Revert Command**:
+```bash
+git reset --hard 45037009
+```
+
+**What This Restores**:
+- All aggregator phase optimizations (core + specialized)
+- All report generation optimizations (table generators + delta calculator)
+- All utility function optimizations (template processor + extract normalization + validation utils)
+- Fully tested and validated baseline with 100% output compatibility
+
+**Use This When**:
+- Future optimizations introduce regressions
+- Need to return to a known working state
+- Want to start fresh from the optimized baseline
+
 The plan ensures that pandas optimizations are applied systematically while maintaining the integrity of the SOTD Pipeline's data processing capabilities. The review has identified specific, actionable optimization targets with clear impact assessments.
+
+## **Phase 3: Fetch & Enrich Phase Optimization**
+
+### **Task 15: Fetch Phase Optimization** 🔄
+**Objective**: Optimize Reddit data processing and thread handling with pandas operations
+
+**Key Targets**:
+- **Reddit data processing** (`sotd/fetch/reddit.py`): Optimize thread filtering and comment processing
+- **Thread handling** (`sotd/fetch/run.py`): Optimize month processing and missing data handling
+- **Data iteration** (`sotd/fetch/audit.py`): Optimize file scanning and validation loops
+
+**Optimization Strategy**:
+- Convert Reddit API results to DataFrames for vectorized processing
+- Use pandas operations for thread filtering and validation
+- Optimize missing data detection with vectorized operations
+- Keep data as DataFrames throughout fetch phase
+
+**Expected Impact**:
+- Eliminate 15+ Python loops in fetch phase
+- Improve performance for large thread datasets
+- Better memory efficiency with DataFrame operations
+
+### **Task 16: Baseline Validation #5** 🔄
+**Objective**: Verify fetch phase optimizations don't change output
+
+**Validation Requirements**:
+- All fetched data files identical to baseline
+- Thread and comment counts match exactly
+- No changes in data structure or content
+- Performance improvements achieved without functional changes
+
+### **Task 17: Enrich Phase Optimization** 🔄
+**Objective**: Optimize pattern matching and data enrichment with pandas operations
+
+**Key Targets**:
+- **Pattern matching loops** (`sotd/enrich/*_enricher.py`): Combine regex patterns and use vectorized operations
+- **Data processing** (`sotd/enrich/registry.py`): Optimize record processing with DataFrame operations
+- **Field extraction** (`sotd/enrich/save.py`): Vectorize field processing operations
+
+**Optimization Strategy**:
+- Convert input data to DataFrame once at start of enrich phase
+- Keep data as DataFrame throughout enrich → aggregate → report pipeline
+- Use pandas string operations for pattern matching
+- Combine multiple regex patterns into optimized single patterns
+- Use `DataFrame.to_json()` for final output
+
+**Expected Impact**:
+- Eliminate 20+ Python loops in enrich phase
+- Reduce regex pattern count through consolidation
+- Improve performance for large datasets
+- Better memory efficiency with consistent DataFrame format
+
+### **Task 18: Baseline Validation #6** 🔄
+**Objective**: Verify enrich phase optimizations don't change output
+
+**Validation Requirements**:
+- All enriched data files identical to baseline
+- All aggregated data files identical to baseline
+- All report files identical to baseline
+- No changes in enrichment logic or output quality
+
+### **Task 19: Final Integration Testing** 🔄
+**Objective**: Verify all phases work together with pandas optimizations
+
+**Testing Requirements**:
+- End-to-end pipeline execution from fetch to report
+- Performance benchmarking against original baseline
+- Memory usage analysis and optimization
+- Validation that DataFrame format works throughout pipeline
+- Confirmation that `DataFrame.to_json()` produces identical output
+
+**Key Success Criteria**:
+- All phases optimized with pandas operations
+- Data remains as DataFrames throughout pipeline
+- No conversion overhead between phases
+- Identical output quality and structure
+- Measurable performance improvements
+- Memory efficiency maintained or improved
+
+**Risk Mitigation**:
+- Use baseline commit `45037009` as safe revert point
+- Validate each phase independently before integration
+- Test with realistic dataset sizes
+- Monitor memory usage during optimization
+- Ensure DataFrame.to_json() produces identical output to current format
 description:
 globs:
 alwaysApply: false
