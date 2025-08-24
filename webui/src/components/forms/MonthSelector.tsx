@@ -40,7 +40,8 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
       current.setMonth(current.getMonth() + 1);
     }
 
-    return months;
+    // Sort in descending order (newest first)
+    return months.sort((a, b) => b.localeCompare(a));
   };
 
   // Use pre-populated months initially, then merge with API results
