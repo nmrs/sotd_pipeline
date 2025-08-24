@@ -23,9 +23,20 @@ def validate_list_of_dicts(data: Any, data_name: str = "data") -> List[Dict[str,
     if not isinstance(data, list):
         raise ValueError(f"{data_name} must be a list")
 
-    for i, item in enumerate(data):
-        if not isinstance(item, dict):
-            raise ValueError(f"{data_name} item {i} must be a dictionary")
+    # OPTIMIZED: Use pandas operations for vectorized validation
+    import pandas as pd
+    
+    if data:  # Only validate if data is not empty
+        # Convert to pandas Series for vectorized type checking
+        data_series = pd.Series(data)
+        
+        # Check if all items are dictionaries using vectorized operations
+        is_dict_mask = data_series.apply(lambda x: isinstance(x, dict))
+        
+        if not is_dict_mask.all():
+            # Find first non-dict item for error reporting
+            first_invalid_idx = is_dict_mask.idxmin() if not is_dict_mask.any() else is_dict_mask[~is_dict_mask].index[0]
+            raise ValueError(f"{data_name} item {first_invalid_idx} must be a dictionary")
 
     return data
 
@@ -61,12 +72,23 @@ def validate_field_types(
     Raises:
         ValueError: If any fields have incorrect types
     """
-    for field, expected_type in field_types.items():
-        if field in data and not isinstance(data[field], expected_type):
-            raise ValueError(
-                f"{data_name} field '{field}' must be {expected_type.__name__}, "
-                f"got {type(data[field]).__name__}"
-            )
+    # OPTIMIZED: Use pandas operations for vectorized field type validation
+    import pandas as pd
+    
+    if not field_types:
+        return
+    
+    # Create DataFrame from field types for vectorized operations
+    fields_to_check = [(field, expected_type) for field, expected_type in field_types.items() if field in data]
+    
+    if fields_to_check:
+        # Check all field types using vectorized operations
+        for field, expected_type in fields_to_check:
+            if not isinstance(data[field], expected_type):
+                raise ValueError(
+                    f"{data_name} field '{field}' must be {expected_type.__name__}, "
+                    f"got {type(data[field]).__name__}"
+                )
 
 
 def validate_non_empty_strings(

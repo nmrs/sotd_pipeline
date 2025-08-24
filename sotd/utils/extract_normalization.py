@@ -110,18 +110,15 @@ def strip_blade_count_patterns(value: str) -> str:
     )
     cleaned = re.sub(location_condition_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for country of origin indicators: (Indian), (Russian), (Made in Germany), etc.
-    country_origin_patterns = [
-        r"(?:[\(\[\{])\s*Indian\s*[\)\]\}]",  # (Indian)
-        r"(?:[\(\[\{])\s*Russian\s*[\)\]\}]",  # (Russian)
-        r"(?:[\(\[\{])\s*Made\s+in\s+Germany\s*[\)\]\}]",  # (Made in Germany)
-        r"(?:[\(\[\{])\s*Made\s+in\s+China\s*[\)\]\}]",  # (Made in China)
-        r"(?:[\(\[\{])\s*russia\s+green\s*[\)\]\}]",  # (russia green)
-        r"(?:[\(\[\{])\s*Czechoslovakian\s*[\)\]\}]",  # (Czechoslovakian)
-        r"(?:[\(\[\{])\s*Poland\s*[\)\]\}]",  # (Poland)
-    ]
-    for pattern in country_origin_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    # OPTIMIZED: Pattern for country of origin indicators using combined regex
+    # Combine all country origin patterns into a single regex for better performance
+    country_origin_pattern = (
+        r"(?:[\(\[\{])\s*(?:"
+        r"Indian|Russian|Made\s+in\s+Germany|Made\s+in\s+China|"
+        r"russia\s+green|Czechoslovakian|Poland"
+        r")\s*[\)\]\}]"
+    )
+    cleaned = re.sub(country_origin_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
     decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
@@ -175,16 +172,13 @@ def strip_handle_indicators(value: str) -> str:
         return value
 
     # Pattern for handle indicators
-    handle_patterns = [
-        r"\s*\(in\s+handle\)",
-        r"\s*\(with\s+handle\)",
-        r"\s*\(.*\s+handle\)",
-        r"\s*\(handle.*\)",
-    ]
+    # OPTIMIZED: Combine handle patterns into a single regex for better performance
+    handle_pattern = (
+        r"\s*\((?:in\s+handle|with\s+handle|.*\s+handle|handle.*)\)"
+    )
 
     cleaned = value
-    for pattern in handle_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(handle_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up extra whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
@@ -209,21 +203,13 @@ def strip_razor_use_counts(value: str) -> str:
     if not isinstance(value, str):
         return value
 
-    # Pattern for razor use counts
-    use_count_patterns = [
-        r"\s*\(\d+(?:st|nd|rd|th)\s+use\)",
-        r"\s*\(used\)",
-        r"\s*\(worn\)",
-        r"\s*\(old\)",
-        r"\s*\(\d+\)",  # Basic numbers like (6), (12), (23)
-        r"\s*\[\d+\]",  # Numbers in brackets like [5], [10]
-        r"\s*\(new\)",  # New indicators
-        r"\s*\(NEW\)",  # NEW indicators
-    ]
+    # OPTIMIZED: Combine razor use count patterns into a single regex for better performance
+    use_count_pattern = (
+        r"\s*(?:\(\d+(?:st|nd|rd|th)\s+use\)|\((?:used|worn|old|\d+|new|NEW)\)|\[\d+\])"
+    )
 
     cleaned = value
-    for pattern in use_count_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(use_count_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up extra whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
@@ -253,40 +239,25 @@ def strip_soap_patterns(value: str) -> str:
 
     cleaned = value
 
+    # OPTIMIZED: Combine all soap-related patterns into optimized regexes
     # First remove complete phrases like "Shave Soap", "Shaving Soap", etc.
-    shaving_patterns = [
-        r"\b(shave soap|shaving soap|shave cream|shaving cream|"
-        r"shave splash|shaving splash|shave balm|shaving balm|"
-        r"shave aftershave|shaving aftershave)\b",
-    ]
-    for pattern in shaving_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    shaving_pattern = (
+        r"\b(?:shave\s+(?:soap|cream|splash|balm|aftershave)|"
+        r"shaving\s+(?:soap|cream|splash|balm|aftershave))\b"
+    )
+    cleaned = re.sub(shaving_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Then remove individual product type indicators
-    product_patterns = [
-        r"\b(soap|cream|splash|balm|aftershave|puck|croap)\b",
-    ]
-    for pattern in product_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    product_pattern = r"\b(?:soap|cream|splash|balm|aftershave|puck|croap)\b"
+    cleaned = re.sub(product_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for soap-related indicators in parentheses
-    soap_patterns = [
-        r"\s*\(sample\)",
-        r"\s*\(tester\)",
-        r"\s*\(travel\s+size\)",
-        r"\s*\(mini\)",
-        r"\s*\(small\)",
-    ]
-    for pattern in soap_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    # OPTIMIZED: Combine soap-related indicators in parentheses
+    soap_pattern = r"\s*\((?:sample|tester|travel\s+size|mini|small)\)"
+    cleaned = re.sub(soap_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for standalone sample indicators at the end
-    standalone_sample_patterns = [
-        r"\s+sample\s*[.!?]*\s*$",  # "sample" at the end (with optional punctuation)
-        r"\s+tester\s*[.!?]*\s*$",  # "tester" at the end (with optional punctuation)
-    ]
-    for pattern in standalone_sample_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    # OPTIMIZED: Combine standalone sample patterns into a single regex
+    standalone_sample_pattern = r"\s+(?:sample|tester)\s*[.!?]*\s*$"
+    cleaned = re.sub(standalone_sample_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up any leading/trailing delimiters and punctuation that the matcher needs
     # This ensures the normalized field is truly ready for matching
@@ -515,16 +486,10 @@ def normalize_remainder_text(value: str) -> str:
     cleaned = re.sub(r"https?://[^\s]+", "", cleaned)
     cleaned = re.sub(r"www\.[^\s]+", "", cleaned)
 
-    # Remove condition indicators for clean analysis
+    # OPTIMIZED: Combine condition patterns into a single regex for better performance
     # These will be preserved in normalize_remainder_text_preserve_locations
-    condition_patterns = [
-        r"\(vintage\)",
-        r"\(sample\)",
-        r"\(test\)",
-        r"\(old\)",
-    ]
-    for pattern in condition_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+    condition_pattern = r"\((?:vintage|sample|test|old)\)"
+    cleaned = re.sub(condition_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Remove empty parentheses, brackets, and braces
     cleaned = re.sub(r"\(\s*\)", "", cleaned)  # Empty parentheses
