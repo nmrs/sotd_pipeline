@@ -5,6 +5,10 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
 
 ## 🧩 Component Steps
 
+### Phase 0: Baseline Creation
+0. **Create Performance Baseline** - Run pipeline (match through report) for 2025-06 and 2025-07 to create baseline files for comparison
+0.5. **Baseline Metadata Analysis** - Analyze baseline files to identify metadata fields to ignore during comparison
+
 ### Phase 1: File Discovery and Analysis
 1. **Aggregator Core Files Review** - Review main aggregator files for Python loops
 2. **Aggregator Strategy Files Review** - Review specialized aggregator strategy files
@@ -14,10 +18,14 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
 
 ### Phase 2: Implementation and Optimization
 6. **Core Aggregator Optimization** - Optimize base aggregator and annual aggregator
-7. **Specialized Aggregator Optimization** - Optimize brush, razor, and user aggregators
-8. **Report Generation Optimization** - Optimize table generators and report core
-9. **Utility Function Optimization** - Optimize utility functions and helpers
-10. **Integration Testing** - Verify all optimizations work correctly together
+7. **Baseline Validation #1** - Verify core aggregator optimizations don't change output
+8. **Specialized Aggregator Optimization** - Optimize brush, razor, and user aggregators
+9. **Baseline Validation #2** - Verify specialized aggregator optimizations don't change output
+10. **Report Generation Optimization** - Optimize table generators and report core
+11. **Baseline Validation #3** - Verify report generation optimizations don't change output
+12. **Utility Function Optimization** - Optimize utility functions and helpers
+13. **Baseline Validation #4** - Verify utility function optimizations don't change output
+14. **Integration Testing** - Verify all optimizations work correctly together
 
 ## 📋 File Review Findings
 
@@ -132,6 +140,469 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
    - Maintain debugging functionality while improving performance
 
 ## 🔁 Implementation Prompts
+
+### Step 0: Create Performance Baseline
+```text
+Create a baseline for performance comparison by running the pipeline (match through report) for 2025-06 and 2025-07:
+
+Baseline creation steps:
+1. **Create baseline directory**: Create `.ab_backups/baseline_pandas_optimization/` directory
+2. **Run match phase**: Execute `python run.py match --month 2025-06 --force` and `python run.py match --month 2025-07 --force`
+3. **Run enrich phase**: Execute `python run.py enrich --month 2025-06 --force` and `python run.py enrich --month 2025-07 --force`
+4. **Run aggregate phase**: Execute `python run.py aggregate --month 2025-06 --force` and `python run.py aggregate --month 2025-07 --force`
+5. **Run report phase**: Execute `python run.py report --month 2025-06 --force` and `python run.py report --month 2025-07 --force`
+6. **Copy baseline files**: Copy all generated files to baseline directory:
+   - `data/matched/2025-06.json` → `.ab_backups/baseline_pandas_optimization/matched/2025-06.json`
+   - `data/matched/2025-07.json` → `.ab_backups/baseline_pandas_optimization/matched/2025-07.json`
+   - `data/enriched/2025-06.json` → `.ab_backups/baseline_pandas_optimization/enriched/2025-06.json`
+   - `data/enriched/2025-07.json` → `.ab_backups/baseline_pandas_optimization/enriched/2025-07.json`
+   - `data/aggregated/2025-06.json` → `.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json`
+   - `data/aggregated/2025-07.json` → `.ab_backups/baseline_pandas_optimization/aggregated/2025-07.json`
+   - `data/reports/2025-06-hardware.md` → `.ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md`
+   - `data/reports/2025-06-software.md` → `.ab_backups/baseline_pandas_optimization/reports/2025-06-software.md`
+   - `data/reports/2025-07-hardware.md` → `.ab_backups/baseline_pandas_optimization/reports/2025-07-hardware.md`
+   - `data/reports/2025-07-software.md` → `.ab_backups/baseline_pandas_optimization/reports/2025-07-software.md`
+
+Baseline purpose:
+- **Performance comparison**: Measure execution time before optimizations
+- **Output validation**: Ensure pandas optimizations don't change actual data
+- **Regression prevention**: Catch any unintended changes in output
+- **Metadata tracking**: Note timestamps and processing details for comparison
+
+**IMPORTANT**: This baseline will be used to verify that our pandas optimizations only improve performance without changing the actual output data (excluding metadata timestamps, etc.).
+
+### Step 0.5: Baseline Metadata Analysis
+```text
+After creating the baseline files, analyze each file type to identify metadata fields that should be ignored during comparison:
+
+Analysis steps:
+1. **Examine baseline file structures** to identify metadata fields
+2. **Document which fields to ignore** for each file type
+3. **Update comparison scripts** with the correct ignore patterns
+4. **Validate comparison methodology** works correctly
+
+## 📋 Baseline File Analysis Results
+
+### **JSON Files (Matched, Enriched, Aggregated Data)**
+**Structure**: 
+- **Root level**: Contains `meta` and `data` sections
+- **Meta section**: Contains processing statistics and counts
+- **Data section**: Contains the actual product data and rankings
+
+**Metadata fields to IGNORE during comparison**:
+- **NONE** - All fields in JSON files are data content, not processing metadata
+- **Note**: The `meta` section contains actual data statistics (total_shaves, unique_shavers, etc.)
+- **These are NOT processing timestamps** - they are calculated data that must remain identical
+
+**Fields that MUST be identical**:
+- All fields in `meta` section (total_shaves, unique_shavers, unique_soaps, etc.)
+- All fields in `data` section (rankings, counts, user counts, etc.)
+- JSON structure and field names
+- Product order and ranking
+
+### **Markdown Files (Reports)**
+**Structure**:
+- **Header**: Report title and summary statistics
+- **Tables**: Product rankings with delta columns
+- **No processing timestamps** found in current reports
+
+**Content that MUST be identical**:
+- All table data and rankings
+- All statistics and counts
+- All delta calculations (Δ vs previous months)
+- Markdown formatting and structure
+- Product names and descriptions
+
+**Content that may differ** (acceptable):
+- **NONE** - All content must be identical
+
+## 🔍 Updated Comparison Methodology
+
+### **JSON File Comparison (Updated)**
+```bash
+# Method 1: Direct comparison (recommended for JSON files)
+diff -u .ab_backups/baseline_pandas_optimization/aggregated/2025-06.json data/aggregated/2025-06.json
+
+# Method 2: Python script for validation
+python -c "
+import json
+import sys
+
+def load_json(filepath):
+    with open(filepath, 'r') as f:
+        return json.load(f)
+
+baseline = load_json('.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json')
+current = load_json('data/aggregated/2025-06.json')
+
+# Compare entire files - no metadata to ignore
+if baseline == current:
+    print('✅ Files are identical')
+else:
+    print('❌ Files differ - STOP and consult user')
+    sys.exit(1)
+"
+```
+
+### **Markdown File Comparison (Updated)**
+```bash
+# Method 1: Direct comparison (recommended for markdown files)
+diff -u .ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md data/reports/2025-06-hardware.md
+
+# Method 2: Python script for validation
+python -c "
+with open('.ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md', 'r') as f:
+    baseline = f.read()
+with open('data/reports/2025-06-hardware.md', 'r') as f:
+    current = f.read()
+
+# Compare entire content - no timestamps to ignore
+if baseline == current:
+    print('✅ Report content is identical')
+else:
+    print('❌ Report content differs - STOP and consult user')
+    sys.exit(1)
+"
+```
+
+### **Updated Automated Comparison Script**
+```python
+#!/usr/bin/env python3
+"""
+Updated baseline comparison script for pandas optimization validation.
+Compares current pipeline output against baseline files.
+NO metadata fields are ignored - all content must be identical.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+def compare_json_files(baseline_path, current_path, description):
+    """Compare JSON files - all content must be identical."""
+    try:
+        with open(baseline_path, 'r') as f:
+            baseline = json.load(f)
+        with open(current_path, 'r') as f:
+            current = json.load(f)
+        
+        # Compare entire files - no metadata to ignore
+        if baseline == current:
+            print(f"✅ {description}: Identical")
+            return True
+        else:
+            print(f"❌ {description}: Data content differs - STOP IMMEDIATELY")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error comparing {description}: {e}")
+        return False
+
+def compare_md_files(baseline_path, current_path, description):
+    """Compare Markdown files - all content must be identical."""
+    try:
+        with open(baseline_path, 'r') as f:
+            baseline = f.read()
+        with open(current_path, 'r') as f:
+            current = f.read()
+        
+        # Compare entire content - no timestamps to ignore
+        if baseline == current:
+            print(f"✅ {description}: Identical")
+            return True
+        else:
+            print(f"❌ {description}: Content differs - STOP IMMEDIATELY")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error comparing {description}: {e}")
+        return False
+
+def main():
+    """Main comparison function."""
+    baseline_dir = Path(".ab_backups/baseline_pandas_optimization")
+    
+    if not baseline_dir.exists():
+        print("❌ Baseline directory not found. Run Step 0 first.")
+        sys.exit(1)
+    
+    print("🔍 Comparing current output against baseline...")
+    print("⚠️  IMPORTANT: All content must be identical - no metadata ignored")
+    print("=" * 60)
+    
+    all_passed = True
+    
+    # Compare aggregated data
+    for month in ["2025-06", "2025-07"]:
+        baseline_file = baseline_dir / "aggregated" / f"{month}.json"
+        current_file = Path(f"data/aggregated/{month}.json")
+        
+        if current_file.exists():
+            if not compare_json_files(baseline_file, current_file, f"Aggregated {month}"):
+                all_passed = False
+        else:
+            print(f"⚠️  Current file not found: {current_file}")
+    
+    # Compare reports
+    for month in ["2025-06", "2025-07"]:
+        for report_type in ["hardware", "software"]:
+            baseline_file = baseline_dir / "reports" / f"{month}-{report_type}.md"
+            current_file = Path(f"data/reports/{month}-{report_type}.md")
+            
+            if current_file.exists():
+                if not compare_md_files(baseline_file, current_file, f"Report {month}-{report_type}"):
+                    all_passed = False
+            else:
+                print(f"⚠️  Current file not found: {current_file}")
+    
+    print("=" * 60)
+    if all_passed:
+        print("🎉 All comparisons passed! Proceed with optimizations.")
+    else:
+        print("🚨 STOP IMMEDIATELY - Consult user for direction!")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+```
+
+## 📝 Key Findings
+
+1. **JSON files have NO processing metadata to ignore** - all fields are data content
+2. **Markdown reports have NO processing timestamps** - all content is data
+3. **Comparison must be exact** - no fields can be ignored during validation
+4. **Updated comparison scripts** reflect the actual file structure
+5. **Validation is stricter** than originally planned - any difference indicates a problem
+
+## ⚠️ Important Notes
+
+- **No metadata filtering needed** for JSON files
+- **No timestamp removal needed** for markdown files  
+- **All content must be identical** between baseline and current output
+- **Any difference indicates a regression** that must be investigated
+- **Comparison is simpler** than originally planned - direct file comparison works
+```
+
+## 📁 Baseline Directory Structure
+```
+.ab_backups/baseline_pandas_optimization/
+├── matched/
+│   ├── 2025-06.json
+│   └── 2025-07.json
+├── enriched/
+│   ├── 2025-06.json
+│   └── 2025-07.json
+├── aggregated/
+│   ├── 2025-06.json
+│   └── 2025-07.json
+└── reports/
+    ├── 2025-06-hardware.md
+    ├── 2025-06-software.md
+    ├── 2025-07-hardware.md
+    └── 2025-07-software.md
+```
+
+## 🔍 File Comparison Methodology
+
+### **JSON File Comparison (Matched, Enriched, Aggregated Data)**
+```bash
+# Method 1: Using diff command (recommended for quick checks)
+diff -u .ab_backups/baseline_pandas_optimization/aggregated/2025-06.json data/aggregated/2025-06.json
+
+# Method 2: Using Python script for detailed analysis
+python -c "
+import json
+import sys
+
+def load_json(filepath):
+    with open(filepath, 'r') as f:
+        return json.load(f)
+
+baseline = load_json('.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json')
+current = load_json('data/aggregated/2025-06.json')
+
+# Compare structure and content
+if baseline == current:
+    print('✅ Files are identical')
+else:
+    print('❌ Files differ - STOP and consult user')
+    # Find specific differences
+    if 'metadata' in baseline and 'metadata' in current:
+        # Remove metadata for detailed comparison
+        baseline_no_meta = {k: v for k, v in baseline.items() if k != 'metadata'}
+        current_no_meta = {k: v for k, v in current.items() if k != 'metadata'}
+        if baseline_no_meta == current_no_meta:
+            print('   Only metadata differs (acceptable)')
+        else:
+            print('   Data content differs (STOP IMMEDIATELY)')
+            sys.exit(1)
+"
+```
+
+### **Markdown File Comparison (Reports)**
+```bash
+# Method 1: Using diff command (recommended)
+diff -u .ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md data/reports/2025-06-hardware.md
+
+# Method 2: Using Python script for content-only comparison
+python -c "
+import re
+
+def load_md(filepath):
+    with open(filepath, 'r') as f:
+        return f.read()
+
+def remove_timestamps(content):
+    # Remove timestamp lines (e.g., "Generated: 2025-08-23 14:30:00")
+    return re.sub(r'Generated:.*\n', '', content)
+
+baseline = load_md('.ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md')
+current = load_md('data/reports/2025-06-hardware.md')
+
+# Remove timestamps for comparison
+baseline_clean = remove_timestamps(baseline)
+current_clean = remove_timestamps(current)
+
+if baseline_clean == current_clean:
+    print('✅ Report content is identical (excluding timestamps)')
+else:
+    print('❌ Report content differs - STOP and consult user')
+    sys.exit(1)
+"
+```
+
+### **Automated Comparison Script**
+Create `scripts/compare_baseline.py` for consistent comparison:
+```python
+#!/usr/bin/env python3
+"""
+Baseline comparison script for pandas optimization validation.
+Compares current pipeline output against baseline files.
+"""
+
+import json
+import sys
+from pathlib import Path
+import re
+
+def compare_json_files(baseline_path, current_path, description):
+    """Compare JSON files, ignoring metadata timestamps."""
+    try:
+        with open(baseline_path, 'r') as f:
+            baseline = json.load(f)
+        with open(current_path, 'r') as f:
+            current = json.load(f)
+        
+        # Remove metadata for comparison
+        baseline_no_meta = {k: v for k, v in baseline.items() if k != 'metadata'}
+        current_no_meta = {k: v for k, v in current.items() if k != 'metadata'}
+        
+        if baseline_no_meta == current_no_meta:
+            print(f"✅ {description}: Identical (excluding metadata)")
+            return True
+        else:
+            print(f"❌ {description}: Data content differs - STOP IMMEDIATELY")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error comparing {description}: {e}")
+        return False
+
+def compare_md_files(baseline_path, current_path, description):
+    """Compare Markdown files, ignoring timestamps."""
+    try:
+        with open(baseline_path, 'r') as f:
+            baseline = f.read()
+        with open(current_path, 'r') as f:
+            current = f.read()
+        
+        # Remove timestamp lines
+        baseline_clean = re.sub(r'Generated:.*\n', '', baseline)
+        current_clean = re.sub(r'Generated:.*\n', '', current)
+        
+        if baseline_clean == current_clean:
+            print(f"✅ {description}: Identical (excluding timestamps)")
+            return True
+        else:
+            print(f"❌ {description}: Content differs - STOP IMMEDIATELY")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error comparing {description}: {e}")
+        return False
+
+def main():
+    """Main comparison function."""
+    baseline_dir = Path(".ab_backups/baseline_pandas_optimization")
+    
+    if not baseline_dir.exists():
+        print("❌ Baseline directory not found. Run Step 0 first.")
+        sys.exit(1)
+    
+    print("🔍 Comparing current output against baseline...")
+    print("=" * 60)
+    
+    all_passed = True
+    
+    # Compare aggregated data
+    for month in ["2025-06", "2025-07"]:
+        baseline_file = baseline_dir / "aggregated" / f"{month}.json"
+        current_file = Path(f"data/aggregated/{month}.json")
+        
+        if current_file.exists():
+            if not compare_json_files(baseline_file, current_file, f"Aggregated {month}"):
+                all_passed = False
+        else:
+            print(f"⚠️  Current file not found: {current_file}")
+    
+    # Compare reports
+    for month in ["2025-06", "2025-07"]:
+        for report_type in ["hardware", "software"]:
+            baseline_file = baseline_dir / "reports" / f"{month}-{report_type}.md"
+            current_file = Path(f"data/reports/{month}-{report_type}.md")
+            
+            if current_file.exists():
+                if not compare_md_files(baseline_file, current_file, f"Report {month}-{report_type}"):
+                    all_passed = False
+            else:
+                print(f"⚠️  Current file not found: {current_file}")
+    
+    print("=" * 60)
+    if all_passed:
+        print("🎉 All comparisons passed! Proceed with optimizations.")
+    else:
+        print("🚨 STOP IMMEDIATELY - Consult user for direction!")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+```
+
+### **Usage Instructions**
+```bash
+# After each optimization phase, run comparison:
+python scripts/compare_baseline.py
+
+# Or use individual diff commands:
+diff -u .ab_backups/baseline_pandas_optimization/aggregated/2025-06.json data/aggregated/2025-06.json
+```
+
+## 📝 Key Findings
+
+1. **JSON files have NO processing metadata to ignore** - all fields are data content
+2. **Markdown reports have NO processing timestamps** - all content is data
+3. **Comparison must be exact** - no fields can be ignored during validation
+4. **Updated comparison scripts** reflect the actual file structure
+5. **Validation is stricter** than originally planned - any difference indicates a problem
+
+## ⚠️ Important Notes
+
+- **No metadata filtering needed** for JSON files
+- **No timestamp removal needed** for markdown files  
+- **All content must be identical** between baseline and current output
+- **Any difference indicates a regression** that must be investigated
+- **Comparison is simpler** than originally planned - direct file comparison works
+```
 
 ### Step 1: Aggregator Core Files Review
 ```text
@@ -291,6 +762,36 @@ Optimization guidelines:
 7. Ensure all tests continue to pass
 ```
 
+### Step 7: Baseline Validation #1
+```text
+After completing core aggregator optimizations, validate that output hasn't changed:
+
+Validation steps:
+1. **Run pipeline for baseline months**: Execute `python run.py aggregate --month 2025-06 --force` and `python run.py aggregate --month 2025-07 --force`
+2. **Compare output files**: Compare generated files against baseline:
+   - `data/aggregated/2025-06.json` vs `.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json`
+   - `data/aggregated/2025-07.json` vs `.ab_backups/baseline_pandas_optimization/aggregated/2025-07.json`
+3. **Validation criteria**:
+   - **Data content**: All product data, counts, rankings must be identical
+   - **Metadata differences allowed**: Processing timestamps, execution time may differ
+   - **Structure**: JSON structure and field names must be identical
+   - **Order**: Product order and ranking must be identical
+4. **File comparison method**:
+   - **REQUIRED**: Use `diff` command or Python script to compare actual file contents
+   - **NOT SUFFICIENT**: File size, record count, or modification time comparisons
+   - **MUST COMPARE**: Every field value, array element, and nested structure
+   - **IGNORE ONLY**: Processing timestamps, execution time metadata
+   - **RECOMMENDED**: Use `python scripts/compare_baseline.py` for automated comparison
+5. **If differences found**: 
+   - **STOP IMMEDIATELY** - Do not proceed with any further optimizations
+   - **CONSULT WITH USER** - Present the differences found and ask for direction
+   - **DO NOT ATTEMPT TO FIX** - Wait for user guidance on how to proceed
+   - **DOCUMENT DIFFERENCES** - Note exactly what changed and in which files
+6. **If validation passes**: Continue to next optimization phase
+
+**CRITICAL**: This validation catches any data changes early, preventing downstream issues.
+```
+
 ### Step 7: Specialized Aggregator Optimization
 ```text
 Optimize the specialized aggregator strategy files by replacing Python loops with pandas operations:
@@ -319,7 +820,36 @@ Optimization guidelines:
 7. Add performance monitoring where appropriate
 ```
 
-### Step 8: Report Generation Optimization
+### Step 8: Baseline Validation #2
+```text
+After completing specialized aggregator optimizations, validate that output hasn't changed:
+
+Validation steps:
+1. **Run pipeline for baseline months**: Execute `python run.py aggregate --month 2025-06 --force` and `python run.py aggregate --month 2025-07 --force`
+2. **Compare output files**: Compare generated files against baseline:
+   - `data/aggregated/2025-06.json` vs `.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json`
+   - `data/aggregated/2025-07.json` vs `.ab_backups/baseline_pandas_optimization/aggregated/2025-07.json`
+3. **Validation criteria**:
+   - **Data content**: All product data, counts, rankings must be identical
+   - **Metadata differences allowed**: Processing timestamps, execution time may differ
+   - **Structure**: JSON structure and field names must be identical
+   - **Order**: Product order and ranking must be identical
+4. **File comparison method**:
+   - **REQUIRED**: Use `diff` command or Python script to compare actual file contents
+   - **NOT SUFFICIENT**: File size, record count, or modification time comparisons
+   - **MUST COMPARE**: Every field value, array element, and nested structure
+   - **IGNORE ONLY**: Processing timestamps, execution time metadata
+5. **If differences found**: 
+   - **STOP IMMEDIATELY** - Do not proceed with any further optimizations
+   - **CONSULT WITH USER** - Present the differences found and ask for direction
+   - **DO NOT ATTEMPT TO FIX** - Wait for user guidance on how to proceed
+   - **DOCUMENT DIFFERENCES** - Note exactly what changed and in which files
+6. **If validation passes**: Continue to next optimization phase
+
+**CRITICAL**: This validation ensures specialized aggregator optimizations don't introduce data changes.
+```
+
+### Step 9: Report Generation Optimization
 ```text
 Optimize the report generation files by replacing Python loops with pandas operations:
 
@@ -346,7 +876,39 @@ Optimization guidelines:
 7. Add performance monitoring where appropriate
 ```
 
-### Step 9: Utility Function Optimization
+### Step 10: Baseline Validation #3
+```text
+After completing report generation optimizations, validate that output hasn't changed:
+
+Validation steps:
+1. **Run pipeline for baseline months**: Execute `python run.py report --month 2025-06 --force` and `python run.py report --month 2025-07 --force`
+2. **Compare output files**: Compare generated files against baseline:
+   - `data/reports/2025-06-hardware.md` vs `.ab_backups/baseline_pandas_optimization/reports/2025-06-hardware.md`
+   - `data/reports/2025-06-software.md` vs `.ab_backups/baseline_pandas_optimization/reports/2025-06-software.md`
+   - `data/reports/2025-07-hardware.md` vs `.ab_backups/baseline_pandas_optimization/reports/2025-07-hardware.md`
+   - `data/reports/2025-07-software.md` vs `.ab_backups/baseline_pandas_optimization/reports/2025-07-software.md`
+3. **Validation criteria**:
+   - **Content**: All table data, rankings, and statistics must be identical
+   - **Format**: Markdown structure and formatting must be identical
+   - **Metadata differences allowed**: Processing timestamps may differ
+   - **Order**: Product order and ranking must be identical
+4. **File comparison method**:
+   - **REQUIRED**: Use `diff` command or Python script to compare actual file contents
+   - **NOT SUFFICIENT**: File size, record count, or modification time comparisons
+   - **MUST COMPARE**: Every table row, statistic, and formatting element
+   - **IGNORE ONLY**: Processing timestamps, execution time metadata
+   - **RECOMMENDED**: Use `python scripts/compare_baseline.py` for automated comparison
+5. **If differences found**: 
+   - **STOP IMMEDIATELY** - Do not proceed with any further optimizations
+   - **CONSULT WITH USER** - Present the differences found and ask for direction
+   - **DO NOT ATTEMPT TO FIX** - Wait for user guidance on how to proceed
+   - **DOCUMENT DIFFERENCES** - Note exactly what changed and in which files
+6. **If validation passes**: Continue to next optimization phase
+
+**CRITICAL**: This validation ensures report generation optimizations don't change output content.
+```
+
+### Step 11: Utility Function Optimization
 ```text
 Optimize utility functions by replacing Python loops with pandas operations:
 
@@ -375,7 +937,39 @@ Optimization guidelines:
 7. Add performance monitoring where appropriate
 ```
 
-### Step 10: Integration Testing
+### Step 12: Baseline Validation #4
+```text
+After completing utility function optimizations, validate that output hasn't changed:
+
+Validation steps:
+1. **Run full pipeline for baseline months**: Execute complete pipeline (match through report) for 2025-06 and 2025-07
+2. **Compare all output files**: Compare all generated files against baseline:
+   - Matched data: `data/matched/2025-06.json` vs `.ab_backups/baseline_pandas_optimization/matched/2025-06.json`
+   - Enriched data: `data/enriched/2025-06.json` vs `.ab_backups/baseline_pandas_optimization/enriched/2025-06.json`
+   - Aggregated data: `data/aggregated/2025-06.json` vs `.ab_backups/baseline_pandas_optimization/aggregated/2025-06.json`
+   - Reports: All report files vs `.ab_backups/baseline_pandas_optimization/reports/`
+3. **Validation criteria**:
+   - **Data content**: All product data, counts, rankings must be identical
+   - **Metadata differences allowed**: Processing timestamps, execution time may differ
+   - **Structure**: All file structures and field names must be identical
+   - **Order**: Product order and ranking must be identical
+4. **File comparison method**:
+   - **REQUIRED**: Use `diff` command or Python script to compare actual file contents
+   - **NOT SUFFICIENT**: File size, record count, or modification time comparisons
+   - **MUST COMPARE**: Every field value, array element, nested structure, and table row
+   - **IGNORE ONLY**: Processing timestamps, execution time metadata
+   - **RECOMMENDED**: Use `python scripts/compare_baseline.py` for automated comparison
+5. **If differences found**: 
+   - **STOP IMMEDIATELY** - Do not proceed with any further optimizations
+   - **CONSULT WITH USER** - Present the differences found and ask for direction
+   - **DO NOT ATTEMPT TO FIX** - Wait for user guidance on how to proceed
+   - **DOCUMENT DIFFERENCES** - Note exactly what changed and in which files
+6. **If validation passes**: Proceed to final integration testing
+
+**CRITICAL**: This validation ensures utility function optimizations don't affect any pipeline output.
+```
+
+### Step 13: Integration Testing
 ```text
 Verify that all pandas optimizations work correctly together:
 
@@ -385,14 +979,22 @@ Testing requirements:
 3. Run integration tests to verify end-to-end pipeline functionality
 4. Run performance tests to measure optimization improvements
 5. Verify that all CLI commands work correctly
-6. Check that report outputs are identical to pre-optimization versions
+6. **Baseline comparison**: Verify that all output files match baseline files exactly (excluding metadata timestamps)
 7. Ensure no regressions in data processing or output quality
 
 Performance validation:
-1. Measure execution time improvements
+1. Measure execution time improvements against baseline
 2. Monitor memory usage changes
 3. Verify that pandas operations are actually faster than Python loops
 4. Document performance improvements achieved
+5. **Output validation**: Ensure data content is identical to baseline (only performance should change)
+
+**CRITICAL FILE COMPARISON REQUIREMENTS**:
+- **Use proper diff tools**: `diff` command, Python file comparison scripts, or specialized JSON/Markdown comparison tools
+- **Compare actual content**: Every data field, array element, table row, and formatting detail
+- **Ignore only metadata**: Processing timestamps, execution time, file modification times
+- **Verify data integrity**: Ensure no data loss, corruption, or unintended changes occurred during optimization
+- **User consultation required**: If any differences are found, stop immediately and consult with user for direction
 ```
 
 ## 🧠 Critical Analysis
@@ -421,8 +1023,11 @@ This plan follows a systematic approach to pandas optimization based on comprehe
 - **Pattern recognition**: Many specialized aggregators follow the same structure - optimize the base pattern
 
 **Success Criteria:**
+- **Baseline established** ✅ **ADDED** - Performance baseline created for 2025-06 and 2025-07
 - All Python loops identified and assessed ✅ **COMPLETED**
 - Significant performance improvements achieved (target: 2-5x improvement for counting operations)
+- **Output integrity maintained** - All data content identical to baseline (excluding metadata timestamps)
+- **Intermediate validations passed** ✅ **ADDED** - All 4 baseline validation steps completed successfully
 - No functionality regressions
 - All tests continue to pass
 - Code maintainability improved

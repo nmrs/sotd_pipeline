@@ -15,8 +15,8 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
-    aggregate_users,
     _extract_date_from_thread_title,
+    aggregate_users,
 )
 
 logger = logging.getLogger(__name__)

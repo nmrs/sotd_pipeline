@@ -2,8 +2,8 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ...utils.field_validation import get_field_value, has_required_field
 from ..base_aggregator import BaseAggregator
-from ...utils.field_validation import has_required_field, get_field_value
 
 
 class SuperSpeedTipAggregator(BaseAggregator):

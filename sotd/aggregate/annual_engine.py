@@ -14,10 +14,10 @@ from ..utils.performance_base import BasePerformanceMetrics, BasePerformanceMoni
 from .aggregators.annual_aggregator import (
     aggregate_annual_blades,
     aggregate_annual_brushes,
+    aggregate_annual_highest_use_count_per_blade,
+    aggregate_annual_razor_blade_combinations,
     aggregate_annual_razors,
     aggregate_annual_soaps,
-    aggregate_annual_razor_blade_combinations,
-    aggregate_annual_highest_use_count_per_blade,
 )
 from .aggregators.brush_specialized import (
     aggregate_fibers,

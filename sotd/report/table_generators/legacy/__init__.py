@@ -2,12 +2,33 @@
 
 # Import all legacy table generators for backward compatibility
 from .base import BaseTableGenerator, NoDeltaMixin
+from .blade_tables import (
+    BladeManufacturersTableGenerator,
+    BladesTableGenerator,
+    BladeUsageDistributionTableGenerator,
+)
+from .brush_tables import (
+    BrushesTableGenerator,
+    BrushFibersTableGenerator,
+    BrushHandleMakersTableGenerator,
+    BrushKnotMakersTableGenerator,
+    BrushKnotSizesTableGenerator,
+)
+from .cross_product_tables import (
+    HighestUseCountPerBladeTableGenerator,
+    RazorBladeCombinationsTableGenerator,
+)
+from .razor_tables import (
+    RazorFormatsTableGenerator,
+    RazorManufacturersTableGenerator,
+    RazorsTableGenerator,
+)
 from .soap_tables import (
+    BrandDiversityTableGenerator,
+    SoapBrandsTableGenerator,
     SoapMakersTableGenerator,
     SoapsTableGenerator,
     TopSampledSoapsTableGenerator,
-    SoapBrandsTableGenerator,
-    BrandDiversityTableGenerator,
 )
 from .specialized_tables import (
     BlackbirdPlatesTableGenerator,
@@ -17,27 +38,6 @@ from .specialized_tables import (
     StraightPointsTableGenerator,
     StraightWidthsTableGenerator,
     SuperSpeedTipsTableGenerator,
-)
-from .brush_tables import (
-    BrushesTableGenerator,
-    BrushFibersTableGenerator,
-    BrushHandleMakersTableGenerator,
-    BrushKnotMakersTableGenerator,
-    BrushKnotSizesTableGenerator,
-)
-from .razor_tables import (
-    RazorFormatsTableGenerator,
-    RazorManufacturersTableGenerator,
-    RazorsTableGenerator,
-)
-from .cross_product_tables import (
-    HighestUseCountPerBladeTableGenerator,
-    RazorBladeCombinationsTableGenerator,
-)
-from .blade_tables import (
-    BladeManufacturersTableGenerator,
-    BladesTableGenerator,
-    BladeUsageDistributionTableGenerator,
 )
 from .user_tables import TopShaversTableGenerator
 

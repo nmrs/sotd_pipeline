@@ -48,8 +48,9 @@ class RazorBladeCombinationsTableGenerator(DataTransformingTableGenerator, NoDel
 
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor-blade combinations table."""
-        from .base import STANDARD_PRODUCT_COLUMNS
         import copy
+
+        from .base import STANDARD_PRODUCT_COLUMNS
 
         # Override the name column to show "Razor + Blade"
         config = copy.deepcopy(STANDARD_PRODUCT_COLUMNS)
