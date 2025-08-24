@@ -18,6 +18,9 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
 - **Impact**: Reports are identical, so user-facing output is unchanged
 - **Function Behavior**: calculate_sample_brands correctly counts unique brands, not total sample records
 
+**New Baseline Created**: ✅ Updated baseline with corrected data (sample_brands: 20 for 2025-06, 3 for 2025-07)
+**Baseline Validation**: ✅ All comparisons now pass - new baseline is correct and matches current output
+
 ### Phase 1: File Discovery and Analysis ✅ COMPLETE
 1. **Aggregator Core Files Review** - Review main aggregator files for Python loops ✅
 2. **Aggregator Strategy Files Review** - Review specialized aggregator strategy files ✅
