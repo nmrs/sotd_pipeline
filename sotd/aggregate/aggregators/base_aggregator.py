@@ -193,7 +193,7 @@ class BaseAggregator(ABC):
         # 1. Reorder columns to put rank first using pandas column operations
         cols = ["rank"] + [col for col in grouped.columns if col != "rank"]
         grouped = grouped[cols]
-        
+
         # 2. Convert to list using pandas to_dict - no manual field ordering needed
         # Convert Hashable keys to strings for type compatibility
         result = [{str(k): v for k, v in item.items()} for item in grouped.to_dict("records")]
