@@ -261,18 +261,18 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             if "brush" in record and record["brush"]:
                 brush = record["brush"]
                 matched = brush.get("matched", {})
-                
+
                 # Extract brush information from various possible locations
                 brush_brand = matched.get("brand")
                 brush_model = matched.get("model")
-                
+
                 # Get handle and knot info for display purposes
                 handle = matched.get("handle", {})
                 knot = matched.get("knot", {})
                 handle_brand = handle.get("brand", "") if handle else ""
                 knot_brand = knot.get("brand", "") if knot else ""
                 knot_model = knot.get("model", "") if knot else ""
-                
+
                 # Process all brushes, even those without top-level brand/model
                 # Use actual top-level values, don't fill with fallbacks
                 brush_key = (
