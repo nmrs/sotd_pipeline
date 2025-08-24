@@ -8,13 +8,8 @@ import { Calendar as CalendarIcon, List as ListIcon, Loader2 } from 'lucide-reac
 import { CommentDisplay } from '@/components/domain/CommentDisplay';
 import CommentModal from '@/components/domain/CommentModal';
 import { getCommentDetail, CommentDetail } from '@/services/api';
+import MonthSelector from '@/components/forms/MonthSelector';
 import axios from 'axios';
-
-interface MonthData {
-    month: string;
-    has_data: boolean;
-    user_count: number;
-}
 
 interface UserData {
     username: string;
@@ -65,7 +60,6 @@ interface UserPostingAnalysis {
 const MonthlyUserPosts: React.FC = () => {
     const [selectedMonth, setSelectedMonth] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<string>('');
-    const [availableMonths, setAvailableMonths] = useState<MonthData[]>([]);
     const [users, setUsers] = useState<UserData[]>([]);
     const [userAnalysis, setUserAnalysis] = useState<UserPostingAnalysis | null>(null);
     const [loading, setLoading] = useState(false);
@@ -80,10 +74,8 @@ const MonthlyUserPosts: React.FC = () => {
     const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
     const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
 
-    // Fetch available months on component mount
-    useEffect(() => {
-        fetchAvailableMonths();
-    }, []);
+    // Track expanded state for each product to synchronize comment IDs and usage dates
+    const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
 
     // Fetch users when selected month changes
     useEffect(() => {
@@ -91,20 +83,6 @@ const MonthlyUserPosts: React.FC = () => {
             fetchUsersForMonth(selectedMonth);
         }
     }, [selectedMonth]);
-
-    const fetchAvailableMonths = async () => {
-        try {
-            const response = await axios.get('/api/monthly-user-posts/months');
-            setAvailableMonths(response.data);
-            // Set first available month as default
-            if (response.data.length > 0) {
-                setSelectedMonth(response.data[0].month);
-            }
-        } catch (err) {
-            setError('Failed to fetch available months');
-            console.error(err);
-        }
-    };
 
     const fetchUsersForMonth = async (month: string) => {
         try {
@@ -158,6 +136,52 @@ const MonthlyUserPosts: React.FC = () => {
         } finally {
             setCommentLoading(false);
         }
+    };
+
+    // Helper function to extract usage dates for a product
+    const getProductUsageDates = (commentIds: string[]): string[] => {
+        if (!userAnalysis || !commentIds || commentIds.length === 0) {
+            return [];
+        }
+
+        const usageDates: string[] = [];
+        const commentsByDate = userAnalysis.comments_by_date;
+
+        // For each comment ID, find which date it corresponds to
+        commentIds.forEach(commentId => {
+            for (const [date, dateCommentIds] of Object.entries(commentsByDate)) {
+                if (dateCommentIds.includes(commentId)) {
+                    usageDates.push(date);
+                    break;
+                }
+            }
+        });
+
+        return usageDates.sort(); // Sort dates chronologically
+    };
+
+    // Helper function to generate unique product keys
+    const getProductKey = (productType: string, product: any): string => {
+        switch (productType) {
+            case 'razor':
+                return `razor_${product.brand}_${product.model}`;
+            case 'blade':
+                return `blade_${product.brand}_${product.model}`;
+            case 'brush':
+                return `brush_${product.brand}_${product.knot_model || 'unknown'}`;
+            case 'soap':
+                return `soap_${product.brand}_${product.model}`;
+            default:
+                return `unknown_${productType}_${JSON.stringify(product)}`;
+        }
+    };
+
+    // Helper function to handle expand/collapse state changes
+    const handleProductExpandChange = (productKey: string, expanded: boolean) => {
+        setExpandedProducts(prev => ({
+            ...prev,
+            [productKey]: expanded
+        }));
     };
 
     const handleCommentNavigation = async (direction: 'prev' | 'next') => {
@@ -400,19 +424,12 @@ const MonthlyUserPosts: React.FC = () => {
                     {/* Month Selection */}
                     <div className="space-y-2">
                         <Label htmlFor="month">Month</Label>
-                        <select
-                            id="month"
-                            value={selectedMonth}
-                            onChange={(e) => handleMonthChange(e.target.value)}
-                            className="w-full p-2 border border-input rounded-md"
-                        >
-                            <option value="">Select a month</option>
-                            {availableMonths.map((month) => (
-                                <option key={month.month} value={month.month}>
-                                    {month.month} ({month.user_count} users)
-                                </option>
-                            ))}
-                        </select>
+                        <MonthSelector
+                            selectedMonths={selectedMonth ? [selectedMonth] : []}
+                            onMonthsChange={(months) => handleMonthChange(months[0] || '')}
+                            multiple={false}
+                            label=""
+                        />
                     </div>
 
                     {/* User Selection */}
@@ -532,6 +549,7 @@ const MonthlyUserPosts: React.FC = () => {
                                                 <th className="border border-border p-2 text-left">Brand</th>
                                                 <th className="border border-border p-2 text-left">Model</th>
                                                 <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Usage Dates</th>
                                                 <th className="border border-border p-2 text-left">Comment IDs</th>
                                             </tr>
                                         </thead>
@@ -546,6 +564,18 @@ const MonthlyUserPosts: React.FC = () => {
                                                         <CommentDisplay
                                                             commentIds={razor.comment_ids}
                                                             onCommentClick={(commentId) => handleCommentClick(commentId, razor.comment_ids)}
+                                                            displayMode="dates"
+                                                            dates={getProductUsageDates(razor.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('razor', razor)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('razor', razor), expanded)}
+                                                        />
+                                                    </td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={razor.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, razor.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('razor', razor)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('razor', razor), expanded)}
                                                         />
                                                     </td>
                                                 </tr>
@@ -572,6 +602,7 @@ const MonthlyUserPosts: React.FC = () => {
                                                 <th className="border border-border p-2 text-left">Brand</th>
                                                 <th className="border border-border p-2 text-left">Model</th>
                                                 <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Usage Dates</th>
                                                 <th className="border border-border p-2 text-left">Comment IDs</th>
                                             </tr>
                                         </thead>
@@ -586,6 +617,18 @@ const MonthlyUserPosts: React.FC = () => {
                                                         <CommentDisplay
                                                             commentIds={blade.comment_ids}
                                                             onCommentClick={(commentId) => handleCommentClick(commentId, blade.comment_ids)}
+                                                            displayMode="dates"
+                                                            dates={getProductUsageDates(blade.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('blade', blade)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('blade', blade), expanded)}
+                                                        />
+                                                    </td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={blade.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, blade.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('blade', blade)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('blade', blade), expanded)}
                                                         />
                                                     </td>
                                                 </tr>
@@ -615,6 +658,7 @@ const MonthlyUserPosts: React.FC = () => {
                                                 <th className="border border-border p-2 text-left">Knot Brand</th>
                                                 <th className="border border-border p-2 text-left">Knot Model</th>
                                                 <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Usage Dates</th>
                                                 <th className="border border-border p-2 text-left">Comment IDs</th>
                                             </tr>
                                         </thead>
@@ -632,6 +676,18 @@ const MonthlyUserPosts: React.FC = () => {
                                                         <CommentDisplay
                                                             commentIds={brush.comment_ids}
                                                             onCommentClick={(commentId) => handleCommentClick(commentId, brush.comment_ids)}
+                                                            displayMode="dates"
+                                                            dates={getProductUsageDates(brush.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('brush', brush)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('brush', brush), expanded)}
+                                                        />
+                                                    </td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={brush.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, brush.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('brush', brush)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('brush', brush), expanded)}
                                                         />
                                                     </td>
                                                 </tr>
@@ -658,6 +714,7 @@ const MonthlyUserPosts: React.FC = () => {
                                                 <th className="border border-border p-2 text-left">Brand</th>
                                                 <th className="border border-border p-2 text-left">Scent</th>
                                                 <th className="border border-border p-2 text-center">Count</th>
+                                                <th className="border border-border p-2 text-left">Usage Dates</th>
                                                 <th className="border border-border p-2 text-left">Comment IDs</th>
                                             </tr>
                                         </thead>
@@ -672,6 +729,18 @@ const MonthlyUserPosts: React.FC = () => {
                                                         <CommentDisplay
                                                             commentIds={soap.comment_ids}
                                                             onCommentClick={(commentId) => handleCommentClick(commentId, soap.comment_ids)}
+                                                            displayMode="dates"
+                                                            dates={getProductUsageDates(soap.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('soap', soap)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('soap', soap), expanded)}
+                                                        />
+                                                    </td>
+                                                    <td className="border border-border p-2">
+                                                        <CommentDisplay
+                                                            commentIds={soap.comment_ids}
+                                                            onCommentClick={(commentId) => handleCommentClick(commentId, soap.comment_ids)}
+                                                            expanded={expandedProducts[getProductKey('soap', soap)]}
+                                                            onExpandChange={(expanded) => handleProductExpandChange(getProductKey('soap', soap), expanded)}
                                                         />
                                                     </td>
                                                 </tr>

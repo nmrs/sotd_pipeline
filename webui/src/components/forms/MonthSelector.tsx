@@ -24,6 +24,29 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Generate months from 2016-05 to current month
+  const generatePrepopulatedMonths = (): string[] => {
+    const months: string[] = [];
+    const startDate = new Date(2016, 4, 1); // May 2016 (month is 0-indexed)
+    const currentDate = new Date();
+
+    let current = new Date(startDate);
+    while (current <= currentDate) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      months.push(`${year}-${month}`);
+
+      // Move to next month
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    return months;
+  };
+
+  // Use pre-populated months initially, then merge with API results
+  const [prepopulatedMonths] = useState<string[]>(generatePrepopulatedMonths());
+  const effectiveAvailableMonths = availableMonths.length > 0 ? availableMonths : prepopulatedMonths;
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -60,7 +83,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   };
 
   const selectAll = () => {
-    onMonthsChange([...availableMonths]);
+    onMonthsChange([...effectiveAvailableMonths]);
   };
 
   const clearAll = () => {
@@ -70,7 +93,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   const selectYearToDate = () => {
     const ytdMonths = getYearToDateMonths();
     // Only select months that are available in the system
-    const availableYtdMonths = ytdMonths.filter(month => availableMonths.includes(month));
+    const availableYtdMonths = ytdMonths.filter(month => effectiveAvailableMonths.includes(month));
     onMonthsChange(availableYtdMonths);
   };
 
@@ -93,17 +116,18 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
     return `${selectedMonths.length} months selected`;
   };
 
-  if (loading) {
+  // Show loading spinner only if we have no pre-populated months and API is still loading
+  if (loading && prepopulatedMonths.length === 0) {
     return <LoadingSpinner message='Loading available months...' />;
   }
 
-  if (error) {
+  if (error && prepopulatedMonths.length === 0) {
     return <ErrorDisplay error={error} onRetry={() => window.location.reload()} />;
   }
 
   if (!multiple) {
     // Single select mode using reusable SelectInput
-    const options = availableMonths.map(month => ({
+    const options = effectiveAvailableMonths.map(month => ({
       value: month,
       label: month,
     }));
@@ -158,11 +182,11 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
               </SecondaryButton>
             </div>
 
-            {availableMonths.length === 0 ? (
+            {effectiveAvailableMonths.length === 0 ? (
               <p className='text-gray-500 text-sm py-2'>No months available</p>
             ) : (
               <div className='space-y-1'>
-                {availableMonths.map(month => (
+                {effectiveAvailableMonths.map(month => (
                   <label
                     key={month}
                     className='flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer'

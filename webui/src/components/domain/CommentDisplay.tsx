@@ -6,6 +6,10 @@ interface CommentDisplayProps {
   commentLoading?: boolean;
   maxDisplay?: number;
   className?: string;
+  displayMode?: 'comments' | 'dates';
+  dates?: string[];
+  expanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export const CommentDisplay: React.FC<CommentDisplayProps> = ({
@@ -14,8 +18,29 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
   commentLoading = false,
   maxDisplay = 3,
   className = '',
+  displayMode = 'comments',
+  dates = [],
+  expanded: externalExpanded,
+  onExpandChange,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [internalExpanded, setInternalExpanded] = useState(false);
+
+  // Use external expanded state if provided, otherwise use internal state
+  const isExpanded = externalExpanded !== undefined ? externalExpanded : internalExpanded;
+
+  const handleExpandToggle = () => {
+    const newExpanded = !isExpanded;
+
+    // Update internal state if no external control
+    if (externalExpanded === undefined) {
+      setInternalExpanded(newExpanded);
+    }
+
+    // Notify parent of state change
+    if (onExpandChange) {
+      onExpandChange(newExpanded);
+    }
+  };
 
   // Handle empty state
   if (!commentIds || commentIds.length === 0) {
@@ -29,6 +54,24 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
     return <span className='text-sm text-gray-500'>-</span>;
   }
 
+  // Format date helper function
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString + 'T00:00:00'); // Add time to avoid timezone issues
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch {
+      return dateString; // Fallback to original string if parsing fails
+    }
+  };
+
+  // Determine display text for each item
+  const getDisplayText = (index: number): string => {
+    if (displayMode === 'dates' && dates && dates[index]) {
+      return formatDate(dates[index]);
+    }
+    return validCommentIds[index];
+  };
+
   // Determine which comments to show
   const displayCount = isExpanded ? validCommentIds.length : Math.min(maxDisplay, validCommentIds.length);
   const displayComments = validCommentIds.slice(0, displayCount);
@@ -38,13 +81,13 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
   const handleExpandClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsExpanded(true);
+    handleExpandToggle();
   };
 
   const handleCollapseClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsExpanded(false);
+    handleExpandToggle();
   };
 
   return (
@@ -56,7 +99,7 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
           disabled={commentLoading}
           className='block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left text-sm'
         >
-          {commentId}
+          {getDisplayText(index)}
         </button>
       ))}
 
