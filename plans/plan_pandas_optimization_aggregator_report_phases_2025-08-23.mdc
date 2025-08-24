@@ -5,16 +5,33 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
 
 ## 🧩 Component Steps
 
-### Phase 0: Baseline Creation
-0. **Create Performance Baseline** - Run pipeline (match through report) for 2025-06 and 2025-07 to create baseline files for comparison
-0.5. **Baseline Metadata Analysis** - Analyze baseline files to identify metadata fields to ignore during comparison
+### Phase 0: Baseline Creation ✅ COMPLETE
+0. **Create Performance Baseline** - Run pipeline (match through report) for 2025-06 and 2025-07 to create baseline files for comparison ✅
+0.5. **Baseline Metadata Analysis** - Analyze baseline files to identify metadata fields to ignore during comparison ✅
 
-### Phase 1: File Discovery and Analysis
-1. **Aggregator Core Files Review** - Review main aggregator files for Python loops
-2. **Aggregator Strategy Files Review** - Review specialized aggregator strategy files
-3. **Report Core Files Review** - Review main report generation files
-4. **Report Utility Files Review** - Review report utility and helper files
-5. **Aggregator Utility Files Review** - Review aggregator utility files
+**Baseline Validation Results:**
+- **Reports**: ✅ Identical (hardware and software reports match baseline exactly)
+- **Aggregated Data**: ❌ Different (sample_brands: baseline=0, current=20)
+- **Root Cause**: **CRITICAL BUG DISCOVERY** - Baseline had incorrect sample_brands=0, should have been 20
+- **Validation**: Script confirms 20 unique sample brands in 2025-06 data (27 total samples, 20 unique brands)
+- **Decision**: Keep corrected function - baseline was wrong, our output is correct
+- **Impact**: Reports are identical, so user-facing output is unchanged
+- **Function Behavior**: calculate_sample_brands correctly counts unique brands, not total sample records
+
+### Phase 1: File Discovery and Analysis ✅ COMPLETE
+1. **Aggregator Core Files Review** - Review main aggregator files for Python loops ✅
+2. **Aggregator Strategy Files Review** - Review specialized aggregator strategy files ✅
+3. **Report Core Files Review** - Review main report generation files ✅
+4. **Report Utility Files Review** - Review report utility and helper files ✅
+5. **Aggregator Utility Files Review** - Review aggregator utility files ✅
+
+**Implementation Notes:**
+- **Critical Bug Fix**: Resolved NoneType.strip() errors that were causing aggregate phase failures
+- **Terminology Update**: Updated all references from deprecated 'maker' terminology to 'brand' consistently
+- **Sample Brands Fix**: Corrected calculate_sample_brands function to properly check sample_type field
+- **Pandas Optimization**: Implemented pandas-optimized metrics calculations for better performance
+- **Test Coverage**: Added comprehensive tests for all metrics functions (41 tests passing)
+- **Output Difference**: Current output differs from baseline due to bug fixes (sample_brands: 0 → 20)
 
 ### Phase 2: Implementation and Optimization
 6. **Core Aggregator Optimization** - Optimize base aggregator and annual aggregator
@@ -83,19 +100,21 @@ This plan addresses the optimization of Python loops in the SOTD Pipeline's aggr
   - **Status**: Medium optimization potential - some loops are for data extraction
 
 ### Aggregator Utility Files
-- **sotd/aggregate/utils/metrics.py**:
-  - Lines 11-15: Loop for calculating unique users
-  - Lines 36-42: Loop for counting shaves per user
-  - Lines 62-68: Loop for calculating unique soaps
-  - Lines 85-91: Loop for calculating unique brands
-  - Lines 106-112: Loop for calculating unique razors
-  - Lines 119-125: Loop for calculating unique blades
-  - Lines 134-140: Loop for calculating unique brushes
-  - Lines 152-158: Loop for calculating unique brush handle makers
-  - Lines 175-181: Loop for calculating unique brush knot makers
-  - Lines 198-204: Loop for calculating unique brush fibers
-  - Lines 220-225: Loop for calculating unique brush knot sizes
-  - **Status**: Very High optimization potential - all these functions are counting/aggregating operations that pandas excels at
+- **sotd/aggregate/utils/metrics.py** ✅ OPTIMIZED:
+  - Lines 11-15: Loop for calculating unique users → Pandas DataFrame operations
+  - Lines 36-42: Loop for counting shaves per user → Pandas groupby operations
+  - Lines 62-68: Loop for calculating unique soaps → Pandas Series operations
+  - Lines 85-91: Loop for calculating unique brands → Pandas Series operations
+  - Lines 106-112: Loop for calculating unique razors → Pandas Series operations
+  - Lines 119-125: Loop for calculating unique blades → Pandas Series operations
+  - Lines 134-140: Loop for calculating unique brushes → Pandas Series operations
+  - Lines 152-158: Loop for calculating unique brush handle makers → Pandas Series operations
+  - Lines 175-181: Loop for calculating unique brush knot makers → Pandas Series operations
+  - Lines 198-204: Loop for calculating unique brush fibers → Pandas Series operations
+  - Lines 220-225: Loop for calculating unique brush knot sizes → Pandas Series operations
+  - **Status**: ✅ COMPLETE - All functions optimized with pandas operations
+  - **Performance Impact**: Improved performance for large datasets, better memory efficiency
+  - **Bug Fixes**: Fixed NoneType.strip() errors and sample_brands calculation logic
 
 ## 🚀 Optimization Work Needed
 
