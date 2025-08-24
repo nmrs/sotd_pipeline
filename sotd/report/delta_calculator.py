@@ -3,6 +3,8 @@
 
 from typing import Any, Dict, List, Optional, Tuple
 
+import pandas as pd
+
 from sotd.report.utils.tier_identifier import TierIdentifier
 
 
@@ -45,77 +47,93 @@ class DeltaCalculator:
         if not current_data:
             return []
 
-        # Create lookup for historical ranks
-        historical_ranks = {}
-        for item in historical_data:
-            if not isinstance(item, dict):
-                if self.debug:
-                    print("[DEBUG] Skipping invalid historical item")
-                continue
-
-            name = item.get(name_key)
-            rank = item.get("rank")
-            if not name or rank is None:
-                if self.debug:
-                    print(f"[DEBUG] Historical item missing {name_key} or rank")
-                continue
-
-            historical_ranks[name] = rank
+        # OPTIMIZED: Use pandas operations for vectorized historical rank lookup
+        # Convert historical data to DataFrame for vectorized operations
+        historical_df = pd.DataFrame(historical_data)
+        
+        if historical_df.empty:
+            if self.debug:
+                print("[DEBUG] No historical data available")
+            return []
+        
+        # Filter valid items and create rank mapping using pandas operations
+        valid_historical = historical_df[
+            (historical_df[name_key].notna()) & 
+            (historical_df["rank"].notna())
+        ]
+        
+        if valid_historical.empty:
+            if self.debug:
+                print("[DEBUG] No valid historical items found")
+            return []
+        
+        # Create lookup for historical ranks using pandas operations
+        historical_ranks = valid_historical.set_index(name_key)["rank"].to_dict()
 
         if self.debug:
             print(f"[DEBUG] Created historical rank lookup with {len(historical_ranks)} items")
 
-        # Calculate deltas for current data
-        results = []
-        for item in current_data[:max_items]:
-            if not isinstance(item, dict):
-                if self.debug:
-                    print("[DEBUG] Skipping invalid current item")
-                continue
-
-            name = item.get(name_key)
-            current_rank = item.get("rank")
-            if not name or current_rank is None:
-                if self.debug:
-                    print(f"[DEBUG] Current item missing {name_key} or rank")
-                continue
-
-            historical_rank = historical_ranks.get(name)
-
-            # Calculate delta
-            if historical_rank is not None:
-                # Convert ranks to integers for calculation (handle string ranks like "2=")
-                try:
-                    hist_rank_int = int(str(historical_rank).split("=")[0])
-                    curr_rank_int = int(str(current_rank).split("=")[0])
-                    delta = hist_rank_int - curr_rank_int
-                except (ValueError, AttributeError):
-                    # If conversion fails, skip delta calculation
-                    delta = None
-                    delta_symbol = "n/a"
-                    delta_text = "n/a"
-                else:
-                    delta_symbol = self._get_delta_symbol(delta)
-                    delta_text = delta_symbol  # Use symbol only, not +/- format
-            else:
-                delta = None
-                delta_symbol = "n/a"
-                delta_text = "n/a"
-
-            # Create result item with delta information
-            result_item = item.copy()
-            result_item["delta"] = delta
-            result_item["delta_symbol"] = delta_symbol
-            result_item["delta_text"] = delta_text
-
-            results.append(result_item)
-
+        # OPTIMIZED: Use pandas operations for vectorized current data processing
+        # Convert current data to DataFrame for vectorized operations
+        current_df = pd.DataFrame(current_data[:max_items])
+        
+        if current_df.empty:
             if self.debug:
-                print(
-                    f"[DEBUG] {name}: rank {current_rank}, "
-                    f"historical {historical_rank}, delta {delta_text} {delta_symbol}"
-                )
-
+                print("[DEBUG] No current data to process")
+            return []
+        
+        # Filter valid items using pandas operations
+        valid_current = current_df[
+            (current_df[name_key].notna()) & 
+            (current_df["rank"].notna())
+        ]
+        
+        if valid_current.empty:
+            if self.debug:
+                print("[DEBUG] No valid current items found")
+            return []
+        
+        # Create vectorized delta calculation using pandas operations
+        # Map historical ranks to current data
+        valid_current["historical_rank"] = valid_current[name_key].map(historical_ranks)
+        
+        # Calculate deltas using vectorized operations
+        def calculate_delta_vectorized(row):
+            historical_rank = row["historical_rank"]
+            current_rank = row["rank"]
+            
+            if pd.isna(historical_rank):
+                return None, "n/a", "n/a"
+            
+            try:
+                # Convert ranks to integers for calculation (handle string ranks like "2=")
+                hist_rank_int = int(str(historical_rank).split("=")[0])
+                curr_rank_int = int(str(current_rank).split("=")[0])
+                delta = hist_rank_int - curr_rank_int
+                delta_symbol = self._get_delta_symbol(delta)
+                delta_text = delta_symbol  # Use symbol only, not +/- format
+                return delta, delta_symbol, delta_text
+            except (ValueError, AttributeError):
+                # If conversion fails, skip delta calculation
+                return None, "n/a", "n/a"
+        
+        # Apply vectorized delta calculation
+        delta_results = valid_current.apply(calculate_delta_vectorized, axis=1)
+        
+        # Add delta fields to DataFrame
+        valid_current["delta"] = delta_results.apply(lambda x: x[0])
+        valid_current["delta_symbol"] = delta_results.apply(lambda x: x[1])
+        valid_current["delta_text"] = delta_results.apply(lambda x: x[2])
+        
+        # Convert back to list of dictionaries with string keys for type compatibility
+        results = [
+            {str(k): v for k, v in item.items()}
+            for item in valid_current.drop(columns=["historical_rank"]).to_dict("records")
+        ]
+        
+        if self.debug:
+            print(f"[DEBUG] Processed {len(results)} items with delta calculations")
+        
         return results
 
     def calculate_tier_based_deltas(

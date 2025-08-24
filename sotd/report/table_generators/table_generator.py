@@ -67,20 +67,25 @@ class TableGenerator:
             "vs",  # Special cases
         }
 
-        # Convert to title case while preserving acronyms
-        words = text.split()
-        formatted_words = []
+        # OPTIMIZED: Use pandas Series operations for vectorized text processing
+        if not text:
+            return text
 
-        for word in words:
-            if word.lower() in acronyms:
-                # Keep acronyms in uppercase
-                formatted_words.append(word.upper())
-            elif word.lower() == "per":
-                # Keep "per" lowercase
-                formatted_words.append(word.lower())
-            else:
-                # Convert to title case
-                formatted_words.append(word.title())
+        # Convert to pandas Series for vectorized operations
+        words = pd.Series(text.split())
+
+        # Create mask for acronyms and apply vectorized operations
+        acronym_mask = words.str.lower().isin(acronyms)
+        per_mask = words.str.lower() == "per"
+
+        # Apply formatting using vectorized operations
+        formatted_words = words.copy()
+        formatted_words[acronym_mask] = words[acronym_mask].str.upper()
+        formatted_words[per_mask] = words[per_mask].str.lower()
+
+        # Apply title case to remaining words
+        other_mask = ~(acronym_mask | per_mask)
+        formatted_words[other_mask] = words[other_mask].str.title()
 
         return " ".join(formatted_words)
 
@@ -95,14 +100,19 @@ class TableGenerator:
         """
         formatted_df = df.copy()
 
-        for col in formatted_df.columns:
-            if col.startswith("Δ"):
-                # Keep delta columns as-is
-                continue
+        # OPTIMIZED: Use pandas operations for vectorized column name formatting
+        # Get columns that need formatting (exclude delta columns)
+        columns_to_format = [col for col in formatted_df.columns if not col.startswith("Δ")]
 
-            # Convert underscores to spaces, then to title case while preserving acronyms
-            formatted_name = self._preserve_acronyms(col.replace("_", " ").title())
-            formatted_df = formatted_df.rename(columns={col: formatted_name})
+        if columns_to_format:
+            # Create mapping of old names to new formatted names
+            rename_mapping = {}
+            for col in columns_to_format:
+                formatted_name = self._preserve_acronyms(col.replace("_", " ").title())
+                rename_mapping[col] = formatted_name
+
+            # Apply all renames at once using pandas operations
+            formatted_df = formatted_df.rename(columns=rename_mapping)
 
         return formatted_df
 
@@ -117,15 +127,18 @@ class TableGenerator:
         """
         formatted_df = df.copy()
 
+        # OPTIMIZED: Use pandas operations for vectorized username formatting
         # Check if this table has user-related columns
         user_columns = [col for col in formatted_df.columns if col.lower() in ["user", "author"]]
 
+        # Apply vectorized operations to all user columns at once
         for col in user_columns:
             if col in formatted_df.columns:
-                # Add "u/" prefix to usernames that don't already have it
-                formatted_df[col] = formatted_df[col].apply(
-                    lambda x: f"u/{x}" if x and not str(x).startswith("u/") else x
+                # Use pandas string operations for vectorized prefix addition
+                mask = (formatted_df[col].notna()) & (
+                    ~formatted_df[col].astype(str).str.startswith("u/")
                 )
+                formatted_df.loc[mask, col] = "u/" + formatted_df.loc[mask, col].astype(str)
 
         return formatted_df
 
@@ -144,17 +157,20 @@ class TableGenerator:
         # Create a copy to avoid modifying the original
         df = df.copy()
 
+        # OPTIMIZED: Use pandas operations for vectorized rank formatting
         # Count occurrences of each rank
-        rank_counts = df["rank"].value_counts().to_dict()
+        rank_counts = df["rank"].value_counts()
+
+        # Create vectorized formatting using pandas operations
+        # Use numpy.where for vectorized conditional formatting
+        import numpy as np
 
         # Format ranks: add = for equal ranks, space for single ranks
-        def format_rank(rank):
-            if rank_counts.get(rank, 1) > 1:
-                return f"{rank}="
-            return f"{rank} "  # Add space to force string formatting
-
-        # Apply formatting to rank column
-        df["rank"] = df["rank"].apply(format_rank)
+        df["rank"] = np.where(
+            rank_counts[df["rank"]].values > 1,  # type: ignore
+            df["rank"].astype(str) + "=",
+            df["rank"].astype(str) + " ",
+        )
 
         return df
 
@@ -267,7 +283,7 @@ class TableGenerator:
         df["Δ vs 5 Years Ago"] = "n/a"
 
         # Get identifier columns for matching
-        string_columns = self._get_string_columns(df.columns, table_name)
+        string_columns = self._get_string_columns(list(df.columns), table_name)
         if not string_columns:
             return df
 
@@ -277,7 +293,7 @@ class TableGenerator:
                 continue
 
             # Get the data part of the (metadata, data) tuple
-            period_data = self.comparison_data[period][1]
+            period_data = self.comparison_data[period][1]  # type: ignore
             if table_name not in period_data:
                 continue
 
@@ -409,11 +425,13 @@ class TableGenerator:
         column_order = []
         rename_mapping = {}
 
-        for part in columns_spec.split(","):
-            part = part.strip()
-            if not part:
-                continue
+        # OPTIMIZED: Use pandas operations for vectorized parsing
+        # Split and clean parts using pandas operations
+        parts = pd.Series(columns_spec.split(",")).str.strip()
+        parts = parts[parts != ""]  # Remove empty parts
 
+        # Process parts using vectorized operations where possible
+        for part in parts:
             if "=" in part:
                 # Handle renaming: "name=soap"
                 if part.count("=") != 1:
@@ -498,21 +516,24 @@ class TableGenerator:
 
         limited_df = df.copy()
 
-        for column_name, threshold in numeric_limits.items():
-            # Validate column exists
-            if column_name not in limited_df.columns:
-                raise ValueError(f"Column '{column_name}' not found in table data")
+        # OPTIMIZED: Use pandas operations for vectorized numeric limit application
+        # Since only one limit is allowed, we can process it directly
+        column_name, threshold = next(iter(numeric_limits.items()))
 
-            # Validate threshold is numeric
-            try:
-                numeric_threshold = float(threshold)
-            except (ValueError, TypeError):
-                raise ValueError(
-                    f"Invalid threshold value '{threshold}' for column '{column_name}' - must be numeric"
-                )
+        # Validate column exists
+        if column_name not in limited_df.columns:
+            raise ValueError(f"Column '{column_name}' not found in table data")
 
-            # Apply limit (>= threshold) - cut from bottom
-            limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
+        # Validate threshold is numeric
+        try:
+            numeric_threshold = float(threshold)
+        except (ValueError, TypeError):
+            raise ValueError(
+                f"Invalid threshold value '{threshold}' for column '{column_name}' - must be numeric"
+            )
+
+        # Apply limit (>= threshold) - cut from bottom using pandas boolean indexing
+        limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
 
         # Note: Gap validation removed - gaps in rank sequence are expected and normal
         # when applying numeric limits, as filtering removes records below thresholds
