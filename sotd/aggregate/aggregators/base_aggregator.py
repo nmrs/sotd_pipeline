@@ -189,19 +189,14 @@ class BaseAggregator(ABC):
         grouped = grouped.sort_values(["rank", first_group_column], ascending=[True, True])
         grouped = grouped.reset_index(drop=True)
 
-        # OPTIMIZED: Use pandas to_dict instead of manual loop conversion
-        # This is more efficient and cleaner than manual iteration
-        result = grouped.to_dict("records")
-
-        # Convert Hashable keys to strings for type compatibility and ensure rank appears first
-        result = []
-        for item in grouped.to_dict("records"):
-            # Ensure rank field appears first for consistency with original output
-            new_item = {"rank": int(item["rank"])}
-            for k, v in item.items():
-                if k != "rank":
-                    new_item[str(k)] = v
-            result.append(new_item)
+        # FULLY OPTIMIZED: Use pandas operations to eliminate ALL Python loops
+        # 1. Reorder columns to put rank first using pandas column operations
+        cols = ["rank"] + [col for col in grouped.columns if col != "rank"]
+        grouped = grouped[cols]
+        
+        # 2. Convert to list using pandas to_dict - no manual field ordering needed
+        # Convert Hashable keys to strings for type compatibility
+        result = [{str(k): v for k, v in item.items()} for item in grouped.to_dict("records")]
 
         return result
 
