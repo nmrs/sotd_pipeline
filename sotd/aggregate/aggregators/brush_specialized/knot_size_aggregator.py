@@ -111,11 +111,14 @@ class KnotSizeAggregator(BaseAggregator):
         # Sort and add position
         result = self._sort_and_rank(grouped)
 
-        # Convert knot_size_mm back to float for output
-        for item in result:
-            # The base aggregator now preserves the original field name
-            if "knot_size_mm" in item:
-                item["knot_size_mm"] = float(item["knot_size_mm"])
+        # OPTIMIZED: Convert knot_size_mm back to float using pandas operations
+        # Convert result back to DataFrame for vectorized operations
+        if result:
+            result_df = pd.DataFrame(result)
+            if "knot_size_mm" in result_df.columns:
+                result_df["knot_size_mm"] = result_df["knot_size_mm"].astype(float)
+            # Type conversion to ensure str keys
+            result = [{str(k): v for k, v in item.items()} for item in result_df.to_dict("records")]
 
         return result
 

@@ -194,17 +194,15 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     result_df = result_df.sort_values(["rank", "author"], ascending=[True, True])
     result_df = result_df.reset_index(drop=True)
 
-    # Convert to list of dictionaries
-    final_results = []
-    for _, row in result_df.iterrows():
-        final_results.append(
-            {
-                "rank": int(row["rank"]),
-                "user": row["author"],  # Report generation handles Reddit user tagging
-                "shaves": int(row["shaves"]),
-                "missed_days": int(row["missed_days"]),
-                "missed_dates": row["missed_dates"],
-            }
-        )
+    # OPTIMIZED: Convert to list of dictionaries using pandas operations
+    # Rename columns and convert types using pandas operations
+    result_df = result_df.rename(columns={"author": "user"})
+    result_df["rank"] = result_df["rank"].astype(int)
+    result_df["shaves"] = result_df["shaves"].astype(int)
+    result_df["missed_days"] = result_df["missed_days"].astype(int)
+
+    # Convert to list of dictionaries - no manual processing needed
+    # Type conversion to ensure str keys
+    final_results = [{str(k): v for k, v in item.items()} for item in result_df.to_dict("records")]
 
     return final_results

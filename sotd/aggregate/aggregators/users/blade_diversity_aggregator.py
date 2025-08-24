@@ -114,18 +114,23 @@ class BladeDiversityAggregator(BaseAggregator):
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add rank rankings."""
         grouped = grouped.sort_values(["unique_blades", "shaves"], ascending=[False, False])
-        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            rank=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
-        # Convert to list of dictionaries using vectorized operations
-        result = grouped.to_dict("records")
+        # OPTIMIZED: Use pandas operations to rename and convert types
+        # Rename columns using pandas operations
+        grouped = grouped.rename(columns={"author": "user"})
 
-        # Update field names to match expected output
-        for item in result:
-            item["user"] = item.pop("author")
-            item["rank"] = int(item["rank"])
-            item["unique_blades"] = int(item["unique_blades"])
-            item["shaves"] = int(item["shaves"])
-            item["avg_shaves_per_blade"] = float(item["avg_shaves_per_blade"])
+        # Convert data types using pandas operations
+        grouped["rank"] = grouped["rank"].astype(int)
+        grouped["unique_blades"] = grouped["unique_blades"].astype(int)
+        grouped["shaves"] = grouped["shaves"].astype(int)
+        grouped["avg_shaves_per_blade"] = grouped["avg_shaves_per_blade"].astype(float)
+
+        # Convert to list of dictionaries - no manual processing needed
+        # Type conversion to ensure str keys
+        result = [{str(k): v for k, v in item.items()} for item in grouped.to_dict("records")]
 
         return result
 

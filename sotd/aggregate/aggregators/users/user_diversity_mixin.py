@@ -40,15 +40,36 @@ class UserDiversityMixin:
         Returns:
             List of dictionaries with transformed field names
         """
-        result = []
-        for item in base_result:
-            transformed_item = {"rank": item["rank"], "user": item["name"]}
+        if not base_result:
+            return []
 
-            # Map the ranking fields back to their original names
-            for base_field, output_field in output_fields.items():
-                transformed_item[output_field] = item[base_field]
+        # OPTIMIZED: Use pandas operations for field transformation
+        # Convert to DataFrame for vectorized operations
+        df = pd.DataFrame(base_result)
 
-            result.append(transformed_item)
+        # Rename columns using pandas operations
+        df = df.rename(columns={"name": "user"})
+
+        # Select and rename fields based on output_fields mapping
+        # Start with required fields
+        columns_to_keep = ["rank", "user"]
+        rename_mapping = {}
+
+        # Add mapped fields
+        for base_field, output_field in output_fields.items():
+            if base_field in df.columns:
+                columns_to_keep.append(base_field)
+                if base_field != output_field:
+                    rename_mapping[base_field] = output_field
+
+        # Select columns and apply renaming
+        df = df[columns_to_keep]
+        if rename_mapping:
+            df = df.rename(columns=rename_mapping)
+
+        # Convert back to list of dictionaries
+        # Type conversion to ensure str keys
+        result = [{str(k): v for k, v in item.items()} for item in df.to_dict("records")]
 
         return result
 
