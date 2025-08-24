@@ -110,18 +110,18 @@ class TemplateProcessor:
         """
         # OPTIMIZED: Use pandas operations for vectorized string replacement
         import pandas as pd
-        
+
         if not variables:
             return content
-        
+
         # Convert to pandas Series for vectorized string operations
         content_series = pd.Series([content])
-        
+
         # Apply all replacements using vectorized operations
         for key, value in variables.items():
             placeholder = f"{{{{{key}}}}}"
             content_series = content_series.str.replace(placeholder, str(value), regex=False)
-        
+
         return content_series.iloc[0]
 
     def _substitute_tables(self, content: str, tables: Dict[str, str]) -> str:
@@ -136,22 +136,22 @@ class TemplateProcessor:
         """
         # OPTIMIZED: Use pandas operations for vectorized table replacement
         import pandas as pd
-        
+
         if not tables:
             return content
-        
+
         # Sort tables by length (longest first) to ensure enhanced placeholders
         # are replaced before basic ones, preventing partial replacements
         sorted_tables = sorted(tables.items(), key=lambda x: len(x[0]), reverse=True)
-        
+
         # Convert to pandas Series for vectorized string operations
         content_series = pd.Series([content])
-        
+
         # Apply all replacements using vectorized operations
         for placeholder, value in sorted_tables:
             # Replace the exact placeholder string using vectorized operations
             content_series = content_series.str.replace(placeholder, value, regex=False)
-        
+
         return content_series.iloc[0]
 
     def list_templates(self) -> list[str]:

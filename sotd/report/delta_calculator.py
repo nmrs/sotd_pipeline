@@ -50,23 +50,22 @@ class DeltaCalculator:
         # OPTIMIZED: Use pandas operations for vectorized historical rank lookup
         # Convert historical data to DataFrame for vectorized operations
         historical_df = pd.DataFrame(historical_data)
-        
+
         if historical_df.empty:
             if self.debug:
                 print("[DEBUG] No historical data available")
             return []
-        
+
         # Filter valid items and create rank mapping using pandas operations
         valid_historical = historical_df[
-            (historical_df[name_key].notna()) & 
-            (historical_df["rank"].notna())
+            (historical_df[name_key].notna()) & (historical_df["rank"].notna())
         ]
-        
+
         if valid_historical.empty:
             if self.debug:
                 print("[DEBUG] No valid historical items found")
             return []
-        
+
         # Create lookup for historical ranks using pandas operations
         historical_ranks = valid_historical.set_index(name_key)["rank"].to_dict()
 
@@ -76,35 +75,32 @@ class DeltaCalculator:
         # OPTIMIZED: Use pandas operations for vectorized current data processing
         # Convert current data to DataFrame for vectorized operations
         current_df = pd.DataFrame(current_data[:max_items])
-        
+
         if current_df.empty:
             if self.debug:
                 print("[DEBUG] No current data to process")
             return []
-        
+
         # Filter valid items using pandas operations
-        valid_current = current_df[
-            (current_df[name_key].notna()) & 
-            (current_df["rank"].notna())
-        ]
-        
+        valid_current = current_df[(current_df[name_key].notna()) & (current_df["rank"].notna())]
+
         if valid_current.empty:
             if self.debug:
                 print("[DEBUG] No valid current items found")
             return []
-        
+
         # Create vectorized delta calculation using pandas operations
         # Map historical ranks to current data
         valid_current["historical_rank"] = valid_current[name_key].map(historical_ranks)
-        
+
         # Calculate deltas using vectorized operations
         def calculate_delta_vectorized(row):
             historical_rank = row["historical_rank"]
             current_rank = row["rank"]
-            
+
             if pd.isna(historical_rank):
                 return None, "n/a", "n/a"
-            
+
             try:
                 # Convert ranks to integers for calculation (handle string ranks like "2=")
                 hist_rank_int = int(str(historical_rank).split("=")[0])
@@ -116,24 +112,24 @@ class DeltaCalculator:
             except (ValueError, AttributeError):
                 # If conversion fails, skip delta calculation
                 return None, "n/a", "n/a"
-        
+
         # Apply vectorized delta calculation
         delta_results = valid_current.apply(calculate_delta_vectorized, axis=1)
-        
+
         # Add delta fields to DataFrame
         valid_current["delta"] = delta_results.apply(lambda x: x[0])
         valid_current["delta_symbol"] = delta_results.apply(lambda x: x[1])
         valid_current["delta_text"] = delta_results.apply(lambda x: x[2])
-        
+
         # Convert back to list of dictionaries with string keys for type compatibility
         results = [
             {str(k): v for k, v in item.items()}
             for item in valid_current.drop(columns=["historical_rank"]).to_dict("records")
         ]
-        
+
         if self.debug:
             print(f"[DEBUG] Processed {len(results)} items with delta calculations")
-        
+
         return results
 
     def calculate_tier_based_deltas(

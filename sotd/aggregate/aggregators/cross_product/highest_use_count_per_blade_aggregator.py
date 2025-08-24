@@ -119,11 +119,9 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
 
     # OPTIMIZED: Convert to list of dictionaries using pandas operations
     # Rename columns and convert types using pandas operations
-    blade_max_usage = blade_max_usage.rename(columns={
-        "author": "user",
-        "blade_name": "blade",
-        "blade_format": "format"
-    })
+    blade_max_usage = blade_max_usage.rename(
+        columns={"author": "user", "blade_name": "blade", "blade_format": "format"}
+    )
     blade_max_usage["rank"] = blade_max_usage["rank"].astype(int)
     blade_max_usage["uses"] = blade_max_usage["uses"].astype(int)
 

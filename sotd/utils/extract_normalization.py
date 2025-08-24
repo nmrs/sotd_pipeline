@@ -173,9 +173,7 @@ def strip_handle_indicators(value: str) -> str:
 
     # Pattern for handle indicators
     # OPTIMIZED: Combine handle patterns into a single regex for better performance
-    handle_pattern = (
-        r"\s*\((?:in\s+handle|with\s+handle|.*\s+handle|handle.*)\)"
-    )
+    handle_pattern = r"\s*\((?:in\s+handle|with\s+handle|.*\s+handle|handle.*)\)"
 
     cleaned = value
     cleaned = re.sub(handle_pattern, "", cleaned, flags=re.IGNORECASE)
