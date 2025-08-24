@@ -1,3 +1,4 @@
+import pandas as pd
 from typing import Any, Dict, List
 
 
@@ -8,11 +9,15 @@ def calculate_shaves(records: List[Dict[str, Any]]) -> int:
 
 def calculate_unique_users(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique users from records."""
+    if not records:
+        return 0
+
+    # Use a more defensive approach with pandas
     authors = set()
     for record in records:
-        author = record.get("author", "")
+        author = record.get("author")
         if author and author is not None:
-            author = author.strip()
+            author = str(author).strip()
             if author:
                 authors.add(author)
     return len(authors)
@@ -32,12 +37,14 @@ def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
     if not records:
         return 0.0
 
-    # Count shaves per user
+    # Count shaves per user using a more defensive approach
     user_shaves = {}
     for record in records:
         author = record.get("author")
-        if author and author.strip():  # Skip None, empty strings, and whitespace-only strings
-            user_shaves[author.strip()] = user_shaves.get(author.strip(), 0) + 1
+        if author and author is not None:
+            author = str(author).strip()
+            if author:  # Skip None, empty strings, and whitespace-only strings
+                user_shaves[author] = user_shaves.get(author, 0) + 1
 
     if not user_shaves:
         return 0.0
@@ -59,195 +66,280 @@ def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
 
 def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique soaps from records."""
-    soaps = set()
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        matched = soap.get("matched", {})
+    if not records:
+        return 0
 
-        # Skip if no matched soap data
-        if not matched or not matched.get("brand") or not matched.get("scent"):
-            continue
+    df = pd.DataFrame(records)
 
-        brand = matched.get("brand", "").strip()
-        scent = matched.get("scent", "").strip()
+    # Extract soap data and filter for valid entries
+    soap_data = []
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            matched = soap.get("matched", {})
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                scent = matched.get("scent")
+                if brand and isinstance(brand, str) and scent and isinstance(scent, str):
+                    brand = brand.strip()
+                    scent = scent.strip()
+                    if brand and scent:
+                        soap_data.append(f"{brand} - {scent}".lower())
 
-        if brand and scent:
-            # Use case-insensitive deduplication
-            soap_name = f"{brand} - {scent}".lower()
-            soaps.add(soap_name)
+    if not soap_data:
+        return 0
 
-    return len(soaps)
+    # Use pandas for deduplication
+    soap_series = pd.Series(soap_data)
+    return len(soap_series.unique())
 
 
 def calculate_unique_brands(records: List[Dict[str, Any]]) -> int:
-    """Calculate number of unique soap brands/makers from records."""
-    brands = set()
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        matched = soap.get("matched", {})
+    """Calculate number of unique soap brands from records."""
+    if not records:
+        return 0
 
-        # Skip if no matched soap data or no brand
-        if not matched or not matched.get("brand"):
-            continue
+    df = pd.DataFrame(records)
 
-        brand = matched.get("brand", "").strip()
+    # Extract soap brands and filter for valid entries
+    brands = []
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            matched = soap.get("matched", {})
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                if brand and isinstance(brand, str):
+                    brand = brand.strip()
+                    if brand:
+                        brands.append(brand)
 
-        if brand:
-            brands.add(brand)
+    if not brands:
+        return 0
 
-    return len(brands)
+    # Use pandas for deduplication
+    brand_series = pd.Series(brands)
+    return len(brand_series.unique())
 
 
 def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
     """Calculate total number of sample shaves from records."""
-    total_samples = 0
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        enriched = soap.get("enriched", {})
-        if enriched.get("sample_type"):
-            total_samples += 1
-    return total_samples
+    if not records:
+        return 0
+
+    df = pd.DataFrame(records)
+
+    # Count records with sample_type
+    sample_count = 0
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            if enriched and enriched.get("sample_type"):
+                sample_count += 1
+
+    return sample_count
 
 
 def calculate_sample_users(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique users who used samples."""
-    sample_users = set()
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        enriched = soap.get("enriched", {})
-        if enriched.get("sample_type"):
-            author = record.get("author", "").strip()
-            if author:
-                sample_users.add(author)
-    return len(sample_users)
+    if not records:
+        return 0
+
+    df = pd.DataFrame(records)
+
+    # Extract users who used samples
+    sample_users = []
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            if enriched and enriched.get("sample_type"):
+                author = row.get("author")
+                if author and isinstance(author, str) and author.strip():
+                    sample_users.append(author.strip())
+
+    if not sample_users:
+        return 0
+
+    # Use pandas for deduplication
+    user_series = pd.Series(sample_users)
+    return len(user_series.unique())
 
 
 def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique brands sampled."""
-    sample_brands = set()
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        matched = soap.get("matched", {})
-        if matched is None:
-            continue
-        brand = matched.get("maker") or ""
-        if brand:
-            brand = brand.strip()
-        if brand:
-            sample_brands.add(brand)
-    return len(sample_brands)
+    if not records:
+        return 0
+
+    df = pd.DataFrame(records)
+
+    # Extract brands from samples
+    sample_brands = []
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            matched = soap.get("matched", {})
+
+            # Skip if no sample data OR if sample_type is None/empty (not actually used)
+            if not enriched or "sample_type" not in enriched:
+                continue
+
+            # Check if sample_type actually has a value (not None or empty string)
+            sample_type = enriched.get("sample_type")
+            if not sample_type:  # This catches None, "", and other falsy values
+                continue
+
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                if brand and isinstance(brand, str):
+                    brand = brand.strip()
+                    if brand:
+                        sample_brands.append(brand)
+
+    if not sample_brands:
+        return 0
+
+    # Use pandas for deduplication
+    brand_series = pd.Series(sample_brands)
+    return len(brand_series.unique())
 
 
 def calculate_unique_sample_soaps(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique sample soaps from records."""
-    sample_soaps = set()
-    for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
-        enriched = soap.get("enriched", {})
-        matched = soap.get("matched", {})
+    if not records:
+        return 0
 
-        # Skip if no sample data OR if sample_type is None/empty (not actually used)
-        if not enriched or "sample_type" not in enriched:
-            continue
+    df = pd.DataFrame(records)
 
-        # Check if sample_type actually has a value (not None or empty string)
-        sample_type = enriched.get("sample_type")
-        if not sample_type:  # This catches None, "", and other falsy values
-            continue
+    # Extract sample soaps and filter for valid entries
+    sample_soaps = []
+    for _, row in df.iterrows():
+        soap = row.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            matched = soap.get("matched", {})
 
-        # Skip if no matched soap data
-        if not matched or not matched.get("brand") or not matched.get("scent"):
-            continue
+            # Skip if no sample data OR if sample_type is None/empty (not actually used)
+            if not enriched or "sample_type" not in enriched:
+                continue
 
-        brand = matched.get("brand", "").strip()
-        scent = matched.get("scent", "").strip()
+            # Check if sample_type actually has a value (not None or empty string)
+            sample_type = enriched.get("sample_type")
+            if not sample_type:  # This catches None, "", and other falsy values
+                continue
 
-        if brand and scent:
-            soap_name = f"{brand} - {scent}"
-            sample_soaps.add(soap_name)
+            # Skip if no matched soap data
+            if not matched or not matched.get("brand") or not matched.get("scent"):
+                continue
 
-    return len(sample_soaps)
+            brand = matched.get("brand")
+            scent = matched.get("scent")
+
+            if brand and isinstance(brand, str) and scent and isinstance(scent, str):
+                brand = brand.strip()
+                scent = scent.strip()
+                if brand and scent:
+                    soap_name = f"{brand} - {scent}"
+                    sample_soaps.append(soap_name)
+
+    if not sample_soaps:
+        return 0
+
+    # Use pandas for deduplication
+    soap_series = pd.Series(sample_soaps)
+    return len(soap_series.unique())
 
 
 def calculate_unique_razors(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique razors from records."""
-    razors = set()
-    for record in records:
-        razor = record.get("razor")
-        if razor is None:
-            continue
-        matched = razor.get("matched", {})
+    if not records:
+        return 0
 
-        # Skip if no matched razor data or no brand/model
-        if not matched or not matched.get("brand") or not matched.get("model"):
-            continue
+    df = pd.DataFrame(records)
 
-        brand = matched.get("brand", "").strip()
-        model = matched.get("model", "").strip()
+    # Extract razor data and filter for valid entries
+    razors = []
+    for _, row in df.iterrows():
+        razor = row.get("razor")
+        if razor is not None and isinstance(razor, dict):
+            matched = razor.get("matched", {})
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                model = matched.get("model")
+                if brand and isinstance(brand, str) and model and isinstance(model, str):
+                    brand = brand.strip()
+                    model = model.strip()
+                    if brand and model:
+                        razors.append(f"{brand} {model}")
 
-        if brand and model:
-            razor_name = f"{brand} {model}"
-            razors.add(razor_name)
+    if not razors:
+        return 0
 
-    return len(razors)
+    # Use pandas for deduplication
+    razor_series = pd.Series(razors)
+    return len(razor_series.unique())
 
 
 def calculate_unique_blades(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique blades from records."""
-    blades = set()
-    for record in records:
-        blade = record.get("blade")
-        if blade is None:
-            continue
-        matched = blade.get("matched", {})
+    if not records:
+        return 0
 
-        # Skip if no matched blade data or no brand/model
-        if not matched or not matched.get("brand") or not matched.get("model"):
-            continue
+    df = pd.DataFrame(records)
 
-        brand = matched.get("brand", "").strip()
-        model = matched.get("model", "").strip()
+    # Extract blade data and filter for valid entries
+    blades = []
+    for _, row in df.iterrows():
+        blade = row.get("blade")
+        if blade is not None and isinstance(blade, dict):
+            matched = blade.get("matched", {})
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                model = matched.get("model")
+                if brand and isinstance(brand, str) and model and isinstance(model, str):
+                    brand = brand.strip()
+                    model = model.strip()
+                    if brand and model:
+                        blades.append(f"{brand} {model}")
 
-        if brand and model:
-            blade_name = f"{brand} {model}"
-            blades.add(blade_name)
+    if not blades:
+        return 0
 
-    return len(blades)
+    # Use pandas for deduplication
+    blade_series = pd.Series(blades)
+    return len(blade_series.unique())
 
 
 def calculate_unique_brushes(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique brushes from records."""
-    brushes = set()
-    for record in records:
-        brush = record.get("brush")
-        if brush is None:
-            continue
-        matched = brush.get("matched", {})
+    if not records:
+        return 0
 
-        # Skip if no matched brush data or no brand/model
-        if not matched or not matched.get("brand") or not matched.get("model"):
-            continue
+    df = pd.DataFrame(records)
 
-        brand = matched.get("brand", "").strip()
-        model = matched.get("model", "").strip()
+    # Extract brush data and filter for valid entries
+    brushes = []
+    for _, row in df.iterrows():
+        brush = row.get("brush")
+        if brush is not None and isinstance(brush, dict):
+            matched = brush.get("matched", {})
+            if matched and isinstance(matched, dict):
+                brand = matched.get("brand")
+                model = matched.get("model")
+                if brand and isinstance(brand, str) and model and isinstance(model, str):
+                    brand = brand.strip()
+                    model = model.strip()
+                    if brand and model:
+                        brushes.append(f"{brand} {model}")
 
-        if brand and model:
-            brush_name = f"{brand} {model}"
-            brushes.add(brush_name)
+    if not brushes:
+        return 0
 
-    return len(brushes)
+    # Use pandas for deduplication
+    brush_series = pd.Series(brushes)
+    return len(brush_series.unique())
 
 
 def add_rank_field(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

@@ -74,7 +74,9 @@ def normalize_fields(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
         # Normalize author field
         if "author" in normalized_record and normalized_record["author"] is not None:
-            normalized_record["author"] = normalized_record["author"].strip()
+            author = normalized_record["author"]
+            if isinstance(author, str) and author.strip():
+                normalized_record["author"] = author.strip()
 
         # Normalize product fields
         for product_type in ["razor", "blade", "brush", "soap"]:
@@ -84,7 +86,7 @@ def normalize_fields(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     matched = product["matched"]
                     if matched is not None and isinstance(matched, dict):
                         for key, value in matched.items():
-                            if isinstance(value, str):
+                            if isinstance(value, str) and value.strip():
                                 matched[key] = value.strip()
 
         normalized.append(normalized_record)
