@@ -343,7 +343,7 @@ Cartridge/Disposable:
   "":
     format: Cartridge/Disposable
     patterns:
-      - (?:schick).*(disposable|xtreme 2|skintimate|hydro.*5|shik pla5tik)
+      - (?:sc?hic?k).*(disposable|xtreme 2|skintimate|hydro.*5|pla5tik)
       - (mach.?3|trac.?ii|sensor.?[23])
       - gil.*(cartridge|disposable)
       - gil.*et.*(labs|guard|joy|proglide|sensor|venus)

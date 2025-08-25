@@ -853,6 +853,7 @@ brush:
     - zenith 506u xse
     B15:
     - zenith b15
+    - zenith olive wood / b15 boar
     B37:
     - zenith b37
     Barberpole:
@@ -934,6 +935,9 @@ handle:
     - rad dinosaur creations - jetson - 25mm muhle stf
     - rad dinosaur creations >!expunged!< w/ raptor synthetic
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
+  Summer Break:
+    Unspecified:
+    - Summer Break DeMaranville B15
 knot:
   AP Shave Co:
     G5B:
@@ -958,6 +962,9 @@ knot:
     Badger:
     - chisel & hound - abominable chalice
     - chisel & hound broomstick
+  Declaration Grooming:
+    B15:
+    - Summer Break DeMaranville B15
   Heritage Collection:
     Badger:
     - heritage shaving c-mon 28 mm

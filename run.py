@@ -11,6 +11,42 @@ import sys
 from typing import List, Optional
 
 
+def validate_month(value: str) -> str:
+    """Validate month format (YYYY-MM) and ensure month is 01-12."""
+    import re
+
+    if not re.match(r"^\d{4}-\d{2}$", value):
+        raise argparse.ArgumentTypeError(f"Invalid month format: {value} (expected YYYY-MM)")
+
+    # Validate month value
+    year, month = value.split("-")
+    if not (1 <= int(month) <= 12):
+        raise argparse.ArgumentTypeError(f"Invalid month value: {value} (month must be 01-12)")
+
+    return value
+
+
+def validate_range(value: str) -> str:
+    """Validate range format (YYYY-MM:YYYY-MM) and ensure months are 01-12."""
+    import re
+
+    if not re.match(r"^\d{4}-\d{2}:\d{4}-\d{2}$", value):
+        raise argparse.ArgumentTypeError(
+            f"Invalid range format: {value} (expected YYYY-MM:YYYY-MM)"
+        )
+
+    # Validate month values in range
+    start, end = value.split(":")
+    for v in (start, end):
+        year, month = v.split("-")
+        if not (1 <= int(month) <= 12):
+            raise argparse.ArgumentTypeError(
+                f"Invalid month value in range: {v} (month must be 01-12)"
+            )
+
+    return value
+
+
 def get_default_month() -> str:
     """Get the default month (previous month) in YYYY-MM format."""
     now = datetime.datetime.now()
@@ -150,7 +186,10 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
                         phase_args.append(args[i + 1])
                         i += 1  # Skip the value in next iteration
                 # If phase doesn't support it, skip both flag and value
-                i += 1
+                if i + 1 < len(args):
+                    i += 2  # Skip both flag and value
+                else:
+                    i += 1  # Skip just the flag if no value
                 continue
 
             elif arg.startswith("--type"):
@@ -381,12 +420,16 @@ Examples:
 
     # Common arguments for all phases
     parser.add_argument(
-        "--month", help="Process specific month (YYYY-MM format, default: previous month)"
+        "--month",
+        type=validate_month,
+        help="Process specific month (YYYY-MM format, default: previous month)",
     )
     parser.add_argument("--year", type=int, help="Process entire year (YYYY format)")
-    parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
-    parser.add_argument("--end", help="End month for range (YYYY-MM format)")
-    parser.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
+    parser.add_argument(
+        "--start", type=validate_month, help="Start month for range (YYYY-MM format)"
+    )
+    parser.add_argument("--end", type=validate_month, help="End month for range (YYYY-MM format)")
+    parser.add_argument("--range", type=validate_range, help="Month range (YYYY-MM:YYYY-MM format)")
     parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
@@ -400,6 +443,14 @@ Examples:
         "--delta",
         action="store_true",
         help=("Process delta months: current month(s) + 1 month ago, 1 year ago, and 5 years ago"),
+    )
+    parser.add_argument(
+        "--ytd",
+        action="store_true",
+        help=(
+            "Process year-to-date: from January 1st of current year to current month "
+            "(equivalent to --range 2025-01:2025-08 for August 2025)"
+        ),
     )
     # Report-specific arguments
     parser.add_argument(
@@ -429,9 +480,20 @@ Examples:
         common_args = []
 
         # Handle date arguments - if none provided, default to previous month
-        has_date_args = bool(args.month or args.year or args.start or args.end or args.range)
+        has_date_args = bool(
+            args.month or args.year or args.start or args.end or args.range or args.ytd
+        )
 
-        if args.delta:
+        if args.ytd:
+            # YTD mode: process from January 1st of current year to current month
+            current_year = datetime.datetime.now().year
+            current_month = datetime.datetime.now().month
+            ytd_start = f"{current_year}-01"
+            ytd_end = f"{current_year}-{current_month:02d}"
+            if args.debug:
+                print(f"[DEBUG] YTD mode: processing range {ytd_start} to {ytd_end}")
+            common_args.extend(["--start", ytd_start, "--end", ytd_end])
+        elif args.delta:
             # Delta mode: process current month(s) + historical comparison months
             delta_months = calculate_delta_months(args)
             if args.debug:

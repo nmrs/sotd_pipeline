@@ -67,6 +67,10 @@ AC:
     Salon Select Premium Guard:
       patterns:
         - kai.*prem.*guard
+  Kamisori:
+    AC:
+      patterns:
+        - kamisori.*(ac|artist club)
   Sapphoo:
     Red:
       patterns:
@@ -77,16 +81,13 @@ AC:
         - (schick.*)?proline
         - (schick.*)?(proline.*)?p[ -]?[23]0
 Cartridge/Disposable:
-  "":
-    Cartridge:
+  Cartridge/Disposable:
+    "":
       patterns:
         - cartridge
         - cien\s*men
         - disposable
-        - gil.*fusion
-        - gil.*guard
-        - gil.*labs
-        - gil.*proglide
+        - gil.*(fusion|guard|labs|proglide|venus|joy)
         - harry.{1}?s
         - mach ?(iii|3|three)
         - sensor ?(iii|3|three)
@@ -384,6 +385,10 @@ DE:
       patterns:
         - glatz ss
         - glatz.*stai
+  Goodline:
+    Double Edge:
+      patterns:
+        - goodline
   Kai:
     DE:
       patterns:
@@ -455,6 +460,7 @@ DE:
     Super Stainless:
       patterns:
         - \bok\b.*(stain|\bss\b)
+        - lord.*ok
   PAA:
     Platinum Strangelet Super Sharps:
       patterns:
@@ -462,7 +468,7 @@ DE:
   Parker:
     Premium Platinum:
       patterns:
-        - parker.*premium.*plat
+        - parker(?:.*premium)?(?:.*plat)?
   Personna:
     "74":
       patterns:
@@ -676,9 +682,13 @@ DE:
       patterns:
         - hagen
   Vi-John:
-    Master Stroke:
+    Chrome Platinum:
       patterns:
         - vi.*john.*mas
+        - vi.*john.*chrome
+    Super Stainless:
+      patterns:
+        - vi.*john
   Viking's Sword:
     Stainless:
       patterns:
@@ -694,9 +704,11 @@ DE:
   Voskhod:
     Teflon Coated:
       patterns:
-        - vokshod
-        - voskhod
-        - voshk
+        - vo[shkl]+od
+  Walgreens:
+    2 Edge:
+      patterns:
+        - walgreen
   Wilkinson Sword:
     Classic:
       patterns:
@@ -720,7 +732,7 @@ DE:
     Platinum:
       patterns:
         - zircon.*plat
-  "Zomchí":
+  Zomchí:
     Superior Platinum:
       patterns:
         - "zomch(í|i)"

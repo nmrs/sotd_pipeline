@@ -1,4 +1,10 @@
 blade:
+  7 of them (one for each day of the week!):
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-04.json
+      id: mkvmk0s
+      source: user
   AC Blade:
     added_date: '2025-07-19'
     comment_ids:
@@ -16,11 +22,23 @@ blade:
       id: mxfsteo
       source: user
     reason: not specific enough for matching
+  BLADE:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mygq97l
+      source: user
   I don't even know, tbh; I don't remember the last time I swapped this blade:
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
       id: mwoh2fd
+      source: user
+  IDK, will edit later:
+    added_date: '2025-08-24'
+    comment_ids:
+    - file: 2025-08.json
+      id: n6etxnz
       source: user
   N/A:
     added_date: '2025-07-19'
@@ -34,6 +52,36 @@ blade:
     - file: 2025-06.json
       id: n02soyj
       source: user
+  'Null':
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mw99op2
+      source: user
+  The Three that come on it:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxn87ia
+      source: user
+  Whatever Gillette sticks in these 2 blade thingys:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxq6eld
+      source: user
+  Whatever Gillette stuffs into these things:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: myf7jya
+      source: user
+  Whatever they jammed in:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxd8vix
+      source: user
   leave:
     added_date: '2025-07-19'
     comment_ids:
@@ -41,6 +89,12 @@ blade:
       id: mx0f6ht
       source: user
     reason: garbage
+  n/a:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxm7x7k
+      source: user
 brush:
   '>!REDACTED!<':
     added_date: '2025-07-19'
@@ -211,6 +265,12 @@ brush:
       id: mx6lwpn
       source: user
 razor:
+  Cu:
+    added_date: '2025-08-24'
+    comment_ids:
+    - file: 2025-07.json
+      id: n55ihah
+      source: user
   Hot Wheels Play Razor:
     added_date: '2025-07-19'
     comment_ids:
