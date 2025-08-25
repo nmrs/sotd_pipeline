@@ -25,67 +25,68 @@ brush_scoring_weights:
       fiber_words: 0.0
       size_specification: 0.0
       delimiter_confidence: 0.0
-    
+
     # Modifiers for complete brush strategies (no splitting needed)
     correct_complete_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     correct_split_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     known_split:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     known_brush:
       multiple_brands: 0.0
-      fiber_words: 0.0
+      fiber_match: 0.0
       size_specification: 0.0
-    
+
     omega_semogue:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     zenith:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     other_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-    
+
     unified:
       dual_component: 15.0
       multiple_brands: 20.0
-      fiber_words: 0.0
+      fiber_mismatch: -15.0
       size_specification: 0.0
-    
+
     handle_only:
       handle_indicators: 30.0
       knot_indicators: -30.0
-      handle_brand_without_knot_brand: 25.0    # Bonus when we detect handle brand but no knot brand
-      knot_brand_without_handle_brand: -25.0   # Penalty when we detect knot brand but no handle brand
-    
+      handle_brand_without_knot_brand: 25.0 # Bonus when we detect handle brand but no knot brand
+      knot_brand_without_handle_brand: -25.0 # Penalty when we detect knot brand but no handle brand
+
     knot_only:
+      fiber_mismatch: -15.0
       knot_indicators: 30.0
       handle_indicators: -30.0
-      handle_brand_without_knot_brand: -25.0   # Penalty when we detect handle brand but no knot brand
-      knot_brand_without_handle_brand: 25.0    # Bonus when we detect knot brand but no handle brand 
+      handle_brand_without_knot_brand: -25.0 # Penalty when we detect handle brand but no knot brand
+      knot_brand_without_handle_brand: 25.0 # Bonus when we detect knot brand but no handle brand
 
 # GLOSSARY OF MODIFIERS
 # =====================
-# 
+#
 # Base Strategy Scores:
 # - correct_complete_brush: Perfect match from correct_matches.yaml (highest confidence)
-# - correct_split_brush: Correct match with handle/knot splitting (very high confidence)  
+# - correct_split_brush: Correct match with handle/knot splitting (very high confidence)
 # - known_split: Known brush that requires splitting (high confidence)
 # - known_brush: Known brush from catalog (good confidence)
 # - omega_semogue: Special handling for Omega/Semogue brands (medium-high confidence)
@@ -116,4 +117,4 @@ brush_scoring_weights:
 # STRATEGY-SPECIFIC MODIFIERS:
 # - dual_component: Bonus when both handle and knot components are detected (ONLY for unified strategy)
 # - handle_indicators: Bonus when handle indicators are present (ONLY for handle_only strategy)
-# - knot_indicators: Bonus when knot indicators are present (ONLY for knot_only strategy) 
+# - knot_indicators: Bonus when knot indicators are present (ONLY for knot_only strategy)
