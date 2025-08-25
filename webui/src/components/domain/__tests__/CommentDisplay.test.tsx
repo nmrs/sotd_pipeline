@@ -137,7 +137,7 @@ describe('CommentDisplay', () => {
       <CommentDisplay
         commentIds={['abc123']}
         onCommentClick={mockOnCommentClick}
-        className="custom-class"
+        className='custom-class'
       />
     );
 
@@ -152,7 +152,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={['abc123', 'def456', 'ghi789']}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
         />
       );
@@ -170,7 +170,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
         />
       );
@@ -190,7 +190,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
           maxDisplay={2}
         />
@@ -220,7 +220,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
         />
       );
@@ -239,7 +239,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
         />
       );
@@ -257,7 +257,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
         />
       );
@@ -275,7 +275,7 @@ describe('CommentDisplay', () => {
         <CommentDisplay
           commentIds={commentIds}
           onCommentClick={mockOnCommentClick}
-          displayMode="dates"
+          displayMode='dates'
           dates={dates}
           commentLoading={true}
         />

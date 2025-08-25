@@ -30,7 +30,9 @@ export const CommentList: React.FC<CommentListProps> = ({
   }
 
   // Determine which comments to show
-  const displayCount = isExpanded ? validCommentIds.length : Math.min(maxDisplay, validCommentIds.length);
+  const displayCount = isExpanded
+    ? validCommentIds.length
+    : Math.min(maxDisplay, validCommentIds.length);
   const displayComments = validCommentIds.slice(0, displayCount);
   const remainingCount = validCommentIds.length - maxDisplay;
   const canExpand = !isExpanded && remainingCount > 0;

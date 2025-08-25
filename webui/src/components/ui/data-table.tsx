@@ -163,17 +163,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-        // When using external selection, we need to call onSelectionChange directly
-        // since the table's internal state won't be updated
-        const newSelection =
-          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-        if (onSelectionChange) {
-          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-          onSelectionChange(selectedRows);
+          // When using external selection, we need to call onSelectionChange directly
+          // since the table's internal state won't be updated
+          const newSelection =
+            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+          if (onSelectionChange) {
+            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+            onSelectionChange(selectedRows);
+          }
+          // Also update the internal state so the UI reflects the change immediately
+          setRowSelection(newSelection);
         }
-        // Also update the internal state so the UI reflects the change immediately
-        setRowSelection(newSelection);
-      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -397,16 +397,20 @@ export function DataTable<TData, TValue>({
     const csvRows = [headers, ...dataRows];
 
     // Convert to CSV format (handle commas and quotes properly)
-    return csvRows.map(row =>
-      row.map(cell => {
-        const cellStr = String(cell);
-        // If cell contains comma, quote, or newline, wrap in quotes and escape internal quotes
-        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
-          return `"${cellStr.replace(/"/g, '""')}"`;
-        }
-        return cellStr;
-      }).join(',')
-    ).join('\n');
+    return csvRows
+      .map(row =>
+        row
+          .map(cell => {
+            const cellStr = String(cell);
+            // If cell contains comma, quote, or newline, wrap in quotes and escape internal quotes
+            if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+              return `"${cellStr.replace(/"/g, '""')}"`;
+            }
+            return cellStr;
+          })
+          .join(',')
+      )
+      .join('\n');
   };
 
   const downloadCSV = (csvContent: string, filename: string) => {
@@ -570,8 +574,9 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                                }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
+                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                              }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -614,10 +619,11 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
-                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                      : ''
-                      }`}
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
+                      keyboardNavigationEnabled && activeRowIndex === index
+                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                        : ''
+                    }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell

@@ -1017,7 +1017,7 @@ const SoapAnalyzer: React.FC = () => {
           onClose={handleCloseCommentModal}
           comments={[selectedComment]}
           currentIndex={0}
-          onNavigate={async () => { }} // No navigation needed for single comment
+          onNavigate={async () => {}} // No navigation needed for single comment
           remainingCommentIds={[]}
         />
       )}

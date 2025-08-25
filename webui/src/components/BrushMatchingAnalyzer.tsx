@@ -7,345 +7,408 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2, Search, Trophy, Target, Hash } from 'lucide-react';
 
 interface BrushMatchResult {
-    strategy: string;
-    score: number;
-    matchType: string;
-    pattern: string;
-    scoreBreakdown: {
-        baseScore: number;
-        modifiers: number;
-        modifierDetails: string[];
-    };
-    matchedData: {
-        brand?: string;
-        model?: string;
-        fiber?: string;
-        size?: string;
-        handle?: any;
-        knot?: any;
-    };
+  strategy: string;
+  score: number;
+  matchType: string;
+  pattern: string;
+  scoreBreakdown: {
+    baseScore: number;
+    modifiers: number;
+    modifierDetails: string[];
+  };
+  matchedData: {
+    brand?: string;
+    model?: string;
+    fiber?: string;
+    size?: string;
+    handle?: any;
+    knot?: any;
+  };
 }
 
 interface BrushAnalysisResponse {
-    results: BrushMatchResult[];
-    winner: BrushMatchResult;
-    enrichedData?: any;
+  results: BrushMatchResult[];
+  winner: BrushMatchResult;
+  enrichedData?: any;
 }
 
 export function BrushMatchingAnalyzer() {
-    const [brushString, setBrushString] = useState('');
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [results, setResults] = useState<BrushAnalysisResponse | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const [brushString, setBrushString] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<BrushAnalysisResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    const analyzeBrush = async () => {
-        if (!brushString.trim()) return;
+  const analyzeBrush = async () => {
+    if (!brushString.trim()) return;
 
-        setIsAnalyzing(true);
-        setError(null);
-        setResults(null);
+    setIsAnalyzing(true);
+    setError(null);
+    setResults(null);
 
-        try {
-            const response = await fetch('/api/brush-matching/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ brushString: brushString.trim() }),
-            });
+    try {
+      const response = await fetch('/api/brush-matching/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brushString: brushString.trim() }),
+      });
 
-            if (!response.ok) {
-                throw new Error(`Analysis failed: ${response.statusText}`);
-            }
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.statusText}`);
+      }
 
-            const data = await response.json();
-            setResults(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Analysis failed');
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
+      const data = await response.json();
+      setResults(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Analysis failed');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            analyzeBrush();
-        }
-    };
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      analyzeBrush();
+    }
+  };
 
-    const getStrategyIcon = (rank: number) => {
-        switch (rank) {
-            case 1:
-                return <Trophy className="w-4 h-4 text-yellow-500" />;
-            case 2:
-                return <Target className="w-4 h-4 text-gray-400" />;
-            case 3:
-                return <Hash className="w-4 h-4 text-orange-500" />;
-            default:
-                return <Hash className="w-4 h-4 text-gray-400" />;
-        }
-    };
+  const getStrategyIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <Trophy className='w-4 h-4 text-yellow-500' />;
+      case 2:
+        return <Target className='w-4 h-4 text-gray-400' />;
+      case 3:
+        return <Hash className='w-4 h-4 text-orange-500' />;
+      default:
+        return <Hash className='w-4 h-4 text-gray-400' />;
+    }
+  };
 
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return 'text-green-600';
-        if (score >= 60) return 'text-yellow-600';
-        return 'text-red-600';
-    };
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
 
-    return (
-        <div className="container mx-auto p-6 max-w-6xl">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Search className="w-5 h-5" />
-                        Brush Matching Analyzer
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {/* Input Section */}
-                    <div className="flex gap-2">
-                        <Input
-                            placeholder="Enter brush string (e.g., 'Zenith Olive Wood / B15 Boar')"
-                            value={brushString}
-                            onChange={(e) => setBrushString(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className="flex-1"
-                        />
-                        <Button
-                            onClick={analyzeBrush}
-                            disabled={isAnalyzing || !brushString.trim()}
-                        >
-                            {isAnalyzing ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Analyzing...
-                                </>
-                            ) : (
-                                'Analyze'
-                            )}
-                        </Button>
-                    </div>
+  return (
+    <div className='container mx-auto p-6 max-w-6xl'>
+      <Card>
+        <CardHeader>
+          <CardTitle className='flex items-center gap-2'>
+            <Search className='w-5 h-5' />
+            Brush Matching Analyzer
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-6'>
+          {/* Input Section */}
+          <div className='flex gap-2'>
+            <Input
+              placeholder="Enter brush string (e.g., 'Zenith Olive Wood / B15 Boar')"
+              value={brushString}
+              onChange={e => setBrushString(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className='flex-1'
+            />
+            <Button onClick={analyzeBrush} disabled={isAnalyzing || !brushString.trim()}>
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                  Analyzing...
+                </>
+              ) : (
+                'Analyze'
+              )}
+            </Button>
+          </div>
 
-                    {/* Error Display */}
-                    {error && (
-                        <Card className="border-red-200 bg-red-50">
-                            <CardContent className="pt-6">
-                                <p className="text-red-600">{error}</p>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Results Display */}
-                    {results && (
-                        <div className="space-y-6">
-                            {/* Winner Section */}
-                            <Card className="border-green-200 bg-green-50">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-green-800">
-                                        <Trophy className="w-5 h-5" />
-                                        Winner: {results.winner.strategy.toUpperCase()}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-sm text-gray-600">Strategy</p>
-                                            <p className="font-semibold">{results.winner.strategy}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600">Score</p>
-                                            <p className={`font-bold text-lg ${getScoreColor(results.winner.score)}`}>
-                                                {results.winner.score}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600">Match Type</p>
-                                            <p className="font-semibold">{results.winner.matchType || 'None'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600">Pattern</p>
-                                            <p className="font-mono text-sm">{results.winner.pattern}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* All Results */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>All Strategy Results</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {results.results.map((result, index) => (
-                                            <Card key={result.strategy} className="border-gray-200">
-                                                <CardContent className="pt-6">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <div className="flex items-center gap-2">
-                                                            {getStrategyIcon(index + 1)}
-                                                            <Badge variant="outline" className="font-mono">
-                                                                #{index + 1}
-                                                            </Badge>
-                                                            <h3 className="font-semibold text-lg">
-                                                                {result.strategy.toUpperCase()}
-                                                            </h3>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
-                                                                {result.score}
-                                                            </p>
-                                                            <p className="text-sm text-gray-600">
-                                                                {result.matchType || 'None'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Score Breakdown */}
-                                                    <div className="mb-4">
-                                                        <h4 className="font-medium mb-2">Score Breakdown</h4>
-                                                        <div className="grid grid-cols-3 gap-4 text-sm">
-                                                            <div>
-                                                                <p className="text-gray-600">Base Score</p>
-                                                                <p className="font-semibold">{result.scoreBreakdown.baseScore}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-gray-600">Modifiers</p>
-                                                                <p className="font-semibold">{result.scoreBreakdown.modifiers > 0 ? '+' : ''}{result.scoreBreakdown.modifiers}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-gray-600">Total</p>
-                                                                <p className="font-semibold">{result.scoreBreakdown.baseScore + result.scoreBreakdown.modifiers}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Modifier Details */}
-                                                    {result.scoreBreakdown.modifierDetails.length > 0 && (
-                                                        <div className="mb-4">
-                                                            <h4 className="font-medium mb-2">Modifier Details</h4>
-                                                            <div className="space-y-1">
-                                                                {result.scoreBreakdown.modifierDetails.map((detail, idx) => (
-                                                                    <p key={idx} className="text-sm font-mono text-gray-700">
-                                                                        {detail}
-                                                                    </p>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Matched Data */}
-                                                    <div>
-                                                        <h4 className="font-medium mb-2">Matched Data</h4>
-
-
-
-                                                        <div className="space-y-2 text-sm">
-                                                            {/* Top Level Section - always show */}
-                                                            <div className="border-b pb-2">
-                                                                <div className="text-xs text-gray-500 mb-1 font-medium">TOP LEVEL</div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Brand:</span>
-                                                                        <span className={result.matchedData.brand ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.brand || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Model:</span>
-                                                                        <span className={result.matchedData.model ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.model || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Handle Section - always show */}
-                                                            <div className="border-b pb-2">
-                                                                <div className="text-xs text-gray-500 mb-1 font-medium">HANDLE</div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Brand:</span>
-                                                                        <span className={result.matchedData.handle_brand ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.handle_brand || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Model:</span>
-                                                                        <span className={result.matchedData.handle_model ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.handle_model || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Source:</span>
-                                                                        <span className={result.matchedData.handle_source ? "font-semibold text-xs" : "text-gray-400 italic text-xs"}>
-                                                                            {result.matchedData.handle_source || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Knot Section - always show */}
-                                                            <div>
-                                                                <div className="text-xs text-gray-500 mb-1 font-medium">KNOT</div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Brand:</span>
-                                                                        <span className={result.matchedData.knot_brand ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.knot_brand || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Model:</span>
-                                                                        <span className={result.matchedData.knot_model ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.knot_model || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Fiber:</span>
-                                                                        <span className={result.matchedData.knot_fiber ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.knot_fiber || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Size:</span>
-                                                                        <span className={result.matchedData.knot_size_mm ? "font-semibold" : "text-gray-400 italic"}>
-                                                                            {result.matchedData.knot_size_mm ? `${result.matchedData.knot_size_mm}mm` : "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="flex justify-between">
-                                                                        <span className="text-gray-600">Source:</span>
-                                                                        <span className={result.matchedData.knot_source ? "font-semibold text-xs" : "text-gray-400 italic text-xs"}>
-                                                                            {result.matchedData.knot_source || "Not specified"}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Enriched Data */}
-                            {results.enrichedData && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Enriched Data</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                                            {JSON.stringify(results.enrichedData, null, 2)}
-                                        </pre>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </div>
-                    )}
-                </CardContent>
+          {/* Error Display */}
+          {error && (
+            <Card className='border-red-200 bg-red-50'>
+              <CardContent className='pt-6'>
+                <p className='text-red-600'>{error}</p>
+              </CardContent>
             </Card>
-        </div>
-    );
+          )}
+
+          {/* Results Display */}
+          {results && (
+            <div className='space-y-6'>
+              {/* Winner Section */}
+              <Card className='border-green-200 bg-green-50'>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2 text-green-800'>
+                    <Trophy className='w-5 h-5' />
+                    Winner: {results.winner.strategy.toUpperCase()}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div>
+                      <p className='text-sm text-gray-600'>Strategy</p>
+                      <p className='font-semibold'>{results.winner.strategy}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm text-gray-600'>Score</p>
+                      <p className={`font-bold text-lg ${getScoreColor(results.winner.score)}`}>
+                        {results.winner.score}
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm text-gray-600'>Match Type</p>
+                      <p className='font-semibold'>{results.winner.matchType || 'None'}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm text-gray-600'>Pattern</p>
+                      <p className='font-mono text-sm'>{results.winner.pattern}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* All Results */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Strategy Results</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    {results.results.map((result, index) => (
+                      <Card key={result.strategy} className='border-gray-200'>
+                        <CardContent className='pt-6'>
+                          <div className='flex items-center justify-between mb-4'>
+                            <div className='flex items-center gap-2'>
+                              {getStrategyIcon(index + 1)}
+                              <Badge variant='outline' className='font-mono'>
+                                #{index + 1}
+                              </Badge>
+                              <h3 className='font-semibold text-lg'>
+                                {result.strategy.toUpperCase()}
+                              </h3>
+                            </div>
+                            <div className='text-right'>
+                              <p className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
+                                {result.score}
+                              </p>
+                              <p className='text-sm text-gray-600'>{result.matchType || 'None'}</p>
+                            </div>
+                          </div>
+
+                          {/* Score Breakdown */}
+                          <div className='mb-4'>
+                            <h4 className='font-medium mb-2'>Score Breakdown</h4>
+                            <div className='grid grid-cols-3 gap-4 text-sm'>
+                              <div>
+                                <p className='text-gray-600'>Base Score</p>
+                                <p className='font-semibold'>{result.scoreBreakdown.baseScore}</p>
+                              </div>
+                              <div>
+                                <p className='text-gray-600'>Modifiers</p>
+                                <p className='font-semibold'>
+                                  {result.scoreBreakdown.modifiers > 0 ? '+' : ''}
+                                  {result.scoreBreakdown.modifiers}
+                                </p>
+                              </div>
+                              <div>
+                                <p className='text-gray-600'>Total</p>
+                                <p className='font-semibold'>
+                                  {result.scoreBreakdown.baseScore +
+                                    result.scoreBreakdown.modifiers}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Modifier Details */}
+                          {result.scoreBreakdown.modifierDetails.length > 0 && (
+                            <div className='mb-4'>
+                              <h4 className='font-medium mb-2'>Modifier Details</h4>
+                              <div className='space-y-1'>
+                                {result.scoreBreakdown.modifierDetails.map((detail, idx) => (
+                                  <p key={idx} className='text-sm font-mono text-gray-700'>
+                                    {detail}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Matched Data */}
+                          <div>
+                            <h4 className='font-medium mb-2'>Matched Data</h4>
+
+                            <div className='space-y-2 text-sm'>
+                              {/* Top Level Section - always show */}
+                              <div className='border-b pb-2'>
+                                <div className='text-xs text-gray-500 mb-1 font-medium'>
+                                  TOP LEVEL
+                                </div>
+                                <div className='space-y-1'>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Brand:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.brand
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.brand || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Model:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.model
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.model || 'Not specified'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Handle Section - always show */}
+                              <div className='border-b pb-2'>
+                                <div className='text-xs text-gray-500 mb-1 font-medium'>HANDLE</div>
+                                <div className='space-y-1'>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Brand:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.handle_brand
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.handle_brand || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Model:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.handle_model
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.handle_model || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Source:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.handle_source
+                                          ? 'font-semibold text-xs'
+                                          : 'text-gray-400 italic text-xs'
+                                      }
+                                    >
+                                      {result.matchedData.handle_source || 'Not specified'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Knot Section - always show */}
+                              <div>
+                                <div className='text-xs text-gray-500 mb-1 font-medium'>KNOT</div>
+                                <div className='space-y-1'>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Brand:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.knot_brand
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.knot_brand || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Model:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.knot_model
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.knot_model || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Fiber:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.knot_fiber
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.knot_fiber || 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Size:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.knot_size_mm
+                                          ? 'font-semibold'
+                                          : 'text-gray-400 italic'
+                                      }
+                                    >
+                                      {result.matchedData.knot_size_mm
+                                        ? `${result.matchedData.knot_size_mm}mm`
+                                        : 'Not specified'}
+                                    </span>
+                                  </div>
+                                  <div className='flex justify-between'>
+                                    <span className='text-gray-600'>Source:</span>
+                                    <span
+                                      className={
+                                        result.matchedData.knot_source
+                                          ? 'font-semibold text-xs'
+                                          : 'text-gray-400 italic text-xs'
+                                      }
+                                    >
+                                      {result.matchedData.knot_source || 'Not specified'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Enriched Data */}
+              {results.enrichedData && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Enriched Data</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className='bg-gray-100 p-4 rounded text-sm overflow-x-auto'>
+                      {JSON.stringify(results.enrichedData, null, 2)}
+                    </pre>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

@@ -680,10 +680,11 @@ const BrushValidation: React.FC = () => {
                     <button
                       type='button'
                       onClick={() => setShowSingleStrategy(!showSingleStrategy)}
-                      className={`px-3 py-2 text-sm rounded-md transition-colors ${showSingleStrategy
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                      className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                        showSingleStrategy
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                     >
                       {showSingleStrategy ? 'Hide' : 'Show'} Single Strategy
                       <span className='ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded'>
@@ -697,18 +698,19 @@ const BrushValidation: React.FC = () => {
                     <button
                       type='button'
                       onClick={() => setShowMultipleStrategy(!showMultipleStrategy)}
-                      className={`px-3 py-2 text-sm rounded-md transition-colors ${showMultipleStrategy
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                      className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                        showMultipleStrategy
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                     >
                       {showMultipleStrategy ? 'Hide' : 'Show'} Multiple Strategy
                       <span className='ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded'>
                         {(() => {
                           const count = strategyDistributionStatistics
                             ? Object.entries(strategyDistributionStatistics.all_strategies_lengths)
-                              .filter(([key]) => key !== 'None' && key !== '1')
-                              .reduce((sum, [, count]) => sum + count, 0)
+                                .filter(([key]) => key !== 'None' && key !== '1')
+                                .reduce((sum, [, count]) => sum + count, 0)
                             : 0;
                           return count;
                         })()}
@@ -879,11 +881,12 @@ const BrushValidation: React.FC = () => {
                           .map((strategy, strategyIndex) => (
                             <div
                               key={strategyIndex}
-                              className={`p-3 rounded border ${overrideState?.entryIndex === index &&
+                              className={`p-3 rounded border ${
+                                overrideState?.entryIndex === index &&
                                 overrideState?.selectedStrategy === strategyIndex
-                                ? 'bg-blue-50 border-blue-200'
-                                : 'bg-gray-50 border-gray-200'
-                                }`}
+                                  ? 'bg-blue-50 border-blue-200'
+                                  : 'bg-gray-50 border-gray-200'
+                              }`}
                             >
                               <div className='flex justify-between items-center mb-2'>
                                 <span className='font-medium capitalize'>
@@ -935,10 +938,10 @@ const BrushValidation: React.FC = () => {
                     </h4>
                     <CommentDisplay
                       commentIds={entry.comment_ids}
-                      onCommentClick={(commentId) => handleCommentClick(commentId, entry.comment_ids)}
+                      onCommentClick={commentId => handleCommentClick(commentId, entry.comment_ids)}
                       commentLoading={commentLoading}
                       maxDisplay={5}
-                      className="flex flex-wrap gap-2"
+                      className='flex flex-wrap gap-2'
                     />
                   </div>
                 )}

@@ -30,7 +30,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
     const startDate = new Date(2016, 4, 1); // May 2016 (month is 0-indexed)
     const currentDate = new Date();
 
-    let current = new Date(startDate);
+    const current = new Date(startDate);
     while (current <= currentDate) {
       const year = current.getFullYear();
       const month = String(current.getMonth() + 1).padStart(2, '0');
@@ -46,7 +46,8 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
   // Use pre-populated months initially, then merge with API results
   const [prepopulatedMonths] = useState<string[]>(generatePrepopulatedMonths());
-  const effectiveAvailableMonths = availableMonths.length > 0 ? availableMonths : prepopulatedMonths;
+  const effectiveAvailableMonths =
+    availableMonths.length > 0 ? availableMonths : prepopulatedMonths;
 
   // Close dropdown when clicking outside
   useEffect(() => {

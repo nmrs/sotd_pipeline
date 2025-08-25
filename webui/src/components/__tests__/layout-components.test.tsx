@@ -35,7 +35,9 @@ describe('Layout Components', () => {
 
     // Verify basic header structure
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    // We now have multiple navigation elements for responsive design
+    const navElements = screen.getAllByRole('navigation');
+    expect(navElements.length).toBeGreaterThan(0);
   });
 
   test('should render LoadingSpinner component with message', () => {

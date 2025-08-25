@@ -117,7 +117,7 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
             return (
               <CommentDisplay
                 commentIds={commentIds}
-                onCommentClick={(commentId) => {
+                onCommentClick={commentId => {
                   const startTime = performance.now();
                   onCommentClick(commentId, commentIds);
                   logPerformance('comment click', startTime);

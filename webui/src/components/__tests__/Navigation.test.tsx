@@ -10,8 +10,9 @@ describe('Navigation', () => {
       </MemoryRouter>
     );
 
-    // Test that navigation links are present
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    // Test that navigation links are present (we now have multiple nav elements for responsive design)
+    const navElements = screen.getAllByRole('navigation');
+    expect(navElements.length).toBeGreaterThan(0);
   });
 
   test('should show 404 page for unknown route', () => {
@@ -22,6 +23,7 @@ describe('Navigation', () => {
     );
 
     // Test that the header renders without crashing
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    const navElements = screen.getAllByRole('navigation');
+    expect(navElements.length).toBeGreaterThan(0);
   });
 });
