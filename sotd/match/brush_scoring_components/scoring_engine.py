@@ -5,7 +5,7 @@ This component scores strategy results based on configuration weights and criter
 """
 
 import re
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from sotd.match.types import MatchResult
 
@@ -241,6 +241,84 @@ class ScoringEngine:
                 return 1.0
 
         return 0.0
+
+    def _detect_fiber_conflict(
+        self, input_text: str, result: Any
+    ) -> tuple[bool, str | None, str | None]:
+        """
+        Shared helper to detect fiber conflicts between user input and catalog data.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+
+        Returns:
+            Tuple of (has_conflict, user_fiber, catalog_fiber)
+        """
+        # Use existing fiber_utils to detect user fiber
+        from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+
+        user_fiber = match_fiber(input_text)
+
+        # If no user fiber specified, no conflict possible
+        if not user_fiber:
+            return False, None, None
+
+        # Extract catalog fiber from result
+        catalog_fiber = None
+
+        # Try different possible locations for fiber info
+        if hasattr(result, "matched") and result.matched:
+            # Check matched data
+            matched = result.matched
+            if isinstance(matched, dict):
+                catalog_fiber = matched.get("fiber")
+
+            # Check knot data if no direct fiber
+            if not catalog_fiber and "knot" in matched:
+                knot = matched["knot"]
+                if isinstance(knot, dict):
+                    catalog_fiber = knot.get("fiber")
+
+        # If no catalog fiber, no conflict possible
+        if not catalog_fiber:
+            return False, None, None
+
+        # Check for actual conflict (case-insensitive)
+        has_conflict = user_fiber.lower() != catalog_fiber.lower()
+
+        return has_conflict, user_fiber, catalog_fiber
+
+    def _modifier_fiber_mismatch(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for fiber mismatches between user input and catalog data.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if fiber mismatch detected, 0.0 otherwise)
+        """
+        has_conflict, _, _ = self._detect_fiber_conflict(input_text, result)
+        return 1.0 if has_conflict else 0.0
+
+    def _modifier_fiber_match(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for fiber matches between user input and catalog data.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if fiber match detected, 0.0 otherwise)
+        """
+        has_conflict, user_fiber, catalog_fiber = self._detect_fiber_conflict(input_text, result)
+        # Return 1.0 if we have both fibers and they match (no conflict)
+        return 1.0 if (user_fiber and catalog_fiber and not has_conflict) else 0.0
 
     def _modifier_size_specification(
         self, input_text: str, result: dict, strategy_name: str
