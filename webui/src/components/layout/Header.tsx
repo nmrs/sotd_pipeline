@@ -40,6 +40,7 @@ const Header: React.FC = () => {
     { path: '/catalog-validator', label: 'Catalog Validator', icon: '✅' },
     { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
     { path: '/brush-validation', label: 'Brush Validation', icon: '🖊️' },
+    { path: '/brush-matching-analyzer', label: 'Brush Matching', icon: '🧹' },
     { path: '/soap-analyzer', label: 'Soap Analyzer', icon: '🧼' },
     { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },
     { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
