@@ -78,9 +78,13 @@ class ValidateCorrectMatches:
             base_dir = self._data_dir or Path("data")
 
             if field == "razor":
-                self._matchers[field] = RazorMatcher(bypass_correct_matches=True)
+                self._matchers[field] = RazorMatcher(
+                    catalog_path=base_dir / "razors.yaml", bypass_correct_matches=True
+                )
             elif field == "blade":
-                self._matchers[field] = BladeMatcher(bypass_correct_matches=True)
+                self._matchers[field] = BladeMatcher(
+                    catalog_path=base_dir / "blades.yaml", bypass_correct_matches=True
+                )
             elif field == "brush":
                 self._matchers[field] = BrushMatcher(
                     BrushMatcherConfig(
@@ -91,7 +95,9 @@ class ValidateCorrectMatches:
                     )
                 )
             elif field == "soap":
-                self._matchers[field] = SoapMatcher(bypass_correct_matches=True)
+                self._matchers[field] = SoapMatcher(
+                    catalog_path=base_dir / "soaps.yaml", bypass_correct_matches=True
+                )
             elif field == "knot":
                 # For knots, use BrushMatcher since it handles knot matching
                 self._matchers[field] = BrushMatcher(

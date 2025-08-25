@@ -1149,18 +1149,19 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         # Import and use the validation logic directly
         try:
-            from rich.console import Console
-
             from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
         except ImportError as e:
             raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
 
         # Create validator instance and run validation
-        console = Console()
-        validator = ValidateCorrectMatches(console)
+        # Set the data directory to the project root for proper catalog access
+        validator = ValidateCorrectMatches(
+            correct_matches_path=project_root / "data" / "correct_matches.yaml"
+        )
+        validator._data_dir = project_root / "data"
 
         # Run the catalog validation
-        issues = validator.validate_correct_matches_against_catalog(request.field)
+        issues, expected_structure = validator.validate_field(request.field)
 
         # Count total entries from correct_matches.yaml
         total_entries = 0
@@ -1197,18 +1198,52 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         # Convert issues to proper format
         catalog_issues = []
         for issue in issues:
+            # Map validation tool issue format to API response format
+            issue_type = issue.get("type", "")
+
+            # Determine severity based on issue type
+            severity = "medium"
+            if issue_type in ["missing_brand", "missing_format"]:
+                severity = "high"
+            elif issue_type in ["missing_model"]:
+                severity = "medium"
+            elif issue_type in ["missing_pattern"]:
+                severity = "low"
+
+            # Extract brand and model information
+            brand = issue.get("brand", "")
+            model = issue.get("model", "")
+            pattern = issue.get("pattern", "")
+
+            # Create suggested action based on issue type
+            suggested_action = ""
+            if issue_type == "invalid_brand":
+                suggested_action = (
+                    f"Remove brand '{brand}' from correct_matches.yaml or add it to the catalog"
+                )
+            elif issue_type == "missing_brand":
+                suggested_action = (
+                    f"Add brand '{brand}' to the catalog or remove from correct_matches.yaml"
+                )
+            elif issue_type == "missing_model":
+                suggested_action = f"Add model '{model}' under brand '{brand}' in the catalog or remove from correct_matches.yaml"
+            elif issue_type == "missing_pattern":
+                suggested_action = f"Update pattern for '{brand} {model}' in the catalog or remove '{pattern}' from correct_matches.yaml"
+            elif issue_type == "missing_format":
+                suggested_action = f"Add format '{issue.get('format', '')}' to the catalog or remove from correct_matches.yaml"
+
             catalog_issues.append(
                 CatalogValidationIssue(
-                    issue_type=issue.get("issue_type", ""),
+                    issue_type=issue_type,
                     field=issue.get("field", ""),
-                    correct_match=issue.get("correct_match", ""),
-                    expected_brand=issue.get("expected_brand", ""),
-                    expected_model=issue.get("expected_model", ""),
-                    actual_brand=issue.get("actual_brand", ""),
-                    actual_model=issue.get("actual_model", ""),
-                    severity=issue.get("severity", ""),
-                    suggested_action=issue.get("suggested_action", ""),
-                    details=issue.get("details", ""),
+                    correct_match=pattern or f"{brand} {model}".strip(),
+                    expected_brand=brand,
+                    expected_model=model,
+                    actual_brand="",
+                    actual_model="",
+                    severity=severity,
+                    suggested_action=suggested_action,
+                    details=issue.get("message", ""),
                 )
             )
 
