@@ -1205,15 +1205,19 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             severity = "medium"
             if issue_type in ["missing_brand", "missing_format"]:
                 severity = "high"
-            elif issue_type in ["missing_model"]:
+            elif issue_type in ["missing_model", "mismatched_result"]:
                 severity = "medium"
-            elif issue_type in ["missing_pattern"]:
+            elif issue_type in ["missing_pattern", "unmatchable_entry"]:
                 severity = "low"
 
             # Extract brand and model information
             brand = issue.get("brand", "")
             model = issue.get("model", "")
             pattern = issue.get("pattern", "")
+
+            # Extract actual match information for mismatched results
+            actual_brand = issue.get("actual_brand", "")
+            actual_model = issue.get("actual_model", "")
 
             # Create suggested action based on issue type
             suggested_action = ""
@@ -1231,6 +1235,10 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 suggested_action = f"Update pattern for '{brand} {model}' in the catalog or remove '{pattern}' from correct_matches.yaml"
             elif issue_type == "missing_format":
                 suggested_action = f"Add format '{issue.get('format', '')}' to the catalog or remove from correct_matches.yaml"
+            elif issue_type == "mismatched_result":
+                suggested_action = f"Move '{pattern}' to correct location: {actual_brand} {actual_model} (currently in {brand} {model})"
+            elif issue_type == "unmatchable_entry":
+                suggested_action = f"Remove '{pattern}' from correct_matches.yaml or fix the pattern to match correctly"
 
             catalog_issues.append(
                 CatalogValidationIssue(
@@ -1239,8 +1247,8 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     correct_match=pattern or f"{brand} {model}".strip(),
                     expected_brand=brand,
                     expected_model=model,
-                    actual_brand="",
-                    actual_model="",
+                    actual_brand=actual_brand,
+                    actual_model=actual_model,
                     severity=severity,
                     suggested_action=suggested_action,
                     details=issue.get("message", ""),

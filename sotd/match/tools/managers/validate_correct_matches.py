@@ -12,7 +12,8 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from sotd.match.base_matcher import BaseMatcher  # noqa: E402
+from sotd.match.base_matcher import BaseMatcher, clear_catalog_cache  # noqa: E402
+from sotd.match.loaders import clear_yaml_cache  # noqa: E402
 from sotd.match.blade_matcher import BladeMatcher  # noqa: E402
 from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
 from sotd.match.config import BrushMatcherConfig  # noqa: E402
@@ -71,55 +72,88 @@ class ValidateCorrectMatches:
             logger.error(f"Error loading correct_matches.yaml: {e}")
             return {}
 
-    def _get_matcher(self, field: str) -> Optional[BaseMatcher]:
-        """Get the appropriate matcher for a field, lazy-loading if needed."""
-        if field not in self._matchers:
-            # Use _data_dir if set (for testing), otherwise use default data/ directory
+    def _clear_field_cache(self, field: str):
+        """Clear cache for a specific field only."""
+        logger.info(f"Clearing cache for field: {field}")
+
+        # Clear the specific field's catalog cache
+        if hasattr(self, "_matchers") and field in self._matchers:
+            del self._matchers[field]
+
+        # Clear the specific field's YAML cache entry
+        try:
+            from sotd.match.loaders import _yaml_catalog_cache
+
+            # The YAML cache uses absolute resolved paths as keys
             base_dir = self._data_dir or Path("data")
-
             if field == "razor":
-                self._matchers[field] = RazorMatcher(
-                    catalog_path=base_dir / "razors.yaml", bypass_correct_matches=True
-                )
+                cache_key = str((base_dir / "razors.yaml").resolve())
             elif field == "blade":
-                self._matchers[field] = BladeMatcher(
-                    catalog_path=base_dir / "blades.yaml", bypass_correct_matches=True
-                )
+                cache_key = str((base_dir / "blades.yaml").resolve())
             elif field == "brush":
-                self._matchers[field] = BrushMatcher(
-                    BrushMatcherConfig(
-                        catalog_path=base_dir / "brushes.yaml",
-                        handles_path=base_dir / "handles.yaml",
-                        knots_path=base_dir / "knots.yaml",
-                        bypass_correct_matches=True,
-                    )
-                )
+                cache_key = str((base_dir / "brushes.yaml").resolve())
             elif field == "soap":
-                self._matchers[field] = SoapMatcher(
-                    catalog_path=base_dir / "soaps.yaml", bypass_correct_matches=True
-                )
-            elif field == "knot":
-                # For knots, use BrushMatcher since it handles knot matching
-                self._matchers[field] = BrushMatcher(
-                    BrushMatcherConfig(
-                        catalog_path=base_dir / "brushes.yaml",
-                        handles_path=base_dir / "handles.yaml",
-                        knots_path=base_dir / "knots.yaml",
-                        bypass_correct_matches=True,
-                    )
-                )
-            elif field == "handle":
-                # For handles, use BrushMatcher since it handles handle matching
-                self._matchers[field] = BrushMatcher(
-                    BrushMatcherConfig(
-                        catalog_path=base_dir / "brushes.yaml",
-                        handles_path=base_dir / "handles.yaml",
-                        knots_path=base_dir / "knots.yaml",
-                        bypass_correct_matches=True,
-                    )
-                )
+                cache_key = str((base_dir / "soaps.yaml").resolve())
+            else:
+                return
 
-        return self._matchers.get(field)
+            if cache_key in _yaml_catalog_cache:
+                del _yaml_catalog_cache[cache_key]
+                logger.info(f"Cleared YAML cache for {cache_key}")
+            else:
+                logger.info(f"Cache key {cache_key} not found in YAML cache")
+
+        except Exception as e:
+            logger.warning(f"Could not clear YAML cache for field {field}: {e}")
+
+    def _get_matcher(self, field: str) -> Optional[BaseMatcher]:
+        """Get the appropriate matcher for a field, always creating a fresh instance."""
+        # Clear only this field's cache for targeted performance
+        self._clear_field_cache(field)
+
+        # Always create a fresh matcher instance to avoid caching issues
+        logger.info(f"Creating fresh matcher for field: {field}")
+
+        # Use _data_dir if set (for testing), otherwise use default data/ directory
+        base_dir = self._data_dir or Path("data")
+
+        if field == "razor":
+            return RazorMatcher(catalog_path=base_dir / "razors.yaml", bypass_correct_matches=True)
+        elif field == "blade":
+            return BladeMatcher(catalog_path=base_dir / "blades.yaml", bypass_correct_matches=True)
+        elif field == "brush":
+            return BrushMatcher(
+                BrushMatcherConfig(
+                    catalog_path=base_dir / "brushes.yaml",
+                    handles_path=base_dir / "handles.yaml",
+                    knots_path=base_dir / "knots.yaml",
+                    bypass_correct_matches=True,
+                )
+            )
+        elif field == "soap":
+            return SoapMatcher(catalog_path=base_dir / "soaps.yaml", bypass_correct_matches=True)
+        elif field == "knot":
+            # For knots, use BrushMatcher since it handles knot matching
+            return BrushMatcher(
+                BrushMatcherConfig(
+                    catalog_path=base_dir / "brushes.yaml",
+                    handles_path=base_dir / "handles.yaml",
+                    knots_path=base_dir / "knots.yaml",
+                    bypass_correct_matches=True,
+                )
+            )
+        elif field == "handle":
+            # For handles, use BrushMatcher since it handles handle matching
+            return BrushMatcher(
+                BrushMatcherConfig(
+                    catalog_path=base_dir / "brushes.yaml",
+                    handles_path=base_dir / "handles.yaml",
+                    knots_path=base_dir / "knots.yaml",
+                    bypass_correct_matches=True,
+                )
+            )
+
+        return None
 
     def _clear_validation_cache(self):
         """Clear validation cache when _data_dir is set for testing."""
@@ -140,6 +174,9 @@ class ValidateCorrectMatches:
 
         if field == "blade":
             # For blades: format -> brand -> model -> patterns
+            # Create matcher once outside the loop for performance
+            blade_matcher = self._get_matcher("blade")
+
             for format_name, format_section in field_section.items():
                 expected_structure[field][format_name] = {}
 
@@ -152,7 +189,6 @@ class ValidateCorrectMatches:
                         if isinstance(model_section, list):
                             for pattern in model_section:
                                 # Use context-aware matching for blades
-                                blade_matcher = self._get_matcher("blade")
                                 if blade_matcher and isinstance(blade_matcher, BladeMatcher):
                                     match_result = blade_matcher.match_with_context(
                                         pattern, format_name
@@ -201,6 +237,9 @@ class ValidateCorrectMatches:
                                     ].append(pattern)
         else:
             # For other fields: brand -> model -> patterns
+            # Create matcher once outside the loop for performance
+            matcher = self._get_matcher(field)
+
             for brand_name, brand_section in field_section.items():
                 expected_structure[field][brand_name] = {}
 
@@ -209,7 +248,6 @@ class ValidateCorrectMatches:
 
                     if isinstance(model_section, list):
                         for pattern in model_section:
-                            matcher = self._get_matcher(field)
                             if matcher:
                                 match_result = matcher.match(pattern)
                                 if (
@@ -245,105 +283,158 @@ class ValidateCorrectMatches:
                                     expected_structure[field][brand_name][model_name].append(
                                         pattern
                                     )
+                            else:
+                                # Fallback to original location if no matcher
+                                expected_structure[field][brand_name][model_name].append(pattern)
 
         return expected_structure
 
     def _validate_catalog_existence(
         self, field: str, original: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """Validate that brands and models in correct_matches.yaml exist in current catalogs."""
+        """Validate that entries in correct_matches.yaml can be matched by actual matchers."""
         issues = []
 
         if field not in original:
             return issues
 
+        # Ensure matcher is available (lazy-load if needed)
+        matcher = self._get_matcher(field)
+        if not matcher:
+            logger.warning(f"No matcher available for field: {field}")
+            return issues
+
         original_section = original[field]
 
         if field == "blade":
-            # For blades: validate format -> brand -> model existence
+            # For blades: test each entry in each format
             for format_name in original_section:
                 for brand_name in original_section[format_name]:
-                    # Check if brand exists in current blade catalog
-                    if not self._brand_exists_in_catalog(field, brand_name, format_name):
-                        issues.append(
-                            {
-                                "type": "invalid_brand",
-                                "field": field,
-                                "format": format_name,
-                                "brand": brand_name,
-                                "message": (
-                                    f"Brand '{brand_name}' does not exist in current {field} "
-                                    f"catalog for format '{format_name}'"
-                                ),
-                            }
-                        )
-                        continue
-
                     for model_name in original_section[format_name][brand_name]:
-                        # Check if model exists for this brand in current catalog
-                        if not self._model_exists_in_catalog(
-                            field, brand_name, model_name, format_name
-                        ):
-                            issues.append(
-                                {
-                                    "type": "invalid_model",
-                                    "field": field,
-                                    "format": format_name,
-                                    "brand": brand_name,
-                                    "model": model_name,
-                                    "message": (
-                                        f"Model '{model_name}' does not exist for brand "
-                                        f"'{brand_name}' in current {field} catalog for "
-                                        f"format '{format_name}'"
-                                    ),
-                                }
-                            )
+                        # Test the actual matching
+                        test_text = f"{brand_name} {model_name}"
+                        result = self._test_matcher_entry(
+                            matcher, test_text, field, format_name, brand_name, model_name
+                        )
+                        if result:
+                            issues.append(result)
         else:
-            # For other fields: validate brand -> model existence
+            # For other fields: test each individual pattern
             for brand_name in original_section:
-                # Check if brand exists in current catalog
-                if not self._brand_exists_in_catalog(field, brand_name):
-                    issues.append(
-                        {
-                            "type": "invalid_brand",
-                            "field": field,
-                            "brand": brand_name,
-                            "message": f"Brand '{brand_name}' does not exist in current {field} catalog",
-                        }
-                    )
-                    continue
-
                 for model_name in original_section[brand_name]:
-                    # Check if model exists for this brand in current catalog
-                    if not self._model_exists_in_catalog(field, brand_name, model_name):
-                        # For brush and knot fields, also check if matcher can handle this combination
-                        if field in ["brush", "knot"] and self._matcher_can_handle_combination(
-                            field, brand_name, model_name
-                        ):
-                            issues.append(
-                                {
-                                    "type": "missing_from_catalog",
-                                    "field": field,
-                                    "brand": brand_name,
-                                    "model": model_name,
-                                    "message": (
-                                        f"Model '{model_name}' for brand '{brand_name}' is missing from "
-                                        f"catalog but CAN be matched by {field} matcher strategies"
-                                    ),
-                                }
+                    if isinstance(original_section[brand_name][model_name], list):
+                        # Test each individual pattern in the list
+                        for pattern in original_section[brand_name][model_name]:
+                            result = self._test_matcher_entry(
+                                matcher, pattern, field, brand_name, model_name
                             )
-                        else:
-                            issues.append(
-                                {
-                                    "type": "invalid_model",
-                                    "field": field,
-                                    "brand": brand_name,
-                                    "model": model_name,
-                                    "message": f"Model '{model_name}' does not exist for brand '{brand_name}' in current {field} catalog",
-                                }
-                            )
+                            if result:
+                                issues.append(result)
+                    else:
+                        # Fallback: test brand+model combination
+                        test_text = f"{brand_name} {model_name}"
+                        result = self._test_matcher_entry(
+                            matcher, test_text, field, brand_name, model_name
+                        )
+                        if result:
+                            issues.append(result)
 
         return issues
+
+    def _test_matcher_entry(
+        self, matcher, test_text: str, field: str, *args
+    ) -> Optional[Dict[str, Any]]:
+        """Test if an entry can be matched by the actual matcher."""
+        try:
+            # Use the actual matcher to test the entry
+            # Different matchers expect different input formats
+            if field == "razor":
+                # RazorMatcher expects: match(normalized_text, original_text=None)
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "blade":
+                # BladeMatcher expects: match(normalized_text, original_text=None)
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "soap":
+                # SoapMatcher expects: match(normalized_text, original_text=None)
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "brush":
+                # BrushMatcher expects: match({"original": text, "normalized": text})
+                test_data = {"original": test_text, "normalized": test_text.lower()}
+                result = matcher.match(test_data)
+            else:
+                # Default fallback
+                result = matcher.match(test_text.lower(), test_text)
+
+            if not result:
+                # Entry doesn't match at all - this is a validation issue
+                if field == "blade" and len(args) >= 3:
+                    format_name, brand_name, model_name = args[0], args[1], args[2]
+                    return {
+                        "type": "unmatchable_entry",
+                        "field": field,
+                        "format": format_name,
+                        "brand": brand_name,
+                        "model": model_name,
+                        "pattern": test_text,
+                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
+                    }
+                else:
+                    brand_name, model_name = args[0], args[1]
+                    return {
+                        "type": "unmatchable_entry",
+                        "field": field,
+                        "brand": brand_name,
+                        "model": model_name,
+                        "pattern": test_text,
+                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
+                    }
+
+            # Check if the matcher returned the expected brand/model
+            if hasattr(result, "matched") and result.matched:
+                matched_data = result.matched
+                actual_brand = matched_data.get("brand")
+                actual_model = matched_data.get("model")
+
+                if field == "blade" and len(args) >= 3:
+                    expected_format, expected_brand, expected_model = args[0], args[1], args[2]
+                    if actual_brand != expected_brand or actual_model != expected_model:
+                        return {
+                            "type": "mismatched_result",
+                            "field": field,
+                            "format": expected_format,
+                            "brand": expected_brand,
+                            "model": expected_model,
+                            "pattern": test_text,
+                            "actual_brand": actual_brand,
+                            "actual_model": actual_model,
+                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}'",
+                        }
+                else:
+                    expected_brand, expected_model = args[0], args[1]
+                    if actual_brand != expected_brand or actual_model != expected_model:
+                        return {
+                            "type": "mismatched_result",
+                            "field": field,
+                            "brand": expected_brand,
+                            "model": expected_model,
+                            "pattern": test_text,
+                            "actual_brand": actual_brand,
+                            "actual_model": actual_model,
+                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}'",
+                        }
+
+            # Entry matches successfully and returns expected brand/model - no issue
+            return None
+
+        except Exception as e:
+            # Matcher error - this indicates a problem
+            logger.error(f"Error testing entry '{test_text}' with {field} matcher: {e}")
+            return {
+                "type": "matcher_error",
+                "field": field,
+                "pattern": test_text,
+                "message": f"Error testing entry '{test_text}' with {field} matcher: {str(e)}",
+            }
 
     def _brand_exists_in_catalog(
         self, field: str, brand_name: str, format_name: str = None
@@ -553,26 +644,39 @@ class ValidateCorrectMatches:
 
         return issues
 
-    def validate_field(self, field: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-        """Validate a specific field for catalog drift."""
+    def validate_field(
+        self, field: str, create_expected_structure: bool = False
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+        """Validate a specific field for catalog drift using real matchers."""
         if field not in self.correct_matches:
             return [], {}
 
         logger.info(f"Validating field: {field}")
 
-        # First validate catalog existence (check for invalid brands/models)
+        # Clear matcher cache to force fresh matcher instantiation
+        self._matchers.clear()
+
+        # Debug: Log that we're clearing caches
+        logger.info(f"Cleared matcher cache for field: {field}")
+        logger.info(f"Matcher cache size: {len(self._matchers)}")
+
+        # Use real matchers to validate entries (DRY approach)
         catalog_issues = self._validate_catalog_existence(field, self.correct_matches)
 
-        # Create expected structure using current matchers
-        expected_structure = self._create_temp_correct_matches(field, self.correct_matches)
+        # Create expected structure only if requested (skip for performance when not needed)
+        expected_structure = {}
+        if create_expected_structure:
+            expected_structure = self._create_temp_correct_matches(field, self.correct_matches)
+            logger.info(f"Created expected structure for {field}")
+        else:
+            logger.info(
+                f"Skipped expected structure creation for {field} (performance optimization)"
+            )
 
-        # Compare structures to find drift
-        drift_issues = self._compare_structures(field, self.correct_matches, expected_structure)
+        # No need for manual structure comparison since we're using real matchers
+        # The real matchers already tell us if entries can be matched or not
 
-        # Combine all issues
-        all_issues = catalog_issues + drift_issues
-
-        return all_issues, expected_structure
+        return catalog_issues, expected_structure
 
     def validate_all_fields(self) -> Dict[str, List[Dict[str, Any]]]:
         """Validate all fields for catalog drift."""
