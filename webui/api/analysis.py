@@ -209,6 +209,7 @@ class CatalogValidationIssue(BaseModel):
 
     issue_type: str
     field: str
+    format: Optional[str] = None  # Format field for blade validation
     correct_match: str
     expected_brand: str
     expected_model: str
@@ -217,6 +218,8 @@ class CatalogValidationIssue(BaseModel):
     severity: str
     suggested_action: str
     details: str
+    catalog_format: Optional[str] = None  # Catalog format for format mismatch issues
+    matched_pattern: Optional[str] = None  # Pattern that caused the match for mismatched results
 
 
 class CatalogValidationResponse(BaseModel):
@@ -1198,12 +1201,18 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         # Convert issues to proper format
         catalog_issues = []
         for issue in issues:
+            # Log format mismatch issues for debugging
+            if issue.get("type") == "format_mismatch":
+                correct_match = issue.get("correct_match", "unknown")
+                catalog_format = issue.get("catalog_format", "unknown")
+                logger.debug(f"Format mismatch: {correct_match} -> {catalog_format}")
+
             # Map validation tool issue format to API response format
             issue_type = issue.get("type", "")
 
             # Determine severity based on issue type
             severity = "medium"
-            if issue_type in ["missing_brand", "missing_format"]:
+            if issue_type in ["missing_brand", "missing_format", "format_mismatch"]:
                 severity = "high"
             elif issue_type in ["missing_model", "mismatched_result"]:
                 severity = "medium"
@@ -1235,6 +1244,13 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 suggested_action = f"Update pattern for '{brand} {model}' in the catalog or remove '{pattern}' from correct_matches.yaml"
             elif issue_type == "missing_format":
                 suggested_action = f"Add format '{issue.get('format', '')}' to the catalog or remove from correct_matches.yaml"
+            elif issue_type == "format_mismatch":
+                catalog_format = issue.get("catalog_format", "unknown")
+                suggested_action = (
+                    f"Move '{pattern}' from format '{issue.get('format', '')}' "
+                    f"to format '{catalog_format}' in correct_matches.yaml, "
+                    f"or update the catalog to match the expected format"
+                )
             elif issue_type == "mismatched_result":
                 suggested_action = f"Move '{pattern}' to correct location: {actual_brand} {actual_model} (currently in {brand} {model})"
             elif issue_type == "unmatchable_entry":
@@ -1244,6 +1260,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 CatalogValidationIssue(
                     issue_type=issue_type,
                     field=issue.get("field", ""),
+                    format=issue.get("format"),
                     correct_match=pattern or f"{brand} {model}".strip(),
                     expected_brand=brand,
                     expected_model=model,
@@ -1252,6 +1269,8 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     severity=severity,
                     suggested_action=suggested_action,
                     details=issue.get("message", ""),
+                    catalog_format=issue.get("catalog_format"),
+                    matched_pattern=issue.get("matched_pattern"),
                 )
             )
 

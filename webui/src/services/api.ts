@@ -167,13 +167,13 @@ export interface MismatchAnalysisRequest {
   threshold?: number;
   use_enriched_data?: boolean;
   display_mode?:
-    | 'mismatches'
-    | 'all'
-    | 'unconfirmed'
-    | 'regex'
-    | 'intentionally_unmatched'
-    | 'complete_brushes'
-    | 'matches';
+  | 'mismatches'
+  | 'all'
+  | 'unconfirmed'
+  | 'regex'
+  | 'intentionally_unmatched'
+  | 'complete_brushes'
+  | 'matches';
 }
 
 export interface MismatchItem {
@@ -565,7 +565,7 @@ export interface CatalogValidationRequest {
 }
 
 export interface CatalogValidationIssue {
-  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match';
+  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match' | 'format_mismatch';
   field: string;
   correct_match: string;
   expected_brand: string;
@@ -575,6 +575,9 @@ export interface CatalogValidationIssue {
   severity: string;
   suggested_action: string;
   details: string;
+  format?: string;
+  catalog_format?: string;
+  matched_pattern?: string;
 }
 
 export interface CatalogValidationResult {

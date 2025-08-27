@@ -7,19 +7,20 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import yaml
+
 # Add project root to Python path for direct execution
 project_root = Path(__file__).parent.parent.parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from sotd.match.base_matcher import BaseMatcher, clear_catalog_cache  # noqa: E402
-from sotd.match.loaders import clear_yaml_cache  # noqa: E402
-from sotd.match.blade_matcher import BladeMatcher  # noqa: E402
-from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
-from sotd.match.config import BrushMatcherConfig  # noqa: E402
-from sotd.match.correct_matches_updater import CorrectMatchesUpdater  # noqa: E402
-from sotd.match.razor_matcher import RazorMatcher  # noqa: E402
-from sotd.match.soap_matcher import SoapMatcher  # noqa: E402
+from sotd.match.base_matcher import BaseMatcher
+from sotd.match.blade_matcher import BladeMatcher
+from sotd.match.brush_matcher import BrushMatcher
+from sotd.match.razor_matcher import RazorMatcher
+from sotd.match.soap_matcher import SoapMatcher
+from sotd.match.correct_matches_updater import CorrectMatchesUpdater
+from sotd.match.config import BrushMatcherConfig
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,9 @@ class ValidateCorrectMatches:
         except Exception as e:
             logger.warning(f"Could not clear YAML cache for field {field}: {e}")
 
-    def _get_matcher(self, field: str) -> Optional[BaseMatcher]:
+    def _get_matcher(
+        self, field: str
+    ) -> Optional[BaseMatcher | BladeMatcher | BrushMatcher | RazorMatcher | SoapMatcher]:
         """Get the appropriate matcher for a field, always creating a fresh instance."""
         # Clear only this field's cache for targeted performance
         self._clear_field_cache(field)
@@ -298,6 +301,11 @@ class ValidateCorrectMatches:
         if field not in original:
             return issues
 
+        # For blades, first check for format mismatches between correct_matches.yaml and catalog
+        if field == "blade":
+            format_mismatch_issues = self._validate_blade_format_consistency(original[field])
+            issues.extend(format_mismatch_issues)
+
         # Ensure matcher is available (lazy-load if needed)
         matcher = self._get_matcher(field)
         if not matcher:
@@ -307,17 +315,34 @@ class ValidateCorrectMatches:
         original_section = original[field]
 
         if field == "blade":
-            # For blades: test each entry in each format
+            # For blades: test each individual pattern in each format
             for format_name in original_section:
                 for brand_name in original_section[format_name]:
                     for model_name in original_section[format_name][brand_name]:
-                        # Test the actual matching
-                        test_text = f"{brand_name} {model_name}"
-                        result = self._test_matcher_entry(
-                            matcher, test_text, field, format_name, brand_name, model_name
-                        )
-                        if result:
-                            issues.append(result)
+                        if isinstance(original_section[format_name][brand_name][model_name], list):
+                            # Test each individual pattern in the list
+                            for pattern in original_section[format_name][brand_name][model_name]:
+                                logger.debug(
+                                    f"Testing blade pattern: '{pattern}' in format '{format_name}' under '{brand_name} {model_name}'"
+                                )
+                                result = self._test_matcher_entry_with_format(
+                                    matcher, pattern, field, format_name, brand_name, model_name
+                                )
+                                if result:
+                                    logger.debug(f"Found issue: {result}")
+                                    issues.append(result)
+                        else:
+                            # Fallback: test brand+model combination
+                            test_text = f"{brand_name} {model_name}"
+                            logger.debug(
+                                f"Testing blade fallback: '{test_text}' in format '{format_name}'"
+                            )
+                            result = self._test_matcher_entry_with_format(
+                                matcher, test_text, field, format_name, brand_name, model_name
+                            )
+                            if result:
+                                logger.debug(f"Found issue: {result}")
+                                issues.append(result)
         else:
             # For other fields: test each individual pattern
             for brand_name in original_section:
@@ -340,6 +365,86 @@ class ValidateCorrectMatches:
                             issues.append(result)
 
         return issues
+
+    def _validate_blade_format_consistency(
+        self, blade_section: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Validate that blade formats in correct_matches.yaml match the catalog."""
+        issues = []
+
+        try:
+            # Load the blade catalog
+            catalog_path = (
+                self._data_dir / "blades.yaml" if self._data_dir else Path("data/blades.yaml")
+            )
+            if not catalog_path.exists():
+                logger.warning(f"Blade catalog not found at {catalog_path}")
+                return issues
+
+            with open(catalog_path, "r", encoding="utf-8") as f:
+                catalog_data = yaml.safe_load(f)
+
+            if not catalog_data:
+                return issues
+
+            # Check each format in correct_matches.yaml
+            for correct_format, brands in blade_section.items():
+                if not isinstance(brands, dict):
+                    continue
+
+                for brand_name, models in brands.items():
+                    if not isinstance(models, dict):
+                        continue
+
+                    for model_name in models:
+                        # Check if this brand/model exists in the catalog under the same format
+                        catalog_format = self._find_blade_catalog_format(
+                            catalog_data, brand_name, model_name
+                        )
+
+                        if catalog_format and catalog_format != correct_format:
+                            # Format mismatch detected
+                            issues.append(
+                                {
+                                    "type": "format_mismatch",
+                                    "field": "blade",
+                                    "format": correct_format,
+                                    "brand": brand_name,
+                                    "model": model_name,
+                                    "catalog_format": catalog_format,
+                                    "message": (
+                                        f"Blade '{brand_name} {model_name}' is listed under "
+                                        f"format '{correct_format}' in correct_matches.yaml but "
+                                        f"found under format '{catalog_format}' in catalog"
+                                    ),
+                                }
+                            )
+
+        except Exception as e:
+            logger.error(f"Error validating blade format consistency: {e}")
+
+        return issues
+
+    def _find_blade_catalog_format(
+        self, catalog_data: Dict[str, Any], brand_name: str, model_name: str
+    ) -> Optional[str]:
+        """Find which format a blade brand/model is listed under in the catalog."""
+        for format_name, format_section in catalog_data.items():
+            if not isinstance(format_section, dict):
+                continue
+
+            for catalog_brand, brand_section in format_section.items():
+                if not isinstance(brand_section, dict):
+                    continue
+
+                # Check if brand names match (case-insensitive)
+                if catalog_brand.lower() == brand_name.lower():
+                    # Check if model exists under this brand
+                    for catalog_model in brand_section.keys():
+                        if catalog_model.lower() == model_name.lower():
+                            return format_name
+
+        return None
 
     def _test_matcher_entry(
         self, matcher, test_text: str, field: str, *args
@@ -407,9 +512,13 @@ class ValidateCorrectMatches:
                             "pattern": test_text,
                             "actual_brand": actual_brand,
                             "actual_model": actual_model,
-                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}'",
+                            "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
+                            "message": (
+                                f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' "
+                                f"instead of expected '{expected_brand} {expected_model}'"
+                            ),
                         }
-                else:
+                elif len(args) >= 2:
                     expected_brand, expected_model = args[0], args[1]
                     if actual_brand != expected_brand or actual_model != expected_model:
                         return {
@@ -420,7 +529,11 @@ class ValidateCorrectMatches:
                             "pattern": test_text,
                             "actual_brand": actual_brand,
                             "actual_model": actual_model,
-                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}'",
+                            "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
+                            "message": (
+                                f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' "
+                                f"instead of expected '{expected_brand} {expected_model}'"
+                            ),
                         }
 
             # Entry matches successfully and returns expected brand/model - no issue
@@ -434,6 +547,105 @@ class ValidateCorrectMatches:
                 "field": field,
                 "pattern": test_text,
                 "message": f"Error testing entry '{test_text}' with {field} matcher: {str(e)}",
+            }
+
+    def _test_matcher_entry_with_format(
+        self, matcher, test_text: str, field: str, format_name: str, *args
+    ) -> Optional[Dict[str, Any]]:
+        """Test if an entry can be matched by the actual matcher with format context."""
+        try:
+            # Use the actual matcher to test the entry
+            # Different matchers expect different input formats
+            if field == "razor":
+                # RazorMatcher expects: match(normalized_text, original_text=None)
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "blade":
+                # BladeMatcher expects: match(normalized_text, original_text=None)
+                # We'll validate the result against expected brand/model separately
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "soap":
+                # SoapMatcher expects: match(normalized_text, original_text=None)
+                result = matcher.match(test_text.lower(), test_text)
+            elif field == "brush":
+                # BrushMatcher expects: match({"original": text, "normalized": text})
+                test_data = {"original": test_text, "normalized": test_text.lower()}
+                result = matcher.match(test_data)
+            else:
+                # Default fallback
+                result = matcher.match(test_text.lower(), test_text)
+
+            if not result:
+                # Entry doesn't match at all - this is a validation issue
+                if field == "blade" and len(args) >= 2:
+                    brand_name, model_name = args[0], args[1]
+                    return {
+                        "type": "unmatchable_entry",
+                        "field": field,
+                        "format": format_name,
+                        "brand": brand_name,
+                        "model": model_name,
+                        "pattern": test_text,
+                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher with format '{format_name}'",
+                    }
+                elif len(args) >= 2:
+                    brand_name, model_name = args[0], args[1]
+                    return {
+                        "type": "unmatchable_entry",
+                        "field": field,
+                        "brand": brand_name,
+                        "model": model_name,
+                        "pattern": test_text,
+                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher with format '{format_name}'",
+                    }
+
+            # Check if the matcher returned the expected brand/model
+            if hasattr(result, "matched") and result.matched:
+                matched_data = result.matched
+                actual_brand = matched_data.get("brand")
+                actual_model = matched_data.get("model")
+
+                if field == "blade" and len(args) >= 2:
+                    expected_brand, expected_model = args[0], args[1]
+                    if actual_brand != expected_brand or actual_model != expected_model:
+                        return {
+                            "type": "mismatched_result",
+                            "field": field,
+                            "format": format_name,
+                            "brand": expected_brand,
+                            "model": expected_model,
+                            "pattern": test_text,
+                            "actual_brand": actual_brand,
+                            "actual_model": actual_model,
+                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}' with format '{format_name}'",
+                        }
+                elif len(args) >= 2:
+                    expected_brand, expected_model = args[0], args[1]
+                    if actual_brand != expected_brand or actual_model != expected_model:
+                        return {
+                            "type": "mismatched_result",
+                            "field": field,
+                            "brand": expected_brand,
+                            "model": expected_model,
+                            "pattern": test_text,
+                            "actual_brand": actual_brand,
+                            "actual_model": actual_model,
+                            "message": f"Entry '{test_text}' matched to '{actual_brand} {expected_model}' instead of expected '{expected_brand} {expected_model}' with format '{format_name}'",
+                        }
+
+            # Entry matches successfully and returns expected brand/model - no issue
+            return None
+
+        except Exception as e:
+            # Matcher error - this indicates a problem
+            logger.error(
+                f"Error testing entry '{test_text}' with {field} matcher with format '{format_name}': {e}"
+            )
+            return {
+                "type": "matcher_error",
+                "field": field,
+                "format": format_name,
+                "pattern": test_text,
+                "message": f"Error testing entry '{test_text}' with {field} matcher with format '{format_name}': {str(e)}",
             }
 
     def _brand_exists_in_catalog(

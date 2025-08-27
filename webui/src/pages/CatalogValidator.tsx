@@ -1,40 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CheckCircle, XCircle, Info } from 'lucide-react';
+import { AlertTriangle, XCircle, Info } from 'lucide-react';
 import {
   validateCatalogAgainstCorrectMatches,
   CatalogValidationResult,
+  CatalogValidationIssue,
   handleApiError,
 } from '../services/api';
 
-interface CatalogValidationIssue {
-  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match';
-  field: string;
-  correct_match: string;
-  expected_brand: string;
-  expected_model: string;
-  actual_brand: string;
-  actual_model: string;
-  severity: string;
-  suggested_action: string;
-  details: string;
-}
 
-interface CatalogValidationResponse {
-  field: string;
-  total_entries: number;
-  issues: CatalogValidationIssue[];
-  processing_time: number;
-}
 
 const CatalogValidator: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('blade');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [results, setResults] = useState<CatalogValidationResponse | null>(null);
-  const [displayMode, setDisplayMode] = useState<'all' | 'mismatches' | 'no_match'>('all');
+  const [results, setResults] = useState<CatalogValidationResult | null>(null);
+  const [displayMode, setDisplayMode] = useState<'all' | 'mismatches' | 'no_match' | 'format_mismatches'>('all');
 
   const handleValidate = async () => {
     if (!selectedField) {
@@ -74,6 +57,9 @@ const CatalogValidator: React.FC = () => {
       all: issues.length,
       mismatches: issues.filter(issue => issue.issue_type === 'catalog_pattern_mismatch').length,
       no_match: issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match').length,
+      format_mismatches: issues.filter(issue =>
+        issue.issue_type === 'format_mismatch'
+      ).length,
     };
   };
 
@@ -85,6 +71,10 @@ const CatalogValidator: React.FC = () => {
         return results.issues.filter(issue => issue.issue_type === 'catalog_pattern_mismatch');
       case 'no_match':
         return results.issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match');
+      case 'format_mismatches':
+        return results.issues.filter(issue =>
+          issue.issue_type === 'format_mismatch'
+        );
       default:
         return results.issues;
     }
@@ -112,6 +102,10 @@ const CatalogValidator: React.FC = () => {
       default:
         return 'text-gray-600 bg-gray-50 border-gray-200';
     }
+  };
+
+  const isFormatMismatch = (issue: CatalogValidationIssue) => {
+    return issue.issue_type === 'format_mismatch';
   };
 
   return (
@@ -150,9 +144,8 @@ const CatalogValidator: React.FC = () => {
               >
                 All Issues
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -164,15 +157,31 @@ const CatalogValidator: React.FC = () => {
               >
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
-                      ? 'bg-white text-orange-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
+                    ? 'bg-white text-orange-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
               </Button>
+              {selectedField === 'blade' && (
+                <Button
+                  variant='outline'
+                  onClick={() => setDisplayMode('format_mismatches')}
+                  className={`flex items-center gap-1 text-sm ${displayMode === 'format_mismatches' ? 'bg-purple-600 text-white' : ''}`}
+                >
+                  Format Mismatches
+                  <span
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'format_mismatches'
+                      ? 'bg-white text-purple-600'
+                      : 'bg-gray-100 text-gray-700'
+                      }`}
+                  >
+                    {getDisplayModeCounts().format_mismatches}
+                  </span>
+                </Button>
+              )}
               <Button
                 variant='outline'
                 onClick={() => setDisplayMode('no_match')}
@@ -180,11 +189,10 @@ const CatalogValidator: React.FC = () => {
               >
                 No Match
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'no_match'
-                      ? 'bg-white text-red-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'no_match'
+                    ? 'bg-white text-red-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().no_match}
                 </span>
@@ -258,21 +266,29 @@ const CatalogValidator: React.FC = () => {
                       <div className='flex-1'>
                         <div className='flex items-center gap-2 mb-2'>
                           <h4 className='font-medium text-gray-900'>
-                            {issue.issue_type === 'catalog_pattern_mismatch'
-                              ? 'Pattern Mismatch'
-                              : 'No Match Found'}
+                            {issue.issue_type === 'format_mismatch'
+                              ? 'Format Mismatch'
+                              : issue.issue_type === 'catalog_pattern_mismatch'
+                                ? 'Pattern Mismatch'
+                                : issue.issue_type === 'catalog_pattern_no_match'
+                                  ? 'No Match Found'
+                                  : 'Validation Issue'}
                           </h4>
                           <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              issue.severity === 'high'
-                                ? 'bg-red-100 text-red-800'
-                                : issue.severity === 'medium'
-                                  ? 'bg-orange-100 text-orange-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                            }`}
+                            className={`px-2 py-1 text-xs rounded-full ${issue.severity === 'high'
+                              ? 'bg-red-100 text-red-800'
+                              : issue.severity === 'medium'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                              }`}
                           >
                             {issue.severity}
                           </span>
+                          {isFormatMismatch(issue) && (
+                            <span className='px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800'>
+                              Format Issue
+                            </span>
+                          )}
                         </div>
 
                         <div className='mb-3'>
@@ -281,16 +297,29 @@ const CatalogValidator: React.FC = () => {
                             <code className='bg-gray-100 px-1 rounded'>{issue.correct_match}</code>
                           </p>
 
+                          {/* Show format information prominently for blade format mismatches */}
+                          {selectedField === 'blade' && isFormatMismatch(issue) && (
+                            <div className='mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md'>
+                              <p className='text-sm font-medium text-blue-800 mb-1'>
+                                Format Mismatch Detected:
+                              </p>
+                              <p className='text-sm text-blue-700'>
+                                <strong>Expected Format:</strong> {issue.format || 'Unknown'}<br />
+                                <strong>Catalog Format:</strong> {issue.catalog_format || 'Unknown'}
+                              </p>
+                            </div>
+                          )}
+
                           {issue.issue_type === 'catalog_pattern_mismatch' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
                               <div>
-                                <p className='font-medium text-gray-700'>Expected Mapping:</p>
+                                <p className='font-medium text-gray-700'>Currently Placed:</p>
                                 <p className='text-gray-600'>
                                   {issue.expected_brand} {issue.expected_model}
                                 </p>
                               </div>
                               <div>
-                                <p className='font-medium text-gray-700'>Actual Mapping:</p>
+                                <p className='font-medium text-gray-700'>Should Be:</p>
                                 <p className='text-gray-600'>
                                   {issue.actual_brand} {issue.actual_model}
                                 </p>
@@ -302,6 +331,18 @@ const CatalogValidator: React.FC = () => {
                               <p className='text-gray-600'>
                                 {issue.expected_brand} {issue.expected_model}
                               </p>
+                            </div>
+                          )}
+
+                          {/* Show matched pattern for mismatched results */}
+                          {issue.matched_pattern && (
+                            <div className='mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md'>
+                              <p className='text-sm font-medium text-yellow-800 mb-1'>
+                                Matched Pattern:
+                              </p>
+                              <code className='text-sm text-yellow-700 bg-yellow-100 px-2 py-1 rounded'>
+                                {issue.matched_pattern}
+                              </code>
                             </div>
                           )}
                         </div>
@@ -360,6 +401,7 @@ const CatalogValidator: React.FC = () => {
             <h3 className='text-lg font-medium text-gray-900 mb-2'>Ready to Validate</h3>
             <p className='text-gray-600'>
               Select a field and click "Validate Catalog" to check for catalog pattern conflicts.
+              {selectedField === 'blade' && ' For blades, this will also detect format mismatches.'}
             </p>
           </div>
         </div>
