@@ -1239,22 +1239,39 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     f"Add brand '{brand}' to the catalog or remove from correct_matches.yaml"
                 )
             elif issue_type == "missing_model":
-                suggested_action = f"Add model '{model}' under brand '{brand}' in the catalog or remove from correct_matches.yaml"
+                suggested_action = (
+                    f"Add model '{model}' under brand '{brand}' in the catalog "
+                    f"or remove from correct_matches.yaml"
+                )
             elif issue_type == "missing_pattern":
-                suggested_action = f"Update pattern for '{brand} {model}' in the catalog or remove '{pattern}' from correct_matches.yaml"
+                suggested_action = (
+                    f"Update pattern for '{brand} {model}' in the catalog "
+                    f"or remove '{pattern}' from correct_matches.yaml"
+                )
             elif issue_type == "missing_format":
-                suggested_action = f"Add format '{issue.get('format', '')}' to the catalog or remove from correct_matches.yaml"
+                suggested_action = (
+                    f"Add format '{issue.get('format', '')}' to the catalog "
+                    f"or remove from correct_matches.yaml"
+                )
             elif issue_type == "format_mismatch":
                 catalog_format = issue.get("catalog_format", "unknown")
+                correct_match = issue.get("correct_match", "unknown")
+                expected_format = issue.get("format", "unknown")
                 suggested_action = (
-                    f"Move '{pattern}' from format '{issue.get('format', '')}' "
+                    f"Move '{correct_match}' from format '{expected_format}' "
                     f"to format '{catalog_format}' in correct_matches.yaml, "
                     f"or update the catalog to match the expected format"
                 )
             elif issue_type == "mismatched_result":
-                suggested_action = f"Move '{pattern}' to correct location: {actual_brand} {actual_model} (currently in {brand} {model})"
+                suggested_action = (
+                    f"Move '{pattern}' to correct location: {actual_brand} {actual_model} "
+                    f"(currently in {brand} {model})"
+                )
             elif issue_type == "unmatchable_entry":
-                suggested_action = f"Remove '{pattern}' from correct_matches.yaml or fix the pattern to match correctly"
+                suggested_action = (
+                    f"Remove '{pattern}' from correct_matches.yaml "
+                    f"or fix the pattern to match correctly"
+                )
 
             catalog_issues.append(
                 CatalogValidationIssue(
