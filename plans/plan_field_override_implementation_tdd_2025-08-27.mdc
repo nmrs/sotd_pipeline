@@ -1,0 +1,192 @@
+# Field Override Feature - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Implement a field override system that allows data analysts to correct extracted fields via YAML configuration. The system integrates into the extract phase to automatically apply corrections to all downstream phases. Overrides support both correcting existing fields and creating missing fields, with comprehensive validation and fail-fast error handling.
+
+## 🧩 Component Steps
+
+1. **Core OverrideManager Infrastructure** - YAML loading, validation, and basic override management
+2. **Override Application Logic** - Core algorithms for applying overrides to field data
+3. **Extract Phase Integration** - Integration of override system into existing extraction workflow
+4. **Validation and Error Handling** - Comprehensive validation rules and error handling
+5. **Testing and Integration** - Full test coverage and end-to-end validation
+
+## 🔁 Implementation Prompts
+
+### Step 1: Core OverrideManager Infrastructure
+
+```text
+Create the core OverrideManager class with YAML loading and validation capabilities.
+
+Requirements:
+1. Create `sotd/extract/override_manager.py` with OverrideManager class
+2. Implement YAML file loading with proper error handling
+3. Add validation for field names (only razor, blade, brush, soap allowed)
+4. Add validation for comment ID existence and duplicate prevention
+5. Include comprehensive unit tests for all validation scenarios
+
+Class structure:
+```python
+class OverrideManager:
+    def __init__(self, override_file_path: Path)
+    def load_overrides(self) -> None
+    def get_override(self, month: str, comment_id: str, field: str) -> Optional[str]
+    def validate_overrides(self, data: List[Dict]) -> None
+```
+
+Test requirements:
+- Test YAML loading with valid/invalid files
+- Test field name validation
+- Test duplicate override detection
+- Test comment ID validation
+- Test error handling for malformed YAML
+
+Use fail-fast approach: raise ValueError with clear error messages for any validation failures.
+```
+
+### Step 2: Override Application Logic
+
+```text
+Implement the core logic for applying overrides to field data structures.
+
+Requirements:
+1. Add `apply_override` method to OverrideManager class
+2. Handle existing field override scenario (override normalized, set overridden: "Normalized")
+3. Handle missing field creation scenario (create both original/normalized, set overridden: "Original,Normalized")
+4. Ensure proper data structure preservation and modification
+5. Add comprehensive unit tests for both scenarios
+
+Method signature:
+```python
+def apply_override(self, field_data: Optional[dict], override_value: str, field_exists: bool) -> dict
+```
+
+Test scenarios:
+- Override existing field (preserve original, update normalized)
+- Create missing field (set both original and normalized to override value)
+- Edge cases: empty override values, None field_data
+- Data structure validation after override application
+
+Ensure the method returns properly structured data that matches the expected format for downstream phases.
+```
+
+### Step 3: Extract Phase Integration
+
+```text
+Integrate the OverrideManager into the existing extract phase workflow.
+
+Requirements:
+1. Modify `sotd/extract/comment.py` to load and use OverrideManager
+2. Apply overrides during field processing in parse_comment function
+3. Ensure overrides are applied before normalization
+4. Add debug logging for override operations when --debug flag is used
+5. Maintain backward compatibility when no overrides exist
+
+Integration points:
+- Load OverrideManager in run_extraction_for_month
+- Apply overrides in parse_comment before field normalization
+- Handle override application errors gracefully
+- Add debug logging for override operations
+
+Test requirements:
+- Integration tests with real override files
+- Test override application during comment parsing
+- Test backward compatibility (no overrides)
+- Test error handling during override application
+- Test debug logging functionality
+
+Ensure the integration doesn't break existing extraction functionality and maintains performance.
+```
+
+### Step 4: Validation and Error Handling
+
+```text
+Implement comprehensive validation rules and robust error handling for the override system.
+
+Requirements:
+1. Enhance OverrideManager validation with detailed error messages
+2. Add validation for override values (non-empty, reasonable length)
+3. Implement fail-fast error handling for all validation failures
+4. Add detailed debug logging for troubleshooting
+5. Create comprehensive error test scenarios
+
+Validation rules:
+- Field names must be valid core fields
+- Override values cannot be empty or whitespace-only
+- Comment IDs must exist in source data
+- No duplicate overrides for same comment+field
+- YAML syntax must be valid
+
+Error handling:
+- Fail fast on any validation error
+- Clear, actionable error messages
+- Debug-level logging for troubleshooting
+- Graceful handling of missing override files
+
+Test requirements:
+- Test all validation rules with invalid data
+- Test error message clarity and usefulness
+- Test fail-fast behavior for various error conditions
+- Test debug logging output
+- Test graceful handling of missing override files
+```
+
+### Step 5: Testing and Integration
+
+```text
+Complete the implementation with comprehensive testing and end-to-end validation.
+
+Requirements:
+1. Create integration tests with real SOTD data and override files
+2. Test end-to-end override flow through extract phase
+3. Validate downstream phase compatibility (match, enrich)
+4. Performance testing to ensure no significant impact
+5. Create example override files and documentation
+
+Integration testing:
+- Test complete override workflow with real data
+- Validate data structure integrity after overrides
+- Test downstream phase compatibility
+- Performance benchmarking with/without overrides
+
+Test data requirements:
+- Real SOTD data with known extraction issues
+- Various override scenarios (existing fields, missing fields)
+- Edge cases and error conditions
+- Performance test datasets
+
+Documentation:
+- Example override file formats
+- Common override scenarios
+- Troubleshooting guide
+- Performance considerations
+
+Ensure all tests pass and the system works reliably with real data.
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Structure
+The plan follows a logical progression from core infrastructure to integration, ensuring each step builds on the previous one. The OverrideManager is developed first as a standalone component, then integrated into the existing system.
+
+### Test Coverage Strategy
+Each step includes comprehensive testing requirements, following TDD principles. Unit tests are created first for core functionality, followed by integration tests for the complete workflow.
+
+### Risk Mitigation
+- **Fail-fast approach**: Prevents silent failures and ensures data integrity
+- **Incremental integration**: Each step can be tested independently before integration
+- **Backward compatibility**: Existing functionality remains unchanged when no overrides are present
+- **Performance consideration**: Testing includes performance validation to prevent regression
+
+### Integration Points
+The override system integrates cleanly into the extract phase without modifying downstream phases. This ensures automatic benefit for all pipeline phases while maintaining clean separation of concerns.
+
+### Data Flow Impact
+Overrides are applied early in the pipeline (extract phase) ensuring all downstream phases automatically benefit. The data structure changes are minimal and well-documented, maintaining compatibility with existing analysis tools.
+
+This plan provides a safe, incremental path to implementing the field override feature while maintaining the quality and reliability of the existing pipeline.
+description:
+globs:
+alwaysApply: false
+---

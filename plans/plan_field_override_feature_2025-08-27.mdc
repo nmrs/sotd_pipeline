@@ -1,0 +1,309 @@
+# Field Override Feature Implementation Plan
+
+## Overview
+
+This document specifies the implementation of a field override feature that allows data analysts to correct or add extracted fields when the extraction phase produces ambiguous or incorrect results. The feature integrates directly into the extract phase to ensure all downstream phases automatically benefit from corrections.
+
+## Problem Statement
+
+The current extraction phase sometimes produces ambiguous or incorrect field values that require manual correction:
+
+**Example Scenario:**
+- User comment: "Ko" for razor field
+- Context in comment body reveals they meant "Koraat" (straight razor)
+- Extraction phase captures "Ko" but cannot determine the full product
+- Downstream phases (match, enrich) work with incorrect data
+
+## Solution Design
+
+### Override File Structure
+
+Overrides are defined in a YAML file (`extract_overrides.yaml`) with the following structure:
+
+```yaml
+2025-01:
+  m99b8f9:
+    razor: Koraat
+  m99b8f0:
+    blade: "Gillette Minora Platinum"
+    soap: "Declaration Grooming - Seville"
+```
+
+### Data Structure Changes
+
+The extract phase will apply overrides and modify the field structure as follows:
+
+**For existing field override:**
+```json
+"razor": {
+  "original": "Ko",
+  "normalized": "Koraat", 
+  "overridden": "Normalized"
+}
+```
+
+**For missing field override:**
+```json
+"razor": {
+  "original": "Koraat",
+  "normalized": "Koraat",
+  "overridden": "Original,Normalized"
+}
+```
+
+**For no override (existing behavior):**
+```json
+"razor": {
+  "original": "Ko",
+  "normalized": "Ko"
+}
+```
+
+## Implementation Requirements
+
+### 1. Override File Management
+
+- **File Location**: `data/extract_overrides.yaml`
+- **Format**: YAML with hierarchical structure (month → comment_id → field → value)
+- **Validation**: Fail fast on any YAML syntax errors, invalid field names, or duplicate entries
+- **Optional**: Pipeline continues normally if override file doesn't exist
+
+### 2. Extract Phase Integration
+
+- **Loading**: Load overrides during extract phase initialization
+- **Application**: Apply overrides immediately when creating structured field data
+- **Timing**: Overrides applied before normalization to ensure corrected values get proper normalization
+- **Logging**: Debug-level logging when `--debug` flag is passed
+
+### 3. Override Application Logic
+
+#### Field Exists Scenario
+- Override `normalized` field with corrected value
+- Set `overridden: "Normalized"`
+- Preserve original `original` value for audit trail
+
+#### Field Missing Scenario  
+- Create new field with both `original` and `normalized` set to override value
+- Set `overridden: "Original,Normalized"`
+- Ensure field is included in output data
+
+### 4. Validation Rules
+
+- **Field Names**: Only allow core fields: `razor`, `blade`, `brush`, `soap`
+- **Values**: Override values cannot be empty strings
+- **Comment IDs**: Must exist in the source data (fail fast if not found)
+- **Duplicates**: No duplicate overrides for same comment+field combination
+- **YAML Syntax**: Fail fast on any YAML parsing errors
+
+### 5. Error Handling
+
+- **Fail Fast Strategy**: Pipeline stops immediately on any override-related errors
+- **Debug Logging**: Detailed error information when `--debug` flag is used
+- **Clear Error Messages**: Specific error messages indicating what went wrong and where
+
+## Technical Implementation
+
+### File Structure
+
+```
+sotd/extract/
+├── __init__.py
+├── run.py
+├── comment.py
+├── fields.py
+├── save.py
+├── filter.py
+└── override_manager.py  # NEW: Override management logic
+```
+
+### Core Components
+
+#### 1. OverrideManager Class
+
+```python
+class OverrideManager:
+    """Manages loading and application of field overrides."""
+    
+    def __init__(self, override_file_path: Path):
+        self.override_file_path = override_file_path
+        self.overrides = {}
+        
+    def load_overrides(self) -> None:
+        """Load overrides from YAML file with validation."""
+        
+    def get_override(self, month: str, comment_id: str, field: str) -> Optional[str]:
+        """Get override value for specific field if it exists."""
+        
+    def apply_override(self, field_data: dict, month: str, comment_id: str, field: str) -> dict:
+        """Apply override to field data, creating or modifying as needed."""
+```
+
+#### 2. Integration Points
+
+- **Extract Phase**: Load overrides at startup, apply during field processing
+- **Comment Parsing**: Check for overrides when creating field structures
+- **Data Flow**: Overrides applied before normalization and downstream processing
+
+### 3. Override Application Algorithm
+
+```python
+def apply_field_override(field_data: dict, override_value: str, field_exists: bool) -> dict:
+    """Apply override to field data based on whether field exists."""
+    
+    if field_exists:
+        # Override existing field
+        result = field_data.copy()
+        result["normalized"] = override_value
+        result["overridden"] = "Normalized"
+        return result
+    else:
+        # Create new field
+        return {
+            "original": override_value,
+            "normalized": override_value,
+            "overridden": "Original,Normalized"
+        }
+```
+
+## Data Flow Impact
+
+### Phase Integration
+
+1. **Extract Phase**: Applies overrides, creates corrected field structures
+2. **Match Phase**: Automatically works with corrected `normalized` values
+3. **Enrich Phase**: Gets meaningful `original` values for all fields (including override-created ones)
+4. **Analysis Tools**: Can distinguish between user input and analyst corrections
+
+### Backward Compatibility
+
+- Existing data structures remain unchanged when no overrides are applied
+- New `overridden` field is optional (only present when overrides are applied)
+- All existing pipeline phases continue to work without modification
+
+## Testing Requirements
+
+### Unit Tests
+
+1. **OverrideManager Tests**
+   - YAML loading and validation
+   - Override retrieval logic
+   - Error handling for invalid files
+
+2. **Override Application Tests**
+   - Existing field override scenarios
+   - Missing field creation scenarios
+   - Edge cases (empty values, invalid fields)
+
+3. **Integration Tests**
+   - End-to-end override application in extract phase
+   - Downstream phase compatibility
+   - Error propagation and handling
+
+### Test Data
+
+- Valid override files with various scenarios
+- Invalid override files for error testing
+- Real SOTD data with known issues for realistic testing
+
+## Usage Examples
+
+### Basic Override
+
+**Override file:**
+```yaml
+2025-01:
+  m99b8f9:
+    razor: Koraat
+```
+
+**Result:**
+```json
+"razor": {
+  "original": "Ko",
+  "normalized": "Koraat",
+  "overridden": "Normalized"
+}
+```
+
+### Missing Field Override
+
+**Override file:**
+```yaml
+2025-01:
+  m99b8f9:
+    blade: "Gillette Minora Platinum"
+```
+
+**Result:**
+```json
+"blade": {
+  "original": "Gillette Minora Platinum",
+  "normalized": "Gillette Minora Platinum",
+  "overridden": "Original,Normalized"
+}
+```
+
+### Multiple Overrides
+
+**Override file:**
+```yaml
+2025-01:
+  m99b8f9:
+    razor: Koraat
+    blade: "Gillette Minora Platinum"
+  m99b8f0:
+    soap: "Declaration Grooming - Seville"
+```
+
+## Implementation Phases
+
+### Phase 1: Core Infrastructure
+- [ ] Create `OverrideManager` class
+- [ ] Implement YAML loading and validation
+- [ ] Add basic override application logic
+- [ ] Create unit tests for core functionality
+
+### Phase 2: Extract Phase Integration
+- [ ] Integrate `OverrideManager` into extract phase
+- [ ] Apply overrides during field processing
+- [ ] Add debug logging for override operations
+- [ ] Create integration tests
+
+### Phase 3: Validation and Error Handling
+- [ ] Implement comprehensive validation rules
+- [ ] Add fail-fast error handling
+- [ ] Create error test scenarios
+- [ ] Validate downstream compatibility
+
+### Phase 4: Documentation and Testing
+- [ ] Update pipeline documentation
+- [ ] Create usage examples and best practices
+- [ ] Comprehensive testing with real data
+- [ ] Performance validation
+
+## Success Criteria
+
+1. **Functionality**: Data analysts can override extracted fields via YAML file
+2. **Integration**: Overrides automatically flow through all pipeline phases
+3. **Data Integrity**: Original values preserved for audit trail
+4. **Error Handling**: Pipeline fails fast on any override-related issues
+5. **Performance**: No significant impact on extract phase performance
+6. **Compatibility**: All existing functionality continues to work unchanged
+
+## Future Enhancements
+
+1. **Override History**: Track when overrides were applied and by whom
+2. **Bulk Operations**: Support for applying overrides across multiple months
+3. **Validation Rules**: Configurable validation for override values
+4. **Override Review**: Tools for reviewing and managing override files
+5. **Integration with Analysis Tools**: Direct override creation from analysis results
+
+## Conclusion
+
+This field override feature provides data analysts with a powerful tool to correct extraction issues while maintaining data integrity and audit trails. The integration into the extract phase ensures all downstream phases automatically benefit from corrections, making the entire pipeline more accurate and reliable.
+
+The design prioritizes simplicity, robustness, and fail-fast error handling, ensuring that the feature enhances rather than complicates the existing pipeline architecture.
+description:
+globs:
+alwaysApply: false
+---
