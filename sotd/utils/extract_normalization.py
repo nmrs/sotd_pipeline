@@ -304,7 +304,7 @@ def strip_link_markup(value: str) -> str:
     return cleaned
 
 
-def strip_trailing_periods(value: str | None) -> str | None:
+def strip_trailing_periods(value: str | None) -> str:
     """
     Strip trailing periods and other punctuation from strings.
 
@@ -312,15 +312,16 @@ def strip_trailing_periods(value: str | None) -> str | None:
         value: Input string that may have trailing punctuation
 
     Returns:
-        String with trailing punctuation removed, or None if input is None
+        String with trailing punctuation removed, or empty string if input is None
     """
     if not isinstance(value, str):
-        return value
+        return ""
 
-    # Remove trailing periods, exclamation marks, and question marks
-    cleaned = re.sub(r"[\.\!\?]+$", "", value)
+    # Remove trailing periods, exclamation marks, question marks, commas, semicolons, colons
+    # Also remove trailing spaces that might be left after punctuation removal
+    cleaned = re.sub(r"[\.\!\?\,\;\:\s]+$", "", value)
 
-    return cleaned.strip()
+    return cleaned
 
 
 def normalize_for_matching(
@@ -365,6 +366,9 @@ def normalize_for_matching(
         normalized = re.sub(r"\(\s*\)", "", normalized)  # Empty parentheses
         normalized = re.sub(r"\[\s*\]", "", normalized)  # Empty brackets
         normalized = re.sub(r"\{\s*}", "", normalized)  # Empty braces
+
+    # Strip trailing punctuation (periods, exclamation marks, question marks)
+    normalized = strip_trailing_periods(normalized)
 
     # Final cleanup
     normalized = re.sub(r"\s+", " ", normalized).strip()

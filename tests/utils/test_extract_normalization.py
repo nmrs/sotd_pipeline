@@ -157,7 +157,7 @@ class TestStripTrailingPeriods:
         assert strip_trailing_periods("") == ""
 
         # None input
-        assert strip_trailing_periods(None) is None  # type: ignore
+        assert strip_trailing_periods(None) == ""  # Now returns empty string instead of None
 
         # Only periods
         assert strip_trailing_periods(".") == ""
