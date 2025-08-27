@@ -14,7 +14,6 @@ blade:
         - gillette 7 o'clock sharpe edge yellow
         - gillette 7 o'clock sharpedge
         - gillette 7 o'clock sharpedge (yellow)
-        - gillette 7 o'clock sharpedge .
         - gillette 7 o'clock sharpedge yellow
         - gillette 7 o'clock yellow
         - gillette 7 o'clock yellowddd
@@ -61,7 +60,6 @@ blade:
         - astra - superior platinum
         - astra green
         - astra green - [ on both razors]
-        - astra green .
         - astra green sp
         - astra platinum
         - astra platinum (green)
@@ -88,8 +86,7 @@ blade:
         - bevel de
     Bic:
       Astor Stainless:
-        - bic - astor .
-        - bic - astor.
+        - bic - astor
         - bic astor
         - bic astor stainless
         - bic astor stainless steel
@@ -194,18 +191,14 @@ blade:
       Minora:
         - gillette - minora
         - gillette - minora stainless
-        - gillette - minora stainless .
-        - gillette - minora stainless.
         - gillette minora
         - gillette minora platinum
         - gillette minora stainless
       Nacet:
         - gillette - nacet
         - gillette - nacet stainless
-        - gillette - nacet.
         - gillette nacet
-        - gillette- nacet .
-        - gillette- nacet.
+        - gillette- nacet
         - nacet
       Perma-Sharp:
         - gillete permasharp
@@ -230,8 +223,6 @@ blade:
       Silver Blue:
         - gillete silver blue
         - gillette - silver blue
-        - gillette - silver blue .
-        - gillette - silver blue.
         - gillette silver blue
         - gsb
       Stainless:
@@ -319,7 +310,7 @@ blade:
         - gem ss ptfe
         - gem ss ptfe-coated
         - personna - gem ptfe
-        - personna - gem ptfe coated.
+        - personna - gem ptfe coated
         - personna gem ptfe
         - personna gem ptfe coated
       Injector:
