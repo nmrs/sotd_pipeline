@@ -148,6 +148,10 @@ def strip_blade_count_patterns(value: str) -> str:
     approximate_number_pattern = r"[\(\[\{]\s*\d+\s*[-]?\s*ish\s*\??\s*[\)\]\}]"
     cleaned = re.sub(approximate_number_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for comma-separated ordinal usage: "treet platinum , 1st use" -> "treet platinum"
+    comma_ordinal_pattern = r",\s*\d+(?:st|nd|rd|th)\s+use\b"
+    cleaned = re.sub(comma_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 

@@ -68,6 +68,21 @@ class TestStripBladeCountPatterns:
         # Multiple count patterns
         assert strip_blade_count_patterns("Astra (5) (10)") == "Astra"
 
+    def test_strip_blade_count_patterns_comma_ordinal_usage(self):
+        """Test blade count pattern stripping with comma-separated ordinal usage."""
+        test_cases = [
+            ("treet platinum , 1st use", "treet platinum"),
+            ("treet platinum , 2nd use", "treet platinum"),
+            ("feather artist club , 3rd use", "feather artist club"),
+            ("astra sp , 10th use", "astra sp"),
+            ("personna platinum , 1st use", "personna platinum"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_blade_count_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
 
 class TestStripHandleIndicators:
     """Test handle indicator stripping."""
