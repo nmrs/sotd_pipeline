@@ -76,6 +76,8 @@ class TestStripBladeCountPatterns:
             ("feather artist club , 3rd use", "feather artist club"),
             ("astra sp , 10th use", "astra sp"),
             ("personna platinum , 1st use", "personna platinum"),
+            ("feather, 1st use", "feather"),  # No space after comma
+            ("astra, 2nd use", "astra"),      # No space after comma
         ]
         for input_str, expected in test_cases:
             result = strip_blade_count_patterns(input_str)
