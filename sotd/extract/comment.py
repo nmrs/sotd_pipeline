@@ -6,13 +6,16 @@ from pathlib import Path
 from typing import Optional
 
 from sotd.extract.fields import extract_field
+from sotd.extract.override_manager import OverrideManager
 from sotd.utils.extract_normalization import normalize_for_matching
 from sotd.utils.text import preprocess_body
 
 logger = logging.getLogger(__name__)
 
 
-def parse_comment(comment: dict) -> Optional[dict]:
+def parse_comment(
+    comment: dict, override_manager: Optional[OverrideManager] = None
+) -> Optional[dict]:
     if "body" in comment:
         comment["body"] = preprocess_body(comment["body"])
     else:
@@ -34,6 +37,21 @@ def parse_comment(comment: dict) -> Optional[dict]:
                     result[field] = {"original": value, "normalized": normalized_value}
                     seen_fields.add(field)
 
+    # Apply overrides if override manager is provided
+    if override_manager and comment.get("id"):
+        month = comment.get("created_utc", "").split("-")[:2]  # Extract YYYY-MM from timestamp
+        if len(month) == 2:
+            month_str = f"{month[0]}-{month[1]:0>2}"
+            comment_id = comment["id"]
+            
+            for field in ("razor", "blade", "brush", "soap"):
+                override_value = override_manager.get_override(month_str, comment_id, field)
+                if override_value:
+                    field_exists = field in result
+                    result[field] = override_manager.apply_override(
+                        result.get(field), override_value, field_exists
+                    )
+
     ordered_comment = OrderedDict()
     for key in ("author", "body", "created_utc", "id", "thread_id", "thread_title", "url"):
         if key in comment:
@@ -51,7 +69,9 @@ def parse_comment(comment: dict) -> Optional[dict]:
 # Skips extraction and logging a warning if input file is missing
 
 
-def run_extraction_for_month(month: str, base_path: str = "data") -> Optional[dict]:
+def run_extraction_for_month(
+    month: str, base_path: str = "data", override_manager: Optional[OverrideManager] = None
+) -> Optional[dict]:
     input_path = Path(base_path) / "comments" / f"{month}.json"
     if not input_path.exists():
         logger.warning("Skipping extraction for missing input file: %s", input_path)
@@ -65,7 +85,7 @@ def run_extraction_for_month(month: str, base_path: str = "data") -> Optional[di
     skipped = []
 
     for comment in comments:
-        parsed = parse_comment(comment)
+        parsed = parse_comment(comment, override_manager)
         if parsed:
             extracted.append(parsed)
         else:

@@ -5,6 +5,7 @@ This module provides standardized CLI argument parsing for the extract phase
 using the BaseCLIParser to eliminate code duplication.
 """
 
+from pathlib import Path
 from sotd.cli_utils.base_parser import BaseCLIParser
 
 
@@ -27,5 +28,13 @@ def get_parser() -> BaseCLIParser:
 
     # Add delta processing support
     parser.add_delta_arguments()
+
+    # Add override file argument
+    parser.add_argument(
+        "--override-file",
+        type=Path,
+        default=Path("data/extract_overrides.yaml"),
+        help="Path to override file for field corrections (default: data/extract_overrides.yaml)",
+    )
 
     return parser

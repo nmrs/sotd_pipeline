@@ -8,6 +8,7 @@ from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 from .cli import get_parser
 from .comment import run_extraction_for_month
+from .override_manager import OverrideManager
 from .save import save_month_file
 
 logger = logging.getLogger()
@@ -16,14 +17,21 @@ if not logger.hasHandlers():
 
 
 def _process_month(
-    year: int, month: int, base_path: Path, debug: bool, force: bool
+    year: int,
+    month: int,
+    base_path: Path,
+    debug: bool,
+    force: bool,
+    override_manager: Optional[OverrideManager] = None,
 ) -> Optional[dict]:
     ym = f"{year:04d}-{month:02d}"
     monitor = PerformanceMonitor("extract")
     monitor.start_total_timing()
 
     monitor.start_file_io_timing()
-    all_comments = run_extraction_for_month(ym, base_path=str(base_path))
+    all_comments = run_extraction_for_month(
+        ym, base_path=str(base_path), override_manager=override_manager
+    )
     monitor.end_file_io_timing()
     if all_comments is None:
         if debug:
@@ -73,6 +81,20 @@ def run(args) -> None:
     months = list(month_span(args))
     base_path = Path(args.out_dir)
 
+    # Initialize override manager if override file is specified
+    override_manager = None
+    if hasattr(args, 'override_file') and args.override_file:
+        try:
+            override_manager = OverrideManager(args.override_file)
+            override_manager.load_overrides()
+            if override_manager.has_overrides():
+                logger.info("Loaded overrides from: %s", args.override_file)
+            else:
+                logger.info("No overrides found in: %s", args.override_file)
+        except Exception as e:
+            logger.error("Failed to load overrides from %s: %s", args.override_file, e)
+            raise
+
     # Create parallel processor for extract phase
     processor = create_parallel_processor("extract")
 
@@ -85,7 +107,11 @@ def run(args) -> None:
 
         # Process months in parallel
         results = processor.process_months_parallel(
-            months, _process_month, (base_path, args.debug, args.force), max_workers, "Processing"
+            months,
+            _process_month,
+            (base_path, args.debug, args.force, override_manager),
+            max_workers,
+            "Processing",
         )
 
         # Print parallel processing summary
@@ -94,7 +120,7 @@ def run(args) -> None:
     else:
         # Process months sequentially
         results = processor.process_months_sequential(
-            months, _process_month, (base_path, args.debug, args.force), "Months"
+            months, _process_month, (base_path, args.debug, args.force, override_manager), "Months"
         )
 
     # Convert results to expected format for summary
@@ -131,7 +157,7 @@ def run(args) -> None:
         total_stats = {
             "total_records": sum(r["shave_count"] for r in summary_results),
             "total_missing": sum(r["missing_count"] for r in summary_results),
-            "total_skipped": sum(r["skipped_count"] for r in summary_results),
+            "total_skipped": sum(r["missing_count"] for r in summary_results),
         }
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "extract", start_str, end_str, total_stats
