@@ -194,8 +194,7 @@ class BladeMatcher(BaseMatcher):
         # Also prioritize non-DE formats to prevent generic DE patterns from overriding
         # specific patterns
         return sorted(
-            compiled, 
-            key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True)
+            compiled, key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True)
         )
 
     def _get_context_aware_patterns(self, target_format: str, is_shavette: bool = False):
@@ -212,38 +211,38 @@ class BladeMatcher(BaseMatcher):
 
         # For Shavettes and Half DE razors, re-sort patterns to prioritize target format and
         # related formats
-        
+
         # Use the unified tiebreaker system with context-aware format prioritization
         # The _calculate_pattern_score method handles format priority when deprioritize_de=True
         return sorted(
-            self.patterns, 
-            key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True)
+            self.patterns,
+            key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True),
         )
 
     def _count_non_optional_parts(self, pattern: str) -> int:
         """
         Count non-optional parts in a regex pattern.
-        
+
         Simple approach: split on '.*' and count non-empty parts.
         This handles most cases like 'personna.*hair.*shaper' -> 3 parts.
         """
-        parts = pattern.split('.*')
+        parts = pattern.split(".*")
         return len([part for part in parts if part.strip()])
 
     def _calculate_pattern_score(self, item, deprioritize_de: bool = False) -> tuple:
         """
         Unified tiebreaker function for both normal and context-aware cases.
-        
+
         Args:
             item: Pattern item tuple (brand, model, fmt, pattern, compiled, entry)
             deprioritize_de: Whether to deprioritize DE formats (for context-aware cases)
-        
+
         Returns:
-            Tuple for sorting: (format_priority, -length_score, -non_optional_score, 
+            Tuple for sorting: (format_priority, -length_score, -non_optional_score,
             -complexity_score, -boundary_score)
         """
         brand, model, fmt, pattern, compiled, entry = item
-        
+
         # Primary: format priority (only when deprioritize_de=True)
         if deprioritize_de:
             if fmt.upper() == "DE":
@@ -252,22 +251,68 @@ class BladeMatcher(BaseMatcher):
                 format_priority = 0  # Non-DE formats get higher priority
         else:
             format_priority = 0  # No format bias
-        
+
         # Secondary: pattern length (longer = more specific)
         length_score = len(pattern)
-        
+
         # Tertiary: non-optional vs optional (non-optional wins)
         non_optional_score = self._count_non_optional_parts(pattern)
-        
+
         # Quaternary: pattern complexity (more special chars = more specific)
         complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
-        
+
         # Quinary: word boundaries (more word boundaries = more specific)
         boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-        
+
         return (
-            format_priority, -length_score, -non_optional_score, 
-            -complexity_score, -boundary_score
+            format_priority,
+            -length_score,
+            -non_optional_score,
+            -complexity_score,
+            -boundary_score,
+        )
+
+    def _find_best_global_match(
+        self, normalized_text: str, original: str | None = None
+    ) -> MatchResult:
+        """
+        Find the best match across all formats using global pattern specificity.
+        
+        Uses existing self.patterns (already sorted by unified tiebreaker system).
+        """
+        # Try patterns in order until we find a match
+        for brand, model, fmt, pattern, compiled, entry in self.patterns:
+            if compiled.search(normalized_text):
+                # Basic logging for debugging
+                print(
+                    f"Global pattern match found: {brand} {model} ({fmt}) using pattern '{pattern}'"
+                )
+                
+                match_data = {
+                    "brand": brand,
+                    "model": str(model),
+                    "format": fmt,
+                }
+                
+                # Preserve all additional specifications from the catalog entry
+                for key, value in entry.items():
+                    if key not in ["patterns", "format"]:
+                        match_data[key] = value
+                
+                return create_match_result(
+                    original=original or normalized_text,
+                    matched=match_data,
+                    match_type=MatchType.REGEX,
+                    pattern=pattern,
+                )
+        
+        # No matches found - return same structure as existing "no match" case
+        print("No global pattern match found")
+        return create_match_result(
+            original=original or normalized_text,
+            matched=None,
+            match_type=None,
+            pattern=None,
         )
 
     def _precompute_normalized_correct_matches(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -721,6 +766,14 @@ class BladeMatcher(BaseMatcher):
 
         # 4. General fallback system: try format-appropriate blades first
         if normalized_text:
+            # Check if this is generic "Shavette" (case-insensitive)
+            if razor_format.lower() == "shavette":
+                # Use global pattern specificity approach for generic Shavette
+                print(
+                    "Generic 'Shavette' detected, switching to global pattern specificity approach"
+                )
+                return self._find_best_global_match(normalized_text, original)
+            
             # Determine if this is a Shavette razor for special fallback logic
             is_shavette = razor_format.upper().startswith("SHAVETTE")
 
