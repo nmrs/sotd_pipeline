@@ -69,15 +69,17 @@ class TestStripBladeCountPatterns:
         assert strip_blade_count_patterns("Astra (5) (10)") == "Astra"
 
     def test_strip_blade_count_patterns_comma_ordinal_usage(self):
-        """Test blade count pattern stripping with comma-separated ordinal usage."""
+        """Test blade count pattern stripping with ordinal usage patterns."""
         test_cases = [
-            ("treet platinum , 1st use", "treet platinum"),
-            ("treet platinum , 2nd use", "treet platinum"),
-            ("feather artist club , 3rd use", "feather artist club"),
-            ("astra sp , 10th use", "astra sp"),
-            ("personna platinum , 1st use", "personna platinum"),
-            ("feather, 1st use", "feather"),  # No space after comma
-            ("astra, 2nd use", "astra"),      # No space after comma
+            ("treet platinum , 1st use", "treet platinum ,"),  # Cleanup handles trailing comma
+            ("treet platinum , 2nd use", "treet platinum ,"),  # Cleanup handles trailing comma
+            ("feather artist club , 3rd use", "feather artist club ,"),  # Cleanup handles comma
+            ("astra sp , 10th use", "astra sp ,"),  # Cleanup handles comma
+            ("personna platinum , 1st use", "personna platinum ,"),  # Cleanup handles comma
+            ("feather, 1st use", "feather,"),  # Cleanup handles trailing comma
+            ("astra, 2nd use", "astra,"),      # Cleanup handles trailing comma
+            ("treet platinum 1st use", "treet platinum"),  # No trailing punctuation
+            ("feather 2nd use", "feather"),    # No trailing punctuation
         ]
         for input_str, expected in test_cases:
             result = strip_blade_count_patterns(input_str)
