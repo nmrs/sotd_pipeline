@@ -15,25 +15,17 @@
   # Example: "Ko" was extracted but user confirmed it's "Koraat"
   m99b8f9:
     razor: "Koraat"
-  
-  # Example: Missing razor field that should be "Feather Artist Club"
-  m99b8f0:
-    razor: "Feather Artist Club"
-  
-  # Example: Multiple field corrections for same comment
-  m99b8f1:
-    razor: "Rockwell 6S"
-    blade: "Gillette Minora Platinum"
-    soap: "Declaration Grooming - Seville"
+  m68avhv:
+    razor: "Jenes Razor Sheffield Style (RIP)"
 
-2025-02:
-  # Example: Brush brand correction
-  m99b8f2:
-    brush: "Semogue 610"
-  
-  # Example: Soap maker correction
-  m99b8f3:
-    soap: "Declaration Grooming - Massacre of the Innocents"
+2025-04:
+  mkum44v:
+    razor: "chiseled face legacy"
 
-# Note: This file is optional - the pipeline will work normally if it doesn't exist
-# or if it's empty. All overrides are validated before use.
+2025-07:
+  n55ihah:
+    razor: "custom designed Böker 6 /8 with bog oak scale and French head"
+
+2025-08:
+  n82mv79:
+    razor: "Koraat"

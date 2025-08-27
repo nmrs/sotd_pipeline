@@ -1164,6 +1164,10 @@ J.R. Torrey Razor Co.:
       - j\.?r\.?\s*torrey
       - torrey
       - torrey.*razor
+Jenes Razors:
+  Straight:
+    patterns:
+      - jenes.*razor.*(\d{1,2}/(8|16))?
 Jifuli:
   GF-2179:
     patterns:
@@ -1269,7 +1273,6 @@ Koraat:
     format: Straight
     patterns:
       - koraat.*(\d{1,2}/(8|16))?
-      - ^ko$ #https://www.reddit.com/r/Wetshaving/comments/1ia881e/comment/m99b8f9/
 Krect:
   Spiral Slant:
     patterns:

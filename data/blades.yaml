@@ -862,7 +862,7 @@ Injector:
         - person.*74.*inject
     Injector:
       patterns:
-        - person.*inject
+        - person+a(?:.*inject)?
   Schick:
     Injector:
       patterns:
