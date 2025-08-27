@@ -60,11 +60,11 @@ Above the Tie:
   Windsor SSRH2:
     patterns:
       - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
-ALE Razors:
+Ale Razors:
   Straight:
     format: Straight
     patterns:
-      - ale.*razors?(?:.*\d{1,2}/(8|16))?
+      - \bale\b.*razors?(?:.*\d{1,2}/(8|16))?
 Alpha:
   Claymore:
     format: AC
@@ -649,14 +649,14 @@ Fasan:
     patterns:
       - fasan.*slant
 Fatip:
-  Gentile:
+  Testina Gentile:
     patterns:
-      - fatt?ip.*gentile
+      - fat+ip.*gentile
       - test.*genti.*
   Grande:
     patterns:
-      - fatt?ip.*grande
-      - fatt?ip.*classic
+      - fat+ip.*grande
+      - fat+ip.*classic
   Lo Storto:
     patterns:
       - fatt?ip.*stor[tn]o
@@ -690,7 +690,7 @@ Feather:
     patterns:
       - Feather.*(dx|ss|sr)
       - feather.*artist.*clu
-      - feather.*ac
+      - feather.*ac(?:.*(shavette|kami))?
 Filarmonica:
   Straight:
     format: Straight
@@ -838,6 +838,9 @@ Gillette:
     patterns:
       - gil.*te.*sterling
       - o.{1}clock
+  Aristocrat:
+    patterns:
+      - (?:gil.*)art?istocrat
   Diplomat:
     patterns:
       - Diplomat
@@ -866,7 +869,7 @@ Gillette:
       - gil.*et.*lady
   NEW:
     patterns:
-      - gil.*new
+      - gil\w*te.*new
       - bostonian
       - new.*(s|l)c
       - new.*(short|long).*comb
@@ -881,7 +884,7 @@ Gillette:
       - some new-fangled 3-piece razor design # see https://www.reddit.com/r/Wetshaving/comments/1d5gb5t/comment/l6nxf5b/
   New Improved:
     patterns:
-      - new.*improved
+      - gil\w*te.*new.*improved
   Old Type:
     patterns:
       - gillette.*\bold\b
@@ -903,15 +906,17 @@ Gillette:
       - gil.*service.*razor
   Sheraton:
     patterns:
-      - sheraton
+      - (?:gil.*)?sheraton
   Slim:
     patterns:
-      - art?istocrat
-      - Gil.*Slim
+      - gil.*slim
       - sl?im.*adjust
       - '\d\d.*slim'
       - 'slim.*\d'
       - ^slim$
+      - (?:gil.*)slim.*art?istocrat
+      - (?:gil.*)art?istocrat.*slim
+      - gillette.*slim.*tto
   Super Adjustable:
     patterns:
       - Black.*Beauty
@@ -928,7 +933,7 @@ Gillette:
     patterns:
       - Super.*speed
       - (red|black|blue|flare|flair).*tip
-      - 'gillette.*tto(\W|$)'
+      - gillette.*tto
       - 'gil.*\bss\b'
       - '\d\ds*\s*\bss\b'
       - TV special
@@ -987,6 +992,10 @@ Grand Shave King:
       - grand.*shave.*king
       - \bgsk\b
 Greencult:
+  GC 1.1:
+    patterns:
+      - \bGC\b.*1\.1\b
+      - green.*cult.*1\.1
   GC 2.0:
     patterns:
       - \bGC\b.*2\b
@@ -1062,7 +1071,7 @@ Henkotsu:
   Kamisori:
     format: Straight
     patterns:
-      - henkotsu.*kami
+      - ^(?!.*\bac\b).*henkotsu.*kami
 Heritage:
   Adjustable:
     patterns:
@@ -1143,7 +1152,7 @@ J.A. Henckels:
     format: Straight
     steel: Stainless
     patterns:
-      - (?:henc?k)?.*friodur(\s+straight)*
+      - (?:henc?k)?.*friodur(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
@@ -1260,7 +1269,7 @@ Koraat:
     format: Straight
     patterns:
       - koraat.*(\d{1,2}/(8|16))?
-      - ^ko\b
+      - ^ko$ #https://www.reddit.com/r/Wetshaving/comments/1ia881e/comment/m99b8f9/
 Krect:
   Spiral Slant:
     patterns:
@@ -1435,7 +1444,7 @@ Merkur:
       - (merkur.*)?51c
   Futur:
     patterns:
-      - ^(?!.*\b(?:clone|copy)\b).*?(merkur)?.*?futur
+      - ^(?!.*\b(?:clone|copy|style)\b).*?(merkur)?.*?futur
   Progress:
     patterns:
       - (pro|mer|di)gress
@@ -1542,7 +1551,8 @@ Other DE:
 Other DE Clone:
   "":
     patterns:
-      - ^(?!.*(futur|eagle)).*(knockoff|clone)
+      - ^(?!.*(futur|eagle|shavette|kami)).*(knockoff|clone)
+      - merkur.*style
 Other Shavette:
   "":
     format: Shavette
@@ -1566,8 +1576,8 @@ Other Shavette (AC):
   "":
     format: Shavette (AC)
     patterns:
-      - shavette.*\bac\b
-      - \bac\b.*shavette
+      - (shavette|kami).*\bac\b
+      - \bac\b.*(shavette|kami)
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
@@ -1578,7 +1588,7 @@ Other Kamisori:
   "":
     format: Straight
     patterns:
-      - kami
+      - ^(?!.*\bac\b|shavette|feather|henkotsu|facón|cjb|kai|yurii|raido).*kami
 Other Straight Razor:
   "":
     format: Straight
@@ -1762,7 +1772,7 @@ Pearl:
       - pearl hammer
   L-55:
     patterns:
-      - l-?55
+      - (?:pearl.*)?l-?55
   L-65 Semi Slant:
     patterns:
       - l-?65
@@ -1959,14 +1969,14 @@ Rex:
       - (rex)?.*envoy
   Konsul:
     patterns:
-      - konsul
+      - (?:rex.*)?konsul
   Page:
     patterns:
       - rex.*page
   Sentry:
     patterns:
       - sentry
-Rigarazor:
+RigaRazor:
   Straight:
     format: Straight
     patterns:

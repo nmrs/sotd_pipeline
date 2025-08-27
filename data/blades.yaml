@@ -447,7 +447,7 @@ DE:
     DE:
       patterns:
         - my.*blades
-  "Mühle":
+  Mühle:
     Traditional:
       patterns:
         - "m[uü]hle"
