@@ -104,8 +104,8 @@ const Header: React.FC = () => {
         onClick={() => toggleDropdown(group.label)}
         onBlur={() => setTimeout(closeDropdown, 150)}
         className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${location.pathname === group.items.find(item => item.path === location.pathname)?.path
-            ? 'bg-blue-100 text-blue-700'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          ? 'bg-blue-100 text-blue-700'
+          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
           }`}
       >
         <span>{group.icon}</span>
