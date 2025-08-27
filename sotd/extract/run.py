@@ -83,7 +83,7 @@ def run(args) -> None:
 
     # Initialize override manager if override file is specified
     override_manager = None
-    if hasattr(args, 'override_file') and args.override_file:
+    if hasattr(args, "override_file") and args.override_file:
         try:
             override_manager = OverrideManager(args.override_file)
             override_manager.load_overrides()

@@ -17,7 +17,7 @@ class OverrideManager:
 
     def __init__(self, override_file_path: Path):
         """Initialize OverrideManager with path to override file.
-        
+
         Args:
             override_file_path: Path to the YAML override file
         """
@@ -26,7 +26,7 @@ class OverrideManager:
 
     def load_overrides(self) -> None:
         """Load overrides from YAML file with validation.
-        
+
         Raises:
             ValueError: If override file has validation errors
             FileNotFoundError: If override file doesn't exist
@@ -61,8 +61,7 @@ class OverrideManager:
             for comment_id, field_data in month_data.items():
                 if not isinstance(field_data, dict):
                     raise ValueError(
-                        f"Comment '{comment_id}' in month '{month}' "
-                        f"must contain field overrides"
+                        f"Comment '{comment_id}' in month '{month}' must contain field overrides"
                     )
 
                 comment_overrides = {}
@@ -80,7 +79,7 @@ class OverrideManager:
                             f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
                             f"must be a string, got: {type(value).__name__}"
                         )
-                    
+
                     if not value.strip():
                         raise ValueError(
                             f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
@@ -112,16 +111,18 @@ class OverrideManager:
             if month_overrides:
                 self.overrides[month] = month_overrides
 
-        logger.info("Loaded %d overrides from %s", len(duplicate_overrides), self.override_file_path)
+        logger.info(
+            "Loaded %d overrides from %s", len(duplicate_overrides), self.override_file_path
+        )
 
     def get_override(self, month: str, comment_id: str, field: str) -> Optional[str]:
         """Get override value for specific field if it exists.
-        
+
         Args:
             month: Month in YYYY-MM format
             comment_id: Reddit comment ID
             field: Field name to check for override
-            
+
         Returns:
             Override value if exists, None otherwise
         """
@@ -131,16 +132,16 @@ class OverrideManager:
 
     def validate_overrides(self, data: List[Dict[str, Any]]) -> None:
         """Validate that all override comment IDs exist in the data.
-        
+
         Args:
             data: List of comment records to validate against
-            
+
         Raises:
             ValueError: If any override references non-existent comment IDs
         """
         # Build set of existing comment IDs
         existing_ids = {record["id"] for record in data if "id" in record}
-        
+
         # Check all override comment IDs exist
         missing_ids = []
         for month, month_overrides in self.overrides.items():
@@ -158,12 +159,12 @@ class OverrideManager:
         self, field_data: Optional[Dict[str, str]], override_value: str, field_exists: bool
     ) -> Dict[str, str]:
         """Apply override to field data, creating or modifying as needed.
-        
+
         Args:
             field_data: Existing field data dict or None if field doesn't exist
             override_value: Value to use for override
             field_exists: Whether the field existed in original data
-            
+
         Returns:
             Modified or created field data dict
         """
@@ -172,7 +173,11 @@ class OverrideManager:
             result = field_data.copy()
             result["normalized"] = override_value
             result["overridden"] = "Normalized"
-            logger.debug("Applied override to existing field: %s -> %s", field_data.get("normalized"), override_value)
+            logger.debug(
+                "Applied override to existing field: %s -> %s",
+                field_data.get("normalized"),
+                override_value,
+            )
             return result
         else:
             # Create new field
@@ -185,7 +190,7 @@ class OverrideManager:
 
     def has_overrides(self) -> bool:
         """Check if any overrides are loaded.
-        
+
         Returns:
             True if overrides exist, False otherwise
         """
@@ -193,25 +198,25 @@ class OverrideManager:
 
     def get_override_summary(self) -> Dict[str, Any]:
         """Get summary statistics about loaded overrides.
-        
+
         Returns:
             Dictionary with override statistics
         """
         total_overrides = 0
         month_counts = {}
         field_counts = {}
-        
+
         for month, month_overrides in self.overrides.items():
             month_count = 0
             for comment_id, field_data in month_overrides.items():
                 month_count += len(field_data)
                 total_overrides += len(field_data)
-                
+
                 for field in field_data:
                     field_counts[field] = field_counts.get(field, 0) + 1
-            
+
             month_counts[month] = month_count
-        
+
         return {
             "total_overrides": total_overrides,
             "months_with_overrides": len(month_counts),

@@ -43,7 +43,7 @@ def parse_comment(
         if len(month) == 2:
             month_str = f"{month[0]}-{month[1]:0>2}"
             comment_id = comment["id"]
-            
+
             for field in ("razor", "blade", "brush", "soap"):
                 override_value = override_manager.get_override(month_str, comment_id, field)
                 if override_value:
