@@ -193,25 +193,10 @@ class BladeMatcher(BaseMatcher):
         # Sort by pattern specificity: longer patterns first, then by pattern complexity
         # Also prioritize non-DE formats to prevent generic DE patterns from overriding
         # specific patterns
-        def pattern_sort_key(item):
-            brand, model, fmt, pattern, compiled, entry = item
-
-            # Primary: format priority (non-DE formats get higher priority)
-            if fmt.upper() == "DE":
-                format_priority = 1  # DE gets lower priority
-            else:
-                format_priority = 0  # Non-DE formats get higher priority
-
-            # Secondary: pattern length (longer = more specific)
-            length_score = len(pattern)
-            # Tertiary: pattern complexity (more special chars = more specific)
-            complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
-            # Quaternary: prefer patterns with word boundaries
-            boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-
-            return (format_priority, -length_score, -complexity_score, -boundary_score)
-
-        return sorted(compiled, key=pattern_sort_key)
+        return sorted(
+            compiled, 
+            key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True)
+        )
 
     def _get_context_aware_patterns(self, target_format: str, is_shavette: bool = False):
         """
@@ -227,35 +212,63 @@ class BladeMatcher(BaseMatcher):
 
         # For Shavettes and Half DE razors, re-sort patterns to prioritize target format and
         # related formats
-        target_format_upper = target_format.upper()
+        
+        # Use the unified tiebreaker system with context-aware format prioritization
+        # The _calculate_pattern_score method handles format priority when deprioritize_de=True
+        return sorted(
+            self.patterns, 
+            key=lambda item: self._calculate_pattern_score(item, deprioritize_de=True)
+        )
 
-        def context_aware_pattern_sort_key(item):
-            brand, model, fmt, pattern, compiled, entry = item
+    def _count_non_optional_parts(self, pattern: str) -> int:
+        """
+        Count non-optional parts in a regex pattern.
+        
+        Simple approach: split on '.*' and count non-empty parts.
+        This handles most cases like 'personna.*hair.*shaper' -> 3 parts.
+        """
+        parts = pattern.split('.*')
+        return len([part for part in parts if part.strip()])
 
-            # Primary: target format gets highest priority
-            if fmt.upper() == target_format_upper:
-                format_priority = 0
-            # Secondary: related single-edge formats
-            elif fmt.upper() in ["INJECTOR", "AC", "GEM", "HAIR SHAPER", "FHS", "A77"]:
-                format_priority = 1
-            # Tertiary: Half DE
-            elif fmt.upper() == "HALF DE":
-                format_priority = 2
-            # Last: DE format
-            elif fmt.upper() == "DE":
-                format_priority = 3
+    def _calculate_pattern_score(self, item, deprioritize_de: bool = False) -> tuple:
+        """
+        Unified tiebreaker function for both normal and context-aware cases.
+        
+        Args:
+            item: Pattern item tuple (brand, model, fmt, pattern, compiled, entry)
+            deprioritize_de: Whether to deprioritize DE formats (for context-aware cases)
+        
+        Returns:
+            Tuple for sorting: (format_priority, -length_score, -non_optional_score, 
+            -complexity_score, -boundary_score)
+        """
+        brand, model, fmt, pattern, compiled, entry = item
+        
+        # Primary: format priority (only when deprioritize_de=True)
+        if deprioritize_de:
+            if fmt.upper() == "DE":
+                format_priority = 1  # DE gets lower priority
             else:
-                format_priority = 2  # Other formats get medium priority
-
-            # Within each format priority, sort by pattern specificity
-            pattern = item[3]
-            length_score = len(pattern)
-            complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
-            boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-
-            return (format_priority, -length_score, -complexity_score, -boundary_score)
-
-        return sorted(self.patterns, key=context_aware_pattern_sort_key)
+                format_priority = 0  # Non-DE formats get higher priority
+        else:
+            format_priority = 0  # No format bias
+        
+        # Secondary: pattern length (longer = more specific)
+        length_score = len(pattern)
+        
+        # Tertiary: non-optional vs optional (non-optional wins)
+        non_optional_score = self._count_non_optional_parts(pattern)
+        
+        # Quaternary: pattern complexity (more special chars = more specific)
+        complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
+        
+        # Quinary: word boundaries (more word boundaries = more specific)
+        boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
+        
+        return (
+            format_priority, -length_score, -non_optional_score, 
+            -complexity_score, -boundary_score
+        )
 
     def _precompute_normalized_correct_matches(self) -> Dict[str, List[Dict[str, Any]]]:
         """
