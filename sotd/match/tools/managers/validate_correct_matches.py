@@ -412,6 +412,7 @@ class ValidateCorrectMatches:
                                     "brand": brand_name,
                                     "model": model_name,
                                     "catalog_format": catalog_format,
+                                    "correct_match": f"{brand_name} {model_name}",
                                     "message": (
                                         f"Blade '{brand_name} {model_name}' is listed under "
                                         f"format '{correct_format}' in correct_matches.yaml but "
