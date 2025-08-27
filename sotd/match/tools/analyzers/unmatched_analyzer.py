@@ -115,11 +115,8 @@ class UnmatchedAnalyzer(AnalysisTool):
             # Legacy format - use the string as-is since it should already be normalized
             all_unmatched[field_val].append(file_info)
         elif isinstance(field_val, dict):
-            # Skip intentionally skipped blades (now using match_type)
-            if field == "blade" and field_val.get("match_type") in [
-                "filtered",
-                "irrelevant_razor_format",
-            ]:
+            # Skip irrelevant razor format blades (blade entries on straight razor shaves)
+            if field == "blade" and field_val.get("match_type") == "irrelevant_razor_format":
                 return
 
             # Check if matched field is missing, empty, or doesn't contain valid match data
