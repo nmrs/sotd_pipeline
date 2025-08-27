@@ -191,3 +191,44 @@ class TestUnifiedTiebreakerSystem:
         # Should still find a match, but through context-aware logic
         assert result.matched is not None, "Should still find a match"
         # The exact match type may vary, but it should work
+
+    def test_global_pattern_no_match_found(self, blade_matcher):
+        """Test that global pattern approach returns proper result when no match is found."""
+        # Test with text that won't match any patterns
+        normalized_text = "nonexistent blade brand that won't match anything"
+        original = "Original text"
+        
+        # This should return a "no match" result with the same structure as existing code
+        result = blade_matcher._find_best_global_match(normalized_text, original)
+        
+        # Should return the same structure as existing "no match" case
+        assert result.matched is None, "Should return no match"
+        assert result.match_type is None, "Should have no match type"
+        assert result.pattern is None, "Should have no pattern"
+        assert result.original == original, "Should preserve original text"
+
+    def test_integration_original_problem_scenario(self, blade_matcher):
+        """Integration test: verify the original problem scenario is now fixed."""
+        # This is the exact scenario from the original problem:
+        # "Personna hair shaper" with generic "Shavette" razor
+        # Should now correctly match to "Hair Shaper" format instead of "Injector"
+        
+        normalized_text = "personna hair shaper"
+        razor_format = "Shavette"  # Generic Shavette
+        
+        # This should trigger the global pattern specificity approach
+        result = blade_matcher.match_with_context(normalized_text, razor_format)
+        
+        # Should find a match
+        assert result.matched is not None, "Should find a match using global approach"
+        
+        # Should match to Hair Shaper format (the most specific pattern)
+        assert result.matched["format"] == "Hair Shaper", "Should match to Hair Shaper format"
+        assert "personna" in result.matched["brand"].lower(), "Should match Personna brand"
+        assert "hair" in result.matched["model"].lower(), "Should match Hair Shaper model"
+        
+        # Verify this is NOT matching to Injector format (the original bug)
+        assert result.matched["format"] != "Injector", "Should NOT match to Injector format"
+        
+        # The pattern used should be the Hair Shaper pattern
+        assert "hair.*shaper" in result.pattern, "Should use Hair Shaper pattern"
