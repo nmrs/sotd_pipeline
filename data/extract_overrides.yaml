@@ -1,0 +1,39 @@
+# SOTD Pipeline Extract Phase Overrides
+# This file allows data analysts to override extracted fields when the initial extraction
+# is ambiguous or incorrect, based on user feedback or manual review.
+#
+# Format:
+# YYYY-MM:
+#   comment_id:
+#     field: "corrected_value"
+#
+# Valid fields: razor, blade, brush, soap
+# Comment IDs are Reddit comment IDs from the source data
+# Values should be the corrected, normalized product names
+
+2025-01:
+  # Example: "Ko" was extracted but user confirmed it's "Koraat"
+  m99b8f9:
+    razor: "Koraat"
+  
+  # Example: Missing razor field that should be "Feather Artist Club"
+  m99b8f0:
+    razor: "Feather Artist Club"
+  
+  # Example: Multiple field corrections for same comment
+  m99b8f1:
+    razor: "Rockwell 6S"
+    blade: "Gillette Minora Platinum"
+    soap: "Declaration Grooming - Seville"
+
+2025-02:
+  # Example: Brush brand correction
+  m99b8f2:
+    brush: "Semogue 610"
+  
+  # Example: Soap maker correction
+  m99b8f3:
+    soap: "Declaration Grooming - Massacre of the Innocents"
+
+# Note: This file is optional - the pipeline will work normally if it doesn't exist
+# or if it's empty. All overrides are validated before use.
