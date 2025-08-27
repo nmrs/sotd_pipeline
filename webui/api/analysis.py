@@ -1254,9 +1254,18 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     f"or remove from correct_matches.yaml"
                 )
             elif issue_type == "format_mismatch":
-                catalog_format = issue.get("catalog_format", "unknown")
-                correct_match = issue.get("correct_match", "unknown")
-                expected_format = issue.get("format", "unknown")
+                catalog_format = issue.get("catalog_format")
+                correct_match = issue.get("correct_match")
+                expected_format = issue.get("format")
+                
+                # Fail fast if required fields are missing
+                if not catalog_format:
+                    raise ValueError(f"Missing required field 'catalog_format' in format_mismatch issue: {issue}")
+                if not correct_match:
+                    raise ValueError(f"Missing required field 'correct_match' in format_mismatch issue: {issue}")
+                if not expected_format:
+                    raise ValueError(f"Missing required field 'format' in format_mismatch issue: {issue}")
+                
                 suggested_action = (
                     f"Move '{correct_match}' from format '{expected_format}' "
                     f"to format '{catalog_format}' in correct_matches.yaml, "
