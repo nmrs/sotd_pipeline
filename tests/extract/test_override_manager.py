@@ -21,12 +21,12 @@ class TestOverrideManager:
     def test_load_overrides_empty_file(self):
         """Test loading overrides from empty file."""
         manager = OverrideManager(Path("empty.yaml"))
-        
+
         mock_file = mock_open(read_data="")
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         assert manager.overrides == {}
 
     def test_load_overrides_valid_single_override(self):
@@ -37,12 +37,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         assert "2025-01" in manager.overrides
         assert "m99b8f9" in manager.overrides["2025-01"]
         assert manager.overrides["2025-01"]["m99b8f9"]["razor"] == "Koraat"
@@ -57,12 +57,12 @@ class TestOverrideManager:
     soap: "Declaration Grooming - Seville"
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         comment_overrides = manager.overrides["2025-01"]["m99b8f9"]
         assert comment_overrides["razor"] == "Koraat"
         assert comment_overrides["blade"] == "Gillette Minora Platinum"
@@ -78,12 +78,12 @@ class TestOverrideManager:
     brush: "Semogue 610"
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         assert len(manager.overrides["2025-01"]) == 2
         assert manager.overrides["2025-01"]["m99b8f9"]["razor"] == "Koraat"
         assert manager.overrides["2025-01"]["m99b8f0"]["brush"] == "Semogue 610"
@@ -91,19 +91,19 @@ class TestOverrideManager:
     def test_load_overrides_multiple_months(self):
         """Test loading overrides for multiple months."""
         manager = OverrideManager(Path("test.yaml"))
-        
+
         with patch.object(Path, "exists", return_value=False):
             manager.load_overrides()
-        
+
         assert manager.overrides == {}
 
     def test_load_overrides_file_not_exists(self):
         """Test behavior when override file doesn't exist."""
         manager = OverrideManager(Path("nonexistent.yaml"))
-        
+
         with patch.object(Path, "exists", return_value=False):
             manager.load_overrides()
-        
+
         assert manager.overrides == {}
 
     def test_load_overrides_invalid_yaml(self):
@@ -115,7 +115,7 @@ class TestOverrideManager:
     invalid_field: value
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -130,7 +130,7 @@ class TestOverrideManager:
     razor: 123
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -145,7 +145,7 @@ class TestOverrideManager:
     razor: ""
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -160,7 +160,7 @@ class TestOverrideManager:
     razor: "   "
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -176,7 +176,7 @@ class TestOverrideManager:
     razor: "{long_value}"
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -194,12 +194,12 @@ class TestOverrideManager:
     blade: Feather
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         # Should load successfully since no actual duplicates exist
         assert "2025-01" in manager.overrides
         assert "m99b8f9" in manager.overrides["2025-01"]
@@ -210,7 +210,7 @@ class TestOverrideManager:
         """Test error handling for invalid root type."""
         yaml_content = "invalid content"
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -223,11 +223,13 @@ class TestOverrideManager:
 2025-01: "not a dict"
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
-                with pytest.raises(ValueError, match="must contain a dictionary of comment overrides"):
+                with pytest.raises(
+                    ValueError, match="must contain a dictionary of comment overrides"
+                ):
                     manager.load_overrides()
 
     def test_load_overrides_invalid_comment_type(self):
@@ -237,7 +239,7 @@ class TestOverrideManager:
   m99b8f9: "not a dict"
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
@@ -252,12 +254,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         override = manager.get_override("2025-01", "m99b8f9", "razor")
         assert override == "Koraat"
 
@@ -275,12 +277,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         override = manager.get_override("2025-01", "nonexistent", "razor")
         assert override is None
 
@@ -292,12 +294,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         override = manager.get_override("2025-01", "m99b8f9", "blade")
         assert override is None
 
@@ -309,12 +311,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         data = [{"id": "m99b8f9", "author": "test"}]
         # Should not raise any exception
         manager.validate_overrides(data)
@@ -327,12 +329,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         data = [{"id": "different_id", "author": "test"}]
         with pytest.raises(ValueError, match="non-existent comment IDs"):
             manager.validate_overrides(data)
@@ -345,12 +347,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         data = [{"author": "test"}]  # Missing id field
         with pytest.raises(ValueError, match="non-existent comment IDs"):
             manager.validate_overrides(data)
@@ -359,9 +361,9 @@ class TestOverrideManager:
         """Test applying override to existing field."""
         manager = OverrideManager(Path("test.yaml"))
         field_data = {"original": "Ko", "normalized": "Ko"}
-        
+
         result = manager.apply_override(field_data, "Koraat", True)
-        
+
         assert result["original"] == "Ko"  # Preserved
         assert result["normalized"] == "Koraat"  # Overridden
         assert result["overridden"] == "Normalized"
@@ -369,9 +371,9 @@ class TestOverrideManager:
     def test_apply_override_missing_field(self):
         """Test applying override to create missing field."""
         manager = OverrideManager(Path("test.yaml"))
-        
+
         result = manager.apply_override(None, "Koraat", False)
-        
+
         assert result["original"] == "Koraat"
         assert result["normalized"] == "Koraat"
         assert result["overridden"] == "Original,Normalized"
@@ -379,9 +381,9 @@ class TestOverrideManager:
     def test_apply_override_none_field_data(self):
         """Test applying override when field_data is None."""
         manager = OverrideManager(Path("test.yaml"))
-        
+
         result = manager.apply_override(None, "Koraat", True)
-        
+
         # Should create new field since field_data is None
         assert result["original"] == "Koraat"
         assert result["normalized"] == "Koraat"
@@ -400,12 +402,12 @@ class TestOverrideManager:
     razor: Koraat
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         assert manager.has_overrides()
 
     def test_load_overrides_strips_whitespace(self):
@@ -416,12 +418,12 @@ class TestOverrideManager:
     razor: "  Koraat  "
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         override = manager.get_override("2025-01", "m99b8f9", "razor")
         assert override == "Koraat"  # Whitespace stripped
 
@@ -429,7 +431,7 @@ class TestOverrideManager:
         """Test get_override_summary when no overrides are loaded."""
         manager = OverrideManager(Path("test.yaml"))
         summary = manager.get_override_summary()
-        
+
         assert summary["total_overrides"] == 0
         assert summary["months_with_overrides"] == 0
         assert summary["month_counts"] == {}
@@ -449,14 +451,14 @@ class TestOverrideManager:
     soap: Declaration
 """
         manager = OverrideManager(Path("test.yaml"))
-        
+
         mock_file = mock_open(read_data=yaml_content)
         with patch.object(Path, "open", mock_file):
             with patch.object(Path, "exists", return_value=True):
                 manager.load_overrides()
-        
+
         summary = manager.get_override_summary()
-        
+
         assert summary["total_overrides"] == 4
         assert summary["months_with_overrides"] == 2
         assert summary["month_counts"]["2025-01"] == 3
