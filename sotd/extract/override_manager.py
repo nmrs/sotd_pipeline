@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Override manager for extract phase field corrections."""
 
+import logging
 import yaml
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class OverrideManager:
@@ -31,6 +34,7 @@ class OverrideManager:
         """
         if not self.override_file_path.exists():
             # Override file is optional - pipeline continues normally
+            logger.debug("Override file not found: %s", self.override_file_path)
             return
 
         try:
@@ -41,17 +45,17 @@ class OverrideManager:
 
         if content is None:
             # Empty file is valid
+            logger.debug("Override file is empty: %s", self.override_file_path)
             return
 
         if not isinstance(content, dict):
             raise ValueError("Override file must contain a dictionary at root level")
 
         # Validate and load overrides
+        duplicate_overrides = []
         for month, month_data in content.items():
             if not isinstance(month_data, dict):
-                raise ValueError(
-                    f"Month '{month}' must contain a dictionary of comment overrides"
-                )
+                raise ValueError(f"Month '{month}' must contain a dictionary of comment overrides")
 
             month_overrides = {}
             for comment_id, field_data in month_data.items():
@@ -63,17 +67,42 @@ class OverrideManager:
 
                 comment_overrides = {}
                 for field, value in field_data.items():
+                    # Validate field name
                     if field not in self.VALID_FIELDS:
                         raise ValueError(
                             f"Invalid field '{field}' in comment '{comment_id}' month '{month}'. "
                             f"Valid fields: {', '.join(sorted(self.VALID_FIELDS))}"
                         )
 
-                    if not isinstance(value, str) or not value.strip():
+                    # Validate override value
+                    if not isinstance(value, str):
                         raise ValueError(
                             f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
-                            f"must be a non-empty string, got: {repr(value)}"
+                            f"must be a string, got: {type(value).__name__}"
                         )
+                    
+                    if not value.strip():
+                        raise ValueError(
+                            f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
+                            f"cannot be empty or whitespace-only"
+                        )
+
+                    # Check for reasonable length (prevent extremely long values)
+                    if len(value.strip()) > 200:
+                        raise ValueError(
+                            f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
+                            f"is too long ({len(value.strip())} characters). "
+                            f"Maximum length: 200 characters"
+                        )
+
+                    # Check for duplicate overrides
+                    override_key = f"{month}:{comment_id}:{field}"
+                    if override_key in duplicate_overrides:
+                        raise ValueError(
+                            f"Duplicate override for field '{field}' in comment '{comment_id}' month '{month}'. "
+                            f"Each comment+field combination can only have one override."
+                        )
+                    duplicate_overrides.append(override_key)
 
                     comment_overrides[field] = value.strip()
 
@@ -82,6 +111,8 @@ class OverrideManager:
 
             if month_overrides:
                 self.overrides[month] = month_overrides
+
+        logger.info("Loaded %d overrides from %s", len(duplicate_overrides), self.override_file_path)
 
     def get_override(self, month: str, comment_id: str, field: str) -> Optional[str]:
         """Get override value for specific field if it exists.
@@ -119,7 +150,8 @@ class OverrideManager:
 
         if missing_ids:
             raise ValueError(
-                f"Override file references non-existent comment IDs: {', '.join(missing_ids)}"
+                f"Override file references non-existent comment IDs: {', '.join(missing_ids)}. "
+                f"This usually means the override file is for a different dataset or the data has changed."
             )
 
     def apply_override(
@@ -140,13 +172,15 @@ class OverrideManager:
             result = field_data.copy()
             result["normalized"] = override_value
             result["overridden"] = "Normalized"
+            logger.debug("Applied override to existing field: %s -> %s", field_data.get("normalized"), override_value)
             return result
         else:
             # Create new field
+            logger.debug("Created new field from override: %s", override_value)
             return {
                 "original": override_value,
                 "normalized": override_value,
-                "overridden": "Original,Normalized"
+                "overridden": "Original,Normalized",
             }
 
     def has_overrides(self) -> bool:
@@ -156,3 +190,31 @@ class OverrideManager:
             True if overrides exist, False otherwise
         """
         return bool(self.overrides)
+
+    def get_override_summary(self) -> Dict[str, Any]:
+        """Get summary statistics about loaded overrides.
+        
+        Returns:
+            Dictionary with override statistics
+        """
+        total_overrides = 0
+        month_counts = {}
+        field_counts = {}
+        
+        for month, month_overrides in self.overrides.items():
+            month_count = 0
+            for comment_id, field_data in month_overrides.items():
+                month_count += len(field_data)
+                total_overrides += len(field_data)
+                
+                for field in field_data:
+                    field_counts[field] = field_counts.get(field, 0) + 1
+            
+            month_counts[month] = month_count
+        
+        return {
+            "total_overrides": total_overrides,
+            "months_with_overrides": len(month_counts),
+            "month_counts": month_counts,
+            "field_counts": field_counts,
+        }
