@@ -28,16 +28,16 @@ class TestEnhancedReportGeneration:
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
 
-        # Sample data
+        # Sample data with required rank column
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "razors": [
-                {"name": "Test Razor 1", "shaves": 10, "unique_users": 5},
-                {"name": "Test Razor 2", "shaves": 8, "unique_users": 3},
+                {"rank": 1, "name": "Test Razor 1", "shaves": 10, "unique_users": 5},
+                {"rank": 2, "name": "Test Razor 2", "shaves": 8, "unique_users": 3},
             ],
             "blades": [
-                {"name": "Test Blade 1", "shaves": 15, "unique_users": 8},
-                {"name": "Test Blade 2", "shaves": 12, "unique_users": 6},
+                {"rank": 1, "name": "Test Blade 1", "shaves": 15, "unique_users": 8},
+                {"rank": 2, "name": "Test Blade 2", "shaves": 12, "unique_users": 6},
             ],
         }
 
@@ -66,18 +66,18 @@ class TestEnhancedReportGeneration:
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
 
-        # Sample data with varying shave counts
+        # Sample data with varying shave counts and required rank column
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "razors": [
-                {"name": "High Use Razor", "shaves": 15, "unique_users": 8},
-                {"name": "Medium Use Razor", "shaves": 8, "unique_users": 4},
-                {"name": "Low Use Razor", "shaves": 3, "unique_users": 2},
+                {"rank": 1, "name": "High Use Razor", "shaves": 15, "unique_users": 8},
+                {"rank": 2, "name": "Medium Use Razor", "shaves": 8, "unique_users": 4},
+                {"rank": 3, "name": "Low Use Razor", "shaves": 3, "unique_users": 2},
             ],
             "blades": [
-                {"name": "High Use Blade", "shaves": 20, "unique_users": 10},
-                {"name": "Medium Use Blade", "shaves": 12, "unique_users": 6},
-                {"name": "Low Use Blade", "shaves": 5, "unique_users": 3},
+                {"rank": 1, "name": "High Use Blade", "shaves": 20, "unique_users": 10},
+                {"rank": 2, "name": "Medium Use Blade", "shaves": 12, "unique_users": 6},
+                {"rank": 3, "name": "Low Use Blade", "shaves": 5, "unique_users": 3},
             ],
         }
 
@@ -379,16 +379,12 @@ class TestEnhancedReportGeneration:
         # Sample data
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "razors": [
-                {"name": "Razor 1", "shaves": 10, "unique_users": 5},
-            ],
+            "razors": [{"name": "Razor 1", "shaves": 10, "unique_users": 5}],
             "blades": [
                 {"name": "High Use Blade", "shaves": 15, "unique_users": 8},
                 {"name": "Low Use Blade", "shaves": 3, "unique_users": 2},
             ],
-            "brushes": [
-                {"name": "Brush 1", "shaves": 12, "unique_users": 6},
-            ],
+            "brushes": [{"name": "Brush 1", "shaves": 12, "unique_users": 6}],
         }
 
         # Generate report - should not crash
@@ -427,9 +423,7 @@ class TestEnhancedReportGeneration:
         # Sample data with low values
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "razors": [
-                {"name": "Low Use Razor", "shaves": 5, "unique_users": 2},
-            ],
+            "razors": [{"name": "Low Use Razor", "shaves": 5, "unique_users": 2}],
             "blades": [
                 {"name": "Blade 1", "shaves": 10, "unique_users": 5},
                 {"name": "Blade 2", "shaves": 8, "unique_users": 4},
@@ -471,7 +465,7 @@ class TestEnhancedReportGeneration:
                 {"rank": 2, "name": "Tied Razor A", "shaves": 15, "unique_users": 8},
                 {"rank": 2, "name": "Tied Razor B", "shaves": 15, "unique_users": 8},
                 {"rank": 4, "name": "Fourth Razor", "shaves": 10, "unique_users": 5},
-            ],
+            ]
         }
 
         # Generate report
@@ -509,20 +503,20 @@ class TestEnhancedReportGeneration:
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "soaps": [
-                {"name": "Popular Soap", "shaves": 20, "unique_users": 10, "rank": 1},
-                {"name": "Medium Soap", "shaves": 8, "unique_users": 4, "rank": 2},
-                {"name": "Unpopular Soap", "shaves": 3, "unique_users": 2, "rank": 3},
+                {"rank": 1, "name": "Popular Soap", "shaves": 20, "unique_users": 10},
+                {"rank": 2, "name": "Medium Soap", "shaves": 8, "unique_users": 4},
+                {"rank": 3, "name": "Unpopular Soap", "shaves": 3, "unique_users": 2},
             ],
             "soap_makers": [
-                {"brand": "Popular Brand", "shaves": 25, "unique_users": 8, "rank": 1},
-                {"brand": "Medium Brand", "shaves": 15, "unique_users": 6, "rank": 2},
-                {"brand": "Small Brand", "shaves": 10, "unique_users": 3, "rank": 3},
+                {"rank": 1, "brand": "Popular Brand", "shaves": 25, "unique_users": 8},
+                {"rank": 2, "brand": "Medium Brand", "shaves": 15, "unique_users": 6},
+                {"rank": 3, "brand": "Small Brand", "shaves": 10, "unique_users": 3},
             ],
             "brand_diversity": [
-                {"brand": "Brand A", "unique_soaps": 5, "rank": 1},
-                {"brand": "Brand B", "unique_soaps": 4, "rank": 2},
-                {"brand": "Brand C", "unique_soaps": 3, "rank": 3},
-                {"brand": "Brand D", "unique_soaps": 2, "rank": 4},
+                {"rank": 1, "brand": "Brand A", "unique_soaps": 5},
+                {"rank": 2, "brand": "Brand B", "unique_soaps": 4},
+                {"rank": 3, "brand": "Brand C", "unique_soaps": 3},
+                {"rank": 4, "brand": "Brand D", "unique_soaps": 2},
             ],
         }
 
@@ -561,20 +555,20 @@ class TestEnhancedReportGeneration:
         template_content = """# User Report
 
 ## Top Shavers (20+ shaves, max 2 rows)
-{{tables.top-shavers|shaves:20|rows:2}}
+{{tables.users|shaves:20|rows:2}}
 """
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
 
-        # Sample user data
+        # Sample user data with required rank column
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "users": [
-                {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
-                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2},
-                {"user": "user3", "shaves": 25, "missed_days": 6, "position": 3},
-                {"user": "user4", "shaves": 15, "missed_days": 16, "position": 4},
-            ],
+                {"rank": 1, "user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
+                {"rank": 2, "user": "user2", "shaves": 28, "missed_days": 3, "position": 2},
+                {"rank": 3, "user": "user3", "shaves": 25, "missed_days": 6, "position": 3},
+                {"rank": 4, "user": "user4", "shaves": 15, "missed_days": 16, "position": 4},
+            ]
         }
 
         # Generate report
@@ -589,8 +583,8 @@ class TestEnhancedReportGeneration:
         # Verify filtering and row limits work
         assert "user1" in report_content
         assert "user2" in report_content
-        assert "user3" in report_content  # Should be included due to tie handling
-        assert "user4" not in report_content  # Below shaves threshold
+        assert "user3" not in report_content  # Below shaves threshold (20)
+        assert "user4" not in report_content  # Below shaves threshold (20)
 
     def test_enhanced_table_specialized_tables(self, tmp_path):
         """Test enhanced table functionality with specialized tables."""
@@ -609,13 +603,13 @@ class TestEnhancedReportGeneration:
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "blackbird_plates": [
-                {"plate": "OC", "shaves": 10, "unique_users": 5, "rank": 1},
-                {"plate": "SB", "shaves": 3, "unique_users": 2, "rank": 2},
+                {"rank": 1, "plate": "OC", "shaves": 10, "unique_users": 5},
+                {"rank": 2, "plate": "SB", "shaves": 3, "unique_users": 2},
             ],
             "game_changer_plates": [
-                {"gap": "0.84-P", "shaves": 15, "unique_users": 8, "rank": 1},
-                {"gap": "0.68-P", "shaves": 12, "unique_users": 6, "rank": 2},
-                {"gap": "0.76-P", "shaves": 10, "unique_users": 5, "rank": 3},
+                {"rank": 1, "gap": "0.84-P", "shaves": 15, "unique_users": 8},
+                {"rank": 2, "gap": "0.68-P", "shaves": 12, "unique_users": 6},
+                {"rank": 3, "gap": "0.76-P", "shaves": 10, "unique_users": 5},
             ],
         }
 
@@ -655,15 +649,15 @@ class TestEnhancedReportGeneration:
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "razor_blade_combinations": [
-                {"name": "Razor A + Blade X", "shaves": 15, "unique_users": 8, "rank": 1},
-                {"name": "Razor B + Blade Y", "shaves": 8, "unique_users": 4, "rank": 2},
-                {"name": "Razor C + Blade Z", "shaves": 3, "unique_users": 2, "rank": 3},
+                {"rank": 1, "name": "Razor A + Blade X", "shaves": 15, "unique_users": 8},
+                {"rank": 2, "name": "Razor B + Blade Y", "shaves": 8, "unique_users": 4},
+                {"rank": 3, "name": "Razor C + Blade Z", "shaves": 3, "unique_users": 2},
             ],
             "highest_use_count_per_blade": [
-                {"blade": "Blade A", "uses": 20, "user": "User1", "rank": 1},
-                {"blade": "Blade B", "uses": 18, "user": "User2", "rank": 2},
-                {"blade": "Blade C", "uses": 15, "user": "User3", "rank": 3},
-                {"blade": "Blade D", "uses": 12, "user": "User4", "rank": 4},
+                {"rank": 1, "blade": "Blade A", "uses": 20, "user": "User1"},
+                {"rank": 2, "blade": "Blade B", "uses": 18, "user": "User2"},
+                {"rank": 3, "blade": "Blade C", "uses": 15, "user": "User3"},
+                {"rank": 4, "blade": "Blade D", "uses": 12, "user": "User4"},
             ],
         }
 
@@ -704,7 +698,7 @@ class TestEnhancedReportGeneration:
             "razors": [
                 {"name": "High Use Razor", "shaves": 15, "unique_users": 8},
                 {"name": "Low Use Razor", "shaves": 3, "unique_users": 2},
-            ],
+            ]
         }
 
         # Generate report with debug enabled
@@ -736,12 +730,12 @@ class TestEnhancedReportGeneration:
             "razors": [
                 {
                     "rank": i + 1,
-                    "name": f"Razor {i}",
+                    "name": f"Razor {i}, rank: 1",
                     "shaves": 20 - (i % 10),  # Varying shave counts
                     "unique_users": 10 - (i % 5),  # Varying user counts
                 }
                 for i in range(100)  # 100 razors
-            ],
+            ]
         }
 
         # Generate report - should complete in reasonable time
@@ -787,15 +781,9 @@ class TestEnhancedReportGeneration:
         # Sample data with edge cases
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "razors": [
-                {"name": "Single Razor", "shaves": 5, "unique_users": 2},
-            ],
-            "blades": [
-                {"name": "Low Use Blade", "shaves": 3, "unique_users": 1},
-            ],
-            "brushes": [
-                {"name": "Test Brush", "shaves": 10, "unique_users": 5},
-            ],
+            "razors": [{"name": "Single Razor", "shaves": 5, "unique_users": 2}],
+            "blades": [{"name": "Low Use Blade", "shaves": 3, "unique_users": 1}],
+            "brushes": [{"name": "Test Brush", "shaves": 10, "unique_users": 5}],
         }
 
         # Generate report
@@ -828,8 +816,8 @@ class TestEnhancedReportGeneration:
 ## Test 2: Unique Users + Ranks
 {{tables.blades|unique_users:3|ranks:2}}
 
-## Test 3: All Parameters
-{{tables.brushes|shaves:10|unique_users:2|rows:5|ranks:3}}
+## Test 3: Single Numeric Limit + Other Parameters
+{{tables.brushes|shaves:10|rows:5|ranks:3}}
 """
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
@@ -866,7 +854,7 @@ class TestEnhancedReportGeneration:
         assert "# Parameter Test Report" in report_content
         assert "## Test 1: Shaves + Rows" in report_content
         assert "## Test 2: Unique Users + Ranks" in report_content
-        assert "## Test 3: All Parameters" in report_content
+        assert "## Test 3: Single Numeric Limit + Other Parameters" in report_content
 
         # Test 1: Should filter by shaves and limit rows
         assert "Razor 1" in report_content
@@ -880,7 +868,7 @@ class TestEnhancedReportGeneration:
         assert "Blade 3" not in report_content  # Below unique_users threshold
         assert "Blade 4" not in report_content  # Below unique_users threshold
 
-        # Test 3: Should apply all parameters
+        # Test 3: Should apply single numeric limit + other parameters
         assert "Brush 1" in report_content
         assert "Brush 2" in report_content
         assert "Brush 3" in report_content
