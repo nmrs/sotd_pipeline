@@ -12,7 +12,10 @@ class TestMonthlyReportGenerator:
     def test_init_with_hardware_type(self):
         """Test initialization with hardware report type."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {
+            "razors": [{"name": "Test Razor", "shaves": 1}],
+            "blades": [{"name": "Test Blade", "shaves": 1}],
+        }
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -25,7 +28,7 @@ class TestMonthlyReportGenerator:
     def test_init_with_software_type(self):
         """Test initialization with software report type."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"soaps": []}
+        data = {"soaps": [{"name": "Test Soap", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("software", metadata, data)
 
@@ -36,7 +39,7 @@ class TestMonthlyReportGenerator:
     def test_init_with_comparison_data(self):
         """Test initialization with comparison data."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
         comparison_data = {"previous_month": {"razors": []}}
 
         generator = MonthlyReportGenerator("hardware", metadata, data, comparison_data)
@@ -46,7 +49,7 @@ class TestMonthlyReportGenerator:
     def test_init_with_debug_enabled(self):
         """Test initialization with debug enabled."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data, debug=True)
 
@@ -55,7 +58,7 @@ class TestMonthlyReportGenerator:
     def test_init_with_custom_template_path(self):
         """Test initialization with custom template path."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
         template_path = "/custom/templates"
 
         generator = MonthlyReportGenerator("hardware", metadata, data, template_path=template_path)
@@ -65,7 +68,7 @@ class TestMonthlyReportGenerator:
     def test_generate_header_deprecated(self):
         """Test that generate_header returns empty string (deprecated)."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -75,7 +78,7 @@ class TestMonthlyReportGenerator:
     def test_generate_tables_deprecated(self):
         """Test that generate_tables returns empty list (deprecated)."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -93,7 +96,8 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["razors", "blades"]
         mock_table_generator.generate_table.side_effect = [
             "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-            "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |"]
+            "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
+        ]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
@@ -119,8 +123,12 @@ class TestMonthlyReportGenerator:
             "sample_percentage": 0.0,
             "sample_users": 0,
             "sample_brands": 0,
-            "unique_sample_soaps": 0}
-        data = {"razors": [], "blades": []}
+            "unique_sample_soaps": 0,
+        }
+        data = {
+            "razors": [{"name": "Test Razor", "shaves": 1}],
+            "blades": [{"name": "Test Blade", "shaves": 1}],
+        }
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -145,10 +153,12 @@ class TestMonthlyReportGenerator:
                 "sample_percentage": "0.0%",
                 "sample_users": "0",
                 "sample_brands": "0",
-                "unique_sample_soaps": "0"},
+                "unique_sample_soaps": "0",
+            },
             {
                 "{{tables.razors}}": "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-                "{{tables.blades}}": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |"},
+                "{{tables.blades}}": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
+            },
         )
 
         assert result == "Generated report"
@@ -164,7 +174,8 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["soaps", "scents"]
         mock_table_generator.generate_table.side_effect = [
             "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
-            "| Scent | Shaves |\n|------|--------|\n| Test | 10 |"]
+            "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
+        ]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
@@ -190,8 +201,12 @@ class TestMonthlyReportGenerator:
             "sample_percentage": 10.0,
             "sample_users": 15,
             "sample_brands": 8,
-            "unique_sample_soaps": 12}
-        data = {"soaps": [], "scents": []}
+            "unique_sample_soaps": 12,
+        }
+        data = {
+            "soaps": [{"name": "Test Soap", "shaves": 1}],
+            "scents": [{"name": "Test Scent", "shaves": 1}],
+        }
 
         generator = MonthlyReportGenerator("software", metadata, data)
 
@@ -216,10 +231,12 @@ class TestMonthlyReportGenerator:
                 "sample_percentage": "10.0%",
                 "sample_users": "15",
                 "sample_brands": "8",
-                "unique_sample_soaps": "12"},
+                "unique_sample_soaps": "12",
+            },
             {
                 "{{tables.soaps}}": "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
-                "{{tables.scents}}": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |"},
+                "{{tables.scents}}": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
+            },
         )
 
         assert result == "Generated software report"
@@ -242,7 +259,7 @@ class TestMonthlyReportGenerator:
 
         # Test data
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
         template_path = "/custom/templates"
 
         generator = MonthlyReportGenerator("hardware", metadata, data, template_path=template_path)
@@ -263,7 +280,8 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["razors", "blades"]
         mock_table_generator.generate_table.side_effect = [
             "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-            Exception("Table generation failed")]
+            Exception("Table generation failed"),
+        ]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
@@ -275,7 +293,7 @@ class TestMonthlyReportGenerator:
 
         # Test data
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {"razors": []}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -292,7 +310,7 @@ class TestMonthlyReportGenerator:
     def test_month_parsing_valid_format(self):
         """Test month parsing with valid YYYY-MM format."""
         metadata = {"month": "2025-01", "total_shaves": 100}
-        data = {}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -320,7 +338,7 @@ class TestMonthlyReportGenerator:
     def test_month_parsing_invalid_format(self):
         """Test month parsing with invalid format falls back to original."""
         metadata = {"month": "invalid-month", "total_shaves": 100}
-        data = {}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
@@ -348,7 +366,7 @@ class TestMonthlyReportGenerator:
     def test_month_parsing_none_month(self):
         """Test month parsing with None month falls back to None."""
         metadata = {"month": None, "total_shaves": 100}
-        data = {}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
