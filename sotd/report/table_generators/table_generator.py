@@ -200,26 +200,11 @@ class TableGenerator:
         # Five years ago (same month)
         five_years_ago = current_date.replace(year=current_date.year - 5)
 
-        # Format periods to match the keys used in comparison_data
-        month_names = {
-            1: "Jan",
-            2: "Feb",
-            3: "Mar",
-            4: "Apr",
-            5: "May",
-            6: "Jun",
-            7: "Jul",
-            8: "Aug",
-            9: "Sep",
-            10: "Oct",
-            11: "Nov",
-            12: "Dec",
-        }
-
+        # Return periods in YYYY-MM format to match comparison data keys
         return [
-            f"{month_names[prev_month.month]} {prev_month.year}",
-            f"{month_names[current_date.month]} {prev_year.year}",
-            f"{month_names[current_date.month]} {five_years_ago.year}",
+            prev_month.strftime("%Y-%m"),
+            prev_year.strftime("%Y-%m"),
+            five_years_ago.strftime("%Y-%m"),
         ]
 
     def _format_delta_column_names(self, current_month: str) -> Dict[str, str]:
@@ -292,8 +277,13 @@ class TableGenerator:
             if period not in self.comparison_data:
                 continue
 
-            # Get the data part of the (metadata, data) tuple
-            period_data = self.comparison_data[period][1]  # type: ignore
+            # Get the comparison data for this period
+            # Handle both tuple format (metadata, data) and direct data format
+            period_data = self.comparison_data[period]
+            if isinstance(period_data, tuple) and len(period_data) == 2:
+                # Tuple format: (metadata, data)
+                period_data = period_data[1]
+
             if table_name not in period_data:
                 continue
 
@@ -505,7 +495,7 @@ class TableGenerator:
             Limited DataFrame
 
         Raises:
-            ValueError: If multiple limits specified, column doesn't exist, threshold is invalid, or limits create gaps
+            ValueError: If multiple limits specified, column doesn't exist, or threshold is invalid
         """
         # Only allow one numeric column limit per table
         if len(numeric_limits) > 1:
@@ -534,10 +524,6 @@ class TableGenerator:
 
         # Apply limit (>= threshold) - cut from bottom using pandas boolean indexing
         limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
-
-        # Note: Gap validation removed - gaps in rank sequence are expected and normal
-        # when applying numeric limits, as filtering removes records below thresholds
-        # This is the intended behavior for bottom-cutoff filtering
 
         return limited_df
 
@@ -597,8 +583,10 @@ class TableGenerator:
         if df.empty:
             return ""
 
-        # Validate that rank column exists
-        if "rank" not in df.columns:
+        # Validate that rank column exists only when needed
+        rank_required = ranks is not None or deltas or columns is not None
+
+        if rank_required and "rank" not in df.columns:
             raise ValueError(f"Data for {table_name} is missing 'rank' column")
 
         # Apply ranks filter if specified
@@ -607,7 +595,22 @@ class TableGenerator:
 
         # Apply rows limit if specified
         if rows is not None:
-            df = df.head(rows)
+            # Implement tie-aware row limiting
+            if "rank" in df.columns:
+                # Sort by rank first to ensure proper ordering
+                df = df.sort_values("rank")
+
+                # Find the rank at the row limit boundary
+                if len(df) > rows:
+                    # Get the rank at position 'rows' (0-indexed)
+                    boundary_rank = df.iloc[rows - 1]["rank"]
+
+                    # Include all items with the same rank as the boundary
+                    # This ensures ties are respected
+                    df = df[df["rank"] <= boundary_rank]
+            else:
+                # No rank column, use simple head
+                df = df.head(rows)
 
         # Apply numeric column limits if specified
         if numeric_limits:
