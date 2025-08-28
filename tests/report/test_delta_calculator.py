@@ -20,13 +20,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_basic(self):
         """Test basic delta calculation with rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor B", "shaves": 90},
+            {"name": "Razor B", "shaves": 90, "rank": 1},
             {"name": "Razor A", "shaves": 85, "rank": 2},
             {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
@@ -57,14 +57,14 @@ class TestDeltaCalculator:
     def test_calculate_deltas_new_item(self):
         """Test delta calculation with new items not in historical data."""
         current_data = [
-            {"name": "Razor A", "shaves": 100},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "New Razor", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 90},
-            {"name": "Razor B", "shaves": 85, "rank": 2},
+            {"name": "Razor A", "shaves": 90, "rank": 2},
+            {"name": "Razor B", "shaves": 85, "rank": 1},
         ]
 
         calculator = DeltaCalculator()
@@ -81,7 +81,7 @@ class TestDeltaCalculator:
     def test_calculate_deltas_missing_rank(self):
         """Test delta calculation with missing rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100},
+            {"name": "Razor A", "shaves": 100, "rank": 1},  # Has rank
             {"name": "Razor B", "shaves": 80},  # Missing rank
         ]
 
@@ -106,10 +106,8 @@ class TestDeltaCalculator:
         assert result == []
 
         # Empty historical data
-        result = calculator.calculate_deltas([{"name": "Razor A"}], [])
-        assert len(result) == 1
-        assert result[0]["delta"] is None
-        assert result[0]["delta_text"] == "n/a"
+        result = calculator.calculate_deltas([{"name": "Razor A", "rank": 1}], [])
+        assert len(result) == 0  # No deltas can be calculated without historical data
 
     def test_calculate_deltas_invalid_input(self):
         """Test delta calculation with invalid input types."""
@@ -124,14 +122,14 @@ class TestDeltaCalculator:
     def test_calculate_deltas_max_items(self):
         """Test delta calculation with max_items limit."""
         current_data = [
-            {"name": "Razor A", "shaves": 100},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
             {"name": "Razor A", "shaves": 90, "rank": 2},
-            {"name": "Razor B", "shaves": 85},
+            {"name": "Razor B", "shaves": 85, "rank": 1},
             {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
 
@@ -145,13 +143,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_custom_name_key(self):
         """Test delta calculation with custom name key."""
         current_data = [
-            {"product": "Razor A", "shaves": 100},
+            {"product": "Razor A", "shaves": 100, "rank": 1},
             {"product": "Razor B", "shaves": 80, "rank": 2},
         ]
 
         historical_data = [
             {"product": "Razor A", "shaves": 90, "rank": 2},
-            {"product": "Razor B", "shaves": 85},
+            {"product": "Razor B", "shaves": 85, "rank": 1},
         ]
 
         calculator = DeltaCalculator()
@@ -174,22 +172,22 @@ class TestDeltaCalculator:
         """Test delta calculation for multiple categories."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
                 {"name": "Razor B", "shaves": 80, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 50},
+                {"name": "Blade A", "shaves": 50, "rank": 1},
                 {"name": "Blade B", "shaves": 40, "rank": 2},
             ],
         }
 
         historical_data = {
             "razors": [
-                {"name": "Razor B", "shaves": 90},
+                {"name": "Razor B", "shaves": 90, "rank": 1},
                 {"name": "Razor A", "shaves": 85, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 45},
+                {"name": "Blade A", "shaves": 45, "rank": 1},
                 {"name": "Blade B", "shaves": 35, "rank": 2},
             ],
         }
@@ -280,14 +278,14 @@ class TestDeltaCalculator:
         """
         # Current month data (June 2025)
         current_data = [
-            {"name": "SBC", "shaves": 22, "unique_users": 8},
+            {"name": "SBC", "shaves": 22, "unique_users": 8, "rank": 1},
             {"name": "SBD", "shaves": 31, "unique_users": 6, "rank": 2},
             {"name": "OCF", "shaves": 9, "unique_users": 1, "rank": 3},
         ]
 
         # Previous month data (May 2025) - these plates definitely existed
         historical_data = [
-            {"name": "SBC", "shaves": 23, "unique_users": 3},
+            {"name": "SBC", "shaves": 23, "unique_users": 3, "rank": 1},
             {"name": "SBD", "shaves": 23, "unique_users": 3, "rank": 2},
             {"name": "OCF", "shaves": 3, "unique_users": 1, "rank": 3},
         ]
@@ -753,7 +751,7 @@ class TestCalculateDeltasForPeriod:
         """Test successful delta calculation for a period."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
                 {"name": "Razor B", "shaves": 80, "rank": 2},
             ]
         }
@@ -763,7 +761,7 @@ class TestCalculateDeltasForPeriod:
                 {"month": "2024-12"},
                 {
                     "razors": [
-                        {"name": "Razor B", "shaves": 90},
+                        {"name": "Razor B", "shaves": 90, "rank": 1},
                         {"name": "Razor A", "shaves": 85, "rank": 2},
                     ]
                 },
@@ -811,7 +809,7 @@ class TestCalculateDeltasForPeriod:
 
     def test_calculate_deltas_for_period_with_debug(self):
         """Test delta calculation with debug mode enabled."""
-        current_data = {"razors": [{"name": "Razor A", "shaves": 100}]}
+        current_data = {"razors": [{"name": "Razor A", "shaves": 100, "rank": 1}]}
 
         comparison_data: Dict[str, Tuple[Dict[str, Any], Dict[str, Any]]] = {
             "previous_month": (

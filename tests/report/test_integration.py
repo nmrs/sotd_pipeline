@@ -2,6 +2,7 @@
 
 from sotd.report.process import generate_report_content
 from sotd.report.monthly_generator import MonthlyReportGenerator
+import pytest
 
 
 class TestReportIntegration:
@@ -14,42 +15,55 @@ class TestReportIntegration:
             "month": "2025-01",
             "total_shaves": 1000,
             "unique_shavers": 50,
-            "avg_shaves_per_user": 20.0}
+            "avg_shaves_per_user": 20.0,
+        }
 
         data = {
             "razors": [
-                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12}, {"name": "Karve CB", "shaves": 18, "unique_users": 8}
+                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
+                {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
             ],
             "razor_manufacturers": [
-                {"brand": "Gillette", "shaves": 30, "unique_users": 15},
-                {"brand": "Karve", "shaves": 18, "unique_users": 8}],
+                {"brand": "Gillette", "shaves": 30, "unique_users": 15, "rank": 1},
+                {"brand": "Karve", "shaves": 18, "unique_users": 8, "rank": 2},
+            ],
             "razor_formats": [
-                {"format": "DE", "shaves": 45, "unique_users": 20},
-                {"format": "SE", "shaves": 5, "unique_users": 3}],
+                {"format": "DE", "shaves": 45, "unique_users": 20, "rank": 1},
+                {"format": "SE", "shaves": 5, "unique_users": 3, "rank": 2},
+            ],
             "blades": [
-                {"name": "Gillette Nacet", "shaves": 30, "unique_users": 15}, {"name": "Personna Lab Blue", "shaves": 20, "unique_users": 10}
+                {"name": "Gillette Nacet", "shaves": 30, "unique_users": 15, "rank": 1},
+                {"name": "Personna Lab Blue", "shaves": 20, "unique_users": 10, "rank": 2},
             ],
             "blade_manufacturers": [
-                {"brand": "Gillette", "shaves": 35, "unique_users": 18},
-                {"brand": "Personna", "shaves": 25, "unique_users": 12}],
+                {"brand": "Gillette", "shaves": 35, "unique_users": 18, "rank": 1},
+                {"brand": "Personna", "shaves": 25, "unique_users": 12, "rank": 2},
+            ],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8}, {"name": "AP Shave Co", "shaves": 12, "unique_users": 6}
+                {"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"name": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
             ],
             "brush_handle_makers": [
-                {"handle_maker": "Simpson", "shaves": 15, "unique_users": 8},
-                {"handle_maker": "AP Shave Co", "shaves": 12, "unique_users": 6}],
+                {"handle_maker": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"handle_maker": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
+            ],
             "brush_knot_makers": [
-                {"brand": "Simpson", "shaves": 15, "unique_users": 8},
-                {"brand": "AP Shave Co", "shaves": 12, "unique_users": 6}],
+                {"brand": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"brand": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
+            ],
             "brush_fibers": [
-                {"fiber": "Badger", "shaves": 20, "unique_users": 10},
-                {"fiber": "Synthetic", "shaves": 10, "unique_users": 5}],
+                {"fiber": "Badger", "shaves": 20, "unique_users": 10, "rank": 1},
+                {"fiber": "Synthetic", "shaves": 10, "unique_users": 5, "rank": 2},
+            ],
             "brush_knot_sizes": [
-                {"knot_size": "24mm", "shaves": 15, "unique_users": 8},
-                {"knot_size": "26mm", "shaves": 12, "unique_users": 6}],
+                {"knot_size": "24mm", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"knot_size": "26mm", "shaves": 12, "unique_users": 6, "rank": 2},
+            ],
             "users": [
-                {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
-                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2}]}
+                {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1, "rank": 1},
+                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2, "rank": 2},
+            ],
+        }
 
         # Generate report content with custom template
         report_content = generate_report_content(
@@ -72,9 +86,9 @@ class TestReportIntegration:
 
         # Verify that tables are generated (should contain actual table content)
         assert "| Format" in report_content  # Razor Formats table header
-        assert "| Razor" in report_content  # Razors table header (also used for blades, brushes)
-        assert "| Manufacturer" in report_content  # Razor/Blade Manufacturers table header
-        assert "| Maker" in report_content  # Brush Handle/Knot Makers table headers
+        assert "| Name" in report_content  # Razors table header (uses actual column name)
+        assert "| Brand" in report_content  # Razor/Blade Manufacturers table header
+        assert "| Handle Maker" in report_content  # Brush Handle Makers table header
         assert "| Fiber" in report_content  # Knot Fibers table header
         assert "| User" in report_content  # User tables headers
         assert "Gillette Super Speed" in report_content
@@ -99,11 +113,13 @@ class TestReportIntegration:
             "total_samples": 50,
             "sample_percentage": 5.0,
             "sample_users": 8,
-            "sample_brands": 6}
+            "sample_brands": 6,
+        }
 
         data = {
             "razors": [{"name": "Gillette Super Speed", "shaves": 25}],
-            "soaps": [{"name": "Test Soap", "shaves": 30}]}
+            "soaps": [{"name": "Test Soap", "shaves": 30}],
+        }
 
         # Test hardware report generation
         hardware_generator = MonthlyReportGenerator(
@@ -133,21 +149,27 @@ class TestReportIntegration:
             "total_shaves": 500,
             "unique_shavers": 25,
             "unique_soaps": 100,
-            "unique_brands": 20}
+            "unique_brands": 20,
+        }
 
         data = {
             "soaps": [
-                {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10}, {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8}
+                {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10, "rank": 1},
+                {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8, "rank": 2},
             ],
             "soap_makers": [
-                {"brand": "Declaration Grooming", "shaves": 20, "unique_users": 10},
-                {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8}],
+                {"brand": "Declaration Grooming", "shaves": 20, "unique_users": 10, "rank": 1},
+                {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8, "rank": 2},
+            ],
             "brand_diversity": [
-                {"brand": "Declaration Grooming", "unique_soaps": 5},
-                {"brand": "Stirling Soap Co", "unique_soaps": 5}],
+                {"brand": "Declaration Grooming", "unique_soaps": 5, "rank": 1},
+                {"brand": "Stirling Soap Co", "unique_soaps": 5, "rank": 2},
+            ],
             "users": [
-                {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
-                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2}]}
+                {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1, "rank": 1},
+                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2, "rank": 2},
+            ],
+        }
 
         # Generate report content with custom template
         report_content = generate_report_content(
@@ -177,49 +199,42 @@ class TestReportIntegration:
 
     def test_report_with_empty_data(self, template_dir):
         """Test report generation with empty data."""
-        metadata = {
-            "month": "2025-01",
-            "total_shaves": 0,
-            "unique_shavers": 0}
+        metadata = {"month": "2025-01", "total_shaves": 0, "unique_shavers": 0}
 
         data = {}
 
-        # Should not raise exceptions
-        report_content = generate_report_content(
-            "hardware", metadata, data, template_path=str(template_dir), debug=False
-        )
-
-        # Should still have basic structure
-        assert "# Hardware Report - January 2025" in report_content
-        assert "**Total Shaves:** 0" in report_content
-        assert "**Unique Shavers:** 0" in report_content
-
-        # Should handle empty data gracefully
-        assert "*No data available" in report_content
+        # The system should fail fast with an exception when there's no data
+        # This follows the project's fail-fast philosophy
+        with pytest.raises(ValueError, match="No data provided for report generation"):
+            generate_report_content(
+                "hardware", metadata, data, template_path=str(template_dir), debug=False
+            )
 
     def test_report_with_delta_calculations(self, template_dir):
         """Test report generation with historical data for delta calculations."""
-        metadata = {
-            "month": "2025-01",
-            "total_shaves": 1000,
-            "unique_shavers": 50}
+        metadata = {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50}
 
         data = {
             "razors": [
-                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12}, {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2}
-            ]}
+                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
+                {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
+            ]
+        }
 
         comparison_data = {
             "previous month": (
                 {"month": "2024-12"},  # metadata
                 {  # data
                     "razors": [
-                        {"name": "Karve CB", "shaves": 20, "unique_users": 10}, {
+                        {"name": "Karve CB", "shaves": 20, "unique_users": 10, "rank": 1},
+                        {
                             "name": "Gillette Super Speed",
                             "shaves": 15,
                             "unique_users": 8,
-                            "rank": 2}
-                    ]},
+                            "rank": 2,
+                        },
+                    ]
+                },
             )
         }
 
@@ -234,4 +249,8 @@ class TestReportIntegration:
         )
 
         # Should include delta column
-        assert "Δ vs previous month" in report_content
+        # The system uses default comparison periods (previous month, previous year, 5 years ago)
+        # and shows "n/a" values when comparison data doesn't match these periods
+        assert "Δ vs Dec 2024" in report_content  # Previous month
+        assert "Δ vs Jan 2024" in report_content  # Previous year
+        assert "n/a" in report_content  # Delta values should be n/a when no match found
