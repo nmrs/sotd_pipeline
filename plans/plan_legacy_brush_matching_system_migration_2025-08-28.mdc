@@ -75,16 +75,17 @@ Remove unused code, update tests, verify functionality.
    - Test integration with wrapper strategies
    - **Implementation**: ✅ **COMPLETE** - Consolidated duplicate imports to top of file, removed hardcoded paths in favor of shared config, updated legacy dependency references to use current strategy names (FullInputComponentMatchingStrategy, HandleOnlyStrategy, KnotOnlyStrategy), cleaned up duplicate import statements in methods, and updated load_correct_matches to use shared config. All tests pass and functionality is preserved.
 
-6. **Update Wrapper Strategies** - **IN_PROGRESS** ⏳
+6. **Update Wrapper Strategies** - **COMPLETE** ✅
    - Remove legacy matcher dependencies from wrapper strategies
    - Update strategies to use new system directly
    - Test all wrapper strategies work correctly
-   - **Implementation**: Starting with wrapper strategy dependency cleanup and testing
+   - **Implementation**: ✅ **COMPLETE** - Updated KnownSplitWrapperStrategy, CorrectCompleteBrushWrapperStrategy, CorrectSplitBrushWrapperStrategy, CompleteBrushWrapperStrategy, and FullInputComponentMatchingStrategy to work without legacy matcher dependencies. Strategies now implement their logic directly using catalog data and handle result creation internally. All tests pass and functionality is preserved.
 
-7. **Update Strategy Dependencies**
-   - Modify dependency management to work without legacy system
-   - Update strategy orchestration logic
-   - Ensure clean dependency graph
+7. **Update Strategy Dependencies** - **IN_PROGRESS** ⏳
+   - Remove remaining legacy strategy dependencies
+   - Update automated split strategies to work independently
+   - Test all strategies work without legacy system
+   - **Implementation**: Starting with automated split strategy dependency cleanup and testing
 
 ### **Phase 3: Remove Legacy System**
 8. **Remove Legacy Classes**

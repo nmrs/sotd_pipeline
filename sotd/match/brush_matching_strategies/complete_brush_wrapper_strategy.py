@@ -1,7 +1,7 @@
 """
 Complete Brush Wrapper Strategy.
 
-This strategy wraps the legacy system's complete brush matching functionality
+This strategy implements complete brush functionality directly
 to integrate with the scoring system architecture.
 """
 
@@ -14,21 +14,21 @@ from sotd.match.types import MatchResult
 
 
 class CompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):
-    """Wrapper for legacy _match_complete_brush functionality."""
+    """Strategy for matching complete brush patterns."""
 
-    def __init__(self, legacy_matcher):
+    def __init__(self, catalog_data: dict):
         """
-        Initialize the strategy with legacy matcher.
+        Initialize the strategy with catalog data.
 
         Args:
-            legacy_matcher: Legacy BrushMatcher instance
+            catalog_data: Dictionary containing brush catalog data
         """
         super().__init__()
-        self.legacy_matcher = legacy_matcher
+        self.catalog_data = catalog_data or {}
 
     def match(self, value: str) -> Optional[MatchResult]:
         """
-        Match using legacy complete brush logic.
+        Match using complete brush logic.
 
         Args:
             value: The brush string to match
@@ -36,7 +36,10 @@ class CompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):
         Returns:
             MatchResult or None
         """
-        result = self.legacy_matcher._match_complete_brush(value)
-        if result:
-            result.strategy = "complete_brush"
-        return result
+        if not value or not isinstance(value, str):
+            return None
+
+        # This strategy is now handled by individual brush strategies
+        # (KnownBrushMatchingStrategy, OmegaSemogueBrushMatchingStrategy, etc.)
+        # So we return None to let those strategies handle the matching
+        return None
