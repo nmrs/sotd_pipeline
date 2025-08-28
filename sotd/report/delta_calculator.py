@@ -82,6 +82,13 @@ class DeltaCalculator:
             return []
 
         # Filter valid items using pandas operations
+        # Check if rank column exists before filtering
+        if "rank" not in current_df.columns:
+            if self.debug:
+                print("[DEBUG] No rank column found in current data, skipping delta calculations")
+            return []
+
+        # Filter to only include items that have both name and rank values
         valid_current = current_df[(current_df[name_key].notna()) & (current_df["rank"].notna())]
 
         if valid_current.empty:

@@ -31,7 +31,27 @@ class MonthlyReportGenerator(BaseReportGenerator):
             comparison_data: Historical data for delta calculations
             debug: Enable debug logging
             template_path: Optional custom path to template file for testing
+
+        Raises:
+            ValueError: If there's no meaningful data to process (fail-fast behavior)
         """
+        # Fail-fast check: ensure there's meaningful data to process
+        if not data or not isinstance(data, dict):
+            raise ValueError("No data provided for report generation")
+
+        # Check if there are any non-empty data sections
+        has_meaningful_data = False
+        for key, value in data.items():
+            if isinstance(value, list) and len(value) > 0:
+                has_meaningful_data = True
+                break
+
+        if not has_meaningful_data:
+            raise ValueError(
+                "No meaningful data available for report generation. "
+                "All data sections are empty or missing."
+            )
+
         super().__init__(metadata, data, comparison_data, debug, template_path)
         self.report_type = report_type
 
@@ -118,17 +138,33 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
         # Generate basic tables for all available aggregators
         tables = {}
-        for table_name in table_generator.get_available_table_names():
+
+        # First, scan the template for all table placeholders
+        import re
+
+        template_table_pattern = r"\{\{tables\.([^|}]+)\}\}"
+        template_table_names = re.findall(template_table_pattern, template_content)
+
+        # Generate tables for all template placeholders found
+        for table_name in template_table_names:
             try:
                 table_content = table_generator.generate_table(table_name, deltas=True)
                 if table_content:
-                    tables[f"{{{{tables.{table_name}}}}}"] = table_content
+                    placeholder = f"{{{{tables.{table_name}}}}}"
+                    tables[placeholder] = table_content
+                else:
+                    # If table generation fails or returns empty, provide a placeholder message
+                    placeholder = f"{{{{tables.{table_name}}}}}"
+                    tables[placeholder] = "*No data available for this category*"
             except Exception as e:
                 if self.debug:
                     print(
                         f"[DEBUG] MonthlyReport({self.report_type}): "
                         f"Error generating table '{table_name}': {e}"
                     )
+                # Provide a placeholder message for failed tables
+                placeholder = f"{{{{tables.{table_name}}}}}"
+                tables[placeholder] = "*No data available for this category*"
 
         # Process enhanced table syntax with parameters
         enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
