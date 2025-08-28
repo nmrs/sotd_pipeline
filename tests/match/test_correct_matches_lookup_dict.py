@@ -15,8 +15,6 @@ class TestLookupDictionaryConstruction:
 
     def setup_method(self):
         """Set up test fixtures."""
-        
-        
 
         # Mock correct_matches data with hierarchical YAML structure
         self.correct_matches = {
@@ -81,8 +79,6 @@ class TestLookupPerformance:
 
     def setup_method(self):
         """Set up test fixtures."""
-        
-        
 
         # Create large dataset for performance testing
         self.correct_matches = {"brush": {}}
@@ -143,8 +139,6 @@ class TestCaseInsensitiveAccess:
 
     def setup_method(self):
         """Set up test fixtures."""
-        
-        
 
         self.correct_matches = {
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}}
@@ -182,8 +176,6 @@ class TestMemoryEfficiency:
 
     def setup_method(self):
         """Set up test fixtures."""
-        
-        
 
         # Create dataset for memory testing
         self.correct_matches = {"brush": {"Test Brand": {"Test Model": ["test brand test model"]}}}
@@ -242,8 +234,6 @@ class TestPerformanceRegressionDetection:
 
     def setup_method(self):
         """Set up test fixtures."""
-        
-        
 
         self.correct_matches = {"brush": {"Test Brand": {"Test Model": ["test brand test model"]}}}
 

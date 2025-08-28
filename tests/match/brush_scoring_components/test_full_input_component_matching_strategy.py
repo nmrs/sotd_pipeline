@@ -16,12 +16,7 @@ class TestFullInputComponentMatchingStrategy:
         """Set up test fixtures."""
         self.handle_matcher = Mock()
         self.knot_matcher = Mock()
-        self.catalogs = {
-            "brushes": {},
-            "handles": {},
-            "knots": {},
-            "correct_matches": {}
-        }
+        self.catalogs = {"brushes": {}, "handles": {}, "knots": {}, "correct_matches": {}}
 
         self.strategy = FullInputComponentMatchingStrategy(
             handle_matcher=self.handle_matcher,

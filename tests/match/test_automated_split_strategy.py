@@ -10,12 +10,7 @@ class TestAutomatedSplitStrategy:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.catalogs = {
-            "brushes": {},
-            "handles": {},
-            "knots": {},
-            "correct_matches": {}
-        }
+        self.catalogs = {"brushes": {}, "handles": {}, "knots": {}, "correct_matches": {}}
         self.scoring_config = BrushScoringConfig()
         self.strategy = AutomatedSplitStrategy(self.catalogs, self.scoring_config)
 
