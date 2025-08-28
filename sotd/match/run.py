@@ -487,9 +487,7 @@ def _process_month_for_parallel(
 ) -> dict:
     """Process a single month for parallel processing."""
     month_str = f"{year:04d}-{month:02d}"
-    return process_month(
-        month_str, base_path, force, debug, max_workers, correct_matches_path
-    )
+    return process_month(month_str, base_path, force, debug, max_workers, correct_matches_path)
 
 
 def _process_month_for_sequential(

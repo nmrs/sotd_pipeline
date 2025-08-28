@@ -70,35 +70,19 @@ class BrushScoringMatcher:
         handles_path = Path("data/handles.yaml")
         self.handle_matcher = HandleMatcher(handles_path)
 
-        # Initialize KnotMatcher with knot-specific strategies using shared catalog loader
-        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
-            FiberFallbackStrategy,
-        )
-        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
-            KnotSizeFallbackStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_knot_strategy import (
-            KnownKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_knot_strategy import (
-            OtherKnotMatchingStrategy,
-        )
-        from sotd.match.loaders import CatalogLoader
+        # Initialize KnotMatcher with knot-specific strategies using shared strategy manager
         from sotd.match.config import BrushMatcherConfig
+        from sotd.match.loaders import CatalogLoader
+        from sotd.match.utils.strategy_manager import StrategyManager
 
-        # Use shared catalog loader instead of legacy system
+        # Use shared catalog loader and strategy manager
         config = BrushMatcherConfig.create_default()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
-        knots_data = catalogs["knots"]
 
-        # Use same knot strategies as legacy system
-        knot_strategies = [
-            KnownKnotMatchingStrategy(knots_data.get("known_knots", {})),
-            OtherKnotMatchingStrategy(knots_data.get("other_knots", {})),
-            FiberFallbackStrategy(),
-            KnotSizeFallbackStrategy(),
-        ]
+        # Use strategy manager to create knot strategies
+        strategy_manager = StrategyManager(config)
+        knot_strategies = strategy_manager.create_knot_strategies(catalogs)
         self.knot_matcher = KnotMatcher(knot_strategies)
 
         # Initialize components
@@ -160,82 +144,20 @@ class BrushScoringMatcher:
         Returns:
             List of strategy objects
         """
-        # Use shared catalog loader instead of legacy system
-        from sotd.match.loaders import CatalogLoader
+        # Use shared strategy manager instead of duplicating logic
         from sotd.match.config import BrushMatcherConfig
+        from sotd.match.loaders import CatalogLoader
+        from sotd.match.utils.strategy_manager import StrategyManager
 
         config = BrushMatcherConfig.create_default()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
-        catalog_data = catalogs["brushes"]
 
-        # Import individual strategies for Phase 3.4/3.5
-        from sotd.match.brush_matching_strategies.automated_split_strategy import (
-            AutomatedSplitStrategy,
+        # Use strategy manager to create strategies
+        strategy_manager = StrategyManager(config)
+        strategies = strategy_manager.create_full_strategies(
+            self.handle_matcher, self.knot_matcher, catalogs
         )
-        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
-            CorrectCompleteBrushWrapperStrategy,
-            CorrectSplitBrushWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
-            FullInputComponentMatchingStrategy,
-        )
-
-        # Import new single component strategies
-        from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
-        from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
-
-        # Import individual brush strategies for Phase 3.2
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
-            KnownBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
-            KnownSplitWrapperStrategy,
-        )
-
-        # Import component strategies for Phase 3.3
-        # Removed unused import - strategy replaced by AutomatedSplitStrategy
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
-            OmegaSemogueBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
-            OtherBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
-            ZenithBrushMatchingStrategy,
-        )
-
-        # Create strategies in legacy system priority order
-        strategies = [
-            # Priority 0: correct_complete_brush
-            CorrectCompleteBrushWrapperStrategy(catalogs["correct_matches"]),
-            # Priority 1: correct_split_brush
-            CorrectSplitBrushWrapperStrategy(catalogs["correct_matches"]),
-            # Priority 2: known_split
-            KnownSplitWrapperStrategy(
-                catalog_data.get("known_splits", {})
-            ),
-            # Priority 3: high_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
-            # HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
-            # Priority 4: unified component strategy (before individual brush strategies)
-            FullInputComponentMatchingStrategy(
-                self.handle_matcher, self.knot_matcher, catalogs
-            ),
-            # Priority 5: individual brush strategies (replacing complete_brush wrapper)
-            KnownBrushMatchingStrategy(
-                catalog_data.get("known_brushes", {}), self.handle_matcher
-            ),
-            OmegaSemogueBrushMatchingStrategy(),
-            ZenithBrushMatchingStrategy(),
-            OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
-            # Priority 6: medium_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
-            # NEW: automated_split (unified high/medium priority strategy)
-            AutomatedSplitStrategy(catalogs, self.config),
-            # NEW: handle_only strategy
-            HandleOnlyStrategy(self.handle_matcher),
-            # NEW: knot_only strategy
-            KnotOnlyStrategy(self.knot_matcher),
-        ]
 
         return strategies
 
@@ -248,63 +170,18 @@ class BrushScoringMatcher:
         Returns:
             List of strategy objects (without unified component strategy)
         """
-        # Use shared catalog loader instead of legacy system
-        from sotd.match.loaders import CatalogLoader
+        # Use shared strategy manager instead of duplicating logic
         from sotd.match.config import BrushMatcherConfig
+        from sotd.match.loaders import CatalogLoader
+        from sotd.match.utils.strategy_manager import StrategyManager
 
         config = BrushMatcherConfig.create_default()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
 
-        # Import individual strategies for Phase 3.4/3.5
-        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
-            CorrectCompleteBrushWrapperStrategy,
-            CorrectSplitBrushWrapperStrategy,
-        )
-
-        # Removed unused import - strategy replaced by AutomatedSplitStrategy
-        # Import individual brush strategies for Phase 3.2
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
-            KnownBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
-            KnownSplitWrapperStrategy,
-        )
-
-        # Import component strategies for Phase 3.3
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
-            OmegaSemogueBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
-            OtherBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
-            ZenithBrushMatchingStrategy,
-        )
-
-        # Get catalog data for individual strategies
-        catalog_data = catalogs["brushes"]
-
-        # Create strategies without unified component strategy
-        strategies = [
-            # Priority 0: correct_complete_brush
-            CorrectCompleteBrushWrapperStrategy(catalogs["correct_matches"]),
-            # Priority 1: correct_split_brush
-            CorrectSplitBrushWrapperStrategy(catalogs["correct_matches"]),
-            # Priority 2: known_split
-            KnownSplitWrapperStrategy(
-                catalog_data.get("known_splits", {})
-            ),
-            # Priority 3: high_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
-            # Priority 4: individual brush strategies
-            KnownBrushMatchingStrategy(
-                catalog_data.get("known_brushes", {}), self.handle_matcher
-            ),
-            OmegaSemogueBrushMatchingStrategy(),
-            ZenithBrushMatchingStrategy(),
-            OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
-            # Priority 6: medium_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
-        ]
+        # Use strategy manager to create temporary strategies
+        strategy_manager = StrategyManager(config)
+        strategies = strategy_manager.create_temp_strategies(self.handle_matcher, catalogs)
 
         return strategies
 
@@ -558,15 +435,15 @@ class BrushScoringMatcher:
             from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
                 FullInputComponentMatchingStrategy,
             )
+            from sotd.match.config import BrushMatcherConfig
 
             # Create catalog loader for unified strategy
             from sotd.match.loaders import CatalogLoader
-            from sotd.match.config import BrushMatcherConfig
-            
+
             config = BrushMatcherConfig.create_default()
             catalog_loader = CatalogLoader(config)
             catalogs = catalog_loader.load_brush_catalogs(config)
-            
+
             unified_strategy = FullInputComponentMatchingStrategy(
                 self.handle_matcher, self.knot_matcher, catalogs
             )

@@ -695,21 +695,17 @@ class TestCatalogValidation:
 
     def test_known_brush_with_handle_knot_components_not_flagged_as_composite(self, tmp_path):
         """Test that known brushes with handle/knot components are not incorrectly flagged.
-        
-        This test exposes the bug where the validation logic incorrectly assumes that if 
-        handle/knot components exist, it must be a composite brush that should be stored 
+
+        This test exposes the bug where the validation logic incorrectly assumes that if
+        handle/knot components exist, it must be a composite brush that should be stored
         in handle/knot sections.
-        
-        The brush matcher correctly returns both top-level brand/model AND handle/knot 
+
+        The brush matcher correctly returns both top-level brand/model AND handle/knot
         components for known brushes, but the validation logic was treating this as an error.
         """
         # Create test data that mirrors the real issue: chisel & hound "drake" w/ 26mm v19
         test_brush_data = {
-            "brush": {
-                "Chisel & Hound": {
-                    "v19": ["chisel & hound \"drake\" w/ 26mm v19"]
-                }
-            }
+            "brush": {"Chisel & Hound": {"v19": ['chisel & hound "drake" w/ 26mm v19']}}
         }
 
         correct_matches_file = self.create_temp_yaml(test_brush_data)
@@ -725,6 +721,7 @@ class TestCatalogValidation:
 
             # Copy our test data to the expected location
             import shutil
+
             shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
 
             # Create minimal catalog files for testing that match the real structure
@@ -736,9 +733,9 @@ class TestCatalogValidation:
                         "patterns": [
                             r"chis.*[fh]ou.*v19",
                             r"\bc(?:\&|and|\+)h\b.*v19",
-                            r"\bch\b.*v19"
+                            r"\bch\b.*v19",
                         ]
-                    }
+                    },
                 }
             }
 
@@ -749,31 +746,33 @@ class TestCatalogValidation:
             # Create minimal handle and knot files
             handles_file = test_data_dir / "handles.yaml"
             with open(handles_file, "w") as f:
-                yaml.dump({
-                    "Chisel & Hound": {
-                        "Unspecified": {
-                            "patterns": [
-                                r"chisel.*hound", 
-                                r"chis.*fou", 
-                                r"\bc(?:\&|and|\+\s)?h\b"
-                            ]
+                yaml.dump(
+                    {
+                        "Chisel & Hound": {
+                            "Unspecified": {
+                                "patterns": [
+                                    r"chisel.*hound",
+                                    r"chis.*fou",
+                                    r"\bc(?:\&|and|\+\s)?h\b",
+                                ]
+                            }
                         }
-                    }
-                }, f)
+                    },
+                    f,
+                )
 
             knots_file = test_data_dir / "knots.yaml"
             with open(knots_file, "w") as f:
-                yaml.dump({
-                    "Chisel & Hound": {
-                        "default": "Badger",
-                        "knot_size_mm": 26,
-                        "patterns": [
-                            r"chis.*[fh]ou", 
-                            r"\bc(?:\&|and|\+)h\b", 
-                            r"\bch\b"
-                        ]
-                    }
-                }, f)
+                yaml.dump(
+                    {
+                        "Chisel & Hound": {
+                            "default": "Badger",
+                            "knot_size_mm": 26,
+                            "patterns": [r"chis.*[fh]ou", r"\bc(?:\&|and|\+)h\b", r"\bch\b"],
+                        }
+                    },
+                    f,
+                )
 
             # Now test the actual validation logic
             validator = CatalogValidator(project_root=test_project_root)
@@ -782,23 +781,24 @@ class TestCatalogValidation:
             issues = validator.validate_brush_catalog()
 
             # This should NOT flag the known brush as a composite brush issue
-            # The pattern should be correctly identified as a known brush under 
-            # "Chisel & Hound v19" and NOT flagged as needing to be moved to 
+            # The pattern should be correctly identified as a known brush under
+            # "Chisel & Hound v19" and NOT flagged as needing to be moved to
             # handle/knot sections
-            
+
             # Check that no composite brush issues were found for this pattern
             composite_brush_issues = [
-                issue for issue in issues 
+                issue
+                for issue in issues
                 if "composite brush" in issue.get("message", "").lower()
-                and "chisel & hound \"drake\" w/ 26mm v19" in issue.get("message", "")
+                and 'chisel & hound "drake" w/ 26mm v19' in issue.get("message", "")
             ]
-            
+
             assert len(composite_brush_issues) == 0, (
                 f"Known brush with handle/knot components was incorrectly flagged as "
                 f"composite brush. Issues found: {composite_brush_issues}"
             )
-            
-            # The validation should either find no issues (correct) or only find 
+
+            # The validation should either find no issues (correct) or only find
             # legitimate issues not related to the composite brush misclassification
             print(f"Validation completed. Found {len(issues)} total issues.")
             for issue in issues:
@@ -1171,5 +1171,3 @@ class TestCatalogValidationIntegration:
             # Clean up
             if correct_matches_file.exists():
                 correct_matches_file.unlink()
-
-

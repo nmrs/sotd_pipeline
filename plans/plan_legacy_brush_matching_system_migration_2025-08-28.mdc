@@ -50,15 +50,17 @@ Remove unused code, update tests, verify functionality.
    - **Implementation**: Successfully updated `scoring_brush_matcher.py` to use existing `CatalogLoader` instead of deleted `BrushMatcher`
    - **Result**: Import now successful, dependency on legacy system removed for catalog loading
 
-2. **Extract Strategy Management Logic**
+2. **Extract Strategy Management Logic** - **COMPLETE** ✅
    - Create `sotd/match/utils/strategy_manager.py`
    - Extract strategy creation and dependency management
    - Make strategies work with either system
+   - **Implementation**: ✅ **COMPLETE** - Created StrategyManager utility with methods for creating full strategies, temporary strategies, and knot strategies. Updated scoring_brush_matcher.py to use the new utility instead of duplicating strategy creation logic. All tests pass and functionality is preserved.
 
-3. **Extract Configuration Logic**
+3. **Extract Configuration Logic** - **IN_PROGRESS** ⏳
    - Create `sotd/match/utils/config_loader.py`
    - Extract configuration loading and validation
    - Ensure consistent configuration across systems
+   - **Implementation**: Starting with configuration management extraction and testing
 
 4. **Create Shared Strategy Base Classes**
    - Update wrapper strategies to work without legacy dependencies
@@ -97,18 +99,50 @@ Remove unused code, update tests, verify functionality.
     - Update run.py to use only new system
     - Remove system selection logic
 
-### **Phase 4: Cleanup and Verification**
-11. **Update Tests**
+### **Phase 4: Test Migration and Validation**
+14. **Update Test Imports and Dependencies**
+    - Replace `BrushMatcher` imports with `BrushScoringMatcher` in tests
+    - Update test data and mock objects to use new system
+    - Ensure all tests can run without legacy system
+
+15. **Update Integration Tests**
+    - Fix broken integration tests that depend on legacy system
+    - Update test fixtures and setup to use shared catalog loader
+    - Validate end-to-end functionality
+
+16. **Update Strategy Tests**
+    - Modify tests for wrapper strategies to work with new system
+    - Update test data structures to match new catalog format
+    - Ensure strategy behavior remains consistent
+
+### **Phase 5: Remove Legacy System**
+17. **Remove Legacy Classes**
+    - Delete `BrushMatcher` class
+    - Delete `BrushMatcherEntryPoint` class
+    - Remove legacy wrapper strategies
+
+18. **Remove Legacy Tools and Directories**
+    - Delete `sotd/match/tools/legacy/` directory
+    - Delete `sotd/report/table_generators/legacy/` directory
+    - Remove legacy data directories
+
+19. **Remove Legacy CLI Options**
+    - Remove `--brush-system` argument
+    - Update run.py to use only new system
+    - Remove system selection logic
+
+### **Phase 6: Cleanup and Verification**
+20. **Update Remaining Tests**
     - Remove legacy-specific tests
     - Update remaining tests to use new system
     - Ensure full test coverage
 
-12. **Update Documentation**
+21. **Update Documentation**
     - Remove references to legacy system
     - Update configuration documentation
     - Update user guides
 
-13. **Final Verification**
+22. **Final Verification**
     - Run full test suite
     - Verify pipeline functionality
     - Check for any remaining legacy references
@@ -178,7 +212,20 @@ class StrategyManager:
 - **Recommended Approach**: Systematic extraction rather than wholesale removal
 - **Timeline**: Allow 2-3 development sessions for safe migration
 - **Testing Strategy**: Test each component extraction thoroughly before proceeding
-description:
-globs:
-alwaysApply: false
----
+
+## 🚨 Critical Discovery: Test Dependencies
+
+**Major Finding**: After completing Phase 1, Step 1, we discovered that **many test files still import the deleted `BrushMatcher` class**:
+
+- **25+ test files** depend on the legacy system
+- **Integration tests** are completely broken
+- **Unit tests** for individual components still work
+- **This validates our incremental approach** - we cannot delete everything at once
+
+**Impact**: Our migration must include systematic test updates as we progress through each phase.
+
+**Updated Strategy**: 
+1. **Fix core functionality first** (Phase 1-3)
+2. **Update tests systematically** (Phase 4 - NEW)
+3. **Remove legacy system only after tests pass** (Phase 5)
+4. **Final cleanup and verification** (Phase 6)

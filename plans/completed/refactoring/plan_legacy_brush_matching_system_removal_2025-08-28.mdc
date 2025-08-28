@@ -1,8 +1,30 @@
-# Legacy Brush Matching System Removal Plan
+# Legacy Brush Matching System Removal Plan - OBSOLETE
 
 **Date**: 2025-01-27  
-**Purpose**: Completely remove the legacy brush matching system to eliminate dual-system architecture and simplify the codebase  
-**Status**: PLANNING  
+**Purpose**: Remove legacy brush matching system components  
+**Status**: **OBSOLETE - SUPERSEDED BY MIGRATION PLAN**  
+**Completion Date**: 2025-08-28  
+**Reason for Obsolescence**: Approach failed due to deep architectural dependencies  
+
+## ❌ Why This Plan Failed
+
+**Critical Discovery**: The `BrushScoringMatcher` (new system) is heavily dependent on the legacy system for:
+- Catalog data loading (brushes, handles, knots)
+- Wrapper strategies that call legacy methods  
+- Strategy dependency management
+- Knot strategy initialization
+
+**Failed Approach**: Attempting to remove the legacy system first created a dependency deadlock where the new system couldn't function.
+
+**Lesson Learned**: The new system was designed to work alongside the legacy system, not replace it. We need to extract shared functionality before removal.
+
+## 🔄 Superseded By
+
+**New Plan**: `plans/plan_legacy_brush_matching_system_migration_2025-08-28.mdc`
+
+**New Approach**: Systematic migration that extracts shared functionality before removing legacy components.
+
+## 📝 Original Plan Content (For Reference)
 
 ## 📘 Project Summary
 

@@ -77,9 +77,9 @@ class TestStripBladeCountPatterns:
             ("astra sp , 10th use", "astra sp ,"),  # Cleanup handles comma
             ("personna platinum , 1st use", "personna platinum ,"),  # Cleanup handles comma
             ("feather, 1st use", "feather,"),  # Cleanup handles trailing comma
-            ("astra, 2nd use", "astra,"),      # Cleanup handles trailing comma
+            ("astra, 2nd use", "astra,"),  # Cleanup handles trailing comma
             ("treet platinum 1st use", "treet platinum"),  # No trailing punctuation
-            ("feather 2nd use", "feather"),    # No trailing punctuation
+            ("feather 2nd use", "feather"),  # No trailing punctuation
         ]
         for input_str, expected in test_cases:
             result = strip_blade_count_patterns(input_str)

@@ -185,7 +185,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         # Debug logging
         print(f"DEBUG: Processing {len(analysis_result.get('all_strategies', []))} strategies")
         for i, strategy_result in enumerate(analysis_result.get("all_strategies", [])):
-            print(f"DEBUG: Strategy {i+1}: {strategy_result.strategy}")
+            print(f"DEBUG: Strategy {i + 1}: {strategy_result.strategy}")
 
         # Process all strategy results
         for strategy_result in analysis_result.get("all_strategies", []):
@@ -212,7 +212,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 # Calculate base score and modifiers
                 base_score = engine.config.get_base_strategy_score(strategy_name)
                 print(f"DEBUG: Base score for {strategy_name}: {base_score}")
-                
+
                 modifier_score = engine._calculate_modifiers(
                     strategy_result, request.brushString, strategy_name
                 )
