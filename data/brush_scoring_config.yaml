@@ -12,16 +12,16 @@ brush_scoring_weights:
     zenith: 75.0
     other_brush: 70.0
     automated_split: 60.0
-    unified: 50.0
-    handle_only: 40.0
-    knot_only: 40.0
+    unified: 40.0
+    handle_only: 30.0
+    knot_only: 30.0
 
   # Strategy-specific modifiers (Phase 3.7 - ENABLED)
   strategy_modifiers:
     # Modifiers for split strategies (automated_split, known_split, correct_split_brush)
     automated_split:
       high_confidence: 20.0
-      multiple_brands: 25.0
+      multiple_brands: 30.0 # Should detect multiple brands when split components have different brands
       fiber_words: 0.0
       size_specification: 0.0
       delimiter_confidence: 0.0
@@ -64,7 +64,7 @@ brush_scoring_weights:
 
     unified:
       dual_component: 15.0
-      multiple_brands: 20.0
+      multiple_brands: 30.0
       fiber_mismatch: -15.0
       size_specification: 0.0
 

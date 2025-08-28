@@ -841,6 +841,9 @@ Gillette:
   Aristocrat:
     patterns:
       - (?:gil.*)art?istocrat
+  Blue:
+    patterns:
+      - 'super\s*blue'
   Diplomat:
     patterns:
       - Diplomat
@@ -941,6 +944,10 @@ Gillette:
       - rocket.*hd
       - gil.*mi+lord
       - ranger tech
+  Super Stainless:
+    patterns:
+      - gil.*super\s*stainless
+      - gil.*spoiler
   Tech:
     patterns:
       - ^(?!.*milord|.*ranger|.*clone|.*knock-?off).*(gil|war|contract|slot|triangle|flat|hybrid|canada|english).*Tech

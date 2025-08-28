@@ -118,7 +118,7 @@ artisan_handles:
         - ^(?!.*(zeni|dog)).*\bb[1-8]\b
         - ^(?!.*(zeni|dog)).*\bb9[ab]\b
         - ^(?!.*(zeni|dog)).*\bb1[0-8]\b
-  Dogwood Handcrafts:
+  Dogwood:
     Unspecified:
       patterns:
         - dogwoo

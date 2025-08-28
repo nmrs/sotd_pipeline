@@ -1,4 +1,43 @@
 blade:
+  A77:
+    Cloud:
+      A77:
+        - cloud a77 full blade
+    RhinoceRos:
+      A77:
+        - rhinoceros a77 full blade
+        - rhinoceros a77 mini blade
+    Snow Mountain Wolf:
+      A77:
+        - snow mountain wolf a77
+        - snow mountain wolf a77 blade
+        - snow mountain wolf a77 modified
+  AC:
+    Feather:
+      Pro:
+        - feather artist club
+        - feather pro
+        - feather professional
+        - feather professional artist club
+      Pro Super:
+        - feather super
+        - feather super (?)
+    Kai:
+      Captain Blade:
+        - kai red hair cut blade
+      Captain ProTouch:
+        - kai captain titan mild pro touch
+        - kai protouch mg
+        - kai protouch mg blade
+      Captain Titan Mild:
+        - kai captain mild
+    Schick:
+      Proline (AC):
+        - schick proline p-series artist club
+  Cartridge/Disposable:
+    Cartridge/Disposable:
+      "":
+        - personna twin pivot plus
   DE:
     7 O'Clock:
       Sharpedge (Yellow):
@@ -26,7 +65,8 @@ blade:
         - 7sp(x3)
         - gilette 7 o'clock - super platinum
         - gillete 7oc super platinum
-        - gillette - 7 o' clock super platinum (black).
+        - gillette - 7 o' clock super platinum (black)
+        - gillette - 7 o' clock super platinum (black) -2
         - gillette - 7 o'clock super platinum
         - gillette 7 o'clock black
         - gillette 7o'clock black
@@ -35,11 +75,13 @@ blade:
         - gillette super platinum (black)
       Super Stainless (Green):
         - gilette 7 o' clock super stainless (green)
+        - gillette - 7 o'clock
         - gillette 7 o clock green
         - gillette 7 o'clock stainless (green)
         - gillette 7 o'clock stainless green
         - gillette 7 o'clock super stainless (green)
         - gillette 7 o'clock super stainless (green), de
+        - gillette green
         - gillette seven o'clock super stainless
         - gillette super stainless (green)
     AMC:
@@ -72,6 +114,7 @@ blade:
         - astra superior platinum (green)
         - astra superior platinum, de
         - gillette astra platinum green
+        - ~~rapira platinum lux~~ ~~tiger~~ astra sp
       Superior Stainless (Blue):
         - astra - blue
         - astra blue
@@ -94,6 +137,7 @@ blade:
         - bic
         - bic chrome
         - bic chrome platinum
+        - bic cp
     Big Ben:
       Super Stainless:
         - big ben - super stainless
@@ -108,12 +152,7 @@ blade:
     Böker:
       DE:
         - böker
-    Cartridge/Disposable:
-      "":
-        - personna twin pivot plus
     Cloud:
-      A77:
-        - cloud a77 full blade
       Super Stainless:
         - cloud super blades
     Crown:
@@ -126,6 +165,7 @@ blade:
       Extra:
         - derby - extra
         - derby extra
+        - derby usta
       Premium:
         - derby premium
     Dorco:
@@ -154,17 +194,6 @@ blade:
         - feather new hi stainless
         - feather new hi-stainless
         - feather stainless
-        - feather, 1st use
-      FHS-1:
-        - feather fhs-10
-      Pro:
-        - feather artist club
-        - feather pro
-        - feather professional
-        - feather professional artist club
-      Pro Super:
-        - feather super
-        - feather super (?)
     Filoso:
       Platinum:
         - filoso
@@ -175,17 +204,12 @@ blade:
         - flydear
         - flydear - 9/10
         - modified flydear 🤦🏻♂️
-    Fromm:
-      Hair Shaper:
-        - fromm hair cut blade
-        - fromm hair shaper
-        - fromm hair shaper blade
     Gillette:
       "365":
         - gillette 365
       Blue:
-        - gillette - blue blade
         - gillette blue
+        - gillette super blue
       Goal:
         - gillette goal
       Minora:
@@ -227,6 +251,8 @@ blade:
         - gsb
       Stainless:
         - gillette - stainless
+      Super Stainless:
+        - gillette - 'the spoiler' super stainless
       Super Thin Mejorada:
         - gillette - super thin
       Super Thin Platinum:
@@ -246,12 +272,6 @@ blade:
       Super Platinum:
         - glatz
     Kai:
-      Captain ProTouch:
-        - kai captain titan mild pro touch
-        - kai protouch mg
-        - kai protouch mg blade
-      Captain Titan Mild:
-        - kai captain mild
       DE:
         - kai
         - kai - stainless
@@ -259,12 +279,6 @@ blade:
       DE:
         - gillette - king c gillette blades
         - king c. gillette
-    Kismet:
-      Hair Shaper:
-        - kismet
-        - kismet - hair shaper
-        - kismet hair shaper
-        - kismet rostfrei, polymer beschichtet
     Ladas:
       Super Stainless:
         - ladas
@@ -273,9 +287,6 @@ blade:
         - laser super platinum
         - laser ultra
         - lazer triple coated
-    Leaf:
-      SE:
-        - leaf super platinum
     Leningrad:
       DE:
         - ленинград
@@ -302,20 +313,6 @@ blade:
         - p74
         - personna 74
         - personna p74
-      GEM PTFE:
-        - accutec pro premium
-        - gem
-        - gem ptfe
-        - gem ptfe (?)
-        - gem ss ptfe
-        - gem ss ptfe-coated
-        - personna - gem ptfe
-        - personna - gem ptfe coated
-        - personna gem ptfe
-        - personna gem ptfe coated
-      Injector:
-        - hills (personna) chrome injector
-        - personna
       Lab Blue:
         - accuforge
         - gilette lab blue
@@ -326,6 +323,7 @@ blade:
         - personna comfort coat
         - personna comfort coated
         - personna lab blue
+        - personna lab blue super
         - personna super comfort coated (aka lab blue)
       Med Prep:
         - accutec - med prep
@@ -337,6 +335,7 @@ blade:
         - personna - platinum (for both)
         - personna - platinum chrome israeli red
         - personna platinum
+        - personna platinum chrome
         - personna platinum chrome/german red
         - personna red
       Super Stainless:
@@ -362,25 +361,10 @@ blade:
         - rapira super stainless
       Swedish:
         - rapira sweedish super steel
-    RhinoceRos:
-      A77:
-        - rhinoceros a77 full blade
-        - rhinoceros a77 mini blade
     Rockwell:
       Swedish Stainless:
         - rockwell stainless steel
         - rockwell swedish stainless steel
-    Schick:
-      Injector:
-        - schick injector
-        - schick injector blade
-        - schick injector blades
-        - schick p-30
-        - schick proline b-series injector
-      Proline (AC):
-        - schick proline p-series artist club
-      Stainless (DE):
-        - schick stainless
     Shark:
       Chrome:
         - lord shark - super chrome
@@ -389,19 +373,16 @@ blade:
         - shark super chromes
       Stainless:
         - lord shark - super stainless
+        - shark
         - shark (egypt)
         - shark ss
+        - shark super stainless
     Sharp Star:
       Platinum:
         - sharp star
     Silver Star:
       Super Stainless:
         - lord silver star - stainless
-    Snow Mountain Wolf:
-      A77:
-        - snow mountain wolf a77
-        - snow mountain wolf a77 blade
-        - snow mountain wolf a77 modified
     Starmaxx:
       Superior Platinum:
         - starmaxx - superior platinum
@@ -425,9 +406,6 @@ blade:
       Platinum:
         - czech blades tatra platinum stainless
         - tatra platinum
-    Ted Pella:
-      Injector:
-        - ted pella injector
     Tiger:
       Platinum:
         - tiger
@@ -458,13 +436,13 @@ blade:
         - treet - falcon carbon steel
       New Edge:
         - treet new edge
+      New Steel:
+        - treet - new steel
       Platinum:
         - treet
         - treet - platinum
         - treet platinum
-        - treet platinum , 1st use
-        - treet platinum , 2nd use
-        - treet platinum .
+        - treet stainless
       Silver:
         - treet silver
     V12:
@@ -486,6 +464,7 @@ blade:
       Classic:
         - wilkinson sword
         - wilkinson sword (german)
+        - wilkinson sword black
         - wilkinson sword classic
     Willy's:
       Premium:
@@ -499,15 +478,63 @@ blade:
         - wizamet half
         - wizamet iridium
         - wizamet super iridium
+  FHS:
+    Feather:
+      FHS-1:
+        - feather fhs-10
   GEM:
     Personna:
       GEM PTFE:
+        - accutec pro premium
+        - gem
+        - gem ptfe
+        - gem ptfe (?)
+        - gem ss ptfe
+        - gem ss ptfe-coated
+        - personna - gem ptfe
+        - personna - gem ptfe coated
+        - personna gem ptfe
+        - personna gem ptfe coated
         - personna ptfe
         - ptfe
+  Hair Shaper:
+    Fromm:
+      Hair Shaper:
+        - fromm hair cut blade
+        - fromm hair shaper
+        - fromm hair shaper blade
+    Kismet:
+      Hair Shaper:
+        - kismet
+        - kismet - hair shaper
+        - kismet hair shaper
+        - kismet rostfrei, polymer beschichtet
+    Personna:
+      Hair Shaper:
+        - personna hair shaper
+  Half DE:
+    Leaf:
+      SE:
+        - leaf super platinum
   Injector:
     Personna:
       Injector:
+        - hills (personna) chrome injector
+        - personna
         - personna injector
+    Schick:
+      Injector:
+        - schick injector
+        - schick injector blade
+        - schick injector blades
+        - schick p-30
+        - schick proline b-series injector
+    Supply Co.:
+      Black Label:
+        - supply black injector blade
+    Ted Pella:
+      Injector:
+        - ted pella injector
 brush:
   All-Star Grooming Co.:
     Shave Brush:
@@ -515,8 +542,7 @@ brush:
   Aurora Grooming:
     LG24:
       - aurora grooming lg 2024 synthetic ('lux emerald green')
-      - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush
-      - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush
+      - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh
       - aurora grooming lg24
   Body Shop:
     Synthetic:
@@ -613,8 +639,8 @@ brush:
       - chisel & hound stalwart fanchurian v26 badger
       - chisel and hound - flame on with v26 fanchurian
       - chisel and hound bulldog v26
-    v27:
       - c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian
+    v27:
       - chisel & hound - dinos'mores - 26mm v27 fanchurian
       - chisel & hound - green velvet (5356gc) - 26mm v27 fanchurian
       - chisel & hound texas pearl handle with 26mm v27 fanchurian knot
@@ -655,13 +681,16 @@ brush:
     B9A:
       - declaration grooming - lavender jefferson - 28mm b9a+
       - dg b9a
+  Dogwood:
+    SHD Badger:
+      - dogwood handcrafts kyle shd
   Dreadnought:
     Avenger:
       - dreadnought avenger
   EldrormR Industries/Muninn Woodworks:
     BFM:
       - ">![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
-        woodworks handle $frankenbrush"
+        woodworks handle"
       - ">!redacted!< $bigfuckingmotherload"
       - ">!redacted!< [bigfuckingmotherload]"
       - ">!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
@@ -818,10 +847,13 @@ brush:
     Barberpole:
       - zenith barberpole xse 26mm
     r/wetshaving MOAR BOAR:
+      - "* **zenith - r/wetshaving moar boar** b35/508a xl (60 uses)"
       - moar boar
       - moar f'n boar
+      - r/wetshaving moar boar
       - r/wetshaving zenith moar boar
       - r/wetshaving zentih moar boar 31mm
+      - zenith *moar boar* sub-exclusive (508a xl) 31mm boar knot
       - zenith - moar boar
       - zenith - moar boar 31mm boar
       - zenith - moar boar b35 31mm boar
@@ -833,14 +865,19 @@ brush:
       - zenith moar boar sub brush
       - zenith moar boar sub exclusive
       - zenith moar boar sub-exclusive (508a xl) 31mm boar knot
+      - zenith r/wetshaving 2022 moar boar
       - zenith r/wetshaving 31mm x 57mm moar boar
+      - zenith r/wetshaving exclusive **moar boar** (31 mm × 57 mm bleached boar)
       - zenith r/wetshaving exclusive moar badger (silvertip)
       - zenith r/wetshaving exclusive moar boar
       - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
       - zenith r/wetshaving exclusive moar boar 31 mm
       - zenith r/wetshaving exclusive moar boar 31mm
       - zenith r/wetshaving moar boar
+      - zenith r/wetshaving moar boar 31mm bleached boar
       - zenith r/wetshaving sub exclusive moar boar
+      - zenith sub exclusive moar boar 31mm
+      - zenith ws 508 moar boar
       - zentih - moar boar r/wetshaving
 handle:
   Alpha:
@@ -885,6 +922,32 @@ handle:
       - chisel and hound ambrosia maple with 26 mm synthetic maggard knot
       - chisel and hound azurite with 26 mm maggard tuxedo knot
       - chisel and hound padauk wood handle
+  Dogwood:
+    Unspecified:
+      - \- Dogwood B7
+      - dogwood / dg b14 mammoth yellow label release
+      - Dogwood Arcane Abyss w/ Gealousy
+      - Dogwood Coprolite B15
+      - Dogwood Hancrafts -Black/Blue/Grey-APSCO 26mm SilkSmoke Fan/Flat Top Hybrid
+      - Dogwood Handcrafts - B11 28mm Badger
+      - Dogwood Handcrafts - Good Gully - B13
+      - Dogwood Handcrafts / Maggard SHD Badger 28mm
+      - Dogwood Handcrafts 26mm B9A+
+      - Dogwood Handcrafts 26mm Maggard SHD
+      - Dogwood Handcrafts 26mm Zenith Bleached Boar
+      - Dogwood Handcrafts 28mm Declaration B14
+      - Dogwood Handcrafts B15
+      - Dogwood Handcrafts Dark Red 28mm DG B11 Badger
+      - Dogwood Handcrafts Declaration B18 Badger
+      - Dogwood Handcrafts Hybrid 28mm Declaration Grooming B13 Badger Knot
+      - Dogwood Handcrafts Hybrid B3
+      - Dogwood Handcrafts Oumo Rorschach Two Band Badger Badger
+      - Dogwood Handcrafts Pink And Black Maggard 26mm SHD Fan
+      - Dogwood Handcrafts Tabak Oridjinal, now with 28 mm Gelousy knot
+      - Dogwood Handcrafts with Declaration Grooming B10
+      - Dogwood hybrid / Declaration B13 28mm
+      - Dogwood hybrid / Declaration B18 28mm
+      - Dogwood W/28mm DG B11 Badger
   Heritage Collection:
     Unspecified:
       - heritage shaving c-mon 28 mm
@@ -901,11 +964,16 @@ knot:
   AP Shave Co:
     G5B:
       - chisel & hound "propane" / 26mm ap shave co. g5b
+    Gelousy:
+      - Dogwood Arcane Abyss w/ Gealousy
+      - Dogwood Handcrafts Tabak Oridjinal, now with 28 mm Gelousy knot
     Pure Bliss:
       - chisel & hound 5449sc w/ ap shave co pure bliss
     Pure Bliss SHD:
       - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
       - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
+    Silksmoke:
+      - Dogwood Hancrafts -Black/Blue/Grey-APSCO 26mm SilkSmoke Fan/Flat Top Hybrid
     Synbad:
       - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
     Timberwolf:
@@ -922,8 +990,32 @@ knot:
       - chisel & hound - abominable chalice
       - chisel & hound broomstick
   Declaration Grooming:
+    B10:
+      - Dogwood Handcrafts with Declaration Grooming B10
+    B11:
+      - Dogwood Handcrafts - B11 28mm Badger
+      - Dogwood Handcrafts Dark Red 28mm DG B11 Badger
+      - Dogwood W/28mm DG B11 Badger
+    B13:
+      - Dogwood Handcrafts - Good Gully - B13
+      - Dogwood Handcrafts Hybrid 28mm Declaration Grooming B13 Badger Knot
+      - Dogwood hybrid / Declaration B13 28mm
+    B14:
+      - dogwood / dg b14 mammoth yellow label release
+      - Dogwood Handcrafts 28mm Declaration B14
     B15:
+      - Dogwood Coprolite B15
+      - Dogwood Handcrafts B15
       - summer break demaranville b15
+    B18:
+      - Dogwood Handcrafts Declaration B18 Badger
+      - Dogwood hybrid / Declaration B18 28mm
+    B3:
+      - Dogwood Handcrafts Hybrid B3
+    B7:
+      - \- Dogwood B7
+    B9A:
+      - Dogwood Handcrafts 26mm B9A+
   Heritage Collection:
     Badger:
       - heritage shaving c-mon 28 mm
@@ -935,6 +1027,9 @@ knot:
       - chisel & hound "nice" w/maggard 26mm 2 band badger
       - chisel & hound hive 28mm maggard silver tip badger
       - chisel and hound - tahitian pearl 26mm maggard shd fan
+      - Dogwood Handcrafts / Maggard SHD Badger 28mm
+      - Dogwood Handcrafts 26mm Maggard SHD
+      - Dogwood Handcrafts Pink And Black Maggard 26mm SHD Fan
     Boar:
       - chisel & hound "americana" / 26mm maggard razors premium boar
     G5:
@@ -956,6 +1051,7 @@ knot:
   Oumo:
     Rorschach:
       - chisel & hound esmeralda w/oumo rorschach badger
+      - Dogwood Handcrafts Oumo Rorschach Two Band Badger Badger
   Paragon:
     Boar:
       - chisel & hound season of the witch w/ 26mm paragon boar
@@ -980,6 +1076,9 @@ knot:
       - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
     Tuxedo:
       - chisel & hound "spice lily" - turnnshave tuxedo 26mm synthetic
+  Zenith:
+    Boar:
+      - Dogwood Handcrafts 26mm Zenith Bleached Boar
 razor:
   3D Printed:
     DE:
@@ -1363,7 +1462,7 @@ razor:
       - eldrormr mm24
       - gem - mm24 - eldrormr industries
       - mm24
-      - mm24 baby!!!
+      - mm24 baby
       - u/eldormr industries - mm24
       - u/eldrormr industries mm24
   Ever-Ready:
@@ -1472,7 +1571,6 @@ razor:
     Featherweight:
       - gem - featherweight
       - gem - featherweight $atomic age
-      - gem - featherweight.
       - gem featherweight
     Flying Wing (aka Bullet Tip):
       - gem - "flying wing" bullet tip
@@ -1554,7 +1652,7 @@ razor:
     Lady Gillette:
       - gillette - 1966 lady gillette
       - gillette lady gillette (blue)
-      - lady gillette - blue.
+      - lady gillette - blue
     NEW:
       - gillette "the new" vintage razor
       - gillette - 'new' lc
@@ -1599,7 +1697,6 @@ razor:
       - gillette - slim adjustable (l4, 1966)
       - gillette - slim adjustable m-4
       - gillette - slim adjustable n2
-      - gillette - slim adjustable.
       - gillette - slim j2
       - gillette 1966 slim adjustable. 3 pass levels 4 & 3
       - gillette adjustable slim (h4)
@@ -1636,8 +1733,8 @@ razor:
       - gillette - 1950's flare tip super speed
       - gillette - black handled super speed
       - gillette - black handled super speed - 1968
+      - gillette - flare tip super speed
       - gillette - flare tip super speed - 1956
-      - gillette - flare tip super speed.
       - gillette - gillette flare tip super speed (1954 z3)
       - gillette - r2 tto - 1971
       - gillette - red tip super speed
@@ -1754,7 +1851,7 @@ razor:
       - henson - al 13 mild
       - henson - al13
       - henson - al13 (squatch)
-      - henson - al13 mild.
+      - henson - al13 mild
       - henson - al13++
       - henson al 13
       - henson al 13 (+)
@@ -1774,9 +1871,8 @@ razor:
       - henson shaving al +
       - henson shaving al +++
       - henson shaving al13 +
-      - henson- al13 mild.
+      - henson- al13 mild
       - v2 henson + ("dr. squatch")
-      - v2 henson + ("dr. squatch").
     Ti22:
       - henson - ti22 +++
       - henson razors - ti-22 "++"
@@ -1889,6 +1985,7 @@ razor:
       - kikuboshi r. saito 6/8" extra hollow
   Koraat:
     Moarteen (r/Wetshaving exclusive):
+      - "* **koraat - moarteen**"
       - koraat - moarteen
       - koraat - moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
       - koraat - moarteen 15/16
@@ -1909,6 +2006,7 @@ razor:
       - koraat moarteen r/wetshaving exclusive 15/16, full hollow square point
       - koraat moarteen sub razor
       - koraat moarteen sub-exclusive (15/16", full hollow, square point)
+      - koraat r/wetshaving exclusive moarteen 15/16, full hollow square point
       - koraat r/wetshaving moarteen 7/8
       - koraat-knives - moarteen
       - koraat-knives moarteen
@@ -2199,7 +2297,6 @@ razor:
       - razorock baby smooth
     Cyber:
       - razorock / italian barber - cyber razor, mild
-      - razorock / italian barber - cyber razor, mild.
     Eco:
       - razorock eco hulk green
     GOAT:
@@ -2239,7 +2336,7 @@ razor:
       - razorock gc.84
       - razorock gc.84 $25
     German 37 Slant:
-      - razorock - german 37 slant razor torsionshobel,
+      - razorock - german 37 slant razor torsionshobel
       - razorock german 37
       - razorock german 37 / mr5
       - razorock german 37 slant
@@ -2404,7 +2501,6 @@ razor:
     Krona:
       - schick - krona
       - schick - krona 1960s tto de
-      - schick - krona.
       - schick krona
     Magazine Repeating Razor:
       - schick magazine repeating razor (type c3)
@@ -2496,7 +2592,7 @@ razor:
     Razor:
       - bronze timeless sb
       - timeless - .38 bronze
-      - timeless -.38 bronze.
+      - timeless -.38 bronze
       - timeless bronze 0.38mm
       - timeless bronze 0.38mm sb
       - timeless bronze 0.78mm oc
@@ -2679,7 +2775,7 @@ razor:
     Winning:
       - yates winning v2
       - ypm - winning razor mk1, polished
-      - ypm - winning razor mk1, polished, w/ "madmax" titanium handle.
+      - ypm - winning razor mk1, polished, w/ "madmax" titanium handle
       - ypm - winning razor mk2, polished, tattooed ("the emperor's razor!")
       - ypm - winning razor mk2, polished, tattooed ("the razor of mankind!")
   Yuma:

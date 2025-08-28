@@ -4,6 +4,75 @@ known_brushes:
       fiber: Badger
       patterns:
         - all[ -]?star.*grooming
+  AP Shave Co:
+    APLuxury:
+      fiber: Mixed Badger/Boar
+      knot_size_mm: 24
+      patterns:
+        - apluxury
+        - \bap\b.*luxury
+    Cashmere:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*cashmere
+    Silksmoke:
+      fiber: Synthetic
+      patterns:
+        - silksmoke
+    Gelousy:
+      fiber: Badger
+      patterns:
+        - gea?lousy
+    MiG:
+      fiber: Synthetic
+      patterns:
+        - \bmig\b
+    Synbad:
+      fiber: Synthetic
+      patterns:
+        - synbad
+    G5A:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5a
+        - \bg5a\b
+    G5B:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5b
+        - \bg5b\b
+    G5C:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5c
+        - \bg5c\b
+    Pure Bliss:
+      fiber: Synthetic
+      patterns:
+        - pure\s*bliss(?!.*shd)
+        - \bpb\b(?!.*shd)
+    Pure Bliss SHD:
+      fiber: Synthetic
+      patterns:
+        - pure\s*bliss.*shd
+        - \bpb\b.*shd
+    Timberwolf:
+      fiber: Synthetic
+      patterns:
+        - timberwolf
+    Titanium:
+      fiber: Synthetic
+      patterns:
+        - (?:\ba ?p\b.*)?titanium
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*tuxedo
+        - apshave.*tuxedo
+    2Bed:
+      fiber: Synthetic
+      patterns:
+        - \b2\s*bed\b
   Aurora Grooming:
     default: Synthetic
     patterns:

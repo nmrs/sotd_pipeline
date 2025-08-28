@@ -118,8 +118,9 @@ DE:
         - clock.*sta
         - clock.*green
         - clock
-        - gil.*et.*super.*stain
         - gil.*et.*green
+        - clock.*super.*stain
+        - gil.*super.*stain.*green
   ABEST:
     Hi Platinum:
       patterns:
@@ -357,6 +358,10 @@ DE:
     Stainless:
       patterns:
         - gil.*stain
+    Super Stainless:
+      patterns:
+        - gil.*super.*stain
+        - gil.*spoiler
     Super Thin Mejorada:
       patterns:
         - mejorada
@@ -495,7 +500,7 @@ DE:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?!.*comfort).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*(comfort|lab)).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     TOMY:
       patterns:
         - \btomy\b
@@ -659,8 +664,10 @@ DE:
         - treet.*king
     New Edge:
       patterns:
-        - treet.*new
         - tre(e|a)t.*new.*edge
+    New Steel:
+      patterns:
+        - treet.*new.*steel
     Platinum:
       patterns:
         - treet
@@ -818,7 +825,7 @@ Hair Shaper:
   Personna:
     Hair Shaper:
       patterns:
-        - personn.*hair.*shap
+        - person+a.*hair.*shaper
         - person.*specimen
         - person+a
   Weck:
@@ -875,7 +882,7 @@ Injector:
   Supply Co.:
     Black Label:
       patterns:
-        - supply
+        - supply.*(?:inject)?
         - black label
   Ted Pella:
     Injector:
