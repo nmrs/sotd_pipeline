@@ -12,10 +12,10 @@ from .utils.regex_error_utils import compile_regex_with_context, create_context_
 class BladeMatcher(BaseMatcher):
     """
     Blade matcher with unified tiebreaker system and context-aware format prioritization.
-    
+
     This matcher implements a sophisticated pattern matching system that prioritizes
     blade patterns based on specificity rather than hardcoded format preferences.
-    
+
     Key Features:
     - **Unified Tiebreaker System**: All patterns are sorted by a comprehensive scoring
       system that considers format priority, pattern length, non-optional parts,
@@ -26,11 +26,12 @@ class BladeMatcher(BaseMatcher):
       the system uses global pattern specificity across all formats to find the best match.
     - **Flexible Fallback**: Maintains backward compatibility with existing fallback logic
       while adding new capabilities for generic cases.
-    
+
     The unified tiebreaker system ensures that more specific patterns (longer, more
     complex, with more non-optional parts) are prioritized over generic patterns,
     leading to more accurate blade format identification.
     """
+
     def __init__(
         self,
         catalog_path: Path = Path("data/blades.yaml"),
@@ -253,23 +254,23 @@ class BladeMatcher(BaseMatcher):
     def _calculate_pattern_score(self, item, deprioritize_de: bool = False) -> tuple:
         """
         Unified tiebreaker function for both normal and context-aware cases.
-        
+
         This method implements a comprehensive scoring system that prioritizes patterns
         based on multiple factors. The scoring uses negative values so that smaller
         tuples (more specific patterns) sort first.
-        
+
         Args:
             item: Pattern item tuple (brand, model, fmt, pattern, compiled, entry)
             deprioritize_de: Whether to deprioritize DE formats (for context-aware cases)
-        
+
         Returns:
-            Tuple for sorting: (format_priority, -length_score, -non_optional_score, 
+            Tuple for sorting: (format_priority, -length_score, -non_optional_score,
             -complexity_score, -boundary_score)
-            
+
             Lower tuple values = higher priority (more specific patterns)
         """
         brand, model, fmt, pattern, compiled, entry = item
-        
+
         # Primary: format priority (only when deprioritize_de=True)
         # This allows context-aware matching to prioritize non-DE formats
         if deprioritize_de:
@@ -279,23 +280,23 @@ class BladeMatcher(BaseMatcher):
                 format_priority = 0  # Non-DE formats get higher priority (lower number)
         else:
             format_priority = 0  # No format bias when using global approach
-        
+
         # Secondary: pattern length (longer = more specific)
         # Longer patterns are more specific and should win over shorter ones
         length_score = len(pattern)
-        
+
         # Tertiary: non-optional vs optional (non-optional wins)
         # Patterns with more required parts are more specific
         non_optional_score = self._count_non_optional_parts(pattern)
-        
+
         # Quaternary: pattern complexity (more special chars = more specific)
         # Complex regex patterns are more specific than simple text patterns
         complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
-        
+
         # Quinary: word boundaries (more word boundaries = more specific)
         # Patterns with word boundaries are more precise
         boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-        
+
         # Return tuple for lexicographic sorting
         # Negative values ensure smaller tuples (more specific) sort first
         return (
@@ -311,24 +312,24 @@ class BladeMatcher(BaseMatcher):
     ) -> MatchResult:
         """
         Find the best match across all formats using global pattern specificity.
-        
+
         This method implements the global pattern specificity approach for generic
         razor formats (like "Shavette") where the blade format is unknown. Instead
         of guessing which format to use, it sorts all patterns by specificity and
         finds the most specific match, then derives the format from that match.
-        
+
         The method leverages the existing self.patterns list, which is already
         sorted by the unified tiebreaker system. This ensures that the most
         specific patterns are tried first, leading to more accurate matches.
-        
+
         Args:
             normalized_text: The normalized text to match against
             original: The original text (preserved in the result)
-        
+
         Returns:
             MatchResult with the best match found, or a "no match" result
             with the same structure as existing code for consistency.
-        
+
         Example:
             For "personna hair shaper" with generic "Shavette" razor:
             - The pattern 'person+a.*hair.*shaper' (Hair Shaper format) will win
@@ -338,31 +339,25 @@ class BladeMatcher(BaseMatcher):
         # Try patterns in order until we find a match
         for brand, model, fmt, pattern, compiled, entry in self.patterns:
             if compiled.search(normalized_text):
-                # Basic logging for debugging
-                print(
-                    f"Global pattern match found: {brand} {model} ({fmt}) using pattern '{pattern}'"
-                )
-                
                 match_data = {
                     "brand": brand,
                     "model": str(model),
                     "format": fmt,
                 }
-                
+
                 # Preserve all additional specifications from the catalog entry
                 for key, value in entry.items():
                     if key not in ["patterns", "format"]:
                         match_data[key] = value
-                
+
                 return create_match_result(
                     original=original or normalized_text,
                     matched=match_data,
                     match_type=MatchType.REGEX,
                     pattern=pattern,
                 )
-        
+
         # No matches found - return same structure as existing "no match" case
-        print("No global pattern match found")
         return create_match_result(
             original=original or normalized_text,
             matched=None,
@@ -824,11 +819,8 @@ class BladeMatcher(BaseMatcher):
             # Check if this is generic "Shavette" (case-insensitive)
             if razor_format.lower() == "shavette":
                 # Use global pattern specificity approach for generic Shavette
-                print(
-                    "Generic 'Shavette' detected, switching to global pattern specificity approach"
-                )
                 return self._find_best_global_match(normalized_text, original)
-            
+
             # Determine if this is a Shavette razor for special fallback logic
             is_shavette = razor_format.upper().startswith("SHAVETTE")
 
