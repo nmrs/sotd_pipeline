@@ -385,6 +385,41 @@ const MatchAnalyzer: React.FC = () => {
             };
           }
 
+          // For blade field, include razor format context for correct section placement
+          if (selectedField === 'blade' && item.matched) {
+            // Ensure the format field is present for correct section placement in correct_matches.yaml
+            // The backend expects a 'format' field to determine which section to place the entry in
+            const bladeData = {
+              ...item.matched,
+              // Use existing format field, but warn if it's missing
+              format: item.matched.format || (() => {
+                console.warn(`Blade match missing format field for "${item.original}". This may cause incorrect placement in correct_matches.yaml.`);
+                // Try to infer format from other fields or use a more specific default
+                if (item.matched.brand && item.matched.model) {
+                  // Check if we can infer the format from the brand/model combination
+                  console.warn(`Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`);
+                }
+                // For now, use 'DE' as fallback, but this should be fixed in the backend
+                return 'DE';
+              })(),
+            };
+
+            // Debug logging for blade format handling
+            console.log('Blade match data:', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: bladeData,
+              format: bladeData.format,
+              hasFormatField: 'format' in item.matched,
+              formatFieldValue: item.matched.format
+            });
+
+            return {
+              original: item.original,
+              matched: bladeData,
+            };
+          }
+
           // For non-brush fields, return as-is
           return {
             original: item.original,
@@ -442,6 +477,41 @@ const MatchAnalyzer: React.FC = () => {
             return {
               original: item.original,
               matched: data,
+            };
+          }
+
+          // For blade field, include razor format context for correct section placement
+          if (selectedField === 'blade' && item.matched) {
+            // Ensure the format field is present for correct section placement in correct_matches.yaml
+            // The backend expects a 'format' field to determine which section to place the entry in
+            const bladeData = {
+              ...item.matched,
+              // Use existing format field, but warn if it's missing
+              format: item.matched.format || (() => {
+                console.warn(`Blade match missing format field for "${item.original}" (remove). This may cause incorrect placement in correct_matches.yaml.`);
+                // Try to infer format from other fields or use a more specific default
+                if (item.matched.brand && item.matched.model) {
+                  // Check if we can infer the format from the brand/model combination
+                  console.warn(`Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`);
+                }
+                // For now, use 'DE' as fallback, but this should be fixed in the backend
+                return 'DE';
+              })(),
+            };
+
+            // Debug logging for blade format handling
+            console.log('Blade match data (remove):', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: bladeData,
+              format: bladeData.format,
+              hasFormatField: 'format' in item.matched,
+              formatFieldValue: item.matched.format
+            });
+
+            return {
+              original: item.original,
+              matched: bladeData,
             };
           }
 
@@ -575,6 +645,41 @@ const MatchAnalyzer: React.FC = () => {
             return {
               original: item.original,
               matched: data,
+            };
+          }
+
+          // For blade field, include razor format context for correct section placement
+          if (selectedField === 'blade' && item.matched) {
+            // Ensure the format field is present for correct section placement in correct_matches.yaml
+            // The backend expects a 'format' field to determine which section to place the entry in
+            const bladeData = {
+              ...item.matched,
+              // Use existing format field, but warn if it's missing
+              format: item.matched.format || (() => {
+                console.warn(`Blade match missing format field for "${item.original}" (incorrect). This may cause incorrect placement in correct_matches.yaml.`);
+                // Try to infer format from other fields or use a more specific default
+                if (item.matched.brand && item.matched.model) {
+                  // Check if we can infer the format from the brand/model combination
+                  console.warn(`Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`);
+                }
+                // For now, use 'DE' as fallback, but this should be fixed in the backend
+                return 'DE';
+              })(),
+            };
+
+            // Debug logging for blade format handling
+            console.log('Blade match data (incorrect):', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: bladeData,
+              format: bladeData.format,
+              hasFormatField: 'format' in item.matched,
+              formatFieldValue: item.matched.format
+            });
+
+            return {
+              original: item.original,
+              matched: bladeData,
             };
           }
 
@@ -1024,9 +1129,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -1043,11 +1147,10 @@ const MatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -1064,11 +1167,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'unconfirmed'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -1085,9 +1187,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -1104,11 +1205,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'intentionally_unmatched'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -1126,11 +1226,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Matches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'matches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'matches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().matches}
                 </span>
@@ -1149,11 +1248,10 @@ const MatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'complete_brushes'
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
                         ? 'bg-white text-blue-600'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>

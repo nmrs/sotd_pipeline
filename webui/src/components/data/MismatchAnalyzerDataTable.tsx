@@ -409,63 +409,63 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                // Since backend groups by case-insensitive original text, use that as the key
-                const itemKey = `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              // Since backend groups by case-insensitive original text, use that as the key
+              const itemKey = `${field}:${item.original.toLowerCase()}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
@@ -587,37 +587,98 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return content;
         },
       },
-      {
-        accessorKey: 'match_type',
+    ];
+
+    // Add format column for blade field to show which format section the entry will be placed in
+    if (field === 'blade') {
+      baseColumns.push({
+        id: 'format',
+        accessorFn: (row: MismatchItem) => {
+          const matched = row.matched as Record<string, unknown>;
+          return matched?.format || 'DE';
+        },
         header: () => (
-          <HeaderFilter
-            title='Match Type'
-            options={matchTypeOptions}
-            selectedValues={matchTypeFilter}
-            onSelectionChange={setMatchTypeFilter}
-            searchPlaceholder='Search match types...'
-            onSort={() => {
-              const currentSort = sorting.find(s => s.id === 'match_type');
-              const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
-              setSorting(newDirection ? [{ id: 'match_type', desc: newDirection === 'desc' }] : []);
-            }}
-            sortDirection={(() => {
-              const currentSort = sorting.find(s => s.id === 'match_type');
-              if (!currentSort) return null;
-              return currentSort.desc ? 'desc' : 'asc';
-            })()}
-          />
+          <div className='flex items-center gap-1 group'>
+            <span>Format</span>
+            <span className='text-gray-400 text-xs cursor-help' title='Shows which format section this blade will be placed in when marked as correct (e.g., DE, GEM, AC)'>
+              ℹ️
+            </span>
+          </div>
         ),
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
+          const matched = item.matched as Record<string, unknown>;
+          const format = matched?.format || 'DE';
+
+          // Color-code different formats for better visibility
+          const getFormatColor = (fmt: string) => {
+            switch (fmt.toUpperCase()) {
+              case 'DE':
+                return 'bg-blue-100 text-blue-800';
+              case 'GEM':
+                return 'bg-green-100 text-green-800';
+              case 'AC':
+                return 'bg-purple-100 text-purple-800';
+              case 'INJECTOR':
+                return 'bg-orange-100 text-orange-800';
+              case 'HAIR SHAPER':
+                return 'bg-red-100 text-red-800';
+              case 'FHS':
+                return 'bg-indigo-100 text-indigo-800';
+              case 'A77':
+                return 'bg-pink-100 text-pink-800';
+              case 'HALF DE':
+                return 'bg-yellow-100 text-yellow-800';
+              default:
+                return 'bg-gray-100 text-gray-800';
+            }
+          };
+
           return (
-            <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
-              {item.match_type}
-            </span>
+            <div className='text-sm'>
+              <span
+                className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getFormatColor(format)}`}
+                title={`This blade will be placed in the ${format} format section when marked as correct`}
+              >
+                {format}
+              </span>
+            </div>
           );
         },
+      });
+    }
+
+    // Add match_type column
+    baseColumns.push({
+      accessorKey: 'match_type',
+      header: () => (
+        <HeaderFilter
+          title='Match Type'
+          options={matchTypeOptions}
+          selectedValues={matchTypeFilter}
+          onSelectionChange={setMatchTypeFilter}
+          searchPlaceholder='Search match types...'
+          onSort={() => {
+            const currentSort = sorting.find(s => s.id === 'match_type');
+            const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
+            setSorting(newDirection ? [{ id: 'match_type', desc: newDirection === 'desc' }] : []);
+          }}
+          sortDirection={(() => {
+            const currentSort = sorting.find(s => s.id === 'match_type');
+            if (!currentSort) return null;
+            return currentSort.desc ? 'desc' : 'asc';
+          })()}
+        />
+      ),
+      cell: ({ row }: { row: Row<MismatchItem> }) => {
+        const item = row.original;
+        return (
+          <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
+            {item.match_type}
+          </span>
+        );
       },
-    ];
+    });
 
     // Add brush-specific columns if field is brush
     if (field === 'brush') {
@@ -654,9 +715,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${
-                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {brushType.type}
               </span>
@@ -792,7 +852,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentDisplay
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => {})}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
             />
           );

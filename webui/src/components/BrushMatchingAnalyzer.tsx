@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Loader2, Search, Trophy, Target, Hash } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Loader2, Search, Trophy, Target, Hash, Info } from 'lucide-react';
 
 interface BrushMatchResult {
   strategy: string;
@@ -21,8 +21,18 @@ interface BrushMatchResult {
     model?: string;
     fiber?: string;
     size?: string;
-    handle?: any;
-    knot?: any;
+    handle?: {
+      brand?: string;
+      model?: string;
+      source_text?: string;
+    };
+    knot?: {
+      brand?: string;
+      model?: string;
+      fiber?: string;
+      knot_size_mm?: number;
+      source_text?: string;
+    };
   };
 }
 
@@ -151,9 +161,19 @@ export function BrushMatchingAnalyzer() {
                     </div>
                     <div>
                       <p className='text-sm text-gray-600'>Score</p>
-                      <p className={`font-bold text-lg ${getScoreColor(results.winner.score)}`}>
-                        {results.winner.score}
-                      </p>
+                      <div className='flex items-baseline gap-2'>
+                        <span className={`font-bold text-2xl ${getScoreColor(results.winner.score)}`}>
+                          {results.winner.score}
+                        </span>
+                        {results.winner.scoreBreakdown.modifiers > 0 && (
+                          <span className='text-sm text-green-600 font-medium'>
+                            (+{results.winner.scoreBreakdown.modifiers})
+                          </span>
+                        )}
+                      </div>
+                      <div className='text-xs text-gray-500 mt-1'>
+                        {results.winner.scoreBreakdown.baseScore} base + {results.winner.scoreBreakdown.modifiers} modifiers
+                      </div>
                     </div>
                     <div>
                       <p className='text-sm text-gray-600'>Match Type</p>
@@ -188,10 +208,20 @@ export function BrushMatchingAnalyzer() {
                               </h3>
                             </div>
                             <div className='text-right'>
-                              <p className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
-                                {result.score}
-                              </p>
+                              <div className='flex items-baseline gap-2 justify-end'>
+                                <span className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
+                                  {result.score}
+                                </span>
+                                {result.scoreBreakdown.modifiers > 0 && (
+                                  <span className='text-sm text-green-600 font-medium'>
+                                    (+{result.scoreBreakdown.modifiers})
+                                  </span>
+                                )}
+                              </div>
                               <p className='text-sm text-gray-600'>{result.matchType || 'None'}</p>
+                              <p className='text-xs text-gray-500'>
+                                {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
+                              </p>
                             </div>
                           </div>
 
@@ -202,12 +232,16 @@ export function BrushMatchingAnalyzer() {
                               <div>
                                 <p className='text-gray-600'>Base Score</p>
                                 <p className='font-semibold'>{result.scoreBreakdown.baseScore}</p>
+                                <p className='text-xs text-gray-500'>Strategy match</p>
                               </div>
                               <div>
                                 <p className='text-gray-600'>Modifiers</p>
                                 <p className='font-semibold'>
                                   {result.scoreBreakdown.modifiers > 0 ? '+' : ''}
                                   {result.scoreBreakdown.modifiers}
+                                </p>
+                                <p className='text-xs text-gray-500'>
+                                  {result.scoreBreakdown.modifiers > 0 ? 'Bonus points' : 'No bonuses'}
                                 </p>
                               </div>
                               <div>
@@ -216,14 +250,26 @@ export function BrushMatchingAnalyzer() {
                                   {result.scoreBreakdown.baseScore +
                                     result.scoreBreakdown.modifiers}
                                 </p>
+                                <p className='text-xs text-gray-500'>Final score</p>
                               </div>
                             </div>
                           </div>
 
                           {/* Modifier Details */}
-                          {result.scoreBreakdown.modifierDetails.length > 0 && (
-                            <div className='mb-4'>
-                              <h4 className='font-medium mb-2'>Modifier Details</h4>
+                          <div className='mb-4'>
+                            <h4 className='font-medium mb-2'>Modifier Details</h4>
+                            <div className='text-xs text-gray-600 mb-2 bg-gray-50 p-2 rounded'>
+                              <p className='font-medium'>About Modifiers:</p>
+                              <p>Modifiers are bonus points awarded for:</p>
+                              <ul className='list-disc list-inside ml-2 mt-1 space-y-1'>
+                                <li>Fiber type matches (badger, boar, synthetic)</li>
+                                <li>Size specifications (knot diameter)</li>
+                                <li>Handle material matches</li>
+                                <li>Brand/model confidence</li>
+                                <li>Pattern specificity</li>
+                              </ul>
+                            </div>
+                            {result.scoreBreakdown.modifierDetails.length > 0 ? (
                               <div className='space-y-1'>
                                 {result.scoreBreakdown.modifierDetails.map((detail, idx) => (
                                   <p key={idx} className='text-sm font-mono text-gray-700'>
@@ -231,8 +277,21 @@ export function BrushMatchingAnalyzer() {
                                   </p>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            ) : (
+                              <div className='text-sm text-gray-500 italic'>
+                                {result.scoreBreakdown.modifiers > 0 ? (
+                                  <>
+                                    <p>Modifiers applied: +{result.scoreBreakdown.modifiers}</p>
+                                    <p className='text-xs mt-1'>
+                                      (Detailed breakdown not available from backend)
+                                    </p>
+                                  </>
+                                ) : (
+                                  <p>No modifiers applied</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
 
                           {/* Matched Data */}
                           <div>
@@ -280,36 +339,36 @@ export function BrushMatchingAnalyzer() {
                                     <span className='text-gray-600'>Brand:</span>
                                     <span
                                       className={
-                                        result.matchedData.handle_brand
+                                        result.matchedData.handle?.brand
                                           ? 'font-semibold'
                                           : 'text-gray-400 italic'
                                       }
                                     >
-                                      {result.matchedData.handle_brand || 'Not specified'}
+                                      {result.matchedData.handle?.brand || 'Not specified'}
                                     </span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <span className='text-gray-600'>Model:</span>
                                     <span
                                       className={
-                                        result.matchedData.handle_model
+                                        result.matchedData.handle?.model
                                           ? 'font-semibold'
                                           : 'text-gray-400 italic'
                                       }
                                     >
-                                      {result.matchedData.handle_model || 'Not specified'}
+                                      {result.matchedData.handle?.model || 'Not specified'}
                                     </span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <span className='text-gray-600'>Source:</span>
                                     <span
                                       className={
-                                        result.matchedData.handle_source
+                                        result.matchedData.handle?.source_text
                                           ? 'font-semibold text-xs'
                                           : 'text-gray-400 italic text-xs'
                                       }
                                     >
-                                      {result.matchedData.handle_source || 'Not specified'}
+                                      {result.matchedData.handle?.source_text || 'Not specified'}
                                     </span>
                                   </div>
                                 </div>
@@ -323,49 +382,49 @@ export function BrushMatchingAnalyzer() {
                                     <span className='text-gray-600'>Brand:</span>
                                     <span
                                       className={
-                                        result.matchedData.knot_brand
+                                        result.matchedData.knot?.brand
                                           ? 'font-semibold'
-                                          : 'text-gray-400 italic'
+                                          : 'font-semibold'
                                       }
                                     >
-                                      {result.matchedData.knot_brand || 'Not specified'}
+                                      {result.matchedData.knot?.brand || 'Not specified'}
                                     </span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <span className='text-gray-600'>Model:</span>
                                     <span
                                       className={
-                                        result.matchedData.knot_model
+                                        result.matchedData.knot?.model
                                           ? 'font-semibold'
                                           : 'text-gray-400 italic'
                                       }
                                     >
-                                      {result.matchedData.knot_model || 'Not specified'}
+                                      {result.matchedData.knot?.model || 'Not specified'}
                                     </span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <span className='text-gray-600'>Fiber:</span>
                                     <span
                                       className={
-                                        result.matchedData.knot_fiber
+                                        result.matchedData.knot?.fiber
                                           ? 'font-semibold'
                                           : 'text-gray-400 italic'
                                       }
                                     >
-                                      {result.matchedData.knot_fiber || 'Not specified'}
+                                      {result.matchedData.knot?.fiber || 'Not specified'}
                                     </span>
                                   </div>
                                   <div className='flex justify-between'>
                                     <span className='text-gray-600'>Size:</span>
                                     <span
                                       className={
-                                        result.matchedData.knot_size_mm
+                                        result.matchedData.knot?.knot_size_mm
                                           ? 'font-semibold'
                                           : 'text-gray-400 italic'
                                       }
                                     >
-                                      {result.matchedData.knot_size_mm
-                                        ? `${result.matchedData.knot_size_mm}mm`
+                                      {result.matchedData.knot?.knot_size_mm
+                                        ? `${result.matchedData.knot.knot_size_mm}mm`
                                         : 'Not specified'}
                                     </span>
                                   </div>
@@ -373,12 +432,12 @@ export function BrushMatchingAnalyzer() {
                                     <span className='text-gray-600'>Source:</span>
                                     <span
                                       className={
-                                        result.matchedData.knot_source
+                                        result.matchedData.knot?.source_text
                                           ? 'font-semibold text-xs'
                                           : 'text-gray-400 italic text-xs'
                                       }
                                     >
-                                      {result.matchedData.knot_source || 'Not specified'}
+                                      {result.matchedData.knot?.source_text || 'Not specified'}
                                     </span>
                                   </div>
                                 </div>
