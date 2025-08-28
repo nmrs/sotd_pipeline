@@ -37,13 +37,15 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     if isinstance(model_data, dict) and "patterns" in model_data:
                         for pattern in model_data["patterns"]:
                             try:
-                                compiled.append({
-                                    "pattern": pattern,
-                                    "regex": re.compile(pattern, re.IGNORECASE),
-                                    "brand": brand,
-                                    "model": model,
-                                    "data": model_data
-                                })
+                                compiled.append(
+                                    {
+                                        "pattern": pattern,
+                                        "regex": re.compile(pattern, re.IGNORECASE),
+                                        "brand": brand,
+                                        "model": model,
+                                        "data": model_data,
+                                    }
+                                )
                             except re.error:
                                 # Skip invalid patterns
                                 continue
@@ -74,14 +76,14 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     "handle_maker": pattern_info["data"].get("handle_maker"),
                     "source_text": value,
                     "_matched_by": "KnownSplitWrapperStrategy",
-                    "_pattern": pattern_info["pattern"]
+                    "_pattern": pattern_info["pattern"],
                 }
-                
+
                 return MatchResult(
                     original=value,
                     matched=matched_data,
                     match_type="known_split",
-                    pattern=pattern_info["pattern"]
+                    pattern=pattern_info["pattern"],
                 )
 
         return None

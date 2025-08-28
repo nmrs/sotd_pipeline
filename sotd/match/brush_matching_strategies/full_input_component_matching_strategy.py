@@ -78,7 +78,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
                 result = self._convert_knot_result_to_brush_result(knot_result)
             else:
                 return None
-            
+
             if result:
                 result.strategy = "unified"  # Will get base score 50 (no modifier)
                 result.match_type = "single_component"
@@ -94,7 +94,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         # Extract handle data
         handle_data = handle_result.matched or {}
         knot_data = knot_result.matched or {}
-        
+
         # Create combined brush data
         brush_data = {
             "brand": handle_data.get("handle_maker") or knot_data.get("brand"),
@@ -106,14 +106,11 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "_matched_by": "FullInputComponentMatchingStrategy",
             "_pattern": "dual_component",
             "_original_handle_text": handle_data.get("source_text"),
-            "_original_knot_text": knot_data.get("source_text")
+            "_original_knot_text": knot_data.get("source_text"),
         }
-        
+
         return MatchResult(
-            original=value,
-            matched=brush_data,
-            match_type="composite",
-            pattern="dual_component"
+            original=value, matched=brush_data, match_type="composite", pattern="dual_component"
         )
 
     def _create_single_component_result(
@@ -130,7 +127,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
     def _convert_handle_result_to_brush_result(self, handle_result: MatchResult) -> MatchResult:
         """Convert HandleMatcher result to brush format."""
         handle_data = handle_result.matched or {}
-        
+
         brush_data = {
             "brand": handle_data.get("handle_maker"),
             "model": handle_data.get("handle_model"),
@@ -138,7 +135,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "_matched_by": "HandleMatcher",
             "_pattern": handle_data.get("_pattern_used"),
         }
-        
+
         return MatchResult(
             original=handle_result.original,
             matched=brush_data,
@@ -149,7 +146,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
     def _convert_knot_result_to_brush_result(self, knot_result: MatchResult) -> MatchResult:
         """Convert KnotMatcher result to brush format."""
         knot_data = knot_result.matched or {}
-        
+
         brush_data = {
             "brand": knot_data.get("brand"),
             "model": knot_data.get("model"),
@@ -159,7 +156,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
-        
+
         return MatchResult(
             original=knot_result.original,
             matched=brush_data,

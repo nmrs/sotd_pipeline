@@ -42,7 +42,7 @@ class CorrectCompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):
         # Check for exact match in correct matches (case-insensitive)
         normalized_value = value.lower().strip()
         exact_match = self.correct_matches_data.get(normalized_value)
-        
+
         if exact_match:
             # Create match result
             matched_data = {
@@ -53,14 +53,11 @@ class CorrectCompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):
                 "handle_maker": exact_match.get("handle_maker"),
                 "source_text": value,
                 "_matched_by": "CorrectCompleteBrushWrapperStrategy",
-                "_pattern": "exact_match"
+                "_pattern": "exact_match",
             }
-            
+
             return MatchResult(
-                original=value,
-                matched=matched_data,
-                match_type="exact",
-                pattern="exact_match"
+                original=value, matched=matched_data, match_type="exact", pattern="exact_match"
             )
 
         return None
@@ -95,7 +92,7 @@ class CorrectSplitBrushWrapperStrategy(BaseBrushMatchingStrategy):
         # Check for exact match in correct matches (case-insensitive)
         normalized_value = value.lower().strip()
         exact_match = self.correct_matches_data.get(normalized_value)
-        
+
         if exact_match:
             # Create match result
             matched_data = {
@@ -106,14 +103,11 @@ class CorrectSplitBrushWrapperStrategy(BaseBrushMatchingStrategy):
                 "handle_maker": exact_match.get("handle_maker"),
                 "source_text": value,
                 "_matched_by": "CorrectSplitBrushWrapperStrategy",
-                "_pattern": "exact_match"
+                "_pattern": "exact_match",
             }
-            
+
             return MatchResult(
-                original=value,
-                matched=matched_data,
-                match_type="exact",
-                pattern="exact_match"
+                original=value, matched=matched_data, match_type="exact", pattern="exact_match"
             )
 
         return None

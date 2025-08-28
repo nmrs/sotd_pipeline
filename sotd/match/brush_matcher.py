@@ -78,7 +78,7 @@ class BrushScoringMatcher:
         # Initialize KnotMatcher with knot-specific strategies
         # Load catalogs directly without legacy config dependencies
         catalogs = self._load_catalogs_directly()
-        
+
         # Create knot strategies directly instead of using StrategyManager
         knot_strategies = self._create_knot_strategies(catalogs)
         self.knot_matcher = KnotMatcher(knot_strategies)
@@ -138,15 +138,15 @@ class BrushScoringMatcher:
     def _load_catalogs_directly(self) -> dict:
         """Load catalogs directly without legacy config dependencies."""
         catalogs = {}
-        
+
         # Load main catalogs with direct paths
         catalogs["brushes"] = self._load_yaml_file(Path("data/brushes.yaml"))
         catalogs["handles"] = self._load_yaml_file(Path("data/handles.yaml"))
         catalogs["knots"] = self._load_yaml_file(Path("data/knots.yaml"))
         catalogs["correct_matches"] = self._load_yaml_file(Path("data/correct_matches.yaml"))
-        
+
         return catalogs
-    
+
     def _load_yaml_file(self, path: Path) -> dict:
         """Load a YAML file with error handling."""
         try:
@@ -154,13 +154,19 @@ class BrushScoringMatcher:
                 return yaml.safe_load(f) or {}
         except (FileNotFoundError, yaml.YAMLError):
             return {}
-    
+
     def _create_knot_strategies(self, catalogs: dict) -> list:
         """Create knot strategies directly without legacy config dependencies."""
-        from sotd.match.brush_matching_strategies.known_knot_strategy import KnownKnotMatchingStrategy
-        from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
-        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import KnotSizeFallbackStrategy
-        
+        from sotd.match.brush_matching_strategies.known_knot_strategy import (
+            KnownKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_knot_strategy import (
+            OtherKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+            KnotSizeFallbackStrategy,
+        )
+
         return [
             KnownKnotMatchingStrategy(catalogs["knots"]),
             OtherKnotMatchingStrategy(catalogs["knots"]),
@@ -176,18 +182,26 @@ class BrushScoringMatcher:
         """
         # Use shared utilities instead of duplicating logic
         catalogs = self._load_catalogs_directly()  # Use our direct loading method
-        
+
         # Create strategies directly instead of using StrategyManager
         strategies = self._create_temp_strategies()  # Use _create_temp_strategies
-        
+
         # Add the automated split strategy for high/medium priority splitting
-        from sotd.match.brush_matching_strategies.automated_split_strategy import AutomatedSplitStrategy
+        from sotd.match.brush_matching_strategies.automated_split_strategy import (
+            AutomatedSplitStrategy,
+        )
+
         strategies.append(AutomatedSplitStrategy(catalogs, self.config))
-        
+
         # Add the unified component matching strategy
-        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import FullInputComponentMatchingStrategy
-        strategies.append(FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs))
-        
+        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+            FullInputComponentMatchingStrategy,
+        )
+
+        strategies.append(
+            FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs)
+        )
+
         return strategies
 
     def _create_temp_strategies(self) -> List:
@@ -203,7 +217,7 @@ class BrushScoringMatcher:
         catalogs = self._load_catalogs_directly()  # Use our direct loading method
 
         # Create strategies directly instead of using StrategyManager
-        strategies = self._create_knot_strategies(catalogs) # Use _create_knot_strategies
+        strategies = self._create_knot_strategies(catalogs)  # Use _create_knot_strategies
 
         return strategies
 
@@ -459,7 +473,7 @@ class BrushScoringMatcher:
             )
 
             # Create catalog loader for unified strategy
-            catalogs = self._load_catalogs_directly() # Use our direct loading method
+            catalogs = self._load_catalogs_directly()  # Use our direct loading method
 
             unified_strategy = FullInputComponentMatchingStrategy(
                 self.handle_matcher, self.knot_matcher, catalogs
@@ -608,78 +622,84 @@ class BrushScoringMatcher:
     def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
         """
         Match using correct complete brush logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the correct matches strategy directly
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and 'CorrectCompleteBrush' in strategy.__class__.__name__:
+            if (
+                hasattr(strategy, "__class__")
+                and "CorrectCompleteBrush" in strategy.__class__.__name__
+            ):
                 return strategy.match(value)
         return None
 
     def _match_correct_split_brush(self, value: str) -> Optional["MatchResult"]:
         """
         Match using correct split brush logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the correct split brush strategy directly
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and 'CorrectSplitBrush' in strategy.__class__.__name__:
+            if (
+                hasattr(strategy, "__class__")
+                and "CorrectSplitBrush" in strategy.__class__.__name__
+            ):
                 return strategy.match(value)
         return None
 
     def _match_known_split(self, value: str) -> Optional["MatchResult"]:
         """
         Match using known split logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the known split strategy directly
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and 'KnownSplit' in strategy.__class__.__name__:
+            if hasattr(strategy, "__class__") and "KnownSplit" in strategy.__class__.__name__:
                 return strategy.match(value)
         return None
 
     def _match_complete_brush(self, value: str) -> Optional["MatchResult"]:
         """
         Match using complete brush logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the complete brush strategies directly
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and any(
-                name in strategy.__class__.__name__ 
-                for name in ['KnownBrush', 'OmegaSemogue', 'Zenith', 'OtherBrush']
+            if hasattr(strategy, "__class__") and any(
+                name in strategy.__class__.__name__
+                for name in ["KnownBrush", "OmegaSemogue", "Zenith", "OtherBrush"]
             ):
                 result = strategy.match(value)
                 if result:
@@ -689,47 +709,54 @@ class BrushScoringMatcher:
     def _match_high_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
         """
         Match using high priority automated split logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the automated split strategy with high priority
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and 'AutomatedSplit' in strategy.__class__.__name__:
+            if hasattr(strategy, "__class__") and "AutomatedSplit" in strategy.__class__.__name__:
                 # The automated split strategy handles both high and medium priority
                 # We'll need to modify it to support this legacy interface
                 result = strategy.match(value)
-                if (result and hasattr(result, '_delimiter_priority') and
-                    result._delimiter_priority == "high"):
+                if (
+                    result
+                    and hasattr(result, "_delimiter_priority")
+                    and result._delimiter_priority == "high"
+                ):
                     return result
         return None
 
     def _match_medium_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
         """
         Match using medium priority automated split logic.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             MatchResult if found, None otherwise
         """
         # Use the automated split strategy with medium priority
         for strategy in self.strategy_orchestrator.strategies:
-            if hasattr(strategy, '__class__') and 'AutomatedSplit' in strategy.__class__.__name__:
+            if hasattr(strategy, "__class__") and "AutomatedSplit" in strategy.__class__.__name__:
                 # The automated split strategy handles both high and medium priority
                 # We'll need to modify it to support this legacy interface
                 result = strategy.match(value)
-                if result and hasattr(result, '_delimiter_priority') and result._delimiter_priority == "medium":
+                if (
+                    result
+                    and hasattr(result, "_delimiter_priority")
+                    and result._delimiter_priority == "medium"
+                ):
                     return result
         return None
 
@@ -738,15 +765,15 @@ class BrushScoringMatcher:
     ) -> "MatchResult":
         """
         Create a dual component result combining handle and knot.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             handle_result: HandleMatcher result
             knot_result: KnotMatcher result
             value: Original input string
-            
+
         Returns:
             Combined MatchResult
         """
@@ -757,15 +784,15 @@ class BrushScoringMatcher:
     ) -> "MatchResult":
         """
         Create a single component result.
-        
+
         This method is required by wrapper strategies and implements
         the legacy interface using the new scoring system.
-        
+
         Args:
             component_result: Component matcher result
             value: Original input string
             component_type: Type of component ("handle" or "knot")
-            
+
         Returns:
             Converted MatchResult
         """
