@@ -1231,7 +1231,7 @@ class BrushMatcher:
             "handle": {
                 "brand": handle_match.get("handle_maker") if handle_match else None,
                 "model": handle_match.get("handle_model") if handle_match else None,
-                "source_text": handle_text,
+                "source_text": value,  # Use full original string, not split part
                 "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
                 "_pattern": handle_pattern,
             },
@@ -1250,7 +1250,7 @@ class BrushMatcher:
                     if knot_match and knot_match.matched
                     else None
                 ),
-                "source_text": knot_text,
+                "source_text": value,  # Use full original string, not split part
                 "_matched_by": "BrushSplitter",
                 "_pattern": knot_pattern,
             },
