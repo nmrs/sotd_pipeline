@@ -1,0 +1,184 @@
+# Legacy Brush Matching System Migration Plan
+
+**Date**: 2025-01-27  
+**Purpose**: Systematically migrate from dual-system architecture to single scoring system by extracting shared functionality first  
+**Status**: PLANNING  
+
+## 📘 Project Summary
+
+The SOTD Pipeline currently maintains two brush matching systems: a legacy "first match wins" system and a new multi-strategy scoring system. The legacy system has been completely superseded by the new scoring system, but the new system still depends on legacy components for catalog loading and wrapper strategies.
+
+**Key Discovery**: The `BrushScoringMatcher` is heavily dependent on the legacy system for:
+- Catalog data loading (brushes, handles, knots)
+- Wrapper strategies that call legacy methods  
+- Strategy dependency management
+- Knot strategy initialization
+
+**Goals**:
+- Eliminate dual-system architecture safely
+- Extract shared functionality into reusable utilities
+- Maintain full functionality throughout migration
+- Create clean, single-system architecture
+
+**Success Criteria**:
+- Single brush matching system (BrushScoringMatcher)
+- No legacy system dependencies
+- All functionality preserved
+- Clean, maintainable codebase
+
+## 🎯 Migration Strategy
+
+### **Phase 1: Extract Shared Functionality (SAFE)**
+Extract catalog loading, strategy management, and other shared functionality into utilities that both systems can use.
+
+### **Phase 2: Update New System (SAFE)**  
+Update BrushScoringMatcher to use shared utilities instead of legacy system.
+
+### **Phase 3: Remove Legacy System (SAFE)**
+Once new system is fully independent, remove legacy components.
+
+### **Phase 4: Cleanup and Verification**
+Remove unused code, update tests, verify functionality.
+
+## 📋 Implementation Plan
+
+### **Phase 1: Extract Shared Functionality**
+1. **Extract Catalog Loading Logic** - **COMPLETE** ✅
+   - Create `sotd/match/utils/catalog_loader.py`
+   - Extract brush, handle, knot, fiber loading from legacy system
+   - Ensure both systems can use shared loader
+   - **Implementation**: Successfully updated `scoring_brush_matcher.py` to use existing `CatalogLoader` instead of deleted `BrushMatcher`
+   - **Result**: Import now successful, dependency on legacy system removed for catalog loading
+
+2. **Extract Strategy Management Logic**
+   - Create `sotd/match/utils/strategy_manager.py`
+   - Extract strategy creation and dependency management
+   - Make strategies work with either system
+
+3. **Extract Configuration Logic**
+   - Create `sotd/match/utils/config_loader.py`
+   - Extract configuration loading and validation
+   - Ensure consistent configuration across systems
+
+4. **Create Shared Strategy Base Classes**
+   - Update wrapper strategies to work without legacy dependencies
+   - Create abstract base classes for common functionality
+   - Ensure strategies can work with either catalog source
+
+### **Phase 2: Update New System**
+5. **Update BrushScoringMatcher Dependencies**
+   - Replace legacy catalog loading with shared utilities
+   - Update strategy initialization to use shared components
+   - Remove direct legacy system imports
+
+6. **Update Wrapper Strategies**
+   - Modify strategies to work with shared catalog loader
+   - Remove legacy system method calls
+   - Ensure strategies work with new system only
+
+7. **Update Strategy Dependencies**
+   - Modify dependency management to work without legacy system
+   - Update strategy orchestration logic
+   - Ensure clean dependency graph
+
+### **Phase 3: Remove Legacy System**
+8. **Remove Legacy Classes**
+   - Delete `BrushMatcher` class
+   - Delete `BrushMatcherEntryPoint` class
+   - Remove legacy wrapper strategies
+
+9. **Remove Legacy Tools and Directories**
+   - Delete `sotd/match/tools/legacy/` directory
+   - Delete `sotd/report/table_generators/legacy/` directory
+   - Remove legacy data directories
+
+10. **Remove Legacy CLI Options**
+    - Remove `--brush-system` argument
+    - Update run.py to use only new system
+    - Remove system selection logic
+
+### **Phase 4: Cleanup and Verification**
+11. **Update Tests**
+    - Remove legacy-specific tests
+    - Update remaining tests to use new system
+    - Ensure full test coverage
+
+12. **Update Documentation**
+    - Remove references to legacy system
+    - Update configuration documentation
+    - Update user guides
+
+13. **Final Verification**
+    - Run full test suite
+    - Verify pipeline functionality
+    - Check for any remaining legacy references
+
+## 🔧 Technical Approach
+
+### **Catalog Loading Extraction**
+```python
+# Create shared catalog loader
+class CatalogLoader:
+    def load_brushes(self) -> Dict[str, Any]
+    def load_handles(self) -> Dict[str, Any] 
+    def load_knots(self) -> Dict[str, Any]
+    def load_fibers(self) -> Dict[str, Any]
+    def get_knots_data(self) -> Dict[str, Any]
+```
+
+### **Strategy Management Extraction**
+```python
+# Create shared strategy manager
+class StrategyManager:
+    def create_knot_strategies(self, catalog_loader: CatalogLoader) -> List
+    def create_wrapper_strategies(self, catalog_loader: CatalogLoader) -> List
+    def manage_dependencies(self) -> StrategyDependencyManager
+```
+
+### **Migration Pattern**
+1. **Extract** shared functionality into utilities
+2. **Update** new system to use utilities
+3. **Test** new system works independently
+4. **Remove** legacy system safely
+5. **Verify** no functionality lost
+
+## ⚠️ Risk Mitigation
+
+### **High Risk Areas**
+- **Strategy Dependencies**: Complex dependency graph between strategies
+- **Catalog Data Access**: Multiple systems accessing same data structures
+- **Wrapper Strategy Logic**: Strategies that call legacy methods
+
+### **Mitigation Strategies**
+- **Incremental Extraction**: Extract one component at a time
+- **Dual System Testing**: Test both systems work during extraction
+- **Rollback Plan**: Keep git commits for easy rollback
+- **Comprehensive Testing**: Test each phase thoroughly before proceeding
+
+## 📊 Success Metrics
+
+- **Functionality**: 100% of brush matching functionality preserved
+- **Performance**: No degradation in matching performance
+- **Code Quality**: Cleaner, more maintainable codebase
+- **Test Coverage**: Full test coverage maintained
+- **Documentation**: Updated and accurate documentation
+
+## 🚀 Next Steps
+
+1. **Start with Phase 1, Step 1**: Extract catalog loading logic
+2. **Test thoroughly** after each extraction
+3. **Commit frequently** with clear commit messages
+4. **Validate each phase** before proceeding to next
+5. **Maintain dual system** until new system is fully independent
+
+## 📝 Notes
+
+- **Key Insight**: The new system was designed to work alongside legacy, not replace it
+- **Migration Complexity**: Higher than initially estimated due to deep dependencies
+- **Recommended Approach**: Systematic extraction rather than wholesale removal
+- **Timeline**: Allow 2-3 development sessions for safe migration
+- **Testing Strategy**: Test each component extraction thoroughly before proceeding
+description:
+globs:
+alwaysApply: false
+---
