@@ -609,6 +609,12 @@ brush:
       woodworks handle'
     - muninn woodworks "bfm" 50mm motherlode
     - muninn woodworks bfm
+  Legacy Brand 0:
+    Legacy Model 0:
+    - Legacy Brush 0
+  Legacy Brand 1:
+    Legacy Model 1:
+    - Legacy Brush 1
   Mühle:
     Travel:
     - muhle 31m530 travel
@@ -636,6 +642,15 @@ brush:
     - omega 20102
     '81151':
     - omega 81151
+  Scoring Brand 0:
+    Scoring Model 0:
+    - Scoring Brush 0
+  Scoring Brand 1:
+    Scoring Model 1:
+    - Scoring Brush 1
+  Scoring Brand 2:
+    Scoring Model 2:
+    - Scoring Brush 2
   Semogue:
     '1305':
     - semogue 1305
@@ -696,6 +711,21 @@ brush:
     - stirling two band synthetic
     Finest Badger:
     - stirling finest badger brush
+  Test:
+    Brush:
+    - YAML Test Brush
+  Test Brand:
+    Test Model:
+    - Test Brush Integration
+  Test Brand 0:
+    Test Model 0:
+    - Test Brush 0
+  Test Brand 1:
+    Test Model 1:
+    - Test Brush 1
+  Test Brand 2:
+    Test Model 2:
+    - Test Brush 2
   Wald:
     A1:
     - wald a1
