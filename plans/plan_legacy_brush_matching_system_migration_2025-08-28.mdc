@@ -56,16 +56,17 @@ Remove unused code, update tests, verify functionality.
    - Make strategies work with either system
    - **Implementation**: ✅ **COMPLETE** - Created StrategyManager utility with methods for creating full strategies, temporary strategies, and knot strategies. Updated scoring_brush_matcher.py to use the new utility instead of duplicating strategy creation logic. All tests pass and functionality is preserved.
 
-3. **Extract Configuration Logic** - **IN_PROGRESS** ⏳
+3. **Extract Configuration Logic** - **COMPLETE** ✅
    - Create `sotd/match/utils/config_loader.py`
    - Extract configuration loading and validation
    - Ensure consistent configuration across systems
-   - **Implementation**: Starting with configuration management extraction and testing
+   - **Implementation**: ✅ **COMPLETE** - Created ConfigManager utility with methods for getting default config, debug config, and creating custom configs. Updated scoring_brush_matcher.py to use the shared config manager instead of multiple calls to BrushMatcherConfig.create_default(). All tests pass and functionality is preserved.
 
-4. **Create Shared Strategy Base Classes**
+4. **Create Shared Strategy Base Classes** - **IN_PROGRESS** ⏳
    - Update wrapper strategies to work without legacy dependencies
    - Create abstract base classes for common functionality
    - Ensure strategies can work with either catalog source
+   - **Implementation**: Starting with strategy base class extraction and testing
 
 ### **Phase 2: Update New System**
 5. **Update BrushScoringMatcher Dependencies**
