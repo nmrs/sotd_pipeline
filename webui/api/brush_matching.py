@@ -33,6 +33,98 @@ class BrushAnalysisResponse(BaseModel):
     enrichedData: Dict[str, Any] = {}
 
 
+def _get_modifier_description(modifier_name: str, modifier_value: float, brush_string: str) -> str:
+    """
+    Helper function to generate a user-friendly description for a modifier.
+    """
+    if modifier_name == "knot_indicators":
+        if modifier_value > 0:
+            # Look for fiber words in the input
+            fiber_words = [
+                "badger",
+                "boar",
+                "synthetic",
+                "syn",
+                "nylon",
+                "plissoft",
+                "tuxedo",
+                "cashmere",
+                "mixed",
+                "timberwolf",
+            ]
+            found_words = [word for word in fiber_words if word.lower() in brush_string.lower()]
+            if found_words:
+                return f"Fiber type detected: {', '.join(found_words)}"
+            else:
+                return "Knot indicators detected"
+        return "Knot indicators"
+
+    elif modifier_name == "handle_indicators":
+        if modifier_value > 0:
+            # Look for handle-related words
+            handle_words = [
+                "handle",
+                "wood",
+                "resin",
+                "acrylic",
+                "metal",
+                "brass",
+                "aluminum",
+                "steel",
+                "titanium",
+                "ebonite",
+                "ivory",
+                "horn",
+                "bone",
+                "stone",
+                "marble",
+                "granite",
+            ]
+            found_words = [word for word in handle_words if word.lower() in brush_string.lower()]
+            if found_words:
+                return f"Handle material detected: {', '.join(found_words)}"
+            else:
+                return "Handle indicators detected"
+        return "Handle indicators"
+
+    elif modifier_name == "fiber_mismatch":
+        return "Fiber type mismatch between input and catalog"
+
+    elif modifier_name == "size_specification":
+        if modifier_value > 0:
+            # Look for size specifications
+            import re
+
+            size_patterns = [r"\b\d+mm\b", r"\b\d+\s*mm\b", r"\b\d+x\d+\b", r"\b\d+\s*x\s*\d+\b"]
+            for pattern in size_patterns:
+                match = re.search(pattern, brush_string.lower())
+                if match:
+                    return f"Size specification detected: {match.group()}"
+            return "Size specification detected"
+        return "Size specification"
+
+    elif modifier_name == "multiple_brands":
+        return "Multiple brands detected"
+
+    elif modifier_name == "high_confidence":
+        return "High confidence delimiter used"
+
+    elif modifier_name == "delimiter_confidence":
+        return "High confidence delimiter detected"
+
+    elif modifier_name == "dual_component":
+        return "Both handle and knot components matched"
+
+    elif modifier_name == "handle_brand_without_knot_brand":
+        return "Handle brand detected without knot brand"
+
+    elif modifier_name == "knot_brand_without_handle_brand":
+        return "Knot brand detected without handle brand"
+
+    else:
+        return f"Modifier: {modifier_name}"
+
+
 @router.post("/analyze", response_model=BrushAnalysisResponse)
 async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
     """
@@ -53,8 +145,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         parent_dir = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(parent_dir))
 
-        # Use the shared library for consistent analysis
-        from sotd.match.tools.analyzers.brush_matching_analyzer_lib import analyze_brush_string
+        # Use the new BrushScoringMatcher for consistent analysis
+        from sotd.match.scoring_brush_matcher import BrushScoringMatcher
 
         # Change to the parent directory where the data files are located
         import os
@@ -63,13 +155,20 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         os.chdir(parent_dir)
 
         try:
-            # Use the shared library to get comprehensive analysis
-            analysis_result = analyze_brush_string(
-                request.brushString,
-                debug=True,  # Enable debug output to see what's happening
-                show_all_matches=True,
-                bypass_correct_matches=False,
-            )
+            # Use the new scoring matcher
+            matcher = BrushScoringMatcher()
+            analysis_result = matcher.match(request.brushString)
+
+            # Convert to expected format
+            if analysis_result and hasattr(analysis_result, "all_strategies"):
+                # The new matcher returns a MatchResult with all_strategies
+                analysis_result = {
+                    "all_strategies": analysis_result.all_strategies,
+                    "enriched_data": analysis_result.matched if analysis_result.matched else {},
+                }
+            else:
+                # Fallback if no results
+                analysis_result = {"all_strategies": [], "enriched_data": {}}
         finally:
             # Restore original working directory
             os.chdir(original_cwd)
@@ -85,18 +184,82 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
 
         # Process all strategy results
         for strategy_result in analysis_result.get("all_strategies", []):
+            # The new matcher now provides full MatchResult objects with complete data
+            try:
+                # Extract data from the MatchResult object
+                strategy_name = strategy_result.strategy or "unknown"
+                match_type = strategy_result.match_type or "unknown"
+                pattern = strategy_result.pattern or "unknown"
+                matched_data = strategy_result.matched or {}
+
+                # Get detailed scoring breakdown using the ScoringEngine
+                from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+                from sotd.match.brush_scoring_config import BrushScoringConfig
+
+                config_path = (
+                    Path(__file__).parent.parent.parent / "data" / "brush_scoring_config.yaml"
+                )
+                config = BrushScoringConfig(config_path=config_path)
+                engine = ScoringEngine(config)
+
+                # Calculate base score and modifiers
+                base_score = engine.config.get_base_strategy_score(strategy_name)
+                modifier_score = engine._calculate_modifiers(
+                    strategy_result, request.brushString, strategy_name
+                )
+                total_score = base_score + modifier_score
+
+                # Get modifier details
+                modifier_details = []
+                modifier_names = config.get_all_modifier_names(strategy_name)
+
+                for modifier_name in modifier_names:
+                    modifier_weight = config.get_strategy_modifier(strategy_name, modifier_name)
+                    modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+
+                    if modifier_function is not None and callable(modifier_function):
+                        try:
+                            modifier_value = modifier_function(
+                                request.brushString, strategy_result, strategy_name
+                            )
+                            total_effect = modifier_value * modifier_weight
+
+                            if total_effect != 0:
+                                modifier_description = _get_modifier_description(
+                                    modifier_name, modifier_value, request.brushString
+                                )
+                                modifier_details.append(
+                                    f"{modifier_description} (+{total_effect:+.0f})"
+                                )
+                        except Exception:
+                            continue
+
+            except Exception as e:
+                # Fallback to basic scoring if detailed calculation fails
+                print(
+                    f"Warning: Detailed scoring failed for {strategy_result.strategy or 'unknown'}: {e}"
+                )
+                base_score = getattr(strategy_result, "score", 0.0)
+                modifier_score = 0.0
+                total_score = base_score
+                modifier_details = []
+                matched_data = getattr(strategy_result, "matched", {})
+                strategy_name = getattr(strategy_result, "strategy", "unknown")
+                match_type = getattr(strategy_result, "match_type", "unknown")
+                pattern = getattr(strategy_result, "pattern", "unknown")
+
             formatted_result = BrushMatchResult(
-                strategy=strategy_result.get("strategy", "unknown"),
-                score=strategy_result.get("score", 0.0),
-                matchType=strategy_result.get("match_type", "unknown"),
-                pattern=strategy_result.get("pattern", "unknown"),
+                strategy=strategy_name,
+                score=total_score,
+                matchType=match_type,
+                pattern=pattern,
                 scoreBreakdown={
-                    "baseScore": strategy_result.get("base_score", 0.0),
-                    "modifiers": strategy_result.get("modifier_score", 0.0),
-                    "modifierDetails": [],
-                    "total": strategy_result.get("score", 0.0),
+                    "baseScore": base_score,
+                    "modifiers": modifier_score,
+                    "modifierDetails": modifier_details,
+                    "total": total_score,
                 },
-                matchedData=strategy_result.get("matched_data", {}),
+                matchedData=matched_data,
             )
             formatted_results.append(formatted_result)
 

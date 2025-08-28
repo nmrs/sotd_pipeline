@@ -1221,6 +1221,13 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             # Map validation tool issue format to API response format
             issue_type = issue.get("type", "")
 
+            # Map internal issue types to frontend-expected types
+            mapped_issue_type = issue_type
+            if issue_type == "mismatched_result":
+                mapped_issue_type = "catalog_pattern_mismatch"
+            elif issue_type == "unmatchable_entry":
+                mapped_issue_type = "catalog_pattern_no_match"
+
             # Determine severity based on issue type
             severity = "medium"
             if issue_type in ["missing_brand", "missing_format", "format_mismatch"]:
@@ -1301,7 +1308,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
             catalog_issues.append(
                 CatalogValidationIssue(
-                    issue_type=issue_type,
+                    issue_type=mapped_issue_type,
                     field=issue.get("field", ""),
                     format=issue.get("format"),
                     correct_match=pattern or f"{brand} {model}".strip(),
