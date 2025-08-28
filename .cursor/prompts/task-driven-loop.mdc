@@ -3,8 +3,8 @@ description:
 globs:
 alwaysApply: false
 ---
-### task-driven-tdd-loop
-**Use when**: Implementing features with a test-driven development approach.
+### task-driven-loop
+**Use when**: Implementing features with a task-driven development approach.
 
 **Instructions (tracking required)**
 - At the start of each new **plan task**, print the loop summary and the checklist template below with all boxes empty (☐).

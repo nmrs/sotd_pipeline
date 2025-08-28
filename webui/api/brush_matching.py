@@ -182,6 +182,11 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         # Format results for the API response
         formatted_results = []
 
+        # Debug logging
+        print(f"DEBUG: Processing {len(analysis_result.get('all_strategies', []))} strategies")
+        for i, strategy_result in enumerate(analysis_result.get("all_strategies", [])):
+            print(f"DEBUG: Strategy {i+1}: {strategy_result.strategy}")
+
         # Process all strategy results
         for strategy_result in analysis_result.get("all_strategies", []):
             # The new matcher now provides full MatchResult objects with complete data
@@ -191,6 +196,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 match_type = strategy_result.match_type or "unknown"
                 pattern = strategy_result.pattern or "unknown"
                 matched_data = strategy_result.matched or {}
+
+                print(f"DEBUG: Processing strategy: {strategy_name}")
 
                 # Get detailed scoring breakdown using the ScoringEngine
                 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
@@ -204,10 +211,13 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
 
                 # Calculate base score and modifiers
                 base_score = engine.config.get_base_strategy_score(strategy_name)
+                print(f"DEBUG: Base score for {strategy_name}: {base_score}")
+                
                 modifier_score = engine._calculate_modifiers(
                     strategy_result, request.brushString, strategy_name
                 )
                 total_score = base_score + modifier_score
+                print(f"DEBUG: Total score for {strategy_name}: {total_score}")
 
                 # Get modifier details
                 modifier_details = []
@@ -262,6 +272,9 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 matchedData=matched_data,
             )
             formatted_results.append(formatted_result)
+            print(f"DEBUG: Added formatted result for {strategy_name}")
+
+        print(f"DEBUG: Final formatted results count: {len(formatted_results)}")
 
         # If no strategies, create a basic result
         if not formatted_results:

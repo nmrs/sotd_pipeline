@@ -1,0 +1,1227 @@
+All-Star Grooming Co.:
+  Shave Brush:
+  - match_type: known_brush
+    matched_brand: All-Star Grooming Co.
+    matched_model: Shave Brush
+    pattern: all-star grooming company - badger
+    pattern_used: all[ -]?star.*grooming
+Aurora Grooming:
+  LG24:
+  - match_type: known_brush
+    matched_brand: Aurora Grooming
+    matched_model: LG24
+    pattern: aurora grooming lg 2024 synthetic ('lux emerald green')
+    pattern_used: aurora.*lg ?(20)?24
+  - match_type: known_brush
+    matched_brand: Aurora Grooming
+    matched_model: LG24
+    pattern: aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh
+    pattern_used: aurora.*lg ?(20)?24
+  - match_type: known_brush
+    matched_brand: Aurora Grooming
+    matched_model: LG24
+    pattern: aurora grooming lg24
+    pattern_used: aurora.*lg ?(20)?24
+Body Shop:
+  Synthetic:
+  - match_type: other_brush
+    matched_brand: Body Shop
+    matched_model: Unknown
+    pattern: the body shop brush
+    pattern_used: body.*shop
+"B\xF6ker":
+  Synthetic:
+  - match_type: other_brush
+    matched_brand: "B\xF6ker"
+    matched_model: Unknown
+    pattern: "b\xF6ker synthetic"
+    pattern_used: "b[\xF6o]ker"
+Chisel & Hound:
+  Badger:
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel & hound commodore 26mm badger knot
+    pattern_used: chisel.*hound
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel & hound x house of mammoth "rumble" brush
+    pattern_used: chisel.*hound
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel and hound "everett"
+    pattern_used: chisel.*hound
+  Boar:
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel and hound bloodoath boar
+    pattern_used: chisel.*hound
+  Rob's Finest Boar:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: Rob's Finest Boar
+    pattern: chisel & hound 'rob's finest' boar
+    pattern_used: rob's.*finest.*boar
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: Rob's Finest Boar
+    pattern: chisel and hound 'rob's finest' boar
+    pattern_used: rob's.*finest.*boar
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: Rob's Finest Boar
+    pattern: chisel and hound - rob's finest boar
+    pattern_used: rob's.*finest.*boar
+  Rob's Finest Synthetic:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: Rob's Finest Synthetic
+    pattern: chisel & hound - rob's finest - 25mm synthetic
+    pattern_used: rob's.*finest.*syn
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: Rob's Finest Synthetic
+    pattern: chisel & hound - rob's finest synthetic
+    pattern_used: rob's.*finest.*syn
+  Synthetic:
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel & hound ivory mortar 30mm mother lode
+    pattern_used: chisel.*hound
+  - match_type: other_brush
+    matched_brand: Chisel & Hound
+    matched_model: Unknown
+    pattern: chisel & hound root beer float 26mm black cashmere synth
+    pattern_used: chisel.*hound
+  v10:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v10
+    pattern: chisel and hound - bermuda v10 fanchurian 26mm badger
+    pattern_used: chis.*[fh]ou.*v10
+  v11:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v11
+    pattern: chisel & hound - 'casanova' v11
+    pattern_used: chis.*[fh]ou.*v11
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v11
+    pattern: chisel and hound elm v11
+    pattern_used: chis.*[fh]ou.*v11
+  v13:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v13
+    pattern: chisel & hound lost nativ 26mm fanchurian v13
+    pattern_used: chis.*[fh]ou.*v13
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v13
+    pattern: chisel and hound "silent night" w/v13 fanchurian
+    pattern_used: chis.*[fh]ou.*v13
+  v15:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v15
+    pattern: chisel and hound - fu dao v15 fanchurian 26mm badger
+    pattern_used: chis.*[fh]ou.*v15
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v15
+    pattern: "chisel and hound f\xFA d\xE0o fanchurian v15 badger"
+    pattern_used: chis.*[fh]ou.*v15
+  v16:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v16
+    pattern: c&h x mammoth voices (3508mc) 26mm v16 fanchurian
+    pattern_used: \bc(?:\&|and|\+)h\b.*v16
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v16
+    pattern: chisel & hound - 'manga' v16
+    pattern_used: chis.*[fh]ou.*v16
+  v18:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v18
+    pattern: chisel & hound - 'eyespot' v18
+    pattern_used: chis.*[fh]ou.*v18
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v18
+    pattern: chisel & hound w/ v18 fanchurian badger 26mm
+    pattern_used: chis.*[fh]ou.*v18
+  v19:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v19
+    pattern: chisel & hound "drake" w/ 26mm v19
+    pattern_used: chis.*[fh]ou.*v19
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v19
+    pattern: chisel & hound mighty duck v19 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v19
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v19
+    pattern: chisel & hound the diplomat 26mm v19 fanchurian badger knot
+    pattern_used: chis.*[fh]ou.*v19
+  v20:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel & hound desert ranger v20
+    pattern_used: chis.*[fh]ou.*v20
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel & hound fu dao flare 26mm v20 fanchurian badger knot
+    pattern_used: chis.*[fh]ou.*v20
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel & hound mint smoke with fanchurian v20
+    pattern_used: chis.*[fh]ou.*v20
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel and hound - bangalore v20 26mm badger
+    pattern_used: chis.*[fh]ou.*v20
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel and hound desert ranger v20
+    pattern_used: chis.*[fh]ou.*v20
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v20
+    pattern: chisel and hound resolute v20
+    pattern_used: chis.*[fh]ou.*v20
+  v21:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v21
+    pattern: chisel & hound acer pearl v21
+    pattern_used: chis.*[fh]ou.*v21
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v21
+    pattern: chisel & hound cosmo handle (5146sc) w/ 26mm v21 fanchurian badger knot
+    pattern_used: chis.*[fh]ou.*v21
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v21
+    pattern: chisel and hound sakura with v21 fanchurian
+    pattern_used: chis.*[fh]ou.*v21
+  v22:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v22
+    pattern: c&h redwood giant (4600rc) 26mm v22 fanchurian
+    pattern_used: \bc(?:\&|and|\+)h\b.*v22
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v22
+    pattern: chisel & hound gulf short 26mm v22 fanchurian
+    pattern_used: chis.*[fh]ou.*v22
+  v23:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound "salvage" / v23 fanchurian
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound - bonehive (4766gc) - 26mm v23 fanchurian
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound brilliance 26mm v23 fanchurian badger knot
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound classic 26mm v23 fanchurian
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound rc zebra w/ 26mm v23 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound spice blow handle (4815cc) w/ 26mm v23 fanchurian badger
+      knot
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound v23 fanchurian
+    pattern_used: chis.*[fh]ou.*v23
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v23
+    pattern: chisel & hound x briar brushworks "tobacconist" w/ v23 fanchurian 26mm
+      badger
+    pattern_used: chis.*[fh]ou.*v23
+  v24:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound / house of mammoth "ausflug" v24 fanchurian 26mm
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound carbon lily v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound desperado v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound emerald smoke v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound ivory billed v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound lg 2024 v24
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound lichen v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound punch 26mm v24 badger knot
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel & hound vintage v24 badger
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: chisel and hound lg2024 custom brush v24
+    pattern_used: chis.*[fh]ou.*v24
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v24
+    pattern: grizzly bay - chisel & hound v24 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v24
+  v25:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound - 'xenomorph' v25
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound - cherry w/ v25 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound - fanchurian v25
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound - peridot - v25
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound amboyna glory v25 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound pyinma v25 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound redcoat handle (5018rc) w/ 26mm v25 fanchurian badger
+      knot
+    pattern_used: chis.*[fh]ou.*v25
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v25
+    pattern: chisel & hound walnut v25 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v25
+  v26:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel & hound perfect pint 26mm v26 badger
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel & hound raven 26mm v26 fanchurian
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel & hound stalwart fanchurian v26
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel & hound stalwart fanchurian v26 badger
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel and hound - flame on with v26 fanchurian
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v26
+    pattern: chisel and hound bulldog v26
+    pattern_used: chis.*[fh]ou.*v26
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian
+    pattern_used: \bc(?:\&|and|\+)h\b.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel & hound - dinos'mores - 26mm v27 fanchurian
+    pattern_used: chis.*[fh]ou.*v27
+  v27:
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel & hound - green velvet (5356gc) - 26mm v27 fanchurian
+    pattern_used: chis.*[fh]ou.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel & hound texas pearl handle with 26mm v27 fanchurian knot
+    pattern_used: chis.*[fh]ou.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel and hound - dinos'mores handle w/v27 fanchurian knot
+    pattern_used: chis.*[fh]ou.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel and hound deep night handle and fanchurian 26mm v27 knot
+    pattern_used: chis.*[fh]ou.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel and hound deep night handle w/26mm v27 fanchurian badger
+    pattern_used: chis.*[fh]ou.*v27
+  - match_type: known_brush
+    matched_brand: Chisel & Hound
+    matched_model: v27
+    pattern: chisel and hound dinos'mores handle w/v27 fanchurian
+    pattern_used: chis.*[fh]ou.*v27
+Declaration Grooming:
+  B13:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B13
+    pattern: declaration grooming - roil jefferson - 28mm b13
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B13
+    pattern: declaration grooming butterscotch b13 badger
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
+  B14:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B14
+    pattern: declaration grooming - artisan's choice - b14
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B14
+    pattern: declaration grooming - randy watson washington - 28mm b14
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B14
+    pattern: declaration grooming bok b14
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B14
+    pattern: declaration grooming know it all 28mm b14 badger knot
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B14
+    pattern: declaration grooming washington envy b14 shd badger
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+  B15:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B15
+    pattern: declaration grooming jefferson artist's choice b15 shd badger
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
+  B16:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B16
+    pattern: 6dg b16 thaw washington badger
+    pattern_used: ^(?!.*dog|zen).*\bb16\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B16
+    pattern: declaration grooming - cream jefferson - 28mm b16
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B16
+    pattern: declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B16
+    pattern: dg jefferson know it all 2.0 28mm b16
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+  B18:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B18
+    pattern: declaration grooming - cold 2.0 jeffington - 28mm b18
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B18
+    pattern: declaration grooming blood of kings 28mm b18
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
+  B3:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B3
+    pattern: declaration grooming - unicorn ivory - b3
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B3
+    pattern: declaration grooming blood of kings b3
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B3
+    pattern: declaration grooming washington blood of kings b3
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+  B6:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B6
+    pattern: declaration grooming washington b6
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
+  B7:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B7
+    pattern: dg b7 badger
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
+  B8:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B8
+    pattern: declaration grooming fae b8
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
+  B9A:
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B9A
+    pattern: declaration grooming - lavender jefferson - 28mm b9a+
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
+  - match_type: known_brush
+    matched_brand: Declaration Grooming
+    matched_model: B9A
+    pattern: dg b9a
+    pattern_used: ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
+Dogwood:
+  SHD Badger:
+  - match_type: known_brush
+    matched_brand: Dogwood
+    matched_model: SHD Badger
+    pattern: dogwood handcrafts kyle shd
+    pattern_used: dogwood.*\bshd\b
+Dreadnought:
+  Avenger:
+  - match_type: known_brush
+    matched_brand: Dreadnought
+    matched_model: Avenger
+    pattern: dreadnought avenger
+    pattern_used: dreadnought.*avenger
+EldrormR Industries/Muninn Woodworks:
+  BFM:
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode
+      x muninn woodworks handle'
+    pattern_used: \bbfm\b(.*50mm)?
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: '>!redacted!< $bigfuckingmotherload'
+    pattern_used: bigfuckingmotherload
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: '>!redacted!< [bigfuckingmotherload]'
+    pattern_used: bigfuckingmotherload
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x
+      muninn woodworks handle'
+    pattern_used: \bbfm\b(.*50mm)?
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: muninn woodworks "bfm" 50mm motherlode
+    pattern_used: \bbfm\b(.*50mm)?
+  - match_type: known_brush
+    matched_brand: EldrormR Industries/Muninn Woodworks
+    matched_model: BFM
+    pattern: muninn woodworks bfm
+    pattern_used: \bbfm\b(.*50mm)?
+Legacy Brand 0:
+  Legacy Model 0:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: legacy brush 0
+    pattern_used: No pattern matched
+Legacy Brand 1:
+  Legacy Model 1:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: legacy brush 1
+    pattern_used: No pattern matched
+"M\xFChle":
+  Travel:
+  - match_type: known_brush
+    matched_brand: "M\xFChle"
+    matched_model: Travel
+    pattern: muhle 31m530 travel
+    pattern_used: "m[u\xFC]hle.*travel"
+  - match_type: known_brush
+    matched_brand: "M\xFChle"
+    matched_model: Travel
+    pattern: muhle travel shaving brush
+    pattern_used: "m[u\xFC]hle.*travel"
+  - match_type: known_brush
+    matched_brand: "M\xFChle"
+    matched_model: Travel
+    pattern: "m\xFChle travel"
+    pattern_used: "m[u\xFC]hle.*travel"
+Omega:
+  '10005':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10005'
+    pattern: omega 10005
+    pattern_used: omega.*10005
+  '10048':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10048'
+    pattern: omega pro48
+    pattern_used: omeg\w.*(pro)?.*48
+  '10049':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10049'
+    pattern: omega - 10049
+    pattern_used: omega.*(pro)*.*49
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10049'
+    pattern: omega 10049
+    pattern_used: omega.*(pro)*.*49
+  '10065':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10065'
+    pattern: omega 10065
+    pattern_used: omega.*10065
+  '10066':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10066'
+    pattern: omega 10066
+    pattern_used: omega.*10066
+  '10098':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '10098'
+    pattern: omega 10098
+    pattern_used: omega.*10098
+  '11137':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '11137'
+    pattern: omega 11137
+    pattern_used: '11137'
+  '146818':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '146818'
+    pattern: omega 146818
+    pattern_used: omega.*146818
+  '20102':
+  - match_type: brand_extraction
+    matched_brand: Omega
+    matched_model: Unknown
+    pattern: omega 20102
+    pattern_used: 'Brand regex: omega'
+  '81151':
+  - match_type: known_brush
+    matched_brand: Omega
+    matched_model: '81151'
+    pattern: omega 81151
+    pattern_used: omega.*81151
+Scoring Brand 0:
+  Scoring Model 0:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: scoring brush 0
+    pattern_used: No pattern matched
+Scoring Brand 1:
+  Scoring Model 1:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: scoring brush 1
+    pattern_used: No pattern matched
+Scoring Brand 2:
+  Scoring Model 2:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: scoring brush 2
+    pattern_used: No pattern matched
+Semogue:
+  '1305':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '1305'
+    pattern: semogue 1305
+    pattern_used: semogue.*1305
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '1305'
+    pattern: semogue 1305 (boar)
+    pattern_used: semogue.*1305
+  '1800':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '1800'
+    pattern: semogue - 1800 boar
+    pattern_used: semogue.*1800
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '1800'
+    pattern: semogue 1800
+    pattern_used: semogue.*1800
+  '2000':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '2000'
+    pattern: semogue 2000
+    pattern_used: semogue.*2000
+  '2020':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '2020'
+    pattern: semogue 2020 best badger
+    pattern_used: semogue.*2020
+  '610':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '610'
+    pattern: semogue 610
+    pattern_used: semogue\s*610
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '610'
+    pattern: semogue 610 21mm boar
+    pattern_used: semogue\s*610
+  '830':
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '830'
+    pattern: semogue - semogue 830, boar bristle 22mm
+    pattern_used: semogue.*830
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: '830'
+    pattern: semogue 830
+    pattern_used: semogue.*830
+  Galahad C3:
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: Galahad C3
+    pattern: semogue - galahad c3 premium boar (ib) bristle
+    pattern_used: galahad
+  SOC Boar:
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: SOC Boar
+    pattern: semogue - owners club 24mm boar
+    pattern_used: owner.*club
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: SOC Boar
+    pattern: semogue - owners club taj
+    pattern_used: owner.*club
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: SOC Boar
+    pattern: semogue - soc boar
+    pattern_used: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+  - match_type: known_brush
+    matched_brand: Semogue
+    matched_model: SOC Boar
+    pattern: semogue owners club - cherry wood boar 24mm
+    pattern_used: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+Simpson:
+  Chubby 2:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Chubby 2
+    pattern: simpson - 'chubby 2' silvertip
+    pattern_used: simp.*chubby\s*2\b
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Chubby 2
+    pattern: simpson ch2 super badger super badger
+    pattern_used: simp.*ch2\b
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Chubby 2
+    pattern: simpson chubby 2 manchurian
+    pattern_used: simp.*chubby\s*2\b
+  Chubby 2 Synthetic:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Chubby 2
+    pattern: simpsons chubby 2 synthetic
+    pattern_used: simp.*chubby\s*2\b
+  Chubby 3:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Chubby 3
+    pattern: simpson butterscotch ch3 manchurian badger
+    pattern_used: simp.*ch3
+  Classic 1 Synthetic:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Classic 1
+    pattern: 'simpson classic # 1 synthetic bristle'
+    pattern_used: simp.*classic.*\b1\b
+  Colonel X2L:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Colonel X2L
+    pattern: simpson - 'colonel' best
+    pattern_used: sim.*colonel
+  M7:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: M7
+    pattern: simpson - 'm7' manchurian
+    pattern_used: simp.*m7
+  Trafalgar T2:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Trafalgar T2
+    pattern: simpson trafalgar t2
+    pattern_used: simp.*traf.*\bt2
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Trafalgar T2
+    pattern: simpsons trafalgar t2
+    pattern_used: simp.*traf.*\bt2
+  Trafalgar T3:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Trafalgar T3
+    pattern: simpson - trafalgar t3
+    pattern_used: simp.*traf.*\bt3
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Trafalgar T3
+    pattern: simpson trafalgar t3
+    pattern_used: simp.*traf.*\bt3
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Trafalgar T3
+    pattern: simpson trafalgar t3 synthetic 26mm
+    pattern_used: simp.*traf.*\bt3
+  Wee Scot:
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Wee Scot
+    pattern: simpson - 'wee scot' best
+    pattern_used: simp.*wee.*scot
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Wee Scot
+    pattern: simpson - wee scott
+    pattern_used: simp.*wee.*scot
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Wee Scot
+    pattern: simpson wee scot
+    pattern_used: simp.*wee.*scot
+  - match_type: known_brush
+    matched_brand: Simpson
+    matched_model: Wee Scot
+    pattern: simpsons wee scot
+    pattern_used: simp.*wee.*scot
+Spokar:
+  Badger:
+  - match_type: other_brush
+    matched_brand: Spokar
+    matched_model: Unknown
+    pattern: spokar badger
+    pattern_used: spokar
+Stirling:
+  2-Band Synthetic:
+  - match_type: known_brush
+    matched_brand: Stirling
+    matched_model: 2-Band Synthetic
+    pattern: stirling 2 band synthetic
+    pattern_used: stirl.*(?:2|two)(?:-|\s)+band
+  - match_type: known_brush
+    matched_brand: Stirling
+    matched_model: 2-Band Synthetic
+    pattern: stirling two band synthetic
+    pattern_used: stirl.*(?:2|two)(?:-|\s)+band
+  Finest Badger:
+  - match_type: known_brush
+    matched_brand: Stirling
+    matched_model: Finest Badger
+    pattern: stirling finest badger brush
+    pattern_used: stirling.*finest.*badger
+Test:
+  Brush:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: yaml test brush
+    pattern_used: No pattern matched
+Test Brand:
+  Test Model:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: test brush integration
+    pattern_used: No pattern matched
+Test Brand 0:
+  Test Model 0:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: test brush 0
+    pattern_used: No pattern matched
+Test Brand 1:
+  Test Model 1:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: test brush 1
+    pattern_used: No pattern matched
+Test Brand 2:
+  Test Model 2:
+  - match_type: no_match
+    matched_brand: null
+    matched_model: null
+    pattern: test brush 2
+    pattern_used: No pattern matched
+Wald:
+  A1:
+  - match_type: known_brush
+    matched_brand: Wald
+    matched_model: A1
+    pattern: wald a1
+    pattern_used: wald.*a1
+  - match_type: known_brush
+    matched_brand: Wald
+    matched_model: A1
+    pattern: wald shaving "nimbus werther's/ivory" 29mm a1 fan
+    pattern_used: wald.*a1
+Walfront:
+  Travel Brush:
+  - match_type: known_brush
+    matched_brand: Walfront
+    matched_model: Travel Brush
+    pattern: walfront travel brush
+    pattern_used: walfront.*travel
+West Coast Shaving:
+  Synthetic:
+  - match_type: other_brush
+    matched_brand: West Coast Shaving
+    matched_model: Unknown
+    pattern: wcs 26mm synth
+    pattern_used: wcs
+Yaqi:
+  Ferrari:
+  - match_type: known_brush
+    matched_brand: Yaqi
+    matched_model: Ferrari
+    pattern: yaqi ferrari 26mm
+    pattern_used: yaqi.*ferrari
+  Sagrada:
+  - match_type: known_brush
+    matched_brand: Yaqi
+    matched_model: Sagrada
+    pattern: yaqi sagrada
+    pattern_used: sagrada
+  Synthetic:
+  - match_type: other_brush
+    matched_brand: Yaqi
+    matched_model: Unknown
+    pattern: yaqi 22mm synth
+    pattern_used: yaqi
+  - match_type: other_brush
+    matched_brand: Yaqi
+    matched_model: Unknown
+    pattern: yaqi cola 22mm synthetic three band
+    pattern_used: yaqi
+Zenith:
+  505BC SE:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: 505BC SE
+    pattern: zenith 505bc
+    pattern_used: 505BC
+  506U N:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: 506U SE
+    pattern: zenith 506u n (50/50 horse mane/tail) $horsesass
+    pattern_used: 506u
+  506U SE:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: 506U SE
+    pattern: zenith 506u xse
+    pattern_used: 506u
+  B15:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B15
+    pattern: zenith b15
+    pattern_used: zenith.*\bb15\b
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B15
+    pattern: zenith olive wood / b15 boar
+    pattern_used: zenith.*\bb15\b
+  B37:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B37
+    pattern: zenith b37
+    pattern_used: zenith.*\bb37\b
+  Barberpole:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: Barberpole
+    pattern: zenith barberpole xse 26mm
+    pattern_used: zenith.*barber ?pole
+  r/wetshaving MOAR BOAR:
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B35
+    pattern: '* **zenith - r/wetshaving moar boar** b35/508a xl (60 uses)'
+    pattern_used: 508a
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: moar f'n boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: r/wetshaving moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: r/wetshaving zenith moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: r/wetshaving zentih moar boar 31mm
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B35
+    pattern: zenith *moar boar* sub-exclusive (508a xl) 31mm boar knot
+    pattern_used: 508a
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith - moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith - moar boar 31mm boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith - moar boar b35 31mm boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith 31mm moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith 508 moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith b35 moar boar 31mm boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith moar boar $girth $oldscratchy
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith moar boar sub brush
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith moar boar sub exclusive
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: B35
+    pattern: zenith moar boar sub-exclusive (508a xl) 31mm boar knot
+    pattern_used: 508a
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving 2022 moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving 31mm x 57mm moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: "zenith r/wetshaving exclusive **moar boar** (31 mm \xD7 57 mm bleached\
+      \ boar)"
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving exclusive moar badger (silvertip)
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving exclusive moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: "zenith r/wetshaving exclusive moar boar (31 mm \xD7 57 mm bleached boar)"
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving exclusive moar boar 31 mm
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving exclusive moar boar 31mm
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving moar boar 31mm bleached boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith r/wetshaving sub exclusive moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith sub exclusive moar boar 31mm
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zenith ws 508 moar boar
+    pattern_used: moar(.*boar)?
+  - match_type: known_brush
+    matched_brand: Zenith
+    matched_model: r/wetshaving MOAR BOAR
+    pattern: zentih - moar boar r/wetshaving
+    pattern_used: moar(.*boar)?

@@ -48,6 +48,7 @@ const CatalogValidator: React.FC = () => {
         all: 0,
         mismatches: 0,
         no_match: 0,
+        format_mismatches: 0,
       };
     }
 

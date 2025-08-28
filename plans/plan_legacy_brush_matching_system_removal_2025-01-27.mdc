@@ -1,0 +1,432 @@
+# Legacy Brush Matching System Removal Plan
+
+**Date**: 2025-01-27  
+**Purpose**: Completely remove the legacy brush matching system to eliminate dual-system architecture and simplify the codebase  
+**Status**: PLANNING  
+
+## 📘 Project Summary
+
+The SOTD Pipeline currently maintains two brush matching systems: a legacy "first match wins" system and a new multi-strategy scoring system. The legacy system has been completely superseded by the new scoring system, but remnants remain throughout the codebase, causing confusion and maintenance overhead. This project will completely remove all legacy brush matching code, tools, data paths, and CLI options to create a clean, single-system architecture.
+
+**Goals**:
+- Eliminate all legacy brush matching code and dependencies
+- Remove dual-system architecture and configuration
+- Simplify CLI and data management
+- Clean up tests and analysis tools
+- Ensure the new scoring system handles all use cases
+
+**Success Criteria**:
+- All legacy brush matching code removed
+- No references to legacy system in main pipeline
+- CLI simplified to remove brush system selection
+- Tests pass with only new scoring system
+- Clean, maintainable codebase
+
+## 🧩 Component Steps
+
+### Phase 1: Core Legacy Class Removal
+1. Remove `BrushMatcher` class and all its dependencies
+2. Remove `BrushMatcherEntryPoint` class
+3. Remove legacy wrapper strategies
+
+### Phase 2: Legacy Tools and Analysis Removal
+4. Remove `sotd/match/tools/legacy/` directory
+5. Remove `sotd/report/table_generators/legacy/` directory
+6. Remove legacy analysis scripts and tools
+
+### Phase 3: Data Management Simplification
+7. Remove `BrushParallelDataManager` class
+8. Remove `matched_legacy/` directory structure
+9. Update data paths to use only new system
+
+### Phase 4: CLI and Configuration Cleanup
+10. Remove `--brush-system` CLI argument
+11. Remove legacy system logic from `run.py`
+12. Update configuration handling
+
+### Phase 5: Test and Script Cleanup
+13. Remove legacy-specific tests
+14. Update remaining tests to use only new system
+15. Clean up debug and analysis scripts
+
+### Phase 6: Integration and Verification
+16. Update imports and dependencies
+17. Run full test suite
+18. Verify pipeline functionality
+
+## 🔁 Implementation Prompts
+
+### Step 1: Remove BrushMatcher Class and Dependencies
+
+```text
+Remove the legacy BrushMatcher class and all its direct dependencies from the codebase.
+
+Context: The BrushMatcher class is the core of the legacy brush matching system that uses a "first match wins" approach. It has been completely superseded by the new BrushScoringMatcher.
+
+Files to modify:
+- sotd/match/brush_matcher.py (delete entire file)
+- Remove all imports of BrushMatcher from other files
+- Update any remaining references to use BrushScoringMatcher instead
+
+Requirements:
+- Delete the entire BrushMatcher class file
+- Remove all import statements that reference BrushMatcher
+- Replace any remaining BrushMatcher usage with BrushScoringMatcher
+- Ensure no compilation errors remain
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify that BrushScoringMatcher is used consistently
+```
+
+### Step 2: Remove BrushMatcherEntryPoint Class
+
+```text
+Remove the BrushMatcherEntryPoint class that switches between legacy and new systems.
+
+Context: This class was created to allow switching between legacy and new brush matching systems. Since we're removing the legacy system entirely, this entry point is no longer needed.
+
+Files to modify:
+- sotd/match/brush_matcher_entry.py (delete entire file)
+- Remove all imports and references to BrushMatcherEntryPoint
+- Update run.py to use BrushScoringMatcher directly
+
+Requirements:
+- Delete the entire BrushMatcherEntryPoint class file
+- Remove all import statements that reference it
+- Update run.py to initialize BrushScoringMatcher directly
+- Remove the system selection logic
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify run.py initializes BrushScoringMatcher directly
+```
+
+### Step 3: Remove Legacy Wrapper Strategies
+
+```text
+Remove all legacy wrapper strategies that call legacy system methods.
+
+Context: These wrapper strategies were created to bridge the legacy and new systems. They call legacy methods and are no longer needed.
+
+Files to modify:
+- sotd/match/brush_matching_strategies/legacy_scored_component_strategy.py (delete)
+- sotd/match/brush_matching_strategies/legacy_composite_wrapper_strategies.py (delete)
+- Remove all imports and references to these strategies
+
+Requirements:
+- Delete both legacy strategy files
+- Remove all import statements that reference them
+- Update any code that uses these strategies to use the new system directly
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify no references to legacy strategies remain
+```
+
+### Step 4: Remove Legacy Tools Directory
+
+```text
+Remove the entire legacy tools directory and all its contents.
+
+Context: The legacy tools directory contains analysis and debugging tools specific to the legacy brush matching system.
+
+Files to modify:
+- Delete entire directory: sotd/match/tools/legacy/
+- Remove all imports and references to legacy tools
+- Update any scripts that use these tools
+
+Requirements:
+- Delete the entire legacy tools directory
+- Remove all import statements that reference legacy tools
+- Update any remaining code that depends on these tools
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify no references to legacy tools remain
+```
+
+### Step 5: Remove Legacy Table Generators
+
+```text
+Remove the entire legacy table generators directory and all its contents.
+
+Context: The legacy table generators directory contains report generation code specific to the legacy brush matching system.
+
+Files to modify:
+- Delete entire directory: sotd/report/table_generators/legacy/
+- Remove all imports and references to legacy table generators
+- Update report generation code to use only new system
+
+Requirements:
+- Delete the entire legacy table generators directory
+- Remove all import statements that reference legacy generators
+- Update report generation to use only new system
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify no references to legacy table generators remain
+```
+
+### Step 6: Remove BrushParallelDataManager
+
+```text
+Remove the BrushParallelDataManager class that handles legacy vs new data paths.
+
+Context: This class was created to manage data paths for both legacy and new brush systems. Since we're removing the legacy system, this complexity is no longer needed.
+
+Files to modify:
+- Remove BrushParallelDataManager class
+- Update run.py to use simple data paths
+- Remove legacy data directory logic
+
+Requirements:
+- Remove the BrushParallelDataManager class
+- Simplify data path handling in run.py
+- Remove logic for legacy data directories
+- Update data saving to use only new system paths
+
+Verification:
+- Run `make typecheck` to ensure no import errors
+- Verify data paths are simplified
+```
+
+### Step 7: Remove Legacy Data Directory Structure
+
+```text
+Remove the matched_legacy/ directory structure and update data paths.
+
+Context: The legacy system used a separate data directory structure. We need to consolidate to use only the new system paths.
+
+Files to modify:
+- Remove matched_legacy/ directories
+- Update data path references
+- Consolidate data management
+
+Requirements:
+- Remove all matched_legacy/ directories
+- Update data path references to use only new system
+- Consolidate data management logic
+
+Verification:
+- Verify no matched_legacy/ directories remain
+- Verify data paths are consistent
+```
+
+### Step 8: Remove --brush-system CLI Argument
+
+```text
+Remove the --brush-system CLI argument and all related logic.
+
+Context: This argument allowed switching between legacy and new brush systems. Since we're removing the legacy system, this option is no longer needed.
+
+Files to modify:
+- sotd/match/cli.py (remove --brush-system argument)
+- sotd/match/run.py (remove brush_system parameter and logic)
+- Update function signatures and calls
+
+Requirements:
+- Remove --brush-system argument from CLI
+- Remove brush_system parameter from all functions
+- Update function calls to remove this parameter
+- Simplify CLI logic
+
+Verification:
+- Run `make typecheck` to ensure no errors
+- Verify CLI works without brush system argument
+```
+
+### Step 9: Remove Legacy System Logic from run.py
+
+```text
+Remove all legacy system logic from the main run.py file.
+
+Context: run.py contains logic to handle both legacy and new brush systems. We need to simplify it to use only the new system.
+
+Files to modify:
+- sotd/match/run.py (remove legacy system logic)
+- Simplify brush matcher initialization
+- Remove legacy-specific code paths
+
+Requirements:
+- Remove all legacy system logic from run.py
+- Simplify brush matcher initialization to use only BrushScoringMatcher
+- Remove legacy-specific code paths and conditionals
+- Clean up imports
+
+Verification:
+- Run `make typecheck` to ensure no errors
+- Verify run.py initializes only new system
+```
+
+### Step 10: Update Configuration Handling
+
+```text
+Update configuration handling to remove legacy system options.
+
+Context: Various configuration files and code may reference legacy system options that need to be removed.
+
+Files to modify:
+- Update any configuration files that reference legacy system
+- Remove legacy system configuration options
+- Simplify configuration handling
+
+Requirements:
+- Remove legacy system configuration options
+- Simplify configuration handling
+- Update any configuration documentation
+
+Verification:
+- Verify configuration is simplified
+- Verify no legacy system options remain
+```
+
+### Step 11: Remove Legacy-Specific Tests
+
+```text
+Remove tests that specifically test legacy behavior and update remaining tests.
+
+Context: Many tests were written to test both legacy and new systems. We need to remove legacy-specific tests and update remaining ones.
+
+Files to modify:
+- Remove tests that specifically test legacy behavior
+- Update remaining tests to use only new system
+- Clean up test data and fixtures
+
+Requirements:
+- Remove legacy-specific tests
+- Update remaining tests to use only new system
+- Clean up test data and fixtures
+- Ensure all tests pass
+
+Verification:
+- Run `make test` to ensure all tests pass
+- Verify no legacy-specific test logic remains
+```
+
+### Step 12: Update Remaining Tests
+
+```text
+Update all remaining tests to use only the new brush matching system.
+
+Context: Tests that were designed to work with both systems need to be updated to work with only the new system.
+
+Files to modify:
+- Update test imports to use only new system
+- Update test logic to work with new system
+- Clean up test data and fixtures
+
+Requirements:
+- Update all test imports
+- Update test logic for new system
+- Clean up test data and fixtures
+- Ensure all tests pass
+
+Verification:
+- Run `make test` to ensure all tests pass
+- Verify tests work with only new system
+```
+
+### Step 13: Clean Up Debug and Analysis Scripts
+
+```text
+Clean up debug and analysis scripts that use the legacy system.
+
+Context: Various debug and analysis scripts throughout the codebase may still reference the legacy system.
+
+Files to modify:
+- Update debug scripts to use only new system
+- Update analysis scripts to use only new system
+- Remove legacy system references
+
+Requirements:
+- Update all debug and analysis scripts
+- Remove legacy system references
+- Ensure scripts work with only new system
+
+Verification:
+- Verify debug scripts work correctly
+- Verify analysis scripts work correctly
+```
+
+### Step 14: Update Imports and Dependencies
+
+```text
+Update all remaining imports and dependencies to remove legacy system references.
+
+Context: After removing the legacy system, we need to ensure no remaining references exist throughout the codebase.
+
+Files to modify:
+- Update all remaining imports
+- Remove any remaining legacy system references
+- Clean up dependencies
+
+Requirements:
+- Update all remaining imports
+- Remove any remaining legacy system references
+- Clean up dependencies
+- Ensure no compilation errors
+
+Verification:
+- Run `make typecheck` to ensure no errors
+- Verify no legacy system references remain
+```
+
+### Step 15: Run Full Test Suite
+
+```text
+Run the full test suite to ensure all functionality works correctly.
+
+Context: After removing the legacy system, we need to verify that all functionality still works correctly.
+
+Requirements:
+- Run full test suite
+- Fix any remaining issues
+- Ensure all tests pass
+- Verify pipeline functionality
+
+Verification:
+- All tests pass
+- Pipeline runs successfully
+- No legacy system references remain
+```
+
+### Step 16: Final Integration and Verification
+
+```text
+Perform final integration testing and verification of the cleaned codebase.
+
+Context: Final verification that the legacy system removal is complete and the codebase is clean.
+
+Requirements:
+- Final code review
+- Integration testing
+- Documentation updates
+- Clean codebase verification
+
+Verification:
+- Codebase is clean and maintainable
+- All functionality works correctly
+- Documentation is updated
+- No legacy system remnants remain
+```
+
+## 🧠 Critical Analysis
+
+This plan systematically removes the legacy brush matching system while maintaining code quality and functionality. The key insights are:
+
+**Architecture Simplification**: Removing the dual-system architecture will significantly simplify the codebase, making it easier to maintain and reason about.
+
+**Incremental Removal**: The plan breaks down the removal into logical phases that can be implemented safely without breaking existing functionality.
+
+**Dependency Management**: Each step carefully manages dependencies to ensure no orphaned code remains.
+
+**Testing Strategy**: The plan includes comprehensive testing at each phase to ensure functionality is maintained.
+
+**Risk Mitigation**: By removing the system incrementally and testing thoroughly, we minimize the risk of breaking existing functionality.
+
+The plan is designed to be safe, incremental, and verifiable, with each step building logically on the previous one. The final result will be a clean, maintainable codebase that uses only the new multi-strategy scoring system.
+description:
+globs:
+alwaysApply: false
+---

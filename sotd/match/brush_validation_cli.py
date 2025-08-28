@@ -29,16 +29,16 @@ class BrushValidationCLI:
         self.counting_service = BrushValidationCountingService(data_path)
 
         # Lazy-load brush matcher entry point only when needed
-        self._brush_entry_point = None
+        self._brush_matcher = None
 
     @property
-    def brush_entry_point(self):
-        """Lazy-load brush matcher entry point when first accessed."""
-        if self._brush_entry_point is None:
-            from sotd.match.brush_matcher_entry import BrushMatcherEntryPoint
+    def brush_matcher(self):
+        """Lazy-load brush matcher when first accessed."""
+        if self._brush_matcher is None:
+            from sotd.match.scoring_brush_matcher import BrushScoringMatcher
 
-            self._brush_entry_point = BrushMatcherEntryPoint()
-        return self._brush_entry_point
+            self._brush_matcher = BrushScoringMatcher()
+        return self._brush_matcher
 
     def _get_processed_normalized_texts(self, month: str) -> set[str]:
         """Get all processed normalized texts (correct matches + user actions).

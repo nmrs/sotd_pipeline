@@ -869,6 +869,35 @@ const MatchAnalyzer: React.FC = () => {
     // We always have the full dataset now, so calculate from the returned items
     const returnedItems = results.mismatch_items || [];
 
+    // Debug logging to understand the data structure
+    console.log('Debug: Analyzing data for counts:', {
+      totalItems: returnedItems.length,
+      field: results.field,
+      months: results.months,
+      sampleItems: returnedItems.slice(0, 3).map(item => ({
+        original: item.original,
+        match_type: item.match_type,
+        mismatch_type: item.mismatch_type,
+        is_confirmed: item.is_confirmed,
+        pattern: item.pattern
+      }))
+    });
+
+    // Count regex matches specifically
+    const regexMatches = returnedItems.filter(item => item.match_type === 'regex');
+    const unconfirmedRegexMatches = returnedItems.filter(item => item.match_type === 'regex' && !isItemConfirmed(item));
+    
+    console.log('Debug: Regex analysis:', {
+      totalRegexMatches: regexMatches.length,
+      unconfirmedRegexMatches: unconfirmedRegexMatches.length,
+      regexMatchTypes: regexMatches.map(item => ({
+        original: item.original,
+        match_type: item.match_type,
+        is_confirmed: item.is_confirmed,
+        pattern: item.pattern
+      }))
+    });
+
     return {
       mismatches: returnedItems.filter(
         item =>
@@ -879,8 +908,7 @@ const MatchAnalyzer: React.FC = () => {
       ).length,
       all: returnedItems.length, // Use actual returned items count instead of totalMatches
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
-      regex: returnedItems.filter(item => item.match_type === 'regex' && !isItemConfirmed(item))
-        .length,
+      regex: unconfirmedRegexMatches.length,
       intentionally_unmatched: returnedItems.filter(
         item => item.mismatch_type === 'intentionally_unmatched'
       ).length,

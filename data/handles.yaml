@@ -250,6 +250,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - paragon
+  PerFectWoodworks:
+    Unspecified:
+      patterns:
+        - perfect.*woodworks
+        - leo.*frilot
   Power Rangers:
     Novelty:
       patterns:

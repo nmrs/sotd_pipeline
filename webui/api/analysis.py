@@ -1161,9 +1161,14 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
     try:
         validate_field(request.field)
 
-        # For brushes, use the File A vs File B approach
+        # For brushes, use the shared validator
         if request.field == "brush":
-            issues, expected_structure = await _validate_brush_catalog()
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            validator = CatalogValidator(project_root=project_root)
+            summary = validator.get_validation_summary("brush")
+            issues = summary["issues"]
+            expected_structure = {}  # Not used in current implementation
         else:
             # Import and use the validation logic directly for other fields
             try:
@@ -1254,20 +1259,49 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 severity = "low"
 
             # Extract brand and model information
-            brand = issue.get("brand", "")
-            model = issue.get("model", "")
+            # Handle both old validator format and new shared validator format
+            brand = issue.get("brand", issue.get("stored_brand", ""))
+            model = issue.get("model", issue.get("stored_model", ""))
             pattern = issue.get("pattern", "")
 
             # Extract actual match information for mismatched results
-            actual_brand = issue.get("actual_brand", "")
-            actual_model = issue.get("actual_model", "")
+            # Handle both old validator format and new shared validator format
+            actual_brand = issue.get("actual_brand", issue.get("matched_brand", ""))
+            actual_model = issue.get("actual_model", issue.get("matched_model", ""))
+
+            # For composite brushes, extract handle/knot information
+            if issue.get("type") in [
+                "composite_brush_in_wrong_section",
+                "handle_only_brush_in_wrong_section",
+                "knot_only_brush_in_wrong_section",
+            ]:
+                # Use handle brand if available, otherwise knot brand
+                if not actual_brand:
+                    actual_brand = issue.get(
+                        "matched_handle_brand", issue.get("matched_knot_brand", "")
+                    )
+                # For composite brushes, model is typically null, so use a descriptive string
+                if not actual_model and issue.get("type") == "composite_brush_in_wrong_section":
+                    actual_model = "composite_brush"
+                elif not actual_model and issue.get("type") == "handle_only_brush_in_wrong_section":
+                    actual_model = "handle_only"
+                elif not actual_model and issue.get("type") == "knot_only_brush_in_wrong_section":
+                    actual_model = "knot_only"
+
+            # Debug logging for field mapping
+            logger.debug(f"Field mapping - brand: {brand}, model: {model}, pattern: {pattern}")
+            logger.debug(
+                f"Field mapping - actual_brand: {actual_brand}, actual_model: {actual_model}"
+            )
 
             # Create suggested action based on issue type
-            suggested_action = ""
-            if issue_type == "invalid_brand":
-                suggested_action = (
-                    f"Remove brand '{brand}' from correct_matches.yaml or add it to the catalog"
-                )
+            # Use the suggested_action from our shared validator if available
+            suggested_action = issue.get("suggested_action", "")
+            if not suggested_action:
+                if issue_type == "invalid_brand":
+                    suggested_action = (
+                        f"Remove brand '{brand}' from correct_matches.yaml or add it to the catalog"
+                    )
             elif issue_type == "missing_brand":
                 suggested_action = (
                     f"Add brand '{brand}' to the catalog or remove from correct_matches.yaml"
@@ -1332,6 +1366,15 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                         f"Pattern '{pattern}' cannot be matched by {request.field} matcher. "
                         f"Check if this pattern is still valid or needs to be updated."
                     )
+            elif issue_type in [
+                "composite_brush_in_wrong_section",
+                "handle_only_brush_in_wrong_section",
+                "knot_only_brush_in_wrong_section",
+            ]:
+                # Use our validator's suggested action for brush-specific issues
+                suggested_action = issue.get(
+                    "suggested_action", f"Investigate brush issue with '{pattern}'"
+                )
             else:
                 suggested_action = f"Investigate issue with '{pattern}'"
 
@@ -1346,7 +1389,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 actual_model=actual_model,
                 severity=severity,
                 suggested_action=suggested_action,
-                details=issue.get("details", ""),
+                details=issue.get(
+                    "details", issue.get("message", issue.get("suggested_action", ""))
+                ),
                 format=issue.get("format"),
                 catalog_format=issue.get("catalog_format"),
                 matched_pattern=issue.get("matched_pattern"),
@@ -1378,6 +1423,10 @@ async def _validate_brush_catalog():
 
         brush_data = data.get("brush", {})
 
+        # Debug logging to see the brush data structure
+        print(f"DEBUG: Brush data keys: {list(brush_data.keys())}")
+        print(f"DEBUG: Total brush entries: {len(brush_data)}")
+
         # File B: Run each pattern through the brush matcher
         try:
             from sotd.match.brush_matcher import BrushMatcher
@@ -1401,6 +1450,11 @@ async def _validate_brush_catalog():
                     for model, model_data in brand_data.items():
                         if isinstance(model_data, list):
                             for pattern in model_data:
+                                # Debug logging to see what patterns are being processed
+                                print(
+                                    f"DEBUG: Processing pattern '{pattern}' under brand '{brand}' model '{model}'"
+                                )
+
                                 try:
                                     # Run pattern through brush matcher
                                     # BrushMatcher expects: match(pattern_string)
@@ -1473,8 +1527,10 @@ async def _validate_brush_catalog():
                                                 )
 
                                             # Now check if this is a composite brush (model is null, but handle/knot components exist)
+                                            # IMPORTANT: Only flag as composite brush if the matcher didn't return a top-level brand/model
+                                            # Known brushes can have both top-level brand/model AND handle/knot components populated
                                             if (
-                                                not matched_model
+                                                not matched_model  # No top-level brand/model
                                                 and hasattr(result.matched, "handle")
                                                 and hasattr(result.matched, "knot")
                                             ):
@@ -1492,39 +1548,59 @@ async def _validate_brush_catalog():
                                                     result.matched.knot, "model", None
                                                 )
 
-                                                # For composite brushes stored in the brush section, this might indicate a mismatch
-                                                # since they should probably be in handle/knot sections
-                                                if matched_handle_brand or matched_knot_brand:
-                                                    issues.append(
-                                                        {
-                                                            "type": "catalog_pattern_mismatch",
-                                                            "field": "brush",
-                                                            "pattern": pattern,
-                                                            "stored_brand": brand.strip(),
-                                                            "stored_model": model.strip(),
-                                                            "matched_brand": matched_brand,
-                                                            "matched_model": "COMPOSITE",
-                                                            "message": (
-                                                                f"Pattern '{pattern}' is stored as complete brush under "
-                                                                f"'{brand.strip()} {model.strip()}' but matcher returns "
-                                                                f"composite brush with handle: {matched_handle_brand}, knot: {matched_knot_brand}"
-                                                            ),
-                                                            "suggested_action": (
-                                                                f"Consider moving pattern '{pattern}' to handle/knot sections "
-                                                                f"since it's being matched as a composite brush"
-                                                            ),
-                                                        }
-                                                    )
-                                            
+                                                # Only flag as composite brush issue if this is actually a composite brush
+                                            # (no top-level brand/model) AND it's stored in the brush section
+                                            # Known brushes with handle/knot enrichment should NOT be flagged
+                                            # RULE: If top-level brand AND model are specified, it's a complete brush
+                                            if (
+                                                matched_handle_brand or matched_knot_brand
+                                            ) and not matched_brand:
+                                                issues.append(
+                                                    {
+                                                        "type": "catalog_pattern_mismatch",
+                                                        "field": "brush",
+                                                        "pattern": pattern,
+                                                        "stored_brand": brand.strip(),
+                                                        "stored_model": model.strip(),
+                                                        "matched_brand": matched_brand,
+                                                        "matched_model": "COMPOSITE",
+                                                        "message": (
+                                                            f"Pattern '{pattern}' is stored as complete brush under "
+                                                            f"'{brand.strip()} {model.strip()}' but matcher returns "
+                                                            f"composite brush with handle: {matched_handle_brand}, knot: {matched_knot_brand}"
+                                                        ),
+                                                        "suggested_action": (
+                                                            f"Consider moving pattern '{pattern}' to handle/knot sections "
+                                                            f"since it's being matched as a composite brush"
+                                                        ),
+                                                    }
+                                                )
+
                                             # Now check for single component brushes (handle-only or knot-only)
                                             elif not matched_model and (
-                                                (hasattr(result.matched, "handle") and getattr(result.matched.handle, "brand", None)) or
-                                                (hasattr(result.matched, "knot") and getattr(result.matched.knot, "brand", None))
+                                                (
+                                                    hasattr(result.matched, "handle")
+                                                    and getattr(
+                                                        result.matched.handle, "brand", None
+                                                    )
+                                                )
+                                                or (
+                                                    hasattr(result.matched, "knot")
+                                                    and getattr(result.matched.knot, "brand", None)
+                                                )
                                             ):
                                                 # This is a single component brush - check if it should be stored in handle/knot sections
-                                                matched_handle_brand = getattr(result.matched.handle, "brand", None) if hasattr(result.matched, "handle") else None
-                                                matched_knot_brand = getattr(result.matched.knot, "brand", None) if hasattr(result.matched, "knot") else None
-                                                
+                                                matched_handle_brand = (
+                                                    getattr(result.matched.handle, "brand", None)
+                                                    if hasattr(result.matched, "handle")
+                                                    else None
+                                                )
+                                                matched_knot_brand = (
+                                                    getattr(result.matched.knot, "brand", None)
+                                                    if hasattr(result.matched, "knot")
+                                                    else None
+                                                )
+
                                                 # Determine which component is populated
                                                 if matched_handle_brand and not matched_knot_brand:
                                                     # Handle-only brush
@@ -1548,7 +1624,9 @@ async def _validate_brush_catalog():
                                                             ),
                                                         }
                                                     )
-                                                elif matched_knot_brand and not matched_handle_brand:
+                                                elif (
+                                                    matched_knot_brand and not matched_handle_brand
+                                                ):
                                                     # Knot-only brush
                                                     issues.append(
                                                         {

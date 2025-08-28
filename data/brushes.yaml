@@ -1107,6 +1107,12 @@ other_brushes:
     default: Synthetic
     patterns:
       - alpha
+  AP Shave Co:
+    default: Synthetic
+    patterns:
+      - A\.? ?P\.? ?\s*shave\s*(co)?
+      - \bap\b
+      - \bapsc\b
   Gilette:
     default: Synthetic
     patterns:

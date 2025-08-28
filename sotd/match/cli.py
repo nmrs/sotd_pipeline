@@ -27,14 +27,6 @@ def get_parser() -> BaseCLIParser:
         help="Operation mode (default: match)",
     )
 
-    # Add brush system selection flag (new system is now default)
-    parser.add_argument(
-        "--brush-system",
-        choices=["new", "legacy"],
-        default="new",
-        help="Brush matching system to use (default: new multi-strategy scoring system)",
-    )
-
     # Add test string argument for direct brush matching
     parser.add_argument(
         "--test-string",

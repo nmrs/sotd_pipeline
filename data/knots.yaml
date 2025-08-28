@@ -4,447 +4,447 @@ known_knots:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-      - ak4
+        - ak4
     AK47:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-      - ak47
+        - ak47
     AK5:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-      - ak5
+        - ak5
     AK7:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-      - ak7
+        - ak7
     AK7/DoughMan Hybrid:
       fiber: Mixed Badger/Synthetic
       knot_size_mm: 26
       patterns:
-      - ak7.*doughman
-      - doughman.*ak7
+        - ak7.*doughman
+        - doughman.*ak7
     Black Silk:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-      - aka.*black.*silk
+        - aka.*black.*silk
     ChocolateDoughMan:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-      - choc.*doughman
+        - choc.*doughman
     Dough:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-      - dough
+        - dough
     DoughMan:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-      - doughman
+        - doughman
   Alpha:
     fiber: Synthetic
     knot_size_mm: 28
     G4:
       patterns:
-      - alpha.*g4
-      - \bg4\b
+        - alpha.*g4
+        - \bg4\b
     G5:
       patterns:
-      - alpha.*g5
-      - \bg5\b
+        - alpha.*g5
+        - \bg5\b
   AP Shave Co:
     APLuxury:
       fiber: Mixed Badger/Boar
       knot_size_mm: 24
       patterns:
-      - apluxury
-      - \bap\b.*luxury
+        - apluxury
+        - \bap\b.*luxury
     Cashmere:
       fiber: Synthetic
       patterns:
-      - \ba[\s.]*p\b.*cashmere
+        - \ba[\s.]*p\b.*cashmere
     Silksmoke:
       fiber: Synthetic
       patterns:
-      - silksmoke
+        - silksmoke
     Gelousy:
       fiber: Badger
       patterns:
-      - gea?lousy
+        - gea?lousy
     MiG:
       fiber: Synthetic
       patterns:
-      - \bmig\b
+        - \bmig\b
     Synbad:
       fiber: Synthetic
       patterns:
-      - synbad
+        - synbad
     G5A:
       fiber: Synthetic
       patterns:
-      - \ba[\s.]*p\b.*g5a
-      - \bg5a\b
+        - \ba[\s.]*p\b.*g5a
+        - \bg5a\b
     G5B:
       fiber: Synthetic
       patterns:
-      - \ba[\s.]*p\b.*g5b
-      - \bg5b\b
+        - \ba[\s.]*p\b.*g5b
+        - \bg5b\b
     G5C:
       fiber: Synthetic
       patterns:
-      - \ba[\s.]*p\b.*g5c
-      - \bg5c\b
+        - \ba[\s.]*p\b.*g5c
+        - \bg5c\b
     Pure Bliss:
       fiber: Synthetic
       patterns:
-      - pure\s*bliss(?!.*shd)
-      - \bpb\b(?!.*shd)
+        - pure\s*bliss(?!.*shd)
+        - \bpb\b(?!.*shd)
     Pure Bliss SHD:
       fiber: Synthetic
       patterns:
-      - pure\s*bliss.*shd
-      - \bpb\b.*shd
+        - pure\s*bliss.*shd
+        - \bpb\b.*shd
     Timberwolf:
       fiber: Synthetic
       patterns:
-      - timberwolf
+        - timberwolf
     Titanium:
       fiber: Synthetic
       patterns:
-      - (?:\ba ?p\b.*)?titanium
+        - (?:\ba ?p\b.*)?titanium
     Tuxedo:
       fiber: Synthetic
       patterns:
-      - \ba[\s.]*p\b.*tuxedo
-      - apshave.*tuxedo
+        - \ba[\s.]*p\b.*tuxedo
+        - apshave.*tuxedo
     2Bed:
       fiber: Synthetic
       patterns:
-      - \b2\s*bed\b
+        - \b2\s*bed\b
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
     v10:
       patterns:
-      - chis.*[fh]ou.*v10
-      - \bc(?:\&|and|\+)h\b.*v10
-      - \bch\b.*v10
-      - \bv10\b
+        - chis.*[fh]ou.*v10
+        - \bc(?:\&|and|\+)h\b.*v10
+        - \bch\b.*v10
+        - \bv10\b
     v11:
       patterns:
-      - chis.*[fh]ou.*v11
-      - \bc(?:\&|and|\+)h\b.*v11
-      - \bch\b.*v11
-      - \bv11\b
+        - chis.*[fh]ou.*v11
+        - \bc(?:\&|and|\+)h\b.*v11
+        - \bch\b.*v11
+        - \bv11\b
     v12:
       patterns:
-      - chis.*[fh]ou.*v12
-      - \bc(?:\&|and|\+)h\b.*v12
-      - \bch\b.*v12
-      - \bv12\b
+        - chis.*[fh]ou.*v12
+        - \bc(?:\&|and|\+)h\b.*v12
+        - \bch\b.*v12
+        - \bv12\b
     v13:
       patterns:
-      - chis.*[fh]ou.*v13
-      - \bc(?:\&|and|\+)h\b.*v13
-      - \bch\b.*v13
-      - \bv13\b
+        - chis.*[fh]ou.*v13
+        - \bc(?:\&|and|\+)h\b.*v13
+        - \bch\b.*v13
+        - \bv13\b
     v14:
       patterns:
-      - chis.*[fh]ou.*v14
-      - \bc(?:\&|and|\+)h\b.*v14
-      - \bch\b.*v14
-      - \bv14\b
+        - chis.*[fh]ou.*v14
+        - \bc(?:\&|and|\+)h\b.*v14
+        - \bch\b.*v14
+        - \bv14\b
     v15:
       patterns:
-      - chis.*[fh]ou.*v15
-      - \bc(?:\&|and|\+)h\b.*v15
-      - \bch\b.*v15
-      - \bv15\b
+        - chis.*[fh]ou.*v15
+        - \bc(?:\&|and|\+)h\b.*v15
+        - \bch\b.*v15
+        - \bv15\b
     v16:
       patterns:
-      - chis.*[fh]ou.*v16
-      - \bc(?:\&|and|\+)h\b.*v16
-      - \bch\b.*v16
-      - \bv16\b
+        - chis.*[fh]ou.*v16
+        - \bc(?:\&|and|\+)h\b.*v16
+        - \bch\b.*v16
+        - \bv16\b
     v17:
       patterns:
-      - chis.*[fh]ou.*v17
-      - \bc(?:\&|and|\+)h\b.*v17
-      - \bch\b.*v17
-      - \bv17\b
+        - chis.*[fh]ou.*v17
+        - \bc(?:\&|and|\+)h\b.*v17
+        - \bch\b.*v17
+        - \bv17\b
     v18:
       patterns:
-      - chis.*[fh]ou.*v18
-      - \bc(?:\&|and|\+)h\b.*v18
-      - \bch\b.*v18
-      - \bv18\b
+        - chis.*[fh]ou.*v18
+        - \bc(?:\&|and|\+)h\b.*v18
+        - \bch\b.*v18
+        - \bv18\b
     v19:
       patterns:
-      - chis.*[fh]ou.*v19
-      - \bc(?:\&|and|\+)h\b.*v19
-      - \bch\b.*v19
-      - \bv19\b
+        - chis.*[fh]ou.*v19
+        - \bc(?:\&|and|\+)h\b.*v19
+        - \bch\b.*v19
+        - \bv19\b
     v20:
       patterns:
-      - chis.*[fh]ou.*v20
-      - \bc(?:\&|and|\+)h\b.*v20
-      - \bch\b.*v20
-      - \bv20\b
+        - chis.*[fh]ou.*v20
+        - \bc(?:\&|and|\+)h\b.*v20
+        - \bch\b.*v20
+        - \bv20\b
     v21:
       patterns:
-      - chis.*[fh]ou.*v21
-      - \bc(?:\&|and|\+)h\b.*v21
-      - \bch\b.*v21
-      - \bv21\b
+        - chis.*[fh]ou.*v21
+        - \bc(?:\&|and|\+)h\b.*v21
+        - \bch\b.*v21
+        - \bv21\b
     v22:
       patterns:
-      - chis.*[fh]ou.*v22
-      - \bc(?:\&|and|\+)h\b.*v22
-      - \bch\b.*v22
-      - \bv22\b
+        - chis.*[fh]ou.*v22
+        - \bc(?:\&|and|\+)h\b.*v22
+        - \bch\b.*v22
+        - \bv22\b
     v23:
       patterns:
-      - chis.*[fh]ou.*v23
-      - \bc(?:\&|and|\+)h\b.*v23
-      - \bch\b.*v23
-      - \bv23\b
+        - chis.*[fh]ou.*v23
+        - \bc(?:\&|and|\+)h\b.*v23
+        - \bch\b.*v23
+        - \bv23\b
     v24:
       patterns:
-      - chis.*[fh]ou.*v24
-      - \bc(?:\&|and|\+)h\b.*v24
-      - \bch\b.*v24
-      - \bv24\b
+        - chis.*[fh]ou.*v24
+        - \bc(?:\&|and|\+)h\b.*v24
+        - \bch\b.*v24
+        - \bv24\b
     v25:
       patterns:
-      - chis.*[fh]ou.*v25
-      - \bc(?:\&|and|\+)h\b.*v25
-      - \bch\b.*v25
-      - \bv25\b
+        - chis.*[fh]ou.*v25
+        - \bc(?:\&|and|\+)h\b.*v25
+        - \bch\b.*v25
+        - \bv25\b
     v26:
       patterns:
-      - chis.*[fh]ou.*v26
-      - \bc(?:\&|and|\+)h\b.*v26
-      - \bch\b.*v26
-      - \bv26\b
+        - chis.*[fh]ou.*v26
+        - \bc(?:\&|and|\+)h\b.*v26
+        - \bch\b.*v26
+        - \bv26\b
     v27:
       patterns:
-      - chis.*[fh]ou.*v27
-      - \bc(?:\&|and|\+)h\b.*v27
-      - \bch\b.*v27
-      - \bv27\b
+        - chis.*[fh]ou.*v27
+        - \bc(?:\&|and|\+)h\b.*v27
+        - \bch\b.*v27
+        - \bv27\b
     v28:
       patterns:
-      - chis.*[fh]ou.*v28
-      - \bc(?:\&|and|\+)h\b.*v28
-      - \bch\b.*v28
-      - \bv28\b
+        - chis.*[fh]ou.*v28
+        - \bc(?:\&|and|\+)h\b.*v28
+        - \bch\b.*v28
+        - \bv28\b
     Soot Sprite:
       fiber: Synthetic
       patterns:
-      - soot.*sprite
+        - soot.*sprite
     White Boar:
       fiber: Boar
       patterns:
-      - chis.*[fh]ou.*white.*boar
-      - \bc(?:\&|and|\+)h\b.*white.*boar
-      - \bch\b.*white.*boar
+        - chis.*[fh]ou.*white.*boar
+        - \bc(?:\&|and|\+)h\b.*white.*boar
+        - \bch\b.*white.*boar
   Declaration Grooming:
     knot_size_mm: 28
     fiber: Badger
     B1:
       patterns:
-      - (declaration|\bdg\b).*\bb1\b
-      - \bb1\b
+        - (declaration|\bdg\b).*\bb1\b
+        - \bb1\b
     B2:
       patterns:
-      - (declaration|\bdg\b).*\bb2\b
-      - \bb2\b
+        - (declaration|\bdg\b).*\bb2\b
+        - \bb2\b
     B3:
       patterns:
-      - (declaration|\bdg\b).*\bb3\b
-      - \bb3\b
+        - (declaration|\bdg\b).*\bb3\b
+        - \bb3\b
     B4:
       patterns:
-      - (declaration|\bdg\b).*\bb4\b
-      - \bb4\b
+        - (declaration|\bdg\b).*\bb4\b
+        - \bb4\b
     B5:
       patterns:
-      - (declaration|\bdg\b).*\bb5\b
-      - \bb5\b
+        - (declaration|\bdg\b).*\bb5\b
+        - \bb5\b
     B6:
       patterns:
-      - (declaration|\bdg\b).*\bb6\b
-      - \bb6\b
+        - (declaration|\bdg\b).*\bb6\b
+        - \bb6\b
     B7:
       patterns:
-      - (declaration|\bdg\b).*\bb7\b
-      - \bb7\b
+        - (declaration|\bdg\b).*\bb7\b
+        - \bb7\b
     B8:
       patterns:
-      - (declaration|\bdg\b).*\bb8\b
-      - \bb8\b
+        - (declaration|\bdg\b).*\bb8\b
+        - \bb8\b
     B9A:
-        patterns:
+      patterns:
         - (declaration|\bdg\b)?.*\bb9a\+?\b
     B9B:
       patterns:
-      - (declaration|\bdg\b)?.*\bb9b\+?\b
+        - (declaration|\bdg\b)?.*\bb9b\+?\b
     B10:
       patterns:
-      - (declaration|\bdg\b).*\bb10\b
-      - \bb10\b
+        - (declaration|\bdg\b).*\bb10\b
+        - \bb10\b
     B11:
       patterns:
-      - (declaration|\bdg\b).*\bb11\b
-      - \bb11\b
+        - (declaration|\bdg\b).*\bb11\b
+        - \bb11\b
     B12:
       patterns:
-      - (declaration|\bdg\b).*\bb12\b
-      - \bb12\b
+        - (declaration|\bdg\b).*\bb12\b
+        - \bb12\b
     B13:
       patterns:
-      - (declaration|\bdg\b).*\bb13\b
-      - \bb13\b
+        - (declaration|\bdg\b).*\bb13\b
+        - \bb13\b
     B14:
       patterns:
-      - (declaration|\bdg\b).*\bb14\b
-      - \bb14\b
+        - (declaration|\bdg\b).*\bb14\b
+        - \bb14\b
     B15:
       patterns:
-      - (declaration|\bdg\b).*\bb15\b
-      - \bb15\b
+        - (declaration|\bdg\b).*\bb15\b
+        - \bb15\b
     B16:
       patterns:
-      - (declaration|\bdg\b).*\bb16\b
-      - \bb16\b
+        - (declaration|\bdg\b).*\bb16\b
+        - \bb16\b
     B17:
       patterns:
-      - (declaration|\bdg\b).*\bb17\b
-      - \bb17\b
+        - (declaration|\bdg\b).*\bb17\b
+        - \bb17\b
     B18:
       patterns:
-      - (declaration|\bdg\b).*\bb18\b
-      - \bb18\b
+        - (declaration|\bdg\b).*\bb18\b
+        - \bb18\b
   Maggard:
     G5:
       default: Synthetic
       patterns:
-      - mag(g?ard)?s?.*g5\b
+        - mag(g?ard)?s?.*g5\b
     Timberwolf:
       fiber: Synthetic
       patterns:
-      - maggard.*timber
+        - maggard.*timber
   Mühle:
     fiber: Synthetic
     STF:
       patterns:
-      - m[uü]hle.*stf
-      - stf
+        - m[uü]hle.*stf
+        - stf
   Omega:
     fiber: Boar
-    '10049':
+    "10049":
       knot_size_mm: 26
       patterns:
-      - omega.*(pro)*.*49
-    '10098':
+        - omega.*(pro)*.*49
+    "10098":
       knot_size_mm: 27
       patterns:
-      - omega.*10098
+        - omega.*10098
   Oumo:
     Rorschach:
       fiber: Badger
       patterns:
-      - (oumo.*)?rorschach
+        - (oumo.*)?rorschach
   Rad Dinosaur Creations:
     Raptor:
       fiber: Synthetic
       patterns:
-      - raptor
+        - raptor
   Rich Man Shaving:
     S2 Innovator:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-      - rich.*man.*shav.*s-?2.*innovator
+        - rich.*man.*shav.*s-?2.*innovator
   Turn-N-Shave:
     BoBa (50/50 Boar Badger):
       fiber: Mixed Badger/Boar
       patterns:
-      - turn.{1,5}shave.*boba
-      - t[&n]s.*mix
-      - t[&n]s.*boba
+        - turn.{1,5}shave.*boba
+        - t[&n]s.*mix
+        - t[&n]s.*boba
     High Density Badger (H*):
       fiber: Badger
       patterns:
-      - turn.{1,5}shave.*h\d
-      - t[&n]s.*h\d
+        - turn.{1,5}shave.*h\d
+        - t[&n]s.*h\d
     Low Density Badger (L*):
       fiber: Badger
       patterns:
-      - turn.{1,5}shave.*l\d
-      - t[&n]s.*l\d
+        - turn.{1,5}shave.*l\d
+        - t[&n]s.*l\d
     Medium Density Badger (M*):
       fiber: Badger
       patterns:
-      - turn.{1,5}shave.*m\d
-      - t[&n]s.*m\d
+        - turn.{1,5}shave.*m\d
+        - t[&n]s.*m\d
     Quartermoon:
       fiber: Synthetic
       patterns:
-      - turn.{1,5}shave.*quarter
-      - t[&n]s.*quarter
+        - turn.{1,5}shave.*quarter
+        - t[&n]s.*quarter
     Shoat:
       fiber: Boar
       patterns:
-      - turn.{1,5}shave.*shoat
-      - t[&n]s.*shoat
+        - turn.{1,5}shave.*shoat
+        - t[&n]s.*shoat
     Tip (Badger):
       fiber: Badger
       patterns:
-      - turn.{1,5}shave
-      - t[&n]s
-      - \btip\b v[1-9]
+        - turn.{1,5}shave.*(tip|v[1-9])
+        - t[&n]s.*(tip|v[1-9])
+        - \btip\b v[1-9]
     Tuxedo:
       fiber: Synthetic
       patterns:
-      - turn.{1,5}shave.*tuxedo
-      - t[&n]s.*tuxedo
+        - turn.{1,5}shave.*tuxedo
+        - t[&n]s.*tuxedo
   Wald:
     A1:
       fiber: Synthetic
       knot_size_mm: 29
       patterns:
-      - wald.*a1
+        - wald.*a1
     Calyx:
       fiber: Synthetic
       knot_size_mm: 27
       patterns:
-      - (?:wald.*)?calyx
+        - (?:wald.*)?calyx
     J1:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-      - wald.*j1
+        - wald.*j1
     J2:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-      - wald.*j2
+        - wald.*j2
     J3:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-      - wald.*j3
+        - wald.*j3
     J4:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-      - wald.*j4
+        - wald.*j4
   Zenith:
     fiber: Boar
     B03 (aka B2):
@@ -505,639 +505,639 @@ other_knots:
   AKA Brushworx:
     default: Synthetic
     patterns:
-    - aka.*brush
+      - aka.*brush
   AMACK:
     default: Synthetic
     patterns:
-    - amack
+      - amack
   AP Shave Co:
     default: Synthetic
     patterns:
-    - A\.? ?P\.? ?\s*shave\s*(co)?
-    - \bap\b
-    - \bapsc\b
+      - A\.? ?P\.? ?\s*shave\s*(co)?
+      - \bap\b
+      - \bapsc\b
   Alpha:
     default: Synthetic
     patterns:
-    - alpha
+      - alpha
   Anbbas:
     default: Synthetic
     patterns:
-    - an?bbas
+      - an?bbas
   Arno:
     default: Badger
     patterns:
-    - arno
-    - arno.*shav
-    - arno.*brush
+      - arno
+      - arno.*shav
+      - arno.*brush
   Art of Shaving:
     default: Badger
     patterns:
-    - ^\s*aos
-    - art.*of.*sha
+      - ^\s*aos
+      - art.*of.*sha
   Artesania Romera:
     default: Badger
     patterns:
-    - romera
+      - romera
   B&M:
     default: Synthetic
     patterns:
-    - b\s*(&|a|\+)\s*m\b
-    - barrister
+      - b\s*(&|a|\+)\s*m\b
+      - barrister
   Badlands Shaving Co.:
     default: Badger
     patterns:
-    - badlands
+      - badlands
   Balea Men:
     default: Synthetic
     patterns:
-    - balea
+      - balea
   Bass:
     default: Boar
     patterns:
-    - \bbass\b
+      - \bbass\b
   Beaumont:
     default: Badger
     patterns:
-    - bea.{1,3}mont
+      - bea.{1,3}mont
   Black Anvil:
     default: Badger
     patterns:
-    - black.*anv
+      - black.*anv
   Black Eagle:
     default: Badger
     patterns:
-    - black.*eag
+      - black.*eag
   Blackland:
     default: Synthetic
     knot_size_mm: 23
     patterns:
-    - blackland
+      - blackland
   Böker:
     default: Synthetic
     patterns:
-    - b[oö]ker
+      - b[oö]ker
   Boti:
     default: Badger
     patterns:
-    - boti
+      - boti
   Brad Sears:
     default: Badger
     patterns:
-    - brad.*sears
+      - brad.*sears
   Bristle Brushwerks:
     default: Badger
     patterns:
-    - huck
-    - bristle.*brush
+      - huck
+      - bristle.*brush
   Brushcraft:
     default: Synthetic
     patterns:
-    - brushcraft
+      - brushcraft
   Bullseye Brushworks:
     default: Synthetic
     patterns:
-    - bullseye
+      - bullseye
   Bundubeard:
     default: Badger
     patterns:
-    - bund\wbeard
-    - boendoebaard
+      - bund\wbeard
+      - boendoebaard
   CaYuen:
     default: Synthetic
     patterns:
-    - ca\s*?yuen
+      - ca\s*?yuen
   Carnavis & Richardson:
     default: Synthetic
     patterns:
-    - carn.*rich
+      - carn.*rich
   Catalin:
     default: Badger
     patterns:
-    - catalin
+      - catalin
   Captain's Choice:
     default: Synthetic
     patterns:
-    - captain.*choice
+      - captain.*choice
   Chisel & Hound:
     default: Badger
     knot_size_mm: 26
     patterns:
-    - chis.*[fh]ou
-    - \bc(?:\&|and|\+)h\b
-    - \bch\b
-    - broomstick
-    - season.*witch
+      - chis.*[fh]ou
+      - \bc(?:\&|and|\+)h\b
+      - \bch\b
+      - broomstick
+      - season.*witch
   Col. Ichabod Conk:
     default: Badger
     patterns:
-    - col.*\bconk\b
+      - col.*\bconk\b
   Commonwealth 'CW':
     default: Badger
     patterns:
-    - commonwealth
-    - \bcw\b
+      - commonwealth
+      - \bcw\b
   Cool Dog:
     default: Badger
     patterns:
-    - cool dog
-    - rasierpinselei
+      - cool dog
+      - rasierpinselei
   Craving Shaving:
     default: Synthetic
     patterns:
-    - crav.*shav
+      - crav.*shav
   Cremo:
     default: Horse
     patterns:
-    - cremo
+      - cremo
   Crescent City Craftsman:
     default: Synthetic
     patterns:
-    - cres.*city
+      - cres.*city
   Cumberbatch:
     default: Badger
     patterns:
-    - cumberbatch
+      - cumberbatch
   DSCosmetics:
     default: Synthetic
     patterns:
-    - DSC?\s*Cosmetic
-    - \bDSC\b
+      - DSC?\s*Cosmetic
+      - \bDSC\b
   Declaration Grooming (batch not specified):
     default: Badger
     patterns:
-    - (declaration|\bdg\b)
+      - (declaration|\bdg\b)
   Den of Man:
     default: Synthetic
     patterns:
-    - den.*of.*man
+      - den.*of.*man
   Dogwood:
     default: Badger
     patterns:
-    - dogw
-    - dogc*l
-    - ^voa
-    - \bdw\b
+      - dogw
+      - dogc*l
+      - ^voa
+      - \bdw\b
   Dovo:
     default: Synthetic
     patterns:
-    - dovo
+      - dovo
   Doug Korn:
     default: Badger
     patterns:
-    - doug\s*korn
+      - doug\s*korn
   Dubl Duck:
     default: Boar
     patterns:
-    - dubl.*duck
+      - dubl.*duck
   Edwin Jagger:
     default: Badger
     patterns:
-    - edwin.*jag
+      - edwin.*jag
   El Druida:
     default: Badger
     patterns:
-    - druidi*a
+      - druidi*a
   Elite:
     default: Badger
     patterns:
-    - elite
+      - elite
   Envy Shave:
     default: Badger
     patterns:
-    - envy.*(?:shave)?
+      - envy.*(?:shave)?
   Erskine:
     default: Boar
     patterns:
-    - erskine
+      - erskine
   Executive Shaving:
     default: Synthetic
     patterns:
-    - execut.*shav
+      - execut.*shav
   Fendrihan:
     default: Badger
     patterns:
-    - fendri
+      - fendri
   Fine:
     default: Synthetic
     patterns:
-    - fine\b
+      - fine\b
   Firehouse Potter:
     default: Synthetic
     patterns:
-    - fireh.*pott
+      - fireh.*pott
   Frank Shaving:
     default: Synthetic
     patterns:
-    - frank.*sha
+      - frank.*sha
   Geo F. Trumper:
     default: Badger
     patterns:
-    - geo.*trumper
+      - geo.*trumper
   Goodfellas Smile:
     default: Synthetic
     patterns:
-    - goodfella.*smile
+      - goodfella.*smile
   Grizzly Bay:
     default: Badger
     patterns:
-    - griz.*bay
+      - griz.*bay
   Groomatorium:
     default: Synthetic
     knot_size_mm: 24
     patterns:
-    - groomatorium
-    - chiseled face
-    - \bcf\b
+      - groomatorium
+      - chiseled face
+      - \bcf\b
   Haircut & Shave Co:
     default: Badger
     patterns:
-    - haircut.*shave
+      - haircut.*shave
   Hendrix Classics & Co.:
     default: Synthetic
     patterns:
-    - hendrix.*classics
-    - hc&c
+      - hendrix.*classics
+      - hc&c
   Heritage Collection:
     default: Badger
     patterns:
-    - heritage
+      - heritage
   Holzleute:
     default: Badger
     patterns:
-    - holzleute
+      - holzleute
   Imperial:
     default: Synthetic
     patterns:
-    - imperial
+      - imperial
   Jequil & Corenveo:
     default: Badger
     knot_size_mm: 21
     patterns:
-    - jequil
-    - corenveo
+      - jequil
+      - corenveo
   L'Occitane en Provence:
     default: Synthetic
     patterns:
-    - oc*citane
+      - oc*citane
   Lancaster Brushworks:
     default: Synthetic
     patterns:
-    - lancaster
+      - lancaster
   Leavitt & Pierce:
     default: Badger
     patterns:
-    - leav.*pie
-    - leav.*pei
+      - leav.*pie
+      - leav.*pei
   Lentfer Custom Woodworks:
     default: Synthetic
     patterns:
-    - lentfer
+      - lentfer
   Leonidam:
     default: Badger
     patterns:
-    - leonidam
-    - leo.*nem
+      - leonidam
+      - leo.*nem
   Liojuny Shaving:
     default: Synthetic
     patterns:
-    - liojuny
+      - liojuny
   Long Shaving:
     default: Badger
     patterns:
-    - long\s*shaving
-    - long reserve
+      - long\s*shaving
+      - long reserve
   Lutin Brushworks:
     default: Synthetic
     patterns:
-    - lutin
+      - lutin
   MRed:
     default: Badger
     patterns:
-    - mred
+      - mred
   Maggard:
     default: Synthetic
     patterns:
-    - mag(g?ard)?s?
+      - mag(g?ard)?s?
   Maritime Brush Co.:
     default: Synthetic
     patterns:
-    - maritime\sbrush
+      - maritime\sbrush
   Maseto:
     default: Badger
     patterns:
-    - maseto
+      - maseto
   Mistic:
     default: Synthetic
     patterns:
-    - mistic
+      - mistic
   Mojo:
     default: Badger
     patterns:
-    - mojo
+      - mojo
   Mondial:
     default: Boar
     patterns:
-    - mondial
+      - mondial
   Morris & Forndran:
     default: Badger
     patterns:
-    - morris
-    - m\s*&\s*f
+      - morris
+      - m\s*&\s*f
   Mountain Hare Shaving:
     default: Badger
     patterns:
-    - mountain.*hare
+      - mountain.*hare
   Mozingo:
     default: Badger
     patterns:
-    - mozingo
+      - mozingo
   Mühle:
     default: Badger
     patterns:
-    - \bm[uü]hle\b
+      - \bm[uü]hle\b
   Muninn Woodworks:
     default: Badger
     patterns:
-    - mun+in
+      - mun+in
   Mutiny:
     default: Synthetic
     patterns:
-    - mutiny
+      - mutiny
   NY Shave Co:
     default: Badger
     patterns:
-    - ny\s.*shave.*co
+      - ny\s.*shave.*co
   New England Shaving Company:
     default: Synthetic
     patterns:
-    - new.*england
+      - new.*england
   Noble Otter:
     default: Badger
     patterns:
-    - noble
-    - no\s*\d{2}mm
+      - noble
+      - no\s*\d{2}mm
   Nom:
     default: Synthetic
     patterns:
-    - \bnom\b
+      - \bnom\b
   Omega:
     default: Boar
     patterns:
-    - omega
+      - omega
   Oumo:
     default: Badger
     patterns:
-    - \bo(o|u)+mo\b
-    - rorschach
-    - st-2
+      - \bo(o|u)+mo\b
+      - rorschach
+      - st-2
   Oz Shaving:
     default: Synthetic
     patterns:
-    - oz.*sha
+      - oz.*sha
   PAA:
     default: Synthetic
     patterns:
-    - paa
-    - phoenix.*art
+      - paa
+      - phoenix.*art
   Paladin:
     default: Badger
     patterns:
-    - paladin
+      - paladin
   Paragon:
     default: Synthetic
     patterns:
-    - paragon(?:aldkjgajklk)*
+      - paragon(?:aldkjgajklk)*
   Parker:
     default: Badger
     patterns:
-    - parker
+      - parker
   Pearl:
     default: Synthetic
     patterns:
-    - ^pearl\b
+      - ^pearl\b
   Perfecto:
     default: Badger
     knot_size_mm: 20
     patterns:
-    - perfecto
+      - perfecto
   Plisson:
     default: Badger
     patterns:
-    - plisson
+      - plisson
   Prometheus Handcrafts:
     default: Synthetic
     patterns:
-    - promethe
+      - promethe
   Rad Dinosaur Creations:
     default: Synthetic
     patterns:
-    - rad dino(saur)?
-    - priusaurus
-    - rdc
+      - rad dino(saur)?
+      - priusaurus
+      - rdc
   RazoRock:
     default: Synthetic
     patterns:
-    - Razorr*ock
-    - (^|\s)rr\s
-    - plissoft
-    - razor rock
+      - Razorr*ock
+      - (^|\s)rr\s
+      - plissoft
+      - razor rock
   Rich Man Shaving:
     default: Synthetic
     patterns:
-    - \brich ?man\b
+      - \brich ?man\b
   Rick Montalvo:
     default: Synthetic
     patterns:
-    - montalv
+      - montalv
   Rocky Mountain Barber:
     default: Badger
     patterns:
-    - rocky.*mountain
-    - rockymountain
+      - rocky.*mountain
+      - rockymountain
   Rockwell:
     default: Synthetic
     patterns:
-    - rockwell
+      - rockwell
   Rooney:
     default: Badger
     patterns:
-    - rooney
+      - rooney
   Rubab Men:
     default: Synthetic
     patterns:
-    - \brubab\b
+      - \brubab\b
   Rudy Vey:
     default: Badger
     patterns:
-    - rudy.*vey
+      - rudy.*vey
   Runeman Nordic Shave Design:
     default: Badger
     patterns:
-    - runeman
+      - runeman
   SHAVEDANDY:
     default: Synthetic
     patterns:
-    - shavedandy
+      - shavedandy
   Sawdust Creation Studios:
     default: Synthetic
     patterns:
-    - sawdust
+      - sawdust
   Semogue:
     default: Boar
     patterns:
-    - semogue
+      - semogue
   Simpson:
     default: Badger
     patterns:
-    - simpson
+      - simpson
   Strike Gold Shave:
     default: Synthetic
     patterns:
-    - strike.*gold
+      - strike.*gold
   Supply:
     default: Synthetic
     patterns:
-    - supply
+      - supply
   Surrey:
     default: Boar
     patterns:
-    - surrey
+      - surrey
   TOBS:
     default: Badger
     patterns:
-    - tobs
-    - taylor.*bond
+      - tobs
+      - taylor.*bond
   TanZ:
     default: Badger
     patterns:
-    - tobs
-    - tanz
+      - tobs
+      - tanz
   Teton Shaves:
     default: Badger
     patterns:
-    - teton
+      - teton
   That Darn Rob:
     default: Badger
     patterns:
-    - darn.*rob
-    - tdr
+      - darn.*rob
+      - tdr
   Thater:
     default: Badger
     patterns:
-    - thater
+      - thater
   The Bluebeard's Revenge:
     default: Synthetic
     patterns:
-    - bluebeard.*rev
+      - bluebeard.*rev
   The Golden Nib:
     default: Boar
     patterns:
-    - tgn
-    - golden.*nib
+      - tgn
+      - golden.*nib
   The Holy Black:
     default: Synthetic
     patterns:
-    - holy black
+      - holy black
   The Razor Company:
     default: Synthetic
     patterns:
-    - razor.*co
-    - trc
+      - razor.*co
+      - trc
   The Varlet:
     default: Badger
     patterns:
-    - varlet
+      - varlet
   Tony Forsyth:
     default: Badger
     patterns:
-    - tony.*fors
+      - tony.*fors
   Trotter Handcrafts:
     default: Synthetic
     patterns:
-    - trotter
+      - trotter
   Turn-N-Shave:
     default: Badger
     patterns:
-    - turn.{1,5}shave
-    - tns
+      - turn.{1,5}shave
+      - tns
   Van der Hagen:
     default: Boar
     patterns:
-    - van.*hag.*
+      - van.*hag.*
   Vie Long:
     default: Horse
     patterns:
-    - vie.*long
+      - vie.*long
   Viking:
     default: Badger
     patterns:
-    - viking
+      - viking
   Vintage Blades:
     default: Badger
     patterns:
-    - vintage.*blades
+      - vintage.*blades
   Virginia Cheng:
     default: Badger
     patterns:
-    - virginia.*cheng
+      - virginia.*cheng
   Voigt & Cop:
     default: Badger
     patterns:
-    - v&c
-    - voigt
+      - v&c
+      - voigt
   Vulfix:
     default: Badger
     patterns:
-    - vul?fix
+      - vul?fix
   West Coast Shaving:
     default: Synthetic
     patterns:
-    - wcs
-    - west.*coast
+      - wcs
+      - west.*coast
   Wald:
     default: Badger
     patterns:
-    - wald
-    - west.*coast
+      - wald
+      - west.*coast
   Wallygator Manufacturing Co.:
     default: Synthetic
     knot_size_mm:: 26
     patterns:
-    - wallygator
+      - wallygator
   Whipped Dog:
     default: Badger
     patterns:
-    - whipped.*dog
+      - whipped.*dog
   Wild West Brushworks:
     default: Synthetic
     patterns:
-    - wild.*west
-    - wwb
-    - ww.*brushw
+      - wild.*west
+      - wwb
+      - ww.*brushw
   Wilkinson Sword:
     default: Synthetic
     patterns:
-    - wilkinson
+      - wilkinson
   Wiborg:
     default: Badger
     patterns:
-    - wiborg
+      - wiborg
   WSP:
     default: Badger
     patterns:
-    - wsp
-    - wet.*shav.*prod
+      - wsp
+      - wet.*shav.*prod
   Wolf Whiskers:
     default: Badger
     patterns:
-    - wolf.*whis
+      - wolf.*whis
   Yaqi:
     default: Synthetic
     patterns:
-    - yaqu*i
+      - yaqu*i
   Zenith:
     default: Boar
     patterns:
-    - zenith
-    - zenith.*\bb\d+
+      - zenith
+      - zenith.*\bb\d+

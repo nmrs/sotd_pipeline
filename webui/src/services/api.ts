@@ -578,6 +578,8 @@ export interface CatalogValidationIssue {
   format?: string;
   catalog_format?: string;
   matched_pattern?: string;
+  // Additional fields for brush validation
+  version?: string; // For brush version (e.g., v26, v27)
 }
 
 export interface CatalogValidationResult {

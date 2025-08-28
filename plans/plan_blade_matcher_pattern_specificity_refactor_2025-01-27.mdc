@@ -1,0 +1,328 @@
+# Blade Matcher Pattern Specificity Refactor - TDD Implementation Plan
+
+## Overview
+
+Refactor the blade matcher to use global pattern specificity instead of format-based fallback logic for generic razor formats. Instead of guessing which format a generic razor (like "Shavette") should use, we'll sort all patterns across all formats by specificity and let the best match determine the format.
+
+## Problem Statement
+
+**Current Issue**: Generic razor formats like "Shavette" don't have specific blade format mappings, causing the system to fall back to hardcoded format priority lists. This leads to incorrect matches like "Personna hair shaper" being matched to "Injector" format instead of "Hair Shaper" format.
+
+**Root Cause**: The `_build_shavette_fallback_formats` method prioritizes "Injector" over "Hair Shaper" for generic Shavettes, even though Hair Shaper patterns are more specific.
+
+**Better Approach**: Use global pattern specificity across all formats to determine the best match for generic cases, while preserving the existing context-aware logic for specific razor formats.
+
+## Goals
+
+1. **Eliminate format guessing for generic cases**: No more hardcoded fallback format priority lists for generic "Shavette"
+2. **Data-driven matching for generics**: Let pattern specificity determine the best match when format is unknown
+3. **Preserve existing logic**: Keep context-aware matching for specific razor formats that work correctly
+4. **Maintainable code**: Simpler, more robust logic that's easier to maintain
+
+## Success Criteria
+
+- [ ] "Personna hair shaper" with generic "Shavette" razor correctly matches to "Hair Shaper" format
+- [ ] Pattern specificity (length, non-optional parts, complexity, word boundaries) drives matching decisions
+- [ ] No more hardcoded format priority lists in fallback logic for generic cases
+- [ ] All existing blade matching functionality continues to work unchanged
+- [ ] Performance remains acceptable (no significant degradation)
+- [ ] Generic "Shavette" detection triggers global pattern specificity approach
+
+## Implementation Plan
+
+### Phase 1: Unified Tiebreaker System (2-3 hours)
+
+#### 1.1 Create Unified Tiebreaker Function
+- [ ] Implement `_calculate_pattern_score(item, deprioritize_de: bool = False)` helper method
+- [ ] Include all tiebreaker factors: format priority (when enabled), length, non-optional parts, complexity, word boundaries
+- [ ] Create `_count_non_optional_parts(pattern)` helper for counting required vs optional pattern elements
+- [ ] Test tiebreaker logic with edge cases (same length, same complexity patterns)
+
+#### 1.2 Update Existing Sorting Functions
+- [ ] Modify `_compile_patterns` to use unified tiebreaker system
+- [ ] Update `_get_context_aware_patterns` to use unified tiebreaker system
+- [ ] Ensure backward compatibility for existing functionality
+- [ ] Test that existing pattern sorting still works correctly
+
+#### 1.3 Test Tiebreaker System
+- [ ] Test that "Personna hair shaper" wins over "Personna injector" when both have same length
+- [ ] Test format priority logic (DE deprioritization when enabled)
+- [ ] Test edge cases and tie scenarios
+
+### Phase 2: Generic "Shavette" Detection and Global Approach (2-3 hours)
+
+#### 2.1 Modify match_with_context Method
+- [ ] Add detection for generic "Shavette" razor format (case-insensitive)
+- [ ] Integrate global pattern specificity approach when generic "Shavette" is detected
+- [ ] Preserve existing context-aware logic for specific razor formats
+- [ ] Add basic logging for when global approach is triggered
+
+#### 2.2 Implement Global Pattern Matching
+- [ ] Create `_find_best_global_match` method that uses existing `self.patterns` sorting
+- [ ] Ensure the method returns the same `MatchResult` structure as existing code
+- [ ] Implement fail-fast error handling for edge cases
+- [ ] Add logging for debugging and monitoring
+
+#### 2.3 Integration Testing
+- [ ] Test generic "Shavette" detection triggers global approach
+- [ ] Test specific razor formats still use context-aware logic
+- [ ] Test that "Personna hair shaper" correctly wins over "Personna injector"
+- [ ] Test edge cases and error conditions
+
+### Phase 3: Testing and Validation (2-3 hours)
+
+#### 3.1 Unit Tests
+- [ ] Test unified tiebreaker system with various pattern combinations
+- [ ] Test generic "Shavette" detection logic
+- [ ] Test global pattern matching functionality
+- [ ] Test integration with existing `match_with_context` method
+
+#### 3.2 Integration Tests
+- [ ] Test "Personna hair shaper" with generic "Shavette" razor scenario
+- [ ] Test other generic razor format scenarios (if any exist)
+- [ ] Test existing specific razor format scenarios remain unchanged
+- [ ] Test edge cases and error conditions
+
+#### 3.3 Performance Tests
+- [ ] Test with existing pattern sets
+- [ ] Benchmark against current implementation
+- [ ] Validate performance requirements are met
+- [ ] Test memory usage and scalability
+
+#### 3.4 Regression Tests
+- [ ] Ensure all existing blade matching functionality works unchanged
+- [ ] Test backward compatibility
+- [ ] Validate existing test suite passes
+- [ ] Test with real-world data samples
+
+### Phase 4: Documentation and Cleanup (1 hour)
+
+#### 4.1 Code Documentation
+- [ ] Document new unified tiebreaker system
+- [ ] Update existing method documentation
+- [ ] Add inline comments for complex logic
+- [ ] Document performance characteristics
+
+#### 4.2 Test Documentation
+- [ ] Document test scenarios and expected behavior
+- [ ] Add performance test documentation
+- [ ] Document edge cases and error conditions
+- [ ] Update test README if applicable
+
+#### 4.3 Code Cleanup
+- [ ] Remove obsolete fallback format logic for generic cases
+- [ ] Clean up unused methods and variables
+- [ ] Ensure consistent code style
+- [ ] Remove debug logging and temporary code
+
+## Technical Details
+
+### Unified Tiebreaker System
+
+```python
+def _calculate_pattern_score(self, item, deprioritize_de: bool = False) -> tuple:
+    """
+    Unified tiebreaker function for both normal and context-aware cases.
+    
+    Args:
+        item: Pattern item tuple (brand, model, fmt, pattern, compiled, entry)
+        deprioritize_de: Whether to deprioritize DE formats (for context-aware cases)
+    
+    Returns:
+        Tuple for sorting: (format_priority, -length_score, -non_optional_score, -complexity_score, -boundary_score)
+    """
+    brand, model, fmt, pattern, compiled, entry = item
+    
+    # Primary: format priority (only when deprioritize_de=True)
+    if deprioritize_de:
+        if fmt.upper() == "DE":
+            format_priority = 1  # DE gets lower priority
+        else:
+            format_priority = 0  # Non-DE formats get higher priority
+    else:
+        format_priority = 0  # No format bias
+    
+    # Secondary: pattern length (longer = more specific)
+    length_score = len(pattern)
+    
+    # Tertiary: non-optional vs optional (non-optional wins)
+    non_optional_score = self._count_non_optional_parts(pattern)
+    
+    # Quaternary: pattern complexity (more special chars = more specific)
+    complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
+    
+    # Quinary: word boundaries (more word boundaries = more specific)
+    boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
+    
+    return (format_priority, -length_score, -non_optional_score, -complexity_score, -boundary_score)
+
+def _count_non_optional_parts(self, pattern: str) -> int:
+    """
+    Count non-optional parts in a regex pattern.
+    
+    Simple approach: split on '.*' and count non-empty parts.
+    This handles most cases like 'personna.*hair.*shaper' -> 3 parts.
+    """
+    parts = pattern.split('.*')
+    return len([part for part in parts if part.strip()])
+```
+
+### Generic "Shavette" Detection and Global Approach
+
+```python
+def match_with_context(self, normalized_text: str, razor_format: str | None = None, original: str | None = None) -> MatchResult:
+    """
+    Match blade with context-aware logic, falling back to global pattern specificity for generic cases.
+    """
+    # ... existing context-aware logic ...
+    
+    # After context-aware matching fails, check if this is generic "Shavette"
+    if razor_format and razor_format.lower() == "shavette":
+        # Use global pattern specificity approach
+        logging.info(f"Generic 'Shavette' detected, switching to global pattern specificity approach")
+        return self._find_best_global_match(normalized_text, original)
+    else:
+        # Use existing fallback logic for specific formats
+        # ... existing fallback code ...
+
+def _find_best_global_match(self, normalized_text: str, original: str | None = None) -> MatchResult:
+    """
+    Find the best match across all formats using global pattern specificity.
+    
+    Uses existing self.patterns (already sorted by unified tiebreaker system).
+    """
+    # Try patterns in order until we find a match
+    for brand, model, fmt, pattern, compiled, entry in self.patterns:
+        if compiled.search(normalized_text):
+            logging.info(f"Global pattern match found: {brand} {model} ({fmt}) using pattern '{pattern}'")
+            
+            match_data = {
+                "brand": brand,
+                "model": str(model),
+                "format": fmt,
+            }
+            
+            # Preserve all additional specifications from the catalog entry
+            for key, value in entry.items():
+                if key not in ["patterns", "format"]:
+                    match_data[key] = value
+            
+            return create_match_result(
+                original=original or normalized_text,
+                matched=match_data,
+                match_type=MatchType.REGEX,
+                pattern=pattern,
+            )
+    
+    # No matches found - return same structure as existing "no match" case
+    logging.info("No global pattern match found")
+    return create_match_result(
+        original=original or normalized_text,
+        matched=None,
+        match_type=None,
+        pattern=None,
+    )
+```
+
+## Testing Strategy
+
+### Test-Driven Development Approach
+
+1. **Write failing tests first** for the new functionality
+2. **Implement minimal code** to make tests pass
+3. **Refactor** to improve design and performance
+4. **Repeat** for each component
+
+### Test Categories
+
+1. **Unit Tests**: Individual methods and algorithms
+2. **Integration Tests**: End-to-end blade matching scenarios
+3. **Performance Tests**: Large pattern sets and edge cases
+4. **Regression Tests**: Existing functionality preservation
+
+### Test Data Requirements
+
+1. **Real-world blade patterns** from the catalog
+2. **Edge cases** (same length, same complexity patterns)
+3. **Performance test data** (large pattern sets)
+4. **Error conditions** (invalid patterns, missing data)
+
+### Specific Test Cases
+
+1. **"Personna hair shaper" vs "Personna injector" tiebreaker test**:
+   - Both patterns have same length
+   - Hair shaper should win due to more non-optional parts
+   - Test with generic "Shavette" razor format
+
+2. **Generic vs Specific razor format test**:
+   - Generic "Shavette" should trigger global approach
+   - Specific formats (DE, GEM, etc.) should use existing context-aware logic
+
+3. **Unified tiebreaker system test**:
+   - Test all tiebreaker factors work correctly
+   - Test format priority logic when enabled/disabled
+
+## Risk Assessment
+
+### High Risk
+- **Breaking existing functionality** during refactor
+- **Performance degradation** with large pattern sets
+- **Complex integration** with existing context-aware logic
+
+### Medium Risk
+- **Pattern specificity scoring** edge cases
+- **Backward compatibility** maintenance
+- **Test coverage** completeness
+
+### Low Risk
+- **Code complexity** increase
+- **Documentation** maintenance
+- **Debugging complexity** increase
+
+## Mitigation Strategies
+
+1. **Comprehensive testing** at each phase
+2. **Performance monitoring** throughout development
+3. **Incremental implementation** with frequent validation
+4. **Fallback mechanisms** for edge cases
+5. **Extensive logging** for debugging
+
+## Success Metrics
+
+1. **Functional correctness**: All tests pass
+2. **Performance**: No significant degradation
+3. **Code quality**: Maintainable, well-documented code
+4. **User experience**: Correct blade format matching for generic cases
+5. **Maintainability**: Simpler, more robust logic
+
+## Timeline
+
+- **Total estimated time**: 7-10 hours
+- **Phase 1**: 2-3 hours (Unified Tiebreaker System)
+- **Phase 2**: 2-3 hours (Generic "Shavette" Detection and Global Approach)
+- **Phase 3**: 2-3 hours (Testing and Validation)
+- **Phase 4**: 1 hour (Documentation and Cleanup)
+
+## Dependencies
+
+1. **Existing blade matcher code** must be stable
+2. **Test infrastructure** must support new test types
+3. **Performance monitoring tools** for validation
+4. **Real-world data** for testing scenarios
+
+## Next Steps
+
+1. **Review and approve** this updated plan
+2. **Set up development environment** and test data
+3. **Begin Phase 1** with unified tiebreaker system
+4. **Implement incrementally** with frequent validation
+5. **Document lessons learned** throughout the process
+
+## Notes
+
+- This refactor represents a focused improvement to handle generic razor formats
+- The approach preserves existing functionality while adding new capabilities
+- Performance impact must be carefully monitored
+- Backward compatibility is critical for existing functionality
+- Comprehensive testing is essential for success
+- The unified tiebreaker system simplifies and unifies the existing complex logic

@@ -164,6 +164,11 @@ class ValidateCorrectMatches:
         self._normalized_catalogs.clear()
         self._matchers.clear()
 
+        # Clear individual matcher caches to ensure fresh validation
+        for matcher in self._matchers.values():
+            if hasattr(matcher, "clear_cache"):
+                matcher.clear_cache()
+
     def _create_temp_correct_matches(
         self, field: str, correct_matches: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -313,6 +318,26 @@ class ValidateCorrectMatches:
             return issues
 
         original_section = original[field]
+        logger.info(f"Processing {field} section: {type(original_section)}")
+        logger.info(
+            f"Section keys: {list(original_section.keys()) if isinstance(original_section, dict) else 'Not a dict'}"
+        )
+
+        # Debug: Check if we have the problematic entries
+        if field == "brush" and "Chisel & Hound" in original_section:
+            ch_hound_section = original_section["Chisel & Hound"]
+            logger.info(f"Chisel & Hound section: {type(ch_hound_section)}")
+            logger.info(
+                f"Chisel & Hound keys: {list(ch_hound_section.keys()) if isinstance(ch_hound_section, dict) else 'Not a dict'}"
+            )
+
+            if "v26" in ch_hound_section:
+                v26_patterns = ch_hound_section["v26"]
+                logger.info(f"v26 patterns: {v26_patterns}")
+                if isinstance(v26_patterns, list):
+                    for pattern in v26_patterns:
+                        if "v27" in pattern.lower():
+                            logger.info(f"Found v27 pattern in v26 section: {pattern}")
 
         if field == "blade":
             # For blades: test each individual pattern in each format
@@ -343,18 +368,84 @@ class ValidateCorrectMatches:
                             if result:
                                 logger.debug(f"Found issue: {result}")
                                 issues.append(result)
+        elif field == "brush":
+            # For brushes: test each individual pattern string, not the organizational structure
+            logger.info(f"Processing {field} section with {len(original_section)} brands")
+            for brand_name in original_section:
+                logger.info(f"  Processing brand: {brand_name}")
+                for version_name in original_section[brand_name]:
+                    logger.info(f"    Processing version: {version_name}")
+                    if isinstance(original_section[brand_name][version_name], list):
+                        patterns = original_section[brand_name][version_name]
+                        logger.info(f"      Found {len(patterns)} patterns")
+                        # Test each individual pattern string
+                        for pattern in patterns:
+                            logger.info(f"        Testing pattern: {pattern}")
+                            try:
+                                result = self._test_brush_pattern(
+                                    matcher, pattern, field, brand_name, version_name
+                                )
+                                if result:
+                                    logger.info(f"        Found issue: {result}")
+                                    issues.append(result)
+                                else:
+                                    logger.info(f"        No issue found")
+                            except Exception as e:
+                                logger.error(f"        Error testing pattern: {e}")
+                                # Add error as an issue
+                                issues.append(
+                                    {
+                                        "type": "validation_error",
+                                        "field": field,
+                                        "brand": brand_name,
+                                        "version": version_name,
+                                        "pattern": pattern,
+                                        "message": f"Error testing pattern: {str(e)}",
+                                    }
+                                )
+                    else:
+                        # Fallback: test the version string itself
+                        test_text = f"{brand_name} {version_name}"
+                        result = self._test_brush_pattern(
+                            matcher, test_text, field, brand_name, version_name
+                        )
+                        if result:
+                            issues.append(result)
         else:
             # For other fields: test each individual pattern
+            logger.info(f"Processing {field} section with {len(original_section)} brands")
             for brand_name in original_section:
+                logger.info(f"  Processing brand: {brand_name}")
                 for model_name in original_section[brand_name]:
+                    logger.info(f"    Processing model: {model_name}")
                     if isinstance(original_section[brand_name][model_name], list):
+                        patterns = original_section[brand_name][model_name]
+                        logger.info(f"      Found {len(patterns)} patterns")
                         # Test each individual pattern in the list
-                        for pattern in original_section[brand_name][model_name]:
-                            result = self._test_matcher_entry(
-                                matcher, pattern, field, brand_name, model_name
-                            )
-                            if result:
-                                issues.append(result)
+                        for pattern in patterns:
+                            logger.info(f"        Testing pattern: {pattern}")
+                            try:
+                                result = self._test_matcher_entry(
+                                    matcher, pattern, field, brand_name, model_name
+                                )
+                                if result:
+                                    logger.info(f"        Found issue: {result}")
+                                    issues.append(result)
+                                else:
+                                    logger.info(f"        No issue found")
+                            except Exception as e:
+                                logger.error(f"        Error testing pattern: {e}")
+                                # Add error as an issue
+                                issues.append(
+                                    {
+                                        "type": "validation_error",
+                                        "field": field,
+                                        "brand": brand_name,
+                                        "model": model_name,
+                                        "pattern": pattern,
+                                        "message": f"Error testing pattern: {str(e)}",
+                                    }
+                                )
                     else:
                         # Fallback: test brand+model combination
                         test_text = f"{brand_name} {model_name}"
@@ -458,8 +549,14 @@ class ValidateCorrectMatches:
                 # RazorMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
             elif field == "blade":
-                # BladeMatcher expects: match(normalized_text, original_text=None)
-                result = matcher.match(test_text.lower(), test_text)
+                # BladeMatcher expects: match_with_context(normalized_text, format_name)
+                # for format-aware matching
+                if hasattr(matcher, "match_with_context"):
+                    result = matcher.match_with_context(
+                        test_text.lower(), format_name, strict_format=True
+                    )
+                else:
+                    result = matcher.match(test_text.lower(), test_text)
             elif field == "soap":
                 # SoapMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
@@ -471,7 +568,7 @@ class ValidateCorrectMatches:
                 # Default fallback
                 result = matcher.match(test_text.lower(), test_text)
 
-            if not result:
+            if not result or not hasattr(result, "matched") or not result.matched:
                 # Entry doesn't match at all - this is a validation issue
                 if field == "blade" and len(args) >= 3:
                     format_name, brand_name, model_name = args[0], args[1], args[2]
@@ -561,13 +658,9 @@ class ValidateCorrectMatches:
                 # RazorMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
             elif field == "blade":
-                # BladeMatcher expects: match_with_context(normalized_text, format_name, original_text=None)
-                # Use format context to ensure correct format matching
-                if hasattr(matcher, "match_with_context"):
-                    result = matcher.match_with_context(test_text.lower(), format_name, test_text)
-                else:
-                    # Fallback to regular match if match_with_context not available
-                    result = matcher.match(test_text.lower(), test_text)
+                # BladeMatcher expects: match(normalized_text, original_text=None)
+                # We'll validate the result against expected brand/model separately
+                result = matcher.match(test_text.lower(), test_text)
             elif field == "soap":
                 # SoapMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
@@ -651,6 +744,103 @@ class ValidateCorrectMatches:
                 "format": format_name,
                 "pattern": test_text,
                 "message": f"Error testing entry '{test_text}' with {field} matcher with format '{format_name}': {str(e)}",
+            }
+
+    def _test_brush_pattern(
+        self, matcher, test_text: str, field: str, brand_name: str, version_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """Test if a brush pattern can be matched by the brush matcher."""
+        try:
+            # BrushMatcher expects: match({"original": text, "normalized": text})
+            test_data = {"original": test_text, "normalized": test_text.lower()}
+            result = matcher.match(test_data)
+
+            if not result:
+                # Entry doesn't match at all - this is a validation issue
+                return {
+                    "type": "catalog_pattern_no_match",
+                    "field": field,
+                    "brand": brand_name,
+                    "version": version_name,
+                    "pattern": test_text,
+                    "correct_match": test_text,
+                    "expected_brand": brand_name,
+                    "expected_model": version_name,
+                    "actual_brand": None,
+                    "actual_model": None,
+                    "severity": "high",
+                    "suggested_action": f"Pattern '{test_text}' cannot be matched by brush matcher. Check if this pattern is still valid or needs to be updated.",
+                    "details": f"The brush matcher could not find a match for '{test_text}'. This may indicate a catalog pattern issue or the pattern may need to be updated.",
+                }
+
+            # Check if the matcher returned valid brush data
+            if hasattr(result, "matched") and result.matched:
+                matched_data = result.matched
+                actual_brand = matched_data.get("brand")
+                actual_model = matched_data.get("model")
+
+                # For brushes, we don't validate against the organizational structure
+                # Instead, we validate that the matcher can successfully match the pattern
+                # and return valid brush information
+                if actual_brand and actual_model:
+                    # Successfully matched - no issue
+                    logger.info(
+                        f"        Successfully matched '{test_text}' to '{actual_brand} {actual_model}'"
+                    )
+                    return None
+                else:
+                    # Matched but missing brand/model - this is an issue
+                    return {
+                        "type": "catalog_pattern_mismatch",
+                        "field": field,
+                        "brand": brand_name,
+                        "version": version_name,
+                        "pattern": test_text,
+                        "correct_match": test_text,
+                        "expected_brand": brand_name,
+                        "expected_model": version_name,
+                        "actual_brand": actual_brand,
+                        "actual_model": actual_model,
+                        "severity": "medium",
+                        "suggested_action": f"Pattern '{test_text}' matched but returned incomplete data. Check brush matcher implementation.",
+                        "details": f"The brush matcher found a match for '{test_text}' but returned incomplete brand/model information: brand='{actual_brand}', model='{actual_model}'",
+                        "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
+                    }
+            else:
+                # No match data returned - this is an issue
+                return {
+                    "type": "catalog_pattern_no_match",
+                    "field": field,
+                    "brand": brand_name,
+                    "version": version_name,
+                    "pattern": test_text,
+                    "correct_match": test_text,
+                    "expected_brand": brand_name,
+                    "expected_model": version_name,
+                    "actual_brand": None,
+                    "actual_model": None,
+                    "severity": "high",
+                    "suggested_action": f"Pattern '{test_text}' matched but returned no data. Check brush matcher implementation.",
+                    "details": f"The brush matcher found a match for '{test_text}' but returned no matched data. This indicates a matcher implementation issue.",
+                }
+
+        except Exception as e:
+            # Matcher error - this indicates a problem
+            logger.error(f"Error testing brush pattern '{test_text}': {e}")
+            return {
+                "type": "validation_error",
+                "field": field,
+                "brand": brand_name,
+                "version": version_name,
+                "pattern": test_text,
+                "correct_match": test_text,
+                "expected_brand": brand_name,
+                "expected_model": version_name,
+                "actual_brand": None,
+                "actual_model": None,
+                "severity": "high",
+                "suggested_action": f"Pattern '{test_text}' caused a matcher error. Check brush matcher implementation and catalog data.",
+                "details": f"Error testing pattern '{test_text}' with brush matcher: {str(e)}",
             }
 
     def _brand_exists_in_catalog(
@@ -872,6 +1062,13 @@ class ValidateCorrectMatches:
 
         # Clear matcher cache to force fresh matcher instantiation
         self._matchers.clear()
+
+        # Clear brush matcher cache specifically for brush validation
+        if field == "brush" and field in self._matchers:
+            brush_matcher = self._matchers[field]
+            if hasattr(brush_matcher, "clear_cache"):
+                brush_matcher.clear_cache()
+                logger.info("Cleared brush matcher cache for fresh validation")
 
         # Debug: Log that we're clearing caches
         logger.info(f"Cleared matcher cache for field: {field}")

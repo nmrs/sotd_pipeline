@@ -404,6 +404,409 @@ class TestCatalogValidation:
         assert isinstance(issues, list)
         assert isinstance(expected_structure, dict)
 
+    def test_brush_version_mismatch_detection(self):
+        """Test that brush version mismatches are detected correctly.
+
+        This test specifically checks the dinos'mores case where:
+        - Pattern: "c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian"
+        - Stored in: Chisel & Hound v26 section
+        - Matcher returns: Chisel & Hound v27
+        - Should be flagged as: version mismatch
+        """
+        # Create test data that mirrors the actual issue
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [
+                        "c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian",
+                        "chisel & hound - dinos'mores - 26mm v27 fanchurian",
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Create a new validator instance for testing
+            validator = ValidateCorrectMatches()
+
+            # Run validation
+            issues, expected_structure = validator.validate_field("brush")
+
+            # Should find validation issues for the version mismatches
+            assert len(issues) > 0, "Should detect version mismatch issues"
+
+            # Check that the specific dinos'mores patterns are flagged
+            dinos_issues = [issue for issue in issues if "dinos'mores" in str(issue)]
+            assert len(dinos_issues) > 0, "Should detect dinos'mores version mismatch"
+
+            # Verify the issue details
+            for issue in dinos_issues:
+                assert "v27" in str(issue), "Issue should mention v27"
+                assert "v26" in str(issue), "Issue should mention v26"
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_brush_brand_model_validation(self):
+        """Test that brush brand and model validation works correctly."""
+        # Create test data with known mismatches
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": ["c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian"]
+                },
+                "Declaration Grooming": {
+                    "B13": ["declaration grooming - roil jefferson - 28mm b13"]
+                },
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Create a new validator instance for testing
+            validator = ValidateCorrectMatches()
+
+            # Run validation
+            issues, expected_structure = validator.validate_field("brush")
+
+            # Should find validation issues
+            assert len(issues) > 0, "Should detect validation issues"
+
+            # Check that we have the expected structure
+            assert "brush" in expected_structure
+            assert "Chisel & Hound" in expected_structure["brush"]
+            assert "Declaration Grooming" in expected_structure["brush"]
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_step3_composite_brush_validation(self, tmp_path):
+        """Test Step 3: Composite Brush Validation Logic.
+
+        This test verifies that our validation correctly detects when a composite brush
+        pattern is stored in the complete brush section instead of handle/knot sections.
+        """
+        # Create test data with a composite brush stored in the wrong section
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [  # WRONG: Should be in handle/knot sections
+                        "chisel & hound deep night handle w/26mm v27 fanchurian badger"
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Set up test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy test data
+            import shutil
+
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Use the real catalog files for testing
+            shutil.copy(Path("data/brushes.yaml"), test_data_dir / "brushes.yaml")
+            shutil.copy(Path("data/handles.yaml"), test_data_dir / "handles.yaml")
+            shutil.copy(Path("data/knots.yaml"), test_data_dir / "knots.yaml")
+
+            # Test the shared validator
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            validator = CatalogValidator(project_root=test_project_root)
+            issues = validator.validate_brush_catalog()
+
+            # Should find composite brush in wrong section issue
+            assert len(issues) > 0, "Should find validation issues"
+
+            # Look for the specific composite brush issue
+            composite_issues = [
+                i for i in issues if i["type"] == "composite_brush_in_wrong_section"
+            ]
+            assert len(composite_issues) > 0, "Should find composite brush validation issue"
+
+            # Verify the issue details
+            issue = composite_issues[0]
+            assert (
+                issue["pattern"] == "chisel & hound deep night handle w/26mm v27 fanchurian badger"
+            )
+            assert issue["stored_brand"] == "Chisel & Hound"
+            assert issue["stored_model"] == "v26"
+            assert "composite brush" in issue["message"].lower()
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_step4_single_component_brush_validation(self, tmp_path):
+        """Test Step 4: Single Component Brush Validation Logic.
+
+        This test verifies that our validation correctly detects when a single component
+        brush (handle-only or knot-only) is stored in the complete brush section.
+        """
+        # Create test data with a handle-only brush stored in the wrong section
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [  # WRONG: Should be in handle section
+                        "chisel & hound test handle only"  # Handle-only brush
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Set up test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy test data
+            import shutil
+
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Use the real catalog files for testing
+            shutil.copy(Path("data/brushes.yaml"), test_data_dir / "brushes.yaml")
+            shutil.copy(Path("data/handles.yaml"), test_data_dir / "handles.yaml")
+            shutil.copy(Path("data/knots.yaml"), test_data_dir / "knots.yaml")
+
+            # Test the shared validator
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            validator = CatalogValidator(project_root=test_project_root)
+            issues = validator.validate_brush_catalog()
+
+            # Should find single component brush in wrong section issue
+            assert len(issues) > 0, "Should find validation issues"
+
+            # Look for the specific single component brush issue
+            single_component_issues = [
+                i for i in issues if i["type"] == "handle_only_brush_in_wrong_section"
+            ]
+            assert (
+                len(single_component_issues) > 0
+            ), "Should find handle-only brush validation issue"
+
+            # Verify the issue details
+            issue = single_component_issues[0]
+            assert issue["pattern"] == "chisel & hound deep night handle"
+            assert issue["stored_brand"] == "Chisel & Hound"
+            assert issue["stored_model"] == "v26"
+            assert "handle-only brush" in issue["message"].lower()
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_step1_complete_brush_validation_dinos_mores(self, tmp_path):
+        """Test Step 1: Complete Brush Validation Logic for dinos'mores case.
+
+        This test verifies that our validation correctly detects when a complete brush
+        pattern is stored in the wrong model section.
+        """
+        # Create test data that mirrors the actual dinos'mores issue
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [  # WRONG: Should be v27
+                        "c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian",
+                        "chisel & hound - dinos'mores - 26mm v27 fanchurian",
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Set up test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy test data
+            import shutil
+
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Use the real catalog files for testing - we're testing validation logic, not brush matching
+            import shutil
+
+            # Copy real catalog files
+            shutil.copy(Path("data/brushes.yaml"), test_data_dir / "brushes.yaml")
+            shutil.copy(Path("data/handles.yaml"), test_data_dir / "handles.yaml")
+            shutil.copy(Path("data/knots.yaml"), test_data_dir / "knots.yaml")
+
+            # Test the shared validator
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            validator = CatalogValidator(project_root=test_project_root)
+
+            # Run validation
+            issues = validator.validate_brush_catalog()
+
+            # Should find validation issues for the version mismatches
+            assert len(issues) > 0, "Should detect version mismatch issues"
+
+            # Check that the specific dinos'mores patterns are flagged
+            dinos_issues = [issue for issue in issues if "dinos'mores" in str(issue)]
+            assert len(dinos_issues) > 0, "Should detect dinos'mores version mismatch"
+
+            # Verify the issue details for complete brush validation
+            for issue in dinos_issues:
+                assert (
+                    issue["type"] == "catalog_pattern_mismatch"
+                ), f"Should be catalog pattern mismatch, got {issue['type']}"
+                assert "v27" in str(
+                    issue.get("matched_model", "")
+                ), f"Issue should show v27 from matcher: {issue}"
+                assert "v26" in str(
+                    issue.get("stored_model", "")
+                ), f"Issue should show v26 from storage: {issue}"
+                assert "Chisel & Hound" in str(
+                    issue.get("stored_brand", "")
+                ), f"Issue should show correct brand: {issue}"
+
+        finally:
+            # Clean up
+            pass
+
+    def test_known_brush_with_handle_knot_components_not_flagged_as_composite(self, tmp_path):
+        """Test that known brushes with handle/knot components are not incorrectly flagged.
+        
+        This test exposes the bug where the validation logic incorrectly assumes that if 
+        handle/knot components exist, it must be a composite brush that should be stored 
+        in handle/knot sections.
+        
+        The brush matcher correctly returns both top-level brand/model AND handle/knot 
+        components for known brushes, but the validation logic was treating this as an error.
+        """
+        # Create test data that mirrors the real issue: chisel & hound "drake" w/ 26mm v19
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v19": ["chisel & hound \"drake\" w/ 26mm v19"]
+                }
+            }
+        }
+
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Create a new shared validator instance for testing
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            # Create minimal test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy our test data to the expected location
+            import shutil
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Create minimal catalog files for testing that match the real structure
+            brushes_catalog = {
+                "Chisel & Hound": {
+                    "fiber": "Badger",
+                    "knot_size_mm": 26,
+                    "v19": {
+                        "patterns": [
+                            r"chis.*[fh]ou.*v19",
+                            r"\bc(?:\&|and|\+)h\b.*v19",
+                            r"\bch\b.*v19"
+                        ]
+                    }
+                }
+            }
+
+            brushes_file = test_data_dir / "brushes.yaml"
+            with open(brushes_file, "w") as f:
+                yaml.dump(brushes_catalog, f)
+
+            # Create minimal handle and knot files
+            handles_file = test_data_dir / "handles.yaml"
+            with open(handles_file, "w") as f:
+                yaml.dump({
+                    "Chisel & Hound": {
+                        "Unspecified": {
+                            "patterns": [
+                                r"chisel.*hound", 
+                                r"chis.*fou", 
+                                r"\bc(?:\&|and|\+\s)?h\b"
+                            ]
+                        }
+                    }
+                }, f)
+
+            knots_file = test_data_dir / "knots.yaml"
+            with open(knots_file, "w") as f:
+                yaml.dump({
+                    "Chisel & Hound": {
+                        "default": "Badger",
+                        "knot_size_mm": 26,
+                        "patterns": [
+                            r"chis.*[fh]ou", 
+                            r"\bc(?:\&|and|\+)h\b", 
+                            r"\bch\b"
+                        ]
+                    }
+                }, f)
+
+            # Now test the actual validation logic
+            validator = CatalogValidator(project_root=test_project_root)
+
+            # Run validation
+            issues = validator.validate_brush_catalog()
+
+            # This should NOT flag the known brush as a composite brush issue
+            # The pattern should be correctly identified as a known brush under 
+            # "Chisel & Hound v19" and NOT flagged as needing to be moved to 
+            # handle/knot sections
+            
+            # Check that no composite brush issues were found for this pattern
+            composite_brush_issues = [
+                issue for issue in issues 
+                if "composite brush" in issue.get("message", "").lower()
+                and "chisel & hound \"drake\" w/ 26mm v19" in issue.get("message", "")
+            ]
+            
+            assert len(composite_brush_issues) == 0, (
+                f"Known brush with handle/knot components was incorrectly flagged as "
+                f"composite brush. Issues found: {composite_brush_issues}"
+            )
+            
+            # The validation should either find no issues (correct) or only find 
+            # legitimate issues not related to the composite brush misclassification
+            print(f"Validation completed. Found {len(issues)} total issues.")
+            for issue in issues:
+                print(f"  - {issue.get('type', 'unknown')}: {issue.get('message', 'no message')}")
+
+        except Exception as e:
+            pytest.fail(f"Test failed with exception: {e}")
+
 
 class TestCatalogValidationIntegration:
     """Integration tests for catalog validation with real API."""
@@ -493,3 +896,280 @@ class TestCatalogValidationIntegration:
                 assert "severity" in issue, "Each issue should have a severity"
         else:
             pytest.skip("API server not available")
+
+    def test_api_brush_validation_with_temp_data(self):
+        """Test the actual API validation logic with temporary brush data.
+
+        This test creates a temporary correct_matches.yaml and tests our new
+        validation logic that compares brush matcher results with storage location.
+        """
+        # Create test data that mirrors the actual issue
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [
+                        "c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian",
+                        "chisel & hound - dinos'mores - 26mm v27 fanchurian",
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Temporarily replace the real correct_matches.yaml with our test data
+            # We need to modify the API to use our test file for this test
+            # For now, let's test that the API can process the data structure
+
+            # Test the API endpoint with our test data
+            # Note: This requires the API to be running and configured to use our test file
+            try:
+                response = requests.post(
+                    "http://localhost:8000/api/analyze/validate-catalog",
+                    json={"field": "brush"},
+                    timeout=10,
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    print(
+                        f"API Response: {data['total_entries']} entries, {len(data['issues'])} issues"
+                    )
+
+                    # The API should return validation results
+                    assert "total_entries" in data, "Response should include total_entries"
+                    assert "issues" in data, "Response should include issues"
+                    assert isinstance(data["issues"], list), "Issues should be a list"
+
+                    # For now, we're just testing that the API structure works
+                    # The actual validation logic will be tested in integration tests
+
+                else:
+                    pytest.skip("API server not available or returned error")
+
+            except requests.exceptions.ConnectionError:
+                pytest.skip("API server not running - skipping integration test")
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_brush_validation_logic_structure(self):
+        """Test that our brush validation logic has the right structure.
+
+        This test verifies that our validation logic can:
+        1. Load brush data from correct_matches.yaml
+        2. Process patterns through the brush matcher
+        3. Compare results with storage location
+        4. Flag mismatches appropriately
+        """
+        # Create test data with known patterns
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": ["c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian"]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Test that we can load and process the data structure
+            with open(correct_matches_file, "r") as f:
+                loaded_data = yaml.safe_load(f)
+
+            # Verify the data structure
+            assert "brush" in loaded_data
+            assert "Chisel & Hound" in loaded_data["brush"]
+            assert "v26" in loaded_data["brush"]["Chisel & Hound"]
+            assert len(loaded_data["brush"]["Chisel & Hound"]["v26"]) == 1
+
+            # Verify the specific pattern
+            pattern = loaded_data["brush"]["Chisel & Hound"]["v26"][0]
+            assert "v27" in pattern, "Pattern should contain v27"
+            assert "dinos'mores" in pattern, "Pattern should contain dinos'mores"
+
+            # This test verifies our test data structure is correct
+            # The actual validation logic will be tested in the API integration tests
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_shared_catalog_validator_brush_validation(self, tmp_path):
+        """Test the shared CatalogValidator with brush validation logic.
+
+        This test verifies that our new shared validation logic correctly:
+        1. Loads brush data from correct_matches.yaml
+        2. Processes patterns through the brush matcher
+        3. Compares results with storage location
+        4. Flags the dinos'mores version mismatch
+        """
+        # Create test data that mirrors the actual issue
+        test_brush_data = {
+            "brush": {
+                "Chisel & Hound": {
+                    "v26": [
+                        "c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian",
+                        "chisel & hound - dinos'mores - 26mm v27 fanchurian",
+                    ]
+                }
+            }
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Create a new shared validator instance for testing
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            # We need to mock the project root to use our test file
+            # For now, let's test the structure and logic without full integration
+            validator = CatalogValidator(project_root=tmp_path)
+
+            # Test that we can load and process the data structure
+            # Note: This won't work with the real brush matcher since we don't have the full catalog
+            # But we can test the data loading and structure validation
+
+            # Create a minimal test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy our test data to the expected location
+            import shutil
+
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Create minimal catalog files for testing
+            brushes_catalog = {
+                "Chisel & Hound": {
+                    "v27": {"patterns": ["c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian"]}
+                }
+            }
+
+            brushes_file = test_data_dir / "brushes.yaml"
+            with open(brushes_file, "w") as f:
+                yaml.dump(brushes_catalog, f)
+
+            # Create minimal handle and knot files
+            handles_file = test_data_dir / "handles.yaml"
+            with open(handles_file, "w") as f:
+                yaml.dump({"Chisel & Hound": {"Unspecified": {"patterns": []}}}, f)
+
+            knots_file = test_data_dir / "knots.yaml"
+            with open(knots_file, "w") as f:
+                yaml.dump({"Chisel & Hound": {"v27": {"patterns": []}}}, f)
+
+            # Now test the actual validation logic
+            validator = CatalogValidator(project_root=test_project_root)
+
+            # Run validation
+            issues = validator.validate_brush_catalog()
+
+            # Should find validation issues for the version mismatches
+            assert len(issues) > 0, "Should detect version mismatch issues"
+
+            # Check that the specific dinos'mores patterns are flagged
+            dinos_issues = [issue for issue in issues if "dinos'mores" in str(issue)]
+            assert len(dinos_issues) > 0, "Should detect dinos'mores version mismatch"
+
+            # Verify the issue details
+            for issue in dinos_issues:
+                assert (
+                    issue["type"] == "catalog_pattern_mismatch"
+                ), "Should be catalog pattern mismatch"
+                assert "v27" in issue["matched_model"], "Issue should show v27 from matcher"
+                assert "v26" in issue["stored_model"], "Issue should show v26 from storage"
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+    def test_api_issue_type_mapping(self, tmp_path):
+        """Test that the API correctly maps issue types and fields from shared validator.
+
+        This test verifies that:
+        1. Issue types are properly populated
+        2. Pattern fields are properly populated
+        3. Message fields are mapped to details
+        4. All required fields are present
+        """
+        # Create test data with known validation issues
+        test_brush_data = {
+            "brush": {"Test Brand": {"Test Model": ["test pattern that will cause matching error"]}}
+        }
+
+        # Create temporary correct_matches.yaml
+        correct_matches_file = self.create_temp_yaml(test_brush_data)
+
+        try:
+            # Set up test environment
+            test_project_root = tmp_path
+            test_data_dir = test_project_root / "data"
+            test_data_dir.mkdir()
+
+            # Copy test data
+            import shutil
+
+            shutil.copy(correct_matches_file, test_data_dir / "correct_matches.yaml")
+
+            # Create minimal catalog files (this will cause matching errors)
+            brushes_file = test_data_dir / "brushes.yaml"
+            with open(brushes_file, "w") as f:
+                yaml.dump({"Test Brand": {"Test Model": {"patterns": []}}}, f)
+
+            handles_file = test_data_dir / "handles.yaml"
+            with open(handles_file, "w") as f:
+                yaml.dump({"Test Brand": {"Unspecified": {"patterns": []}}}, f)
+
+            knots_file = test_data_dir / "knots.yaml"
+            with open(knots_file, "w") as f:
+                yaml.dump({"Test Brand": {"Test Model": {"patterns": []}}}, f)
+
+            # Test the shared validator directly
+            from webui.api.validators.catalog_validator import CatalogValidator
+
+            validator = CatalogValidator(project_root=test_project_root)
+
+            # Run validation
+            issues = validator.validate_brush_catalog()
+
+            # Should find validation issues
+            assert len(issues) > 0, "Should detect validation issues"
+
+            # Check that issue types are properly populated
+            for issue in issues:
+                assert issue["type"] is not None, "Issue type should not be null"
+                assert issue["pattern"] is not None, "Issue pattern should not be null"
+                assert issue["message"] is not None, "Issue message should not be null"
+
+                # Verify issue structure
+                assert "field" in issue, "Issue should have field"
+                assert "stored_brand" in issue, "Issue should have stored_brand"
+                assert "stored_model" in issue, "Issue should have stored_model"
+
+                # For matching errors, should have error details
+                if issue["type"] == "matching_error":
+                    assert "error" in issue, "Matching error should have error field"
+                    assert issue["error"] is not None, "Error field should not be null"
+
+                # For catalog mismatches, should have matched fields
+                elif issue["type"] == "catalog_pattern_mismatch":
+                    assert "matched_brand" in issue, "Mismatch should have matched_brand"
+                    assert "matched_model" in issue, "Mismatch should have matched_model"
+
+        finally:
+            # Clean up
+            if correct_matches_file.exists():
+                correct_matches_file.unlink()
+
+

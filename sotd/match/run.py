@@ -6,8 +6,6 @@ from typing import Any, Optional
 
 from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.brush_matcher_entry import BrushMatcherEntryPoint
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.scoring_brush_matcher import BrushScoringMatcher
@@ -85,7 +83,7 @@ def match_record(
     razor_matcher: RazorMatcher,
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
-    brush_matcher: "BrushMatcher | BrushScoringMatcher | BrushMatcherEntryPoint",  # type: ignore
+    brush_matcher: "BrushScoringMatcher",  # type: ignore
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
@@ -263,7 +261,6 @@ def process_month(
     debug: bool = False,
     max_workers: int = 1,
     correct_matches_path: Optional[Path] = None,
-    brush_system: str = "new",
 ) -> dict:
     """Process a single month of data."""
     try:
@@ -271,10 +268,10 @@ def process_month(
         monitor = PerformanceMonitor("match", max_workers)
         monitor.start_total_timing()
 
-        # Initialize parallel data manager
-        from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
+        # Initialize simple data manager
+        from sotd.match.simple_data_manager import SimpleDataManager
 
-        data_manager = BrushParallelDataManager(base_path)
+        data_manager = SimpleDataManager(base_path)
 
         # Load extracted data
         extracted_path = base_path / "extracted" / f"{month}.json"
@@ -282,7 +279,7 @@ def process_month(
             return {"status": "skipped", "month": month, "reason": "missing input file"}
 
         # Check if output already exists and force is not set
-        if data_manager.file_exists(month, brush_system) and not force:
+        if data_manager.file_exists(month) and not force:
             return {"status": "skipped", "month": month, "reason": "output exists"}
 
         # Load data
@@ -295,20 +292,11 @@ def process_month(
         monitor.start_processing_timing()
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
 
-        # Initialize brush matcher using entry point for system selection
-        # New multi-strategy scoring system is now the default
-        use_scoring_system = brush_system != "legacy"
-        brush_matcher = BrushMatcherEntryPoint(
-            use_scoring_system=use_scoring_system,
+        # Initialize brush matcher using the new multi-strategy scoring system
+        brush_matcher = BrushScoringMatcher(
             correct_matches_path=correct_matches_path,
             debug=debug,
         )
-
-        # Attach monitor for strategy timing if using legacy system
-        if not use_scoring_system:
-            # Only legacy BrushMatcher has monitor attribute
-            if hasattr(brush_matcher.matcher, "monitor"):
-                brush_matcher.matcher.monitor = monitor  # type: ignore
 
         razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
         soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
@@ -381,12 +369,11 @@ def process_month(
                 "month": month,
                 "record_count": len(records),
                 "performance": monitor.get_summary(),
-                "brush_system": brush_system,
             },
             "data": records,
         }
 
-        output_path = data_manager.save_data(month, output_data, brush_system)
+        output_path = data_manager.save_data(month, output_data)
         monitor.end_file_io_timing()
 
         if debug:
@@ -462,7 +449,7 @@ def run_match(args):
         results = processor.process_months_parallel(
             months,
             _process_month_for_parallel,
-            (base_path, args.force, args.debug, max_workers, None, args.brush_system),
+            (base_path, args.force, args.debug, max_workers, None),
             max_workers,
             "Processing",
         )
@@ -475,7 +462,7 @@ def run_match(args):
         results = processor.process_months_sequential(
             months,
             _process_month_for_sequential,
-            (base_path, args.force, args.debug, None, args.brush_system),
+            (base_path, args.force, args.debug, None),
             "Months",
         )
 
@@ -497,12 +484,11 @@ def _process_month_for_parallel(
     debug: bool,
     max_workers: int,
     correct_matches_path: Optional[Path],
-    brush_system: str,
 ) -> dict:
     """Process a single month for parallel processing."""
     month_str = f"{year:04d}-{month:02d}"
     return process_month(
-        month_str, base_path, force, debug, max_workers, correct_matches_path, brush_system
+        month_str, base_path, force, debug, max_workers, correct_matches_path
     )
 
 
@@ -513,11 +499,10 @@ def _process_month_for_sequential(
     force: bool,
     debug: bool,
     correct_matches_path: Optional[Path],
-    brush_system: str,
 ) -> dict:
     """Process a single month for sequential processing."""
     month_str = f"{year:04d}-{month:02d}"
-    return process_month(month_str, base_path, force, debug, 1, correct_matches_path, brush_system)
+    return process_month(month_str, base_path, force, debug, 1, correct_matches_path)
 
 
 def run_analysis(args):
