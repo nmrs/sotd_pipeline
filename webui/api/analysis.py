@@ -755,7 +755,8 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
                 # Handle intentionally unmatched items differently - they don't have matched data
                 if mismatch_type == "intentionally_unmatched":
-                    # For intentionally unmatched items, use empty matched dict and set match_type to "filtered"
+                    # For intentionally unmatched items, use empty matched dict and set
+                    # match_type to "filtered"
                     matched = {}
                     enriched = {}
                     match_type = "filtered"
@@ -984,16 +985,26 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                 # Debug logging
                 logger.info(f"Processing match - original: {original}, matched: {matched}")
 
-                # Use the proper method to mark as correct
-                match_key = manager.create_match_key(request.field, original, matched)
-                manager.mark_match_as_correct(
-                    match_key,
-                    {
+                # For blade field, ensure format is preserved for correct section placement
+                if request.field == "blade" and "format" in matched:
+                    logger.info(f"Blade format detected: {matched['format']}")
+                    # Ensure the format field is preserved in the match data
+                    match_data_to_save = {
                         "original": original,
                         "matched": matched,
                         "field": request.field,
-                    },
-                )
+                    }
+                else:
+                    # For non-blade fields or blade fields without format, use standard structure
+                    match_data_to_save = {
+                        "original": original,
+                        "matched": matched,
+                        "field": request.field,
+                    }
+
+                # Use the proper method to mark as correct
+                match_key = manager.create_match_key(request.field, original, matched)
+                manager.mark_match_as_correct(match_key, match_data_to_save)
                 marked_count += 1
 
             except Exception as e:
@@ -1257,15 +1268,21 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 catalog_format = issue.get("catalog_format")
                 correct_match = issue.get("correct_match")
                 expected_format = issue.get("format")
-                
+
                 # Fail fast if required fields are missing
                 if not catalog_format:
-                    raise ValueError(f"Missing required field 'catalog_format' in format_mismatch issue: {issue}")
+                    raise ValueError(
+                        f"Missing required field 'catalog_format' in format_mismatch issue: {issue}"
+                    )
                 if not correct_match:
-                    raise ValueError(f"Missing required field 'correct_match' in format_mismatch issue: {issue}")
+                    raise ValueError(
+                        f"Missing required field 'correct_match' in format_mismatch issue: {issue}"
+                    )
                 if not expected_format:
-                    raise ValueError(f"Missing required field 'format' in format_mismatch issue: {issue}")
-                
+                    raise ValueError(
+                        f"Missing required field 'format' in format_mismatch issue: {issue}"
+                    )
+
                 suggested_action = (
                     f"Move '{correct_match}' from format '{expected_format}' "
                     f"to format '{catalog_format}' in correct_matches.yaml, "

@@ -372,3 +372,53 @@ class TestCorrectMatchesManagerNewStructure:
         # handle -> Alpha -> Outlaw -> [normalized_handle_text]
         # knot -> Silver -> STF++ -> [normalized_knot_text]
         # NOT brush -> null -> null -> [original]
+
+    def test_blade_format_preservation(self, correct_matches_manager):
+        """Test that blade format information is preserved when loading and saving."""
+        # Test data for blade with format
+        match_data = {
+            "original": "Feather Artist Club",
+            "matched": {
+                "brand": "Feather",
+                "model": "Artist Club",
+                "format": "AC",  # AC format, not DE
+            },
+            "field": "blade",
+        }
+
+        # Create match key
+        match_key = correct_matches_manager.create_match_key(
+            "blade", "Feather Artist Club", match_data["matched"]
+        )
+
+        # Mark as correct
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save to file
+        correct_matches_manager.save_correct_matches()
+
+        # Reload to verify format preservation
+        correct_matches_manager.load_correct_matches()
+
+        # Check that the entry exists
+        assert match_key in correct_matches_manager._correct_matches
+
+        # Verify that the format field is preserved in the loaded data
+        loaded_data = correct_matches_manager._correct_matches_data[match_key]
+        assert "matched" in loaded_data
+        assert "format" in loaded_data["matched"]
+        assert loaded_data["matched"]["format"] == "AC"
+
+        # Save again to verify the format is still preserved
+        correct_matches_manager.save_correct_matches()
+
+        # Reload one more time to ensure the format persists through multiple save/load cycles
+        correct_matches_manager.load_correct_matches()
+
+        # Verify format is still preserved
+        loaded_data_again = correct_matches_manager._correct_matches_data[match_key]
+        assert loaded_data_again["matched"]["format"] == "AC"
+
+        # This test verifies that the fix for the format preservation bug is working
+        # Previously, the format field would be lost during loading, causing all
+        # blade entries to default to "DE" format

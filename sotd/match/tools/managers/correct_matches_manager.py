@@ -81,6 +81,8 @@ class CorrectMatchesManager:
                                                             {
                                                                 "brand": brand,
                                                                 "model": model,
+                                                                # PRESERVE FORMAT!
+                                                                "format": format_name,
                                                             },
                                                         )
                                                         self._correct_matches.add(match_key)
@@ -89,6 +91,8 @@ class CorrectMatchesManager:
                                                             "matched": {
                                                                 "brand": brand,
                                                                 "model": model,
+                                                                # PRESERVE FORMAT!
+                                                                "format": format_name,
                                                             },
                                                             "field": field,
                                                         }
