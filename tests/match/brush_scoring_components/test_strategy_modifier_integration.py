@@ -373,8 +373,47 @@ class TestModifierIntegrationWithScoringEngine:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = BrushScoringConfig()
+        # Create a temporary config file for testing
+        import tempfile
+        import yaml
+        from pathlib import Path
+
+        # Create minimal test config
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {"automated_split": 60.0},
+                "strategy_modifiers": {
+                    "automated_split": {
+                        "multiple_brands": 25.0,
+                        "fiber_words": 0.0,
+                        "size_specification": 0.0,
+                        "high_confidence": 0.0,
+                        "delimiter_confidence": 0.0,
+                    }
+                },
+            }
+        }
+
+        # Create temporary file
+        self.temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, self.temp_config_file)
+        self.temp_config_file.close()
+
+        # Load config from temporary file
+        config_path = Path(self.temp_config_file.name)
+        self.config = BrushScoringConfig(config_path=config_path)
         self.scoring_engine = ScoringEngine(self.config)
+
+    def teardown_method(self):
+        """Clean up test fixtures."""
+        # Remove temporary config file
+        if hasattr(self, "temp_config_file"):
+            import os
+
+            try:
+                os.unlink(self.temp_config_file.name)
+            except OSError:
+                pass  # File may already be deleted
 
     def test_scoring_engine_applies_modifiers_to_results(self):
         """Test that scoring engine applies modifiers when scoring results."""
@@ -462,3 +501,78 @@ class TestModifierIntegrationWithScoringEngine:
         # Should handle gracefully
         assert len(scored_results) == 1
         assert scored_results[0].matched is None
+
+    def test_automated_split_multiple_brands_modifier_bug(self):
+        """Test that automated_split strategy correctly applies multiple_brands modifier."""
+        # This test reproduces the bug where automated_split shows
+        # "Multiple brands detected (++25)" but the total score is 60 instead of 85
+        # (60 base + 25 modifier)
+
+        # Create a result that should trigger the multiple_brands modifier
+        result = MatchResult(
+            original="AP Shave Co. - Lemon Drop 26mm TGN Boar",
+            matched={
+                "brand": None,  # Composite brush
+                "model": None,  # Composite brush
+                "handle": {
+                    "brand": "AP Shave Co.",
+                    "model": "Lemon Drop",
+                    "source_text": "AP Shave Co.",
+                },
+                "knot": {
+                    "brand": "TGN",
+                    "model": "Boar",
+                    "source_text": "Lemon Drop 26mm TGN Boar",
+                },
+            },
+            match_type="composite",
+            pattern="medium_priority_split",
+            strategy="automated_split",
+        )
+
+        # Calculate score
+        score = self.scoring_engine._calculate_score(
+            result, "AP Shave Co. - Lemon Drop 26mm TGN Boar"
+        )
+
+        # Debug output
+        print(f"\n=== Debug Output ===")
+        print(f"Strategy: {result.strategy}")
+        print(f"Base score: {self.config.get_base_strategy_score(result.strategy)}")
+        print(
+            f"Modifier score: {self.scoring_engine._calculate_modifiers(result, result.original, result.strategy)}"
+        )
+        print(f"Total score: {score}")
+
+        # Check multiple_brands modifier specifically
+        modifier_value = self.scoring_engine._modifier_multiple_brands(
+            result.original, result, result.strategy
+        )
+        print(f"Multiple brands modifier value: {modifier_value}")
+        print(
+            f"Multiple brands weight: {self.config.get_strategy_modifier(result.strategy, 'multiple_brands')}"
+        )
+        print(
+            f"Expected modifier score: {modifier_value * self.config.get_strategy_modifier(result.strategy, 'multiple_brands')}"
+        )
+        print(f"=== End Debug ===\n")
+
+        # Should have base score (60) plus modifier (25) for multiple brands
+        # Base score: 60 (from brush_scoring_config.yaml)
+        # Multiple brands modifier: 1.0 * 25.0 = 25
+        # Total: 60 + 25 = 85
+        assert score == 85.0, f"Expected 85.0, got {score}"
+
+        # Verify the modifier calculation separately
+        modifier_score = self.scoring_engine._calculate_modifiers(
+            result, "AP Shave Co. - Lemon Drop 26mm TGN Boar", "automated_split"
+        )
+        assert modifier_score == 25.0, f"Expected modifier score 25.0, got {modifier_score}"
+
+        # Verify the multiple_brands modifier specifically
+        multiple_brands_value = self.scoring_engine._modifier_multiple_brands(
+            "AP Shave Co. - Lemon Drop 26mm TGN Boar", result, "automated_split"
+        )
+        assert (
+            multiple_brands_value == 1.0
+        ), f"Expected multiple_brands value 1.0, got {multiple_brands_value}"
