@@ -14,7 +14,7 @@ from sotd.match.config import BrushMatcherConfig
 class ConfigManager:
     """
     Manages configuration creation and caching for brush matching system.
-    
+
     This class centralizes configuration creation logic to avoid multiple
     calls to BrushMatcherConfig.create_default() and provides consistent
     configuration across all components.
@@ -28,7 +28,7 @@ class ConfigManager:
     def get_default_config(self) -> BrushMatcherConfig:
         """
         Get the default configuration, creating it if necessary.
-        
+
         Returns:
             Default BrushMatcherConfig instance
         """
@@ -39,7 +39,7 @@ class ConfigManager:
     def get_debug_config(self) -> BrushMatcherConfig:
         """
         Get the debug configuration, creating it if necessary.
-        
+
         Returns:
             Debug BrushMatcherConfig instance
         """
@@ -60,7 +60,7 @@ class ConfigManager:
     ) -> BrushMatcherConfig:
         """
         Create a custom configuration with specified parameters.
-        
+
         Args:
             catalog_path: Path to brushes catalog file
             handles_path: Path to handles catalog file
@@ -70,7 +70,7 @@ class ConfigManager:
             cache_enabled: Enable caching
             cache_max_size: Maximum cache size
             strict_validation: Enable strict validation
-            
+
         Returns:
             Custom BrushMatcherConfig instance
         """
@@ -93,10 +93,10 @@ class ConfigManager:
     def validate_config(self, config: BrushMatcherConfig) -> None:
         """
         Validate a configuration instance.
-        
+
         Args:
             config: Configuration to validate
-            
+
         Raises:
             ValueError: If configuration is invalid
             FileNotFoundError: If required files don't exist
