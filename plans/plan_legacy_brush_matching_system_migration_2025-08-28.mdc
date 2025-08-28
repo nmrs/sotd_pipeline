@@ -81,11 +81,11 @@ Remove unused code, update tests, verify functionality.
    - Test all wrapper strategies work correctly
    - **Implementation**: ✅ **COMPLETE** - Updated KnownSplitWrapperStrategy, CorrectCompleteBrushWrapperStrategy, CorrectSplitBrushWrapperStrategy, CompleteBrushWrapperStrategy, and FullInputComponentMatchingStrategy to work without legacy matcher dependencies. Strategies now implement their logic directly using catalog data and handle result creation internally. All tests pass and functionality is preserved.
 
-7. **Update Strategy Dependencies** - **IN_PROGRESS** ⏳
+7. **Update Strategy Dependencies** - **COMPLETE** ✅
    - Remove remaining legacy strategy dependencies
    - Update automated split strategies to work independently
    - Test all strategies work without legacy system
-   - **Implementation**: Starting with automated split strategy dependency cleanup and testing
+   - **Implementation**: ✅ **COMPLETE** - Refactored AutomatedSplitStrategy to remove legacy matcher dependency and implement automated split logic directly. Updated test files to use new interface. All tests now pass for both AutomatedSplitStrategy and FullInputComponentMatchingStrategy.
 
 ### **Phase 3: Remove Legacy System**
 8. **Remove Legacy Classes**
@@ -259,4 +259,4 @@ class StrategyManager:
 3. **Remove legacy system only after tests pass** (Phase 5)
 4. **Final cleanup and verification** (Phase 6)
 
-- **Overall Progress**: 6/24 steps complete (25.0%)
+- **Overall Progress**: 7/24 steps complete (29.17%)
