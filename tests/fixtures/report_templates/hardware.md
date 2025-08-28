@@ -21,7 +21,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Razor Formats
 
-{{tables.razor-formats}}
+{{tables.razor_formats}}
 
 ## Razors
 
@@ -29,7 +29,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Razor Manufacturers
 
-{{tables.razor-manufacturers}}
+{{tables.razor_manufacturers}}
 
 ## Blades
 
@@ -37,7 +37,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Blade Manufacturers
 
-{{tables.blade-manufacturers}}
+{{tables.blade_manufacturers}}
 
 ## Brushes
 
@@ -45,56 +45,20 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Brush Handle Makers
 
-{{tables.brush-handle-makers}}
+{{tables.brush_handle_makers}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers}}
+{{tables.brush_knot_makers}}
 
 ## Knot Fibers
 
-{{tables.knot-fibers}}
+{{tables.brush_fibers}}
 
 ## Knot Sizes
 
-{{tables.knot-sizes}}
-
-## Blackbird Plates
-
-{{tables.blackbird-plates}}
-
-## Christopher Bradley Plates
-
-{{tables.christopher-bradley-plates}}
-
-## Game Changer Plates
-
-{{tables.game-changer-plates}}
-
-## Super Speed Tips
-
-{{tables.super-speed-tips}}
-
-## Straight Widths
-
-{{tables.straight-widths}}
-
-## Straight Grinds
-
-{{tables.straight-grinds}}
-
-## Straight Points
-
-{{tables.straight-points}}
-
-## Most Used Blades in Most Used Razors
-
-{{tables.razor-blade-combinations}}
-
-## Highest Use Count per Blade
-
-{{tables.highest-use-count-per-blade}}
+{{tables.brush_knot_sizes}}
 
 ## Top Shavers
 
-{{tables.top-shavers}}
+{{tables.users}}

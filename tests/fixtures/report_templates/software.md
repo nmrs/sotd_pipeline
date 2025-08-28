@@ -23,7 +23,7 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Soap Makers
 
-{{tables.soap-makers}}
+{{tables.soap_makers}}
 
 ## Soaps
 
@@ -31,8 +31,8 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Brand Diversity
 
-{{tables.brand-diversity}}
+{{tables.brand_diversity}}
 
 ## Top Shavers
 
-{{tables.top-shavers}}
+{{tables.users}}
