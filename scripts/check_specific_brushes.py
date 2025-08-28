@@ -9,7 +9,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 
 
 def main():

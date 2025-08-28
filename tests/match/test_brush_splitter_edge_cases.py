@@ -10,7 +10,7 @@ from pathlib import Path
 
 from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.handle_matcher import HandleMatcher
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 
 
 class TestBrushSplitterEdgeCases:

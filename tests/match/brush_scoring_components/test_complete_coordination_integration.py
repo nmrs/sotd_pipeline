@@ -1,6 +1,6 @@
 """Complete coordination integration tests for multi-strategy scoring system."""
 
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 
 
 class TestCompleteCoordinationIntegration:

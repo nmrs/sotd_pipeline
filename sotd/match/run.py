@@ -8,7 +8,7 @@ from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor

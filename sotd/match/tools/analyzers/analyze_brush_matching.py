@@ -27,7 +27,7 @@ try:
     from sotd.enrich.brush_enricher import BrushEnricher
     from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
     from sotd.match.brush_scoring_config import BrushScoringConfig
-    from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+    from sotd.match.brush_matcher import BrushScoringMatcher
 except ImportError:
     print(
         "Error: Could not import required modules. Make sure you're running from the project root."

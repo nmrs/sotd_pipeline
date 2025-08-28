@@ -35,7 +35,7 @@ class BrushValidationCLI:
     def brush_matcher(self):
         """Lazy-load brush matcher when first accessed."""
         if self._brush_matcher is None:
-            from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+            from sotd.match.brush_matcher import BrushScoringMatcher
 
             self._brush_matcher = BrushScoringMatcher()
         return self._brush_matcher

@@ -4,7 +4,7 @@ from sotd.match.brush_scoring_components.result_conflict_resolver import (
     ConflictType,
     ResultConflictResolver,
 )
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 from sotd.match.types import MatchResult
 
 

@@ -180,6 +180,14 @@ class BrushScoringMatcher:
         # Create strategies directly instead of using StrategyManager
         strategies = self._create_temp_strategies()  # Use _create_temp_strategies
         
+        # Add the automated split strategy for high/medium priority splitting
+        from sotd.match.brush_matching_strategies.automated_split_strategy import AutomatedSplitStrategy
+        strategies.append(AutomatedSplitStrategy(catalogs, self.config))
+        
+        # Add the unified component matching strategy
+        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import FullInputComponentMatchingStrategy
+        strategies.append(FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs))
+        
         return strategies
 
     def _create_temp_strategies(self) -> List:

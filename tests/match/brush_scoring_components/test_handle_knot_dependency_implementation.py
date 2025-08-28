@@ -12,7 +12,7 @@ from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     StrategyDependency,
     DependencyType,
 )
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushScoringMatcher
 from sotd.match.types import create_match_result
 
 
