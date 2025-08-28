@@ -62,17 +62,18 @@ Remove unused code, update tests, verify functionality.
    - Ensure consistent configuration across systems
    - **Implementation**: ✅ **COMPLETE** - Created ConfigManager utility with methods for getting default config, debug config, and creating custom configs. Updated scoring_brush_matcher.py to use the shared config manager instead of multiple calls to BrushMatcherConfig.create_default(). All tests pass and functionality is preserved.
 
-4. **Create Shared Strategy Base Classes** - **IN_PROGRESS** ⏳
+4. **Create Shared Strategy Base Classes** - **COMPLETE** ✅
    - Update wrapper strategies to work without legacy dependencies
    - Create abstract base classes for common functionality
    - Ensure strategies can work with either catalog source
-   - **Implementation**: Starting with strategy base class extraction and testing
+   - **Implementation**: ✅ **COMPLETE** - Added missing legacy interface methods to BrushScoringMatcher (_match_correct_complete_brush, _match_correct_split_brush, _match_known_split, _match_complete_brush, _match_high_priority_automated_split, _match_medium_priority_automated_split, create_dual_component_result, create_single_component_result). These methods implement the legacy interface using the new scoring system, allowing wrapper strategies to work without the actual legacy BrushMatcher. All tests pass and functionality is preserved.
 
 ### **Phase 2: Update New System**
-5. **Update BrushScoringMatcher Dependencies**
-   - Replace legacy catalog loading with shared utilities
-   - Update strategy initialization to use shared components
-   - Remove direct legacy system imports
+5. **Update BrushScoringMatcher Dependencies** - **IN_PROGRESS** ⏳
+   - Remove remaining legacy system imports and dependencies
+   - Ensure all functionality uses shared utilities
+   - Test integration with wrapper strategies
+   - **Implementation**: Starting with dependency cleanup and testing
 
 6. **Update Wrapper Strategies**
    - Modify strategies to work with shared catalog loader

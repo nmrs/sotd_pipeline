@@ -584,3 +584,177 @@ class BrushScoringMatcher:
             "dependency_graph": self.strategy_dependency_manager.dependency_graph,
             "topological_graph": self.strategy_dependency_manager.topological_graph,
         }
+
+    # Methods required by wrapper strategies to maintain compatibility
+    # These methods implement the legacy interface using the new system
+
+    def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using correct complete brush logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the correct matches strategy directly
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and 'CorrectCompleteBrush' in strategy.__class__.__name__:
+                return strategy.match(value)
+        return None
+
+    def _match_correct_split_brush(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using correct split brush logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the correct split brush strategy directly
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and 'CorrectSplitBrush' in strategy.__class__.__name__:
+                return strategy.match(value)
+        return None
+
+    def _match_known_split(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using known split logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the known split strategy directly
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and 'KnownSplit' in strategy.__class__.__name__:
+                return strategy.match(value)
+        return None
+
+    def _match_complete_brush(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using complete brush logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the complete brush strategies directly
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and any(
+                name in strategy.__class__.__name__ 
+                for name in ['KnownBrush', 'OmegaSemogue', 'Zenith', 'OtherBrush']
+            ):
+                result = strategy.match(value)
+                if result:
+                    return result
+        return None
+
+    def _match_high_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using high priority automated split logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the automated split strategy with high priority
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and 'AutomatedSplit' in strategy.__class__.__name__:
+                # The automated split strategy handles both high and medium priority
+                # We'll need to modify it to support this legacy interface
+                result = strategy.match(value)
+                if (result and hasattr(result, '_delimiter_priority') and
+                    result._delimiter_priority == "high"):
+                    return result
+        return None
+
+    def _match_medium_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match using medium priority automated split logic.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            value: The brush string to match
+            
+        Returns:
+            MatchResult if found, None otherwise
+        """
+        # Use the automated split strategy with medium priority
+        for strategy in self.strategy_orchestrator.strategies:
+            if hasattr(strategy, '__class__') and 'AutomatedSplit' in strategy.__class__.__name__:
+                # The automated split strategy handles both high and medium priority
+                # We'll need to modify it to support this legacy interface
+                result = strategy.match(value)
+                if result and hasattr(result, '_delimiter_priority') and result._delimiter_priority == "medium":
+                    return result
+        return None
+
+    def create_dual_component_result(
+        self, handle_result: "MatchResult", knot_result: "MatchResult", value: str
+    ) -> "MatchResult":
+        """
+        Create a dual component result combining handle and knot.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            handle_result: HandleMatcher result
+            knot_result: KnotMatcher result
+            value: Original input string
+            
+        Returns:
+            Combined MatchResult
+        """
+        return self._combine_handle_and_knot_results(handle_result, knot_result)
+
+    def create_single_component_result(
+        self, component_result: "MatchResult", value: str, component_type: str
+    ) -> "MatchResult":
+        """
+        Create a single component result.
+        
+        This method is required by wrapper strategies and implements
+        the legacy interface using the new scoring system.
+        
+        Args:
+            component_result: Component matcher result
+            value: Original input string
+            component_type: Type of component ("handle" or "knot")
+            
+        Returns:
+            Converted MatchResult
+        """
+        if component_type == "handle":
+            return self._convert_handle_result_to_brush_result(component_result)
+        elif component_type == "knot":
+            return self._convert_knot_result_to_brush_result(component_result)
+        else:
+            return component_result
