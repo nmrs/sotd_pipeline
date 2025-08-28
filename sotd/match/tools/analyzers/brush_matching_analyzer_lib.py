@@ -15,7 +15,6 @@ sys.path.insert(0, str(project_root))
 
 # Import SOTD modules after path setup
 from sotd.enrich.brush_enricher import BrushEnricher
-from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.scoring_brush_matcher import BrushScoringMatcher
 
@@ -31,7 +30,6 @@ class BrushMatchingAnalyzer:
         """
         self.debug = debug
         self.scoring_matcher = None
-        self.brush_matcher = None
         self.brush_enricher = None
 
     def analyze_brush_string(
@@ -59,9 +57,6 @@ class BrushMatchingAnalyzer:
             # Initialize components if needed
             if not self.scoring_matcher:
                 self.scoring_matcher = BrushScoringMatcher()
-
-            if not self.brush_matcher:
-                self.brush_matcher = BrushMatcher()
 
             if not self.brush_enricher:
                 self.brush_enricher = BrushEnricher()
@@ -160,7 +155,7 @@ class BrushMatchingAnalyzer:
     def _get_basic_matching_results(self, brush_string: str) -> Dict[str, Any]:
         """Get basic matching results from the brush matcher."""
         try:
-            result = self.brush_matcher.match(brush_string)
+            result = self.scoring_matcher.match(brush_string)
             if result:
                 return {
                     "matched": result.matched if hasattr(result, "matched") else None,

@@ -36,8 +36,8 @@ class TestStrategyModifierIntegration:
             matched={
                 "brand": "Simpson",
                 "model": "Chubby 2",
-                "handle_brand": "Omega",
-                "knot_brand": "Omega",
+                "handle": {"brand": "Simpson"},
+                "knot": {"brand": "Omega"},
             },
             match_type="regex",
             pattern="simpson.*chubby",
@@ -66,7 +66,12 @@ class TestStrategyModifierIntegration:
         # Create test result with multiple brands to trigger the modifier
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098",
-            matched={"brand": "Simpson", "model": "Chubby 2", "handle_brand": "Omega"},
+            matched={
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "handle": {"brand": "Simpson"},
+                "knot": {"brand": "Omega"},
+            },
             match_type="regex",
             pattern="simpson.*chubby",
             strategy="automated_split",
@@ -162,7 +167,12 @@ class TestStrategyModifierIntegration:
         # Create test result with multiple brands and size specification to trigger modifiers
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098 26mm Badger",
-            matched={"brand": "Simpson", "model": "Chubby 2", "handle_brand": "Omega"},
+            matched={
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "handle": {"brand": "Simpson"},
+                "knot": {"brand": "Omega"},
+            },
             match_type="regex",
             pattern="simpson.*chubby",
             strategy="automated_split",
@@ -273,7 +283,12 @@ class TestStrategyModifierIntegration:
         # Create test result with multiple brands to trigger the modifier
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098",
-            matched={"brand": "Brand1", "model": "Brush", "handle_brand": "Brand2"},
+            matched={
+                "brand": "Brand1",
+                "model": "Brush",
+                "handle": {"brand": "Brand1"},
+                "knot": {"brand": "Brand2"},
+            },
             match_type="regex",
             pattern="brand1.*brush",
             strategy="automated_split",
@@ -362,10 +377,14 @@ class TestModifierConfiguration:
         known_brush_modifiers = config.get_all_modifier_names("known_brush")
 
         # Verify common modifiers exist across different strategy types
-        common_modifiers = ["multiple_brands", "fiber_words", "size_specification"]
+        common_modifiers = ["multiple_brands", "size_specification"]
         for modifier in common_modifiers:
             assert modifier in automated_split_modifiers, f"Automated split should have {modifier}"
             assert modifier in known_brush_modifiers, f"Known brush should have {modifier}"
+
+        # Check strategy-specific modifiers
+        assert "fiber_words" in automated_split_modifiers, "Automated split should have fiber_words"
+        assert "fiber_match" in known_brush_modifiers, "Known brush should have fiber_match"
 
 
 class TestModifierIntegrationWithScoringEngine:

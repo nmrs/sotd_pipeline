@@ -35,7 +35,7 @@ class TestDualSingleComponentOptimization:
         dual_dependencies = [
             dep
             for dep in dependency_manager.dependencies
-            if dep.dependent_strategy == "LegacyDualComponentWrapperStrategy"
+            if dep.dependent_strategy == "FullInputComponentMatchingStrategy"
         ]
 
         assert len(dual_dependencies) == 2, "Dual component should have 2 dependencies"
@@ -59,26 +59,27 @@ class TestDualSingleComponentOptimization:
         dependency_manager = scoring_matcher.strategy_dependency_manager
 
         # Check that single component depends on any of HandleMatcher or KnotMatcher
-        single_dependencies = [
+        handle_dependencies = [
             dep
             for dep in dependency_manager.dependencies
-            if dep.dependent_strategy == "LegacySingleComponentFallbackWrapperStrategy"
+            if dep.dependent_strategy == "HandleOnlyStrategy"
+        ]
+        knot_dependencies = [
+            dep
+            for dep in dependency_manager.dependencies
+            if dep.dependent_strategy == "KnotOnlyStrategy"
         ]
 
-        assert len(single_dependencies) == 2, "Single component should have 2 dependencies"
-
-        # Check HandleMatcher dependency
-        handle_dep = next(
-            (dep for dep in single_dependencies if dep.depends_on_strategy == "HandleMatcher"), None
-        )
-        assert handle_dep is not None, "Single component should depend on HandleMatcher"
+        # HandleOnlyStrategy should depend on HandleMatcher
+        assert len(handle_dependencies) == 1, "HandleOnlyStrategy should have 1 dependency"
+        handle_dep = handle_dependencies[0]
+        assert handle_dep.depends_on_strategy == "HandleMatcher"
         assert handle_dep.dependency_type == DependencyType.REQUIRES_ANY
 
-        # Check KnotMatcher dependency
-        knot_dep = next(
-            (dep for dep in single_dependencies if dep.depends_on_strategy == "KnotMatcher"), None
-        )
-        assert knot_dep is not None, "Single component should depend on KnotMatcher"
+        # KnotOnlyStrategy should depend on KnotMatcher
+        assert len(knot_dependencies) == 1, "KnotOnlyStrategy should have 1 dependency"
+        knot_dep = knot_dependencies[0]
+        assert knot_dep.depends_on_strategy == "KnotMatcher"
         assert knot_dep.dependency_type == DependencyType.REQUIRES_ANY
 
     def test_dual_component_execution_constraints(self, dependency_manager):
@@ -154,9 +155,7 @@ class TestDualSingleComponentOptimization:
         )
 
         # Test with no results - should be allowed (REQUIRES_ANY allows execution when no deps checked)
-        can_execute = dependency_manager.can_execute_strategy(
-            "LegacySingleComponentFallbackWrapperStrategy", {}
-        )
+        can_execute = dependency_manager.can_execute_strategy("HandleOnlyStrategy", {})
         assert (
             can_execute is True
         ), "Single component should be allowed when no dependencies have run"
@@ -172,7 +171,7 @@ class TestDualSingleComponentOptimization:
             )
         }
         can_execute = dependency_manager.can_execute_strategy(
-            "LegacySingleComponentFallbackWrapperStrategy", strategy_results
+            "HandleOnlyStrategy", strategy_results
         )
         assert can_execute is True, "Single component should execute when HandleMatcher succeeded"
 
@@ -186,9 +185,7 @@ class TestDualSingleComponentOptimization:
                 strategy="KnotMatcher",
             )
         }
-        can_execute = dependency_manager.can_execute_strategy(
-            "LegacySingleComponentFallbackWrapperStrategy", strategy_results
-        )
+        can_execute = dependency_manager.can_execute_strategy("KnotOnlyStrategy", strategy_results)
         assert can_execute is True, "Single component should execute when KnotMatcher succeeded"
 
         # Test with both HandleMatcher and KnotMatcher success
@@ -200,7 +197,7 @@ class TestDualSingleComponentOptimization:
             strategy="HandleMatcher",
         )
         can_execute = dependency_manager.can_execute_strategy(
-            "LegacySingleComponentFallbackWrapperStrategy", strategy_results
+            "HandleOnlyStrategy", strategy_results
         )
         assert (
             can_execute is True
@@ -214,16 +211,16 @@ class TestDualSingleComponentOptimization:
         strategy_names = [
             "HandleMatcher",
             "KnotMatcher",
-            "LegacyDualComponentWrapperStrategy",
-            "LegacySingleComponentFallbackWrapperStrategy",
+            "FullInputComponentMatchingStrategy",
+            "HandleOnlyStrategy",
         ]
         execution_order = dependency_manager.get_execution_order(strategy_names)
 
         # HandleMatcher and KnotMatcher should come before component strategies
         handle_index = execution_order.index("HandleMatcher")
         knot_index = execution_order.index("KnotMatcher")
-        dual_index = execution_order.index("LegacyDualComponentWrapperStrategy")
-        single_index = execution_order.index("LegacySingleComponentFallbackWrapperStrategy")
+        dual_index = execution_order.index("FullInputComponentMatchingStrategy")
+        single_index = execution_order.index("HandleOnlyStrategy")
 
         assert handle_index < dual_index, "HandleMatcher should come before dual component"
         assert handle_index < single_index, "HandleMatcher should come before single component"

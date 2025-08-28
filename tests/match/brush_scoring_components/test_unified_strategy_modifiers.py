@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Tests for unified strategy modifiers."""
 
+import tempfile
+import yaml
 from pathlib import Path
 
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
@@ -13,8 +15,44 @@ class TestUnifiedStrategyModifiers:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = BrushScoringConfig(Path("data/brush_scoring_config.yaml"))
+        # Create a temporary config file for testing to insulate from production data changes
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "unified": 50.0,  # Test-specific base score
+                    "dual_component": 60.0,
+                },
+                "strategy_modifiers": {
+                    "unified": {
+                        "dual_component": 15.0,
+                        "multiple_brands": 20.0,
+                        "fiber_mismatch": -15.0,
+                        "size_specification": 0.0,
+                    }
+                },
+            }
+        }
+
+        # Create temporary file
+        self.temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, self.temp_config_file)
+        self.temp_config_file.close()
+
+        # Load config from temporary file
+        config_path = Path(self.temp_config_file.name)
+        self.config = BrushScoringConfig(config_path=config_path)
         self.scoring_engine = ScoringEngine(self.config)
+
+    def teardown_method(self):
+        """Clean up test fixtures."""
+        # Remove temporary config file
+        if hasattr(self, "temp_config_file"):
+            import os
+
+            try:
+                os.unlink(self.temp_config_file.name)
+            except OSError:
+                pass  # File may already be deleted
 
     def test_dual_component_modifier_returns_1_0_when_both_handle_and_knot_match(self):
         """Test that dual_component modifier returns 1.0 when both handle and knot match."""

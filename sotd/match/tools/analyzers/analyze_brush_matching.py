@@ -25,7 +25,6 @@ sys.path.insert(0, str(project_root))
 
 try:
     from sotd.enrich.brush_enricher import BrushEnricher
-    from sotd.match.brush_matcher import BrushMatcher
     from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
     from sotd.match.brush_scoring_config import BrushScoringConfig
     from sotd.match.scoring_brush_matcher import BrushScoringMatcher
@@ -350,7 +349,7 @@ def analyze_brush_matching(
         print("-" * 40)
 
         # Initialize the brush matcher with debug enabled
-        brush_matcher = BrushMatcher(
+        brush_matcher = BrushScoringMatcher(
             catalog_path=Path("data/brushes.yaml"),
             handles_path=Path("data/handles.yaml"),
             knots_path=Path("data/knots.yaml"),
@@ -361,8 +360,8 @@ def analyze_brush_matching(
         # If bypassing correct_matches, temporarily clear them
         original_correct_matches = None
         if bypass_correct_matches:
-            original_correct_matches = brush_matcher.correct_matches
-            brush_matcher.correct_matches = {}
+            original_correct_matches = brush_matcher.correct_matches_matcher.correct_matches
+            brush_matcher.correct_matches_matcher.correct_matches = {}
             print("  📝 Temporarily cleared correct_matches for raw strategy testing")
 
         # Test each strategy individually
@@ -372,7 +371,7 @@ def analyze_brush_matching(
 
             # Test KnownBrushMatchingStrategy
             print("1. Testing KnownBrushMatchingStrategy:")
-            for strategy in brush_matcher.brush_strategies:
+            for strategy in brush_matcher.strategy_orchestrator.strategies:
                 if strategy.__class__.__name__ == "KnownBrushMatchingStrategy":
                     try:
                         result = strategy.match(brush_string)
@@ -389,7 +388,7 @@ def analyze_brush_matching(
 
         # Restore correct_matches if we bypassed them
         if bypass_correct_matches and original_correct_matches is not None:
-            brush_matcher.correct_matches = original_correct_matches
+            brush_matcher.correct_matches_matcher.correct_matches = original_correct_matches
 
         print("\n📊 Brush matching result:")
         if result:
@@ -432,7 +431,7 @@ def analyze_brush_matching(
         except Exception:
             result = None
     else:
-        brush_matcher = BrushMatcher(
+        brush_matcher = BrushScoringMatcher(
             catalog_path=Path("data/brushes.yaml"),
             handles_path=Path("data/handles.yaml"),
             knots_path=Path("data/knots.yaml"),
@@ -443,14 +442,14 @@ def analyze_brush_matching(
         # If bypassing correct_matches, temporarily clear them
         original_correct_matches = None
         if bypass_correct_matches:
-            original_correct_matches = brush_matcher.correct_matches
-            brush_matcher.correct_matches = {}
+            original_correct_matches = brush_matcher.correct_matches_matcher.correct_matches
+            brush_matcher.correct_matches_matcher.correct_matches = {}
 
         result = brush_matcher.match(brush_string)
 
         # Restore correct_matches if we bypassed them
         if bypass_correct_matches and original_correct_matches is not None:
-            brush_matcher.correct_matches = original_correct_matches
+            brush_matcher.correct_matches_matcher.correct_matches = original_correct_matches
 
     if result and result.matched:
         enricher = BrushEnricher()
@@ -502,38 +501,9 @@ def _show_modifier_details(strategy_name: str, input_text: str, matched_data: di
                 # Since this is a standalone analysis tool, we need to recreate the
                 # scoring process to get the real cached results
                 if strategy_name in ["handle_only", "knot_only"]:
-                    # Create a temporary scoring engine to get the real cached results
-                    temp_engine = ScoringEngine(config)
-
-                    # We need to run the unified strategy first to get its results
-                    # This is what the real scoring process does
-                    try:
-                        # Import the brush matcher to run the unified strategy
-                        from sotd.match.brush_matcher import BrushMatcher
-
-                        # Create a temporary brush matcher to run the unified strategy
-                        temp_matcher = BrushMatcher(
-                            catalog_path=Path("data/brushes.yaml"),
-                            handles_path=Path("data/handles.yaml"),
-                            knots_path=Path("data/knots.yaml"),
-                            correct_matches_path=Path("data/correct_matches.yaml"),
-                            debug=False,
-                        )
-
-                        # Run the unified strategy to get real results
-                        unified_result = temp_matcher.match(input_text)
-
-                        if unified_result and unified_result.matched:
-                            # Store the real unified result in the engine
-                            temp_engine.cached_results = {"unified_result": unified_result}
-                            # Copy the cached results to our main engine
-                            engine.cached_results = temp_engine.cached_results
-                    except Exception as e:
-                        # If we can't get real results, fall back to a reasonable approximation
-                        # based on the input text analysis
-                        print(f"     ⚠️  Could not get real unified results: {e}")
-                        # Create minimal cached results for modifier functions to work
-                        engine.cached_results = {"unified_result": None}
+                    # Since we're removing the legacy system, we'll use a simplified approach
+                    # Create minimal cached results for modifier functions to work
+                    engine.cached_results = {"unified_result": None}
 
                 try:
                     modifier_value = modifier_function(input_text, mock_result, strategy_name)
