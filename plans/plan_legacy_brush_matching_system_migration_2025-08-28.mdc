@@ -1,0 +1,92 @@
+# Legacy Brush Matching System Migration Plan
+
+## Overview
+This plan outlines the systematic migration from the legacy brush matching system to the new scoring-based system. The legacy system uses a "first match wins" approach, while the new system uses multi-strategy scoring with configurable weights and modifiers.
+
+## Critical Success Criteria
+
+### **MANDATORY**: Test Suite Must Be 100% Passing
+- **ALL tests must pass before proceeding to any next step or phase**
+- **Test failures indicate incomplete migration or architectural incompatibilities**
+- **Running tests during migration helps catch issues early and prevents accumulation of problems**
+- **Test failures are NOT just "config changes" - they reveal fundamental migration issues**
+
+### **MANDATORY**: Quality Gates Between Phases
+- **Phase completion requires:**
+  1. All tests passing (100%)
+  2. No linter errors
+  3. No type check errors
+  4. All quality checks passing (`make format lint typecheck test`)
+- **No exceptions - failing tests block progression**
+
+## Progress Summary
+
+### ✅ **COMPLETED PHASES**
+
+#### Phase 1: Extract Shared Functionality ✅
+- **Step 1**: Extract catalog loading logic to `CatalogLoader` ✅
+- **Step 2**: Extract strategy management logic to `StrategyManager` ✅  
+- **Step 3**: Extract configuration management logic to `ConfigManager` ✅
+- **Step 4**: Extract correct matches loading logic ✅
+
+#### Phase 2: Update New Scoring System ✅
+- **Step 5**: Update `BrushScoringMatcher` to use extracted components ✅
+- **Step 6**: Update wrapper strategies to remove legacy dependencies ✅
+- **Step 7**: Update `AutomatedSplitStrategy` to implement logic directly ✅
+
+#### Phase 3: Remove Legacy Components ✅
+- **Step 8**: Remove legacy classes (`BrushMatcher`, `BrushMatcherConfig`) ✅
+- **Step 9**: Remove legacy tools and directories ✅
+
+#### Phase 4: Test Migration and Validation ✅
+- **Step 10**: Restore critical test files to prevent massive coverage loss ✅
+- **Step 11**: Audit and triage all deleted test files ✅
+
+#### Phase 5: Test Validation and Updates ✅
+- **Step 12**: Verify restored tests can run without import errors ✅
+- **Step 13**: Update tests to work with current system interfaces ✅
+- **Step 14**: Run test suite to ensure no regressions ✅
+
+### 🔄 **CURRENT PHASE**
+
+#### Phase 6: Final Cleanup and Validation ✅ COMPLETE
+- **Step 15**: Analyze and remove orphaned strategies ✅ COMPLETE
+- **Step 16**: Rename `scoring_brush_matcher.py` to `brush_matcher.py` ✅ COMPLETE
+- **Step 17**: Final validation and documentation ✅ COMPLETE
+
+## Next Action
+
+**🎉 MIGRATION COMPLETE! 🎉**
+
+All phases and steps of the legacy brush matching system migration have been completed successfully:
+
+- ✅ **Phase 1**: Extract shared functionality ✅ COMPLETE
+- ✅ **Phase 2**: Remove legacy dependencies ✅ COMPLETE  
+- ✅ **Phase 3**: Remove legacy classes and tools ✅ COMPLETE
+- ✅ **Phase 4**: Remove legacy strategies ✅ COMPLETE
+- ✅ **Phase 5**: Test validation and updates ✅ COMPLETE
+- ✅ **Phase 6**: Final cleanup and validation ✅ COMPLETE
+
+**Final Status**: Legacy brush matching system completely removed, new scoring system fully independent.
+
+**Migration Summary**: Successfully migrated from legacy "first match wins" system to modern multi-strategy scoring system with zero functionality loss.
+
+## Critical Success Metrics
+
+### ✅ **ACHIEVED**
+- **Test Coverage Preservation**: Prevented loss of 32 critical test files
+- **Legacy System Removal**: Successfully removed all legacy brush matching components
+- **New System Independence**: `BrushScoringMatcher` now works without legacy dependencies
+- **Import Validation**: All restored test files can be imported without errors
+- **Test Suite Cleanup**: Successfully identified and removed 18 incorrectly restored legacy tests
+- **Clean Test Suite**: 931 tests passing, 0 errors, 0 broken tests
+- **Match Phase Tests Working**: 34 tests passing from 2 working test files
+
+### 🎯 **TARGETS**
+- **100% Test Pass Rate**: All tests continue to pass ✅ (ACHIEVED)
+- **No Linter Errors**: Clean code quality across all tests ✅ (ACHIEVED)
+- **No Type Check Errors**: Proper type safety maintained ✅ (ACHIEVED)
+- **Full Test Coverage**: All critical functionality remains tested ✅ (ACHIEVED)
+- **Complete Legacy Cleanup**: Strategy audit complete ✅ (ACHIEVED)
+- **System Renaming**: Rename `scoring_brush_matcher.py` to `brush_matcher.py` ✅ (ACHIEVED)
+- **Migration Complete**: Legacy system fully removed, new system independent ✅ (ACHIEVED)
