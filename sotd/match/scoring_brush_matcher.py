@@ -15,32 +15,31 @@ from sotd.match.brush_scoring_components.result_conflict_resolver import ResultC
 from sotd.match.brush_scoring_components.result_processor import ResultProcessor
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
 from sotd.match.brush_scoring_components.strategy_dependency_manager import (
-    DependencyType,
-    StrategyDependency,
     StrategyDependencyManager,
+    StrategyDependency,
+    DependencyType,
 )
 from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
 from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
-from sotd.match.types import MatchResult
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
-from sotd.match.loaders import CatalogLoader
-from sotd.match.utils.config_manager import config_manager
-from sotd.match.utils.strategy_manager import StrategyManager
+from sotd.match.types import MatchResult
+from sotd.match.utils.catalog_loader import CatalogLoader
 
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file."""
     if correct_matches_path is None:
-        # Use default path from config manager
-        from sotd.match.utils.config_manager import config_manager
-        config = config_manager.get_default_config()
-        correct_matches_path = config.correct_matches_path
-    with open(correct_matches_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        # Use default path directly instead of legacy config
+        correct_matches_path = Path("data/correct_matches.yaml")
+    try:
+        with open(correct_matches_path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except (FileNotFoundError, yaml.YAMLError):
+        return {}
 
 
 class BrushScoringMatcher:
@@ -72,18 +71,16 @@ class BrushScoringMatcher:
         correct_matches_data = load_correct_matches(correct_matches_path)
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
-        # Use shared configuration for paths
-        config = config_manager.get_default_config()
-        handles_path = config.handles_path
+        # Use direct paths instead of legacy config
+        handles_path = Path("data/handles.yaml")
         self.handle_matcher = HandleMatcher(handles_path)
 
-        # Initialize KnotMatcher with knot-specific strategies using shared utilities
-        catalog_loader = CatalogLoader(config)
-        catalogs = catalog_loader.load_brush_catalogs(config)
+        # Initialize KnotMatcher with knot-specific strategies
+        # Load catalogs directly without legacy config dependencies
+        catalogs = self._load_catalogs_directly()
         
-        # Use strategy manager to create knot strategies
-        strategy_manager = StrategyManager(config)
-        knot_strategies = strategy_manager.create_knot_strategies(catalogs)
+        # Create knot strategies directly instead of using StrategyManager
+        knot_strategies = self._create_knot_strategies(catalogs)
         self.knot_matcher = KnotMatcher(knot_strategies)
 
         # Initialize components
@@ -138,6 +135,38 @@ class BrushScoringMatcher:
 
         # HandleMatcher and KnotMatcher are now initialized above
 
+    def _load_catalogs_directly(self) -> dict:
+        """Load catalogs directly without legacy config dependencies."""
+        catalogs = {}
+        
+        # Load main catalogs with direct paths
+        catalogs["brushes"] = self._load_yaml_file(Path("data/brushes.yaml"))
+        catalogs["handles"] = self._load_yaml_file(Path("data/handles.yaml"))
+        catalogs["knots"] = self._load_yaml_file(Path("data/knots.yaml"))
+        catalogs["correct_matches"] = self._load_yaml_file(Path("data/correct_matches.yaml"))
+        
+        return catalogs
+    
+    def _load_yaml_file(self, path: Path) -> dict:
+        """Load a YAML file with error handling."""
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f) or {}
+        except (FileNotFoundError, yaml.YAMLError):
+            return {}
+    
+    def _create_knot_strategies(self, catalogs: dict) -> list:
+        """Create knot strategies directly without legacy config dependencies."""
+        from sotd.match.brush_matching_strategies.known_knot_strategy import KnownKnotMatchingStrategy
+        from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
+        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import KnotSizeFallbackStrategy
+        
+        return [
+            KnownKnotMatchingStrategy(catalogs["knots"]),
+            OtherKnotMatchingStrategy(catalogs["knots"]),
+            KnotSizeFallbackStrategy(),
+        ]
+
     def _create_strategies(self) -> List:
         """
         Create list of strategies for Phase 3.2 with individual brush strategies.
@@ -146,16 +175,11 @@ class BrushScoringMatcher:
             List of strategy objects
         """
         # Use shared utilities instead of duplicating logic
-        config = config_manager.get_default_config()
-        catalog_loader = CatalogLoader(config)
-        catalogs = catalog_loader.load_brush_catalogs(config)
-
-        # Use strategy manager to create strategies
-        strategy_manager = StrategyManager(config)
-        strategies = strategy_manager.create_full_strategies(
-            self.handle_matcher, self.knot_matcher, catalogs
-        )
-
+        catalogs = self._load_catalogs_directly()  # Use our direct loading method
+        
+        # Create strategies directly instead of using StrategyManager
+        strategies = self._create_temp_strategies()  # Use _create_temp_strategies
+        
         return strategies
 
     def _create_temp_strategies(self) -> List:
@@ -168,13 +192,10 @@ class BrushScoringMatcher:
             List of strategy objects (without unified component strategy)
         """
         # Use shared utilities instead of duplicating logic
-        config = config_manager.get_default_config()
-        catalog_loader = CatalogLoader(config)
-        catalogs = catalog_loader.load_brush_catalogs(config)
+        catalogs = self._load_catalogs_directly()  # Use our direct loading method
 
-        # Use strategy manager to create temporary strategies
-        strategy_manager = StrategyManager(config)
-        strategies = strategy_manager.create_temp_strategies(self.handle_matcher, catalogs)
+        # Create strategies directly instead of using StrategyManager
+        strategies = self._create_knot_strategies(catalogs) # Use _create_knot_strategies
 
         return strategies
 
@@ -430,9 +451,7 @@ class BrushScoringMatcher:
             )
 
             # Create catalog loader for unified strategy
-            config = config_manager.get_default_config()
-            catalog_loader = CatalogLoader(config)
-            catalogs = catalog_loader.load_brush_catalogs(config)
+            catalogs = self._load_catalogs_directly() # Use our direct loading method
 
             unified_strategy = FullInputComponentMatchingStrategy(
                 self.handle_matcher, self.knot_matcher, catalogs
