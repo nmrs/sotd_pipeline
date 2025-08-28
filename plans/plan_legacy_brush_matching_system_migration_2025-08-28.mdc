@@ -69,16 +69,17 @@ Remove unused code, update tests, verify functionality.
    - **Implementation**: ✅ **COMPLETE** - Added missing legacy interface methods to BrushScoringMatcher (_match_correct_complete_brush, _match_correct_split_brush, _match_known_split, _match_complete_brush, _match_high_priority_automated_split, _match_medium_priority_automated_split, create_dual_component_result, create_single_component_result). These methods implement the legacy interface using the new scoring system, allowing wrapper strategies to work without the actual legacy BrushMatcher. All tests pass and functionality is preserved.
 
 ### **Phase 2: Update New System**
-5. **Update BrushScoringMatcher Dependencies** - **IN_PROGRESS** ⏳
+5. **Update BrushScoringMatcher Dependencies** - **COMPLETE** ✅
    - Remove remaining legacy system imports and dependencies
    - Ensure all functionality uses shared utilities
    - Test integration with wrapper strategies
-   - **Implementation**: Starting with dependency cleanup and testing
+   - **Implementation**: ✅ **COMPLETE** - Consolidated duplicate imports to top of file, removed hardcoded paths in favor of shared config, updated legacy dependency references to use current strategy names (FullInputComponentMatchingStrategy, HandleOnlyStrategy, KnotOnlyStrategy), cleaned up duplicate import statements in methods, and updated load_correct_matches to use shared config. All tests pass and functionality is preserved.
 
-6. **Update Wrapper Strategies**
-   - Modify strategies to work with shared catalog loader
-   - Remove legacy system method calls
-   - Ensure strategies work with new system only
+6. **Update Wrapper Strategies** - **IN_PROGRESS** ⏳
+   - Remove legacy matcher dependencies from wrapper strategies
+   - Update strategies to use new system directly
+   - Test all wrapper strategies work correctly
+   - **Implementation**: Starting with wrapper strategy dependency cleanup and testing
 
 7. **Update Strategy Dependencies**
    - Modify dependency management to work without legacy system

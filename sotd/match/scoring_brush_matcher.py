@@ -25,12 +25,20 @@ from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
+from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.loaders import CatalogLoader
+from sotd.match.utils.config_manager import config_manager
+from sotd.match.utils.strategy_manager import StrategyManager
 
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file."""
     if correct_matches_path is None:
-        correct_matches_path = Path("data/correct_matches.yaml")
+        # Use default path from config manager
+        from sotd.match.utils.config_manager import config_manager
+        config = config_manager.get_default_config()
+        correct_matches_path = config.correct_matches_path
     with open(correct_matches_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
@@ -64,19 +72,12 @@ class BrushScoringMatcher:
         correct_matches_data = load_correct_matches(correct_matches_path)
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
-        from sotd.match.handle_matcher import HandleMatcher
-        from sotd.match.knot_matcher import KnotMatcher
-
-        handles_path = Path("data/handles.yaml")
+        # Use shared configuration for paths
+        config = config_manager.get_default_config()
+        handles_path = config.handles_path
         self.handle_matcher = HandleMatcher(handles_path)
 
         # Initialize KnotMatcher with knot-specific strategies using shared utilities
-        from sotd.match.loaders import CatalogLoader
-        from sotd.match.utils.config_manager import config_manager
-        from sotd.match.utils.strategy_manager import StrategyManager
-
-        # Use shared configuration and strategy manager
-        config = config_manager.get_default_config()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
         
@@ -108,28 +109,28 @@ class BrushScoringMatcher:
         # Dual Component depends on both HandleMatcher and KnotMatcher success
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "LegacyDualComponentWrapperStrategy",
+                "FullInputComponentMatchingStrategy",
                 "HandleMatcher",
                 DependencyType.REQUIRES_SUCCESS,
             )
         )
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "LegacyDualComponentWrapperStrategy", "KnotMatcher", DependencyType.REQUIRES_SUCCESS
+                "FullInputComponentMatchingStrategy", "KnotMatcher", DependencyType.REQUIRES_SUCCESS
             )
         )
 
         # Single Component depends on any of HandleMatcher or KnotMatcher
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "LegacySingleComponentFallbackWrapperStrategy",
+                "HandleOnlyStrategy",
                 "HandleMatcher",
                 DependencyType.REQUIRES_ANY,
             )
         )
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "LegacySingleComponentFallbackWrapperStrategy",
+                "KnotOnlyStrategy",
                 "KnotMatcher",
                 DependencyType.REQUIRES_ANY,
             )
@@ -145,10 +146,6 @@ class BrushScoringMatcher:
             List of strategy objects
         """
         # Use shared utilities instead of duplicating logic
-        from sotd.match.loaders import CatalogLoader
-        from sotd.match.utils.config_manager import config_manager
-        from sotd.match.utils.strategy_manager import StrategyManager
-
         config = config_manager.get_default_config()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
@@ -171,10 +168,6 @@ class BrushScoringMatcher:
             List of strategy objects (without unified component strategy)
         """
         # Use shared utilities instead of duplicating logic
-        from sotd.match.loaders import CatalogLoader
-        from sotd.match.utils.config_manager import config_manager
-        from sotd.match.utils.strategy_manager import StrategyManager
-
         config = config_manager.get_default_config()
         catalog_loader = CatalogLoader(config)
         catalogs = catalog_loader.load_brush_catalogs(config)
@@ -437,9 +430,6 @@ class BrushScoringMatcher:
             )
 
             # Create catalog loader for unified strategy
-            from sotd.match.loaders import CatalogLoader
-            from sotd.match.utils.config_manager import config_manager
-
             config = config_manager.get_default_config()
             catalog_loader = CatalogLoader(config)
             catalogs = catalog_loader.load_brush_catalogs(config)
