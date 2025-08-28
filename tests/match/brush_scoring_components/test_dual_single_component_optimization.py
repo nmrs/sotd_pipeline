@@ -10,7 +10,7 @@ from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     StrategyDependency,
     DependencyType,
 )
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.types import MatchResult
 
 
@@ -20,7 +20,7 @@ class TestDualSingleComponentOptimization:
     @pytest.fixture
     def scoring_matcher(self):
         """Create a scoring matcher with optimization dependencies."""
-        return BrushScoringMatcher()
+        return BrushMatcher()
 
     @pytest.fixture
     def dependency_manager(self):

@@ -12,7 +12,7 @@ from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     StrategyDependency,
     DependencyType,
 )
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.types import create_match_result
 
 
@@ -27,7 +27,7 @@ class TestHandleKnotDependencyImplementation:
     @pytest.fixture
     def scoring_matcher(self):
         """Create scoring matcher instance."""
-        return BrushScoringMatcher()
+        return BrushMatcher()
 
     def test_dependency_manager_initialization(self, dependency_manager):
         """Test dependency manager initializes correctly."""

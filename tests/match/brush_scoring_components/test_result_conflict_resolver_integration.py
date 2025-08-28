@@ -4,7 +4,7 @@ from sotd.match.brush_scoring_components.result_conflict_resolver import (
     ConflictType,
     ResultConflictResolver,
 )
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.types import MatchResult
 
 
@@ -13,7 +13,7 @@ class TestResultConflictResolverIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.matcher = BrushScoringMatcher()
+        self.matcher = BrushMatcher()
         self.conflict_resolver = ResultConflictResolver()
 
     def test_integration_with_conflicting_results(self):

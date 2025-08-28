@@ -10,7 +10,7 @@ from pathlib import Path
 
 from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.handle_matcher import HandleMatcher
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 
 
 class TestBrushSplitterEdgeCases:
@@ -21,7 +21,7 @@ class TestBrushSplitterEdgeCases:
         self.handle_matcher = HandleMatcher()
         self.splitter = BrushSplitter(self.handle_matcher)
         # Also test with the new scoring system
-        self.scoring_matcher = BrushScoringMatcher()
+        self.scoring_matcher = BrushMatcher()
 
     def test_fiber_words_dont_force_split_for_complete_brushes(self):
         """Test that fiber words don't force a split when string should be a complete brush."""

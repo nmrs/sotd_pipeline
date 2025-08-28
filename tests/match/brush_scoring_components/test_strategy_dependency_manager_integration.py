@@ -5,7 +5,7 @@ from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     DependencyType,
     StrategyDependency,
 )
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.types import MatchResult
 
 
@@ -14,7 +14,7 @@ class TestStrategyDependencyManagerIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.matcher = BrushScoringMatcher()
+        self.matcher = BrushMatcher()
         self.dependency_manager = StrategyDependencyManager()
 
     def test_integration_with_strategy_dependencies(self):

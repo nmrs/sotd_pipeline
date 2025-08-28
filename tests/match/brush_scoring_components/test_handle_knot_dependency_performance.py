@@ -8,7 +8,7 @@ within automated split strategies.
 import time
 import pytest
 
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     StrategyDependency,
     DependencyType,
@@ -21,12 +21,12 @@ class TestHandleKnotDependencyPerformance:
     @pytest.fixture
     def scoring_matcher_with_dependencies(self):
         """Create scoring matcher with dependencies configured."""
-        return BrushScoringMatcher()
+        return BrushMatcher()
 
     @pytest.fixture
     def scoring_matcher_without_dependencies(self):
         """Create scoring matcher with dependencies disabled."""
-        matcher = BrushScoringMatcher()
+        matcher = BrushMatcher()
         # Clear all dependencies to simulate no-dependency scenario
         matcher.strategy_dependency_manager.dependencies.clear()
         matcher.strategy_dependency_manager.dependency_graph.clear()

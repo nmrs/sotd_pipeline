@@ -1,6 +1,6 @@
 """Complete coordination integration tests for multi-strategy scoring system."""
 
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 
 
 class TestCompleteCoordinationIntegration:
@@ -8,7 +8,7 @@ class TestCompleteCoordinationIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.matcher = BrushScoringMatcher()
+        self.matcher = BrushMatcher()
 
     def test_complete_workflow_with_all_components(self):
         """Test complete workflow with all coordination components active."""

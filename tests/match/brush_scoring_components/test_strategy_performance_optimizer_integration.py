@@ -3,7 +3,7 @@
 from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 
 
 class TestStrategyPerformanceOptimizerIntegration:
@@ -11,7 +11,7 @@ class TestStrategyPerformanceOptimizerIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.matcher = BrushScoringMatcher()
+        self.matcher = BrushMatcher()
         self.performance_optimizer = StrategyPerformanceOptimizer()
 
     def test_integration_with_strategy_execution_tracking(self):
