@@ -1161,21 +1161,29 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
     try:
         validate_field(request.field)
 
-        # Import and use the validation logic directly
-        try:
-            from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
-        except ImportError as e:
-            raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
+        # For brushes, use the File A vs File B approach
+        if request.field == "brush":
+            issues, expected_structure = await _validate_brush_catalog()
+        else:
+            # Import and use the validation logic directly for other fields
+            try:
+                from sotd.match.tools.managers.validate_correct_matches import (
+                    ValidateCorrectMatches,
+                )
+            except ImportError as e:
+                raise HTTPException(
+                    status_code=500, detail=f"Could not import validation tools: {e}"
+                )
 
-        # Create validator instance and run validation
-        # Set the data directory to the project root for proper catalog access
-        validator = ValidateCorrectMatches(
-            correct_matches_path=project_root / "data" / "correct_matches.yaml"
-        )
-        validator._data_dir = project_root / "data"
+            # Create validator instance and run validation
+            # Set the data directory to the project root for proper catalog access
+            validator = ValidateCorrectMatches(
+                correct_matches_path=project_root / "data" / "correct_matches.yaml"
+            )
+            validator._data_dir = project_root / "data"
 
-        # Run the catalog validation
-        issues, expected_structure = validator.validate_field(request.field)
+            # Run the catalog validation
+            issues, expected_structure = validator.validate_field(request.field)
 
         # Count total entries from correct_matches.yaml
         total_entries = 0
@@ -1227,12 +1235,20 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 mapped_issue_type = "catalog_pattern_mismatch"
             elif issue_type == "unmatchable_entry":
                 mapped_issue_type = "catalog_pattern_no_match"
+            elif issue_type == "catalog_pattern_no_match":
+                # Keep as-is for brush validation
+                mapped_issue_type = "catalog_pattern_no_match"
 
             # Determine severity based on issue type
             severity = "medium"
-            if issue_type in ["missing_brand", "missing_format", "format_mismatch"]:
+            if issue_type in [
+                "missing_brand",
+                "missing_format",
+                "format_mismatch",
+                "catalog_pattern_no_match",
+            ]:
                 severity = "high"
-            elif issue_type in ["missing_model", "mismatched_result"]:
+            elif issue_type in ["missing_model", "mismatched_result", "catalog_pattern_mismatch"]:
                 severity = "medium"
             elif issue_type in ["missing_pattern", "unmatchable_entry"]:
                 severity = "low"
@@ -1292,37 +1308,51 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
                 suggested_action = (
                     f"Move '{correct_match}' from format '{expected_format}' "
-                    f"to format '{catalog_format}' in correct_matches.yaml, "
-                    f"or update the catalog to match the expected format"
+                    f"to format '{catalog_format}' in correct_matches.yaml"
                 )
             elif issue_type == "mismatched_result":
                 suggested_action = (
-                    f"Move '{pattern}' to correct location: {actual_brand} {actual_model} "
-                    f"(currently in {brand} {model})"
+                    f"Move '{pattern}' from '{brand} {model}' to '{actual_brand} {actual_model}' "
+                    f"in correct_matches.yaml"
                 )
             elif issue_type == "unmatchable_entry":
                 suggested_action = (
                     f"Remove '{pattern}' from correct_matches.yaml "
                     f"or fix the pattern to match correctly"
                 )
+            elif issue_type == "catalog_pattern_no_match":
+                # Handle brush validation issues
+                if request.field == "brush":
+                    suggested_action = (
+                        f"Pattern '{pattern}' cannot be matched by brush matcher. "
+                        f"Check if this pattern is still valid or needs to be updated."
+                    )
+                else:
+                    suggested_action = (
+                        f"Pattern '{pattern}' cannot be matched by {request.field} matcher. "
+                        f"Check if this pattern is still valid or needs to be updated."
+                    )
+            else:
+                suggested_action = f"Investigate issue with '{pattern}'"
 
-            catalog_issues.append(
-                CatalogValidationIssue(
-                    issue_type=mapped_issue_type,
-                    field=issue.get("field", ""),
-                    format=issue.get("format"),
-                    correct_match=pattern or f"{brand} {model}".strip(),
-                    expected_brand=brand,
-                    expected_model=model,
-                    actual_brand=actual_brand,
-                    actual_model=actual_model,
-                    severity=severity,
-                    suggested_action=suggested_action,
-                    details=issue.get("message", ""),
-                    catalog_format=issue.get("catalog_format"),
-                    matched_pattern=issue.get("matched_pattern"),
-                )
+            # Create the catalog issue
+            catalog_issue = CatalogValidationIssue(
+                issue_type=mapped_issue_type,
+                field=request.field,
+                correct_match=pattern or f"{brand} {model}".strip(),
+                expected_brand=brand,
+                expected_model=model,
+                actual_brand=actual_brand,
+                actual_model=actual_model,
+                severity=severity,
+                suggested_action=suggested_action,
+                details=issue.get("details", ""),
+                format=issue.get("format"),
+                catalog_format=issue.get("catalog_format"),
+                matched_pattern=issue.get("matched_pattern"),
             )
+
+            catalog_issues.append(catalog_issue)
 
         return CatalogValidationResponse(
             field=request.field,
@@ -1334,3 +1364,238 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
     except Exception as e:
         logger.error(f"Error validating catalog: {e}")
         raise HTTPException(status_code=500, detail=f"Error validating catalog: {str(e)}")
+
+
+async def _validate_brush_catalog():
+    """Validate brush catalog by running patterns through brush matcher and comparing results."""
+    try:
+        import yaml
+
+        # File A: Extract brush data from correct_matches.yaml
+        correct_matches_path = project_root / "data" / "correct_matches.yaml"
+        with open(correct_matches_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        brush_data = data.get("brush", {})
+
+        # File B: Run each pattern through the brush matcher
+        try:
+            from sotd.match.brush_matcher import BrushMatcher
+            from sotd.match.config import BrushMatcherConfig
+
+            # Create brush matcher that bypasses correct_matches.yaml
+            config = BrushMatcherConfig(
+                catalog_path=Path(project_root / "data" / "brushes.yaml"),
+                handles_path=Path(project_root / "data" / "handles.yaml"),
+                knots_path=Path(project_root / "data" / "knots.yaml"),
+                bypass_correct_matches=True,  # This is crucial!
+            )
+
+            brush_matcher = BrushMatcher(config)
+
+            issues = []
+
+            # Process each pattern through the brush matcher
+            for brand, brand_data in brush_data.items():
+                if isinstance(brand_data, dict):
+                    for model, model_data in brand_data.items():
+                        if isinstance(model_data, list):
+                            for pattern in model_data:
+                                try:
+                                    # Run pattern through brush matcher
+                                    # BrushMatcher expects: match(pattern_string)
+                                    result = brush_matcher.match(pattern)
+
+                                    if result and hasattr(result, "matched") and result.matched:
+                                        # Extract brand and model from matcher result
+                                        matched_brand = getattr(result.matched, "brand", None)
+                                        matched_model = getattr(result.matched, "model", None)
+
+                                        # Check if this is a complete brush (brand and model populated)
+                                        if matched_brand and matched_model:
+                                            # Normalize for comparison
+                                            stored_brand = brand.strip()
+                                            stored_model = model.strip()
+
+                                            if (
+                                                matched_brand.lower() != stored_brand.lower()
+                                                or matched_model.lower() != stored_model.lower()
+                                            ):
+                                                # Mismatch found!
+                                                issues.append(
+                                                    {
+                                                        "type": "catalog_pattern_mismatch",
+                                                        "field": "brush",
+                                                        "pattern": pattern,
+                                                        "stored_brand": stored_brand,
+                                                        "stored_model": stored_model,
+                                                        "matched_brand": matched_brand,
+                                                        "matched_model": matched_model,
+                                                        "message": (
+                                                            f"Pattern '{pattern}' is stored under "
+                                                            f"'{stored_brand} {stored_model}' but matcher returns "
+                                                            f"'{matched_brand} {matched_model}'"
+                                                        ),
+                                                        "suggested_action": (
+                                                            f"Move from '{stored_brand} {stored_model}' to "
+                                                            f"'{matched_brand} {matched_model}' in correct_matches.yaml"
+                                                        ),
+                                                    }
+                                                )
+                                        else:
+                                            # This is a composite brush or the matcher didn't return expected structure
+                                            # For now, we'll handle this in the next step (composite brush validation)
+                                            # But we should still check if there's a basic mismatch
+                                            if (
+                                                matched_brand
+                                                and matched_brand.lower() != brand.strip().lower()
+                                            ):
+                                                # Brand mismatch even for composite brushes
+                                                issues.append(
+                                                    {
+                                                        "type": "catalog_pattern_mismatch",
+                                                        "field": "brush",
+                                                        "pattern": pattern,
+                                                        "stored_brand": brand.strip(),
+                                                        "stored_model": model.strip(),
+                                                        "matched_brand": matched_brand,
+                                                        "matched_model": matched_model,
+                                                        "message": (
+                                                            f"Pattern '{pattern}' is stored under "
+                                                            f"'{brand.strip()}' but matcher returns brand "
+                                                            f"'{matched_brand}'"
+                                                        ),
+                                                        "suggested_action": (
+                                                            f"Check if pattern '{pattern}' should be moved to "
+                                                            f"'{matched_brand}' section or if the matcher result is incorrect"
+                                                        ),
+                                                    }
+                                                )
+
+                                            # Now check if this is a composite brush (model is null, but handle/knot components exist)
+                                            if (
+                                                not matched_model
+                                                and hasattr(result.matched, "handle")
+                                                and hasattr(result.matched, "knot")
+                                            ):
+                                                # This is a composite brush - check if it should be stored in handle/knot sections
+                                                matched_handle_brand = getattr(
+                                                    result.matched.handle, "brand", None
+                                                )
+                                                matched_handle_model = getattr(
+                                                    result.matched.handle, "model", None
+                                                )
+                                                matched_knot_brand = getattr(
+                                                    result.matched.knot, "brand", None
+                                                )
+                                                matched_knot_model = getattr(
+                                                    result.matched.knot, "model", None
+                                                )
+
+                                                # For composite brushes stored in the brush section, this might indicate a mismatch
+                                                # since they should probably be in handle/knot sections
+                                                if matched_handle_brand or matched_knot_brand:
+                                                    issues.append(
+                                                        {
+                                                            "type": "catalog_pattern_mismatch",
+                                                            "field": "brush",
+                                                            "pattern": pattern,
+                                                            "stored_brand": brand.strip(),
+                                                            "stored_model": model.strip(),
+                                                            "matched_brand": matched_brand,
+                                                            "matched_model": "COMPOSITE",
+                                                            "message": (
+                                                                f"Pattern '{pattern}' is stored as complete brush under "
+                                                                f"'{brand.strip()} {model.strip()}' but matcher returns "
+                                                                f"composite brush with handle: {matched_handle_brand}, knot: {matched_knot_brand}"
+                                                            ),
+                                                            "suggested_action": (
+                                                                f"Consider moving pattern '{pattern}' to handle/knot sections "
+                                                                f"since it's being matched as a composite brush"
+                                                            ),
+                                                        }
+                                                    )
+                                    else:
+                                        # Pattern couldn't be matched at all
+                                        issues.append(
+                                            {
+                                                "type": "catalog_pattern_no_match",
+                                                "field": "brush",
+                                                "pattern": pattern,
+                                                "stored_brand": brand,
+                                                "stored_model": model,
+                                                "message": f"Pattern '{pattern}' cannot be matched by brush matcher",
+                                                "suggested_action": (
+                                                    f"Check if pattern '{pattern}' is still valid "
+                                                    f"or needs to be updated"
+                                                ),
+                                            }
+                                        )
+
+                                except Exception as e:
+                                    # Error during matching
+                                    issues.append(
+                                        {
+                                            "type": "catalog_pattern_no_match",
+                                            "field": "brush",
+                                            "pattern": pattern,
+                                            "stored_brand": brand,
+                                            "stored_model": model,
+                                            "message": f"Error during matching: {str(e)}",
+                                            "suggested_action": (
+                                                f"Check if pattern '{pattern}' is still valid "
+                                                f"or needs to be updated"
+                                            ),
+                                        }
+                                    )
+
+        except ImportError as e:
+            # Fallback if brush matcher can't be imported
+            issues.append(
+                {
+                    "type": "catalog_pattern_no_match",
+                    "field": "brush",
+                    "pattern": "N/A",
+                    "stored_brand": "N/A",
+                    "stored_model": "N/A",
+                    "message": f"Could not import brush matcher: {str(e)}",
+                    "suggested_action": "Check brush matcher installation and configuration",
+                }
+            )
+
+        # Convert to expected format
+        converted_issues = []
+        for issue in issues:
+            converted_issues.append(
+                {
+                    "issue_type": issue["type"],
+                    "field": issue["field"],
+                    "correct_match": issue["pattern"],
+                    "expected_brand": issue["stored_brand"],
+                    "expected_model": issue["stored_model"],
+                    "actual_brand": issue.get("matched_brand", "N/A"),
+                    "actual_model": issue.get("matched_model", "N/A"),
+                    "severity": "high" if issue["type"] == "catalog_pattern_mismatch" else "medium",
+                    "suggested_action": issue["suggested_action"],
+                    "details": issue["message"],
+                }
+            )
+
+        return converted_issues, brush_data
+
+    except Exception as e:
+        # Return error as issue
+        return [
+            {
+                "issue_type": "catalog_pattern_no_match",
+                "field": "brush",
+                "correct_match": "N/A",
+                "expected_brand": "N/A",
+                "expected_model": "N/A",
+                "actual_brand": "N/A",
+                "actual_model": "N/A",
+                "severity": "high",
+                "suggested_action": f"Check validation system: {str(e)}",
+                "details": f"Error during brush validation: {str(e)}",
+            }
+        ], {}
