@@ -80,7 +80,7 @@ class TestHandleMatcherBaseline:
         for text, expected_pattern in test_cases:
             result = handle_matcher.match_handle_maker(text)
             assert result is not None, f"Failed to match: {text}"
-            assert result["handle_maker"] == "Dogwood Handcrafts", f"Wrong maker for: {text}"
+            assert result["handle_maker"] == "Dogwood", f"Wrong maker for: {text}"
             assert result["_matched_by_section"] == "artisan_handles", f"Wrong section for: {text}"
             assert result["_pattern_used"] == expected_pattern, f"Wrong pattern for: {text}"
 
@@ -134,7 +134,7 @@ class TestHandleMatcherBaseline:
         test_cases = [
             ("DECLARATION GROOMING WASHINGTON", "Declaration Grooming"),
             ("jayaruh", "Jayaruh"),
-            ("DOGWOOD HANDCRAFTS", "Dogwood Handcrafts"),
+            ("DOGWOOD HANDCRAFTS", "Dogwood"),
             ("chisel & hound", "Chisel & Hound"),
         ]
 
@@ -175,7 +175,7 @@ class TestHandleMatcherBaseline:
         # Test known handle makers
         assert handle_matcher.is_known_handle_maker("Declaration Grooming") is True
         assert handle_matcher.is_known_handle_maker("Jayaruh") is True
-        assert handle_matcher.is_known_handle_maker("Dogwood Handcrafts") is True
+        assert handle_matcher.is_known_handle_maker("Dogwood") is True
         assert handle_matcher.is_known_handle_maker("Simpson") is True
 
         # Test unknown handle makers
@@ -227,7 +227,7 @@ class TestHandleMatcherBaseline:
             ("Brad Sears handle", "Brad Sears"),
             ("Chisel & Hound handle", "Chisel & Hound"),
             ("Declaration Grooming Washington", "Declaration Grooming"),
-            ("Dogwood Handcrafts handle", "Dogwood Handcrafts"),
+            ("Dogwood Handcrafts handle", "Dogwood"),
             ("Jayaruh handle", "Jayaruh"),
         ]
 

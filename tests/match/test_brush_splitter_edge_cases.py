@@ -10,6 +10,7 @@ from pathlib import Path
 
 from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.scoring_brush_matcher import BrushScoringMatcher
 
 
 class TestBrushSplitterEdgeCases:
@@ -19,6 +20,8 @@ class TestBrushSplitterEdgeCases:
         """Set up test fixtures."""
         self.handle_matcher = HandleMatcher()
         self.splitter = BrushSplitter(self.handle_matcher)
+        # Also test with the new scoring system
+        self.scoring_matcher = BrushScoringMatcher()
 
     def test_fiber_words_dont_force_split_for_complete_brushes(self):
         """Test that fiber words don't force a split when string should be a complete brush."""
@@ -343,3 +346,32 @@ class TestBrushSplitterEdgeCases:
                 ), f"Specification should have units or numbers: {text}"
             else:
                 print("  Note: Delimiter patterns may not have units/numbers")
+
+    def test_new_scoring_system_handles_edge_cases(self):
+        """Test that the new scoring system handles the same edge cases correctly."""
+        # Test cases that should NOT be split (complete brushes)
+        complete_brush_cases = [
+            "Zenith r/wetshaving MOAR BOAR",
+            "Zenith 31mm MOAR BOAR",
+            "Zenith 508 Moar Boar",
+        ]
+
+        for test_str in complete_brush_cases:
+            result = self.scoring_matcher.match(test_str)
+            # Should return a match result, not None
+            assert result is not None, f"Expected match for '{test_str}', got None"
+            # Should have matched data
+            assert result.matched is not None, f"Expected matched data for '{test_str}'"
+
+        # Test cases that SHOULD be split (clear delimiters)
+        split_cases = [
+            "Elite handle w/ Declaration Boar knot",
+            "Wolf Whiskers w/ Omega Boar",
+        ]
+
+        for test_str in split_cases:
+            result = self.scoring_matcher.match(test_str)
+            # Should return a match result
+            assert result is not None, f"Expected match for '{test_str}', got None"
+            # Should have matched data
+            assert result.matched is not None, f"Expected matched data for '{test_str}'"

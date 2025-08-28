@@ -2,7 +2,6 @@
 Tests for the CorrectMatchesChecker component.
 """
 
-from sotd.match.config import BrushMatcherConfig
 from sotd.match.correct_matches import CorrectMatchesChecker
 
 
@@ -11,8 +10,6 @@ class TestCorrectMatchesChecker:
 
     def setup_method(self):
         """Set up test data and configuration."""
-        self.config = BrushMatcherConfig.create_default()
-
         # Test correct matches data
         self.test_correct_matches = {
             "brush": {
@@ -35,7 +32,7 @@ class TestCorrectMatchesChecker:
             },
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.test_correct_matches)
+        self.checker = CorrectMatchesChecker(self.test_correct_matches)
 
     def test_check_brush_section_match(self):
         """Test that brush section matches work correctly."""
@@ -78,7 +75,7 @@ class TestCorrectMatchesChecker:
 
     def test_check_empty_correct_matches(self):
         """Test that empty correct matches data returns None."""
-        empty_checker = CorrectMatchesChecker(self.config, {})
+        empty_checker = CorrectMatchesChecker({})
         result = empty_checker.check("test brush")
         assert result is None
 
@@ -123,7 +120,7 @@ class TestCorrectMatchesChecker:
             "handle": {"Test Handle Maker": {"Test Handle": ["handle only"]}},
             "knot": {},  # Empty knot section
         }
-        checker = CorrectMatchesChecker(self.config, handle_only_matches)
+        checker = CorrectMatchesChecker(handle_only_matches)
 
         result = checker.check("handle only")
         assert result is not None
@@ -145,7 +142,7 @@ class TestCorrectMatchesChecker:
 
     def test_get_statistics_empty_data(self):
         """Test statistics with empty correct matches data."""
-        empty_checker = CorrectMatchesChecker(self.config, {})
+        empty_checker = CorrectMatchesChecker({})
         stats = empty_checker.get_statistics()
 
         assert stats["total_brush_entries"] == 0
@@ -166,7 +163,7 @@ class TestCorrectMatchesChecker:
             "handle": {"Handle Maker": {"Handle": "not a list"}},  # Invalid structure
         }
 
-        checker = CorrectMatchesChecker(self.config, invalid_matches)
+        checker = CorrectMatchesChecker(invalid_matches)
 
         # Should not raise exceptions, just return None
         result = checker.check("test brush")
@@ -185,7 +182,7 @@ class TestCorrectMatchesChecker:
             "knot": {"Knot Maker": {"Knot Model": {"fiber": "Badger", "strings": ["test string"]}}},
         }
 
-        checker = CorrectMatchesChecker(self.config, priority_matches)
+        checker = CorrectMatchesChecker(priority_matches)
         result = checker.check("test string")
 
         # Should match brush section first (new priority order)

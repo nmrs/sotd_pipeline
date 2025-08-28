@@ -5,10 +5,7 @@ Tests the logic that determines whether handle and knot components
 come from the same maker or different makers.
 """
 
-from unittest.mock import Mock
-
 from sotd.match.correct_matches import CorrectMatchesChecker
-from sotd.match.config import BrushMatcherConfig
 
 
 class TestSameMakerDetermination:
@@ -16,9 +13,6 @@ class TestSameMakerDetermination:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         # Mock correct_matches data with same maker in handle/knot sections
         self.correct_matches = {
             "handle": {
@@ -27,7 +21,7 @@ class TestSameMakerDetermination:
             "knot": {"Declaration Grooming": {"B14": ["declaration grooming washington b14"]}},
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_same_maker_exact_string_matching(self):
         """Test same maker with exact string matching."""
@@ -57,9 +51,6 @@ class TestDifferentMakerDetermination:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         # Mock correct_matches data with different makers in handle/knot sections
         self.correct_matches = {
             "handle": {
@@ -74,7 +65,7 @@ class TestDifferentMakerDetermination:
             },
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_different_makers_exact_string_matching(self):
         """Test different makers with exact string matching."""
@@ -104,16 +95,13 @@ class TestEdgeCasesAndErrorConditions:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         # Mock correct_matches data with edge cases
         self.correct_matches = {
             "handle": {"Test Brand": {"Test Model": ["test brand test model"]}},
             "knot": {"Test Brand": {"Test Model": ["test brand test model"]}},
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_null_maker_handling(self):
         """Test null maker handling."""
@@ -165,9 +153,6 @@ class TestMakerComparisonIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         # Mock correct_matches data with realistic catalog brand names
         self.correct_matches = {
             "handle": {
@@ -176,7 +161,7 @@ class TestMakerComparisonIntegration:
             "knot": {"Declaration Grooming": {"B18": ["declaration grooming jeffington b18"]}},
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_real_catalog_brand_names_same_maker(self):
         """Test with real catalog brand names (same maker)."""

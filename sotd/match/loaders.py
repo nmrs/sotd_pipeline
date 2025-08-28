@@ -10,7 +10,6 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from sotd.match.config import BrushMatcherConfig
 from sotd.match.exceptions import CatalogLoadError
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
@@ -30,7 +29,7 @@ class CatalogLoader:
     and loading statistics for all catalog types.
     """
 
-    def __init__(self, config: Optional[BrushMatcherConfig] = None):
+    def __init__(self, config: Optional[Any] = None):
         self.config = config
         self.load_stats: Dict[str, int] = {
             "catalogs_loaded": 0,
@@ -161,7 +160,7 @@ class CatalogLoader:
 
         return catalogs
 
-    def load_brush_catalogs(self, config: BrushMatcherConfig) -> Dict[str, Any]:
+    def load_brush_catalogs(self, config: Any) -> Dict[str, Any]:
         """
         Load all catalogs for brush matching (special case with multiple catalogs).
 

@@ -31,7 +31,7 @@ class TestBrushValidationCLI:
         """Test CLI initialization with entry point integration."""
         assert self.cli.data_path == Path(self.test_dir)
         assert isinstance(self.cli.user_actions_manager, BrushUserActionsManager)
-        assert hasattr(self.cli, "brush_entry_point")
+        assert hasattr(self.cli, "brush_matcher")
 
     @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")

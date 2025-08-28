@@ -308,25 +308,79 @@ This document tracks and triages all test files that were deleted during the leg
 
 ## Key Insights
 
-1. **✅ CRITICAL WORK COMPLETED**: Successfully restored 32 critical test files that test current functionality
-2. **🟢 SAFE DELETIONS CONFIRMED**: Only 10 legacy tests remain deleted (all safe to delete)
-3. **📊 TEST COVERAGE PRESERVED**: Prevented massive loss of test coverage for current functionality
-4. **🎯 SYSTEMATIC APPROACH SUCCESSFUL**: Methodical restoration prevented loss of valuable tests
+1. **❌ INITIAL ASSESSMENT INCORRECT**: Many restored tests are testing removed legacy functionality, not current functionality
+2. **🔍 REALITY CHECK**: Import errors reveal tests depend on classes that no longer exist
+3. **📊 ACTUAL STATUS**: Only 34 tests are actually passing (from 2 working test files)
+4. **🎯 CORRECT APPROACH**: Need to identify which tests actually test current functionality vs. removed legacy functionality
 
-## File Status Tracking
+## Current Test Status Analysis
 
-| Category | Count | Status | Action Required |
-|----------|-------|--------|-----------------|
-| **Brush Strategy Tests** | 15 | ✅ COMPLETED | None - Ready for testing |
-| **CLI Integration Tests** | 3 | ✅ COMPLETED | None - Ready for testing |
-| **Handle/Knot Tests** | 8 | ✅ COMPLETED | None - Ready for testing |
-| **Scoring System Tests** | 6 | ✅ COMPLETED | None - Ready for testing |
-| **Legacy Class Tests** | 7 | 🟢 SAFE TO DELETE | Confirm deletion |
-| **Other Tests** | 3 | ✅ COMPLETED | None - Ready for testing |
+### ✅ **WORKING TESTS (34 tests)**
+These tests are working and testing current functionality:
+1. `test_brush_splitter_edge_cases.py` - 8 tests passing ✅
+2. `test_brush_validation_cli.py` - 26 tests passing ✅
 
----
+### ❌ **BROKEN TESTS (18 test files)**
+These tests have import errors and test removed legacy functionality:
+1. `test_brush_cli_entry_point_integration.py` - Tests removed `BrushMatcherEntryPoint`
+2. `test_brush_output_format_refactoring.py` - Tests removed `BrushMatcher`
+3. `test_brush_parallel_data_directories.py` - Tests removed `BrushParallelDataManager`
+4. `test_brush_parallel_data_manager.py` - Tests removed `BrushParallelDataManager`
+5. `test_brush_scoring_strategy_integration.py` - Tests removed legacy strategy system
+6. `test_brush_strategy_persistence.py` - Tests removed legacy strategy system
+7. `test_complete_brush_catalog.py` - Tests removed legacy catalog system
+8. `test_complete_brush_handle_knot_logic.py` - Tests removed legacy handle/knot system
+9. `test_complete_brush_handle_matching.py` - Tests removed legacy handle matching
+10. `test_composite_brush_analysis.py` - Tests removed legacy analysis system
+11. `test_correct_matches_brush_types.py` - Tests removed legacy correct matches system
+12. `test_correct_matches_performance.py` - Tests removed legacy performance system
+13. `test_handle_knot_combination_structure.py` - Tests removed legacy structure system
+14. `test_maker_comparison_logic.py` - Tests removed legacy maker comparison
+15. `test_moar_boar_brush_matching.py` - Tests removed legacy matching system
+16. `test_normalization_consistency.py` - Tests removed legacy normalization
+17. `test_zenith_brush_matching.py` - Tests removed legacy matching system
+18. `tools/test_analyze_unmatched_blades.py` - Tests removed legacy analyzer
+19. `tools/test_validate_correct_matches.py` - Tests removed legacy validator
 
-**Created**: 2025-08-28  
-**Purpose**: Track and triage ALL 42 deleted test files during legacy brush matching system migration  
-**Status**: ✅ **CRITICAL WORK COMPLETED** - 32 files restored, 10 files safe to delete  
-**Result**: **Massive test coverage loss prevented** - All critical functionality tests have been restored
+## Revised Assessment
+
+### **Files That Actually Test Current Functionality (2 files)**
+- ✅ `test_brush_splitter_edge_cases.py` - Tests current brush splitter functionality
+- ✅ `test_brush_validation_cli.py` - Tests current validation CLI functionality
+
+### **Files That Test Removed Legacy Functionality (18 files)**
+These should **NOT** have been restored - they test functionality that was intentionally removed:
+- ❌ All the broken test files above test removed legacy classes and systems
+- ❌ These represent the old "first match wins" system that was replaced
+- ❌ The functionality they test no longer exists in the current scoring system
+
+## Corrected Action Plan
+
+### **Phase 1: Clean Up Incorrectly Restored Tests (IMMEDIATE)**
+1. **Delete the 18 broken test files** - They test removed functionality
+2. **Keep the 2 working test files** - They test current functionality
+3. **Update tracking MDC** - Correct the assessment
+
+### **Phase 2: Verify Current Test Coverage**
+1. **Run working tests** - Ensure they still pass
+2. **Identify gaps** - What current functionality needs test coverage?
+3. **Create new tests** - For any missing coverage of current functionality
+
+### **Phase 3: Final Validation**
+1. **Clean test suite** - Only tests that actually work
+2. **Document lessons learned** - Why the initial assessment was wrong
+3. **Update migration plan** - Reflect the correct understanding
+
+## Lessons Learned
+
+1. **❌ DON'T TRUST TEST FILE NAMES** - A test file named "test_brush_*" doesn't mean it tests current brush functionality
+2. **❌ DON'T ASSUME TESTS ARE RELEVANT** - Many tests were testing the old system architecture
+3. **✅ ALWAYS VERIFY IMPORTS FIRST** - Check what classes the tests actually depend on
+4. **✅ RUN TESTS BEFORE RESTORING** - Verify they actually test current functionality
+5. **✅ FOCUS ON FUNCTIONALITY, NOT FILE NAMES** - What matters is what the test actually tests
+
+## Next Action
+
+**IMMEDIATE PRIORITY**: Delete the 18 incorrectly restored test files that test removed legacy functionality.
+
+These files should never have been restored because they test functionality that was intentionally removed during the legacy system migration. The current system has completely different architecture and these tests are not relevant.

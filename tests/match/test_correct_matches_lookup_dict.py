@@ -8,7 +8,6 @@ import time
 from unittest.mock import Mock
 
 from sotd.match.correct_matches import CorrectMatchesChecker
-from sotd.match.config import BrushMatcherConfig
 
 
 class TestLookupDictionaryConstruction:
@@ -16,8 +15,8 @@ class TestLookupDictionaryConstruction:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
+        
+        
 
         # Mock correct_matches data with hierarchical YAML structure
         self.correct_matches = {
@@ -36,7 +35,7 @@ class TestLookupDictionaryConstruction:
             "knot": {"Declaration Grooming": {"B14": ["declaration grooming b14"]}},
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_dictionary_construction_from_hierarchical_yaml(self):
         """Test dictionary construction from hierarchical YAML."""
@@ -65,7 +64,7 @@ class TestLookupDictionaryConstruction:
         # This test will be implemented when we add flattened lookup dictionary
         # For now, we're testing the current behavior
         malformed_matches = {"brush": "not a dict"}
-        checker = CorrectMatchesChecker(self.config, malformed_matches)
+        checker = CorrectMatchesChecker(malformed_matches)
 
         # Current implementation will fail with AttributeError
         # This will be fixed in the new implementation to handle gracefully
@@ -82,8 +81,8 @@ class TestLookupPerformance:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
+        
+        
 
         # Create large dataset for performance testing
         self.correct_matches = {"brush": {}}
@@ -99,7 +98,7 @@ class TestLookupPerformance:
 
             self.correct_matches["brush"][brand][model] = [string]
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_o1_lookup_time_validation(self):
         """Test O(1) lookup time validation."""
@@ -144,14 +143,14 @@ class TestCaseInsensitiveAccess:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
+        
+        
 
         self.correct_matches = {
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}}
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_case_insensitive_key_matching(self):
         """Test case-insensitive key matching."""
@@ -183,13 +182,13 @@ class TestMemoryEfficiency:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
+        
+        
 
         # Create dataset for memory testing
         self.correct_matches = {"brush": {"Test Brand": {"Test Model": ["test brand test model"]}}}
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_memory_usage_optimization(self):
         """Test memory usage optimization."""
@@ -222,7 +221,7 @@ class TestMemoryEfficiency:
             large_catalog["brush"][brand][model] = [string]
 
         # Initialize checker with large catalog
-        checker = CorrectMatchesChecker(self.config, large_catalog)
+        checker = CorrectMatchesChecker(large_catalog)
 
         end_time = time.time()
         init_time = end_time - start_time
@@ -243,12 +242,12 @@ class TestPerformanceRegressionDetection:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
+        
+        
 
         self.correct_matches = {"brush": {"Test Brand": {"Test Model": ["test brand test model"]}}}
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_performance_regression_detection(self):
         """Test performance regression detection."""

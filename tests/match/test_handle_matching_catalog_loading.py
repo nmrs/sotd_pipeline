@@ -2,7 +2,6 @@
 
 import yaml
 
-from sotd.match.config import BrushMatcherConfig
 from sotd.match.loaders import CatalogLoader
 
 
@@ -52,14 +51,12 @@ class TestHandleMatchingCatalogLoading:
             yaml.dump(correct_matches_data, f)
 
         # Load catalog and verify handle_matching is preserved
-        config = BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
-        )
-        loader = CatalogLoader(config)
-        catalogs = loader.load_all_catalogs()
+        loader = CatalogLoader()
+        catalogs = {}
+        catalogs["brushes"] = loader.load_catalog(catalog_path, "brushes")
+        catalogs["handles"] = loader.load_catalog(handles_path, "handles")
+        catalogs["knots"] = loader.load_catalog(knots_path, "knots")
+        catalogs["correct_matches"] = loader.load_catalog(correct_matches_path, "correct_matches")
 
         # Check that handle_matching is preserved at brand level
         declaration_grooming = catalogs["brushes"]["known_brushes"]["Declaration Grooming"]
@@ -118,14 +115,12 @@ class TestHandleMatchingCatalogLoading:
             yaml.dump(correct_matches_data, f)
 
         # Load catalog and verify handle_matching is preserved
-        config = BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
-        )
-        loader = CatalogLoader(config)
-        catalogs = loader.load_all_catalogs()
+        loader = CatalogLoader()
+        catalogs = {}
+        catalogs["brushes"] = loader.load_catalog(catalog_path, "brushes")
+        catalogs["handles"] = loader.load_catalog(handles_path, "handles")
+        catalogs["knots"] = loader.load_catalog(knots_path, "knots")
+        catalogs["correct_matches"] = loader.load_catalog(correct_matches_path, "correct_matches")
 
         # Check that handle_matching is preserved at model level
         declaration_grooming = catalogs["brushes"]["known_brushes"]["Declaration Grooming"]
@@ -183,14 +178,12 @@ class TestHandleMatchingCatalogLoading:
             yaml.dump(correct_matches_data, f)
 
         # Load catalog and verify hierarchical behavior
-        config = BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
-        )
-        loader = CatalogLoader(config)
-        catalogs = loader.load_all_catalogs()
+        loader = CatalogLoader()
+        catalogs = {}
+        catalogs["brushes"] = loader.load_catalog(catalog_path, "brushes")
+        catalogs["handles"] = loader.load_catalog(handles_path, "handles")
+        catalogs["knots"] = loader.load_catalog(knots_path, "knots")
+        catalogs["correct_matches"] = loader.load_catalog(correct_matches_path, "correct_matches")
 
         # Check hierarchical behavior
         declaration_grooming = catalogs["brushes"]["known_brushes"]["Declaration Grooming"]
@@ -247,14 +240,12 @@ class TestHandleMatchingCatalogLoading:
             yaml.dump(correct_matches_data, f)
 
         # Load catalog and verify default behavior
-        config = BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
-        )
-        loader = CatalogLoader(config)
-        catalogs = loader.load_all_catalogs()
+        loader = CatalogLoader()
+        catalogs = {}
+        catalogs["brushes"] = loader.load_catalog(catalog_path, "brushes")
+        catalogs["handles"] = loader.load_catalog(handles_path, "handles")
+        catalogs["knots"] = loader.load_catalog(knots_path, "knots")
+        catalogs["correct_matches"] = loader.load_catalog(correct_matches_path, "correct_matches")
 
         # Check that handle_matching is not present (defaults to False)
         declaration_grooming = catalogs["brushes"]["known_brushes"]["Declaration Grooming"]
@@ -302,14 +293,12 @@ class TestHandleMatchingCatalogLoading:
 
         # Load catalog - should not raise error but should preserve the values as-is
         # (validation will be handled during usage, not during loading)
-        config = BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
-        )
-        loader = CatalogLoader(config)
-        catalogs = loader.load_all_catalogs()
+        loader = CatalogLoader()
+        catalogs = {}
+        catalogs["brushes"] = loader.load_catalog(catalog_path, "brushes")
+        catalogs["handles"] = loader.load_catalog(handles_path, "handles")
+        catalogs["knots"] = loader.load_catalog(knots_path, "knots")
+        catalogs["correct_matches"] = loader.load_catalog(correct_matches_path, "correct_matches")
 
         # Check that invalid values are preserved (validation happens during usage)
         declaration_grooming = catalogs["brushes"]["known_brushes"]["Declaration Grooming"]

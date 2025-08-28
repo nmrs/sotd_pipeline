@@ -8,7 +8,6 @@ any entries in the correct_matches.yaml file, supporting both brush section
 
 from typing import Any, Dict, Optional
 
-from sotd.match.config import BrushMatcherConfig
 from sotd.match.types import CorrectMatchData
 from sotd.utils.extract_normalization import normalize_for_matching
 
@@ -22,17 +21,16 @@ class CorrectMatchesChecker:
     and handle/knot sections (combo brushes).
     """
 
-    def __init__(self, config: BrushMatcherConfig, correct_matches: Dict[str, Any]):
+    def __init__(self, correct_matches: Dict[str, Any], debug: bool = False):
         """
         Initialize the correct matches checker.
 
         Args:
-            config: Configuration object containing paths and settings
             correct_matches: Loaded correct matches data from YAML
+            debug: Optional debug flag for verbose logging
         """
-        self.config = config
         self.correct_matches = correct_matches or {}
-        self.debug = config.debug
+        self.debug = debug
 
     def check(self, value: str) -> Optional[CorrectMatchData]:
         """

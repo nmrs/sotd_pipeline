@@ -1,14 +1,11 @@
 """
-Unit tests for interface consistency in CorrectMatchesChecker.
+Tests for correct matches interface consistency.
 
-Tests that the implementation returns the same MatchResult structure
-as regex strategies and maintains interface consistency.
+This test ensures that the correct matches checker provides a consistent
+interface for different types of correct matches data.
 """
 
-from unittest.mock import Mock
-
 from sotd.match.correct_matches import CorrectMatchesChecker
-from sotd.match.config import BrushMatcherConfig
 
 
 class TestMatchResultStructure:
@@ -16,14 +13,11 @@ class TestMatchResultStructure:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         self.correct_matches = {
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}}
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_match_result_structure_matches_regex_strategies(self):
         """Test MatchResult structure matches regex strategies."""
@@ -119,7 +113,7 @@ class TestMatchResultStructure:
 
         # Test with malformed data
         malformed_matches = {"brush": "not a dict"}
-        malformed_checker = CorrectMatchesChecker(self.config, malformed_matches)
+        malformed_checker = CorrectMatchesChecker(malformed_matches)
 
         # Current implementation will fail with AttributeError
         # New implementation will handle gracefully and fail fast
@@ -136,12 +130,9 @@ class TestErrorHandlingConsistency:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         self.correct_matches = {"brush": {"Test Brand": {"Test Model": ["test brand test model"]}}}
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_error_handling_consistency_for_invalid_input(self):
         """Test error handling consistency for invalid input."""
@@ -162,7 +153,7 @@ class TestErrorHandlingConsistency:
 
         # Test with malformed correct_matches
         malformed_matches = {"brush": "not a dict"}
-        malformed_checker = CorrectMatchesChecker(self.config, malformed_matches)
+        malformed_checker = CorrectMatchesChecker(malformed_matches)
 
         # Current implementation will fail with AttributeError
         # New implementation will handle gracefully
@@ -187,14 +178,11 @@ class TestDebugOutputConsistency:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = True  # Enable debug mode
-
         self.correct_matches = {
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}}
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_debug_output_consistency_for_successful_matches(self):
         """Test debug output consistency for successful matches."""
@@ -221,7 +209,7 @@ class TestDebugOutputConsistency:
 
         # Test with malformed data
         malformed_matches = {"brush": "not a dict"}
-        malformed_checker = CorrectMatchesChecker(self.config, malformed_matches)
+        malformed_checker = CorrectMatchesChecker(malformed_matches)
 
         # Current implementation will fail with AttributeError
         # New implementation will handle gracefully and provide debug output
@@ -238,9 +226,6 @@ class TestStrategyIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = Mock(spec=BrushMatcherConfig)
-        self.config.debug = False
-
         self.correct_matches = {
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}},
             "handle": {
@@ -249,7 +234,7 @@ class TestStrategyIntegration:
             "knot": {"Declaration Grooming": {"B14": ["declaration grooming b14"]}},
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches)
 
     def test_strategy_integration_with_brush_matcher_priority_order(self):
         """Test strategy integration with brush matcher priority order."""
