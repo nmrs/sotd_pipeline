@@ -8,7 +8,7 @@ from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
@@ -83,7 +83,7 @@ def match_record(
     razor_matcher: RazorMatcher,
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
-    brush_matcher: "BrushScoringMatcher",  # type: ignore
+    brush_matcher: "BrushMatcher",  # type: ignore
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
@@ -293,7 +293,7 @@ def process_month(
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
 
         # Initialize brush matcher using the new multi-strategy scoring system
-        brush_matcher = BrushScoringMatcher(
+        brush_matcher = BrushMatcher(
             correct_matches_path=correct_matches_path,
             debug=debug,
         )

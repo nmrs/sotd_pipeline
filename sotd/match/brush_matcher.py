@@ -42,7 +42,7 @@ def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
         return {}
 
 
-class BrushScoringMatcher:
+class BrushMatcher:
     """
     Enhanced brush scoring matcher using all components.
 
@@ -57,10 +57,28 @@ class BrushScoringMatcher:
         Initialize the enhanced brush scoring matcher.
 
         Args:
-            config_path: Path to configuration file
+            config_path: Path to configuration file or BrushMatcherConfig object (for compatibility)
             correct_matches_path: Path to correct_matches.yaml file
             **kwargs: Additional arguments (ignored for now)
         """
+        # Handle legacy BrushMatcherConfig objects for compatibility
+        if (
+            config_path is not None
+            and not isinstance(config_path, Path)
+            and hasattr(config_path, "catalog_path")
+        ):
+            # Legacy config object - extract paths
+            legacy_config = config_path
+            config_path = legacy_config.catalog_path
+            handles_path = getattr(legacy_config, "handles_path", Path("data/handles.yaml"))
+            knots_path = getattr(legacy_config, "knots_path", Path("data/knots.yaml"))
+            bypass_correct_matches = getattr(legacy_config, "bypass_correct_matches", False)
+        else:
+            # New interface - use default paths
+            handles_path = Path("data/handles.yaml")
+            knots_path = Path("data/knots.yaml")
+            bypass_correct_matches = False
+
         # Initialize configuration
         self.config = BrushScoringConfig(config_path=config_path)
 
