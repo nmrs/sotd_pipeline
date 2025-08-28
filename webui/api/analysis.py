@@ -1515,6 +1515,62 @@ async def _validate_brush_catalog():
                                                             ),
                                                         }
                                                     )
+                                            
+                                            # Now check for single component brushes (handle-only or knot-only)
+                                            elif not matched_model and (
+                                                (hasattr(result.matched, "handle") and getattr(result.matched.handle, "brand", None)) or
+                                                (hasattr(result.matched, "knot") and getattr(result.matched.knot, "brand", None))
+                                            ):
+                                                # This is a single component brush - check if it should be stored in handle/knot sections
+                                                matched_handle_brand = getattr(result.matched.handle, "brand", None) if hasattr(result.matched, "handle") else None
+                                                matched_knot_brand = getattr(result.matched.knot, "brand", None) if hasattr(result.matched, "knot") else None
+                                                
+                                                # Determine which component is populated
+                                                if matched_handle_brand and not matched_knot_brand:
+                                                    # Handle-only brush
+                                                    issues.append(
+                                                        {
+                                                            "type": "catalog_pattern_mismatch",
+                                                            "field": "brush",
+                                                            "pattern": pattern,
+                                                            "stored_brand": brand.strip(),
+                                                            "stored_model": model.strip(),
+                                                            "matched_brand": matched_brand,
+                                                            "matched_model": "HANDLE_ONLY",
+                                                            "message": (
+                                                                f"Pattern '{pattern}' is stored as complete brush under "
+                                                                f"'{brand.strip()} {model.strip()}' but matcher returns "
+                                                                f"handle-only brush with handle: {matched_handle_brand}"
+                                                            ),
+                                                            "suggested_action": (
+                                                                f"Consider moving pattern '{pattern}' to handle section "
+                                                                f"since it's being matched as a handle-only brush"
+                                                            ),
+                                                        }
+                                                    )
+                                                elif matched_knot_brand and not matched_handle_brand:
+                                                    # Knot-only brush
+                                                    issues.append(
+                                                        {
+                                                            "type": "catalog_pattern_mismatch",
+                                                            "field": "brush",
+                                                            "pattern": pattern,
+                                                            "stored_brand": brand.strip(),
+                                                            "stored_model": model.strip(),
+                                                            "matched_brand": matched_brand,
+                                                            "matched_model": "KNOT_ONLY",
+                                                            "message": (
+                                                                f"Pattern '{pattern}' is stored as complete brush under "
+                                                                f"'{brand.strip()} {model.strip()}' but matcher returns "
+                                                                f"knot-only brush with knot: {matched_knot_brand}"
+                                                            ),
+                                                            "suggested_action": (
+                                                                f"Consider moving pattern '{pattern}' to knot section "
+                                                                f"since it's being matched as a knot-only brush"
+                                                            ),
+                                                        }
+                                                    )
+
                                     else:
                                         # Pattern couldn't be matched at all
                                         issues.append(
