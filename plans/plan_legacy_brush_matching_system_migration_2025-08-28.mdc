@@ -160,6 +160,13 @@ Remove unused code, update tests, verify functionality.
     - **Rationale**: After removing the legacy system, this will be the only brush matcher, so the name should reflect its primary role
     - **Implementation**: TBD - will be done after all legacy system removal is complete
 
+24. **Analyze and Remove Orphaned Strategies** - **PLANNED** 📋
+    - Identify strategies that are no longer used by any system
+    - Remove orphaned strategy files that only the legacy system used
+    - Clean up unused imports and dependencies
+    - **Rationale**: After migration, some strategies may become orphaned and should be removed to clean up the codebase
+    - **Implementation**: TBD - will be done after all legacy system removal is complete
+
 ## 🔧 Technical Approach
 
 ### **Migration Strategy**
@@ -252,4 +259,4 @@ class StrategyManager:
 3. **Remove legacy system only after tests pass** (Phase 5)
 4. **Final cleanup and verification** (Phase 6)
 
-- **Overall Progress**: 4/23 steps complete (17.4%)
+- **Overall Progress**: 6/24 steps complete (25.0%)
