@@ -145,11 +145,29 @@ Remove unused code, update tests, verify functionality.
     - Update user guides
 
 22. **Final Verification**
-    - Run full test suite
-    - Verify pipeline functionality
+    - Run comprehensive test suite
+    - Verify all functionality works as expected
     - Check for any remaining legacy references
+    - **Implementation**: TBD
+
+23. **Rename Main Matcher** - **PLANNED** 📋
+    - Rename `scoring_brush_matcher.py` to `brush_matcher.py`
+    - Update all imports and references throughout the codebase
+    - Update class name from `BrushScoringMatcher` to `BrushMatcher`
+    - Update documentation and type hints
+    - **Rationale**: After removing the legacy system, this will be the only brush matcher, so the name should reflect its primary role
+    - **Implementation**: TBD - will be done after all legacy system removal is complete
 
 ## 🔧 Technical Approach
+
+### **Migration Strategy**
+1. **Extract shared functionality** into reusable utilities (Phase 1)
+2. **Update new system** to use shared utilities (Phase 2)
+3. **Remove legacy system** only after tests pass (Phase 3)
+4. **Final cleanup and verification** (Phase 4)
+5. **Rename main matcher** to reflect its primary role (Phase 5)
+
+### **Key Principles**
 
 ### **Catalog Loading Extraction**
 ```python
@@ -231,3 +249,5 @@ class StrategyManager:
 2. **Update tests systematically** (Phase 4 - NEW)
 3. **Remove legacy system only after tests pass** (Phase 5)
 4. **Final cleanup and verification** (Phase 6)
+
+- **Overall Progress**: 4/23 steps complete (17.4%)
