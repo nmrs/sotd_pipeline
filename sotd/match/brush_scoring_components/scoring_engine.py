@@ -196,18 +196,27 @@ class ScoringEngine:
             # Return 1.0 if we have 2+ different brands, 0.0 otherwise
             return 1.0 if len(brands_found) > 1 else 0.0
 
-        # For other strategies, check if the result has multiple brand fields
-        # This is a fallback for non-unified strategies
-        brand_fields = ["brand", "handle_brand", "knot_brand"]
+        # For all strategies, check nested handle and knot brand fields
         brands_found = set()
 
         # Handle case where matched is None
         if matched is None:
             return 0.0
 
-        for field in brand_fields:
-            if field in matched and matched[field]:
-                brands_found.add(matched[field])
+        # Check nested handle and knot brand fields
+        if "handle" in matched and isinstance(matched["handle"], dict):
+            handle_brand = matched["handle"].get("brand")
+            if handle_brand:
+                brands_found.add(handle_brand)
+
+        if "knot" in matched and isinstance(matched["knot"], dict):
+            knot_brand = matched["knot"].get("brand")
+            if knot_brand:
+                brands_found.add(knot_brand)
+
+        # Also check direct brand field if it exists
+        if "brand" in matched and matched["brand"]:
+            brands_found.add(matched["brand"])
 
         return 1.0 if len(brands_found) > 1 else 0.0
 

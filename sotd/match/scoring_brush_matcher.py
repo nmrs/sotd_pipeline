@@ -612,17 +612,11 @@ class BrushScoringMatcher:
             best_result = self.scoring_engine.get_best_result(scored_results)
 
             # Phase 4.1: Capture all strategy results for persistence
-            # Convert strategy results to serializable format for JSON storage
+            # Store full MatchResult objects to preserve detailed data for API
             all_strategies = []
             for result in scored_results:  # Use scored_results from ScoringEngine
-                strategy_data = {
-                    "strategy": result.strategy,
-                    "score": result.score,
-                    "result": result.matched,
-                    "match_type": result.match_type,
-                    "pattern": result.pattern,
-                }
-                all_strategies.append(strategy_data)
+                # Store the full MatchResult object to preserve all data
+                all_strategies.append(result)
 
             # Note: We no longer create separate best_result_data since strategy and score
             # are now added directly to the matched data
