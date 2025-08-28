@@ -93,8 +93,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["razors", "blades"]
         mock_table_generator.generate_table.side_effect = [
             "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-            "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
-        ]
+            "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |"]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
@@ -120,8 +119,7 @@ class TestMonthlyReportGenerator:
             "sample_percentage": 0.0,
             "sample_users": 0,
             "sample_brands": 0,
-            "unique_sample_soaps": 0,
-        }
+            "unique_sample_soaps": 0}
         data = {"razors": [], "blades": []}
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
@@ -147,12 +145,10 @@ class TestMonthlyReportGenerator:
                 "sample_percentage": "0.0%",
                 "sample_users": "0",
                 "sample_brands": "0",
-                "unique_sample_soaps": "0",
-            },
+                "unique_sample_soaps": "0"},
             {
                 "{{tables.razors}}": "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-                "{{tables.blades}}": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |",
-            },
+                "{{tables.blades}}": "| Blade | Shaves |\n|-------|--------|\n| Test | 10 |"},
         )
 
         assert result == "Generated report"
@@ -168,8 +164,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["soaps", "scents"]
         mock_table_generator.generate_table.side_effect = [
             "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
-            "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
-        ]
+            "| Scent | Shaves |\n|------|--------|\n| Test | 10 |"]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()
@@ -195,8 +190,7 @@ class TestMonthlyReportGenerator:
             "sample_percentage": 10.0,
             "sample_users": 15,
             "sample_brands": 8,
-            "unique_sample_soaps": 12,
-        }
+            "unique_sample_soaps": 12}
         data = {"soaps": [], "scents": []}
 
         generator = MonthlyReportGenerator("software", metadata, data)
@@ -222,12 +216,10 @@ class TestMonthlyReportGenerator:
                 "sample_percentage": "10.0%",
                 "sample_users": "15",
                 "sample_brands": "8",
-                "unique_sample_soaps": "12",
-            },
+                "unique_sample_soaps": "12"},
             {
                 "{{tables.soaps}}": "| Soap | Shaves |\n|------|--------|\n| Test | 10 |",
-                "{{tables.scents}}": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |",
-            },
+                "{{tables.scents}}": "| Scent | Shaves |\n|------|--------|\n| Test | 10 |"},
         )
 
         assert result == "Generated software report"
@@ -271,8 +263,7 @@ class TestMonthlyReportGenerator:
         mock_table_generator.get_available_table_names.return_value = ["razors", "blades"]
         mock_table_generator.generate_table.side_effect = [
             "| Razor | Shaves |\n|-------|--------|\n| Test | 10 |",
-            Exception("Table generation failed"),
-        ]
+            Exception("Table generation failed")]
         mock_table_generator_class.return_value = mock_table_generator
 
         mock_processor = Mock()

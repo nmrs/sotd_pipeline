@@ -7,9 +7,8 @@ specifically addressing the bug where all ranks show as '1=' in the final report
 import pytest
 from pathlib import Path
 
-from sotd.report.table_generator import TableGenerator
+from sotd.report.table_generators.table_generator import TableGenerator
 from sotd.report.enhanced_table_generator import EnhancedTableGenerator
-from sotd.report.table_generators.cross_product_tables import HighestUseCountPerBladeTableGenerator
 
 
 class TestRankingIntegration:
@@ -20,13 +19,7 @@ class TestRankingIntegration:
         # Sample aggregated data with correct ranks
         aggregated_data = {
             "highest_use_count_per_blade": [
-                {
-                    "rank": 1,
-                    "user": "user1",
-                    "blade": "Gillette Nacet",
-                    "format": "DE",
-                    "uses": 15,
-                },
+                {"rank": 1, "user": "user1", "blade": "Gillette Nacet", "format": "DE", "uses": 15},
                 {
                     "rank": 2,
                     "user": "user2",
@@ -68,8 +61,8 @@ class TestRankingIntegration:
         assert blade_data[4]["rank"] == 5
 
         # Test 2: Verify table generator preserves ranks
-        table_generator = HighestUseCountPerBladeTableGenerator(aggregated_data, debug=False)
-        table_data = table_generator.get_table_data()
+        table_generator = TableGenerator(aggregated_data, debug=False)
+        table_data = table_generator.generate_table("specific-table")
 
         # This should NOT be empty - if it is, we've found the bug!
         assert len(table_data) == 5, (
@@ -134,8 +127,8 @@ class TestRankingIntegration:
         }
 
         # Test the table generator directly to get raw data
-        table_generator = HighestUseCountPerBladeTableGenerator(aggregated_data, debug=False)
-        basic_table = table_generator.get_table_data()
+        table_generator = TableGenerator(aggregated_data, debug=False)
+        basic_table = table_generator.generate_table("specific-table")
 
         # Basic table should preserve ranks
         assert len(basic_table) == 3, f"Basic table should have 3 items, got {len(basic_table)}"
@@ -179,8 +172,8 @@ class TestRankingIntegration:
         }
 
         # Test the table generator directly to get raw data
-        table_generator = HighestUseCountPerBladeTableGenerator(aggregated_data, debug=False)
-        raw_data = table_generator.get_table_data()
+        table_generator = TableGenerator(aggregated_data, debug=False)
+        raw_data = table_generator.generate_table("specific-table")
 
         # Test enhanced table processing
         enhanced_generator = EnhancedTableGenerator()
@@ -242,8 +235,8 @@ class TestRankingIntegration:
             ), f"Item {i}: rank {actual_rank} should be positive integer"
 
         # Test 2: Verify table generator works with real data
-        table_generator = HighestUseCountPerBladeTableGenerator(real_data["data"], debug=False)
-        table_data = table_generator.get_table_data()
+        table_generator = TableGenerator(real_data["data"], debug=False)
+        table_data = table_generator.generate_table("specific-table")
 
         # This should NOT be empty with real data
         assert (
@@ -280,8 +273,8 @@ class TestRankingIntegration:
         }
 
         # Test the complete pipeline
-        table_generator = HighestUseCountPerBladeTableGenerator(test_data, debug=False)
-        table_data = table_generator.get_table_data()
+        table_generator = TableGenerator(test_data, debug=False)
+        table_data = table_generator.generate_table("specific-table")
 
         # This assertion will fail if the bug exists (empty data)
         assert (
@@ -322,8 +315,8 @@ class TestRankingIntegration:
             ]
         }
 
-        table_generator = HighestUseCountPerBladeTableGenerator(test_data, debug=False)
-        table_data = table_generator.get_table_data()
+        table_generator = TableGenerator(test_data, debug=False)
+        table_data = table_generator.generate_table("specific-table")
 
         # If the bug exists, provide clear error information
         if len(table_data) != 3:

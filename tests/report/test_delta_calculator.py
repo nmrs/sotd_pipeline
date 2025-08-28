@@ -20,13 +20,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_basic(self):
         """Test basic delta calculation with rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor A", "shaves": 100},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor B", "shaves": 90, "rank": 1},
+            {"name": "Razor B", "shaves": 90},
             {"name": "Razor A", "shaves": 85, "rank": 2},
             {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
@@ -57,13 +57,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_new_item(self):
         """Test delta calculation with new items not in historical data."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor A", "shaves": 100},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "New Razor", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 90, "rank": 1},
+            {"name": "Razor A", "shaves": 90},
             {"name": "Razor B", "shaves": 85, "rank": 2},
         ]
 
@@ -81,13 +81,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_missing_rank(self):
         """Test delta calculation with missing rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor A", "shaves": 100},
             {"name": "Razor B", "shaves": 80},  # Missing rank
         ]
 
         historical_data = [
             {"name": "Razor A", "shaves": 90, "rank": 2},
-            {"name": "Razor B", "shaves": 85, "rank": 1},
+            {"name": "Razor B", "shaves": 85},
         ]
 
         calculator = DeltaCalculator()
@@ -102,11 +102,11 @@ class TestDeltaCalculator:
         calculator = DeltaCalculator()
 
         # Empty current data
-        result = calculator.calculate_deltas([], [{"name": "Razor A", "rank": 1}])
+        result = calculator.calculate_deltas([], [{"name": "Razor A"}])
         assert result == []
 
         # Empty historical data
-        result = calculator.calculate_deltas([{"name": "Razor A", "rank": 1}], [])
+        result = calculator.calculate_deltas([{"name": "Razor A"}], [])
         assert len(result) == 1
         assert result[0]["delta"] is None
         assert result[0]["delta_text"] == "n/a"
@@ -124,14 +124,14 @@ class TestDeltaCalculator:
     def test_calculate_deltas_max_items(self):
         """Test delta calculation with max_items limit."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor A", "shaves": 100},
             {"name": "Razor B", "shaves": 80, "rank": 2},
             {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
             {"name": "Razor A", "shaves": 90, "rank": 2},
-            {"name": "Razor B", "shaves": 85, "rank": 1},
+            {"name": "Razor B", "shaves": 85},
             {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
 
@@ -145,13 +145,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_custom_name_key(self):
         """Test delta calculation with custom name key."""
         current_data = [
-            {"product": "Razor A", "shaves": 100, "rank": 1},
+            {"product": "Razor A", "shaves": 100},
             {"product": "Razor B", "shaves": 80, "rank": 2},
         ]
 
         historical_data = [
             {"product": "Razor A", "shaves": 90, "rank": 2},
-            {"product": "Razor B", "shaves": 85, "rank": 1},
+            {"product": "Razor B", "shaves": 85},
         ]
 
         calculator = DeltaCalculator()
@@ -174,22 +174,22 @@ class TestDeltaCalculator:
         """Test delta calculation for multiple categories."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "rank": 1},
+                {"name": "Razor A", "shaves": 100},
                 {"name": "Razor B", "shaves": 80, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 50, "rank": 1},
+                {"name": "Blade A", "shaves": 50},
                 {"name": "Blade B", "shaves": 40, "rank": 2},
             ],
         }
 
         historical_data = {
             "razors": [
-                {"name": "Razor B", "shaves": 90, "rank": 1},
+                {"name": "Razor B", "shaves": 90},
                 {"name": "Razor A", "shaves": 85, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 45, "rank": 1},
+                {"name": "Blade A", "shaves": 45},
                 {"name": "Blade B", "shaves": 35, "rank": 2},
             ],
         }
@@ -216,17 +216,10 @@ class TestDeltaCalculator:
 
     def test_calculate_category_deltas_invalid_category(self):
         """Test delta calculation with invalid category data."""
-        current_data = {
-            "razors": [
-                {"name": "Razor A", "shaves": 100, "rank": 1},
-            ],
-            "invalid": "not a list",
-        }
+        current_data = {"razors": [{"name": "Razor A", "shaves": 100}], "invalid": "not a list"}
 
         historical_data = {
-            "razors": [
-                {"name": "Razor A", "shaves": 90, "rank": 2},
-            ],
+            "razors": [{"name": "Razor A", "shaves": 90, "rank": 2}],
             "invalid": "not a list",
         }
 
@@ -287,14 +280,14 @@ class TestDeltaCalculator:
         """
         # Current month data (June 2025)
         current_data = [
-            {"name": "SBC", "shaves": 22, "unique_users": 8, "rank": 1},
+            {"name": "SBC", "shaves": 22, "unique_users": 8},
             {"name": "SBD", "shaves": 31, "unique_users": 6, "rank": 2},
             {"name": "OCF", "shaves": 9, "unique_users": 1, "rank": 3},
         ]
 
         # Previous month data (May 2025) - these plates definitely existed
         historical_data = [
-            {"name": "SBC", "shaves": 23, "unique_users": 3, "rank": 1},
+            {"name": "SBC", "shaves": 23, "unique_users": 3},
             {"name": "SBD", "shaves": 23, "unique_users": 3, "rank": 2},
             {"name": "OCF", "shaves": 3, "unique_users": 1, "rank": 3},
         ]
@@ -354,9 +347,7 @@ class TestDeltaCalculator:
         This test exposes the bug where the table generation process fails to
         include delta calculations even though the DeltaCalculator works correctly.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            ChristopherBradleyPlatesTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
@@ -441,14 +432,12 @@ class TestDeltaCalculator:
 
         This test confirms the same bug exists in Straight Grinds table generation.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            StraightGrindsTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_grinds": [
-                {"grind": "Full Hollow", "shaves": 71, "unique_users": 18, "rank": 1},
+                {"grind": "Full Hollow", "shaves": 71, "unique_users": 18},
                 {"grind": "Hollow", "shaves": 32, "unique_users": 12, "rank": 2},
                 {"grind": "Extra Hollow", "shaves": 8, "unique_users": 6, "rank": 3},
             ]
@@ -460,7 +449,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_grinds": [
-                        {"grind": "Full Hollow", "shaves": 65, "unique_users": 16, "rank": 1},
+                        {"grind": "Full Hollow", "shaves": 65, "unique_users": 16},
                         {"grind": "Hollow", "shaves": 35, "unique_users": 14, "rank": 2},
                         {"grind": "Extra Hollow", "shaves": 10, "unique_users": 5, "rank": 3},
                     ]
@@ -498,14 +487,12 @@ class TestDeltaCalculator:
 
         This test confirms the Straight Points table is working with the new base class.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            StraightPointsTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_points": [
-                {"point": "Square", "shaves": 44, "unique_users": 15, "rank": 1},
+                {"point": "Square", "shaves": 44, "unique_users": 15},
                 {"point": "Round", "shaves": 32, "unique_users": 11, "rank": 2},
                 {"point": "Barber's Notch", "shaves": 10, "unique_users": 6, "rank": 3},
             ]
@@ -517,7 +504,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_points": [
-                        {"point": "Square", "shaves": 40, "unique_users": 14, "rank": 1},
+                        {"point": "Square", "shaves": 40, "unique_users": 14},
                         {"point": "Round", "shaves": 35, "unique_users": 12, "rank": 2},
                         {"point": "Barber's Notch", "shaves": 12, "unique_users": 5, "rank": 3},
                     ]
@@ -550,14 +537,12 @@ class TestDeltaCalculator:
 
         This test confirms the Straight Widths table is working with the new base class.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            StraightWidthsTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "straight_widths": [
-                {"width": "5/8", "shaves": 45, "unique_users": 12, "rank": 1},
+                {"width": "5/8", "shaves": 45, "unique_users": 12},
                 {"width": "6/8", "shaves": 38, "unique_users": 10, "rank": 2},
                 {"width": "4/8", "shaves": 22, "unique_users": 8, "rank": 3},
             ]
@@ -569,7 +554,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "straight_widths": [
-                        {"width": "5/8", "shaves": 42, "unique_users": 11, "rank": 1},
+                        {"width": "5/8", "shaves": 42, "unique_users": 11},
                         {"width": "6/8", "shaves": 40, "unique_users": 12, "rank": 2},
                         {"width": "4/8", "shaves": 25, "unique_users": 9, "rank": 3},
                     ]
@@ -603,14 +588,12 @@ class TestDeltaCalculator:
         This test exposes the bug where Game Changer plates table fails to
         include delta calculations because it doesn't inherit from DataTransformingTableGenerator.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            GameChangerPlatesTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "game_changer_plates": [
-                {"gap": ".84", "shaves": 71, "unique_users": 10, "rank": 1},
+                {"gap": ".84", "shaves": 71, "unique_users": 10},
                 {"gap": ".68", "shaves": 1, "unique_users": 1, "rank": 2},
                 {"gap": ".76", "shaves": 1, "unique_users": 1, "rank": 3},
             ]
@@ -622,7 +605,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "game_changer_plates": [
-                        {"gap": ".84", "shaves": 65, "unique_users": 8, "rank": 1},
+                        {"gap": ".84", "shaves": 65, "unique_users": 8},
                         {"gap": ".68", "shaves": 3, "unique_users": 2, "rank": 2},
                         {"gap": ".76", "shaves": 2, "unique_users": 1, "rank": 3},
                     ]
@@ -661,14 +644,12 @@ class TestDeltaCalculator:
         This test exposes the bug where Super Speed tips table fails to
         include delta calculations because it doesn't inherit from DataTransformingTableGenerator.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            SuperSpeedTipsTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "super_speed_tips": [
-                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8, "rank": 1},
+                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8},
                 {"super_speed_tip": "Long", "shaves": 15, "unique_users": 5, "rank": 2},
                 {"super_speed_tip": "Short", "shaves": 8, "unique_users": 3, "rank": 3},
             ]
@@ -680,7 +661,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "super_speed_tips": [
-                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7, "rank": 1},
+                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7},
                         {"super_speed_tip": "Long", "shaves": 18, "unique_users": 6, "rank": 2},
                         {"super_speed_tip": "Short", "shaves": 10, "unique_users": 4, "rank": 3},
                     ]
@@ -719,14 +700,12 @@ class TestDeltaCalculator:
         This test validates that Blackbird plates table works correctly
         since it already inherits from DataTransformingTableGenerator.
         """
-        from sotd.report.table_generators.specialized_tables import (
-            BlackbirdPlatesTableGenerator,
-        )
+        from sotd.report.table_generators.table_generator import TableGenerator
 
         # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = {
             "blackbird_plates": [
-                {"plate": "OC", "shaves": 45, "unique_users": 12, "rank": 1},
+                {"plate": "OC", "shaves": 45, "unique_users": 12},
                 {"plate": "SB", "shaves": 38, "unique_users": 10, "rank": 2},
                 {"plate": "OC-SB", "shaves": 22, "unique_users": 8, "rank": 3},
             ]
@@ -738,7 +717,7 @@ class TestDeltaCalculator:
                 {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
                 {
                     "blackbird_plates": [
-                        {"plate": "OC", "shaves": 42, "unique_users": 11, "rank": 1},
+                        {"plate": "OC", "shaves": 42, "unique_users": 11},
                         {"plate": "SB", "shaves": 40, "unique_users": 12, "rank": 2},
                         {"plate": "OC-SB", "shaves": 25, "unique_users": 9, "rank": 3},
                     ]
@@ -774,7 +753,7 @@ class TestCalculateDeltasForPeriod:
         """Test successful delta calculation for a period."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "rank": 1},
+                {"name": "Razor A", "shaves": 100},
                 {"name": "Razor B", "shaves": 80, "rank": 2},
             ]
         }
@@ -784,7 +763,7 @@ class TestCalculateDeltasForPeriod:
                 {"month": "2024-12"},
                 {
                     "razors": [
-                        {"name": "Razor B", "shaves": 90, "rank": 1},
+                        {"name": "Razor B", "shaves": 90},
                         {"name": "Razor A", "shaves": 85, "rank": 2},
                     ]
                 },
@@ -832,20 +811,12 @@ class TestCalculateDeltasForPeriod:
 
     def test_calculate_deltas_for_period_with_debug(self):
         """Test delta calculation with debug mode enabled."""
-        current_data = {
-            "razors": [
-                {"name": "Razor A", "shaves": 100, "rank": 1},
-            ]
-        }
+        current_data = {"razors": [{"name": "Razor A", "shaves": 100}]}
 
         comparison_data: Dict[str, Tuple[Dict[str, Any], Dict[str, Any]]] = {
             "previous_month": (
                 {"month": "2024-12"},
-                {
-                    "razors": [
-                        {"name": "Razor A", "shaves": 90, "rank": 2},
-                    ]
-                },
+                {"razors": [{"name": "Razor A", "shaves": 90, "rank": 2}]},
             )
         }
 

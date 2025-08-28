@@ -1,8 +1,6 @@
 """Test ranking functionality for HighestUseCountPerBladeTableGenerator."""
 
-from sotd.report.table_generators.cross_product_tables import (
-    HighestUseCountPerBladeTableGenerator,
-)
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestHighestUseCountPerBladeRanking:
@@ -20,26 +18,22 @@ class TestHighestUseCountPerBladeRanking:
                         "rank": 1,
                         "user": "u/user1",
                         "blade": "Feather",
-                        "uses": 100,
-                    },
+                        "uses": 100},
                     {
                         "rank": 2,
                         "user": "u/user2",
                         "blade": "Astra",
-                        "uses": 90,
-                    },
+                        "uses": 90},
                     {
                         "rank": 3,
                         "user": "u/user3",
                         "blade": "Derby",
-                        "uses": 80,
-                    },
-                ]
+                        "uses": 80}]
             }
         }
 
-        generator = HighestUseCountPerBladeTableGenerator(mock_data)
-        table_data = generator.get_table_data()
+        generator = TableGenerator(mock_data)
+        table_data = generator.generate_table("specific-table")
 
         # Verify that ranks are preserved exactly as provided
         assert table_data[0]["rank"] == 1
@@ -61,26 +55,22 @@ class TestHighestUseCountPerBladeRanking:
                         "rank": 1,
                         "user": "u/user1",
                         "blade": "Feather",
-                        "uses": 100,
-                    },
+                        "uses": 100},
                     {
                         "rank": 1,  # Tied for first
                         "user": "u/user2",
                         "blade": "Astra",
-                        "uses": 100,
-                    },
+                        "uses": 100},
                     {
                         "rank": 3,
                         "user": "u/user3",
                         "blade": "Derby",
-                        "uses": 80,
-                    },
-                ]
+                        "uses": 80}]
             }
         }
 
-        generator = HighestUseCountPerBladeTableGenerator(mock_data)
-        table_data = generator.get_table_data()
+        generator = TableGenerator(mock_data)
+        table_data = generator.generate_table("specific-table")
 
         # Verify that tied ranks are preserved
         assert table_data[0]["rank"] == 1
@@ -97,26 +87,22 @@ class TestHighestUseCountPerBladeRanking:
                         "rank": 1,
                         "user": "u/user1",
                         "blade": "Feather",
-                        "uses": 100,
-                    },
+                        "uses": 100},
                     {
                         "rank": 2,
                         "user": "u/user2",
                         "blade": "Astra",
-                        "uses": 90,
-                    },
+                        "uses": 90},
                     {
                         "rank": 3,
                         "user": "u/user3",
                         "blade": "Derby",
-                        "uses": 80,
-                    },
-                ]
+                        "uses": 80}]
             }
         }
 
-        generator = HighestUseCountPerBladeTableGenerator(mock_data)
-        table_data = generator.get_table_data()
+        generator = TableGenerator(mock_data)
+        table_data = generator.generate_table("specific-table")
 
         # The table generator should NOT change the rank values
         # It should only format them for display (e.g., adding "=" for ties)
@@ -139,26 +125,22 @@ class TestHighestUseCountPerBladeRanking:
                         "rank": 1,
                         "user": "u/tsrblke",
                         "blade": "Derby Premium",
-                        "uses": 275,
-                    },
+                        "uses": 275},
                     {
                         "rank": 2,
                         "user": "u/another_user",
                         "blade": "Feather",
-                        "uses": 112,
-                    },
+                        "uses": 112},
                     {
                         "rank": 3,
                         "user": "u/third_user",
                         "blade": "Astra",
-                        "uses": 110,
-                    },
-                ]
+                        "uses": 110}]
             }
         }
 
-        generator = HighestUseCountPerBladeTableGenerator(mock_data)
-        table_data = generator.get_table_data()
+        generator = TableGenerator(mock_data)
+        table_data = generator.generate_table("specific-table")
 
         # Verify ranks are preserved exactly as provided by aggregator
         assert table_data[0]["rank"] == 1

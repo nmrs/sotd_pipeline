@@ -10,14 +10,14 @@ class TestTierIntegration:
     def test_delta_calculator_tier_integration(self):
         """Test that DeltaCalculator integrates with TierIdentifier utility."""
         current_data = [
-            {"name": "Razor A", "rank": 1},
+            {"name": "Razor A"},
             {"name": "Razor B", "rank": 2},
             {"name": "Razor C", "rank": 2},  # Tied with Razor B
         ]
 
         historical_data = [
             {"name": "Razor A", "rank": 2},  # Was in Tier 2
-            {"name": "Razor B", "rank": 1},  # Was in Tier 1
+            {"name": "Razor B"},  # Was in Tier 1
             {"name": "Razor C", "rank": 2},  # Still in Tier 2
         ]
 
@@ -42,14 +42,14 @@ class TestTierIntegration:
     def test_delta_calculator_tier_analysis(self):
         """Test that DeltaCalculator provides tier analysis."""
         current_data = [
-            {"name": "Razor A", "rank": 1},
+            {"name": "Razor A"},
             {"name": "Razor B", "rank": 2},
             {"name": "Razor C", "rank": 2},
         ]
 
         historical_data = [
             {"name": "Razor A", "rank": 2},
-            {"name": "Razor B", "rank": 1},
+            {"name": "Razor B"},
             {"name": "Razor C", "rank": 2},
         ]
 
@@ -72,7 +72,7 @@ class TestTierIntegration:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "rank": 1},
+                    {"name": "Razor A"},
                     {"name": "Razor B", "rank": 2},
                     {"name": "Razor C", "rank": 2},
                 ]
@@ -84,7 +84,7 @@ class TestTierIntegration:
             "data": {
                 "razors": [
                     {"name": "Razor A", "rank": 2},
-                    {"name": "Razor B", "rank": 1},
+                    {"name": "Razor B"},
                     {"name": "Razor C", "rank": 2},
                 ]
             },
@@ -118,7 +118,7 @@ class TestTierIntegration:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "rank": 1},
+                    {"name": "Razor A"},
                     {"name": "Razor B", "rank": 2},
                     {"name": "Razor C", "rank": 2},
                 ]
@@ -130,7 +130,7 @@ class TestTierIntegration:
             "data": {
                 "razors": [
                     {"name": "Razor A", "rank": 2},
-                    {"name": "Razor B", "rank": 1},
+                    {"name": "Razor B"},
                     {"name": "Razor C", "rank": 2},
                 ]
             },
@@ -155,7 +155,7 @@ class TestTierIntegration:
     def test_complex_tier_scenarios_integration(self):
         """Test integration handles complex tier scenarios correctly."""
         current_data = [
-            {"name": "Razor A", "rank": 1},  # Moved up from Tier 2
+            {"name": "Razor A"},  # Moved up from Tier 2
             {"name": "Razor B", "rank": 2},  # Still in Tier 2
             {"name": "Razor C", "rank": 2},  # Still in Tier 2
             {"name": "Razor D", "rank": 3},  # Moved down from Tier 2

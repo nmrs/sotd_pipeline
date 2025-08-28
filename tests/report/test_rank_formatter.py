@@ -1,6 +1,6 @@
 """Tests for rank formatting functionality in table generators."""
 
-from sotd.report.table_generators.base import BaseTableGenerator
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestRankFormatter:
@@ -151,7 +151,7 @@ class TestRankFormatter:
 
         # Test data with EXISTING ranks (from aggregators) - generators don't assign ranks
         test_data = [
-            {"name": "Item A", "shaves": 10, "unique_users": 3, "rank": 1},
+            {"name": "Item A", "shaves": 10, "unique_users": 3},
             {"name": "Item B", "shaves": 8, "unique_users": 2, "rank": 2},
             {"name": "Item C", "shaves": 8, "unique_users": 2, "rank": 2},  # Tied with Item B
             {"name": "Item D", "shaves": 6, "unique_users": 1, "rank": 3},
@@ -178,7 +178,7 @@ class TestRankFormatter:
         class TestTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return [
-                    {"name": "Item A", "shaves": 10, "unique_users": 3, "rank": 1},
+                    {"name": "Item A", "shaves": 10, "unique_users": 3},
                     {"name": "Item B", "shaves": 8, "unique_users": 2, "rank": 2},
                     {
                         "name": "Item C",

@@ -23,13 +23,10 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01", "2024-02"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "position": 1},
-            ],
-        }
+                {"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
 
         # Test creating generator
         generator = create_annual_report_generator("hardware", "2024", metadata, data, debug=True)
@@ -53,13 +50,10 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01", "2024-02"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "position": 1},
-            ],
-        }
+                {"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
 
         # Test content generation
         result = generate_annual_report_content("hardware", "2024", metadata, data, debug=True)
@@ -74,13 +68,10 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01", "2024-02"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "position": 1},
-            ],
-        }
+                {"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
 
@@ -109,8 +100,7 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01", "2024-02", "2024-03"],
-            "missing_months": ["2024-04"],
-        }
+            "missing_months": ["2024-04"]}
         data = {"razors": []}
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -129,13 +119,10 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "position": 1},
-            ],
-        }
+                {"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
         comparison_data = {
             "2023": (
                 {"total_shaves": 1000, "unique_shavers": 80},
@@ -161,21 +148,15 @@ class TestAnnualGeneratorRefactoring:
                 "total_shaves": 1200,
                 "unique_shavers": 100,
                 "included_months": ["2024-01", "2024-02"],
-                "missing_months": [],
-            },
+                "missing_months": []},
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "position": 1},
-            ],
+                {"name": "Rockwell 6C", "shaves": 200, "position": 1}],
             "blades": [
-                {"name": "Astra Superior Platinum", "shaves": 250, "position": 1},
-            ],
+                {"name": "Astra Superior Platinum", "shaves": 250, "position": 1}],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "position": 1},
-            ],
+                {"name": "Simpson Chubby 2", "shaves": 100, "position": 1}],
             "soaps": [
-                {"name": "Barrister and Mann Seville", "shaves": 120, "position": 1},
-            ],
-        }
+                {"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}]}
 
         # Create test annual data file
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
@@ -198,13 +179,10 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {
             "soaps": [
-                {"name": "Barrister and Mann Seville", "shaves": 120, "position": 1},
-            ],
-        }
+                {"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}]}
 
         generator = AnnualReportGenerator("2024", "software", metadata, data, debug=True)
 
@@ -219,8 +197,7 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {"razors": []}
 
         generator = AnnualReportGenerator(
@@ -237,8 +214,7 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 0,
             "unique_shavers": 0,
             "included_months": [],
-            "missing_months": ["2024-01", "2024-02"],
-        }
+            "missing_months": ["2024-01", "2024-02"]}
         data = {"razors": [], "blades": [], "brushes": [], "soaps": []}
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -258,8 +234,7 @@ class TestAnnualGeneratorRefactoring:
             "total_shaves": 1200,
             "unique_shavers": 100,
             "included_months": ["2024-01"],
-            "missing_months": [],
-        }
+            "missing_months": []}
         data = {"razors": []}
 
         # Test that performance monitoring is included in generate_annual_report

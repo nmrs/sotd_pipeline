@@ -1,9 +1,6 @@
 """Tests for cross-product table generators."""
 
-from sotd.report.table_generators.cross_product_tables import (
-    RazorBladeCombinationsTableGenerator,
-    HighestUseCountPerBladeTableGenerator,
-)
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestRazorBladeCombinationsTableGenerator:
@@ -12,7 +9,7 @@ class TestRazorBladeCombinationsTableGenerator:
     def test_empty_data(self):
         """Test with empty data."""
         generator = RazorBladeCombinationsTableGenerator({}, debug=False)
-        data = generator.get_table_data()
+        data = generator.generate_table("specific-table")
         assert data == []
 
     def test_valid_data(self):
@@ -34,7 +31,7 @@ class TestRazorBladeCombinationsTableGenerator:
             ]
         }
         generator = RazorBladeCombinationsTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        data = generator.generate_table("specific-table")
         assert len(data) == 2
         assert data[0]["name"] == "Gillette Super Speed + Gillette Nacet"
         assert data[0]["shaves"] == 25
@@ -53,7 +50,7 @@ class TestRazorBladeCombinationsTableGenerator:
             ]
         }
         generator = RazorBladeCombinationsTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        data = generator.generate_table("specific-table")
         assert len(data) == 1  # Only the valid record should be included
 
     def test_table_title(self):
@@ -75,8 +72,8 @@ class TestHighestUseCountPerBladeTableGenerator:
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator({}, debug=False)
+        data = generator.generate_table("specific-table")
         assert data == []
 
     def test_valid_data(self):
@@ -102,8 +99,8 @@ class TestHighestUseCountPerBladeTableGenerator:
                 ]
             }
         }
-        generator = HighestUseCountPerBladeTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator(sample_data, debug=False)
+        data = generator.generate_table("specific-table")
         assert len(data) == 2
         assert data[0]["user"] == "u/user1"
         assert data[0]["blade"] == "Gillette Nacet"
@@ -127,18 +124,18 @@ class TestHighestUseCountPerBladeTableGenerator:
                 ]
             }
         }
-        generator = HighestUseCountPerBladeTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator(sample_data, debug=False)
+        data = generator.generate_table("specific-table")
         assert len(data) == 1  # Only the valid record should be included
 
     def test_table_title(self):
         """Test table title."""
-        generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
+        generator = TableGenerator({}, debug=False)
         assert generator.get_table_title() == "Highest Use Count per Blade"
 
     def test_column_config(self):
         """Test column configuration."""
-        generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
+        generator = TableGenerator({}, debug=False)
         config = generator.get_column_config()
         assert "rank" in config
         assert "user" in config
@@ -148,7 +145,7 @@ class TestHighestUseCountPerBladeTableGenerator:
 
     def test_no_delta_mixin_inheritance(self):
         """Test that the table generator correctly inherits from NoDeltaMixin."""
-        generator = HighestUseCountPerBladeTableGenerator({}, debug=False)
+        generator = TableGenerator({}, debug=False)
 
         # Should inherit from NoDeltaMixin to disable delta columns
         from sotd.report.table_generators.base import NoDeltaMixin

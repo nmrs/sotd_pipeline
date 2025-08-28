@@ -86,9 +86,7 @@ class TestEnhancedTableGenerator:
     def test_generate_table_unknown_table(self):
         """Test that unknown table names are caught."""
         generator = EnhancedTableGenerator()
-        data = [
-            {"rank": 1, "name": "Item 1", "shaves": 10},
-        ]
+        data = [{"rank": 1, "name": "Item 1", "shaves": 10}]
 
         with pytest.raises(ValueError, match="Unknown table"):
             generator.generate_table("unknown_table", data, {"shaves": 5})
@@ -200,9 +198,7 @@ class TestEnhancedTableGenerator:
     def test_generate_table_from_placeholder_invalid_format(self):
         """Test generating table from invalid placeholder format."""
         generator = EnhancedTableGenerator()
-        data = [
-            {"rank": 1, "name": "Item 1", "shaves": 10},
-        ]
+        data = [{"rank": 1, "name": "Item 1", "shaves": 10}]
 
         with pytest.raises(ValueError, match="Invalid placeholder format"):
             generator.generate_table_from_placeholder("invalid_format", data)

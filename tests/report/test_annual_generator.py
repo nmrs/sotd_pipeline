@@ -19,40 +19,31 @@ class TestAnnualReportGenerator:
                 "total_shaves": 1200,
                 "unique_shavers": 100,
                 "included_months": 12,
-                "missing_months": 0,
-            },
+                "missing_months": 0},
             "razors": [
                 {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1},
-                {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "position": 2},
-            ],
+                {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "position": 2}],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1,
-                },
-                {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "position": 2},
-            ],
+                    "position": 1},
+                {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "position": 2}],
             "brushes": [
                 {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1},
-                {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "position": 2},
-            ],
+                {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "position": 2}],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1,
-                },
+                    "position": 1},
                 {
                     "name": "Stirling Executive Man",
                     "shaves": 100,
                     "unique_users": 45,
-                    "position": 2,
-                },
-            ],
-        }
+                    "position": 2}]}
 
         # Create test annual data file
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
@@ -103,13 +94,11 @@ class TestAnnualReportGenerator:
                 "total_shaves": 1200,
                 "unique_shavers": 100,
                 "included_months": 12,
-                "missing_months": 0,
-            },
+                "missing_months": 0},
             "razors": [],
             "blades": [],
             "brushes": [],
-            "soaps": [],
-        }
+            "soaps": []}
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
@@ -135,34 +124,25 @@ class TestAnnualReportGenerator:
                 "unique_shavers": 100,
                 "included_months": 12,
                 "missing_months": 0,
-                "extra_metadata_field": "should be ignored",
-            },
+                "extra_metadata_field": "should be ignored"},
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1},
-            ],
+                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1}],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1,
-                },
-            ],
+                    "position": 1}],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1},
-            ],
+                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1}],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1,
-                },
-            ],
+                    "position": 1}],
             "extra_category": [
-                {"name": "Extra Product", "shaves": 50, "unique_users": 20, "position": 1},
-            ],
-        }
+                {"name": "Extra Product", "shaves": 50, "unique_users": 20, "position": 1}]}
 
         # Create test annual data file
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
@@ -229,13 +209,11 @@ class TestAnnualReportGenerator:
                 "total_shaves": 50000,
                 "unique_shavers": 1000,
                 "included_months": [f"2024-{i:02d}" for i in range(1, 13)],
-                "missing_months": [],
-            },
+                "missing_months": []},
             "razors": large_razors,
             "blades": large_blades,
             "brushes": large_brushes,
-            "soaps": large_soaps,
-        }
+            "soaps": large_soaps}
 
         # Create test annual data file
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
@@ -285,68 +263,54 @@ class TestAnnualReportGenerator:
                     "2024-03",
                     "2024-04",
                     "2024-05",
-                    "2024-06",
-                ],
+                    "2024-06"],
                 "missing_months": [
                     "2024-07",
                     "2024-08",
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12",
-                ],
-            },
+                    "2024-12"]},
             "razors": [
                 {"name": "Rockwell 6C", "shaves": 1200, "unique_users": 300, "position": 1},
                 {"name": "Merkur 34C", "shaves": 800, "unique_users": 250, "position": 2},
-                {"name": "Gillette Super Speed", "shaves": 600, "unique_users": 200, "position": 3},
-            ],
+                {"name": "Gillette Super Speed", "shaves": 600, "unique_users": 200, "position": 3}],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 2000,
                     "unique_users": 400,
-                    "position": 1,
-                },
+                    "position": 1},
                 {
                     "name": "Feather Hi-Stainless",
                     "shaves": 1500,
                     "unique_users": 350,
-                    "position": 2,
-                },
+                    "position": 2},
                 {
                     "name": "Gillette Silver Blue",
                     "shaves": 1000,
                     "unique_users": 300,
-                    "position": 3,
-                },
-            ],
+                    "position": 3}],
             "brushes": [
                 {"name": "Simpson Chubby 2", "shaves": 500, "unique_users": 150, "position": 1},
                 {"name": "Omega 10049", "shaves": 400, "unique_users": 120, "position": 2},
-                {"name": "Yaqi Sagrada Familia", "shaves": 300, "unique_users": 100, "position": 3},
-            ],
+                {"name": "Yaqi Sagrada Familia", "shaves": 300, "unique_users": 100, "position": 3}],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 800,
                     "unique_users": 200,
-                    "position": 1,
-                },
+                    "position": 1},
                 {
                     "name": "Stirling Executive Man",
                     "shaves": 600,
                     "unique_users": 180,
-                    "position": 2,
-                },
+                    "position": 2},
                 {
                     "name": "Declaration Grooming Original",
                     "shaves": 400,
                     "unique_users": 120,
-                    "position": 3,
-                },
-            ],
-        }
+                    "position": 3}]}
 
         # Create test annual data file
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"

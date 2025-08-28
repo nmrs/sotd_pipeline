@@ -14,55 +14,42 @@ class TestReportIntegration:
             "month": "2025-01",
             "total_shaves": 1000,
             "unique_shavers": 50,
-            "avg_shaves_per_user": 20.0,
-        }
+            "avg_shaves_per_user": 20.0}
 
         data = {
             "razors": [
-                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12},
-                {"name": "Karve CB", "shaves": 18, "unique_users": 8},
+                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12}, {"name": "Karve CB", "shaves": 18, "unique_users": 8}
             ],
             "razor_manufacturers": [
                 {"brand": "Gillette", "shaves": 30, "unique_users": 15},
-                {"brand": "Karve", "shaves": 18, "unique_users": 8},
-            ],
+                {"brand": "Karve", "shaves": 18, "unique_users": 8}],
             "razor_formats": [
                 {"format": "DE", "shaves": 45, "unique_users": 20},
-                {"format": "SE", "shaves": 5, "unique_users": 3},
-            ],
+                {"format": "SE", "shaves": 5, "unique_users": 3}],
             "blades": [
-                {"name": "Gillette Nacet", "shaves": 30, "unique_users": 15},
-                {"name": "Personna Lab Blue", "shaves": 20, "unique_users": 10},
+                {"name": "Gillette Nacet", "shaves": 30, "unique_users": 15}, {"name": "Personna Lab Blue", "shaves": 20, "unique_users": 10}
             ],
             "blade_manufacturers": [
                 {"brand": "Gillette", "shaves": 35, "unique_users": 18},
-                {"brand": "Personna", "shaves": 25, "unique_users": 12},
-            ],
+                {"brand": "Personna", "shaves": 25, "unique_users": 12}],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8},
-                {"name": "AP Shave Co", "shaves": 12, "unique_users": 6},
+                {"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8}, {"name": "AP Shave Co", "shaves": 12, "unique_users": 6}
             ],
             "brush_handle_makers": [
                 {"handle_maker": "Simpson", "shaves": 15, "unique_users": 8},
-                {"handle_maker": "AP Shave Co", "shaves": 12, "unique_users": 6},
-            ],
+                {"handle_maker": "AP Shave Co", "shaves": 12, "unique_users": 6}],
             "brush_knot_makers": [
                 {"brand": "Simpson", "shaves": 15, "unique_users": 8},
-                {"brand": "AP Shave Co", "shaves": 12, "unique_users": 6},
-            ],
+                {"brand": "AP Shave Co", "shaves": 12, "unique_users": 6}],
             "brush_fibers": [
                 {"fiber": "Badger", "shaves": 20, "unique_users": 10},
-                {"fiber": "Synthetic", "shaves": 10, "unique_users": 5},
-            ],
+                {"fiber": "Synthetic", "shaves": 10, "unique_users": 5}],
             "brush_knot_sizes": [
                 {"knot_size": "24mm", "shaves": 15, "unique_users": 8},
-                {"knot_size": "26mm", "shaves": 12, "unique_users": 6},
-            ],
+                {"knot_size": "26mm", "shaves": 12, "unique_users": 6}],
             "users": [
                 {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
-                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2},
-            ],
-        }
+                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2}]}
 
         # Generate report content with custom template
         report_content = generate_report_content(
@@ -112,13 +99,11 @@ class TestReportIntegration:
             "total_samples": 50,
             "sample_percentage": 5.0,
             "sample_users": 8,
-            "sample_brands": 6,
-        }
+            "sample_brands": 6}
 
         data = {
             "razors": [{"name": "Gillette Super Speed", "shaves": 25}],
-            "soaps": [{"name": "Test Soap", "shaves": 30}],
-        }
+            "soaps": [{"name": "Test Soap", "shaves": 30}]}
 
         # Test hardware report generation
         hardware_generator = MonthlyReportGenerator(
@@ -148,27 +133,21 @@ class TestReportIntegration:
             "total_shaves": 500,
             "unique_shavers": 25,
             "unique_soaps": 100,
-            "unique_brands": 20,
-        }
+            "unique_brands": 20}
 
         data = {
             "soaps": [
-                {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10},
-                {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
+                {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10}, {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8}
             ],
             "soap_makers": [
                 {"brand": "Declaration Grooming", "shaves": 20, "unique_users": 10},
-                {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
-            ],
+                {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8}],
             "brand_diversity": [
                 {"brand": "Declaration Grooming", "unique_soaps": 5},
-                {"brand": "Stirling Soap Co", "unique_soaps": 5},
-            ],
+                {"brand": "Stirling Soap Co", "unique_soaps": 5}],
             "users": [
                 {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
-                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2},
-            ],
-        }
+                {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2}]}
 
         # Generate report content with custom template
         report_content = generate_report_content(
@@ -201,8 +180,7 @@ class TestReportIntegration:
         metadata = {
             "month": "2025-01",
             "total_shaves": 0,
-            "unique_shavers": 0,
-        }
+            "unique_shavers": 0}
 
         data = {}
 
@@ -224,30 +202,24 @@ class TestReportIntegration:
         metadata = {
             "month": "2025-01",
             "total_shaves": 1000,
-            "unique_shavers": 50,
-        }
+            "unique_shavers": 50}
 
         data = {
             "razors": [
-                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
-                {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
-            ],
-        }
+                {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12}, {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2}
+            ]}
 
         comparison_data = {
             "previous month": (
                 {"month": "2024-12"},  # metadata
                 {  # data
                     "razors": [
-                        {"name": "Karve CB", "shaves": 20, "unique_users": 10, "rank": 1},
-                        {
+                        {"name": "Karve CB", "shaves": 20, "unique_users": 10}, {
                             "name": "Gillette Super Speed",
                             "shaves": 15,
                             "unique_users": 8,
-                            "rank": 2,
-                        },
-                    ],
-                },
+                            "rank": 2}
+                    ]},
             )
         }
 

@@ -1,12 +1,12 @@
-"""Tests for Top Shavers table generator."""
+"""Tests for Top Shavers table generation using the universal TableGenerator."""
 
-from sotd.report.table_generators.user_tables import TopShaversTableGenerator
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestTopShaversTableGenerator:
     def test_empty_data(self):
-        generator = TopShaversTableGenerator({}, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator({}, debug=False)
+        data = generator.generate_table("top-shavers")
         assert data == []
 
     def test_missing_required_fields(self):
@@ -17,8 +17,8 @@ class TestTopShaversTableGenerator:
                 {"user": "user2", "shaves": 8, "missed_days": 1},  # Valid
             ]
         }
-        generator = TopShaversTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator(sample_data, debug=False)
+        data = generator.generate_table("top-shavers")
         assert len(data) == 1
         assert data[0]["user_display"] == "u/user2"
         assert data[0]["user"] == "user2"
@@ -29,11 +29,10 @@ class TestTopShaversTableGenerator:
         sample_data = {
             "users": [
                 {"user": "user1", "shaves": 15, "missed_days": 2, "rank": 1},
-                {"user": "user2", "shaves": 12, "missed_days": 1, "rank": 2},
-            ]
+                {"user": "user2", "shaves": 12, "missed_days": 1, "rank": 2}]
         }
-        generator = TopShaversTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator(sample_data, debug=False)
+        data = generator.generate_table("specific-table")
         assert len(data) == 2
         assert data[0]["user_display"] == "u/user1"
         assert data[1]["user_display"] == "u/user2"
@@ -56,18 +55,17 @@ class TestTopShaversTableGenerator:
                 "user": "user21",
                 "shaves": 21,
                 "missed_days": 2,
-                "rank": 21,
-            },  # Should be included
+                "rank": 21},  # Should be included
         ]
         sample_data = {"users": users}
-        generator = TopShaversTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator(sample_data, debug=False)
+        data = generator.generate_table("specific-table")
         # All 21 should be included due to tie at 20th
         assert len(data) == 21
         assert any(u["user_display"] == "u/user21" for u in data)
 
     def test_table_title_and_columns(self):
-        generator = TopShaversTableGenerator({}, debug=False)
+        generator = TableGenerator({}, debug=False)
         assert generator.get_table_title() == "Top Shavers"
         config = generator.get_column_config()
         assert "user_display" in config
@@ -79,8 +77,7 @@ class TestTopShaversTableGenerator:
         current_data = {
             "users": [
                 {"user": "user1", "shaves": 10, "missed_days": 1, "rank": 1},
-                {"user": "user2", "shaves": 8, "missed_days": 2, "rank": 2},
-            ]
+                {"user": "user2", "shaves": 8, "missed_days": 2, "rank": 2}]
         }
         previous_data = {
             "previous month": (
@@ -88,12 +85,10 @@ class TestTopShaversTableGenerator:
                 {  # data
                     "users": [
                         {"user": "user1", "shaves": 8, "missed_days": 2, "rank": 2},
-                        {"user": "user2", "shaves": 10, "missed_days": 1, "rank": 1},
-                    ],
-                },
+                        {"user": "user2", "shaves": 10, "missed_days": 1, "rank": 1}]},
             )
         }
-        generator = TopShaversTableGenerator(current_data, debug=False)
+        generator = TableGenerator(current_data, debug=False)
         # Simulate delta calculation via base class (handled in generate_table)
         table_md = generator.generate_table(
             max_rows=20,

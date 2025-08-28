@@ -1,12 +1,6 @@
 """Tests for brush table generators."""
 
-from sotd.report.table_generators.brush_tables import (
-    BrushesTableGenerator,
-    BrushHandleMakersTableGenerator,
-    BrushKnotMakersTableGenerator,
-    BrushFibersTableGenerator,
-    BrushKnotSizesTableGenerator,
-)
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestBrushesTableGenerator:
@@ -14,24 +8,16 @@ class TestBrushesTableGenerator:
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = BrushesTableGenerator({}, debug=False)
-        data = generator.get_table_data()
+        generator = TableGenerator()
+        data = generator.generate_table("brushes", [])
         assert data == []
 
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
             "brushes": [
-                {
-                    "name": "Simpson Chubby 2",
-                    "shaves": 40,
-                    "unique_users": 20,
-                },
-                {
-                    "name": "Declaration B15",
-                    "shaves": 25,
-                    "unique_users": 12,
-                },
+                {"name": "Simpson Chubby 2", "shaves": 40, "unique_users": 20},
+                {"name": "Declaration B15", "shaves": 25, "unique_users": 12},
             ]
         }
         generator = BrushesTableGenerator(sample_data, debug=False)
@@ -45,11 +31,7 @@ class TestBrushesTableGenerator:
         sample_data = {
             "brushes": [
                 {"name": "Simpson Chubby 2"},  # Missing shaves
-                {
-                    "name": "Declaration B15",
-                    "shaves": 25,
-                    "unique_users": 12,
-                },  # Valid
+                {"name": "Declaration B15", "shaves": 25, "unique_users": 12},  # Valid
             ]
         }
         generator = BrushesTableGenerator(sample_data, debug=False)

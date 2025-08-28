@@ -74,8 +74,7 @@ class TestAnnualTemplateSystem:
             "unique_shavers": "567",
             "avg_shaves_per_user": "21.8",
             "included_months": "12",
-            "missing_months": "0",
-        }
+            "missing_months": "0"}
 
         result = processor.process_template("annual_hardware", variables)
 
@@ -222,8 +221,7 @@ class TestAnnualTemplateSystem:
         variables = {"year": "2024"}
         tables = {
             "razors": "| Razor | Shaves | Users |\n|-------|--------|-------|\n| Test Razor | 100 | 50 |",
-            "blades": "| Blade | Shaves | Users |\n|-------|--------|-------|\n| Test Blade | 150 | 75 |",
-        }
+            "blades": "| Blade | Shaves | Users |\n|-------|--------|-------|\n| Test Blade | 150 | 75 |"}
 
         result = processor.process_template("annual_hardware", variables, tables)
 
@@ -277,8 +275,7 @@ class TestAnnualTemplateSystem:
             "avg_shaves_per_user": "21.8",
             "included_months": "12",
             "missing_months": "0",
-            "data_completeness": "100.0",
-        }
+            "data_completeness": "100.0"}
 
         result = processor.process_template("annual_hardware", variables)
 
@@ -314,8 +311,7 @@ class TestAnnualTemplateSystem:
             "total_shaves": "10,000",
             "unique_shavers": "500",
             "included_months": "10",
-            "missing_months": "2",
-        }
+            "missing_months": "2"}
 
         result = processor.process_template("annual_hardware", variables_with_missing)
 
@@ -329,8 +325,7 @@ class TestAnnualTemplateSystem:
             "total_shaves": "12,000",
             "unique_shavers": "600",
             "included_months": "12",
-            "missing_months": "0",
-        }
+            "missing_months": "0"}
 
         result_no_missing = processor.process_template("annual_hardware", variables_no_missing)
         assert "Data includes 12 months of the year" in result_no_missing

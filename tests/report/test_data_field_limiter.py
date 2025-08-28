@@ -15,8 +15,7 @@ class TestDataFieldLimiter:
         data = [
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
-            {"shaves": 3, "unique_users": 2},
-        ]
+            {"shaves": 3, "unique_users": 2}]
 
         result = limiter.apply_limits(data, {})
 
@@ -28,8 +27,7 @@ class TestDataFieldLimiter:
         data = [
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
-            {"shaves": 3, "unique_users": 2},
-        ]
+            {"shaves": 3, "unique_users": 2}]
 
         result = limiter.apply_limits(data, {"shaves": 5})
 
@@ -44,8 +42,7 @@ class TestDataFieldLimiter:
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
             {"shaves": 3, "unique_users": 2},
-            {"shaves": 8, "unique_users": 1},
-        ]
+            {"shaves": 8, "unique_users": 1}]
 
         result = limiter.apply_limits(data, {"shaves": 5, "unique_users": 2})
 
@@ -58,8 +55,7 @@ class TestDataFieldLimiter:
         limiter = DataFieldLimiter()
         data = [
             {"shaves": 3, "unique_users": 1},
-            {"shaves": 2, "unique_users": 1},
-        ]
+            {"shaves": 2, "unique_users": 1}]
 
         result = limiter.apply_limits(data, {"shaves": 5})
 
@@ -79,8 +75,7 @@ class TestDataFieldLimiter:
         limiter = DataFieldLimiter()
         data = [
             {"shaves": 10, "unique_users": 5},
-            {"shaves": 5, "unique_users": 3},
-        ]
+            {"shaves": 5, "unique_users": 3}]
 
         result = limiter.apply_limits(data, {"missing_column": 5})
 
@@ -94,8 +89,7 @@ class TestDataFieldLimiter:
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
             {"shaves": 5, "unique_users": 2},  # Tied at threshold
-            {"shaves": 3, "unique_users": 1},
-        ]
+            {"shaves": 3, "unique_users": 1}]
 
         result = limiter.apply_limits(data, {"shaves": 5})
 
@@ -111,8 +105,7 @@ class TestDataFieldLimiter:
         data = [
             {"format": "DE", "shaves": 10},
             {"format": "SE", "shaves": 5},
-            {"format": "SR", "shaves": 3},
-        ]
+            {"format": "SR", "shaves": 3}]
 
         result = limiter.apply_limits(data, {"format": "SE"})
 
@@ -127,8 +120,7 @@ class TestDataFieldLimiter:
         data = [
             {"avg_shaves_per_user": 5.5, "shaves": 10},
             {"avg_shaves_per_user": 3.2, "shaves": 5},
-            {"avg_shaves_per_user": 2.1, "shaves": 3},
-        ]
+            {"avg_shaves_per_user": 2.1, "shaves": 3}]
 
         result = limiter.apply_limits(data, {"avg_shaves_per_user": 3.0})
 
@@ -142,8 +134,7 @@ class TestDataFieldLimiter:
         data = [
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
-            {"shaves": 3, "unique_users": 2},
-        ]
+            {"shaves": 3, "unique_users": 2}]
 
         result = limiter.apply_limits(data, {"shaves": 5})
 
@@ -157,8 +148,7 @@ class TestDataFieldLimiter:
         data = [
             {"shaves": 10, "unique_users": 5},
             {"shaves": 5, "unique_users": 3},
-            {"shaves": 3, "unique_users": 2},
-        ]
+            {"shaves": 3, "unique_users": 2}]
 
         result = limiter.apply_column_limit(data, "shaves", 5)
 
@@ -171,8 +161,7 @@ class TestDataFieldLimiter:
         limiter = DataFieldLimiter()
         data = [
             {"shaves": 10, "unique_users": 5},
-            {"shaves": 5, "unique_users": 3},
-        ]
+            {"shaves": 5, "unique_users": 3}]
 
         result = limiter.apply_column_limit(data, "missing_column", 5)
 
@@ -185,8 +174,7 @@ class TestDataFieldLimiter:
         data = [
             {"shaves": 10, "unique_users": 5},
             {"shaves": None, "unique_users": 3},
-            {"shaves": 3, "unique_users": 2},
-        ]
+            {"shaves": 3, "unique_users": 2}]
 
         result = limiter.apply_column_limit(data, "shaves", 5)
 

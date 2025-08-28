@@ -36,21 +36,17 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 1000},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
-                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}, {"name": "Razor B", "shaves": 80, "rank": 2}
                 ]
-            },
-        }
+            }}
         previous_data = {
             "year": previous_year,
             "meta": {"total_shaves": 900},
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "rank": 1},
-                    {"name": "Razor A", "shaves": 85, "rank": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1}, {"name": "Razor A", "shaves": 85, "rank": 2}
                 ]
-            },
-        }
+            }}
         self._write_annual_file(current_year, current_data)
         self._write_annual_file(previous_year, previous_data)
         # Load comparison data
@@ -70,10 +66,9 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 1000},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "position": 1}
                 ]
-            },
-        }
+            }}
         self._write_annual_file(current_year, current_data)
         # No previous year file
         comparison = self.comparison_loader.load_comparison_years(["2023"], self.data_dir)
@@ -92,19 +87,17 @@ class TestAnnualDeltaIntegration:
             "meta": {"total_shaves": 1000},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
         previous_data = {
             "year": previous_year,
             "meta": {"total_shaves": 900},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2}
                 ]
-            },
-        }
+            }}
         self._write_annual_file(current_year, current_data)
         self._write_annual_file(previous_year, previous_data)
         comparison = self.comparison_loader.load_comparison_years([previous_year], self.data_dir)

@@ -10,7 +10,7 @@ from pathlib import Path
 import json
 
 from sotd.report.utils.rank_tracer import enable_rank_tracing, disable_rank_tracing, trace_ranks
-from sotd.report.table_generators.cross_product_tables import HighestUseCountPerBladeTableGenerator
+from sotd.report.table_generators.table_generator import TableGenerator
 from sotd.report.enhanced_table_generator import EnhancedTableGenerator
 
 
@@ -47,8 +47,8 @@ class TestRankingCorruptionDetection:
 
             # Test 2: Trace ranks through table generator
             print("\n=== STEP 2: Table Generator Processing ===")
-            table_generator = HighestUseCountPerBladeTableGenerator(real_data, debug=True)
-            table_data = table_generator.get_table_data()
+            table_generator = TableGenerator(real_data, debug=True)
+            table_data = table_generator.generate_table("specific-table")
 
             # Test 3: Trace ranks through enhanced table processing
             print("\n=== STEP 3: Enhanced Table Processing ===")
@@ -110,29 +110,26 @@ class TestRankingCorruptionDetection:
                             "user": "user1",
                             "blade": "Test Blade 1",
                             "format": "DE",
-                            "uses": 15,
-                        },
+                            "uses": 15},
                         {
                             "rank": 1,
                             "user": "user2",
                             "blade": "Test Blade 2",
                             "format": "DE",
-                            "uses": 12,
-                        },  # Corrupted rank
+                            "uses": 12},  # Corrupted rank
                         {
                             "rank": 1,
                             "user": "user3",
                             "blade": "Test Blade 3",
                             "format": "DE",
-                            "uses": 10,
-                        },  # Corrupted rank
+                            "uses": 10},  # Corrupted rank
                     ]
                 }
             }
 
             # This should detect the rank corruption
-            table_generator = HighestUseCountPerBladeTableGenerator(test_data, debug=True)
-            table_data = table_generator.get_table_data()
+            table_generator = TableGenerator(test_data, debug=True)
+            table_data = table_generator.generate_table("specific-table")
 
             # Verify the corruption is detected
             ranks = [item.get("rank") for item in table_data]

@@ -13,8 +13,7 @@ class TestTemplateIntegration:
             "month": "2025-01",
             "total_shaves": 1234,
             "unique_shavers": 567,
-            "avg_shaves_per_user": 2.2,
-        }
+            "avg_shaves_per_user": 2.2}
         data = {}
 
         generator = MonthlyReportGenerator(
@@ -38,8 +37,7 @@ class TestTemplateIntegration:
             "total_shaves": 1234,
             "unique_shavers": 567,
             "unique_soaps": 100,
-            "unique_brands": 25,
-        }
+            "unique_brands": 25}
         data = {}
 
         generator = MonthlyReportGenerator(

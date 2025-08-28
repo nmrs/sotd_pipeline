@@ -21,25 +21,19 @@ class TestAnnualReportIntegration:
                 "total_shaves": 12000,
                 "unique_shavers": 150,
                 "included_months": ["2024-01", "2024-02", "2024-03"],
-                "missing_months": ["2024-04"],
-            },
+                "missing_months": ["2024-04"]},
             "razors": [
                 {"brand": "Rockwell", "model": "6C", "count": 500},
-                {"brand": "Merkur", "model": "34C", "count": 300},
-            ],
+                {"brand": "Merkur", "model": "34C", "count": 300}],
             "blades": [
                 {"brand": "Astra", "model": "Superior Platinum", "count": 800},
-                {"brand": "Feather", "model": "Hi-Stainless", "count": 600},
-            ],
+                {"brand": "Feather", "model": "Hi-Stainless", "count": 600}],
             "brushes": [
                 {"brand": "Simpson", "model": "Chubby 2", "count": 400},
-                {"brand": "Omega", "model": "10049", "count": 300},
-            ],
+                {"brand": "Omega", "model": "10049", "count": 300}],
             "soaps": [
                 {"brand": "Barrister and Mann", "model": "Seville", "count": 700},
-                {"brand": "Stirling", "model": "Executive Man", "count": 500},
-            ],
-        }
+                {"brand": "Stirling", "model": "Executive Man", "count": 500}]}
 
     @pytest.fixture
     def mock_args(self, tmp_path):

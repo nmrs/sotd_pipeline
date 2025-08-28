@@ -36,8 +36,7 @@ class TestDeltasIntegration:
             "soap_brands": [
                 {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
                 {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
-                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"},
-            ]
+                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"}]
         }
 
         # Create comparison data for previous month
@@ -46,8 +45,7 @@ class TestDeltasIntegration:
                 "soap_brands": [
                     {"rank": 1, "shaves": 90, "unique_users": 45, "brand": "Brand A"},
                     {"rank": 2, "shaves": 85, "unique_users": 42, "brand": "Brand B"},
-                    {"rank": 3, "shaves": 70, "unique_users": 35, "brand": "Brand C"},
-                ]
+                    {"rank": 3, "shaves": 70, "unique_users": 35, "brand": "Brand C"}]
             }
         }
 
@@ -91,16 +89,14 @@ class TestDeltasIntegration:
             "soap_brands": [
                 {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
                 {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
-                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"},
-            ]
+                {"rank": 3, "shaves": 60, "unique_users": 30, "brand": "Brand C"}]
         }
 
         comparison_data = {
             "2025-05": {
                 "soap_brands": [
                     {"rank": 1, "shaves": 90, "unique_users": 45, "brand": "Brand A"},
-                    {"rank": 2, "shaves": 85, "unique_users": 42, "brand": "Brand B"},
-                ]
+                    {"rank": 2, "shaves": 85, "unique_users": 42, "brand": "Brand B"}]
             }
         }
 
@@ -158,8 +154,7 @@ class TestDeltasIntegration:
         data = {
             "soap_brands": [
                 {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
-                {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"},
-            ]
+                {"rank": 2, "shaves": 80, "unique_users": 40, "brand": "Brand B"}]
         }
 
         # No comparison data

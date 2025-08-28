@@ -1,10 +1,6 @@
 """Tests for razor table generators."""
 
-from sotd.report.table_generators.razor_tables import (
-    RazorFormatsTableGenerator,
-    RazorsTableGenerator,
-    RazorManufacturersTableGenerator,
-)
+from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestRazorFormatsTableGenerator:
@@ -83,16 +79,8 @@ class TestRazorsTableGenerator:
         """Test with valid data."""
         sample_data = {
             "razors": [
-                {
-                    "name": "Gillette Super Speed DE",
-                    "shaves": 25,
-                    "unique_users": 10,
-                },
-                {
-                    "name": "Blackland Blackbird DE",
-                    "shaves": 15,
-                    "unique_users": 8,
-                },
+                {"name": "Gillette Super Speed DE", "shaves": 25, "unique_users": 10},
+                {"name": "Blackland Blackbird DE", "shaves": 15, "unique_users": 8},
             ]
         }
         generator = RazorsTableGenerator(sample_data, debug=False)
@@ -106,11 +94,7 @@ class TestRazorsTableGenerator:
         sample_data = {
             "razors": [
                 {"name": "Gillette Super Speed"},  # Missing shaves
-                {
-                    "name": "Blackland Blackbird DE",
-                    "shaves": 15,
-                    "unique_users": 8,
-                },  # Valid
+                {"name": "Blackland Blackbird DE", "shaves": 15, "unique_users": 8},  # Valid
             ]
         }
         generator = RazorsTableGenerator(sample_data, debug=False)

@@ -23,21 +23,17 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
-                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}, {"name": "Razor B", "shaves": 80, "rank": 2}
                 ]
-            },
-        }
+            }}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "rank": 1},
-                    {"name": "Razor A", "shaves": 85, "rank": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1}, {"name": "Razor A", "shaves": 85, "rank": 2}
                 ]
-            },
-        }
+            }}
 
         result = calculator.calculate_annual_deltas(
             current_year_data, previous_year_data, categories=["razors"]
@@ -61,25 +57,21 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 200, "rank": 1},
-                ],
-            },
-        }
+                    {"name": "Blade A", "shaves": 200, "rank": 1}
+                ]}}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2}
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 180, "rank": 2},
-                ],
-            },
-        }
+                    {"name": "Blade A", "shaves": 180, "rank": 2}
+                ]}}
 
         result = calculator.calculate_annual_deltas(current_year_data, previous_year_data)
 
@@ -96,19 +88,17 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "New Razor", "shaves": 100, "rank": 1},
+                    {"name": "New Razor", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Old Razor", "shaves": 90, "rank": 1},
+                    {"name": "Old Razor", "shaves": 90, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         result = calculator.calculate_annual_deltas(
             current_year_data, previous_year_data, categories=["razors"]
@@ -127,19 +117,17 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "blades": [
-                    {"name": "Blade A", "shaves": 200, "rank": 1},
+                    {"name": "Blade A", "shaves": 200, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         result = calculator.calculate_annual_deltas(
             current_year_data, previous_year_data, categories=["razors"]
@@ -157,29 +145,25 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         comparison_years_data = {
             "2023": {
                 "year": "2023",
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 90, "rank": 2},
+                        {"name": "Razor A", "shaves": 90, "rank": 2}
                     ]
-                },
-            },
+                }},
             "2022": {
                 "year": "2022",
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 80, "rank": 3},
+                        {"name": "Razor A", "shaves": 80, "rank": 3}
                     ]
-                },
-            },
-        }
+                }}}
 
         result = calculator.calculate_multi_year_deltas(
             current_year_data, comparison_years_data, categories=["razors"]
@@ -202,10 +186,9 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         result = calculator.calculate_multi_year_deltas(
             current_year_data, {}, categories=["razors"]
@@ -260,23 +243,17 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
-                    {"name": "Razor B", "shaves": 80, "rank": 2},
-                    {"name": "Razor C", "shaves": 60, "rank": 3},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}, {"name": "Razor B", "shaves": 80, "rank": 2}, {"name": "Razor C", "shaves": 60, "rank": 3}
                 ]
-            },
-        }
+            }}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "rank": 2},
-                    {"name": "Razor B", "shaves": 85, "rank": 1},
-                    {"name": "Razor C", "shaves": 70, "rank": 3},
+                    {"name": "Razor A", "shaves": 90, "rank": 2}, {"name": "Razor B", "shaves": 85, "rank": 1}, {"name": "Razor C", "shaves": 70, "rank": 3}
                 ]
-            },
-        }
+            }}
 
         result = calculator.calculate_annual_deltas(
             current_year_data, previous_year_data, categories=["razors"], max_items=2
@@ -293,19 +270,17 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1}
                 ]
-            },
-        }
+            }}
 
         previous_year_data = {
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2}
                 ]
-            },
-        }
+            }}
 
         # Test that performance monitoring works without errors
         result = calculator.calculate_annual_deltas(
