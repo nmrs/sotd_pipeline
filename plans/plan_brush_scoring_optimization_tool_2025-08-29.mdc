@@ -1,0 +1,296 @@
+# Brush Scoring Optimization Tool - TDD Implementation Plan
+
+**Date**: 2025-08-29  
+**Status**: IN_PROGRESS  
+**Type**: Feature Implementation Plan  
+**Priority**: High  
+
+## 📘 Project Summary
+Create a web UI tool that uses gradient descent to optimize all weights in `brush_scoring_config.yaml` to maximize brush matching success rate against `correct_matches.yaml` entries. The tool will provide one-click optimization with before/after comparisons and apply/revert capabilities.
+
+## 🧩 Component Steps
+1. **Core Optimization Engine** - Gradient descent algorithm for weight optimization
+2. **Brush Matching Test Harness** - Test different weight configurations against correct matches
+3. **API Endpoint** - Backend optimization service with progress tracking
+4. **React Component** - Web UI with optimization controls and results display
+5. **Integration & Testing** - End-to-end testing and validation
+
+## 🔁 Implementation Prompts
+
+### Step 1: Core Optimization Engine
+
+```text
+Create a Python module `sotd/optimization/brush_scoring_optimizer.py` that implements PyTorch-based optimization for brush scoring weights.
+
+Requirements:
+- Class `BrushScoringOptimizer` that takes brush_scoring_config.yaml and correct_matches.yaml as input
+- Method `optimize_weights()` that runs PyTorch optimization to maximize success rate
+- Method `evaluate_configuration(weights)` that tests a weight configuration and returns success rate
+- Use PyTorch tensors and automatic differentiation instead of manual gradient calculation
+- Support for GPU acceleration if available
+- Support for optimizing all numeric values in the config (base_strategies, strategy_modifiers)
+- Convergence criteria: stop at 100% success rate, iteration limit (100,000), or minimal improvement threshold
+- Progress tracking with iteration count and current success rate
+- Use advanced optimizers like Adam with adaptive learning rates
+
+Include comprehensive unit tests in `tests/optimization/test_brush_scoring_optimizer.py` that test:
+- Weight optimization with mock brush matching results
+- PyTorch tensor operations and automatic differentiation
+- Convergence behavior with different optimizers
+- Edge cases (empty configs, invalid weights)
+- GPU acceleration (if available)
+
+The optimizer should be designed to work with a test harness that can evaluate different weight configurations.
+```
+
+### Step 2: Brush Matching Test Harness
+
+```text
+Create a Python module `sotd/optimization/brush_matching_test_harness.py` that provides a testing environment for different weight configurations.
+
+Requirements:
+- Class `BrushMatchingTestHarness` that can load and test different weight configurations
+- Method `test_configuration(weights, correct_matches)` that runs brush matching against correct_matches.yaml
+- Method `calculate_success_rate(results)` that computes the percentage of successful matches
+- Integration with existing brush matching logic from the pipeline
+- Support for testing individual entries and batch testing
+- Detailed result analysis showing which entries succeeded/failed and why
+
+Include unit tests in `tests/optimization/test_brush_matching_test_harness.py` that test:
+- Configuration loading and validation
+- Success rate calculation
+- Integration with brush matching system
+- Error handling for invalid configurations
+
+This harness should work seamlessly with the optimizer to evaluate different weight combinations.
+```
+
+### Step 3: API Endpoint
+
+```text
+Create a FastAPI endpoint in `webui/api/brush_scoring_optimization.py` that provides the optimization service.
+
+Requirements:
+- POST endpoint `/api/brush-scoring/optimize` that starts optimization
+- GET endpoint `/api/brush-scoring/status/{job_id}` for progress tracking
+- POST endpoint `/api/brush-scoring/apply` to apply optimized weights
+- POST endpoint `/api/brush-scoring/revert` to revert to original weights
+- Background job processing using asyncio or similar
+- Progress tracking with current iteration and success rate
+- Result storage with before/after weight comparisons
+- Error handling and validation
+
+Include comprehensive tests in `tests/webui/api/test_brush_scoring_optimization.py` that test:
+- API endpoint functionality
+- Background job processing
+- Progress tracking
+- Apply/revert operations
+- Error handling
+
+The API should integrate with the optimization engine and test harness.
+```
+
+### Step 4: React Component
+
+```text
+Create a React component `webui/src/components/BrushScoringOptimizer.tsx` that provides the web UI for the optimization tool.
+
+Requirements:
+- Component that displays current brush scoring configuration
+- One-click "Optimize" button that starts the optimization process
+- Progress display showing current iteration and success rate
+- Before/after comparison table showing weight changes
+- Success rate comparison (before vs after)
+- Apply/Revert buttons for applying or discarding changes
+- Real-time updates during optimization
+- Error handling and user feedback
+
+Include comprehensive tests in `webui/src/components/__tests__/BrushScoringOptimizer.test.tsx` that test:
+- Component rendering and state management
+- Optimization workflow
+- Progress updates
+- Apply/revert functionality
+- Error handling
+
+The component should integrate with the API endpoints and provide a smooth user experience.
+```
+
+### Step 5: Integration & Testing
+
+```text
+Create integration tests and final validation for the complete brush scoring optimization system.
+
+Requirements:
+- Integration tests in `tests/integration/test_brush_scoring_optimization_integration.py` that test:
+  - Complete optimization workflow from UI to backend
+  - Weight application and reversion
+  - Success rate improvements
+  - System stability with new weights
+- End-to-end tests that verify the complete user workflow
+- Performance testing to ensure optimization completes in reasonable time
+- Validation that optimized weights don't break existing functionality
+
+Include a test script that can run the complete optimization process and validate results.
+
+The system should be production-ready with comprehensive testing coverage.
+```
+
+## 🧠 Critical Analysis
+
+This plan follows a logical progression from core optimization logic to user interface, ensuring each component can be tested independently before integration. The gradient descent approach requires careful testing of the optimization algorithm and convergence behavior. The test harness is crucial for evaluating weight configurations without affecting production systems. The API design supports background processing and real-time progress updates, while the React component provides an intuitive interface for users to control the optimization process.
+
+The plan emphasizes incremental development with each step building on the previous one, ensuring no orphaned code and maintaining system integrity throughout development. The integration testing phase validates that all components work together correctly and that the optimized weights actually improve brush matching performance.
+
+## 📋 Testing Requirements
+
+### Unit Test Specifications
+- **Core Optimization Engine**: Test weight optimization, gradient calculation, convergence behavior
+- **Test Harness**: Test configuration loading, success rate calculation, integration
+- **API Endpoints**: Test endpoint functionality, background processing, progress tracking
+- **React Component**: Test component rendering, state management, user interactions
+
+### Integration Test Specifications
+- **Real Data Files**: Use `data/correct_matches.yaml`, `data/brushes.yaml`, `data/handles.yaml`, `data/knots.yaml`
+- **End-to-End Workflow**: Test complete optimization process from UI to weight application
+- **Catalog Validation**: Ensure optimized weights work with existing brush matching system
+- **Test Data Management**: Use temporary config files for testing, never modify production data
+
+### Test Coverage Requirements
+- **Minimum Coverage**: 90% for all new optimization code
+- **Critical Paths**: Weight optimization algorithm, gradient calculation, convergence logic
+- **Performance Testing**: Ensure optimization completes within reasonable time limits
+- **Error Handling**: Test all failure scenarios and edge cases
+
+### WebUI Testing Requirements
+- **React Component Tests**: Unit tests with React Testing Library for all component functionality
+- **API Integration Tests**: Mock API calls and test component behavior with different responses
+- **User Interaction Tests**: Test optimization workflow, progress updates, apply/revert operations
+- **Error State Tests**: Test error handling and user feedback for various failure scenarios
+
+## 🚀 Implementation Notes
+
+- **Business Logic**: All optimization logic must be implemented in the backend Python code, not in the React UI
+- **Data Protection**: Never modify production YAML files during testing - use temporary files and test data
+- **Performance**: The optimization process may take time, so implement proper background processing and progress tracking
+- **Validation**: Ensure that optimized weights don't break existing brush matching functionality
+- **User Experience**: Provide clear feedback during optimization and meaningful before/after comparisons
+
+## 📚 Dependencies
+
+- Existing brush matching system from `sotd/match/` modules
+- FastAPI for backend API endpoints
+- React with TypeScript for frontend component
+- PyTorch for GPU-accelerated optimization with automatic differentiation
+- YAML configuration file handling
+- Background job processing capabilities
+
+## 📊 Implementation Progress
+
+### ✅ **Step 1: Core Optimization Engine - COMPLETE**
+- **File**: `sotd/optimization/brush_scoring_optimizer.py`
+- **Status**: Fully implemented with PyTorch integration and real brush matching evaluation
+- **Features**: 
+  - GPU acceleration support (Apple Silicon MPS, CUDA, CPU fallback)
+  - 100K iteration limit with Adam optimizer
+  - Automatic device detection and tensor management
+  - **Real integration with BrushMatcher for evaluation** ✅
+  - **Proper handling of correct_matches.yaml structure** ✅
+  - **Caching of test cases to avoid YAML reloading** ✅
+  - **Validation of complete vs. composite brush matches** ✅
+- **Tests**: `tests/optimization/test_brush_scoring_optimizer.py` - All tests passing
+- **Status**: COMPLETE
+
+### ✅ **Step 1.5: Brush Matcher Bypass Integration - COMPLETE**
+- **File**: `sotd/match/brush_matcher.py`
+- **Status**: Added bypass_correct_matches parameter and logic
+- **Features**:
+  - Correct matches strategy now runs separately from strategy orchestrator
+  - When bypass=True, correct matches strategy is completely skipped
+  - Optimizer can now test against real SOTD data without immediate 100% success
+  - **Performance**: Uses cached correct_matches_data instead of reloading YAML files
+- **Tests**: Verified bypass functionality works correctly
+- **Status**: COMPLETE
+
+### 🔄 **Next Steps**
+1. **Step 2: Brush Matching Test Harness** - Create test data and validation logic
+2. **Step 3: API Endpoint** - Implement FastAPI endpoint for optimization service
+3. **Step 4: React Component** - Create web UI component for user interaction
+4. **Step 5: Integration & Testing** - End-to-end testing and optimization
+
+
+
+## 🔍 Key Integration Insights from Brush Matcher Analysis
+
+After reviewing `brush_matcher.py`, we discovered critical integration requirements:
+
+### **Strategy-Based Architecture Integration**
+- The system uses a priority-ordered strategy pattern: `CorrectMatchesStrategy` → `KnownBrushMatchingStrategy` → `AutomatedSplitStrategy` → etc.
+- Each strategy returns `MatchResult` objects with consistent structure
+- The `ScoringEngine` evaluates results from all strategies to select the best match
+
+### **Correct Matches Priority System - BYPASSED FOR OPTIMIZATION**
+- `correct_matches.yaml` entries are checked FIRST in normal brush matching
+- **BUT for optimization, we must BYPASS correct_matches.yaml** to test actual scoring weights
+- If we test against correct_matches.yaml, we'll get 100% success immediately (no optimization needed)
+- The optimization tool must test against **real SOTD data** or **synthetic test cases** that aren't in correct_matches.yaml
+
+### **Match Result Structure Requirements**
+- All matches return `MatchResult` objects with `matched` field containing product data
+- Brush matches include `brand`, `model`, `fiber`, `knot_size_mm`, `handle_maker` fields
+- Case-insensitive matching is enforced throughout the system
+
+### **Performance Monitoring Integration**
+- The system tracks strategy performance for optimization
+- Our tool can leverage this data to understand which strategies need weight adjustments
+- Performance data includes execution time, success rate, and scoring metrics
+
+### **Implementation Approach**
+Instead of creating a separate test harness, we'll integrate directly with the existing system:
+1. Create temporary config files with different weights
+2. Instantiate `BrushMatcher` with each configuration
+3. Test each `correct_matches.yaml` entry using `brush_matcher.match()`
+4. Validate results against expected brand/model combinations
+5. Calculate success rate based on correct matches
+
+**Performance Note**: The `BrushMatcher` now caches `correct_matches_data` as an instance attribute, so the optimizer won't reload YAML files on every evaluation. This is critical for optimization performance since the evaluation method may be called thousands of times.
+
+This ensures our optimization tool works with the actual production brush matching system rather than a simplified simulation.
+
+## 📊 Correct Matches Structure Understanding
+
+After analyzing `correct_matches_manager.py` and `correct_matches_updater.py`, the optimization tool must properly handle the hierarchical structure:
+
+### **YAML Structure**
+1. **Complete Brushes**: Stored under `brush:` → `brand:` → `model:` → `[test_strings]`
+2. **Composite Brushes**: Stored under both `handle:` → `brand:` → `model:` → `[test_strings]` and `knot:` → `brand:` → `model:` → `[test_strings]`
+3. **Test Strings**: The actual input text that should produce specific match results
+
+### **Data Population Logic**
+- **Complete brushes** are stored when a single strategy matches the entire input
+- **Composite brushes** are stored when handle/knot splitting occurs, with the same test string appearing in both handle and knot sections
+- **Test strings** preserve original casing but are normalized for case-insensitive lookup
+
+## 🎯 Evaluation Criteria for Optimization
+
+The optimizer must validate that weight changes produce the **exact same match structure** as stored in `correct_matches.yaml`:
+
+### **Success Cases**
+- **Complete brush input** → returns complete brush with matching brand/model
+- **Composite brush input** → returns composite brush with matching handle/knot structure
+
+### **Failure Cases**
+- **Complete brush input** → returns composite brush (wrong structure)
+- **Composite brush input** → returns complete brush (wrong structure)
+- **Any input** → returns no match or wrong brand/model
+
+### **Implementation Requirements**
+1. **Extract test cases** from the nested YAML structure (not just top-level keys)
+2. **Categorize each test case** as complete vs. composite based on storage location
+3. **Validate result structure** matches expected format
+4. **Calculate success rate** based on structural correctness, not just presence of any match
+
+This ensures the optimizer tunes weights to guide the matcher to choose the correct strategy (complete vs. composite) for each input, not just produce any match.
+description:
+globs:
+alwaysApply: false
+---
