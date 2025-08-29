@@ -1,20 +1,86 @@
+# Brush Scoring Configuration
+# This file defines the scoring weights for different brush matching strategies and their modifiers
+#
+# Strategy Modifiers Explained:
+#
+# Composite Brush Strategies (automated_split, full_input_component_matching, known_split):
+# - multiple_brands: Awarded when the strategy detects multiple brands in handle/knot components
+# - handle_brand_without_knot_brand: Awarded when the strategy detects a handle brand without a knot brand
+# - handle_weight: Multiplier for handle matching score (base + priority)
+# - knot_weight: Multiplier for knot matching score (base + priority)
+# - high_confidence: Awarded when the strategy uses high-priority delimiters (w/, with, in) (automated_split only)
+# - dual_component: Awarded when the strategy successfully matches both handle and knot components (full_input_component_matching only)
+#
+# Component Strategies (handle_matching, knot_matching):
+# - fiber_match: Awarded when the strategy detects fiber type in input text (badger, boar, synthetic, etc.)
+# - size_match: Awarded when the strategy detects size specifications in input text (26mm, 28mm, etc.)
+# - handle_indicators: Awarded when the strategy detects handle-specific terminology (wood, resin, metal, etc.)
+# - knot_indicators: Awarded when the strategy detects knot-specific terminology (wood, resin, metal, etc.)
+# - priority_score: Rewards based on handle/knot priority levels from catalog matching
+# - brand_match: Awarded when the strategy successfully matches a brand pattern (regex match success)
+
 brush_scoring_weights:
+  # Base Strategy Scores:
+  # - Higher base scores indicate more reliable/accurate strategies
+  # - Strategies are ranked by their ability to provide accurate, complete brush information
+  # - Modifiers provide additional points for specific achievements within each strategy
   base_strategies:
+    #complete brushes
+    known_brush: 80.0
+    other_brush: 70.0
+    omega_semogue_brush: 75.0
+    zenith_brush: 75.0
+
+    #component brushes
     automated_split: 60.0
     full_input_component_matching: 50.0
-    known_brush: 80.0
     known_split: 90.0
-    omega_semogue_brush: 75.0
-    other_brush: 70.0
-    zenith_brush: 75.0
+
+  # Strategy Modifiers:
+  # - Modifiers provide additional points for specific achievements within each strategy
   strategy_modifiers:
-    automated_split: {}
-    full_input_component_matching: {}
-    handle_matching: {}
+    #there are no modifiers for complete brushes -- it is what it is
+    #complete brushes:
+    #   known_brush:
+    #   other_brush:
+    #   omega_semogue_brush:
+    #   zenith_brush:
+
+    #composite brushes
+    automated_split:
+      multiple_brands: 10.0
+      handle_weight: 1.0
+      knot_weight: 1.0
+      handle_brand_without_knot_brand: -10.0
+      high_confidence: 15.0
+
+    full_input_component_matching:
+      multiple_brands: 10.0
+      handle_weight: 1.0
+      knot_weight: 1.0
+      handle_brand_without_knot_brand: -10.0
+      dual_component: 10.0
+
+    known_split:
+      multiple_brands: 10.0
+      handle_weight: 1.0
+      knot_weight: 1.0
+      handle_brand_without_knot_brand: -10.0
+
+    #
+    #component strategies
+    handle_matching:
+      fiber_match: -10.0
+      size_match: -10.0
+      handle_indicators: 15.0
+      knot_indicators: -10.0
+      priority_score: 10.0
+      brand_match: 0.0
+
     knot_matching:
-      brand_match: 12.0
-    known_brush: {}
-    known_split: {}
-    omega_semogue_brush: {}
-    other_brush: {}
-    zenith_brush: {}
+      fiber_match: 5.0
+      size_match: 5.0
+      handle_indicators: -10.0
+      knot_indicators: 5.0
+      priority_score: 5.0
+      brand_match: 5.0
