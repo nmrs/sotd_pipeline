@@ -158,26 +158,24 @@ class ValidateCorrectMatches:
         brush_config = {
             "brush_scoring_weights": {
                 "base_strategies": {
-                    "correct_complete_brush": 100.0,
-                    "correct_split_brush": 95.0,
                     "known_split": 90.0,
                     "known_brush": 80.0,
-                    "fiber_detection": 70.0,
-                    "size_detection": 60.0,
-                    "dual_component_fallback": 50.0,
-                    "handle_only_fallback": 40.0,
-                    "knot_only_fallback": 30.0,
+                    "other_brush": 70.0,
+                    "automated_split": 60.0,
+                    "full_input_component_matching": 50.0,
+                    "zenith_brush": 75.0,
+                    "omega_semogue_brush": 75.0,
                 },
                 "strategy_modifiers": {
-                    "correct_complete_brush": {},
-                    "correct_split_brush": {},
                     "known_split": {},
                     "known_brush": {},
-                    "fiber_detection": {},
-                    "size_detection": {},
-                    "dual_component_fallback": {},
-                    "handle_only_fallback": {},
-                    "knot_only_fallback": {},
+                    "other_brush": {},
+                    "automated_split": {},
+                    "full_input_component_matching": {},
+                    "zenith_brush": {},
+                    "omega_semogue_brush": {},
+                    "handle_matching": {},
+                    "knot_matching": {"brand_match": 12.0},
                 },
             }
         }
