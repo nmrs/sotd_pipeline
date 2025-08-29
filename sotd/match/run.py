@@ -85,6 +85,11 @@ def match_record(
     soap_matcher: SoapMatcher,
     brush_matcher: "BrushMatcher",  # type: ignore
     monitor: PerformanceMonitor,
+    debug: bool = False,
+    enable_razor: bool = True,
+    enable_blade: bool = True,
+    enable_soap: bool = True,
+    enable_brush: bool = True,
 ) -> dict:
     result = record.copy()
     filtered_manager = _get_filtered_entries_manager()
@@ -100,7 +105,9 @@ def match_record(
                 f"Expected structured data format with 'normalized' field, got: {type(input_data)}"
             )
 
-    if "razor" in result:
+    if "razor" in result and enable_razor:
+        if debug:
+            print(f"  🔪 Processing razor: {result['razor'].get('original', 'Unknown')[:50]}...")
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["razor"])
@@ -114,6 +121,8 @@ def match_record(
                 match_type="filtered",
                 pattern=None,
             )
+            if debug:
+                print("    ⏭️  Razor filtered, skipping")
         else:
             razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
             # Use MatchResult consistently
@@ -121,6 +130,10 @@ def match_record(
                 # Update the MatchResult to include normalized field
                 razor_result.normalized = result["razor"]["normalized"]
                 result["razor"] = razor_result
+                if debug:
+                    print(
+                        f"    ✅ Razor matched: {razor_result.matched.get('brand', 'Unknown')} {razor_result.matched.get('model', 'Unknown')}"
+                    )
             else:
                 result["razor"] = MatchResult(
                     original=result["razor"]["original"],
@@ -129,9 +142,13 @@ def match_record(
                     match_type=None,
                     pattern=None,
                 )
+                if debug:
+                    print("    ❌ Razor no match")
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
-    if "blade" in result:
+    if "blade" in result and enable_blade:
+        if debug:
+            print(f"  🪒 Processing blade: {result['blade'].get('original', 'Unknown')[:50]}...")
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["blade"])
@@ -145,6 +162,8 @@ def match_record(
                 match_type="filtered",
                 pattern=None,
             )
+            if debug:
+                print("    ⏭️  Blade filtered, skipping")
         else:
             # Check if razor is cartridge/disposable/straight and clear blade if so
             razor_result = result.get("razor")
@@ -160,12 +179,21 @@ def match_record(
                         match_type="irrelevant_razor_format",
                         pattern=None,
                     )
+                    if debug:
+                        print(f"    ⏭️  Blade irrelevant for {razor_format}")
                 else:
                     # For other formats, use context-aware matching to ensure correct format
                     blade_result = blade_matcher.match_with_context(
                         normalized_text, razor_format, result["blade"]["original"]
                     )
                     result["blade"] = blade_result
+                    if debug:
+                        if blade_result and blade_result.matched:
+                            print(
+                                f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
+                            )
+                        else:
+                            print(f"    ❌ Blade no match")
             else:
                 # Handle legacy dict format for razor
                 razor_matched = (
@@ -185,19 +213,37 @@ def match_record(
                             match_type="irrelevant_razor_format",
                             pattern=None,
                         )
+                        if debug:
+                            print(f"    ⏭️  Blade irrelevant for {razor_format}")
                     else:
                         # For other formats, use context-aware matching to ensure correct format
                         blade_result = blade_matcher.match_with_context(
                             normalized_text, razor_format, result["blade"]["original"]
                         )
                         result["blade"] = blade_result
+                        if debug:
+                            if blade_result and blade_result.matched:
+                                print(
+                                    f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
+                                )
+                            else:
+                                print(f"    ❌ Blade no match")
                 else:
-                    # No razor context, match blade normally
+                    # No razor context, use basic matching
                     blade_result = blade_matcher.match(normalized_text, result["blade"]["original"])
                     result["blade"] = blade_result
+                    if debug:
+                        if blade_result and blade_result.matched:
+                            print(
+                                f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
+                            )
+                        else:
+                            print(f"    ❌ Blade no match")
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
-    if "soap" in result:
+    if "soap" in result and enable_soap:
+        if debug:
+            print(f"  🧼 Processing soap: {result['soap'].get('original', 'Unknown')[:50]}...")
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["soap"])
@@ -211,12 +257,23 @@ def match_record(
                 match_type="filtered",
                 pattern=None,
             )
+            if debug:
+                print(f"    ⏭️  Soap filtered, skipping")
         else:
             soap_result = soap_matcher.match(normalized_text, result["soap"]["original"])
             result["soap"] = soap_result
+            if debug:
+                if soap_result and soap_result.matched:
+                    print(
+                        f"    ✅ Soap matched: {soap_result.matched.get('brand', 'Unknown')} {soap_result.matched.get('model', 'Unknown')}"
+                    )
+                else:
+                    print(f"    ❌ Soap no match")
         monitor.record_matcher_timing("soap", time.time() - start_time)
 
-    if "brush" in result:
+    if "brush" in result and enable_brush:
+        if debug:
+            print(f"  🖌️  Processing brush: {result['brush'].get('original', 'Unknown')[:50]}...")
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["brush"])
@@ -230,7 +287,11 @@ def match_record(
                 match_type="filtered",
                 pattern=None,
             )
+            if debug:
+                print(f"    ⏭️  Brush filtered, skipping")
         else:
+            if debug:
+                print(f"    🎯 Running brush matcher strategies...")
             brush_result = brush_matcher.match(normalized_text)
             # Convert MatchResult to dict for consistency
             if brush_result is not None:
@@ -241,6 +302,13 @@ def match_record(
                     "match_type": brush_result.match_type,
                     "pattern": brush_result.pattern,
                 }
+                if debug:
+                    if brush_result.matched:
+                        print(
+                            f"    ✅ Brush matched: {brush_result.matched.get('brand', 'Unknown')} {brush_result.matched.get('model', 'Unknown')} (strategy: {getattr(brush_result, 'strategy', 'unknown')})"
+                        )
+                    else:
+                        print(f"    ❌ Brush no match")
             else:
                 result["brush"] = {
                     "original": result["brush"]["original"],
@@ -249,6 +317,8 @@ def match_record(
                     "match_type": None,
                     "pattern": None,
                 }
+                if debug:
+                    print(f"    ❌ Brush no match")
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
     return result
@@ -305,10 +375,28 @@ def process_month(
         records = data.get("data", [])
         monitor.set_record_count(len(records))
 
+        if debug:
+            print(f"🎯 Processing {len(records)} records...")
+
         for i, record in enumerate(records):
+            if debug:
+                print(f"\n📝 Record {i+1}/{len(records)}")
+                comment_id = record.get("comment_id", "unknown")
+                print(f"   Comment ID: {comment_id}")
+
             # Use the match_record function that includes blade clearing logic
             matched_record = match_record(
-                record, razor_matcher, blade_matcher, soap_matcher, brush_matcher, monitor
+                record,
+                razor_matcher,
+                blade_matcher,
+                soap_matcher,
+                brush_matcher,
+                monitor,
+                debug,
+                enable_razor=True,
+                enable_blade=True,
+                enable_soap=True,
+                enable_brush=True,
             )
             # Convert MatchResult objects to dicts for JSON serialization
             converted_record = {}

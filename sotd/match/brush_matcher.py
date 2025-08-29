@@ -50,6 +50,9 @@ from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
 
+# Module-level cache for catalogs to avoid redundant loading
+_catalog_cache = None
+
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file."""
@@ -186,14 +189,21 @@ class BrushMatcher:
 
     def _load_catalogs_directly(self) -> dict:
         """Load catalogs directly without legacy config dependencies."""
-        catalogs = {}
+        global _catalog_cache
 
-        # Load main catalogs with direct paths
+        # Return cached catalogs if available
+        if _catalog_cache is not None:
+            return _catalog_cache
+
+        # Load catalogs and cache them
+        catalogs = {}
         catalogs["brushes"] = self._load_yaml_file(Path("data/brushes.yaml"))
         catalogs["handles"] = self._load_yaml_file(Path("data/handles.yaml"))
         catalogs["knots"] = self._load_yaml_file(Path("data/knots.yaml"))
         catalogs["correct_matches"] = self._load_yaml_file(Path("data/correct_matches.yaml"))
 
+        # Cache the catalogs for future use
+        _catalog_cache = catalogs
         return catalogs
 
     def _load_yaml_file(self, path: Path) -> dict:
