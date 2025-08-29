@@ -233,14 +233,14 @@ class TestBrushScoringConfigIntegration:
         """Test configuration performance with repeated access."""
         config = BrushScoringConfig()
 
-        # Test repeated access to same values
+        # Test repeated access to same values using actual strategies from config
         for _ in range(100):
-            score = config.get_base_strategy_score("correct_complete_brush")
+            # Use a strategy that actually exists in the config
+            score = config.get_base_strategy_score("known_brush")
             assert score > 0
 
-            modifier = config.get_strategy_modifier(
-                "high_priority_automated_split", "multiple_brands"
-            )
+            # Use a modifier that actually exists in the config
+            modifier = config.get_strategy_modifier("knot_matching", "brand_match")
             assert isinstance(modifier, float)
 
     def test_config_error_recovery(self):
