@@ -480,6 +480,54 @@ class ScoringEngine:
 
         return 0.0
 
+    def _modifier_priority_score(
+        self, input_text: str, result: MatchResult, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for handle/knot priority levels.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value based on priority levels (higher quality = more points)
+        """
+        # Apply to strategies that do handle/knot component matching
+        if strategy_name not in ["automated_split", "unified"]:
+            return 0.0
+
+        # Check if we have handle and knot components with priority info
+        if not result.matched:
+            return 0.0
+
+        handle = result.matched.get("handle", {})
+        knot = result.matched.get("knot", {})
+
+        # For automated_split: get priority from handle and knot components
+        if strategy_name == "automated_split":
+            # Handle and knot are dictionaries, so use .get() instead of getattr()
+            handle_priority = handle.get("priority") if handle else None
+            knot_priority = knot.get("priority") if knot else None
+
+            # Calculate priority score dynamically based on actual catalog priority
+            # Lower priority number = higher quality = more points
+            handle_score = 0.0
+            if handle_priority is not None:
+                # Dynamic scoring: assume priority 1 is highest, scale accordingly
+                # This works whether there are 2, 3, or more priority levels
+                handle_score = max(0, 3 - handle_priority + 1)  # 1->3, 2->2, 3->1, 4->0, etc.
+
+            knot_score = 0.0
+            if knot_priority is not None:
+                # Same dynamic scaling for knots
+                knot_score = max(0, 3 - knot_priority + 1)  # 1->3, 2->2, 3->1, 4->0, etc.
+
+            return handle_score + knot_score
+
+        return 0.0
+
     def _modifier_handle_indicators(
         self, input_text: str, result: dict, strategy_name: str
     ) -> float:

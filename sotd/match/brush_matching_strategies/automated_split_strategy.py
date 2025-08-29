@@ -17,17 +17,21 @@ from sotd.match.types import MatchResult
 class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
     """Unified strategy for automated split handling with priority-based scoring."""
 
-    def __init__(self, catalogs, scoring_config):
+    def __init__(self, catalogs, scoring_config, handle_matcher, knot_matcher):
         """
         Initialize automated split strategy.
 
         Args:
             catalogs: Dictionary containing all catalog data
             scoring_config: BrushScoringConfig instance
+            handle_matcher: HandleMatcher instance for matching handle components
+            knot_matcher: KnotMatcher instance for matching knot components
         """
         super().__init__()
         self.catalogs = catalogs
         self.scoring_config = scoring_config
+        self.handle_matcher = handle_matcher
+        self.knot_matcher = knot_matcher
         self.strategy_name = "automated_split"
 
         # Define delimiter priorities based on BrushSplitter logic
@@ -161,8 +165,11 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
         self, handle: str, knot: str, original_value: str, priority: str
     ) -> MatchResult:
         """Create a MatchResult for a split brush."""
+        # Use the handle and knot matchers to match the split parts
+        handle_result = self.handle_matcher.match(handle)
+        knot_result = self.knot_matcher.match(knot)
+
         # Create a basic match result structure
-        # The actual component matching will be done by the handle and knot matchers
         result = MatchResult(
             original=original_value,
             normalized=original_value.lower().strip(),
@@ -172,6 +179,30 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                 "split_priority": priority,
                 "_delimiter_priority": priority,
                 "high_priority_delimiter": priority == "high",
+                "handle": {
+                    "brand": (
+                        handle_result.matched.get("handle_maker") if handle_result.matched else None
+                    ),
+                    "model": (
+                        handle_result.matched.get("handle_model") if handle_result.matched else None
+                    ),
+                    "source_text": handle,
+                    "_matched_by": "automated_split",
+                    "_pattern": "unknown",
+                    "priority": getattr(handle_result, "priority", None),
+                },
+                "knot": {
+                    "brand": (knot_result.matched.get("brand") if knot_result.matched else None),
+                    "model": (knot_result.matched.get("model") if knot_result.matched else None),
+                    "fiber": knot_result.matched.get("fiber") if knot_result.matched else None,
+                    "knot_size_mm": (
+                        knot_result.matched.get("knot_size_mm") if knot_result.matched else None
+                    ),
+                    "source_text": knot,
+                    "_matched_by": "automated_split",
+                    "_pattern": "unknown",
+                    "priority": getattr(knot_result, "priority", None),
+                },
             },
             match_type="split_brush",
             strategy="automated_split",

@@ -22,6 +22,7 @@ brush_scoring_weights:
     automated_split:
       high_confidence: 15.0
       multiple_brands: 30.0 # Should detect multiple brands when split components have different brands
+      priority_score: 5.0 # Bonus for handle/knot priority levels (higher quality = more points)
       fiber_words: 0.0
       size_specification: 0.0
       delimiter_confidence: 0.0
@@ -31,6 +32,8 @@ brush_scoring_weights:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
+
+
 
     correct_split_brush:
       multiple_brands: 0.0
