@@ -147,14 +147,46 @@ class ValidateCorrectMatches:
 
         return None
 
-    def _create_brush_config(self, base_dir: Path) -> BrushMatcherConfig:
-        """Create a BrushMatcherConfig for DRY brush matcher creation."""
-        return BrushMatcherConfig(
-            catalog_path=base_dir / "brushes.yaml",
-            handles_path=base_dir / "handles.yaml",
-            knots_path=base_dir / "knots.yaml",
-            bypass_correct_matches=True,
-        )
+    def _create_brush_config(self, base_dir: Path) -> Path:
+        """Create a temporary brush scoring config file for DRY brush matcher creation."""
+        import yaml
+
+        # Create a temporary brush scoring config file
+        brush_config_file = base_dir / "brush_scoring_config.yaml"
+
+        # Create minimal brush scoring config for testing
+        brush_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": 100.0,
+                    "correct_split_brush": 95.0,
+                    "known_split": 90.0,
+                    "known_brush": 80.0,
+                    "fiber_detection": 70.0,
+                    "size_detection": 60.0,
+                    "dual_component_fallback": 50.0,
+                    "handle_only_fallback": 40.0,
+                    "knot_only_fallback": 30.0,
+                },
+                "strategy_modifiers": {
+                    "correct_complete_brush": {},
+                    "correct_split_brush": {},
+                    "known_split": {},
+                    "known_brush": {},
+                    "fiber_detection": {},
+                    "size_detection": {},
+                    "dual_component_fallback": {},
+                    "handle_only_fallback": {},
+                    "knot_only_fallback": {},
+                },
+            }
+        }
+
+        # Write the temporary config file
+        with brush_config_file.open("w", encoding="utf-8") as f:
+            yaml.dump(brush_config, f)
+
+        return brush_config_file
 
     def _clear_validation_cache(self):
         """Clear validation cache when _data_dir is set for testing."""
@@ -771,6 +803,13 @@ class ValidateCorrectMatches:
                     "details": f"The brush matcher could not find a match for '{test_text}'. This may indicate a catalog pattern issue or the pattern may need to be updated.",
                 }
 
+            # Check for model name mismatch between stored location and pattern content
+            model_mismatch_issue = self._check_brush_model_mismatch(
+                test_text, brand_name, version_name, result
+            )
+            if model_mismatch_issue:
+                return model_mismatch_issue
+
             # Check if the matcher returned valid brush data
             if hasattr(result, "matched") and result.matched:
                 matched_data = result.matched
@@ -840,6 +879,49 @@ class ValidateCorrectMatches:
                 "suggested_action": f"Pattern '{test_text}' caused a matcher error. Check brush matcher implementation and catalog data.",
                 "details": f"Error testing pattern '{test_text}' with brush matcher: {str(e)}",
             }
+
+    def _check_brush_model_mismatch(
+        self, test_text: str, brand_name: str, stored_model: str, result
+    ) -> Optional[Dict[str, Any]]:
+        """Check if the pattern contains a model name that doesn't match where it's stored."""
+        # Look for model names in the pattern text (e.g., "v27", "v26", "B13")
+        import re
+
+        # Common model name patterns
+        model_patterns = [
+            r"\bv\d+\b",  # v27, v26, v25, etc.
+            r"\bB\d+\b",  # B13, B14, etc.
+            r"\b[A-Z]\d+\b",  # Other letter+number patterns
+        ]
+
+        found_models = []
+        for pattern in model_patterns:
+            matches = re.findall(pattern, test_text, re.IGNORECASE)
+            found_models.extend(matches)
+
+        # Check if any found model names don't match the stored model
+        for found_model in found_models:
+            if found_model.lower() != stored_model.lower():
+                # Get the actual matched data from the result
+                actual_brand = None
+                actual_model = None
+                if hasattr(result, "matched") and result.matched:
+                    actual_brand = result.matched.get("brand")
+                    actual_model = result.matched.get("model")
+
+                return {
+                    "type": "catalog_pattern_mismatch",
+                    "field": "brush",
+                    "pattern": test_text,
+                    "stored_brand": brand_name,
+                    "stored_model": stored_model,
+                    "matched_brand": actual_brand,
+                    "matched_model": actual_model,
+                    "message": f"Pattern '{test_text}' is stored under '{brand_name} {stored_model}' but contains model name '{found_model}'",
+                    "suggested_action": f"Move from '{brand_name} {stored_model}' to '{brand_name} {found_model}' in correct_matches.yaml",
+                }
+
+        return None
 
     def _brand_exists_in_catalog(
         self, field: str, brand_name: str, format_name: str = None

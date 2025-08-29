@@ -35,9 +35,9 @@ class BrushValidationCLI:
     def brush_matcher(self):
         """Lazy-load brush matcher when first accessed."""
         if self._brush_matcher is None:
-            from sotd.match.brush_matcher import BrushScoringMatcher
+            from sotd.match.brush_matcher import BrushMatcher
 
-            self._brush_matcher = BrushScoringMatcher()
+            self._brush_matcher = BrushMatcher()
         return self._brush_matcher
 
     def _get_processed_normalized_texts(self, month: str) -> set[str]:
