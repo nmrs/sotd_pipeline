@@ -30,31 +30,41 @@ class TestAnnualDataLoading:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1}, {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "position": 2}
+                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1},
+                {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "position": 2},
             ],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1}, {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "position": 2}
+                    "position": 1,
+                },
+                {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "position": 2},
             ],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1}, {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "position": 2}
+                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1},
+                {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "position": 2},
             ],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1}, {
+                    "position": 1,
+                },
+                {
                     "name": "Stirling Executive Man",
                     "shaves": 100,
                     "unique_users": 45,
-                    "position": 2}
-            ]}
+                    "position": 2,
+                },
+            ],
+        }
 
         # Write test file
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
@@ -95,11 +105,7 @@ class TestAnnualDataLoading:
 
     def test_load_missing_metadata_section(self, tmp_path: Path) -> None:
         """Test loading annual file missing metadata section."""
-        test_data = {
-            "razors": [],
-            "blades": [],
-            "brushes": [],
-            "soaps": []}
+        test_data = {"razors": [], "blades": [], "brushes": [], "soaps": []}
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -119,7 +125,8 @@ class TestAnnualDataLoading:
             "razors": [],
             "blades": [],
             "brushes": [],
-            "soaps": []}
+            "soaps": [],
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -148,7 +155,9 @@ class TestAnnualDataLoading:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [],
             # Missing blades, brushes, soaps
         }
@@ -180,11 +189,14 @@ class TestAnnualDataLoading:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [],
             "blades": [],
             "brushes": [],
-            "soaps": []}
+            "soaps": [],
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -237,11 +249,14 @@ class TestAnnualDataValidation:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [],
             "blades": [],
             "brushes": [],
-            "soaps": []}
+            "soaps": [],
+        }
 
         # Should not raise any exceptions
         annual_load.validate_annual_data_structure(test_data)
@@ -255,11 +270,7 @@ class TestAnnualDataValidation:
 
     def test_validate_annual_data_structure_missing_metadata(self) -> None:
         """Test validation of annual data missing metadata."""
-        test_data = {
-            "razors": [],
-            "blades": [],
-            "brushes": [],
-            "soaps": []}
+        test_data = {"razors": [], "blades": [], "brushes": [], "soaps": []}
 
         with pytest.raises(ValueError, match="Annual data must contain 'metadata' section"):
             annual_load.validate_annual_data_structure(test_data)
@@ -283,7 +294,9 @@ class TestAnnualDataValidation:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [],
             # Missing blades, brushes, soaps
         }
@@ -311,7 +324,9 @@ class TestAnnualDataValidation:
                 "2024-09",
                 "2024-10",
                 "2024-11",
-                "2024-12"]}
+                "2024-12",
+            ],
+        }
 
         # Should not raise any exceptions
         annual_load.validate_annual_metadata(metadata)
@@ -344,7 +359,9 @@ class TestAnnualDataValidation:
                 "2024-09",
                 "2024-10",
                 "2024-11",
-                "2024-12"]}
+                "2024-12",
+            ],
+        }
 
         with pytest.raises(ValueError, match="Annual metadata 'total_shaves' must be a number"):
             annual_load.validate_annual_metadata(metadata)
@@ -372,11 +389,14 @@ class TestAnnualDataIntegration:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
+                    "2024-12",
+                ],
+            },
             "razors": [],
             "blades": [],
             "brushes": [],
-            "soaps": []}
+            "soaps": [],
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -414,16 +434,17 @@ class TestAnnualDataIntegration:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"]},
-            "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1}
-            ],
+                    "2024-12",
+                ],
+            },
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1}],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1}
+                    "position": 1,
+                }
             ],
             "brushes": [
                 {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1}
@@ -433,8 +454,10 @@ class TestAnnualDataIntegration:
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1}
-            ]}
+                    "position": 1,
+                }
+            ],
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -492,13 +515,16 @@ class TestAnnualDataErrorHandling:
                     "2024-09",
                     "2024-10",
                     "2024-11",
-                    "2024-12"],
-                "extra_field": "should be allowed"},
+                    "2024-12",
+                ],
+                "extra_field": "should be allowed",
+            },
             "razors": [],
             "blades": [],
             "brushes": [],
             "soaps": [],
-            "extra_category": []}
+            "extra_category": [],
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
@@ -519,11 +545,21 @@ class TestAnnualDataPerformance:
         """Test loading large annual dataset (performance test)."""
         # Create large dataset with many products
         large_razors = [
-            {"name": f"Razor {i}, rank: 1", "shaves": 100 + i, "unique_users": 50 + i, "position": i}
+            {
+                "name": f"Razor {i}, rank: 1",
+                "shaves": 100 + i,
+                "unique_users": 50 + i,
+                "position": i,
+            }
             for i in range(1, 101)
         ]
         large_blades = [
-            {"name": f"Blade {i}, rank: 1", "shaves": 200 + i, "unique_users": 100 + i, "position": i}
+            {
+                "name": f"Blade {i}, rank: 1",
+                "shaves": 200 + i,
+                "unique_users": 100 + i,
+                "position": i,
+            }
             for i in range(1, 101)
         ]
         large_brushes = [
@@ -541,11 +577,13 @@ class TestAnnualDataPerformance:
                 "total_shaves": 50000,
                 "unique_shavers": 1000,
                 "included_months": [f"2024-{i:02d}" for i in range(1, 13)],
-                "missing_months": []},
+                "missing_months": [],
+            },
             "razors": large_razors,
             "blades": large_blades,
             "brushes": large_brushes,
-            "soaps": large_soaps}
+            "soaps": large_soaps,
+        }
 
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)

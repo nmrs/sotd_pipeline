@@ -1,121 +1,21 @@
-# Brush Scoring Configuration
-# This file defines the scoring weights and modifiers for the brush matching system
-
 brush_scoring_weights:
-  # Base strategy scores (Phase 3.1)
   base_strategies:
     correct_complete_brush: 100.0
     correct_split_brush: 95.0
-    known_split: 90.0
+    dual_component_fallback: 50.0
+    fiber_detection: 70.0
+    handle_only_fallback: 40.0
+    knot_only_fallback: 30.0
     known_brush: 80.0
-    omega_semogue: 75.0
-    zenith: 75.0
-    other_brush: 70.0
-    automated_split: 60.0
-    unified: 40.0
-    handle_only: 30.0
-    knot_only: 30.0
-
-  # Strategy-specific modifiers (Phase 3.7 - ENABLED)
+    known_split: 90.0
+    size_detection: 60.0
   strategy_modifiers:
-    # Modifiers for split strategies (automated_split, known_split, correct_split_brush)
-    automated_split:
-      high_confidence: 15.0
-      multiple_brands: 30.0 # Should detect multiple brands when split components have different brands
-      priority_score: 5.0 # Bonus for handle/knot priority levels (higher quality = more points)
-      fiber_words: 0.0
-      size_specification: 0.0
-      delimiter_confidence: 0.0
-
-    # Modifiers for complete brush strategies (no splitting needed)
-    correct_complete_brush:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    correct_split_brush:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    known_split:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    known_brush:
-      multiple_brands: 0.0
-      fiber_match: 0.0
-      size_specification: 0.0
-
-    omega_semogue:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    zenith:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    other_brush:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-
-    unified:
-      dual_component: 25.0
-      multiple_brands: 20.0
-      fiber_mismatch: -15.0
-      size_specification: 0.0
-
-    handle_only:
-      handle_indicators: 30.0
-      knot_indicators: -30.0
-      handle_brand_without_knot_brand: 25.0 # Bonus when we detect handle brand but no knot brand
-      knot_brand_without_handle_brand: -25.0 # Penalty when we detect knot brand but no handle brand
-
-    knot_only:
-      fiber_mismatch: -15.0
-      knot_indicators: 30.0
-      handle_indicators: -30.0
-      handle_brand_without_knot_brand: -25.0 # Penalty when we detect handle brand but no knot brand
-      knot_brand_without_handle_brand: 25.0 # Bonus when we detect knot brand but no handle brand
-
-# GLOSSARY OF MODIFIERS
-# =====================
-#
-# Base Strategy Scores:
-# - correct_complete_brush: Perfect match from correct_matches.yaml (highest confidence)
-# - correct_split_brush: Correct match with handle/knot splitting (very high confidence)
-# - known_split: Known brush that requires splitting (high confidence)
-# - known_brush: Known brush from catalog (good confidence)
-# - omega_semogue: Special handling for Omega/Semogue brands (medium-high confidence)
-# - zenith: Special handling for Zenith brand (medium-high confidence)
-# - other_brush: Generic brush matching (medium confidence)
-# - automated_split: Automated splitting with confidence scoring (lower confidence)
-# - unified: Unified strategy for complex cases (low confidence)
-# - handle_only: Single component strategy for handle-only input (low confidence)
-# - knot_only: Single component strategy for knot-only input (low confidence)
-#
-# Modifier Types and Strategy Applicability:
-# =========================================
-#
-# HIGH CONFIDENCE MODIFIERS (only for splitting strategies):
-# - high_confidence: Bonus when result uses high-priority delimiter (w/, with, in) - ONLY for automated_split
-# - delimiter_confidence: Bonus when input contains high-confidence delimiters (w/, with, in) - ONLY for automated_split
-#
-# GENERAL MODIFIERS (for all strategies):
-# - multiple_brands: Penalty when multiple brands are detected (potential confusion)
-# - fiber_words: Bonus when fiber type words are present (helps identify knot vs handle)
-# - size_specification: Bonus when size specifications are present (more specific match)
-#
-# UNUSED MODIFIERS (currently 0.0 for all strategies):
-# - handle_confidence: Bonus for high-confidence handle matching (placeholder for future use)
-# - knot_confidence: Bonus for high-confidence knot matching (placeholder for future use)
-# - word_count_balance: Bonus for balanced word distribution (placeholder for future use)
-#
-# STRATEGY-SPECIFIC MODIFIERS:
-# - dual_component: Bonus when both handle and knot components are detected (ONLY for unified strategy)
-# - handle_indicators: Bonus when handle indicators are present (ONLY for handle_only strategy)
-# - knot_indicators: Bonus when knot indicators are present (ONLY for knot_only strategy)
+    correct_complete_brush: {}
+    correct_split_brush: {}
+    dual_component_fallback: {}
+    fiber_detection: {}
+    handle_only_fallback: {}
+    knot_only_fallback: {}
+    known_brush: {}
+    known_split: {}
+    size_detection: {}

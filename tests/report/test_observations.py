@@ -8,10 +8,7 @@ class TestObservationsGenerator:
 
     def test_basic_statistics(self):
         """Test basic statistics generation."""
-        metadata = {
-            "total_shaves": 1622,
-            "unique_shavers": 110,
-            "avg_shaves_per_user": 14.75}
+        metadata = {"total_shaves": 1622, "unique_shavers": 110, "avg_shaves_per_user": 14.75}
         data = {}
         generator = ObservationsGenerator(metadata, data)
 
@@ -27,7 +24,8 @@ class TestObservationsGenerator:
         data = {
             "razors": [{"name": "Test Razor", "shaves": 50, "unique_users": 5}],
             "blades": [{"name": "Test Blade", "shaves": 40, "unique_users": 4}],
-            "brushes": [{"name": "Test Brush", "shaves": 30, "unique_users": 3}]}
+            "brushes": [{"name": "Test Brush", "shaves": 30, "unique_users": 3}],
+        }
         generator = ObservationsGenerator(metadata, data)
 
         observations = generator.generate_observations()
@@ -44,7 +42,9 @@ class TestObservationsGenerator:
         metadata = {"total_shaves": 100, "unique_shavers": 10}
         data = {
             "razor_formats": [
-                {"name": "DE", "shaves": 60}, {"name": "Straight", "shaves": 30}, {"name": "GEM", "shaves": 10}
+                {"name": "DE", "shaves": 60},
+                {"name": "Straight", "shaves": 30},
+                {"name": "GEM", "shaves": 10},
             ]
         }
         generator = ObservationsGenerator(metadata, data)

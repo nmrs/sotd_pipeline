@@ -16,15 +16,14 @@ class TestLoadAggregatedData:
         """Test loading valid aggregated data."""
         # Create test data
         test_data = {
-            "meta": {
-                "month": "2025-01",
-                "total_shaves": 1000,
-                "unique_shavers": 50},
+            "meta": {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50},
             "data": {
                 "razors": [
-                    {"name": "Razor 1", "shaves": 100, "unique_users": 20}, {"name": "Razor 2", "shaves": 80, "unique_users": 15}
+                    {"name": "Razor 1", "shaves": 100, "unique_users": 20},
+                    {"name": "Razor 2", "shaves": 80, "unique_users": 15},
                 ]
-            }}
+            },
+        }
 
         # Write test file
         file_path = tmp_path / "aggregated" / "2025-01.json"
@@ -70,12 +69,7 @@ class TestLoadAggregatedData:
 
     def test_load_missing_data_section(self, tmp_path: Path) -> None:
         """Test loading file missing data section."""
-        test_data = {
-            "meta": {
-                "month": "2025-01",
-                "total_shaves": 1000,
-                "unique_shavers": 50}
-        }
+        test_data = {"meta": {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50}}
 
         file_path = tmp_path / "missing_data.json"
         with open(file_path, "w") as f:
@@ -91,7 +85,8 @@ class TestLoadAggregatedData:
                 "month": "2025-01",
                 # Missing total_shaves and unique_shavers
             },
-            "data": {"razors": []}}
+            "data": {"razors": []},
+        }
 
         file_path = tmp_path / "missing_fields.json"
         with open(file_path, "w") as f:
@@ -103,11 +98,9 @@ class TestLoadAggregatedData:
     def test_load_with_debug(self, tmp_path: Path) -> None:
         """Test loading with debug output."""
         test_data = {
-            "meta": {
-                "month": "2025-01",
-                "total_shaves": 1000,
-                "unique_shavers": 50},
-            "data": {"razors": []}}
+            "meta": {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50},
+            "data": {"razors": []},
+        }
 
         file_path = tmp_path / "debug_test.json"
         with open(file_path, "w") as f:
@@ -125,15 +118,9 @@ class TestHistoricalDataLoading:
         """Test loading historical data that exists."""
         # Create test data
         test_data = {
-            "meta": {
-                "month": "2024-12",
-                "total_shaves": 900,
-                "unique_shavers": 45},
-            "data": {
-                "razors": [
-                    {"name": "Razor 1", "shaves": 90, "unique_users": 18}
-                ]
-            }}
+            "meta": {"month": "2024-12", "total_shaves": 900, "unique_shavers": 45},
+            "data": {"razors": [{"name": "Razor 1", "shaves": 90, "unique_users": 18}]},
+        }
 
         # Write test file
         file_path = tmp_path / "aggregated" / "2024-12.json"
@@ -227,13 +214,17 @@ class TestComparisonDataLoading:
         periods_data = {
             "2025-02": {
                 "meta": {"month": "2025-02", "total_shaves": 950, "unique_shavers": 48},
-                "data": {"razors": [{"name": "Razor 1", "shaves": 85, "unique_users": 17}]}},
+                "data": {"razors": [{"name": "Razor 1", "shaves": 85, "unique_users": 17}]},
+            },
             "2024-03": {
                 "meta": {"month": "2024-03", "total_shaves": 800, "unique_shavers": 40},
-                "data": {"razors": [{"name": "Razor 1", "shaves": 70, "unique_users": 15}]}},
+                "data": {"razors": [{"name": "Razor 1", "shaves": 70, "unique_users": 15}]},
+            },
             "2020-03": {
                 "meta": {"month": "2020-03", "total_shaves": 600, "unique_shavers": 30},
-                "data": {"razors": [{"name": "Razor 1", "shaves": 50, "unique_users": 12}]}}}
+                "data": {"razors": [{"name": "Razor 1", "shaves": 50, "unique_users": 12}]},
+            },
+        }
 
         # Write test files
         aggregated_dir = tmp_path / "aggregated"
@@ -272,7 +263,8 @@ class TestComparisonDataLoading:
         # Create test data for only one period
         test_data = {
             "meta": {"month": "2024-03", "total_shaves": 800, "unique_shavers": 40},
-            "data": {"razors": [{"name": "Razor 1", "shaves": 70, "unique_users": 15}]}}
+            "data": {"razors": [{"name": "Razor 1", "shaves": 70, "unique_users": 15}]},
+        }
 
         # Write test file for previous year only
         aggregated_dir = tmp_path / "aggregated"
