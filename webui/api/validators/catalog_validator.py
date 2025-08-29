@@ -63,8 +63,62 @@ class CatalogValidator:
                                         matched_brand = getattr(result.matched, "brand", None)
                                         matched_model = getattr(result.matched, "model", None)
 
-                                    # Check if this is a complete brush (brand and model populated)
-                                    if matched_brand and matched_model:
+                                    # Check if this is a composite brush (has handle/knot components)
+                                    has_handle = False
+                                    has_knot = False
+                                    if hasattr(result.matched, "get"):
+                                        # Dictionary-like object
+                                        has_handle = "handle" in result.matched and result.matched.get("handle")
+                                        has_knot = "knot" in result.matched and result.matched.get("knot")
+                                    else:
+                                        # Object with attributes
+                                        has_handle = hasattr(result.matched, "handle") and result.matched.handle
+                                        has_knot = hasattr(result.matched, "knot") and result.matched.knot
+
+                                    if has_handle or has_knot:
+                                        # This is a composite brush - check if it should be stored in handle/knot sections
+                                        # Extract handle/knot information
+                                        if hasattr(result.matched, "get"):
+                                            # Dictionary-like object
+                                            handle_data = result.matched.get("handle", {})
+                                            knot_data = result.matched.get("knot", {})
+                                            matched_handle_brand = handle_data.get("brand") if handle_data else None
+                                            matched_handle_model = handle_data.get("model") if handle_data else None
+                                            matched_knot_brand = knot_data.get("brand") if knot_data else None
+                                            matched_knot_model = knot_data.get("model") if knot_data else None
+                                        else:
+                                            # Object with attributes
+                                            matched_handle_brand = getattr(result.matched.handle, "brand", None) if hasattr(result.matched, "handle") else None
+                                            matched_handle_model = getattr(result.matched.handle, "model", None) if hasattr(result.matched, "handle") else None
+                                            matched_knot_brand = getattr(result.matched.knot, "brand", None) if hasattr(result.matched, "knot") else None
+                                            matched_knot_model = getattr(result.matched.knot, "model", None) if hasattr(result.matched, "knot") else None
+
+                                        # Flag if composite brush is stored in complete brush section
+                                        issues.append(
+                                            {
+                                                "type": "composite_brush_in_wrong_section",
+                                                "field": "brush",
+                                                "pattern": pattern,
+                                                "stored_brand": brand.strip(),
+                                                "stored_model": model.strip(),
+                                                "matched_handle_brand": matched_handle_brand,
+                                                "matched_handle_model": matched_handle_model,
+                                                "matched_knot_brand": matched_knot_brand,
+                                                "matched_knot_model": matched_knot_model,
+                                                "message": (
+                                                    f"Pattern '{pattern}' is stored as complete brush under "
+                                                    f"'{brand.strip()} {model.strip()}' but matcher returns "
+                                                    f"composite brush with handle: {matched_handle_brand}/{matched_handle_model}, "
+                                                    f"knot: {matched_knot_brand}/{matched_knot_model}"
+                                                ),
+                                                "suggested_action": (
+                                                    f"Move pattern '{pattern}' from complete brush section to "
+                                                    f"handle/knot sections or fix matcher to return complete brush"
+                                                ),
+                                            }
+                                        )
+                                    elif matched_brand and matched_model:
+                                        # This is a complete brush - check for mismatches
                                         # Normalize for comparison
                                         stored_brand = brand.strip()
                                         stored_model = model.strip()
@@ -95,14 +149,13 @@ class CatalogValidator:
                                                 }
                                             )
                                     else:
-                                        # This is a composite brush or the matcher didn't return expected structure
-                                        # For now, we'll handle this in the next step (composite brush validation)
-                                        # But we should still check if there's a basic mismatch
+                                        # This is neither a complete brush nor a composite brush
+                                        # Check if there's a basic brand mismatch
                                         if (
                                             matched_brand
                                             and matched_brand.lower() != brand.strip().lower()
                                         ):
-                                            # Brand mismatch even for composite brushes
+                                            # Brand mismatch
                                             issues.append(
                                                 {
                                                     "type": "catalog_pattern_mismatch",
