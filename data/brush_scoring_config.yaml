@@ -33,8 +33,6 @@ brush_scoring_weights:
       fiber_words: 0.0
       size_specification: 0.0
 
-
-
     correct_split_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
