@@ -6,7 +6,6 @@ from typing import Dict, List, Any
 
 import yaml
 from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.config import BrushMatcherConfig
 
 
 class CatalogValidator:
@@ -17,14 +16,10 @@ class CatalogValidator:
         self.project_root = project_root
         self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
 
-        # Initialize brush matcher
-        config = BrushMatcherConfig(
-            catalog_path=project_root / "data" / "brushes.yaml",
-            handles_path=project_root / "data" / "handles.yaml",
-            knots_path=project_root / "data" / "knots.yaml",
-            bypass_correct_matches=True,  # This is crucial!
-        )
-        self.brush_matcher = BrushMatcher(config)
+        # Initialize brush matcher with the correct configuration path
+        # The BrushMatcher expects a path to brush_scoring_config.yaml
+        brush_scoring_config_path = project_root / "data" / "brush_scoring_config.yaml"
+        self.brush_matcher = BrushMatcher(brush_scoring_config_path)
 
     def load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml data."""

@@ -122,8 +122,7 @@ class TestBrushSplitsAPI:
 
     @patch("webui.api.brush_splits.validator")
     @patch("pathlib.Path.exists")
-    @patch("builtins.open")
-    def test_load_brush_splits_corrupted_file(self, mock_open, mock_exists, mock_validator):
+    def test_load_brush_splits_corrupted_file(self, mock_exists, mock_validator):
         """Test loading brush splits with corrupted JSON file."""
         mock_exists.return_value = True
 

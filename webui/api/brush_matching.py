@@ -145,8 +145,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         parent_dir = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(parent_dir))
 
-        # Use the new BrushScoringMatcher for consistent analysis
-        from sotd.match.brush_matcher import BrushScoringMatcher
+        # Use the BrushMatcher for consistent analysis
+        from sotd.match.brush_matcher import BrushMatcher
 
         # Change to the parent directory where the data files are located
         import os
@@ -155,8 +155,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         os.chdir(parent_dir)
 
         try:
-            # Use the new scoring matcher
-            matcher = BrushScoringMatcher()
+            # Use the brush matcher
+            matcher = BrushMatcher()
             analysis_result = matcher.match(request.brushString)
 
             # Convert to expected format
