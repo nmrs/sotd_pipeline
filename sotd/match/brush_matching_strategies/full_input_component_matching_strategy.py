@@ -75,7 +75,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             # Both matched - dual component
             result = self._create_dual_component_result(handle_result, knot_result, text)
             if result:
-                result.strategy = "unified"  # Will get base score 50 + modifier 15 = 65
+                result.strategy = "full_input_component_matching"  # Base score 75 + modifiers
                 result.match_type = "composite"
             return result
         elif handle_result or knot_result:
@@ -88,7 +88,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
                 return None
 
             if result:
-                result.strategy = "unified"  # Will get base score 50 (no modifier)
+                result.strategy = "full_input_component_matching"  # Base score 75
                 result.match_type = "single_component"
             return result
         else:

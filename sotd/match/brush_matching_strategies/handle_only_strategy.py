@@ -33,8 +33,8 @@ class HandleOnlyStrategy(BaseBrushMatchingStrategy):
             return None
 
         # Try to use cached unified result first
-        if cached_results and "unified_result" in cached_results:
-            unified_result = cached_results["unified_result"]
+        if cached_results and "full_input_component_matching_result" in cached_results:
+            unified_result = cached_results["full_input_component_matching_result"]
             if unified_result and unified_result.matched:
                 # Extract handle component from unified result
                 handle_data = unified_result.matched.get("handle", {})

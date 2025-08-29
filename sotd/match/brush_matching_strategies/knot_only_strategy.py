@@ -40,8 +40,8 @@ class KnotOnlyStrategy(BaseBrushMatchingStrategy):
             return None
 
         # Try to use cached unified result first
-        if cached_results and "unified_result" in cached_results:
-            unified_result = cached_results["unified_result"]
+        if cached_results and "full_input_component_matching_result" in cached_results:
+            unified_result = cached_results["full_input_component_matching_result"]
 
         # If we have a unified result, extract knot component from it
         if unified_result and unified_result.matched:

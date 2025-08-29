@@ -184,8 +184,8 @@ class ScoringEngine:
         else:
             matched = result.get("matched", {}) if isinstance(result, dict) else {}
 
-        # For unified strategy, check handle and knot sections
-        if strategy_name == "unified":
+        # For full_input_component_matching strategy, check handle and knot sections
+        if strategy_name == "full_input_component_matching":
             handle = matched.get("handle", {})
             knot = matched.get("knot", {})
 
@@ -585,7 +585,7 @@ class ScoringEngine:
         if not hasattr(self, "cached_results") or not self.cached_results:
             return 0.0
 
-        unified_result = self.cached_results.get("unified_result")
+        unified_result = self.cached_results.get("full_input_component_matching_result")
         if not unified_result or not unified_result.matched:
             return 0.0
 
@@ -706,7 +706,7 @@ class ScoringEngine:
         if not hasattr(self, "cached_results") or not self.cached_results:
             return 0.0
 
-        unified_result = self.cached_results.get("unified_result")
+        unified_result = self.cached_results.get("full_input_component_matching_result")
         if not unified_result or not unified_result.matched:
             return 0.0
 

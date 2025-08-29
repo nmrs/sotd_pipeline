@@ -111,7 +111,7 @@ class BrushMatcher:
             # New interface - use default paths
             handles_path = Path("data/handles.yaml")
             knots_path = Path("data/knots.yaml")
-            bypass_correct_matches = False
+            bypass_correct_matches = kwargs.get("bypass_correct_matches", False)
 
         # Initialize configuration
         self.config = BrushScoringConfig(config_path=config_path)
@@ -119,8 +119,12 @@ class BrushMatcher:
         # Store correct_matches_path for wrapper strategies
         self.correct_matches_path = correct_matches_path
 
+        # Store bypass setting for optimization
+        self.bypass_correct_matches = bypass_correct_matches
+
         # Load correct matches data
         correct_matches_data = load_correct_matches(correct_matches_path)
+        self.correct_matches_data = correct_matches_data
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
         # Use direct paths instead of legacy config
@@ -250,8 +254,8 @@ class BrushMatcher:
         # Create brush-level strategies (not knot strategies)
         strategies = []
 
-        # Add correct matches strategy (highest priority)
-        strategies.append(CorrectMatchesStrategy(catalogs["correct_matches"]))
+        # Note: Correct matches strategy is handled separately, not in the strategy orchestrator
+        # It runs first with highest priority when not bypassed
 
         # Add complete brush wrapper strategy
         strategies.append(CompleteBrushWrapperStrategy(catalogs["brushes"]))
@@ -574,9 +578,9 @@ class BrushMatcher:
             )
             unified_result = unified_strategy.match(value)
             if unified_result:
-                cached_results["unified_result"] = unified_result
+                cached_results["full_input_component_matching_result"] = unified_result
         except Exception:
-            # Unified strategy failed, continue without unified result
+            # FullInputComponentMatchingStrategy failed, continue without result
             pass
 
         return cached_results
@@ -594,8 +598,9 @@ class BrushMatcher:
         Returns:
             MatchResult if correct match found, None otherwise
         """
-        # Only check the first strategy which is the correct matches strategy
-        correct_strategy = self.strategy_orchestrator.strategies[0]
+        # Use the already-loaded correct matches data from initialization
+        # (This method is only called when bypass_correct_matches is False)
+        correct_strategy = CorrectMatchesStrategy(self.correct_matches_data)
 
         try:
             result = correct_strategy.match(value)
@@ -629,13 +634,14 @@ class BrushMatcher:
             # Pre-compute HandleMatcher and KnotMatcher results for optimization
             cached_results = self._precompute_handle_knot_results(value)
 
-            # PHASE 1: Check correct matches strategies first (highest priority)
-            correct_match_result = self._try_correct_matches_strategies(value, cached_results)
-            if correct_match_result:
-                # Correct match found - return immediately, don't run other strategies
-                return correct_match_result
+            # PHASE 1: Check correct matches strategies first (highest priority) if not bypassed
+            if not self.bypass_correct_matches:
+                correct_match_result = self._try_correct_matches_strategies(value, cached_results)
+                if correct_match_result:
+                    # Correct match found - return immediately, don't run other strategies
+                    return correct_match_result
 
-            # PHASE 2: Only if no correct match found, run and score other strategies
+            # PHASE 2: Run all other strategies (excluding correct matches if bypassed)
             strategy_results = self.strategy_orchestrator.run_all_strategies(value, cached_results)
 
             # If no strategy results, return None
