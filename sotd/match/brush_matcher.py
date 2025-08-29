@@ -24,6 +24,7 @@ from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.config import BrushMatcherConfig
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
 from sotd.match.types import MatchResult
@@ -51,7 +52,10 @@ class BrushMatcher:
     """
 
     def __init__(
-        self, config_path: Path | None = None, correct_matches_path: Path | None = None, **kwargs
+        self,
+        config_path: Path | BrushMatcherConfig | None = None,
+        correct_matches_path: Path | None = None,
+        **kwargs,
     ):
         """
         Initialize the enhanced brush scoring matcher.
@@ -69,7 +73,14 @@ class BrushMatcher:
         ):
             # Legacy config object - extract paths
             legacy_config = config_path
-            config_path = legacy_config.catalog_path
+            # Use brush_scoring_config_path if available, otherwise fall back to catalog_path
+            if (
+                hasattr(legacy_config, "brush_scoring_config_path")
+                and legacy_config.brush_scoring_config_path
+            ):
+                config_path = legacy_config.brush_scoring_config_path
+            else:
+                config_path = legacy_config.catalog_path
             handles_path = getattr(legacy_config, "handles_path", Path("data/handles.yaml"))
             knots_path = getattr(legacy_config, "knots_path", Path("data/knots.yaml"))
             bypass_correct_matches = getattr(legacy_config, "bypass_correct_matches", False)
@@ -186,8 +197,8 @@ class BrushMatcher:
         )
 
         return [
-            KnownKnotMatchingStrategy(catalogs["knots"]),
-            OtherKnotMatchingStrategy(catalogs["knots"]),
+            KnownKnotMatchingStrategy(catalogs["knots"]["known_knots"]),
+            OtherKnotMatchingStrategy(catalogs["knots"]["other_knots"]),
             KnotSizeFallbackStrategy(),
         ]
 
@@ -201,15 +212,62 @@ class BrushMatcher:
         # Use shared utilities instead of duplicating logic
         catalogs = self._load_catalogs_directly()  # Use our direct loading method
 
-        # Create strategies directly instead of using StrategyManager
-        strategies = self._create_temp_strategies()  # Use _create_temp_strategies
+        # Create brush-level strategies (not knot strategies)
+        strategies = []
+
+        # Add correct matches wrapper strategies
+        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
+            CorrectCompleteBrushWrapperStrategy,
+            CorrectSplitBrushWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
+            CompleteBrushWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
+            KnownSplitWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+            OtherBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.zenith_strategy import (
+            ZenithBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+            OmegaSemogueBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
+            FiberFallbackStrategy,
+        )
+        from sotd.match.brush_matching_strategies.handle_only_strategy import (
+            HandleOnlyStrategy,
+        )
+        from sotd.match.brush_matching_strategies.knot_only_strategy import (
+            KnotOnlyStrategy,
+        )
+
+        # Add strategies in priority order
+        strategies.append(CorrectCompleteBrushWrapperStrategy(catalogs["correct_matches"]))
+        strategies.append(CorrectSplitBrushWrapperStrategy(catalogs["correct_matches"]))
+        strategies.append(CompleteBrushWrapperStrategy(catalogs["brushes"]))
+        strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
+        # Add strategies that expect the correct catalog structure
+        strategies.append(OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {})))
+        # Add specialized strategies
+        strategies.append(ZenithBrushMatchingStrategy())
+        strategies.append(OmegaSemogueBrushMatchingStrategy())
+        # Skip other strategies for now - they may expect different catalog structure
+        # strategies.append(ZenithBrushMatchingStrategy(catalogs["brushes"].get("zenith_brushes", {})))
+        # strategies.append(OmegaSemogueBrushMatchingStrategy(catalogs["brushes"].get("omega_semogue_brushes", {})))
+        # strategies.append(FiberFallbackStrategy(catalogs["brushes"].get("fiber_fallback_brushes", {})))
 
         # Add the automated split strategy for high/medium priority splitting
         from sotd.match.brush_matching_strategies.automated_split_strategy import (
             AutomatedSplitStrategy,
         )
 
-        strategies.append(AutomatedSplitStrategy(catalogs, self.config))
+        strategies.append(
+            AutomatedSplitStrategy(catalogs, self.config, self.handle_matcher, self.knot_matcher)
+        )
 
         # Add the unified component matching strategy
         from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
@@ -219,6 +277,10 @@ class BrushMatcher:
         strategies.append(
             FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs)
         )
+
+        # Skip problematic component strategies for now - they expect component-level data, not brush-level data
+        # strategies.append(HandleOnlyStrategy(self.handle_matcher))
+        # strategies.append(KnotOnlyStrategy(self.knot_matcher))
 
         return strategies
 

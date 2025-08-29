@@ -48,21 +48,39 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                 )
         return compiled_patterns
 
-    def match(self, value: str) -> MatchResult:
+    def match(self, value: str | dict) -> MatchResult:
+        # Handle both string and field data object inputs
+        if isinstance(value, dict):
+            # Extract normalized text from field data object
+            text = value.get("normalized", value.get("original", ""))
+        else:
+            # Direct string input
+            text = value
+
+        # Skip strings that contain delimiters - let splitting strategies handle them
+        delimiters = [" w/ ", " with ", " in ", " / ", " - ", " + "]
+        if any(delimiter in text for delimiter in delimiters):
+            return create_match_result(
+                original=value.get("original", text) if isinstance(value, dict) else value,
+                matched=None,
+                pattern=None,
+                match_type=None,
+            )
+
         # Use precompiled patterns for performance optimization
         for pattern_data in self.compiled_patterns:
-            if pattern_data["compiled"].search(value):
+            if pattern_data["compiled"].search(text):
                 brand = pattern_data["brand"]
                 metadata = pattern_data["metadata"]
                 pattern = pattern_data["pattern"]
 
                 # Extract fiber from user input or use default
-                user_fiber = match_fiber(value)
+                user_fiber = match_fiber(text)
                 default_fiber = metadata["default"]
                 final_fiber = user_fiber or default_fiber
 
                 # Extract knot size from user input or use default
-                user_knot_size = parse_knot_size(value)
+                user_knot_size = parse_knot_size(text)
                 default_knot_size = metadata.get("knot_size_mm")
 
                 # Set model to just the fiber type
@@ -87,7 +105,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     result["knot_size_mm"] = default_knot_size
 
                 return create_match_result(
-                    original=value,
+                    original=value.get("original", text) if isinstance(value, dict) else value,
                     matched=result,
                     pattern=pattern,
                     match_type="brand_default",
@@ -95,7 +113,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                 )
 
         return create_match_result(
-            original=value,
+            original=value.get("original", text) if isinstance(value, dict) else value,
             matched=None,
             pattern=None,  # type: ignore
             match_type=None,  # type: ignore

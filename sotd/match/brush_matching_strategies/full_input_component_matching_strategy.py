@@ -33,17 +33,25 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         self.knot_matcher = knot_matcher
         self.catalogs = catalogs
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str | dict) -> Optional[MatchResult]:
         """
         Match a brush string using unified component matching logic.
 
         Args:
-            value: The brush string to match
+            value: The brush string or field data object to match
 
         Returns:
             MatchResult or None
         """
-        if not value or not isinstance(value, str):
+        # Handle both string and field data object inputs
+        if isinstance(value, dict):
+            # Extract normalized text from field data object
+            text = value.get("normalized", value.get("original", ""))
+        else:
+            # Direct string input
+            text = value
+
+        if not text or not isinstance(text, str):
             return None
 
         # Run both matchers once
@@ -51,13 +59,13 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         knot_result = None
 
         try:
-            handle_result = self.handle_matcher.match_handle_maker(value)
+            handle_result = self.handle_matcher.match_handle_maker(text)
         except Exception:
             # Handle matcher failed, continue with None
             pass
 
         try:
-            knot_result = self.knot_matcher.match(value)
+            knot_result = self.knot_matcher.match(text)
         except Exception:
             # Knot matcher failed, continue with None
             pass
@@ -65,7 +73,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         # Determine match type and create result
         if handle_result and knot_result:
             # Both matched - dual component
-            result = self._create_dual_component_result(handle_result, knot_result, value)
+            result = self._create_dual_component_result(handle_result, knot_result, text)
             if result:
                 result.strategy = "unified"  # Will get base score 50 + modifier 15 = 65
                 result.match_type = "composite"
@@ -87,13 +95,19 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             # Neither matched
             return None
 
-    def _create_dual_component_result(
-        self, handle_result: MatchResult, knot_result: MatchResult, value: str
-    ) -> MatchResult:
+    def _create_dual_component_result(self, handle_result, knot_result, value: str) -> MatchResult:
         """Create a dual component result combining handle and knot."""
-        # Extract handle data
-        handle_data = handle_result.matched or {}
-        knot_data = knot_result.matched or {}
+        # Extract handle data - handle_result might be a dict or MatchResult
+        if hasattr(handle_result, "matched"):
+            handle_data = handle_result.matched or {}
+        else:
+            handle_data = handle_result or {}
+
+        # Extract knot data - knot_result should be a MatchResult
+        if hasattr(knot_result, "matched"):
+            knot_data = knot_result.matched or {}
+        else:
+            knot_data = knot_result or {}
 
         # Create combined brush data
         brush_data = {
@@ -124,20 +138,24 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         else:
             return component_result
 
-    def _convert_handle_result_to_brush_result(self, handle_result: MatchResult) -> MatchResult:
+    def _convert_handle_result_to_brush_result(self, handle_result) -> MatchResult:
         """Convert HandleMatcher result to brush format."""
-        handle_data = handle_result.matched or {}
+        # Handle both dict and MatchResult types
+        if hasattr(handle_result, "matched"):
+            handle_data = handle_result.matched or {}
+        else:
+            handle_data = handle_result or {}
 
         brush_data = {
             "brand": handle_data.get("handle_maker"),
             "model": handle_data.get("handle_model"),
-            "source_text": handle_data.get("source_text", handle_result.original),
+            "source_text": handle_data.get("source_text", ""),
             "_matched_by": "HandleMatcher",
             "_pattern": handle_data.get("_pattern_used"),
         }
 
         return MatchResult(
-            original=handle_result.original,
+            original="",  # Handle matcher doesn't provide original text
             matched=brush_data,
             match_type="handle",
             pattern=handle_data.get("_pattern_used"),
@@ -152,13 +170,13 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "model": knot_data.get("model"),
             "fiber": knot_data.get("fiber"),
             "knot_size_mm": knot_data.get("knot_size_mm"),
-            "source_text": knot_data.get("source_text", knot_result.original),
+            "source_text": knot_data.get("source_text", ""),
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
 
         return MatchResult(
-            original=knot_result.original,
+            original="",  # Knot matcher doesn't provide original text
             matched=brush_data,
             match_type="knot",
             pattern=knot_data.get("_pattern_used"),
