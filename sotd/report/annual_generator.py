@@ -78,7 +78,7 @@ class AnnualReportGenerator(BaseReportGenerator):
         }
 
         # Create table generator for table placeholders
-        table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
+        table_generator = TableGenerator(self.data, self.comparison_data, None, self.debug)
 
         # Generate all tables for the template
         tables = {}
@@ -273,9 +273,10 @@ class LegacyAnnualReportGenerator:
             else:
                 # Add empty placeholder for missing years
                 formatted_comparison[year] = ({}, {})
-        tg = TableGenerator(data, formatted_comparison, self.debug)
+        tg = TableGenerator(data, formatted_comparison, None, self.debug)
         try:
-            table_md = tg.generate_table_by_name(category)
+            # Pass deltas=True to include delta columns in the table
+            table_md = tg.generate_table(category, deltas=True)
         except Exception as e:
             if self.debug:
                 logger.warning(f"Error generating table for {category}: {e}")

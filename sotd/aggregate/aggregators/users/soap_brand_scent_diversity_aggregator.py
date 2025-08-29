@@ -123,6 +123,9 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
             grouped["shaves"] / grouped["unique_combinations"]
         ).round(2)
 
+        # Add unique_users field (always 1 for user aggregators)
+        grouped["unique_users"] = 1
+
         # Use mixin to prepare for base class ranking
         grouped = self._prepare_for_base_ranking(grouped)
 
@@ -144,6 +147,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
                 "unique_combinations": "unique_combinations",
                 "shaves": "shaves",
                 "avg_shaves_per_combination": "avg_shaves_per_combination",
+                "unique_users": "unique_users",
             },
         )
 

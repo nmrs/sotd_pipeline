@@ -3,6 +3,7 @@
 
 from typing import Any, Dict, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 from sotd.report.utils.tier_identifier import TierIdentifier
@@ -54,7 +55,28 @@ class DeltaCalculator:
         if historical_df.empty:
             if self.debug:
                 print("[DEBUG] No historical data available")
-            return []
+            # Return current data with delta fields set to indicate no comparison possible
+            current_df = pd.DataFrame(current_data[:max_items])
+            if current_df.empty:
+                return []
+
+            # Add delta fields with no comparison values
+            current_df["delta"] = None
+            current_df["delta_symbol"] = "n/a"
+            current_df["delta_text"] = "n/a"
+
+            # Convert back to list of dictionaries
+            results = [
+                {str(k): v for k, v in item.items()} for item in current_df.to_dict("records")
+            ]
+
+            if self.debug:
+                print(
+                    "[DEBUG] No historical data, returning "
+                    f"{len(results)} current items without deltas"
+                )
+
+            return results
 
         # Filter valid items and create rank mapping using pandas operations
         valid_historical = historical_df[
@@ -110,8 +132,14 @@ class DeltaCalculator:
 
             try:
                 # Convert ranks to integers for calculation (handle string ranks like "2=")
-                hist_rank_int = int(str(historical_rank).split("=")[0])
-                curr_rank_int = int(str(current_rank).split("=")[0])
+                # Handle float ranks by converting to string and removing decimal part
+                hist_rank_str = str(historical_rank).split("=")[0]
+                curr_rank_str = str(current_rank).split("=")[0]
+
+                # Remove decimal part if present (e.g., "2.0" -> "2")
+                hist_rank_int = int(float(hist_rank_str))
+                curr_rank_int = int(float(curr_rank_str))
+
                 delta = hist_rank_int - curr_rank_int
                 delta_symbol = self._get_delta_symbol(delta)
                 delta_text = delta_symbol  # Use symbol only, not +/- format
@@ -127,6 +155,11 @@ class DeltaCalculator:
         valid_current["delta"] = delta_results.apply(lambda x: x[0])
         valid_current["delta_symbol"] = delta_results.apply(lambda x: x[1])
         valid_current["delta_text"] = delta_results.apply(lambda x: x[2])
+
+        # Convert NaN values back to None for consistency
+        valid_current["delta"] = valid_current["delta"].replace({np.nan: None})
+        valid_current["delta_symbol"] = valid_current["delta_symbol"].replace({np.nan: None})
+        valid_current["delta_text"] = valid_current["delta_text"].replace({np.nan: None})
 
         # Convert back to list of dictionaries with string keys for type compatibility
         results = [
