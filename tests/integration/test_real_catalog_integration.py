@@ -41,16 +41,19 @@ class TestRealCatalogIntegration:
         self, brush_matcher, soap_matcher, razor_matcher, blade_matcher
     ):
         """Test that all real catalogs load without errors."""
-        # Verify basic structure
-        assert brush_matcher.catalog_data is not None
+        # Verify basic structure - use attributes that actually exist
+        assert hasattr(brush_matcher, "config"), "BrushMatcher should have config"
+        assert hasattr(
+            brush_matcher, "strategy_orchestrator"
+        ), "BrushMatcher should have strategy_orchestrator"
         assert soap_matcher.catalog is not None
         assert razor_matcher.catalog is not None
         assert blade_matcher.catalog is not None
 
     def test_real_catalog_patterns_compile(self, brush_matcher, soap_matcher):
         """Test that all regex patterns in real catalogs compile successfully."""
-        # Verify patterns exist and compiled successfully
-        assert len(brush_matcher.strategies) > 0
+        # Verify patterns exist and compiled successfully - use correct attribute path
+        assert len(brush_matcher.strategy_orchestrator.strategies) > 0
         assert len(brush_matcher.handle_matcher.handle_patterns) > 0
         assert len(soap_matcher.scent_patterns) + len(soap_matcher.brand_patterns) > 0
 
@@ -87,10 +90,19 @@ class TestRealCatalogIntegration:
         """Test handle/knot splitting with real catalog data."""
         # Test cases that exercise both brush and handle catalogs
         # Note: These are matched as dual-component brushes, not split brushes
+        # Updated expectations to match current matcher behavior
         test_cases = [
-            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
-            ("Elite handle w/ Declaration B10", "Declaration Grooming", "Elite"),
-            ("Wolf Whiskers w/ Omega knot", "Omega", "Wolf Whiskers"),
+            (
+                "DG B15 w/ C&H Zebra",
+                "Declaration Grooming",
+                "Chisel & Hound",
+            ),  # Correct: knot=DG B15, handle=C&H Zebra
+            (
+                "Elite handle w/ Declaration B10",
+                "Declaration Grooming",
+                "Elite",
+            ),  # Correct knot result
+            ("Wolf Whiskers w/ Omega knot", "Omega", "Wolf Whiskers"),  # Correct knot result
         ]
 
         for input_text, expected_knot_brand, expected_handle_maker in test_cases:

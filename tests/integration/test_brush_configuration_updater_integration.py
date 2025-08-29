@@ -232,48 +232,75 @@ class TestBrushConfigurationUpdaterIntegration:
 
     def test_integration_with_real_brush_scoring_config(self):
         """Test integration with the actual brush scoring configuration structure."""
-        # Copy the real brush scoring config for testing
-        real_config_path = Path("data/brush_scoring_config.yaml")
-        if not real_config_path.exists():
-            # Skip test if real config doesn't exist
-            return
-
-        test_config_path = Path(self.temp_dir) / "real_brush_config.yaml"
-        shutil.copy2(real_config_path, test_config_path)
-
-        updater = BrushConfigurationUpdater(test_config_path)
-
-        # Test with realistic adjustments that might come from ChatGPT
-        realistic_suggestions = {
-            "weight_adjustments": {
-                "known_brush": 82.0,  # Small adjustment
-                "automated_split": 62.0,  # Small adjustment
-            },
-            "modifier_adjustments": {
-                "multiple_brands": -4.0,  # Adjust existing modifier
-            },
+        # Create test-specific config instead of using production file
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": 100.0,
+                    "correct_split_brush": 95.0,
+                    "known_split": 90.0,
+                    "known_brush": 80.0,
+                    "automated_split": 60.0,
+                },
+                "strategy_modifiers": {
+                    "automated_split": {
+                        "multiple_brands": 15.0,
+                        "fiber_words": 10.0,
+                        "size_specification": 5.0,
+                    }
+                },
+            }
         }
 
-        result = updater.apply_chatgpt_suggestions(realistic_suggestions)
-        assert result is True
+        # Create temporary config file for testing
+        import tempfile
+        import yaml
+        from pathlib import Path
 
-        # Verify changes were applied
-        updated_config = updater.load_configuration()
-        base_strategies = updated_config["brush_scoring_weights"]["base_strategies"]
+        temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, temp_config_file)
+        temp_config_file.close()
 
-        assert base_strategies["known_brush"] == 82.0
-        assert base_strategies["automated_split"] == 62.0
+        try:
+            test_config_path = Path(temp_config_file.name)
+            updater = BrushConfigurationUpdater(test_config_path)
 
-        # Find a strategy that has multiple_brands modifier
-        strategy_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"]
-        found_modifier_update = False
-        for strategy_name, modifiers in strategy_modifiers.items():
-            if "multiple_brands" in modifiers:
-                assert modifiers["multiple_brands"] == -4.0
-                found_modifier_update = True
-                break
+            # Test with realistic adjustments that might come from ChatGPT
+            realistic_suggestions = {
+                "weight_adjustments": {
+                    "known_brush": 82.0,  # Small adjustment
+                    "automated_split": 62.0,  # Small adjustment
+                },
+                "modifier_adjustments": {
+                    "multiple_brands": -4.0,  # Adjust existing modifier
+                },
+            }
 
-        assert found_modifier_update, "multiple_brands modifier should have been updated"
+            result = updater.apply_chatgpt_suggestions(realistic_suggestions)
+            assert result is True
+
+            # Verify changes were applied
+            updated_config = updater.load_configuration()
+            base_strategies = updated_config["brush_scoring_weights"]["base_strategies"]
+
+            assert base_strategies["known_brush"] == 82.0
+            assert base_strategies["automated_split"] == 62.0
+
+            # Find a strategy that has multiple_brands modifier
+            strategy_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"]
+            found_modifier_update = False
+            for strategy_name, modifiers in strategy_modifiers.items():
+                if "multiple_brands" in modifiers:
+                    assert modifiers["multiple_brands"] == -4.0
+                    found_modifier_update = True
+                    break
+
+            assert found_modifier_update, "multiple_brands modifier should have been updated"
+        finally:
+            # Clean up temporary file
+            import os
+
+            os.unlink(temp_config_file.name)
 
     def test_backup_and_restore_workflow(self):
         """Test the complete backup and restore workflow."""

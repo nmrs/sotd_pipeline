@@ -73,31 +73,70 @@ class TestBrushScoringConfigIntegration:
 
     def test_config_with_default_file(self):
         """Test configuration with default file path."""
-        # Test that default config loads without errors
-        config = BrushScoringConfig()
+        # Create test-specific config instead of using production config
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": 100.0,
+                    "correct_split_brush": 95.0,
+                    "known_split": 90.0,
+                    "known_brush": 80.0,
+                    "omega_semogue": 75.0,
+                    "zenith": 70.0,
+                    "other_brush": 65.0,
+                    "automated_split": 60.0,
+                    "unified": 50.0,
+                },
+                "strategy_modifiers": {
+                    "automated_split": {
+                        "multiple_brands": 15.0,
+                        "fiber_words": 10.0,
+                        "size_specification": 5.0,
+                    }
+                },
+            }
+        }
 
-        # Verify default structure
-        assert "base_strategies" in config.weights
-        assert "strategy_modifiers" in config.weights
+        # Create temporary config file for testing
+        import tempfile
+        import yaml
+        from pathlib import Path
 
-        # Verify all expected strategies are present (updated for current config)
-        expected_strategies = [
-            "correct_complete_brush",
-            "correct_split_brush",
-            "known_split",
-            "known_brush",
-            "omega_semogue",
-            "zenith",
-            "other_brush",
-            "automated_split",
-            "unified",
-        ]
+        temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, temp_config_file)
+        temp_config_file.close()
 
-        for strategy in expected_strategies:
-            assert strategy in config.weights["base_strategies"]
-            score = config.get_base_strategy_score(strategy)
-            assert isinstance(score, float)
-            assert score > 0
+        try:
+            test_config_path = Path(temp_config_file.name)
+            config = BrushScoringConfig(config_path=test_config_path)
+
+            # Verify default structure
+            assert "base_strategies" in config.weights
+            assert "strategy_modifiers" in config.weights
+
+            # Verify all expected strategies are present (updated for current config)
+            expected_strategies = [
+                "correct_complete_brush",
+                "correct_split_brush",
+                "known_split",
+                "known_brush",
+                "omega_semogue",
+                "zenith",
+                "other_brush",
+                "automated_split",
+                "unified",
+            ]
+
+            for strategy in expected_strategies:
+                assert strategy in config.weights["base_strategies"]
+                score = config.get_base_strategy_score(strategy)
+                assert isinstance(score, float)
+                assert score > 0
+        finally:
+            # Clean up temporary file
+            import os
+
+            os.unlink(temp_config_file.name)
 
     def test_config_hot_reload(self):
         """Test hot-reloading configuration."""

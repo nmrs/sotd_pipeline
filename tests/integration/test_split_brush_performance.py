@@ -223,8 +223,8 @@ class TestSplitBrushPerformance:
             # Verify results are correct
             if i < 50:  # First 50 should match
                 assert result.matched is not None
-                # Allow both "exact" and "regex" match types for correct matches
-                assert result.match_type in ["exact", "regex"]
+                # Allow "split_brush" match type for split brush detection
+                assert result.match_type == "split_brush"
             else:  # Remaining 50 should not match (different combinations)
                 # These might not match depending on the exact logic
                 pass

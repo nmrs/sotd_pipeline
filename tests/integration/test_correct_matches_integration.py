@@ -24,7 +24,7 @@ class TestRealDataIntegration:
             "brush": {"Declaration Grooming": {"B14": ["declaration grooming bok b14"]}}
         }
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches, debug=False)
 
     def test_real_correct_matches_yaml_data_processing(self):
         """Test real correct_matches.yaml data processing."""
@@ -275,7 +275,7 @@ class TestProductionCatalogLookup:
         self.handles = {}
         self.knots = {}
 
-        self.checker = CorrectMatchesChecker(self.config, self.correct_matches)
+        self.checker = CorrectMatchesChecker(self.correct_matches, debug=False)
 
     def test_production_catalog_lookup_validation(self):
         """Test production catalog lookup validation."""
