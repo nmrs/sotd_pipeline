@@ -102,4 +102,5 @@ class CorrectMatchesMatcher:
             },
             match_type=match_type,
             pattern=pattern,
+            strategy="correct_complete_brush",  # Set the strategy name
         )

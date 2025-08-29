@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 # Import SOTD modules after path setup
 from sotd.enrich.brush_enricher import BrushEnricher
 from sotd.match.brush_scoring_config import BrushScoringConfig
-from sotd.match.brush_matcher import BrushScoringMatcher
+from sotd.match.brush_matcher import BrushMatcher
 
 
 class BrushMatchingAnalyzer:
@@ -56,7 +56,7 @@ class BrushMatchingAnalyzer:
         try:
             # Initialize components if needed
             if not self.scoring_matcher:
-                self.scoring_matcher = BrushScoringMatcher()
+                self.scoring_matcher = BrushMatcher()
 
             if not self.brush_enricher:
                 self.brush_enricher = BrushEnricher()
