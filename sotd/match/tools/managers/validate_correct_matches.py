@@ -1386,11 +1386,17 @@ class ValidateCorrectMatches:
 
     def _get_normalized_catalog(self, field: str) -> Dict[str, Any]:
         """Get cached normalized catalog with pre-computed keys."""
+        logger.debug(f"Getting normalized catalog for field: {field}")
+        
         if field not in self._normalized_catalogs:
+            logger.debug(f"Field {field} not in cache, loading catalog data")
             catalog_data = self._load_catalog_data(field)
+            logger.debug(f"Loaded catalog data for {field}. Keys: {list(catalog_data.keys()) if catalog_data else 'None'}")
 
             normalized = self._normalize_catalog_keys(catalog_data)
             self._normalized_catalogs[field] = normalized
+        else:
+            logger.debug(f"Field {field} found in cache")
 
         return self._normalized_catalogs[field]
 
@@ -1402,12 +1408,18 @@ class ValidateCorrectMatches:
         if not catalog_data:
             return {}
 
+        # Debug logging to see what structure we're dealing with
+        logger.debug(f"Normalizing catalog keys. Data keys: {list(catalog_data.keys())}")
+        logger.debug(f"Catalog data type: {type(catalog_data)}")
+        logger.debug(f"First few items: {list(catalog_data.items())[:3] if catalog_data else 'None'}")
+
         # Create a deep copy to avoid mutating the original data
         catalog_data = copy.deepcopy(catalog_data)
 
         normalized = {}
 
         if "74" in catalog_data:  # Blade format
+            logger.debug("Detected blade format (has '74' key)")
             for format_name, format_section in catalog_data.items():
                 normalized[format_name] = {}
                 for brand_name, brand_section in format_section.items():
@@ -1417,6 +1429,7 @@ class ValidateCorrectMatches:
                         normalized_model = unicodedata.normalize("NFC", model_name)
                         normalized[format_name][normalized_brand][normalized_model] = model_section
         elif "known_brushes" in catalog_data:  # Brush format with nested structure
+            logger.debug("Detected brush format (has 'known_brushes' key)")
             # LINEAR FALLBACK: Include BOTH known_brushes AND other_brushes for validation
             # This matches how BrushMatcher actually works - it tries known_brushes first, then other_brushes
             for section_name in ["known_brushes", "other_brushes"]:
@@ -1431,6 +1444,7 @@ class ValidateCorrectMatches:
                             normalized_model = unicodedata.normalize("NFC", model_name)
                             normalized[normalized_brand][normalized_model] = model_section
         elif "artisan_handles" in catalog_data:  # Handle format with nested structure
+            logger.debug("Detected handle format (has 'artisan_handles' key)")
             # LINEAR FALLBACK: Include ALL handle sections for validation
             # This matches how HandleMatcher actually works
             for section_name in ["artisan_handles", "manufacturer_handles", "other_handles"]:
@@ -1445,6 +1459,7 @@ class ValidateCorrectMatches:
                             normalized_model = unicodedata.normalize("NFC", model_name)
                             normalized[normalized_brand][normalized_model] = model_section
         elif "known_knots" in catalog_data:  # Knot format with nested structure
+            logger.debug("Detected knot format (has 'known_knots' key)")
             # LINEAR FALLBACK: Include BOTH known_knots AND other_knots for validation
             # This matches how KnotMatcher actually works
             for section_name in ["known_knots", "other_knots"]:
@@ -1459,6 +1474,7 @@ class ValidateCorrectMatches:
                             normalized_model = unicodedata.normalize("NFC", model_name)
                             normalized[normalized_brand][normalized_model] = model_section
         else:  # Other fields (razor, soap)
+            logger.debug("Detected other format (razor/soap - flat structure)")
             for brand_name, brand_section in catalog_data.items():
                 normalized_brand = unicodedata.normalize("NFC", brand_name)
                 normalized[normalized_brand] = {}
@@ -1466,6 +1482,7 @@ class ValidateCorrectMatches:
                     normalized_model = unicodedata.normalize("NFC", model_name)
                     normalized[normalized_brand][normalized_model] = model_section
 
+        logger.debug(f"Normalization complete. Result keys: {list(normalized.keys())}")
         return normalized
 
     def _matcher_can_handle_combination(self, field: str, brand_name: str, model_name: str) -> bool:
