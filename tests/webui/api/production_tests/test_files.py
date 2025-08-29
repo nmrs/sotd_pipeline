@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from webui.api.main import app
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ class TestFileSystemIntegration:
 
     def test_get_available_months_success(self, client, temp_data_dir):
         """Test successful retrieval of available months."""
-        with patch("files.get_data_directory", return_value=temp_data_dir):
+        with patch("webui.api.files.get_data_directory", return_value=temp_data_dir):
             response = client.get("/api/files/available-months")
 
             assert response.status_code == 200
@@ -66,7 +66,7 @@ class TestFileSystemIntegration:
             empty_data_dir = Path(temp_dir) / "data" / "matched"
             empty_data_dir.mkdir(parents=True)
 
-            with patch("files.get_data_directory", return_value=empty_data_dir):
+            with patch("webui.api.files.get_data_directory", return_value=empty_data_dir):
                 response = client.get("/api/files/available-months")
 
                 assert response.status_code == 200
@@ -79,7 +79,7 @@ class TestFileSystemIntegration:
         with tempfile.TemporaryDirectory() as temp_dir:
             nonexistent_dir = Path(temp_dir) / "nonexistent"
 
-            with patch("files.get_data_directory", return_value=nonexistent_dir):
+            with patch("webui.api.files.get_data_directory", return_value=nonexistent_dir):
                 response = client.get("/api/files/available-months")
 
                 assert response.status_code == 200
@@ -89,7 +89,7 @@ class TestFileSystemIntegration:
 
     def test_get_month_data_success(self, client, temp_data_dir):
         """Test successful retrieval of month data."""
-        with patch("files.get_data_directory", return_value=temp_data_dir):
+        with patch("webui.api.files.get_data_directory", return_value=temp_data_dir):
             response = client.get("/api/files/2025-01")
 
             assert response.status_code == 200
@@ -101,7 +101,7 @@ class TestFileSystemIntegration:
 
     def test_get_month_data_not_found(self, client, temp_data_dir):
         """Test handling of nonexistent month."""
-        with patch("files.get_data_directory", return_value=temp_data_dir):
+        with patch("webui.api.files.get_data_directory", return_value=temp_data_dir):
             response = client.get("/api/files/2025-03")
 
             assert response.status_code == 404
@@ -118,7 +118,7 @@ class TestFileSystemIntegration:
             # Create invalid JSON file
             (data_dir / "2025-01.json").write_text("invalid json content")
 
-            with patch("files.get_data_directory", return_value=data_dir):
+            with patch("webui.api.files.get_data_directory", return_value=data_dir):
                 response = client.get("/api/files/2025-01")
 
                 assert response.status_code == 500
@@ -128,7 +128,7 @@ class TestFileSystemIntegration:
 
     def test_get_month_summary_success(self, client, temp_data_dir):
         """Test successful retrieval of month summary."""
-        with patch("files.get_data_directory", return_value=temp_data_dir):
+        with patch("webui.api.files.get_data_directory", return_value=temp_data_dir):
             response = client.get("/api/files/2025-01/summary")
 
             assert response.status_code == 200
@@ -144,7 +144,7 @@ class TestFileSystemIntegration:
 
     def test_get_month_summary_not_found(self, client, temp_data_dir):
         """Test handling of nonexistent month for summary."""
-        with patch("files.get_data_directory", return_value=temp_data_dir):
+        with patch("webui.api.files.get_data_directory", return_value=temp_data_dir):
             response = client.get("/api/files/2025-03/summary")
 
             assert response.status_code == 404
@@ -154,14 +154,14 @@ class TestFileSystemIntegration:
 
     def test_validate_json_file_valid(self, temp_data_dir):
         """Test JSON validation with valid file."""
-        from files import validate_json_file
+        from webui.api.files import validate_json_file
 
         test_file = temp_data_dir / "2025-01.json"
         assert validate_json_file(test_file) is True
 
     def test_validate_json_file_invalid(self, temp_data_dir):
         """Test JSON validation with invalid file."""
-        from files import validate_json_file
+        from webui.api.files import validate_json_file
 
         # Create invalid JSON file
         invalid_file = temp_data_dir / "invalid.json"
@@ -171,7 +171,7 @@ class TestFileSystemIntegration:
 
     def test_get_data_directory(self):
         """Test data directory path resolution."""
-        from files import get_data_directory
+        from webui.api.files import get_data_directory
 
         data_dir = get_data_directory()
         assert isinstance(data_dir, Path)

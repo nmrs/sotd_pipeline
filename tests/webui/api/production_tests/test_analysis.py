@@ -11,7 +11,7 @@ webui_dir = Path(__file__).parent.parent
 if str(webui_dir) not in sys.path:
     sys.path.insert(0, str(webui_dir))
 
-from api.analysis import MismatchItem  # noqa: E402
+from webui.api.analysis import MismatchItem  # noqa: E402
 
 
 class TestMismatchItemModel:
@@ -36,72 +36,72 @@ class TestMismatchItemModel:
         assert item.count == 1
         assert item.examples == ["example1"]
         assert item.comment_ids == ["123"]
-        assert item.is_split_brush is None
-        assert item.handle_component is None
-        assert item.knot_component is None
+        # Check that split brush fields are not present (they don't exist in the model)
+        assert not hasattr(item, "is_split_brush")
+        assert not hasattr(item, "handle_component")
+        assert not hasattr(item, "knot_component")
 
     def test_mismatch_item_split_brush_fields(self):
-        """Test MismatchItem with split brush fields."""
+        """Test MismatchItem with split brush fields in matched data."""
         item = MismatchItem(
             original="Jayaruh #441 w/ AP Shave Co G5C",
             matched={
                 "brand": None,
                 "model": None,
-                "handle": "Jayaruh #441",
-                "knot": "AP Shave Co G5C",
+                "handle": {"brand": "Jayaruh", "model": "#441"},
+                "knot": {"brand": "AP Shave Co", "model": "G5C"},
             },
             pattern="split_brush_pattern",
             match_type="split",
             count=1,
             examples=["example1"],
             comment_ids=["123"],
-            is_split_brush=True,
-            handle_component="Jayaruh #441",
-            knot_component="AP Shave Co G5C",
         )
 
         assert item.original == "Jayaruh #441 w/ AP Shave Co G5C"
-        assert item.is_split_brush is True
-        assert item.handle_component == "Jayaruh #441"
-        assert item.knot_component == "AP Shave Co G5C"
+        # Check that split brush data is in the matched field structure
+        assert "handle" in item.matched
+        assert "knot" in item.matched
+        assert item.matched["handle"]["brand"] == "Jayaruh"
+        assert item.matched["knot"]["brand"] == "AP Shave Co"
 
     def test_mismatch_item_handle_only_split_brush(self):
         """Test MismatchItem with handle-only split brush."""
         item = MismatchItem(
             original="Jayaruh #441",
-            matched={"brand": None, "model": None, "handle": "Jayaruh #441"},
+            matched={"brand": None, "model": None, "handle": {"brand": "Jayaruh", "model": "#441"}},
             pattern="handle_only_pattern",
             match_type="split",
             count=1,
             examples=["example1"],
             comment_ids=["123"],
-            is_split_brush=True,
-            handle_component="Jayaruh #441",
-            knot_component=None,
         )
 
-        assert item.is_split_brush is True
-        assert item.handle_component == "Jayaruh #441"
-        assert item.knot_component is None
+        # Check that handle data is in the matched field structure
+        assert "handle" in item.matched
+        assert item.matched["handle"]["brand"] == "Jayaruh"
+        assert item.matched["handle"]["model"] == "#441"
 
     def test_mismatch_item_knot_only_split_brush(self):
         """Test MismatchItem with knot-only split brush."""
         item = MismatchItem(
             original="AP Shave Co G5C",
-            matched={"brand": None, "model": None, "knot": "AP Shave Co G5C"},
+            matched={
+                "brand": None,
+                "model": None,
+                "knot": {"brand": "AP Shave Co", "model": "G5C"},
+            },
             pattern="knot_only_pattern",
             match_type="split",
             count=1,
             examples=["example1"],
             comment_ids=["123"],
-            is_split_brush=True,
-            handle_component=None,
-            knot_component="AP Shave Co G5C",
         )
 
-        assert item.is_split_brush is True
-        assert item.handle_component is None
-        assert item.knot_component == "AP Shave Co G5C"
+        # Check that knot data is in the matched field structure
+        assert "knot" in item.matched
+        assert item.matched["knot"]["brand"] == "AP Shave Co"
+        assert item.matched["knot"]["model"] == "G5C"
 
     def test_mismatch_item_backward_compatibility(self):
         """Test MismatchItem backward compatibility with existing fields."""
@@ -123,10 +123,10 @@ class TestMismatchItemModel:
         assert item.mismatch_type == "levenshtein_distance"
         assert item.reason == "High Levenshtein distance"
         assert item.is_confirmed is False
-        # Split brush fields should be None by default
-        assert item.is_split_brush is None
-        assert item.handle_component is None
-        assert item.knot_component is None
+        # Split brush fields should not exist in the model
+        assert not hasattr(item, "is_split_brush")
+        assert not hasattr(item, "handle_component")
+        assert not hasattr(item, "knot_component")
 
 
 # Keep the existing test classes for when we can run them properly

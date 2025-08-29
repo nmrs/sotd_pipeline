@@ -3,7 +3,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from webui.api.main import app
 
 
 @pytest.fixture

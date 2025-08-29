@@ -10,30 +10,33 @@ class TestBrushSplitsYAMLRefactor:
     """Test that brush_splits module uses YAML utilities correctly."""
 
     def test_load_validated_splits_uses_yaml_utils(self, tmp_path):
-        """Test that load_validated_splits uses the new YAML utilities."""
-        # Create test YAML data
-        test_data = {
-            "splits": [
-                {
-                    "original": "Test Brush",
-                    "handle": "Test Handle",
-                    "knot": "Test Knot",
-                    "validated": True,
-                    "should_not_split": False,
-                }
-            ]
-        }
+        """Test that load_validated_splits loads data correctly."""
+        from webui.api.brush_splits import BrushSplitValidator
 
         yaml_file = tmp_path / "brush_splits.yaml"
-        # Create the file so the method doesn't return early
-        yaml_file.touch()
 
-        # Mock the YAML utilities
-        with patch("webui.api.utils.yaml_utils.load_yaml_file") as mock_load:
-            mock_load.return_value = test_data
+        # Mock the file operations to avoid touching filesystem
+        with (
+            patch("builtins.open") as mock_open,
+            patch("yaml.safe_load") as mock_yaml_load,
+            patch("pathlib.Path.exists") as mock_exists,
+        ):
 
-            # Import the refactored module
-            from webui.api.brush_splits import BrushSplitValidator
+            # Mock file exists check
+            mock_exists.return_value = True
+
+            # Mock file content
+            mock_yaml_load.return_value = {
+                "Test Brush": {
+                    "handle": "Test Handle",
+                    "knot": "Test Knot",
+                    "validated_at": "2025-08-28",
+                    "should_not_split": False,
+                }
+            }
+
+            # Mock file context manager
+            mock_file = mock_open.return_value.__enter__.return_value
 
             validator = BrushSplitValidator()
             validator.yaml_path = yaml_file
@@ -41,11 +44,15 @@ class TestBrushSplitsYAMLRefactor:
             # Call the method
             validator.load_validated_splits()
 
-            # Verify the YAML utility was called
-            mock_load.assert_called_once_with(yaml_file)
+            # Verify the file was opened and YAML was loaded
+            mock_open.assert_called_once_with(yaml_file, "r", encoding="utf-8")
+            mock_yaml_load.assert_called_once()
+
+            # Verify data was loaded into validator
+            assert "Test Brush" in validator.validated_splits
 
     def test_save_validated_splits_uses_yaml_utils(self, tmp_path):
-        """Test that save_validated_splits uses the new YAML utilities."""
+        """Test that save_validated_splits saves data correctly."""
         from webui.api.brush_splits import BrushSplit, BrushSplitValidator
 
         # Create test splits
@@ -54,59 +61,78 @@ class TestBrushSplitsYAMLRefactor:
                 original="Test Brush",
                 handle="Test Handle",
                 knot="Test Knot",
-                validated=True,
+                validated_at="2025-08-28",
                 should_not_split=False,
             )
         ]
 
         yaml_file = tmp_path / "brush_splits.yaml"
 
-        # Mock the YAML utilities
-        with patch("webui.api.utils.yaml_utils.save_yaml_file") as mock_save:
+        # Mock the file operations to avoid touching filesystem
+        with (
+            patch("builtins.open") as mock_open,
+            patch("yaml.dump") as mock_yaml_dump,
+            patch("pathlib.Path.exists") as mock_exists,
+            patch("shutil.copy2") as mock_copy,
+        ):
+
+            # Mock file exists check
+            mock_exists.return_value = True
+
+            # Mock file context manager
+            mock_file = mock_open.return_value.__enter__.return_value
+
             validator = BrushSplitValidator()
             validator.yaml_path = yaml_file
 
             # Call the method
             result = validator.save_validated_splits(test_splits)
 
-            # Verify the YAML utility was called with correct data
+            # Verify the method succeeded
             assert result is True
-            mock_save.assert_called_once()
 
-            # Check that the data structure is correct
-            call_args = mock_save.call_args
-            assert call_args[0][1] == yaml_file  # file_path
-            data = call_args[0][0]  # data
-            assert "splits" in data
-            assert len(data["splits"]) == 1
+            # Verify file operations were called
+            mock_open.assert_called_once_with(yaml_file, "w", encoding="utf-8")
+            mock_yaml_dump.assert_called_once()
+
+            # Verify backup was created
+            mock_copy.assert_called_once()
 
     def test_load_validated_splits_handles_missing_file(self, tmp_path):
         """Test that load_validated_splits handles missing file gracefully."""
         yaml_file = tmp_path / "nonexistent.yaml"
-        yaml_file.touch()  # Create the file so the method doesn't return early
 
-        with patch("webui.api.utils.yaml_utils.load_yaml_file") as mock_load:
-            mock_load.side_effect = FileNotFoundError("YAML file not found")
+        # Mock the file operations to avoid touching filesystem
+        with patch("pathlib.Path.exists") as mock_exists:
+            # Mock file doesn't exist
+            mock_exists.return_value = False
 
-            from webui.api.brush_splits import BrushSplitValidator, ProcessingError
+            from webui.api.brush_splits import BrushSplitValidator
 
             validator = BrushSplitValidator()
             validator.yaml_path = yaml_file
 
-            # Should raise ProcessingError
-            with pytest.raises(ProcessingError, match="Failed to load validated splits"):
-                validator.load_validated_splits()
+            # Should handle missing file gracefully (no exception)
+            validator.load_validated_splits()
 
-            # Verify the YAML utility was called
-            mock_load.assert_called_once_with(yaml_file)
+            # Verify the method completed without error
+            assert len(validator.validated_splits) == 0
 
     def test_load_validated_splits_handles_corrupted_data(self, tmp_path):
         """Test that load_validated_splits handles corrupted YAML data."""
         yaml_file = tmp_path / "corrupted.yaml"
-        yaml_file.touch()  # Create the file
 
-        with patch("webui.api.utils.yaml_utils.load_yaml_file") as mock_load:
-            mock_load.return_value = "not a dict"  # Invalid data
+        # Mock the file operations to avoid touching filesystem
+        with (
+            patch("pathlib.Path.exists") as mock_exists,
+            patch("builtins.open") as mock_open,
+            patch("yaml.safe_load") as mock_yaml_load,
+        ):
+            # Mock file exists
+            mock_exists.return_value = True
+
+            # Mock corrupted data (not a dict)
+            mock_yaml_load.return_value = "not a dict"
 
             from webui.api.brush_splits import BrushSplitValidator, DataCorruptionError
 
@@ -123,14 +149,25 @@ class TestBrushSplitsYAMLRefactor:
 
         test_splits = [
             BrushSplit(
-                original="Test Brush", handle="Test Handle", knot="Test Knot", validated=True
+                original="Test Brush",
+                handle="Test Handle",
+                knot="Test Knot",
+                validated_at="2025-08-28",
             )
         ]
 
         yaml_file = tmp_path / "brush_splits.yaml"
 
-        with patch("webui.api.utils.yaml_utils.save_yaml_file") as mock_save:
-            mock_save.side_effect = OSError("I/O error")
+        # Mock the file operations to avoid touching filesystem
+        with (
+            patch("pathlib.Path.exists") as mock_exists,
+            patch("builtins.open") as mock_open,
+        ):
+            # Mock file exists
+            mock_exists.return_value = True
+
+            # Mock I/O error when opening file
+            mock_open.side_effect = OSError("I/O error")
 
             validator = BrushSplitValidator()
             validator.yaml_path = yaml_file
@@ -149,14 +186,14 @@ class TestBrushSplitsYAMLRefactor:
                 original="Test Brush 1",
                 handle="Test Handle",
                 knot="Test Knot",
-                validated=True,
+                validated_at="2025-08-28",
                 should_not_split=False,
             ),
             BrushSplit(
                 original="Test Brush 2",
                 handle=None,
                 knot="Test Brush 2",
-                validated=True,
+                validated_at="2025-08-28",
                 should_not_split=True,
             ),
         ]
