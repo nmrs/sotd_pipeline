@@ -1288,6 +1288,10 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 elif not actual_model and issue.get("type") == "knot_only_brush_in_wrong_section":
                     actual_model = "knot_only"
 
+            # Ensure actual_brand and actual_model are never None - convert to empty string if needed
+            actual_brand = actual_brand if actual_brand is not None else ""
+            actual_model = actual_model if actual_model is not None else ""
+
             # Debug logging for field mapping
             logger.debug(f"Field mapping - brand: {brand}, model: {model}, pattern: {pattern}")
             logger.debug(
