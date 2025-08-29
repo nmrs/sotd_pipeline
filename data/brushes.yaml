@@ -1140,6 +1140,10 @@ other_brushes:
     default: Badger
     patterns:
       - london.*razors
+  PerPoro:
+    default: Synthetic
+    patterns:
+      - perporo
   QSHAVE:
     default: Badger
     patterns:

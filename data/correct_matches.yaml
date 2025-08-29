@@ -556,10 +556,70 @@ brush:
     Synthetic:
     - böker synthetic
   Chisel & Hound:
+    Rob's Finest Boar:
+    - chisel & hound 'rob's finest' boar
+    - chisel and hound 'rob's finest' boar
+    - chisel and hound - rob's finest boar
+    - chisel and hound resolute v20 - rob's finest boar
+    Rob's Finest Synthetic:
+    - chisel & hound - rob's finest - 25mm synthetic
+    v10:
+    - chisel & hound bermuda fanchurian v10 badger
+    v11:
+    - chisel & hound 'elm' v11
+    - chisel and hound "elm" v11
+    - chisel and hound 'elm' v11
+    v12:
+    - chisel and hound kingfisher - v12
+    v13:
+    - chisel and hound "silent night" w/v13 fanchurian
+    v15:
+    - chisel and hound fú dào fanchurian v15 badger
+    v16:
+    - chisel & hound *fougère* 26mm v16 fanchurian badger knot
+    v17:
+    - chisel and hound frag handle with a v17 knot
+    v18:
+    - chisel and hound brasilia v18
     v19:
     - chisel & hound "drake" w/ 26mm v19
+    - chisel & hound *chocolate drop* 26mm v19 fanchurian badger knot
+    - chisel & hound mighty duck v19 fanchurian badger
+    - muninn woodworks w/ c&h v19 fanchurian
+    v20:
+    - chisel & hound desert ranger v20
+    - chisel and hound bangalore v20
+    - chisel and hound resolute v20
+    v21:
+    - chisel and hound sakura with v21 fanchurian
     v22:
     - c&h orchid v22
+    v23:
+    - chisel & hound 'newsprint' v23
+    - chisel & hound *"salvage"* / v23 fanchurian
+    - chisel & hound - tusk (4697gc) - 26mm v23 fanchurian
+    - chisel & hound house of mammoth everett 26mm v23 badger
+    - chisel & hound rc zebra w/ 26mm v23 fanchurian badger
+    - chisel & hound spice blow handle w/ 26mm v23 fanchurian badger knot
+    - chisel & hound v23 fanchurian
+    v24:
+    - chisel & hound carbon lily v24 fanchurian badger
+    - chisel & hound desperado v24 fanchurian badger
+    - chisel & hound emerald smoke v24 fanchurian badger
+    - chisel & hound ivory billed v24 fanchurian badger
+    - chisel & hound lg 2024 v24
+    - chisel & hound multiplicity v24 badger
+    - chisel & hound vintage v24 badger
+    - chisel and hound x briar brushworks "treachery of images" w/ 26mm v24
+    - grizzly bay - chisel & hound v24 fanchurian badger
+    v25:
+    - chisel & hound - peridot - v25
+    - chisel & hound amboyna glory v25 fanchurian badger
+    - chisel & hound pyinma v25 fanchurian badger
+    - chisel & hound redcoat handle (5018rc) w/ 26mm v25 fanchurian badger knot
+    - rad dinosaur creations "brainard" w/ chisel & hound v25 fanchurian 26mm
+    v26:
+    - chisel & hound stalwart fanchurian v26 badger
   Declaration Grooming:
     B13:
     - declaration grooming - roil jefferson - 28mm b13
@@ -808,6 +868,7 @@ handle:
     - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
     - chisel & hound "americana" / 26mm maggard razors premium boar
     - chisel & hound "cadbury" w/ mühle stf 37% plant based dense++ 25mm
+    - chisel & hound "cherry"
     - chisel & hound "chocolate drop" / 26mm maggard razors faux horse
     - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
     - chisel & hound "diplomat" w/ turn n shave tip v1 bulb 26mm
@@ -836,6 +897,7 @@ handle:
     - chisel & hound strata turnnshave m8 fan badger
     - chisel & hound t&s quartermoon
     - chisel and hound "rob's finest" - paragon synthetic 25mm synthetic
+    - chisel and hound "ruby"
     - chisel and hound - tahitian pearl 26mm maggard shd fan
     - chisel and hound ambrosia maple with 26 mm synthetic maggard knot
     - chisel and hound azurite with 26 mm maggard tuxedo knot
@@ -956,6 +1018,7 @@ knot:
     G5:
     - chisel & hound "espresso" 26mm maggard razors g5
     Mixed Badger/Boar:
+    - 26mm maggard mixed knot
     - chisel & hound "ruby" w/ 26mm maggard mixed knot
     - chisel & hound "ruby" w/ maggard mixed knot
     Synthetic:
@@ -998,6 +1061,7 @@ knot:
     - chisel & hound "swamper" / 26mm turnnshave v9 tip badger
     - chisel & hound ivy w/ tns 26mm v9
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
+    - turn n shave tip v9 fan 26mm
     Tuxedo:
     - chisel & hound "spice lily" - turnnshave tuxedo 26mm synthetic
   Zenith:
@@ -1937,7 +2001,6 @@ razor:
     - r/wetshaving moarteen
     Straight:
     - 15/16" koraat 14-2.0 bellied hollow
-    - ko
     - koraat
     - koraat - 6/8 14-2.0
     - koraat - 6/8 ebony
