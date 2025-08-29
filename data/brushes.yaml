@@ -115,6 +115,16 @@ known_brushes:
       knot_size_mm: 25
       patterns:
         - rob's.*finest.*syn
+    v8:
+      patterns:
+        - chis.*[fh]ou.*v8
+        - \bc(?:\&|and|\+)h\b.*v8
+        - \bch\b.*v8
+    v9:
+      patterns:
+        - chis.*[fh]ou.*v9
+        - \bc(?:\&|and|\+)h\b.*v9
+        - \bch\b.*v9
     v10:
       patterns:
         - chis.*[fh]ou.*v10
