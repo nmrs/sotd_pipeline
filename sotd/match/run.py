@@ -380,7 +380,7 @@ def process_month(
 
         for i, record in enumerate(records):
             if debug:
-                print(f"\n📝 Record {i+1}/{len(records)}")
+                print(f"\n📝 Record {i + 1}/{len(records)}")
                 comment_id = record.get("comment_id", "unknown")
                 print(f"   Comment ID: {comment_id}")
 

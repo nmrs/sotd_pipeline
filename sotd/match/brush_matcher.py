@@ -259,16 +259,13 @@ class BrushMatcher:
         # Add the known brush matching strategy for complete brushes
         strategies.append(
             KnownBrushMatchingStrategy(
-                catalogs["brushes"].get("known_brushes", {}), 
-                self.handle_matcher
+                catalogs["brushes"].get("known_brushes", {}), self.handle_matcher
             )
         )
 
         strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
         # Add strategies that expect the correct catalog structure
-        strategies.append(
-            OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {}))
-        )
+        strategies.append(OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {})))
         # Add specialized strategies
         strategies.append(ZenithBrushMatchingStrategy())
         strategies.append(OmegaSemogueBrushMatchingStrategy())
@@ -283,9 +280,7 @@ class BrushMatcher:
         )
 
         strategies.append(
-            AutomatedSplitStrategy(
-                catalogs, self.config, self.handle_matcher, self.knot_matcher
-            )
+            AutomatedSplitStrategy(catalogs, self.config, self.handle_matcher, self.knot_matcher)
         )
 
         # Add the unified component matching strategy
@@ -294,9 +289,7 @@ class BrushMatcher:
         )
 
         strategies.append(
-            FullInputComponentMatchingStrategy(
-                self.handle_matcher, self.knot_matcher, catalogs
-            )
+            FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs)
         )
 
         # Skip problematic component strategies for now - they expect component-level data, not brush-level data
