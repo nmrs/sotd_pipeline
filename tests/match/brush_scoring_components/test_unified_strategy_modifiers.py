@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for unified strategy modifiers."""
+"""Tests for full input component matching strategy modifiers."""
 
 import tempfile
 import yaml
@@ -10,8 +10,8 @@ from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
-class TestUnifiedStrategyModifiers:
-    """Test that unified strategy modifiers work correctly."""
+class TestFullInputComponentMatchingStrategyModifiers:
+    """Test that full input component matching strategy modifiers work correctly."""
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -19,11 +19,11 @@ class TestUnifiedStrategyModifiers:
         test_config = {
             "brush_scoring_weights": {
                 "base_strategies": {
-                    "unified": 50.0,  # Test-specific base score
+                    "full_input_component_matching": 50.0,  # Test-specific base score
                     "dual_component": 60.0,
                 },
                 "strategy_modifiers": {
-                    "unified": {
+                    "full_input_component_matching": {
                         "dual_component": 15.0,
                         "multiple_brands": 20.0,
                         "fiber_mismatch": -15.0,
@@ -67,12 +67,14 @@ class TestUnifiedStrategyModifiers:
             },
             match_type="composite",
             pattern="dual_component",
-            strategy="unified",
+            strategy="full_input_component_matching",
         )
 
         # Test the modifier directly
         modifier_value = self.scoring_engine._modifier_dual_component(
-            "Declaration Grooming Washington B2", result.matched or {}, "unified"
+            "Declaration Grooming Washington B2",
+            result.matched or {},
+            "full_input_component_matching",
         )
 
         assert modifier_value == 1.0
@@ -90,12 +92,12 @@ class TestUnifiedStrategyModifiers:
             },
             match_type="single_component",
             pattern="handle_only",
-            strategy="unified",
+            strategy="full_input_component_matching",
         )
 
         # Test the modifier directly
         modifier_value = self.scoring_engine._modifier_dual_component(
-            "Declaration Grooming Washington", result.matched or {}, "unified"
+            "Declaration Grooming Washington", result.matched or {}, "full_input_component_matching"
         )
 
         assert modifier_value == 0.0
@@ -135,7 +137,7 @@ class TestUnifiedStrategyModifiers:
             },
             match_type="composite",
             pattern="dual_component",
-            strategy="unified",
+            strategy="full_input_component_matching",
         )
 
         # Score the result
@@ -159,7 +161,7 @@ class TestUnifiedStrategyModifiers:
             },
             match_type="single_component",
             pattern="handle_only",
-            strategy="unified",
+            strategy="full_input_component_matching",
         )
 
         # Score the result
