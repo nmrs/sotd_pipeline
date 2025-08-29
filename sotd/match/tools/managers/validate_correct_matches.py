@@ -688,9 +688,12 @@ class ValidateCorrectMatches:
                 # RazorMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
             elif field == "blade":
-                # BladeMatcher expects: match(normalized_text, original_text=None)
-                # We'll validate the result against expected brand/model separately
-                result = matcher.match(test_text.lower(), test_text)
+                # BladeMatcher expects: match_with_context(normalized_text, format_name)
+                # for format-aware matching
+                if hasattr(matcher, "match_with_context"):
+                    result = matcher.match_with_context(test_text.lower(), format_name)
+                else:
+                    result = matcher.match(test_text.lower(), test_text)
             elif field == "soap":
                 # SoapMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
