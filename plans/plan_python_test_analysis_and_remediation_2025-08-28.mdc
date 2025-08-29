@@ -1,0 +1,193 @@
+# Python Test Analysis and Remediation Plan
+
+**Date**: 2025-08-28  
+**Status**: IN_PROGRESS  
+**Priority**: HIGH  
+
+## Overview
+
+This plan addresses the 15 failing Python tests identified during the comprehensive test analysis. The failures are primarily related to brush matching system issues and catalog validation problems.
+
+## Current Test Status
+
+**Total Tests**: 3,072  
+- **Passed**: 3,057 ✅  
+- **Failed**: 15 ❌  
+- **Skipped**: 15 ⏭️  
+- **Warnings**: 23 ⚠️  
+
+## Issues Identified
+
+### 1. **Brush Matching Integration Failures** (10 failures)
+- Knot fallback strategy not working correctly
+- Pattern matching issues with split brushes
+- Model names not being preserved correctly
+- Some brushes returning `None` instead of proper results
+
+### 2. **Catalog Validation Issues** (5 failures)
+- Composite brush validation logic incorrectly flagging known brushes
+- Brush model mismatch detection issues
+- Validation logic not properly categorizing brush types
+
+### 3. **Performance Test Issues** (1 failure)
+- Brush matcher performance test failing due to `None` results
+
+## Root Cause Analysis
+
+### Primary Issue: AutomatedSplitStrategy Failures
+
+The `AutomatedSplitStrategy` is failing to properly handle split brushes due to:
+
+1. **Incorrect field mapping**: The strategy is looking for `handle_maker` instead of `brand` in handle results
+2. **Missing pattern detection**: The strategy always sets `_pattern` to "unknown" instead of detecting actual patterns
+3. **Incomplete result structure**: The strategy is not properly handling cases where handle/knot matchers return `None`
+
+### Secondary Issue: Catalog Validation Logic
+
+The catalog validation system is incorrectly categorizing brushes because:
+
+1. **Brush type detection**: The system is not properly distinguishing between complete brushes and composite brushes
+2. **Pattern matching**: The validation logic is not correctly identifying brush patterns
+3. **Field mapping**: Incorrect field mappings between stored data and matched data
+
+## Remediation Strategy
+
+### Phase 1: Fix AutomatedSplitStrategy (HIGH PRIORITY)
+
+#### 1.1 Fix Field Mapping Issues
+- **File**: `sotd/match/brush_matching_strategies/automated_split_strategy.py`
+- **Issue**: Incorrect field names (`handle_maker` vs `brand`)
+- **Fix**: Update field mappings to use correct field names
+- **Test**: Update `tests/match/test_automated_split_strategy.py`
+
+#### 1.2 Implement Pattern Detection
+- **Issue**: Strategy always returns `_pattern: "unknown"`
+- **Fix**: Implement proper pattern detection based on delimiter and content
+- **Test**: Add pattern detection tests
+
+#### 1.3 Fix Result Structure
+- **Issue**: Strategy returns incomplete results when handle/knot matchers fail
+- **Fix**: Implement proper fallback logic and result validation
+- **Test**: Add edge case tests for failed component matching
+
+### Phase 2: Fix Catalog Validation Logic (MEDIUM PRIORITY)
+
+#### 2.1 Fix Brush Type Detection
+- **File**: `sotd/webui/api/catalog_validation.py`
+- **Issue**: Incorrect categorization of brush types
+- **Fix**: Implement proper brush type detection logic
+- **Test**: Update catalog validation tests
+
+#### 2.2 Fix Pattern Matching
+- **Issue**: Validation logic not correctly identifying patterns
+- **Fix**: Implement proper pattern matching for brush validation
+- **Test**: Add pattern matching tests
+
+#### 2.3 Fix Field Mapping
+- **Issue**: Incorrect field mappings between stored and matched data
+- **Fix**: Align field mappings with actual data structure
+- **Test**: Update field mapping tests
+
+### Phase 3: Fix Integration Tests (MEDIUM PRIORITY)
+
+#### 3.1 Fix Knot Fallback Tests
+- **File**: `tests/integration/test_knot_fallback_e2e.py`
+- **Issue**: Tests expecting different behavior than implementation
+- **Fix**: Align test expectations with actual implementation
+- **Test**: Update test assertions
+
+#### 3.2 Fix Real Catalog Integration Tests
+- **File**: `tests/integration/test_real_catalog_integration.py`
+- **Issue**: Tests expecting specific brand/model combinations
+- **Fix**: Update test data or fix matching logic
+- **Test**: Validate test data consistency
+
+#### 3.3 Fix Performance Tests
+- **File**: `tests/integration/test_split_brush_performance.py`
+- **Issue**: Performance test failing due to `None` results
+- **Fix**: Ensure performance test data is valid
+- **Test**: Update performance test data
+
+## Implementation Plan
+
+### Step 1: Fix AutomatedSplitStrategy (IMMEDIATE)
+1. Fix field mapping in `_create_split_result` method
+2. Implement pattern detection logic
+3. Add proper error handling and fallbacks
+4. Update tests to verify fixes
+
+### Step 2: Fix Catalog Validation (NEXT)
+1. Analyze catalog validation logic
+2. Fix brush type detection
+3. Fix pattern matching
+4. Update validation tests
+
+### Step 3: Fix Integration Tests (FINAL)
+1. Review test data consistency
+2. Update test expectations
+3. Fix test data issues
+4. Validate all tests pass
+
+## Success Criteria
+
+- [ ] All 15 failing tests pass
+- [ ] AutomatedSplitStrategy properly handles split brushes
+- [ ] Catalog validation correctly categorizes brushes
+- [ ] Integration tests pass with real data
+- [ ] Performance tests complete successfully
+- [ ] No new test failures introduced
+
+## Risk Assessment
+
+### High Risk
+- **AutomatedSplitStrategy fixes**: Core functionality, high impact if broken
+- **Field mapping changes**: Could affect downstream systems
+
+### Medium Risk
+- **Catalog validation changes**: Affects validation logic
+- **Test data updates**: Could mask real issues
+
+### Low Risk
+- **Test assertion updates**: Test-only changes
+
+## Testing Strategy
+
+### Unit Tests
+- Test AutomatedSplitStrategy fixes in isolation
+- Test catalog validation logic changes
+- Verify field mapping corrections
+
+### Integration Tests
+- Test brush matching end-to-end
+- Test catalog validation with real data
+- Verify performance characteristics
+
+### Regression Tests
+- Ensure existing functionality still works
+- Verify no new failures introduced
+- Check performance characteristics
+
+## Timeline
+
+- **Phase 1 (AutomatedSplitStrategy)**: 1-2 hours
+- **Phase 2 (Catalog Validation)**: 2-3 hours  
+- **Phase 3 (Integration Tests)**: 1-2 hours
+- **Total Estimated Time**: 4-7 hours
+
+## Next Steps
+
+1. **Immediate**: Start with AutomatedSplitStrategy fixes
+2. **Next**: Address catalog validation issues
+3. **Final**: Fix integration test problems
+4. **Validation**: Run full test suite to verify fixes
+
+## Notes
+
+- Focus on fixing the root causes, not just making tests pass
+- Ensure changes maintain backward compatibility
+- Document any significant logic changes
+- Update related documentation as needed
+description:
+globs:
+alwaysApply: false
+---
