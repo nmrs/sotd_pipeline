@@ -704,4 +704,381 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.queryByText('🔄')).not.toBeInTheDocument();
     });
   });
+
+  describe('MismatchAnalyzerDataTable with Handle and Knot Columns', () => {
+    test('shows handle and knot columns for brush fields', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'Declaration B2 in Mozingo handle',
+          matched: {
+            handle: {
+              brand: 'Mozingo',
+              model: 'Custom',
+              _pattern: 'mozingo.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*mozingo.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          comment_ids: ['def456'],
+          examples: ['example3'],
+          is_confirmed: false,
+          is_split_brush: true,
+          handle_component: 'Mozingo handle',
+          knot_component: 'Declaration B2',
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      expect(screen.getByText('Handle')).toBeInTheDocument();
+      expect(screen.getByText('Knot')).toBeInTheDocument();
+    });
+
+    test('displays correct brush data for complete vs split brushes', () => {
+      // Complete brush data (has top-level brand/model)
+      const completeBrushData: MismatchItem[] = [
+        {
+          original: 'Simpson Chubby 2 Best Badger',
+          matched: {
+            brand: 'Simpson',
+            model: 'Chubby 2',
+            fiber: 'best_badger',
+            knot_size_mm: 27.0,
+            handle_maker: 'Simpson',
+          },
+          pattern: 'simpson.*chubby.*2',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from catalog',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      // Split brush data (no top-level brand/model, has handle/knot components)
+      const splitBrushData: MismatchItem[] = [
+        {
+          original: 'Declaration B2 in Mozingo handle',
+          matched: {
+            handle: {
+              brand: 'Mozingo',
+              model: 'Custom',
+              _pattern: 'mozingo.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*mozingo.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          examples: ['2025-06.json'],
+          comment_ids: ['def456'],
+          is_confirmed: false,
+          is_split_brush: true,
+          handle_component: 'Mozingo handle',
+          knot_component: 'Declaration B2',
+        },
+      ];
+
+      // Test complete brush - should show brand/model in "Matched" column
+      const { rerender } = render(
+        <MismatchAnalyzerDataTable
+          data={completeBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Complete brush should show brand-model-fiber-size format
+      // Look specifically for the matched data format (not the original)
+      expect(screen.getByText('Simpson - Chubby 2 - best_badger - 27mm')).toBeInTheDocument();
+
+      // Test split brush - should show handle and knot components
+      rerender(
+        <MismatchAnalyzerDataTable
+          data={splitBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Split brush should show handle and knot components
+      expect(screen.getByText('Handle: Mozingo - Custom')).toBeInTheDocument();
+      expect(screen.getByText('Knot: Declaration - B2')).toBeInTheDocument();
+    });
+
+    // NEW TEST: Expose the PerPro brush UI bug
+    test('properly formats split brush data with metadata fields (PerPro case)', () => {
+      // This is the problematic PerPro case that shows raw JSON instead of formatted output
+      const perProBrushData: MismatchItem[] = [
+        {
+          original: 'PerPro nylon brush, came with my bowl and stand',
+          matched: {
+            // These metadata fields are preventing isBrushSplit from working correctly
+            handle_text: 'PerPro nylon brush, came',
+            knot_text: 'my bowl and stand',
+            split_priority: 'high',
+            _delimiter_priority: 'high',
+            high_priority_delimiter: true,
+            // The actual handle and knot objects
+            handle: {
+              brand: null,
+              model: null,
+              source_text: 'PerPro nylon brush, came',
+              _matched_by: 'automated_split',
+              _pattern: 'unknown',
+              priority: null,
+            },
+            knot: {
+              brand: null,
+              model: null,
+              fiber: null,
+              knot_size_mm: null,
+              source_text: 'my bowl and stand',
+              _matched_by: 'automated_split',
+              _pattern: 'unknown',
+              priority: null,
+            },
+            strategy: 'automated_split',
+            score: 0,
+          },
+          pattern: 'perpro.*nylon.*brush',
+          match_type: 'regex',
+          confidence: 0.5,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Automated split with metadata',
+          count: 1,
+          examples: ['2025-06.json'],
+          comment_ids: ['perpro123'],
+          is_confirmed: false,
+          is_split_brush: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={perProBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // This should show formatted handle/knot output, NOT raw JSON
+      // The bug is that it's currently showing raw JSON instead of:
+      expect(screen.getByText('Handle: PerPro nylon brush, came')).toBeInTheDocument();
+      expect(screen.getByText('Knot: my bowl and stand')).toBeInTheDocument();
+
+      // It should NOT show raw JSON like:
+      // expect(screen.queryByText(/handle_text.*PerPro nylon brush, came/)).not.toBeInTheDocument();
+      // expect(screen.queryByText(/split_priority.*high/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('MismatchAnalyzerDataTable with Handle and Knot Columns', () => {
+    test('displays correct icon and text for exact_matches type', () => {
+      const exactMatchData: MismatchItem[] = [
+        {
+          original: 'Gillette Super Speed',
+          matched: {
+            brand: 'Gillette',
+            model: 'Super Speed',
+            format: 'DE',
+          },
+          pattern: 'gillette.*super.*speed',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from correct_matches.yaml',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={exactMatchData}
+          field='razor'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show ✅ icon and "Exact Match" text
+      expect(screen.getByText('✅')).toBeInTheDocument();
+      expect(screen.getByText('Exact Match')).toBeInTheDocument();
+    });
+
+    test('displays correct brush data for complete vs split brushes', () => {
+      // Complete brush data (has top-level brand/model)
+      const completeBrushData: MismatchItem[] = [
+        {
+          original: 'Simpson Chubby 2 Best Badger',
+          matched: {
+            brand: 'Simpson',
+            model: 'Chubby 2',
+            fiber: 'best_badger',
+            knot_size_mm: 27.0,
+            handle_maker: 'Simpson',
+          },
+          pattern: 'simpson.*chubby.*2',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from catalog',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      // Split brush data (no top-level brand/model, has handle/knot components)
+      const splitBrushData: MismatchItem[] = [
+        {
+          original: 'Declaration B2 in Mozingo handle',
+          matched: {
+            handle: {
+              brand: 'Mozingo',
+              model: 'Custom',
+              _pattern: 'mozingo.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*mozingo.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          examples: ['2025-06.json'],
+          comment_ids: ['def456'],
+          is_confirmed: false,
+          is_split_brush: true,
+          handle_component: 'Mozingo handle',
+          knot_component: 'Declaration B2',
+        },
+      ];
+
+      // Test complete brush - should show brand/model in "Matched" column
+      const { rerender } = render(
+        <MismatchAnalyzerDataTable
+          data={completeBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Complete brush should show brand-model-fiber-size format
+      // Look specifically for the matched data format (not the original)
+      expect(screen.getByText('Simpson - Chubby 2 - best_badger - 27mm')).toBeInTheDocument();
+
+      // Test split brush - should show handle and knot components
+      rerender(
+        <MismatchAnalyzerDataTable
+          data={splitBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Split brush should show handle and knot components
+      expect(screen.getByText('Handle: Mozingo - Custom')).toBeInTheDocument();
+      expect(screen.getByText('Knot: Declaration - B2')).toBeInTheDocument();
+    });
+
+    // NEW TEST: Expose the PerPro brush UI bug
+    test('properly formats split brush data with metadata fields (PerPro case)', () => {
+      // This is the problematic PerPro case that shows raw JSON instead of formatted output
+      const perProBrushData: MismatchItem[] = [
+        {
+          original: 'PerPro nylon brush, came with my bowl and stand',
+          matched: {
+            // These metadata fields are preventing isBrushSplit from working correctly
+            handle_text: 'PerPro nylon brush, came',
+            knot_text: 'my bowl and stand',
+            split_priority: 'high',
+            _delimiter_priority: 'high',
+            high_priority_delimiter: true,
+            // The actual handle and knot objects
+            handle: {
+              brand: null,
+              model: null,
+              source_text: 'PerPro nylon brush, came',
+              _matched_by: 'automated_split',
+              _pattern: 'unknown',
+              priority: null,
+            },
+            knot: {
+              brand: null,
+              model: null,
+              fiber: null,
+              knot_size_mm: null,
+              source_text: 'my bowl and stand',
+              _matched_by: 'automated_split',
+              _pattern: 'unknown',
+              priority: null,
+            },
+            strategy: 'automated_split',
+            score: 0,
+          },
+          pattern: 'perpro.*nylon.*brush',
+          match_type: 'regex',
+          confidence: 0.5,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Automated split with metadata',
+          count: 1,
+          examples: ['2025-06.json'],
+          comment_ids: ['perpro123'],
+          is_confirmed: false,
+          is_split_brush: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={perProBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // This should show formatted handle/knot output, NOT raw JSON
+      // The bug is that it's currently showing raw JSON instead of:
+      expect(screen.getByText('Handle: PerPro nylon brush, came')).toBeInTheDocument();
+      expect(screen.getByText('Knot: my bowl and stand')).toBeInTheDocument();
+
+      // It should NOT show raw JSON like:
+      // expect(screen.queryByText(/handle_text.*PerPro nylon brush, came/)).not.toBeInTheDocument();
+      // expect(screen.queryByText(/split_priority.*high/)).not.toBeInTheDocument();
+    });
+  });
 });

@@ -40,6 +40,11 @@ const formatBrushComponent = (
     if (componentData.knot_size_mm) parts.push(`${componentData.knot_size_mm}mm`);
   }
 
+  // If no brand/model/fiber/size, try to use source_text (for automated splits)
+  if (parts.length === 0 && componentData.source_text) {
+    return String(componentData.source_text);
+  }
+
   return parts.length > 0 ? parts.join(' - ') : 'N/A';
 };
 
@@ -47,11 +52,17 @@ const formatBrushComponent = (
 const isBrushSplit = (matched: Record<string, unknown>): boolean => {
   if (!matched || typeof matched !== 'object') return false;
 
-  // If top-level brand and model are null/undefined, it's a split brush
+  // Check if it has handle/knot components (this is the key indicator)
+  const hasHandle = matched.handle && typeof matched.handle === 'object' && matched.handle !== null;
+  const hasKnot = matched.knot && typeof matched.knot === 'object' && matched.knot !== null;
+
+  // If it has both handle and knot components, it's a split brush
+  if (hasHandle && hasKnot) return true;
+
+  // Fallback: if top-level brand and model are missing, it's likely a split brush
   const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined;
   const hasTopLevelModel = matched.model && matched.model !== null && matched.model !== undefined;
 
-  // If both brand and model are missing at top level, it's a split brush
   return !hasTopLevelBrand && !hasTopLevelModel;
 };
 

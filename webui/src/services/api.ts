@@ -191,6 +191,10 @@ export interface MismatchItem {
   comment_ids: string[];
   comment_sources?: Record<string, string>; // comment_id -> source_file
   is_confirmed?: boolean;
+  // Split brush fields added by backend API
+  is_split_brush?: boolean;
+  handle_component?: string;
+  knot_component?: string;
 }
 
 export interface MismatchAnalysisResult {
