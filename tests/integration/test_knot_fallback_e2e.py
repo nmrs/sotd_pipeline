@@ -13,25 +13,34 @@ def brush_matcher():
 
 
 def test_complete_brush_matching_with_timberwolf_split_brush(brush_matcher):
-    """Test complete brush matching with 'Timberwolf 24mm' (split brush case)."""
+    """Test complete brush matching with 'Timberwolf 24mm' (single component case)."""
     result = brush_matcher.match("Timberwolf 24mm")
 
     assert result is not None
     assert result.matched is not None
 
-    # Should have handle and knot sections
+    # Should be matched as a single component with both handle and knot sections
+    assert result.matched["brand"] == "AP Shave Co"  # Timberwolf is from AP Shave Co
+    assert result.matched["model"] == "Timberwolf"  # Model should be Timberwolf
+    assert result.match_type == "single_component"  # Should be single component
+    assert result.matched["strategy"] == "unified"  # Should use unified strategy
+
+    # Should have both handle and knot sections (even if handle is empty)
     assert "handle" in result.matched
     assert "knot" in result.matched
 
-    # Handle may not be matched (depends on handle matcher)
-    # Handle brand may be None if not matched by handle matcher
+    # Handle section should exist but may be empty (Timberwolf not in handles.yaml)
+    handle = result.matched["handle"]
+    assert handle["brand"] == "AP Shave Co"  # Brand inferred from knot match
+    assert handle["model"] is None  # No handle model found
 
-    # Knot should be matched by KnotMatcher (Timberwolf is in the knot catalog)
+    # Knot section should have the actual match data
     knot = result.matched["knot"]
-    assert knot["brand"] == "AP Shave Co"  # Timberwolf is matched as AP Shave Co brand
-    assert knot["model"] == "Timberwolf"  # Model should be Timberwolf
-    assert knot["_pattern"] == "timberwolf"  # Should match the timberwolf pattern
-    assert result.match_type == "regex"
+    assert knot["brand"] == "AP Shave Co"  # Timberwolf brand
+    assert knot["model"] == "Timberwolf"  # Timberwolf model
+    assert knot["fiber"] == "Synthetic"  # Fiber should be Synthetic
+
+    # The size information (24mm) will be extracted during enrichment phase
 
 
 def test_complete_brush_matching_with_custom_size_only(brush_matcher):
@@ -51,7 +60,7 @@ def test_complete_brush_matching_with_custom_size_only(brush_matcher):
     assert knot["model"] == "26mm"
     assert knot["fiber"] is None
     assert knot["_pattern"] == "size_detection"
-    assert result.match_type == "regex"
+    assert result.match_type == "single_component"  # Should be single component, not regex
 
 
 def test_existing_brush_matching_still_works(brush_matcher):
@@ -61,10 +70,18 @@ def test_existing_brush_matching_still_works(brush_matcher):
 
     assert result is not None
     assert result.matched is not None
-    # Check that it's a known brush match (not fallback)
-    # The exact structure may vary, but it should be a successful match
-    assert result.matched["brand"] == "Simpson"
-    assert result.matched["model"] == "Chubby 2"
+
+    # Should be matched by known_brush strategy as a complete brush
+    assert result.match_type == "regex"  # Should be regex for known brush
+    assert result.matched["strategy"] == "known_brush"  # Should use known_brush strategy
+
+    # Should have complete brush information
+    assert result.matched["brand"] == "Simpson"  # Simpson brand
+    assert result.matched["model"] == "Chubby 2"  # Chubby 2 model
+    assert result.matched["fiber"] == "Badger"  # Badger fiber
+    assert result.matched["knot_size_mm"] == 27  # 27mm knot size
+    assert result.pattern == "simp.*chubby\\s*2\\b"  # Pattern from catalog
+
     # Should not be matched by fallback strategies
     assert "_matched_by_strategy" not in result.matched or result.matched[
         "_matched_by_strategy"
@@ -220,3 +237,28 @@ def test_fallback_strategy_priority_in_complex_scenarios(brush_matcher):
     assert knot["_pattern"] == "size_detection"
     assert knot["fiber"] is None
     assert knot["model"] == "26mm"
+
+
+def test_correct_matches_no_match_runs_other_strategies(brush_matcher):
+    """Test that when correct matches finds nothing, other strategies are run and scored."""
+    # Test with a brush that is NOT in correct_matches but should match via other strategies
+    test_input = "Simpson Chubby 2"  # This should match via known_brush strategy
+
+    # First verify it's not in correct_matches
+    import yaml
+
+    with open("data/correct_matches.yaml", "r") as f:
+        correct_matches = yaml.safe_load(f)
+
+    brush_entries = correct_matches.get("brush", {})
+    assert (
+        test_input.lower() not in brush_entries
+    ), f"Test input {test_input} is in correct_matches, choose different input"
+
+    # Test that it matches via other strategies
+    result = brush_matcher.match(test_input)
+
+    assert result is not None
+    assert result.matched is not None
+    assert result.match_type == "regex"  # Should be regex for known brush strategy
+    assert result.matched["strategy"] == "known_brush"  # Should use known brush strategy

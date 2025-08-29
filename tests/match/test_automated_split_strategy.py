@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Test file for AutomatedSplitStrategy (unified high/medium priority split strategy)."""
 
+from unittest.mock import Mock
+
 from sotd.match.brush_matching_strategies.automated_split_strategy import AutomatedSplitStrategy
 from sotd.match.brush_scoring_config import BrushScoringConfig
 
@@ -12,7 +14,14 @@ class TestAutomatedSplitStrategy:
         """Set up test fixtures."""
         self.catalogs = {"brushes": {}, "handles": {}, "knots": {}, "correct_matches": {}}
         self.scoring_config = BrushScoringConfig()
-        self.strategy = AutomatedSplitStrategy(self.catalogs, self.scoring_config)
+
+        # Create mock instances for required dependencies
+        self.handle_matcher = Mock()
+        self.knot_matcher = Mock()
+
+        self.strategy = AutomatedSplitStrategy(
+            self.catalogs, self.scoring_config, self.handle_matcher, self.knot_matcher
+        )
 
     def test_high_priority_delimiter_with_match(self):
         """Test that high priority delimiters (' w/ ', ' with ') return appropriate strategy name."""

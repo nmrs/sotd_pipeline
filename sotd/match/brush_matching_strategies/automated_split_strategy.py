@@ -181,26 +181,44 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                 "high_priority_delimiter": priority == "high",
                 "handle": {
                     "brand": (
-                        handle_result.matched.get("handle_maker") if handle_result.matched else None
+                        handle_result.matched.get("handle_maker")
+                        if handle_result and handle_result.matched
+                        else None
                     ),
                     "model": (
-                        handle_result.matched.get("handle_model") if handle_result.matched else None
+                        handle_result.matched.get("handle_model")
+                        if handle_result and handle_result.matched
+                        else None
                     ),
                     "source_text": handle,
                     "_matched_by": "automated_split",
-                    "_pattern": "unknown",
+                    "_pattern": (handle_result.pattern if handle_result else "unknown"),
                     "priority": getattr(handle_result, "priority", None),
                 },
                 "knot": {
-                    "brand": (knot_result.matched.get("brand") if knot_result.matched else None),
-                    "model": (knot_result.matched.get("model") if knot_result.matched else None),
-                    "fiber": knot_result.matched.get("fiber") if knot_result.matched else None,
+                    "brand": (
+                        knot_result.matched.get("brand")
+                        if knot_result and knot_result.matched
+                        else None
+                    ),
+                    "model": (
+                        knot_result.matched.get("model")
+                        if knot_result and knot_result.matched
+                        else None
+                    ),
+                    "fiber": (
+                        knot_result.matched.get("fiber")
+                        if knot_result and knot_result.matched
+                        else None
+                    ),
                     "knot_size_mm": (
-                        knot_result.matched.get("knot_size_mm") if knot_result.matched else None
+                        knot_result.matched.get("knot_size_mm")
+                        if knot_result and knot_result.matched
+                        else None
                     ),
                     "source_text": knot,
                     "_matched_by": "automated_split",
-                    "_pattern": "unknown",
+                    "_pattern": (knot_result.pattern if knot_result else "unknown"),
                     "priority": getattr(knot_result, "priority", None),
                 },
             },
