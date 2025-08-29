@@ -51,12 +51,12 @@ class ValidateCorrectMatches:
         # Initialize the updater for creating temp files
         self.updater = CorrectMatchesUpdater()
 
-        # Performance optimization: Pre-compute normalized catalogs
+        # Performance optimization: Lazy-load normalized catalogs and validation cache
         self._normalized_catalogs = {}
         self._validation_cache = {}
 
-        # Pre-compute all validation data structures
-        self._precompute_validation_structures()
+        # Don't pre-compute validation structures - build them lazily when needed
+        # This prevents errors during initialization for fields that aren't being validated
 
     @property
     def _data_dir(self):
@@ -1014,7 +1014,8 @@ class ValidateCorrectMatches:
 
             with open(catalog_path, "r", encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error loading catalog data for field {field}: {e}")
             return {}
 
     def _compare_structures(
@@ -1357,23 +1358,6 @@ class ValidateCorrectMatches:
             for issue in issues:  # Show ALL issues per field - no truncation
                 print(f"   • {issue['message']}")
             print()
-
-    def _precompute_validation_structures(self):
-        """Pre-compute all validation data structures for performance."""
-        # Skip pre-computation if _data_dir is set (for testing)
-        if hasattr(self, "_data_dir") and self._data_dir is not None:
-            logger.info("Skipping validation structure pre-computation for testing")
-            return
-
-        logger.info("Pre-computing validation structures...")
-        start_time = time.perf_counter()
-
-        for field in ["razor", "blade", "brush", "soap", "handle", "knot"]:
-            if field in self.correct_matches:
-                self._build_validation_cache(field)
-
-        precompute_time = time.perf_counter() - start_time
-        logger.info(f"Validation structures pre-computed in {precompute_time * 1000:.2f}ms")
 
     def _build_validation_cache(self, field: str):
         """Build validation cache for a specific field."""
