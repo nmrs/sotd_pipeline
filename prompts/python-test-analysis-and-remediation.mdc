@@ -52,6 +52,7 @@ Run the full Python test suite via `make test`.
 - Preserve readability and maintainability of both tests and production code.  
 - Keep commits atomic per group for easier code review.  
 - Avoid merging unrelated fixes into a single commit.  
+- **Do not modify yaml files without explicit user permission**
 
 **Output Format:**  
 - Initial categorization table of failures.  

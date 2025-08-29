@@ -16,6 +16,7 @@ alwaysApply: false
 - If you ever get lost, **reset to the Checklist Template** and restart from Step 1.
 - **Do not silently handle failures, gaps, or new work items.** Always communicate them to the user and record them in the implementation plan.
 - The implementation plan is the single source of truth for feature tasks.
+- **Do not modify yaml files without explicity permission from the user.**
 
 **Loop Summary:**  
 Pick task → Update/Review plan → Run quality checks → Capture/record new work → Reconcile plan → Commit → Report progress → Move to next task
