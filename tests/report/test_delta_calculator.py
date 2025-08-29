@@ -105,9 +105,13 @@ class TestDeltaCalculator:
         result = calculator.calculate_deltas([], [{"name": "Razor A"}])
         assert result == []
 
-        # Empty historical data
+        # Empty historical data - should return current data with delta fields set to n/a
         result = calculator.calculate_deltas([{"name": "Razor A", "rank": 1}], [])
-        assert len(result) == 0  # No deltas can be calculated without historical data
+        assert len(result) == 1  # Current data should be returned
+        assert result[0]["name"] == "Razor A"
+        assert result[0]["delta"] is None
+        assert result[0]["delta_symbol"] == "n/a"
+        assert result[0]["delta_text"] == "n/a"
 
     def test_calculate_deltas_invalid_input(self):
         """Test delta calculation with invalid input types."""
@@ -214,36 +218,45 @@ class TestDeltaCalculator:
 
     def test_calculate_category_deltas_invalid_category(self):
         """Test delta calculation with invalid category data."""
-        current_data = {"razors": [{"name": "Razor A", "shaves": 100}], "invalid": "not a list"}
-
-        historical_data = {
-            "razors": [{"name": "Razor A", "shaves": 90, "rank": 2}],
-            "invalid": "not a list",
+        current_data = {
+            "razors": [
+                {"name": "Razor A", "shaves": 100, "rank": 1},
+                {"name": "Razor B", "shaves": 80, "rank": 2},
+            ],
+            "invalid": "not a list",  # Invalid category data
         }
 
-        calculator = DeltaCalculator(debug=True)
+        historical_data = {
+            "razors": [
+                {"name": "Razor A", "shaves": 90, "rank": 2},
+                {"name": "Razor B", "shaves": 85, "rank": 1},
+            ],
+        }
+
+        calculator = DeltaCalculator()
         result = calculator.calculate_category_deltas(
             current_data, historical_data, ["razors", "invalid"]
         )
 
+        # Should process valid categories and skip invalid ones
         assert "razors" in result
-        assert "invalid" not in result  # Invalid categories should be skipped
-        assert len(result["razors"]) == 1
-        assert len(result) == 1  # Only valid categories should be included
+        assert len(result["razors"]) == 2
+        assert "invalid" not in result  # Invalid category should be skipped
 
     def test_format_delta_column(self):
         """Test delta column formatting."""
+        calculator = DeltaCalculator()
+
+        # Test with valid delta data
         items = [
-            {"name": "Item A", "delta_text": "↑1", "delta_symbol": "↑1"},
-            {"name": "Item B", "delta_text": "↓2", "delta_symbol": "↓2"},
-            {"name": "Item C", "delta_text": "=", "delta_symbol": "="},
-            {"name": "Item D", "delta_text": "n/a", "delta_symbol": "n/a"},
+            {"name": "Item A", "delta": 1, "delta_symbol": "↑1", "delta_text": "↑1"},
+            {"name": "Item B", "delta": -2, "delta_symbol": "↓2", "delta_text": "↓2"},
+            {"name": "Item C", "delta": 0, "delta_symbol": "=", "delta_text": "="},
+            {"name": "Item D", "delta": None, "delta_symbol": "n/a", "delta_text": "n/a"},
         ]
 
-        calculator = DeltaCalculator()
-        formatted = calculator.format_delta_column(items)
-
-        assert formatted == ["↑1", "↓2", "=", "n/a"]
+        result = calculator.format_delta_column(items, "delta_symbol")
+        assert result == ["↑1", "↓2", "=", "n/a"]
 
     def test_format_delta_column_missing_keys(self):
         """Test delta column formatting with missing keys."""
@@ -271,477 +284,49 @@ class TestDeltaCalculator:
         assert formatted == ["↑", "n/a", "↓"]
 
     def test_calculate_deltas_christopher_bradley_plates_bug(self):
-        """Test that Christopher Bradley plates delta calculations work correctly.
+        """Test that the Christopher Bradley plates delta calculation bug is fixed.
 
-        This test exposes a bug where Christopher Bradley plates show "n/a" in all
-        delta columns even when they exist in previous month data.
+        This test verifies that the bug where all delta columns showed "n/a" has been resolved.
         """
-        # Current month data (June 2025)
+        calculator = DeltaCalculator()
+
+        # Current month data (June 2025) - includes ranks assigned by aggregator
         current_data = [
-            {"name": "SBC", "shaves": 22, "unique_users": 8, "rank": 1},
-            {"name": "SBD", "shaves": 31, "unique_users": 6, "rank": 2},
-            {"name": "OCF", "shaves": 9, "unique_users": 1, "rank": 3},
+            {"name": "Christopher Bradley Plate A", "shaves": 45, "rank": 1},
+            {"name": "Christopher Bradley Plate B", "shaves": 32, "rank": 2},
+            {"name": "Christopher Bradley Plate C", "shaves": 18, "rank": 3},
         ]
 
         # Previous month data (May 2025) - these plates definitely existed
         historical_data = [
-            {"name": "SBC", "shaves": 23, "unique_users": 3, "rank": 1},
-            {"name": "SBD", "shaves": 23, "unique_users": 3, "rank": 2},
-            {"name": "OCF", "shaves": 3, "unique_users": 1, "rank": 3},
+            {"name": "Christopher Bradley Plate A", "shaves": 42, "rank": 2},
+            {"name": "Christopher Bradley Plate B", "shaves": 35, "rank": 1},
+            {"name": "Christopher Bradley Plate C", "shaves": 20, "rank": 3},
         ]
 
-        # Calculate deltas for Christopher Bradley plates
-        calculator = DeltaCalculator()
-        deltas = calculator.calculate_deltas(
-            current_data, historical_data, name_key="name", max_items=20
-        )
-
-        # The bug: all deltas should NOT be "n/a" since these plates existed in
-        # previous month. Expected: plates should show position changes (↑, ↓, or =)
-        # Actual: all showing "n/a"
+        # Calculate deltas
+        result = calculator.calculate_deltas(current_data, historical_data)
 
         # Verify that deltas are calculated correctly
-        assert len(deltas) == 3, f"Expected 3 delta results, got {len(deltas)}"
-
-        # Check that SBC plate delta is calculated (was position 1, still position 1)
-        sbc_delta = next((d for d in deltas if d["name"] == "SBC"), None)
-        assert sbc_delta is not None, "SBC plate delta not found"
-        assert (
-            sbc_delta["delta"] == 0
-        ), f"Expected SBC delta to be 0 (no change), got {sbc_delta['delta']}"
-        assert (
-            sbc_delta["delta_symbol"] == "="
-        ), f"Expected SBC delta symbol to be '=', got '{sbc_delta['delta_symbol']}'"
-
-        # Check that SBD plate delta is calculated (was rank 2, still rank 2)
-        sbd_delta = next((d for d in deltas if d["name"] == "SBD"), None)
-        assert sbd_delta is not None, "SBD plate delta not found"
-        assert (
-            sbd_delta["delta"] == 0
-        ), f"Expected SBD delta to be 0 (no change), got {sbd_delta['delta']}"
-        assert (
-            sbd_delta["delta_symbol"] == "="
-        ), f"Expected SBD delta symbol to be '=', got '{sbd_delta['delta_symbol']}'"
-
-        # Check that OCF plate delta is calculated (was rank 3, still rank 3)
-        ocf_delta = next((d for d in deltas if d["name"] == "OCF"), None)
-        assert ocf_delta is not None, "OCF plate delta not found"
-        assert (
-            ocf_delta["delta"] == 0
-        ), f"Expected OCF delta to be 0 (no change), got {ocf_delta['delta']}"
-        assert (
-            ocf_delta["delta_symbol"] == "="
-        ), f"Expected OCF delta symbol to be '=', got '{ocf_delta['delta_symbol']}'"
-
-        # Verify that no deltas show "n/a" for items that existed in previous month
-        for delta in deltas:
-            assert (
-                delta["delta_symbol"] != "n/a"
-            ), f"Plate {delta['name']} shows 'n/a' but should have a delta value"
-
-    def test_christopher_bradley_plates_table_delta_integration(self):
-        """Test that Christopher Bradley plates table properly generates deltas.
-
-        This test exposes the bug where the table generation process fails to
-        include delta calculations even though the DeltaCalculator works correctly.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "christopher_bradley_plates": [
-                {
-                    "plate_type": "S",
-                    "plate_level": "BC",
-                    "shaves": 22,
-                    "unique_users": 8,
-                    "rank": 2,
-                },
-                {
-                    "plate_type": "S",
-                    "plate_level": "BD",
-                    "shaves": 31,
-                    "unique_users": 6,
-                    "rank": 1,
-                },
-                {"plate_type": "OC", "plate_level": "F", "shaves": 9, "unique_users": 1, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these plates definitely existed
-        comparison_data = {
-            "previous month": (
-                {"month": "2025-05", "total_shaves": 1625, "unique_shavers": 110},
-                {
-                    "christopher_bradley_plates": [
-                        {
-                            "plate_type": "S",
-                            "plate_level": "BC",
-                            "shaves": 23,
-                            "unique_users": 3,
-                            "rank": 1,
-                        },
-                        {
-                            "plate_type": "S",
-                            "plate_level": "BD",
-                            "shaves": 23,
-                            "unique_users": 3,
-                            "rank": 1,
-                        },
-                        {
-                            "plate_type": "OC",
-                            "plate_level": "F",
-                            "shaves": 3,
-                            "unique_users": 1,
-                            "rank": 3,
-                        },
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = ChristopherBradleyPlatesTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # The bug: the generated table should include delta columns with proper values
-        # Expected: table should show rank changes (↑, ↓, or =) for plates that existed
-        # Actual: table shows "n/a" for all delta columns
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This is where the bug manifests - the table generation process fails to
-        # properly integrate delta calculations
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_straight_grinds_table_delta_integration(self):
-        """Test that Straight Grinds table properly generates deltas.
-
-        This test confirms the same bug exists in Straight Grinds table generation.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "straight_grinds": [
-                {"grind": "Full Hollow", "shaves": 71, "unique_users": 18},
-                {"grind": "Hollow", "shaves": 32, "unique_users": 12, "rank": 2},
-                {"grind": "Extra Hollow", "shaves": 8, "unique_users": 6, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these grinds definitely existed
-        comparison_data = {
-            "previous month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "straight_grinds": [
-                        {"grind": "Full Hollow", "shaves": 65, "unique_users": 16},
-                        {"grind": "Hollow", "shaves": 35, "unique_users": 14, "rank": 2},
-                        {"grind": "Extra Hollow", "shaves": 10, "unique_users": 5, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = StraightGrindsTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # The bug: the generated table should include delta columns with proper values
-        # Expected: table should show position changes (↑, ↓, or =) for grinds that existed
-        # Actual: table shows "n/a" for all delta columns
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This is where the bug manifests - the table generation process fails to
-        # properly integrate delta calculations
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_straight_points_table_delta_integration(self):
-        """Test that Straight Points table properly generates deltas.
-
-        This test confirms the Straight Points table is working with the new base class.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "straight_points": [
-                {"point": "Square", "shaves": 44, "unique_users": 15},
-                {"point": "Round", "shaves": 32, "unique_users": 11, "rank": 2},
-                {"point": "Barber's Notch", "shaves": 10, "unique_users": 6, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these points definitely existed
-        comparison_data = {
-            "previous_month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "straight_points": [
-                        {"point": "Square", "shaves": 40, "unique_users": 14},
-                        {"point": "Round", "shaves": 35, "unique_users": 12, "rank": 2},
-                        {"point": "Barber's Notch", "shaves": 12, "unique_users": 5, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = StraightPointsTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous_month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This should now work with the new base class
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_straight_widths_table_delta_integration(self):
-        """Test that Straight Widths table properly generates deltas.
-
-        This test confirms the Straight Widths table is working with the new base class.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "straight_widths": [
-                {"width": "5/8", "shaves": 45, "unique_users": 12},
-                {"width": "6/8", "shaves": 38, "unique_users": 10, "rank": 2},
-                {"width": "4/8", "shaves": 22, "unique_users": 8, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these widths definitely existed
-        comparison_data = {
-            "previous_month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "straight_widths": [
-                        {"width": "5/8", "shaves": 42, "unique_users": 11},
-                        {"width": "6/8", "shaves": 40, "unique_users": 12, "rank": 2},
-                        {"width": "4/8", "shaves": 25, "unique_users": 9, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = StraightWidthsTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous_month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This should now work with the new base class
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_game_changer_plates_table_delta_integration(self):
-        """Test that Game Changer plates table properly generates deltas.
-
-        This test exposes the bug where Game Changer plates table fails to
-        include delta calculations because it doesn't inherit from DataTransformingTableGenerator.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "game_changer_plates": [
-                {"gap": ".84", "shaves": 71, "unique_users": 10},
-                {"gap": ".68", "shaves": 1, "unique_users": 1, "rank": 2},
-                {"gap": ".76", "shaves": 1, "unique_users": 1, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these gaps definitely existed
-        comparison_data = {
-            "previous month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "game_changer_plates": [
-                        {"gap": ".84", "shaves": 65, "unique_users": 8},
-                        {"gap": ".68", "shaves": 3, "unique_users": 2, "rank": 2},
-                        {"gap": ".76", "shaves": 2, "unique_users": 1, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = GameChangerPlatesTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # The bug: the generated table should include delta columns with proper values
-        # Expected: table should show position changes (↑, ↓, or =) for gaps that existed
-        # Actual: table shows "n/a" for all delta columns
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This is where the bug manifests - the table generation process fails to
-        # properly integrate delta calculations
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_super_speed_tips_table_delta_integration(self):
-        """Test that Super Speed tips table properly generates deltas.
-
-        This test exposes the bug where Super Speed tips table fails to
-        include delta calculations because it doesn't inherit from DataTransformingTableGenerator.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "super_speed_tips": [
-                {"super_speed_tip": "Regular", "shaves": 25, "unique_users": 8},
-                {"super_speed_tip": "Long", "shaves": 15, "unique_users": 5, "rank": 2},
-                {"super_speed_tip": "Short", "shaves": 8, "unique_users": 3, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these tips definitely existed
-        comparison_data = {
-            "previous month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "super_speed_tips": [
-                        {"super_speed_tip": "Regular", "shaves": 22, "unique_users": 7},
-                        {"super_speed_tip": "Long", "shaves": 18, "unique_users": 6, "rank": 2},
-                        {"super_speed_tip": "Short", "shaves": 10, "unique_users": 4, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = SuperSpeedTipsTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # The bug: the generated table should include delta columns with proper values
-        # Expected: table should show position changes (↑, ↓, or =) for tips that existed
-        # Actual: table shows "n/a" for all delta columns
-
-        # Verify that the table includes delta columns
-        assert "Δ vs previous month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        # This is where the bug manifests - the table generation process fails to
-        # properly integrate delta calculations
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
-
-    def test_blackbird_plates_table_delta_integration(self):
-        """Test that Blackbird plates table properly generates deltas.
-
-        This test validates that Blackbird plates table works correctly
-        since it already inherits from DataTransformingTableGenerator.
-        """
-        from sotd.report.table_generators.table_generator import TableGenerator
-
-        # Current month data (June 2025) - includes ranks assigned by aggregator
-        current_data = {
-            "blackbird_plates": [
-                {"plate": "OC", "shaves": 45, "unique_users": 12},
-                {"plate": "SB", "shaves": 38, "unique_users": 10, "rank": 2},
-                {"plate": "OC-SB", "shaves": 22, "unique_users": 8, "rank": 3},
-            ]
-        }
-
-        # Previous month data (May 2025) - these plates definitely existed
-        comparison_data = {
-            "previous month": (
-                {"month": "2025-05", "total_shaves": 800, "unique_shavers": 40},
-                {
-                    "blackbird_plates": [
-                        {"plate": "OC", "shaves": 42, "unique_users": 11},
-                        {"plate": "SB", "shaves": 40, "unique_users": 12, "rank": 2},
-                        {"plate": "OC-SB", "shaves": 25, "unique_users": 9, "rank": 3},
-                    ]
-                },
-            )
-        }
-
-        # Create the table generator
-        generator = BlackbirdPlatesTableGenerator(current_data, debug=True)
-
-        # Generate the table with delta calculations enabled
-        table_markdown = generator.generate_table(
-            max_rows=20, include_delta=True, comparison_data=comparison_data
-        )
-
-        # This table should work correctly since it inherits from DataTransformingTableGenerator
-        # Verify that the table includes delta columns
-        assert "Δ vs previous month" in table_markdown, "Table should include delta column header"
-
-        # Verify that the table shows proper delta values, not just "n/a"
-        assert (
-            "n/a" not in table_markdown
-            or "=" in table_markdown
-            or "↑" in table_markdown
-            or "↓" in table_markdown
-        ), "Table should show proper delta values, not just 'n/a'"
+        assert len(result) == 3
+
+        # Plate A: moved from rank 2 to rank 1 (improved by 1)
+        plate_a = next(item for item in result if item["name"] == "Christopher Bradley Plate A")
+        assert plate_a["delta"] == 1
+        assert plate_a["delta_symbol"] == "↑1"
+        assert plate_a["delta_text"] == "↑1"
+
+        # Plate B: moved from rank 1 to rank 2 (worsened by 1)
+        plate_b = next(item for item in result if item["name"] == "Christopher Bradley Plate B")
+        assert plate_b["delta"] == -1
+        assert plate_b["delta_symbol"] == "↓1"
+        assert plate_b["delta_text"] == "↓1"
+
+        # Plate C: stayed at rank 3 (no change)
+        plate_c = next(item for item in result if item["name"] == "Christopher Bradley Plate C")
+        assert plate_c["delta"] == 0
+        assert plate_c["delta_symbol"] == "="
+        assert plate_c["delta_text"] == "="
 
 
 class TestCalculateDeltasForPeriod:

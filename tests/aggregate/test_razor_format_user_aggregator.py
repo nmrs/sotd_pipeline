@@ -150,29 +150,29 @@ class TestRazorFormatUserAggregator:
         # Check DE format (alphabetically first)
         assert result[0]["format"] == "DE"
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 5
 
         assert result[1]["format"] == "DE"
         assert result[1]["rank"] == 2
-        assert result[1]["user"] == "u/user2"
+        assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 3
 
         # Check GEM format
         assert result[2]["format"] == "GEM"
         assert result[2]["rank"] == 1
-        assert result[2]["user"] == "u/user4"
+        assert result[2]["user"] == "user4"
         assert result[2]["shaves"] == 1
 
         # Check Straight format
         assert result[3]["format"] == "Straight"
         assert result[3]["rank"] == 1
-        assert result[3]["user"] == "u/user1"
+        assert result[3]["user"] == "user1"
         assert result[3]["shaves"] == 8
 
         assert result[4]["format"] == "Straight"
         assert result[4]["rank"] == 2
-        assert result[4]["user"] == "u/user3"
+        assert result[4]["user"] == "user3"
         assert result[4]["shaves"] == 2
 
     def test_aggregate_razor_format_users(self):
@@ -217,26 +217,26 @@ class TestRazorFormatUserAggregator:
         # Check DE format (alphabetically first)
         assert result[0]["format"] == "DE"
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
 
         assert result[1]["format"] == "DE"
         assert result[1]["rank"] == 2
-        assert result[1]["user"] == "u/user2"
+        assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
 
         # Check Straight format
         assert result[2]["format"] == "Straight"
         assert result[2]["rank"] == 1
-        assert result[2]["user"] == "u/user1"
+        assert result[2]["user"] == "user1"
         assert result[2]["shaves"] == 1
         assert result[2]["unique_users"] == 1
 
         assert result[3]["format"] == "Straight"
         assert result[3]["rank"] == 2
-        assert result[3]["user"] == "u/user3"
+        assert result[3]["user"] == "user3"
         assert result[3]["shaves"] == 1
         assert result[3]["unique_users"] == 1
 
@@ -287,15 +287,15 @@ class TestRazorFormatUserAggregator:
         assert len(result) == 3
         assert result[0]["format"] == "DE"
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 1
         assert result[1]["format"] == "DE"
         assert result[1]["rank"] == 2
-        assert result[1]["user"] == "u/user2"
+        assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
         assert result[2]["format"] == "DE"
         assert result[2]["rank"] == 3
-        assert result[2]["user"] == "u/user3"
+        assert result[2]["user"] == "user3"
         assert result[2]["shaves"] == 1
 
     def test_aggregate_same_user_same_format_multiple_shaves(self):
@@ -326,6 +326,6 @@ class TestRazorFormatUserAggregator:
         assert len(result) == 1
         assert result[0]["format"] == "DE"
         assert result[0]["rank"] == 1
-        assert result[0]["user"] == "u/user1"
+        assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 3
         assert result[0]["unique_users"] == 1

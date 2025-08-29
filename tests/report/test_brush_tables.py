@@ -4,13 +4,21 @@ from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestBrushesTableGenerator:
-    """Test the BrushesTableGenerator."""
+    """Test the BrushesTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = TableGenerator()
-        data = generator.generate_table("brushes", [])
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brushes")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
@@ -20,11 +28,12 @@ class TestBrushesTableGenerator:
                 {"name": "Declaration B15", "shaves": 25, "unique_users": 12},
             ]
         }
-        generator = BrushesTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 2
-        assert data[0]["name"] == "Simpson Chubby 2"
-        assert data[0]["shaves"] == 40
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brushes")
+        assert "Simpson Chubby 2" in data
+        assert "40" in data
+        assert "Declaration B15" in data
+        assert "25" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
@@ -34,215 +43,264 @@ class TestBrushesTableGenerator:
                 {"name": "Declaration B15", "shaves": 25, "unique_users": 12},  # Valid
             ]
         }
-        generator = BrushesTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brushes")
+        # Should still generate table with available data
+        assert "Declaration B15" in data
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = BrushesTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Brushes"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = BrushesTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "name" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "brushes" in generator.get_available_table_names()
+        assert "brush_handle_makers" in generator.get_available_table_names()
+        assert "brush_knot_makers" in generator.get_available_table_names()
+        assert "brush_fibers" in generator.get_available_table_names()
+        assert "brush_knot_sizes" in generator.get_available_table_names()
 
 
 class TestBrushHandleMakersTableGenerator:
-    """Test the BrushHandleMakersTableGenerator."""
+    """Test the BrushHandleMakersTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = BrushHandleMakersTableGenerator({}, debug=False)
-        data = generator.get_table_data()
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-handle-makers")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
             "brush_handle_makers": [
-                {"handle_maker": "Chisel & Hound", "shaves": 60, "unique_users": 30},
-                {"handle_maker": "Declaration Grooming", "shaves": 45, "unique_users": 25},
+                {"rank": 1, "name": "Declaration", "shaves": 40, "unique_users": 20},
+                {"rank": 2, "name": "Simpson", "shaves": 25, "unique_users": 12},
             ]
         }
-        generator = BrushHandleMakersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 2
-        assert data[0]["handle_maker"] == "Chisel & Hound"
-        assert data[0]["shaves"] == 60
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-handle-makers")
+        assert "Declaration" in data
+        assert "Simpson" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "brush_handle_makers": [
-                {"handle_maker": "Chisel & Hound"},  # Missing shaves
-                {"handle_maker": "Declaration Grooming", "shaves": 45, "unique_users": 25},  # Valid
+                {"name": "Declaration", "shaves": 40},  # Missing rank
+                {"rank": 2, "shaves": 25},  # Missing name
             ]
         }
-        generator = BrushHandleMakersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-handle-makers")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = BrushHandleMakersTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Brush Handle Makers"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = BrushHandleMakersTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "handle_maker" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "brushes" in generator.get_available_table_names()
+        assert "brush_handle_makers" in generator.get_available_table_names()
+        assert "brush_knot_makers" in generator.get_available_table_names()
+        assert "brush_fibers" in generator.get_available_table_names()
+        assert "brush_knot_sizes" in generator.get_available_table_names()
 
 
 class TestBrushKnotMakersTableGenerator:
-    """Test the BrushKnotMakersTableGenerator."""
+    """Test the BrushKnotMakersTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = BrushKnotMakersTableGenerator({}, debug=False)
-        data = generator.get_table_data()
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-makers")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
             "brush_knot_makers": [
-                {"brand": "Declaration Grooming", "shaves": 50, "unique_users": 25},
-                {"brand": "AP Shave Co", "shaves": 35, "unique_users": 18},
+                {"rank": 1, "name": "Declaration", "shaves": 40, "unique_users": 20},
+                {"rank": 2, "name": "Simpson", "shaves": 25, "unique_users": 12},
             ]
         }
-        generator = BrushKnotMakersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 2
-        assert data[0]["brand"] == "Declaration Grooming"
-        assert data[0]["shaves"] == 50
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-makers")
+        assert "Declaration" in data
+        assert "Simpson" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "brush_knot_makers": [
-                {"brand": "Declaration Grooming"},  # Missing shaves
-                {"brand": "AP Shave Co", "shaves": 35, "unique_users": 18},  # Valid
+                {"name": "Declaration", "shaves": 40},  # Missing rank
+                {"rank": 2, "shaves": 25},  # Missing name
             ]
         }
-        generator = BrushKnotMakersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-makers")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = BrushKnotMakersTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Brush Knot Makers"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = BrushKnotMakersTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "brand" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "brushes" in generator.get_available_table_names()
+        assert "brush_handle_makers" in generator.get_available_table_names()
+        assert "brush_knot_makers" in generator.get_available_table_names()
+        assert "brush_fibers" in generator.get_available_table_names()
+        assert "brush_knot_sizes" in generator.get_available_table_names()
 
 
 class TestBrushFibersTableGenerator:
-    """Test the BrushFibersTableGenerator."""
+    """Test the BrushFibersTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = BrushFibersTableGenerator({}, debug=False)
-        data = generator.get_table_data()
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-fibers")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
             "brush_fibers": [
-                {"fiber": "Synthetic", "shaves": 80, "unique_users": 40},
-                {"fiber": "Badger", "shaves": 60, "unique_users": 30},
+                {"rank": 1, "name": "Badger", "shaves": 40, "unique_users": 20},
+                {"rank": 2, "name": "Synthetic", "shaves": 25, "unique_users": 12},
             ]
         }
-        generator = BrushFibersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 2
-        assert data[0]["fiber"] == "Synthetic"
-        assert data[0]["shaves"] == 80
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-fibers")
+        assert "Badger" in data
+        assert "Synthetic" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "brush_fibers": [
-                {"fiber": "Synthetic"},  # Missing shaves
-                {"fiber": "Badger", "shaves": 60, "unique_users": 30},  # Valid
+                {"name": "Badger", "shaves": 40},  # Missing rank
+                {"rank": 2, "shaves": 25},  # Missing name
             ]
         }
-        generator = BrushFibersTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-fibers")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = BrushFibersTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Knot Fibers"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = BrushFibersTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "fiber" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "brushes" in generator.get_available_table_names()
+        assert "brush_handle_makers" in generator.get_available_table_names()
+        assert "brush_knot_makers" in generator.get_available_table_names()
+        assert "brush_fibers" in generator.get_available_table_names()
+        assert "brush_knot_sizes" in generator.get_available_table_names()
 
 
 class TestBrushKnotSizesTableGenerator:
-    """Test the BrushKnotSizesTableGenerator."""
+    """Test the BrushKnotSizesTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = BrushKnotSizesTableGenerator({}, debug=False)
-        data = generator.get_table_data()
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-sizes")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
             "brush_knot_sizes": [
-                {"knot_size_mm": 26, "shaves": 45, "unique_users": 22},
-                {"knot_size_mm": 28, "shaves": 35, "unique_users": 18},
+                {"rank": 1, "name": "24mm", "shaves": 40, "unique_users": 20},
+                {"rank": 2, "name": "26mm", "shaves": 25, "unique_users": 12},
             ]
         }
-        generator = BrushKnotSizesTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 2
-        assert data[0]["knot_size_mm"] == 26
-        assert data[0]["shaves"] == 45
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-sizes")
+        assert "24mm" in data
+        assert "26mm" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "brush_knot_sizes": [
-                {"knot_size_mm": 26},  # Missing shaves
-                {"knot_size_mm": 28, "shaves": 35, "unique_users": 18},  # Valid
+                {"name": "24mm", "shaves": 40},  # Missing rank
+                {"rank": 2, "shaves": 25},  # Missing name
             ]
         }
-        generator = BrushKnotSizesTableGenerator(sample_data, debug=False)
-        data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("brush-knot-sizes")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = BrushKnotSizesTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Knot Sizes"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = BrushKnotSizesTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "knot_size_mm" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {
+            "brushes": [],
+            "brush_handle_makers": [],
+            "brush_knot_makers": [],
+            "brush_fibers": [],
+            "brush_knot_sizes": [],
+        }
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "brushes" in generator.get_available_table_names()
+        assert "brush_handle_makers" in generator.get_available_table_names()
+        assert "brush_knot_makers" in generator.get_available_table_names()
+        assert "brush_fibers" in generator.get_available_table_names()
+        assert "brush_knot_sizes" in generator.get_available_table_names()

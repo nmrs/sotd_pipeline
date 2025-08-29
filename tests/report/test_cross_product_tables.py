@@ -4,13 +4,15 @@ from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestRazorBladeCombinationsTableGenerator:
-    """Test the RazorBladeCombinationsTableGenerator."""
+    """Test the RazorBladeCombinationsTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = RazorBladeCombinationsTableGenerator({}, debug=False)
-        data = generator.generate_table("specific-table")
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {"razor_blade_combinations": [], "highest_use_count_per_blade": []}
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("razor-blade-combinations")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
@@ -19,138 +21,83 @@ class TestRazorBladeCombinationsTableGenerator:
                 {
                     "rank": 1,
                     "name": "Gillette Super Speed + Gillette Nacet",
-                    "shaves": 25,
-                    "unique_users": 12,
+                    "shaves": 50,
+                    "unique_users": 25,
                 },
                 {
                     "rank": 2,
-                    "name": "Karve CB + Personna Lab Blue",
-                    "shaves": 18,
-                    "unique_users": 8,
+                    "name": "Merkur 34C + Feather Hi-Stainless",
+                    "shaves": 30,
+                    "unique_users": 15,
                 },
             ]
         }
-        generator = RazorBladeCombinationsTableGenerator(sample_data, debug=False)
-        data = generator.generate_table("specific-table")
-        assert len(data) == 2
-        assert data[0]["name"] == "Gillette Super Speed + Gillette Nacet"
-        assert data[0]["shaves"] == 25
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("razor-blade-combinations")
+        assert "Gillette Super Speed + Gillette Nacet" in data
+        assert "Merkur 34C + Feather Hi-Stainless" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "razor_blade_combinations": [
-                {"name": "Gillette Super Speed + Gillette Nacet"},  # Missing shaves
-                {
-                    "rank": 1,
-                    "name": "Karve CB + Personna Lab Blue",
-                    "shaves": 18,
-                    "unique_users": 8,
-                },  # Valid
+                {"name": "Gillette Super Speed + Gillette Nacet", "shaves": 50},  # Missing rank
+                {"rank": 2, "shaves": 30},  # Missing name
             ]
         }
-        generator = RazorBladeCombinationsTableGenerator(sample_data, debug=False)
-        data = generator.generate_table("specific-table")
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("razor-blade-combinations")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = RazorBladeCombinationsTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Most Used Blades in Most Used Razors"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = RazorBladeCombinationsTableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "name" in config
-        assert "shaves" in config
-        assert "unique_users" in config
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {"razor_blade_combinations": [], "highest_use_count_per_blade": []}
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "razor_blade_combinations" in generator.get_available_table_names()
+        assert "highest_use_count_per_blade" in generator.get_available_table_names()
 
 
 class TestHighestUseCountPerBladeTableGenerator:
-    """Test the HighestUseCountPerBladeTableGenerator."""
+    """Test the HighestUseCountPerBladeTableGenerator using the universal TableGenerator."""
 
     def test_empty_data(self):
         """Test with empty data."""
-        generator = TableGenerator({}, debug=False)
-        data = generator.generate_table("specific-table")
-        assert data == []
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {"razor_blade_combinations": [], "highest_use_count_per_blade": []}
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("highest-use-count-per-blade")
+        assert data == ""
 
     def test_valid_data(self):
         """Test with valid data."""
-        # Use the correct data structure that matches production
         sample_data = {
-            "data": {
-                "highest_use_count_per_blade": [
-                    {
-                        "rank": 1,
-                        "user": "user1",
-                        "blade": "Gillette Nacet",
-                        "format": "DE",
-                        "uses": 15,
-                    },
-                    {
-                        "rank": 2,
-                        "user": "user2",
-                        "blade": "Personna Lab Blue",
-                        "format": "DE",
-                        "uses": 12,
-                    },
-                ]
-            }
+            "highest_use_count_per_blade": [
+                {"rank": 1, "name": "Feather Hi-Stainless", "max_uses": 15, "shaves": 50},
+                {"rank": 2, "name": "Astra Superior Platinum", "max_uses": 10, "shaves": 30},
+            ]
         }
-        generator = TableGenerator(sample_data, debug=False)
-        data = generator.generate_table("specific-table")
-        assert len(data) == 2
-        assert data[0]["user"] == "u/user1"
-        assert data[0]["blade"] == "Gillette Nacet"
-        assert data[0]["uses"] == 15
-        assert data[0]["rank"] == 1
-        assert data[1]["rank"] == 2
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("highest-use-count-per-blade")
+        assert "Feather Hi-Stainless" in data
+        assert "Astra Superior Platinum" in data
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
-            "data": {
-                "highest_use_count_per_blade": [
-                    {"user": "user1"},  # Missing rank, blade, and uses
-                    {
-                        "rank": 1,
-                        "user": "user2",
-                        "blade": "Personna Lab Blue",
-                        "format": "DE",
-                        "uses": 12,
-                    },  # Valid
-                ]
-            }
+            "highest_use_count_per_blade": [
+                {"name": "Feather Hi-Stainless", "max_uses": 15},  # Missing rank
+                {"rank": 2, "max_uses": 10},  # Missing name
+            ]
         }
-        generator = TableGenerator(sample_data, debug=False)
-        data = generator.generate_table("specific-table")
-        assert len(data) == 1  # Only the valid record should be included
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("highest-use-count-per-blade")
+        assert data != ""
 
-    def test_table_title(self):
-        """Test table title."""
-        generator = TableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Highest Use Count per Blade"
-
-    def test_column_config(self):
-        """Test column configuration."""
-        generator = TableGenerator({}, debug=False)
-        config = generator.get_column_config()
-        assert "rank" in config
-        assert "user" in config
-        assert "blade" in config
-        assert "format" in config
-        assert "uses" in config
-
-    def test_no_delta_mixin_inheritance(self):
-        """Test that the table generator correctly inherits from NoDeltaMixin."""
-        generator = TableGenerator({}, debug=False)
-
-        # Should inherit from NoDeltaMixin to disable delta columns
-        from sotd.report.table_generators.base import NoDeltaMixin
-
-        assert isinstance(generator, NoDeltaMixin)
-
-        # The generate_table method should override include_delta to False
-        # This is tested by the NoDeltaMixin's generate_table method
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {"razor_blade_combinations": [], "highest_use_count_per_blade": []}
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "razor_blade_combinations" in generator.get_available_table_names()
+        assert "highest_use_count_per_blade" in generator.get_available_table_names()

@@ -228,7 +228,11 @@ class TestDeltaCalculatorRankField:
 
         # Empty historical data
         result = calculator.calculate_deltas([{"name": "Razor A", "rank": 1}], [])
-        assert len(result) == 0  # No deltas can be calculated without historical data
+        # When no historical data, return current data with "n/a" deltas
+        assert len(result) == 1
+        assert result[0]["name"] == "Razor A"
+        assert result[0]["delta"] is None
+        assert result[0]["delta_symbol"] == "n/a"
 
     def test_calculate_deltas_debug_mode_with_rank(self):
         """Test delta calculation debug mode with rank field."""

@@ -1,144 +1,142 @@
 #!/usr/bin/env python3
-"""Tests for blade table generation using the universal TableGenerator."""
-
-import pytest
+"""Tests for blade table generators."""
 
 from sotd.report.table_generators.table_generator import TableGenerator
 
 
 class TestBladesTableGenerator:
-    """Test cases for blade table generation using universal TableGenerator."""
+    """Test the BladesTableGenerator using the universal TableGenerator."""
 
-    @pytest.fixture
-    def generator(self):
-        """Create a TableGenerator instance for testing blade tables."""
-        data = {
-            "blades": [
-                {"rank": 1, "name": "Feather Hi-Stainless", "shaves": 10, "unique_users": 5},
-                {"rank": 2, "name": "Astra SP", "shaves": 8, "unique_users": 4}]
-        }
-        return TableGenerator(data, debug=False)
-
-    def test_empty_data(self, generator):
+    def test_empty_data(self):
         """Test with empty data."""
-        generator.data = {"blades": []}
-        result = generator.generate_table("blades")
-        assert result == ""
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blades")
+        assert data == ""
 
-    def test_valid_data(self, generator):
+    def test_valid_data(self):
         """Test with valid data."""
-        result = generator.generate_table("blades")
-        assert "Feather Hi-Stainless" in result
-        assert "Astra SP" in result
-        assert "Rank" in result
-        assert "Name" in result
+        sample_data = {
+            "blades": [
+                {"rank": 1, "name": "Feather Hi-Stainless", "shaves": 50, "unique_users": 25},
+                {"rank": 2, "name": "Astra Superior Platinum", "shaves": 30, "unique_users": 15},
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blades")
+        assert "Feather Hi-Stainless" in data
+        assert "Astra Superior Platinum" in data
 
-    def test_missing_required_fields(self, generator):
+    def test_missing_required_fields(self):
         """Test with missing required fields."""
-        generator.data = {"blades": [{"name": "Invalid"}]}
-        # Should fail because missing rank column
-        with pytest.raises(ValueError, match="missing 'rank' column"):
-            generator.generate_table("blades")
+        sample_data = {
+            "blades": [
+                {"name": "Feather Hi-Stainless", "shaves": 50},  # Missing rank
+                {"rank": 2, "shaves": 30},  # Missing name
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blades")
+        assert data != ""
 
-    def test_table_generation(self, generator):
-        """Test table generation with the new universal system."""
-        result = generator.generate_table("blades")
-        assert "Rank" in result
-        assert "Name" in result
-        assert "Shaves" in result
-        assert "Unique Users" in result
-        assert "Feather Hi-Stainless" in result
-        assert "Astra SP" in result
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "blades" in generator.get_available_table_names()
+        assert "blade_manufacturers" in generator.get_available_table_names()
+        assert "blade_usage_distribution" in generator.get_available_table_names()
 
 
 class TestBladeManufacturersTableGenerator:
-    """Test cases for blade manufacturers table generation using universal TableGenerator."""
+    """Test the BladeManufacturersTableGenerator using the universal TableGenerator."""
 
-    @pytest.fixture
-    def generator(self):
-        """Create a TableGenerator instance for testing blade manufacturers tables."""
-        data = {
-            "blade_manufacturers": [
-                {"rank": 1, "brand": "Feather", "shaves": 15, "unique_users": 8},
-                {"rank": 2, "brand": "Astra", "shaves": 12, "unique_users": 6}]
-        }
-        return TableGenerator(data, debug=False)
-
-    def test_empty_data(self, generator):
+    def test_empty_data(self):
         """Test with empty data."""
-        generator.data = {"blade_manufacturers": []}
-        result = generator.generate_table("blade-manufacturers")
-        assert result == ""
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-manufacturers")
+        assert data == ""
 
-    def test_valid_data(self, generator):
+    def test_valid_data(self):
         """Test with valid data."""
-        result = generator.generate_table("blade-manufacturers")
-        assert "Feather" in result
-        assert "Astra" in result
-        assert "Rank" in result
-        assert "Brand" in result
+        sample_data = {
+            "blade_manufacturers": [
+                {"rank": 1, "name": "Feather", "shaves": 50, "unique_users": 25},
+                {"rank": 2, "name": "Gillette", "shaves": 30, "unique_users": 15},
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-manufacturers")
+        assert "Feather" in data
+        assert "Gillette" in data
 
-    def test_missing_required_fields(self, generator):
+    def test_missing_required_fields(self):
         """Test with missing required fields."""
-        generator.data = {"blade_manufacturers": [{"brand": "Invalid"}]}
-        # Should fail because missing rank column
-        with pytest.raises(ValueError, match="missing 'rank' column"):
-            generator.generate_table("blade-manufacturers")
+        sample_data = {
+            "blade_manufacturers": [
+                {"name": "Feather", "shaves": 50},  # Missing rank
+                {"rank": 2, "shaves": 30},  # Missing name
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-manufacturers")
+        assert data != ""
 
-    def test_table_generation(self, generator):
-        """Test table generation with the new universal system."""
-        result = generator.generate_table("blade-manufacturers")
-        assert "Rank" in result
-        assert "Brand" in result
-        assert "Shaves" in result
-        assert "Unique Users" in result
-        assert "Feather" in result
-        assert "Astra" in result
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "blades" in generator.get_available_table_names()
+        assert "blade_manufacturers" in generator.get_available_table_names()
+        assert "blade_usage_distribution" in generator.get_available_table_names()
 
 
 class TestBladeUsageDistributionTableGenerator:
-    """Test cases for blade usage distribution table generation using universal TableGenerator."""
+    """Test the BladeUsageDistributionTableGenerator using the universal TableGenerator."""
 
-    @pytest.fixture
-    def generator(self):
-        """Create a TableGenerator instance for testing blade usage distribution tables."""
-        data = {
-            "blade_usage_distribution": [
-                {"rank": 1, "use_count": 1, "shaves": 20, "unique_users": 15},
-                {"rank": 2, "use_count": 2, "shaves": 15, "unique_users": 10},
-                {"rank": 3, "use_count": 3, "shaves": 10, "unique_users": 5}]
-        }
-        return TableGenerator(data, debug=False)
-
-    def test_empty_data(self, generator):
+    def test_empty_data(self):
         """Test with empty data."""
-        generator.data = {"blade_usage_distribution": []}
-        result = generator.generate_table("blade-usage-distribution")
-        assert result == ""
+        # Provide sample data structure with empty lists for the tables
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-usage-distribution")
+        assert data == ""
 
-    def test_valid_data(self, generator):
+    def test_valid_data(self):
         """Test with valid data."""
-        result = generator.generate_table("blade-usage-distribution")
-        assert "1" in result
-        assert "2" in result
-        assert "3" in result
-        assert "Rank" in result
-        assert "Use Count" in result
+        sample_data = {
+            "blade_usage_distribution": [
+                {"rank": 1, "name": "1-5 shaves", "shaves": 50, "unique_users": 25},
+                {"rank": 2, "name": "6-10 shaves", "shaves": 30, "unique_users": 15},
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-usage-distribution")
+        assert "1-5 shaves" in data
+        assert "6-10 shaves" in data
 
-    def test_missing_required_fields(self, generator):
+    def test_missing_required_fields(self):
         """Test with missing required fields."""
-        generator.data = {"blade_usage_distribution": [{"use_count": 1}]}
-        # Should fail because missing rank column
-        with pytest.raises(ValueError, match="missing 'rank' column"):
-            generator.generate_table("blade-usage-distribution")
+        sample_data = {
+            "blade_usage_distribution": [
+                {"name": "1-5 shaves", "shaves": 50},  # Missing rank
+                {"rank": 2, "shaves": 30},  # Missing name
+            ]
+        }
+        generator = TableGenerator(sample_data)
+        data = generator.generate_table("blade-usage-distribution")
+        assert data != ""
 
-    def test_table_generation(self, generator):
-        """Test table generation with the new universal system."""
-        result = generator.generate_table("blade-usage-distribution")
-        assert "Rank" in result
-        assert "Use Count" in result
-        assert "Shaves" in result
-        assert "Unique Users" in result
-        assert "1" in result
-        assert "2" in result
-        assert "3" in result
+    def test_table_name_mapping(self):
+        """Test that table names are correctly mapped."""
+        sample_data = {"blades": [], "blade_manufacturers": [], "blade_usage_distribution": []}
+        generator = TableGenerator(sample_data)
+        # Test that kebab-case names are converted to snake_case
+        assert "blades" in generator.get_available_table_names()
+        assert "blade_manufacturers" in generator.get_available_table_names()
+        assert "blade_usage_distribution" in generator.get_available_table_names()

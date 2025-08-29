@@ -6,6 +6,21 @@ from sotd.aggregate.aggregators.base_aggregator import BaseAggregator
 class TestAggregator(BaseAggregator):
     """Test implementation of BaseAggregator for testing."""
 
+    @property
+    def IDENTIFIER_FIELDS(self) -> list[str]:
+        """Fields used for matching/grouping."""
+        return ["brand", "model"]
+
+    @property
+    def METRIC_FIELDS(self) -> list[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> list[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
+
     def _extract_data(self, records):
         """Extract test data from records."""
         extracted_data = []
@@ -32,6 +47,21 @@ class TestAggregator(BaseAggregator):
 
 class TestAggregatorWithGrouping(BaseAggregator):
     """Test implementation with additional grouping fields."""
+
+    @property
+    def IDENTIFIER_FIELDS(self) -> list[str]:
+        """Fields used for matching/grouping."""
+        return ["brand", "model", "category"]
+
+    @property
+    def METRIC_FIELDS(self) -> list[str]:
+        """Calculated/metric fields."""
+        return ["shaves", "unique_users"]
+
+    @property
+    def RANKING_FIELDS(self) -> list[str]:
+        """Fields used for sorting/ranking."""
+        return ["shaves", "unique_users"]
 
     def _extract_data(self, records):
         """Extract test data with additional grouping field."""
