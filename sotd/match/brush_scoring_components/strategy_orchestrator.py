@@ -42,40 +42,38 @@ class StrategyOrchestrator:
         results = []
 
         for strategy in self.strategies:
-            try:
-                # Pass cached results to strategies that support them
-                if cached_results is not None:
-                    # Check if the strategy's match method accepts cached_results parameter
-                    import inspect
+            # Pass cached results to strategies that support them
+            if cached_results is not None:
+                # Check if the strategy's match method accepts cached_results parameter
+                import inspect
 
-                    sig = inspect.signature(strategy.match)
-                    if len(sig.parameters) > 1:  # Has more than just 'self' and 'value'
-                        result = strategy.match(value, cached_results)
-                    else:
-                        result = strategy.match(value)
+                sig = inspect.signature(strategy.match)
+                if len(sig.parameters) > 1:  # Has more than just 'self' and 'value'
+                    result = strategy.match(value, cached_results)
                 else:
                     result = strategy.match(value)
+            else:
+                result = strategy.match(value)
 
-                if result is not None:
-                    # Convert dict results to MatchResult objects
-                    if isinstance(result, dict):
-                        from sotd.match.types import create_match_result
+            if result is not None:
+                # Convert dict results to MatchResult objects
+                if isinstance(result, dict):
+                    from sotd.match.types import create_match_result
 
-                        result = create_match_result(
-                            original=value,
-                            matched=result.get("matched", {}),
-                            match_type=result.get("match_type", "unknown"),
-                            pattern=result.get("pattern", "unknown"),
-                        )
+                    result = create_match_result(
+                        original=value,
+                        matched=result.get("matched", {}),
+                        match_type=result.get("match_type", "unknown"),
+                        pattern=result.get("pattern", "unknown"),
+                        strategy=strategy.__class__.__name__,  # Set the strategy name
+                    )
+                elif not isinstance(result, MatchResult):
+                    # Skip results that are neither dict nor MatchResult
+                    continue
 
-                    # Only include results that have actual matches (matched is not None)
-                    if result.matched is not None:
-                        results.append(result)
-            except Exception as e:
-                # Log error but continue with other strategies
-                # This allows individual strategy failures without breaking the system
-                print(f"Strategy {strategy.__class__.__name__} failed: {e}")
-                continue
+                # Only include results that have actual matches (matched is not None)
+                if result.matched is not None:
+                    results.append(result)
 
         return results
 

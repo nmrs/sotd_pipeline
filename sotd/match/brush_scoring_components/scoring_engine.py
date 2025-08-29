@@ -6,6 +6,8 @@ This component scores strategy results based on configuration weights and criter
 
 import re
 from typing import List, Optional, Any
+from pathlib import Path
+import yaml
 
 from sotd.match.types import MatchResult
 
@@ -17,6 +19,10 @@ class ScoringEngine:
     This component applies scoring weights and modifiers to strategy results
     to determine the best match.
     """
+
+    # Class-level cache for knots.yaml data
+    _knots_cache = None
+    _knots_cache_timestamp = 0
 
     def __init__(self, config):
         """
@@ -220,37 +226,6 @@ class ScoringEngine:
 
         return 1.0 if len(brands_found) > 1 else 0.0
 
-    def _modifier_fiber_words(self, input_text: str, result: dict, strategy_name: str) -> float:
-        """
-        Return score modifier for fiber-specific terminology.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if fiber words detected, 0.0 otherwise)
-        """
-        fiber_patterns = [
-            r"\bbadger\b",
-            r"\bboar\b",
-            r"\bsynthetic\b",
-            r"\bsyn\b",
-            r"\bnylon\b",
-            r"\bplissoft\b",
-            r"\btuxedo\b",
-            r"\bcashmere\b",
-            r"\bmixed\b",
-            r"\btimberwolf\b",
-        ]
-
-        for pattern in fiber_patterns:
-            if re.search(pattern, input_text.lower()):
-                return 1.0
-
-        return 0.0
-
     def _detect_fiber_conflict(
         self, input_text: str, result: Any
     ) -> tuple[bool, str | None, str | None]:
@@ -298,6 +273,78 @@ class ScoringEngine:
 
         return has_conflict, user_fiber, catalog_fiber
 
+    def _modifier_fiber_match(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for fiber type detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if fiber detected, 0.0 otherwise)
+        """
+        # Only apply to individual component strategies
+        if strategy_name not in ["handle_matching", "knot_matching"]:
+            return 0.0
+
+        # Use fiber_utils to detect fiber in input text
+        try:
+            from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+
+            fiber_type = match_fiber(input_text)
+            return 1.0 if fiber_type else 0.0
+        except ImportError:
+            # Fallback to simple pattern matching if fiber_utils not available
+            fiber_patterns = [
+                r"\bbadger\b",
+                r"\bboar\b",
+                r"\bsynthetic\b",
+                r"\bsilvertip\b",
+                r"\btwo_band\b",
+                r"\bthree_band\b",
+            ]
+            for pattern in fiber_patterns:
+                if re.search(pattern, input_text.lower()):
+                    return 1.0
+            return 0.0
+
+    def _modifier_size_match(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for size specification detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if size detected, 0.0 otherwise)
+        """
+        # Only apply to individual component strategies
+        if strategy_name not in ["handle_matching", "knot_matching"]:
+            return 0.0
+
+        # Use knot_size_utils to detect size in input text
+        try:
+            from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+
+            size_match = parse_knot_size(input_text)
+            return 1.0 if size_match else 0.0
+        except ImportError:
+            # Fallback to simple pattern matching if knot_size_utils not available
+            size_patterns = [
+                r"\b\d+mm\b",
+                r"\b\d+\.\d+mm\b",
+                r"\b\d+/\d+\b",
+                r"\b\d+\.\d+\b",
+            ]
+            for pattern in size_patterns:
+                if re.search(pattern, input_text.lower()):
+                    return 1.0
+            return 0.0
+
     def _modifier_fiber_mismatch(self, input_text: str, result: dict, strategy_name: str) -> float:
         """
         Return score modifier for fiber mismatches between user input and catalog data.
@@ -313,121 +360,10 @@ class ScoringEngine:
         has_conflict, _, _ = self._detect_fiber_conflict(input_text, result)
         return 1.0 if has_conflict else 0.0
 
-    def _modifier_fiber_match(self, input_text: str, result: dict, strategy_name: str) -> float:
-        """
-        Return score modifier for fiber matches between user input and catalog data.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if fiber match detected, 0.0 otherwise)
-        """
-        has_conflict, user_fiber, catalog_fiber = self._detect_fiber_conflict(input_text, result)
-        # Return 1.0 if we have both fibers and they match (no conflict)
-        return 1.0 if (user_fiber and catalog_fiber and not has_conflict) else 0.0
-
-    def _modifier_size_specification(
-        self, input_text: str, result: dict, strategy_name: str
-    ) -> float:
-        """
-        Return score modifier for size specifications.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if size specification detected, 0.0 otherwise)
-        """
-        size_patterns = [r"\b\d+mm\b", r"\b\d+\s*mm\b", r"\b\d+x\d+\b", r"\b\d+\s*x\s*\d+\b"]
-
-        for pattern in size_patterns:
-            if re.search(pattern, input_text.lower()):
-                return 1.0
-
-        return 0.0
-
-    def _modifier_delimiter_confidence(
-        self, input_text: str, result: dict, strategy_name: str
-    ) -> float:
-        """
-        Return score modifier for high-confidence delimiters.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if high-confidence delimiter detected, 0.0 otherwise)
-        """
-        high_confidence_delimiters = [r"\s+w/\s+", r"\s+with\s+", r"\s+in\s+"]
-
-        for delimiter in high_confidence_delimiters:
-            if re.search(delimiter, input_text.lower()):
-                return 1.0
-
-        return 0.0
-
-    def _modifier_handle_confidence(
-        self, input_text: str, result: dict, strategy_name: str
-    ) -> float:
-        """
-        Return score modifier for handle confidence.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (0.0 to 1.0 based on handle confidence)
-        """
-        # This is a placeholder for handle confidence scoring
-        # In a full implementation, this would use the existing _score_as_handle logic
-        return 0.0
-
-    def _modifier_knot_confidence(self, input_text: str, result: dict, strategy_name: str) -> float:
-        """
-        Return score modifier for knot confidence.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (0.0 to 1.0 based on knot confidence)
-        """
-        # This is a placeholder for knot confidence scoring
-        # In a full implementation, this would use the existing _score_as_knot logic
-        return 0.0
-
-    def _modifier_word_count_balance(
-        self, input_text: str, result: dict, strategy_name: str
-    ) -> float:
-        """
-        Return score modifier for word count balance.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (0.0 to 1.0 based on word count balance)
-        """
-        # This is a placeholder for word count balance scoring
-        # In a full implementation, this would calculate balance between handle/knot words
-        return 0.0
-
     def _modifier_dual_component(self, input_text: str, result: dict, strategy_name: str) -> float:
         """
-        Return score modifier for dual component matches (unified strategy only).
+        Return score modifier for dual component matches
+        (full_input_component_matching strategy only).
 
         Args:
             input_text: Original input string
@@ -437,7 +373,8 @@ class ScoringEngine:
         Returns:
             Modifier value (1.0 if both handle and knot matched, 0.0 otherwise)
         """
-        if strategy_name != "unified":
+        # Only apply to full_input_component_matching strategy
+        if strategy_name != "full_input_component_matching":
             return 0.0
 
         # Check if both handle and knot sections exist and have valid matches
@@ -454,11 +391,9 @@ class ScoringEngine:
 
         return 0.0
 
-    def _modifier_high_confidence(
-        self, input_text: str, result: MatchResult, strategy_name: str
-    ) -> float:
+    def _modifier_high_confidence(self, input_text: str, result: dict, strategy_name: str) -> float:
         """
-        Return score modifier for high confidence delimiter splits.
+        Return score modifier for high-confidence delimiter usage.
 
         Args:
             input_text: Original input string
@@ -466,17 +401,37 @@ class ScoringEngine:
             strategy_name: Name of the strategy
 
         Returns:
-            Modifier value (1.0 if high priority delimiter used, 0.0 otherwise)
+            Modifier value (1.0 if high-confidence delimiters used, 0.0 otherwise)
         """
-        # Check if this result used a high priority delimiter
-        delimiter_priority = getattr(result, "_delimiter_priority", None)
-        if delimiter_priority is not None:
-            return 1.0 if delimiter_priority == "high" else 0.0
+        # Only apply to automated_split strategy
+        if strategy_name != "automated_split":
+            return 0.0
 
-        # Fallback: check if high_priority_delimiter attribute exists
-        high_priority_delimiter = getattr(result, "high_priority_delimiter", None)
-        if high_priority_delimiter is not None:
-            return 1.0 if high_priority_delimiter else 0.0
+        # High-priority delimiters that indicate strong component separation
+        high_priority_delimiters = [
+            r"\bw/\b",  # "w/" (with)
+            r"\bwith\b",  # "with"
+            r"\bin\b",  # "in"
+        ]
+
+        # Lower-priority delimiters
+        low_priority_delimiters = [
+            r"\s/\s",  # " / "
+            r"\s-\s",  # " - "
+            r"\s\+\s",  # " + "
+        ]
+
+        input_lower = input_text.lower()
+
+        # Check for high-priority delimiters
+        for delimiter in high_priority_delimiters:
+            if re.search(delimiter, input_lower):
+                return 1.0
+
+        # Check for low-priority delimiters (no bonus)
+        for delimiter in low_priority_delimiters:
+            if re.search(delimiter, input_lower):
+                return 0.0
 
         return 0.0
 
@@ -494,39 +449,189 @@ class ScoringEngine:
         Returns:
             Modifier value based on priority levels (higher quality = more points)
         """
-        # Apply to strategies that do handle/knot component matching
-        if strategy_name not in ["automated_split", "unified"]:
+        # Apply to individual handle/knot matching strategies
+        if strategy_name not in ["handle_matching", "knot_matching"]:
             return 0.0
 
-        # Check if we have handle and knot components with priority info
+        # Check if we have handle or knot component with priority info
         if not result.matched:
             return 0.0
 
-        handle = result.matched.get("handle", {})
-        knot = result.matched.get("knot", {})
-
-        # For automated_split: get priority from handle and knot components
-        if strategy_name == "automated_split":
-            # Handle and knot are dictionaries, so use .get() instead of getattr()
+        if strategy_name == "handle_matching":
+            handle = result.matched.get("handle", {})
             handle_priority = handle.get("priority") if handle else None
+
+            if handle_priority is not None:
+                # Lower priority number = higher quality = more points
+                # 1->3, 2->2, 3->1, 4->0, etc.
+                return max(0, 3 - handle_priority + 1)
+
+        elif strategy_name == "knot_matching":
+            knot = result.matched.get("knot", {})
             knot_priority = knot.get("priority") if knot else None
 
-            # Calculate priority score dynamically based on actual catalog priority
-            # Lower priority number = higher quality = more points
-            handle_score = 0.0
-            if handle_priority is not None:
-                # Dynamic scoring: assume priority 1 is highest, scale accordingly
-                # This works whether there are 2, 3, or more priority levels
-                handle_score = max(0, 3 - handle_priority + 1)  # 1->3, 2->2, 3->1, 4->0, etc.
-
-            knot_score = 0.0
             if knot_priority is not None:
                 # Same dynamic scaling for knots
-                knot_score = max(0, 3 - knot_priority + 1)  # 1->3, 2->2, 3->1, 4->0, etc.
-
-            return handle_score + knot_score
+                return max(0, 3 - knot_priority + 1)
 
         return 0.0
+
+    def _modifier_handle_weight(
+        self, input_text: str, result: MatchResult, strategy_name: str
+    ) -> float:
+        """
+        Return handle score weight for component strategies.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Weighted handle matching score for this strategy
+        """
+        # Apply to component strategies that do handle/knot matching
+        if strategy_name not in ["automated_split", "full_input_component_matching"]:
+            return 0.0
+
+        # Get configured weight for this strategy
+        weight = self.config.get_strategy_modifier(strategy_name, "handle_weight")
+
+        # Calculate handle matching score (simplified base + priority)
+        handle_data = result.matched.get("handle", {}) if result.matched else {}
+        if not handle_data:
+            return 0.0
+
+        # Base handle score (could be configurable)
+        base_handle_score = 50.0
+
+        # Add priority bonus if available
+        handle_priority = handle_data.get("priority")
+        priority_bonus = 0.0
+        if handle_priority is not None:
+            priority_bonus = max(0, 3 - handle_priority + 1)
+
+        total_handle_score = base_handle_score + priority_bonus
+
+        # Return weight × score
+        return weight * total_handle_score
+
+    def _modifier_knot_weight(
+        self, input_text: str, result: MatchResult, strategy_name: str
+    ) -> float:
+        """
+        Return knot score weight for component strategies.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Weighted knot matching score for this strategy
+        """
+        # Apply to component strategies that do handle/knot matching
+        if strategy_name not in ["automated_split", "full_input_component_matching"]:
+            return 0.0
+
+        # Get configured weight for this strategy
+        weight = self.config.get_strategy_modifier(strategy_name, "knot_weight")
+
+        # Calculate knot matching score (simplified base + priority)
+        knot_data = result.matched.get("knot", {}) if result.matched else {}
+        if not knot_data:
+            return 0.0
+
+        # Base knot score (could be configurable)
+        base_knot_score = 50.0
+
+        # Add priority bonus if available
+        knot_priority = knot_data.get("priority")
+        priority_bonus = 0.0
+        if knot_priority is not None:
+            priority_bonus = max(0, 3 - knot_priority + 1)
+
+        total_knot_score = base_knot_score + priority_bonus
+
+        # Return weight × score
+        return weight * total_knot_score
+
+    def _modifier_handle_brand_without_knot_brand(
+        self, input_text: str, result: MatchResult, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for handle brand without knot brand detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if handle brand detected but no knot brand, 0.0 otherwise)
+        """
+        # Apply to composite brush strategies
+        if strategy_name not in ["automated_split", "full_input_component_matching", "known_split"]:
+            return 0.0
+
+        # Check if we have handle and knot components
+        if not result.matched:
+            return 0.0
+
+        handle_data = result.matched.get("handle", {})
+        knot_data = result.matched.get("knot", {})
+
+        handle_brand = handle_data.get("brand") if handle_data else None
+        knot_brand = knot_data.get("brand") if knot_data else None
+
+        # Return 1.0 if handle brand is populated but knot brand is not
+        return 1.0 if handle_brand and not knot_brand else 0.0
+
+    def _modifier_knot_indicators(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for knot-specific indicators.
+
+        Detects:
+        - Known knot model names from knots.yaml known_knots section
+        - NOT fiber/size (handled by fiber_match/size_match)
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if knot indicators detected, 0.0 otherwise)
+        """
+        try:
+            # Use cached knots data
+            knots_data = self._load_knots_data()
+
+            if not knots_data or "known_knots" not in knots_data:
+                return 0.0
+
+            input_lower = input_text.lower()
+
+            # Extract all knot model names from known_knots section
+            for brand, brand_data in knots_data["known_knots"].items():
+                for model_name, model_data in brand_data.items():
+                    # Skip non-model keys like 'fiber' and 'knot_size_mm'
+                    if isinstance(model_data, dict) and "patterns" in model_data:
+                        # Check if model name appears in input (e.g., "Timberwolf", "v8", "G5")
+                        if model_name.lower() in input_lower:
+                            return 1.0
+
+                        # Also check the patterns for this model
+                        for pattern in model_data["patterns"]:
+                            if re.search(pattern, input_lower, re.IGNORECASE):
+                                return 1.0
+
+            return 0.0
+
+        except Exception as e:
+            # Fail fast - log error and return 0
+            print(f"Error in knot_indicators modifier: {e}")
+            return 0.0
 
     def _modifier_handle_indicators(
         self, input_text: str, result: dict, strategy_name: str
@@ -542,6 +647,10 @@ class ScoringEngine:
         Returns:
             Modifier value (1.0 if handle indicators detected, 0.0 otherwise)
         """
+        # Only apply to individual component strategies
+        if strategy_name not in ["handle_matching", "knot_matching"]:
+            return 0.0
+
         handle_indicators = [
             r"\bhandle\b",
             r"\bwood\b",
@@ -564,74 +673,6 @@ class ScoringEngine:
             if re.search(pattern, input_text.lower()):
                 return 1.0
         return 0.0
-
-    def _modifier_knot_indicators(self, input_text: str, result: dict, strategy_name: str) -> float:
-        """
-        Return score modifier for knot-specific indicators.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if knot indicators detected, 0.0 otherwise)
-        """
-        knot_indicators = [
-            r"\bbadger\b",
-            r"\bboar\b",
-            r"\bsynthetic\b",
-            r"\bsyn\b",
-            r"\bnylon\b",
-            r"\bplissoft\b",
-            r"\btuxedo\b",
-            r"\bcashmere\b",
-            r"\bmixed\b",
-            r"\btimberwolf\b",
-            r"\b26mm\b",
-            r"\b28mm\b",
-            r"\b30mm\b",
-            r"\b24mm\b",
-            r"\b22mm\b",
-        ]
-        for pattern in knot_indicators:
-            if re.search(pattern, input_text.lower()):
-                return 1.0
-        return 0.0
-
-    def _modifier_handle_brand_without_knot_brand(
-        self, input_text: str, result, strategy_name: str
-    ) -> float:
-        """
-        Return score modifier for handle brand without knot brand detection.
-
-        Args:
-            input_text: Original input string
-            result: MatchResult object or dict
-            strategy_name: Name of the strategy
-
-        Returns:
-            Modifier value (1.0 if handle brand detected but no knot brand, 0.0 otherwise)
-        """
-        if strategy_name not in ["handle_only", "knot_only"]:
-            return 0.0
-
-        # We need cached_results to check brand balance
-        if not hasattr(self, "cached_results") or not self.cached_results:
-            return 0.0
-
-        unified_result = self.cached_results.get("unified_result")
-        if not unified_result or not unified_result.matched:
-            return 0.0
-
-        handle_data = unified_result.matched.get("handle", {})
-        knot_data = unified_result.matched.get("knot", {})
-
-        handle_brand = handle_data.get("brand")
-        knot_brand = knot_data.get("brand")
-
-        # Return 1.0 if handle brand is populated but knot brand is not
-        return 1.0 if handle_brand and not knot_brand else 0.0
 
     def _modifier_knot_brand_without_handle_brand(
         self, input_text: str, result, strategy_name: str
@@ -666,3 +707,64 @@ class ScoringEngine:
 
         # Return 1.0 if knot brand is populated but handle brand is not
         return 1.0 if knot_brand and not handle_brand else 0.0
+
+    def _modifier_brand_match(self, input_text: str, result, strategy_name: str) -> float:
+        """
+        Return score modifier for brand matching (knot_matching strategy only).
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object or dict
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if knot brand is populated, 0.0 otherwise)
+        """
+        # Only apply to knot_matching strategy
+        if strategy_name != "knot_matching":
+            return 0.0
+
+        # Handle both MatchResult objects and dicts
+        if hasattr(result, "matched"):
+            matched = result.matched
+        else:
+            matched = result.get("matched", {}) if isinstance(result, dict) else {}
+
+        # Check if knot brand is populated
+        if matched and "knot" in matched:
+            knot = matched["knot"]
+            if isinstance(knot, dict) and knot.get("brand"):
+                return 1.0
+
+        return 0.0
+
+    def _load_knots_data(self) -> dict:
+        """
+        Load knots.yaml data with caching.
+
+        Returns:
+            Cached knots data or loads from file if not cached
+        """
+        # Check if we have valid cached data
+        if self._knots_cache is not None:
+            return self._knots_cache
+
+        try:
+            # Load knots.yaml to extract model names
+            knots_path = Path("data/knots.yaml")
+            if not knots_path.exists():
+                self._knots_cache = {}
+                return self._knots_cache
+
+            with knots_path.open("r", encoding="utf-8") as f:
+                knots_data = yaml.safe_load(f)
+
+            # Cache the data
+            self._knots_cache = knots_data if knots_data else {}
+            return self._knots_cache
+
+        except Exception as e:
+            # Fail fast - log error and cache empty dict
+            print(f"Error loading knots.yaml: {e}")
+            self._knots_cache = {}
+            return self._knots_cache
