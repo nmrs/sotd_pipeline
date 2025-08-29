@@ -286,7 +286,7 @@ class ScoringEngine:
             Modifier value (1.0 if fiber detected, 0.0 otherwise)
         """
         # Only apply to individual component strategies
-        if strategy_name not in ["handle_matching", "knot_matching"]:
+        if strategy_name not in ["handle_matching", "knot_matching", "handle_only", "knot_only"]:
             return 0.0
 
         # Use fiber_utils to detect fiber in input text
@@ -323,7 +323,7 @@ class ScoringEngine:
             Modifier value (1.0 if size detected, 0.0 otherwise)
         """
         # Only apply to individual component strategies
-        if strategy_name not in ["handle_matching", "knot_matching"]:
+        if strategy_name not in ["handle_matching", "knot_matching", "handle_only", "knot_only"]:
             return 0.0
 
         # Use knot_size_utils to detect size in input text
@@ -570,16 +570,27 @@ class ScoringEngine:
         Returns:
             Modifier value (1.0 if handle brand detected but no knot brand, 0.0 otherwise)
         """
-        # Apply to composite brush strategies
-        if strategy_name not in ["automated_split", "full_input_component_matching", "known_split"]:
+        # Apply to composite brush strategies and individual component strategies
+        allowed_strategies = [
+            "automated_split",
+            "full_input_component_matching",
+            "known_split",
+            "handle_only",
+            "knot_only",
+        ]
+        if strategy_name not in allowed_strategies:
             return 0.0
 
-        # Check if we have handle and knot components
-        if not result.matched:
+        # We need cached_results to check brand balance
+        if not hasattr(self, "cached_results") or not self.cached_results:
             return 0.0
 
-        handle_data = result.matched.get("handle", {})
-        knot_data = result.matched.get("knot", {})
+        unified_result = self.cached_results.get("unified_result")
+        if not unified_result or not unified_result.matched:
+            return 0.0
+
+        handle_data = unified_result.matched.get("handle", {})
+        knot_data = unified_result.matched.get("knot", {})
 
         handle_brand = handle_data.get("brand") if handle_data else None
         knot_brand = knot_data.get("brand") if knot_data else None
@@ -648,7 +659,7 @@ class ScoringEngine:
             Modifier value (1.0 if handle indicators detected, 0.0 otherwise)
         """
         # Only apply to individual component strategies
-        if strategy_name not in ["handle_matching", "knot_matching"]:
+        if strategy_name not in ["handle_matching", "knot_matching", "handle_only", "knot_only"]:
             return 0.0
 
         handle_indicators = [
