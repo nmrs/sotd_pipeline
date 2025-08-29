@@ -9,6 +9,31 @@ from typing import List, Optional
 
 import yaml
 
+from sotd.match.config import BrushMatcherConfig
+from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.types import MatchResult
+from sotd.match.brush_matching_strategies.known_brush_strategy import (
+    KnownBrushMatchingStrategy,
+)
+from sotd.match.brush_matching_strategies.correct_matches_strategy import (
+    CorrectMatchesStrategy,
+)
+from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
+    CompleteBrushWrapperStrategy,
+)
+from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
+    KnownSplitWrapperStrategy,
+)
+from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+    OtherBrushMatchingStrategy,
+)
+from sotd.match.brush_matching_strategies.zenith_strategy import (
+    ZenithBrushMatchingStrategy,
+)
+from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+    OmegaSemogueBrushMatchingStrategy,
+)
 from sotd.match.brush_scoring_components.correct_matches_matcher import CorrectMatchesMatcher
 from sotd.match.brush_scoring_components.performance_monitor import PerformanceMonitor
 from sotd.match.brush_scoring_components.result_conflict_resolver import ResultConflictResolver
@@ -24,11 +49,6 @@ from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
-from sotd.match.config import BrushMatcherConfig
-from sotd.match.handle_matcher import HandleMatcher
-from sotd.match.knot_matcher import KnotMatcher
-from sotd.match.types import MatchResult
-from sotd.match.utils.catalog_loader import CatalogLoader
 
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
@@ -215,40 +235,19 @@ class BrushMatcher:
         # Create brush-level strategies (not knot strategies)
         strategies = []
 
-        # Add correct matches wrapper strategies
-        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
-            CorrectCompleteBrushWrapperStrategy,
-            CorrectSplitBrushWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
-            CompleteBrushWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
-            KnownSplitWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
-            OtherBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
-            ZenithBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
-            OmegaSemogueBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
-            FiberFallbackStrategy,
-        )
-        from sotd.match.brush_matching_strategies.handle_only_strategy import (
-            HandleOnlyStrategy,
-        )
-        from sotd.match.brush_matching_strategies.knot_only_strategy import (
-            KnotOnlyStrategy,
+        # Add correct matches strategy (highest priority)
+        strategies.append(CorrectMatchesStrategy(catalogs["correct_matches"]))
+
+        # Add complete brush wrapper strategy
+        strategies.append(CompleteBrushWrapperStrategy(catalogs["brushes"]))
+
+        # Add the known brush matching strategy for complete brushes
+        strategies.append(
+            KnownBrushMatchingStrategy(
+                catalogs["brushes"].get("known_brushes", {}), self.handle_matcher
+            )
         )
 
-        # Add strategies in priority order
-        strategies.append(CorrectCompleteBrushWrapperStrategy(catalogs["correct_matches"]))
-        strategies.append(CorrectSplitBrushWrapperStrategy(catalogs["correct_matches"]))
-        strategies.append(CompleteBrushWrapperStrategy(catalogs["brushes"]))
         strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
         # Add strategies that expect the correct catalog structure
         strategies.append(OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {})))
@@ -567,6 +566,34 @@ class BrushMatcher:
 
         return cached_results
 
+    def _try_correct_matches_strategies(
+        self, value: str, cached_results: dict
+    ) -> Optional[MatchResult]:
+        """
+        Try correct matches strategy first (highest priority).
+
+        Args:
+            value: The brush string to match
+            cached_results: Pre-computed results for optimization
+
+        Returns:
+            MatchResult if correct match found, None otherwise
+        """
+        # Only check the first strategy which is the correct matches strategy
+        correct_strategy = self.strategy_orchestrator.strategies[0]
+
+        try:
+            result = correct_strategy.match(value)
+            if result and result.matched:
+                # Correct match found - return immediately
+                return result
+        except Exception as e:
+            # Log error but continue
+            print(f"Correct matches strategy {correct_strategy.__class__.__name__} failed: {e}")
+
+        # No correct match found
+        return None
+
     def match(self, value: str) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
@@ -587,8 +614,13 @@ class BrushMatcher:
             # Pre-compute HandleMatcher and KnotMatcher results for optimization
             cached_results = self._precompute_handle_knot_results(value)
 
-            # For Phase 3.1 (Black Box Alignment), use wrapper strategies for all matches
-            # This ensures we get the exact same results as the legacy system
+            # PHASE 1: Check correct matches strategies first (highest priority)
+            correct_match_result = self._try_correct_matches_strategies(value, cached_results)
+            if correct_match_result:
+                # Correct match found - return immediately, don't run other strategies
+                return correct_match_result
+
+            # PHASE 2: Only if no correct match found, run and score other strategies
             strategy_results = self.strategy_orchestrator.run_all_strategies(value, cached_results)
 
             # If no strategy results, return None
