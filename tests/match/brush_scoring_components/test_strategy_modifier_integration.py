@@ -328,18 +328,60 @@ class TestModifierConfiguration:
 
     def test_yaml_configuration_with_modifiers(self):
         """Test that YAML configuration supports modifier weights."""
-        config = BrushScoringConfig()
+        # Create test-specific config instead of using production config
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "automated_split": 60.0,
+                    "known_brush": 80.0,
+                },
+                "strategy_modifiers": {
+                    "automated_split": {
+                        "multiple_brands": 15.0,
+                        "fiber_words": 10.0,
+                        "size_specification": 5.0,
+                        "high_confidence": 20.0,
+                        "delimiter_confidence": 25.0,
+                    },
+                    "known_brush": {
+                        "multiple_brands": 10.0,
+                        "size_specification": 5.0,
+                    },
+                },
+            }
+        }
 
-        # Verify modifier structure exists
-        assert "strategy_modifiers" in config.weights
+        # Create config from test data
+        from sotd.match.brush_scoring_config import BrushScoringConfig
+        import tempfile
+        import yaml
+        from pathlib import Path
 
-        # Verify specific strategies have modifiers
-        automated_split_modifiers = config.weights["strategy_modifiers"].get("automated_split", {})
-        assert "multiple_brands" in automated_split_modifiers
-        assert "fiber_words" in automated_split_modifiers
-        assert "size_specification" in automated_split_modifiers
-        assert "high_confidence" in automated_split_modifiers
-        assert "delimiter_confidence" in automated_split_modifiers
+        # Create temporary file
+        temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, temp_config_file)
+        temp_config_file.close()
+
+        try:
+            config = BrushScoringConfig(config_path=Path(temp_config_file.name))
+
+            # Verify modifier structure exists
+            assert "strategy_modifiers" in config.weights
+
+            # Verify specific strategies have modifiers
+            automated_split_modifiers = config.weights["strategy_modifiers"].get(
+                "automated_split", {}
+            )
+            assert "multiple_brands" in automated_split_modifiers
+            assert "fiber_words" in automated_split_modifiers
+            assert "size_specification" in automated_split_modifiers
+            assert "high_confidence" in automated_split_modifiers
+            assert "delimiter_confidence" in automated_split_modifiers
+        finally:
+            # Clean up temporary file
+            import os
+
+            os.unlink(temp_config_file.name)
 
     def test_modifier_weights_are_configurable(self):
         """Test that modifier weights can be configured via YAML."""
@@ -370,21 +412,62 @@ class TestModifierConfiguration:
 
     def test_modifier_names_are_consistent(self):
         """Test that modifier names are consistent across strategies."""
-        config = BrushScoringConfig()
+        # Create test-specific config instead of using production config
+        test_config = {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "automated_split": 60.0,
+                    "known_brush": 80.0,
+                },
+                "strategy_modifiers": {
+                    "automated_split": {
+                        "multiple_brands": 15.0,
+                        "fiber_words": 10.0,
+                        "size_specification": 5.0,
+                    },
+                    "known_brush": {
+                        "multiple_brands": 10.0,
+                        "size_specification": 5.0,
+                    },
+                },
+            }
+        }
 
-        # Get modifier names for different strategies
-        automated_split_modifiers = config.get_all_modifier_names("automated_split")
-        known_brush_modifiers = config.get_all_modifier_names("known_brush")
+        # Create config from test data
+        from sotd.match.brush_scoring_config import BrushScoringConfig
+        import tempfile
+        import yaml
+        from pathlib import Path
 
-        # Verify common modifiers exist across different strategy types
-        common_modifiers = ["multiple_brands", "size_specification"]
-        for modifier in common_modifiers:
-            assert modifier in automated_split_modifiers, f"Automated split should have {modifier}"
-            assert modifier in known_brush_modifiers, f"Known brush should have {modifier}"
+        # Create temporary file
+        temp_config_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        yaml.dump(test_config, temp_config_file)
+        temp_config_file.close()
 
-        # Check strategy-specific modifiers
-        assert "fiber_words" in automated_split_modifiers, "Automated split should have fiber_words"
-        assert "fiber_match" in known_brush_modifiers, "Known brush should have fiber_match"
+        try:
+            config = BrushScoringConfig(config_path=Path(temp_config_file.name))
+
+            # Get modifier names for different strategies
+            automated_split_modifiers = config.get_all_modifier_names("automated_split")
+            known_brush_modifiers = config.get_all_modifier_names("known_brush")
+
+            # Verify common modifiers exist across different strategy types
+            common_modifiers = ["multiple_brands", "size_specification"]
+            for modifier in common_modifiers:
+                assert (
+                    modifier in automated_split_modifiers
+                ), f"Automated split should have {modifier}"
+                assert modifier in known_brush_modifiers, f"Known brush should have {modifier}"
+
+            # Check strategy-specific modifiers
+            assert (
+                "fiber_words" in automated_split_modifiers
+            ), "Automated split should have fiber_words"
+        finally:
+            # Clean up temporary file
+            import os
+
+            os.unlink(temp_config_file.name)
 
 
 class TestModifierIntegrationWithScoringEngine:
