@@ -84,6 +84,7 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     matched=matched_data,
                     match_type="known_split",
                     pattern=pattern_info["pattern"],
+                    strategy="known_split",  # Set the strategy name
                 )
 
         return None

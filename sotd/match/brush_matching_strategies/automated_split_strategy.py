@@ -6,6 +6,7 @@ and MediumPriorityAutomatedSplitStrategy into a single strategy that uses
 scoring modifiers to differentiate between high and medium priority delimiters.
 """
 
+import re
 from typing import Optional
 
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
@@ -36,7 +37,7 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
 
         # Define delimiter priorities based on BrushSplitter logic
         self.high_priority_delimiters = [" w/ ", " w/", " with ", " in "]
-        self.medium_priority_delimiters = [" - ", " + "]
+        self.medium_priority_delimiters = [" - ", " + ", "/"]
 
     def match(self, value: str) -> Optional[MatchResult]:
         """
@@ -127,6 +128,23 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                 handle, knot = self._split_by_delimiter_smart(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "medium")
+
+        # Special handling for "/" as medium-priority delimiter (any spaces, not part of 'w/')
+        # But first check if "/" is part of a specification rather than a delimiter
+        if "/" in value and "w/" not in value.lower():
+            # Use regex to split on "/" but avoid splitting "w/" patterns
+            slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", value)
+            if slash_match:
+                part1 = slash_match.group(1).strip()
+                part2 = slash_match.group(2).strip()
+                if part1 and part2:
+                    # Score both parts to determine which is handle vs knot
+                    part1_handle_score = self._score_as_handle(part1)
+                    part2_handle_score = self._score_as_handle(part2)
+                    if part1_handle_score > part2_handle_score:
+                        return self._create_split_result(part1, part2, value, "medium")
+                    else:
+                        return self._create_split_result(part2, part1, value, "medium")
 
         return None
 
@@ -249,3 +267,40 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                 return "medium"
 
         return "none"
+
+    def _score_as_handle(self, text: str) -> int:
+        """
+        Score text as likely being a handle component.
+
+        Higher scores indicate the text is more likely to be a handle.
+        Lower scores indicate the text is more likely to be a knot.
+
+        Args:
+            text: Text to score
+
+        Returns:
+            Score (positive = handle likely, negative = knot likely)
+        """
+        if not text:
+            return 0
+
+        text_lower = text.lower()
+        score = 0
+
+        # Strong handle indicators
+        if "handle" in text_lower:
+            score += 10
+        if any(
+            word in text_lower for word in ["stock", "custom", "artisan", "turned", "wood", "resin"]
+        ):
+            score += 2
+
+        # Strong knot indicators (negative score)
+        if any(word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon"]):
+            score -= 8
+        if re.search(r"\d+\s*mm", text_lower):
+            score -= 6
+        if re.search(r"[vV]\d+|[bB]\d+", text_lower):
+            score -= 6
+
+        return score
