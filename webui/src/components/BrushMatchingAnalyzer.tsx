@@ -14,7 +14,7 @@ interface BrushMatchResult {
   scoreBreakdown: {
     baseScore: number;
     modifiers: number;
-    modifierDetails: string[];
+    modifierDetails: { name: string; weight: number; description: string }[];
   };
   matchedData: {
     brand?: string;
@@ -47,6 +47,7 @@ export function BrushMatchingAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<BrushAnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [bypassCorrectMatches, setBypassCorrectMatches] = useState(false);
 
   const analyzeBrush = async () => {
     if (!brushString.trim()) return;
@@ -61,7 +62,10 @@ export function BrushMatchingAnalyzer() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ brushString: brushString.trim() }),
+        body: JSON.stringify({
+          brushString: brushString.trim(),
+          bypass_correct_matches: bypassCorrectMatches
+        }),
       });
 
       if (!response.ok) {
@@ -113,24 +117,37 @@ export function BrushMatchingAnalyzer() {
         </CardHeader>
         <CardContent className='space-y-6'>
           {/* Input Section */}
-          <div className='flex gap-2'>
-            <Input
-              placeholder="Enter brush string (e.g., 'Zenith Olive Wood / B15 Boar')"
-              value={brushString}
-              onChange={e => setBrushString(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className='flex-1'
-            />
-            <Button onClick={analyzeBrush} disabled={isAnalyzing || !brushString.trim()}>
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                  Analyzing...
-                </>
-              ) : (
-                'Analyze'
-              )}
-            </Button>
+          <div className='mb-6'>
+            <div className='flex items-center gap-4 mb-4'>
+              <input
+                type='text'
+                value={brushString}
+                onChange={(e) => setBrushString(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder='Enter brush string to analyze...'
+                className='flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+              <button
+                onClick={analyzeBrush}
+                disabled={isAnalyzing || !brushString.trim()}
+                className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+              </button>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <input
+                type='checkbox'
+                id='bypass-correct-matches'
+                checked={bypassCorrectMatches}
+                onChange={(e) => setBypassCorrectMatches(e.target.checked)}
+                className='w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+              />
+              <label htmlFor='bypass-correct-matches' className='text-sm text-gray-600'>
+                Bypass correct_matches.yaml to see all strategies
+              </label>
+            </div>
           </div>
 
           {/* Error Display */}
@@ -272,9 +289,13 @@ export function BrushMatchingAnalyzer() {
                             {result.scoreBreakdown.modifierDetails.length > 0 ? (
                               <div className='space-y-1'>
                                 {result.scoreBreakdown.modifierDetails.map((detail, idx) => (
-                                  <p key={idx} className='text-sm font-mono text-gray-700'>
-                                    {detail}
-                                  </p>
+                                  <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
+                                    <div className='flex justify-between items-center'>
+                                      <span className='font-medium'>{detail.name}</span>
+                                      <span className='text-green-600 font-semibold'>+{detail.weight}</span>
+                                    </div>
+                                    <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
+                                  </div>
                                 ))}
                               </div>
                             ) : (

@@ -16,6 +16,7 @@ router = APIRouter(prefix="/api/brush-matching", tags=["brush-matching"])
 
 class BrushAnalysisRequest(BaseModel):
     brushString: str
+    bypass_correct_matches: bool = False
 
 
 class BrushMatchResult(BaseModel):
@@ -131,7 +132,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
     Analyze a brush string and return detailed scoring results.
 
     Args:
-        request: Contains the brush string to analyze
+        request: Contains the brush string to analyze and bypass option
 
     Returns:
         Detailed analysis results including all strategies and scores
@@ -145,9 +146,6 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         parent_dir = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(parent_dir))
 
-        # Use the BrushMatcher for consistent analysis
-        from sotd.match.brush_matcher import BrushMatcher
-
         # Change to the parent directory where the data files are located
         import os
 
@@ -155,20 +153,119 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         os.chdir(parent_dir)
 
         try:
-            # Use the brush matcher
-            matcher = BrushMatcher()
-            analysis_result = matcher.match(request.brushString)
+            # Use the brush matcher directly
+            from sotd.match.brush_matcher import BrushMatcher
 
-            # Convert to expected format
-            if analysis_result and hasattr(analysis_result, "all_strategies"):
-                # The new matcher returns a MatchResult with all_strategies
+            matcher = BrushMatcher()
+
+            def transform_brush_data(flat_data: dict) -> dict:
+                """Transform flat brush data into nested handle/knot structure for React component."""
+                if not flat_data:
+                    return {}
+
+                # Check if this is an automated_split result with handle/knot sections
+                if "handle" in flat_data and "knot" in flat_data:
+                    # This is already in the correct nested structure
+                    return {
+                        "brand": flat_data.get("brand"),
+                        "model": flat_data.get("model"),
+                        "handle": {
+                            "brand": flat_data["handle"].get("brand"),
+                            "model": flat_data["handle"].get("model"),
+                            "source_text": flat_data["handle"].get("source_text"),
+                        },
+                        "knot": {
+                            "brand": flat_data["knot"].get("brand"),
+                            "model": flat_data["knot"].get("model"),
+                            "fiber": flat_data["knot"].get("fiber"),
+                            "knot_size_mm": flat_data["knot"].get("knot_size_mm"),
+                            "source_text": flat_data["knot"].get("source_text"),
+                        },
+                    }
+
+                # Extract handle information - use handle_maker as brand, try to extract handle model
+                handle_brand = flat_data.get("handle_maker")
+                handle_model = flat_data.get("handle_model")
+
+                # Try to extract handle model from source_text if available
+                source_text = flat_data.get("source_text", "")
+                if not handle_model and source_text and "/" in source_text:
+                    # Extract handle part before "/"
+                    handle_part = source_text.split("/")[0].strip()
+                    handle_model = handle_part if handle_part else None
+
+                handle_data = {
+                    "brand": handle_brand,
+                    "model": handle_model,
+                    "source_text": (
+                        flat_data.get("_original_handle_text")
+                        or (source_text.split("/")[0].strip() if "/" in source_text else "")
+                    ),
+                }
+
+                # Extract knot information - use fiber and knot_size_mm from flat data
+                knot_brand = flat_data.get("knot_brand") or flat_data.get("brand")
+                knot_model = flat_data.get("knot_model") or flat_data.get("model")
+
+                # Try to extract knot info from source_text if available
+                knot_source_text = ""
+                if source_text and "*" in source_text:
+                    # Extract part after "*" as knot info
+                    knot_part = source_text.split("*")[-1].strip()
+                    knot_source_text = knot_part if knot_part else ""
+
+                knot_data = {
+                    "brand": knot_brand,
+                    "model": knot_model,
+                    "fiber": flat_data.get("fiber"),
+                    "knot_size_mm": flat_data.get("knot_size_mm"),
+                    "source_text": (flat_data.get("_original_knot_text") or knot_source_text),
+                }
+
+                # Create nested structure
+                return {
+                    "brand": flat_data.get("brand"),
+                    "model": flat_data.get("model"),
+                    "handle": handle_data,
+                    "knot": knot_data,
+                }
+
+            if request.bypass_correct_matches:
+                # If bypassing, run all strategies EXCEPT CorrectMatchesStrategy
+                # Filter out CorrectMatchesStrategy to avoid running correct matches logic
+                filtered_strategies = [
+                    s
+                    for s in matcher.strategy_orchestrator.strategies
+                    if s.__class__.__name__ != "CorrectMatchesStrategy"
+                ]
+
+                # Create a temporary orchestrator with filtered strategies
+                from sotd.match.brush_scoring_components.strategy_orchestrator import (
+                    StrategyOrchestrator,
+                )
+
+                temp_orchestrator = StrategyOrchestrator(filtered_strategies)
+
+                strategy_results = temp_orchestrator.run_all_strategies(request.brushString)
+
+                # Convert to expected format
                 analysis_result = {
-                    "all_strategies": analysis_result.all_strategies,
-                    "enriched_data": analysis_result.matched if analysis_result.matched else {},
+                    "all_strategies": strategy_results,
+                    "enriched_data": {},
                 }
             else:
-                # Fallback if no results
-                analysis_result = {"all_strategies": [], "enriched_data": {}}
+                # Use normal matching (will return early if correct match found)
+                result = matcher.match(request.brushString)
+
+                # Convert to expected format
+                if result and hasattr(result, "all_strategies"):
+                    analysis_result = {
+                        "all_strategies": result.all_strategies,
+                        "enriched_data": result.matched if result.matched else {},
+                    }
+                else:
+                    # Fallback if no results
+                    analysis_result = {"all_strategies": [], "enriched_data": {}}
         finally:
             # Restore original working directory
             os.chdir(original_cwd)
@@ -182,13 +279,11 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         # Format results for the API response
         formatted_results = []
 
-        # Debug logging
-        print(f"DEBUG: Processing {len(analysis_result.get('all_strategies', []))} strategies")
-        for i, strategy_result in enumerate(analysis_result.get("all_strategies", [])):
-            print(f"DEBUG: Strategy {i + 1}: {strategy_result.strategy}")
+        # Get strategies from analysis result
+        strategies = analysis_result.get("all_strategies", []) or []
 
         # Process all strategy results
-        for strategy_result in analysis_result.get("all_strategies", []):
+        for strategy_result in strategies:
             # The new matcher now provides full MatchResult objects with complete data
             try:
                 # Extract data from the MatchResult object
@@ -197,7 +292,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 pattern = strategy_result.pattern or "unknown"
                 matched_data = strategy_result.matched or {}
 
-                print(f"DEBUG: Processing strategy: {strategy_name}")
+                # Transform flat brush data to nested structure for React component
+                transformed_matched_data = transform_brush_data(matched_data)
 
                 # Get detailed scoring breakdown using the ScoringEngine
                 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
@@ -211,13 +307,11 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
 
                 # Calculate base score and modifiers
                 base_score = engine.config.get_base_strategy_score(strategy_name)
-                print(f"DEBUG: Base score for {strategy_name}: {base_score}")
 
                 modifier_score = engine._calculate_modifiers(
                     strategy_result, request.brushString, strategy_name
                 )
                 total_score = base_score + modifier_score
-                print(f"DEBUG: Total score for {strategy_name}: {total_score}")
 
                 # Get modifier details
                 modifier_details = []
@@ -225,56 +319,48 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
 
                 for modifier_name in modifier_names:
                     modifier_weight = config.get_strategy_modifier(strategy_name, modifier_name)
-                    modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+                    if modifier_weight:
+                        modifier_details.append(
+                            {
+                                "name": modifier_name,
+                                "weight": modifier_weight,
+                                "description": f"{modifier_name} bonus",
+                            }
+                        )
 
-                    if modifier_function is not None and callable(modifier_function):
-                        try:
-                            modifier_value = modifier_function(
-                                request.brushString, strategy_result, strategy_name
-                            )
-                            total_effect = modifier_value * modifier_weight
+                # Create the formatted result
+                formatted_result = BrushMatchResult(
+                    strategy=strategy_name,
+                    score=total_score,
+                    matchType=match_type,
+                    pattern=pattern,
+                    scoreBreakdown={
+                        "baseScore": base_score,
+                        "modifiers": modifier_score,
+                        "modifierDetails": modifier_details,
+                        "total": total_score,
+                    },
+                    matchedData=transformed_matched_data,
+                )
 
-                            if total_effect != 0:
-                                modifier_description = _get_modifier_description(
-                                    modifier_name, modifier_value, request.brushString
-                                )
-                                modifier_details.append(
-                                    f"{modifier_description} (+{total_effect:+.0f})"
-                                )
-                        except Exception:
-                            continue
+                formatted_results.append(formatted_result)
 
             except Exception as e:
-                # Fallback to basic scoring if detailed calculation fails
-                print(
-                    f"Warning: Detailed scoring failed for {strategy_result.strategy or 'unknown'}: {e}"
+                # Add a fallback result for failed strategies
+                fallback_result = BrushMatchResult(
+                    strategy="error",
+                    score=0.0,
+                    matchType="error",
+                    pattern="error",
+                    scoreBreakdown={
+                        "baseScore": 0.0,
+                        "modifiers": 0.0,
+                        "modifierDetails": [],
+                        "total": 0.0,
+                    },
+                    matchedData={"error": str(e)},
                 )
-                base_score = getattr(strategy_result, "score", 0.0)
-                modifier_score = 0.0
-                total_score = base_score
-                modifier_details = []
-                matched_data = getattr(strategy_result, "matched", {})
-                strategy_name = getattr(strategy_result, "strategy", "unknown")
-                match_type = getattr(strategy_result, "match_type", "unknown")
-                pattern = getattr(strategy_result, "pattern", "unknown")
-
-            formatted_result = BrushMatchResult(
-                strategy=strategy_name,
-                score=total_score,
-                matchType=match_type,
-                pattern=pattern,
-                scoreBreakdown={
-                    "baseScore": base_score,
-                    "modifiers": modifier_score,
-                    "modifierDetails": modifier_details,
-                    "total": total_score,
-                },
-                matchedData=matched_data,
-            )
-            formatted_results.append(formatted_result)
-            print(f"DEBUG: Added formatted result for {strategy_name}")
-
-        print(f"DEBUG: Final formatted results count: {len(formatted_results)}")
+                formatted_results.append(fallback_result)
 
         # If no strategies, create a basic result
         if not formatted_results:
