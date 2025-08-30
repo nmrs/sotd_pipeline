@@ -11,6 +11,7 @@ from typing import Optional
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from sotd.match.brush_scoring_components.component_score_calculator import ComponentScoreCalculator
 from sotd.match.types import MatchResult
 
 
@@ -95,6 +96,9 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                         "_pattern": pattern_info["pattern"],
                     },
                 }
+
+                # Calculate component scores using the utility
+                matched_data = ComponentScoreCalculator.calculate_component_scores(matched_data)
 
                 return MatchResult(
                     original=value,

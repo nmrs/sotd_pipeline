@@ -6,6 +6,7 @@ from typing import Optional
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from sotd.match.brush_scoring_components.component_score_calculator import ComponentScoreCalculator
 from sotd.match.types import MatchResult
 
 
@@ -140,6 +141,9 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             },
         }
 
+        # Calculate component scores using the utility
+        brush_data = ComponentScoreCalculator.calculate_component_scores(brush_data)
+
         return MatchResult(
             original=value, matched=brush_data, match_type="composite", pattern="dual_component"
         )
@@ -188,6 +192,9 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             },
         }
 
+        # Calculate component scores using the utility
+        brush_data = ComponentScoreCalculator.calculate_component_scores(brush_data)
+
         return MatchResult(
             original="",  # Handle matcher doesn't provide original text
             matched=brush_data,
@@ -225,6 +232,9 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
                 "_pattern": knot_data.get("_pattern_used"),
             },
         }
+
+        # Calculate component scores using the utility
+        brush_data = ComponentScoreCalculator.calculate_component_scores(brush_data)
 
         return MatchResult(
             original="",  # Knot matcher doesn't provide original text

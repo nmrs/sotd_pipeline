@@ -519,24 +519,21 @@ class ScoringEngine:
         # Get configured weight for this strategy
         weight = self.config.get_strategy_modifier(strategy_name, "handle_weight")
 
-        # Calculate handle matching score (simplified base + priority)
+        # Calculate handle matching score using actual matcher score
         handle_data = result.matched.get("handle", {}) if result.matched else {}
         if not handle_data:
             return 0.0
 
-        # Base handle score (could be configurable)
-        base_handle_score = 50.0
+        # Use actual score from handle matcher if available, otherwise FAIL FAST
+        actual_score = handle_data.get("score")
+        if actual_score is None:
+            raise ValueError(
+                f"Handle matcher missing score for strategy {strategy_name}. "
+                "Score must be explicitly set to 0 if not applicable."
+            )
 
-        # Add priority bonus if available
-        handle_priority = handle_data.get("priority")
-        priority_bonus = 0.0
-        if handle_priority is not None:
-            priority_bonus = max(0, 3 - handle_priority + 1)
-
-        total_handle_score = base_handle_score + priority_bonus
-
-        # Return weight × score
-        return weight * total_handle_score
+        # Component score already includes priority bonus - use it directly
+        return float(actual_score)
 
     def _modifier_knot_weight(
         self, input_text: str, result: MatchResult, strategy_name: str
@@ -559,24 +556,21 @@ class ScoringEngine:
         # Get configured weight for this strategy
         weight = self.config.get_strategy_modifier(strategy_name, "knot_weight")
 
-        # Calculate knot matching score (simplified base + priority)
+        # Calculate knot matching score using actual matcher score
         knot_data = result.matched.get("knot", {}) if result.matched else {}
         if not knot_data:
             return 0.0
 
-        # Base knot score (could be configurable)
-        base_knot_score = 50.0
+        # Use actual score from knot matcher if available, otherwise FAIL FAST
+        actual_score = knot_data.get("score")
+        if actual_score is None:
+            raise ValueError(
+                f"Knot matcher missing score for strategy {strategy_name}. "
+                "Score must be explicitly set to 0 if not applicable."
+            )
 
-        # Add priority bonus if available
-        knot_priority = knot_data.get("priority")
-        priority_bonus = 0.0
-        if knot_priority is not None:
-            priority_bonus = max(0, 3 - knot_priority + 1)
-
-        total_knot_score = base_knot_score + priority_bonus
-
-        # Return weight × score
-        return weight * total_knot_score
+        # Component score already includes priority bonus - use it directly
+        return float(actual_score)
 
     def _modifier_handle_brand_without_knot_brand(
         self, input_text: str, result: MatchResult, strategy_name: str

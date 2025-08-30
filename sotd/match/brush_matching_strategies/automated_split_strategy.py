@@ -12,6 +12,7 @@ from typing import Optional
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from sotd.match.brush_scoring_components.component_score_calculator import ComponentScoreCalculator
 from sotd.match.types import MatchResult
 
 
@@ -241,8 +242,13 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                 },
             },
             match_type="split_brush",
+            pattern=f"split_on_{priority}_priority_delimiter",
             strategy="automated_split",
         )
+
+        # Calculate component scores using the utility
+        if result.matched:
+            result.matched = ComponentScoreCalculator.calculate_component_scores(result.matched)
 
         return result
 
