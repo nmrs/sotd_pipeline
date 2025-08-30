@@ -16,7 +16,7 @@ class OmegaSemogueBrushMatchingStrategy:
                 original_value=value,
                 matched_data=None,
                 pattern=None,
-                strategy_name="omega_semogue_brush"
+                strategy_name="omega_semogue_brush",
             )
 
         # Normalize and fix common typo
@@ -54,7 +54,7 @@ class OmegaSemogueBrushMatchingStrategy:
             original_value=value,
             matched_data=None,
             pattern=None,
-            strategy_name="omega_semogue_brush"
+            strategy_name="omega_semogue_brush",
         )
 
     def _get_default_match(self) -> dict:

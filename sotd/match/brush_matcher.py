@@ -77,36 +77,45 @@ class BrushMatcher:
         brush_scoring_config_path: Optional[Path] = None,
     ):
         """Initialize the brush matcher with catalog paths."""
-        # Set default paths if not provided
-        if brushes_path is None:
-            brushes_path = Path("data/brushes.yaml")
-        if handles_path is None:
-            handles_path = Path("data/handles.yaml")
-        if knots_path is None:
-            knots_path = Path("data/knots.yaml")
-
-        # Store catalog paths
+        # Store catalog paths FIRST (before validation)
         self.brushes_path = brushes_path
         self.handles_path = handles_path
         self.knots_path = knots_path
-
-        # Set default correct_matches_path if not provided
-        if correct_matches_path is None:
-            correct_matches_path = Path("data/correct_matches.yaml")
-
-        # Store correct_matches_path for wrapper strategies
         self.correct_matches_path = correct_matches_path
 
+        # Set default paths if not provided (AFTER storing)
+        if self.brushes_path is None:
+            self.brushes_path = Path("data/brushes.yaml")
+        if self.handles_path is None:
+            self.handles_path = Path("data/handles.yaml")
+        if self.knots_path is None:
+            self.knots_path = Path("data/knots.yaml")
+        if self.correct_matches_path is None:
+            self.correct_matches_path = Path("data/correct_matches.yaml")
+
         # FAIL FAST: Validate that all catalog files exist and are readable
-        self._validate_catalog_paths()
+        # Only validate if all paths are set (not None)
+        if all([self.brushes_path, self.handles_path, self.knots_path, self.correct_matches_path]):
+            self._validate_catalog_paths()
 
         # Initialize configuration with provided path or default
         if brush_scoring_config_path is None:
             brush_scoring_config_path = Path("data/brush_scoring_config.yaml")
+
+        # FAIL FAST: Validate scoring configuration exists and is readable
+        if not brush_scoring_config_path.exists():
+            raise FileNotFoundError(
+                f"Brush scoring configuration file not found: "
+                f"{brush_scoring_config_path.absolute()}"
+            )
+
         self.config = BrushScoringConfig(config_path=brush_scoring_config_path)
 
+        # FAIL FAST: Validate that scoring configuration has required structure
+        self._validate_scoring_config()
+
         # Load correct matches data
-        correct_matches_data = load_correct_matches(correct_matches_path)
+        correct_matches_data = load_correct_matches(self.correct_matches_path)
         self.correct_matches_data = correct_matches_data
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
@@ -172,6 +181,51 @@ class BrushMatcher:
         )
 
         # HandleMatcher and KnotMatcher are now initialized above
+
+    def _validate_scoring_config(self):
+        """Validate that scoring configuration has required structure. Fail fast if not."""
+        if not hasattr(self.config, "weights"):
+            raise ValueError("Scoring configuration missing 'weights' attribute")
+
+        if not isinstance(self.config.weights, dict):
+            raise ValueError("Scoring configuration 'weights' must be a dictionary")
+
+        if "base_strategies" not in self.config.weights:
+            raise ValueError("Scoring configuration missing 'base_strategies' section")
+
+        if "strategy_modifiers" not in self.config.weights:
+            raise ValueError("Scoring configuration missing 'strategy_modifiers' section")
+
+        # Validate that all required strategies have base scores
+        required_strategies = [
+            "known_brush",
+            "other_brush",
+            "omega_semogue_brush",
+            "zenith_brush",
+            "automated_split",
+            "full_input_component_matching",
+            "known_split",
+        ]
+
+        base_strategies = self.config.weights["base_strategies"]
+        missing_strategies = [s for s in required_strategies if s not in base_strategies]
+
+        if missing_strategies:
+            raise ValueError(
+                f"Scoring configuration missing base scores for strategies: {missing_strategies}"
+            )
+
+        # Validate that all base strategy scores are positive numbers
+        for strategy_name, score in base_strategies.items():
+            if not isinstance(score, (int, float)) or score <= 0:
+                raise ValueError(
+                    f"Invalid base score for strategy '{strategy_name}': {score} "
+                    f"(must be positive number)"
+                )
+
+        print("✅ Scoring configuration validated successfully:")
+        for strategy_name, score in base_strategies.items():
+            print(f"   {strategy_name}: {score}")
 
     def _validate_catalog_paths(self):
         """Validate that all catalog paths exist and are readable. Fail fast if not."""

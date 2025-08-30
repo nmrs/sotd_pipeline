@@ -206,8 +206,22 @@ class ValidateCorrectMatches:
         elif field == "blade":
             return BladeMatcher(catalog_path=base_dir / "blades.yaml")
         elif field == "brush":
-            # For brush field, use BrushMatcher with absolute paths to prevent relative path fallbacks
-            # This fixes the issue where hardcoded relative paths were causing path resolution failures
+            # For brush field, use BrushMatcher with absolute paths from _data_dir
+            # This fixes the issue where relative paths were resolving to webui/data/ instead of project/data/
+            brush_matcher_paths = {
+                "correct_matches_path": base_dir / "correct_matches.yaml",
+                "brushes_path": base_dir / "brushes.yaml",
+                "handles_path": base_dir / "handles.yaml",
+                "knots_path": base_dir / "knots.yaml",
+                "brush_scoring_config_path": base_dir / "brush_scoring_config.yaml",
+            }
+            print(f"🔍 DEBUG: Creating BrushMatcher with paths: {brush_matcher_paths}")
+            return BrushMatcher(**brush_matcher_paths)
+        elif field == "soap":
+            return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
+        elif field in ["knot", "handle"]:
+            # For brush-related fields, use BrushMatcher with absolute paths from _data_dir
+            # This fixes the issue where relative paths were resolving to webui/data/ instead of project/data/
             return BrushMatcher(
                 correct_matches_path=base_dir / "correct_matches.yaml",
                 brushes_path=base_dir / "brushes.yaml",
@@ -215,12 +229,6 @@ class ValidateCorrectMatches:
                 knots_path=base_dir / "knots.yaml",
                 brush_scoring_config_path=base_dir / "brush_scoring_config.yaml",
             )
-        elif field == "soap":
-            return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
-        elif field in ["knot", "handle"]:
-            # For brush-related fields, use BrushMatcher with default paths (same as working analyzer)
-            # This fixes the issue where hardcoded paths were causing "None" results
-            return BrushMatcher()
 
         return None
 
@@ -922,24 +930,34 @@ class ValidateCorrectMatches:
 
             # For brush matcher, handle the nested structure and validate brand/model
             if field == "brush":
-                # Extract brand and model from the nested structure
-                handle_brand = bypass_result.matched.get("handle", {}).get("brand")
-                knot_brand = bypass_result.matched.get("knot", {}).get("brand")
+                # FIRST: Check flat structure (what KnownBrushMatchingStrategy returns)
+                if bypass_brand and bypass_model:
+                    print(
+                        f"🔍 DEBUG: Using flat structure - Brand: '{bypass_brand}', Model: '{bypass_model}'"
+                    )
+                else:
+                    # FALLBACK: Extract brand and model from the nested structure
+                    handle_brand = bypass_result.matched.get("handle", {}).get("brand")
+                    knot_brand = bypass_result.matched.get("knot", {}).get("brand")
 
-                # Use handle brand if available, otherwise knot brand
-                if handle_brand:
-                    bypass_brand = handle_brand
-                elif knot_brand:
-                    bypass_brand = knot_brand
+                    # Use handle brand if available, otherwise knot brand
+                    if handle_brand:
+                        bypass_brand = handle_brand
+                    elif knot_brand:
+                        bypass_brand = knot_brand
 
-                # For model, try to get it from handle or knot
-                handle_model = bypass_result.matched.get("handle", {}).get("model")
-                knot_model = bypass_result.matched.get("knot", {}).get("model")
+                    # For model, try to get it from handle or knot
+                    handle_model = bypass_result.matched.get("handle", {}).get("model")
+                    knot_model = bypass_result.matched.get("knot", {}).get("model")
 
-                if handle_model and handle_model != "Unspecified":
-                    bypass_model = handle_model
-                elif knot_model:
-                    bypass_model = knot_model
+                    if handle_model and handle_model != "Unspecified":
+                        bypass_model = handle_model
+                    elif knot_model:
+                        bypass_model = knot_model
+
+                    print(
+                        f"🔍 DEBUG: Using nested structure - Brand: '{bypass_brand}', Model: '{bypass_model}'"
+                    )
 
             print(f"🔍 DEBUG: Bypass result - Brand: '{bypass_brand}', Model: '{bypass_model}'")
 

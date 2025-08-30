@@ -696,15 +696,6 @@ brush:
       - omega 20102
     "81151":
       - omega 81151
-  Scoring Brand 0:
-    Scoring Model 0:
-      - scoring brush 0
-  Scoring Brand 1:
-    Scoring Model 1:
-      - scoring brush 1
-  Scoring Brand 2:
-    Scoring Model 2:
-      - scoring brush 2
   Semogue:
     "1305":
       - semogue 1305
@@ -765,21 +756,6 @@ brush:
       - stirling two band synthetic
     Finest Badger:
       - stirling finest badger brush
-  Test:
-    Brush:
-      - yaml test brush
-  Test Brand:
-    Test Model:
-      - test brush integration
-  Test Brand 0:
-    Test Model 0:
-      - test brush 0
-  Test Brand 1:
-    Test Model 1:
-      - test brush 1
-  Test Brand 2:
-    Test Model 2:
-      - test brush 2
   Wald:
     A1:
       - wald a1

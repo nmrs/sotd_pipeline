@@ -49,13 +49,18 @@ class ScoringEngine:
         # Store cached_results for use in manufacturer detection
         self.cached_results = cached_results
 
+        print("🔍 Scoring {len(results)} strategy results...")
+
         scored_results = []
 
         for result in results:
+            print(f"   📊 Scoring result from strategy: {getattr(result, 'strategy', 'None')}")
             score = self._calculate_score(result, value)
+            print(f"      Calculated score: {score}")
             result.score = score
             scored_results.append(result)
 
+        print("✅ Scoring complete. All results now have scores.")
         return scored_results
 
     def get_best_result(self, scored_results: List[MatchResult]) -> Optional[MatchResult]:
@@ -92,12 +97,19 @@ class ScoringEngine:
         """
         # Get base strategy score
         strategy_name = self._get_strategy_name_from_result(result)
+        print(f"      Strategy name extracted: '{strategy_name}'")
+
         base_score = self.config.get_base_strategy_score(strategy_name)
+        print(f"      Base score from config: {base_score}")
 
         # Apply modifiers
         modifier_score = self._calculate_modifiers(result, value, strategy_name)
+        print(f"      Modifier score: {modifier_score}")
 
-        return base_score + modifier_score
+        final_score = base_score + modifier_score
+        print(f"      Final score: {final_score}")
+
+        return final_score
 
     def _get_strategy_name_from_result(self, result: MatchResult) -> str:
         """
@@ -157,7 +169,7 @@ class ScoringEngine:
 
             # Apply the modifier function if it exists
             modifier_function = getattr(self, f"_modifier_{modifier_name}", None)
-            if modifier_function is not None and callable(modifier_function):
+            if modifier_function is not None and hasattr(modifier_function, "__call__"):
                 modifier_value = modifier_function(value, result, strategy_name)
                 modifier_score += modifier_value * modifier_weight
             else:

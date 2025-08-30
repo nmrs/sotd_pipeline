@@ -143,7 +143,7 @@ class StrategyAnalyzer:
             # Analyze each test case
             for i, test_case in enumerate(self.test_cases):
                 logger.info(
-                    f"Analyzing test case {i+1}/{len(self.test_cases)}: {test_case['input']}"
+                    f"Analyzing test case {i + 1}/{len(self.test_cases)}: {test_case['input']}"
                 )
 
                 try:

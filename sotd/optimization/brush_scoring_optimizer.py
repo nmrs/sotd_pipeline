@@ -439,9 +439,9 @@ class BrushScoringOptimizer:
         round_number = 1
 
         while True:
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Starting optimization round {round_number}")
-            logger.info(f"{'='*60}")
+            logger.info(f"{'=' * 60}")
 
             round_improved = False
             strategies_this_round.clear()
@@ -543,9 +543,9 @@ class BrushScoringOptimizer:
 
         # Optimize each strategy in priority order
         for strategy_name in self.strategy_order:
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Starting optimization of strategy: {strategy_name}")
-            logger.info(f"{'='*60}")
+            logger.info(f"{'=' * 60}")
 
             # Get current overall success rate
             current_success_rate = self.evaluate_configuration(current_weights)

@@ -2,6 +2,7 @@
 """Analysis endpoints for SOTD pipeline analyzer API."""
 
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -1171,6 +1172,12 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         print(f"🔍 API DEBUG: Correct matches path: {correct_matches_path}")
         print(f"🔍 API DEBUG: Path exists: {correct_matches_path.exists()}")
 
+        # Change to project root directory to fix path resolution issues
+        # This ensures BrushMatcher can find catalog files using relative paths
+        original_cwd = Path.cwd()
+        os.chdir(project_root)
+        print(f"🔍 API DEBUG: Changed working directory from {original_cwd} to {Path.cwd()}")
+
         validator = ValidateCorrectMatches(correct_matches_path=correct_matches_path)
         validator._data_dir = project_root / "data"
         print(f"🔍 API DEBUG: Created validator: {type(validator)}")
@@ -1205,7 +1212,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         for i, issue in enumerate(issues):
             issue_type = issue.get("type", "NO_TYPE")
             pattern = issue.get("pattern", "NO_PATTERN")
-            print(f"🔍 API DEBUG: Processing issue {i+1}/{len(issues)}: {issue_type} - {pattern}")
+            print(f"🔍 API DEBUG: Processing issue {i + 1}/{len(issues)}: {issue_type} - {pattern}")
 
             # Extract issue details
             issue_type = issue.get("type", "unknown")
@@ -1214,10 +1221,10 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             details = issue.get("details", "")
             suggested_action = issue.get("suggested_action", "")
 
-            print(f"🔍 API DEBUG: Issue {i+1} type: {issue_type}, Pattern: {pattern}")
-            print(f"🔍 API DEBUG: Issue {i+1} message: {message}")
-            print(f"🔍 API DEBUG: Issue {i+1} details: {details}")
-            print(f"🔍 API DEBUG: Issue {i+1} suggested action: {suggested_action}")
+            print(f"🔍 API DEBUG: Issue {i + 1} type: {issue_type}, Pattern: {pattern}")
+            print(f"🔍 API DEBUG: Issue {i + 1} message: {message}")
+            print(f"🔍 API DEBUG: Issue {i + 1} details: {details}")
+            print(f"🔍 API DEBUG: Issue {i + 1} suggested action: {suggested_action}")
 
             # Use the actual issue types from ValidateCorrectMatches (eliminates DRY violation)
             # The frontend should adapt to the validation system, not the other way around
@@ -1246,12 +1253,16 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "matched_pattern": None,  # Not applicable for brush validation
             }
 
-            print(f"🔍 API DEBUG: Created processed issue {i+1}: {processed_issue}")
+            print(f"🔍 API DEBUG: Created processed issue {i + 1}: {processed_issue}")
             processed_issues.append(processed_issue)
 
         print(f"🔍 API DEBUG: Returning {len(processed_issues)} processed issues")
         response_info = f"field={request.field}, total_entries={len(processed_issues)}, issues_count={len(processed_issues)}"
         print(f"🔍 API DEBUG: Final response structure: {response_info}")
+
+        # Restore original working directory
+        os.chdir(original_cwd)
+        print(f"🔍 API DEBUG: Restored working directory to {Path.cwd()}")
 
         return {
             "field": request.field,
