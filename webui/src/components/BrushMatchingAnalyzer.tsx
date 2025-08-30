@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Loader2, Search, Trophy, Target, Hash, Info } from 'lucide-react';
+import { Loader2, Search, Trophy, Target, Hash, Info, Split, Component } from 'lucide-react';
 
 interface BrushMatchResult {
   strategy: string;
@@ -15,6 +15,7 @@ interface BrushMatchResult {
     baseScore: number;
     modifiers: number;
     modifierDetails: { name: string; weight: number; description: string }[];
+    total?: number;
   };
   matchedData: {
     brand?: string;
@@ -34,12 +35,345 @@ interface BrushMatchResult {
       source_text?: string;
     };
   };
+  // Enhanced fields for detailed analysis
+  componentDetails?: {
+    handle?: {
+      score: number;
+      breakdown: Record<string, number>;
+      metadata: Record<string, any>;
+    };
+    knot?: {
+      score: number;
+      breakdown: Record<string, number>;
+      metadata: Record<string, any>;
+    };
+  };
+  splitInformation?: {
+    handleText: string;
+    knotText: string;
+    splitPriority?: string;
+  };
 }
 
 interface BrushAnalysisResponse {
   results: BrushMatchResult[];
   winner: BrushMatchResult;
   enrichedData?: any;
+}
+
+// Reusable component for displaying score breakdowns
+function ScoreBreakdownDisplay({
+  baseScore,
+  modifiers,
+  modifierDetails,
+  total
+}: {
+  baseScore: number;
+  modifiers: number;
+  modifierDetails: { name: string; weight: number; description: string }[];
+  total?: number;
+}) {
+  const finalTotal = total ?? (baseScore + modifiers);
+
+  return (
+    <div className='mb-4'>
+      <h4 className='font-medium mb-2'>Score Breakdown</h4>
+      <div className='grid grid-cols-3 gap-4 text-sm'>
+        <div>
+          <p className='text-gray-600'>Base Score</p>
+          <p className='font-semibold'>{baseScore}</p>
+          <p className='text-xs text-gray-500'>Strategy match</p>
+        </div>
+        <div>
+          <p className='text-gray-600'>Modifiers</p>
+          <p className='font-semibold'>
+            {modifiers > 0 ? '+' : ''}
+            {modifiers}
+          </p>
+          <p className='text-xs text-gray-500'>
+            {modifiers > 0 ? 'Bonus points' : 'No bonuses'}
+          </p>
+        </div>
+        <div>
+          <p className='text-gray-600'>Total</p>
+          <p className='font-semibold'>{finalTotal}</p>
+          <p className='text-xs text-gray-500'>Final score</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Reusable component for displaying modifier details
+function ModifierDetailsDisplay({
+  modifierDetails,
+  modifiers
+}: {
+  modifierDetails: { name: string; weight: number; description: string }[];
+  modifiers: number;
+}) {
+  return (
+    <div className='mb-4'>
+      <h4 className='font-medium mb-2'>Modifier Details</h4>
+      <div className='text-xs text-gray-600 mb-2 bg-gray-50 p-2 rounded'>
+        <p className='font-medium'>About Modifiers:</p>
+        <p>Modifiers are bonus points awarded for:</p>
+        <ul className='list-disc list-inside ml-2 mt-1 space-y-1'>
+          <li>Fiber type matches (badger, boar, synthetic)</li>
+          <li>Size specifications (knot diameter)</li>
+          <li>Handle material matches</li>
+          <li>Brand/model confidence</li>
+          <li>Pattern specificity</li>
+          <li>Component matching success</li>
+        </ul>
+      </div>
+      {modifierDetails.length > 0 ? (
+        <div className='space-y-1'>
+          {modifierDetails.map((detail, idx) => (
+            <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
+              <div className='flex justify-between items-center'>
+                <span className='font-medium'>{detail.name}</span>
+                <span className='text-green-600 font-semibold'>+{detail.weight}</span>
+              </div>
+              <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className='text-sm text-gray-500 italic'>
+          {modifiers > 0 ? (
+            <>
+              <p>Modifiers applied: +{modifiers}</p>
+              <p className='text-xs mt-1'>
+                (Detailed breakdown not available from backend)
+              </p>
+            </>
+          ) : (
+            <p>No modifiers applied</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Reusable component for displaying component details
+function ComponentDetailsDisplay({
+  componentDetails,
+  splitInformation
+}: {
+  componentDetails?: {
+    handle?: { score: number; breakdown: Record<string, number>; metadata: Record<string, any> };
+    knot?: { score: number; breakdown: Record<string, number>; metadata: Record<string, any> };
+  };
+  splitInformation?: { handleText: string; knotText: string; splitPriority?: string };
+}) {
+  if (!componentDetails && !splitInformation) return null;
+
+  return (
+    <div className='mb-4'>
+      <h4 className='font-medium mb-2 flex items-center gap-2'>
+        <Component className='w-4 h-4' />
+        Component Analysis
+      </h4>
+
+      {/* Split Information */}
+      {splitInformation && (
+        <div className='mb-3 p-3 bg-blue-50 border border-blue-200 rounded'>
+          <h5 className='font-medium text-sm text-blue-800 mb-2 flex items-center gap-2'>
+            <Split className='w-4 h-4' />
+            Split Information
+          </h5>
+          <div className='grid grid-cols-2 gap-4 text-sm'>
+            <div>
+              <p className='text-blue-600 font-medium'>Handle Text:</p>
+              <p className='font-mono text-xs bg-white p-2 rounded border'>{splitInformation.handleText}</p>
+            </div>
+            <div>
+              <p className='text-blue-600 font-medium'>Knot Text:</p>
+              <p className='font-mono text-xs bg-white p-2 rounded border'>{splitInformation.knotText}</p>
+            </div>
+          </div>
+          {splitInformation.splitPriority && (
+            <div className='mt-2'>
+              <p className='text-blue-600 font-medium'>Split Priority:</p>
+              <Badge variant='outline' className='text-xs'>{splitInformation.splitPriority}</Badge>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Component Details */}
+      {componentDetails && (
+        <div className='space-y-3'>
+          {/* Handle Component */}
+          {componentDetails.handle && (
+            <div className='p-3 bg-green-50 border border-green-200 rounded'>
+              <h5 className='font-medium text-sm text-green-800 mb-2'>🖐️ Handle Component</h5>
+              <div className='grid grid-cols-2 gap-4 text-sm'>
+                <div>
+                  <p className='text-green-600 font-medium'>Score:</p>
+                  <p className='font-semibold'>{componentDetails.handle.score}</p>
+                </div>
+                <div>
+                  <p className='text-green-600 font-medium'>Breakdown:</p>
+                  <div className='space-y-1'>
+                    {Object.entries(componentDetails.handle.breakdown).map(([key, value]) => (
+                      <div key={key} className='flex justify-between text-xs'>
+                        <span className='text-gray-600'>{key}:</span>
+                        <span className='font-medium'>+{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {Object.keys(componentDetails.handle.metadata).length > 0 && (
+                <div className='mt-2'>
+                  <p className='text-green-600 font-medium text-xs'>Metadata:</p>
+                  <div className='text-xs text-gray-700 bg-white p-2 rounded border mt-1'>
+                    {Object.entries(componentDetails.handle.metadata).map(([key, value]) => (
+                      <div key={key} className='flex justify-between'>
+                        <span className='text-gray-600'>{key}:</span>
+                        <span>{value || 'Not specified'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Knot Component */}
+          {componentDetails.knot && (
+            <div className='p-3 bg-purple-50 border border-purple-200 rounded'>
+              <h5 className='font-medium text-sm text-purple-800 mb-2'>🧶 Knot Component</h5>
+              <div className='grid grid-cols-2 gap-4 text-sm'>
+                <div>
+                  <p className='text-purple-600 font-medium'>Score:</p>
+                  <p className='font-semibold'>{componentDetails.knot.score}</p>
+                </div>
+                <div>
+                  <p className='text-purple-600 font-medium'>Breakdown:</p>
+                  <div className='space-y-1'>
+                    {Object.entries(componentDetails.knot.breakdown).map(([key, value]) => (
+                      <div key={key} className='flex justify-between text-xs'>
+                        <span className='text-gray-600'>{key}:</span>
+                        <span className='font-medium'>+{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {Object.keys(componentDetails.knot.metadata).length > 0 && (
+                <div className='mt-2'>
+                  <p className='text-purple-600 font-medium text-xs'>Metadata:</p>
+                  <div className='text-xs text-gray-700 bg-white p-2 rounded border mt-1'>
+                    {Object.entries(componentDetails.knot.metadata).map(([key, value]) => (
+                      <div key={key} className='flex justify-between'>
+                        <span className='text-gray-600'>{key}:</span>
+                        <span>{value || 'Not specified'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Reusable component for displaying matched data
+function MatchedDataDisplay({ matchedData }: { matchedData: BrushMatchResult['matchedData'] }) {
+  return (
+    <div>
+      <h4 className='font-medium mb-2'>Matched Data</h4>
+      <div className='space-y-2 text-sm'>
+        {/* Top Level Section - always show */}
+        <div className='border-b pb-2'>
+          <div className='text-xs text-gray-500 mb-1 font-medium'>TOP LEVEL</div>
+          <div className='space-y-1'>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Brand:</span>
+              <span className={matchedData.brand ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.brand || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Model:</span>
+              <span className={matchedData.model ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.model || 'Not specified'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Handle Section - always show */}
+        <div className='border-b pb-2'>
+          <div className='text-xs text-gray-500 mb-1 font-medium'>HANDLE</div>
+          <div className='space-y-1'>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Brand:</span>
+              <span className={matchedData.handle?.brand ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.handle?.brand || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Model:</span>
+              <span className={matchedData.handle?.model ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.handle?.model || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Source:</span>
+              <span className={matchedData.handle?.source_text ? 'font-semibold text-xs' : 'text-gray-400 italic text-xs'}>
+                {matchedData.handle?.source_text || 'Not specified'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Knot Section - always show */}
+        <div>
+          <div className='text-xs text-gray-500 mb-1 font-medium'>KNOT</div>
+          <div className='space-y-1'>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Brand:</span>
+              <span className={matchedData.knot?.brand ? 'font-semibold' : 'font-semibold'}>
+                {matchedData.knot?.brand || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Model:</span>
+              <span className={matchedData.knot?.model ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.knot?.model || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Fiber:</span>
+              <span className={matchedData.knot?.fiber ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.knot?.fiber || 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Size:</span>
+              <span className={matchedData.knot?.knot_size_mm ? 'font-semibold' : 'text-gray-400 italic'}>
+                {matchedData.knot?.knot_size_mm ? `${matchedData.knot.knot_size_mm}mm` : 'Not specified'}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Source:</span>
+              <span className={matchedData.knot?.source_text ? 'font-semibold text-xs' : 'text-gray-400 italic text-xs'}>
+                {matchedData.knot?.source_text || 'Not specified'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function BrushMatchingAnalyzer() {
@@ -242,229 +576,28 @@ export function BrushMatchingAnalyzer() {
                             </div>
                           </div>
 
-                          {/* Score Breakdown */}
-                          <div className='mb-4'>
-                            <h4 className='font-medium mb-2'>Score Breakdown</h4>
-                            <div className='grid grid-cols-3 gap-4 text-sm'>
-                              <div>
-                                <p className='text-gray-600'>Base Score</p>
-                                <p className='font-semibold'>{result.scoreBreakdown.baseScore}</p>
-                                <p className='text-xs text-gray-500'>Strategy match</p>
-                              </div>
-                              <div>
-                                <p className='text-gray-600'>Modifiers</p>
-                                <p className='font-semibold'>
-                                  {result.scoreBreakdown.modifiers > 0 ? '+' : ''}
-                                  {result.scoreBreakdown.modifiers}
-                                </p>
-                                <p className='text-xs text-gray-500'>
-                                  {result.scoreBreakdown.modifiers > 0 ? 'Bonus points' : 'No bonuses'}
-                                </p>
-                              </div>
-                              <div>
-                                <p className='text-gray-600'>Total</p>
-                                <p className='font-semibold'>
-                                  {result.scoreBreakdown.baseScore +
-                                    result.scoreBreakdown.modifiers}
-                                </p>
-                                <p className='text-xs text-gray-500'>Final score</p>
-                              </div>
-                            </div>
-                          </div>
+                          {/* Score Breakdown - Reusable Component */}
+                          <ScoreBreakdownDisplay
+                            baseScore={result.scoreBreakdown.baseScore}
+                            modifiers={result.scoreBreakdown.modifiers}
+                            modifierDetails={result.scoreBreakdown.modifierDetails}
+                            total={result.scoreBreakdown.total}
+                          />
 
-                          {/* Modifier Details */}
-                          <div className='mb-4'>
-                            <h4 className='font-medium mb-2'>Modifier Details</h4>
-                            <div className='text-xs text-gray-600 mb-2 bg-gray-50 p-2 rounded'>
-                              <p className='font-medium'>About Modifiers:</p>
-                              <p>Modifiers are bonus points awarded for:</p>
-                              <ul className='list-disc list-inside ml-2 mt-1 space-y-1'>
-                                <li>Fiber type matches (badger, boar, synthetic)</li>
-                                <li>Size specifications (knot diameter)</li>
-                                <li>Handle material matches</li>
-                                <li>Brand/model confidence</li>
-                                <li>Pattern specificity</li>
-                              </ul>
-                            </div>
-                            {result.scoreBreakdown.modifierDetails.length > 0 ? (
-                              <div className='space-y-1'>
-                                {result.scoreBreakdown.modifierDetails.map((detail, idx) => (
-                                  <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
-                                    <div className='flex justify-between items-center'>
-                                      <span className='font-medium'>{detail.name}</span>
-                                      <span className='text-green-600 font-semibold'>+{detail.weight}</span>
-                                    </div>
-                                    <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className='text-sm text-gray-500 italic'>
-                                {result.scoreBreakdown.modifiers > 0 ? (
-                                  <>
-                                    <p>Modifiers applied: +{result.scoreBreakdown.modifiers}</p>
-                                    <p className='text-xs mt-1'>
-                                      (Detailed breakdown not available from backend)
-                                    </p>
-                                  </>
-                                ) : (
-                                  <p>No modifiers applied</p>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          {/* Modifier Details - Reusable Component */}
+                          <ModifierDetailsDisplay
+                            modifierDetails={result.scoreBreakdown.modifierDetails}
+                            modifiers={result.scoreBreakdown.modifiers}
+                          />
 
-                          {/* Matched Data */}
-                          <div>
-                            <h4 className='font-medium mb-2'>Matched Data</h4>
+                          {/* Component Details - Reusable Component */}
+                          <ComponentDetailsDisplay
+                            componentDetails={result.componentDetails}
+                            splitInformation={result.splitInformation}
+                          />
 
-                            <div className='space-y-2 text-sm'>
-                              {/* Top Level Section - always show */}
-                              <div className='border-b pb-2'>
-                                <div className='text-xs text-gray-500 mb-1 font-medium'>
-                                  TOP LEVEL
-                                </div>
-                                <div className='space-y-1'>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Brand:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.brand
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.brand || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Model:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.model
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.model || 'Not specified'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Handle Section - always show */}
-                              <div className='border-b pb-2'>
-                                <div className='text-xs text-gray-500 mb-1 font-medium'>HANDLE</div>
-                                <div className='space-y-1'>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Brand:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.handle?.brand
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.handle?.brand || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Model:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.handle?.model
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.handle?.model || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Source:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.handle?.source_text
-                                          ? 'font-semibold text-xs'
-                                          : 'text-gray-400 italic text-xs'
-                                      }
-                                    >
-                                      {result.matchedData.handle?.source_text || 'Not specified'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Knot Section - always show */}
-                              <div>
-                                <div className='text-xs text-gray-500 mb-1 font-medium'>KNOT</div>
-                                <div className='space-y-1'>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Brand:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.knot?.brand
-                                          ? 'font-semibold'
-                                          : 'font-semibold'
-                                      }
-                                    >
-                                      {result.matchedData.knot?.brand || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Model:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.knot?.model
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.knot?.model || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Fiber:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.knot?.fiber
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.knot?.fiber || 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Size:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.knot?.knot_size_mm
-                                          ? 'font-semibold'
-                                          : 'text-gray-400 italic'
-                                      }
-                                    >
-                                      {result.matchedData.knot?.knot_size_mm
-                                        ? `${result.matchedData.knot.knot_size_mm}mm`
-                                        : 'Not specified'}
-                                    </span>
-                                  </div>
-                                  <div className='flex justify-between'>
-                                    <span className='text-gray-600'>Source:</span>
-                                    <span
-                                      className={
-                                        result.matchedData.knot?.source_text
-                                          ? 'font-semibold text-xs'
-                                          : 'text-gray-400 italic text-xs'
-                                      }
-                                    >
-                                      {result.matchedData.knot?.source_text || 'Not specified'}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          {/* Matched Data - Reusable Component */}
+                          <MatchedDataDisplay matchedData={result.matchedData} />
                         </CardContent>
                       </Card>
                     ))}

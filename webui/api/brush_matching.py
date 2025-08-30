@@ -5,7 +5,7 @@ This endpoint provides a web interface to the brush matching analysis tool,
 allowing users to test brush strings and see detailed scoring results.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -26,6 +26,8 @@ class BrushMatchResult(BaseModel):
     pattern: str
     scoreBreakdown: Dict[str, Any]
     matchedData: Dict[str, Any]
+    componentDetails: Optional[Dict[str, Any]] = None
+    splitInformation: Optional[Dict[str, Any]] = None
 
 
 class BrushAnalysisResponse(BaseModel):
@@ -124,6 +126,177 @@ def _get_modifier_description(modifier_name: str, modifier_value: float, brush_s
 
     else:
         return f"Modifier: {modifier_name}"
+
+
+def _extract_component_details(strategy_result, strategy_name: str) -> Optional[Dict[str, Any]]:
+    """Extract component details for strategies that support component analysis."""
+    if not strategy_result or not hasattr(strategy_result, "matched"):
+        return None
+
+    matched_data = strategy_result.matched or {}
+
+    # Only provide component details for strategies that support them
+    if strategy_name not in [
+        "automated_split",
+        "full_input_component_matching",
+        "known_split",
+    ]:
+        return None
+
+    component_details = {}
+
+    # Extract handle component details
+    if "handle" in matched_data and matched_data["handle"]:
+        handle = matched_data["handle"]
+        component_details["handle"] = {
+            "score": handle.get("score", 0.0),
+            "breakdown": _calculate_handle_score_breakdown(handle),
+            "metadata": {
+                "brand": handle.get("brand"),
+                "model": handle.get("model"),
+                "source": handle.get("source_text", ""),
+            },
+        }
+
+    # Extract knot component details
+    if "knot" in matched_data and matched_data["knot"]:
+        knot = matched_data["knot"]
+        component_details["knot"] = {
+            "score": knot.get("score", 0.0),
+            "breakdown": _calculate_knot_score_breakdown(knot),
+            "metadata": {
+                "brand": knot.get("brand"),
+                "model": knot.get("model"),
+                "fiber": knot.get("fiber"),
+                "source": knot.get("source_text", ""),
+            },
+        }
+
+    return component_details if component_details else None
+
+
+def _calculate_handle_score_breakdown(handle_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate detailed breakdown of handle component score."""
+    breakdown = {}
+    
+    # Brand match (5 points)
+    if handle_data.get("brand"):
+        breakdown["brand_match"] = 5.0
+    else:
+        breakdown["brand_match"] = 0.0
+    
+    # Model match (5 points)
+    if handle_data.get("model"):
+        breakdown["model_match"] = 5.0
+    else:
+        breakdown["model_match"] = 0.0
+    
+    # Handle indicators (look for handle-related terms)
+    handle_indicators = 0.0
+    source_text = handle_data.get("source_text", "").lower()
+    handle_terms = ["handle", "wood", "resin", "acrylic", "metal", "brass", "aluminum", "steel", "titanium", "ebonite", "ivory", "horn", "bone", "stone", "marble", "granite"]
+    for term in handle_terms:
+        if term in source_text:
+            handle_indicators += 2.0
+            break  # Only count once
+    
+    breakdown["handle_indicators"] = handle_indicators
+    
+    # Priority bonus (2 points for priority 1, 1 point for priority 2)
+    priority = handle_data.get("priority")
+    if priority == 1:
+        breakdown["priority_score"] = 2.0
+    elif priority == 2:
+        breakdown["priority_score"] = 1.0
+    else:
+        breakdown["priority_score"] = 0.0
+    
+    return breakdown
+
+
+def _calculate_knot_score_breakdown(knot_data: Dict[str, Any]) -> Dict[str, float]:
+    """Calculate detailed breakdown of knot component score."""
+    breakdown = {}
+    
+    # Brand match (5 points)
+    if knot_data.get("brand"):
+        breakdown["brand_match"] = 5.0
+    else:
+        breakdown["brand_match"] = 0.0
+    
+    # Model match (5 points)
+    if knot_data.get("model"):
+        breakdown["model_match"] = 5.0
+    else:
+        breakdown["model_match"] = 0.0
+    
+    # Fiber match (5 points)
+    if knot_data.get("fiber"):
+        breakdown["fiber_match"] = 5.0
+    else:
+        breakdown["fiber_match"] = 0.0
+    
+    # Size match (2 points)
+    if knot_data.get("knot_size_mm"):
+        breakdown["size_match"] = 2.0
+    else:
+        breakdown["size_match"] = 0.0
+    
+    # Knot indicators (look for knot-related terms)
+    knot_indicators = 0.0
+    source_text = knot_data.get("source_text", "").lower()
+    knot_terms = ["syn", "mm", "knot", "badger", "boar", "synthetic", "fiber"]
+    for term in knot_terms:
+        if term in source_text:
+            knot_indicators += 2.0
+    
+    # Cap knot indicators at 10 points
+    knot_indicators = min(knot_indicators, 10.0)
+    breakdown["knot_indicators"] = knot_indicators
+    
+    # Priority bonus (2 points for priority 1, 1 point for priority 2)
+    priority = knot_data.get("priority")
+    if priority == 1:
+        breakdown["priority_score"] = 2.0
+    elif priority == 2:
+        breakdown["priority_score"] = 1.0
+    else:
+        breakdown["priority_score"] = 0.0
+    
+    return breakdown
+
+
+def _extract_split_information(strategy_result, strategy_name: str) -> Optional[Dict[str, Any]]:
+    """Extract split information for strategies that split brush strings."""
+    if not strategy_result or not hasattr(strategy_result, "matched"):
+        return None
+
+    matched_data = strategy_result.matched or {}
+
+    # Only provide split information for strategies that split
+    if strategy_name not in [
+        "automated_split",
+        "full_input_component_matching",
+        "known_split",
+    ]:
+        return None
+
+    # Extract split information from matched data
+    split_info = {}
+
+    if "handle" in matched_data and matched_data["handle"]:
+        split_info["handleText"] = matched_data["handle"].get("source_text", "")
+
+    if "knot" in matched_data and matched_data["knot"]:
+        split_info["knotText"] = matched_data["knot"].get("source_text", "")
+
+    # Add split priority if available
+    if hasattr(strategy_result, "split_priority"):
+        split_info["splitPriority"] = strategy_result.split_priority
+    elif strategy_name == "automated_split":
+        split_info["splitPriority"] = "medium"  # Default for automated split
+
+    return split_info if split_info else None
 
 
 @router.post("/analyze", response_model=BrushAnalysisResponse)
@@ -353,6 +526,10 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                         "total": total_score,
                     },
                     matchedData=transformed_matched_data,
+                    # Add component details for strategies that support them
+                    componentDetails=_extract_component_details(strategy_result, strategy_name),
+                    # Add split information for strategies that split brush strings
+                    splitInformation=_extract_split_information(strategy_result, strategy_name),
                 )
 
                 formatted_results.append(formatted_result)
