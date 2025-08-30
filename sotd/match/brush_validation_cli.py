@@ -37,7 +37,9 @@ class BrushValidationCLI:
         if self._brush_matcher is None:
             from sotd.match.brush_matcher import BrushMatcher
 
-            self._brush_matcher = BrushMatcher()
+            # Use the same correct_matches_path that was set in __init__
+            correct_matches_path = self.data_path / "correct_matches.yaml"
+            self._brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path)
         return self._brush_matcher
 
     def _get_processed_normalized_texts(self, month: str) -> set[str]:
