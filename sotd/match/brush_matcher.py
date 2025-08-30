@@ -435,6 +435,7 @@ class BrushMatcher:
             matched=brush_data,
             match_type="handle",
             pattern=handle_data.get("_pattern_used"),
+            strategy="handle_matching",
         )
 
     def _combine_handle_and_knot_results(
@@ -500,6 +501,7 @@ class BrushMatcher:
             matched=brush_data,
             match_type="composite",
             pattern=handle_data.get("_pattern_used"),
+            strategy="dual_component_matching",
         )
 
     def _convert_knot_result_to_brush_result(self, knot_result: MatchResult) -> MatchResult:
@@ -550,6 +552,7 @@ class BrushMatcher:
             matched=brush_data,
             match_type="knot",
             pattern=knot_data.get("_pattern_used"),
+            strategy="knot_matching",
         )
 
     def _track_strategy_performance(self, strategy_results: List[MatchResult], value: str):
