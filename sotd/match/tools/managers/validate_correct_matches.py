@@ -133,58 +133,22 @@ class ValidateCorrectMatches:
         base_dir = self._data_dir or Path("data")
 
         if field == "razor":
-            return RazorMatcher(catalog_path=base_dir / "razors.yaml", bypass_correct_matches=True)
+            return RazorMatcher(catalog_path=base_dir / "razors.yaml")
         elif field == "blade":
-            return BladeMatcher(catalog_path=base_dir / "blades.yaml", bypass_correct_matches=True)
+            return BladeMatcher(catalog_path=base_dir / "blades.yaml")
         elif field == "brush":
-            # For brush field, use BrushMatcher with shared config
-            return BrushMatcher(self._create_brush_config(base_dir))
+            # For brush field, use BrushMatcher with default config
+            # No need to set bypass_correct_matches at instantiation - use method parameter instead
+            return BrushMatcher()
         elif field == "soap":
-            return SoapMatcher(catalog_path=base_dir / "soaps.yaml", bypass_correct_matches=True)
+            return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
         elif field in ["knot", "handle"]:
-            # For brush-related fields, use BrushMatcher with shared config
-            return BrushMatcher(self._create_brush_config(base_dir))
+            # For brush-related fields, use BrushMatcher with default config
+            return BrushMatcher()
 
         return None
 
-    def _create_brush_config(self, base_dir: Path) -> Path:
-        """Create a temporary brush scoring config file for DRY brush matcher creation."""
-        import yaml
 
-        # Create a temporary brush scoring config file
-        brush_config_file = base_dir / "brush_scoring_config.yaml"
-
-        # Create minimal brush scoring config for testing
-        brush_config = {
-            "brush_scoring_weights": {
-                "base_strategies": {
-                    "known_split": 90.0,
-                    "known_brush": 80.0,
-                    "other_brush": 70.0,
-                    "automated_split": 60.0,
-                    "full_input_component_matching": 50.0,
-                    "zenith_brush": 75.0,
-                    "omega_semogue_brush": 75.0,
-                },
-                "strategy_modifiers": {
-                    "known_split": {},
-                    "known_brush": {},
-                    "other_brush": {},
-                    "automated_split": {},
-                    "full_input_component_matching": {},
-                    "zenith_brush": {},
-                    "omega_semogue_brush": {},
-                    "handle_matching": {},
-                    "knot_matching": {"brand_match": 12.0},
-                },
-            }
-        }
-
-        # Write the temporary config file
-        with brush_config_file.open("w", encoding="utf-8") as f:
-            yaml.dump(brush_config, f)
-
-        return brush_config_file
 
     def _clear_validation_cache(self):
         """Clear validation cache when _data_dir is set for testing."""
@@ -589,9 +553,9 @@ class ValidateCorrectMatches:
                 # SoapMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
             elif field == "brush":
-                # BrushMatcher expects: match({"original": text, "normalized": text})
-                test_data = {"original": test_text, "normalized": test_text.lower()}
-                result = matcher.match(test_data)
+                # BrushMatcher expects: match(text_string) - NOT a dictionary
+                # The matcher handles normalization internally
+                result = matcher.match(test_text)
             else:
                 # Default fallback
                 result = matcher.match(test_text.lower(), test_text)
@@ -636,11 +600,11 @@ class ValidateCorrectMatches:
                             "brand": expected_brand,
                             "model": expected_model,
                             "pattern": test_text,
-                            "actual_brand": actual_brand,
-                            "actual_model": actual_model,
+                            "actual_brand": actual_brand or "Unknown",
+                            "actual_model": actual_model or "Unknown",
                             "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
                             "message": (
-                                f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' "
+                                f"Entry '{test_text}' matched to '{actual_brand or 'Unknown'} {actual_model or 'Unknown'}' "
                                 f"instead of expected '{expected_brand} {expected_model}'"
                             ),
                         }
@@ -696,9 +660,9 @@ class ValidateCorrectMatches:
                 # SoapMatcher expects: match(normalized_text, original_text=None)
                 result = matcher.match(test_text.lower(), test_text)
             elif field == "brush":
-                # BrushMatcher expects: match({"original": text, "normalized": text})
-                test_data = {"original": test_text, "normalized": test_text.lower()}
-                result = matcher.match(test_data)
+                # BrushMatcher expects: match(text_string) - NOT a dictionary
+                # The matcher handles normalization internally
+                result = matcher.match(test_text)
             else:
                 # Default fallback
                 result = matcher.match(test_text.lower(), test_text)
@@ -781,104 +745,87 @@ class ValidateCorrectMatches:
         self, matcher, test_text: str, field: str, brand_name: str, version_name: str
     ) -> Optional[Dict[str, Any]]:
         """Test if a brush pattern can be matched by the brush matcher."""
+        print(f"🔍 DEBUG: Testing brush pattern: '{test_text}'")
+        print(f"🔍 DEBUG: Expected brand: '{brand_name}', model: '{version_name}'")
+
         try:
-            # BrushMatcher expects: match({"original": text, "normalized": text})
-            test_data = {"original": test_text, "normalized": test_text.lower()}
-            result = matcher.match(test_data)
+            # CRITICAL: Use the same matcher instance but with bypass parameter
+            # This eliminates the need to create separate matcher instances
+            print(f"🔍 DEBUG: Testing with bypass parameter...")
+            bypass_result = matcher.match(test_text, bypass_correct_matches=True)
 
-            if not result:
-                # Entry doesn't match at all - this is a validation issue
+            if (
+                not bypass_result
+                or not hasattr(bypass_result, "matched")
+                or not bypass_result.matched
+            ):
+                print(f"🔍 DEBUG: ❌ Bypass matcher found no match")
                 return {
                     "type": "catalog_pattern_no_match",
-                    "field": field,
-                    "brand": brand_name,
-                    "version": version_name,
                     "pattern": test_text,
-                    "correct_match": test_text,
+                    "message": f"Pattern '{test_text}' cannot be matched by brush matcher",
+                    "details": f"Bypass matcher found no match for '{test_text}'",
+                    "suggested_action": f"Pattern '{test_text}' may need to be updated or removed from correct_matches.yaml",
                     "expected_brand": brand_name,
                     "expected_model": version_name,
                     "actual_brand": None,
                     "actual_model": None,
-                    "severity": "high",
-                    "suggested_action": f"Pattern '{test_text}' cannot be matched by brush matcher. Check if this pattern is still valid or needs to be updated.",
-                    "details": f"The brush matcher could not find a match for '{test_text}'. This may indicate a catalog pattern issue or the pattern may need to be updated.",
                 }
 
-            # Check for model name mismatch between stored location and pattern content
-            model_mismatch_issue = self._check_brush_model_mismatch(
-                test_text, brand_name, version_name, result
+            bypass_brand = bypass_result.matched.get("brand")
+            bypass_model = bypass_result.matched.get("model")
+            print(f"🔍 DEBUG: Bypass result - Brand: '{bypass_brand}', Model: '{bypass_model}'")
+
+            # NOW validate: does the bypass result match where it's stored in correct_matches.yaml?
+            if bypass_brand != brand_name:
+                print(
+                    f"🔍 DEBUG: ❌ BRAND MISMATCH! Bypass thinks '{bypass_brand}', stored under '{brand_name}'"
+                )
+                return {
+                    "type": "catalog_pattern_mismatch",
+                    "pattern": test_text,
+                    "message": f"Pattern '{test_text}' is stored under wrong brand",
+                    "details": f"Pattern mentions '{bypass_brand}' but is stored under '{brand_name}' section",
+                    "suggested_action": f"Move pattern '{test_text}' from '{brand_name}' to '{bypass_brand}' section",
+                    "expected_brand": brand_name,
+                    "expected_model": version_name,
+                    "actual_brand": bypass_brand,
+                    "actual_model": bypass_model,
+                }
+
+            if bypass_model != version_name:
+                print(
+                    f"🔍 DEBUG: ❌ MODEL MISMATCH! Bypass thinks '{bypass_model}', stored under '{version_name}'"
+                )
+                return {
+                    "type": "catalog_pattern_mismatch",
+                    "pattern": test_text,
+                    "message": f"Pattern '{test_text}' is stored under wrong model",
+                    "details": f"Pattern mentions '{bypass_model}' but is stored under '{version_name}' section",
+                    "suggested_action": f"Move pattern '{test_text}' from '{brand_name} {version_name}' to '{bypass_brand} {bypass_model}' section",
+                    "expected_brand": brand_name,
+                    "expected_model": version_name,
+                    "actual_brand": bypass_brand,
+                    "actual_model": bypass_model,
+                }
+
+            print(
+                f"🔍 DEBUG: ✅ Pattern validation successful - stored location matches bypass result"
             )
-            if model_mismatch_issue:
-                return model_mismatch_issue
-
-            # Check if the matcher returned valid brush data
-            if hasattr(result, "matched") and result.matched:
-                matched_data = result.matched
-                actual_brand = matched_data.get("brand")
-                actual_model = matched_data.get("model")
-
-                # For brushes, we don't validate against the organizational structure
-                # Instead, we validate that the matcher can successfully match the pattern
-                # and return valid brush information
-                if actual_brand and actual_model:
-                    # Successfully matched - no issue
-                    logger.info(
-                        f"        Successfully matched '{test_text}' to '{actual_brand} {actual_model}'"
-                    )
-                    return None
-                else:
-                    # Matched but missing brand/model - this is an issue
-                    return {
-                        "type": "catalog_pattern_mismatch",
-                        "field": field,
-                        "brand": brand_name,
-                        "version": version_name,
-                        "pattern": test_text,
-                        "correct_match": test_text,
-                        "expected_brand": brand_name,
-                        "expected_model": version_name,
-                        "actual_brand": actual_brand,
-                        "actual_model": actual_model,
-                        "severity": "medium",
-                        "suggested_action": f"Pattern '{test_text}' matched but returned incomplete data. Check brush matcher implementation.",
-                        "details": f"The brush matcher found a match for '{test_text}' but returned incomplete brand/model information: brand='{actual_brand}', model='{actual_model}'",
-                        "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
-                    }
-            else:
-                # No match data returned - this is an issue
-                return {
-                    "type": "catalog_pattern_no_match",
-                    "field": field,
-                    "brand": brand_name,
-                    "version": version_name,
-                    "pattern": test_text,
-                    "correct_match": test_text,
-                    "expected_brand": brand_name,
-                    "expected_model": version_name,
-                    "actual_brand": None,
-                    "actual_model": None,
-                    "severity": "high",
-                    "suggested_action": f"Pattern '{test_text}' matched but returned no data. Check brush matcher implementation.",
-                    "details": f"The brush matcher found a match for '{test_text}' but returned no matched data. This indicates a matcher implementation issue.",
-                }
+            return None  # No issues
 
         except Exception as e:
-            # Matcher error - this indicates a problem
-            logger.error(f"Error testing brush pattern '{test_text}': {e}")
+            print(f"🔍 DEBUG: ❌ Exception during bypass validation: {e}")
             return {
-                "type": "validation_error",
-                "field": field,
-                "brand": brand_name,
-                "version": version_name,
+                "type": "unmatchable_entry",
                 "pattern": test_text,
-                "correct_match": test_text,
+                "message": f"Pattern '{test_text}' caused exception during bypass validation",
+                "details": f"Exception: {e}",
+                "suggested_action": f"Investigate exception in bypass validation for '{test_text}'",
                 "expected_brand": brand_name,
                 "expected_model": version_name,
                 "actual_brand": None,
                 "actual_model": None,
-                "severity": "high",
-                "suggested_action": f"Pattern '{test_text}' caused a matcher error. Check brush matcher implementation and catalog data.",
-                "details": f"Error testing pattern '{test_text}' with brush matcher: {str(e)}",
             }
 
     def _check_brush_model_mismatch(
@@ -916,8 +863,8 @@ class ValidateCorrectMatches:
                     "pattern": test_text,
                     "stored_brand": brand_name,
                     "stored_model": stored_model,
-                    "matched_brand": actual_brand,
-                    "matched_model": actual_model,
+                    "matched_brand": actual_brand or "Unknown",
+                    "matched_model": actual_model or "Unknown",
                     "message": f"Pattern '{test_text}' is stored under '{brand_name} {stored_model}' but contains model name '{found_model}'",
                     "suggested_action": f"Move from '{brand_name} {stored_model}' to '{brand_name} {found_model}' in correct_matches.yaml",
                 }
