@@ -1161,34 +1161,24 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
     try:
         validate_field(request.field)
 
-        # For brushes, use the shared validator
-        if request.field == "brush":
-            from webui.api.validators.catalog_validator import CatalogValidator
-
-            validator = CatalogValidator(project_root=project_root)
-            summary = validator.get_validation_summary("brush")
-            issues = summary["issues"]
-            expected_structure = {}  # Not used in current implementation
-        else:
-            # Import and use the validation logic directly for other fields
-            try:
-                from sotd.match.tools.managers.validate_correct_matches import (
-                    ValidateCorrectMatches,
-                )
-            except ImportError as e:
-                raise HTTPException(
-                    status_code=500, detail=f"Could not import validation tools: {e}"
-                )
-
-            # Create validator instance and run validation
-            # Set the data directory to the project root for proper catalog access
-            validator = ValidateCorrectMatches(
-                correct_matches_path=project_root / "data" / "correct_matches.yaml"
+        # Use the unified validation system for ALL fields (eliminates DRY violation)
+        try:
+            from sotd.match.tools.managers.validate_correct_matches import (
+                ValidateCorrectMatches,
             )
-            validator._data_dir = project_root / "data"
+        except ImportError as e:
+            raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
 
-            # Run the catalog validation
-            issues, expected_structure = validator.validate_field(request.field)
+        # Create validator instance and run validation
+        # Set the data directory to the project root for proper catalog access
+        validator = ValidateCorrectMatches(
+            correct_matches_path=project_root / "data" / "correct_matches.yaml"
+        )
+        validator._data_dir = project_root / "data"
+
+        # Run the catalog validation for ALL fields (including brushes)
+        # This eliminates the DRY violation by using one unified validation system
+        issues, expected_structure = validator.validate_field(request.field)
 
         # Count total entries from correct_matches.yaml
         total_entries = 0
@@ -1234,15 +1224,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             # Map validation tool issue format to API response format
             issue_type = issue.get("type", "")
 
-            # Map internal issue types to frontend-expected types
+            # Use the actual issue types from ValidateCorrectMatches (eliminates DRY violation)
+            # The frontend should adapt to the validation system, not the other way around
             mapped_issue_type = issue_type
-            if issue_type == "mismatched_result":
-                mapped_issue_type = "catalog_pattern_mismatch"
-            elif issue_type == "unmatchable_entry":
-                mapped_issue_type = "catalog_pattern_no_match"
-            elif issue_type == "catalog_pattern_no_match":
-                # Keep as-is for brush validation
-                mapped_issue_type = "catalog_pattern_no_match"
 
             # Determine severity based on issue type
             severity = "medium"
@@ -1358,18 +1342,14 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     f"Remove '{pattern}' from correct_matches.yaml "
                     f"or fix the pattern to match correctly"
                 )
-            elif issue_type == "catalog_pattern_no_match":
-                # Handle brush validation issues
-                if request.field == "brush":
-                    suggested_action = (
-                        f"Pattern '{pattern}' cannot be matched by brush matcher. "
-                        f"Check if this pattern is still valid or needs to be updated."
-                    )
-                else:
-                    suggested_action = (
-                        f"Pattern '{pattern}' cannot be matched by {request.field} matcher. "
-                        f"Check if this pattern is still valid or needs to be updated."
-                    )
+            elif issue_type == "unmatchable_entry":
+                # Use the actual validation result from ValidateCorrectMatches
+                # This eliminates the DRY violation by using one source of truth
+                suggested_action = issue.get(
+                    "suggested_action",
+                    f"Pattern '{pattern}' cannot be matched by {request.field} matcher. "
+                    f"Check if this pattern is still valid or needs to be updated.",
+                )
             elif issue_type in [
                 "composite_brush_in_wrong_section",
                 "handle_only_brush_in_wrong_section",
