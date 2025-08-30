@@ -32,9 +32,9 @@ brush_scoring_weights:
     zenith_brush: 75.0
 
     #component brushes
-    automated_split: 60.0
+    automated_split: 50.0
     full_input_component_matching: 50.0
-    known_split: 90.0
+    known_split: 50.0
 
   # Strategy Modifiers:
   # - Modifiers provide additional points for specific achievements within each strategy
