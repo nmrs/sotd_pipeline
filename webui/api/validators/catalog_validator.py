@@ -16,10 +16,23 @@ class CatalogValidator:
         self.project_root = project_root
         self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
 
+        # Debug logging
+        import os
+
+        print(f"DEBUG: Current working directory: {os.getcwd()}")
+        print(f"DEBUG: Project root: {project_root}")
+        print(f"DEBUG: Correct matches path: {self.correct_matches_path}")
+
         # Initialize brush matcher with the same configuration as the Brush Matching Analyzer API
         # This ensures both systems use the same configuration and produce consistent results
         # The BrushMatcher will use the default config path relative to the working directory
         self.brush_matcher = BrushMatcher(bypass_correct_matches=True)
+
+        # Debug logging for brush matcher
+        print(f"DEBUG: Brush matcher initialized: {self.brush_matcher}")
+        print(
+            f"DEBUG: Brush matcher config path: {getattr(self.brush_matcher, 'config_path', 'Not set')}"
+        )
 
     def load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml data."""
@@ -55,7 +68,15 @@ class CatalogValidator:
                             try:
                                 # Run pattern through brush matcher WITHOUT correct_matches.yaml
                                 # This tests the actual strategy system, not the cheat sheet
-                                result = self.brush_matcher.match(pattern)
+                                print(f"DEBUG: Testing pattern: {pattern}")  # Debug log
+                                result = self.brush_matcher.match(pattern, bypass_correct_matches=True)
+                                print(f"DEBUG: Result: {result}")  # Debug log
+                                print(
+                                    f"DEBUG: Has matched: {hasattr(result, 'matched') if result else False}"
+                                )  # Debug log
+                                print(
+                                    f"DEBUG: Matched value: {getattr(result, 'matched', None) if result else None}"
+                                )  # Debug log
 
                                 if result and hasattr(result, "matched") and result.matched:
                                     # Extract brand and model from matcher result
@@ -94,9 +115,7 @@ class CatalogValidator:
                                     # IMPORTANT: Only flag as composite brush if the matcher didn't return a top-level brand/model
                                     # Known brushes can have both top-level brand/model AND handle/knot components populated
                                     # This is the correct behavior for catalog-driven brushes according to the specification
-                                    if (
-                                        has_handle or has_knot
-                                    ) and (
+                                    if (has_handle or has_knot) and (
                                         not matched_brand or not matched_model
                                     ):
                                         # This is a composite brush - check if it should be stored in handle/knot sections
@@ -452,12 +471,12 @@ class CatalogValidator:
 
     def get_validation_summary(self, field: str) -> Dict[str, Any]:
         """Get validation summary for a specific field.
-        
+
         This method is expected by the API to return a dictionary with an "issues" key.
-        
+
         Args:
             field: Field to validate (e.g., "brush")
-            
+
         Returns:
             Dictionary with "issues" key containing validation results
         """
