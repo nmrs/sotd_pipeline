@@ -22,7 +22,8 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Add the project root to the path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+project_root = Path(__file__).parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 try:
     from sotd.match.blade_matcher import BladeMatcher

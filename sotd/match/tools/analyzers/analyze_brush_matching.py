@@ -27,7 +27,7 @@ try:
     from sotd.enrich.brush_enricher import BrushEnricher
     from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
     from sotd.match.brush_scoring_config import BrushScoringConfig
-    from sotd.match.brush_matcher import BrushScoringMatcher
+    from sotd.match.brush_matcher import BrushMatcher
 except ImportError:
     print(
         "Error: Could not import required modules. Make sure you're running from the project root."
@@ -56,7 +56,7 @@ def analyze_brush_matching(
         print("=" * 60)
 
         try:
-            scoring_matcher = BrushScoringMatcher()
+            scoring_matcher = BrushMatcher()
 
             # If bypassing correct_matches, temporarily patch multiple components
             original_match_method = None
@@ -349,12 +349,11 @@ def analyze_brush_matching(
         print("-" * 40)
 
         # Initialize the brush matcher with debug enabled
-        brush_matcher = BrushScoringMatcher(
-            catalog_path=Path("data/brushes.yaml"),
+        brush_matcher = BrushMatcher(
+            brushes_path=Path("data/brushes.yaml"),
             handles_path=Path("data/handles.yaml"),
             knots_path=Path("data/knots.yaml"),
             correct_matches_path=Path("data/correct_matches.yaml"),
-            debug=debug,
         )
 
         # If bypassing correct_matches, temporarily clear them
@@ -414,7 +413,7 @@ def analyze_brush_matching(
     # Get the result from the appropriate matcher
     if show_all_matches:
         try:
-            scoring_matcher = BrushScoringMatcher()
+            scoring_matcher = BrushMatcher()
 
             # If bypassing correct_matches, temporarily clear them
             original_correct_matches = None
@@ -431,12 +430,11 @@ def analyze_brush_matching(
         except Exception:
             result = None
     else:
-        brush_matcher = BrushScoringMatcher(
-            catalog_path=Path("data/brushes.yaml"),
+        brush_matcher = BrushMatcher(
+            brushes_path=Path("data/brushes.yaml"),
             handles_path=Path("data/handles.yaml"),
             knots_path=Path("data/knots.yaml"),
             correct_matches_path=Path("data/correct_matches.yaml"),
-            debug=debug,
         )
 
         # If bypassing correct_matches, temporarily clear them
