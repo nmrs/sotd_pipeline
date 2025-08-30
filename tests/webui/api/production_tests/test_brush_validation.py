@@ -1,5 +1,6 @@
 """Tests for brush validation API endpoints."""
 
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -388,7 +389,14 @@ class TestBrushValidationAPI:
         from sotd.match.correct_matches_updater import CorrectMatchesUpdater
 
         # Create a temporary manager instance
-        manager = BrushUserActionsManager()
+        temp_dir = tempfile.mkdtemp()
+        temp_data_dir = Path(temp_dir) / "data"
+        temp_learning_dir = temp_data_dir / "learning"
+        temp_correct_matches_path = temp_data_dir / "correct_matches.yaml"
+        manager = BrushUserActionsManager(
+            base_path=temp_learning_dir,
+            correct_matches_path=temp_correct_matches_path
+        )
 
         # Test data representing a dual-component brush result
         dual_component_result = {
@@ -419,7 +427,10 @@ class TestBrushValidationAPI:
 
         # Now test that the CorrectMatchesUpdater properly handles split_brush
         # by storing components in the correct sections
-        updater = CorrectMatchesUpdater()
+        # Use a temporary file to avoid polluting production data
+        temp_dir = tempfile.mkdtemp()
+        temp_path = Path(temp_dir) / "test_correct_matches.yaml"
+        updater = CorrectMatchesUpdater(temp_path)
 
         # Mock the save method to capture what's being written
         original_save = updater.save_correct_matches
@@ -474,3 +485,7 @@ class TestBrushValidationAPI:
 
         # Restore original method
         updater.save_correct_matches = original_save
+        
+        # Clean up temporary directories
+        shutil.rmtree(temp_dir)
+        shutil.rmtree(temp_dir)

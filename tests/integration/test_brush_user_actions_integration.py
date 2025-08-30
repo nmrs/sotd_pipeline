@@ -17,7 +17,12 @@ class TestBrushUserActionsIntegration:
         self.test_dir = tempfile.mkdtemp()
         self.test_data_dir = Path(self.test_dir) / "data"
         self.test_learning_dir = self.test_data_dir / "learning"
-        self.manager = BrushUserActionsManager(base_path=self.test_learning_dir)
+        # Create a temporary correct_matches.yaml file to avoid polluting production
+        test_correct_matches_path = self.test_data_dir / "correct_matches.yaml"
+        self.manager = BrushUserActionsManager(
+            base_path=self.test_learning_dir,
+            correct_matches_path=test_correct_matches_path
+        )
 
     def teardown_method(self):
         """Clean up test directories."""

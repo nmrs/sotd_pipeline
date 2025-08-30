@@ -9,6 +9,8 @@ find nothing.
 import pytest
 import yaml
 from pathlib import Path
+import tempfile
+import shutil
 
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -18,22 +20,56 @@ class TestBrushMatcherCorrectMatchesPriority:
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Use current BrushMatcher constructor signature
+        # Create temporary directory for test files
+        self.test_dir = tempfile.mkdtemp()
+
+        # Create temporary correct_matches.yaml with test data
+        self.correct_matches_path = Path(self.test_dir) / "correct_matches.yaml"
+        test_correct_matches = {
+            "brush": {
+                "Test Brand": {"Test Model": ["test brush pattern", "another test pattern"]},
+                "Simpson": {"Chubby 2": ["simpson chubby 2"]},
+            }
+        }
+
+        with open(self.correct_matches_path, "w") as f:
+            yaml.dump(test_correct_matches, f)
+
+        # Copy production catalog files to temp directory for testing
+        production_brushes = Path("data/brushes.yaml")
+        production_handles = Path("data/handles.yaml")
+        production_knots = Path("data/knots.yaml")
+        production_config = Path("data/brush_scoring_config.yaml")
+
+        self.brushes_path = Path(self.test_dir) / "brushes.yaml"
+        self.handles_path = Path(self.test_dir) / "handles.yaml"
+        self.knots_path = Path(self.test_dir) / "knots.yaml"
+        self.config_path = Path(self.test_dir) / "brush_scoring_config.yaml"
+
+        if production_brushes.exists():
+            shutil.copy(production_brushes, self.brushes_path)
+        if production_handles.exists():
+            shutil.copy(production_handles, self.handles_path)
+        if production_knots.exists():
+            shutil.copy(production_knots, self.knots_path)
+        if production_config.exists():
+            shutil.copy(production_config, self.config_path)
+
+        # Use temporary files for BrushMatcher
         self.brush_matcher = BrushMatcher(
-            correct_matches_path=Path("data/correct_matches.yaml"),
-            brushes_path=Path("data/brushes.yaml"),
-            handles_path=Path("data/handles.yaml"),
-            knots_path=Path("data/knots.yaml"),
-            brush_scoring_config_path=Path("data/brush_scoring_config.yaml"),
+            correct_matches_path=self.correct_matches_path,
+            brushes_path=self.brushes_path,
+            handles_path=self.handles_path,
+            knots_path=self.knots_path,
+            brush_scoring_config_path=self.config_path,
         )
 
-        # Load actual correct_matches.yaml for testing
-        correct_matches_path = Path("data/correct_matches.yaml")
-        if correct_matches_path.exists():
-            with open(correct_matches_path, "r") as f:
-                self.correct_matches = yaml.safe_load(f)
-        else:
-            pytest.skip("correct_matches.yaml not found")
+        # Load test correct_matches for testing
+        self.correct_matches = test_correct_matches
+
+    def teardown_method(self):
+        """Clean up test directory."""
+        shutil.rmtree(self.test_dir)
 
     def test_correct_matches_have_highest_priority(self):
         """Test that correct matches return immediately and don't run other strategies."""

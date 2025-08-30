@@ -1,6 +1,9 @@
 """Test the unified tiebreaker system for blade pattern matching."""
 
 import pytest
+import tempfile
+import shutil
+import yaml
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.loaders import CatalogLoader
 from sotd.match.types import MatchType
@@ -13,19 +16,38 @@ class TestUnifiedTiebreakerSystem:
     @pytest.fixture
     def blade_matcher(self):
         """Create a BladeMatcher instance for testing."""
-        catalog_path = Path("data/blades.yaml")
-        correct_matches_path = Path("data/correct_matches.yaml")
+        # Create temporary directory for test files
+        test_dir = tempfile.mkdtemp()
+
+        # Create temporary correct_matches.yaml with test data
+        correct_matches_path = Path(test_dir) / "correct_matches.yaml"
+        test_correct_matches = {"blade": {"Test Brand": {"Test Model": ["test blade pattern"]}}}
+
+        with open(correct_matches_path, "w") as f:
+            yaml.dump(test_correct_matches, f)
+
+        # Copy production catalog file to temp directory
+        production_catalog = Path("data/blades.yaml")
+        catalog_path = Path(test_dir) / "blades.yaml"
+
+        if production_catalog.exists():
+            shutil.copy(production_catalog, catalog_path)
 
         loader = CatalogLoader()
         loader.load_matcher_catalogs(
             catalog_path, "blade", correct_matches_path=correct_matches_path
         )
 
-        return BladeMatcher(
+        matcher = BladeMatcher(
             catalog_path=catalog_path,
             correct_matches_path=correct_matches_path,
             bypass_correct_matches=False,
         )
+
+        yield matcher
+
+        # Cleanup
+        shutil.rmtree(test_dir)
 
     def test_count_non_optional_parts_simple_pattern(self, blade_matcher):
         """Test counting non-optional parts in simple patterns."""
@@ -79,7 +101,7 @@ class TestUnifiedTiebreakerSystem:
         non_de_item = ("Personna", "Hair Shaper", "HAIR SHAPER", "personna.*hair.*shaper", None, {})
         non_de_score = blade_matcher._calculate_pattern_score(non_de_item, deprioritize_de=True)
 
-        # DE should have lower priority (higher number) when deprioritization is enabled
+        # DE should have lower priority (higher number) when deprioritization enabled
         assert de_score[0] == 1  # DE gets lower priority
         assert non_de_score[0] == 0  # Non-DE gets higher priority
 
@@ -102,7 +124,7 @@ class TestUnifiedTiebreakerSystem:
                 second_pattern, deprioritize_de=False
             )
 
-            # First pattern should have higher specificity (lower score values due to negative signs)
+            # First pattern should have higher specificity (lower score values)
             # Compare the scores lexicographically
             assert first_score <= second_score, (
                 f"First pattern {first_pattern[3]} should be more specific than "
@@ -110,7 +132,7 @@ class TestUnifiedTiebreakerSystem:
             )
 
     def test_personna_hair_shaper_vs_injector_tiebreaker(self, blade_matcher):
-        """Test that 'Personna hair shaper' wins over 'Personna injector' due to non-optional parts."""
+        """Test 'Personna hair shaper' wins over 'Personna injector' due to non-optional parts."""
         # Find the specific patterns we want to test
         hair_shaper_pattern = None
         injector_pattern = None
@@ -150,7 +172,7 @@ class TestUnifiedTiebreakerSystem:
         # The score tuple should be lexicographically smaller (more specific)
         assert (
             hair_shaper_score < injector_score
-        ), "Hair shaper pattern should be more specific than injector pattern due to length and parts"
+        ), "Hair shaper pattern should be more specific than injector pattern"
 
         # Verify the non-optional parts count
         hair_shaper_parts = blade_matcher._count_non_optional_parts(hair_shaper_pattern[3])
@@ -162,7 +184,7 @@ class TestUnifiedTiebreakerSystem:
         ), "Hair shaper should have more non-optional parts than injector"
 
     def test_generic_shavette_detection_and_global_approach(self, blade_matcher):
-        """Test that generic 'Shavette' razor format triggers global pattern specificity approach."""
+        """Test generic 'Shavette' razor format triggers global pattern specificity approach."""
         # Test with generic "Shavette" razor format
         normalized_text = "personna hair shaper"
         razor_format = "Shavette"
