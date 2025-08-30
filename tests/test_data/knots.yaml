@@ -1,0 +1,8 @@
+brands:
+  declaration_grooming:
+    models:
+      b2:
+        patterns:
+          - declaration grooming b2
+        fiber: badger
+        knot_size_mm: 26

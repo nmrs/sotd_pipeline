@@ -1,0 +1,17 @@
+known_brushes:
+  simpson:
+    chubby 2:
+      fiber: Badger
+      patterns:
+        - simpson.*chubby.*2
+  declaration_grooming:
+    b2:
+      fiber: Badger
+      patterns:
+        - declaration.*grooming.*b2
+  zenith:
+    moar_boar:
+      fiber: Boar
+      patterns:
+        - zenith.*moar.*boar
+        - zenith.*r/wetshaving.*moar.*boar

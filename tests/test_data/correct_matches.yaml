@@ -1,0 +1,34 @@
+blade:
+  feather:
+    artist club:
+      - feather artist club
+  personna:
+    lab blue:
+      - personna lab blue
+      - personna hair shaper
+  accuforge:
+    de:
+      - accuforge
+
+brush:
+  declaration_grooming:
+    b2:
+      - declaration grooming b2
+
+razor:
+  koraat:
+    moarteen:
+      - koraat moarteen
+      grind: full_hollow
+      width: 15/16
+      point: round
+
+soap:
+  declaration grooming:
+    original:
+      - declaration grooming original
+    massacre of the innocents:
+      - declaration grooming massacre of the innocents
+  stirling:
+    executive man:
+      - stirling executive man
