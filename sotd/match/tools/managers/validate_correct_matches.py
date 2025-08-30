@@ -49,7 +49,13 @@ class ValidateCorrectMatches:
         print(f"🔍 INIT_DEBUG: __file__: {__file__}")
         print(f"🔍 INIT_DEBUG: Project root: {project_root}")
 
-        self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
+        # Fail fast: correct_matches_path must be provided for proper path resolution
+        if not correct_matches_path:
+            raise ValueError(
+                "correct_matches_path must be provided. This prevents path resolution failures. "
+                "Pass the absolute path to correct_matches.yaml when creating the validator."
+            )
+        self.correct_matches_path = correct_matches_path
         print(f"🔍 INIT_DEBUG: Final correct_matches_path: {self.correct_matches_path}")
         print(f"🔍 INIT_DEBUG: Final path absolute: {self.correct_matches_path.absolute()}")
         print(f"🔍 INIT_DEBUG: Final path exists: {self.correct_matches_path.exists()}")
@@ -150,7 +156,12 @@ class ValidateCorrectMatches:
             from sotd.match.loaders import _yaml_catalog_cache
 
             # The YAML cache uses absolute resolved paths as keys
-            base_dir = self._data_dir or Path("data")
+            if not self._data_dir:
+                raise ValueError(
+                    f"_data_dir not set for validator. This causes path resolution failures. "
+                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                )
+            base_dir = self._data_dir
             if field == "razor":
                 cache_key = str((base_dir / "razors.yaml").resolve())
             elif field == "blade":
@@ -181,17 +192,29 @@ class ValidateCorrectMatches:
         # Always create a fresh matcher instance to avoid caching issues
         logger.info(f"Creating fresh matcher for field: {field}")
 
-        # Use _data_dir if set (for testing), otherwise use default data/ directory
-        base_dir = self._data_dir or Path("data")
+        # Fail fast: _data_dir must be set for proper path resolution
+        if not self._data_dir:
+            raise ValueError(
+                f"_data_dir not set for validator. This causes path resolution failures. "
+                f"Set validator._data_dir to project root / 'data' before calling validate_field."
+            )
+
+        base_dir = self._data_dir
 
         if field == "razor":
             return RazorMatcher(catalog_path=base_dir / "razors.yaml")
         elif field == "blade":
             return BladeMatcher(catalog_path=base_dir / "blades.yaml")
         elif field == "brush":
-            # For brush field, use BrushMatcher with default paths (same as working analyzer)
-            # This fixes the issue where hardcoded paths were causing "None" results
-            return BrushMatcher()
+            # For brush field, use BrushMatcher with absolute paths to prevent relative path fallbacks
+            # This fixes the issue where hardcoded relative paths were causing path resolution failures
+            return BrushMatcher(
+                correct_matches_path=base_dir / "correct_matches.yaml",
+                brushes_path=base_dir / "brushes.yaml",
+                handles_path=base_dir / "handles.yaml",
+                knots_path=base_dir / "knots.yaml",
+                brush_scoring_config_path=base_dir / "brush_scoring_config.yaml",
+            )
         elif field == "soap":
             return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
         elif field in ["knot", "handle"]:
@@ -572,10 +595,15 @@ class ValidateCorrectMatches:
         issues = []
 
         try:
+            # Fail fast: _data_dir must be set for proper path resolution
+            if not self._data_dir:
+                raise ValueError(
+                    f"_data_dir not set for validator. This causes path resolution failures. "
+                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                )
+            base_dir = self._data_dir
             # Load the blade catalog
-            catalog_path = (
-                self._data_dir / "blades.yaml" if self._data_dir else Path("data/blades.yaml")
-            )
+            catalog_path = base_dir / "blades.yaml"
             if not catalog_path.exists():
                 logger.warning(f"Blade catalog not found at {catalog_path}")
                 return issues
@@ -1073,8 +1101,13 @@ class ValidateCorrectMatches:
     def _load_catalog_data(self, field: str) -> Dict[str, Any]:
         """Load catalog data for a specific field."""
         try:
-            # Use _data_dir if set (for testing), otherwise use default data/ directory
-            base_dir = self._data_dir or Path("data")
+            # Fail fast: _data_dir must be set for proper path resolution
+            if not self._data_dir:
+                raise ValueError(
+                    f"_data_dir not set for validator. This causes path resolution failures. "
+                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                )
+            base_dir = self._data_dir
 
             if field == "blade":
                 catalog_path = base_dir / "blades.yaml"
