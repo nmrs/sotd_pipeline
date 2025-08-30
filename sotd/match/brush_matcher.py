@@ -9,7 +9,6 @@ from typing import List, Optional
 
 import yaml
 
-from sotd.match.config import BrushMatcherConfig
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
 from sotd.match.types import MatchResult
@@ -67,62 +66,52 @@ def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
 
 
 class BrushMatcher:
-    """
-    Enhanced brush scoring matcher using all components.
-
-    This implementation uses the brush scoring components for improved
-    architecture, performance monitoring, and scoring capabilities.
-    """
+    """Main brush matcher that orchestrates all matching strategies."""
 
     def __init__(
         self,
-        config_path: Path | BrushMatcherConfig | None = None,
-        correct_matches_path: Path | None = None,
-        **kwargs,
+        correct_matches_path: Optional[Path] = None,
+        brushes_path: Optional[Path] = None,
+        handles_path: Optional[Path] = None,
+        knots_path: Optional[Path] = None,
+        brush_scoring_config_path: Optional[Path] = None,
     ):
-        """
-        Initialize the enhanced brush scoring matcher.
-
-        Args:
-            config_path: Path to configuration file or BrushMatcherConfig object (for compatibility)
-            correct_matches_path: Path to correct_matches.yaml file
-            **kwargs: Additional arguments (ignored for now)
-        """
-        # Handle legacy BrushMatcherConfig objects for compatibility
-        if (
-            config_path is not None
-            and not isinstance(config_path, Path)
-            and hasattr(config_path, "catalog_path")
-        ):
-            # Legacy config object - extract paths
-            legacy_config = config_path
-            # Use brush_scoring_config_path if available, otherwise fall back to catalog_path
-            if (
-                hasattr(legacy_config, "brush_scoring_config_path")
-                and legacy_config.brush_scoring_config_path
-            ):
-                config_path = legacy_config.brush_scoring_config_path
-            else:
-                config_path = legacy_config.catalog_path
-            handles_path = getattr(legacy_config, "handles_path", Path("data/handles.yaml"))
-        else:
-            # New interface - use default paths
+        """Initialize the brush matcher with catalog paths."""
+        # Set default paths if not provided
+        if brushes_path is None:
+            brushes_path = Path("data/brushes.yaml")
+        if handles_path is None:
             handles_path = Path("data/handles.yaml")
+        if knots_path is None:
+            knots_path = Path("data/knots.yaml")
 
-        # Initialize configuration
-        self.config = BrushScoringConfig(config_path=config_path)
+        # Store catalog paths
+        self.brushes_path = brushes_path
+        self.handles_path = handles_path
+        self.knots_path = knots_path
+
+        # Set default correct_matches_path if not provided
+        if correct_matches_path is None:
+            correct_matches_path = Path("data/correct_matches.yaml")
 
         # Store correct_matches_path for wrapper strategies
         self.correct_matches_path = correct_matches_path
+
+        # FAIL FAST: Validate that all catalog files exist and are readable
+        self._validate_catalog_paths()
+
+        # Initialize configuration with provided path or default
+        if brush_scoring_config_path is None:
+            brush_scoring_config_path = Path("data/brush_scoring_config.yaml")
+        self.config = BrushScoringConfig(config_path=brush_scoring_config_path)
 
         # Load correct matches data
         correct_matches_data = load_correct_matches(correct_matches_path)
         self.correct_matches_data = correct_matches_data
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
-        # Use direct paths instead of legacy config
-        handles_path = Path("data/handles.yaml")
-        self.handle_matcher = HandleMatcher(handles_path)
+        # Use provided paths instead of hardcoded ones
+        self.handle_matcher = HandleMatcher(self.handles_path)
 
         # Initialize KnotMatcher with knot-specific strategies
         # Load catalogs directly without legacy config dependencies
@@ -176,13 +165,41 @@ class BrushMatcher:
         )
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "KnotOnlyStrategy",
+                "KnotMatcher",
                 "KnotMatcher",
                 DependencyType.REQUIRES_ANY,
             )
         )
 
         # HandleMatcher and KnotMatcher are now initialized above
+
+    def _validate_catalog_paths(self):
+        """Validate that all catalog paths exist and are readable. Fail fast if not."""
+        catalog_paths = [
+            ("brushes", self.brushes_path),
+            ("handles", self.handles_path),
+            ("knots", self.knots_path),
+            ("correct_matches", self.correct_matches_path),
+        ]
+
+        for name, path in catalog_paths:
+            if not path.exists():
+                raise FileNotFoundError(f"Catalog file '{name}' not found at: {path.absolute()}")
+
+            if not path.is_file():
+                raise ValueError(f"Catalog path '{name}' is not a file: {path.absolute()}")
+
+            # Test if we can actually read the file
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    # Just read first few bytes to test readability
+                    f.read(1)
+            except (PermissionError, UnicodeDecodeError) as e:
+                raise ValueError(f"Catalog file '{name}' is not readable: {path.absolute()} - {e}")
+
+        print("✅ All catalog paths validated successfully:")
+        for name, path in catalog_paths:
+            print(f"   {name}: {path.absolute()}")
 
     def _load_catalogs_directly(self) -> dict:
         """Load catalogs directly without legacy config dependencies."""
@@ -192,12 +209,12 @@ class BrushMatcher:
         if _catalog_cache is not None:
             return _catalog_cache
 
-        # Load catalogs and cache them
+        # Load catalogs and cache them using the stored paths
         catalogs = {}
-        catalogs["brushes"] = self._load_yaml_file(Path("data/brushes.yaml"))
-        catalogs["handles"] = self._load_yaml_file(Path("data/handles.yaml"))
-        catalogs["knots"] = self._load_yaml_file(Path("data/knots.yaml"))
-        catalogs["correct_matches"] = self._load_yaml_file(Path("data/correct_matches.yaml"))
+        catalogs["brushes"] = self._load_yaml_file(self.brushes_path)
+        catalogs["handles"] = self._load_yaml_file(self.handles_path)
+        catalogs["knots"] = self._load_yaml_file(self.knots_path)
+        catalogs["correct_matches"] = self._load_yaml_file(self.correct_matches_path)
 
         # Cache the catalogs for future use
         _catalog_cache = catalogs
