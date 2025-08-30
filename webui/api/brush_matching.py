@@ -178,30 +178,47 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
 def _calculate_handle_score_breakdown(handle_data: Dict[str, Any]) -> Dict[str, float]:
     """Calculate detailed breakdown of handle component score."""
     breakdown = {}
-    
+
     # Brand match (5 points)
     if handle_data.get("brand"):
         breakdown["brand_match"] = 5.0
     else:
         breakdown["brand_match"] = 0.0
-    
+
     # Model match (5 points)
     if handle_data.get("model"):
         breakdown["model_match"] = 5.0
     else:
         breakdown["model_match"] = 0.0
-    
+
     # Handle indicators (look for handle-related terms)
     handle_indicators = 0.0
     source_text = handle_data.get("source_text", "").lower()
-    handle_terms = ["handle", "wood", "resin", "acrylic", "metal", "brass", "aluminum", "steel", "titanium", "ebonite", "ivory", "horn", "bone", "stone", "marble", "granite"]
+    handle_terms = [
+        "handle",
+        "wood",
+        "resin",
+        "acrylic",
+        "metal",
+        "brass",
+        "aluminum",
+        "steel",
+        "titanium",
+        "ebonite",
+        "ivory",
+        "horn",
+        "bone",
+        "stone",
+        "marble",
+        "granite",
+    ]
     for term in handle_terms:
         if term in source_text:
             handle_indicators += 2.0
             break  # Only count once
-    
+
     breakdown["handle_indicators"] = handle_indicators
-    
+
     # Priority bonus (2 points for priority 1, 1 point for priority 2)
     priority = handle_data.get("priority")
     if priority == 1:
@@ -210,38 +227,38 @@ def _calculate_handle_score_breakdown(handle_data: Dict[str, Any]) -> Dict[str, 
         breakdown["priority_score"] = 1.0
     else:
         breakdown["priority_score"] = 0.0
-    
+
     return breakdown
 
 
 def _calculate_knot_score_breakdown(knot_data: Dict[str, Any]) -> Dict[str, float]:
     """Calculate detailed breakdown of knot component score."""
     breakdown = {}
-    
+
     # Brand match (5 points)
     if knot_data.get("brand"):
         breakdown["brand_match"] = 5.0
     else:
         breakdown["brand_match"] = 0.0
-    
+
     # Model match (5 points)
     if knot_data.get("model"):
         breakdown["model_match"] = 5.0
     else:
         breakdown["model_match"] = 0.0
-    
+
     # Fiber match (5 points)
     if knot_data.get("fiber"):
         breakdown["fiber_match"] = 5.0
     else:
         breakdown["fiber_match"] = 0.0
-    
+
     # Size match (2 points)
     if knot_data.get("knot_size_mm"):
         breakdown["size_match"] = 2.0
     else:
         breakdown["size_match"] = 0.0
-    
+
     # Knot indicators (look for knot-related terms)
     knot_indicators = 0.0
     source_text = knot_data.get("source_text", "").lower()
@@ -249,11 +266,11 @@ def _calculate_knot_score_breakdown(knot_data: Dict[str, Any]) -> Dict[str, floa
     for term in knot_terms:
         if term in source_text:
             knot_indicators += 2.0
-    
+
     # Cap knot indicators at 10 points
     knot_indicators = min(knot_indicators, 10.0)
     breakdown["knot_indicators"] = knot_indicators
-    
+
     # Priority bonus (2 points for priority 1, 1 point for priority 2)
     priority = knot_data.get("priority")
     if priority == 1:
@@ -262,7 +279,7 @@ def _calculate_knot_score_breakdown(knot_data: Dict[str, Any]) -> Dict[str, floa
         breakdown["priority_score"] = 1.0
     else:
         breakdown["priority_score"] = 0.0
-    
+
     return breakdown
 
 

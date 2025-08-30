@@ -20,12 +20,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "AP Shave Co",
                 "handle_model": "Beehive",
                 "_source_text": "AP Shave Co Beehive",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="AP Shave Co Beehive w/ G5C",
             matched={
@@ -34,28 +34,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
                 "source_text": "G5C",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure
         assert result.matched is not None
         assert result.matched["brand"] == "AP Shave Co"  # Same brand set at top level
         assert result.matched["model"] == "Beehive"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] == "AP Shave Co"
         assert result.matched["handle"]["model"] == "Beehive"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] == "AP Shave Co"
@@ -72,12 +72,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "Custom Handle",
                 "handle_model": "Artisan Turned",
                 "_source_text": "Custom Handle",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="Custom Handle w/ Declaration Grooming B2",
             matched={
@@ -86,28 +86,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Badger",
                 "knot_size_mm": 26.0,
                 "source_text": "Declaration Grooming B2",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure
         assert result.matched is not None
         assert result.matched["brand"] == "Custom Handle"  # Handle brand (fallback)
         assert result.matched["model"] == "Artisan Turned"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] == "Custom Handle"
         assert result.matched["handle"]["model"] == "Artisan Turned"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] == "Declaration Grooming"
@@ -124,12 +124,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "AP Shave Co",
                 "handle_model": "Custom Handle",
                 "_source_text": "AP Shave Co Handle",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="AP Shave Co Handle w/ Unknown Knot",
             matched={
@@ -138,28 +138,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Unknown",
                 "knot_size_mm": None,
                 "source_text": "Unknown Knot",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure
         assert result.matched is not None
         assert result.matched["brand"] == "AP Shave Co"  # Handle brand as fallback
         assert result.matched["model"] == "Custom Handle"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] == "AP Shave Co"
         assert result.matched["handle"]["model"] == "Custom Handle"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] is None
@@ -174,12 +174,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": None,  # No brand for handle
                 "handle_model": "Unknown",
                 "_source_text": "Unknown Handle",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="Unknown Handle w/ Declaration Grooming B2",
             matched={
@@ -188,28 +188,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Badger",
                 "knot_size_mm": 26.0,
                 "source_text": "Declaration Grooming B2",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure
         assert result.matched is not None
         assert result.matched["brand"] is None  # Handle brand (None) as fallback
         assert result.matched["model"] == "Unknown"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] is None
         assert result.matched["handle"]["model"] == "Unknown"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] == "Declaration Grooming"
@@ -226,12 +226,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "AP SHAVE CO",  # Uppercase
                 "handle_model": "Beehive",
                 "_source_text": "AP SHAVE CO Beehive",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="AP SHAVE CO Beehive w/ ap shave co G5C",
             matched={
@@ -240,28 +240,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
                 "source_text": "ap shave co G5C",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure - should NOT match due to case difference
         assert result.matched is not None
         assert result.matched["brand"] == "AP SHAVE CO"  # Handle brand (fallback, not same brand)
         assert result.matched["model"] == "Beehive"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] == "AP SHAVE CO"
         assert result.matched["handle"]["model"] == "Beehive"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] == "ap shave co"
@@ -276,12 +276,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "",  # Empty string
                 "handle_model": "Custom",
                 "_source_text": "Handle",
-                "_pattern_used": "handle_pattern"
+                "_pattern_used": "handle_pattern",
             },
             match_type="handle",
-            pattern="handle_pattern"
+            pattern="handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="Handle w/ Knot",
             matched={
@@ -290,28 +290,28 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Unknown",
                 "knot_size_mm": None,
                 "source_text": "Knot",
-                "_pattern_used": "knot_pattern"
+                "_pattern_used": "knot_pattern",
             },
             match_type="knot",
-            pattern="knot_pattern"
+            pattern="knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify the result structure
         assert result.matched is not None
         assert result.matched["brand"] == ""  # Empty string from handle (not same as None)
         assert result.matched["model"] == "Custom"  # Handle model preserved
-        
+
         # Verify handle section
         assert "handle" in result.matched
         assert result.matched["handle"]["brand"] == ""
         assert result.matched["handle"]["model"] == "Custom"
-        
+
         # Verify knot section
         assert "knot" in result.matched
         assert result.matched["knot"]["brand"] is None
@@ -326,12 +326,12 @@ class TestCompositeBrushBrandLogic:
                 "handle_maker": "Test Brand",
                 "handle_model": "Test Handle",
                 "_source_text": "Test Handle",
-                "_pattern_used": "test_handle_pattern"
+                "_pattern_used": "test_handle_pattern",
             },
             match_type="handle",
-            pattern="test_handle_pattern"
+            pattern="test_handle_pattern",
         )
-        
+
         knot_result = MatchResult(
             original="Test Handle w/ Test Knot",
             matched={
@@ -340,32 +340,32 @@ class TestCompositeBrushBrandLogic:
                 "fiber": "Test Fiber",
                 "knot_size_mm": 24.0,
                 "source_text": "Test Knot",
-                "_pattern_used": "test_knot_pattern"
+                "_pattern_used": "test_knot_pattern",
             },
             match_type="knot",
-            pattern="test_knot_pattern"
+            pattern="test_knot_pattern",
         )
-        
+
         # Create a minimal brush matcher instance
         matcher = BrushMatcher.__new__(BrushMatcher)
-        
+
         # Call the method that combines handle and knot results
         result = matcher._combine_handle_and_knot_results(handle_result, knot_result)
-        
+
         # Verify metadata preservation
         assert result.matched is not None
         assert result.matched["_matched_by"] == "HandleMatcher+KnotMatcher"
         assert result.matched["_pattern"] == "test_handle_pattern"
         assert result.matched["source_text"] == "Test Handle"  # Uses handle source_text
-        
+
         # Verify handle metadata
         assert result.matched["handle"]["_matched_by"] == "HandleMatcher"
         assert result.matched["handle"]["_pattern"] == "test_handle_pattern"
-        
+
         # Verify knot metadata
         assert result.matched["knot"]["_matched_by"] == "KnotMatcher"
         assert result.matched["knot"]["_pattern"] == "test_knot_pattern"
-        
+
         # Verify match type
         assert result.match_type == "composite"
         assert result.pattern == "test_handle_pattern"

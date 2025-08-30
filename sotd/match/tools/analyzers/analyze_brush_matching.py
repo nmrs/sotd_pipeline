@@ -218,7 +218,7 @@ def analyze_brush_matching(
                                     if handle.get("model"):
                                         print(f"        • model: {handle['model']}")
                                     if handle.get("source_text"):
-                                        print(f"        • source: \"{handle['source_text']}\"")
+                                        print(f'        • source: "{handle["source_text"]}"')
 
                             # Show knot component if present
                             if "knot" in matched_data and matched_data["knot"]:
@@ -239,7 +239,7 @@ def analyze_brush_matching(
                                     if knot.get("fiber"):
                                         print(f"        • fiber: {knot['fiber']}")
                                     if knot.get("source_text"):
-                                        print(f"        • source: \"{knot['source_text']}\"")
+                                        print(f'        • source: "{knot["source_text"]}"')
 
                         # Show split information if this is a split strategy
                         if strategy_name in ["automated_split", "full_input_component_matching"]:
@@ -270,7 +270,7 @@ def analyze_brush_matching(
                             if "knot_size_mm" in matched_data and matched_data["knot_size_mm"]:
                                 print(f"   📏 Size: {matched_data['knot_size_mm']}mm")
                             if "source_text" in matched_data and matched_data["source_text"]:
-                                print(f"   📝 Source: \"{matched_data['source_text']}\"")
+                                print(f'   📝 Source: "{matched_data["source_text"]}"')
 
                         # Show strategy-specific fields (only if they have meaningful values)
                         strategy_fields = []

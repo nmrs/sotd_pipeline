@@ -854,7 +854,7 @@ class TestCatalogValidation:
             # Clean up
             pass
 
-    # This test has been removed as it tests webui API logic, 
+    # This test has been removed as it tests webui API logic,
     # not core pipeline validation
     # The core pipeline validation is tested by the other tests in this file
 

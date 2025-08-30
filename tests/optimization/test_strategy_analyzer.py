@@ -57,7 +57,7 @@ brush_scoring_weights:
     automated_split: 60.0
 """
         )
-        
+
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -89,7 +89,7 @@ brush_scoring_weights:
     automated_split: 60.0
 """
         )
-        
+
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -121,7 +121,7 @@ brush_scoring_weights:
     automated_split: 60.0
 """
         )
-        
+
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -157,7 +157,7 @@ brush_scoring_weights:
       brand_match: 12.0
 """
         )
-        
+
         # Create a minimal correct_matches.yaml file
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
@@ -277,7 +277,7 @@ brush_scoring_weights:
     automated_split: 60.0
 """
         )
-        
+
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -287,7 +287,7 @@ brush:
       - test brush input
 """
         )
-        
+
         analyzer = StrategyAnalyzer(config_path, correct_matches_path)
         recommendations = analyzer.generate_recommendations()
 
