@@ -459,12 +459,12 @@ class CatalogValidator:
             field: Field to validate (e.g., "brush")
             
         Returns:
-            Dictionary with validation summary containing "issues" key
+            Dictionary with "issues" key containing validation results
         """
         if field == "brush":
             issues = self.validate_brush_catalog()
             return {"issues": issues}
         else:
             # For other fields, return empty issues list
-            # This can be extended later if needed
+            # This method is primarily for brush validation
             return {"issues": []}
