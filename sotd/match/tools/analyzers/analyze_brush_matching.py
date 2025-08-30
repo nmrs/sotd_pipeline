@@ -111,7 +111,7 @@ def analyze_brush_matching(
                     "matcher methods to bypass all matches"
                 )
 
-            result = scoring_matcher.match(brush_string)
+            result = scoring_matcher.match(brush_string, bypass_correct_matches=True)
 
             # Restore all original methods if we bypassed them
             if bypass_correct_matches:
@@ -140,15 +140,15 @@ def analyze_brush_matching(
 
                 # Sort by score (highest first)
                 sorted_strategies = sorted(
-                    result.all_strategies, key=lambda x: x.get("score", 0), reverse=True
+                    result.all_strategies, key=lambda x: getattr(x, "score", 0) or 0, reverse=True
                 )
 
                 for i, strategy_result in enumerate(sorted_strategies, 1):
-                    strategy_name = strategy_result.get("strategy", "Unknown")
-                    score = strategy_result.get("score", 0)
-                    match_type = strategy_result.get("match_type", "Unknown")
-                    pattern = strategy_result.get("pattern", "Unknown")
-                    matched_data = strategy_result.get("result", {})
+                    strategy_name = getattr(strategy_result, "strategy", "Unknown")
+                    score = getattr(strategy_result, "score", 0) or 0
+                    match_type = getattr(strategy_result, "match_type", "Unknown")
+                    pattern = getattr(strategy_result, "pattern", "Unknown")
+                    matched_data = strategy_result.matched or {}
 
                     # Format the score display
                     score_display = f"{score:.1f}"
@@ -167,73 +167,100 @@ def analyze_brush_matching(
                     print(f"   🔍 Pattern: {pattern}")
 
                     # Show detailed score breakdown
-                    print("   📊 Score Breakdown:")
+                    print("   📊 SCORE BREAKDOWN")
+                    print("   ─────────────────")
                     base_score = _get_base_score_for_strategy(strategy_name)
                     modifier_score = score - base_score
-                    print(f"     Base Score: {base_score:.1f}")
-                    print(f"     Modifiers: {modifier_score:+.1f}")
+                    print(f"   Base Score: {base_score:.1f}")
+                    print(f"   Modifiers: {modifier_score:+.1f}")
+                    print(f"   Final Score: {score:.1f}")
 
-                    # Show modifier details for ALL strategies (even if total effect is 0.0)
-                    print("     Modifier Details:")
+                    # Show modifier details
+                    print("\n   🔧 MODIFIER DETAILS")
+                    print("   ──────────────────")
                     _show_modifier_details(strategy_name, brush_string, matched_data)
 
                     if matched_data:
-                        print("   📝 Matched Data:")
+                        print("\n   🧩 COMPONENT DETAILS")
+                        print("   ───────────────────")
 
-                        # Debug: Show all available fields for this strategy
-                        if debug:
-                            print(f"     🔍 Available fields: {list(matched_data.keys())}")
-
-                        # Show key information in a clean way
-                        if "brand" in matched_data and matched_data["brand"]:
-                            print(f"     🏷️  Brand: {matched_data['brand']}")
-                        if "model" in matched_data and matched_data["model"]:
-                            print(f"     🏷️  Model: {matched_data['model']}")
-                        if "fiber" in matched_data and matched_data["fiber"]:
-                            print(f"     🧶 Fiber: {matched_data['fiber']}")
-                        if "knot_size_mm" in matched_data and matched_data["knot_size_mm"]:
-                            print(f"     📏 Size: {matched_data['knot_size_mm']}mm")
-
-                        # Show handle/knot structure if present
+                        # Show handle component if present
                         if "handle" in matched_data and matched_data["handle"]:
                             handle = matched_data["handle"]
-                            if handle.get("brand"):
-                                print(f"     🖐️  Handle: {handle['brand']}")
-                                if handle.get("model"):
-                                    print(f"        Model: {handle['model']}")
-                                if handle.get("material"):
-                                    print(f"        Material: {handle['material']}")
+                            handle_score = handle.get("score", 0.0)
+                            print(f"   🖐️  Handle Component")
+                            print(f"        Score: {handle_score:.1f}")
+                            print(f"        Breakdown:")
+                            _show_component_modifier_details("handle", brush_string, handle)
 
+                            # Show handle metadata
+                            if handle.get("brand") or handle.get("model"):
+                                print(f"        Metadata:")
+                                if handle.get("brand"):
+                                    print(f"        • brand: {handle['brand']}")
+                                if handle.get("model"):
+                                    print(f"        • model: {handle['model']}")
+                                if handle.get("source_text"):
+                                    print(f"        • source: \"{handle['source_text']}\"")
+
+                        # Show knot component if present
                         if "knot" in matched_data and matched_data["knot"]:
                             knot = matched_data["knot"]
-                            if knot.get("brand"):
-                                print(f"     🧶 Knot: {knot['brand']}")
-                                if knot.get("model"):
-                                    print(f"        Model: {knot['model']}")
-                                if knot.get("fiber"):
-                                    print(f"        Fiber: {knot['fiber']}")
-                                if knot.get("knot_size_mm"):
-                                    print(f"        Size: {knot['knot_size_mm']}mm")
+                            knot_score = knot.get("score", 0.0)
+                            print(f"\n   🧶 Knot Component")
+                            print(f"        Score: {knot_score:.1f}")
+                            print(f"        Breakdown:")
+                            _show_component_modifier_details("knot", brush_string, knot)
 
-                        # Show strategy-specific fields
+                            # Show knot metadata
+                            if knot.get("brand") or knot.get("model") or knot.get("fiber"):
+                                print(f"        Metadata:")
+                                if knot.get("brand"):
+                                    print(f"        • brand: {knot['brand']}")
+                                if knot.get("model"):
+                                    print(f"        • model: {knot['model']}")
+                                if knot.get("fiber"):
+                                    print(f"        • fiber: {knot['fiber']}")
+                                if knot.get("source_text"):
+                                    print(f"        • source: \"{knot['source_text']}\"")
+
+                        # Show split information if this is a split strategy
+                        if strategy_name in ["automated_split", "full_input_component_matching"]:
+                            print(f"\n   🔪 Split Information")
+                            print(f"   ──────────────────")
+                            if "handle" in matched_data and matched_data["handle"]:
+                                handle_text = matched_data["handle"].get("source_text", "unknown")
+                                print(f'   Handle Text: "{handle_text}"')
+                            if "knot" in matched_data and matched_data["knot"]:
+                                knot_text = matched_data["knot"].get("source_text", "unknown")
+                                print(f'   Knot Text: "{knot_text}"')
+                            if "split_priority" in matched_data:
+                                print(f"   Split Priority: {matched_data['split_priority']}")
+                            if "delimiter_priority" in matched_data:
+                                print(
+                                    f"   Delimiter Priority: {matched_data['delimiter_priority']}"
+                                )
+
+                        # Show strategy-specific fields (only if they have meaningful values)
+                        strategy_fields = []
                         if "user_intent" in matched_data and matched_data["user_intent"]:
-                            print(f"     🎯 User Intent: {matched_data['user_intent']}")
-                        if "strategy" in matched_data and matched_data["strategy"]:
-                            print(f"     🔧 Strategy: {matched_data['strategy']}")
-                        if "score" in matched_data and matched_data["score"]:
-                            print(f"     💯 Score: {matched_data['score']}")
+                            strategy_fields.append(("User Intent", matched_data["user_intent"]))
                         if (
                             "_matched_by_strategy" in matched_data
                             and matched_data["_matched_by_strategy"]
                         ):
-                            print(
-                                f"     🔧 Matched By Strategy: "
-                                f"{matched_data['_matched_by_strategy']}"
+                            strategy_fields.append(
+                                ("Matched By Strategy", matched_data["_matched_by_strategy"])
                             )
                         if "_pattern_used" in matched_data and matched_data["_pattern_used"]:
-                            print(f"     🔍 Pattern Used: {matched_data['_pattern_used']}")
+                            strategy_fields.append(("Pattern Used", matched_data["_pattern_used"]))
 
-                        # Show other relevant fields
+                        if strategy_fields:
+                            print(f"        Strategy Fields:")
+                            for key, value in strategy_fields:
+                                print(f"        • {key}: {value}")
+
+                        # Show other relevant fields (only if they have meaningful values)
                         excluded_keys = [
                             "brand",
                             "model",
@@ -247,11 +274,27 @@ def analyze_brush_matching(
                             "source_text",
                             "strategy",
                             "score",
+                            "split_priority",
+                            "delimiter_priority",
+                            "handle_text",
+                            "knot_text",
+                            "handle_maker",  # These are shown in split info section
                         ]
+                        other_fields = []
                         for key, value in matched_data.items():
-                            if key not in excluded_keys:
-                                if value and value != "Unknown":
-                                    print(f"     🔧 {key.replace('_', ' ').title()}: {value}")
+                            if (
+                                key not in excluded_keys
+                                and value
+                                and value != "Unknown"
+                                and value != "None"
+                                and not key.startswith("_")
+                            ):
+                                other_fields.append((key, value))
+
+                        if other_fields:
+                            print(f"        Other Fields:")
+                            for key, value in other_fields:
+                                print(f"        • {key.replace('_', ' ').title()}: {value}")
                     else:
                         print("   ❌ No match data")
 
@@ -268,46 +311,50 @@ def analyze_brush_matching(
                     print(f"  🔍 Pattern: {result.pattern}")
 
                     # Show detailed score breakdown for winner
-                    print("  📊 Score Breakdown:")
+                    print("  📊 SCORE BREAKDOWN")
+                    print("  ─────────────────")
                     base_score = _get_base_score_for_strategy(strategy)
                     modifier_score = float(score) - base_score if score != "N/A" else 0
-                    print(f"    Base Score: {base_score:.1f}")
-                    print(f"    Modifiers: {modifier_score:+.1f}")
+                    print(f"  Base Score: {base_score:.1f}")
+                    print(f"  Modifiers: {modifier_score:+.1f}")
+                    print(f"  Final Score: {score}")
 
-                    # Show modifier details for winner (even if total effect is 0.0)
-                    print("    Modifier Details:")
-                    _show_modifier_details(strategy, brush_string, result.matched)
+                    # Show modifier details for winner
+                    print("\n  🔧 MODIFIER DETAILS")
+                    print("  ──────────────────")
+                    _show_modifier_details(strategy, brush_string, result)
 
-                    print("\n  📝 Final Result:")
+                    print("\n  🧩 FINAL RESULT")
+                    print("  ────────────────")
 
                     # Show complete brush structure clearly
-                    print("     🪮 BRUSH COMPONENTS:")
+                    print("     🪮 BRUSH COMPONENTS")
 
-                    # Top-level brush info - ALWAYS show these fields
-                    print("       🏷️  TOP-LEVEL:")
-                    print(f"         Brand: {result.matched.get('brand', 'None')}")
-                    print(f"         Model: {result.matched.get('model', 'None')}")
-                    print(f"         Fiber: {result.matched.get('fiber', 'None')}")
-                    print(f"         Size: {result.matched.get('knot_size_mm', 'None')}mm")
+                    # Top-level brush info
+                    print("       🏷️  TOP-LEVEL")
+                    print(f"         • Brand: {result.matched.get('brand', 'None')}")
+                    print(f"         • Model: {result.matched.get('model', 'None')}")
+                    print(f"         • Fiber: {result.matched.get('fiber', 'None')}")
+                    print(f"         • Size: {result.matched.get('knot_size_mm', 'None')}mm")
 
-                    # Handle component - ALWAYS show all fields
-                    print("       🖐️  HANDLE:")
+                    # Handle component
+                    print("       🖐️  HANDLE")
                     if "handle" in result.matched and result.matched["handle"]:
                         handle = result.matched["handle"]
-                        print(f"         Brand: {handle.get('brand', 'None')}")
-                        print(f"         Model: {handle.get('model', 'None')}")
-                        print(f"         Material: {handle.get('material', 'None')}")
+                        print(f"         • Brand: {handle.get('brand', 'None')}")
+                        print(f"         • Model: {handle.get('model', 'None')}")
+                        print(f"         • Material: {handle.get('material', 'None')}")
                     else:
                         print("         (No handle data)")
 
-                    # Knot component - ALWAYS show all fields
-                    print("       🧶 KNOT:")
+                    # Knot component
+                    print("       🧶 KNOT")
                     if "knot" in result.matched and result.matched["knot"]:
                         knot = result.matched["knot"]
-                        print(f"         Brand: {knot.get('brand', 'None')}")
-                        print(f"         Model: {knot.get('model', 'None')}")
-                        print(f"         Fiber: {knot.get('fiber', 'None')}")
-                        print(f"         Size: {knot.get('knot_size_mm', 'None')}mm")
+                        print(f"         • Brand: {knot.get('brand', 'None')}")
+                        print(f"         • Model: {knot.get('model', 'None')}")
+                        print(f"         • Fiber: {knot.get('fiber', 'None')}")
+                        print(f"         • Size: {knot.get('knot_size_mm', 'None')}mm")
                     else:
                         print("         (No knot data)")
 
@@ -470,20 +517,32 @@ def _get_base_score_for_strategy(strategy_name: str) -> float:
     return config.get_base_strategy_score(strategy_name)
 
 
-def _show_modifier_details(strategy_name: str, input_text: str, matched_data: dict):
+def _show_modifier_details(strategy_name: str, input_text: str, result):
     """Show detailed breakdown of modifiers using actual ScoringEngine."""
     try:
         # Import the actual ScoringEngine and config
         config = BrushScoringConfig()
         engine = ScoringEngine(config)
 
-        # Create a mock result object for the engine to work with
-        mock_result = Mock()
-        mock_result.matched = matched_data
-        mock_result.strategy = strategy_name
+        # The result parameter can be either:
+        # 1. A MatchResult object (from winner section)
+        # 2. A dict (from strategy results section)
+        # We need to handle both cases
+
+        # Handle both MatchResult and dict cases
+        if hasattr(result, "matched"):
+            # This is a MatchResult object - use it directly
+            result_obj = result
+        else:
+            # This is a dict - create a minimal result object
+            from unittest.mock import Mock
+
+            result_obj = Mock()
+            result_obj.matched = result
+            result_obj.strategy = strategy_name
 
         # Get the actual modifier calculation from the engine
-        modifier_score = engine._calculate_modifiers(mock_result, input_text, strategy_name)
+        modifier_score = engine._calculate_modifiers(result_obj, input_text, strategy_name)
 
         # Show the real modifier breakdown
         print(f"     Real Modifier Total: {modifier_score:+.1f}")
@@ -504,21 +563,108 @@ def _show_modifier_details(strategy_name: str, input_text: str, matched_data: di
                     engine.cached_results = {"unified_result": None}
 
                 try:
-                    modifier_value = modifier_function(input_text, mock_result, strategy_name)
+                    modifier_value = modifier_function(input_text, result_obj, strategy_name)
                     total_effect = modifier_value * modifier_weight
 
-                    # Show ALL modifiers, including those with 0.0 effect
-                    print(
-                        f"       {modifier_name}: {modifier_value:.1f} × "
-                        f"{modifier_weight:+.1f} = {total_effect:+.1f}"
-                    )
+                    # Show just the final modifier value (clean and simple)
+                    if total_effect > 0:
+                        print(f"       {modifier_name}: +{total_effect:.1f}")
+                    elif total_effect < 0:
+                        print(f"       {modifier_name}: {total_effect:.1f}")
+                    else:
+                        print(f"       {modifier_name}: +0.0")
                 except Exception as e:
                     print(f"       {modifier_name}: Error calculating modifier: {e}")
 
     except Exception as e:
         # Fallback to simplified calculation if engine fails
         print(f"     ⚠️  Using simplified modifier calculation (engine error: {e})")
-        _show_simplified_modifier_details(strategy_name, input_text, matched_data)
+        _show_simplified_modifier_details(strategy_name, input_text, result.matched)
+
+
+def _show_component_modifier_details(component_type: str, input_text: str, component_data: dict):
+    """Show detailed breakdown of modifiers for handle/knot components."""
+    _show_simplified_component_modifier_details(component_type, input_text, component_data)
+
+
+def _show_simplified_component_modifier_details(
+    component_type: str, input_text: str, component_data: dict
+):
+    """Show simplified modifier details for handle/knot components when engine fails."""
+    # Simplified modifier calculations for component-level debugging
+    if component_type == "knot":
+        print(f"           🧶 Analyzing KNOT component...")
+        # Knot-specific modifiers
+        if component_data.get("fiber"):
+            print(f"              fiber_match: +5.0")
+        else:
+            print(f"              fiber_match: +0.0")
+
+        if component_data.get("knot_size_mm"):
+            print(f"              size_match: +5.0")
+        else:
+            print(f"              size_match: +0.0")
+
+        if component_data.get("brand"):
+            print(f"              brand_match: +5.0")
+        else:
+            print(f"              brand_match: +0.0")
+
+        # Check for knot indicators in text
+        knot_indicators = [
+            "boar",
+            "badger",
+            "synthetic",
+            "syn",
+            "nylon",
+            "plissoft",
+            "tuxedo",
+            "cashmere",
+            "mixed",
+        ]
+        if any(indicator in input_text.lower() for indicator in knot_indicators):
+            print(f"              knot_indicators: +5.0")
+        else:
+            print(f"              knot_indicators: +0.0")
+
+        # Priority score based on section priority
+        priority = component_data.get("priority", 0)
+        if priority is not None:
+            priority_bonus = max(0, 3 - priority + 1)
+            print(f"              priority_score: +{priority_bonus:.1f}")
+        else:
+            print(f"              priority_score: +0.0")
+
+    elif component_type == "handle":
+        print(f"           🖐️  Analyzing HANDLE component...")
+        # Handle-specific modifiers - show ALL fields for consistency
+
+        # Brand match
+        if component_data.get("brand"):
+            print(f"              brand_match: +5.0")
+        else:
+            print(f"              brand_match: +0.0")
+
+        # Model match (if applicable)
+        if component_data.get("model"):
+            print(f"              model_match: +5.0")
+        else:
+            print(f"              model_match: +0.0")
+
+        # Check for handle indicators in text
+        handle_indicators = ["wood", "resin", "metal", "turned", "custom", "artisan", "stock"]
+        if any(indicator in input_text.lower() for indicator in handle_indicators):
+            print(f"              handle_indicators: +5.0")
+        else:
+            print(f"              handle_indicators: +0.0")
+
+        # Priority score based on section priority
+        priority = component_data.get("priority", 0)
+        if priority is not None:
+            priority_bonus = max(0, 3 - priority + 1)
+            print(f"              priority_score: +{priority_bonus:.1f}")
+        else:
+            print(f"              priority_score: +0.0")
 
 
 def _get_modifier_weights_for_strategy(strategy_name: str) -> dict:
