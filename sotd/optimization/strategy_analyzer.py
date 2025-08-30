@@ -135,9 +135,8 @@ class StrategyAnalyzer:
 
         try:
             brush_matcher = BrushMatcher(
-                config_path=temp_config_path,
+                brush_scoring_config_path=temp_config_path,
                 correct_matches_path=self.correct_matches_path,
-                bypass_correct_matches=True,  # Skip correct_matches.yaml to see natural strategy wins
             )
 
             # Analyze each test case
@@ -148,11 +147,11 @@ class StrategyAnalyzer:
 
                 try:
                     # Get the match result
-                    result = brush_matcher.match(test_case["input"])
+                    result = brush_matcher.match(test_case["input"], bypass_correct_matches=True)
 
                     if result and result.matched:
                         # Extract strategy information
-                        strategy_used = result.matched.get("strategy", "unknown")
+                        strategy_used = result.matched.get("_matched_by_strategy", "unknown")
                         pattern_used = result.matched.get("_pattern_used", "unknown")
 
                         # Record the win

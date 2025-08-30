@@ -171,14 +171,14 @@ class BrushMatcher:
         # Single Component depends on any of HandleMatcher or KnotMatcher
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "HandleOnlyStrategy",
+                "FullInputComponentMatchingStrategy",
                 "HandleMatcher",
                 DependencyType.REQUIRES_ANY,
             )
         )
         self.strategy_dependency_manager.add_dependency(
             StrategyDependency(
-                "KnotMatcher",
+                "FullInputComponentMatchingStrategy",
                 "KnotMatcher",
                 DependencyType.REQUIRES_ANY,
             )
@@ -367,8 +367,7 @@ class BrushMatcher:
         )
 
         # Skip problematic component strategies for now - they expect component-level data, not brush-level data
-        # strategies.append(HandleOnlyStrategy(self.handle_matcher))
-        # strategies.append(KnotOnlyStrategy(self.knot_matcher))
+        # These strategies are now deprecated and replaced by component strategies within unified strategies
 
         return strategies
 

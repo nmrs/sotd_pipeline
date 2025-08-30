@@ -106,6 +106,10 @@ class BrushScoringOptimizer:
         self.weight_tensors = extract_weights(self.config)
         logger.info(f"Created {len(self.weight_tensors)} weight tensors")
 
+        # Create properties for easy access to weight information
+        self.optimizable_weights = self._weights_to_dict()
+        self.weight_names = list(self.weight_tensors.keys())
+
     def _weights_to_dict(self) -> Dict[str, float]:
         """Convert weight tensors back to dictionary."""
         return {name: tensor.item() for name, tensor in self.weight_tensors.items()}
@@ -119,13 +123,36 @@ class BrushScoringOptimizer:
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     if isinstance(value, (int, float)):
-                        weight_key = f"{key}"
-                        if weight_key in weight_dict:
-                            obj[key] = weight_dict[weight_key]
+                        # Check if this exact key path exists in weights
+                        if key in weight_dict:
+                            obj[key] = weight_dict[key]
                     elif isinstance(value, dict):
                         update_nested(value, weight_dict)
 
-        update_nested(updated_config, weights)
+        # Handle dot-notation keys like "brush_scoring_weights.base_strategies.known_brush"
+        for weight_key, weight_value in weights.items():
+            if "." in weight_key:
+                # Split the key into parts
+                parts = weight_key.split(".")
+                current = updated_config
+
+                # Navigate to the parent of the target key
+                for part in parts[:-1]:
+                    if part in current and isinstance(current[part], dict):
+                        current = current[part]
+                    else:
+                        # If path doesn't exist, skip this weight
+                        break
+                else:
+                    # We found the parent, now update the target key
+                    target_key = parts[-1]
+                    if target_key in current:
+                        current[target_key] = weight_value
+            else:
+                # Simple key, update directly
+                if weight_key in updated_config:
+                    updated_config[weight_key] = weight_value
+
         return updated_config
 
     def _load_test_cases(self) -> List[Dict[str, Any]]:
@@ -258,9 +285,8 @@ class BrushScoringOptimizer:
 
         try:
             brush_matcher = BrushMatcher(
-                config_path=temp_config_path,
                 correct_matches_path=self.correct_matches_path,
-                bypass_correct_matches=True,  # Skip correct_matches.yaml for optimization
+                brush_scoring_config_path=temp_config_path,
             )
 
             # Use cached test cases to avoid reloading YAML file
@@ -595,3 +621,48 @@ class BrushScoringOptimizer:
     def optimize_weights(self) -> Tuple[Dict[str, float], List[Dict[str, Any]]]:
         """Legacy method - now calls round-robin optimization by default."""
         return self.optimize_weights_round_robin()
+
+    def save_optimized_config(self, weights: Dict[str, float], output_path: Path) -> None:
+        """Save optimized configuration to a YAML file.
+
+        Args:
+            weights: Dictionary of optimized weight values
+            output_path: Path where to save the optimized configuration
+        """
+        # Update the configuration with the optimized weights
+        updated_config = self._update_config_with_weights(weights)
+
+        # Save to file
+        with open(output_path, "w") as f:
+            yaml.dump(updated_config, f, default_flow_style=False, indent=2)
+
+        logger.info(f"Saved optimized configuration to: {output_path}")
+
+    def get_weight_changes(
+        self, optimized_weights: Dict[str, float]
+    ) -> Dict[str, Dict[str, float]]:
+        """Calculate weight changes from original to optimized values.
+
+        Args:
+            optimized_weights: Dictionary of optimized weight values
+
+        Returns:
+            Dictionary mapping weight names to change information
+        """
+        original_weights = self._weights_to_dict()
+        changes = {}
+
+        for weight_name, optimized_value in optimized_weights.items():
+            if weight_name in original_weights:
+                original_value = original_weights[weight_name]
+                change = optimized_value - original_value
+                change_percent = (change / original_value) * 100 if original_value != 0 else 0
+
+                changes[weight_name] = {
+                    "original": original_value,
+                    "optimized": optimized_value,
+                    "change": change,
+                    "change_percent": change_percent,
+                }
+
+        return changes

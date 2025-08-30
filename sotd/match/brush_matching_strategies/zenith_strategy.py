@@ -19,9 +19,9 @@ class ZenithBrushMatchingStrategy:
         # Normalize text
         normalized = normalized_text.lower()
 
-        # Match Zenith B-series patterns (e.g., 'zenith b2', 'zenith b15')
+        # Match Zenith B-series patterns (e.g., 'zenith b2', 'zenith b15') - only 1-2 digit models
         brand_match = re.search(r"zenith", normalized, re.IGNORECASE)
-        model_match = re.search(r"zenith\s+(b\d{1,2})", normalized, re.IGNORECASE)
+        model_match = re.search(r"zenith\s+(b\d{1,2})\b", normalized, re.IGNORECASE)
 
         if brand_match and model_match:
             brand = "Zenith"
