@@ -333,13 +333,23 @@ def analyze_brush_matching(
                 print("🏆 WINNER: Best Match (Highest Score)")
                 print("=" * 40)
 
-                if result.matched:
-                    strategy = result.matched.get("strategy", "Unknown")
-                    score = result.matched.get("score", "N/A")
+                # Filter out results with no valid matches, just like the pipeline does
+                valid_results = [
+                    r
+                    for r in sorted_strategies
+                    if r.matched
+                    and (r.matched.get("brand") or r.matched.get("handle") or r.matched.get("knot"))
+                ]
+
+                if valid_results:
+                    # Use the best valid result
+                    best_valid_result = valid_results[0]  # Already sorted by score
+                    strategy = best_valid_result.matched.get("strategy", "Unknown")
+                    score = best_valid_result.matched.get("score", "N/A")
                     print(f"  🥇 Strategy: {strategy}")
                     print(f"  💯 Score: {score}")
-                    print(f"  🎯 Match Type: {result.match_type}")
-                    print(f"  🔍 Pattern: {result.pattern}")
+                    print(f"  🎯 Match Type: {best_valid_result.match_type}")
+                    print(f"  🔍 Pattern: {best_valid_result.pattern}")
 
                     # Show detailed score breakdown for winner
                     print("  📊 SCORE BREAKDOWN")
@@ -353,7 +363,7 @@ def analyze_brush_matching(
                     # Show modifier details for winner
                     print("\n  🔧 MODIFIER DETAILS")
                     print("  ──────────────────")
-                    _show_modifier_details(strategy, brush_string, result)
+                    _show_modifier_details(strategy, brush_string, best_valid_result)
 
                     print("\n  🧩 FINAL RESULT")
                     print("  ────────────────")
@@ -363,15 +373,20 @@ def analyze_brush_matching(
 
                     # Top-level brush info
                     print("       🏷️  TOP-LEVEL")
-                    print(f"         • Brand: {result.matched.get('brand', 'None')}")
-                    print(f"         • Model: {result.matched.get('model', 'None')}")
-                    print(f"         • Fiber: {result.matched.get('fiber', 'None')}")
-                    print(f"         • Size: {result.matched.get('knot_size_mm', 'None')}mm")
+                    print(f"         • Brand: {best_valid_result.matched.get('brand', 'None')}")
+                    print(f"         • Model: {best_valid_result.matched.get('model', 'None')}")
+                    print(f"         • Fiber: {best_valid_result.matched.get('fiber', 'None')}")
+                    print(
+                        f"         • Size: {best_valid_result.matched.get('knot_size_mm', 'None')}mm"
+                    )
 
                     # Handle component
                     print("       🖐️  HANDLE")
-                    if "handle" in result.matched and result.matched["handle"]:
-                        handle = result.matched["handle"]
+                    if (
+                        "handle" in best_valid_result.matched
+                        and best_valid_result.matched["handle"]
+                    ):
+                        handle = best_valid_result.matched["handle"]
                         print(f"         • Brand: {handle.get('brand', 'None')}")
                         print(f"         • Model: {handle.get('model', 'None')}")
                         print(f"         • Material: {handle.get('material', 'None')}")
@@ -380,8 +395,8 @@ def analyze_brush_matching(
 
                     # Knot component
                     print("       🧶 KNOT")
-                    if "knot" in result.matched and result.matched["knot"]:
-                        knot = result.matched["knot"]
+                    if "knot" in best_valid_result.matched and best_valid_result.matched["knot"]:
+                        knot = best_valid_result.matched["knot"]
                         print(f"         • Brand: {knot.get('brand', 'None')}")
                         print(f"         • Model: {knot.get('model', 'None')}")
                         print(f"         • Fiber: {knot.get('fiber', 'None')}")
@@ -391,7 +406,7 @@ def analyze_brush_matching(
 
                     # Show other relevant fields
                     other_fields = []
-                    for key, value in result.matched.items():
+                    for key, value in best_valid_result.matched.items():
                         excluded_keys = [
                             "brand",
                             "model",
@@ -411,7 +426,12 @@ def analyze_brush_matching(
                         for field in other_fields:
                             print(f"         {field}")
                 else:
-                    print("  ❌ No final result")
+                    print("  ❌ No valid results found (all strategies returned empty matches)")
+                    print("  📊 Raw scores (including invalid results):")
+                    for i, strategy_result in enumerate(sorted_strategies[:3], 1):  # Show top 3
+                        strategy_name = getattr(strategy_result, "strategy", "Unknown")
+                        score = getattr(strategy_result, "score", 0)
+                        print(f"    #{i}: {strategy_name} - Score: {score} (No valid match)")
 
             else:
                 print("  ❌ No matches found or no strategy results available")

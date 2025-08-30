@@ -581,8 +581,23 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
             )
             formatted_results.append(formatted_result)
 
-        # Find the winner (highest score)
-        winner = max(formatted_results, key=lambda x: x.score)
+        # Find the winner (highest score among valid results)
+        # Filter out results with no valid matches, just like the pipeline does
+        valid_results = [
+            r
+            for r in formatted_results
+            if r.matchedData
+            and (
+                r.matchedData.get("brand")
+                or r.matchedData.get("handle")
+                or r.matchedData.get("knot")
+            )
+        ]
+        winner = (
+            max(valid_results, key=lambda x: x.score)
+            if valid_results
+            else max(formatted_results, key=lambda x: x.score)
+        )
 
         # Get enriched data
         enriched_data = analysis_result.get("enriched_data", {})

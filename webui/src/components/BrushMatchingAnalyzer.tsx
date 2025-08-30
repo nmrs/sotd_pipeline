@@ -454,59 +454,164 @@ export function BrushMatchingAnalyzer() {
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-4'>
-                    {results.results.map((result, index) => (
-                      <Card key={result.strategy} className='border-gray-200'>
-                        <CardContent className='pt-6'>
-                          <div className='flex items-center justify-between mb-4'>
-                            <div className='flex items-center gap-2'>
-                              {getStrategyIcon(index + 1)}
-                              <Badge variant='outline' className='font-mono'>
-                                #{index + 1}
-                              </Badge>
-                              <h3 className='font-semibold text-lg'>
-                                {result.strategy.toUpperCase()}
-                              </h3>
-                            </div>
-                            <div className='text-right'>
-                              <div className='flex items-baseline gap-2 justify-end'>
-                                <span className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
-                                  {result.score}
-                                </span>
-                                {result.scoreBreakdown.modifiers > 0 && (
-                                  <span className='text-sm text-green-600 font-medium'>
-                                    (+{result.scoreBreakdown.modifiers})
-                                  </span>
-                                )}
+                    {results.results
+                      .filter(result => {
+                        // Filter out strategies with no valid matches
+                        const hasValidData = result.matchedData && (
+                          result.matchedData.brand ||
+                          result.matchedData.handle ||
+                          result.matchedData.knot
+                        );
+                        return hasValidData;
+                      })
+                      .map((result, index) => (
+                        <Card key={result.strategy} className='border-gray-200'>
+                          <CardContent className='pt-6'>
+                            <div className='flex items-center justify-between mb-4'>
+                              <div className='flex items-center gap-2'>
+                                {getStrategyIcon(index + 1)}
+                                <Badge variant='outline' className='font-mono'>
+                                  #{index + 1}
+                                </Badge>
+                                <h3 className='font-semibold text-lg'>
+                                  {result.strategy.toUpperCase()}
+                                </h3>
+                                <Badge variant='secondary' className='bg-green-100 text-green-800'>
+                                  ✓ Matched
+                                </Badge>
                               </div>
-                              <p className='text-sm text-gray-600'>{result.matchType || 'None'}</p>
-                              <p className='text-xs text-gray-500'>
-                                {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
-                              </p>
+                              <div className='text-right'>
+                                <div className='flex items-baseline gap-2 justify-end'>
+                                  <span className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
+                                    {result.score}
+                                  </span>
+                                  {result.scoreBreakdown.modifiers > 0 && (
+                                    <span className='text-sm text-green-600 font-medium'>
+                                      (+{result.scoreBreakdown.modifiers})
+                                    </span>
+                                  )}
+                                </div>
+                                <p className='text-sm text-gray-600'>{result.matchType || 'None'}</p>
+                                <p className='text-xs text-gray-500'>
+                                  {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
+                                </p>
+                              </div>
                             </div>
-                          </div>
 
-                          {/* Score Breakdown - Reusable Component */}
-                          <ScoreBreakdownDisplay
-                            baseScore={result.scoreBreakdown.baseScore}
-                            modifiers={result.scoreBreakdown.modifiers}
-                            modifierDetails={result.scoreBreakdown.modifierDetails}
-                            total={result.scoreBreakdown.total}
-                          />
+                            {/* Score Breakdown - Reusable Component */}
+                            <ScoreBreakdownDisplay
+                              baseScore={result.scoreBreakdown.baseScore}
+                              modifiers={result.scoreBreakdown.modifiers}
+                              modifierDetails={result.scoreBreakdown.modifierDetails}
+                              total={result.scoreBreakdown.total}
+                            />
 
-                          {/* Modifier Details - Reusable Component */}
-                          <ModifierDetailsDisplay
-                            modifierDetails={result.scoreBreakdown.modifierDetails}
-                            modifiers={result.scoreBreakdown.modifiers}
-                          />
+                            {/* Modifier Details - Reusable Component */}
+                            <ModifierDetailsDisplay
+                              modifierDetails={result.scoreBreakdown.modifierDetails}
+                              modifiers={result.scoreBreakdown.modifiers}
+                            />
 
-                          {/* Component Details - Reusable Component */}
-                          <ComponentDetailsDisplay
-                            componentDetails={result.componentDetails}
-                            splitInformation={result.splitInformation}
-                          />
-                        </CardContent>
-                      </Card>
-                    ))}
+                            {/* Component Details - Reusable Component */}
+                            <ComponentDetailsDisplay
+                              componentDetails={result.componentDetails}
+                              splitInformation={result.splitInformation}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+
+                    {/* Non-Matching Strategies */}
+                    {results.results
+                      .filter(result => {
+                        // Filter for strategies with no valid matches
+                        const hasValidData = result.matchedData && (
+                          result.matchedData.brand ||
+                          result.matchedData.handle ||
+                          result.matchedData.knot
+                        );
+                        return !hasValidData;
+                      })
+                      .map((result, index) => (
+                        <Card key={result.strategy} className='border-gray-200 bg-gray-50'>
+                          <CardContent className='pt-6'>
+                            <div className='flex items-center justify-between mb-4'>
+                              <div className='flex items-center gap-2'>
+                                <Hash className='w-4 h-4 text-gray-400' />
+                                <Badge variant='outline' className='font-mono text-gray-500'>
+                                  #{results.results.filter(r => {
+                                    const hasValidData = r.matchedData && (
+                                      r.matchedData.brand ||
+                                      r.matchedData.handle ||
+                                      r.matchedData.knot
+                                    );
+                                    return hasValidData;
+                                  }).length + index + 1}
+                                </Badge>
+                                <h3 className='font-semibold text-lg text-gray-600'>
+                                  {result.strategy.toUpperCase()}
+                                </h3>
+                                <Badge variant='secondary' className='bg-red-100 text-red-800'>
+                                  ✗ No Match
+                                </Badge>
+                              </div>
+                              <div className='text-right'>
+                                <div className='flex items-baseline gap-2 justify-end'>
+                                  <span className='text-2xl font-bold text-gray-400'>
+                                    {result.score}
+                                  </span>
+                                  {result.scoreBreakdown.modifiers > 0 && (
+                                    <span className='text-sm text-gray-500 font-medium'>
+                                      (+{result.scoreBreakdown.modifiers})
+                                    </span>
+                                  )}
+                                </div>
+                                <p className='text-sm text-gray-500'>{result.matchType || 'None'}</p>
+                                <p className='text-xs text-gray-400'>
+                                  {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Score Breakdown for Non-Matching Strategies */}
+                            <ScoreBreakdownDisplay
+                              baseScore={result.scoreBreakdown.baseScore}
+                              modifiers={result.scoreBreakdown.modifiers}
+                              modifierDetails={result.scoreBreakdown.modifierDetails}
+                              total={result.scoreBreakdown.total}
+                            />
+
+                            {/* Modifier Details for Non-Matching Strategies */}
+                            <ModifierDetailsDisplay
+                              modifierDetails={result.scoreBreakdown.modifierDetails}
+                              modifiers={result.scoreBreakdown.modifiers}
+                            />
+
+                            {/* Component Details for Non-Matching Strategies */}
+                            <ComponentDetailsDisplay
+                              componentDetails={result.componentDetails}
+                              splitInformation={result.splitInformation}
+                            />
+
+                            {/* No Match Explanation */}
+                            <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded'>
+                              <h4 className='font-medium text-sm text-red-800 mb-2'>Why No Match?</h4>
+                              <div className='text-sm text-red-700 space-y-1'>
+                                <p>This strategy failed to produce a valid match because:</p>
+                                <ul className='list-disc list-inside ml-4 space-y-1'>
+                                  <li>No matching patterns found in the catalog</li>
+                                  <li>Pattern matching failed for the input text</li>
+                                  <li>Required fields (brand, model, etc.) could not be extracted</li>
+                                  <li>Strategy-specific logic rejected the input</li>
+                                </ul>
+                                <p className='text-xs text-red-600 mt-2'>
+                                  Score: {result.score} (below threshold or invalid result)
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                   </div>
                 </CardContent>
               </Card>
