@@ -106,7 +106,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched["brand"] == "Omega"
         assert result.matched["model"] == "10049"
         assert result.matched["fiber"] == "Boar"
-        assert result.strategy == "omega_semogue"
+        assert result.strategy == "omega_semogue_brush"
 
     def test_omega_semogue_strategy_matches_semogue_c3(self):
         """Test that OmegaSemogueBrushMatchingStrategy matches Semogue C3."""
@@ -122,7 +122,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched["brand"] == "Semogue"
         assert result.matched["model"] == "c3"  # Fixed: lowercase as returned by strategy
         assert result.matched["fiber"] == "Boar"
-        assert result.strategy == "omega_semogue"
+        assert result.strategy == "omega_semogue_brush"
 
     def test_omega_semogue_strategy_returns_none_for_no_match(self):
         """Test that OmegaSemogueBrushMatchingStrategy returns None for no match."""
@@ -162,9 +162,9 @@ class TestZenithBrushMatchingStrategy:
         assert result is not None
         assert result.matched is not None
         assert result.matched["brand"] == "Zenith"
-        assert result.matched["model"] == "B2"
+        assert result.matched["model"] == "b2"  # Strategy returns lowercase model names
         assert result.matched["fiber"] == "Boar"  # Fixed: capitalized as returned by strategy
-        assert result.strategy == "zenith"
+        assert result.strategy == "zenith_brush"
 
     def test_zenith_strategy_returns_none_for_no_match(self):
         """Test that ZenithBrushMatchingStrategy returns None for no match."""

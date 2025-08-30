@@ -47,6 +47,17 @@ brush:
 
     def test_extract_test_cases_complete_brush(self, tmp_path):
         """Test extraction of complete brush test cases."""
+        # Create a minimal config file
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(
+            """
+brush_scoring_weights:
+  base_strategies:
+    known_brush: 80.0
+    automated_split: 60.0
+"""
+        )
+        
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -58,7 +69,7 @@ brush:
 """
         )
 
-        analyzer = StrategyAnalyzer(Path("dummy"), correct_matches_path)
+        analyzer = StrategyAnalyzer(config_path, correct_matches_path)
 
         assert len(analyzer.test_cases) == 2
         assert analyzer.test_cases[0]["expected_type"] == "complete"
@@ -68,6 +79,17 @@ brush:
 
     def test_extract_test_cases_composite_handle(self, tmp_path):
         """Test extraction of composite handle test cases."""
+        # Create a minimal config file
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(
+            """
+brush_scoring_weights:
+  base_strategies:
+    known_brush: 80.0
+    automated_split: 60.0
+"""
+        )
+        
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -79,7 +101,7 @@ handle:
 """
         )
 
-        analyzer = StrategyAnalyzer(Path("dummy"), correct_matches_path)
+        analyzer = StrategyAnalyzer(config_path, correct_matches_path)
 
         assert len(analyzer.test_cases) == 2
         assert analyzer.test_cases[0]["expected_type"] == "composite"
@@ -89,6 +111,17 @@ handle:
 
     def test_extract_test_cases_composite_knot(self, tmp_path):
         """Test extraction of composite knot test cases."""
+        # Create a minimal config file
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(
+            """
+brush_scoring_weights:
+  base_strategies:
+    known_brush: 80.0
+    automated_split: 60.0
+"""
+        )
+        
         correct_matches_path = tmp_path / "correct_matches.yaml"
         correct_matches_path.write_text(
             """
@@ -100,7 +133,7 @@ knot:
 """
         )
 
-        analyzer = StrategyAnalyzer(Path("dummy"), correct_matches_path)
+        analyzer = StrategyAnalyzer(config_path, correct_matches_path)
 
         assert len(analyzer.test_cases) == 2
         assert analyzer.test_cases[0]["expected_type"] == "composite"
@@ -124,8 +157,19 @@ brush_scoring_weights:
       brand_match: 12.0
 """
         )
+        
+        # Create a minimal correct_matches.yaml file
+        correct_matches_path = tmp_path / "correct_matches.yaml"
+        correct_matches_path.write_text(
+            """
+brush:
+  Test Brand:
+    Test Model:
+      - test brush input
+"""
+        )
 
-        analyzer = StrategyAnalyzer(config_path, Path("dummy"))
+        analyzer = StrategyAnalyzer(config_path, correct_matches_path)
 
         expected_strategies = [
             "automated_split",
@@ -221,9 +265,30 @@ brush:
         assert results["overall_stats"]["success_rate"] == 0.0
         assert results["strategy_performance"]["failures"]["no_match"] == 1
 
-    def test_generate_recommendations_no_analysis(self):
+    def test_generate_recommendations_no_analysis(self, tmp_path):
         """Test recommendations generation without analysis."""
-        analyzer = StrategyAnalyzer(Path("dummy"), Path("dummy"))
+        # Create minimal test files
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text(
+            """
+brush_scoring_weights:
+  base_strategies:
+    known_brush: 80.0
+    automated_split: 60.0
+"""
+        )
+        
+        correct_matches_path = tmp_path / "correct_matches.yaml"
+        correct_matches_path.write_text(
+            """
+brush:
+  Test Brand:
+    Test Model:
+      - test brush input
+"""
+        )
+        
+        analyzer = StrategyAnalyzer(config_path, correct_matches_path)
         recommendations = analyzer.generate_recommendations()
 
         assert "error" in recommendations

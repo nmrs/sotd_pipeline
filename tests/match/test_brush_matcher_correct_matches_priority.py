@@ -11,7 +11,6 @@ import yaml
 from pathlib import Path
 
 from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.config import BrushMatcherConfig
 
 
 class TestBrushMatcherCorrectMatchesPriority:
@@ -19,8 +18,14 @@ class TestBrushMatcherCorrectMatchesPriority:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.config = BrushMatcherConfig.create_default()
-        self.brush_matcher = BrushMatcher(self.config)
+        # Use current BrushMatcher constructor signature
+        self.brush_matcher = BrushMatcher(
+            correct_matches_path=Path("data/correct_matches.yaml"),
+            brushes_path=Path("data/brushes.yaml"),
+            handles_path=Path("data/handles.yaml"),
+            knots_path=Path("data/knots.yaml"),
+            brush_scoring_config_path=Path("data/brush_scoring_config.yaml"),
+        )
 
         # Load actual correct_matches.yaml for testing
         correct_matches_path = Path("data/correct_matches.yaml")

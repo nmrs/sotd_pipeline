@@ -215,7 +215,7 @@ class TestScoringEngine:
             "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
             "knot": {"brand": None, "fiber": "badger"},
         }
-        engine.cached_results = {"unified_result": mock_unified_result}
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         result = MatchResult(
             original="Farvour Turn Craft 26mm",
@@ -262,7 +262,7 @@ class TestScoringEngine:
             "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
             "knot": {"brand": None, "fiber": "badger"},
         }
-        cached_results = {"unified_result": mock_unified_result}
+        cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         scored_results = engine.score_results([result], "Farvour Turn Craft 26mm", cached_results)
 
@@ -285,7 +285,7 @@ class TestScoringEngine:
             "handle": {"brand": None, "model": None},
             "knot": {"brand": "Declaration Grooming", "model": "B2"},
         }
-        engine.cached_results = {"unified_result": mock_unified_result}
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         result = MatchResult(
             original="Declaration B2",
@@ -393,7 +393,7 @@ class TestScoringEngine:
             "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
             "knot": {"brand": None, "fiber": "badger"},
         }
-        engine.cached_results = {"unified_result": mock_unified_result}
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         # Should return 1.0 when handle brand is populated but knot brand is not
         assert engine._modifier_handle_brand_without_knot_brand("test", None, "handle_only") == 1.0
@@ -451,7 +451,7 @@ class TestScoringEngine:
             "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
             "knot": {"brand": None, "fiber": "badger"},
         }
-        engine.cached_results = {"unified_result": mock_unified_result}
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         # Test handle_only strategy
         result_handle = MatchResult(
@@ -777,7 +777,7 @@ class TestScoringEngine:
             "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
             "knot": {"brand": None, "fiber": "badger"},
         }
-        engine.cached_results = {"unified_result": mock_unified_result}
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
 
         result = MatchResult(
             original="Farvour Turn Craft 26mm",

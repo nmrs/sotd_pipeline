@@ -15,7 +15,7 @@ class TestBrushMatcherMatchBypass:
 
         # Create matcher WITHOUT bypass setting
         matcher = BrushMatcher(
-            config_path=data_dir / "brush_scoring_config.yaml",
+            brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
         )
 
@@ -62,9 +62,8 @@ class TestBrushMatcherMatchBypass:
         # This is what the validation system currently does - creates a new matcher
         # with bypass_correct_matches=True
         bypass_matcher = BrushMatcher(
-            config_path=data_dir / "brush_scoring_config.yaml",
+            brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
-            bypass_correct_matches=True,
         )
 
         test_pattern = "a.p. shave co amber smoke g5c fan"
@@ -96,7 +95,7 @@ class TestBrushMatcherMatchBypass:
 
         # Create single matcher instance
         matcher = BrushMatcher(
-            config_path=data_dir / "brush_scoring_config.yaml",
+            brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
         )
 

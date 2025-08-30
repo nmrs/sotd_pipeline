@@ -107,14 +107,16 @@ class TestValidateCorrectMatchesBypass:
         data_dir = project_root / "data"
 
         # Test the exact constructor call that ValidateCorrectMatches makes
-        config_path = data_dir / "brush_scoring_config.yaml"
+        brush_scoring_config_path = data_dir / "brush_scoring_config.yaml"
 
-        print(f"🔍 DEBUG: Testing BrushMatcher constructor with config_path: {config_path}")
+        print(
+            f"🔍 DEBUG: Testing BrushMatcher constructor with brush_scoring_config_path: {brush_scoring_config_path}"
+        )
         print(f"🔍 DEBUG: Testing that bypass_correct_matches is no longer a constructor parameter")
 
         try:
             # This should work - test the constructor signature without bypass_correct_matches
-            matcher = BrushMatcher(config_path=config_path)
+            matcher = BrushMatcher(brush_scoring_config_path=brush_scoring_config_path)
 
             print(f"🔍 DEBUG: Successfully created BrushMatcher")
             print(

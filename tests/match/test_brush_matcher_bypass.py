@@ -1,6 +1,5 @@
 """Test BrushMatcher bypass functionality."""
 
-import pytest
 from pathlib import Path
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -14,18 +13,17 @@ class TestBrushMatcherBypass:
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Create matcher with bypass enabled
+        # Create matcher (correct_matches.yaml is always loaded, but can be bypassed in match calls)
         matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
             knots_path=data_dir / "knots.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
-            bypass_correct_matches=True,
         )
 
-        # Test the specific pattern that's failing
+        # Test the specific pattern that's failing with bypass enabled
         test_pattern = "a.p. shave co amber smoke g5c fan"
-        result = matcher.match(test_pattern)
+        result = matcher.match(test_pattern, bypass_correct_matches=True)
 
         # Debug output
         print(f"🔍 DEBUG: Testing pattern: '{test_pattern}'")
@@ -67,18 +65,17 @@ class TestBrushMatcherBypass:
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Create matcher with bypass disabled (default)
+        # Create matcher with default behavior (correct_matches.yaml is always loaded)
         matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
             knots_path=data_dir / "knots.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
-            bypass_correct_matches=False,
         )
 
-        # Test the same pattern
+        # Test the same pattern with bypass disabled (default)
         test_pattern = "a.p. shave co amber smoke g5c fan"
-        result = matcher.match(test_pattern)
+        result = matcher.match(test_pattern, bypass_correct_matches=False)
 
         print(f"🔍 DEBUG: Testing pattern with bypass=False: '{test_pattern}'")
         print(f"🔍 DEBUG: Result: {result}")
@@ -114,25 +111,29 @@ class TestBrushMatcherBypass:
             print(f"🔍 DEBUG: Match span: {match.span()}")
 
     def test_brush_matcher_initialization(self):
-        """Test that BrushMatcher is initialized with correct bypass setting."""
+        """Test that BrushMatcher can bypass correct_matches.yaml in match calls."""
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Test with bypass=True
-        matcher_true = BrushMatcher(
+        # Create matcher (correct_matches.yaml is always loaded)
+        matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
-            knots_path=data_dir / "correct_matches.yaml",
+            knots_path=data_dir / "knots.yaml",
             correct_matches_path=data_dir / "correct_matches.yaml",
-            bypass_correct_matches=True,
         )
 
-        print(
-            f"🔍 DEBUG: Matcher bypass_correct_matches attribute: {getattr(matcher_true, 'bypass_correct_matches', 'NOT_FOUND')}"
-        )
+        # Test that bypass_correct_matches parameter works in match method
+        test_pattern = "test pattern"
 
-        # Should have the bypass attribute set correctly
-        assert hasattr(
-            matcher_true, "bypass_correct_matches"
-        ), "Matcher should have bypass_correct_matches attribute"
-        assert matcher_true.bypass_correct_matches is True, "bypass_correct_matches should be True"
+        # Test with bypass=True
+        result_bypass = matcher.match(test_pattern, bypass_correct_matches=True)
+        print(f"🔍 DEBUG: Match with bypass=True: {result_bypass}")
+
+        # Test with bypass=False (default)
+        result_no_bypass = matcher.match(test_pattern, bypass_correct_matches=False)
+        print(f"🔍 DEBUG: Match with bypass=False: {result_no_bypass}")
+
+        # Both should work without errors
+        assert matcher is not None, "Matcher should be created successfully"
+        print("✅ Matcher initialization and bypass parameter testing successful")

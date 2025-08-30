@@ -38,7 +38,12 @@ class TestDualSingleComponentOptimization:
             if dep.dependent_strategy == "FullInputComponentMatchingStrategy"
         ]
 
-        assert len(dual_dependencies) == 2, "Dual component should have 2 dependencies"
+        # FullInputComponentMatchingStrategy should have 4 dependencies:
+        # - 2 REQUIRES_SUCCESS (for dual component scenarios)
+        # - 2 REQUIRES_ANY (for single component scenarios)
+        assert (
+            len(dual_dependencies) == 4
+        ), "FullInputComponentMatchingStrategy should have 4 dependencies (2 REQUIRES_SUCCESS + 2 REQUIRES_ANY)"
 
         # Check HandleMatcher dependency
         handle_dep = next(
@@ -58,29 +63,59 @@ class TestDualSingleComponentOptimization:
         """Test that single component dependencies are properly configured."""
         dependency_manager = scoring_matcher.strategy_dependency_manager
 
-        # Check that single component depends on any of HandleMatcher or KnotMatcher
-        handle_dependencies = [
+        # Check that FullInputComponentMatchingStrategy depends on both HandleMatcher and KnotMatcher
+        full_input_dependencies = [
             dep
             for dep in dependency_manager.dependencies
-            if dep.dependent_strategy == "HandleOnlyStrategy"
-        ]
-        knot_dependencies = [
-            dep
-            for dep in dependency_manager.dependencies
-            if dep.dependent_strategy == "KnotOnlyStrategy"
+            if dep.dependent_strategy == "FullInputComponentMatchingStrategy"
         ]
 
-        # HandleOnlyStrategy should depend on HandleMatcher
-        assert len(handle_dependencies) == 1, "HandleOnlyStrategy should have 1 dependency"
-        handle_dep = handle_dependencies[0]
-        assert handle_dep.depends_on_strategy == "HandleMatcher"
-        assert handle_dep.dependency_type == DependencyType.REQUIRES_ANY
+        # FullInputComponentMatchingStrategy should have 4 dependencies:
+        # - 2 REQUIRES_SUCCESS (for dual component scenarios)
+        # - 2 REQUIRES_ANY (for single component scenarios)
+        assert (
+            len(full_input_dependencies) == 4
+        ), "FullInputComponentMatchingStrategy should have 4 dependencies (2 REQUIRES_SUCCESS + 2 REQUIRES_ANY)"
 
-        # KnotOnlyStrategy should depend on KnotMatcher
-        assert len(knot_dependencies) == 1, "KnotOnlyStrategy should have 1 dependency"
-        knot_dep = knot_dependencies[0]
-        assert knot_dep.depends_on_strategy == "KnotMatcher"
-        assert knot_dep.dependency_type == DependencyType.REQUIRES_ANY
+        # Check HandleMatcher dependencies (both REQUIRES_SUCCESS and REQUIRES_ANY)
+        handle_deps = [
+            dep for dep in full_input_dependencies if dep.depends_on_strategy == "HandleMatcher"
+        ]
+        assert (
+            len(handle_deps) == 2
+        ), "FullInputComponentMatchingStrategy should have 2 HandleMatcher dependencies"
+
+        # Check that one is REQUIRES_SUCCESS and one is REQUIRES_ANY
+        handle_success = next(
+            (dep for dep in handle_deps if dep.dependency_type == DependencyType.REQUIRES_SUCCESS),
+            None,
+        )
+        handle_any = next(
+            (dep for dep in handle_deps if dep.dependency_type == DependencyType.REQUIRES_ANY), None
+        )
+        assert (
+            handle_success is not None
+        ), "Should have REQUIRES_SUCCESS dependency on HandleMatcher"
+        assert handle_any is not None, "Should have REQUIRES_ANY dependency on HandleMatcher"
+
+        # Check KnotMatcher dependencies (both REQUIRES_SUCCESS and REQUIRES_ANY)
+        knot_deps = [
+            dep for dep in full_input_dependencies if dep.depends_on_strategy == "KnotMatcher"
+        ]
+        assert (
+            len(knot_deps) == 2
+        ), "FullInputComponentMatchingStrategy should have 2 KnotMatcher dependencies"
+
+        # Check that one is REQUIRES_SUCCESS and one is REQUIRES_ANY
+        knot_success = next(
+            (dep for dep in knot_deps if dep.dependency_type == DependencyType.REQUIRES_SUCCESS),
+            None,
+        )
+        knot_any = next(
+            (dep for dep in knot_deps if dep.dependency_type == DependencyType.REQUIRES_ANY), None
+        )
+        assert knot_success is not None, "Should have REQUIRES_SUCCESS dependency on KnotMatcher"
+        assert knot_any is not None, "Should have REQUIRES_ANY dependency on KnotMatcher"
 
     def test_dual_component_execution_constraints(self, dependency_manager):
         """Test that dual component is constrained by HandleMatcher and KnotMatcher success."""

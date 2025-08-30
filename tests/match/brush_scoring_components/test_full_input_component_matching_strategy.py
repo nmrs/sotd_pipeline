@@ -54,7 +54,7 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington B2")
 
         assert result is not None
-        assert result.strategy == "unified"  # Now uses unified strategy name
+        assert result.strategy == "full_input_component_matching"  # Uses the actual strategy name
         assert result.match_type == "composite"
         # Score is applied by scoring engine: base 50 + dual_component modifier 15 = 65
 
@@ -75,7 +75,7 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington")
 
         assert result is not None
-        assert result.strategy == "unified"  # Now uses unified strategy name
+        assert result.strategy == "full_input_component_matching"  # Uses the actual strategy name
         assert result.match_type == "single_component"
         # Score is applied by scoring engine: base 50 (no modifier)
 
@@ -97,7 +97,7 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming B2")
 
         assert result is not None
-        assert result.strategy == "unified"  # Now uses unified strategy name
+        assert result.strategy == "full_input_component_matching"  # Uses the actual strategy name
         assert result.match_type == "single_component"
         # Score is applied by scoring engine: base 50 (no modifier)
 
@@ -132,7 +132,7 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming B2")
 
         assert result is not None
-        assert result.strategy == "unified"  # Now uses unified strategy name
+        assert result.strategy == "full_input_component_matching"  # Uses the actual strategy name
         # Score is applied by scoring engine: base 50 (no modifier)
 
     def test_knot_matcher_exception_handling(self):
@@ -153,7 +153,7 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington")
 
         assert result is not None
-        assert result.strategy == "unified"  # Now uses unified strategy name
+        assert result.strategy == "full_input_component_matching"  # Uses the actual strategy name
         assert result.match_type == "single_component"
         # Score is applied by scoring engine: base 50 (no modifier)
 

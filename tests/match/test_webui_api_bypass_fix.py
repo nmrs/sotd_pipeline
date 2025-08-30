@@ -25,7 +25,7 @@ def test_webui_api_bypass_issue():
     # self.brush_matcher = BrushMatcher(bypass_correct_matches=True)
     # result = self.brush_matcher.match(pattern)  # Missing bypass parameter!
 
-    matcher = BrushMatcher(bypass_correct_matches=True)  # OLD approach
+    matcher = BrushMatcher()  # NEW approach - no constructor parameter
     test_pattern = "a.p. shave co amber smoke g5c fan"
 
     # This should work but doesn't because the constructor parameter is ignored

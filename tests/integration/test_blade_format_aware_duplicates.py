@@ -44,7 +44,7 @@ def test_blade_format_aware_duplicate_integration(tmp_path):
         yaml.dump(catalog_data, f)
 
     # Run validator
-    validator = ValidateCorrectMatches()
+    validator = ValidateCorrectMatches(correct_matches_path=correct_matches_file)
     validator._data_dir = tmp_path  # type: ignore
     validator.correct_matches = validator._load_correct_matches()
 
