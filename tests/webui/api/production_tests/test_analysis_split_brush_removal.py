@@ -1,5 +1,4 @@
 from unittest.mock import patch
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -20,12 +19,6 @@ class TestAnalysisAPISplitBrushRemoval:
     def mock_analyze_mismatch(self):
         """Mock the analyze_mismatch function"""
         with patch("webui.api.analysis.analyze_mismatch") as mock:
-            yield mock
-
-    @pytest.fixture
-    def mock_get_correct_matches(self):
-        """Mock the get_correct_matches function"""
-        with patch("webui.api.analysis.get_correct_matches") as mock:
             yield mock
 
     @pytest.fixture
@@ -67,45 +60,8 @@ class TestAnalysisAPISplitBrushRemoval:
             assert "handle_component" not in first_item
             assert "knot_component" not in first_item
 
-    def test_get_correct_matches_response_without_split_brush(self, mock_get_correct_matches):
-        """Test that get_correct_matches endpoint returns data without split_brush section"""
-
-        # Mock response without split_brush section
-        mock_response = {
-            "brush": {
-                "declaration grooming b2": {
-                    "original": "Declaration Grooming B2",
-                    "matched": {
-                        "brand": "Declaration Grooming",
-                        "model": "B2",
-                        "handle_maker": "Declaration Grooming",
-                        "knot_maker": "Declaration Grooming",
-                        "knot_type": "badger",
-                        "knot_size": "26mm",
-                    },
-                }
-            },
-            "handle": {},
-            "knot": {},
-        }
-
-        mock_get_correct_matches.return_value = mock_response
-
-        response = client.get("/api/analyze/correct-matches/brush")
-
-        assert response.status_code == 200
-        data = response.json()
-
-        # Verify that split_brush section is not present
-        assert "split_brush" not in data["entries"]
-
-        # Verify that brush data is present (API returns brand -> model -> strings structure)
-        assert "Declaration Grooming" in data["entries"]
-        # Check for a model that actually exists in the data
-        assert "B13" in data["entries"]["Declaration Grooming"]
-
     def test_brush_field_processing_without_split_brush(
-        self, mock_analyze_mismatch, mock_get_correct_matches
+        self, mock_analyze_mismatch
     ):
         """Test that brush field processing works without split_brush section"""
 
@@ -132,27 +88,7 @@ class TestAnalysisAPISplitBrushRemoval:
             ],
         }
 
-        # Mock correct_matches response without split_brush section
-        mock_correct_matches_response = {
-            "brush": {
-                "declaration grooming b2": {
-                    "original": "Declaration Grooming B2",
-                    "matched": {
-                        "brand": "Declaration Grooming",
-                        "model": "B2",
-                        "handle_maker": "Declaration Grooming",
-                        "knot_maker": "Declaration Grooming",
-                        "knot_type": "badger",
-                        "knot_size": "26mm",
-                    },
-                }
-            },
-            "handle": {},
-            "knot": {},
-        }
-
         mock_analyze_mismatch.return_value = mock_analyze_response
-        mock_get_correct_matches.return_value = mock_correct_matches_response
 
         # Test analyze_mismatch endpoint
         response = client.post(

@@ -488,4 +488,3 @@ class TestBrushValidationAPI:
         
         # Clean up temporary directories
         shutil.rmtree(temp_dir)
-        shutil.rmtree(temp_dir)
