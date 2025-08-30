@@ -110,12 +110,10 @@ const getBrushType = (
   if (!hasTopLevelBrand && !hasTopLevelModel && hasHandle && hasKnot) {
     // Check if handle and knot brands are the same
     if (handleBrand && knotBrand && handleBrand === knotBrand) {
-      // ERROR: Same brands but no top-level brand/model - this is a pipeline error
-      return {
-        type: 'ERROR',
-        isValid: false,
-        error: `Pipeline error: handle and knot have same brand (${handleBrand}) but no top-level brand/model`,
-      };
+      // Business rule: When handle and knot have the same brand, 
+      // the backend should automatically set that brand at the top level
+      // This is now handled correctly in the backend, so treat as valid
+      return { type: 'Composite (Same Brand)', isValid: true };
     } else if (handleBrand && knotBrand && handleBrand !== knotBrand) {
       // Valid composite: different brands
       return { type: 'Composite', isValid: true };

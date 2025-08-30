@@ -133,7 +133,7 @@ class TestBrushScoringOptimizer:
         # Create a sequence of values that will be returned
         values = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         value_index = [0]  # Use list to make it mutable in closure
-        
+
         def mock_evaluation_side_effect(*args, **kwargs):
             if value_index[0] < len(values):
                 result = values[value_index[0]]
@@ -141,7 +141,7 @@ class TestBrushScoringOptimizer:
                 return result
             else:
                 return 1.0  # Default return value after sequence is exhausted
-        
+
         mock_evaluate.side_effect = mock_evaluation_side_effect
 
         optimizer = BrushScoringOptimizer(temp_config_file, temp_correct_matches_file)
