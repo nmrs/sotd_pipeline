@@ -23,10 +23,9 @@ class CatalogValidator:
         print(f"DEBUG: Project root: {project_root}")
         print(f"DEBUG: Correct matches path: {self.correct_matches_path}")
 
-        # Initialize brush matcher with the same configuration as the Brush Matching Analyzer API
-        # This ensures both systems use the same configuration and produce consistent results
-        # The BrushMatcher will use the default config path relative to the working directory
-        self.brush_matcher = BrushMatcher(bypass_correct_matches=True)
+        # Initialize brush matcher with default configuration
+        # The bypass_correct_matches parameter is now passed to the match method, not constructor
+        self.brush_matcher = BrushMatcher()
 
         # Debug logging for brush matcher
         print(f"DEBUG: Brush matcher initialized: {self.brush_matcher}")
@@ -69,7 +68,9 @@ class CatalogValidator:
                                 # Run pattern through brush matcher WITHOUT correct_matches.yaml
                                 # This tests the actual strategy system, not the cheat sheet
                                 print(f"DEBUG: Testing pattern: {pattern}")  # Debug log
-                                result = self.brush_matcher.match(pattern, bypass_correct_matches=True)
+                                result = self.brush_matcher.match(
+                                    pattern, bypass_correct_matches=True
+                                )
                                 print(f"DEBUG: Result: {result}")  # Debug log
                                 print(
                                     f"DEBUG: Has matched: {hasattr(result, 'matched') if result else False}"

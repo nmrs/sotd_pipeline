@@ -9,7 +9,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException
+import traceback
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 # Add project root to Python path for imports
@@ -27,14 +28,17 @@ logger = logging.getLogger(__name__)
 try:
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
     from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
+    from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 
     logger.info("✅ MismatchAnalyzer imported successfully")
     logger.info("✅ UnmatchedAnalyzer imported successfully")
+    logger.info("✅ ValidateCorrectMatches imported successfully")
 except ImportError as e:
     # Fallback for development
     logger.error(f"❌ Failed to import analyzers: {e}")
     UnmatchedAnalyzer = None
     MismatchAnalyzer = None
+    ValidateCorrectMatches = None
 
 router = APIRouter(prefix="/api/analyze", tags=["analysis"])
 
@@ -211,10 +215,10 @@ class CatalogValidationIssue(BaseModel):
     field: str
     format: Optional[str] = None  # Format field for blade validation
     correct_match: str
-    expected_brand: str
-    expected_model: str
-    actual_brand: str
-    actual_model: str
+    expected_brand: Optional[str]
+    expected_model: Optional[str]
+    actual_brand: Optional[str]
+    actual_model: Optional[str]
     severity: str
     suggested_action: str
     details: str
@@ -1153,243 +1157,112 @@ async def clear_all_correct_matches():
 
 @router.post("/validate-catalog", response_model=CatalogValidationResponse)
 async def validate_catalog_against_correct_matches(request: CatalogValidationRequest):
-    """Validate correct_matches.yaml against current catalog patterns."""
-    import time
-
-    start_time = time.time()
+    """Validate catalog entries against correct_matches.yaml."""
+    print(f"🔍 API DEBUG: Starting validation for field: {request.field}")
+    print(f"🔍 API DEBUG: Request object: {request}")
+    print(f"🔍 API DEBUG: Request field: {request.field}")
 
     try:
-        validate_field(request.field)
+        # Use the unified ValidateCorrectMatches class for all field validations
+        # Fix the path issue: API runs from webui/ but needs project root data/
+        project_root = Path(__file__).parent.parent.parent
+        print(f"🔍 API DEBUG: Project root: {project_root}")
+        correct_matches_path = project_root / "data" / "correct_matches.yaml"
+        print(f"🔍 API DEBUG: Correct matches path: {correct_matches_path}")
+        print(f"🔍 API DEBUG: Path exists: {correct_matches_path.exists()}")
 
-        # Use the unified validation system for ALL fields (eliminates DRY violation)
-        try:
-            from sotd.match.tools.managers.validate_correct_matches import (
-                ValidateCorrectMatches,
-            )
-        except ImportError as e:
-            raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
-
-        # Create validator instance and run validation
-        # Set the data directory to the project root for proper catalog access
-        validator = ValidateCorrectMatches(
-            correct_matches_path=project_root / "data" / "correct_matches.yaml"
-        )
+        validator = ValidateCorrectMatches(correct_matches_path=correct_matches_path)
         validator._data_dir = project_root / "data"
+        print(f"🔍 API DEBUG: Created validator: {type(validator)}")
+        print(f"🔍 API DEBUG: Validator object ID: {id(validator)}")
+        print(f"🔍 API DEBUG: Validator correct_matches_path: {validator.correct_matches_path}")
+        print(f"🔍 API DEBUG: Validator _data_dir: {validator._data_dir}")
+        correct_matches_keys = (
+            list(validator.correct_matches.keys()) if validator.correct_matches else "None"
+        )
+        print(f"🔍 API DEBUG: Validator correct_matches keys: {correct_matches_keys}")
+        correct_matches_length = len(validator.correct_matches) if validator.correct_matches else 0
+        print(f"🔍 API DEBUG: Validator correct_matches length: {correct_matches_length}")
 
-        # Run the catalog validation for ALL fields (including brushes)
-        # This eliminates the DRY violation by using one unified validation system
+        # Validate the field
+        print(f"🔍 API DEBUG: About to call validator.validate_field('{request.field}')...")
         issues, expected_structure = validator.validate_field(request.field)
+        print(f"🔍 API DEBUG: Validation returned {len(issues)} issues")
+        print(f"🔍 API DEBUG: Issues type: {type(issues)}")
+        print(f"🔍 API DEBUG: Expected structure type: {type(expected_structure)}")
+        print(f"🔍 API DEBUG: First few issues: {issues[:3] if issues else 'No issues'}")
+        issue_types = [issue.get("type", "NO_TYPE") for issue in issues] if issues else "No issues"
+        print(f"🔍 API DEBUG: All issue types: {issue_types}")
+        issue_patterns = (
+            [issue.get("pattern", "NO_PATTERN") for issue in issues] if issues else "No issues"
+        )
+        print(f"🔍 API DEBUG: All issue patterns: {issue_patterns}")
 
-        # Count total entries from correct_matches.yaml
-        total_entries = 0
-        try:
-            import yaml
+        # Process issues for frontend consumption
+        processed_issues = []
+        print(f"🔍 API DEBUG: Starting to process {len(issues)} issues...")
 
-            correct_matches_file = project_root / "data" / "correct_matches.yaml"
-            if correct_matches_file.exists():
-                with open(correct_matches_file, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
-                    field_data = data.get(request.field, {})
-                    if isinstance(field_data, dict):
-                        if request.field == "blade":
-                            # Blade has format-aware structure: format -> brand -> model -> strings
-                            for format, brands in field_data.items():
-                                if isinstance(brands, dict):
-                                    for brand, models in brands.items():
-                                        if isinstance(models, dict):
-                                            for model, strings in models.items():
-                                                if isinstance(strings, list):
-                                                    total_entries += len(strings)
-                        else:
-                            # Other fields have flat structure: brand -> model -> strings
-                            for brand, models in field_data.items():
-                                if isinstance(models, dict):
-                                    for model, strings in models.items():
-                                        if isinstance(strings, list):
-                                            total_entries += len(strings)
-        except Exception as e:
-            logger.warning(f"Could not count total entries: {e}")
+        for i, issue in enumerate(issues):
+            issue_type = issue.get("type", "NO_TYPE")
+            pattern = issue.get("pattern", "NO_PATTERN")
+            print(f"🔍 API DEBUG: Processing issue {i+1}/{len(issues)}: {issue_type} - {pattern}")
 
-        processing_time = time.time() - start_time
+            # Extract issue details
+            issue_type = issue.get("type", "unknown")
+            pattern = issue.get("pattern", "unknown")
+            message = issue.get("message", "")
+            details = issue.get("details", "")
+            suggested_action = issue.get("suggested_action", "")
 
-        # Convert issues to proper format
-        catalog_issues = []
-        for issue in issues:
-            # Log format mismatch issues for debugging
-            if issue.get("type") == "format_mismatch":
-                correct_match = issue.get("correct_match", "unknown")
-                catalog_format = issue.get("catalog_format", "unknown")
-                logger.debug(f"Format mismatch: {correct_match} -> {catalog_format}")
-
-            # Map validation tool issue format to API response format
-            issue_type = issue.get("type", "")
+            print(f"🔍 API DEBUG: Issue {i+1} type: {issue_type}, Pattern: {pattern}")
+            print(f"🔍 API DEBUG: Issue {i+1} message: {message}")
+            print(f"🔍 API DEBUG: Issue {i+1} details: {details}")
+            print(f"🔍 API DEBUG: Issue {i+1} suggested action: {suggested_action}")
 
             # Use the actual issue types from ValidateCorrectMatches (eliminates DRY violation)
             # The frontend should adapt to the validation system, not the other way around
             mapped_issue_type = issue_type
 
-            # Determine severity based on issue type
-            severity = "medium"
-            if issue_type in [
-                "missing_brand",
-                "missing_format",
-                "format_mismatch",
-                "catalog_pattern_no_match",
-            ]:
-                severity = "high"
-            elif issue_type in ["missing_model", "mismatched_result", "catalog_pattern_mismatch"]:
-                severity = "medium"
-            elif issue_type in ["missing_pattern", "unmatchable_entry"]:
-                severity = "low"
+            # Create the processed issue with all required fields
+            # Extract brand/model info directly from the issue data, preserving None values
+            expected_brand = issue.get("expected_brand")
+            expected_model = issue.get("expected_model")
+            actual_brand = issue.get("actual_brand")
+            actual_model = issue.get("actual_model")
 
-            # Extract brand and model information
-            # Handle both old validator format and new shared validator format
-            brand = issue.get("brand", issue.get("stored_brand", ""))
-            model = issue.get("model", issue.get("stored_model", ""))
-            pattern = issue.get("pattern", "")
+            processed_issue = {
+                "issue_type": mapped_issue_type,
+                "field": request.field,
+                "format": None,  # Not applicable for brush validation
+                "correct_match": pattern,
+                "expected_brand": expected_brand,
+                "expected_model": expected_model,
+                "actual_brand": actual_brand,
+                "actual_model": actual_model,
+                "severity": issue.get("severity", "medium"),
+                "suggested_action": suggested_action or f"Investigate issue with '{pattern}'",
+                "details": details or f"Validation issue for pattern '{pattern}'",
+                "catalog_format": None,  # Not applicable for brush validation
+                "matched_pattern": None,  # Not applicable for brush validation
+            }
 
-            # Extract actual match information for mismatched results
-            # Handle both old validator format and new shared validator format
-            actual_brand = issue.get("actual_brand", issue.get("matched_brand", ""))
-            actual_model = issue.get("actual_model", issue.get("matched_model", ""))
+            print(f"🔍 API DEBUG: Created processed issue {i+1}: {processed_issue}")
+            processed_issues.append(processed_issue)
 
-            # For composite brushes, extract handle/knot information
-            if issue.get("type") in [
-                "composite_brush_in_wrong_section",
-                "handle_only_brush_in_wrong_section",
-                "knot_only_brush_in_wrong_section",
-            ]:
-                # Use handle brand if available, otherwise knot brand
-                if not actual_brand:
-                    actual_brand = issue.get(
-                        "matched_handle_brand", issue.get("matched_knot_brand", "")
-                    )
-                # For composite brushes, model is typically null, so use a descriptive string
-                if not actual_model and issue.get("type") == "composite_brush_in_wrong_section":
-                    actual_model = "composite_brush"
-                elif not actual_model and issue.get("type") == "handle_only_brush_in_wrong_section":
-                    actual_model = "handle_only"
-                elif not actual_model and issue.get("type") == "knot_only_brush_in_wrong_section":
-                    actual_model = "knot_only"
+        print(f"🔍 API DEBUG: Returning {len(processed_issues)} processed issues")
+        response_info = f"field={request.field}, total_entries={len(processed_issues)}, issues_count={len(processed_issues)}"
+        print(f"🔍 API DEBUG: Final response structure: {response_info}")
 
-            # Ensure actual_brand and actual_model are never None - convert to empty string if needed
-            actual_brand = actual_brand if actual_brand is not None else ""
-            actual_model = actual_model if actual_model is not None else ""
-
-            # Debug logging for field mapping
-            logger.debug(f"Field mapping - brand: {brand}, model: {model}, pattern: {pattern}")
-            logger.debug(
-                f"Field mapping - actual_brand: {actual_brand}, actual_model: {actual_model}"
-            )
-
-            # Create suggested action based on issue type
-            # Use the suggested_action from our shared validator if available
-            suggested_action = issue.get("suggested_action", "")
-            if not suggested_action:
-                if issue_type == "invalid_brand":
-                    suggested_action = (
-                        f"Remove brand '{brand}' from correct_matches.yaml or add it to the catalog"
-                    )
-            elif issue_type == "missing_brand":
-                suggested_action = (
-                    f"Add brand '{brand}' to the catalog or remove from correct_matches.yaml"
-                )
-            elif issue_type == "missing_model":
-                suggested_action = (
-                    f"Add model '{model}' under brand '{brand}' in the catalog "
-                    f"or remove from correct_matches.yaml"
-                )
-            elif issue_type == "missing_pattern":
-                suggested_action = (
-                    f"Update pattern for '{brand} {model}' in the catalog "
-                    f"or remove '{pattern}' from correct_matches.yaml"
-                )
-            elif issue_type == "missing_format":
-                suggested_action = (
-                    f"Add format '{issue.get('format', '')}' to the catalog "
-                    f"or remove from correct_matches.yaml"
-                )
-            elif issue_type == "format_mismatch":
-                catalog_format = issue.get("catalog_format")
-                correct_match = issue.get("correct_match")
-                expected_format = issue.get("format")
-
-                # Fail fast if required fields are missing
-                if not catalog_format:
-                    raise ValueError(
-                        f"Missing required field 'catalog_format' in format_mismatch issue: {issue}"
-                    )
-                if not correct_match:
-                    raise ValueError(
-                        f"Missing required field 'correct_match' in format_mismatch issue: {issue}"
-                    )
-                if not expected_format:
-                    raise ValueError(
-                        f"Missing required field 'format' in format_mismatch issue: {issue}"
-                    )
-
-                suggested_action = (
-                    f"Move '{correct_match}' from format '{expected_format}' "
-                    f"to format '{catalog_format}' in correct_matches.yaml"
-                )
-            elif issue_type == "mismatched_result":
-                suggested_action = (
-                    f"Move '{pattern}' from '{brand} {model}' to '{actual_brand} {actual_model}' "
-                    f"in correct_matches.yaml"
-                )
-            elif issue_type == "unmatchable_entry":
-                suggested_action = (
-                    f"Remove '{pattern}' from correct_matches.yaml "
-                    f"or fix the pattern to match correctly"
-                )
-            elif issue_type == "unmatchable_entry":
-                # Use the actual validation result from ValidateCorrectMatches
-                # This eliminates the DRY violation by using one source of truth
-                suggested_action = issue.get(
-                    "suggested_action",
-                    f"Pattern '{pattern}' cannot be matched by {request.field} matcher. "
-                    f"Check if this pattern is still valid or needs to be updated.",
-                )
-            elif issue_type in [
-                "composite_brush_in_wrong_section",
-                "handle_only_brush_in_wrong_section",
-                "knot_only_brush_in_wrong_section",
-            ]:
-                # Use our validator's suggested action for brush-specific issues
-                suggested_action = issue.get(
-                    "suggested_action", f"Investigate brush issue with '{pattern}'"
-                )
-            else:
-                suggested_action = f"Investigate issue with '{pattern}'"
-
-            # Create the catalog issue
-            catalog_issue = CatalogValidationIssue(
-                issue_type=mapped_issue_type,
-                field=request.field,
-                correct_match=pattern or f"{brand} {model}".strip(),
-                expected_brand=brand,
-                expected_model=model,
-                actual_brand=actual_brand,
-                actual_model=actual_model,
-                severity=severity,
-                suggested_action=suggested_action,
-                details=issue.get(
-                    "details", issue.get("message", issue.get("suggested_action", ""))
-                ),
-                format=issue.get("format"),
-                catalog_format=issue.get("catalog_format"),
-                matched_pattern=issue.get("matched_pattern"),
-            )
-
-            catalog_issues.append(catalog_issue)
-
-        return CatalogValidationResponse(
-            field=request.field,
-            total_entries=total_entries,
-            issues=catalog_issues,
-            processing_time=processing_time,
-        )
+        return {
+            "field": request.field,
+            "total_entries": len(processed_issues),  # Count of issues found
+            "issues": processed_issues,
+            "processing_time": 0.0,  # Placeholder for now
+        }
 
     except Exception as e:
+        print(f"🔍 API DEBUG: Exception during validation: {e}")
+        print(f"🔍 API DEBUG: Exception type: {type(e)}")
+        print(f"🔍 API DEBUG: Exception traceback: {traceback.format_exc()}")
         logger.error(f"Error validating catalog: {e}")
-        raise HTTPException(status_code=500, detail=f"Error validating catalog: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")

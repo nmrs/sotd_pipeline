@@ -30,6 +30,7 @@ def get_catalog_path(field: str) -> Path:
     """Get the path to the catalog YAML file for a field."""
     if field not in CATALOG_FILES:
         raise HTTPException(status_code=404, detail=f"Unknown catalog field: {field}")
+
     return CATALOG_DIR / CATALOG_FILES[field]
 
 
