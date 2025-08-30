@@ -67,7 +67,7 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
         # Try to match against compiled patterns
         for pattern_info in self.compiled_patterns:
             if pattern_info["regex"].search(value):
-                # Create match result
+                # Create match result with nested handle/knot structure for modifier functions
                 matched_data = {
                     "brand": pattern_info["brand"],
                     "model": pattern_info["model"],
@@ -77,6 +77,23 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     "source_text": value,
                     "_matched_by": "KnownSplitWrapperStrategy",
                     "_pattern": pattern_info["pattern"],
+                    # Add nested handle and knot sections for modifier functions
+                    "handle": {
+                        "brand": pattern_info["data"].get("handle_maker"),
+                        "model": None,  # Known splits typically don't specify handle model
+                        "source_text": value,
+                        "_matched_by": "KnownSplitWrapperStrategy",
+                        "_pattern": pattern_info["pattern"],
+                    },
+                    "knot": {
+                        "brand": pattern_info["brand"],
+                        "model": pattern_info["model"],
+                        "fiber": pattern_info["data"].get("fiber"),
+                        "knot_size_mm": pattern_info["data"].get("knot_size_mm"),
+                        "source_text": value,
+                        "_matched_by": "KnownSplitWrapperStrategy",
+                        "_pattern": pattern_info["pattern"],
+                    },
                 }
 
                 return MatchResult(

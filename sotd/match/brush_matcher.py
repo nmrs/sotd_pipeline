@@ -75,8 +75,12 @@ class BrushMatcher:
         handles_path: Optional[Path] = None,
         knots_path: Optional[Path] = None,
         brush_scoring_config_path: Optional[Path] = None,
+        debug: bool = False,
     ):
         """Initialize the brush matcher with catalog paths."""
+        # Store debug flag
+        self.debug = debug
+
         # Store catalog paths FIRST (before validation)
         self.brushes_path = brushes_path
         self.handles_path = handles_path
@@ -133,7 +137,7 @@ class BrushMatcher:
         # Initialize components
         self.correct_matches_matcher = CorrectMatchesMatcher(correct_matches_data)
         self.strategy_orchestrator = StrategyOrchestrator(self._create_strategies())
-        self.scoring_engine = ScoringEngine(self.config)
+        self.scoring_engine = ScoringEngine(self.config, debug=self.debug)
         self.result_processor = ResultProcessor(self.knot_matcher)
         self.performance_monitor = PerformanceMonitor()
         self.conflict_resolver = ResultConflictResolver()
@@ -223,9 +227,10 @@ class BrushMatcher:
                     f"(must be positive number)"
                 )
 
-        print("✅ Scoring configuration validated successfully:")
-        for strategy_name, score in base_strategies.items():
-            print(f"   {strategy_name}: {score}")
+        if self.debug:
+            print("✅ Scoring configuration validated successfully:")
+            for strategy_name, score in base_strategies.items():
+                print(f"   {strategy_name}: {score}")
 
     def _validate_catalog_paths(self):
         """Validate that all catalog paths exist and are readable. Fail fast if not."""
@@ -251,9 +256,10 @@ class BrushMatcher:
             except (PermissionError, UnicodeDecodeError) as e:
                 raise ValueError(f"Catalog file '{name}' is not readable: {path.absolute()} - {e}")
 
-        print("✅ All catalog paths validated successfully:")
-        for name, path in catalog_paths:
-            print(f"   {name}: {path.absolute()}")
+        if self.debug:
+            print("✅ All catalog paths validated successfully:")
+            for name, path in catalog_paths:
+                print(f"   {name}: {path.absolute()}")
 
     def _load_catalogs_directly(self) -> dict:
         """Load catalogs directly without legacy config dependencies."""

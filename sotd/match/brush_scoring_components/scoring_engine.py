@@ -24,14 +24,16 @@ class ScoringEngine:
     _knots_cache = None
     _knots_cache_timestamp = 0
 
-    def __init__(self, config):
+    def __init__(self, config, debug: bool = False):
         """
         Initialize the scoring engine.
 
         Args:
             config: BrushScoringConfig instance
+            debug: Enable debug output
         """
         self.config = config
+        self.debug = debug
 
     def score_results(
         self, results: List[MatchResult], value: str, cached_results: Optional[dict] = None
@@ -49,18 +51,22 @@ class ScoringEngine:
         # Store cached_results for use in manufacturer detection
         self.cached_results = cached_results
 
-        print("🔍 Scoring {len(results)} strategy results...")
+        if self.debug:
+            print("🔍 Scoring {len(results)} strategy results...")
 
         scored_results = []
 
         for result in results:
-            print(f"   📊 Scoring result from strategy: {getattr(result, 'strategy', 'None')}")
+            if self.debug:
+                print(f"   📊 Scoring result from strategy: {getattr(result, 'strategy', 'None')}")
             score = self._calculate_score(result, value)
-            print(f"      Calculated score: {score}")
+            if self.debug:
+                print(f"      Calculated score: {score}")
             result.score = score
             scored_results.append(result)
 
-        print("✅ Scoring complete. All results now have scores.")
+        if self.debug:
+            print("✅ Scoring complete. All results now have scores.")
         return scored_results
 
     def get_best_result(self, scored_results: List[MatchResult]) -> Optional[MatchResult]:
@@ -97,17 +103,21 @@ class ScoringEngine:
         """
         # Get base strategy score
         strategy_name = self._get_strategy_name_from_result(result)
-        print(f"      Strategy name extracted: '{strategy_name}'")
+        if self.debug:
+            print(f"      Strategy name extracted: '{strategy_name}'")
 
         base_score = self.config.get_base_strategy_score(strategy_name)
-        print(f"      Base score from config: {base_score}")
+        if self.debug:
+            print(f"      Base score from config: {base_score}")
 
         # Apply modifiers
         modifier_score = self._calculate_modifiers(result, value, strategy_name)
-        print(f"      Modifier score: {modifier_score}")
+        if self.debug:
+            print(f"      Modifier score: {modifier_score}")
 
         final_score = base_score + modifier_score
-        print(f"      Final score: {final_score}")
+        if self.debug:
+            print(f"      Final score: {final_score}")
 
         return final_score
 

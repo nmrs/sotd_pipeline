@@ -109,7 +109,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         else:
             knot_data = knot_result or {}
 
-        # Create combined brush data
+        # Create combined brush data with nested handle/knot structure
         brush_data = {
             "brand": handle_data.get("handle_maker") or knot_data.get("brand"),
             "model": handle_data.get("handle_model") or knot_data.get("model"),
@@ -121,6 +121,23 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "_pattern": "dual_component",
             "_original_handle_text": handle_data.get("source_text"),
             "_original_knot_text": knot_data.get("source_text"),
+            # Add nested handle and knot sections for modifier functions
+            "handle": {
+                "brand": handle_data.get("handle_maker"),
+                "model": handle_data.get("handle_model"),
+                "source_text": handle_data.get("source_text", value),
+                "_matched_by": "HandleMatcher",
+                "_pattern": handle_data.get("_pattern_used"),
+            },
+            "knot": {
+                "brand": knot_data.get("brand"),
+                "model": knot_data.get("model"),
+                "fiber": knot_data.get("fiber"),
+                "knot_size_mm": knot_data.get("knot_size_mm"),
+                "source_text": knot_data.get("source_text", value),
+                "_matched_by": "KnotMatcher",
+                "_pattern": knot_data.get("_pattern_used"),
+            },
         }
 
         return MatchResult(
@@ -152,6 +169,23 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "source_text": handle_data.get("source_text", ""),
             "_matched_by": "HandleMatcher",
             "_pattern": handle_data.get("_pattern_used"),
+            # Add nested handle and knot sections for modifier functions
+            "handle": {
+                "brand": handle_data.get("handle_maker"),
+                "model": handle_data.get("handle_model"),
+                "source_text": handle_data.get("source_text", ""),
+                "_matched_by": "HandleMatcher",
+                "_pattern": handle_data.get("_pattern_used"),
+            },
+            "knot": {
+                "brand": None,
+                "model": None,
+                "fiber": None,
+                "knot_size_mm": None,
+                "source_text": "",
+                "_matched_by": "HandleMatcher",
+                "_pattern": handle_data.get("_pattern_used"),
+            },
         }
 
         return MatchResult(
@@ -173,6 +207,23 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             "source_text": knot_data.get("source_text", ""),
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
+            # Add nested handle and knot sections for modifier functions
+            "handle": {
+                "brand": None,
+                "model": None,
+                "source_text": "",
+                "_matched_by": "KnotMatcher",
+                "_pattern": knot_data.get("_pattern_used"),
+            },
+            "knot": {
+                "brand": knot_data.get("brand"),
+                "model": knot_data.get("model"),
+                "fiber": knot_data.get("fiber"),
+                "knot_size_mm": knot_data.get("knot_size_mm"),
+                "source_text": knot_data.get("source_text", ""),
+                "_matched_by": "KnotMatcher",
+                "_pattern": knot_data.get("_pattern_used"),
+            },
         }
 
         return MatchResult(

@@ -54,3 +54,14 @@ class BrushMatcherConfig:
             bypass_correct_matches=False,
             brush_scoring_config_path=Path("data/brush_scoring_config.yaml"),
         )
+
+    @classmethod
+    def create_debug(cls) -> "BrushMatcherConfig":
+        """Create a debug configuration for development and testing."""
+        return cls(
+            catalog_path=Path("data/brushes.yaml"),
+            handles_path=Path("data/handles.yaml"),
+            knots_path=Path("data/knots.yaml"),
+            bypass_correct_matches=False,
+            brush_scoring_config_path=Path("data/brush_scoring_config.yaml"),
+        )

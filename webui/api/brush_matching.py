@@ -183,7 +183,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                         },
                     }
 
-                # Extract handle information - use handle_maker as brand, try to extract handle model
+                # Extract handle information - use handle_maker as brand,
+                # try to extract handle model
                 handle_brand = flat_data.get("handle_maker")
                 handle_model = flat_data.get("handle_model")
 
@@ -320,10 +321,21 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 for modifier_name in modifier_names:
                     modifier_weight = config.get_strategy_modifier(strategy_name, modifier_name)
                     if modifier_weight:
+                        # Calculate the actual modifier value using the scoring engine
+                        modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+                        if modifier_function and hasattr(modifier_function, "__call__"):
+                            modifier_value = modifier_function(
+                                request.brushString, strategy_result, strategy_name
+                            )
+                            actual_modifier_score = modifier_value * modifier_weight
+                        else:
+                            # If no modifier function exists, just use the weight directly
+                            actual_modifier_score = modifier_weight
+
                         modifier_details.append(
                             {
                                 "name": modifier_name,
-                                "weight": modifier_weight,
+                                "weight": actual_modifier_score,  # Use calculated value
                                 "description": f"{modifier_name} bonus",
                             }
                         )
