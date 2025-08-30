@@ -1,6 +1,5 @@
 import re
 
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
@@ -14,40 +13,45 @@ class ZenithBrushMatchingStrategy:
         normalized_text = validate_string_input(value)
         if normalized_text is None:
             return create_strategy_result(
-                original_value=value, matched_data=None, pattern=None, strategy_name="zenith"
+                original_value=value, matched_data=None, pattern=None, strategy_name="zenith_brush"
             )
 
-        zenith_re = r"zenith.*([a-wyz]\d{1,3})"
-        res = re.search(zenith_re, normalized_text, re.IGNORECASE)
+        # Normalize text
+        normalized = normalized_text.lower()
 
-        if res:
-            fiber = match_fiber(normalized_text) or "Boar"
-            model = res.group(1).upper()
+        # Match Zenith B-series patterns (e.g., 'zenith b2', 'zenith b15')
+        brand_match = re.search(r"zenith", normalized, re.IGNORECASE)
+        model_match = re.search(r"zenith\s+(b\d{1,2})", normalized, re.IGNORECASE)
+
+        if brand_match and model_match:
+            brand = "Zenith"
+            model_num = model_match.group(1)
 
             matched_data = {
-                "brand": "Zenith",
-                "model": model,
-                "fiber": fiber,
+                "brand": brand,
+                "model": model_num,
+                "fiber": "Boar",
                 "knot_size_mm": None,
                 "handle_maker": None,
-                "source_text": res.group(0),
+                "source_text": model_match.group(0),
                 "source_type": "exact",
             }
 
             return create_strategy_result(
                 original_value=value,
                 matched_data=matched_data,
-                pattern=zenith_re,
-                strategy_name="zenith",
+                pattern=model_match.re.pattern,
+                strategy_name="zenith_brush",
+                match_type="regex",
             )
 
         return create_strategy_result(
-            original_value=value, matched_data=None, pattern=None, strategy_name="zenith"
+            original_value=value, matched_data=None, pattern=None, strategy_name="zenith_brush"
         )
 
     def _get_default_match(self) -> dict:
         return {
-            "brand": "Zenith",
+            "brand": None,
             "model": None,
             "fiber": None,
             "knot_size_mm": None,
