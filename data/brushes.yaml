@@ -1150,6 +1150,10 @@ other_brushes:
     default: Badger
     patterns:
       - london.*razors
+  Maggard:
+    default: Synthetic
+    patterns:
+      - maggard
   PerPoro:
     default: Synthetic
     patterns:
