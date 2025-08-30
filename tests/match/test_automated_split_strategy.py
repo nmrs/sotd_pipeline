@@ -109,3 +109,57 @@ class TestAutomatedSplitStrategy:
         # implemented yet
         assert result is not None
         assert result.strategy == "automated_split"
+
+    def test_reddit_references_not_split(self):
+        """Test that Reddit subreddit and user references are not treated as delimiters."""
+        test_cases = [
+            {
+                "text": "Declaration B2 in r/wetshaving handle",
+                "expected_handle": "Declaration B2 in r/wetshaving handle",
+                "expected_knot": None,
+                "description": "Reddit subreddit reference should not split",
+            },
+            {
+                "text": "Zenith B2 u/username knot",
+                "expected_handle": "Zenith B2 u/username knot",
+                "expected_knot": None,
+                "description": "Reddit user reference should not split",
+            },
+            {
+                "text": "Simpson Chubby 2 w/ r/wetshaving community",
+                "expected_handle": "Simpson Chubby 2",
+                "expected_knot": "r/wetshaving community",
+                "description": "Reddit reference after valid delimiter should work",
+            },
+        ]
+
+        for test_case in test_cases:
+            text = test_case["text"]
+            expected_handle = test_case["expected_handle"]
+            expected_knot = test_case["expected_knot"]
+            description = test_case["description"]
+
+            print(f"\nTest case: {description}")
+            print(f"Text: {text}")
+            print(f"Expected: handle='{expected_handle}', knot='{expected_knot}'")
+
+            # Test that Reddit references don't cause unwanted splits
+            result = self.strategy.match(text)
+
+            if expected_knot is None:
+                # Should not split - should return None or handle as complete brush
+                if result is not None and result.matched:
+                    assert result.matched.get(
+                        "brand"
+                    ), f"Expected no split for Reddit reference, got: {result}"
+            else:
+                # Should split on valid delimiter, preserving Reddit references
+                assert result is not None, f"Expected split result, got: {result}"
+                assert result.matched, "Expected matched data in result"
+                assert result.matched.get("handle_text") == expected_handle, (
+                    f"Expected handle '{expected_handle}', "
+                    f"got '{result.matched.get('handle_text')}'"
+                )
+                assert result.matched.get("knot_text") == expected_knot, (
+                    f"Expected knot '{expected_knot}', " f"got '{result.matched.get('knot_text')}'"
+                )

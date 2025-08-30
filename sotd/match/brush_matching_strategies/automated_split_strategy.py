@@ -107,6 +107,14 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
         # Check handle-primary delimiters (first part is knot, second part is handle)
         for delimiter in handle_primary_delimiters:
             if delimiter in value:
+                # Check if the delimiter is followed by a Reddit reference
+                delimiter_index = value.find(delimiter)
+                after_delimiter = value[delimiter_index + len(delimiter) :].strip()
+
+                # If after delimiter starts with r/ or u/, don't split
+                if after_delimiter.startswith(("r/", "u/")):
+                    continue
+
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "high")
@@ -132,9 +140,12 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
 
         # Special handling for "/" as medium-priority delimiter (any spaces, not part of 'w/')
         # But first check if "/" is part of a specification rather than a delimiter
+        # Also exclude Reddit references: r/ and u/ (e.g., r/wetshaving, u/username)
         if "/" in value and "w/" not in value.lower():
-            # Use regex to split on "/" but avoid splitting "w/" patterns
-            slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", value)
+            # Use regex to split on "/" but avoid splitting "w/" patterns and Reddit references
+            # Pattern: (.+?)(?<!w)(?<!r)(?<!u)\s*/\s*(.+)
+            # This excludes splitting when "/" follows "w", "r", or "u"
+            slash_match = re.search(r"(.+?)(?<!w)(?<!r)(?<!u)\s*/\s*(.+)", value)
             if slash_match:
                 part1 = slash_match.group(1).strip()
                 part2 = slash_match.group(2).strip()
