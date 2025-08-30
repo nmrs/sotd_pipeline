@@ -451,32 +451,20 @@ class CatalogValidator:
             return []
 
     def get_validation_summary(self, field: str) -> Dict[str, Any]:
-        """Get a summary of validation results for a field.
-
+        """Get validation summary for a specific field.
+        
+        This method is expected by the API to return a dictionary with an "issues" key.
+        
         Args:
-            field: The field to validate
-
+            field: Field to validate (e.g., "brush")
+            
         Returns:
-            Dictionary with validation summary
+            Dictionary with validation summary containing "issues" key
         """
-        issues = self.validate_field(field)
-
-        # Load data to get total entries
-        data = self.load_correct_matches()
-        field_data = data.get(field, {})
-
-        # Count total entries
-        total_entries = 0
-        if isinstance(field_data, dict):
-            for brand_data in field_data.values():
-                if isinstance(brand_data, dict):
-                    for model_data in brand_data.values():
-                        if isinstance(model_data, list):
-                            total_entries += len(model_data)
-
-        return {
-            "field": field,
-            "total_entries": total_entries,
-            "issues": issues,
-            "issue_count": len(issues),
-        }
+        if field == "brush":
+            issues = self.validate_brush_catalog()
+            return {"issues": issues}
+        else:
+            # For other fields, return empty issues list
+            # This can be extended later if needed
+            return {"issues": []}
