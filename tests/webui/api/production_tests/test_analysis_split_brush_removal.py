@@ -60,9 +60,7 @@ class TestAnalysisAPISplitBrushRemoval:
             assert "handle_component" not in first_item
             assert "knot_component" not in first_item
 
-    def test_brush_field_processing_without_split_brush(
-        self, mock_analyze_mismatch
-    ):
+    def test_brush_field_processing_without_split_brush(self, mock_analyze_mismatch):
         """Test that brush field processing works without split_brush section"""
 
         # Mock analyze_mismatch response
