@@ -16,12 +16,26 @@ from sotd.match.brush_matcher import BrushMatcher
 class TestBrushSplitterEdgeCases:
     """Test edge cases for brush splitting."""
 
-    def setup_method(self):
+    @pytest.fixture(autouse=True)
+    def setup_test_fixtures(
+        self,
+        test_correct_matches_path,
+        test_brushes_path,
+        test_handles_path,
+        test_knots_path,
+        test_brush_scoring_config_path,
+    ):
         """Set up test fixtures."""
-        self.handle_matcher = HandleMatcher()
+        self.handle_matcher = HandleMatcher(test_handles_path)
         self.splitter = BrushSplitter(self.handle_matcher)
         # Also test with the new scoring system
-        self.scoring_matcher = BrushMatcher()
+        self.scoring_matcher = BrushMatcher(
+            correct_matches_path=test_correct_matches_path,
+            brushes_path=test_brushes_path,
+            handles_path=test_handles_path,
+            knots_path=test_knots_path,
+            brush_scoring_config_path=test_brush_scoring_config_path,
+        )
 
     def test_fiber_words_dont_force_split_for_complete_brushes(self):
         """Test that fiber words don't force a split when string should be a complete brush."""

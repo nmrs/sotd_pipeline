@@ -25,9 +25,22 @@ class TestHandleKnotDependencyImplementation:
         return StrategyDependencyManager()
 
     @pytest.fixture
-    def scoring_matcher(self):
+    def scoring_matcher(
+        self,
+        test_correct_matches_path,
+        test_brushes_path,
+        test_handles_path,
+        test_knots_path,
+        test_brush_scoring_config_path,
+    ):
         """Create scoring matcher instance."""
-        return BrushMatcher()
+        return BrushMatcher(
+            correct_matches_path=test_correct_matches_path,
+            brushes_path=test_brushes_path,
+            handles_path=test_handles_path,
+            knots_path=test_knots_path,
+            brush_scoring_config_path=test_brush_scoring_config_path,
+        )
 
     def test_dependency_manager_initialization(self, dependency_manager):
         """Test dependency manager initializes correctly."""

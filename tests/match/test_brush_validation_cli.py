@@ -27,8 +27,13 @@ class TestBrushValidationCLI:
         """Clean up test directory."""
         shutil.rmtree(self.test_dir)
 
-    def test_initialization(self):
+    @patch("sotd.match.brush_matcher.BrushMatcher")
+    def test_initialization(self, mock_brush_matcher_class):
         """Test CLI initialization with entry point integration."""
+        # Mock the BrushMatcher to avoid file dependencies
+        mock_matcher = Mock()
+        mock_brush_matcher_class.return_value = mock_matcher
+
         assert self.cli.data_path == Path(self.test_dir)
         assert isinstance(self.cli.user_actions_manager, BrushUserActionsManager)
         assert hasattr(self.cli, "brush_matcher")

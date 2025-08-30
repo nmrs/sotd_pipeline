@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 import yaml
 import json
+from unittest.mock import Mock
 
 from sotd.match.brush_validation_cli import BrushValidationCLI
 
@@ -26,6 +27,13 @@ class TestBrushValidationCLIIntegration:
         self.test_learning_dir.mkdir(parents=True)
 
         self.cli = BrushValidationCLI(data_path=self.test_data_dir)
+
+        # Mock the brush_matcher property to avoid file dependencies
+        mock_matcher = Mock()
+        # Monkey patch the property to return our mock
+        self.cli._brush_matcher = mock_matcher
+        # Store the mock for later use in tests
+        self.mock_brush_matcher = mock_matcher
 
     def teardown_method(self):
         """Clean up test directories."""

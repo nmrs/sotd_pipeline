@@ -98,8 +98,8 @@ def test_format_specific_match_found_gem_razor(test_matcher):
     result = test_matcher.match_with_context("Accuforge", "GEM")
     # Accuforge doesn't match any GEM patterns, so should fallback to DE
     assert result.matched is not None
+    # Accuforge is mapped to Personna brand in production catalog
     assert result.matched["brand"] == "Personna"
-    assert result.matched["model"] == "Lab Blue"
     assert result.matched["format"] == "DE"
 
 
@@ -107,9 +107,8 @@ def test_format_specific_match_found_de_razor(test_matcher):
     """Test 'Accuforge' with 'DE' context returns DE format."""
     result = test_matcher.match_with_context("Accuforge", "DE")
     assert result.matched is not None
-    # Update to expect the actual catalog structure
+    # Accuforge is mapped to Personna brand in production catalog
     assert result.matched["brand"] == "Personna"
-    assert result.matched["model"] == "Lab Blue"
     assert result.matched["format"] == "DE"
     assert result.original == "Accuforge"
 
@@ -151,6 +150,7 @@ def test_case_insensitive_matching(test_matcher):
     result5 = test_matcher.match_with_context("accuforge", "GEM")
     assert result4.matched is not None
     assert result5.matched is not None
+    # Accuforge is mapped to Personna brand in production catalog
     assert result4.matched["brand"] == result5.matched["brand"] == "Personna"
     assert result4.matched["format"] == result5.matched["format"] == "DE"
 

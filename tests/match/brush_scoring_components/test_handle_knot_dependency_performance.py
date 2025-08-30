@@ -19,14 +19,40 @@ class TestHandleKnotDependencyPerformance:
     """Test performance impact of handle/knot dependencies."""
 
     @pytest.fixture
-    def scoring_matcher_with_dependencies(self):
+    def scoring_matcher_with_dependencies(
+        self,
+        test_correct_matches_path,
+        test_brushes_path,
+        test_handles_path,
+        test_knots_path,
+        test_brush_scoring_config_path,
+    ):
         """Create scoring matcher with dependencies configured."""
-        return BrushMatcher()
+        return BrushMatcher(
+            correct_matches_path=test_correct_matches_path,
+            brushes_path=test_brushes_path,
+            handles_path=test_handles_path,
+            knots_path=test_knots_path,
+            brush_scoring_config_path=test_brush_scoring_config_path,
+        )
 
     @pytest.fixture
-    def scoring_matcher_without_dependencies(self):
+    def scoring_matcher_without_dependencies(
+        self,
+        test_correct_matches_path,
+        test_brushes_path,
+        test_handles_path,
+        test_knots_path,
+        test_brush_scoring_config_path,
+    ):
         """Create scoring matcher with dependencies disabled."""
-        matcher = BrushMatcher()
+        matcher = BrushMatcher(
+            correct_matches_path=test_correct_matches_path,
+            brushes_path=test_brushes_path,
+            handles_path=test_handles_path,
+            knots_path=test_knots_path,
+            brush_scoring_config_path=test_brush_scoring_config_path,
+        )
         # Clear all dependencies to simulate no-dependency scenario
         matcher.strategy_dependency_manager.dependencies.clear()
         matcher.strategy_dependency_manager.dependency_graph.clear()
@@ -141,7 +167,7 @@ class TestHandleKnotDependencyPerformance:
                 brush_splitter_index < knot_matcher_index
             ), "BrushSplitter should come before KnotMatcher"
 
-        print(f"\nExecution Order Optimization:")
+        print("\nExecution Order Optimization:")
         print(f"Original order: {strategy_names}")
         print(f"Optimized order: {optimized_order}")
 
@@ -169,7 +195,7 @@ class TestHandleKnotDependencyPerformance:
         # Calculate memory overhead
         memory_overhead = memory_after - memory_before
 
-        print(f"\nMemory Usage Impact:")
+        print("\nMemory Usage Impact:")
         print(f"Before dependency operations: {memory_before} bytes")
         print(f"After dependency operations: {memory_after} bytes")
         print(f"Memory overhead: {memory_overhead} bytes")

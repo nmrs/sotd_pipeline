@@ -10,7 +10,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from sotd.match.brush_matcher import BrushMatcher
 
 
-def test_webui_api_bypass_issue():
+def test_webui_api_bypass_issue(
+    test_correct_matches_path,
+    test_brushes_path,
+    test_handles_path,
+    test_knots_path,
+    test_brush_scoring_config_path,
+):
     """Test that exposes the webui API bypass issue.
 
     The webui API is using the old constructor parameter approach:
@@ -25,7 +31,13 @@ def test_webui_api_bypass_issue():
     # self.brush_matcher = BrushMatcher(bypass_correct_matches=True)
     # result = self.brush_matcher.match(pattern)  # Missing bypass parameter!
 
-    matcher = BrushMatcher()  # NEW approach - no constructor parameter
+    matcher = BrushMatcher(
+        correct_matches_path=test_correct_matches_path,
+        brushes_path=test_brushes_path,
+        handles_path=test_handles_path,
+        knots_path=test_knots_path,
+        brush_scoring_config_path=test_brush_scoring_config_path,
+    )  # NEW approach - no constructor parameter
     test_pattern = "a.p. shave co amber smoke g5c fan"
 
     # This should work but doesn't because the constructor parameter is ignored
@@ -38,13 +50,25 @@ def test_webui_api_bypass_issue():
     assert result.matched.get("model") == "G5C", "Should match G5C model"
 
 
-def test_correct_bypass_approach():
+def test_correct_bypass_approach(
+    test_correct_matches_path,
+    test_brushes_path,
+    test_handles_path,
+    test_knots_path,
+    test_brush_scoring_config_path,
+):
     """Test the correct bypass approach that the webui API should use."""
     # This is what the webui API SHOULD do (CORRECT):
     # self.brush_matcher = BrushMatcher()  # No constructor parameter
     # result = self.brush_matcher.match(pattern, bypass_correct_matches=True)  # Method parameter
 
-    matcher = BrushMatcher()  # NEW approach - no constructor parameter
+    matcher = BrushMatcher(
+        correct_matches_path=test_correct_matches_path,
+        brushes_path=test_brushes_path,
+        handles_path=test_handles_path,
+        knots_path=test_knots_path,
+        brush_scoring_config_path=test_brush_scoring_config_path,
+    )  # NEW approach - no constructor parameter
     test_pattern = "a.p. shave co amber smoke g5c fan"
 
     # This should work correctly
@@ -61,14 +85,34 @@ if __name__ == "__main__":
     # Run the failing test to see the issue
     print("Testing OLD approach (should fail):")
     try:
-        test_webui_api_bypass_issue()
+        # Create test paths for standalone execution
+        test_data_dir = Path(__file__).parent / "test_data"
+        test_correct_matches_path = test_data_dir / "correct_matches.yaml"
+        test_brushes_path = test_data_dir / "brushes.yaml"
+        test_handles_path = test_data_dir / "handles.yaml"
+        test_knots_path = test_data_dir / "knots.yaml"
+        test_brush_scoring_config_path = test_data_dir / "brush_scoring_config.yaml"
+
+        test_webui_api_bypass_issue(
+            test_correct_matches_path,
+            test_brushes_path,
+            test_handles_path,
+            test_knots_path,
+            test_brush_scoring_config_path,
+        )
         print("❌ OLD approach unexpectedly passed - this shouldn't happen!")
     except AssertionError as e:
         print(f"✅ OLD approach failed as expected: {e}")
 
     print("\nTesting NEW approach (should pass):")
     try:
-        test_correct_bypass_approach()
+        test_correct_bypass_approach(
+            test_correct_matches_path,
+            test_brushes_path,
+            test_handles_path,
+            test_knots_path,
+            test_brush_scoring_config_path,
+        )
         print("✅ NEW approach passed as expected!")
     except Exception as e:
         print(f"❌ NEW approach failed unexpectedly: {e}")

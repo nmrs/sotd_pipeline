@@ -28,7 +28,6 @@ class TestBrushMatcherCorrectMatchesPriority:
         test_correct_matches = {
             "brush": {
                 "Test Brand": {"Test Model": ["test brush pattern", "another test pattern"]},
-                "Simpson": {"Chubby 2": ["simpson chubby 2"]},
             }
         }
 
