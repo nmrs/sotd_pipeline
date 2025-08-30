@@ -54,6 +54,7 @@ class KnotMatcher:
                         pattern=result.pattern,
                         section=section,
                         priority=priority,
+                        score=result.score if result.score is not None else 0.0,
                     )
             except Exception:
                 # Continue to next strategy if one fails

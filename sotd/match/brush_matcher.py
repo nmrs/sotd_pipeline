@@ -453,9 +453,22 @@ class BrushMatcher:
         handle_data = handle_result.matched or {}
         knot_data = knot_result.matched or {}
 
+        # Get handle and knot brands
+        handle_brand = handle_data.get("handle_maker")
+        knot_brand = knot_data.get("brand")
+
+        # Business rule: If handle and knot have the same brand,
+        # set that brand at the top level
+        top_level_brand = None
+        if handle_brand and knot_brand and handle_brand == knot_brand:
+            top_level_brand = handle_brand
+        else:
+            # Fall back to handle brand if brands don't match
+            top_level_brand = handle_brand
+
         # Create combined brush data
         brush_data = {
-            "brand": handle_data.get("handle_maker"),
+            "brand": top_level_brand,
             "model": handle_data.get("handle_model"),
             "source_text": handle_data.get("_source_text", handle_result.original),
             "_matched_by": "HandleMatcher+KnotMatcher",

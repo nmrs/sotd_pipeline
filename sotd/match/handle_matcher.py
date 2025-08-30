@@ -91,6 +91,7 @@ class HandleMatcher:
                     pattern=pattern_info["pattern"],
                     section=pattern_info["section"],
                     priority=pattern_info["priority"],
+                    score=0.0,  # Handle matcher doesn't have scoring, explicitly set to 0
                 )
 
         return None

@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
@@ -8,7 +9,7 @@ from sotd.match.types import MatchResult
 
 
 class ZenithBrushMatchingStrategy:
-    def match(self, value: str) -> MatchResult:
+    def match(self, value: str) -> Optional[MatchResult]:
         # Use unified string validation
         normalized_text = validate_string_input(value)
         if normalized_text is None:
@@ -45,9 +46,9 @@ class ZenithBrushMatchingStrategy:
                 match_type="regex",
             )
 
-        return create_strategy_result(
-            original_value=value, matched_data=None, pattern=None, strategy_name="zenith_brush"
-        )
+        # Return None when no match is found - this is the correct behavior
+        # The StrategyOrchestrator will skip None results
+        return None
 
     def _get_default_match(self) -> dict:
         return {

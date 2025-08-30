@@ -71,9 +71,9 @@ class StrategyOrchestrator:
                     # Skip results that are neither dict nor MatchResult
                     continue
 
-                # Only include results that have actual matches (matched is not None)
-                if result.matched is not None:
-                    results.append(result)
+                # Always include results, even if they don't have matches
+                # This allows the analyzer to show what each strategy attempted
+                results.append(result)
 
         return results
 
