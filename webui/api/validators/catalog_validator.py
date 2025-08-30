@@ -16,10 +16,10 @@ class CatalogValidator:
         self.project_root = project_root
         self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
 
-        # Initialize brush matcher with the correct configuration path
-        # The BrushMatcher expects a path to brush_scoring_config.yaml
-        brush_scoring_config_path = project_root / "data" / "brush_scoring_config.yaml"
-        self.brush_matcher = BrushMatcher(brush_scoring_config_path)
+        # Initialize brush matcher with the same configuration as the Brush Matching Analyzer API
+        # This ensures both systems use the same configuration and produce consistent results
+        # The BrushMatcher will use the default config path relative to the working directory
+        self.brush_matcher = BrushMatcher(bypass_correct_matches=True)
 
     def load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml data."""
@@ -30,25 +30,31 @@ class CatalogValidator:
             return yaml.safe_load(f) or {}
 
     def validate_brush_catalog(self) -> List[Dict[str, Any]]:
-        """Validate brush catalog entries.
+        """Validate brush catalog entries by testing actual matching system.
+
+        This method tests whether the brush matching strategies (without correct_matches.yaml)
+        can produce the same results as stored in correct_matches.yaml. It validates
+        that our strategy system is working correctly, not just that entries exist.
 
         Returns:
             List of validation issues found
         """
-        # Load correct_matches.yaml
+        # Load correct_matches.yaml to get expected results
         data = self.load_correct_matches()
         brush_data = data.get("brush", {})
 
         issues = []
 
-        # Process each pattern through the brush matcher
+        # Process each pattern through the brush matcher WITHOUT correct_matches.yaml
+        # This tests whether our strategy system can produce the expected results
         for brand, brand_data in brush_data.items():
             if isinstance(brand_data, dict):
                 for model, model_data in brand_data.items():
                     if isinstance(model_data, list):
                         for pattern in model_data:
                             try:
-                                # Run pattern through brush matcher
+                                # Run pattern through brush matcher WITHOUT correct_matches.yaml
+                                # This tests the actual strategy system, not the cheat sheet
                                 result = self.brush_matcher.match(pattern)
 
                                 if result and hasattr(result, "matched") and result.matched:
