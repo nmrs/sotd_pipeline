@@ -101,6 +101,19 @@ class ScoringEngine:
         Returns:
             Calculated score
         """
+        # Check if this strategy actually produced valid results
+        has_valid_data = result.matched and (
+            result.matched.get("brand")
+            or result.matched.get("handle")
+            or result.matched.get("knot")
+        )
+
+        # If no valid data, return 0.0 regardless of base score
+        if not has_valid_data:
+            if self.debug:
+                print("      Strategy failed to produce valid results - score: 0.0")
+            return 0.0
+
         # Get base strategy score
         strategy_name = self._get_strategy_name_from_result(result)
         if self.debug:

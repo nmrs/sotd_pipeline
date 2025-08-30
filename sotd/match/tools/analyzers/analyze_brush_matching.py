@@ -159,20 +159,47 @@ def analyze_brush_matching(
                     score = getattr(strategy_result, "score", 0) or 0
                     match_type = getattr(strategy_result, "match_type", "Unknown")
                     pattern = getattr(strategy_result, "pattern", "Unknown")
-                    matched_data = strategy_result.matched or {}
+                    matched_data = getattr(strategy_result, "matched", {}) or {}
 
-                    # Format the score display
+                    # Check if this strategy actually produced valid results
+                    has_valid_data = matched_data and (
+                        matched_data.get("brand")
+                        or matched_data.get("handle")
+                        or matched_data.get("knot")
+                    )
+
+                    # Format the score display with appropriate status indicators
                     score_display = f"{score:.1f}"
-                    if score >= 80:
-                        score_emoji = "🥇"
-                    elif score >= 60:
-                        score_emoji = "🥈"
-                    elif score >= 40:
-                        score_emoji = "🥉"
+                    if has_valid_data:
+                        # Successful strategies get medal emojis based on score
+                        if score >= 80:
+                            score_emoji = "🥇"
+                            status_indicator = "✅ MATCHED"
+                        elif score >= 60:
+                            score_emoji = "🥈"
+                            status_indicator = "✅ MATCHED"
+                        elif score >= 40:
+                            score_emoji = "🥉"
+                            status_indicator = "✅ MATCHED"
+                        else:
+                            score_emoji = "📊"
+                            status_indicator = "✅ MATCHED"
                     else:
-                        score_emoji = "📊"
+                        # Failed strategies get different indicators
+                        if score >= 80:
+                            score_emoji = "📊"
+                            status_indicator = "❌ NO MATCH"
+                        elif score >= 60:
+                            score_emoji = "📊"
+                            status_indicator = "❌ NO MATCH"
+                        elif score >= 40:
+                            score_emoji = "📊"
+                            status_indicator = "❌ NO MATCH"
+                        else:
+                            score_emoji = "📊"
+                            status_indicator = "❌ NO MATCH"
 
-                    print(f"\n{score_emoji} #{i}: {strategy_name.upper()}")
+                    print(f"\n{score_emoji} #{i}: {strategy_name.upper()} - {status_indicator}")
                     print(f"   💯 Score: {score_display}")
                     print(f"   🎯 Match Type: {match_type}")
                     print(f"   🔍 Pattern: {pattern}")
@@ -337,19 +364,23 @@ def analyze_brush_matching(
                 valid_results = [
                     r
                     for r in sorted_strategies
-                    if r.matched
-                    and (r.matched.get("brand") or r.matched.get("handle") or r.matched.get("knot"))
+                    if getattr(r, "matched", None)
+                    and (
+                        getattr(r, "matched", {}).get("brand")
+                        or getattr(r, "matched", {}).get("handle")
+                        or getattr(r, "matched", {}).get("knot")
+                    )
                 ]
 
                 if valid_results:
                     # Use the best valid result
                     best_valid_result = valid_results[0]  # Already sorted by score
-                    strategy = best_valid_result.matched.get("strategy", "Unknown")
-                    score = best_valid_result.matched.get("score", "N/A")
+                    strategy = getattr(best_valid_result, "matched", {}).get("strategy", "Unknown")
+                    score = getattr(best_valid_result, "matched", {}).get("score", "N/A")
                     print(f"  🥇 Strategy: {strategy}")
                     print(f"  💯 Score: {score}")
-                    print(f"  🎯 Match Type: {best_valid_result.match_type}")
-                    print(f"  🔍 Pattern: {best_valid_result.pattern}")
+                    print(f"  🎯 Match Type: {getattr(best_valid_result, 'match_type', 'Unknown')}")
+                    print(f"  🔍 Pattern: {getattr(best_valid_result, 'pattern', 'Unknown')}")
 
                     # Show detailed score breakdown for winner
                     print("  📊 SCORE BREAKDOWN")
@@ -373,20 +404,26 @@ def analyze_brush_matching(
 
                     # Top-level brush info
                     print("       🏷️  TOP-LEVEL")
-                    print(f"         • Brand: {best_valid_result.matched.get('brand', 'None')}")
-                    print(f"         • Model: {best_valid_result.matched.get('model', 'None')}")
-                    print(f"         • Fiber: {best_valid_result.matched.get('fiber', 'None')}")
                     print(
-                        f"         • Size: {best_valid_result.matched.get('knot_size_mm', 'None')}mm"
+                        f"         • Brand: {getattr(best_valid_result, 'matched', {}).get('brand', 'None')}"
+                    )
+                    print(
+                        f"         • Model: {getattr(best_valid_result, 'matched', {}).get('model', 'None')}"
+                    )
+                    print(
+                        f"         • Fiber: {getattr(best_valid_result, 'matched', {}).get('fiber', 'None')}"
+                    )
+                    print(
+                        f"         • Size: {getattr(best_valid_result, 'matched', {}).get('knot_size_mm', 'None')}mm"
                     )
 
                     # Handle component
                     print("       🖐️  HANDLE")
                     if (
-                        "handle" in best_valid_result.matched
-                        and best_valid_result.matched["handle"]
+                        "handle" in getattr(best_valid_result, "matched", {})
+                        and getattr(best_valid_result, "matched", {})["handle"]
                     ):
-                        handle = best_valid_result.matched["handle"]
+                        handle = getattr(best_valid_result, "matched", {})["handle"]
                         print(f"         • Brand: {handle.get('brand', 'None')}")
                         print(f"         • Model: {handle.get('model', 'None')}")
                         print(f"         • Material: {handle.get('material', 'None')}")
@@ -395,8 +432,11 @@ def analyze_brush_matching(
 
                     # Knot component
                     print("       🧶 KNOT")
-                    if "knot" in best_valid_result.matched and best_valid_result.matched["knot"]:
-                        knot = best_valid_result.matched["knot"]
+                    if (
+                        "knot" in getattr(best_valid_result, "matched", {})
+                        and getattr(best_valid_result, "matched", {})["knot"]
+                    ):
+                        knot = getattr(best_valid_result, "matched", {})["knot"]
                         print(f"         • Brand: {knot.get('brand', 'None')}")
                         print(f"         • Model: {knot.get('model', 'None')}")
                         print(f"         • Fiber: {knot.get('fiber', 'None')}")
@@ -406,7 +446,7 @@ def analyze_brush_matching(
 
                     # Show other relevant fields
                     other_fields = []
-                    for key, value in best_valid_result.matched.items():
+                    for key, value in getattr(best_valid_result, "matched", {}).items():
                         excluded_keys = [
                             "brand",
                             "model",
