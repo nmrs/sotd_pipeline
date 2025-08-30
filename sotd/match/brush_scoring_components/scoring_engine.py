@@ -131,6 +131,14 @@ class ScoringEngine:
         Returns:
             Strategy name
         """
+        # Validate that strategy name is not None
+        if result.strategy is None:
+            raise ValueError(
+                f"MatchResult has None strategy name. "
+                f"This is a bug - all MatchResult objects must have a valid strategy name. "
+                f"Result: {result}"
+            )
+
         # If the result has a strategy field, use it directly
         if result.strategy:
             return result.strategy

@@ -65,6 +65,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                 matched=None,
                 pattern=None,
                 match_type=None,
+                strategy="other_brush",
             )
 
         # Use precompiled patterns for performance optimization
@@ -117,4 +118,5 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
             matched=None,
             pattern=None,  # type: ignore
             match_type=None,  # type: ignore
+            strategy="other_brush",
         )
