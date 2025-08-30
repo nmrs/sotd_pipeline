@@ -105,22 +105,15 @@ class BrushMatcher:
             else:
                 config_path = legacy_config.catalog_path
             handles_path = getattr(legacy_config, "handles_path", Path("data/handles.yaml"))
-            knots_path = getattr(legacy_config, "knots_path", Path("data/knots.yaml"))
-            bypass_correct_matches = getattr(legacy_config, "bypass_correct_matches", False)
         else:
             # New interface - use default paths
             handles_path = Path("data/handles.yaml")
-            knots_path = Path("data/knots.yaml")
-            bypass_correct_matches = kwargs.get("bypass_correct_matches", False)
 
         # Initialize configuration
         self.config = BrushScoringConfig(config_path=config_path)
 
         # Store correct_matches_path for wrapper strategies
         self.correct_matches_path = correct_matches_path
-
-        # Store bypass setting for optimization
-        self.bypass_correct_matches = bypass_correct_matches
 
         # Load correct matches data
         correct_matches_data = load_correct_matches(correct_matches_path)
@@ -599,7 +592,7 @@ class BrushMatcher:
             MatchResult if correct match found, None otherwise
         """
         # Use the already-loaded correct matches data from initialization
-        # (This method is only called when bypass_correct_matches is False)
+        # (This method is only called when correct_matches.yaml should be used)
         correct_strategy = CorrectMatchesStrategy(self.correct_matches_data)
 
         try:
@@ -614,18 +607,22 @@ class BrushMatcher:
         # No correct match found
         return None
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, bypass_correct_matches: bool = None) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
 
         Args:
             value: The brush string to match
+            bypass_correct_matches: If True, bypass correct_matches.yaml. If None or False, use correct_matches.yaml.
 
         Returns:
             MatchResult if found, None otherwise
         """
         if not value:
             return None
+
+        # Use parameter if provided, otherwise default to False (use correct_matches.yaml)
+        should_bypass = bypass_correct_matches if bypass_correct_matches is not None else False
 
         # Start performance monitoring
         self.performance_monitor.start_timing()
@@ -635,7 +632,7 @@ class BrushMatcher:
             cached_results = self._precompute_handle_knot_results(value)
 
             # PHASE 1: Check correct matches strategies first (highest priority) if not bypassed
-            if not self.bypass_correct_matches:
+            if not should_bypass:
                 correct_match_result = self._try_correct_matches_strategies(value, cached_results)
                 if correct_match_result:
                     # Correct match found - return immediately, don't run other strategies
