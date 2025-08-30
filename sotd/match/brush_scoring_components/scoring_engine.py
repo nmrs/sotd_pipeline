@@ -510,7 +510,11 @@ class ScoringEngine:
         self, input_text: str, result: MatchResult, strategy_name: str
     ) -> float:
         """
-        Return handle score weight for component strategies.
+        Return raw handle score for component strategies.
+
+        The scoring engine will apply the weight multiplier to this raw score.
+        This prevents double-weighting where both the modifier function and
+        scoring engine multiply by the weight.
 
         Args:
             input_text: Original input string
@@ -518,14 +522,11 @@ class ScoringEngine:
             strategy_name: Name of the strategy
 
         Returns:
-            Weighted handle matching score for this strategy
+            Raw handle matching score (weight will be applied by scoring engine)
         """
         # Apply to component strategies that do handle/knot matching
         if strategy_name not in ["automated_split", "full_input_component_matching"]:
             return 0.0
-
-        # Get configured weight for this strategy
-        weight = self.config.get_strategy_modifier(strategy_name, "handle_weight")
 
         # Calculate handle matching score using actual matcher score
         handle_data = result.matched.get("handle", {}) if result.matched else {}
@@ -540,14 +541,18 @@ class ScoringEngine:
                 "Score must be explicitly set to 0 if not applicable."
             )
 
-        # Component score already includes priority bonus - use it directly
+        # Return raw score - scoring engine will apply weight multiplier
         return float(actual_score)
 
     def _modifier_knot_weight(
         self, input_text: str, result: MatchResult, strategy_name: str
     ) -> float:
         """
-        Return knot score weight for component strategies.
+        Return raw knot score for component strategies.
+
+        The scoring engine will apply the weight multiplier to this raw score.
+        This prevents double-weighting where both the modifier function and
+        scoring engine multiply by the weight.
 
         Args:
             input_text: Original input string
@@ -555,14 +560,11 @@ class ScoringEngine:
             strategy_name: Name of the strategy
 
         Returns:
-            Weighted knot matching score for this strategy
+            Raw knot matching score (weight will be applied by scoring engine)
         """
         # Apply to component strategies that do handle/knot matching
         if strategy_name not in ["automated_split", "full_input_component_matching"]:
             return 0.0
-
-        # Get configured weight for this strategy
-        weight = self.config.get_strategy_modifier(strategy_name, "knot_weight")
 
         # Calculate knot matching score using actual matcher score
         knot_data = result.matched.get("knot", {}) if result.matched else {}
@@ -577,7 +579,7 @@ class ScoringEngine:
                 "Score must be explicitly set to 0 if not applicable."
             )
 
-        # Component score already includes priority bonus - use it directly
+        # Return raw score - scoring engine will apply weight multiplier
         return float(actual_score)
 
     def _modifier_handle_brand_without_knot_brand(
