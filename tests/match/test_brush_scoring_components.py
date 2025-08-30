@@ -138,10 +138,18 @@ class TestScoringEngine:
 
         results = [
             MatchResult(
-                original="test", matched={"brand": "Test1"}, match_type="exact", pattern="test1"
+                original="test",
+                matched={"brand": "Test1"},
+                match_type="exact",
+                pattern="test1",
+                strategy="test_strategy",
             ),
             MatchResult(
-                original="test", matched={"brand": "Test2"}, match_type="exact", pattern="test2"
+                original="test",
+                matched={"brand": "Test2"},
+                match_type="exact",
+                pattern="test2",
+                strategy="test_strategy",
             ),
         ]
 
@@ -193,6 +201,7 @@ class TestScoringEngine:
             matched={"brand": "Test", "fiber": "badger"},
             match_type="exact",
             pattern="test",
+            strategy="test_strategy",
         )
 
         scored_results = engine.score_results([result], "test brush")

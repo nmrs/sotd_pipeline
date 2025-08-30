@@ -46,9 +46,14 @@ class ZenithBrushMatchingStrategy:
                 match_type="regex",
             )
 
-        # Return None when no match is found - this is the correct behavior
-        # The StrategyOrchestrator will skip None results
-        return None
+        # Return MatchResult with matched=None when no match is found
+        # This maintains consistency with the expected interface
+        return create_strategy_result(
+            original_value=value,
+            matched_data=None,
+            pattern=None,
+            strategy_name="zenith_brush",
+        )
 
     def _get_default_match(self) -> dict:
         return {

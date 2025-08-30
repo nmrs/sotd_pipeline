@@ -241,4 +241,5 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             matched=brush_data,
             match_type="knot",
             pattern=knot_data.get("_pattern_used"),
+            strategy="full_input_component_matching",
         )

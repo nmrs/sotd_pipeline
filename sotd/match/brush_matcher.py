@@ -18,9 +18,7 @@ from sotd.match.brush_matching_strategies.known_brush_strategy import (
 from sotd.match.brush_matching_strategies.correct_matches_strategy import (
     CorrectMatchesStrategy,
 )
-from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
-    CompleteBrushWrapperStrategy,
-)
+
 from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
     KnownSplitWrapperStrategy,
 )
@@ -327,8 +325,8 @@ class BrushMatcher:
         # Note: Correct matches strategy is handled separately, not in the strategy orchestrator
         # It runs first with highest priority when not bypassed
 
-        # Add complete brush wrapper strategy
-        strategies.append(CompleteBrushWrapperStrategy(catalogs["brushes"]))
+        # Add the known split wrapper strategy for brush splits
+        strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
 
         # Add the known brush matching strategy for complete brushes
         strategies.append(
@@ -337,12 +335,13 @@ class BrushMatcher:
             )
         )
 
-        strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
         # Add strategies that expect the correct catalog structure
         strategies.append(OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {})))
+
         # Add specialized strategies
         strategies.append(ZenithBrushMatchingStrategy())
         strategies.append(OmegaSemogueBrushMatchingStrategy())
+
         # Skip other strategies for now - they may expect different catalog structure
         # strategies.append(ZenithBrushMatchingStrategy(catalogs["brushes"].get("zenith_brushes", {})))
         # strategies.append(OmegaSemogueBrushMatchingStrategy(catalogs["brushes"].get("omega_semogue_brushes", {})))

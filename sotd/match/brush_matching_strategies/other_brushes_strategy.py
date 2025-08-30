@@ -3,16 +3,21 @@ from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_kno
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     validate_catalog_structure,
 )
-from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
-    YamlBackedBrushMatchingStrategy,
+from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+    BaseBrushMatchingStrategy,
 )
+
 from sotd.match.types import MatchResult, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
-class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
+class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
+    @property
+    def strategy_name(self) -> str:
+        return "other_brush"
+
     def __init__(self, catalog: dict):
-        super().__init__(catalog)
+        self.catalog = catalog
         self._validate_catalog()
         self.compiled_patterns = self._compile_patterns()
 

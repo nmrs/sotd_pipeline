@@ -285,97 +285,6 @@ function ComponentDetailsDisplay({
   );
 }
 
-// Reusable component for displaying matched data
-function MatchedDataDisplay({ matchedData }: { matchedData: BrushMatchResult['matchedData'] }) {
-  return (
-    <div>
-      <h4 className='font-medium mb-2'>Matched Data</h4>
-      <div className='space-y-2 text-sm'>
-        {/* Top Level Section - always show */}
-        <div className='border-b pb-2'>
-          <div className='text-xs text-gray-500 mb-1 font-medium'>TOP LEVEL</div>
-          <div className='space-y-1'>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Brand:</span>
-              <span className={matchedData.brand ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.brand || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Model:</span>
-              <span className={matchedData.model ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.model || 'Not specified'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Handle Section - always show */}
-        <div className='border-b pb-2'>
-          <div className='text-xs text-gray-500 mb-1 font-medium'>HANDLE</div>
-          <div className='space-y-1'>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Brand:</span>
-              <span className={matchedData.handle?.brand ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.handle?.brand || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Model:</span>
-              <span className={matchedData.handle?.model ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.handle?.model || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Source:</span>
-              <span className={matchedData.handle?.source_text ? 'font-semibold text-xs' : 'text-gray-400 italic text-xs'}>
-                {matchedData.handle?.source_text || 'Not specified'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Knot Section - always show */}
-        <div>
-          <div className='text-xs text-gray-500 mb-1 font-medium'>KNOT</div>
-          <div className='space-y-1'>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Brand:</span>
-              <span className={matchedData.knot?.brand ? 'font-semibold' : 'font-semibold'}>
-                {matchedData.knot?.brand || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Model:</span>
-              <span className={matchedData.knot?.model ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.knot?.model || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Fiber:</span>
-              <span className={matchedData.knot?.fiber ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.knot?.fiber || 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Size:</span>
-              <span className={matchedData.knot?.knot_size_mm ? 'font-semibold' : 'text-gray-400 italic'}>
-                {matchedData.knot?.knot_size_mm ? `${matchedData.knot.knot_size_mm}mm` : 'Not specified'}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-gray-600'>Source:</span>
-              <span className={matchedData.knot?.source_text ? 'font-semibold text-xs' : 'text-gray-400 italic text-xs'}>
-                {matchedData.knot?.source_text || 'Not specified'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function BrushMatchingAnalyzer() {
   const [brushString, setBrushString] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -595,9 +504,6 @@ export function BrushMatchingAnalyzer() {
                             componentDetails={result.componentDetails}
                             splitInformation={result.splitInformation}
                           />
-
-                          {/* Matched Data - Reusable Component */}
-                          <MatchedDataDisplay matchedData={result.matchedData} />
                         </CardContent>
                       </Card>
                     ))}
