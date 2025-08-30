@@ -91,7 +91,14 @@ class CatalogValidator:
                                             hasattr(result.matched, "knot") and result.matched.knot
                                         )
 
-                                    if has_handle or has_knot:
+                                    # IMPORTANT: Only flag as composite brush if the matcher didn't return a top-level brand/model
+                                    # Known brushes can have both top-level brand/model AND handle/knot components populated
+                                    # This is the correct behavior for catalog-driven brushes according to the specification
+                                    if (
+                                        has_handle or has_knot
+                                    ) and (
+                                        not matched_brand or not matched_model
+                                    ):
                                         # This is a composite brush - check if it should be stored in handle/knot sections
                                         # Extract handle/knot information
                                         if hasattr(result.matched, "get"):
