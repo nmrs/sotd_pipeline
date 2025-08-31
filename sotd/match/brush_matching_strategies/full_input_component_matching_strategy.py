@@ -112,8 +112,8 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
 
         # Create combined brush data with nested handle/knot structure
         brush_data = {
-            "brand": handle_data.get("handle_maker") or knot_data.get("brand"),
-            "model": handle_data.get("handle_model") or knot_data.get("model"),
+            "brand": None,  # Multi-component brushes should not have top-level brand
+            "model": None,  # Multi-component brushes should not have top-level model
             "fiber": knot_data.get("fiber"),
             "knot_size_mm": knot_data.get("knot_size_mm"),
             "handle_maker": handle_data.get("handle_maker"),

@@ -166,3 +166,48 @@ class TestFullInputComponentMatchingStrategy:
         """Test handling of None input string."""
         result = self.strategy.match("")  # Empty string instead of None
         assert result is None
+
+    def test_dual_component_different_brands_should_not_set_top_level_brand_model(self):
+        """Test that dual component brushes with different brands should not set top-level brand/model."""
+        # Mock handle match with one brand
+        handle_result = MatchResult(
+            original="Heritage Collection Merit 99-4 w/ AP Shave Co G5C",
+            matched={"handle_maker": "Heritage Collection", "handle_model": "Merit 99-4"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match with different brand
+        knot_result = MatchResult(
+            original="Heritage Collection Merit 99-4 w/ AP Shave Co G5C",
+            matched={"brand": "AP Shave Co", "model": "G5C", "fiber": "Synthetic"},
+            match_type="exact",
+            pattern="ap shave co.*g5c",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        result = self.strategy.match("Heritage Collection Merit 99-4 w/ AP Shave Co G5C")
+
+        assert result is not None
+        assert result.strategy == "full_input_component_matching"
+        assert result.match_type == "composite"
+
+        # Ensure matched data exists
+        assert result.matched is not None
+
+        # Key assertion: Top-level brand and model should be None for multi-component brushes
+        assert (
+            result.matched["brand"] is None
+        ), "Top-level brand should be None for multi-component brushes with different brands"
+        assert (
+            result.matched["model"] is None
+        ), "Top-level model should be None for multi-component brushes with different brands"
+
+        # Handle and knot sections should still be populated
+        assert result.matched["handle"]["brand"] == "Heritage Collection"
+        assert result.matched["handle"]["model"] == "Merit 99-4"
+        assert result.matched["knot"]["brand"] == "AP Shave Co"
+        assert result.matched["knot"]["model"] == "G5C"
+        assert result.matched["knot"]["fiber"] == "Synthetic"
