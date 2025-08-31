@@ -929,14 +929,14 @@ async def get_correct_matches(field: str):
             brush_data = data.get(field, {})
             handle_data = data.get("handle", {})
             knot_data = data.get("knot", {})
-
+            
             # Combine all sections for composite brush confirmation logic
             combined_data = {
                 "brush": brush_data,
                 "handle": handle_data,
                 "knot": knot_data,
             }
-
+            
             logger.info(
                 f"Brush field data - brush: {brush_data}, handle: {handle_data}, knot: {knot_data}"
             )
@@ -970,7 +970,7 @@ async def get_correct_matches(field: str):
         elif field == "brush":
             # For brush field, count entries from all sections (brush, handle, knot)
             total_entries = 0
-
+            
             # Count brush section entries
             brush_data = data.get(field, {})
             total_entries += sum(
@@ -979,7 +979,7 @@ async def get_correct_matches(field: str):
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
-
+            
             # Count handle section entries
             handle_data = data.get("handle", {})
             total_entries += sum(
@@ -988,7 +988,7 @@ async def get_correct_matches(field: str):
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
-
+            
             # Count knot section entries
             knot_data = data.get("knot", {})
             total_entries += sum(

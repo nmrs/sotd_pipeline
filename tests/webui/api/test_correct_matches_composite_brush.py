@@ -103,11 +103,12 @@ class TestCorrectMatchesCompositeBrush:
             assert result.field == "brush"
             assert result.total_entries == 2  # 2 entries in the brush section
 
-            # Verify the entries contain only brush section data
+            # Verify the entries contain all three sections for composite brush logic
+            # The UI expects all sections to be present even when empty
             entries = result.entries
             assert "brush" in entries
-            assert "handle" not in entries
-            assert "knot" not in entries
+            assert "handle" in entries
+            assert "knot" in entries
 
     @patch("webui.api.analysis.project_root")
     @patch("builtins.open")
@@ -169,18 +170,21 @@ class TestCorrectMatchesCompositeBrush:
 
         # Mock file exists check
         with patch("pathlib.Path.exists", return_value=True):
-            # Call the function
-            result = get_correct_matches("brush")
+            # Call the async function
+            import asyncio
+
+            result = asyncio.run(get_correct_matches("brush"))
 
             # Verify the result handles missing sections
             assert result.field == "brush"
             assert result.total_entries == 1  # Only brush section entries
 
-            # Verify the entries contain available sections
+            # Verify the entries contain all three sections for composite brush logic
+            # The UI expects all sections to be present even when empty
             entries = result.entries
             assert "brush" in entries
-            assert "handle" not in entries
-            assert "knot" not in entries
+            assert "handle" in entries
+            assert "knot" in entries
 
     @patch("webui.api.analysis.project_root")
     @patch("builtins.open")
@@ -209,15 +213,18 @@ class TestCorrectMatchesCompositeBrush:
         # Mock file exists check
         with patch("pathlib.Path.exists", return_value=True):
             # Test razor field (should not be affected)
-            result = get_correct_matches("razor")
+            import asyncio
+
+            result = asyncio.run(get_correct_matches("razor"))
 
             # Verify razor field is not affected
             assert result.field == "razor"
             assert result.total_entries == 1  # Only razor section entries
 
             # Verify the entries contain only razor section data
+            # Non-brush fields return data directly without field name wrapper
             entries = result.entries
-            assert "razor" in entries
+            assert "Koraat" in entries
             assert "brush" not in entries
             assert "handle" not in entries
             assert "knot" not in entries
@@ -247,8 +254,10 @@ class TestCorrectMatchesCompositeBrush:
 
         # Mock file exists check
         with patch("pathlib.Path.exists", return_value=True):
-            # Call the function
-            result = get_correct_matches("brush")
+            # Call the async function
+            import asyncio
+
+            result = asyncio.run(get_correct_matches("brush"))
 
             # Verify the result provides data needed for composite brush confirmation
             assert result.field == "brush"
