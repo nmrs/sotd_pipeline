@@ -46,7 +46,7 @@ const Header: React.FC = () => {
         { path: '/mismatch', label: 'Match Analyzer', icon: '📊' },
         { path: '/soap-analyzer', label: 'Soap Analyzer', icon: '🧼' },
         { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },
-      ]
+      ],
     },
     {
       label: 'Validators',
@@ -55,7 +55,7 @@ const Header: React.FC = () => {
         { path: '/catalog-validator', label: 'Catalog Validator', icon: '✅' },
         { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
         { path: '/brush-validation', label: 'Brush Validation', icon: '🖊️' },
-      ]
+      ],
     },
     {
       label: 'Tools',
@@ -63,8 +63,8 @@ const Header: React.FC = () => {
       items: [
         { path: '/brush-matching-analyzer', label: 'Brush Matching', icon: '🧹' },
         { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
-      ]
-    }
+      ],
+    },
   ];
 
   const toggleMobileMenu = () => {
@@ -88,41 +88,46 @@ const Header: React.FC = () => {
       key={item.path}
       to={item.path}
       onClick={closeMobileMenu}
-      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap ${location.pathname === item.path
-        ? 'bg-blue-100 text-blue-700'
-        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-        }`}
+      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
+        location.pathname === item.path
+          ? 'bg-blue-100 text-blue-700'
+          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+      }`}
     >
       <span>{item.icon}</span>
       <span>{item.label}</span>
     </Link>
   );
 
-  const renderDropdownGroup = (group: typeof navigationGroups[0]) => (
-    <div key={group.label} className="relative">
+  const renderDropdownGroup = (group: (typeof navigationGroups)[0]) => (
+    <div key={group.label} className='relative'>
       <button
         onClick={() => toggleDropdown(group.label)}
         onBlur={() => setTimeout(closeDropdown, 150)}
-        className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${location.pathname === group.items.find(item => item.path === location.pathname)?.path
-          ? 'bg-blue-100 text-blue-700'
-          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+        className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+          location.pathname === group.items.find(item => item.path === location.pathname)?.path
+            ? 'bg-blue-100 text-blue-700'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        }`}
       >
         <span>{group.icon}</span>
         <span>{group.label}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === group.label ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${openDropdown === group.label ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {openDropdown === group.label && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-          <div className="py-1">
+        <div className='absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50'>
+          <div className='py-1'>
             {group.items.map(item => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={closeDropdown}
-                className={`flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${location.pathname === item.path ? 'bg-blue-50 text-blue-700' : ''
-                  }`}
+                className={`flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${
+                  location.pathname === item.path ? 'bg-blue-50 text-blue-700' : ''
+                }`}
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>

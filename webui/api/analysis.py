@@ -813,7 +813,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         else:
                             matched_by_strategy = "unknown"
                         logger.debug(f"Determined strategy: {matched_by_strategy}")
-                    
+
                     logger.debug(f"Final strategy for {normalized}: {matched_by_strategy}")
 
                 # Use analyzer's results directly

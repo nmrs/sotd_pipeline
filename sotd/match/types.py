@@ -110,11 +110,21 @@ class HandleKnotData:
     Used when brush input is split into handle and knot components.
     """
 
+    type: str = "brush"  # Explicit type field for frontend type discrimination
     brand: Optional[str] = None
     model: Optional[str] = None
     source_text: Optional[str] = None
     fiber: Optional[str] = None
     knot_size_mm: Optional[float] = None
+    handle_maker: Optional[str] = None
+    knot_maker: Optional[str] = None
+    fiber_strategy: Optional[str] = None
+    fiber_conflict: Optional[str] = None
+    _matched_by_strategy: Optional[str] = None
+    _pattern_used: Optional[str] = None
+    _matched_from: Optional[str] = None
+    _original_knot_text: Optional[str] = None
+    _original_handle_text: Optional[str] = None
 
 
 @dataclass

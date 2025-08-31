@@ -66,14 +66,14 @@ function ScoreBreakdownDisplay({
   baseScore,
   modifiers,
   modifierDetails,
-  total
+  total,
 }: {
   baseScore: number;
   modifiers: number;
   modifierDetails: { name: string; weight: number; description: string }[];
   total?: number;
 }) {
-  const finalTotal = total ?? (baseScore + modifiers);
+  const finalTotal = total ?? baseScore + modifiers;
 
   return (
     <div className='mb-4'>
@@ -90,9 +90,7 @@ function ScoreBreakdownDisplay({
             {modifiers > 0 ? '+' : ''}
             {modifiers}
           </p>
-          <p className='text-xs text-gray-500'>
-            {modifiers > 0 ? 'Bonus points' : 'No bonuses'}
-          </p>
+          <p className='text-xs text-gray-500'>{modifiers > 0 ? 'Bonus points' : 'No bonuses'}</p>
         </div>
         <div>
           <p className='text-gray-600'>Total</p>
@@ -107,7 +105,7 @@ function ScoreBreakdownDisplay({
 // Reusable component for displaying modifier details
 function ModifierDetailsDisplay({
   modifierDetails,
-  modifiers
+  modifiers,
 }: {
   modifierDetails: { name: string; weight: number; description: string }[];
   modifiers: number;
@@ -144,9 +142,7 @@ function ModifierDetailsDisplay({
           {modifiers > 0 ? (
             <>
               <p>Modifiers applied: +{modifiers}</p>
-              <p className='text-xs mt-1'>
-                (Detailed breakdown not available from backend)
-              </p>
+              <p className='text-xs mt-1'>(Detailed breakdown not available from backend)</p>
             </>
           ) : (
             <p>No modifiers applied</p>
@@ -160,7 +156,7 @@ function ModifierDetailsDisplay({
 // Reusable component for displaying component details
 function ComponentDetailsDisplay({
   componentDetails,
-  splitInformation
+  splitInformation,
 }: {
   componentDetails?: {
     handle?: { score: number; breakdown: Record<string, number>; metadata: Record<string, any> };
@@ -187,17 +183,23 @@ function ComponentDetailsDisplay({
           <div className='grid grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-blue-600 font-medium'>Handle Text:</p>
-              <p className='font-mono text-xs bg-white p-2 rounded border'>{splitInformation.handleText}</p>
+              <p className='font-mono text-xs bg-white p-2 rounded border'>
+                {splitInformation.handleText}
+              </p>
             </div>
             <div>
               <p className='text-blue-600 font-medium'>Knot Text:</p>
-              <p className='font-mono text-xs bg-white p-2 rounded border'>{splitInformation.knotText}</p>
+              <p className='font-mono text-xs bg-white p-2 rounded border'>
+                {splitInformation.knotText}
+              </p>
             </div>
           </div>
           {splitInformation.splitPriority && (
             <div className='mt-2'>
               <p className='text-blue-600 font-medium'>Split Priority:</p>
-              <Badge variant='outline' className='text-xs'>{splitInformation.splitPriority}</Badge>
+              <Badge variant='outline' className='text-xs'>
+                {splitInformation.splitPriority}
+              </Badge>
             </div>
           )}
         </div>
@@ -307,7 +309,7 @@ export function BrushMatchingAnalyzer() {
         },
         body: JSON.stringify({
           brushString: brushString.trim(),
-          bypass_correct_matches: bypassCorrectMatches
+          bypass_correct_matches: bypassCorrectMatches,
         }),
       });
 
@@ -365,7 +367,7 @@ export function BrushMatchingAnalyzer() {
               <input
                 type='text'
                 value={brushString}
-                onChange={(e) => setBrushString(e.target.value)}
+                onChange={e => setBrushString(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder='Enter brush string to analyze...'
                 className='flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -384,7 +386,7 @@ export function BrushMatchingAnalyzer() {
                 type='checkbox'
                 id='bypass-correct-matches'
                 checked={bypassCorrectMatches}
-                onChange={(e) => setBypassCorrectMatches(e.target.checked)}
+                onChange={e => setBypassCorrectMatches(e.target.checked)}
                 className='w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
               />
               <label htmlFor='bypass-correct-matches' className='text-sm text-gray-600'>
@@ -422,7 +424,9 @@ export function BrushMatchingAnalyzer() {
                     <div>
                       <p className='text-sm text-gray-600'>Score</p>
                       <div className='flex items-baseline gap-2'>
-                        <span className={`font-bold text-2xl ${getScoreColor(results.winner.score)}`}>
+                        <span
+                          className={`font-bold text-2xl ${getScoreColor(results.winner.score)}`}
+                        >
                           {results.winner.score}
                         </span>
                         {results.winner.scoreBreakdown.modifiers > 0 && (
@@ -432,7 +436,8 @@ export function BrushMatchingAnalyzer() {
                         )}
                       </div>
                       <div className='text-xs text-gray-500 mt-1'>
-                        {results.winner.scoreBreakdown.baseScore} base + {results.winner.scoreBreakdown.modifiers} modifiers
+                        {results.winner.scoreBreakdown.baseScore} base +{' '}
+                        {results.winner.scoreBreakdown.modifiers} modifiers
                       </div>
                     </div>
                     <div>
@@ -457,11 +462,11 @@ export function BrushMatchingAnalyzer() {
                     {results.results
                       .filter(result => {
                         // Filter out strategies with no valid matches
-                        const hasValidData = result.matchedData && (
-                          result.matchedData.brand ||
-                          result.matchedData.handle ||
-                          result.matchedData.knot
-                        );
+                        const hasValidData =
+                          result.matchedData &&
+                          (result.matchedData.brand ||
+                            result.matchedData.handle ||
+                            result.matchedData.knot);
                         return hasValidData;
                       })
                       .map((result, index) => (
@@ -482,7 +487,9 @@ export function BrushMatchingAnalyzer() {
                               </div>
                               <div className='text-right'>
                                 <div className='flex items-baseline gap-2 justify-end'>
-                                  <span className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
+                                  <span
+                                    className={`text-2xl font-bold ${getScoreColor(result.score)}`}
+                                  >
                                     {result.score}
                                   </span>
                                   {result.scoreBreakdown.modifiers > 0 && (
@@ -491,9 +498,12 @@ export function BrushMatchingAnalyzer() {
                                     </span>
                                   )}
                                 </div>
-                                <p className='text-sm text-gray-600'>{result.matchType || 'None'}</p>
+                                <p className='text-sm text-gray-600'>
+                                  {result.matchType || 'None'}
+                                </p>
                                 <p className='text-xs text-gray-500'>
-                                  {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
+                                  {result.scoreBreakdown.baseScore} +{' '}
+                                  {result.scoreBreakdown.modifiers}
                                 </p>
                               </div>
                             </div>
@@ -525,11 +535,11 @@ export function BrushMatchingAnalyzer() {
                     {results.results
                       .filter(result => {
                         // Filter for strategies with no valid matches
-                        const hasValidData = result.matchedData && (
-                          result.matchedData.brand ||
-                          result.matchedData.handle ||
-                          result.matchedData.knot
-                        );
+                        const hasValidData =
+                          result.matchedData &&
+                          (result.matchedData.brand ||
+                            result.matchedData.handle ||
+                            result.matchedData.knot);
                         return !hasValidData;
                       })
                       .map((result, index) => (
@@ -539,14 +549,17 @@ export function BrushMatchingAnalyzer() {
                               <div className='flex items-center gap-2'>
                                 <Hash className='w-4 h-4 text-gray-400' />
                                 <Badge variant='outline' className='font-mono text-gray-500'>
-                                  #{results.results.filter(r => {
-                                    const hasValidData = r.matchedData && (
-                                      r.matchedData.brand ||
-                                      r.matchedData.handle ||
-                                      r.matchedData.knot
-                                    );
+                                  #
+                                  {results.results.filter(r => {
+                                    const hasValidData =
+                                      r.matchedData &&
+                                      (r.matchedData.brand ||
+                                        r.matchedData.handle ||
+                                        r.matchedData.knot);
                                     return hasValidData;
-                                  }).length + index + 1}
+                                  }).length +
+                                    index +
+                                    1}
                                 </Badge>
                                 <h3 className='font-semibold text-lg text-gray-600'>
                                   {result.strategy.toUpperCase()}
@@ -566,9 +579,12 @@ export function BrushMatchingAnalyzer() {
                                     </span>
                                   )}
                                 </div>
-                                <p className='text-sm text-gray-500'>{result.matchType || 'None'}</p>
+                                <p className='text-sm text-gray-500'>
+                                  {result.matchType || 'None'}
+                                </p>
                                 <p className='text-xs text-gray-400'>
-                                  {result.scoreBreakdown.baseScore} + {result.scoreBreakdown.modifiers}
+                                  {result.scoreBreakdown.baseScore} +{' '}
+                                  {result.scoreBreakdown.modifiers}
                                 </p>
                               </div>
                             </div>
@@ -595,13 +611,17 @@ export function BrushMatchingAnalyzer() {
 
                             {/* No Match Explanation */}
                             <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded'>
-                              <h4 className='font-medium text-sm text-red-800 mb-2'>Why No Match?</h4>
+                              <h4 className='font-medium text-sm text-red-800 mb-2'>
+                                Why No Match?
+                              </h4>
                               <div className='text-sm text-red-700 space-y-1'>
                                 <p>This strategy failed to produce a valid match because:</p>
                                 <ul className='list-disc list-inside ml-4 space-y-1'>
                                   <li>No matching patterns found in the catalog</li>
                                   <li>Pattern matching failed for the input text</li>
-                                  <li>Required fields (brand, model, etc.) could not be extracted</li>
+                                  <li>
+                                    Required fields (brand, model, etc.) could not be extracted
+                                  </li>
                                   <li>Strategy-specific logic rejected the input</li>
                                 </ul>
                                 <p className='text-xs text-red-600 mt-2'>

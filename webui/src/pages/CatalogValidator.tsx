@@ -10,14 +10,14 @@ import {
   handleApiError,
 } from '../services/api';
 
-
-
 const CatalogValidator: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('blade');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CatalogValidationResult | null>(null);
-  const [displayMode, setDisplayMode] = useState<'all' | 'mismatches' | 'no_match' | 'format_mismatches'>('all');
+  const [displayMode, setDisplayMode] = useState<
+    'all' | 'mismatches' | 'no_match' | 'format_mismatches'
+  >('all');
 
   const handleValidate = async () => {
     if (!selectedField) {
@@ -58,9 +58,7 @@ const CatalogValidator: React.FC = () => {
       all: issues.length,
       mismatches: issues.filter(issue => issue.issue_type === 'catalog_pattern_mismatch').length,
       no_match: issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match').length,
-      format_mismatches: issues.filter(issue =>
-        issue.issue_type === 'format_mismatch'
-      ).length,
+      format_mismatches: issues.filter(issue => issue.issue_type === 'format_mismatch').length,
     };
   };
 
@@ -73,9 +71,7 @@ const CatalogValidator: React.FC = () => {
       case 'no_match':
         return results.issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match');
       case 'format_mismatches':
-        return results.issues.filter(issue =>
-          issue.issue_type === 'format_mismatch'
-        );
+        return results.issues.filter(issue => issue.issue_type === 'format_mismatch');
       default:
         return results.issues;
     }
@@ -145,8 +141,9 @@ const CatalogValidator: React.FC = () => {
               >
                 All Issues
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -158,10 +155,11 @@ const CatalogValidator: React.FC = () => {
               >
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                    ? 'bg-white text-orange-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'mismatches'
+                      ? 'bg-white text-orange-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -174,10 +172,11 @@ const CatalogValidator: React.FC = () => {
                 >
                   Format Mismatches
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'format_mismatches'
-                      ? 'bg-white text-purple-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                      displayMode === 'format_mismatches'
+                        ? 'bg-white text-purple-600'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
                   >
                     {getDisplayModeCounts().format_mismatches}
                   </span>
@@ -190,10 +189,11 @@ const CatalogValidator: React.FC = () => {
               >
                 No Match
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'no_match'
-                    ? 'bg-white text-red-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'no_match'
+                      ? 'bg-white text-red-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().no_match}
                 </span>
@@ -276,12 +276,13 @@ const CatalogValidator: React.FC = () => {
                                   : 'Validation Issue'}
                           </h4>
                           <span
-                            className={`px-2 py-1 text-xs rounded-full ${issue.severity === 'high'
-                              ? 'bg-red-100 text-red-800'
-                              : issue.severity === 'medium'
-                                ? 'bg-orange-100 text-orange-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                              }`}
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              issue.severity === 'high'
+                                ? 'bg-red-100 text-red-800'
+                                : issue.severity === 'medium'
+                                  ? 'bg-orange-100 text-orange-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                            }`}
                           >
                             {issue.severity}
                           </span>
@@ -305,7 +306,8 @@ const CatalogValidator: React.FC = () => {
                                 Format Mismatch Detected:
                               </p>
                               <p className='text-sm text-blue-700'>
-                                <strong>Expected Format:</strong> {issue.format || 'Unknown'}<br />
+                                <strong>Expected Format:</strong> {issue.format || 'Unknown'}
+                                <br />
                                 <strong>Catalog Format:</strong> {issue.catalog_format || 'Unknown'}
                               </p>
                             </div>
