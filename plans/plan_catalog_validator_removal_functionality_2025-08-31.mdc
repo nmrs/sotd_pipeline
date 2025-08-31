@@ -1,0 +1,40 @@
+## Implementation Steps
+
+### Phase 1: Frontend Selection Interface ✅ COMPLETE
+1. ✅ Add checkbox state management
+2. ✅ Implement checkbox rendering for each issue
+3. ✅ Add selection count display
+4. ✅ Style selected items for visual feedback
+
+**Implementation Details:**
+- Added `selectedIssues` state using `Set<number>` for efficient selection tracking
+- Added `removing` state for future removal functionality
+- Implemented `handleIssueSelect` function for checkbox state management
+- Added `isAnyIssueSelected` computed value for conditional rendering
+- Added checkboxes next to each validation issue with proper styling
+- Added selection count display in the results header
+- Added visual feedback with blue ring and background for selected items
+- Added "Remove Selected" button that appears when items are selected
+- Integrated with existing validation workflow (clears selection on new validation)
+
+### Phase 2: Remove Button and Logic
+1. Add Remove Selected button with conditional rendering
+2. Implement `handleRemoveSelected` function
+3. Add loading state during removal
+4. Handle successful removal flow
+
+### Phase 3: API Integration
+1. Create backend endpoint for entry removal
+2. Implement YAML file update logic
+3. Add error handling and response formatting
+4. Test API with various input scenarios
+
+### Phase 4: Error Handling and Polish
+1. Implement comprehensive error handling
+2. Add user feedback for all operations
+3. Test error scenarios and edge cases
+4. Polish UI/UX and add final styling
+description:
+globs:
+alwaysApply: true
+---

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertTriangle, XCircle, Info } from 'lucide-react';
 import {
   validateCatalogAgainstCorrectMatches,
@@ -19,6 +20,10 @@ const CatalogValidator: React.FC = () => {
     'all' | 'mismatches' | 'no_match' | 'format_mismatches'
   >('all');
 
+  // New state for multi-select functionality
+  const [selectedIssues, setSelectedIssues] = useState<Set<number>>(new Set());
+  const [removing] = useState(false);
+
   const handleValidate = async () => {
     if (!selectedField) {
       setError('Please select a field to validate');
@@ -29,6 +34,8 @@ const CatalogValidator: React.FC = () => {
       setLoading(true);
       setError(null);
       setResults(null);
+      // Clear selection when starting new validation
+      setSelectedIssues(new Set());
 
       const result = await validateCatalogAgainstCorrectMatches({
         field: selectedField,
@@ -41,6 +48,21 @@ const CatalogValidator: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // New functions for multi-select functionality
+  const handleIssueSelect = (index: number, selected: boolean) => {
+    setSelectedIssues(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(index);
+      } else {
+        newSet.delete(index);
+      }
+      return newSet;
+    });
+  };
+
+  const isAnyIssueSelected = selectedIssues.size > 0;
 
   const getDisplayModeCounts = () => {
     if (!results) {
@@ -249,8 +271,30 @@ const CatalogValidator: React.FC = () => {
                     Processing Time:{' '}
                     <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
                   </span>
+                  {isAnyIssueSelected && (
+                    <span className='text-blue-600 font-medium'>
+                      Selected: {selectedIssues.size}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Remove Selected Button */}
+              {isAnyIssueSelected && (
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='destructive'
+                    onClick={() => {
+                      // TODO: Implement removal functionality
+                      console.log('Remove selected:', selectedIssues);
+                    }}
+                    disabled={removing}
+                    className='flex items-center gap-2'
+                  >
+                    {removing ? 'Removing...' : `Remove Selected (${selectedIssues.size})`}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -260,9 +304,18 @@ const CatalogValidator: React.FC = () => {
                 {getFilteredIssues().map((issue, index) => (
                   <div
                     key={index}
-                    className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)}`}
+                    className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)} ${
+                      selectedIssues.has(index) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                    }`}
                   >
                     <div className='flex items-start gap-3'>
+                      {/* Checkbox for selection */}
+                      <Checkbox
+                        checked={selectedIssues.has(index)}
+                        onCheckedChange={checked => handleIssueSelect(index, checked as boolean)}
+                        className='mt-1'
+                      />
+
                       {getIssueIcon(issue)}
                       <div className='flex-1'>
                         <div className='flex items-center gap-2 mb-2'>
@@ -403,7 +456,8 @@ const CatalogValidator: React.FC = () => {
             <div className='text-gray-400 text-6xl mb-4'>🔍</div>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>Ready to Validate</h3>
             <p className='text-gray-600'>
-              Select a field and click "Validate Catalog" to check for catalog pattern conflicts.
+              Select a field and click &quot;Validate Catalog&quot; to check for catalog pattern
+              conflicts.
               {selectedField === 'blade' && ' For blades, this will also detect format mismatches.'}
             </p>
           </div>
