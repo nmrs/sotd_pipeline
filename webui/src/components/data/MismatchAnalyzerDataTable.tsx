@@ -170,22 +170,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   // Sorting state
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // Helper function to safely get strategy field with debugging
+  // Helper function to safely get strategy field
   const getStrategyField = (item: MismatchItem): string => {
-    // Debug: log the actual data structure
-    console.log('getStrategyField called with item:', item);
-    console.log('item.matched:', item.matched);
-    console.log('item.matched_by_strategy:', item.matched_by_strategy);
-
-    // First try to get from the matched object if it's brush data
-    if (isBrushMatchedData(item.matched)) {
-      console.log('isBrushMatchedData returned true');
-      console.log('item.matched.matched_by_strategy:', item.matched.matched_by_strategy);
-      return item.matched.matched_by_strategy || 'unknown';
-    }
-
-    console.log('isBrushMatchedData returned false');
-    // Fallback to item level
+    // The API now provides the strategy directly at the item level
     return item.matched_by_strategy || 'unknown';
   };
 
@@ -811,8 +798,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         ),
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
-          const matched = item.matched as Record<string, unknown>;
-          const strategy = (matched._matched_by_strategy as string) || 'unknown';
+          const strategy = getStrategyField(item);
 
           // Color-code different strategies for better visibility
           const getStrategyColor = (strat: string) => {
