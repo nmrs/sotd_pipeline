@@ -19,7 +19,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "AP Shave Co",
                 "handle_model": "Beehive",
-                "_source_text": "AP Shave Co Beehive",
+                "_source_text": "AP Shave Co Beehive w/ G5C",
                 "_pattern_used": "handle_pattern",
             },
             match_type="handle",
@@ -33,7 +33,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "G5C",
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
-                "source_text": "G5C",
+                "source_text": "AP Shave Co Beehive w/ G5C",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -71,7 +71,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "Custom Handle",
                 "handle_model": "Artisan Turned",
-                "_source_text": "Custom Handle",
+                "_source_text": "Custom Handle w/ Declaration Grooming B2",
                 "_pattern_used": "handle_pattern",
             },
             match_type="handle",
@@ -85,7 +85,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "B2",
                 "fiber": "Badger",
                 "knot_size_mm": 26.0,
-                "source_text": "Declaration Grooming B2",
+                "source_text": "Custom Handle w/ Declaration Grooming B2",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -123,7 +123,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "AP Shave Co",
                 "handle_model": "Custom Handle",
-                "_source_text": "AP Shave Co Handle",
+                "_source_text": "AP Shave Co Handle w/ Unknown Knot",
                 "_pattern_used": "handle_pattern",
             },
             match_type="handle",
@@ -137,7 +137,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "Unknown",
                 "fiber": "Unknown",
                 "knot_size_mm": None,
-                "source_text": "Unknown Knot",
+                "source_text": "AP Shave Co Handle w/ Unknown Knot",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -187,7 +187,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "B2",
                 "fiber": "Badger",
                 "knot_size_mm": 26.0,
-                "source_text": "Declaration Grooming B2",
+                "source_text": "Unknown Handle w/ Declaration Grooming B2",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -225,7 +225,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "AP SHAVE CO",  # Uppercase
                 "handle_model": "Beehive",
-                "_source_text": "AP SHAVE CO Beehive",
+                "_source_text": "AP SHAVE CO Beehive w/ ap shave co G5C",
                 "_pattern_used": "handle_pattern",
             },
             match_type="handle",
@@ -239,7 +239,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "G5C",
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
-                "source_text": "ap shave co G5C",
+                "source_text": "AP SHAVE CO Beehive w/ ap shave co G5C",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -275,7 +275,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "",  # Empty string
                 "handle_model": "Custom",
-                "_source_text": "Handle",
+                "_source_text": "Handle w/ Knot",
                 "_pattern_used": "handle_pattern",
             },
             match_type="handle",
@@ -289,7 +289,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "Unknown",
                 "fiber": "Unknown",
                 "knot_size_mm": None,
-                "source_text": "Knot",
+                "source_text": "Handle w/ Knot",
                 "_pattern_used": "knot_pattern",
             },
             match_type="knot",
@@ -325,7 +325,7 @@ class TestCompositeBrushBrandLogic:
             matched={
                 "handle_maker": "Test Brand",
                 "handle_model": "Test Handle",
-                "_source_text": "Test Handle",
+                "_source_text": "Test Handle w/ Test Knot",
                 "_pattern_used": "test_handle_pattern",
             },
             match_type="handle",
@@ -339,7 +339,7 @@ class TestCompositeBrushBrandLogic:
                 "model": "Test Knot",
                 "fiber": "Test Fiber",
                 "knot_size_mm": 24.0,
-                "source_text": "Test Knot",
+                "source_text": "Test Handle w/ Test Knot",
                 "_pattern_used": "test_knot_pattern",
             },
             match_type="knot",
@@ -356,7 +356,9 @@ class TestCompositeBrushBrandLogic:
         assert result.matched is not None
         assert result.matched["_matched_by"] == "HandleMatcher+KnotMatcher"
         assert result.matched["_pattern"] == "test_handle_pattern"
-        assert result.matched["source_text"] == "Test Handle"  # Uses handle source_text
+        assert (
+            result.matched["source_text"] == "Test Handle w/ Test Knot"
+        )  # Uses full original text
 
         # Verify handle metadata
         assert result.matched["handle"]["_matched_by"] == "HandleMatcher"

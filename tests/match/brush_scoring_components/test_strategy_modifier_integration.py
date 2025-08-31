@@ -619,12 +619,12 @@ class TestModifierIntegrationWithScoringEngine:
                 "handle": {
                     "brand": "AP Shave Co.",
                     "model": "Lemon Drop",
-                    "source_text": "AP Shave Co.",
+                    "source_text": "AP Shave Co. - Lemon Drop 26mm TGN Boar",
                 },
                 "knot": {
                     "brand": "TGN",
                     "model": "Boar",
-                    "source_text": "Lemon Drop 26mm TGN Boar",
+                    "source_text": "AP Shave Co. - Lemon Drop 26mm TGN Boar",
                 },
             },
             match_type="composite",

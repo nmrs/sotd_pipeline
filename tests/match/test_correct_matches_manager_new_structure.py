@@ -422,3 +422,161 @@ class TestCorrectMatchesManagerNewStructure:
         # This test verifies that the fix for the format preservation bug is working
         # Previously, the format field would be lost during loading, causing all
         # blade entries to default to "DE" format
+
+    def test_composite_brush_various_scenarios(self, correct_matches_manager):
+        """Test composite brush handling across various real-world scenarios."""
+        test_cases = [
+            {
+                "name": "AP Shave Co with TGN Boar",
+                "original": "AP Shave Co. - Lemon Drop 26mm TGN Boar",
+                "handle": {
+                    "brand": "AP Shave Co",
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "The Golden Nib",
+                    "model": "Boar",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26.0,
+                },
+            },
+            {
+                "name": "Declaration Grooming with B2",
+                "original": "Declaration Grooming B2 in Mozingo handle",
+                "handle": {
+                    "brand": "Mozingo",
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                },
+            },
+            {
+                "name": "Simpson with Manchurian",
+                "original": "Simpson Chubby 2 Manchurian in Jade",
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Manchurian",
+                    "fiber": "Badger",
+                },
+            },
+        ]
+
+        for test_case in test_cases:
+            print(f"\n🔍 Testing: {test_case['name']}")
+
+            # Simulate frontend data structure
+            frontend_data = {
+                "original": test_case["original"],
+                "matched": {
+                    "handle": {
+                        **test_case["handle"],
+                        "source_text": test_case["original"],  # Full original text
+                    },
+                    "knot": {
+                        **test_case["knot"],
+                        "source_text": test_case["original"],  # Full original text
+                    },
+                },
+                "field": "brush",
+            }
+
+            # Process the data
+            original = frontend_data["original"]
+            matched = frontend_data["matched"]
+            field = frontend_data["field"]
+
+            # Create match key and save
+            match_key = correct_matches_manager.create_match_key(field, original, matched)
+            correct_matches_manager.mark_match_as_correct(
+                match_key,
+                {
+                    "original": original,
+                    "matched": matched,
+                    "field": field,
+                },
+            )
+
+            # Save and reload
+            correct_matches_manager.save_correct_matches()
+            correct_matches_manager.load_correct_matches()
+
+            # Verify the expected structure
+            normalized_original = original.lower()
+            original_brush_key = f"brush:{normalized_original}"
+            handle_key = f"handle:{normalized_original}"
+            knot_key = f"knot:{normalized_original}"
+
+            # Original brush key should not exist
+            assert (
+                original_brush_key not in correct_matches_manager._correct_matches
+            ), f"Original brush key should not exist: {original_brush_key}"
+
+            # Handle and knot keys should exist
+            assert (
+                handle_key in correct_matches_manager._correct_matches
+            ), f"Handle section not created: {handle_key}"
+            assert (
+                knot_key in correct_matches_manager._correct_matches
+            ), f"Knot section not created: {knot_key}"
+
+            # The CorrectMatchesManager saves data in a catalog structure, not individual match records
+            # We need to verify that the data can be looked up correctly using the full original text
+
+            # Test that the lookup keys work correctly
+            # This simulates what happens when the pipeline tries to find matches
+            normalized_original = original.lower()
+
+            # Test handle lookup - should find the handle section
+            handle_lookup_key = f"handle:{normalized_original}"
+            assert (
+                handle_lookup_key in correct_matches_manager._correct_matches
+            ), f"Handle lookup key not found: {handle_lookup_key}"
+
+            # Test knot lookup - should find the knot section
+            knot_lookup_key = f"knot:{normalized_original}"
+            assert (
+                knot_lookup_key in correct_matches_manager._correct_matches
+            ), f"Knot lookup key not found: {knot_lookup_key}"
+
+            # Verify that the individual match data is preserved in _correct_matches_data
+            # This contains the original match records for reference
+            handle_data = correct_matches_manager._correct_matches_data[handle_key]
+            knot_data = correct_matches_manager._correct_matches_data[knot_key]
+
+            # Debug output to see what's actually saved
+            print(f"🔍 DEBUG: Handle data structure: {handle_data}")
+            print(f"🔍 DEBUG: Knot data structure: {knot_data}")
+
+            # Verify that the original match data is preserved
+            assert "original" in handle_data, "Handle data missing 'original' field"
+            assert handle_data["original"] == test_case["original"]
+            assert "matched" in handle_data, "Handle data missing 'matched' field"
+            assert handle_data["matched"]["brand"] == test_case["handle"]["brand"]
+            assert handle_data["matched"]["model"] == test_case["handle"]["model"]
+
+            # Verify that the original match data is preserved for knot
+            assert "original" in knot_data, "Knot data missing 'original' field"
+            assert knot_data["original"] == test_case["original"]
+            assert "matched" in knot_data, "Knot data missing 'matched' field"
+            assert knot_data["matched"]["brand"] == test_case["knot"]["brand"]
+            assert knot_data["matched"]["model"] == test_case["knot"]["model"]
+
+            # Test lookup functionality
+            assert handle_key in correct_matches_manager._correct_matches
+            assert knot_key in correct_matches_manager._correct_matches
+
+            print(f"✅ {test_case['name']}: All validations passed")
+
+        print("\n🎯 SUCCESS: Composite brush handling works correctly across all scenarios")
+        print(
+            "The fix ensures that all composite brushes are properly routed to "
+            "handle/knot sections"
+        )
+        print("Each section gets the full original text for proper lookup functionality")
