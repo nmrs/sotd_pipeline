@@ -126,14 +126,20 @@ def match_record(
         else:
             razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
             # Use MatchResult consistently
-            if razor_result is not None:
+            if razor_result is not None and razor_result.matched:
                 # Update the MatchResult to include normalized field
                 razor_result.normalized = result["razor"]["normalized"]
                 result["razor"] = razor_result
                 if debug:
-                    print(
-                        f"    ✅ Razor matched: {razor_result.matched.get('brand', 'Unknown')} {razor_result.matched.get('model', 'Unknown')}"
-                    )
+                    brand = razor_result.matched.get("brand", "Unknown")
+                    model = razor_result.matched.get("model", "Unknown")
+                    print(f"    ✅ Razor matched: {brand} {model}")
+            elif razor_result is not None:
+                # Matcher returned a result but it's not matched
+                razor_result.normalized = result["razor"]["normalized"]
+                result["razor"] = razor_result
+                if debug:
+                    print("    ❌ Razor no match")
             else:
                 result["razor"] = MatchResult(
                     original=result["razor"]["original"],
