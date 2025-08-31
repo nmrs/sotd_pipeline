@@ -48,21 +48,21 @@ brush_scoring_weights:
 
     #composite brushes
     automated_split:
-      multiple_brands: 10.0
+      multiple_brands: 30.0
       handle_weight: 0.5
       knot_weight: 0.5
       handle_brand_without_knot_brand: -10.0
       high_confidence: 15.0
 
     full_input_component_matching:
-      multiple_brands: 10.0
+      multiple_brands: 30.0
       handle_weight: 0.1
       knot_weight: 0.1
       handle_brand_without_knot_brand: -10.0
       dual_component: 0.0
 
     known_split:
-      multiple_brands: 10.0
+      multiple_brands: 30.0
       handle_weight: 1.0
       knot_weight: 1.0
       handle_brand_without_knot_brand: -10.0

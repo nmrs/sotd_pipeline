@@ -536,17 +536,56 @@ blade:
       Injector:
       - ted pella injector
 brush:
+  AKA Brushworx:
+    Boar:
+    - aka brushworx- 26mm boar
   AP Shave Co:
+    2Bed:
+    - ap shave co. 26mm 2bed knot in the zen handle
+    APLuxury:
+    - ap shaveco 24mm luxury mixed badger
+    Cashmere:
+    - ap shave co cashmere 24mm
+    - ap shave co. 24mm cashmere w/ emerald handle
+    - ap shave co. goldflake w/ 30mm cashmere
     G5C:
     - a.p. shave co amber smoke g5c fan
+    - ap shave co beehive w/ g5c
+    - ap shave co summer 28mm g5c
+    - ap shave co. - 28 mm g5c synth
+    - ap shave co. black & clear handle w/ 24mm g5c premium synthetic fan knot
+    - ap shaveco ap400b xl 28 mm (g5c)
+    Gelousy:
+    - ap shave co ap400 gelousy fan 2 band badger
+    - ap shave co. - handcrafted series "summer" with 24mm gelousy shd fan knot (a1)
+    - ap shave co. blue & clear gelousy a3 badger
+    MiG:
+    - ap shave co. -26 mig synthetic
     Mixed Badger/Boar:
     - a p shaveco 24mm luxury badger mix
+    Silksmoke:
+    - ap shave co silksmoke 24mm
+    - ap shave co. silksmoke 24mm
+    Synbad:
+    - ap shave co synbad 24mm
+    - ap shave co. - 24mm synbad
+    - ap shave co. 24mm 'synbad' synthetic
+    - ap shave co. 24mm synbad
+    - ap shave co. synbad 24 mm
+    - ap shave co. synbad fan
   All-Star Grooming Co.:
     Shave Brush:
     - all-star grooming company - badger
   Aurora Grooming:
     LG24:
+    - aurora grooming - lg 2024 blurple 24mm synthetic
+    - aurora grooming 2024 lg blurple 24mm synthetic
+    - aurora grooming lather games 2024
+    - aurora grooming lg 2024 - blurple 24mm synthetic
+    - aurora grooming lg 2024 blurple 24mm synthetic
     - aurora grooming lg 2024 synthetic ('lux emerald green')
+    - aurora grooming lg2024 synthetic ("lux emerald green" handle)
+    - aurora grooming lg2024 synthetic ("lux emerald green")
     - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh
     - aurora grooming lg24
   Body Shop:
@@ -826,10 +865,18 @@ handle:
     Unspecified:
     - aka brushworx - 26mm g5b
     - aka brushworx - 26mm g5c
+    - aka brushworxs metamorphosis kaiser-i-hind
+  AP Shave Co:
+    Unspecified:
+    - ap shave co
   Alpha:
     Outlaw:
     - alpha outlaw silver stf++
     - alpha shaving works outlaw 28mm g5
+  Aurora Grooming:
+    Unspecified:
+    - aurora grooming gentleman's reserve
+    - Aurora Grooming LG24
   Aylsworth Razors:
     Unspecified:
     - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
@@ -872,6 +919,9 @@ handle:
     - chisel and hound ambrosia maple with 26 mm synthetic maggard knot
     - chisel and hound azurite with 26 mm maggard tuxedo knot
     - chisel and hound padauk wood handle
+  DS Cosmetics:
+    Unspecified:
+    - ds cosmetics jade green handle
   Dogwood:
     Unspecified:
     - \- dogwood b7
@@ -917,6 +967,7 @@ knot:
     - chisel & hound "propane" / 26mm ap shave co. g5b
     G5C:
     - aka brushworx - 26mm g5c
+    - ap shave co. 24mm g5c premium synthetic fan knot set
     Gelousy:
     - dogwood arcane abyss w/ gealousy
     - dogwood handcrafts tabak oridjinal, now with 28 mm gelousy knot
@@ -1007,6 +1058,10 @@ knot:
     Rorschach:
     - chisel & hound esmeralda w/oumo rorschach badger
     - dogwood handcrafts oumo rorschach two band badger badger
+    - rorschach
+    - rorschach knot
+    Synthetic:
+    - 26mm Oumo Synthetic
   Paragon:
     Boar:
     - chisel & hound season of the witch w/ 26mm paragon boar
@@ -1015,7 +1070,12 @@ knot:
   Rad Dinosaur Creations:
     Raptor:
     - rad dinosaur creations >!expunged!< w/ raptor synthetic
+  The Golden Nib:
+    Boar:
+    - lemon drop 26mm tgn boar
   Turn-N-Shave:
+    Full Moon:
+    - 26mm turn-n-shave fullmoon knot
     Medium Density Badger (M*):
     - chisel & hound strata tns m8 fan badger
     - chisel & hound strata turnnshave m8 fan badger

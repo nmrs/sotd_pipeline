@@ -841,17 +841,46 @@ known_brushes:
       patterns:
         - true.*inline.*grooming
   Turn-N-Shave:
+    Angel:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - turn.{1,5}shave.*angel
+        - t[&n]s.*angel
     BoBa (50/50 Boar Badger):
       fiber: Mixed Badger/Boar
       patterns:
         - turn.{1,5}shave.*boba
         - t[&n]s.*mix
         - t[&n]s.*boba
+    Boss:
+      fiber: Synthetic
+      patterns:
+        - turn.{1,5}shave.*boss
+        - t[&n]s.*boss
+    Full Moon:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - turn.{1,5}shave.*full.*moon
+        - t[&n]s.*full.*moon
+    Hawk:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+        - turn.{1,5}shave.*hawk
+        - t[&n]s.*hawk
     High Density Badger (H*):
       fiber: Badger
       patterns:
         - turn.{1,5}shave.*h\d
         - t[&n]s.*h\d
+    Horse Synth:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - turn.{1,5}shave.*horse.*syn
+        - t[&n]s.*horse.*syn
     Low Density Badger (L*):
       fiber: Badger
       patterns:
@@ -862,6 +891,33 @@ known_brushes:
       patterns:
         - turn.{1,5}shave.*m\d
         - t[&n]s.*m\d
+    Plissoft:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - turn.{1,5}shave.*plissoft
+        - t[&n]s.*plissoft
+    Quartermoon:
+      fiber: Synthetic
+      patterns:
+        - turn.{1,5}shave.*quarter
+        - t[&n]s.*quarter
+    Shoat:
+      fiber: Boar
+      patterns:
+        - turn.{1,5}shave.*shoat
+        - t[&n]s.*shoat
+    Tip (Badger):
+      fiber: Badger
+      patterns:
+        - turn.{1,5}shave.*(tip|v[1-9])
+        - t[&n]s.*(tip|v[1-9])
+        - \btip\b v[1-9]
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - turn.{1,5}shave.*tuxedo
+        - t[&n]s.*tuxedo
   Tweezerman:
     Shaving Brush:
       fiber: Badger
