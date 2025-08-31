@@ -30,6 +30,7 @@ class BaseCLIParser(argparse.ArgumentParser):
         add_output_args: bool = True,
         add_debug_args: bool = True,
         add_force_args: bool = True,
+        add_verbose_args: bool = True,
         require_date_args: bool = True,
         **kwargs,
     ):
@@ -61,6 +62,9 @@ class BaseCLIParser(argparse.ArgumentParser):
 
         if add_force_args:
             self._add_force_arguments()
+
+        if add_verbose_args:
+            self._add_verbose_arguments()
 
     def _add_date_arguments(self) -> None:
         """Add standardized date/time range arguments."""
@@ -96,6 +100,12 @@ class BaseCLIParser(argparse.ArgumentParser):
     def _add_force_arguments(self) -> None:
         """Add standardized force flag."""
         self.add_argument("--force", action="store_true", help="Overwrite existing files")
+
+    def _add_verbose_arguments(self) -> None:
+        """Add standardized verbose flag."""
+        self.add_argument(
+            "--verbose", action="store_true", help="Show INFO messages during execution"
+        )
 
     @staticmethod
     def _validate_month(value: str) -> str:

@@ -1113,6 +1113,10 @@ known_brushes:
         brand: Zenith
 
 other_brushes:
+  AKA Brushworx:
+    default: Synthetic
+    patterns:
+      - aka.*brush
   Alpha:
     default: Synthetic
     patterns:

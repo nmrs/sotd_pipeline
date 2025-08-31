@@ -458,6 +458,11 @@ Examples:
         choices=["hardware", "software", "all"],
         help="Report type: hardware, software, or all (only applies to report phase)",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show INFO messages during pipeline execution",
+    )
 
     args = parser.parse_args(argv)
 
@@ -539,6 +544,8 @@ Examples:
             common_args.append("--debug")
         if args.force:
             common_args.append("--force")
+        if args.verbose:
+            common_args.append("--verbose")
         if args.max_workers:
             common_args.extend(["--max-workers", str(args.max_workers)])
         if args.type:

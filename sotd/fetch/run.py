@@ -128,14 +128,16 @@ def _process_month(
         }
 
     # comment records with parallel processing
-    print(f"[INFO] Fetching comments for {len(threads)} threads using parallel processing...")
+    if args.verbose:
+        print(f"[INFO] Fetching comments for {len(threads)} threads using parallel processing...")
     comment_results = fetch_top_level_comments_parallel(
         threads, max_workers=10, return_metrics=True
     )
 
     if isinstance(comment_results, tuple):
         new_comment_records, metrics = comment_results
-        print(f"[INFO] Parallel processing metrics: {metrics}")
+        if args.verbose:
+            print(f"[INFO] Parallel processing metrics: {metrics}")
     else:
         new_comment_records = comment_results
 
@@ -265,13 +267,15 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
                 res["threads"] == 0 and len(missing_days) == calendar.monthrange(year, month)[1]
             ):
                 for d in missing_days:
-                    print(f"[WARN] Missing day: {d}")
-            print(
-                f"[INFO] SOTD fetch complete for {year:04d}-{month:02d}: "
-                f"{res['threads']} threads, "
-                f"{res['comments']} comments, "
-                f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
-            )
+                    if args.verbose:
+                        print(f"[WARN] Missing day: {d}")
+            if args.verbose:
+                print(
+                    f"[INFO] SOTD fetch complete for {year:04d}-{month:02d}: "
+                    f"{res['threads']} threads, "
+                    f"{res['comments']} comments, "
+                    f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
+                )
         elif len(valid_results) > 1:
             # multiple months
             all_missing_days = sorted(
@@ -280,20 +284,22 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
                 for d in ([] if res.get("missing_days") is None else res["missing_days"])
             )
             for d in all_missing_days:
-                print(f"[WARN] Missing day: {d}")
+                if args.verbose:
+                    print(f"[WARN] Missing day: {d}")
             start_ym = valid_results[0]["year"], valid_results[0]["month"]
             end_ym = valid_results[-1]["year"], valid_results[-1]["month"]
             total_threads = sum(res["threads"] for res in valid_results)
             total_comments = sum(res["comments"] for res in valid_results)
             total_missing = len(all_missing_days)
 
-            print(
-                f"[INFO] SOTD fetch complete for "
-                f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
-                f"{total_threads} threads, "
-                f"{total_comments} comments, "
-                f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
-            )
+            if args.verbose:
+                print(
+                    f"[INFO] SOTD fetch complete for "
+                    f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
+                    f"{total_threads} threads, "
+                    f"{total_comments} comments, "
+                    f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
+                )
 
         return 0  # Success
     except KeyboardInterrupt:
