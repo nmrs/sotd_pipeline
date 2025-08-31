@@ -395,7 +395,7 @@ def get_phase_range(phase_range: str) -> List[str]:
     if start_idx > end_idx:
         raise ValueError(f"Start phase '{start_phase}' comes after end phase '{end_phase}'")
 
-    return all_phases[start_idx : end_idx + 1]
+    return all_phases[start_idx:end_idx + 1]
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -512,6 +512,39 @@ Examples:
     )
 
     args = parser.parse_args(argv)
+
+    # Validate mutually exclusive date arguments
+    date_args = [args.month, args.year, args.start, args.end, args.range, args.ytd]
+    active_date_args = [arg for arg in date_args if arg is not None]
+    
+    if len(active_date_args) > 1:
+        # Check for specific conflicts
+        if args.month and args.ytd:
+            print("[ERROR] Cannot use --month and --ytd together. Use one or the other.")
+            return 1
+        if args.month and args.range:
+            print("[ERROR] Cannot use --month and --range together. Use one or the other.")
+            return 1
+        if args.year and args.ytd:
+            print("[ERROR] Cannot use --year and --ytd together. Use one or the other.")
+            return 1
+        if args.year and args.range:
+            print("[ERROR] Cannot use --year and --range together. Use one or the other.")
+            return 1
+        if args.ytd and args.range:
+            print("[ERROR] Cannot use --ytd and --range together. Use one or the other.")
+            return 1
+        if args.ytd and (args.start or args.end):
+            print("[ERROR] Cannot use --ytd with --start/--end. Use one or the other.")
+            return 1
+        if args.range and (args.start or args.end):
+            print("[ERROR] Cannot use --range with --start/--end. Use one or the other.")
+            return 1
+        
+        # Generic error for other combinations
+        print(f"[ERROR] Multiple conflicting date arguments specified: {active_date_args}")
+        print("Use only one of: --month, --year, --range, --start/--end, or --ytd")
+        return 1
 
     try:
         # Determine phases to run
