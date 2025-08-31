@@ -929,14 +929,14 @@ async def get_correct_matches(field: str):
             brush_data = data.get(field, {})
             handle_data = data.get("handle", {})
             knot_data = data.get("knot", {})
-            
+
             # Combine all sections for composite brush confirmation logic
             combined_data = {
                 "brush": brush_data,
                 "handle": handle_data,
                 "knot": knot_data,
             }
-            
+
             logger.info(
                 f"Brush field data - brush: {brush_data}, handle: {handle_data}, knot: {knot_data}"
             )
@@ -970,7 +970,7 @@ async def get_correct_matches(field: str):
         elif field == "brush":
             # For brush field, count entries from all sections (brush, handle, knot)
             total_entries = 0
-            
+
             # Count brush section entries
             brush_data = data.get(field, {})
             total_entries += sum(
@@ -979,7 +979,7 @@ async def get_correct_matches(field: str):
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
-            
+
             # Count handle section entries
             handle_data = data.get("handle", {})
             total_entries += sum(
@@ -988,7 +988,7 @@ async def get_correct_matches(field: str):
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
-            
+
             # Count knot section entries
             knot_data = data.get("knot", {})
             total_entries += sum(
@@ -1258,6 +1258,78 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         correct_matches_length = len(validator.correct_matches) if validator.correct_matches else 0
         print(f"🔍 API DEBUG: Validator correct_matches length: {correct_matches_length}")
 
+        # Count total entries in correct_matches.yaml for the requested field
+        def count_total_entries(data: dict, field: str) -> int:
+            """Count total entries in correct_matches.yaml for a specific field."""
+            if field not in data:
+                return 0
+
+            field_data = data[field]
+            total_entries = 0
+
+            if field == "blade":
+                # Blade can have either format -> brand -> model -> strings structure
+                # or brand -> model -> strings structure (flat)
+                for first_level in field_data.values():
+                    if isinstance(first_level, dict):
+                        # Check if this is format structure (has brands as values)
+                        # or brand structure (has models as values)
+                        sample_value = next(iter(first_level.values())) if first_level else None
+                        if isinstance(sample_value, dict):
+                            # Format structure: format -> brand -> model -> strings
+                            for brand_data in first_level.values():
+                                if isinstance(brand_data, dict):
+                                    for model_data in brand_data.values():
+                                        if isinstance(model_data, list):
+                                            total_entries += len(model_data)
+                        else:
+                            # Brand structure: brand -> model -> strings
+                            for model_data in first_level.values():
+                                if isinstance(model_data, list):
+                                    total_entries += len(model_data)
+            elif field == "brush":
+                # For brush field, count entries from all sections (brush, handle, knot)
+                # Count brush section entries
+                brush_data = field_data
+                total_entries += sum(
+                    len(strings) if isinstance(strings, list) else 0
+                    for brand_data in brush_data.values()
+                    if isinstance(brand_data, dict)
+                    for strings in brand_data.values()
+                )
+
+                # Count handle section entries
+                handle_data = data.get("handle", {})
+                total_entries += sum(
+                    len(strings) if isinstance(strings, list) else 0
+                    for brand_data in handle_data.values()
+                    if isinstance(brand_data, dict)
+                    for strings in brand_data.values()
+                )
+
+                # Count knot section entries
+                knot_data = data.get("knot", {})
+                total_entries += sum(
+                    len(strings) if isinstance(strings, list) else 0
+                    for brand_data in knot_data.values()
+                    if isinstance(brand_data, dict)
+                    for strings in brand_data.values()
+                )
+            else:
+                # Other fields have brand -> model -> strings structure
+                total_entries = sum(
+                    len(strings) if isinstance(strings, list) else 0
+                    for brand_data in field_data.values()
+                    if isinstance(brand_data, dict)
+                    for strings in brand_data.values()
+                )
+
+            return total_entries
+
+        # Count total entries before validation
+        total_entries = count_total_entries(validator.correct_matches, request.field)
+        print(f"🔍 API DEBUG: Total entries in {request.field} field: {total_entries}")
+
         # Validate the field
         print(f"🔍 API DEBUG: About to call validator.validate_field('{request.field}')...")
         issues, expected_structure = validator.validate_field(request.field)
@@ -1324,7 +1396,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             processed_issues.append(processed_issue)
 
         print(f"🔍 API DEBUG: Returning {len(processed_issues)} processed issues")
-        response_info = f"field={request.field}, total_entries={len(processed_issues)}, issues_count={len(processed_issues)}"
+        response_info = f"field={request.field}, total_entries={total_entries}, issues_count={len(processed_issues)}"
         print(f"🔍 API DEBUG: Final response structure: {response_info}")
 
         # Restore original working directory
@@ -1333,7 +1405,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         return {
             "field": request.field,
-            "total_entries": len(processed_issues),  # Count of issues found
+            "total_entries": total_entries,  # Total entries in correct_matches.yaml for this field
             "issues": processed_issues,
             "processing_time": 0.0,  # Placeholder for now
         }
