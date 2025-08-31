@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { CommentDisplay } from '../domain/CommentDisplay';
-import { MismatchItem } from '../../services/api';
+import { MismatchItem, BrushMatchedData, isBrushMatchedData } from '../../services/api';
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';

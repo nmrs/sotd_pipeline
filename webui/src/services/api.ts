@@ -199,6 +199,29 @@ export interface MismatchItem {
   _matched_by_strategy?: string;
 }
 
+// More specific interface for brush matched data
+export interface BrushMatchedData {
+  brand?: string;
+  model?: string;
+  fiber?: string;
+  knot_size_mm?: number;
+  handle_maker?: string;
+  knot_maker?: string;
+  fiber_strategy?: string;
+  fiber_conflict?: string;
+  _matched_by_strategy?: string;
+  _pattern_used?: string;
+  _matched_from?: string;
+  _original_knot_text?: string;
+  _original_handle_text?: string;
+  [key: string]: unknown; // Allow additional fields
+}
+
+// Type guard to check if matched data is brush data
+export function isBrushMatchedData(matched: Record<string, unknown>): matched is BrushMatchedData {
+  return typeof matched === 'object' && matched !== null;
+}
+
 export interface MismatchAnalysisResult {
   field: string;
   months: string[]; // Changed from month: string to months: string[]
