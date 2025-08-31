@@ -516,7 +516,7 @@ Examples:
     # Validate mutually exclusive date arguments
     date_args = [args.month, args.year, args.start, args.end, args.range, args.ytd]
     active_date_args = [arg for arg in date_args if arg is not None]
-    
+
     if len(active_date_args) > 1:
         # Check for specific conflicts
         if args.month and args.ytd:
@@ -540,7 +540,7 @@ Examples:
         if args.range and (args.start or args.end):
             print("[ERROR] Cannot use --range with --start/--end. Use one or the other.")
             return 1
-        
+
         # Generic error for other combinations
         print(f"[ERROR] Multiple conflicting date arguments specified: {active_date_args}")
         print("Use only one of: --month, --year, --range, --start/--end, or --ytd")
