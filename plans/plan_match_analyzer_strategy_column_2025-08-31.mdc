@@ -249,6 +249,8 @@ The plan follows a logical progression from fixing foundational type issues to c
 - HeaderFilter integration with filtering and sorting
 - Strategy filter state management and data filtering logic
 - Color-coding for different strategy types
+- **Task 2.1: Backend data structure investigation completed**
+- **Task 2.2: Alternative typing strategy implemented (BrushMatchedData interface and type guards)**
 
 ### 🔄 **In Progress:**
 - TypeScript compilation error resolution
@@ -256,13 +258,15 @@ The plan follows a logical progression from fixing foundational type issues to c
 
 ### ⏳ **Pending:**
 - Complete testing and validation
-- Backend data structure verification
-- Alternative typing strategy implementation
+- Backend data structure verification (✅ COMPLETED)
+- Alternative typing strategy implementation (✅ COMPLETED WITH ISSUES)
 
 ### 🚨 **Blocking Issues:**
 - TypeScript compilation fails due to type inference issues
 - `_matched_by_strategy` field treated as `{}` instead of `string`
 - Multiple type assertion errors prevent successful build
+- **Root cause identified**: `Record<string, unknown>` type too generic for TypeScript inference
+- **Type guards implemented but not resolving the core type inference issue**
 
 ## 📝 **Lessons Learned**
 
