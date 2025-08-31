@@ -1,4 +1,51 @@
 known_brushes:
+  AKA Brushworx:
+    AK4:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak4
+    AK47:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak47
+    AK5:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak5
+    AK7:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak7
+    AK7/DoughMan Hybrid:
+      fiber: Mixed Badger/Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak7.*doughman
+        - doughman.*ak7
+    Black Silk:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - aka.*black.*silk
+    ChocolateDoughMan:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - choc.*doughman
+    Dough:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - dough
+    DoughMan:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - doughman
   All-Star Grooming Co.:
     Shave Brush:
       fiber: Badger
@@ -1183,6 +1230,10 @@ other_brushes:
       - A\.? ?P\.? ?\s*shave\s*(co)?
       - \bap\b
       - \bapsc\b
+  Artesania Romera:
+    default: Badger
+    patterns:
+      - romera
   Gilette:
     default: Synthetic
     patterns:

@@ -39,7 +39,7 @@ artisan_handles:
   Billy Goat Brushworks:
     Unspecified:
       patterns:
-        - billy.*goat
+        - billy.*goat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Black Anvil:
     Unspecified:
       patterns:
