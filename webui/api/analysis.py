@@ -1311,3 +1311,86 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         print(f"🔍 API DEBUG: Exception traceback: {traceback.format_exc()}")
         logger.error(f"Error validating catalog: {e}")
         raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
+
+
+@router.post("/remove-catalog-entries", response_model=RemoveCorrectResponse)
+async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
+    """Remove entries from correct_matches.yaml based on catalog validation issues."""
+    try:
+        validate_field(request.field)
+
+        if not request.matches:
+            return RemoveCorrectResponse(
+                success=False, message="No entries provided", removed_count=0
+            )
+
+        # Import the correct matches manager
+        try:
+            from rich.console import Console
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            )
+
+        # Create manager instance with correct file path
+        console = Console()
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        manager = CorrectMatchesManager(console, correct_matches_file)
+
+        # Load existing correct matches
+        manager.load_correct_matches()
+
+        removed_count = 0
+        errors = []
+
+        for entry in request.matches:
+            try:
+                correct_match = entry.get("correct_match", "")
+                expected_brand = entry.get("expected_brand", "")
+                expected_model = entry.get("expected_model", "")
+
+                if not correct_match:
+                    errors.append(f"Invalid entry data: {entry}")
+                    continue
+
+                # Create the matched data structure expected by remove_match
+                # The structure depends on the field type
+                if request.field == "brush":
+                    # For brush entries, create the expected structure
+                    matched_data = {
+                        "brand": expected_brand or "unknown",
+                        "model": expected_model or "unknown"
+                    }
+                else:
+                    # For other fields, use a simpler structure
+                    matched_data = {
+                        "brand": expected_brand or "unknown",
+                        "model": expected_model or "unknown"
+                    }
+
+                # Try to remove the match
+                if manager.remove_match(request.field, correct_match, matched_data):
+                    removed_count += 1
+                else:
+                    errors.append(f"Entry not found: {correct_match}")
+
+            except Exception as e:
+                errors.append(f"Error removing entry {entry}: {e}")
+
+        # Save to file
+        if removed_count > 0:
+            manager.save_correct_matches()
+
+        return RemoveCorrectResponse(
+            success=removed_count > 0,
+            message=f"Removed {removed_count} entries from correct matches",
+            removed_count=removed_count,
+            errors=errors,
+        )
+
+    except Exception as e:
+        logger.error(f"Error removing catalog validation entries: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error removing catalog validation entries: {str(e)}"
+        )

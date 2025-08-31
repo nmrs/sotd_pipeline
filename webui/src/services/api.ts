@@ -636,6 +636,31 @@ export const validateCatalogAgainstCorrectMatches = async (
   }
 };
 
+export const removeCatalogValidationEntries = async (request: {
+  field: string;
+  entries: Array<{
+    correct_match: string;
+    expected_brand: string;
+    expected_model: string;
+  }>;
+}): Promise<{
+  success: boolean;
+  message: string;
+  removed_count: number;
+  errors: string[];
+}> => {
+  try {
+    const response = await api.post('/analyze/remove-catalog-entries', {
+      field: request.field,
+      matches: request.entries,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to remove catalog validation entries:', error);
+    throw error;
+  }
+};
+
 // Brush validation interfaces
 export interface BrushValidationEntry {
   input_text: string;

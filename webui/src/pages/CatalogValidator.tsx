@@ -9,6 +9,7 @@ import {
   CatalogValidationResult,
   CatalogValidationIssue,
   handleApiError,
+  removeCatalogValidationEntries,
 } from '../services/api';
 
 const CatalogValidator: React.FC = () => {
@@ -50,18 +51,6 @@ const CatalogValidator: React.FC = () => {
   };
 
   // New functions for multi-select functionality
-  const handleIssueSelect = (index: number, selected: boolean) => {
-    setSelectedIssues(prev => {
-      const newSet = new Set(prev);
-      if (selected) {
-        newSet.add(index);
-      } else {
-        newSet.delete(index);
-      }
-      return newSet;
-    });
-  };
-
   const handleRemoveSelected = async () => {
     if (!results || selectedIssues.size === 0) return;
 
@@ -79,26 +68,46 @@ const CatalogValidator: React.FC = () => {
         };
       });
 
-      // TODO: Implement API call to remove entries
-      console.log('Removing entries:', selectedIssuesData);
+      // Call the API to remove entries
+      const response = await removeCatalogValidationEntries({
+        field: selectedField,
+        entries: selectedIssuesData,
+      });
 
-      // For now, just simulate the removal
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (response.success) {
+        // Clear selection after successful removal
+        setSelectedIssues(new Set());
 
-      // Clear selection after successful removal
-      setSelectedIssues(new Set());
+        // Re-validate catalog to refresh results
+        await handleValidate();
 
-      // TODO: Re-validate catalog to refresh results
-      // await handleValidate();
-
-      // Show success message (temporary)
-      console.log(`Successfully removed ${selectedIssuesData.length} entries`);
+        // Show success message
+        console.log(`Successfully removed ${response.removed_count} entries`);
+      } else {
+        // Show error message
+        setError(`Failed to remove entries: ${response.message}`);
+        if (response.errors.length > 0) {
+          console.error('Removal errors:', response.errors);
+        }
+      }
     } catch (err: unknown) {
       setError(handleApiError(err));
       // Keep items selected if removal fails
     } finally {
       setRemoving(false);
     }
+  };
+
+  const handleIssueSelect = (index: number, selected: boolean) => {
+    setSelectedIssues(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(index);
+      } else {
+        newSet.delete(index);
+      }
+      return newSet;
+    });
   };
 
   const isAnyIssueSelected = selectedIssues.size > 0;

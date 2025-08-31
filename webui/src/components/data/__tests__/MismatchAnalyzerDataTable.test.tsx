@@ -445,9 +445,7 @@ describe('MismatchAnalyzerDataTable', () => {
 
       // Complete brush should show brand-model-fiber-size format
       // Look specifically for the matched data format (not the original)
-      expect(
-        screen.getByText('Simpson - Chubby 2 - best_badger - 27mm')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Simpson - Chubby 2 - best_badger - 27mm')).toBeInTheDocument();
 
       // Test split brush - should show handle/knot components in "Matched" column
       rerender(

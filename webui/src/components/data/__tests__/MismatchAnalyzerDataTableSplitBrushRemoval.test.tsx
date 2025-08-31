@@ -116,9 +116,7 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
       // Verify that brush information is displayed correctly
       // The component renders the non-redundant matched data string
       // (handle_maker is removed when it's the same as brand)
-      expect(
-        screen.getByText('Declaration Grooming - B2')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Declaration Grooming - B2')).toBeInTheDocument();
       expect(screen.getByText('Alpha - Amber')).toBeInTheDocument();
     });
   });

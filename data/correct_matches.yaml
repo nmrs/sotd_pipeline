@@ -573,6 +573,8 @@ brush:
     - ap shave co. 24mm synbad
     - ap shave co. synbad 24 mm
     - ap shave co. synbad fan
+    Synthetic:
+    - apshaveco semi-transparent yellow cashmere fan 24 mm
   All-Star Grooming Co.:
     Shave Brush:
     - all-star grooming company - badger
@@ -624,7 +626,6 @@ brush:
     - chisel & hound "drake" w/ 26mm v19
     - chisel & hound *chocolate drop* 26mm v19 fanchurian badger knot
     - chisel & hound mighty duck v19 fanchurian badger
-    - muninn woodworks w/ c&h v19 fanchurian
     v20:
     - chisel & hound desert ranger v20
     - chisel and hound bangalore v20
@@ -650,13 +651,11 @@ brush:
     - chisel & hound multiplicity v24 badger
     - chisel & hound vintage v24 badger
     - chisel and hound x briar brushworks "treachery of images" w/ 26mm v24
-    - grizzly bay - chisel & hound v24 fanchurian badger
     v25:
     - chisel & hound - peridot - v25
     - chisel & hound amboyna glory v25 fanchurian badger
     - chisel & hound pyinma v25 fanchurian badger
     - chisel & hound redcoat handle (5018rc) w/ 26mm v25 fanchurian badger knot
-    - rad dinosaur creations "brainard" w/ chisel & hound v25 fanchurian 26mm
     v26:
     - chisel & hound stalwart fanchurian v26 badger
   Declaration Grooming:
@@ -876,7 +875,7 @@ handle:
   Aurora Grooming:
     Unspecified:
     - aurora grooming gentleman's reserve
-    - Aurora Grooming LG24
+    - aurora grooming lg24
   Aylsworth Razors:
     Unspecified:
     - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
@@ -950,7 +949,11 @@ handle:
     - dogwood w/28mm dg b11 badger
   Heritage Collection:
     Unspecified:
+    - ap shave co. pure bliss shd 24mm x heritage collection merit 99-4 handle
     - heritage shaving c-mon 28 mm
+  PerFectWoodworks:
+    Unspecified:
+    - ap shave co & leo frilot 24mm gelousy bulb
   Rad Dinosaur Creations:
     Unspecified:
     - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
@@ -969,11 +972,13 @@ knot:
     - aka brushworx - 26mm g5c
     - ap shave co. 24mm g5c premium synthetic fan knot set
     Gelousy:
+    - ap shave co & leo frilot 24mm gelousy bulb
     - dogwood arcane abyss w/ gealousy
     - dogwood handcrafts tabak oridjinal, now with 28 mm gelousy knot
     Pure Bliss:
     - chisel & hound 5449sc w/ ap shave co pure bliss
     Pure Bliss SHD:
+    - ap shave co. pure bliss shd 24mm x heritage collection merit 99-4 handle
     - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
     - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
     Silksmoke:
@@ -1061,7 +1066,7 @@ knot:
     - rorschach
     - rorschach knot
     Synthetic:
-    - 26mm Oumo Synthetic
+    - 26mm oumo synthetic
   Paragon:
     Boar:
     - chisel & hound season of the witch w/ 26mm paragon boar

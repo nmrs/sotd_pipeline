@@ -68,6 +68,7 @@ known_knots:
       fiber: Synthetic
       patterns:
         - \ba[\s.]*p\b.*cashmere
+        - \ba[\s.]*p\s?shave.*cashmere
     Silksmoke:
       fiber: Synthetic
       patterns:

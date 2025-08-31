@@ -11,13 +11,13 @@ const mockMismatchItems: MismatchItem[] = [
     normalized: 'Semogue - Barbear Classico Cerda Boar 22mm',
     matched: {
       handle_component: 'Semogue - Barbear Classico Cerda',
-      knot_component: 'Boar 22mm'
+      knot_component: 'Boar 22mm',
     },
     match_type: 'split_brush',
     count: 1,
     examples: ['example1'],
     comment_ids: ['123'],
-    matched_by_strategy: 'automated_split'
+    matched_by_strategy: 'automated_split',
   },
   {
     id: '2',
@@ -25,27 +25,27 @@ const mockMismatchItems: MismatchItem[] = [
     normalized: 'A P ShaveCo 22mm Synbad',
     matched: {
       brand: 'A P ShaveCo',
-      model: '22mm Synbad'
+      model: '22mm Synbad',
     },
     match_type: 'regex',
     count: 1,
     examples: ['example2'],
     comment_ids: ['456'],
-    matched_by_strategy: 'known_brush'
+    matched_by_strategy: 'known_brush',
   },
   {
     id: '3',
     original: 'Unknown Brush Brand',
     normalized: 'Unknown Brush Brand',
     matched: {
-      brand: 'Unknown Brush Brand'
+      brand: 'Unknown Brush Brand',
     },
     match_type: 'brand_default',
     count: 1,
     examples: ['example3'],
     comment_ids: ['789'],
-    matched_by_strategy: 'OtherBrushMatchingStrategy'
-  }
+    matched_by_strategy: 'OtherBrushMatchingStrategy',
+  },
 ];
 
 describe('MismatchAnalyzerDataTable Strategy Column', () => {
@@ -53,8 +53,8 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     render(
       <MismatchAnalyzerDataTable
         data={mockMismatchItems}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
@@ -66,8 +66,8 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     render(
       <MismatchAnalyzerDataTable
         data={mockMismatchItems}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
@@ -82,15 +82,15 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     const itemsWithMissingStrategy = [
       {
         ...mockMismatchItems[0],
-        matched_by_strategy: undefined
-      }
+        matched_by_strategy: undefined,
+      },
     ];
 
     render(
       <MismatchAnalyzerDataTable
         data={itemsWithMissingStrategy}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
@@ -103,8 +103,8 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     render(
       <MismatchAnalyzerDataTable
         data={mockMismatchItems}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
@@ -118,8 +118,8 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     const { rerender } = render(
       <MismatchAnalyzerDataTable
         data={mockMismatchItems}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
@@ -128,15 +128,15 @@ describe('MismatchAnalyzerDataTable Strategy Column', () => {
     const newData = [
       {
         ...mockMismatchItems[0],
-        matched_by_strategy: 'dual_component'
-      }
+        matched_by_strategy: 'dual_component',
+      },
     ];
 
     rerender(
       <MismatchAnalyzerDataTable
         data={newData}
-        field="brush"
-        onRowSelect={() => { }}
+        field='brush'
+        onRowSelect={() => {}}
         selectedRows={[]}
       />
     );
