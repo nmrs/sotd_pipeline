@@ -179,7 +179,7 @@ export interface MismatchAnalysisRequest {
 export interface MismatchItem {
   original: string;
   normalized?: string; // Add normalized field for search functionality
-  matched: Record<string, unknown>;
+  matched: MatchedData; // Use specific union type instead of Record<string, unknown>
   enriched?: Record<string, unknown>;
   pattern: string;
   match_type: string;
@@ -196,11 +196,12 @@ export interface MismatchItem {
   handle_component?: string;
   knot_component?: string;
   // Strategy field for brush matching
-  _matched_by_strategy?: string;
+  matched_by_strategy?: string;
 }
 
 // More specific interface for brush matched data
 export interface BrushMatchedData {
+  type: 'brush'; // Explicit type for discrimination
   brand?: string;
   model?: string;
   fiber?: string;
@@ -209,7 +210,7 @@ export interface BrushMatchedData {
   knot_maker?: string;
   fiber_strategy?: string;
   fiber_conflict?: string;
-  _matched_by_strategy?: string;
+  matched_by_strategy?: string;
   _pattern_used?: string;
   _matched_from?: string;
   _original_knot_text?: string;
@@ -217,9 +218,12 @@ export interface BrushMatchedData {
   [key: string]: unknown; // Allow additional fields
 }
 
+// Union type for all matched data types
+export type MatchedData = BrushMatchedData | Record<string, unknown>;
+
 // Type guard to check if matched data is brush data
-export function isBrushMatchedData(matched: Record<string, unknown>): matched is BrushMatchedData {
-  return typeof matched === 'object' && matched !== null;
+export function isBrushMatchedData(matched: MatchedData): matched is BrushMatchedData {
+  return typeof matched === 'object' && matched !== null && 'type' in matched && matched.type === 'brush';
 }
 
 export interface MismatchAnalysisResult {

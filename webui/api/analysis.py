@@ -141,6 +141,12 @@ class MismatchItem(BaseModel):
     # Source file information for each comment ID
     comment_sources: Dict[str, str] = Field(default_factory=dict)  # comment_id -> source_file
     is_confirmed: Optional[bool] = None
+    # Split brush fields added by backend API
+    is_split_brush: Optional[bool] = None
+    handle_component: Optional[str] = None
+    knot_component: Optional[str] = None
+    # Strategy field for brush matching
+    matched_by_strategy: Optional[str] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -793,6 +799,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 if record_id and source_file:
                     comment_sources[str(record_id)] = source_file
 
+                # Extract strategy field from matched data for brush field
+                matched_by_strategy = None
+                if request.field == "brush" and matched:
+                    matched_by_strategy = matched.get("_matched_by_strategy")
+
                 api_item = MismatchItem(
                     original=normalized,
                     matched=matched,
@@ -811,6 +822,8 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     is_split_brush=item.get("is_split_brush"),
                     handle_component=item.get("handle_component"),
                     knot_component=item.get("knot_component"),
+                    # Strategy field for brush matching
+                    matched_by_strategy=matched_by_strategy,
                 )
 
                 all_items.append(api_item)

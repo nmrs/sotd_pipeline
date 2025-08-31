@@ -170,6 +170,25 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   // Sorting state
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  // Helper function to safely get strategy field with debugging
+  const getStrategyField = (item: MismatchItem): string => {
+    // Debug: log the actual data structure
+    console.log('getStrategyField called with item:', item);
+    console.log('item.matched:', item.matched);
+    console.log('item.matched_by_strategy:', item.matched_by_strategy);
+    
+    // First try to get from the matched object if it's brush data
+    if (isBrushMatchedData(item.matched)) {
+      console.log('isBrushMatchedData returned true');
+      console.log('item.matched.matched_by_strategy:', item.matched.matched_by_strategy);
+      return item.matched.matched_by_strategy || 'unknown';
+    }
+    
+    console.log('isBrushMatchedData returned false');
+    // Fallback to item level
+    return item.matched_by_strategy || 'unknown';
+  };
+
   // Generate filter options from data
   const matchTypeOptions = useMemo((): HeaderFilterOption[] => {
     const typeCounts = new Map<string, number>();
@@ -210,7 +229,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     const strategyCounts = new Map<string, number>();
 
     data.forEach(item => {
-      const strategy = (item.matched as Record<string, unknown>)?._matched_by_strategy || 'unknown';
+      const strategy = getStrategyField(item);
       strategyCounts.set(strategy, (strategyCounts.get(strategy) || 0) + 1);
     });
 
@@ -238,7 +257,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Apply strategy filter (only for brush field)
       if (field === 'brush' && strategyFilter.size > 0) {
-        const strategy = (item.matched as Record<string, unknown>)?._matched_by_strategy || 'unknown';
+        const strategy = getStrategyField(item);
         if (!strategyFilter.has(strategy)) return false;
       }
 
@@ -765,8 +784,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       baseColumns.push({
         id: 'strategy',
         accessorFn: row => {
-          const matched = row.matched as Record<string, unknown>;
-          return (matched._matched_by_strategy as string) || 'unknown';
+          return getStrategyField(row);
         },
         header: () => (
           <HeaderFilter
