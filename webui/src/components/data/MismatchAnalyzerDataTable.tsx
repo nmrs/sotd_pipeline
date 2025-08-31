@@ -346,9 +346,28 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Special handling for brush field
       if (field === 'brush') {
-        // Check if this is a split brush or complete brush
-        if (isBrushSplit(matchedObj)) {
-          // For split brushes, show handle and knot components
+        // Check if this is a complete brush (has top-level brand AND model)
+        const hasTopLevelBrand = matchedObj.brand && matchedObj.brand !== null && matchedObj.brand !== undefined;
+        const hasTopLevelModel = matchedObj.model && matchedObj.model !== null && matchedObj.model !== undefined;
+        const hasHandle = matchedObj.handle && typeof matchedObj.handle === 'object' && matchedObj.handle !== null;
+        const hasKnot = matchedObj.knot && typeof matchedObj.knot === 'object' && matchedObj.knot !== null;
+
+        // Complete brush: must have BOTH top-level brand AND model
+        if (hasTopLevelBrand && hasTopLevelModel) {
+          const parts = [];
+          if (matchedObj.brand) parts.push(String(matchedObj.brand));
+          if (matchedObj.model) parts.push(String(matchedObj.model));
+          if (matchedObj.fiber) parts.push(String(matchedObj.fiber));
+          if (matchedObj.knot_size_mm) parts.push(`${matchedObj.knot_size_mm}mm`);
+          // Only include handle_maker if it's different from the brand
+          if (matchedObj.handle_maker && matchedObj.handle_maker !== matchedObj.brand) {
+            parts.push(String(matchedObj.handle_maker));
+          }
+
+          return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+        } else if (hasHandle && hasKnot) {
+          // Composite brush: has handle/knot components but missing either brand or model
+          // This includes cases where there's a top-level brand but no model
           const handleText = formatBrushComponent(matchedObj, 'handle');
           const knotText = formatBrushComponent(matchedObj, 'knot');
 
@@ -359,7 +378,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return parts.join('\n');
           }
         } else {
-          // For complete brushes, show brand and model like other products
+          // Fallback: show whatever data is available
           const parts = [];
           if (matchedObj.brand) parts.push(String(matchedObj.brand));
           if (matchedObj.model) parts.push(String(matchedObj.model));
