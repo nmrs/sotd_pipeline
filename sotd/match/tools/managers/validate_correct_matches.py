@@ -42,13 +42,6 @@ class ValidateCorrectMatches:
 
     def __init__(self, correct_matches_path: Optional[Path] = None):
         """Initialize validation tool with all matchers."""
-        print(f"🔍 INIT_DEBUG: ValidateCorrectMatches.__init__ called")
-        print(f"🔍 INIT_DEBUG: correct_matches_path parameter: {correct_matches_path}")
-        print(f"🔍 INIT_DEBUG: correct_matches_path type: {type(correct_matches_path)}")
-        print(f"🔍 INIT_DEBUG: Current working directory: {Path.cwd()}")
-        print(f"🔍 INIT_DEBUG: __file__: {__file__}")
-        print(f"🔍 INIT_DEBUG: Project root: {project_root}")
-
         # Fail fast: correct_matches_path must be provided for proper path resolution
         if not correct_matches_path:
             raise ValueError(
@@ -56,9 +49,6 @@ class ValidateCorrectMatches:
                 "Pass the absolute path to correct_matches.yaml when creating the validator."
             )
         self.correct_matches_path = correct_matches_path
-        print(f"🔍 INIT_DEBUG: Final correct_matches_path: {self.correct_matches_path}")
-        print(f"🔍 INIT_DEBUG: Final path absolute: {self.correct_matches_path.absolute()}")
-        print(f"🔍 INIT_DEBUG: Final path exists: {self.correct_matches_path.exists()}")
 
         self.correct_matches = self._load_correct_matches()
 
@@ -89,54 +79,15 @@ class ValidateCorrectMatches:
 
     def _load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml file."""
-        print(f"🔍 LOAD_DEBUG: Starting to load correct_matches.yaml")
-        print(f"🔍 LOAD_DEBUG: Self object ID: {id(self)}")
-        print(f"🔍 LOAD_DEBUG: Self object type: {type(self)}")
-        print(f"🔍 LOAD_DEBUG: Correct matches path: {self.correct_matches_path}")
-        print(f"🔍 LOAD_DEBUG: Path type: {type(self.correct_matches_path)}")
-        print(f"🔍 LOAD_DEBUG: Path absolute: {self.correct_matches_path.absolute()}")
-        print(f"🔍 LOAD_DEBUG: Path exists: {self.correct_matches_path.exists()}")
-        print(f"🔍 LOAD_DEBUG: Path is file: {self.correct_matches_path.is_file()}")
-        print(f"🔍 LOAD_DEBUG: Path parent: {self.correct_matches_path.parent}")
-        print(f"🔍 LOAD_DEBUG: Current working directory: {Path.cwd()}")
-        print(f"🔍 LOAD_DEBUG: __file__: {__file__}")
-        print(f"🔍 LOAD_DEBUG: Project root: {project_root}")
-
         if not self.correct_matches_path.exists():
-            print(f"🔍 LOAD_DEBUG: File does not exist!")
             return {}
 
         try:
             import yaml
 
-            print(f"🔍 LOAD_DEBUG: Opening file for reading...")
             with open(self.correct_matches_path, "r", encoding="utf-8") as f:
-                print(f"🔍 LOAD_DEBUG: File opened successfully")
                 data = yaml.safe_load(f)
-                print(f"🔍 LOAD_DEBUG: YAML loaded, data type: {type(data)}")
-                print(f"🔍 LOAD_DEBUG: Data keys: {list(data.keys()) if data else 'None'}")
-                print(f"🔍 LOAD_DEBUG: Data length: {len(data) if data else 0}")
-                if data and "brush" in data:
-                    brush_data = data["brush"]
-                    print(f"🔍 LOAD_DEBUG: Brush data type: {type(brush_data)}")
-                    print(
-                        f"🔍 LOAD_DEBUG: Brush data keys: {list(brush_data.keys()) if brush_data else 'None'}"
-                    )
-                    print(
-                        f"🔍 LOAD_DEBUG: Brush data length: {len(brush_data) if brush_data else 0}"
-                    )
-                    if brush_data:
-                        # Count total patterns in brush section
-                        total_patterns = 0
-                        for brand, models in brush_data.items():
-                            if isinstance(models, dict):
-                                for model, patterns in models.items():
-                                    if isinstance(patterns, list):
-                                        total_patterns += len(patterns)
-                        print(f"🔍 LOAD_DEBUG: Total brush patterns: {total_patterns}")
-
                 result = data if data else {}
-                print(f"🔍 LOAD_DEBUG: Returning data with {len(result)} top-level keys")
                 return result
         except Exception as e:
             print(f"🔍 LOAD_DEBUG: Error loading file: {e}")
@@ -190,7 +141,7 @@ class ValidateCorrectMatches:
         self._clear_field_cache(field)
 
         # Always create a fresh matcher instance to avoid caching issues
-        logger.info(f"Creating fresh matcher for field: {field}")
+        logger.debug(f"Creating fresh matcher for field: {field}")
 
         # Fail fast: _data_dir must be set for proper path resolution
         if not self._data_dir:
@@ -215,7 +166,7 @@ class ValidateCorrectMatches:
                 "knots_path": base_dir / "knots.yaml",
                 "brush_scoring_config_path": base_dir / "brush_scoring_config.yaml",
             }
-            print(f"🔍 DEBUG: Creating BrushMatcher with paths: {brush_matcher_paths}")
+
             return BrushMatcher(**brush_matcher_paths)
         elif field == "soap":
             return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
@@ -375,30 +326,10 @@ class ValidateCorrectMatches:
         self, field: str, original: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Validate that entries in correct_matches.yaml can be matched by actual matchers."""
-        print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Starting validation for field: {field}")
-        print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original parameter type: {type(original)}")
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original parameter keys: {list(original.keys()) if original else 'None'}"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Field {field} in original: {field in original if original else False}"
-        )
-
         issues = []
 
         if field not in original:
-            print(
-                f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Field {field} not in original, returning empty issues"
-            )
             return issues
-
-        print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Field {field} found in original")
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original[{field}] type: {type(original[field])}"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original[{field}] length: {len(original[field]) if isinstance(original[field], dict) else 'Not a dict'}"
-        )
 
         # For blades, first check for format mismatches between correct_matches.yaml and catalog
         if field == "blade":
@@ -406,33 +337,16 @@ class ValidateCorrectMatches:
             issues.extend(format_mismatch_issues)
 
         # Ensure matcher is available (lazy-load if needed)
-        print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: About to get matcher for field: {field}")
         matcher = self._get_matcher(field)
-        print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Matcher type: {type(matcher)}")
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Matcher object ID: {id(matcher) if matcher else 'None'}"
-        )
 
         if not matcher:
             logger.warning(f"No matcher available for field: {field}")
-            print(
-                f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: No matcher available, returning {len(issues)} issues"
-            )
             return issues
 
         original_section = original[field]
-        logger.info(f"Processing {field} section: {type(original_section)}")
-        logger.info(
+        logger.debug(f"Processing {field} section: {type(original_section)}")
+        logger.debug(
             f"Section keys: {list(original_section.keys()) if isinstance(original_section, dict) else 'Not a dict'}"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original section type: {type(original_section)}"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original section keys: {list(original_section.keys()) if isinstance(original_section, dict) else 'Not a dict'}"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Original section length: {len(original_section) if isinstance(original_section, dict) else 'Not a dict'}"
         )
 
         # Debug: Check if we have the problematic entries
@@ -482,40 +396,30 @@ class ValidateCorrectMatches:
                                 issues.append(result)
         elif field == "brush":
             # For brushes: test each individual pattern string, not the organizational structure
-            logger.info(f"Processing {field} section with {len(original_section)} brands")
+            logger.debug(f"Processing {field} section with {len(original_section)} brands")
             total_patterns = 0
             processed_patterns = 0
-            print(
-                f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Processing brush section with {len(original_section)} brands"
-            )
             for brand_name in original_section:
-                logger.info(f"  Processing brand: {brand_name}")
-                print(f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Processing brand: {brand_name}")
+                logger.debug(f"  Processing brand: {brand_name}")
                 for version_name in original_section[brand_name]:
-                    logger.info(f"    Processing version: {version_name}")
-                    print(
-                        f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Processing version: {version_name}"
-                    )
+                    logger.debug(f"    Processing version: {version_name}")
                     if isinstance(original_section[brand_name][version_name], list):
                         patterns = original_section[brand_name][version_name]
                         total_patterns += len(patterns)
-                        logger.info(f"      Found {len(patterns)} patterns")
-                        print(
-                            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Found {len(patterns)} patterns for {brand_name} {version_name}"
-                        )
+                        logger.debug(f"      Found {len(patterns)} patterns")
                         # Test each individual pattern string
                         for pattern in patterns:
-                            logger.info(f"        Testing pattern: {pattern}")
+                            logger.debug(f"        Testing pattern: {pattern}")
                             processed_patterns += 1
                             try:
                                 result = self._test_brush_pattern(
                                     matcher, pattern, field, brand_name, version_name
                                 )
                                 if result:
-                                    logger.info(f"        Found issue: {result}")
+                                    logger.debug(f"        Found issue: {result}")
                                     issues.append(result)
                                 else:
-                                    logger.info(f"        No issue found")
+                                    logger.debug(f"        No issue found")
                             except Exception as e:
                                 logger.error(f"        Error testing pattern: {e}")
                                 # Add error as an issue
@@ -546,26 +450,26 @@ class ValidateCorrectMatches:
             logger.info(f"Found {len(issues)} issues")
         else:
             # For other fields: test each individual pattern
-            logger.info(f"Processing {field} section with {len(original_section)} brands")
+            logger.debug(f"Processing {field} section with {len(original_section)} brands")
             for brand_name in original_section:
-                logger.info(f"  Processing brand: {brand_name}")
+                logger.debug(f"  Processing brand: {brand_name}")
                 for model_name in original_section[brand_name]:
-                    logger.info(f"    Processing model: {model_name}")
+                    logger.debug(f"    Processing model: {model_name}")
                     if isinstance(original_section[brand_name][model_name], list):
                         patterns = original_section[brand_name][model_name]
-                        logger.info(f"      Found {len(patterns)} patterns")
+                        logger.debug(f"      Found {len(patterns)} patterns")
                         # Test each individual pattern in the list
                         for pattern in patterns:
-                            logger.info(f"        Testing pattern: {pattern}")
+                            logger.debug(f"        Testing pattern: {pattern}")
                             try:
                                 result = self._test_matcher_entry(
                                     matcher, pattern, field, brand_name, model_name
                                 )
                                 if result:
-                                    logger.info(f"        Found issue: {result}")
+                                    logger.debug(f"        Found issue: {result}")
                                     issues.append(result)
                                 else:
-                                    logger.info(f"        No issue found")
+                                    logger.debug(f"        No issue found")
                             except Exception as e:
                                 logger.error(f"        Error testing pattern: {e}")
                                 # Add error as an issue
@@ -588,12 +492,6 @@ class ValidateCorrectMatches:
                         if result:
                             issues.append(result)
 
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: Final result - returning {len(issues)} issues"
-        )
-        print(
-            f"🔍 _VALIDATE_CATALOG_EXISTENCE DEBUG: First few issues: {issues[:3] if issues else 'No issues'}"
-        )
         return issues
 
     def _validate_blade_format_consistency(
@@ -897,13 +795,10 @@ class ValidateCorrectMatches:
         self, matcher, test_text: str, field: str, brand_name: str, version_name: str
     ) -> Optional[Dict[str, Any]]:
         """Test if a brush pattern can be matched by the brush matcher."""
-        print(f"🔍 DEBUG: Testing brush pattern: '{test_text}'")
-        print(f"🔍 DEBUG: Expected brand: '{brand_name}', model: '{version_name}'")
 
         try:
             # CRITICAL: Use the same matcher instance but with bypass parameter
             # This eliminates the need to create separate matcher instances
-            print(f"🔍 DEBUG: Testing with bypass parameter...")
             bypass_result = matcher.match(test_text, bypass_correct_matches=True)
 
             if (
@@ -911,7 +806,6 @@ class ValidateCorrectMatches:
                 or not hasattr(bypass_result, "matched")
                 or not bypass_result.matched
             ):
-                print(f"🔍 DEBUG: ❌ Bypass matcher found no match")
                 return {
                     "type": "catalog_pattern_no_match",
                     "pattern": test_text,
@@ -932,9 +826,7 @@ class ValidateCorrectMatches:
             if field == "brush":
                 # FIRST: Check flat structure (what KnownBrushMatchingStrategy returns)
                 if bypass_brand and bypass_model:
-                    print(
-                        f"🔍 DEBUG: Using flat structure - Brand: '{bypass_brand}', Model: '{bypass_model}'"
-                    )
+                    pass
                 else:
                     # FALLBACK: Extract brand and model from the nested structure
                     handle_brand = bypass_result.matched.get("handle", {}).get("brand")
@@ -955,17 +847,8 @@ class ValidateCorrectMatches:
                     elif knot_model:
                         bypass_model = knot_model
 
-                    print(
-                        f"🔍 DEBUG: Using nested structure - Brand: '{bypass_brand}', Model: '{bypass_model}'"
-                    )
-
-            print(f"🔍 DEBUG: Bypass result - Brand: '{bypass_brand}', Model: '{bypass_model}'")
-
             # NOW validate: does the bypass result match where it's stored in correct_matches.yaml?
             if bypass_brand != brand_name:
-                print(
-                    f"🔍 DEBUG: ❌ BRAND MISMATCH! Bypass thinks '{bypass_brand}', stored under '{brand_name}'"
-                )
                 return {
                     "type": "catalog_pattern_mismatch",
                     "pattern": test_text,
@@ -979,9 +862,6 @@ class ValidateCorrectMatches:
                 }
 
             if bypass_model != version_name:
-                print(
-                    f"🔍 DEBUG: ❌ MODEL MISMATCH! Bypass thinks '{bypass_model}', stored under '{version_name}'"
-                )
                 return {
                     "type": "catalog_pattern_mismatch",
                     "pattern": test_text,
@@ -994,13 +874,9 @@ class ValidateCorrectMatches:
                     "actual_model": bypass_model,
                 }
 
-            print(
-                f"🔍 DEBUG: ✅ Pattern validation successful - stored location matches bypass result"
-            )
             return None  # No issues
 
         except Exception as e:
-            print(f"🔍 DEBUG: ❌ Exception during bypass validation: {e}")
             return {
                 "type": "unmatchable_entry",
                 "pattern": test_text,
@@ -1274,71 +1150,36 @@ class ValidateCorrectMatches:
         self, field: str, create_expected_structure: bool = False
     ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """Validate a specific field for catalog drift using real matchers."""
-        print(f"🔍 VALIDATE_FIELD DEBUG: Starting validation for field: {field}")
-        print(f"🔍 VALIDATE_FIELD DEBUG: Self object ID: {id(self)}")
-        print(f"🔍 VALIDATE_FIELD DEBUG: Self object type: {type(self)}")
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: Correct matches keys: {list(self.correct_matches.keys()) if self.correct_matches else 'None'}"
-        )
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: Correct matches length: {len(self.correct_matches) if self.correct_matches else 0}"
-        )
-
         if field not in self.correct_matches:
-            print(
-                f"🔍 VALIDATE_FIELD DEBUG: Field {field} not found in correct_matches, returning empty"
-            )
             return [], {}
 
-        print(f"🔍 VALIDATE_FIELD DEBUG: Field {field} found in correct_matches")
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: Field {field} has {len(self.correct_matches[field])} entries"
-        )
-
-        logger.info(f"Validating field: {field}")
+        logger.debug(f"Validating field: {field}")
 
         # Clear ALL caches to force fresh validation (DRY principle)
-        print(f"🔍 VALIDATE_FIELD DEBUG: About to clear caches...")
         self._clear_validation_cache()
         self._matchers.clear()
 
         # Debug: Log that we're clearing caches
-        logger.info(f"Cleared ALL caches for field: {field}")
-        logger.info(f"Matcher cache size: {len(self._matchers)}")
-        logger.info(f"Validation cache size: {len(self._validation_cache)}")
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: After clearing - Matcher cache size: {len(self._matchers)}"
-        )
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: After clearing - Validation cache size: {len(self._validation_cache)}"
-        )
+        logger.debug(f"Cleared ALL caches for field: {field}")
+        logger.debug(f"Matcher cache size: {len(self._matchers)}")
+        logger.debug(f"Validation cache size: {len(self._validation_cache)}")
 
         # Use real matchers to validate entries (DRY approach)
-        print(f"🔍 VALIDATE_FIELD DEBUG: About to call _validate_catalog_existence...")
         catalog_issues = self._validate_catalog_existence(field, self.correct_matches)
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: _validate_catalog_existence returned {len(catalog_issues)} issues"
-        )
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: First few issues: {catalog_issues[:3] if catalog_issues else 'No issues'}"
-        )
 
         # Create expected structure only if requested (skip for performance when not needed)
         expected_structure = {}
         if create_expected_structure:
             expected_structure = self._create_temp_correct_matches(field, self.correct_matches)
-            logger.info(f"Created expected structure for {field}")
+            logger.debug(f"Created expected structure for {field}")
         else:
-            logger.info(
+            logger.debug(
                 f"Skipped expected structure creation for {field} (performance optimization)"
             )
 
         # No need for manual structure comparison since we're using real matchers
         # The real matchers already tell us if entries can be matched or not
 
-        print(
-            f"🔍 VALIDATE_FIELD DEBUG: Returning {len(catalog_issues)} issues and {len(expected_structure)} expected structure entries"
-        )
         return catalog_issues, expected_structure
 
     def validate_all_fields(self) -> Dict[str, List[Dict[str, Any]]]:

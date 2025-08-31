@@ -394,8 +394,7 @@ class TestBrushValidationAPI:
         temp_learning_dir = temp_data_dir / "learning"
         temp_correct_matches_path = temp_data_dir / "correct_matches.yaml"
         manager = BrushUserActionsManager(
-            base_path=temp_learning_dir,
-            correct_matches_path=temp_correct_matches_path
+            base_path=temp_learning_dir, correct_matches_path=temp_correct_matches_path
         )
 
         # Test data representing a dual-component brush result
@@ -485,6 +484,6 @@ class TestBrushValidationAPI:
 
         # Restore original method
         updater.save_correct_matches = original_save
-        
+
         # Clean up temporary directories
         shutil.rmtree(temp_dir)

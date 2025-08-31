@@ -247,7 +247,7 @@ class TestBrushMatchingAPIIntegration:
         # Enriched data should contain fiber information for this brush string
         if response.enrichedData:
             # Check for expected enrichment fields based on actual data structure
-            # The actual enrichedData has: brand, model, fiber, knot_size_mm, handle_maker, 
+            # The actual enrichedData has: brand, model, fiber, knot_size_mm, handle_maker,
             # source_text, _matched_by, _pattern, strategy
             enrichment_fields = ["fiber", "knot_size_mm", "handle_maker", "source_text"]
             found_fields = [field for field in enrichment_fields if field in response.enrichedData]
@@ -258,8 +258,12 @@ class TestBrushMatchingAPIIntegration:
             # Verify that basic enrichment fields are present (they may be None if not enriched)
             # The API returns the fields but they may be None if enrichment didn't find data
             assert "fiber" in response.enrichedData, "Fiber field should be present in response"
-            assert "knot_size_mm" in response.enrichedData, "Knot size field should be present in response"
-            assert "source_text" in response.enrichedData, "Source text field should be present in response"
+            assert (
+                "knot_size_mm" in response.enrichedData
+            ), "Knot size field should be present in response"
+            assert (
+                "source_text" in response.enrichedData
+            ), "Source text field should be present in response"
 
 
 if __name__ == "__main__":

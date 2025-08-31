@@ -98,29 +98,76 @@ def calculate_delta_months(args) -> list[str]:
             if current_month > 12:
                 current_month = 1
                 current_year += 1
+    elif args.ytd:
+        # For YTD, add all months from January to current month
+        now = datetime.datetime.now()
+        current_year = now.year
+        current_month = now.month
+
+        # Add all months from January to current month
+        for month in range(1, current_month + 1):
+            delta_months.add(f"{current_year:04d}-{month:02d}")
     else:
         # Default to previous month
         default_month = get_default_month()
         delta_months.add(default_month)
 
-    # Add historical comparison months
-    for month_str in list(delta_months):  # Convert to list to avoid modification during iteration
-        year, month = map(int, month_str.split("-"))
+        # Add historical comparison months
+    if args.ytd:
+        # For YTD mode, use the cleaner approach:
+        # 1. Start with YTD months (Jan to current month)
+        # 2. For each YTD month, add month-1, month-1year, month-5years if not already present
 
-        # 1 month ago
-        if month == 1:
-            one_month_ago = f"{year - 1}-12"
-        else:
-            one_month_ago = f"{year}-{month - 1:02d}"
-        delta_months.add(one_month_ago)
+        now = datetime.datetime.now()
+        current_year = now.year
+        current_month = now.month
 
-        # 1 year ago
-        one_year_ago = f"{year - 1}-{month:02d}"
-        delta_months.add(one_year_ago)
+        # YTD months are already in delta_months (Jan to current month)
+        # Now add historical comparison months for each YTD month
+        ytd_months = list(delta_months)  # Copy to avoid modification during iteration
 
-        # 5 years ago
-        five_years_ago = f"{year - 5}-{month:02d}"
-        delta_months.add(five_years_ago)
+        for month_str in ytd_months:
+            year, month = map(int, month_str.split("-"))
+
+            # Month - 1 month
+            if month == 1:
+                one_month_ago = f"{year - 1}-12"
+            else:
+                one_month_ago = f"{year}-{month - 1:02d}"
+
+            if one_month_ago not in delta_months:
+                delta_months.add(one_month_ago)
+
+            # Month - 1 year
+            one_year_ago = f"{year - 1}-{month:02d}"
+            if one_year_ago not in delta_months:
+                delta_months.add(one_year_ago)
+
+            # Month - 5 years
+            five_years_ago = f"{year - 5}-{month:02d}"
+            if five_years_ago not in delta_months:
+                delta_months.add(five_years_ago)
+    else:
+        # For non-YTD mode, use the original logic
+        for month_str in list(
+            delta_months
+        ):  # Convert to list to avoid modification during iteration
+            year, month = map(int, month_str.split("-"))
+
+            # 1 month ago
+            if month == 1:
+                one_month_ago = f"{year - 1}-12"
+            else:
+                one_month_ago = f"{year}-{month - 1:02d}"
+            delta_months.add(one_month_ago)
+
+            # 1 year ago
+            one_year_ago = f"{year - 1}-{month:02d}"
+            delta_months.add(one_year_ago)
+
+            # 5 years ago
+            five_years_ago = f"{year - 5}-{month:02d}"
+            delta_months.add(five_years_ago)
 
     # Sort months chronologically
     return sorted(list(delta_months))
@@ -167,7 +214,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
             # Handle arguments that take values
             if arg.startswith("--delta-months"):
                 # Only pass delta-months to phases that support it
-                if phase in ["extract", "match", "enrich", "aggregate"]:
+                if phase in ["fetch", "extract", "match", "enrich", "aggregate"]:
                     phase_args.append(arg)
                     # Add the value too (next argument)
                     if i + 1 < len(args):
@@ -489,16 +536,7 @@ Examples:
             args.month or args.year or args.start or args.end or args.range or args.ytd
         )
 
-        if args.ytd:
-            # YTD mode: process from January 1st of current year to current month
-            current_year = datetime.datetime.now().year
-            current_month = datetime.datetime.now().month
-            ytd_start = f"{current_year}-01"
-            ytd_end = f"{current_year}-{current_month:02d}"
-            if args.debug:
-                print(f"[DEBUG] YTD mode: processing range {ytd_start} to {ytd_end}")
-            common_args.extend(["--start", ytd_start, "--end", ytd_end])
-        elif args.delta:
+        if args.delta:
             # Delta mode: process current month(s) + historical comparison months
             delta_months = calculate_delta_months(args)
             if args.debug:
@@ -521,6 +559,15 @@ Examples:
                 common_args.extend(["--end", args.end])
             elif args.range:
                 common_args.extend(["--range", args.range])
+        elif args.ytd:
+            # YTD mode: process from January 1st of current year to current month
+            current_year = datetime.datetime.now().year
+            current_month = datetime.datetime.now().month
+            ytd_start = f"{current_year}-01"
+            ytd_end = f"{current_year}-{current_month:02d}"
+            if args.debug:
+                print(f"[DEBUG] YTD mode: processing range {ytd_start} to {ytd_end}")
+            common_args.extend(["--start", ytd_start, "--end", ytd_end])
         elif args.month:
             common_args.extend(["--month", args.month])
         elif args.year:
