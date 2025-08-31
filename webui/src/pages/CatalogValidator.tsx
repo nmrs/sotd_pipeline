@@ -22,7 +22,7 @@ const CatalogValidator: React.FC = () => {
 
   // New state for multi-select functionality
   const [selectedIssues, setSelectedIssues] = useState<Set<number>>(new Set());
-  const [removing] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   const handleValidate = async () => {
     if (!selectedField) {
@@ -60,6 +60,45 @@ const CatalogValidator: React.FC = () => {
       }
       return newSet;
     });
+  };
+
+  const handleRemoveSelected = async () => {
+    if (!results || selectedIssues.size === 0) return;
+
+    try {
+      setRemoving(true);
+      setError(null);
+
+      // Get the selected issues data
+      const selectedIssuesData = Array.from(selectedIssues).map(index => {
+        const issue = getFilteredIssues()[index];
+        return {
+          correct_match: issue.correct_match,
+          expected_brand: issue.expected_brand,
+          expected_model: issue.expected_model,
+        };
+      });
+
+      // TODO: Implement API call to remove entries
+      console.log('Removing entries:', selectedIssuesData);
+
+      // For now, just simulate the removal
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Clear selection after successful removal
+      setSelectedIssues(new Set());
+
+      // TODO: Re-validate catalog to refresh results
+      // await handleValidate();
+
+      // Show success message (temporary)
+      console.log(`Successfully removed ${selectedIssuesData.length} entries`);
+    } catch (err: unknown) {
+      setError(handleApiError(err));
+      // Keep items selected if removal fails
+    } finally {
+      setRemoving(false);
+    }
   };
 
   const isAnyIssueSelected = selectedIssues.size > 0;
@@ -284,10 +323,7 @@ const CatalogValidator: React.FC = () => {
                 <div className='flex items-center gap-2'>
                   <Button
                     variant='destructive'
-                    onClick={() => {
-                      // TODO: Implement removal functionality
-                      console.log('Remove selected:', selectedIssues);
-                    }}
+                    onClick={handleRemoveSelected}
                     disabled={removing}
                     className='flex items-center gap-2'
                   >

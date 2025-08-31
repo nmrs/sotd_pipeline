@@ -1,27 +1,18 @@
-## Implementation Steps
-
-### Phase 1: Frontend Selection Interface ✅ COMPLETE
-1. ✅ Add checkbox state management
-2. ✅ Implement checkbox rendering for each issue
-3. ✅ Add selection count display
-4. ✅ Style selected items for visual feedback
+### Phase 2: Remove Button and Logic ✅ COMPLETE
+1. ✅ Add Remove Selected button with conditional rendering
+2. ✅ Implement `handleRemoveSelected` function
+3. ✅ Add loading state during removal
+4. ✅ Handle successful removal flow
 
 **Implementation Details:**
-- Added `selectedIssues` state using `Set<number>` for efficient selection tracking
-- Added `removing` state for future removal functionality
-- Implemented `handleIssueSelect` function for checkbox state management
-- Added `isAnyIssueSelected` computed value for conditional rendering
-- Added checkboxes next to each validation issue with proper styling
-- Added selection count display in the results header
-- Added visual feedback with blue ring and background for selected items
-- Added "Remove Selected" button that appears when items are selected
-- Integrated with existing validation workflow (clears selection on new validation)
-
-### Phase 2: Remove Button and Logic
-1. Add Remove Selected button with conditional rendering
-2. Implement `handleRemoveSelected` function
-3. Add loading state during removal
-4. Handle successful removal flow
+- Implemented `handleRemoveSelected` async function with proper error handling
+- Added loading state management using `setRemoving` state
+- Added data extraction from selected issues (correct_match, expected_brand, expected_model)
+- Added temporary simulation of removal process (1-second delay)
+- Added proper error handling that keeps items selected if removal fails
+- Added selection clearing after successful removal
+- Connected the Remove Selected button to the new function
+- Added TODO comments for future API integration and re-validation
 
 ### Phase 3: API Integration
 1. Create backend endpoint for entry removal
