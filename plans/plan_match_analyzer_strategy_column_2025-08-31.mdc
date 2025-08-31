@@ -1,0 +1,283 @@
+# Match Analyzer Strategy Column Implementation Plan
+
+**Date**: 2025-08-31  
+**Status**: IN_PROGRESS  
+**Type**: Feature Implementation  
+**Priority**: Medium  
+
+## 📘 Project Summary
+
+Add a filtered "Strategy" column to the MatchAnalyzer brush view to display and filter brush matches based on the matching strategy used (e.g., `known_brush`, `handle_only`, `knot_only`, `split_brush`, `FiberFallbackStrategy`, `KnotSizeFallbackStrategy`). This column will provide valuable insights into how each brush match was processed and allow users to focus on specific matching approaches.
+
+**Current State**: Strategy column code has been implemented but TypeScript compilation errors prevent successful build due to type inference issues with the `_matched_by_strategy` field.  
+**Target State**: Fully functional Strategy column with proper typing, filtering, and visual styling.
+
+## 🧩 Component Steps
+
+1. **Fix Type Definitions** - ✅ COMPLETED WITH ISSUES - Update MismatchItem interface and resolve type conflicts
+2. **Resolve HeaderFilter Integration** - 🔄 IN PROGRESS - Fix component prop type mismatches
+3. **Complete Strategy Column Implementation** - ✅ COMPLETED - Ensure proper column placement and functionality
+4. **Add Strategy Filtering Logic** - ✅ COMPLETED - Implement proper filter state management
+5. **Test and Validate** - ⏳ PENDING - Verify functionality and resolve any remaining issues
+
+## 🔁 Implementation Prompts
+
+### Step 1: Fix Type Definitions - ✅ COMPLETED WITH ISSUES
+
+```text
+The MatchAnalyzer Strategy column implementation has TypeScript compilation errors that need to be resolved. 
+
+Current issues:
+1. The `_matched_by_strategy` field is not properly typed in the MismatchItem interface
+2. Type mismatches when accessing the strategy field on the matched object
+3. HeaderFilter component prop type conflicts
+
+Tasks:
+1. Update the MismatchItem interface in `webui/src/services/api.ts` to properly include the `_matched_by_strategy` field
+2. Ensure the field is properly typed as `string | undefined`
+3. Update any related type definitions that reference this field
+4. Verify that the backend data structure matches the expected interface
+
+Acceptance criteria:
+- TypeScript compilation succeeds without errors
+- The `_matched_by_strategy` field is properly accessible in the component
+- No type assertion warnings for accessing the strategy field
+```
+
+**Status**: ✅ COMPLETED - Interface updated, but TypeScript compilation still fails due to type inference issues.
+
+### Step 2: Resolve HeaderFilter Integration - 🔄 IN PROGRESS
+
+```text
+The HeaderFilter component integration for the Strategy column has type mismatches that need to be resolved.
+
+Current issues:
+1. HeaderFilter component props are not properly typed for the strategy filter
+2. Filter state management has type conflicts
+3. Options generation for strategy filtering has type issues
+
+Tasks:
+1. Examine the HeaderFilter component's type definitions to understand expected prop types
+2. Fix the strategy filter state management to use proper types
+3. Ensure the strategyOptions generation returns properly typed HeaderFilterOption objects
+4. Resolve any prop type mismatches in the HeaderFilter usage
+
+Acceptance criteria:
+- HeaderFilter component receives properly typed props
+- Strategy filter state management works without type errors
+- Filter options are correctly typed and functional
+```
+
+**Status**: 🔄 IN PROGRESS - HeaderFilter integration implemented but TypeScript errors persist.
+
+### Step 3: Complete Strategy Column Implementation - ✅ COMPLETED
+
+```text
+Complete the Strategy column implementation by ensuring proper column placement, styling, and functionality.
+
+Current state:
+- Strategy column code exists but may have placement issues
+- Column styling and color-coding is implemented
+- Column positioning needs verification
+
+Tasks:
+1. Verify the Strategy column is properly placed after Brush Type and before Brush Pattern
+2. Ensure the column only appears when field === 'brush'
+3. Verify the column header includes proper sorting and filtering functionality
+4. Ensure the column cell renders strategy information with proper color-coding
+5. Test that the column displays correctly in the data table
+
+Acceptance criteria:
+- Strategy column appears in correct position for brush field only
+- Column header includes filterable HeaderFilter component
+- Column cells display strategy information with color-coding
+- Column integrates properly with the existing table structure
+```
+
+**Status**: ✅ COMPLETED - Strategy column fully implemented with proper placement, styling, and functionality.
+
+### Step 4: Add Strategy Filtering Logic - ✅ COMPLETED
+
+```text
+Implement proper strategy filtering logic to allow users to filter brush matches by strategy type.
+
+Current state:
+- Strategy filter state exists but may not be properly integrated
+- Filter logic needs to be connected to the data filtering system
+
+Tasks:
+1. Ensure strategy filter state is properly initialized and managed
+2. Connect strategy filtering to the main data filtering logic
+3. Verify that filtered results update correctly when strategy filter changes
+4. Test filter functionality with different strategy selections
+5. Ensure filter state persists correctly during user interactions
+
+Acceptance criteria:
+- Strategy filter properly filters displayed results
+- Filter state persists during user interactions
+- Filter updates are reflected immediately in the table
+- Multiple filters (strategy + brush type + match type) work together correctly
+```
+
+**Status**: ✅ COMPLETED - Strategy filtering logic fully implemented and integrated.
+
+### Step 5: Test and Validate - ⏳ PENDING
+
+```text
+Test the complete Strategy column implementation to ensure all functionality works correctly.
+
+Tasks:
+1. Test the Strategy column display in the MatchAnalyzer
+2. Verify strategy filtering works correctly
+3. Test column sorting functionality
+4. Verify color-coding displays correctly for different strategies
+5. Test integration with other filters and table functionality
+6. Verify the column only appears for brush field
+7. Test with real data to ensure strategy information is displayed correctly
+
+Acceptance criteria:
+- Strategy column displays correctly in brush view
+- Filtering works for all strategy types
+- Sorting works correctly
+- Color-coding is visually distinct and helpful
+- Column integrates seamlessly with existing functionality
+- No TypeScript compilation errors
+- All existing functionality remains intact
+```
+
+**Status**: ⏳ PENDING - Cannot test until TypeScript compilation issues are resolved.
+
+## 🆕 **New Tasks Discovered During Implementation**
+
+### Task 2.1: Investigate Backend Data Structure
+**Priority**: High  
+**Description**: Verify what the backend is actually sending for the `_matched_by_strategy` field to understand the type mismatch.
+
+**Tasks**:
+1. Check backend API response structure for brush matches
+2. Verify field name and data type consistency
+3. Test with real API data to see actual field values
+4. Update type definitions based on actual backend data
+
+### Task 2.2: Implement Alternative Typing Strategy
+**Priority**: High  
+**Description**: Develop a more robust approach to typing the matched object that satisfies TypeScript's type checker.
+
+**Tasks**:
+1. Create a more specific interface for brush matched data
+2. Implement proper type guards for strategy field access
+3. Consider using discriminated unions for different match types
+4. Test alternative typing approaches
+
+### Task 2.3: Type Guard Implementation
+**Priority**: Medium  
+**Description**: Implement proper type guards to safely access the strategy field without type assertion errors.
+
+**Tasks**:
+1. Create type guard functions for strategy field validation
+2. Implement safe access patterns for the matched object
+3. Add runtime validation for strategy field values
+4. Test type guard effectiveness
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+
+The plan follows a logical progression from fixing foundational type issues to completing the implementation and testing:
+
+1. **Type Definitions First**: Starting with type fixes ensures a solid foundation and prevents cascading errors
+2. **Component Integration**: Resolving HeaderFilter issues before completing the column implementation prevents integration problems
+3. **Incremental Completion**: Each step builds on the previous one, ensuring no orphaned code
+4. **Testing Last**: Comprehensive testing at the end validates the complete implementation
+
+### Risk Assessment
+
+**Low Risk**:
+- Type definition updates are straightforward
+- Column positioning follows existing patterns
+- Filtering logic follows established patterns
+
+**Medium Risk**:
+- HeaderFilter component integration may have complex type requirements
+- Strategy field availability from backend needs verification
+
+**High Risk**:
+- TypeScript type inference issues with `_matched_by_strategy` field
+- Backend data structure may not match expected interface
+
+**Mitigation**:
+- Start with type fixes to establish foundation
+- Test with real data to verify backend field availability
+- Follow existing patterns for column implementation
+- Implement alternative typing strategies if needed
+
+### Dependencies
+
+- Backend must provide `_matched_by_strategy` field in brush match data
+- HeaderFilter component must support the required prop types
+- Existing MatchAnalyzer functionality must remain intact
+- TypeScript type system must be satisfied for successful compilation
+
+### Success Metrics
+
+- ✅ TypeScript compilation succeeds without errors
+- ✅ Strategy column displays correctly in brush view
+- ✅ Filtering and sorting work properly
+- ✅ Color-coding is visually helpful
+- ✅ No regression in existing functionality
+- ✅ Column integrates seamlessly with existing table structure
+
+## 📋 Implementation Notes
+
+- The Strategy column will provide valuable insights into brush matching logic
+- Color-coding will help users quickly identify different strategy types
+- Filtering will allow users to focus on specific matching approaches
+- The implementation follows existing patterns for consistency and maintainability
+
+## 🔄 Next Steps
+
+1. **Immediate**: Investigate backend data structure (Task 2.1)
+2. **Next**: Implement alternative typing strategy (Task 2.2)
+3. **Then**: Complete type guard implementation (Task 2.3)
+4. **Finally**: Test and validate complete functionality (Step 5)
+
+## 📊 **Current Implementation Status**
+
+### ✅ **Completed Components:**
+- MismatchItem interface updated with `_matched_by_strategy` field
+- Strategy column implementation with proper placement and styling
+- HeaderFilter integration with filtering and sorting
+- Strategy filter state management and data filtering logic
+- Color-coding for different strategy types
+
+### 🔄 **In Progress:**
+- TypeScript compilation error resolution
+- HeaderFilter type integration fixes
+
+### ⏳ **Pending:**
+- Complete testing and validation
+- Backend data structure verification
+- Alternative typing strategy implementation
+
+### 🚨 **Blocking Issues:**
+- TypeScript compilation fails due to type inference issues
+- `_matched_by_strategy` field treated as `{}` instead of `string`
+- Multiple type assertion errors prevent successful build
+
+## 📝 **Lessons Learned**
+
+1. **Type Assertion Complexity**: Simple type assertions may not be sufficient for complex nested object types
+2. **Backend Data Verification**: Need to verify actual backend data structure before finalizing type definitions
+3. **Incremental Type Improvement**: May need to start with working implementation and improve types gradually
+4. **Alternative Typing Strategies**: Consider multiple approaches to typing complex nested objects
+
+## 🔄 **Updated Next Steps**
+
+1. Begin with Task 2.1 (Investigate Backend Data Structure)
+2. Progress through Tasks 2.2 and 2.3 based on findings
+3. Complete Step 5 (Test and Validate) once type issues are resolved
+4. Document final implementation approach and lessons learned
+description:
+globs:
+alwaysApply: true
+---

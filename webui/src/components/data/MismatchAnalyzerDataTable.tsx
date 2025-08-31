@@ -165,6 +165,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   // Header filter state
   const [matchTypeFilter, setMatchTypeFilter] = useState<Set<string>>(new Set());
   const [brushTypeFilter, setBrushTypeFilter] = useState<Set<string>>(new Set());
+  const [strategyFilter, setStrategyFilter] = useState<Set<string>>(new Set());
 
   // Sorting state
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -203,6 +204,23 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     }));
   }, [data, field]);
 
+  const strategyOptions = useMemo((): HeaderFilterOption[] => {
+    if (field !== 'brush') return [];
+
+    const strategyCounts = new Map<string, number>();
+
+    data.forEach(item => {
+      const strategy = (item.matched as Record<string, unknown>)?._matched_by_strategy || 'unknown';
+      strategyCounts.set(strategy, (strategyCounts.get(strategy) || 0) + 1);
+    });
+
+    return Array.from(strategyCounts.entries()).map(([value, count]) => ({
+      value,
+      label: value,
+      count,
+    }));
+  }, [data, field]);
+
   // Apply filters to data
   const filteredData = useMemo(() => {
     return data.filter(item => {
@@ -218,9 +236,15 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         if (!brushTypeFilter.has(brushType.type)) return false;
       }
 
+      // Apply strategy filter (only for brush field)
+      if (field === 'brush' && strategyFilter.size > 0) {
+        const strategy = (item.matched as Record<string, unknown>)?._matched_by_strategy || 'unknown';
+        if (!strategyFilter.has(strategy)) return false;
+      }
+
       return true;
     });
-  }, [data, matchTypeFilter, brushTypeFilter, field]);
+  }, [data, matchTypeFilter, brushTypeFilter, strategyFilter, field]);
 
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
@@ -737,6 +761,72 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
       });
 
+      // Add strategy column for brush field
+      baseColumns.push({
+        id: 'strategy',
+        accessorFn: row => {
+          const matched = row.matched as Record<string, unknown>;
+          return (matched._matched_by_strategy as string) || 'unknown';
+        },
+        header: () => (
+          <HeaderFilter
+            title='Strategy'
+            options={strategyOptions}
+            selectedValues={strategyFilter}
+            onSelectionChange={setStrategyFilter}
+            searchPlaceholder='Search strategies...'
+            onSort={() => {
+              const currentSort = sorting.find(s => s.id === 'strategy');
+              const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
+              setSorting(newDirection ? [{ id: 'strategy', desc: newDirection === 'desc' }] : []);
+            }}
+            sortDirection={(() => {
+              const currentSort = sorting.find(s => s.id === 'strategy');
+              if (!currentSort) return null;
+              return currentSort.desc ? 'desc' : 'asc';
+            })()}
+          />
+        ),
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          const matched = item.matched as Record<string, unknown>;
+          const strategy = (matched._matched_by_strategy as string) || 'unknown';
+
+          // Color-code different strategies for better visibility
+          const getStrategyColor = (strat: string) => {
+            switch (strat) {
+              case 'known_brush':
+                return 'bg-blue-100 text-blue-800';
+              case 'handle_only':
+                return 'bg-green-100 text-green-800';
+              case 'knot_only':
+                return 'bg-purple-100 text-purple-800';
+              case 'split_brush':
+                return 'bg-orange-100 text-orange-800';
+              case 'FiberFallbackStrategy':
+                return 'bg-yellow-100 text-yellow-800';
+              case 'KnotSizeFallbackStrategy':
+                return 'bg-indigo-100 text-indigo-800';
+              case 'unknown':
+                return 'bg-gray-100 text-gray-800';
+              default:
+                return 'bg-gray-100 text-gray-800';
+            }
+          };
+
+          return (
+            <div className='text-sm'>
+              <span
+                className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStrategyColor(strategy)}`}
+                title={`Matched using strategy: ${strategy}`}
+              >
+                {strategy}
+              </span>
+            </div>
+          );
+        },
+      });
+
       // Always show brush pattern column
       baseColumns.push({
         id: 'brush_pattern',
@@ -878,6 +968,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     isItemConfirmed,
     field,
     onBrushSplitClick,
+    brushTypeOptions,
+    strategyOptions,
+    matchTypeFilter,
+    brushTypeFilter,
+    strategyFilter,
+    sorting,
   ]);
 
   return (

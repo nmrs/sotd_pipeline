@@ -195,6 +195,8 @@ export interface MismatchItem {
   is_split_brush?: boolean;
   handle_component?: string;
   knot_component?: string;
+  // Strategy field for brush matching
+  _matched_by_strategy?: string;
 }
 
 export interface MismatchAnalysisResult {
