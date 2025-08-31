@@ -141,10 +141,6 @@ class MismatchItem(BaseModel):
     # Source file information for each comment ID
     comment_sources: Dict[str, str] = Field(default_factory=dict)  # comment_id -> source_file
     is_confirmed: Optional[bool] = None
-    # Split brush fields added by backend API
-    is_split_brush: Optional[bool] = None
-    handle_component: Optional[str] = None
-    knot_component: Optional[str] = None
     # Strategy field for brush matching
     matched_by_strategy: Optional[str] = None
 
@@ -789,6 +785,37 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     if not normalized or not matched:
                         continue
 
+                # Extract strategy field from matched data for brush field
+                matched_by_strategy = None
+                if request.field == "brush":
+                    # First try to get from matched data
+                    if matched:
+                        matched_by_strategy = matched.get("_matched_by_strategy") or matched.get(
+                            "strategy"
+                        )
+                        logger.debug(f"Strategy from matched data: {matched_by_strategy}")
+
+                    # If no strategy in matched data, determine based on match characteristics
+                    if not matched_by_strategy:
+                        logger.debug(f"Determining strategy from match_type: {match_type}")
+                        if match_type == "composite":
+                            matched_by_strategy = "dual_component"
+                        elif match_type == "split_brush":
+                            matched_by_strategy = "automated_split"
+                        elif match_type == "regex":
+                            matched_by_strategy = "complete_brush"
+                        elif match_type == "brand_default":
+                            matched_by_strategy = "brand_fallback"
+                        elif match_type == "knot_only":
+                            matched_by_strategy = "knot_only"
+                        elif match_type == "handle_only":
+                            matched_by_strategy = "handle_only"
+                        else:
+                            matched_by_strategy = "unknown"
+                        logger.debug(f"Determined strategy: {matched_by_strategy}")
+                    
+                    logger.debug(f"Final strategy for {normalized}: {matched_by_strategy}")
+
                 # Use analyzer's results directly
                 is_confirmed = item.get("is_confirmed", False)
                 reason = item.get("reason", "")
@@ -798,11 +825,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 comment_sources = {}
                 if record_id and source_file:
                     comment_sources[str(record_id)] = source_file
-
-                # Extract strategy field from matched data for brush field
-                matched_by_strategy = None
-                if request.field == "brush" and matched:
-                    matched_by_strategy = matched.get("_matched_by_strategy")
 
                 api_item = MismatchItem(
                     original=normalized,
@@ -818,11 +840,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     comment_ids=[str(record_id)] if record_id else [],
                     comment_sources=comment_sources,
                     is_confirmed=is_confirmed,
-                    # Split brush fields from analyzer results
-                    is_split_brush=item.get("is_split_brush"),
-                    handle_component=item.get("handle_component"),
-                    knot_component=item.get("knot_component"),
-                    # Strategy field for brush matching
                     matched_by_strategy=matched_by_strategy,
                 )
 

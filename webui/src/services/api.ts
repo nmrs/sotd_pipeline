@@ -167,13 +167,13 @@ export interface MismatchAnalysisRequest {
   threshold?: number;
   use_enriched_data?: boolean;
   display_mode?:
-  | 'mismatches'
-  | 'all'
-  | 'unconfirmed'
-  | 'regex'
-  | 'intentionally_unmatched'
-  | 'complete_brushes'
-  | 'matches';
+    | 'mismatches'
+    | 'all'
+    | 'unconfirmed'
+    | 'regex'
+    | 'intentionally_unmatched'
+    | 'complete_brushes'
+    | 'matches';
 }
 
 export interface MismatchItem {
@@ -223,7 +223,9 @@ export type MatchedData = BrushMatchedData | Record<string, unknown>;
 
 // Type guard to check if matched data is brush data
 export function isBrushMatchedData(matched: MatchedData): matched is BrushMatchedData {
-  return typeof matched === 'object' && matched !== null && 'type' in matched && matched.type === 'brush';
+  return (
+    typeof matched === 'object' && matched !== null && 'type' in matched && matched.type === 'brush'
+  );
 }
 
 export interface MismatchAnalysisResult {
