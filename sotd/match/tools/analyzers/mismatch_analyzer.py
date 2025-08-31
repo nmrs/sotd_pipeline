@@ -2151,31 +2151,29 @@ class MismatchAnalyzer(AnalysisTool):
         # Check if handle component is confirmed
         handle_confirmed = False
         if isinstance(handle, dict):
-            handle_brand = handle.get("brand")
-            handle_model = handle.get("model")
             handle_source_text = handle.get("source_text")
 
-            if handle_brand and handle_model:
-                # Check if handle is in correct_matches.yaml
-                if handle_source_text:
-                    handle_key = f"handle:{handle_source_text.lower()}"
-                else:
-                    handle_key = f"handle:{handle_brand.lower()} {handle_model.lower()}"
+            if handle_source_text:
+                # Use the same key format as CorrectMatchesManager
+                # Normalize and convert to lowercase for consistent key generation
+                handle_normalized = (
+                    self._normalize_for_matching(handle_source_text, "handle").lower().strip()
+                )
+                handle_key = f"handle:{handle_normalized}"
                 handle_confirmed = handle_key in self._correct_matches
 
         # Check if knot component is confirmed
         knot_confirmed = False
         if isinstance(knot, dict):
-            knot_brand = knot.get("brand")
-            knot_model = knot.get("model")
             knot_source_text = knot.get("source_text")
 
-            if knot_brand and knot_model:
-                # Check if knot is in correct_matches.yaml
-                if knot_source_text:
-                    knot_key = f"knot:{knot_source_text.lower()}"
-                else:
-                    knot_key = f"knot:{knot_brand.lower()} {knot_model.lower()}"
+            if knot_source_text:
+                # Use the same key format as CorrectMatchesManager
+                # Normalize and convert to lowercase for consistent key generation
+                knot_normalized = (
+                    self._normalize_for_matching(knot_source_text, "knot").lower().strip()
+                )
+                knot_key = f"knot:{knot_normalized}"
                 knot_confirmed = knot_key in self._correct_matches
 
         # Both components must be confirmed

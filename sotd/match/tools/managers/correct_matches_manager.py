@@ -97,7 +97,7 @@ class CorrectMatchesManager:
                                                             "field": field,
                                                         }
                         elif field in ["handle", "knot"]:
-                            # Handle handle and knot sections
+                            # Handle handle and knot sections - preserve source_text for composite brushes
                             for brand, brand_data in field_data.items():
                                 if isinstance(brand_data, dict):
                                     for model, strings in brand_data.items():
@@ -113,12 +113,18 @@ class CorrectMatchesManager:
                                                     },
                                                 )
                                                 self._correct_matches.add(match_key)
+
+                                                # For composite brushes, preserve the source_text field
+                                                # The source_text should be the full original text from the composite brush
+                                                matched_data = {
+                                                    "brand": brand,
+                                                    "model": model,
+                                                    "source_text": original,  # Preserve source_text
+                                                }
+
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
-                                                    "matched": {
-                                                        "brand": brand,
-                                                        "model": model,
-                                                    },
+                                                    "matched": matched_data,
                                                     "field": field,
                                                 }
                         elif field == "brush":
