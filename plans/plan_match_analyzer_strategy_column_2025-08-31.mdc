@@ -234,12 +234,12 @@ The plan follows a logical progression from fixing foundational type issues to c
 - Filtering will allow users to focus on specific matching approaches
 - The implementation follows existing patterns for consistency and maintainability
 
-## 🔄 Next Steps
+## 🔄 **Updated Next Steps**
 
-1. **Immediate**: Investigate backend data structure (Task 2.1)
-2. **Next**: Implement alternative typing strategy (Task 2.2)
-3. **Then**: Complete type guard implementation (Task 2.3)
-4. **Finally**: Test and validate complete functionality (Step 5)
+1. **Immediate**: Complete data access investigation (check browser console, verify API response)
+2. **Next**: Fix field access path if needed
+3. **Then**: Test strategy column with real data
+4. **Finally**: Complete testing and validation (Step 5)
 
 ## 📊 **Current Implementation Status**
 
@@ -251,22 +251,24 @@ The plan follows a logical progression from fixing foundational type issues to c
 - Color-coding for different strategy types
 - **Task 2.1: Backend data structure investigation completed**
 - **Task 2.2: Alternative typing strategy implemented (BrushMatchedData interface and type guards)**
+- **TypeScript compilation issues resolved** - Strategy column now compiles successfully
+- **Strategy column is displaying** - Column appears in the UI but shows "unknown" for all records
 
 ### 🔄 **In Progress:**
-- TypeScript compilation error resolution
-- HeaderFilter type integration fixes
+- **Investigating why strategy field shows "unknown" for all records**
+- Debugging data access patterns to understand field location
+- Verifying backend data structure and field availability
 
 ### ⏳ **Pending:**
 - Complete testing and validation
-- Backend data structure verification (✅ COMPLETED)
-- Alternative typing strategy implementation (✅ COMPLETED WITH ISSUES)
+- Fix strategy field data access to show actual values
+- Verify filtering and sorting functionality with real data
 
-### 🚨 **Blocking Issues:**
-- TypeScript compilation fails due to type inference issues
-- `_matched_by_strategy` field treated as `{}` instead of `string`
-- Multiple type assertion errors prevent successful build
-- **Root cause identified**: `Record<string, unknown>` type too generic for TypeScript inference
-- **Type guards implemented but not resolving the core type inference issue**
+### 🚨 **Current Issue:**
+- **Strategy column displays but shows "unknown" for all records**
+- Need to investigate whether the `_matched_by_strategy` field exists in the data
+- Need to verify the correct field path for accessing strategy information
+- **Root cause**: Field access path may be incorrect or data structure differs from expected
 
 ## 📝 **Lessons Learned**
 
