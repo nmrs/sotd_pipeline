@@ -80,6 +80,12 @@ const MatchAnalyzer: React.FC = () => {
   const loadCorrectMatches = useCallback(async () => {
     try {
       const data = await getCorrectMatches(selectedField);
+      console.log('🔍 DEBUG: loadCorrectMatches loaded data:', {
+        field: selectedField,
+        totalEntries: data.total_entries,
+        hasData: !!data,
+        dataKeys: data ? Object.keys(data) : [],
+      });
       setCorrectMatches(data);
     } catch (err: unknown) {
       console.warn('Failed to load correct matches:', err);
@@ -115,6 +121,18 @@ const MatchAnalyzer: React.FC = () => {
         use_enriched_data: useEnrichedData,
         display_mode: displayMode,
       });
+
+      // console.log('🔍 DEBUG: handleAnalyze returned result:', {
+      //   field: result.field,
+      //   totalItems: result.mismatch_items?.length || 0,
+      //   hasData: !!result.mismatch_items,
+      //   sampleItems: result.mismatch_items?.slice(0, 3).map(item => ({
+      //     original: item.original,
+      //     match_type: item.match_type,
+      //     mismatch_type: item.mismatch_type,
+      //     is_confirmed: item.is_confirmed,
+      //   })) || [],
+      // });
 
       setResults(result);
     } catch (err: unknown) {
@@ -378,7 +396,7 @@ const MatchAnalyzer: React.FC = () => {
         .map(item => {
           // For brush field, use the shared utility to structure data correctly
           if (selectedField === 'brush' && item.matched) {
-            const { data } = structureBrushDataForAPI(item.matched);
+            const { data } = structureBrushDataForAPI(item.matched, item.original);
             return {
               original: item.original,
               matched: data,
@@ -479,7 +497,7 @@ const MatchAnalyzer: React.FC = () => {
         .map(item => {
           // For brush field, use the shared utility to structure data correctly
           if (selectedField === 'brush' && item.matched) {
-            const { data } = structureBrushDataForAPI(item.matched);
+            const { data } = structureBrushDataForAPI(item.matched, item.original);
             return {
               original: item.original,
               matched: data,
@@ -653,7 +671,7 @@ const MatchAnalyzer: React.FC = () => {
         .map(item => {
           // For brush field, use the shared utility to structure data correctly
           if (selectedField === 'brush' && item.matched) {
-            const { data } = structureBrushDataForAPI(item.matched);
+            const { data } = structureBrushDataForAPI(item.matched, item.original);
             return {
               original: item.original,
               matched: data,
@@ -888,18 +906,18 @@ const MatchAnalyzer: React.FC = () => {
     const returnedItems = results.mismatch_items || [];
 
     // Debug logging to understand the data structure
-    console.log('Debug: Analyzing data for counts:', {
-      totalItems: returnedItems.length,
-      field: results.field,
-      months: results.months,
-      sampleItems: returnedItems.slice(0, 3).map(item => ({
-        original: item.original,
-        match_type: item.match_type,
-        mismatch_type: item.mismatch_type,
-        is_confirmed: item.is_confirmed,
-        pattern: item.pattern,
-      })),
-    });
+    // console.log('Debug: Analyzing data for counts:', {
+    //   totalItems: returnedItems.length,
+    //   field: results.field,
+    //   months: results.months,
+    //   sampleItems: returnedItems.slice(0, 3).map(item => ({
+    //     original: item.original,
+    //     match_type: item.match_type,
+    //     mismatch_type: item.mismatch_type,
+    //     is_confirmed: item.is_confirmed,
+    //     pattern: item.pattern,
+    //   })),
+    // });
 
     // Count regex matches specifically
     const regexMatches = returnedItems.filter(item => item.match_type === 'regex');
@@ -907,16 +925,16 @@ const MatchAnalyzer: React.FC = () => {
       item => item.match_type === 'regex' && !isItemConfirmed(item)
     );
 
-    console.log('Debug: Regex analysis:', {
-      totalRegexMatches: regexMatches.length,
-      unconfirmedRegexMatches: unconfirmedRegexMatches.length,
-      regexMatchTypes: regexMatches.map(item => ({
-        original: item.original,
-        match_type: item.match_type,
-        is_confirmed: item.is_confirmed,
-        pattern: item.pattern,
-      })),
-    });
+    // console.log('Debug: Regex analysis:', {
+    //   totalRegexMatches: regexMatches.length,
+    //   unconfirmedRegexMatches: unconfirmedRegexMatches.length,
+    //   regexMatchTypes: regexMatches.map(item => ({
+    //     original: item.original,
+    //     match_type: item.match_type,
+    //     is_confirmed: item.is_confirmed,
+    //     pattern: item.pattern,
+    //   })),
+    // });
 
     return {
       mismatches: returnedItems.filter(
@@ -1177,9 +1195,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -1196,11 +1213,10 @@ const MatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -1217,11 +1233,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'unconfirmed'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -1238,9 +1253,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -1257,11 +1271,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'intentionally_unmatched'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -1279,11 +1292,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Matches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'matches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'matches'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().matches}
                 </span>
@@ -1302,11 +1314,10 @@ const MatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'complete_brushes'
-                        ? 'bg-white text-blue-600'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                      }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>

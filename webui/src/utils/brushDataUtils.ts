@@ -32,7 +32,7 @@ export interface BrushMatchedData {
  * @param matched - The matched brush data from the matcher
  * @returns Properly structured data for the API
  */
-export function structureBrushDataForAPI(matched: BrushMatchedData): {
+export function structureBrushDataForAPI(matched: BrushMatchedData, original?: string): {
   field: 'brush' | 'handle' | 'knot';
   data: Record<string, unknown>;
 } {
@@ -71,14 +71,14 @@ export function structureBrushDataForAPI(matched: BrushMatchedData): {
           handle: {
             brand: matched.handle!.brand,
             model: matched.handle!.model,
-            source_text: matched.handle!.source_text || null,
+            source_text: matched.handle!.source_text || original || null,
           },
           knot: {
             brand: matched.knot!.brand,
             model: matched.knot!.model,
             fiber: matched.knot!.fiber || null,
             knot_size_mm: matched.knot!.knot_size_mm || null,
-            source_text: matched.knot!.source_text || null,
+            source_text: matched.knot!.source_text || original || null,
           },
         },
       };
@@ -89,7 +89,7 @@ export function structureBrushDataForAPI(matched: BrushMatchedData): {
         data: {
           brand: matched.handle!.brand,
           model: matched.handle!.model,
-          source_text: matched.handle!.source_text || null,
+          source_text: matched.handle!.source_text || original || null,
         },
       };
     } else {
@@ -101,7 +101,7 @@ export function structureBrushDataForAPI(matched: BrushMatchedData): {
           model: matched.knot!.model,
           fiber: matched.knot!.fiber || null,
           knot_size_mm: matched.knot!.knot_size_mm || null,
-          source_text: matched.knot!.source_text || null,
+          source_text: matched.knot!.source_text || original || null,
         },
       };
     }

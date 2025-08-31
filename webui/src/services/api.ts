@@ -167,13 +167,13 @@ export interface MismatchAnalysisRequest {
   threshold?: number;
   use_enriched_data?: boolean;
   display_mode?:
-    | 'mismatches'
-    | 'all'
-    | 'unconfirmed'
-    | 'regex'
-    | 'intentionally_unmatched'
-    | 'complete_brushes'
-    | 'matches';
+  | 'mismatches'
+  | 'all'
+  | 'unconfirmed'
+  | 'regex'
+  | 'intentionally_unmatched'
+  | 'complete_brushes'
+  | 'matches';
 }
 
 export interface MismatchItem {
@@ -526,10 +526,15 @@ export const markMatchesAsCorrect = async (
   request: MarkCorrectRequest
 ): Promise<MarkCorrectResponse> => {
   try {
+    console.log('🔍 DEBUG: markMatchesAsCorrect called with:', request);
+
     const response = await api.post('/analyze/mark-correct', request);
+
+    console.log('🔍 DEBUG: markMatchesAsCorrect response:', response.data);
+
     return response.data;
   } catch (error) {
-    console.error('Failed to mark matches as correct:', error);
+    console.error('🔍 DEBUG: markMatchesAsCorrect error:', error);
     throw error;
   }
 };
