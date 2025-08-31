@@ -924,11 +924,22 @@ async def get_correct_matches(field: str):
 
         logger.info(f"Loaded data keys: {list(data.keys())}")
 
-        # For brush field, use only brush section
+        # For brush field, combine data from brush, handle, and knot sections
         if field == "brush":
-            field_data = data.get(field, {})
-            combined_data = field_data
-            logger.info(f"Field data for '{field}': {field_data}")
+            brush_data = data.get(field, {})
+            handle_data = data.get("handle", {})
+            knot_data = data.get("knot", {})
+            
+            # Combine all sections for composite brush confirmation logic
+            combined_data = {
+                "brush": brush_data,
+                "handle": handle_data,
+                "knot": knot_data,
+            }
+            
+            logger.info(
+                f"Brush field data - brush: {brush_data}, handle: {handle_data}, knot: {knot_data}"
+            )
         else:
             field_data = data.get(field, {})
             combined_data = field_data
@@ -957,10 +968,32 @@ async def get_correct_matches(field: str):
                             if isinstance(model_data, list):
                                 total_entries += len(model_data)
         elif field == "brush":
-            # For brush field, count brush section entries only
-            total_entries = sum(
+            # For brush field, count entries from all sections (brush, handle, knot)
+            total_entries = 0
+            
+            # Count brush section entries
+            brush_data = data.get(field, {})
+            total_entries += sum(
                 len(strings) if isinstance(strings, list) else 0
-                for brand_data in field_data.values()
+                for brand_data in brush_data.values()
+                if isinstance(brand_data, dict)
+                for strings in brand_data.values()
+            )
+            
+            # Count handle section entries
+            handle_data = data.get("handle", {})
+            total_entries += sum(
+                len(strings) if isinstance(strings, list) else 0
+                for brand_data in handle_data.values()
+                if isinstance(brand_data, dict)
+                for strings in brand_data.values()
+            )
+            
+            # Count knot section entries
+            knot_data = data.get("knot", {})
+            total_entries += sum(
+                len(strings) if isinstance(strings, list) else 0
+                for brand_data in knot_data.values()
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
@@ -1360,13 +1393,13 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                     # For brush entries, create the expected structure
                     matched_data = {
                         "brand": expected_brand or "unknown",
-                        "model": expected_model or "unknown"
+                        "model": expected_model or "unknown",
                     }
                 else:
                     # For other fields, use a simpler structure
                     matched_data = {
                         "brand": expected_brand or "unknown",
-                        "model": expected_model or "unknown"
+                        "model": expected_model or "unknown",
                     }
 
                 # Try to remove the match
