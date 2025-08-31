@@ -752,7 +752,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
             for item in items:
                 record = item["record"]
-                field_data = record.get(request.field, {})
+                field_data = item.get("field_data", {})
+
+                # If field_data is not available, try to get it from the record
+                if not field_data:
+                    field_data = record.get(request.field, {})
 
                 original = field_data.get("original", "")
                 normalized = field_data.get("normalized", original)

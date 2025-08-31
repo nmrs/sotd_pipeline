@@ -395,7 +395,7 @@ def get_phase_range(phase_range: str) -> List[str]:
     if start_idx > end_idx:
         raise ValueError(f"Start phase '{start_phase}' comes after end phase '{end_phase}'")
 
-    return all_phases[start_idx:end_idx + 1]
+    return all_phases[start_idx : end_idx + 1]
 
 
 def main(argv: Optional[List[str]] = None) -> int:
