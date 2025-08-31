@@ -62,17 +62,6 @@ class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
             # Direct string input
             text = value
 
-        # Skip strings that contain delimiters - let splitting strategies handle them
-        delimiters = [" w/ ", " with ", " in ", " / ", " - ", " + "]
-        if any(delimiter in text for delimiter in delimiters):
-            return create_match_result(
-                original=value.get("original", text) if isinstance(value, dict) else value,
-                matched=None,
-                pattern=None,
-                match_type=None,
-                strategy="other_brush",
-            )
-
         # Use precompiled patterns for performance optimization
         for pattern_data in self.compiled_patterns:
             if pattern_data["compiled"].search(text):
