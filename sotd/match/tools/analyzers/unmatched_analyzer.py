@@ -81,14 +81,49 @@ class UnmatchedAnalyzer(AnalysisTool):
             print(f"❌ Error: {e}")
             return {}
 
+        # Load intentionally unmatched items to filter them out
+        filtered_items = self._load_filtered_items(args.field)
+
         all_unmatched = defaultdict(list)
 
         for record in data:
-            self._process_field_unmatched(record, args.field, all_unmatched)
+            self._process_field_unmatched(record, args.field, all_unmatched, filtered_items)
 
-        return all_unmatched
+        # Filter out intentionally unmatched items (case-insensitive)
+        filtered_unmatched = {}
+        for k, v in all_unmatched.items():
+            # Check if this item is in the filtered list (case-insensitive)
+            if k.lower() not in filtered_items:
+                filtered_unmatched[k] = v
 
-    def _process_field_unmatched(self, record: Dict, field: str, all_unmatched: Dict) -> None:
+        return filtered_unmatched
+
+    def _load_filtered_items(self, field: str) -> set:
+        """Load intentionally unmatched items for the given field."""
+        try:
+            from sotd.utils.filtered_entries import FilteredEntriesManager
+
+            # Load filtered entries from the data directory
+            filtered_file = project_root / "data" / "intentionally_unmatched.yaml"
+            if filtered_file.exists():
+                manager = FilteredEntriesManager(filtered_file)
+                manager.load()
+
+                # Get all filtered items for this field (case-insensitive)
+                filtered_items = set()
+                for item_name in manager._data.get(field, {}).keys():
+                    filtered_items.add(item_name.lower())
+
+                return filtered_items
+        except Exception as e:
+            # Log error but continue - don't fail the analysis
+            print(f"⚠️ Warning: Could not load filtered items: {e}")
+
+        return set()
+
+    def _process_field_unmatched(
+        self, record: Dict, field: str, all_unmatched: Dict, filtered_items: set
+    ) -> None:
         """Process unmatched field records."""
         if field == "brush":
             # Use new brush-specific logic for handle/knot granularity
@@ -98,10 +133,10 @@ class UnmatchedAnalyzer(AnalysisTool):
             self._process_soap_brand_unmatched(record, all_unmatched)
         else:
             # Use existing simple logic for razor, blade, soap
-            self._process_simple_field_unmatched(record, field, all_unmatched)
+            self._process_simple_field_unmatched(record, field, all_unmatched, filtered_items)
 
     def _process_simple_field_unmatched(
-        self, record: Dict, field: str, all_unmatched: Dict
+        self, record: Dict, field: str, all_unmatched: Dict, filtered_items: set
     ) -> None:
         """Process unmatched simple field records (razor, blade, soap)."""
         field_val = record.get(field)
