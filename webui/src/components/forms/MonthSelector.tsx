@@ -6,12 +6,15 @@ import ErrorDisplay from '../feedback/ErrorDisplay';
 import { SelectInput } from '../ui/reusable-forms';
 import { SecondaryButton } from '../ui/reusable-buttons';
 import { getYearToDateMonths, getLast12Months } from '../../utils/dateUtils';
+import { calculateDeltaMonths, formatDeltaMonths } from '../../utils/deltaMonths';
 
 interface MonthSelectorProps {
   selectedMonths: string[];
   onMonthsChange: (months: string[]) => void;
   multiple?: boolean;
   label?: string;
+  enableDeltaMonths?: boolean;
+  onDeltaMonthsChange?: (deltaMonths: string[]) => void;
 }
 
 const MonthSelector: React.FC<MonthSelectorProps> = ({
@@ -19,10 +22,22 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   onMonthsChange,
   multiple = true,
   label = 'Months',
+  enableDeltaMonths = false,
+  onDeltaMonthsChange,
 }) => {
   const { availableMonths, loading, error } = useAvailableMonths();
   const [isOpen, setIsOpen] = useState(false);
+  const [deltaMonthsEnabled, setDeltaMonthsEnabled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Calculate delta months when enabled
+  const deltaCalculation = deltaMonthsEnabled ? calculateDeltaMonths(selectedMonths) : null;
+  // Note: effectiveSelectedMonths is only used for display, not for filtering delta months
+  const effectiveSelectedMonths = deltaMonthsEnabled && deltaCalculation ? deltaCalculation.allMonths : selectedMonths;
+
+
+
+
 
   // Generate months from 2016-05 to current month
   const generatePrepopulatedMonths = (): string[] => {
@@ -38,6 +53,15 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
       // Move to next month
       current.setMonth(current.getMonth() + 1);
+    }
+
+    // Ensure current month is included (in case the loop logic missed it)
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const currentMonthStr = `${currentYear}-${currentMonth}`;
+
+    if (!months.includes(currentMonthStr)) {
+      months.push(currentMonthStr);
     }
 
     // Sort in descending order (newest first)
@@ -73,49 +97,85 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   }, [isOpen]);
 
   const handleMonthChange = (month: string, checked: boolean) => {
+    let newSelectedMonths: string[];
+
     if (multiple) {
       if (checked) {
-        onMonthsChange([...selectedMonths, month]);
+        newSelectedMonths = [...selectedMonths, month];
       } else {
-        onMonthsChange(selectedMonths.filter(m => m !== month));
+        newSelectedMonths = selectedMonths.filter(m => m !== month);
       }
     } else {
-      onMonthsChange(checked ? [month] : []);
+      newSelectedMonths = checked ? [month] : [];
+    }
+
+    updateMonthsAndDelta(newSelectedMonths);
+  };
+
+  const handleDeltaMonthsToggle = (enabled: boolean) => {
+    setDeltaMonthsEnabled(enabled);
+
+    if (enabled && onDeltaMonthsChange) {
+      // Calculate delta months immediately with current selectedMonths
+      const newDeltaCalculation = calculateDeltaMonths(selectedMonths);
+      if (newDeltaCalculation) {
+        onDeltaMonthsChange(newDeltaCalculation.deltaMonths);
+      }
+    } else if (!enabled && onDeltaMonthsChange) {
+      onDeltaMonthsChange([]);
+    }
+  };
+
+  const updateMonthsAndDelta = (newMonths: string[]) => {
+    onMonthsChange(newMonths);
+
+    // Update delta months if enabled
+    if (deltaMonthsEnabled && onDeltaMonthsChange) {
+      const newDeltaCalculation = calculateDeltaMonths(newMonths);
+      if (newDeltaCalculation) {
+        onDeltaMonthsChange(newDeltaCalculation.deltaMonths);
+      }
     }
   };
 
   const selectAll = () => {
-    onMonthsChange([...effectiveAvailableMonths]);
+    updateMonthsAndDelta([...effectiveAvailableMonths]);
   };
 
   const clearAll = () => {
-    onMonthsChange([]);
+    updateMonthsAndDelta([]);
   };
 
   const selectYearToDate = () => {
     const ytdMonths = getYearToDateMonths();
     // Only select months that are available in the system
     const availableYtdMonths = ytdMonths.filter(month => effectiveAvailableMonths.includes(month));
-    onMonthsChange(availableYtdMonths);
+    updateMonthsAndDelta(availableYtdMonths);
   };
 
   const selectLast12Months = () => {
     const last12Months = getLast12Months();
     // Select full last 12 months range
-    onMonthsChange(last12Months);
+    updateMonthsAndDelta(last12Months);
   };
 
   const getDisplayText = () => {
-    if (selectedMonths.length === 0) {
+    if (effectiveSelectedMonths.length === 0) {
       return 'Select Months';
     }
-    if (selectedMonths.length === 1) {
-      return selectedMonths[0];
+    if (effectiveSelectedMonths.length === 1) {
+      return effectiveSelectedMonths[0];
     }
-    if (selectedMonths.length <= 3) {
-      return selectedMonths.join(', ');
+    if (effectiveSelectedMonths.length <= 3) {
+      return effectiveSelectedMonths.join(', ');
     }
-    return `${selectedMonths.length} months selected`;
+
+    // Only show delta months count if they're actually enabled and available
+    if (deltaMonthsEnabled && deltaCalculation && deltaCalculation.deltaMonths.length > 0) {
+      return formatDeltaMonths(deltaCalculation);
+    }
+
+    return `${effectiveSelectedMonths.length} months selected`;
   };
 
   // Show loading spinner only if we have no pre-populated months and API is still loading
@@ -183,6 +243,28 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
                 Clear All
               </SecondaryButton>
             </div>
+
+            {enableDeltaMonths && (
+              <div className='flex items-center gap-2 mb-2 pb-2 border-b border-gray-200'>
+                <label className='flex items-center space-x-2 text-xs text-gray-700'>
+                  <Checkbox
+                    checked={deltaMonthsEnabled}
+                    onCheckedChange={handleDeltaMonthsToggle}
+                  />
+                  <span>Include Delta Months</span>
+                </label>
+                {deltaMonthsEnabled && deltaCalculation && (
+                  <span className='text-xs text-gray-500'>
+                    +{deltaCalculation.deltaMonths.length} historical months
+                  </span>
+                )}
+                {!deltaMonthsEnabled && (
+                  <span className='text-xs text-gray-400'>
+                    Check to include historical comparison months
+                  </span>
+                )}
+              </div>
+            )}
 
             {effectiveAvailableMonths.length === 0 ? (
               <p className='text-gray-500 text-sm py-2'>No months available</p>
