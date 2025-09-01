@@ -71,7 +71,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Knot Sizes
 
-{{tables.knot-sizes|deltas:true}}
+{{tables.brush-knot-sizes|deltas:true}}
 
 ## Blackbird Plates
 

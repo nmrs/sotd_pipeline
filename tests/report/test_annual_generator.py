@@ -60,12 +60,50 @@ class TestAnnualReportGenerator:
         with open(annual_data_file, "w") as f:
             json.dump(test_data, f, ensure_ascii=False)
 
-        # Generate annual hardware report
+        # Create a simplified test template that only includes the tables we have
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+
+        # Create a simplified annual hardware template
+        annual_hardware_template = template_dir / "annual_hardware.md"
+        annual_hardware_template.write_text(
+            """# Annual Hardware Report - {{year}}
+
+Welcome to your Annual SOTD Hardware Report for {{year}}
+
+## Annual Summary
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
+* Data includes {{included_months}} months of the year.
+{% if missing_months > 0 %}
+* Note: {{missing_months}} months were missing from the data set.
+{% endif %}
+
+## Razors
+
+{{tables.razors}}
+
+## Blades
+
+{{tables.blades}}
+
+## Brushes
+
+{{tables.brushes}}
+
+## Soaps
+
+{{tables.soaps}}
+"""
+        )
+
+        # Generate annual hardware report with custom template
         result = annual_generator.generate_annual_report(
             report_type="hardware",
             year="2024",
             data_dir=tmp_path,
             debug=False,
+            template_path=str(template_dir),
         )
 
         # Verify the report was generated
@@ -241,6 +279,40 @@ class TestAnnualReportGenerator:
         with open(annual_data_file, "w") as f:
             json.dump(test_data, f, ensure_ascii=False)
 
+        # Create a simplified test template for performance testing
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+
+        # Create a simplified annual hardware template
+        annual_hardware_template = template_dir / "annual_hardware.md"
+        annual_hardware_template.write_text(
+            """# Annual Hardware Report - {{year}}
+
+Welcome to your Annual SOTD Hardware Report for {{year}}
+
+## Annual Summary
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
+* Data includes {{included_months}} months of the year.
+
+## Razors
+
+{{tables.razors}}
+
+## Blades
+
+{{tables.blades}}
+
+## Brushes
+
+{{tables.brushes}}
+
+## Soaps
+
+{{tables.soaps}}
+"""
+        )
+
         # Generate annual hardware report and measure performance
         import time
 
@@ -251,6 +323,7 @@ class TestAnnualReportGenerator:
             year="2024",
             data_dir=tmp_path,
             debug=False,
+            template_path=str(template_dir),
         )
 
         end_time = time.time()

@@ -53,8 +53,32 @@ class TestAnnualGeneratorRefactoring:
         }
         data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
 
-        # Test content generation
-        result = generate_annual_report_content("hardware", "2024", metadata, data, debug=True)
+        # Create a simplified test template
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+
+        # Create a simplified annual hardware template
+        annual_hardware_template = template_dir / "annual_hardware.md"
+        annual_hardware_template.write_text(
+            """# Annual Hardware Report - {{year}}
+
+Welcome to your Annual SOTD Hardware Report for {{year}}
+
+## Annual Summary
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
+* Data includes {{included_months}} months of the year.
+
+## Razors
+
+{{tables.razors}}
+"""
+        )
+
+        # Test content generation with custom template
+        result = generate_annual_report_content(
+            "hardware", "2024", metadata, data, debug=True, template_path=str(template_dir)
+        )
         assert result is not None
         assert "2024" in result
         assert "1,200" in result

@@ -156,18 +156,111 @@ class TestTemplateProcessor:
 
     def test_template_caching(self, tmp_path):
         """Test that templates are cached after first load."""
+        # Create a template directory
         template_dir = tmp_path / "report_templates"
         template_dir.mkdir()
 
-        template_file = template_dir / "test.md"
-        template_file.write_text("Test content")
+        # Create a template file
+        template_file = template_dir / "hardware.md"
+        template_file.write_text("# Hardware Report\n\n{{tables.razors}}")
 
         processor = TemplateProcessor(template_dir)
 
-        # First call should load templates
+        # First call should load from disk
         templates1 = processor._load_templates()
-        assert "test" in templates1
-
-        # Second call should use cached templates
+        # Second call should use cached version
         templates2 = processor._load_templates()
-        assert templates1 is templates2  # Same object reference
+
+        # Both should be the same object (cached)
+        assert templates1 is templates2
+
+    def test_fail_fast_unrecognized_variables(self, tmp_path):
+        """Test that template processing fails fast for unrecognized variables."""
+        # Create a template directory
+        template_dir = tmp_path / "report_templates"
+        template_dir.mkdir()
+
+        # Create a template with unrecognized variables
+        template_file = template_dir / "hardware.md"
+        template_file.write_text("# Hardware Report\n\n{{unknown_variable}}")
+
+        processor = TemplateProcessor(template_dir)
+
+        # Should fail fast with clear error message
+        with pytest.raises(
+            ValueError, match="Unrecognized template placeholders found: unknown_variable"
+        ):
+            processor.process_template("hardware", {"total_shaves": 100})
+
+    def test_fail_fast_unrecognized_tables(self, tmp_path):
+        """Test that template processing fails fast for unrecognized table placeholders."""
+        # Create a template directory
+        template_dir = tmp_path / "report_templates"
+        template_dir.mkdir()
+
+        # Create a template with unrecognized table placeholders
+        template_file = template_dir / "hardware.md"
+        template_file.write_text("# Hardware Report\n\n{{tables.unknown-table}}")
+
+        processor = TemplateProcessor(template_dir)
+
+        # Should fail fast with clear error message
+        with pytest.raises(
+            ValueError, match="Unrecognized template placeholders found: tables.unknown-table"
+        ):
+            processor.process_template(
+                "hardware",
+                {"total_shaves": 100},
+                {"{{tables.razors|deltas:true}}": "table content"},
+            )
+
+    def test_recognized_enhanced_table_placeholders(self, tmp_path):
+        """Test that enhanced table placeholders with parameters are recognized."""
+        # Create a template directory
+        template_dir = tmp_path / "report_templates"
+        template_dir.mkdir()
+
+        # Create a template with enhanced table placeholders
+        template_file = template_dir / "hardware.md"
+        template_file.write_text(
+            "# Hardware Report\n\n{{tables.razors|ranks:50|deltas:true}}\n{{tables.blades|deltas:true}}"
+        )
+
+        processor = TemplateProcessor(template_dir)
+
+        # Should work with enhanced table placeholders
+        available_tables = {
+            "{{tables.razors|ranks:50|deltas:true}}": "table content",
+            "{{tables.blades|deltas:true}}": "blade content",
+        }
+
+        result = processor.process_template("hardware", {"total_shaves": 100}, available_tables)
+        assert "table content" in result
+        assert "blade content" in result
+
+    def test_mixed_recognized_and_unrecognized_placeholders(self, tmp_path):
+        """Test that mixed recognized and unrecognized placeholders fail fast."""
+        # Create a template directory
+        template_dir = tmp_path / "report_templates"
+        template_dir.mkdir()
+
+        # Create a template with both recognized and unrecognized placeholders
+        template_file = template_dir / "hardware.md"
+        template_file.write_text(
+            "# Hardware Report\n\n{{total_shaves}}\n{{tables.razors}}\n{{unknown_placeholder}}"
+        )
+
+        processor = TemplateProcessor(template_dir)
+
+        # Should fail fast and report all unrecognized placeholders
+        with pytest.raises(ValueError) as exc_info:
+            processor.process_template(
+                "hardware",
+                {"total_shaves": 100},
+                {"{{tables.razors|deltas:true}}": "table content"},
+            )
+
+        error_msg = str(exc_info.value)
+        assert "Unrecognized template placeholders found: unknown_placeholder" in error_msg
+        assert "Available variables: total_shaves" in error_msg
+        assert "Available tables: razors" in error_msg

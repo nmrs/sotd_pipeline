@@ -77,47 +77,55 @@ class TemplateProcessor:
         # Find all variable placeholders: {{variable_name}}
         variable_pattern = r"\{\{([^}]+)\}\}"
         all_placeholders = re.findall(variable_pattern, content)
-        
+
         unrecognized_placeholders = []
-        
+        available_base_tables = set()
+
         for placeholder in all_placeholders:
             # Skip table placeholders as they're handled separately
             if placeholder.startswith("tables."):
                 continue
-                
+
             # Check if this is a variable placeholder
             if placeholder not in variables:
                 unrecognized_placeholders.append(placeholder)
-        
+
         # Check table placeholders if tables are provided
         if tables:
             table_pattern = r"\{\{tables\.([^|}]+)(?:\|[^}]*)?\}\}"
             table_placeholders = re.findall(table_pattern, content)
-            
+
+            # Extract base table names from available tables (remove parameters)
+            for table_key in tables.keys():
+                # Extract the base table name from enhanced table keys
+                # e.g., "{{tables.razors|ranks:50|deltas:true}}" -> "razors"
+                base_match = re.match(r"\{\{tables\.([^|}]+)(?:\|[^}]*)?\}\}", table_key)
+                if base_match:
+                    available_base_tables.add(base_match.group(1))
+                else:
+                    # Handle simple table keys (e.g., "blades", "razors")
+                    available_base_tables.add(table_key)
+
             for table_name in table_placeholders:
-                table_placeholder = f"{{{{tables.{table_name}}}}}"
-                
-                # Check if this table placeholder exists in the tables dict
-                if table_placeholder not in tables:
+                # Check if this base table name exists in available base tables
+                if table_name not in available_base_tables:
                     unrecognized_placeholders.append(f"tables.{table_name}")
-        
+
         if unrecognized_placeholders:
             # Sort for consistent error messages
             unrecognized_placeholders.sort()
             available_variables = sorted(variables.keys()) if variables else []
-            available_tables = sorted([
-                k.replace("{{", "").replace("}}", "") for k in tables.keys()
-            ]) if tables else []
-            
+            available_base_tables_sorted = sorted(available_base_tables)
+
             error_msg = (
                 f"Unrecognized template placeholders found: "
                 f"{', '.join(unrecognized_placeholders)}"
             )
             if available_variables:
                 error_msg += f"\nAvailable variables: {', '.join(available_variables)}"
-            if available_tables:
-                error_msg += f"\nAvailable tables: {', '.join(available_tables)}"
-            
+            if available_base_tables_sorted:
+                error_msg += f"\nAvailable tables: {', '.join(available_base_tables_sorted)}"
+
             raise ValueError(error_msg)
 
     def process_template(
@@ -137,10 +145,10 @@ class TemplateProcessor:
             ValueError: If any unrecognized placeholders are found
         """
         template = self.get_template(template_name)
-        
+
         # Validate all placeholders before processing (fail-fast)
         self._validate_placeholders(template, variables, tables)
-        
+
         return self._process_content(template, variables, tables)
 
     def _process_content(
