@@ -638,7 +638,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-        - razo.*big.*bruce
+        - big.*bruce
     Bruce:
       fiber: Synthetic
       knot_size_mm: 24

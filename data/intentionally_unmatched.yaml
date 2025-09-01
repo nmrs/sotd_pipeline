@@ -5,7 +5,13 @@ blade:
     - file: 2025-04.json
       id: mkvmk0s
       source: user
-  AC Blade:
+  ???:
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-07.json
+      id: leplof6
+      source: user
+  ac blade:
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
@@ -15,84 +21,48 @@ blade:
       id: mxfsteo
       source: user
     reason: not specific enough for matching
-  Artist Club:
+  artist club:
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
       id: mxfsteo
       source: user
     reason: not specific enough for matching
-  BLADE:
+  blade:
     added_date: '2025-08-25'
     comment_ids:
     - file: 2025-06.json
       id: mygq97l
-      source: user
-  I don't even know, tbh; I don't remember the last time I swapped this blade:
-    added_date: '2025-07-19'
-    comment_ids:
-    - file: 2025-06.json
-      id: mwoh2fd
-      source: user
-  IDK, will edit later:
-    added_date: '2025-08-24'
-    comment_ids:
-    - file: 2025-08.json
-      id: n6etxnz
-      source: user
-  Jenes Razor Sheffield Style (RIP):
-    added_date: '2025-08-27'
-    comment_ids:
-    - file: 2025-01.json
-      id: m68avhv
-      source: user
-  N/A:
-    added_date: '2025-07-19'
-    comment_ids:
-    - file: 2025-06.json
-      id: mwu3bfj
-      source: user
-  Not sure, didn't take it apart to see:
-    added_date: '2025-07-19'
-    comment_ids:
-    - file: 2025-06.json
-      id: n02soyj
-      source: user
-  'Null':
-    added_date: '2025-08-25'
-    comment_ids:
-    - file: 2025-06.json
-      id: mw99op2
-      source: user
-  The Three that come on it:
-    added_date: '2025-08-25'
-    comment_ids:
-    - file: 2025-06.json
-      id: mxn87ia
-      source: user
-  Whatever Gillette sticks in these 2 blade thingys:
-    added_date: '2025-08-25'
-    comment_ids:
-    - file: 2025-06.json
-      id: mxq6eld
-      source: user
-  Whatever Gillette stuffs into these things:
-    added_date: '2025-08-25'
-    comment_ids:
-    - file: 2025-06.json
-      id: myf7jya
-      source: user
-  Whatever they jammed in:
-    added_date: '2025-08-25'
-    comment_ids:
-    - file: 2025-06.json
-      id: mxd8vix
       source: user
   chiseled face legacy:
     added_date: '2025-08-27'
     comment_ids:
     - file: 2025-04.json
       id: mkum44v
+      source: user
+  i don't even know, tbh; i don't remember the last time i swapped this blade:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mwoh2fd
+      source: user
+  i don't even remember:
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-07.json
+      id: lf0f1ta
+      source: user
+  idk, will edit later:
+    added_date: '2025-08-24'
+    comment_ids:
+    - file: 2025-08.json
+      id: n6etxnz
+      source: user
+  jenes razor sheffield style (rip):
+    added_date: '2025-08-27'
+    comment_ids:
+    - file: 2025-01.json
+      id: m68avhv
       source: user
   leave:
     added_date: '2025-07-19'
@@ -102,61 +72,103 @@ blade:
       source: user
     reason: garbage
   n/a:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mwu3bfj
+      source: user
+  n/a (n/a):
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-07.json
+      id: lfjrr79
+      source: user
+  not sure, didn't take it apart to see:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: n02soyj
+      source: user
+  'null':
     added_date: '2025-08-25'
     comment_ids:
     - file: 2025-06.json
-      id: mxm7x7k
+      id: mw99op2
+      source: user
+  the three that come on it:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxn87ia
+      source: user
+  whatever gillette sticks in these 2 blade thingys:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxq6eld
+      source: user
+  whatever gillette stuffs into these things:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: myf7jya
+      source: user
+  whatever they jammed in:
+    added_date: '2025-08-25'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxd8vix
       source: user
 brush:
-  '>!REDACTED!<':
+  '>!redacted!<':
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
       id: mwl00zz
       source: user
-  Banana:
+  banana:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mxbcgzq
       source: user
-  Brandless Green Boar brush:
+  brandless green boar brush:
     added_date: '2025-08-09'
     comment_ids:
     - file: 2025-06.json
       id: mxi9gdw
       source: user
-  ChronnoCrafts English Lavender:
+  chronnocrafts english lavender:
     added_date: '2025-08-10'
     comment_ids:
     - file: 2025-06.json
       id: mypjzvi
       source: user
-  Do:
+  do:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: my83k77
       source: user
-  Dull BUTTER KNIFE:
+  dull butter knife:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mx5zrlm
       source: user
-  GUM Sulcular brush:
+  gum sulcular brush:
     added_date: '2025-08-10'
     comment_ids:
     - file: 2025-06.json
       id: mxba65n
       source: user
-  Hand:
+  hand:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mykjukt
       source: user
-  Hands:
+  hands:
     added_date: '2025-07-19'
     comment_ids:
     - file: mxazln2.json
@@ -168,31 +180,31 @@ brush:
     - file: mz17zzu.json
       id: mz17zzu
       source: user
-  Handsies!:
+  handsies!:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: myketzj
       source: user
-  Imma:
+  imma:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mx0f6ht
       source: user
-  Manos de Tetriside:
+  manos de tetriside:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: myhyv77
       source: user
-  Muh hands:
+  muh hands:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mykchyc
       source: user
-  My Hand:
+  my hand:
     added_date: '2025-07-19'
     comment_ids:
     - file: mxljw15.json
@@ -204,31 +216,31 @@ brush:
     - file: mxxcov6.json
       id: mxxcov6
       source: user
-  My hand ( left ):
+  my hand ( left ):
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mxjuhmv
       source: user
-  N/A:
+  n/a:
     added_date: '2025-08-10'
     comment_ids:
     - file: 2025-06.json
       id: myha7z7
       source: user
-  No Brush Needed for Goop!:
+  no brush needed for goop!:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: myh1k6t
       source: user
-  Non-Dominant Hand:
+  non-dominant hand:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: myl3ndl
       source: user
-  None:
+  none:
     added_date: '2025-07-19'
     comment_ids:
     - file: mxsklcx.json
@@ -240,29 +252,23 @@ brush:
     - file: mxit7rm.json
       id: mxit7rm
       source: user
-  Not applicable:
+  not applicable:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: myg6dwu
       source: user
-  Plastic Spatula:
+  plastic spatula:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mx75a02
       source: user
-  Right Hand:
+  right hand:
     added_date: '2025-07-28'
     comment_ids:
     - file: 2025-06.json
       id: mw9kte2
-      source: user
-  The Hands of my Children:
-    added_date: '2025-07-28'
-    comment_ids:
-    - file: 2025-06.json
-      id: mxz7bbg
       source: user
   see below:
     added_date: '2025-07-28'
@@ -270,33 +276,32 @@ brush:
     - file: 2025-06.json
       id: mw88dgo
       source: user
-  u/jwoods23's Hands:
+  the hands of my children:
+    added_date: '2025-07-28'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxz7bbg
+      source: user
+  u/jwoods23's hands:
     added_date: '2025-08-10'
     comment_ids:
     - file: 2025-06.json
       id: mx6lwpn
       source: user
 razor:
-  Hot Wheels Play Razor:
+  .:
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-07.json
+      id: ldysm3n
+      source: user
+  hot wheels play razor:
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
       id: mx5l4qe
       source: user
     reason: not a real razor
-  ? Unknown (I don't remember the model, I got it back in like 2013 through a subscription
-    box as my first ever DE razor so figured I'd try it again!)
-  : added_date: '2025-08-19'
-    comment_ids:
-    - file: 2025-08.json
-      id: n77pdd8
-      source: user
-  Unknown (Unknown):
-    added_date: '2025-08-19'
-    comment_ids:
-    - file: 2025-02.json
-      id: mfn1cig
-      source: user
   jus:
     added_date: '2025-07-19'
     comment_ids:
@@ -304,4 +309,22 @@ razor:
       id: mx0f6ht
       source: user
     reason: garbage
+  n/a:
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-07.json
+      id: lfjrr79
+      source: user
+  unknown (unknown):
+    added_date: '2025-08-19'
+    comment_ids:
+    - file: 2025-02.json
+      id: mfn1cig
+      source: user
+  'yes':
+    added_date: '2025-09-01'
+    comment_ids:
+    - file: 2024-02.json
+      id: kpay05o
+      source: user
 soap: {}

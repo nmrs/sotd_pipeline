@@ -80,7 +80,6 @@ artisan_handles:
       patterns:
         - century
   Chisel & Hound:
-    knot_size_mm: 26
     Unspecified:
       patterns:
         - chisel.*hound(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -323,7 +322,7 @@ artisan_handles:
   Summer Break:
     Unspecified:
       patterns:
-        - summer.*break(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - summer.*break(?:.*soaps)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - \bsbs\b
   Surrey:
     Unspecified:

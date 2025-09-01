@@ -55,12 +55,12 @@ Above the Tie:
   SE1:
     format: AC
     patterns:
-      - (?:\batt\b|tie).*se-*1
+      - (?:\batt\b|tie).*se[- ]?1
       - (?:atlas|bamboo|calypso|colossus|kronos).*se1
   SE2:
     format: AC
     patterns:
-      - (?:\batt\b|tie).*se-*2
+      - (?:\batt\b|tie).*se[- ]?2
   Windsor Pro SB90:
     patterns:
       - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -391,10 +391,10 @@ Chinchilla:
   Razor:
     patterns:
       - chinchilla
-# Chisel & Hound:
-#   Briar Brushworks Collab Slim:
-#     patterns:
-#     - chisel.*hound.*briar.*slim
+Chisel & Hound:
+  Briar Brushworks Collab Slim:
+    patterns:
+      - chisel.*hound.*briar.*slim
 Chiseled Face:
   Legacy:
     patterns:
@@ -852,7 +852,7 @@ Gillette:
       - o.{1}clock
   Aristocrat:
     patterns:
-      - (?:gil.*)art?istocrat
+      - (?:gil)?.*art?istocrat
   Blue:
     patterns:
       - 'super\s*blue'
@@ -1298,6 +1298,8 @@ Koraat:
     format: Straight
     patterns:
       - koraat.*(\d{1,2}/(8|16))?
+      - \bchani\b # https://www.reddit.com/r/Wetshaving/comments/ipykey/theme_thursday_sotd_thread_sep_10_2020/g4nemse/
+      - mariko # https://www.reddit.com/r/Wetshaving/comments/iwvnb8/monday_sotd_thread_sep_21_2020/g630shr/
 Krect:
   Spiral Slant:
     patterns:
@@ -1532,6 +1534,9 @@ Mühle:
   Rocca:
     patterns:
       - '\brocca\b'
+  Unspecified:
+    patterns:
+      - m[uü]hle
 Noble Otter:
   DE:
     patterns:
@@ -1580,7 +1585,7 @@ Other AC Clone:
   "":
     format: AC
     patterns:
-      - chinese.*\bac\b.*copy
+      - chinese.*(\bac\b|artist club).*copy
 Other DE:
   "":
     patterns:
@@ -1889,6 +1894,7 @@ Ralf Aust:
     patterns:
       - 'ralf.*aust(\s+straight)*'
       - \baust\b(?:.*\d{1,2}/(8|16))?
+      - triilian # https://www.reddit.com/r/Wetshaving/comments/iw97kc/sunday_sotd_thread_sep_20_2020/g5ye2ip/
 Rapira:
   Double Edge Safety Razor:
     patterns:
@@ -1921,6 +1927,7 @@ RazoRock:
       - gc
       - game.*center
       - game.*ganger
+      - (razorock|rr).*jaws
   German 37 Slant:
     patterns:
       - 'german.*\b37\b'
@@ -2060,14 +2067,9 @@ Rocky Mountain Barber:
     patterns:
       - rocky moun
 Rocnel:
-  Elite 2019:
+  Elite:
     patterns:
-      - Roc.*elite.*2019
-      - 2019.*roc.*elite
-  Elite 2022:
-    patterns:
-      - Roc.*elite.*2022
-      - 2022.*roc.*elite
+      - roc.*elite
   Sailor:
     patterns:
       - Roc.*sail
@@ -2341,7 +2343,7 @@ Tatara:
       - tatara
   Masamune Nodachi:
     patterns:
-      - ta.*nodachi
+      - nodachi
       - masadachi
       - masamodachi
       - tatara.*dachi
