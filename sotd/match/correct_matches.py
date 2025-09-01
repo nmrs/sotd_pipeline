@@ -32,6 +32,25 @@ class CorrectMatchesChecker:
         self.correct_matches = correct_matches or {}
         self.debug = debug
         self._case_insensitive_lookup: Optional[Dict[str, Dict[str, Any]]] = None
+        # Add normalization cache for performance optimization
+        self._normalization_cache: Dict[str, str] = {}
+
+    def _normalize_with_cache(self, value: str) -> str:
+        """
+        Normalize value with caching for performance optimization.
+
+        Args:
+            value: Input string to normalize
+
+        Returns:
+            Normalized string
+        """
+        if value in self._normalization_cache:
+            return self._normalization_cache[value]
+
+        normalized = normalize_for_matching(value, field="brush")
+        self._normalization_cache[value] = normalized
+        return normalized
 
     def check(self, value: str) -> Optional[CorrectMatchData]:
         """
@@ -48,9 +67,8 @@ class CorrectMatchesChecker:
         if not value or not self.correct_matches:
             return None
 
-        # All correct match lookups must use normalize_for_matching
-        # (see docs/product_matching_validation.md)
-        normalized_value = normalize_for_matching(value, field="brush")
+        # Use cached normalization for performance
+        normalized_value = self._normalize_with_cache(value)
         if not normalized_value:
             return None
 
@@ -169,8 +187,9 @@ class CorrectMatchesChecker:
         return lookup
 
     def clear_cache(self):
-        """Clear the case-insensitive lookup cache."""
+        """Clear all caches (case-insensitive lookup and normalization cache)."""
         self._case_insensitive_lookup = None
+        self._normalization_cache.clear()
 
     def _check_handle_knot_correct_matches(
         self, value: str, normalized_value: str
@@ -224,7 +243,7 @@ class CorrectMatchesChecker:
         Returns:
             Knot info if found, None otherwise.
         """
-        normalized_value = normalize_for_matching(value, field="brush")
+        normalized_value = self._normalize_with_cache(value)
 
         # Search through knot section
         for knot_maker, knot_models in knot_section.items():
@@ -242,7 +261,7 @@ class CorrectMatchesChecker:
                 # Check if normalized value matches any of the correct strings
                 # Use case-insensitive comparison
                 for correct_string in strings:
-                    normalized_correct = normalize_for_matching(correct_string, field="brush")
+                    normalized_correct = self._normalize_with_cache(correct_string)
                     if normalized_correct.lower() == normalized_value.lower():
                         return {
                             "brand": knot_maker,
