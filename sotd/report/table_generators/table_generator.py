@@ -395,7 +395,17 @@ class TableGenerator:
             # This handles future fields we haven't explicitly classified
             return True
 
-        return [col for col in columns if is_identifier_column(col)]
+        # Get all identifier columns
+        identifier_columns = [col for col in columns if is_identifier_column(col)]
+
+        # Prioritize 'name' column for product tables (soaps, razors, brushes, etc.)
+        # since it's the unique identifier, not brand_normalized
+        if "name" in identifier_columns:
+            # Move 'name' to the front of the list
+            identifier_columns.remove("name")
+            identifier_columns.insert(0, "name")
+
+        return identifier_columns
 
     def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
         """Parse the columns parameter specification.

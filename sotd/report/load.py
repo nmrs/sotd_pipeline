@@ -174,7 +174,7 @@ def load_comparison_data(
         debug: Enable debug logging
 
     Returns:
-        Dictionary mapping period description to (metadata, data) tuples
+        Dictionary mapping YYYY-MM format keys to (metadata, data) tuples
     """
     comparison_data = {}
     periods = get_comparison_periods(year, month)
@@ -183,12 +183,11 @@ def load_comparison_data(
         # Use base_dir directly since it should already point to the aggregated directory
         data = load_historical_data_from_dir(base_dir, comp_year, comp_month, debug)
         if data is not None:
-            comparison_data[description] = data
+            # Use YYYY-MM format key to match what table generator expects
+            key = f"{comp_year:04d}-{comp_month:02d}"
+            comparison_data[key] = data
             if debug:
-                print(
-                    f"[DEBUG] Loaded comparison data for {description}: "
-                    f"{comp_year:04d}-{comp_month:02d}"
-                )
+                print(f"[DEBUG] Loaded comparison data for {key}: {description}")
         else:
             if debug:
                 print(

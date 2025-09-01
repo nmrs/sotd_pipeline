@@ -514,7 +514,15 @@ Examples:
     args = parser.parse_args(argv)
 
     # Validate mutually exclusive date arguments
-    date_args = [args.month, args.year, args.start, args.end, args.range, args.ytd]
+    # Note: args.ytd is False when not specified (not None), so we need to check for truthy values
+    date_args = [
+        args.month if args.month else None,
+        args.year if args.year else None,
+        args.start if args.start else None,
+        args.end if args.end else None,
+        args.range if args.range else None,
+        args.ytd if args.ytd else None,
+    ]
     active_date_args = [arg for arg in date_args if arg is not None]
 
     if len(active_date_args) > 1:

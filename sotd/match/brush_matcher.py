@@ -684,7 +684,9 @@ class BrushMatcher:
         """
         # Use the already-loaded correct matches data from initialization
         # (This method is only called when correct_matches.yaml should be used)
-        correct_strategy = CorrectMatchesStrategy(self.correct_matches_data)
+        correct_strategy = CorrectMatchesStrategy(
+            self.correct_matches_data, self._load_catalogs_directly()
+        )
 
         try:
             result = correct_strategy.match(value)
