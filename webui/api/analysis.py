@@ -649,9 +649,16 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Create args object for the analyzer
         class Args:
             def __init__(self):
-                self.month = request.months[
-                    0
-                ]  # Use first month for now, analyzer expects single month
+                # Handle multiple months using delta_months
+                if len(request.months) == 1:
+                    # Single month - use month field
+                    self.month = request.months[0]
+                    self.delta_months = None
+                else:
+                    # Multiple months - use delta_months with comma-separated list
+                    self.month = None
+                    self.delta_months = ",".join(request.months)
+
                 self.year = None
                 self.range = None
                 self.start = None
@@ -669,7 +676,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 self.show_correct = True
                 self.test_correct_matches = None
                 self.use_enriched_data = request.use_enriched_data
-                self.delta_months = None  # Add missing attribute
 
         args = Args()
 
