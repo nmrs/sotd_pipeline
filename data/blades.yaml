@@ -99,6 +99,7 @@ DE:
     Permasharp:
       patterns:
         - clock.*perm
+        - permasharp
     Sharpedge (Yellow):
       patterns:
         - gill.*sharp.*edg
@@ -308,7 +309,7 @@ DE:
   Gillette:
     "365":
       patterns:
-        - \b365\b
+        - (?:gillette)?.*\b365\b
     Blue:
       patterns:
         - gil.*blu
@@ -335,7 +336,7 @@ DE:
         - nacrt
     Perma-Sharp:
       patterns:
-        - perma\s*-*sharp
+        - (?:gil)?.*perma\s*-*sharp
     Platinum:
       patterns:
         - gil.*pla
@@ -477,7 +478,7 @@ DE:
   Personna:
     "74":
       patterns:
-        - p(?:ersonn*a)?\s*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - p(?:ersonn*a)?.*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - pseventy-four
         - p74
     Lab Blue:
@@ -548,7 +549,7 @@ DE:
   Schick:
     Stainless (DE):
       patterns:
-        - schl?ick.*s(?:tainles)*s
+        - sc?hick
   Shark:
     Chrome:
       patterns:
@@ -826,7 +827,7 @@ Hair Shaper:
     Hair Shaper:
       patterns:
         - person+a.*hair.*shaper
-        - person.*specimen
+        - person.*specimen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - person+a
   Weck:
     Sextoblade:
@@ -876,6 +877,9 @@ Injector:
         - s?c?hick
         - inject
         - schick.*inject(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    Krona:
+      patterns:
+        - (?:schick)?.*krona
     Proline (Injector):
       patterns:
         - (schick.*)?(proline.*)?b[ -]?20

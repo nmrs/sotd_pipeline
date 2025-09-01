@@ -737,7 +737,7 @@ Catie's Bubbles:
         - "terre verte?"
     Le Marche du Rasage:
       patterns:
-        - 'marche? d\w ras+age'
+        - "march.*ras+age"
     Le Piment de la Vie:
       patterns:
         - 'p\w+ment.*vie'
@@ -1853,7 +1853,7 @@ London Razors:
         - coffee.*contemplation
 Long Rifle Soap Co.:
   patterns:
-    - 'long rifle (soap|shaving) co(\.|mpany)?'
+    - 'long rifle ?(soap|shaving)? ?co(\.|mpany)?'
 Los Jabones de Joserra:
   patterns:
     - "(los )?jabr?ones.*joser+a"
@@ -2593,7 +2593,7 @@ Sebum:
         - sebum.*green
 Shannon's Soaps:
   patterns:
-    - ^shannon'?s( soaps?)?
+    - ^shannon'?s?( soaps?)?
   scents:
     A Saturday Afternoon in Columbus:
       patterns:
@@ -3512,7 +3512,7 @@ Williams:
         - "william'?s.*tonso"
 Wooly Wash Soapery:
   patterns:
-    - "wool+y wash(?: soapery)?"
+    - "wo+l+y wash(?: soapery)?"
   scents:
     Outback:
       patterns:
@@ -3541,7 +3541,7 @@ Yardley:
     - "(?:vintage )?yardley"
 Zingari Man:
   patterns:
-    - "zingari( man)?"
+    - zina?gari( man)?
   scents:
     Barrel Proof:
       patterns:

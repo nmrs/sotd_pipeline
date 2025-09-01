@@ -139,6 +139,16 @@ known_brushes:
       knot_size_mm: 22
       patterns:
         - badger.*blade.*essential
+  Black Eagle:
+    HT1:
+      fiber: Badger
+      patterns:
+        - black.*eag.*ht1
+    HT2:
+      fiber: Badger
+      patterns:
+        - black.*eag.*ht2
+        - black.*eag.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Century:
     Pure Bristle:
       fiber: Boar
@@ -707,11 +717,16 @@ known_brushes:
       knot_size_mm: 22
       patterns:
         - galahad
-    Pharos C3:
+    Pharos C3 Synth:
       fiber: Synthetic
       knot_size_mm: 21
       patterns:
         - pharos
+    Pharos C3 Horse:
+      fiber: Horse
+      knot_size_mm: 21
+      patterns:
+        - pharos.*horse
     SOC Badger:
       fiber: Badger
       knot_size_mm: 24
@@ -741,10 +756,14 @@ known_brushes:
       patterns:
         - semogue.*bullgoose
         - semogue.*shave.*nook
-    Torga C5 Boar:
+    Torga C5:
       knot_size_mm: 24
       patterns:
         - torga.*c5
+    Torga C5 Synt:
+      knot_size_mm: 24
+      patterns:
+        - torga.*c5.*synth
     r/wetshaving Brushbutt Boar:
       knot_size_mm: 22
       patterns:
@@ -1277,6 +1296,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - aurora\s*grooming
+  Black Eagle:
+    default: Badger
+    patterns:
+      - black.*eag
   Gilette:
     default: Synthetic
     patterns:

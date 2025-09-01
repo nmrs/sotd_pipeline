@@ -861,8 +861,9 @@ Gillette:
       - Gil.*et.*heritage
   King C. Gillette:
     patterns:
-      - k*.*c.*gil.*et
+      - king.*gil.*et
       - gil.*et.*king(.*c)?
+      - kc gill
   Knack:
     patterns:
       - Gil.*et.*knack
@@ -1268,6 +1269,11 @@ Kobar:
     format: Straight
     patterns:
       - kobar(?:.*\d{1,2}/(8|16))?
+Консул (Konsul):
+  Adjustable:
+    patterns:
+      - Консул
+      - (?:ussr)?.*konsul.*adjust
 Koraat:
   Moarteen (r/Wetshaving exclusive):
     format: Straight
@@ -2153,8 +2159,9 @@ Shield:
     patterns:
       - shield.*evo
   Predator:
+    format: GEM
     patterns:
-      - shield.*pred
+      - shield.*(pred|gem)
   SE AC:
     format: AC
     patterns:

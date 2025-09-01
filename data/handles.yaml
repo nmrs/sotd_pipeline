@@ -3,15 +3,6 @@ artisan_handles:
     Unspecified:
       patterns:
         - \b3d\b.*(?:printed)?
-  AKA Brushworx:
-    Stanley:
-      patterns:
-        - aka.*brush.*stanley
-        - aka.*stanley
-    Unspecified:
-      patterns:
-        - aka.*brush
-        - aka
   Alpha:
     Amber:
       patterns:
@@ -33,6 +24,9 @@ artisan_handles:
       patterns:
         - romera
   Aurora Grooming:
+    LG 2024:
+      patterns:
+        - auror?a.*lg ?(20)?24
     Unspecified:
       patterns:
         - auroro?a\s*groom
@@ -56,7 +50,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - huck
-        - bristle.*brush
+        - bristle.*brush(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Brochas El Druida:
     Unspecified:
       patterns:
@@ -116,12 +110,8 @@ artisan_handles:
         - jeffington(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Unspecified:
       patterns:
-        - ^(?!.*dog).*declaration
-        - ^(?!.*dog).*\bdg\b
+        - declaration
         - \bdg\b
-        - ^(?!.*(zeni|dog)).*\bb[1-8]\b
-        - ^(?!.*(zeni|dog)).*\bb9[ab]\b
-        - ^(?!.*(zeni|dog)).*\bb1[0-8]\b
   Dogwood:
     Unspecified:
       patterns:
@@ -271,6 +261,12 @@ artisan_handles:
     Badger:
       patterns:
         - qed.*select.*badger
+  Rad Dinosaur Creations:
+    Unspecified:
+      patterns:
+        - rad dino(saur)?
+        - priusaurus
+        - rdc
   Rick Montalvo:
     Unspecified:
       patterns:
@@ -411,6 +407,15 @@ artisan_handles:
         - wolfman.*(?:wrb\d)+
 
 manufacturer_handles:
+  AKA Brushworx:
+    Stanley:
+      patterns:
+        - aka.*brush.*stanley
+        - aka.*stanley
+    Unspecified:
+      patterns:
+        - aka.*brush
+        - aka
   AMACK:
     Unspecified:
       patterns:
@@ -684,12 +689,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - promethe
-  Rad Dinosaur Creations:
-    Unspecified:
-      patterns:
-        - rad dino(saur)?
-        - priusaurus
-        - rdc
   Razorock:
     Unspecified:
       patterns:
@@ -811,7 +810,7 @@ manufacturer_handles:
   Yaqi:
     Unspecified:
       patterns:
-        - yaqu*i\b
+        - yaqu?i
   Zenith:
     Unspecified:
       patterns:

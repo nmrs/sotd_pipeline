@@ -127,6 +127,16 @@ known_knots:
       fiber: Synthetic
       patterns:
         - \b2\s*bed\b
+  Black Eagle:
+    HT1:
+      fiber: Badger
+      patterns:
+        - black.*eag.*ht1
+    HT2:
+      fiber: Badger
+      patterns:
+        - black.*eag.*ht2
+        - (?:black.*eag)?.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
@@ -264,6 +274,11 @@ known_knots:
         - chis.*[fh]ou.*white.*boar
         - \bc(?:\&|and|\+)h\b.*white.*boar
         - \bch\b.*white.*boar
+  Cornfed Viking:
+    Odin's Beard:
+      fiber: Badger
+      patterns:
+        - odin'?s.*beard
   Declaration Grooming:
     knot_size_mm: 28
     fiber: Badger
@@ -342,6 +357,10 @@ known_knots:
         - (declaration|\bdg\b).*\bb18\b
         - \bb18\b
   Maggard:
+    2-Band Badger:
+      fiber: Badger
+      patterns:
+        - maggard.*2.*band
     G5:
       default: Synthetic
       patterns:
@@ -349,7 +368,7 @@ known_knots:
     Timberwolf:
       fiber: Synthetic
       patterns:
-        - maggard.*timber
+        - mag.*timber
   Mühle:
     fiber: Synthetic
     STF:
@@ -366,16 +385,34 @@ known_knots:
       knot_size_mm: 27
       patterns:
         - omega.*10098
+    Hi-Brush Synthetic:
+      fiber: Synthetic
+      patterns:
+        - hi-?brush
+        - omega.*syn
   Oumo:
     Rorschach:
       fiber: Badger
       patterns:
         - (oumo.*)?rorschach
   Rad Dinosaur Creations:
+    knot_size_mm: 26
+    DinoBoar:
+      fiber: Boar
+      patterns:
+        - rad.*dinosaur.*dino.*boar
+    High Mountain Rex:
+      fiber: Badger
+      patterns:
+        - rad.*dinosaur.*high.*mountain.*rex
     Raptor:
       fiber: Synthetic
       patterns:
         - raptor
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - rad.*dinosaur.*tuxedo
   Rich Man Shaving:
     S2 Innovator:
       fiber: Badger

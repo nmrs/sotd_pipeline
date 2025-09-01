@@ -43,7 +43,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Razors
 
-{{tables.razors|ranks:50|deltas:true}}
+{{tables.razors|ranks:50|columns:rank, name=razor, shaves, unique_users|deltas:true}}
 
 ## Razor Manufacturers
 
@@ -51,11 +51,11 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Blades
 
-{{tables.blades|ranks:50|deltas:true}}
+{{tables.blades|ranks:50|columns:rank, name=blade, shaves, unique_users|deltas:true}}
 
 ## Brushes
 
-{{tables.brushes|ranks:50|deltas:true}}
+{{tables.brushes|ranks:50|columns:rank, name=brush, shaves, unique_users|deltas:true}}
 
 ## Brush Handle Makers
 
@@ -63,7 +63,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers|ranks:30|deltas:true}}
+{{tables.brush-knot-makers|ranks:30|columns:rank, brand=Knot Maker, shaves, unique_users|deltas:true}}
 
 ## Knot Fibers
 
@@ -71,7 +71,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Knot Sizes
 
-{{tables.brush-knot-sizes|deltas:true}}
+{{tables.knot-sizes|deltas:true}}
 
 ## Blackbird Plates
 
@@ -83,7 +83,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Game Changer Plates
 
-{{tables.game-changer-plates|deltas:true}}
+{{tables.game-changer-plates|columns:rank, gap=plate, shaves, unique_users|deltas:true}}
 
 ## Straight Widths
 

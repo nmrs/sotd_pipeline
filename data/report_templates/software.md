@@ -1,4 +1,4 @@
-# Software Report - {{month_year}}
+# Lather Log {{month_year}}
 
 **Total Shaves:** {{total_shaves}}
 **Unique Shavers:** {{unique_shavers}}
@@ -39,4 +39,4 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Top Shavers
 
-{{tables.users|rows:50|columns:rank, user, shaves, missed_days|deltas:true}}
+{{tables.users|ranks:30|columns:rank, user, shaves, missed_days|deltas:true}}
