@@ -14,6 +14,11 @@
     format: GEM
     patterns:
       - 3d.*(?:printed)?.*lather.*catcher
+Adopted Acres:
+  Chisel Plow:
+    format: AC
+    patterns:
+      - adopted acres.*chisel.*plow
 Above the Tie:
   H1:
     patterns:
