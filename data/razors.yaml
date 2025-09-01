@@ -28,6 +28,9 @@ Above the Tie:
     patterns:
       - '\b(?:att|tie)\b.*h-*2'
       - (?:atlas|bamboo|calypso|colossus|kronos).*h2
+  M1:
+    patterns:
+      - att.*m1
   M2:
     patterns:
       - att.*m2
@@ -186,6 +189,10 @@ Baili:
     patterns:
       - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{1}[79]'
       - bail[ie].*(tto|butterfly)
+Bakelite:
+  Slant:
+    patterns:
+      - bakelite.*slant
 Barbaros:
   TR-1:
     patterns:
@@ -1040,8 +1047,8 @@ Gutche:
 H&S Co.:
   NO75:
     patterns:
-      - h\+s.*n[o0]75
-      - haircut.*n[0o]75
+      - h[\&]+s.*(?:n[o0])?.*75
+      - haircut.*(?:n[0o])?.*75
   Z074:
     patterns:
       - h\+s.*z074
@@ -1506,6 +1513,9 @@ Mühle:
   Hexagon:
     patterns:
       - m[uü]hle.*hexagon
+  Liscio:
+    patterns:
+      - liscio
   Neo:
     patterns:
       - muhle neo
@@ -1516,6 +1526,9 @@ Mühle:
     patterns:
       - R(89|106)
       - "m[uü]hle.*89"
+  R103:
+    patterns:
+      - m\whle.*101
   Rocca:
     patterns:
       - '\brocca\b'
@@ -1563,6 +1576,11 @@ OneBlade:
     format: FHS
     patterns:
       - oneblade.*hybrid
+Other AC Clone:
+  "":
+    format: AC
+    patterns:
+      - chinese.*\bac\b.*copy
 Other DE:
   "":
     patterns:
@@ -2133,7 +2151,7 @@ Schick:
     format: Injector
     patterns:
       - golden.*500
-      - schl?ick
+      - sc?hl?ick
       - lad(y.|ies)*eversharp
       - injector
   Krona:
@@ -2584,6 +2602,9 @@ Yaqi:
   DLC:
     patterns:
       - yaqi.*dlc
+  DOC:
+    patterns:
+      - yaqi.*doc\b
   Excalibur:
     patterns:
       - yaqi.*excal
