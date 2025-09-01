@@ -163,15 +163,67 @@ class TestCorrectMatchesStrategy:
         matched = result.matched
         assert "brand" in matched
         assert "model" in matched
-        assert "fiber" in matched
-        assert "knot_size_mm" in matched
-        assert "handle_maker" in matched
         assert "source_text" in matched
         assert "strategy" in matched
         assert "_matched_by" in matched
         assert "_pattern" in matched
 
-        # Check that optional fields are None (as expected for correct_matches)
-        assert matched["fiber"] is None
-        assert matched["knot_size_mm"] is None
-        assert matched["handle_maker"] is None
+        # Check that optional fields are not present (correct_matches without catalogs)
+        # Note: With catalogs, these fields would be populated from the catalog lookup
+        assert "fiber" not in matched
+        assert "knot_size_mm" not in matched
+        assert "handle_maker" not in matched
+
+    def test_catalog_integration_with_bfm_brush(self):
+        """Test that BFM brush gets complete catalog data including knot_size_mm."""
+        # Create test data for BFM brush
+        bfm_correct_matches = {
+            "brush": {
+                "EldrormR Industries/Muninn Woodworks": {
+                    "BFM": ["muninn woodworks bfm", "eldrormr industries/muninn woodworks bfm"]
+                }
+            }
+        }
+
+        # Mock catalog data that should be looked up
+        bfm_catalogs = {
+            "brushes": {
+                "known_brushes": {
+                    "EldrormR Industries/Muninn Woodworks": {
+                        "BFM": {
+                            "knot": {
+                                "brand": "Moti",
+                                "fiber": "Synthetic",
+                                "knot_size_mm": 50,
+                                "model": "Motherlode",
+                            },
+                            "handle": {"brand": "Muninn Woodworks"},
+                        }
+                    }
+                }
+            }
+        }
+
+        # Create strategy with catalogs
+        bfm_strategy = CorrectMatchesStrategy(bfm_correct_matches, bfm_catalogs)
+
+        # Test BFM brush match
+        result = bfm_strategy.match("muninn woodworks bfm")
+
+        assert result is not None
+        assert result.match_type == "exact"
+        assert result.matched is not None
+
+        # Should have complete catalog data
+        assert result.matched["brand"] == "EldrormR Industries/Muninn Woodworks"
+        assert result.matched["model"] == "BFM"
+
+        # Should have nested sections from catalog
+        assert "knot" in result.matched
+        assert result.matched["knot"]["brand"] == "Moti"
+        assert result.matched["knot"]["fiber"] == "Synthetic"
+        assert result.matched["knot"]["knot_size_mm"] == 50
+        assert result.matched["knot"]["model"] == "Motherlode"
+
+        assert "handle" in result.matched
+        assert result.matched["handle"]["brand"] == "Muninn Woodworks"
