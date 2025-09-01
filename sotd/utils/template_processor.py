@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any, Dict, Optional
+import re
 
 
 class TemplateProcessor:
@@ -60,6 +61,65 @@ class TemplateProcessor:
             )
         return templates[template_name]
 
+    def _validate_placeholders(
+        self, content: str, variables: Dict[str, Any], tables: Optional[Dict[str, str]] = None
+    ) -> None:
+        """Validate that all placeholders in the template are recognized.
+
+        Args:
+            content: Template content to validate
+            variables: Dictionary of available variables
+            tables: Optional dictionary of available table placeholders
+
+        Raises:
+            ValueError: If any unrecognized placeholders are found
+        """
+        # Find all variable placeholders: {{variable_name}}
+        variable_pattern = r"\{\{([^}]+)\}\}"
+        all_placeholders = re.findall(variable_pattern, content)
+        
+        unrecognized_placeholders = []
+        
+        for placeholder in all_placeholders:
+            # Skip table placeholders as they're handled separately
+            if placeholder.startswith("tables."):
+                continue
+                
+            # Check if this is a variable placeholder
+            if placeholder not in variables:
+                unrecognized_placeholders.append(placeholder)
+        
+        # Check table placeholders if tables are provided
+        if tables:
+            table_pattern = r"\{\{tables\.([^|}]+)(?:\|[^}]*)?\}\}"
+            table_placeholders = re.findall(table_pattern, content)
+            
+            for table_name in table_placeholders:
+                table_placeholder = f"{{{{tables.{table_name}}}}}"
+                
+                # Check if this table placeholder exists in the tables dict
+                if table_placeholder not in tables:
+                    unrecognized_placeholders.append(f"tables.{table_name}")
+        
+        if unrecognized_placeholders:
+            # Sort for consistent error messages
+            unrecognized_placeholders.sort()
+            available_variables = sorted(variables.keys()) if variables else []
+            available_tables = sorted([
+                k.replace("{{", "").replace("}}", "") for k in tables.keys()
+            ]) if tables else []
+            
+            error_msg = (
+                f"Unrecognized template placeholders found: "
+                f"{', '.join(unrecognized_placeholders)}"
+            )
+            if available_variables:
+                error_msg += f"\nAvailable variables: {', '.join(available_variables)}"
+            if available_tables:
+                error_msg += f"\nAvailable tables: {', '.join(available_tables)}"
+            
+            raise ValueError(error_msg)
+
     def process_template(
         self, template_name: str, variables: Dict[str, Any], tables: Optional[Dict[str, str]] = None
     ) -> str:
@@ -72,8 +132,15 @@ class TemplateProcessor:
 
         Returns:
             Processed template content
+
+        Raises:
+            ValueError: If any unrecognized placeholders are found
         """
         template = self.get_template(template_name)
+        
+        # Validate all placeholders before processing (fail-fast)
+        self._validate_placeholders(template, variables, tables)
+        
         return self._process_content(template, variables, tables)
 
     def _process_content(
