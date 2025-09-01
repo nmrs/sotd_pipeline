@@ -239,6 +239,13 @@ function ComponentDetailsDisplay({
                         <span>{value || 'Not specified'}</span>
                       </div>
                     ))}
+                    {/* Show pattern information inline */}
+                    {componentDetails.handle.patterns?.brand_pattern && (
+                      <div className='flex justify-between'>
+                        <span className='text-gray-600'>pattern:</span>
+                        <span className='font-mono'>{componentDetails.handle.patterns.brand_pattern}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -276,6 +283,13 @@ function ComponentDetailsDisplay({
                         <span>{value || 'Not specified'}</span>
                       </div>
                     ))}
+                    {/* Show pattern information inline */}
+                    {componentDetails.knot.patterns?.brand_pattern && (
+                      <div className='flex justify-between'>
+                        <span className='text-gray-600'>pattern:</span>
+                        <span className='font-mono'>{componentDetails.knot.patterns.brand_pattern}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

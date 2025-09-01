@@ -156,6 +156,12 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
                 "model": handle.get("model"),
                 "source": handle.get("source_text", ""),
             },
+            "patterns": {
+                "brand_pattern": handle.get("_pattern"),
+                "model_pattern": handle.get("_pattern"),
+                "handle_pattern": handle.get("_pattern"),
+                "source": handle.get("source_text", ""),
+            },
         }
 
     # Extract knot component details
@@ -168,6 +174,13 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
                 "brand": knot.get("brand"),
                 "model": knot.get("model"),
                 "fiber": knot.get("fiber"),
+                "source": knot.get("source_text", ""),
+            },
+            "patterns": {
+                "brand_pattern": knot.get("_pattern"),
+                "model_pattern": knot.get("_pattern"),
+                "fiber_pattern": knot.get("_pattern"),
+                "size_pattern": knot.get("_pattern"),
                 "source": knot.get("source_text", ""),
             },
         }
@@ -370,6 +383,33 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                             "fiber": flat_data["knot"].get("fiber"),
                             "knot_size_mm": flat_data["knot"].get("knot_size_mm"),
                             "source_text": flat_data["knot"].get("source_text"),
+                        },
+                    }
+
+                # Check if this is simple flat data (like other_brush strategy)
+                # that already has brand, model, fiber in the correct format
+                if (
+                    flat_data.get("brand")
+                    and flat_data.get("model")
+                    and not flat_data.get("handle_maker")
+                ):
+                    # This is already in the correct flat format, just add empty handle/knot sections
+                    return {
+                        "brand": flat_data.get("brand"),
+                        "model": flat_data.get("model"),
+                        "fiber": flat_data.get("fiber"),
+                        "knot_size_mm": flat_data.get("knot_size_mm"),
+                        "handle": {
+                            "brand": None,
+                            "model": None,
+                            "source_text": "",
+                        },
+                        "knot": {
+                            "brand": None,
+                            "model": None,
+                            "fiber": flat_data.get("fiber"),
+                            "knot_size_mm": flat_data.get("knot_size_mm"),
+                            "source_text": "",
                         },
                     }
 
