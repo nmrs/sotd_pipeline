@@ -56,12 +56,54 @@ class BladeMatcher(BaseMatcher):
         self._normalized_correct_matches = self._precompute_normalized_correct_matches()
         # Add cache for expensive operations
         self._match_cache = {}
+        # Add normalization cache for performance optimization
+        self._normalization_cache: Dict[str, str] = {}
         # Build fallback formats list dynamically from catalog (general fallback)
         self._fallback_formats = self._build_fallback_formats()
+        # O(1) case-insensitive lookup dictionary
+        self._case_insensitive_lookup: Optional[Dict[str, List[Dict[str, Any]]]] = None
 
     def clear_cache(self):
         """Clear the match cache. Useful for testing to prevent cache pollution."""
         self._match_cache.clear()
+        self._normalization_cache.clear()
+        self._case_insensitive_lookup = None
+
+    def _build_case_insensitive_lookup(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Build O(1) case-insensitive lookup dictionary for all correct matches.
+
+        Returns:
+            Dictionary mapping lowercase strings to match data
+        """
+        if self._case_insensitive_lookup is not None:
+            return self._case_insensitive_lookup
+
+        lookup = {}
+
+        # Build lookup from normalized correct matches
+        for key, matches in self._normalized_correct_matches.items():
+            lookup[key.lower()] = matches
+
+        self._case_insensitive_lookup = lookup
+        return lookup
+
+    def _normalize_with_cache(self, value: str) -> str:
+        """
+        Normalize value with caching for performance optimization.
+
+        Args:
+            value: Input string to normalize
+
+        Returns:
+            Normalized string
+        """
+        if value in self._normalization_cache:
+            return self._normalization_cache[value]
+
+        normalized = normalize_for_matching(value, field="blade")
+        self._normalization_cache[value] = normalized
+        return normalized
 
     def _build_fallback_formats(self, target_format: Optional[str] = None) -> List[str]:
         """
@@ -440,9 +482,8 @@ class BladeMatcher(BaseMatcher):
 
         original = original_text
 
-        # All correct match lookups must use normalize_for_matching
-        # (see docs/product_matching_validation.md)
-        normalized = normalize_for_matching(normalized_text, field="blade")
+        # Use cached normalization for performance
+        normalized = self._normalize_with_cache(normalized_text)
         if not normalized:
             result = create_match_result(
                 original=original,
@@ -501,8 +542,8 @@ class BladeMatcher(BaseMatcher):
             self._match_cache[cache_key] = []
             return []
 
-        # Use canonical normalization function
-        normalized_value = normalize_for_matching(value, field="blade")
+        # Use cached normalization for performance
+        normalized_value = self._normalize_with_cache(value)
         if not normalized_value:
             self._match_cache[cache_key] = []
             return []
@@ -513,12 +554,12 @@ class BladeMatcher(BaseMatcher):
             self._match_cache[cache_key] = result
             return result
 
-        # If no exact match, try case-insensitive match
-        normalized_value_lower = normalized_value.lower()
-        for key, matches in self._normalized_correct_matches.items():
-            if key.lower() == normalized_value_lower:
-                self._match_cache[cache_key] = matches
-                return matches
+        # If no exact match, try case-insensitive match using O(1) lookup
+        lookup = self._build_case_insensitive_lookup()
+        matches = lookup.get(normalized_value.lower())
+        if matches:
+            self._match_cache[cache_key] = matches
+            return matches
 
         self._match_cache[cache_key] = []
         return []
@@ -539,8 +580,8 @@ class BladeMatcher(BaseMatcher):
         if not value or not self._normalized_correct_matches:
             return []
 
-        # Use canonical normalization function
-        normalized_value = normalize_for_matching(value, field="blade")
+        # Use cached normalization for performance
+        normalized_value = self._normalize_with_cache(value)
         if not normalized_value:
             return []
 
