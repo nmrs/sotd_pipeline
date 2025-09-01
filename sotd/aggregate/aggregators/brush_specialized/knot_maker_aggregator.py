@@ -40,14 +40,18 @@ class KnotMakerAggregator(BaseAggregator):
             matched = matched if isinstance(matched, dict) else {}
             enriched = enriched if isinstance(enriched, dict) else {}
 
-            # Get brand (knot maker) from matched.knot.brand
+            # Priority 1: Use matched.knot.brand for split brushes
             knot = matched.get("knot", {})
             if isinstance(knot, dict):
                 brand = knot.get("brand")
             else:
                 brand = None
 
-            # Fallback to enriched data if available
+            # Priority 2: Fallback to matched.brand for complete brushes
+            if not brand:
+                brand = matched.get("brand")
+
+            # Priority 3: Fallback to enriched data if available (legacy support)
             if not brand and enriched:
                 brand = enriched.get("brand")
 

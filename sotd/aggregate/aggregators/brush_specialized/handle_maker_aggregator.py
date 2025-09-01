@@ -40,14 +40,18 @@ class HandleMakerAggregator(BaseAggregator):
             matched = matched if isinstance(matched, dict) else {}
             enriched = enriched if isinstance(enriched, dict) else {}
 
-            # Get handle maker from matched.handle.brand (handle_maker field is deprecated)
+            # Priority 1: Use matched.handle.brand for split brushes
             handle = matched.get("handle", {})
             if isinstance(handle, dict):
                 handle_maker = handle.get("brand")
             else:
                 handle_maker = None
 
-            # Fallback to enriched data if available
+            # Priority 2: Fallback to matched.brand for complete brushes
+            if not handle_maker:
+                handle_maker = matched.get("brand")
+
+            # Priority 3: Fallback to enriched data if available (legacy support)
             if not handle_maker and enriched:
                 handle_maker = enriched.get("handle_maker")
 
