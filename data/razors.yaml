@@ -939,7 +939,7 @@ Gillette:
       - (red|black|blue|flare|flair).*tip
       - gillette.*tto
       - 'gil.*\bss\b'
-      - '\d\ds*\s*\bss\b'
+      - \b(?:\d{2}|19\d{2})\b \bss\b
       - TV special
       - gil.*rocket
       - rocket.*hd
@@ -1647,6 +1647,9 @@ PAA:
   Phantom Blue:
     patterns:
       - phantom blue
+  Quantum:
+    patterns:
+      - (paa|ph\w+x).*quantum.*(?:flair.*tip)?
 PAL:
   Adjustable Injector:
     format: Injector
