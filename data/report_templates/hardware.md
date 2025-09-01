@@ -67,11 +67,11 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Knot Fibers
 
-{{tables.knot-fibers|deltas:true}}
+{{tables.brush-fibers|deltas:true}}
 
 ## Knot Sizes
 
-{{tables.knot-sizes|deltas:true}}
+{{tables.brush-knot-sizes|deltas:true}}
 
 ## Blackbird Plates
 
@@ -107,4 +107,4 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Top Shavers
 
-{{tables.users|rows:50|columns:rank, user, shaves, missed_days|deltas:true}}
+{{tables.users|ranks:30|columns:rank, user, shaves, missed_days|deltas:true}}

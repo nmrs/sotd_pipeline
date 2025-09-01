@@ -70,11 +70,11 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 ## Knot Fibers
 
-{{tables.knot-fibers}}
+{{tables.brush-fibers}}
 
 ## Knot Sizes
 
-{{tables.knot-sizes}}
+{{tables.brush-knot-sizes}}
 
 ## Blackbird Plates
 
