@@ -34,7 +34,7 @@ const UnmatchedAnalyzer: React.FC = () => {
 
 
 
-  const [limit, setLimit] = useState<number>(1000);
+  const [limit, setLimit] = useState<number>(500);
   const [loading, setLoading] = useState(false);
   const [matchPhaseOutput, setMatchPhaseOutput] = useState<string | null>(null);
   const [results, setResults] = useState<UnmatchedAnalysisResult | null>(null);
@@ -195,7 +195,9 @@ const UnmatchedAnalyzer: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const comment = await getCommentDetail(commentId, selectedMonths);
+      // Combine selected months with delta months if enabled (same as analysis)
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
       setCommentModalOpen(true);
@@ -231,7 +233,9 @@ const UnmatchedAnalyzer: React.FC = () => {
         try {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
-          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
+          // Combine selected months with delta months if enabled (same as analysis)
+          const allMonths = [...selectedMonths, ...deltaMonths];
+          const nextComment = await getCommentDetail(nextCommentId, allMonths);
 
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
@@ -481,9 +485,9 @@ const UnmatchedAnalyzer: React.FC = () => {
               <input
                 type='number'
                 value={limit}
-                onChange={e => setLimit(parseInt(e.target.value) || 50)}
+                onChange={e => setLimit(parseInt(e.target.value) || 500)}
                 min='1'
-                max='1000'
+                max='5000'
                 className='w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500'
               />
             </div>
