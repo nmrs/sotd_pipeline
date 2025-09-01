@@ -898,7 +898,6 @@ const MatchAnalyzer: React.FC = () => {
         regex: 0,
         intentionally_unmatched: 0,
         matches: 0,
-
         complete_brushes: 0,
       };
 
@@ -936,24 +935,55 @@ const MatchAnalyzer: React.FC = () => {
     //   })),
     // });
 
-    return {
-      mismatches: returnedItems.filter(
-        item =>
-          item.mismatch_type !== 'good_match' &&
-          item.mismatch_type !== 'exact_matches' &&
-          item.mismatch_type !== 'intentionally_unmatched' &&
-          !isItemConfirmed(item)
-      ).length,
-      all: returnedItems.length, // Use actual returned items count instead of totalMatches
-      unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
-      regex: unconfirmedRegexMatches.length,
-      intentionally_unmatched: returnedItems.filter(
-        item => item.mismatch_type === 'intentionally_unmatched'
-      ).length,
-      matches: returnedItems.filter(item => isItemConfirmed(item)).length,
+    // Calculate all counts with detailed logging
+    const mismatchesCount = returnedItems.filter(
+      item =>
+        item.mismatch_type !== 'good_match' &&
+        item.mismatch_type !== 'exact_matches' &&
+        item.mismatch_type !== 'intentionally_unmatched' &&
+        !isItemConfirmed(item)
+    ).length;
 
-      complete_brushes: returnedItems.filter(item => (item as any).is_complete_brush === true)
-        .length,
+    const unconfirmedCount = returnedItems.filter(item => !isItemConfirmed(item)).length;
+    const intentionallyUnmatchedCount = returnedItems.filter(
+      item => item.mismatch_type === 'intentionally_unmatched'
+    ).length;
+    const matchesCount = returnedItems.filter(item => isItemConfirmed(item)).length;
+    const completeBrushesCount = returnedItems.filter(item => (item as any).is_complete_brush === true)
+      .length;
+
+    // Debug logging for count calculations
+    // console.log('🔍 DEBUG: Display mode count calculations:', {
+    //   totalItems: returnedItems.length,
+    //   field: results.field,
+    //   months: results.months,
+    //   calculatedCounts: {
+    //     mismatches: mismatchesCount,
+    //     all: returnedItems.length,
+    //     unconfirmed: unconfirmedCount,
+    //     regex: unconfirmedRegexMatches.length,
+    //     intentionally_unmatched: intentionallyUnmatchedCount,
+    //     matches: matchesCount,
+    //     complete_brushes: completeBrushesCount,
+    //   },
+    //   mismatchTypeBreakdown: returnedItems.reduce((acc, item) => {
+    //     acc[item.mismatch_type || 'unknown'] = (acc[item.mismatch_type || 'unknown'] || 0) + 1;
+    //     return acc;
+    //   }, {} as Record<string, number>),
+    //   confirmedBreakdown: {
+    //     confirmed: returnedItems.filter(item => item.is_confirmed).length,
+    //     unconfirmed: returnedItems.filter(item => !item.is_confirmed).length,
+    //   }
+    // });
+
+    return {
+      mismatches: mismatchesCount,
+      all: returnedItems.length, // Use actual returned items count instead of totalMatches
+      unconfirmed: unconfirmedCount,
+      regex: unconfirmedRegexMatches.length,
+      intentionally_unmatched: intentionallyUnmatchedCount,
+      matches: matchesCount,
+      complete_brushes: completeBrushesCount,
     };
   };
 
