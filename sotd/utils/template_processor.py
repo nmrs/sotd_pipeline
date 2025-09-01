@@ -118,8 +118,7 @@ class TemplateProcessor:
             available_base_tables_sorted = sorted(available_base_tables)
 
             error_msg = (
-                f"Unrecognized template placeholders found: "
-                f"{', '.join(unrecognized_placeholders)}"
+                f"Unrecognized template placeholders found: {', '.join(unrecognized_placeholders)}"
             )
             if available_variables:
                 error_msg += f"\nAvailable variables: {', '.join(available_variables)}"

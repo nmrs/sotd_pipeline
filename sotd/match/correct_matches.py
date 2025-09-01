@@ -31,6 +31,7 @@ class CorrectMatchesChecker:
         """
         self.correct_matches = correct_matches or {}
         self.debug = debug
+        self._case_insensitive_lookup: Optional[Dict[str, Dict[str, Any]]] = None
 
     def check(self, value: str) -> Optional[CorrectMatchData]:
         """
@@ -79,7 +80,7 @@ class CorrectMatchesChecker:
         self, value: str, normalized_value: str
     ) -> Optional[CorrectMatchData]:
         """
-        Check if value matches any brush section correct matches entry.
+        Check if value matches any brush section correct matches entry using O(1) lookup.
 
         Args:
             value: Original input string
@@ -88,34 +89,94 @@ class CorrectMatchesChecker:
         Returns:
             CorrectMatchData if found, None otherwise.
         """
-        brush_section = self.correct_matches.get("brush", {})
+        # Use O(1) case-insensitive lookup
+        lookup = self._build_case_insensitive_lookup()
+        match_data = lookup.get(normalized_value.lower())
 
-        # Search through correct matches structure
+        if match_data and match_data["type"] == "brush_section":
+            return CorrectMatchData(
+                brand=match_data["brand"],
+                model=match_data["model"],
+                match_type=match_data["match_type"],
+            )
+
+        return None
+
+    def _build_case_insensitive_lookup(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Build O(1) case-insensitive lookup dictionary for all correct matches.
+
+        Returns:
+            Dictionary mapping lowercase strings to match data
+        """
+        if self._case_insensitive_lookup is not None:
+            return self._case_insensitive_lookup
+
+        lookup = {}
+
+        # Build brush section lookup
+        brush_section = self.correct_matches.get("brush", {})
         for brand, brand_data in brush_section.items():
             if not isinstance(brand_data, dict):
                 continue
-
             for model, strings in brand_data.items():
                 if not isinstance(strings, list):
                     continue
-
-                # Check if normalized value matches any of the correct strings
-                # Use case-insensitive comparison as per match phase rules
                 for correct_string in strings:
-                    # Compare normalized versions for case-insensitive matching
-                    if correct_string.lower() == normalized_value.lower():
-                        # Return match data in the expected format
-                        return CorrectMatchData(
-                            brand=brand, model=model, match_type="brush_section"
-                        )
+                    key = correct_string.lower()
+                    lookup[key] = {
+                        "type": "brush_section",
+                        "brand": brand,
+                        "model": model,
+                        "match_type": "brush_section",
+                    }
 
-        return None
+        # Build handle section lookup
+        handle_section = self.correct_matches.get("handle", {})
+        for handle_maker, handle_models in handle_section.items():
+            if not isinstance(handle_models, dict):
+                continue
+            for handle_model, strings in handle_models.items():
+                if not isinstance(strings, list):
+                    continue
+                for correct_string in strings:
+                    key = correct_string.lower()
+                    lookup[key] = {
+                        "type": "handle_section",
+                        "handle_maker": handle_maker,
+                        "handle_model": handle_model,
+                        "match_type": "handle_knot_section",
+                    }
+
+        # Build knot section lookup
+        knot_section = self.correct_matches.get("knot", {})
+        for knot_brand, knot_models in knot_section.items():
+            if not isinstance(knot_models, dict):
+                continue
+            for knot_model, strings in knot_models.items():
+                if not isinstance(strings, list):
+                    continue
+                for correct_string in strings:
+                    key = correct_string.lower()
+                    lookup[key] = {
+                        "type": "knot_section",
+                        "knot_brand": knot_brand,
+                        "knot_model": knot_model,
+                        "match_type": "handle_knot_section",
+                    }
+
+        self._case_insensitive_lookup = lookup
+        return lookup
+
+    def clear_cache(self):
+        """Clear the case-insensitive lookup cache."""
+        self._case_insensitive_lookup = None
 
     def _check_handle_knot_correct_matches(
         self, value: str, normalized_value: str
     ) -> Optional[CorrectMatchData]:
         """
-        Check if value matches any handle/knot section correct matches entry.
+        Check if value matches any handle/knot section correct matches entry using O(1) lookup.
 
         Args:
             value: Original input string
@@ -124,52 +185,29 @@ class CorrectMatchesChecker:
         Returns:
             CorrectMatchData if found, None otherwise.
         """
-        handle_section = self.correct_matches.get("handle", {})
-        knot_section = self.correct_matches.get("knot", {})
+        # Use O(1) case-insensitive lookup
+        lookup = self._build_case_insensitive_lookup()
+        match_data = lookup.get(normalized_value.lower())
 
-        # Search through handle section
-        for handle_maker, handle_models in handle_section.items():
-            if not isinstance(handle_models, dict):
-                continue
+        if not match_data:
+            return None
 
-            for handle_model, strings in handle_models.items():
-                if not isinstance(strings, list):
-                    continue
-
-                # Check if normalized value matches any of the correct strings
-                # Use case-insensitive comparison as per match phase rules
-                for correct_string in strings:
-                    if correct_string.lower() == normalized_value.lower():
-                        # Find corresponding knot info
-                        knot_info = self._find_knot_info_for_string(value, knot_section)
-                        return CorrectMatchData(
-                            handle_maker=handle_maker,
-                            handle_model=handle_model,
-                            knot_info=knot_info,
-                            match_type="handle_knot_section",
-                        )
-
-        # Search through knot section
-        for knot_brand, knot_models in knot_section.items():
-            if not isinstance(knot_models, dict):
-                continue
-
-            for knot_model, strings in knot_models.items():
-                if not isinstance(strings, list):
-                    continue
-
-                # Check if normalized value matches any of the correct strings
-                # Use case-insensitive comparison as per match phase rules
-                for correct_string in strings:
-                    if correct_string.lower() == normalized_value.lower():
-                        # Create knot info structure
-                        knot_info = {
-                            "brand": knot_brand,
-                            "model": knot_model,
-                        }
-                        return CorrectMatchData(
-                            knot_info=knot_info, match_type="handle_knot_section"
-                        )
+        if match_data["type"] == "handle_section":
+            # Find corresponding knot info
+            knot_info = self._find_knot_info_for_string(value, self.correct_matches.get("knot", {}))
+            return CorrectMatchData(
+                handle_maker=match_data["handle_maker"],
+                handle_model=match_data["handle_model"],
+                knot_info=knot_info,
+                match_type=match_data["match_type"],
+            )
+        elif match_data["type"] == "knot_section":
+            # Create knot info structure
+            knot_info = {
+                "brand": match_data["knot_brand"],
+                "model": match_data["knot_model"],
+            }
+            return CorrectMatchData(knot_info=knot_info, match_type=match_data["match_type"])
 
         return None
 

@@ -12,6 +12,7 @@ from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
+from sotd.match.utils import calculate_match_statistics, format_match_statistics_for_display
 from sotd.utils.filtered_entries import load_filtered_entries
 
 # Load filtered entries at module level for performance
@@ -453,6 +454,9 @@ def process_month(
         brush_cache_stats = brush_matcher.get_cache_stats()
         monitor.record_cache_stats("brush_matcher", brush_cache_stats)
 
+        # Calculate enhanced match statistics
+        match_statistics = calculate_match_statistics(records)
+
         # Save results using parallel data manager
         monitor.start_file_io_timing()
 
@@ -463,6 +467,7 @@ def process_month(
                 "month": month,
                 "record_count": len(records),
                 "performance": monitor.get_summary(),
+                "match_statistics": match_statistics,
             },
             "data": records,
         }
@@ -477,8 +482,14 @@ def process_month(
         monitor.end_total_timing()
         performance = monitor.get_summary()
 
+        # Add match statistics to performance data
+        performance["match_statistics"] = match_statistics
+
         if debug:
             monitor.print_summary()
+
+            # Display enhanced match statistics
+            print("\n" + format_match_statistics_for_display(match_statistics))
 
         return {
             "status": "completed",

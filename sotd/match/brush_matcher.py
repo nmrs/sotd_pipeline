@@ -684,9 +684,12 @@ class BrushMatcher:
         """
         # Use the already-loaded correct matches data from initialization
         # (This method is only called when correct_matches.yaml should be used)
-        correct_strategy = CorrectMatchesStrategy(
-            self.correct_matches_data, self._load_catalogs_directly()
-        )
+        # Reuse the same instance to avoid rebuilding the O(1) lookup dictionary
+        if not hasattr(self, "_correct_matches_strategy"):
+            self._correct_matches_strategy = CorrectMatchesStrategy(
+                self.correct_matches_data, self._load_catalogs_directly()
+            )
+        correct_strategy = self._correct_matches_strategy
 
         try:
             result = correct_strategy.match(value)

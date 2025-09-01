@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from .base_matcher import BaseMatcher
 from .loaders import CatalogLoader
@@ -29,10 +29,58 @@ class RazorMatcher(BaseMatcher):
         self.correct_matches = catalogs["correct_matches"] if not bypass_correct_matches else {}
         self.patterns = self._compile_patterns()
         self._match_cache = {}
+        self._case_insensitive_lookup: Optional[Dict[str, Dict[str, Any]]] = None
 
     def clear_cache(self):
         """Clear the match cache. Useful for testing to prevent cache pollution."""
         self._match_cache.clear()
+        self._case_insensitive_lookup = None
+
+    def _build_case_insensitive_lookup(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Build a case-insensitive lookup dictionary for O(1) correct matches lookup.
+
+        Returns:
+            Dictionary mapping lowercase keys to match data
+        """
+        if self._case_insensitive_lookup is not None:
+            return self._case_insensitive_lookup
+
+        lookup = {}
+
+        for brand, models in self.correct_matches.items():
+            for model, entries in models.items():
+                if isinstance(entries, list):
+                    # Simple string list format
+                    for entry in entries:
+                        key = entry.lower()
+                        # Get format from catalog entry
+                        fmt = "DE"  # Default format
+                        if brand in self.catalog and model in self.catalog[brand]:
+                            model_data = self.catalog[brand][model]
+                            if isinstance(model_data, dict):
+                                fmt = model_data.get("format", "DE")
+                        lookup[key] = {"brand": brand, "model": model, "format": fmt}
+                elif isinstance(entries, dict):
+                    # Nested format with additional data
+                    strings = entries.get("strings", [])
+                    for entry in strings:
+                        key = entry.lower()
+                        # Get format from catalog entry
+                        fmt = "DE"  # Default format
+                        if brand in self.catalog and model in self.catalog[brand]:
+                            model_data = self.catalog[brand][model]
+                            if isinstance(model_data, dict):
+                                fmt = model_data.get("format", "DE")
+                        matched_data = {"brand": brand, "model": model, "format": fmt}
+                        # Copy additional fields from the entry
+                        for key_field, val in entries.items():
+                            if key_field != "strings":
+                                matched_data[key_field] = val
+                        lookup[key] = matched_data
+
+        self._case_insensitive_lookup = lookup
+        return lookup
 
     def _compile_patterns(self):
         compiled = []
@@ -147,59 +195,31 @@ class RazorMatcher(BaseMatcher):
         normalized_text = value
 
         if not bypass_correct_matches:
-            # Check correct matches first
-            if self.correct_matches:
-                for brand, models in self.correct_matches.items():
-                    for model, entries in models.items():
-                        if isinstance(entries, list):
-                            # Simple string list format
-                            if normalized_text in entries:
-                                # Get format from catalog entry
-                                fmt = "DE"  # Default format
-                                if brand in self.catalog and model in self.catalog[brand]:
-                                    model_data = self.catalog[brand][model]
-                                    if isinstance(model_data, dict):
-                                        fmt = model_data.get("format", "DE")
-                                    else:
-                                        # This should not happen if _compile_patterns validation is working
-                                        # But provide a helpful error message just in case
-                                        raise ValueError(
-                                            f"Invalid YAML structure in razors.yaml: "
-                                            f"Brand '{brand}' -> Model '{model}' has value "
-                                            f"'{model_data}' (type: {type(model_data).__name__}), "
-                                            f"but expected a dictionary. This usually means 'format' "
-                                            f"is placed at the brand level instead of the model level. "
-                                            f"Fix: Move 'format: {model_data}' inside the '{model}:' "
-                                            f"section."
-                                        )
-                                    # If model_data is a string, use default format
-                                return create_match_result(
-                                    original=original_text,
-                                    matched={"brand": brand, "model": model, "format": fmt},
-                                    match_type=MatchType.EXACT,
-                                    pattern=None,
-                                )
-                        elif isinstance(entries, dict):
-                            # Nested format with additional data
-                            strings = entries.get("strings", [])
-                            if normalized_text in strings:
-                                # Get format from catalog entry
-                                fmt = "DE"  # Default format
-                                if brand in self.catalog and model in self.catalog[brand]:
-                                    model_data = self.catalog[brand][model]
-                                    if isinstance(model_data, dict):
-                                        fmt = model_data.get("format", "DE")
-                                    # If model_data is a string, use default format
-                                matched_data = {"brand": brand, "model": model, "format": fmt}
-                                # Copy additional fields from the entry
-                                for key, val in entries.items():
-                                    if key != "strings":
-                                        matched_data[key] = val
-                                return create_match_result(
-                                    original=original_text,
-                                    matched=matched_data,
-                                    match_type=MatchType.EXACT,
-                                    pattern=None,
-                                )
+            # Check correct matches first using BaseMatcher's case-insensitive logic
+            correct_match = self._check_correct_matches(normalized_text)
+            if correct_match:
+                return create_match_result(
+                    original=original_text,
+                    matched=correct_match,
+                    match_type=MatchType.EXACT,
+                    pattern=None,
+                )
         # Fall back to regex matching
         return self._match_with_regex(normalized_text, original_text)
+
+    def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
+        """
+        Check correct matches with O(1) lookup for razors.
+
+        Args:
+            value: Normalized text string for matching
+
+        Returns:
+            Match data if found, None otherwise
+        """
+        if not value or not self.correct_matches:
+            return None
+
+        # Use O(1) case-insensitive lookup for all matches
+        lookup = self._build_case_insensitive_lookup()
+        return lookup.get(value.lower())

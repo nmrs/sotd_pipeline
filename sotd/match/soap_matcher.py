@@ -39,10 +39,43 @@ class SoapMatcher(BaseMatcher):
         )
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
         self._match_cache = {}
+        # O(1) case-insensitive lookup dictionary
+        self._case_insensitive_lookup: Optional[Dict[str, Dict[str, Any]]] = None
 
     def clear_cache(self):
         """Clear the match cache. Useful for testing to prevent cache pollution."""
         self._match_cache.clear()
+        self._case_insensitive_lookup = None
+
+    def _build_case_insensitive_lookup(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Build O(1) case-insensitive lookup dictionary for all correct matches.
+
+        Returns:
+            Dictionary mapping lowercase strings to match data
+        """
+        if self._case_insensitive_lookup is not None:
+            return self._case_insensitive_lookup
+
+        lookup = {}
+
+        # Handle both direct structure and nested "soap" structure
+        correct_matches_data = self.correct_matches
+        if "soap" in self.correct_matches:
+            correct_matches_data = self.correct_matches["soap"]
+
+        for brand, brand_data in correct_matches_data.items():
+            if not isinstance(brand_data, dict):
+                continue
+            for scent, strings in brand_data.items():
+                if not isinstance(strings, list):
+                    continue
+                for correct_string in strings:
+                    key = self._normalize_common_text(correct_string).lower()
+                    lookup[key] = {"brand": brand, "scent": scent}
+
+        self._case_insensitive_lookup = lookup
+        return lookup
 
     def _is_sample(self, text: str) -> bool:
         """Check if text contains sample indicators."""
@@ -339,29 +372,13 @@ class SoapMatcher(BaseMatcher):
                 self._match_cache[cache_key] = None
             return None
 
-        # Search through correct matches structure
-        # Handle both direct structure and nested "soap" structure
-        correct_matches_data = self.correct_matches
-        if "soap" in self.correct_matches:
-            correct_matches_data = self.correct_matches["soap"]
-
-        for brand, brand_data in correct_matches_data.items():
-            if not isinstance(brand_data, dict):
-                continue
-
-            for scent, strings in brand_data.items():
-                if not isinstance(strings, list):
-                    continue
-
-                # Check if normalized value matches any of the correct strings (case-insensitive)
-                for correct_string in strings:
-                    normalized_correct = self._normalize_common_text(correct_string).lower()
-                    if normalized_correct == normalized_value.lower():
-                        # Return match data in the expected format for soaps
-                        result = {"brand": brand, "scent": scent}
-                        if hasattr(self, "_match_cache"):
-                            self._match_cache[cache_key] = result
-                        return result
+        # Use O(1) case-insensitive lookup
+        lookup = self._build_case_insensitive_lookup()
+        result = lookup.get(normalized_value.lower())
+        if result:
+            if hasattr(self, "_match_cache"):
+                self._match_cache[cache_key] = result
+            return result
         if hasattr(self, "_match_cache"):
             self._match_cache[cache_key] = None
         return None

@@ -293,6 +293,102 @@ class ParallelMonthProcessor:
                 print(f"  Avg Individual Month Time: {avg_individual_time:.2f}s")
                 print(f"  Theoretical Sequential Time: {theoretical_sequential_time:.2f}s")
 
+            # Aggregate and display enhanced match statistics
+            self._print_aggregated_match_statistics(completed_results)
+
+    def _print_aggregated_match_statistics(self, completed_results: List[Dict[str, Any]]) -> None:
+        """
+        Aggregate and display enhanced match statistics across all months.
+
+        Args:
+            completed_results: List of completed processing results
+        """
+        from collections import Counter
+
+        # Aggregate statistics across all months
+        total_records = 0
+        total_matched = 0
+        total_unmatched = 0
+        field_presence = Counter()
+        match_type_counts = Counter()
+        field_match_type_counts = {
+            "razor": Counter(),
+            "blade": Counter(),
+            "brush": Counter(),
+            "soap": Counter(),
+        }
+
+        # Collect statistics from each month
+        for result in completed_results:
+            performance = result.get("performance", {})
+            match_stats = performance.get("match_statistics", {})
+
+            if not match_stats:
+                continue
+
+            # Aggregate totals
+            total_records += match_stats.get("total_records", 0)
+            match_summary = match_stats.get("match_summary", {})
+            total_matched += match_summary.get("total_matched", 0)
+            total_unmatched += match_summary.get("total_unmatched", 0)
+
+            # Aggregate field presence
+            field_presence.update(match_stats.get("field_presence", {}))
+
+            # Aggregate overall match types
+            overall_types = match_stats.get("match_types", {}).get("overall", {})
+            match_type_counts.update(overall_types)
+
+            # Aggregate field-specific match types
+            by_field = match_stats.get("match_types", {}).get("by_field", {})
+            for field, field_types in by_field.items():
+                if field in field_match_type_counts:
+                    field_match_type_counts[field].update(field_types)
+
+        # Calculate overall match rate
+        overall_match_rate = (
+            (total_matched / (total_matched + total_unmatched) * 100)
+            if (total_matched + total_unmatched) > 0
+            else 0
+        )
+
+        # Display aggregated statistics
+        print("\nMatch Statistics Summary:")
+        print("=" * 50)
+        print(f"Total Records: {total_records:,}")
+        print(f"Total Matched: {total_matched:,}")
+        print(f"Total Unmatched: {total_unmatched:,}")
+        print(f"Overall Match Rate: {overall_match_rate:.1f}%")
+
+        # Field presence
+        print("\nField Presence:")
+        for field, count in field_presence.most_common():
+            print(f"  {field.capitalize()}: {count:,}")
+
+        # Overall match types
+        print("\nOverall Match Types:")
+        for match_type, count in match_type_counts.most_common():
+            print(f"  {match_type}: {count:,}")
+
+        # Field-specific analysis
+        print("\nField-Specific Analysis:")
+        for field in ["razor", "blade", "brush", "soap"]:
+            field_total = field_presence.get(field, 0)
+            if field_total > 0:
+                field_matches = field_match_type_counts[field]
+                total_field_matches = sum(field_matches.values())
+                success_rate = (total_field_matches / field_total * 100) if field_total > 0 else 0
+
+                print(f"\n  {field.capitalize()}:")
+                print(f"    Present: {field_total:,}")
+                print(f"    Success Rate: {success_rate:.1f}%")
+
+                # Show top match types for this field
+                for match_type, count in field_matches.most_common(3):
+                    if count > 0:
+                        percentage = (count / field_total * 100) if field_total > 0 else 0
+                        print(f"      {match_type}: {count:,} ({percentage:.1f}%)")
+
 
 def create_parallel_processor(phase_name: str) -> ParallelMonthProcessor:
     """
