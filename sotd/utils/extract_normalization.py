@@ -353,6 +353,9 @@ def normalize_for_matching(
     # Start with competition tag stripping
     normalized = strip_competition_tags(value, competition_tags)
 
+    # Strip asterisk markup (leading asterisks, asterisk separators, etc.)
+    normalized = strip_asterisk_markup(normalized)
+
     # Strip link markup
     normalized = strip_link_markup(normalized)
 
@@ -527,23 +530,30 @@ def normalize_remainder_text(value: str) -> str:
 
 def strip_asterisk_markup(value: str) -> str:
     """
-    Strip asterisk markup from strings.
+    Strip asterisk markup and leading punctuation from strings.
 
     This removes patterns like:
     - Asterisk separators: ****, ***, etc.
     - Asterisk-wrapped text: *text*, **text**, etc.
+    - Leading periods: ...... text
+    - Leading punctuation: - text, : text, etc.
 
     Args:
-        value: Input string that may contain asterisk markup
+        value: Input string that may contain asterisk markup and leading punctuation
 
     Returns:
-        String with asterisk markup removed
+        String with asterisk markup and leading punctuation removed
     """
     if not isinstance(value, str):
         return value
 
-    # Remove all asterisks and clean up whitespace
+    # Remove all asterisks
     cleaned = value.replace("*", "")
+
+    # Remove leading punctuation (periods, dashes, colons, etc.)
+    cleaned = re.sub(r"^[\s\-:*/_,~`\\\.]+", "", cleaned)
+
+    # Clean up whitespace
     cleaned = re.sub(r"\s+", " ", cleaned)
     cleaned = cleaned.strip()
 

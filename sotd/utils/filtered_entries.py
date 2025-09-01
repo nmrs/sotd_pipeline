@@ -65,12 +65,12 @@ class FilteredEntriesManager:
         source: str = "user",
         reason: Optional[str] = None,
     ) -> None:
-        """Add an entry to the filtered list."""
+        """Add an entry to the filtered list (case-insensitive)."""
         if category not in self._data:
             self._data[category] = {}
 
-        # Always use entry_name as the key
-        key_name = entry_name
+        # Normalize key to lowercase for consistency
+        key_name = entry_name.lower()
 
         if key_name not in self._data[category]:
             self._data[category][key_name] = {
@@ -92,30 +92,40 @@ class FilteredEntriesManager:
         comment_ids.append({"file": file_path, "id": comment_id, "source": source})
 
     def remove_entry(self, category: str, entry_name: str, comment_id: str, file_path: str) -> bool:
-        """Remove a specific comment_id from an entry."""
-        if category not in self._data or entry_name not in self._data[category]:
+        """Remove a specific comment_id from an entry (case-insensitive)."""
+        if category not in self._data:
             return False
 
-        comment_ids = self._data[category][entry_name]["comment_ids"]
-        for i, existing in enumerate(comment_ids):
-            if existing["id"] == comment_id and existing["file"] == file_path:
-                comment_ids.pop(i)
+        # Case-insensitive lookup
+        entry_name_lower = entry_name.lower()
+        for key in self._data[category].keys():
+            if key.lower() == entry_name_lower:
+                comment_ids = self._data[category][key]["comment_ids"]
+                for i, existing in enumerate(comment_ids):
+                    if existing["id"] == comment_id and existing["file"] == file_path:
+                        comment_ids.pop(i)
 
-                # Remove entry entirely if no more comment_ids
-                if not comment_ids:
-                    del self._data[category][entry_name]
+                        # Remove entry entirely if no more comment_ids
+                        if not comment_ids:
+                            del self._data[category][key]
 
-                return True
+                        return True
+                break
 
         return False
 
     def is_filtered(self, category: str, entry_name: str) -> bool:
-        """Check if an entry is in the filtered list."""
-        return (
-            category in self._data
-            and entry_name in self._data[category]
-            and len(self._data[category][entry_name]["comment_ids"]) > 0
-        )
+        """Check if an entry is in the filtered list (case-insensitive)."""
+        if category not in self._data:
+            return False
+
+        # Case-insensitive lookup
+        entry_name_lower = entry_name.lower()
+        for key in self._data[category].keys():
+            if key.lower() == entry_name_lower:
+                return len(self._data[category][key]["comment_ids"]) > 0
+
+        return False
 
     def get_filtered_entries(self, category: Optional[str] = None) -> Dict[str, Any]:
         """Get all filtered entries, optionally filtered by category."""
@@ -124,10 +134,17 @@ class FilteredEntriesManager:
         return self._data
 
     def get_entry_comment_ids(self, category: str, entry_name: str) -> List[Dict[str, str]]:
-        """Get all comment_ids for a specific entry."""
-        if category not in self._data or entry_name not in self._data[category]:
+        """Get all comment_ids for a specific entry (case-insensitive)."""
+        if category not in self._data:
             return []
-        return self._data[category][entry_name].get("comment_ids", [])
+
+        # Case-insensitive lookup
+        entry_name_lower = entry_name.lower()
+        for key in self._data[category].keys():
+            if key.lower() == entry_name_lower:
+                return self._data[category][key].get("comment_ids", [])
+
+        return []
 
     def validate_data(self) -> Tuple[bool, List[str]]:
         """Validate the data structure and return (is_valid, error_messages)."""

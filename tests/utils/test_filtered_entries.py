@@ -280,8 +280,8 @@ class TestFilteredEntriesManager:
 
         assert "razor" in result
         assert "brush" in result
-        assert "Test Razor" in result["razor"]
-        assert "Test Brush" in result["brush"]
+        assert "test razor" in result["razor"]  # Keys are now lowercase
+        assert "test brush" in result["brush"]  # Keys are now lowercase
 
     def test_get_filtered_entries_category(self, tmp_path):
         """Test getting filtered entries for specific category."""
@@ -297,7 +297,7 @@ class TestFilteredEntriesManager:
 
         assert "razor" in result
         assert "brush" not in result
-        assert "Test Razor" in result["razor"]
+        assert "test razor" in result["razor"]  # Keys are now lowercase
 
     def test_get_entry_comment_ids(self, tmp_path):
         """Test getting comment IDs for an entry."""
@@ -328,6 +328,112 @@ class TestFilteredEntriesManager:
         comment_ids = manager.get_entry_comment_ids("razor", "Test Razor")
 
         assert comment_ids == []
+
+    def test_case_insensitive_add_entry(self, tmp_path):
+        """Test that add_entry normalizes keys to lowercase."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add entry with mixed case
+        manager.add_entry("razor", "TEST RAZOR", "abc123", "data/comments/2025-01.json")
+
+        # Check that it's stored as lowercase
+        assert "test razor" in manager._data["razor"]
+        assert "TEST RAZOR" not in manager._data["razor"]
+
+    def test_case_insensitive_is_filtered(self, tmp_path):
+        """Test that is_filtered works case-insensitively."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add entry with lowercase
+        manager.add_entry("razor", "test razor", "abc123", "data/comments/2025-01.json")
+
+        # Test various case combinations
+        assert manager.is_filtered("razor", "test razor")  # exact match
+        assert manager.is_filtered("razor", "TEST RAZOR")  # all caps
+        assert manager.is_filtered("razor", "Test Razor")  # title case
+        assert manager.is_filtered("razor", "tEsT rAzOr")  # mixed case
+
+    def test_case_insensitive_remove_entry(self, tmp_path):
+        """Test that remove_entry works case-insensitively."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add entry with lowercase
+        manager.add_entry("razor", "test razor", "abc123", "data/comments/2025-01.json")
+
+        # Remove with different case
+        result = manager.remove_entry("razor", "TEST RAZOR", "abc123", "data/comments/2025-01.json")
+
+        assert result is True
+        assert "test razor" not in manager._data["razor"]
+
+    def test_case_insensitive_get_entry_comment_ids(self, tmp_path):
+        """Test that get_entry_comment_ids works case-insensitively."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add entry with lowercase
+        manager.add_entry("razor", "test razor", "abc123", "data/comments/2025-01.json")
+
+        # Get with different case
+        comment_ids = manager.get_entry_comment_ids("razor", "TEST RAZOR")
+
+        assert len(comment_ids) == 1
+        assert comment_ids[0]["id"] == "abc123"
+
+    def test_case_insensitive_different_strings(self, tmp_path):
+        """Test that different strings (like n/a vs na) are treated separately."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add two different entries
+        manager.add_entry("razor", "n/a", "abc123", "data/comments/2025-01.json")
+        manager.add_entry("razor", "na", "def456", "data/comments/2025-01.json")
+
+        # They should be separate entries
+        assert manager.is_filtered("razor", "n/a")
+        assert manager.is_filtered("razor", "na")
+        assert manager.is_filtered("razor", "N/A")  # case-insensitive for n/a
+        assert manager.is_filtered("razor", "NA")  # case-insensitive for na
+
+        # But n/a should not find na and vice versa
+        comment_ids_n_a = manager.get_entry_comment_ids("razor", "n/a")
+        comment_ids_na = manager.get_entry_comment_ids("razor", "na")
+
+        assert len(comment_ids_n_a) == 1
+        assert comment_ids_n_a[0]["id"] == "abc123"
+        assert len(comment_ids_na) == 1
+        assert comment_ids_na[0]["id"] == "def456"
+
+    def test_case_insensitive_duplicate_prevention(self, tmp_path):
+        """Test that adding same entry with different cases doesn't create duplicates."""
+        file_path = tmp_path / "test_filtered.yaml"
+        manager = FilteredEntriesManager(file_path)
+        manager.load()
+
+        # Add same entry with different cases
+        manager.add_entry("razor", "Test Razor", "abc123", "data/comments/2025-01.json")
+        manager.add_entry("razor", "TEST RAZOR", "def456", "data/comments/2025-02.json")
+
+        # Should only have one entry (lowercase)
+        assert len(manager._data["razor"]) == 1
+        assert "test razor" in manager._data["razor"]
+        assert "Test Razor" not in manager._data["razor"]
+        assert "TEST RAZOR" not in manager._data["razor"]
+
+        # But should have both comment IDs
+        comment_ids = manager.get_entry_comment_ids("razor", "test razor")
+        assert len(comment_ids) == 2
+        ids = [c["id"] for c in comment_ids]
+        assert "abc123" in ids
+        assert "def456" in ids
 
     def test_validate_data_valid(self, tmp_path):
         """Test validation with valid data."""
@@ -427,4 +533,4 @@ class TestUtilityFunctions:
             saved_data = yaml.safe_load(f)
 
         assert "razor" in saved_data
-        assert "Test Razor" in saved_data["razor"]
+        assert "test razor" in saved_data["razor"]  # Keys are now lowercase
