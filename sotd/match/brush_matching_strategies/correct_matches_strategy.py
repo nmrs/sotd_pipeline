@@ -80,28 +80,32 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
                 # This is a composite brush - reconstruct the full structure
                 matched_data = self._reconstruct_composite_brush_structure(value, match_data)
             else:
-                # Fallback to flattened structure for single components
-                matched_data = {
-                    "brand": match_data.knot_info.get("brand") if match_data.knot_info else None,
-                    "model": match_data.knot_info.get("model") if match_data.knot_info else None,
-                    "fiber": match_data.knot_info.get("fiber") if match_data.knot_info else None,
-                    "knot_size_mm": (
-                        match_data.knot_info.get("knot_size_mm") if match_data.knot_info else None
-                    ),
-                    "handle_maker": match_data.handle_maker,
-                    "source_text": value,
-                    "_matched_by": "CorrectMatchesStrategy",
-                    "_pattern": "exact_match",
-                    "strategy": "correct_matches",
-                }
+                # Handle-only entry - reconstruct nested structure to match regex result
+                if match_data.handle_maker:
+                    matched_data = self._reconstruct_handle_only_structure(value, match_data)
+                else:
+                    # Fallback to flattened structure for single components
+                    matched_data = {
+                        "brand": match_data.knot_info.get("brand") if match_data.knot_info else None,
+                        "model": match_data.knot_info.get("model") if match_data.knot_info else None,
+                        "fiber": match_data.knot_info.get("fiber") if match_data.knot_info else None,
+                        "knot_size_mm": (
+                            match_data.knot_info.get("knot_size_mm") if match_data.knot_info else None
+                        ),
+                        "handle_maker": match_data.handle_maker,
+                        "source_text": value,
+                        "_matched_by": "CorrectMatchesStrategy",
+                        "_pattern": "exact_match",
+                        "strategy": "correct_matches",
+                    }
 
-                # Try to enhance with catalog data if available
-                if matched_data["brand"] and matched_data["model"]:
-                    catalog_data = self._get_complete_knot_data(
-                        matched_data["brand"], matched_data["model"]
-                    )
-                    if catalog_data:
-                        matched_data.update(catalog_data)
+                    # Try to enhance with catalog data if available
+                    if matched_data["brand"] and matched_data["model"]:
+                        catalog_data = self._get_complete_knot_data(
+                            matched_data["brand"], matched_data["model"]
+                        )
+                        if catalog_data:
+                            matched_data.update(catalog_data)
         else:
             # Fallback for unknown match types
             matched_data = {
@@ -218,6 +222,54 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             matched_data["handle"].update(handle_catalog_data)
         if knot_catalog_data:
             matched_data["knot"].update(knot_catalog_data)
+
+        return matched_data
+
+    def _reconstruct_handle_only_structure(self, value: str, match_data) -> dict:
+        """
+        Reconstruct the nested structure for handle-only entries to match regex result.
+
+        Args:
+            value: Original input string
+            match_data: Result from CorrectMatchesChecker with handle info only
+
+        Returns:
+            Dictionary with the nested structure matching the original regex result
+        """
+        # Extract handle information
+        handle_maker = match_data.handle_maker
+        handle_model = getattr(match_data, "handle_model", "Unspecified")
+
+        # Get the actual catalog data for handle
+        handle_catalog_data = self._get_handle_catalog_data(handle_maker, handle_model)
+
+        # Reconstruct the nested structure to match regex result
+        matched_data = {
+            # Top-level fields (required for aggregation compatibility)
+            "brand": None,  # Handle-only entries don't have top-level brand
+            "model": None,  # Handle-only entries don't have top-level model
+            # Handle section (nested)
+            "handle": {
+                "brand": handle_maker,
+                "model": handle_model,
+            },
+            # Knot section (nested but null values)
+            "knot": {
+                "brand": None,
+                "model": None,
+                "fiber": None,
+                "knot_size_mm": None,
+            },
+            # Match metadata
+            "source_text": value,  # Original input string
+            "_matched_by": "CorrectMatchesStrategy",
+            "_pattern": "exact_match",
+            "strategy": "correct_matches",
+        }
+
+        # Merge in any additional catalog data
+        if handle_catalog_data:
+            matched_data["handle"].update(handle_catalog_data)
 
         return matched_data
 
