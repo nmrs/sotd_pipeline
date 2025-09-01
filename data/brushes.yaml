@@ -106,7 +106,7 @@ known_brushes:
     Timberwolf:
       fiber: Synthetic
       patterns:
-        - timberwolf
+        - ap.*timberwolf
     Titanium:
       fiber: Synthetic
       patterns:
@@ -467,6 +467,11 @@ known_brushes:
         - c[aá]ceres
   Omega:
     fiber: Boar
+    "011842":
+      knot_size_mm: 27
+      patterns:
+        - omega.*011842
+        - omega.*1842
     "10005":
       knot_size_mm: 24
       patterns:
@@ -525,11 +530,21 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - "20106"
+    "40033":
+      knot_size_mm: 24
+      patterns:
+        - omega.*40033
     "46206":
       fiber: Synthetic
       knot_size_mm: 25
       patterns:
         - omega.*46206
+    "50068 Bambino":
+      fiber: Synthetic
+      knot_size_mm: 18
+      patterns:
+        - omega.*50068
+        - omega.*bambino
     "80005":
       knot_size_mm: 24
       patterns:
@@ -544,10 +559,15 @@ known_brushes:
       patterns:
         - omega.*evo
         - evo.*omega
+    GT Series:
+      fiber: Synthetic
+      knot_size_mm: 29
+      patterns:
+        - omega.*gt(?:\s?series)?
     Hi-Brush Synthetic:
       fiber: Synthetic
       patterns:
-        - hi-*brush
+        - hi-?brush
         - omega.*syn
     Proraso Professional:
       knot_maker: Omega
@@ -574,16 +594,35 @@ known_brushes:
       knot_size_mm: 30
       patterns:
         - pearl.*sbb( |-)?97
+  Portland Razor Co.:
+    Executive:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+        - portland.*executive
   Power Rangers:
     Synthetic:
       fiber: Synthetic
       patterns:
         - power.*rangers.*syn
   Rad Dinosaur Creations:
+    knot_size_mm: 26
+    DinoBoar:
+      fiber: Boar
+      patterns:
+        - rad.*dinosaur.*dino.*boar
+    High Mountain Rex:
+      fiber: Badger
+      patterns:
+        - rad.*dinosaur.*high.*mountain.*rex
     Raptor:
       fiber: Synthetic
       patterns:
-        - rad.*dinosaur.*raptor
+        - raptor
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - rad.*dinosaur.*tuxedo
   RazoRock:
     Big Bruce:
       fiber: Synthetic
@@ -1234,6 +1273,10 @@ other_brushes:
     default: Badger
     patterns:
       - romera
+  Aurora Grooming:
+    default: Synthetic
+    patterns:
+      - aurora\s*grooming
   Gilette:
     default: Synthetic
     patterns:
@@ -1248,6 +1291,10 @@ other_brushes:
     patterns:
       - b[öo]ker
       - \bbö\b
+  Boti:
+    default: Synthetic
+    patterns:
+      - boti
   Chisel & Hound:
     default: Badger
     patterns:
@@ -1257,6 +1304,11 @@ other_brushes:
     default: Badger
     patterns:
       - cineen
+  DSCosmetics:
+    default: Synthetic
+    patterns:
+      - DSC?\s*Cosmetic
+      - \bDSC\b
   London Razors:
     default: Badger
     patterns:
@@ -1265,6 +1317,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - maggard
+  Omega:
+    default: Boar
+    patterns:
+      - omega
   PerPoro:
     default: Synthetic
     patterns:
@@ -1273,6 +1329,10 @@ other_brushes:
     default: Badger
     patterns:
       - qshave
+  Semogue:
+    default: Boar
+    patterns:
+      - semogue
   Shave Factory:
     default: Boar
     patterns:
@@ -1303,3 +1363,7 @@ other_brushes:
     default: Synthetic
     patterns:
       - yaqi
+  Zenith:
+    default: Boar
+    patterns:
+      - zenith
