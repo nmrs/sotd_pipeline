@@ -46,22 +46,20 @@ class ChristopherBradleyPlateAggregator(BaseAggregator):
             author = record.get("author", "").strip()
 
             if plate_type and plate_level and author:
-                plate_data.append(
-                    {"plate_type": plate_type, "plate_level": plate_level, "author": author}
-                )
+                # Combine plate_type and plate_level into single plate field
+                plate = f"{plate_type}-{plate_level}"
+                plate_data.append({"plate": plate, "author": author})
 
         return plate_data
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
-        """Create composite name from plate_type and plate_level data."""
-        # Use pandas string concatenation to avoid Series ambiguity
-        plate_type = df["plate_type"].fillna("")
-        plate_level = df["plate_level"].fillna("")
-        return plate_type.astype(str) + " " + plate_level.astype(str)
+        """Create composite name from plate data."""
+        # The plate field is already combined, so just return it
+        return df["plate"].fillna("").astype(str)  # type: ignore
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
-        return ["plate_type", "plate_level"]
+        return ["plate"]
 
 
 # Legacy function interface for backward compatibility

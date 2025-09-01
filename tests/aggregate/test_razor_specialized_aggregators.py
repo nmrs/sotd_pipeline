@@ -55,13 +55,11 @@ def test_aggregate_christopher_bradley_plates():
     ]
     result = aggregate_christopher_bradley_plates(records)
     assert len(result) == 2
-    assert result[0]["plate_type"] == "SB"
-    assert result[0]["plate_level"] == "C"
+    assert result[0]["plate"] == "SB-C"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
     assert result[0]["rank"] == 1
-    assert result[1]["plate_type"] == "SB"
-    assert result[1]["plate_level"] == "D"
+    assert result[1]["plate"] == "SB-D"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
     assert result[1]["rank"] == 2
