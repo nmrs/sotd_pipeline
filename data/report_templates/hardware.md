@@ -107,4 +107,4 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Top Shavers
 
-{{tables.users|rows:50|deltas:true}}
+{{tables.users|rows:50|columns:rank, user, shaves, missed_days|deltas:true}}
