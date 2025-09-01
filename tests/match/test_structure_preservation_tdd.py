@@ -103,13 +103,7 @@ class TestStructurePreservationTDD:
         assert regex_result.matched["knot"]["model"] is None
 
         # Step 2: Create temporary correct_matches.yaml
-        temp_correct_matches = {
-            "handle": {
-                "Summer Break": {
-                    "Unspecified": ["summer break soaps"]
-                }
-            }
-        }
+        temp_correct_matches = {"handle": {"Summer Break": {"Unspecified": ["summer break soaps"]}}}
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(temp_correct_matches, f, default_flow_style=False)
@@ -134,6 +128,84 @@ class TestStructurePreservationTDD:
             self._assert_summer_break_soaps_structures_identical(
                 original_matched, rehydrated_matched
             )
+
+        finally:
+            # Clean up
+            Path(temp_file_path).unlink()
+
+    def test_knot_only_structure_preservation(self):
+        """
+        Test that knot-only structure is preserved identically.
+
+        The rehydrated structure should match the original regex match structure exactly,
+        including the nested handle/knot objects and all metadata fields.
+        """
+        # Step 1: Create a made-up scenario for knot-only case
+        test_input = "Custom Knot Only"
+
+        # Simulate what the regex result would look like for a knot-only entry
+        # This is a made-up structure that represents a knot-only brush
+        expected_regex_structure = {
+            "brand": None,
+            "model": None,
+            "handle": {
+                "brand": None,
+                "model": None,
+            },
+            "knot": {
+                "brand": "Custom Knot Brand",
+                "model": "Only",
+                "fiber": "Synthetic",  # Will come from catalog lookup
+                "knot_size_mm": None,  # Will remain None from catalog
+            },
+            "source_text": "Custom Knot Only",
+            "_matched_by": "KnotMatcher",
+            "_pattern": "custom.*knot.*only",
+            "strategy": "knot_only",
+            "score": 25.0,
+        }
+
+        # Step 2: Create temporary correct_matches.yaml
+        temp_correct_matches = {"knot": {"Custom Knot Brand": {"Only": ["custom knot only"]}}}
+
+        # Step 2b: Create temporary knot catalog with fiber data
+        temp_knot_catalog = {
+            "Custom Knot Brand": {
+                "Only": {
+                    "fiber": "Synthetic",
+                    "knot_size_mm": None,  # Not specified in this catalog
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(temp_correct_matches, f, default_flow_style=False)
+            temp_file_path = f.name
+
+        try:
+            # Step 3: Rehydrate using CorrectMatchesStrategy
+            with open(temp_file_path, "r") as f:
+                loaded_correct_matches = yaml.safe_load(f)
+
+            # Mock the catalog lookup to return our temporary catalog data
+            correct_matches_strategy = CorrectMatchesStrategy(loaded_correct_matches)
+
+            # Patch the _get_knot_catalog_data method to return our temp catalog data
+            correct_matches_strategy._get_knot_catalog_data = lambda knot_maker, knot_model: (
+                temp_knot_catalog.get(knot_maker, {}).get(knot_model, {})
+            )
+
+            rehydrated_result = correct_matches_strategy.match(test_input)
+
+            assert rehydrated_result is not None, "Should rehydrate successfully"
+            assert rehydrated_result.matched is not None, "Should have matched data"
+
+            # Step 4: Verify structures are IDENTICAL
+            original_matched = expected_regex_structure
+            rehydrated_matched = rehydrated_result.matched
+
+            # The rehydrated structure should preserve the EXACT same format
+            self._assert_knot_only_structures_identical(original_matched, rehydrated_matched)
 
         finally:
             # Clean up
@@ -210,9 +282,7 @@ class TestStructurePreservationTDD:
         print("\nActual rehydrated structure:")
         print(json.dumps(rehydrated, indent=2, default=str))
 
-    def _assert_summer_break_soaps_structures_identical(
-        self, original: dict, rehydrated: dict
-    ):
+    def _assert_summer_break_soaps_structures_identical(self, original: dict, rehydrated: dict):
         """Assert that the rehydrated Summer Break Soaps structure matches the expected format."""
 
         # Check that we have the expected structure for composite brushes
@@ -244,6 +314,62 @@ class TestStructurePreservationTDD:
         # Verify the source_text matches the original input
         assert (
             rehydrated["source_text"] == "Summer Break Soaps"
+        ), "Should preserve original source text"
+
+        # Verify metadata fields indicate correct source
+        assert (
+            rehydrated["_matched_by"] == "CorrectMatchesStrategy"
+        ), "Should indicate correct matches strategy"
+        assert rehydrated["_pattern"] == "exact_match", "Should indicate exact match"
+        assert (
+            rehydrated["strategy"] == "correct_matches"
+        ), "Should indicate correct matches strategy"
+
+        # Check that nested objects DON'T have unnecessary metadata fields
+        assert "source_text" not in rehydrated_handle, "Handle should not have source_text"
+        assert "_matched_by" not in rehydrated_handle, "Handle should not have _matched_by"
+        assert "_pattern" not in rehydrated_handle, "Handle should not have _pattern"
+        assert "score" not in rehydrated_handle, "Handle should not have score"
+
+        assert "source_text" not in rehydrated_knot, "Knot should not have source_text"
+        assert "_matched_by" not in rehydrated_knot, "Knot should not have _matched_by"
+        assert "_pattern" not in rehydrated_knot, "Knot should not have _pattern"
+        assert "score" not in rehydrated_knot, "Knot should not have score"
+
+    def _assert_knot_only_structures_identical(self, original: dict, rehydrated: dict):
+        """Assert that the rehydrated knot-only structure matches the expected format."""
+
+        # Check that we have the expected structure for composite brushes
+        assert "handle" in rehydrated, "Should preserve handle section"
+        assert "knot" in rehydrated, "Should preserve knot section"
+
+        # Check handle section has core data (only what aggregators need)
+        rehydrated_handle = rehydrated["handle"]
+        assert rehydrated_handle["brand"] is None, "Should preserve handle brand (null)"
+        assert rehydrated_handle["model"] is None, "Should preserve handle model (null)"
+
+        # Check knot section has core data (only what aggregators need)
+        rehydrated_knot = rehydrated["knot"]
+        assert rehydrated_knot["brand"] == "Custom Knot Brand", "Should preserve knot brand"
+        assert rehydrated_knot["model"] == "Only", "Should preserve knot model"
+        assert rehydrated_knot["fiber"] == "Synthetic", "Should preserve knot fiber from catalog"
+        assert (
+            rehydrated_knot["knot_size_mm"] is None
+        ), "Should preserve knot size (None from catalog)"
+
+        # Check that we have the required top-level fields for aggregation compatibility
+        assert rehydrated.get("brand") is None, "Should have top-level brand: null for aggregation"
+        assert rehydrated.get("model") is None, "Should have top-level model: null for aggregation"
+
+        # Check that we have the required metadata fields at root level only
+        assert "source_text" in rehydrated, "Should preserve source_text at root level"
+        assert "_matched_by" in rehydrated, "Should preserve _matched_by at root level"
+        assert "_pattern" in rehydrated, "Should preserve _pattern at root level"
+        assert "strategy" in rehydrated, "Should preserve strategy at root level"
+
+        # Verify the source_text matches the original input
+        assert (
+            rehydrated["source_text"] == "Custom Knot Only"
         ), "Should preserve original source text"
 
         # Verify metadata fields indicate correct source
