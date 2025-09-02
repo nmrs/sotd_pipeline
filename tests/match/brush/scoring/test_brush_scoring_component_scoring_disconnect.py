@@ -12,12 +12,17 @@ class TestComponentScoringIntegration:
         # It validates that modifier functions return raw scores, not weighted scores
 
         from sotd.match.brush.scoring.engine import ScoringEngine
-        from sotd.match.brush.config import BrushScoringConfig
-        from unittest.mock import Mock
+        from unittest.mock import Mock, MagicMock
 
-        # Arrange - Create a real strategy result with component scores
-        config = BrushScoringConfig()
-        engine = ScoringEngine(config)
+        # Arrange - Create a mock config with known values for testing
+        mock_config = MagicMock()
+        mock_config.get_all_modifier_names.return_value = ['handle_weight', 'knot_weight']
+        mock_config.get_strategy_modifier.side_effect = lambda strategy, modifier: {
+            'handle_weight': 0.5,
+            'knot_weight': 0.5
+        }.get(modifier, 0.0)
+        
+        engine = ScoringEngine(mock_config)
 
         # Create a mock result that matches what the automated_split strategy produces
         mock_result = Mock()
