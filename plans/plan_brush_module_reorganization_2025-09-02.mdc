@@ -10,14 +10,22 @@
 
 ## 🧩 Component Steps
 
-1. **Create Module Structure** - Set up the new directory structure and `__init__.py` files
-2. **Move Strategy Files** - Reorganize 19 strategy files into logical subdirectories
-3. **Move Scoring Components** - Reorganize 9 scoring component files
-4. **Move Validation Files** - Reorganize 3 validation files
-5. **Move Comparison Files** - Reorganize 3 comparison files
-6. **Move Core Files** - Reorganize 6 core brush matching files
-7. **Update Entry Point** - Create simple `brush_matcher.py` entry point
-8. **Update All Imports** - Update imports across the entire codebase
+1. **Create Module Structure** - Set up the new directory structure and `__init__.py` files ✅
+2. **Move Strategy Files** - Reorganize 19 strategy files into logical subdirectories ✅
+3. **Move Scoring Components** - Reorganize 9 scoring component files ✅
+4. **Move Validation Files** - Reorganize 3 validation files ✅
+5. **Move Comparison Files** - Reorganize 3 comparison files ✅
+6. **Move Core Files** - Reorganize 6 core brush matching files ✅
+7. **Update Entry Point** - Create simple `brush_matcher.py` entry point ✅
+8. **Update All Imports** - Update imports across the entire codebase (broken into 8 sub-steps)
+   - 8.1 Update Imports in Moved Strategy Files
+   - 8.2 Update Imports in Moved Scoring Files
+   - 8.3 Update Imports in Moved Validation and Comparison Files
+   - 8.4 Update Imports in Core Brush Files
+   - 8.5 Update Imports in External Files (sotd/ directory)
+   - 8.6 Update Imports in WebUI Files
+   - 8.7 Update Imports in Test Files
+   - 8.8 Update Imports in Script Files
 9. **Update Test Structure** - Reorganize test files to match new structure
 10. **Verify Backward Compatibility** - Ensure existing imports continue to work
 11. **Run Comprehensive Tests** - Verify no regressions after reorganization
@@ -185,30 +193,211 @@ This ensures that existing code using `from sotd.match.brush_matcher import Brus
 Verify that the entry point works correctly and maintains the same API.
 ```
 
-### Step 8: Update All Imports
+### Step 8: Update All Imports (Broken Down into Sub-steps)
+
+This step has been broken down into smaller, manageable chunks due to the large scope:
+
+#### Step 8.1: Update Imports in Moved Strategy Files
 
 ```text
-Update all import statements across the entire codebase to use the new module structure:
+Update relative imports within all moved strategy files to use the new module structure:
 
-**Search and replace patterns:**
+**Files to update:**
+- All files in `sotd/match/brush/strategies/automated/`
+- All files in `sotd/match/brush/strategies/known/`
+- All files in `sotd/match/brush/strategies/component/`
+- All files in `sotd/match/brush/strategies/fallback/`
+- All files in `sotd/match/brush/strategies/specialized/`
+- All files in `sotd/match/brush/strategies/utils/`
+- Root strategy files in `sotd/match/brush/strategies/`
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → relative imports using `..` or `...`
+- `from sotd.match.brush_scoring_components.` → `from ...scoring.`
+
+**Process:**
+1. Update each strategy file individually
+2. Test imports after each file update
+3. Commit changes after each subdirectory is complete
+4. Verify no circular import issues
+
+This ensures the moved strategy files can import each other correctly.
+```
+
+#### Step 8.2: Update Imports in Moved Scoring Files
+
+```text
+Update relative imports within all moved scoring component files:
+
+**Files to update:**
+- All files in `sotd/match/brush/scoring/`
+- All files in `sotd/match/brush/scoring/performance/`
+- All files in `sotd/match/brush/scoring/dependencies/`
+
+**Import patterns to update:**
+- `from sotd.match.brush_scoring_components.` → relative imports using `..` or `...`
+- `from sotd.match.brush_matching_strategies.` → `from ...strategies.`
+
+**Process:**
+1. Update each scoring file individually
+2. Test imports after each file update
+3. Commit changes after each subdirectory is complete
+4. Verify scoring system can import all components
+
+This ensures the moved scoring files can import each other correctly.
+```
+
+#### Step 8.3: Update Imports in Moved Validation and Comparison Files
+
+```text
+Update relative imports within validation and comparison files:
+
+**Files to update:**
+- All files in `sotd/match/brush/validation/`
+- All files in `sotd/match/brush/comparison/`
+
+**Import patterns to update:**
+- `from sotd.match.brush_validation_` → relative imports using `..` or `...`
+- `from sotd.match.brush_comparison_` → relative imports using `..` or `...`
+
+**Process:**
+1. Update each validation/comparison file individually
+2. Test imports after each file update
+3. Commit changes after completion
+4. Verify validation and comparison systems work correctly
+
+This ensures the moved validation and comparison files can import correctly.
+```
+
+#### Step 8.4: Update Imports in Core Brush Files
+
+```text
+Update imports in the main brush module files:
+
+**Files to update:**
+- `sotd/match/brush/matcher.py`
+- `sotd/match/brush/config.py`
+- `sotd/match/brush/splitter.py`
+- `sotd/match/brush/handle_matcher.py`
+- `sotd/match/brush/knot_matcher.py`
+- `sotd/match/brush/knot_matcher_factory.py`
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from .strategies.`
+- `from sotd.match.brush_scoring_components.` → `from .scoring.`
+- `from sotd.match.brush_validation_` → `from .validation.`
+- `from sotd.match.brush_comparison_` → `from .comparison.`
+
+**Process:**
+1. Update each core file individually
+2. Test imports after each file update
+3. Commit changes after completion
+4. Verify main brush matcher can import all components
+
+This ensures the core brush files can import all their dependencies.
+```
+
+#### Step 8.5: Update Imports in External Files (sotd/ directory)
+
+```text
+Update imports in external files that use brush matching functionality:
+
+**Files to update:**
+- `sotd/enrich/brush_enricher.py`
+- `sotd/match/tools/analyzers/brush_matching_analyzer_lib.py`
+- Any other files in `sotd/` that import brush modules
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
+- `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
+- `from sotd.match.brush_matcher import` → `from sotd.match.brush_matcher import` (unchanged)
+
+**Process:**
+1. Update each external file individually
+2. Test imports after each file update
+3. Commit changes after completion
+4. Verify external systems can import brush functionality
+
+This ensures external systems can still access brush matching functionality.
+```
+
+#### Step 8.6: Update Imports in WebUI Files
+
+```text
+Update imports in webui files that use brush matching functionality:
+
+**Files to update:**
+- `webui/api/brush_matching.py`
+- `webui/api/brush_validation.py`
+- Any other webui files that import brush modules
+
+**Import patterns to update:**
 - `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
 - `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
 - `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
 - `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
 
-**Specific file updates:**
-- Update all test files in `tests/match/` to use new import paths
-- Update all files in `sotd/` that import brush-related modules
-- Update any files in `webui/` that import brush matching functionality
-- Update any files in `scripts/` that use brush matching
+**Process:**
+1. Update each webui file individually
+2. Test imports after each file update
+3. Commit changes after completion
+4. Verify webui can import brush functionality
 
-Use a systematic approach:
-1. Search for all files that import brush-related modules
-2. Update imports file by file
-3. Verify each file still imports correctly
-4. Run basic import tests to catch any issues early
+This ensures the webui can still access brush matching functionality.
+```
 
-Ensure no import errors are introduced and all functionality remains accessible.
+#### Step 8.7: Update Imports in Test Files
+
+```text
+Update imports in all test files to use the new module structure:
+
+**Files to update:**
+- All files in `tests/match/brush_matching_strategies/`
+- All files in `tests/match/brush_scoring_components/`
+- All files in `tests/match/test_*brush*`
+- All files in `tests/integration/test_*brush*`
+- Any other test files that import brush modules
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
+- `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
+
+**Process:**
+1. Update test files in batches by directory
+2. Run tests after each batch to catch issues early
+3. Commit changes after each batch
+4. Verify all tests can import and run correctly
+
+This ensures all tests can import the reorganized brush modules.
+```
+
+#### Step 8.8: Update Imports in Script Files
+
+```text
+Update imports in any script files that use brush matching functionality:
+
+**Files to update:**
+- Any files in `scripts/` that import brush modules
+- Any debug files that import brush modules
+- Any other script files that import brush modules
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
+- `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
+
+**Process:**
+1. Update each script file individually
+2. Test imports after each file update
+3. Commit changes after completion
+4. Verify scripts can import brush functionality
+
+This ensures all scripts can still access brush matching functionality.
 ```
 
 ### Step 9: Update Test Structure
