@@ -1,5 +1,5 @@
 import pytest
-from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
+from sotd.match.brush.strategies.specialized.zenith_strategy import ZenithBrushMatchingStrategy
 
 
 @pytest.fixture

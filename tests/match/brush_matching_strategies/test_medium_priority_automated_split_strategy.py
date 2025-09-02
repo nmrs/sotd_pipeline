@@ -8,7 +8,7 @@ to integrate with the scoring system architecture.
 import pytest
 from unittest.mock import Mock
 
-from sotd.match.brush_matching_strategies.medium_priority_automated_split_strategy import (
+from sotd.match.brush.strategies.automated.medium_priority_automated_split_strategy import (
     MediumPriorityAutomatedSplitStrategy,
 )
 from sotd.match.types import create_match_result

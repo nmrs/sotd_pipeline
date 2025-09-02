@@ -1,5 +1,5 @@
 import pytest
-from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
     OmegaSemogueBrushMatchingStrategy,
 )
 
