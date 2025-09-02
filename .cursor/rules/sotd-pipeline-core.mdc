@@ -222,8 +222,9 @@ Before considering any plan complete, verify:
 
 ## Plan File Organization and Naming (MANDATORY)
 - **Directory Structure**: `plans/[category]/[date]/` where:
-  - `[category]` is one of: `features`, `bugs`, `refactoring`, `specs`, `optimization`, `testing`, `documentation`
+  - `[category]` is one of: `features`, `bugs`, `refactoring`, `optimization`, `testing`, `documentation`
   - `[date]` is ISO 8601 format (YYYY-MM-DD) using actual current date
+  - **Specs co-location**: Specs should live alongside their related plans in the same date directory
 - **Current Date Rule**: **ALWAYS** use the actual current date when creating plan files
 - **Command**: Use `date +%Y-%m-%d` to get the actual current date, never assume or guess
 - **File Format**: `{type}_{plan_name}.mdc` (no date suffix in filename)
@@ -232,9 +233,10 @@ Before considering any plan complete, verify:
   - `spec_` - Specifications and requirements documents
 - **Examples**:
   - ✅ **Correct**: `plans/features/2025-09-02/plan_brush_table_specialized_component.mdc`
-  - ✅ **Correct**: `plans/specs/2025-09-02/spec_webui_react_analyzer.mdc`
+  - ✅ **Correct**: `plans/features/2025-09-02/spec_webui_react_analyzer.mdc` (spec alongside plan)
   - ✅ **Correct**: `plans/bugs/2025-09-02/plan_validation_fix.mdc`
   - ❌ **Wrong**: `plans/plan_brush_table_2025-09-02.mdc` (old structure)
+  - ❌ **Wrong**: `plans/specs/2025-09-02/spec_webui_react_analyzer.mdc` (separate specs category)
 - **Process**: 
   1. Run `date +%Y-%m-%d` to get actual current date
   2. Create directory: `plans/[category]/[date]/`
@@ -246,8 +248,9 @@ Before considering any plan complete, verify:
 - **Use `git mv`** instead of `mv` to preserve file history and show as rename operations
 - **File format**: `{type}_{plan_name}.mdc` (no date suffix in filename)
 - **Directory structure**: `plans/completed/[category]/[date]/` where:
-  - `[category]` is one of: `features`, `bugs`, `refactoring`, `specs`, `optimization`, `testing`, `documentation`, `data-recovery`, `performance`, `process-optimization`, `research`, `investigation`, `webui`
+  - `[category]` is one of: `features`, `bugs`, `refactoring`, `optimization`, `testing`, `documentation`, `data-recovery`, `performance`, `process-optimization`, `research`, `investigation`, `webui`
   - `[date]` is the original creation date (YYYY-MM-DD) from the plan file
+  - **Specs co-location**: Specs remain alongside their related plans in completed directories
 - **Process for completing plans**:
   1. Update plan with final completion status and summary
   2. Extract date from original plan filename or use creation date
