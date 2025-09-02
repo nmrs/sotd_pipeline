@@ -1,7 +1,7 @@
 # Plan: Remove Redundant Brush Fields and Fix Rehydration
 
 **Date:** 2025-09-01  
-**Status:** IN PROGRESS - Phase 2.5 (Update Integration Tests)  
+**Status:** IN PROGRESS - Phase 2.6 (Update Aggregator Tests)  
 **Priority:** Medium  
 **Type:** Refactoring + Bug Fix  
 
@@ -220,14 +220,16 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: All 190 brush matching strategy tests already updated and passing
 - **Note**: Strategy tests were updated in previous phases (1.6-1.8) when strategies were refactored
 
-#### 2.5 Update Integration Tests
+#### 2.5 Update Integration Tests ✅ **COMPLETE**
 - **Files**: Tests that verify end-to-end brush matching workflow
 - **Action**: Update mock data creation to use nested structure
 - **Focus**: Tests that create mock brush data for testing
 - **Examples**:
-  - `tests/test_brush_matcher.py`
-  - `tests/test_brush_matching_integration.py`
-  - Any other integration tests with brush data
+  - `tests/integration/test_brush_validation_cli_integration.py` - Updated to use nested structure
+  - `tests/integration/test_tier_based_ranking_integration.py` - Already had correct nested structure
+  - Other integration tests - Already had correct structure or were testing different concerns
+- **Status**: All integration tests updated and passing with new nested structure
+- **Note**: Found that most integration tests already had correct structure, only needed minor updates
 
 #### 2.6 Update Aggregator Tests
 - **Files**: Tests in `tests/aggregate/` that create mock brush data
