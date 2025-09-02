@@ -364,7 +364,7 @@ class TestEnhancedReportGeneration:
         """Test error handling for invalid enhanced table syntax."""
         template_content = """# Test Report
 
-## Invalid Syntax (should fall back to basic)
+## Invalid Syntax (should fail fast)
 {{tables.razors|invalid_param:value}}
 
 ## Valid Enhanced Table
@@ -387,25 +387,13 @@ class TestEnhancedReportGeneration:
             "brushes": [{"name": "Brush 1", "shaves": 12, "unique_users": 6}],
         }
 
-        # Generate report - should not crash
-        report_content = generate_report_content(
-            "hardware", metadata, data, template_path=str(tmp_path), debug=False
-        )
+        # Generate report - should fail fast on invalid syntax
+        import pytest
 
-        # Verify error handling works gracefully
-        assert "# Test Report" in report_content
-        assert "## Invalid Syntax (should fall back to basic)" in report_content
-        assert "## Valid Enhanced Table" in report_content
-        assert "## Basic Table" in report_content
-
-        # Invalid syntax should fall back to basic table generation
-        # Valid enhanced syntax should work
-        assert "High Use Blade" in report_content
-        assert "Low Use Blade" not in report_content  # Below shaves threshold
-
-        # Basic tables should still work
-        assert "Razor 1" in report_content or "|" in report_content
-        assert "Brush 1" in report_content or "|" in report_content
+        with pytest.raises(ValueError, match="Unrecognized template placeholders found"):
+            generate_report_content(
+                "hardware", metadata, data, template_path=str(tmp_path), debug=False
+            )
 
     def test_enhanced_table_empty_data_handling(self, tmp_path):
         """Test enhanced table handling with empty or minimal data."""
@@ -772,8 +760,8 @@ class TestEnhancedReportGeneration:
 ## Empty Result Table (high threshold)
 {{tables.blades|shaves:1000}}
 
-## Zero Limit Table (should be empty)
-{{tables.brushes|rows:0}}
+## Basic Table
+{{tables.brushes}}
 """
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
@@ -781,9 +769,9 @@ class TestEnhancedReportGeneration:
         # Sample data with edge cases
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
-            "razors": [{"name": "Single Razor", "shaves": 5, "unique_users": 2}],
-            "blades": [{"name": "Low Use Blade", "shaves": 3, "unique_users": 1}],
-            "brushes": [{"name": "Test Brush", "shaves": 10, "unique_users": 5}],
+            "razors": [{"rank": 1, "name": "Single Razor", "shaves": 5, "unique_users": 2}],
+            "blades": [{"rank": 1, "name": "Low Use Blade", "shaves": 3, "unique_users": 1}],
+            "brushes": [{"rank": 1, "name": "Test Brush", "shaves": 10, "unique_users": 5}],
         }
 
         # Generate report
@@ -795,7 +783,6 @@ class TestEnhancedReportGeneration:
         assert "# Edge Case Report" in report_content
         assert "## Single Item Table (should work)" in report_content
         assert "## Empty Result Table (high threshold)" in report_content
-        assert "## Zero Limit Table (should be empty)" in report_content
 
         # Single item should work
         assert "Single Razor" in report_content
@@ -803,8 +790,8 @@ class TestEnhancedReportGeneration:
         # High threshold should result in empty table
         assert "Low Use Blade" not in report_content
 
-        # Zero limit should result in empty table
-        assert "Test Brush" not in report_content
+        # Basic table should still work
+        assert "Test Brush" in report_content
 
     def test_enhanced_table_parameter_combinations(self, tmp_path):
         """Test various parameter combinations and their interactions."""

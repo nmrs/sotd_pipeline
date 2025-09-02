@@ -212,7 +212,12 @@ class TestReportIntegration:
 
     def test_report_with_delta_calculations(self, template_dir):
         """Test report generation with historical data for delta calculations."""
-        metadata = {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50}
+        metadata = {
+            "month": "2025-01",
+            "total_shaves": 1000,
+            "unique_shavers": 50,
+            "avg_shaves_per_user": 20.0,  # 1000 / 50 = 20
+        }
 
         data = {
             "razors": [
