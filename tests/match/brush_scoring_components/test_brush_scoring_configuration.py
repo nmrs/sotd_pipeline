@@ -138,7 +138,7 @@ class TestBrushScoringConfiguration:
 
     def test_configuration_loads_correctly_in_scoring_system(self):
         """Test that configuration loads correctly in the scoring system."""
-        from sotd.match.brush_scoring_config import BrushScoringConfig
+        from sotd.match.brush.config import BrushScoringConfig
 
         config = BrushScoringConfig()
 
