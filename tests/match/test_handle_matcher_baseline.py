@@ -1,6 +1,7 @@
 """Test baseline for current handle matching functionality before restructuring."""
 
 import pytest
+from unittest.mock import Mock, patch
 
 from sotd.match.brush.handle_matcher import HandleMatcher
 
@@ -9,9 +10,64 @@ class TestHandleMatcherBaseline:
     """Test baseline for current handle matching functionality."""
 
     @pytest.fixture
-    def handle_matcher(self):
-        """Create handle matcher instance."""
-        return HandleMatcher()
+    def handle_matcher(self, tmp_path):
+        """Create handle matcher instance with test-specific YAML data."""
+        # Create a test-specific handles.yaml file with known patterns
+        # This prevents tests from failing when users modify production YAML files
+        test_handles_data = {
+            "artisan_handles": {
+                "Declaration Grooming": {
+                    "Washington": {
+                        "patterns": ["washington(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)"]
+                    },
+                    "Jefferson": {
+                        "patterns": ["jefferson(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)"]
+                    },
+                    "Jeffington": {
+                        "patterns": ["jeffington(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)"]
+                    },
+                    "Unspecified": {"patterns": ["declaration", "\\bdg\\b"]},
+                },
+                "Jayaruh": {"Unspecified": {"patterns": ["jayaruh"]}},
+                "Dogwood": {
+                    "Unspecified": {
+                        "patterns": [
+                            "dogwood.*(handcrafts+)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)",
+                            "^voa",
+                            "\\bdw\\b",
+                        ]
+                    }
+                },
+                "Chisel & Hound": {
+                    "Unspecified": {
+                        "patterns": [
+                            "chisel.*hound(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)",
+                            "\\bc(?:\\&|and|\\+\\s)?h\\b",
+                        ]
+                    }
+                },
+                "AKA Brushworx": {"Unspecified": {"patterns": ["aka.*brushworx"]}},
+                "Alpha": {"Unspecified": {"patterns": ["alpha"]}},
+                "Brad Sears": {"Unspecified": {"patterns": ["brad.*sears"]}},
+            },
+            "manufacturer_handles": {
+                "Simpson": {"Unspecified": {"patterns": ["simpson"]}},
+                "Omega": {"Unspecified": {"patterns": ["omega"]}},
+                "Semogue": {"Unspecified": {"patterns": ["semogue"]}},
+                "Mühle": {"Unspecified": {"patterns": ["muhle"]}},
+            },
+            "other_handles": {},
+        }
+
+        # Write test data to temporary YAML file
+        import yaml
+
+        test_handles_path = tmp_path / "test_handles.yaml"
+        with test_handles_path.open("w") as f:
+            yaml.dump(test_handles_data, f)
+
+        # Create handle matcher with test data
+        return HandleMatcher(handles_path=test_handles_path)
 
     def test_declaration_grooming_washington_pattern(self, handle_matcher):
         """Test Declaration Grooming Washington pattern matching."""
@@ -46,7 +102,8 @@ class TestHandleMatcherBaseline:
         assert result is not None
         assert result["handle_maker"] == "Declaration Grooming"
         assert result["_matched_by_section"] == "artisan_handles"
-        assert result["_pattern_used"] in ["^(?!.*dog).*declaration", "^(?!.*dog).*\\bdg\\b"]
+        # Test data has "declaration" pattern for general Declaration Grooming matching
+        assert result["_pattern_used"] == "declaration"
 
     def test_declaration_grooming_dg_abbreviation(self, handle_matcher):
         """Test Declaration Grooming DG abbreviation pattern matching."""
@@ -54,7 +111,8 @@ class TestHandleMatcherBaseline:
         assert result is not None
         assert result["handle_maker"] == "Declaration Grooming"
         assert result["_matched_by_section"] == "artisan_handles"
-        assert result["_pattern_used"] == "^(?!.*dog).*\\bdg\\b"
+        # Test data has "\\bdg\\b" pattern for DG abbreviation matching
+        assert result["_pattern_used"] == "\\bdg\\b"
 
     def test_jayaruh_pattern(self, handle_matcher):
         """Test Jayaruh pattern matching."""

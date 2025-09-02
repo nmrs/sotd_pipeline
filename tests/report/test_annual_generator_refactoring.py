@@ -113,7 +113,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "straight-points": [],
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
-            "top-shavers": []
+            "top-shavers": [],
         }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -145,7 +145,28 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": ["2024-01", "2024-02", "2024-03"],
             "missing_months": ["2024-04"],
         }
-        data = {"razors": []}
+        data = {
+            "razors": [],
+            "blades": [],
+            "brushes": [],
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
+        }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
 
@@ -165,7 +186,28 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": ["2024-01"],
             "missing_months": [],
         }
-        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
+        data = {
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}],
+            "blades": [],
+            "brushes": [],
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
+        }
         comparison_data = {
             "2023": (
                 {"total_shaves": 1000, "unique_shavers": 80},
@@ -184,7 +226,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
     def test_generate_annual_report_integration(self, tmp_path: Path):
         """Test the complete generate_annual_report function with unified patterns."""
-        # Create test annual data
+        # Create test annual data with all required categories for hardware report
         test_data = {
             "metadata": {
                 "year": "2024",
@@ -197,6 +239,24 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "blades": [{"name": "Astra Superior Platinum", "shaves": 250, "position": 1}],
             "brushes": [{"name": "Simpson Chubby 2", "shaves": 100, "position": 1}],
             "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}],
+            # Add empty lists for all specialized tables that the template expects
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
         }
 
         # Create test annual data file
@@ -222,7 +282,13 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": ["2024-01"],
             "missing_months": [],
         }
-        data = {"soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}]}
+        data = {
+            "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}],
+            # Add empty lists for all specialized tables that the software template expects
+            "soap-makers": [],
+            "brand-diversity": [],
+            "top-shavers": [],
+        }
 
         generator = AnnualReportGenerator("2024", "software", metadata, data, debug=True)
 
@@ -257,7 +323,30 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": [],
             "missing_months": ["2024-01", "2024-02"],
         }
-        data = {"razors": [], "blades": [], "brushes": [], "soaps": []}
+        data = {
+            "razors": [],
+            "blades": [],
+            "brushes": [],
+            "soaps": [],
+            # Add empty lists for all specialized tables that the hardware template expects
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
+        }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
 
@@ -278,7 +367,30 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": ["2024-01"],
             "missing_months": [],
         }
-        data = {"razors": []}
+        data = {
+            "razors": [],
+            # Add empty lists for all specialized tables that the hardware template expects
+            "blades": [],
+            "brushes": [],
+            "soaps": [],
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
+        }
 
         # Test that performance monitoring is included in generate_annual_report
         # This is tested indirectly through the generate_annual_report function

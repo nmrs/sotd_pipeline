@@ -294,8 +294,8 @@ def test_process_month_debug_output(
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
 ):
-    """_process_month should print debug information when debug=True."""
-    mock_args.debug = True
+    """_process_month should print debug information when verbose=True."""
+    mock_args.verbose = True
     mock_search.return_value = sample_threads
 
     mock_fetch_comments.return_value = []
@@ -424,7 +424,7 @@ def test_main_single_month_processing(mock_process, mock_get_reddit, capsys):
     with patch("sotd.fetch.run.month_span", return_value=[(2025, 5)]):
         with patch("sotd.fetch.run.tqdm") as mock_tqdm:
             mock_tqdm.return_value = [(2025, 5)]  # Single month
-            main(["--month", "2025-05"])
+            main(["--month", "2025-05", "--verbose"])
 
     output = capsys.readouterr().out
     assert "[WARN] Missing day: 2025-05-02" in output
@@ -450,7 +450,7 @@ def test_main_multi_month_processing(mock_process, mock_get_reddit, capsys):
     with patch("sotd.fetch.run.month_span", return_value=months):
         with patch("sotd.fetch.run.tqdm") as mock_tqdm:
             mock_tqdm.return_value = months
-            main(["--year", "2025"])
+            main(["--year", "2025", "--verbose"])
 
     output = capsys.readouterr().out
     # Missing days should be properly sorted as date strings
@@ -479,7 +479,7 @@ def test_main_no_missing_days_warning(mock_process, mock_get_reddit, capsys):
     with patch("sotd.fetch.run.month_span", return_value=[(2025, 5)]):
         with patch("sotd.fetch.run.tqdm") as mock_tqdm:
             mock_tqdm.return_value = [(2025, 5)]
-            main(["--month", "2025-05"])
+            main(["--month", "2025-05", "--verbose"])
 
     output = capsys.readouterr().out
     # Should not show individual missing day warnings when entire month is missing
