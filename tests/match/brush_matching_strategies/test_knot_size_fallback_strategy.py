@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import patch
 
-from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+from sotd.match.brush.strategies.fallback.knot_size_fallback_strategy import (
     KnotSizeFallbackStrategy,
 )
 
@@ -138,7 +138,7 @@ def test_knot_size_fallback_standalone_number_match(strategy):
     assert result is None
 
 
-@patch("sotd.match.brush_matching_strategies.knot_size_fallback_strategy.parse_knot_size")
+@patch("sotd.match.brush.strategies.fallback.knot_size_fallback_strategy.parse_knot_size")
 def test_knot_size_fallback_uses_knot_size_utils(mock_parse_knot_size, strategy):
     """Test that the strategy uses knot_size_utils.parse_knot_size()."""
     mock_parse_knot_size.return_value = 26.0
@@ -150,7 +150,7 @@ def test_knot_size_fallback_uses_knot_size_utils(mock_parse_knot_size, strategy)
     assert result.matched["model"] == "26mm"
 
 
-@patch("sotd.match.brush_matching_strategies.knot_size_fallback_strategy.parse_knot_size")
+@patch("sotd.match.brush.strategies.fallback.knot_size_fallback_strategy.parse_knot_size")
 def test_knot_size_fallback_returns_none_when_knot_size_utils_returns_none(
     mock_parse_knot_size, strategy
 ):
@@ -163,7 +163,7 @@ def test_knot_size_fallback_returns_none_when_knot_size_utils_returns_none(
     assert result is None
 
 
-@patch("sotd.match.brush_matching_strategies.knot_size_fallback_strategy.parse_knot_size")
+@patch("sotd.match.brush.strategies.fallback.knot_size_fallback_strategy.parse_knot_size")
 def test_knot_size_fallback_handles_decimal_from_utils(mock_parse_knot_size, strategy):
     """Test that strategy handles decimal values from knot_size_utils correctly."""
     mock_parse_knot_size.return_value = 27.5

@@ -1,4 +1,4 @@
-from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
+from sotd.match.brush.strategies.other_knot_strategy import OtherKnotMatchingStrategy
 import pytest
 
 
