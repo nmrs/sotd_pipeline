@@ -247,23 +247,22 @@ class TestBrushMatchingAPIIntegration:
         # Enriched data should contain fiber information for this brush string
         if response.enrichedData:
             # Check for expected enrichment fields based on actual data structure
-            # The actual enrichedData has: brand, model, fiber, knot_size_mm, handle_maker,
-            # source_text, _matched_by, _pattern, strategy
-            enrichment_fields = ["fiber", "knot_size_mm", "handle_maker", "source_text"]
-            found_fields = [field for field in enrichment_fields if field in response.enrichedData]
-
-            # At least some enrichment should be present
-            assert len(found_fields) > 0, "No enrichment fields found"
-
-            # Verify that basic enrichment fields are present (they may be None if not enriched)
-            # The API returns the fields but they may be None if enrichment didn't find data
-            assert "fiber" in response.enrichedData, "Fiber field should be present in response"
-            assert (
-                "knot_size_mm" in response.enrichedData
-            ), "Knot size field should be present in response"
-            assert (
-                "source_text" in response.enrichedData
-            ), "Source text field should be present in response"
+            # The actual enrichedData now has nested structure with handle and knot sections
+            # Check for nested structure fields
+            assert "handle" in response.enrichedData, "Handle section should be present in response"
+            assert "knot" in response.enrichedData, "Knot section should be present in response"
+            
+            # Verify that fiber information is in the knot section
+            knot_section = response.enrichedData["knot"]
+            assert "fiber" in knot_section, "Fiber field should be present in knot section"
+            assert "knot_size_mm" in knot_section, "Knot size field should be present in knot section"
+            
+            # Verify that handle information is in the handle section
+            handle_section = response.enrichedData["handle"]
+            assert "brand" in handle_section, "Handle brand should be present in handle section"
+            
+            # Verify that source text is at the root level
+            assert "source_text" in response.enrichedData, "Source text field should be present in response"
 
 
 if __name__ == "__main__":
