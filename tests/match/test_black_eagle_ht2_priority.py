@@ -1,7 +1,7 @@
 """Test that Black Eagle HT2 patterns have higher priority than generic B2 patterns."""
 
 import pytest
-from sotd.match.brush_matching_strategies.known_knot_strategy import KnownKnotMatchingStrategy
+from sotd.match.brush.strategies.known.known_knot_strategy import KnownKnotMatchingStrategy
 
 
 class TestBlackEagleHT2Priority:

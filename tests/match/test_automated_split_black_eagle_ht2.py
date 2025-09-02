@@ -9,10 +9,10 @@ parent_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(parent_dir))
 
 # Import SOTD modules after path setup
-from sotd.match.brush_matching_strategies.automated_split_strategy import AutomatedSplitStrategy
-from sotd.match.brush_scoring_config import BrushScoringConfig
-from sotd.match.handle_matcher import HandleMatcher
-from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.brush.strategies.automated.automated_split_strategy import AutomatedSplitStrategy
+from sotd.match.brush.config import BrushScoringConfig
+from sotd.match.brush.handle_matcher import HandleMatcher
+from sotd.match.brush.knot_matcher import KnotMatcher
 
 
 class TestAutomatedSplitBlackEagleHT2:

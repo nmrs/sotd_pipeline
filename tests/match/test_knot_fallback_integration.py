@@ -1,11 +1,11 @@
 # pylint: disable=redefined-outer-name
 import pytest
 
-from sotd.match.knot_matcher import KnotMatcher
-from sotd.match.brush_matching_strategies.known_knot_strategy import KnownKnotMatchingStrategy
-from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
-from sotd.match.brush_matching_strategies.fiber_fallback_strategy import FiberFallbackStrategy
-from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+from sotd.match.brush.knot_matcher import KnotMatcher
+from sotd.match.brush.strategies.known.known_knot_strategy import KnownKnotMatchingStrategy
+from sotd.match.brush.strategies.other_knot_strategy import OtherKnotMatchingStrategy
+from sotd.match.brush.strategies.fallback.fiber_fallback_strategy import FiberFallbackStrategy
+from sotd.match.brush.strategies.fallback.knot_size_fallback_strategy import (
     KnotSizeFallbackStrategy,
 )
 
