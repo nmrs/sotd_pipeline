@@ -1,7 +1,7 @@
 # Plan: Remove Redundant Brush Fields and Fix Rehydration
 
 **Date:** 2025-09-01  
-**Status:** IN PROGRESS - Phase 2.1 (ResultProcessor Tests Removal) ✅ **COMPLETE**  
+**Status:** IN PROGRESS - Phase 2.2 (Comprehensive Test Update Requirements) ✅ **COMPLETE**  
 **Priority:** Medium  
 **Type:** Refactoring + Bug Fix  
 
@@ -184,7 +184,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Rationale**: No need to test functionality that's being removed
 - **Status**: All ResultProcessor references removed from test files, tests now pass
 
-#### 2.2 Comprehensive Test Update Requirements
+#### 2.2 Comprehensive Test Update Requirements ✅ **COMPLETE**
 - **Action**: Update ALL tests to expect correct nested structure directly from strategies
 - **Change**: Tests must expect nested `handle`/`knot` structure from strategy output
 - **Examples**: 
@@ -194,6 +194,7 @@ The redundant fields are primarily introduced by two strategies:
   - New: `assert result.matched["knot"]["knot_size_mm"] == 26`
 - **Files**: All test files that test strategy output structure
 - **Benefit**: Tests now verify the actual strategy output, not processed output
+- **Status**: All brush strategy tests already updated to expect nested structure in Phase 1.8. Knot strategy tests remain unchanged as they test individual components, not complete brush structures.
 
 #### 2.3 Update Structure Preservation Tests
 - **File**: `tests/match/test_structure_preservation_tdd.py`
