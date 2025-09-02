@@ -255,13 +255,15 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: ✅ **COMPLETE** - All 3 files completed with nested structure
 - **Note**: All updated tests pass with new nested structure, aggregator supports both formats
 
-#### 2.8 Update Report Generation Tests
+#### 2.8 Update Report Generation Tests ✅ **COMPLETE**
 - **Files**: Tests that verify report generation with brush data
 - **Action**: Update test data to use nested structure
 - **Focus**: Tests that verify table generation and report output
 - **Examples**:
-  - `tests/report/test_brush_table_generator.py`
-  - `tests/report/test_report_generation.py`
+  - `tests/report/test_brush_tables.py` - No brush data updates needed (tests table generation, not raw data)
+  - `tests/report/test_integration.py` - Contains aggregated data with correct structure (fiber/knot_size in aggregated format)
+- **Status**: ✅ **COMPLETE** - No brush data structure updates needed in report tests
+- **Note**: Report tests use aggregated data format, not raw brush matching data, so no updates required
 
 #### 2.9 Verify Test Coverage
 - **Action**: Run test discovery to identify any missed test files
