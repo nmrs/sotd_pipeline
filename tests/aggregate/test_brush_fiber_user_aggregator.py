@@ -16,13 +16,19 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "synthetic"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "synthetic"}
+                    },
                 },
             },
         ]
@@ -48,7 +54,10 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "badger", "brand": "Declaration"},
+                    "matched": {
+                        "handle": {"brand": "Declaration", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
         ]
@@ -65,13 +74,19 @@ class TestBrushFiberUserAggregator:
         records = [
             {
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "synthetic"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "synthetic"}
+                    },
                 },
             },
         ]
@@ -93,7 +108,10 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
         ]
@@ -181,31 +199,46 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "synthetic"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "synthetic"}
+                    },
                 },
             },
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user3",
                 "brush": {
-                    "matched": {"fiber": "synthetic"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "synthetic"}
+                    },
                 },
             },
         ]
@@ -265,19 +298,28 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user3",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
         ]
@@ -304,19 +346,28 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
         ]
@@ -336,31 +387,46 @@ class TestBrushFiberUserAggregator:
             {
                 "author": "user1",
                 "brush": {
-                    "matched": {"fiber": "badger"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "badger"}
+                    },
                 },
             },
             {
                 "author": "user2",
                 "brush": {
-                    "matched": {"fiber": "boar"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "boar"}
+                    },
                 },
             },
             {
                 "author": "user3",
                 "brush": {
-                    "matched": {"fiber": "synthetic"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "synthetic"}
+                    },
                 },
             },
             {
                 "author": "user4",
                 "brush": {
-                    "matched": {"fiber": "horse"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "horse"}
+                    },
                 },
             },
             {
                 "author": "user5",
                 "brush": {
-                    "matched": {"fiber": "mixed"},
+                    "matched": {
+                        "handle": {"brand": "Test Brand", "model": "Test Model"},
+                        "knot": {"fiber": "mixed"}
+                    },
                 },
             },
         ]
