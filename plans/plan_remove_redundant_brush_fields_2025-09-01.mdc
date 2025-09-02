@@ -274,7 +274,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Files Found Needing Updates**:
   - `tests/match/test_brush_validation_investigation.py` - Contains root-level fiber/knot_size_mm fields
   - `tests/match/test_brush_scoring_components.py` - Line 201 has root-level fiber field
-  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - Expects root-level fiber/knot_size_mm from KnownKnotMatchingStrategy
+  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - ✅ **CORRECT** - Component strategy should return root-level fields
 - **Note**: Most test files already have correct nested structure or use aggregated data format
 
 #### 2.10 Update Discovered Test Files (New Task from Phase 2.9)
@@ -282,7 +282,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Files to Update**:
   - `tests/match/test_brush_validation_investigation.py` - Update test data to use nested structure
   - `tests/match/test_brush_scoring_components.py` - Update MatchResult creation to use nested structure
-  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - Update assertions to expect nested structure
+  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - ✅ **NO UPDATE NEEDED** - Component strategy correctly returns root-level fields
 - **Status**: ⏳ **PENDING** - Files identified, updates needed
 - **Priority**: Medium - These are test files that need to match the new nested structure
 
