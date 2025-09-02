@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import patch
 
-from sotd.match.brush_matching_strategies.fiber_fallback_strategy import FiberFallbackStrategy
+from sotd.match.brush.strategies.fallback.fiber_fallback_strategy import FiberFallbackStrategy
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ def test_fiber_fallback_whitespace_only_no_match(strategy):
     assert result is None
 
 
-@patch("sotd.match.brush_matching_strategies.fiber_fallback_strategy.match_fiber")
+@patch("sotd.match.brush.strategies.fallback.fiber_fallback_strategy.match_fiber")
 def test_fiber_fallback_uses_fiber_utils(mock_match_fiber, strategy):
     """Test that the strategy uses fiber_utils.match_fiber()."""
     mock_match_fiber.return_value = "Synthetic"
@@ -140,7 +140,7 @@ def test_fiber_fallback_uses_fiber_utils(mock_match_fiber, strategy):
     assert result.matched["fiber"] == "Synthetic"
 
 
-@patch("sotd.match.brush_matching_strategies.fiber_fallback_strategy.match_fiber")
+@patch("sotd.match.brush.strategies.fallback.fiber_fallback_strategy.match_fiber")
 def test_fiber_fallback_returns_none_when_fiber_utils_returns_none(mock_match_fiber, strategy):
     """Test that strategy returns None when fiber_utils returns None."""
     mock_match_fiber.return_value = None
