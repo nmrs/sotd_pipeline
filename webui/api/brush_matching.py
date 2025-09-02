@@ -471,7 +471,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 ]
 
                 # Create a temporary orchestrator with filtered strategies
-                from sotd.match.brush_scoring_components.strategy_orchestrator import (
+                from sotd.match.brush.scoring.orchestrator import (
                     StrategyOrchestrator,
                 )
 
@@ -527,7 +527,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 transformed_matched_data = transform_brush_data(matched_data)
 
                 # Get detailed scoring breakdown using the ScoringEngine
-                from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+                from sotd.match.brush.scoring.engine import ScoringEngine
                 from sotd.match.brush_scoring_config import BrushScoringConfig
 
                 config_path = (
