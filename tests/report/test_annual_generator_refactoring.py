@@ -92,7 +92,29 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "included_months": ["2024-01", "2024-02"],
             "missing_months": [],
         }
-        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
+        # Provide minimal data for all expected tables to satisfy template validation
+        data = {
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}],
+            "blades": [],
+            "brushes": [],
+            "razor-formats": [],
+            "razor-manufacturers": [],
+            "blade-manufacturers": [],
+            "brush-handle-makers": [],
+            "brush-knot-makers": [],
+            "brush-fibers": [],
+            "brush-knot-sizes": [],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": []
+        }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
 
