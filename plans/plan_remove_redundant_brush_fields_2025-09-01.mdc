@@ -335,7 +335,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Tests**: Update any tests that expect nested structure from component strategies
 - **Benefit**: Cleaner separation of concerns, component strategies focus only on matching
 
-#### 2.15 Knot Matcher Factory Refactoring (New Task from Focused Discussion)
+#### 2.15 Knot Matcher Factory Refactoring (New Task from Focused Discussion) ✅ **COMPLETE**
 - **Action**: Extract knot strategy creation from brush_matcher.py to improve architecture
 - **Rationale**: brush_matcher.py is too large (1000+ lines) and has multiple responsibilities
 - **Files to Create**:
@@ -352,8 +352,16 @@ The redundant fields are primarily introduced by two strategies:
   - Single responsibility: knot strategy creation
   - Easier testing of knot strategy creation
   - Better separation of concerns
-- **Status**: ⏳ **PENDING** - High priority architectural improvement
+- **Status**: ✅ **COMPLETE** - Factory refactoring successfully implemented
 - **Priority**: High - Reduces technical debt and improves maintainability
+- **Results**:
+  - ✅ Created `KnotMatcherFactory` class with explicit priority order
+  - ✅ Moved `_create_knot_strategies()` method to factory
+  - ✅ Updated `brush_matcher.py` to use factory instead of direct creation
+  - ✅ Removed `_create_knot_strategies()` method from `brush_matcher.py`
+  - ✅ Added `get_strategy_priority_order()` method for explicit ordering
+  - ✅ All tests pass, confirming the refactoring works correctly
+  - ✅ Reduced `brush_matcher.py` complexity by ~30 lines
 
 #### 2.16 Handle Strategy Analysis (New Task from Focused Discussion)
 - **Action**: Analyze handle strategies to ensure consistency with knot strategy architecture

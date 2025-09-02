@@ -11,6 +11,7 @@ import yaml
 
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.knot_matcher_factory import KnotMatcherFactory
 from sotd.match.types import MatchResult
 from sotd.match.brush_matching_strategies.known_brush_strategy import (
     KnownBrushMatchingStrategy,
@@ -128,8 +129,8 @@ class BrushMatcher:
         # Load catalogs directly without legacy config dependencies
         catalogs = self._load_catalogs_directly()
 
-        # Create knot strategies directly instead of using StrategyManager
-        knot_strategies = self._create_knot_strategies(catalogs)
+        # Create knot strategies using factory for better separation of concerns
+        knot_strategies = KnotMatcherFactory.create_knot_strategies(catalogs)
         self.knot_matcher = KnotMatcher(knot_strategies)
 
         # Initialize components
@@ -286,33 +287,6 @@ class BrushMatcher:
         except (FileNotFoundError, yaml.YAMLError):
             return {}
 
-    def _create_knot_strategies(self, catalogs: dict) -> list:
-        """Create knot strategies directly without legacy config dependencies."""
-        from sotd.match.brush_matching_strategies.known_knot_strategy import (
-            KnownKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_knot_strategy import (
-            OtherKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
-            FiberFallbackStrategy,
-        )
-        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
-            KnotSizeFallbackStrategy,
-        )
-
-        # Safely access knots catalog data with default empty dictionaries
-        knots_data = catalogs.get("knots", {})
-        known_knots = knots_data.get("known_knots", {})
-        other_knots = knots_data.get("other_knots", {})
-
-        return [
-            KnownKnotMatchingStrategy(known_knots),
-            OtherKnotMatchingStrategy(other_knots),
-            FiberFallbackStrategy(),
-            KnotSizeFallbackStrategy(),
-        ]
-
     def _create_strategies(self) -> List:
         """
         Create list of strategies for Phase 3.2 with individual brush strategies.
@@ -386,8 +360,8 @@ class BrushMatcher:
         # Use shared utilities instead of duplicating logic
         catalogs = self._load_catalogs_directly()  # Use our direct loading method
 
-        # Create strategies directly instead of using StrategyManager
-        strategies = self._create_knot_strategies(catalogs)  # Use _create_knot_strategies
+        # Create strategies using factory for better separation of concerns
+        strategies = KnotMatcherFactory.create_knot_strategies(catalogs)
 
         return strategies
 
