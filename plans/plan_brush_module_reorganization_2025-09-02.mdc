@@ -202,6 +202,13 @@ Verify that the entry point works correctly and maintains the same API.
 
 This step has been broken down into smaller, manageable chunks due to the large scope:
 
+**⚠️ CRITICAL: Test Frequently Throughout Import Updates**
+- **Run tests after updating 2-3 files, not after entire subdirectories**
+- **Use `python -m pytest tests/match/ -x --tb=short` to catch issues early**
+- **If tests fail, fix immediately before continuing**
+- **This prevents cascading import failures that are hard to debug**
+- **Goal: Keep the system in a "partially working" state rather than "completely broken"**
+
 #### Step 8.1: Update Imports in Moved Strategy Files
 
 ```text
@@ -222,9 +229,16 @@ Update relative imports within all moved strategy files to use the new module st
 
 **Process:**
 1. Update each strategy file individually
-2. Test imports after each file update
-3. Commit changes after each subdirectory is complete
-4. Verify no circular import issues
+2. **CRITICAL: Test imports after each file update** - Run `python -c "from sotd.match.brush.strategies.X import Y"` to verify
+3. **CRITICAL: Run match tests frequently** - Use `python -m pytest tests/match/ -x --tb=short` to catch issues early
+4. Commit changes after each subdirectory is complete
+5. Verify no circular import issues
+
+**⚠️ IMPORTANT: Test Frequently to Avoid "Too Broken" State**
+- Run tests after updating 2-3 files, not after entire subdirectories
+- If tests fail, fix immediately before continuing
+- Use `-x` flag to stop on first failure for faster feedback
+- This prevents cascading import failures that are hard to debug
 
 This ensures the moved strategy files can import each other correctly.
 ```
@@ -245,9 +259,16 @@ Update relative imports within all moved scoring component files:
 
 **Process:**
 1. Update each scoring file individually
-2. Test imports after each file update
-3. Commit changes after each subdirectory is complete
-4. Verify scoring system can import all components
+2. **CRITICAL: Test imports after each file update** - Run `python -c "from sotd.match.brush.scoring.X import Y"` to verify
+3. **CRITICAL: Run match tests frequently** - Use `python -m pytest tests/match/ -x --tb=short` to catch issues early
+4. Commit changes after each subdirectory is complete
+5. Verify scoring system can import all components
+
+**⚠️ IMPORTANT: Test Frequently to Avoid "Too Broken" State**
+- Run tests after updating 2-3 files, not after entire subdirectories
+- If tests fail, fix immediately before continuing
+- Use `-x` flag to stop on first failure for faster feedback
+- This prevents cascading import failures that are hard to debug
 
 This ensures the moved scoring files can import each other correctly.
 ```
@@ -267,9 +288,16 @@ Update relative imports within validation and comparison files:
 
 **Process:**
 1. Update each validation/comparison file individually
-2. Test imports after each file update
-3. Commit changes after completion
-4. Verify validation and comparison systems work correctly
+2. **CRITICAL: Test imports after each file update** - Run `python -c "from sotd.match.brush.validation.X import Y"` to verify
+3. **CRITICAL: Run match tests frequently** - Use `python -m pytest tests/match/ -x --tb=short` to catch issues early
+4. Commit changes after completion
+5. Verify validation and comparison systems work correctly
+
+**⚠️ IMPORTANT: Test Frequently to Avoid "Too Broken" State**
+- Run tests after updating 2-3 files, not after entire subdirectories
+- If tests fail, fix immediately before continuing
+- Use `-x` flag to stop on first failure for faster feedback
+- This prevents cascading import failures that are hard to debug
 
 This ensures the moved validation and comparison files can import correctly.
 ```
@@ -295,9 +323,16 @@ Update imports in the main brush module files:
 
 **Process:**
 1. Update each core file individually
-2. Test imports after each file update
-3. Commit changes after completion
-4. Verify main brush matcher can import all components
+2. **CRITICAL: Test imports after each file update** - Run `python -c "from sotd.match.brush_matcher import BrushMatcher"` to verify entry point
+3. **CRITICAL: Run match tests frequently** - Use `python -m pytest tests/match/ -x --tb=short` to catch issues early
+4. Commit changes after completion
+5. Verify main brush matcher can import all components
+
+**⚠️ IMPORTANT: Test Frequently to Avoid "Too Broken" State**
+- Run tests after updating 2-3 files, not after entire subdirectories
+- If tests fail, fix immediately before continuing
+- Use `-x` flag to stop on first failure for faster feedback
+- This prevents cascading import failures that are hard to debug
 
 This ensures the core brush files can import all their dependencies.
 ```
