@@ -56,8 +56,8 @@ brush_scoring_weights:
 
     full_input_component_matching:
       multiple_brands: 35.0
-      handle_weight: 0.5
-      knot_weight: 0.5
+      handle_weight: 0
+      knot_weight: 0
       handle_brand_without_knot_brand: -15.0
       dual_component: 0.0
 
