@@ -6,11 +6,11 @@ Tests individual components with single responsibilities and improved architectu
 
 from unittest.mock import Mock
 
-from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+from sotd.match.brush.scoring.engine import ScoringEngine
 
-from sotd.match.brush_scoring_components.correct_matches_matcher import CorrectMatchesMatcher
-from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
-from sotd.match.brush_scoring_components.performance_monitor import PerformanceMonitor
+from sotd.match.brush.scoring.matcher import CorrectMatchesMatcher
+from sotd.match.brush.scoring.orchestrator import StrategyOrchestrator
+from sotd.match.brush.scoring.performance.performance_monitor import PerformanceMonitor
 from sotd.match.types import MatchResult
 
 

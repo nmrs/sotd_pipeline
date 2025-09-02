@@ -3,8 +3,8 @@
 
 from unittest.mock import Mock
 
-from sotd.match.brush_matching_strategies.automated_split_strategy import AutomatedSplitStrategy
-from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.brush.strategies.automated.automated_split_strategy import AutomatedSplitStrategy
+from sotd.match.brush.config import BrushScoringConfig
 
 
 class TestAutomatedSplitStrategy:

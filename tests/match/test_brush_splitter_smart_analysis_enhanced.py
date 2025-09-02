@@ -1,9 +1,9 @@
 import pytest
 
-from sotd.match.brush_splitter import BrushSplitter
-from sotd.match.handle_matcher import HandleMatcher
-from sotd.match.brush_matching_strategies.known_brush_strategy import KnownBrushMatchingStrategy
-from sotd.match.brush_matching_strategies.other_brushes_strategy import OtherBrushMatchingStrategy
+from sotd.match.brush.splitter import BrushSplitter
+from sotd.match.brush.handle_matcher import HandleMatcher
+from sotd.match.brush.strategies.known.known_brush_strategy import KnownBrushMatchingStrategy
+from sotd.match.brush.strategies.other_brushes_strategy import OtherBrushMatchingStrategy
 
 
 class TestBrushSplitterSmartAnalysis:

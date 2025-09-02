@@ -4,7 +4,7 @@ Tests for CorrectMatchesStrategy.
 This tests the direct strategy for matching against correct_matches.yaml.
 """
 
-from sotd.match.brush_matching_strategies.correct_matches_strategy import (
+from sotd.match.brush.strategies.correct_matches_strategy import (
     CorrectMatchesStrategy,
 )
 from sotd.match.correct_matches import CorrectMatchesChecker
