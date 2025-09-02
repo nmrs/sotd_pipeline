@@ -283,7 +283,7 @@ class ScoringEngine:
             Tuple of (has_conflict, user_fiber, catalog_fiber)
         """
         # Use existing fiber_utils to detect user fiber
-        from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+        from ..strategies.utils.fiber_utils import match_fiber
 
         user_fiber = match_fiber(input_text)
 
@@ -334,7 +334,7 @@ class ScoringEngine:
 
         # Use fiber_utils to detect fiber in input text
         try:
-            from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+            from ..strategies.utils.fiber_utils import match_fiber
 
             fiber_type = match_fiber(input_text)
             return 1.0 if fiber_type else 0.0
@@ -371,7 +371,7 @@ class ScoringEngine:
 
         # Use knot_size_utils to detect size in input text
         try:
-            from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+            from ..strategies.utils.knot_size_utils import parse_knot_size
 
             size_match = parse_knot_size(input_text)
             return 1.0 if size_match else 0.0
