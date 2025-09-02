@@ -327,7 +327,93 @@ The redundant fields are primarily introduced by two strategies:
   - Let parent strategies handle JSON structure creation
 - **Tests**: Update any tests that expect nested structure from component strategies
 - **Benefit**: Cleaner separation of concerns, component strategies focus only on matching
-- **Status**: Both strategies successfully refactored to return only component data, all tests updated and passing
+
+#### 2.15 Knot Matcher Factory Refactoring (New Task from Focused Discussion)
+- **Action**: Extract knot strategy creation from brush_matcher.py to improve architecture
+- **Rationale**: brush_matcher.py is too large (1000+ lines) and has multiple responsibilities
+- **Files to Create**:
+  - `sotd/match/knot_matcher_factory.py` - New factory class
+- **Files to Modify**:
+  - `sotd/match/brush_matcher.py` - Remove `_create_knot_strategies()` method
+- **Changes**:
+  - Move `_create_knot_strategies()` method to new factory class
+  - Move knot strategy imports and instantiation to factory
+  - Update brush_matcher.py to use factory instead of direct creation
+  - Make knot strategy priority order explicit and testable
+- **Benefits**:
+  - Reduces brush_matcher.py complexity by ~50 lines
+  - Single responsibility: knot strategy creation
+  - Easier testing of knot strategy creation
+  - Better separation of concerns
+- **Status**: ⏳ **PENDING** - High priority architectural improvement
+- **Priority**: High - Reduces technical debt and improves maintainability
+
+#### 2.16 Handle Strategy Analysis (New Task from Focused Discussion)
+- **Action**: Analyze handle strategies to ensure consistency with knot strategy architecture
+- **Rationale**: We focused heavily on knot strategies but need to verify handle strategies are consistent
+- **Files to Analyze**:
+  - `sotd/match/brush_matching_strategies/handle_only_strategy.py`
+  - `sotd/match/brush_matching_strategies/handle_component_strategy.py`
+  - `sotd/match/handle_matcher.py`
+- **Analysis Points**:
+  - Verify handle strategies return only component data (not nested structure)
+  - Check if handle strategies have consistent priority order
+  - Ensure handle strategy architecture matches knot strategy patterns
+  - Identify any missing handle strategies or inconsistencies
+- **Expected Findings**:
+  - Handle strategies should return root-level `handle_maker`, `handle_model` fields
+  - Handle strategies should not create nested `handle`/`knot` sections
+  - Handle matcher should orchestrate handle strategies similar to knot matcher
+- **Status**: ⏳ **PENDING** - Medium priority consistency check
+- **Priority**: Medium - Ensures architectural consistency across all strategies
+
+#### 2.17 Component Strategy Testing Requirements (New Task from Focused Discussion)
+- **Action**: Define and implement comprehensive testing requirements for component vs parent strategies
+- **Rationale**: Need proper test coverage for the new component/parent strategy architecture
+- **Testing Requirements**:
+
+**Component Strategy Testing:**
+- Test that component strategies return only root-level component data
+- Test that component strategies never create nested `handle`/`knot` sections
+- Test both cached result extraction and direct matching fallback paths
+- Test edge cases: empty input, no match, exception handling
+
+**Parent Strategy Testing:**
+- Test that parent strategies always create full nested structure
+- Test correct combination of component data into nested structure
+- Test both single and dual component scenarios
+
+**Integration Testing:**
+- Test complete workflow: Component → Parent → Aggregator
+- Test data flow through entire pipeline
+- Test that aggregators can read from nested structure
+
+- **Files to Create/Update**:
+  - Test files for component strategy behavior
+  - Test files for parent strategy behavior
+  - Integration test files for complete workflow
+- **Status**: ⏳ **PENDING** - Medium priority testing improvement
+- **Priority**: Medium - Ensures proper test coverage for new architecture
+
+## Focused Discussion Results: Handle and Knot Strategy Architecture
+
+### **Architecture Requirements Identified:**
+- **Component Strategies**: Return only root-level component data (no nested structure)
+- **Parent Strategies**: Create full nested JSON structure with `handle` and `knot` sections
+- **Core Strategies**: Used by KnotMatcher, return root-level component data
+- **Priority Order**: Known → Other → Fiber → Size (fiber more important than size)
+
+### **Key Discoveries:**
+1. **FiberFallbackStrategy was missing** from KnotMatcher but expected by priority calculation
+2. **Knot strategy priority order corrected**: Fiber detection before size detection
+3. **brush_matcher.py is too large** (1000+ lines) and needs refactoring
+4. **Handle strategies need analysis** to ensure consistency with knot strategy patterns
+5. **Testing requirements need definition** for component vs parent strategy architecture
+
+### **New Tasks Added to Phase 2:**
+- 2.15: Knot Matcher Factory Refactoring (High Priority)
+- 2.16: Handle Strategy Analysis (Medium Priority)  
+- 2.17: Component Strategy Testing Requirements (Medium Priority)
 
 ### Phase 3: Verify Rehydration Works with New Structure
 
