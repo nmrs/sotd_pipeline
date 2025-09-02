@@ -1,7 +1,7 @@
 # Plan: Remove Redundant Brush Fields and Fix Rehydration
 
 **Date:** 2025-09-01  
-**Status:** IN PROGRESS - Phase 2.4 (Update Strategy-Specific Tests)  
+**Status:** IN PROGRESS - Phase 2.5 (Update Integration Tests)  
 **Priority:** Medium  
 **Type:** Refactoring + Bug Fix  
 
@@ -208,15 +208,17 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: All 5 structure preservation tests updated and passing
 - **Changes**: Updated test expectations to match actual CorrectMatchesStrategy output structure
 
-#### 2.4 Update Strategy-Specific Tests
+#### 2.4 Update Strategy-Specific Tests ✅ **COMPLETE**
 - **Files**: All strategy test files in `tests/match/brush_matching_strategies/`
-- **Focus**: Tests for `known_brush_strategy`, `other_brush_strategy`, `omega_semogue_strategy`, `zenith_strategy`
+- **Focus**: Tests for `known_brush_strategy`, `other_brushes_strategy`, `omega_semogue_strategy`, `zenith_strategy`
 - **Action**: Update assertions to expect nested structure instead of flat structure
 - **Examples**:
   - `tests/match/brush_matching_strategies/test_known_brush_strategy.py`
-  - `tests/match/brush_matching_strategies/test_other_brush_strategy.py`
+  - `tests/match/brush_matching_strategies/test_other_brushes_strategy.py`
   - `tests/match/brush_matching_strategies/test_omega_semogue_strategy.py`
   - `tests/match/brush_matching_strategies/test_zenith_strategy.py`
+- **Status**: All 190 brush matching strategy tests already updated and passing
+- **Note**: Strategy tests were updated in previous phases (1.6-1.8) when strategies were refactored
 
 #### 2.5 Update Integration Tests
 - **Files**: Tests that verify end-to-end brush matching workflow
