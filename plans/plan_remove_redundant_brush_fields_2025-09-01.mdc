@@ -554,117 +554,17 @@ The redundant fields are primarily introduced by two strategies:
   - ✅ **Memory Usage Stable** - No significant memory increase
   - ✅ **Processing Speed Maintained** - All timing benchmarks within acceptable ranges
 
-#### 4.5 Brush Module Reorganization (New Architectural Task)
+#### 4.5 Brush Module Reorganization ⏸️ **DEFERRED**
 - **Objective**: Reorganize complex brush matching system into dedicated module
 - **Rationale**: Brush matching system is much more complex than simple matchers (razor, blade, soap)
-- **Current Problem**: 
-  - `sotd/match/` has 15+ brush-related files mixed with simple matchers
-  - Brush system is 1000+ lines vs simple matchers that are ~100-200 lines
-  - Poor separation of concerns and navigation
-- **Proposed Structure**:
-  ```
-  sotd/match/
-  ├── brush_matcher.py          # Simple entry point, delegates to brush/
-  ├── razor_matcher.py          # Simple matchers at top level
-  ├── blade_matcher.py
-  ├── soap_matcher.py
-  └── brush/                    # Complex brush matching system (30+ files)
-      ├── __init__.py           # Exports BrushMatcher
-      ├── matcher.py            # Main BrushMatcher class
-      ├── strategies/           # 19 strategy files + utils (from brush_matching_strategies/)
-      │   ├── __init__.py
-      │   ├── automated/        # Split strategies (automated_split, high_priority, medium_priority)
-      │   ├── known/            # Known strategies (known_brush, known_knot, known_split_wrapper)
-      │   ├── component/        # Component strategies (handle_component, knot_component)
-      │   ├── fallback/         # Fallback strategies (fiber_fallback, knot_size_fallback)
-      │   ├── specialized/      # Specialized strategies (omega_semogue, zenith)
-      │   ├── correct_matches_strategy.py
-      │   ├── complete_brush_wrapper_strategy.py
-      │   ├── full_input_component_matching_strategy.py
-      │   ├── other_brushes_strategy.py
-      │   └── utils/            # Strategy utilities (fiber_utils, knot_size_utils, pattern_utils)
-      ├── scoring/              # 9 scoring component files (from brush_scoring_components/)
-      │   ├── __init__.py
-      │   ├── engine.py         # scoring_engine.py
-      │   ├── orchestrator.py   # strategy_orchestrator.py
-      │   ├── performance/      # performance_monitor.py, strategy_performance_optimizer.py
-      │   ├── dependencies/     # strategy_dependency_manager.py
-      │   ├── calculator.py     # component_score_calculator.py
-      │   ├── resolver.py       # result_conflict_resolver.py
-      │   └── matcher.py        # correct_matches_matcher.py
-      ├── validation/           # Validation and CLI files
-      │   ├── cli.py            # brush_validation_cli.py
-      │   ├── counting.py       # brush_validation_counting_service.py
-      │   └── user_actions.py   # brush_user_actions.py
-      ├── comparison/           # Comparison and framework files
-      │   ├── framework.py      # brush_comparison_framework.py
-      │   ├── system.py         # brush_system_comparator.py
-      │   └── splits_loader.py  # brush_splits_loader.py
-      ├── config.py             # brush_scoring_config.py
-      ├── splitter.py           # brush_splitter.py
-      ├── handle_matcher.py     # Component matchers
-      ├── knot_matcher.py
-      └── knot_matcher_factory.py
-  ```
-- **Benefits**:
-  - **Consistent API surface** - All matchers follow same import pattern
-  - **Progressive disclosure** - Simple interface, complex implementation hidden
-  - **Backward compatibility** - Existing imports continue to work
-  - **Better organization** - Complex system properly encapsulated
-  - **Easier navigation** - All brush code in one place
-- **Implementation Approach**:
-  - Create `sotd/match/brush/` module structure
-  - Move all brush-related files to appropriate subdirectories
-  - Update `sotd/match/brush_matcher.py` to be simple entry point that delegates
-  - Update all imports across codebase
-  - Maintain backward compatibility with existing imports
-- **Files to Move**:
-  - **Strategies** (19 files + utils):
-    - `brush_matching_strategies/automated_split_strategy.py` → `brush/strategies/automated/`
-    - `brush_matching_strategies/high_priority_automated_split_strategy.py` → `brush/strategies/automated/`
-    - `brush_matching_strategies/medium_priority_automated_split_strategy.py` → `brush/strategies/automated/`
-    - `brush_matching_strategies/known_brush_strategy.py` → `brush/strategies/known/`
-    - `brush_matching_strategies/known_knot_strategy.py` → `brush/strategies/known/`
-    - `brush_matching_strategies/known_split_wrapper_strategy.py` → `brush/strategies/known/`
-    - `brush_matching_strategies/handle_component_strategy.py` → `brush/strategies/component/`
-    - `brush_matching_strategies/knot_component_strategy.py` → `brush/strategies/component/`
-    - `brush_matching_strategies/fiber_fallback_strategy.py` → `brush/strategies/fallback/`
-    - `brush_matching_strategies/knot_size_fallback_strategy.py` → `brush/strategies/fallback/`
-    - `brush_matching_strategies/omega_semogue_strategy.py` → `brush/strategies/specialized/`
-    - `brush_matching_strategies/zenith_strategy.py` → `brush/strategies/specialized/`
-    - `brush_matching_strategies/correct_matches_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/complete_brush_wrapper_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/full_input_component_matching_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/other_brushes_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/other_knot_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/base_brush_matching_strategy.py` → `brush/strategies/`
-    - `brush_matching_strategies/utils/` → `brush/strategies/utils/`
-  - **Scoring Components** (9 files):
-    - `brush_scoring_components/scoring_engine.py` → `brush/scoring/engine.py`
-    - `brush_scoring_components/strategy_orchestrator.py` → `brush/scoring/orchestrator.py`
-    - `brush_scoring_components/performance_monitor.py` → `brush/scoring/performance/`
-    - `brush_scoring_components/strategy_performance_optimizer.py` → `brush/scoring/performance/`
-    - `brush_scoring_components/strategy_dependency_manager.py` → `brush/scoring/dependencies/`
-    - `brush_scoring_components/component_score_calculator.py` → `brush/scoring/calculator.py`
-    - `brush_scoring_components/result_conflict_resolver.py` → `brush/scoring/resolver.py`
-    - `brush_scoring_components/correct_matches_matcher.py` → `brush/scoring/matcher.py`
-  - **Validation Files**:
-    - `brush_validation_cli.py` → `brush/validation/cli.py`
-    - `brush_validation_counting_service.py` → `brush/validation/counting.py`
-    - `brush_user_actions.py` → `brush/validation/user_actions.py`
-  - **Comparison Files**:
-    - `brush_comparison_framework.py` → `brush/comparison/framework.py`
-    - `brush_system_comparator.py` → `brush/comparison/system.py`
-    - `brush_splits_loader.py` → `brush/comparison/splits_loader.py`
-  - **Core Files**:
-    - `brush_matcher.py` → `brush/matcher.py` (main class)
-    - `brush_scoring_config.py` → `brush/config.py`
-    - `brush_splitter.py` → `brush/splitter.py`
-    - `handle_matcher.py` → `brush/handle_matcher.py`
-    - `knot_matcher.py` → `brush/knot_matcher.py`
-    - `knot_matcher_factory.py` → `brush/knot_matcher_factory.py`
-- **Status**: ⏳ **PENDING** - High priority architectural improvement
-- **Priority**: High - Significantly improves code organization and maintainability
+- **Status**: ⏸️ **DEFERRED** - Created separate plan for this complex architectural task
+- **Separate Plan**: `plans/plan_brush_module_reorganization_2025-09-02.mdc`
+- **Reason for Deferral**: 
+  - Very large and complex task (30+ files to move, extensive import updates)
+  - Not critical for current redundant field removal goal
+  - Better to tackle as dedicated project with proper planning
+  - Current system is working correctly with new nested structure
+- **Priority**: Medium - Important for long-term maintainability but not urgent
 
 ## Rehydration Format Specification
 
