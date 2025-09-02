@@ -265,13 +265,28 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: ✅ **COMPLETE** - No brush data structure updates needed in report tests
 - **Note**: Report tests use aggregated data format, not raw brush matching data, so no updates required
 
-#### 2.9 Verify Test Coverage
+#### 2.9 Verify Test Coverage ✅ **COMPLETE**
 - **Action**: Run test discovery to identify any missed test files
 - **Command**: `python -m pytest --collect-only` to see all test files
 - **Goal**: Ensure no test file is missed in the update process
 - **Risk**: Missing test updates could cause silent test failures
+- **Status**: ✅ **COMPLETE** - Comprehensive search completed
+- **Files Found Needing Updates**:
+  - `tests/match/test_brush_validation_investigation.py` - Contains root-level fiber/knot_size_mm fields
+  - `tests/match/test_brush_scoring_components.py` - Line 201 has root-level fiber field
+  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - Expects root-level fiber/knot_size_mm from KnownKnotMatchingStrategy
+- **Note**: Most test files already have correct nested structure or use aggregated data format
 
-#### 2.10 Comprehensive Test File Search
+#### 2.10 Update Discovered Test Files (New Task from Phase 2.9)
+- **Action**: Update the test files discovered in Phase 2.9 that contain root-level fiber/knot_size_mm fields
+- **Files to Update**:
+  - `tests/match/test_brush_validation_investigation.py` - Update test data to use nested structure
+  - `tests/match/test_brush_scoring_components.py` - Update MatchResult creation to use nested structure
+  - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - Update assertions to expect nested structure
+- **Status**: ⏳ **PENDING** - Files identified, updates needed
+- **Priority**: Medium - These are test files that need to match the new nested structure
+
+#### 2.11 Comprehensive Test File Search ✅ **COMPLETE**
 - **Action**: Search for any test files that might contain brush-related assertions
 - **Search Patterns**: 
   - Files containing `"fiber"` assertions
@@ -279,8 +294,9 @@ The redundant fields are primarily introduced by two strategies:
   - Files containing `"handle"` or `"knot"` structure tests
 - **Command**: `grep -r "fiber\|knot_size_mm" tests/ --include="*.py"`
 - **Goal**: Find any test files that might have been missed in the above categories
+- **Status**: ✅ **COMPLETE** - Comprehensive search completed, files identified in Phase 2.9
 
-#### 2.11 Update BrushAggregator Logic (New Task Discovered)
+#### 2.12 Update BrushAggregator Logic (New Task Discovered)
 - **File**: `sotd/aggregate/aggregators/core/brush_aggregator.py`
 - **Action**: Update aggregator to use nested structure for fiber field access
 - **Current Issue**: Uses `get_field_value(matched, "fiber")` which looks for root-level fields
@@ -288,7 +304,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: ⏳ **PENDING** - Identified during Phase 2.6 analysis
 - **Priority**: High - Core aggregator that processes all brush data
 
-#### 2.12 Additional Aggregator Analysis (New Task Discovered)
+#### 2.13 Additional Aggregator Analysis (New Task Discovered)
 - **Action**: Search for other aggregators that might expect root-level brush fields
 - **Search Patterns**: 
   - Files using `matched.get("fiber")` or `matched.get("knot_size_mm")`
@@ -298,7 +314,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Goal**: Identify all aggregators that need updates for nested structure
 - **Status**: ⏳ **PENDING** - Comprehensive analysis needed
 
-#### 2.13 Remove Unnecessary JSON Writing from Component Strategies ✅ **COMPLETE**
+#### 2.14 Remove Unnecessary JSON Writing from Component Strategies ✅ **COMPLETE**
 - **Action**: Remove JSON structure creation from KnotOnlyStrategy and HandleOnlyStrategy
 - **Rationale**: Component strategies should only return component data, not create complete JSON structure
 - **Files**: 
