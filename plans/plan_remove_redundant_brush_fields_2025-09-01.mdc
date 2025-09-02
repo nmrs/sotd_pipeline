@@ -304,7 +304,7 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: ✅ **COMPLETE** - Updated to look for fiber in nested knot structure with backward compatibility fallback
 - **Priority**: High - Core aggregator that processes all brush data
 
-#### 2.13 Additional Aggregator Analysis (New Task Discovered)
+#### 2.13 Additional Aggregator Analysis (New Task Discovered) ✅ **COMPLETE**
 - **Action**: Search for other aggregators that might expect root-level brush fields
 - **Search Patterns**: 
   - Files using `matched.get("fiber")` or `matched.get("knot_size_mm")`
@@ -312,7 +312,14 @@ The redundant fields are primarily introduced by two strategies:
   - Any aggregator that processes brush data
 - **Command**: `grep -r "matched.*fiber\|matched.*knot_size_mm" sotd/aggregate/ --include="*.py"`
 - **Goal**: Identify all aggregators that need updates for nested structure
-- **Status**: ⏳ **PENDING** - Comprehensive analysis needed
+- **Status**: ✅ **COMPLETE** - Found and updated BrushDiversityAggregator, other aggregators already support nested structure
+- **Results**: 
+  - ✅ KnotSizeAggregator: Already supports nested structure
+  - ✅ FiberAggregator: Already supports nested structure  
+  - ✅ BrushFiberUserAggregator: Already supports nested structure
+  - ✅ KnotMakerAggregator: Already supports nested structure
+  - ✅ HandleMakerAggregator: Already supports nested structure
+  - ✅ BrushDiversityAggregator: **UPDATED** to support nested structure
 
 #### 2.14 Remove Unnecessary JSON Writing from Component Strategies ✅ **COMPLETE**
 - **Action**: Remove JSON structure creation from KnotOnlyStrategy and HandleOnlyStrategy

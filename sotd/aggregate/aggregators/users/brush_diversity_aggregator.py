@@ -40,12 +40,18 @@ class BrushDiversityAggregator(BaseAggregator):
             if not matched:
                 continue
 
-            # Extract all available brush fields
+            # Extract all available brush fields from nested structure
             brand = matched.get("brand")
             model = matched.get("model")
-            knot_brand = matched.get("knot_brand")
-            knot_model = matched.get("knot_model")
-            handle_brand = matched.get("handle_brand")
+
+            # Extract knot information from nested structure
+            knot = matched.get("knot", {})
+            knot_brand = knot.get("brand") if isinstance(knot, dict) else None
+            knot_model = knot.get("model") if isinstance(knot, dict) else None
+
+            # Extract handle information from nested structure
+            handle = matched.get("handle", {})
+            handle_brand = handle.get("brand") if isinstance(handle, dict) else None
 
             # Skip if no basic brand/model info
             if not brand or not model:
@@ -124,7 +130,9 @@ class BrushDiversityAggregator(BaseAggregator):
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add rank rankings."""
         grouped = grouped.sort_values(["unique_brushes", "shaves"], ascending=[False, False])
-        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            rank=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # OPTIMIZED: Use pandas operations to rename and convert types
         # Rename columns using pandas operations

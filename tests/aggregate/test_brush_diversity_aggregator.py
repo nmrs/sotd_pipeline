@@ -19,9 +19,13 @@ class TestBrushDiversityAggregator:
                     "matched": {
                         "brand": "Declaration",
                         "model": "B2",
-                        "knot_brand": "Declaration",
-                        "knot_model": "B2",
-                        "handle_brand": "Dogwood",
+                        "knot": {
+                            "brand": "Declaration",
+                            "model": "B2",
+                        },
+                        "handle": {
+                            "brand": "Dogwood",
+                        },
                     },
                 },
             },
@@ -31,9 +35,13 @@ class TestBrushDiversityAggregator:
                     "matched": {
                         "brand": "Simpson",
                         "model": "Chubby 2",
-                        "knot_brand": "Simpson",
-                        "knot_model": "Best Badger",
-                        "handle_brand": "Simpson",
+                        "knot": {
+                            "brand": "Simpson",
+                            "model": "Best Badger",
+                        },
+                        "handle": {
+                            "brand": "Simpson",
+                        },
                     },
                 },
             },
