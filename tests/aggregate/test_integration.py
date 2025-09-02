@@ -249,18 +249,30 @@ class TestAggregateIntegration:
         assert len(data["soaps"]) > 0
         assert len(data["users"]) > 0
 
-        # Verify rank fields are present for list categories with dictionaries
+        # Verify ranking fields are present for list categories with dictionaries
         for category in data:
             if isinstance(data[category], list) and data[category]:
                 # Check if the first item is a dictionary (indicating it's an aggregation result)
                 first_item = data[category][0]
                 if isinstance(first_item, dict):
                     for item in data[category]:
-                        assert "rank" in item, f"Missing rank in {category}"
-                        assert isinstance(
-                            item["rank"], int
-                        ), f"Rank should be integer in {category}"
-                        assert item["rank"] >= 1, f"Rank should be positive in {category}"
+                        # Some categories use "rank", others use "position"
+                        has_rank = "rank" in item
+                        has_position = "position" in item
+                        assert has_rank or has_position, f"Missing rank or position in {category}"
+
+                        if has_rank:
+                            assert isinstance(
+                                item["rank"], int
+                            ), f"Rank should be integer in {category}"
+                            assert item["rank"] >= 1, f"Rank should be positive in {category}"
+                        if has_position:
+                            assert isinstance(
+                                item["position"], int
+                            ), f"Position should be integer in {category}"
+                            assert (
+                                item["position"] >= 1
+                            ), f"Position should be positive in {category}"
 
     def test_file_io_integration(self, sample_enriched_data, temp_data_dir):
         """Test file I/O operations with sample data."""

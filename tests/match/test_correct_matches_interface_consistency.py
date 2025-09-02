@@ -42,11 +42,14 @@ class TestMatchResultStructure:
         assert result.match_type == "brush_section"
 
         # Test handle/knot section
-        self.correct_matches["handle"] = {
+        updated_correct_matches = self.correct_matches.copy()
+        updated_correct_matches["handle"] = {
             "Declaration Grooming": {"Washington": ["declaration grooming washington b14"]}
         }
 
-        result2 = self.checker.check("declaration grooming washington b14")
+        # Create new checker with updated data
+        checker2 = CorrectMatchesChecker(updated_correct_matches)
+        result2 = checker2.check("declaration grooming washington b14")
         assert result2 is not None
         assert result2.match_type == "handle_knot_section"
 

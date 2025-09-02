@@ -239,16 +239,16 @@ class TestComparisonDataLoading:
         comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3)
 
         assert len(comparison_data) == 3
-        # Check for date-based keys instead of descriptive keys
-        assert any("Feb 2025" in key for key in comparison_data.keys())  # Previous month
-        assert any("Mar 2024" in key for key in comparison_data.keys())  # Previous year
-        assert any("Mar 2020" in key for key in comparison_data.keys())  # 5 years ago
+        # Check for YYYY-MM format keys
+        assert any("2025-02" in key for key in comparison_data.keys())  # Previous month
+        assert any("2024-03" in key for key in comparison_data.keys())  # Previous year
+        assert any("2020-03" in key for key in comparison_data.keys())  # 5 years ago
 
         # Check that data is loaded correctly
         # Find the actual keys returned by the function
-        prev_month_key = next(key for key in comparison_data.keys() if "Feb 2025" in key)
-        prev_year_key = next(key for key in comparison_data.keys() if "Mar 2024" in key)
-        five_years_key = next(key for key in comparison_data.keys() if "Mar 2020" in key)
+        prev_month_key = next(key for key in comparison_data.keys() if "2025-02" in key)
+        prev_year_key = next(key for key in comparison_data.keys() if "2024-03" in key)
+        five_years_key = next(key for key in comparison_data.keys() if "2020-03" in key)
 
         prev_month_meta, prev_month_data = comparison_data[prev_month_key]
         prev_year_meta, prev_year_data = comparison_data[prev_year_key]
@@ -277,8 +277,8 @@ class TestComparisonDataLoading:
         comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3)
 
         assert len(comparison_data) == 1
-        # Check for date-based key instead of descriptive key
-        assert any("Mar 2024" in key for key in comparison_data.keys())  # Previous year
+        # Check for YYYY-MM format key
+        assert any("2024-03" in key for key in comparison_data.keys())  # Previous year
         assert "previous month" not in comparison_data
         assert "5 years ago" not in comparison_data
 

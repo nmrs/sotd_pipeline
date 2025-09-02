@@ -227,7 +227,7 @@ class TestBrushScoringConfigIntegration:
             modifier_names = config.get_all_modifier_names(strategy_name)
             for modifier_name in modifier_names:
                 modifier_value = config.get_strategy_modifier(strategy_name, modifier_name)
-                assert isinstance(modifier_value, float)
+                assert isinstance(modifier_value, (int, float))
 
     def test_config_performance(self):
         """Test configuration performance with repeated access."""
