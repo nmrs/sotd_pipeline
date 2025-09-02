@@ -109,7 +109,7 @@ class BrushFiberUserAggregator(BaseAggregator):
                 current_position = 1
 
             item = {
-                "position": current_position,
+                "rank": current_position,
                 "fiber": fiber_type,
                 "user": row["author"],  # Keep clean, add "u/" in report
                 "shaves": int(row["shaves"]),

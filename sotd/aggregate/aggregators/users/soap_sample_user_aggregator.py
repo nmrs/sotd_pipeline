@@ -141,7 +141,7 @@ class SoapSampleUserAggregator(BaseAggregator):
         result = []
         for _, row in grouped.iterrows():
             item = {
-                "position": int(row["position"]),
+                "rank": int(row["position"]),
                 "user": row["author"],  # Keep clean, add "u/" in report
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
