@@ -3,10 +3,10 @@ Test model naming consistency across all brush matching strategies.
 Ensures that no strategy includes brand prefixes in the model field.
 """
 
-from sotd.match.brush_matching_strategies.known_brush_strategy import (
+from sotd.match.brush.strategies.known.known_brush_strategy import (
     KnownBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+from sotd.match.brush.strategies.other_brushes_strategy import (
     OtherBrushMatchingStrategy,
 )
 

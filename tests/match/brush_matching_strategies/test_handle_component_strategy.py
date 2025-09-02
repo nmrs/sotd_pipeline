@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from sotd.match.brush_matching_strategies.handle_component_strategy import HandleComponentStrategy
+from sotd.match.brush.strategies.component.handle_component_strategy import HandleComponentStrategy
 from sotd.match.types import MatchResult
 
 

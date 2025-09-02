@@ -3,7 +3,7 @@ from typing import Optional
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.knot_matcher import KnotMatcher
+from ...knot_matcher import KnotMatcher
 from sotd.match.types import MatchResult, create_match_result
 
 

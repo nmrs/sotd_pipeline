@@ -11,7 +11,7 @@ class TestKnownBrushMatchingStrategy:
 
     def test_known_brush_strategy_creation(self):
         """Test that KnownBrushMatchingStrategy can be created as individual strategy."""
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+        from sotd.match.brush.strategies.known.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
 
@@ -31,7 +31,7 @@ class TestKnownBrushMatchingStrategy:
 
     def test_known_brush_strategy_matches_simpson_chubby_2(self):
         """Test that KnownBrushMatchingStrategy matches Simpson Chubby 2."""
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+        from sotd.match.brush.strategies.known.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
 
@@ -63,7 +63,7 @@ class TestKnownBrushMatchingStrategy:
 
     def test_known_brush_strategy_returns_none_for_no_match(self):
         """Test that KnownBrushMatchingStrategy returns None for no match."""
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+        from sotd.match.brush.strategies.known.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
 
@@ -89,7 +89,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
 
     def test_omega_semogue_strategy_creation(self):
         """Test that OmegaSemogueBrushMatchingStrategy can be created as individual strategy."""
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+        from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
 
@@ -99,7 +99,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
 
     def test_omega_semogue_strategy_matches_omega_10049(self):
         """Test that OmegaSemogueBrushMatchingStrategy matches Omega 10049."""
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+        from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
 
@@ -117,7 +117,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
 
     def test_omega_semogue_strategy_matches_semogue_c3(self):
         """Test that OmegaSemogueBrushMatchingStrategy matches Semogue C3."""
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+        from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
 
@@ -135,7 +135,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
 
     def test_omega_semogue_strategy_returns_none_for_no_match(self):
         """Test that OmegaSemogueBrushMatchingStrategy returns None for no match."""
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+        from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
 
@@ -151,7 +151,7 @@ class TestZenithBrushMatchingStrategy:
 
     def test_zenith_strategy_creation(self):
         """Test that ZenithBrushMatchingStrategy can be created as individual strategy."""
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
+        from sotd.match.brush.strategies.specialized.zenith_strategy import (
             ZenithBrushMatchingStrategy,
         )
 
@@ -161,7 +161,7 @@ class TestZenithBrushMatchingStrategy:
 
     def test_zenith_strategy_matches_zenith_b2(self):
         """Test that ZenithBrushMatchingStrategy matches Zenith B2."""
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
+        from sotd.match.brush.strategies.specialized.zenith_strategy import (
             ZenithBrushMatchingStrategy,
         )
 
@@ -180,7 +180,7 @@ class TestZenithBrushMatchingStrategy:
 
     def test_zenith_strategy_returns_none_for_no_match(self):
         """Test that ZenithBrushMatchingStrategy returns None for no match."""
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
+        from sotd.match.brush.strategies.specialized.zenith_strategy import (
             ZenithBrushMatchingStrategy,
         )
 
@@ -196,7 +196,7 @@ class TestOtherBrushMatchingStrategy:
 
     def test_other_brush_strategy_creation(self):
         """Test that OtherBrushMatchingStrategy can be created as individual strategy."""
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+        from sotd.match.brush.strategies.other_brushes_strategy import (
             OtherBrushMatchingStrategy,
         )
 
@@ -213,7 +213,7 @@ class TestOtherBrushMatchingStrategy:
 
     def test_other_brush_strategy_matches_elite_brush(self):
         """Test that OtherBrushMatchingStrategy matches Elite brush."""
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+        from sotd.match.brush.strategies.other_brushes_strategy import (
             OtherBrushMatchingStrategy,
         )
 
@@ -238,7 +238,7 @@ class TestOtherBrushMatchingStrategy:
 
     def test_other_brush_strategy_returns_none_for_no_match(self):
         """Test that OtherBrushMatchingStrategy returns None for no match."""
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+        from sotd.match.brush.strategies.other_brushes_strategy import (
             OtherBrushMatchingStrategy,
         )
 
@@ -261,16 +261,16 @@ class TestIndividualBrushStrategyIntegration:
 
     def test_individual_strategies_can_be_used_in_scoring_system(self):
         """Test that individual strategies can be used in the scoring system."""
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+        from sotd.match.brush.strategies.known.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+        from sotd.match.brush.strategies.specialized.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
+        from sotd.match.brush.strategies.specialized.zenith_strategy import (
             ZenithBrushMatchingStrategy,
         )
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+        from sotd.match.brush.strategies.other_brushes_strategy import (
             OtherBrushMatchingStrategy,
         )
 
@@ -300,7 +300,7 @@ class TestIndividualBrushStrategyIntegration:
 
     def test_individual_strategies_produce_consistent_results(self):
         """Test that individual strategies produce consistent results with legacy system."""
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+        from sotd.match.brush.strategies.known.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
 

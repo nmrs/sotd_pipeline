@@ -2,7 +2,7 @@
 
 import pytest
 
-from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+from sotd.match.brush.strategies.utils.pattern_utils import (
     compile_catalog_patterns,
     compile_patterns_with_metadata,
     create_default_match_structure,

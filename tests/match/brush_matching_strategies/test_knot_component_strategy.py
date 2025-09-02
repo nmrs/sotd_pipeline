@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from sotd.match.brush_matching_strategies.knot_component_strategy import KnotComponentStrategy
+from sotd.match.brush.strategies.component.knot_component_strategy import KnotComponentStrategy
 from sotd.match.types import MatchResult
 
 
