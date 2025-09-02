@@ -481,7 +481,15 @@ export function BrushMatchingAnalyzer() {
                           (result.matchedData.brand ||
                             result.matchedData.handle ||
                             result.matchedData.knot);
-                        return hasValidData;
+
+                        // Also check if enrichedData has valid match information
+                        const hasEnrichedData =
+                          results.enrichedData &&
+                          (results.enrichedData.brand ||
+                            results.enrichedData.handle ||
+                            results.enrichedData.knot);
+
+                        return hasValidData || hasEnrichedData;
                       })
                       .map((result, index) => (
                         <Card key={result.strategy} className='border-gray-200'>
@@ -554,7 +562,15 @@ export function BrushMatchingAnalyzer() {
                           (result.matchedData.brand ||
                             result.matchedData.handle ||
                             result.matchedData.knot);
-                        return !hasValidData;
+
+                        // Also check if enrichedData has valid match information
+                        const hasEnrichedData =
+                          results.enrichedData &&
+                          (results.enrichedData.brand ||
+                            results.enrichedData.handle ||
+                            results.enrichedData.knot);
+
+                        return !hasValidData && !hasEnrichedData;
                       })
                       .map((result, index) => (
                         <Card key={result.strategy} className='border-gray-200 bg-gray-50'>

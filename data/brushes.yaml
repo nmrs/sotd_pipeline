@@ -760,7 +760,7 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - torga.*c5
-    Torga C5 Synt:
+    Torga C5 Synth:
       knot_size_mm: 24
       patterns:
         - torga.*c5.*synth

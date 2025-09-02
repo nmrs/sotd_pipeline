@@ -1,0 +1,195 @@
+# Knot-Based Brushes Category Implementation Plan
+
+## 📘 Project Summary
+Implement a new `known_knot_based_brushes` category in the SOTD Pipeline brush matching system. This category will handle brushes where the knot is the primary identifier (e.g., "DB B3 Chisel & Hound v23") and will be positioned between `known_brushes` and `other_brushes` in the priority hierarchy.
+
+**Priority Order:**
+1. `known_brush`: 90.0 (bumped from 80.0)
+2. `known_knot_based_brush`: 80.0 (new category)
+3. `other_brush`: 70.0 (unchanged)
+
+## 🧩 Component Steps
+
+### Step 1: Catalog Structure Setup
+Add new `known_knot_based_brushes` section to `brushes.yaml` with initial test entries
+
+### Step 2: Strategy Class Implementation
+Create `KnownKnotBasedBrushMatchingStrategy` class with comprehensive testing
+
+### Step 3: Scoring Configuration Update
+Update `brush_scoring_config.yaml` with new base scores and priority order
+
+### Step 4: Integration and Orchestration
+Integrate new strategy into `BrushMatcher` and `StrategyOrchestrator`
+
+### Step 5: Comprehensive Testing
+Add integration tests and validate end-to-end functionality
+
+### Step 6: Documentation and Rules Update
+Update match phase rules and documentation
+
+## 🔁 Implementation Prompts
+
+### Step 1: Catalog Structure Setup
+
+```text
+**Context**: We're implementing a new `known_knot_based_brushes` category for the SOTD Pipeline brush matching system. This category will handle brushes where the knot is the primary identifier.
+
+**Task**: Add a new top-level section `known_knot_based_brushes` to `data/brushes.yaml` with initial test entries.
+
+**Requirements**:
+1. Add the new section after the existing `known_brushes` section
+2. Include test entries for Chisel & Hound v23 and Declaration Grooming B1
+3. Follow the existing pattern structure with fiber, knot_size_mm, and patterns fields
+4. Use realistic patterns that would match actual SOTD comments
+
+**Test Data to Include**:
+- Chisel & Hound v23: Badger, 26mm, patterns for "chisel & hound v23", "c&h v23", etc.
+- Declaration Grooming B1: Badger, 28mm, patterns for "declaration grooming b1", "dg b1", etc.
+
+**Validation**: Ensure the YAML structure is valid and follows existing patterns.
+```
+
+### Step 2: Strategy Class Implementation
+
+```text
+**Context**: We've added the `known_knot_based_brushes` section to the catalog. Now we need to create a matching strategy class.
+
+**Task**: Create `KnownKnotBasedBrushMatchingStrategy` class in `sotd/match/brush/strategies/known/known_knot_based_brush_strategy.py`.
+
+**Requirements**:
+1. Inherit from `BaseBrushMatchingStrategy`
+2. Use the same pattern matching logic as `KnownBrushMatchingStrategy`
+3. Load from `known_knot_based_brushes` section instead of `known_brushes`
+4. Return strategy name as `known_knot_based_brush`
+5. Include comprehensive unit tests covering:
+   - Basic pattern matching
+   - Edge cases (empty input, no matches)
+   - Case insensitivity
+   - Multiple pattern matching
+   - Fiber and size detection
+
+**Test Cases**:
+- "chisel & hound v23" → should match Chisel & Hound v23
+- "C&H v23" → should match Chisel & Hound v23 (case insensitive)
+- "declaration grooming b1" → should match Declaration Grooming B1
+- "unknown brush" → should return None
+- "" → should return None
+
+**Validation**: All tests must pass and the strategy should integrate with existing brush matching infrastructure.
+```
+
+### Step 3: Scoring Configuration Update
+
+```text
+**Context**: We have the strategy class implemented. Now we need to update the scoring configuration to include the new category with proper priority.
+
+**Task**: Update `data/brush_scoring_config.yaml` to include the new `known_knot_based_brush` strategy with base score 80.0 and update `known_brush` to 90.0.
+
+**Requirements**:
+1. Add `known_knot_based_brush: 80.0` to `base_strategies` section
+2. Update `known_brush` from 80.0 to 90.0
+3. Maintain existing priority order: known_brush (90.0) > known_knot_based_brush (80.0) > other_brush (70.0)
+4. Add comprehensive comments explaining the new category
+5. Ensure no modifiers are needed (following the "complete brushes" pattern)
+
+**Validation**: Verify the YAML is valid and the scoring hierarchy is correct.
+```
+
+### Step 4: Integration and Orchestration
+
+```text
+**Context**: We have the strategy class and scoring configuration. Now we need to integrate it into the main brush matching system.
+
+**Task**: Integrate `KnownKnotBasedBrushMatchingStrategy` into the `BrushMatcher` and `StrategyOrchestrator` with correct priority order.
+
+**Requirements**:
+1. Add the new strategy to `StrategyOrchestrator.run_all_strategies()` method
+2. Ensure it runs after `known_brush` but before `other_brush`
+3. Update any strategy factory or creation methods
+4. Add integration tests to verify the priority order works correctly
+5. Test that the new strategy is called in the correct sequence
+
+**Test Scenarios**:
+- "chisel & hound v23" should match via `known_knot_based_brush` strategy
+- "simpson chubby 2" should still match via `known_brush` strategy (higher priority)
+- Verify strategy execution order in logs/debug output
+
+**Validation**: All existing tests must pass and new integration tests must verify correct priority ordering.
+```
+
+### Step 5: Comprehensive Testing
+
+```text
+**Context**: The new strategy is integrated into the system. Now we need comprehensive testing to ensure everything works correctly.
+
+**Task**: Add comprehensive integration tests and validate end-to-end functionality.
+
+**Requirements**:
+1. Add integration tests in `tests/match/test_brush_matching_integration.py`
+2. Test the complete matching pipeline with the new category
+3. Verify scoring works correctly (known_knot_based_brush gets 80.0 base score)
+4. Test edge cases and error handling
+5. Add performance tests to ensure no regression
+6. Test with real SOTD data patterns
+
+**Test Cases**:
+- End-to-end matching: "DB B3 Chisel & Hound v23" → should match with score 80.0
+- Priority verification: known_brush should still have higher priority
+- Error handling: malformed input, missing catalog entries
+- Performance: ensure no significant slowdown
+
+**Validation**: All tests pass, including existing ones, and performance is maintained.
+```
+
+### Step 6: Documentation and Rules Update
+
+```text
+**Context**: The implementation is complete and tested. Now we need to update documentation and rules.
+
+**Task**: Update match phase rules and documentation to reflect the new `known_knot_based_brushes` category.
+
+**Requirements**:
+1. Update `.cursor/rules/match-phase.mdc` to document the new category
+2. Add examples of knot-based brushes vs complete brushes
+3. Update any relevant documentation in `docs/` directory
+4. Add the new category to any strategy documentation
+5. Update comments in code to reflect the new priority order
+
+**Documentation Updates**:
+- Explain the difference between complete brushes and knot-based brushes
+- Document the priority hierarchy: known_brush > known_knot_based_brush > other_brush
+- Add examples of each category type
+- Update any strategy pattern documentation
+
+**Validation**: All documentation is accurate and reflects the current implementation.
+```
+
+## 🧠 Critical Analysis
+
+**Prompt Sequence Analysis:**
+1. **Step 1** establishes the data foundation with minimal risk - just adding YAML structure
+2. **Step 2** creates the core logic with comprehensive testing, following TDD principles
+3. **Step 3** updates configuration, which is low-risk and easily reversible
+4. **Step 4** integrates the new component, which is the highest risk step requiring careful testing
+5. **Step 5** provides comprehensive validation to catch any integration issues
+6. **Step 6** ensures documentation stays current, preventing future confusion
+
+**Risk Mitigation:**
+- Each step builds incrementally on the previous one
+- Comprehensive testing at each stage prevents regressions
+- The priority order change is isolated to configuration, making it easy to adjust
+- Integration testing ensures the new strategy doesn't break existing functionality
+
+**Design Decisions:**
+- Reusing existing `KnownBrushMatchingStrategy` pattern minimizes code duplication
+- No priority modifiers needed - simple base score approach is cleaner
+- Maintaining existing priority hierarchy prevents breaking changes
+- Comprehensive testing ensures reliability and maintainability
+
+**Success Criteria:**
+- All existing tests continue to pass
+- New `known_knot_based_brush` strategy works correctly
+- Priority order is maintained: known_brush (90.0) > known_knot_based_brush (80.0) > other_brush (70.0)
+- Performance is maintained or improved
+- Documentation is accurate and complete

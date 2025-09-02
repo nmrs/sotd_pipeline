@@ -925,8 +925,6 @@ brush:
     B9A:
     - declaration grooming - lavender jefferson - 28mm b9a+
     - dg b9a
-    B9B:
-    - hucklaration b9b
   Dogwood:
     Boar:
     - dogwood handcrafts - faux ivory - 26mm boar
@@ -1285,6 +1283,7 @@ handle:
     - bristle brush werks tns quarter moon
     - bristle brushwerks 28mm amber huckleration b3
     - bristle brushwerks amber hucklaration b3 28mm
+    - Hucklaration B9B
   Brochas El Druida:
     Unspecified:
     - brochas el druida
@@ -1625,6 +1624,8 @@ knot:
     - dogclaration 30mm b9a
     - dogwood handcrafts 26mm b9a+
     - dogwood handcrafts 26mm declaration b9a+
+    B9B:
+    - Hucklaration B9B
   Dogwood:
     Badger:
     - dogwood handcrafts 24mm 2-band
@@ -1802,6 +1803,8 @@ razor:
     - att oc r2
     S1:
     - above the tie - aluminum alrh plate bamboo handle
+    - above the tie - s1 slant
+    - above the tie - s1 slant razor
     - above the tie atlas s1
     - att s1
     - att s1 slant
@@ -1812,6 +1815,9 @@ razor:
     Windsor SSRH2:
     - above the tie - windsor ssrh2, oc base plate, de - (original version not windsor
       pro)
+  Adopted Acres:
+    Chisel Plow:
+    - adopted acres chisel plow scalloped
   Ale Razors:
     Straight:
     - ale razors 8/8 near half hollow barber's notch
@@ -1821,6 +1827,8 @@ razor:
   Alpha:
     Claymore:
     - alpha shaving - claymore
+    Futura:
+    - alpha futura
     Outlaw:
     - alpha outlaw
     - alpha outlaw evolution ti
@@ -1842,7 +1850,10 @@ razor:
   Art Razor:
     Straight:
     - art razor gulliver 12/8"
+    - art razors 13/18" el comandante full hollow barber's notch
     - art razors capitaine 19/16 full hollow square tip
+    - straight art razor anaconda
+    - straight art_razor_ua dolphin by yurii kravchenko
     - straight yurii kravcenko konsul
     - yurii kravcenko hunter half hollow 8/8
     - yurii kravcenko kamisori style razor
@@ -1861,6 +1872,7 @@ razor:
     - atelier durdan - horizon
     - atelier durdan - horizon - ac adjustable
     - atelier durdan horizon
+    - atelier durdan horizon(on loan)
     Le Faulx:
     - atelier durdan - la faulx classique
     - atelier durdan le faux plus plate
@@ -1912,18 +1924,22 @@ razor:
   Blackland:
     Blackbird:
     - backland blackbird lite ss
+    - blackbird ti sb
     - 'blackland - batch #003 (aluminum blackbird)'
     - blackland - blackbird
     - blackland - blackbird and van der hagen - traditional safety razor
     - blackland - blackbird batch 3
     - blackland - blackbird ss
     - blackland - blackbird ti
+    - blackland - blackbird, de safety razor, brass, 101 mm handle
     - blackland - blackbird, de safety razor, brass, 101 mm handle \- "brassbird"
+    - blackland bb
     - blackland blackbird
     - blackland blackbird (brass)
     - blackland blackbird (ss)
     - blackland blackbird brass
     - blackland blackbird lite
+    - blackland blackbird lite plate (ss)
     - blackland blackbird lite ss
     - blackland blackbird lite ss / gillette silver blue
     - blackland blackbird oc
@@ -1951,6 +1967,7 @@ razor:
     - blackland - era
     - blackland - era sb level 5
     - blackland era
+    - blackland era (l4 plate)
     - blackland era - level 3
     - blackland era - level 4 sb
     - blackland era sb lvl 3
@@ -1968,6 +1985,7 @@ razor:
     - blackland sabre l2
     - blackland sabre level 2
     - blackland sabre lvl 2
+    - sabre v1 - level 2 plate
     Sabre V2:
     - blackland - sabre v2 l3
     - blackland sabre 2.0
@@ -2025,6 +2043,7 @@ razor:
     - h boker 5/8" and tang
   C-Mon:
     Straight:
+    - c-mon special 5/8 hollow ground square point
     - c-mon special square tip
     - cmon special 5/8 hollow ground square point
   C.V. Heljestrand:
@@ -2112,6 +2131,7 @@ razor:
     - charcoal goods - gen 1 level 3
   Chiseled Face:
     Legacy:
+    - cf legacy
     - chiseled face - legacy
     - chiseled face - legacy brass
     - chiseled face - legacy ti
@@ -2149,6 +2169,8 @@ razor:
     Monobilt:
     - cooper - monobilt
   DSCosmetic:
+    AX:
+    - ds-ax 1.55 "poleaxe"
     Mars SE:
     - ds cosmetic mars single edge razor
   Daune:
@@ -2254,6 +2276,7 @@ razor:
   F.W. Engels:
     Straight:
     - f.w. engels leader 6/8 full hollow square point
+    - f.w. engels special
   Facón:
     Kamisori Shavette:
     - facón - kamisori-style shavette; karve shaving co. - overlander brass
@@ -2287,9 +2310,11 @@ razor:
   Feather:
     Popular:
     - feather - popular
+    - feather popular
     Shavette:
     - feather - ss kamisori
     - feather ac kamisori
+    - feather ac sr kamisori shavette
     - feather artist club dx
     - feather artist club sr
     - feather artist club ss
@@ -2305,6 +2330,7 @@ razor:
     - filarmonica 14 7/8 dt
     - filarmonica 14 doble temple (8/8", extra full hollow, carbon steel)
     - filarmonica 14 epbd 1st gen
+    - filarmónica 14 doble temple (2nd gen)
     - filarmónica doble temple 14
   Fine Accoutrements:
     DE5:
@@ -2372,12 +2398,15 @@ razor:
     - gem micromatic
     Micromatic Open Comb:
     - gem - micromatic open comb
+    - gem - micromatic open comb (second generation)
     - gem - micromatic open comb - gen 2
     - gem - mmoc (first gen, 1930-1932)
     - gem micro-matic (open comb)
     - gem micromatic mmoc
     - gem micromatic open comb
+    - gem micromatic open comb (mmoc)
     - gem micromatic open comb gen 1
+    - gem micromatic open comb gen 2
     - gem mmoc
     - gem mmoc - gen 1
     - gem mmoc djudges edition
@@ -2385,9 +2414,13 @@ razor:
     - gem mmoc gen2
     - gem mmoc gold gen2
     - gem mmoc, gen 2
+    - gem open comb micromatic (gen. 1)
     - gem open comb micromatic gen. 2
+    - grandma's mmoc
     - micromatic open comb (mmoc)
     - micromatic open comb (mmoc) gen 2
+    - mmoc
+    - mmoc gen 2
     Pushbutton:
     - gem - push button
     - gem pushbutton
@@ -2425,6 +2458,7 @@ razor:
     - gillette executive fatboy
     - gillette executive fatboy (d3)
     - gillette fatboy
+    - gillette fatboy (9 + 5)
     - gillette fatboy adjustable
     - gillette fatboy adjustable (e3-1959)
     - 'gillette fatboy e4 (setting: 6)'
@@ -2438,6 +2472,7 @@ razor:
     - gillette king c gillette on barbaros levened handle
     - kc gillette
     - king c gillette
+    - king c gillette (almost identical head to murkur 34c and r89)
     - king c gillette (it has the same head as some merkur one, can't remember exactly
       what model)
     - king c gillette de
@@ -2450,6 +2485,8 @@ razor:
     - gillette lady gillette (blue)
     - lady gillette - blue
     NEW:
+    - 1930's gillette new ball handle gold
+    - 1930's gillette new short comb
     - gillette "the new" vintage razor
     - gillette - 'new' lc
     - gillette long-comb new
@@ -2632,6 +2669,7 @@ razor:
     - gillette - tech 1964 solid handle
     - gillette - tech with chisel and hound x briar works handle
     - gillette - travel tech
+    - gillette 50s tech gold
     - gillette ball end gold plated tech
     - gillette ball end tech
     - gillette ball end tech (a)
@@ -2657,6 +2695,7 @@ razor:
     - gillette travel tech
     - gillette travel tech (date code m4)
     - gillette travel tech k3
+    - wolfman guerrilla + gillette tech
     Toggle:
     - gillette - toggle 1960 f4
     - gillette toggle
@@ -2684,10 +2723,14 @@ razor:
     - grelot - le petit coiffeur( shapton seven gs 30k finish)
     Straight:
     - le grelot royal canada - full hollow - round point - 6/8
+  Griffon:
+    Straight:
+    - straight griffon 01 germany 6/8
   Gutche:
     A77 Shavette:
     - gutche a77 folding shavette
     - gutche a77 shavette
+    - gutche a77 style shavette
   H&S Co.:
     NO75:
     - haircut & save co. - no75 stainless steel
@@ -2733,6 +2776,7 @@ razor:
     - henson shaving al +
     - henson shaving al +++
     - henson shaving al13 +
+    - henson shaving al13 mild
     - henson- al13 mild
     - v2 henson + ("dr. squatch")
     Ti22:
@@ -2803,6 +2847,7 @@ razor:
   Jön Engström:
     Straight:
     - jon engström "acero de bessemer" - frameback
+    - 'straight 3 engstrom etched engstrom #3 frame back'
   Kafurt:
     Straight:
     - kafurt karl furtmann weyer solingen - 4/8 round point hollow grind
@@ -2828,6 +2873,7 @@ razor:
     - karve cb b plate
     - karve cb c
     - karve cb c-plate
+    - karve cb oc-f
     - karve cb sb b
     - karve cb sb c
     - karve cb sb c brass
@@ -2892,6 +2938,7 @@ razor:
     - koraat moarteen sub-exclusive (15/16", full hollow, square point)
     - koraat r/wetshaving exclusive moarteen 15/16, full hollow square point
     - koraat r/wetshaving moarteen 7/8
+    - koraat r/wetshaving moarteen 7/8 square point
     - koraat-knives - moarteen
     - koraat-knives moarteen
     - r/wetshaving moarteen
@@ -2922,10 +2969,12 @@ razor:
     - lambda razors - ares ss
     Athena:
     - lambda - athena
+    - lambda athena ti
     - lambda razors - athena ss
     - lambda razors athena
   Leaf:
     Razor:
+    - leaf
     - leaf razor
     - leaf shave co. - leaf razor
   Lee Mfg Co.:
@@ -2957,6 +3006,7 @@ razor:
     - maggard razors v3
     - maggard razors v3 head
     - maggard v3
+    - maggard v3 (i know, it's not in the photo; deal with it)
     - maggard v3a/muhle handle
     - maggard v3m/mr5
     - windrose g3 ss with maggard v3m
@@ -3014,6 +3064,8 @@ razor:
   Mongoose:
     Alumigoose:
     - mongoose alumigoose
+    - 'mongoose blue alumigoose #3'
+    - 'mongoose blue alumigoose #3 of 25'
     - mongoose razors alumigoose
     Original:
     - mongoose - mongoose
@@ -3079,6 +3131,7 @@ razor:
   Other Kamisori:
     ? ''
     : - kikuboshi 24 western kamisori
+      - nobel "aa" folding kamisori
       - nobel "aa" folding kamisori, 13/16 traditional right hand (on loan)
       - nobles nobles folding kamisori
       - wood handle black kamisori
@@ -3121,7 +3174,9 @@ razor:
       - robeson sheer edge straight
       - robeson shuredge the razor the fits your face - 6/8 spike point hollow
       - solingen best silver steel 6/8
+      - straight catauragus
       - straight genco roma finished on yellow lake
+      - straight palmer palmer 21 5/8
       - t. r. cadman & sons straight
       - the alberta - 6/8 round point full hollow
       - u-no 9/16" hollow ground square point
@@ -3136,6 +3191,7 @@ razor:
     - pal - injectomatic
   Paradigm:
     Diamondback:
+    - paradigm diamondback ti
     - paradigm diamondback titanium
     SE:
     - paradigm ti se
@@ -3153,6 +3209,7 @@ razor:
     - parker 55sl-rg
     65R:
     - parker 65 r
+    - parker 65r
     78R:
     - parker 78r
     96R:
@@ -3194,6 +3251,7 @@ razor:
     Straight:
     - portland cutlery co. steinmetz "salamander"
     - portland cutlery steinmetz "salamander"
+    - portland razor co. hydra 7/8 wedge
   Puma:
     '89':
     - 'puma 89 #1 11/16 full hollow - black shadow'
@@ -3213,6 +3271,7 @@ razor:
   Ralf Aust:
     Straight:
     - ralf aust - ralf aust 5/8" round point straight razor
+    - ralf aust - ralf-121npks-s-e - 6/8 spanish point
     - ralf aust 5/8
     - ralf aust 5/8 round point hollow ground
     - ralf aust 5/8" full hollow, spanish tip, stainless steel
@@ -3250,6 +3309,7 @@ razor:
     - razorock .84 gamechanger
     - razorock game changer .68
     - razorock game changer .68 jaws (face) + leaf (3 blades for the dome)
+    - razorock game changer .68 plate
     - razorock game changer .76
     - razorock game changer .76 gap
     - razorock game changer .76-p
@@ -3258,6 +3318,7 @@ razor:
     - razorock game changer .84 p
     - razorock game changer .84-p
     - razorock game changer 0.84 sb
+    - razorock game changer 0.84- p
     - razorock game changer 0.84-p
     - razorock game changer 0.84-p / mr5
     - razorock game changer 1.05
@@ -3297,6 +3358,7 @@ razor:
     - razorock lupo .58
     - razorock lupo .72 (face) + leaf (2 blades for the dome)
     - razorock lupo .72 oc (face) + leaf (2 blades for the dome)
+    - razorock lupo .95 sb
     - razorock lupo 58
     - razorock lupo 72
     - razorock lupo 72 oc
@@ -3352,6 +3414,7 @@ razor:
     Konsul:
     - rex - konsul
     - rex konsul
+    - 'rex konsul (setting #2)'
     - rex supply co. - konsul
     - rex supply konsul (face) + leaf (2 blade for the dome)
     Page:
@@ -3372,6 +3435,8 @@ razor:
     6C:
     - rockwell - 6c
     - rockwell 6c
+    - rockwell 6c (3 plate)
+    - rockwell 6c (plate 3)
     - rockwell 6c (r4)
     - rockwell r6
     - stahly live blade vibrating razor handle + rockwell 6c r2 plate
@@ -3381,6 +3446,9 @@ razor:
     - rockwell 6s $six
     - rockwell 6s (4 plate)
     - rockwell 6s (plate 3)
+    - rockwell 6s, 6
+    - 'rockwell 6s: 6'
+    - rockwell 6s:6
   Rocnel:
     Elite:
     - rocnel elite 2022
@@ -3475,6 +3543,7 @@ razor:
     - shavent
   Shield:
     Predator:
+    - shield gem
     - shield gem style alu
     SE AC:
     - shield - se ac brass
@@ -3518,6 +3587,9 @@ razor:
     - the razor co. - stainless steel
     - the razor company - trc al lvl 2
     - the razor company - trc aluminum lvl 2
+  Tanifuji:
+    Kintaka:
+    - kintaka made by tanifuji
   Tatara:
     Amakuni:
     - tatara amakuni
@@ -3567,6 +3639,7 @@ razor:
     Razor:
     - bronze timeless sb
     - timeless - .38 bronze
+    - timeless - stainless steel .68 - open comb
     - timeless -.38 bronze
     - timeless .38 bronze
     - timeless bronze 0.38mm
@@ -3604,6 +3677,8 @@ razor:
     Long Handle:
     - viking revolution long handle
   WCS:
+    '78':
+    - wcs 78b
     Multi Titanium Collection Razor:
     - w.c.s. multi titanium collection razor, 84m
   Wacker:
@@ -3618,8 +3693,10 @@ razor:
     - w&b celebrated eh 6/8 barber's notch
     - w&b celebrated hollow in cherry heartwood
     - w&b celebrated hollow, 6/8 in cherry heartwood scales
+    - w&b fbu, 8/8 celebrated hollow
     - wade & butcher "the celebrated hollow ground razor for barber's use" 8/8, half
       hollow barber's notch
+    - wade & butcher "the hollow ground razor"
     - wade & butcher - 5/8" square point hollow ground
     - wade & butcher - 6/8" barber's notch wedge
     - wade & butcher - 6/8" wedge barber's notch
@@ -3639,6 +3716,7 @@ razor:
     - wade butcher 6/8 extra hollow ground
   Weck:
     Med Prep:
+    - weck - sextoblade med prep
     - weck sextoblade - med prep
     - weck sextoblade med prep
     Sextoblade:
@@ -3668,6 +3746,9 @@ razor:
   Well Kept:
     Safety Razor:
     - well kept "rose" safety razor
+  Werner Breidenbach:
+    Monte Rosa 14:
+    - werner breidenbach monte rosa 14
   Whityle:
     20T Glide Pro 4D:
     - whityle 20t glide pro 4d razor
@@ -3683,6 +3764,7 @@ razor:
     - guerrilla .99 on loan from u/joboozerum
     - guerrilla razors camo brown .99 gap
     - wolfman - guerrilla
+    - wolfman - titanium guerrilla
     - wolfman guerilla - gen 1
     - wolfman guerilla 0.99 (bronze)
     - wolfman guerrilla
@@ -3721,6 +3803,7 @@ razor:
     - wolfman wr2 razorocl super knurl handle
     - wolfman wr2 sb 1.35mm
     - wolfman wr2-sb 1.05 gap
+    - wolfman wr2-sb ti
     WR3:
     - wolfman copper wr3 -
     - wolfman wr3
@@ -3741,6 +3824,7 @@ razor:
     Ghost:
     - yaqi - titanium ghost .90
     - yaqi ghost 70 sp
+    - yaqi ghost 70sp
     - yaqi ghost 70sp with euro handle
     - yaqi ghost70sp
     - yaqi stainless .90 ghost
@@ -3751,6 +3835,7 @@ razor:
     - yaqi - open comb head
     Romulus:
     - yaqi romulus
+    - yaqui romulus
     Slant:
     - yaqi slant
     - yaqi slant -> shark teeth razor
@@ -3763,6 +3848,7 @@ razor:
     - yaqi slant 37 + rr ufo handle
     Slope:
     - yaqi slope
+    - yaqi slope w/ bolt handle
     - yaqi slope with bolt handle
     Torqx:
     - yaqi - torqx

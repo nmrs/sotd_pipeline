@@ -362,7 +362,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
             matcher = BrushMatcher()
 
             def transform_brush_data(flat_data: dict) -> dict:
-                """Transform flat brush data into nested handle/knot structure for React component."""
+                """Transform flat brush data into nested handle/knot structure."""
                 if not flat_data:
                     return {}
 
@@ -393,7 +393,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                     and flat_data.get("model")
                     and not flat_data.get("handle_maker")
                 ):
-                    # This is already in the correct flat format, just add empty handle/knot sections
+                    # This is already in the correct flat format, add empty handle/knot sections
                     return {
                         "brand": flat_data.get("brand"),
                         "model": flat_data.get("model"),
@@ -553,7 +553,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                     if modifier_weight:
                         # Calculate the actual modifier value using the scoring engine
                         modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
-                        if modifier_function and hasattr(modifier_function, "__call__"):
+                        if modifier_function and callable(modifier_function):
                             modifier_value = modifier_function(
                                 request.brushString, strategy_result, strategy_name
                             )
@@ -633,11 +633,25 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 or r.matchedData.get("knot")
             )
         ]
-        winner = (
-            max(valid_results, key=lambda x: x.score)
-            if valid_results
-            else max(formatted_results, key=lambda x: x.score)
-        )
+
+        # If no valid results but we have enriched data, create a winner from enriched data
+        if not valid_results and analysis_result.get("enriched_data"):
+            enriched_data = analysis_result.get("enriched_data", {})
+            # Create a winner result from enriched data
+            winner = BrushMatchResult(
+                strategy=enriched_data.get("strategy", "correct_matches"),
+                score=100.0,  # High score for correct matches
+                matchType=enriched_data.get("_pattern", "exact"),
+                pattern=enriched_data.get("_pattern", "exact_match"),
+                scoreBreakdown={"baseScore": 100.0, "modifiers": 0.0, "modifierDetails": []},
+                matchedData=transform_brush_data(enriched_data),
+            )
+        else:
+            winner = (
+                max(valid_results, key=lambda x: x.score)
+                if valid_results
+                else max(formatted_results, key=lambda x: x.score)
+            )
 
         # Get enriched data
         enriched_data = analysis_result.get("enriched_data", {})

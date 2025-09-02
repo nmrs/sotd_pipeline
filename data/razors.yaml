@@ -78,6 +78,9 @@ Alpha:
     format: AC
     patterns:
       - alpha.*claymore
+  Futura:
+    patterns:
+      - alpha.*futura
   Outlaw:
     patterns:
       - alpha.*outl
@@ -110,7 +113,7 @@ Art Razor:
   Straight:
     format: Straight
     patterns:
-      - yurii.*kravcenko.*(?:\d{1,2}/(8|16))?
+      - yurii.*kravch?enko.*(?:\d{1,2}/(8|16))?
       - \bart\b.*razor.*(?:\d{1,2}/(8|16))?
   Kamisori:
     format: Straight
@@ -873,6 +876,8 @@ Gillette:
       - Gil.*et.*heritage
   King C. Gillette:
     patterns:
+      - (merkur.*)?34-*[cg]
+      - ^king c.? gillette.*
       - king.*gil.*et
       - gil.*et.*king(.*c)?
       - kc gill
@@ -1298,8 +1303,6 @@ Koraat:
     format: Straight
     patterns:
       - koraat.*(\d{1,2}/(8|16))?
-      - \bchani\b # https://www.reddit.com/r/Wetshaving/comments/ipykey/theme_thursday_sotd_thread_sep_10_2020/g4nemse/
-      - mariko # https://www.reddit.com/r/Wetshaving/comments/iwvnb8/monday_sotd_thread_sep_21_2020/g630shr/
 Krect:
   Spiral Slant:
     patterns:
@@ -1474,7 +1477,7 @@ Merkur:
       - (merkur.*)?51c
   Futur:
     patterns:
-      - ^(?!.*\b(?:clone|copy|style)\b).*?(merkur)?.*?futur
+      - ^(?!.*\b(?:clone|copy|style)\b).*?(merkur)?.*?futur\b
   Progress:
     patterns:
       - (pro|mer|di)gress
@@ -1485,7 +1488,7 @@ Mongoose:
   Alumigoose:
     format: AC
     patterns:
-      - al[iu]migoose
+      - (?:mongoose)?.*alumigoose
   II:
     format: AC
     patterns:
@@ -1894,7 +1897,6 @@ Ralf Aust:
     patterns:
       - 'ralf.*aust(\s+straight)*'
       - \baust\b(?:.*\d{1,2}/(8|16))?
-      - triilian # https://www.reddit.com/r/Wetshaving/comments/iw97kc/sunday_sotd_thread_sep_20_2020/g5ye2ip/
 Rapira:
   Double Edge Safety Razor:
     patterns:

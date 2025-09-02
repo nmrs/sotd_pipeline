@@ -220,40 +220,38 @@ Before considering any plan complete, verify:
 - **See `.cursor/rules/match-phase.mdc` for comprehensive match phase rules and implementation details**
 - **Key principles**: Check correct_matches.yaml first, preserve complete catalog specifications, use normalized field for matching
 
-## File Naming and Date Formatting (MANDATORY)
-- **Date Format**: Use ISO 8601 format (YYYY-MM-DD) for all date suffixes in filenames
-- **Current Date Rule**: **ALWAYS** use the actual current date when creating files with date suffixes
+## Plan File Organization and Naming (MANDATORY)
+- **Directory Structure**: `plans/[category]/[date]/` where:
+  - `[category]` is one of: `features`, `bugs`, `refactoring`, `specs`, `optimization`, `testing`, `documentation`
+  - `[date]` is ISO 8601 format (YYYY-MM-DD) using actual current date
+- **Current Date Rule**: **ALWAYS** use the actual current date when creating plan files
 - **Command**: Use `date +%Y-%m-%d` to get the actual current date, never assume or guess
-- **Format**: `{type}_{plan_name}_{YYYY-MM-DD}.mdc` for plan files
+- **File Format**: `{type}_{plan_name}.mdc` (no date suffix in filename)
 - **Type Prefixes**:
   - `plan_` - Implementation plans and development roadmaps
   - `spec_` - Specifications and requirements documents
 - **Examples**:
-  - ✅ **Correct**: `plan_brush_table_specialized_component_2025-07-19.mdc` (actual current date)
-  - ✅ **Correct**: `spec_webui_react_analyzer_2025-07-17.mdc` (actual current date)
-  - ❌ **Wrong**: `plan_brush_table_specialized_component_2025-01-27.mdc` (assumed date)
-  - ❌ **Wrong**: `spec_webui_react_analyzer_2025-01-28.mdc` (assumed date)
+  - ✅ **Correct**: `plans/features/2025-09-02/plan_brush_table_specialized_component.mdc`
+  - ✅ **Correct**: `plans/specs/2025-09-02/spec_webui_react_analyzer.mdc`
+  - ✅ **Correct**: `plans/bugs/2025-09-02/plan_validation_fix.mdc`
+  - ❌ **Wrong**: `plans/plan_brush_table_2025-09-02.mdc` (old structure)
 - **Process**: 
   1. Run `date +%Y-%m-%d` to get actual current date
-  2. Use exact date in filename
-  3. Verify accuracy before creating file
-- **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates, improves autocomplete by grouping files by type
+  2. Create directory: `plans/[category]/[date]/`
+  3. Create file: `{type}_{plan_name}.mdc` in that directory
+- **Why This Matters**: Better organization by category and date, easier navigation, cleaner filenames, improved autocomplete
 
 ## Completed Plan Organization (MANDATORY)
-- **ALL completed plans** must be moved to `plans/completed/` with appropriate subfolder organization
+- **ALL completed plans** must be moved to `plans/completed/[category]/[date]/` with date-based subfolder organization
 - **Use `git mv`** instead of `mv` to preserve file history and show as rename operations
-- **Add date suffix** to completed plan filenames: `{type}_{plan_name}_{YYYY-MM-DD}.mdc`
-- **Subfolder organization**:
-  - `plans/completed/features/` - Feature implementation plans
-  - `plans/completed/bugs/` - Bug fix plans
-  - `plans/completed/data-recovery/` - Data recovery plans
-  - `plans/completed/refactoring/` - Refactoring plans
-  - `plans/completed/testing/` - Test implementation plans
-  - `plans/completed/documentation/` - Documentation plans
-  - `plans/completed/performance/` - Performance optimization plans
+- **File format**: `{type}_{plan_name}.mdc` (no date suffix in filename)
+- **Directory structure**: `plans/completed/[category]/[date]/` where:
+  - `[category]` is one of: `features`, `bugs`, `refactoring`, `specs`, `optimization`, `testing`, `documentation`, `data-recovery`, `performance`, `process-optimization`, `research`, `investigation`, `webui`
+  - `[date]` is the original creation date (YYYY-MM-DD) from the plan file
 - **Process for completing plans**:
   1. Update plan with final completion status and summary
-  2. Create subfolder in `plans/completed/` if it doesn't exist
-  3. Use `git mv` to move with date suffix: `git mv plans/plan.mdc plans/completed/category/type_plan_YYYY-MM-DD.mdc`
-  4. Commit with descriptive message: `docs(plan): mark {plan_name} complete and move to completed/{category}`
-- **Why This Matters**: Single source of truth for all completed work, easy discovery, consistent organization, historical tracking
+  2. Extract date from original plan filename or use creation date
+  3. Create directory: `plans/completed/[category]/[date]/`
+  4. Use `git mv` to move: `git mv plans/[category]/[date]/plan_name.mdc plans/completed/[category]/[date]/plan_name.mdc`
+  5. Commit with descriptive message: `docs(plan): mark {plan_name} complete and move to completed/{category}/{date}`
+- **Why This Matters**: Single source of truth for all completed work, easy discovery by category and date, consistent organization, historical tracking
