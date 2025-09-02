@@ -315,6 +315,13 @@ razor:
     - file: 2024-07.json
       id: lfjrr79
       source: user
+  ? unknown (i don't remember the model, i got it back in like 2013 through a subscription
+    box as my first ever de razor so figured i'd try it again!)
+  : added_date: '2025-09-02'
+    comment_ids:
+    - file: 2025-08.json
+      id: n77pdd8
+      source: user
   unknown (unknown):
     added_date: '2025-08-19'
     comment_ids:
