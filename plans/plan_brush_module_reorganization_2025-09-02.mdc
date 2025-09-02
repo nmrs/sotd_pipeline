@@ -68,6 +68,7 @@
 14. **Stabilize Test Suite** - Ensure 100% test success rate ❌ **IN PROGRESS**
     - 14.1 Run full test suite and identify remaining failures ✅ **COMPLETED** (55 failed, 3242 passed)
     - 14.2 Fix remaining import issues in test files ❌ **IN PROGRESS**
+        - 14.2.1 Fix @patch decorators in test_brush_validation_cli.py ✅ **COMPLETED**
     - 14.3 Fix brush validation CLI import issues ❌ **PENDING**
     - 14.4 Fix webui API import issues ❌ **PENDING**
     - 14.5 Fix other test failures (fetch, enrich, report, etc.) ❌ **PENDING**

@@ -7,12 +7,12 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import io
 
-from sotd.match.brush_validation_cli import (
+from sotd.match.brush.validation.cli import (
     BrushValidationCLI,
     setup_validation_cli,
     main as cli_main,
 )
-from sotd.match.brush_user_actions import BrushUserActionsManager
+from sotd.match.brush.validation.user_actions import BrushUserActionsManager
 
 
 class TestBrushValidationCLI:
@@ -39,7 +39,7 @@ class TestBrushValidationCLI:
         assert hasattr(self.cli, "brush_matcher")
 
     @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
-    @patch("sotd.match.brush_validation_cli.load_json_data")
+    @patch("sotd.match.brush.validation.cli.load_json_data")
     def test_load_month_data_legacy_system(self, mock_load_json, mock_get_processed_texts):
         """Test loading monthly data for legacy system."""
         # Mock the processed texts to return empty set (no processed texts)
@@ -81,7 +81,7 @@ class TestBrushValidationCLI:
         mock_load_json.assert_called_once()
 
     @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
-    @patch("sotd.match.brush_validation_cli.load_json_data")
+    @patch("sotd.match.brush.validation.cli.load_json_data")
     def test_load_month_data_scoring_system(self, mock_load_json, mock_get_processed_texts):
         """Test loading monthly data for scoring system."""
         # Mock the processed texts to return empty set (no processed texts)
@@ -128,7 +128,7 @@ class TestBrushValidationCLI:
         mock_load_json.assert_called_once()
 
     @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
-    @patch("sotd.match.brush_validation_cli.load_json_data")
+    @patch("sotd.match.brush.validation.cli.load_json_data")
     def test_load_month_data_scoring_system_filters_correct_matches(
         self, mock_load_json, mock_get_processed_texts
     ):
@@ -203,7 +203,7 @@ class TestBrushValidationCLI:
         mock_load_json.assert_called_once()
         mock_get_processed_texts.assert_called_once_with("2025-08")
 
-    @patch("sotd.match.brush_validation_cli.load_json_data")
+    @patch("sotd.match.brush.validation.cli.load_json_data")
     def test_load_month_data_scoring_system_handles_null_matched(self, mock_load_json):
         """Test that entries with matched: null are handled correctly."""
         # Mock data structure with an entry that has matched: null
@@ -615,7 +615,7 @@ class TestBrushValidationCLISetup:
 class TestBrushValidationCLIMain:
     """Test CLI main function."""
 
-    @patch("sotd.match.brush_validation_cli.BrushValidationCLI")
+    @patch("sotd.match.brush.validation.cli.BrushValidationCLI")
     def test_main_function_scoring_system(self, mock_cli_class):
         """Test main function with scoring system."""
         mock_cli = Mock()
@@ -630,7 +630,7 @@ class TestBrushValidationCLIMain:
 
         mock_cli.run_validation_workflow.assert_called_once_with("2025-08", "scoring", "ambiguity")
 
-    @patch("sotd.match.brush_validation_cli.BrushValidationCLI")
+    @patch("sotd.match.brush.validation.cli.BrushValidationCLI")
     def test_main_function_both_systems(self, mock_cli_class):
         """Test main function with both systems."""
         mock_cli = Mock()
@@ -646,7 +646,7 @@ class TestBrushValidationCLIMain:
         # Should be called twice for both systems
         assert mock_cli.run_validation_workflow.call_count == 2
 
-    @patch("sotd.match.brush_validation_cli.BrushValidationCLI")
+    @patch("sotd.match.brush.validation.cli.BrushValidationCLI")
     def test_main_function_exception_handling(self, mock_cli_class):
         """Test main function exception handling."""
         mock_cli = Mock()
