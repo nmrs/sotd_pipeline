@@ -1028,7 +1028,7 @@ knot_size_mm = matched.get("knot", {}).get("knot_size_mm")
 
 ## Next Steps
 
-1. **Complete Phase 2.6-2.10**: Update remaining tests and aggregators
+1. **Complete Phase 2.13-2.18**: Update remaining aggregators and strategy improvements
 2. **Execute Phase 3**: Verify rehydration works with new structure
 3. **Execute Phase 4**: Clean up ResultProcessor files and final verification
 4. **Execute Phase 5**: Update WebUI and APIs for new structure
