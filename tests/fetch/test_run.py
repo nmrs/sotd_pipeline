@@ -56,6 +56,7 @@ def mock_args():
     args.out_dir = "test_data"
     args.debug = False
     args.force = False
+    args.verbose = False
     return args
 
 
