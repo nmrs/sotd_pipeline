@@ -211,6 +211,117 @@ class TestStructurePreservationTDD:
             # Clean up
             Path(temp_file_path).unlink()
 
+    def test_simpson_chubby_2_complete_brush_rehydration(self):
+        """
+        Test that Simpson Chubby 2 complete brush rehydration works correctly.
+
+        This tests the new _reconstruct_complete_brush_structure method for simple complete brushes.
+        """
+        # Step 1: Get actual regex match result
+        matcher = BrushMatcher()
+        test_input = "Simpson Chubby 2"
+
+        regex_result = matcher.match(test_input, bypass_correct_matches=True)
+        assert regex_result is not None, "Should get regex match result"
+        assert regex_result.matched is not None, "Should have matched data"
+
+        # Verify we have the expected nested structure for complete brush
+        assert "handle" in regex_result.matched, "Should have handle section"
+        assert "knot" in regex_result.matched, "Should have knot section"
+        assert regex_result.matched["brand"] == "Simpson", "Should have top-level brand"
+        assert regex_result.matched["model"] == "Chubby 2", "Should have top-level model"
+
+        # Step 2: Create temporary correct_matches.yaml for complete brush
+        temp_correct_matches = {"brush": {"Simpson": {"Chubby 2": ["simpson chubby 2"]}}}
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(temp_correct_matches, f, default_flow_style=False)
+            temp_file_path = f.name
+
+        try:
+            # Step 3: Rehydrate using CorrectMatchesStrategy
+            with open(temp_file_path, "r") as f:
+                loaded_correct_matches = yaml.safe_load(f)
+
+            # Get catalogs from the matcher to pass to CorrectMatchesStrategy
+            catalogs = matcher._load_catalogs_directly()
+            correct_matches_strategy = CorrectMatchesStrategy(loaded_correct_matches, catalogs)
+            rehydrated_result = correct_matches_strategy.match(test_input)
+
+            assert rehydrated_result is not None, "Should rehydrate successfully"
+            assert rehydrated_result.matched is not None, "Should have matched data"
+
+            # Step 4: Verify structures are IDENTICAL
+            original_matched = regex_result.matched
+            rehydrated_matched = rehydrated_result.matched
+
+            # Debug output to see what we're actually comparing
+            print(f"\nOriginal regex result: {original_matched}")
+            print(f"\nRehydrated result: {rehydrated_matched}")
+
+            # The rehydrated structure should preserve the EXACT same format
+            self._assert_complete_brush_structures_identical(
+                original_matched, rehydrated_matched, test_input
+            )
+
+        finally:
+            # Clean up
+            Path(temp_file_path).unlink()
+
+    def test_bfm_complex_complete_brush_rehydration(self):
+        """
+        Test that BFM complex complete brush rehydration works correctly.
+
+        This tests the new _reconstruct_complete_brush_structure method for complex complete brushes
+        with different brands for handle and knot.
+        """
+        # Step 1: Get actual regex match result
+        matcher = BrushMatcher()
+        test_input = "BFM"
+
+        regex_result = matcher.match(test_input, bypass_correct_matches=True)
+        assert regex_result is not None, "Should get regex match result"
+        assert regex_result.matched is not None, "Should have matched data"
+
+        # Verify we have the expected nested structure for complete brush
+        assert "handle" in regex_result.matched, "Should have handle section"
+        assert "knot" in regex_result.matched, "Should have knot section"
+        assert regex_result.matched["brand"] is not None, "Should have top-level brand"
+        assert regex_result.matched["model"] is not None, "Should have top-level model"
+
+        # Step 2: Create temporary correct_matches.yaml for complex complete brush
+        temp_correct_matches = {"brush": {"BFM": {"Unspecified": ["bfm"]}}}
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(temp_correct_matches, f, default_flow_style=False)
+            temp_file_path = f.name
+
+        try:
+            # Step 3: Rehydrate using CorrectMatchesStrategy
+            with open(temp_file_path, "r") as f:
+                loaded_correct_matches = yaml.safe_load(f)
+
+            # Get catalogs from the matcher to pass to CorrectMatchesStrategy
+            catalogs = matcher._load_catalogs_directly()
+            correct_matches_strategy = CorrectMatchesStrategy(loaded_correct_matches, catalogs)
+            rehydrated_result = correct_matches_strategy.match(test_input)
+
+            assert rehydrated_result is not None, "Should rehydrate successfully"
+            assert rehydrated_result.matched is not None, "Should have matched data"
+
+            # Step 4: Verify structures are IDENTICAL
+            original_matched = regex_result.matched
+            rehydrated_matched = rehydrated_result.matched
+
+            # The rehydrated structure should preserve the EXACT same format
+            self._assert_complete_brush_structures_identical(
+                original_matched, rehydrated_matched, test_input
+            )
+
+        finally:
+            # Clean up
+            Path(temp_file_path).unlink()
+
     def _assert_structures_identical(self, original: dict, rehydrated: dict):
         """Assert that the rehydrated structure matches the expected simplified format."""
 
@@ -391,6 +502,37 @@ class TestStructurePreservationTDD:
         assert "_matched_by" not in rehydrated_knot, "Knot should not have _matched_by"
         assert "_pattern" not in rehydrated_knot, "Knot should not have _pattern"
         assert "score" not in rehydrated_knot, "Knot should not have score"
+
+    def _assert_complete_brush_structures_identical(
+        self, original: dict, rehydrated: dict, test_input: str
+    ):
+        """Assert that complete brush rehydrated structure matches what CorrectMatchesStrategy produces."""
+        # Check that we have the expected structure from CorrectMatchesStrategy
+        assert "brand" in rehydrated, "Should have top-level brand"
+        assert "model" in rehydrated, "Should have top-level model"
+        
+        # Check that we have the required metadata fields
+        assert (
+            rehydrated["_matched_by"] == "CorrectMatchesStrategy"
+        ), "Should indicate correct matches"
+        assert rehydrated["_pattern"] == "exact_match", "Should indicate exact match"
+        assert rehydrated["strategy"] == "correct_matches", "Should indicate correct matches"
+
+        # Check that we DON'T have redundant root-level fields (per plan specification)
+        assert (
+            "fiber" not in rehydrated
+        ), "Should NOT have root-level fiber (only in knot)"
+        assert (
+            "knot_size_mm" not in rehydrated
+        ), "Should NOT have root-level knot_size_mm (only in knot)"
+
+        # Check that we don't have regex-specific fields
+        assert "score" not in rehydrated, "Should not have score field from regex matching"
+        assert "_pattern_used" not in rehydrated, "Should not have regex pattern field"
+        assert "fiber_strategy" not in rehydrated, "Should not have fiber strategy field"
+        assert "knot_size_strategy" not in rehydrated, "Should not have knot size strategy field"
+
+        print("✅ Complete brush rehydration structure matches CorrectMatchesStrategy output!")
 
 
 if __name__ == "__main__":

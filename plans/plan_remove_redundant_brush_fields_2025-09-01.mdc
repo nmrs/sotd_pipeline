@@ -1,7 +1,7 @@
 # Plan: Remove Redundant Brush Fields and Fix Rehydration
 
 **Date:** 2025-09-01  
-**Status:** IN PROGRESS - Phase 2.3 (Update Structure Preservation Tests)  
+**Status:** IN PROGRESS - Phase 2.4 (Update Strategy-Specific Tests)  
 **Priority:** Medium  
 **Type:** Refactoring + Bug Fix  
 
@@ -201,10 +201,12 @@ The redundant fields are primarily introduced by two strategies:
 - **Component strategies** (KnotOnlyStrategy, HandleOnlyStrategy) only return component data, not JSON structure
 - **Separation of concerns**: Component strategies focus on matching, parent strategies handle structure
 
-#### 2.3 Update Structure Preservation Tests
+#### 2.3 Update Structure Preservation Tests ✅ **COMPLETE**
 - **File**: `tests/match/test_structure_preservation_tdd.py`
 - **Action**: Update tests to expect correct structure directly from strategies
 - **Verify**: Tests pass with new direct nested structure (no processing step)
+- **Status**: All 5 structure preservation tests updated and passing
+- **Changes**: Updated test expectations to match actual CorrectMatchesStrategy output structure
 
 #### 2.4 Update Strategy-Specific Tests
 - **Files**: All strategy test files in `tests/match/brush_matching_strategies/`
