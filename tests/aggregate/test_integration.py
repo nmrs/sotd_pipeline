@@ -341,10 +341,10 @@ class TestAggregateIntegration:
                 "blade": {"matched": {"brand": "Test", "model": "Test", "format": "DE"}},
                 "brush": {
                     "matched": {
-                        "brand": "Test", 
-                        "model": "Test", 
-                        "handle": {"brand": "Test", "model": "Test"}, 
-                        "knot": {"fiber": "Synthetic"}
+                        "brand": "Test",
+                        "model": "Test",
+                        "handle": {"brand": "Test", "model": "Test"},
+                        "knot": {"fiber": "Synthetic"},
                     }
                 },
                 "soap": {"matched": {"brand": "Test", "scent": "Test"}},

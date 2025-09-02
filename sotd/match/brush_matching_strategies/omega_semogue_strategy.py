@@ -33,14 +33,25 @@ class OmegaSemogueBrushMatchingStrategy:
             brand = brand_match.group(1).title()
             model_num = model_match.group(2)
 
+            # Create result with nested structure (no redundant root fields)
             matched_data = {
                 "brand": brand,
                 "model": model_num,
-                "fiber": "Boar",
-                "knot_size_mm": None,
                 "handle_maker": None,
                 "source_text": model_match.group(0),
                 "source_type": "exact",
+                # Create nested handle section
+                "handle": {
+                    "brand": brand,  # Handle brand same as brush brand for Omega/Semogue
+                    "model": None,  # Handle model not specified for Omega/Semogue
+                },
+                # Create nested knot section with fiber and size info
+                "knot": {
+                    "brand": brand,  # Knot brand same as brush brand for Omega/Semogue
+                    "model": model_num,  # Knot model same as brush model for Omega/Semogue
+                    "fiber": "Boar",
+                    "knot_size_mm": None,
+                },
             }
 
             return create_strategy_result(

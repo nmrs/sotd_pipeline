@@ -201,7 +201,7 @@ class TestScoringEngine:
             matched={
                 "brand": "Test",
                 "handle": {"brand": None, "model": None},
-                "knot": {"brand": "Test", "model": None, "fiber": "badger", "knot_size_mm": None}
+                "knot": {"brand": "Test", "model": None, "fiber": "badger", "knot_size_mm": None},
             },
             match_type="exact",
             pattern="test",

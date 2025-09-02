@@ -18,7 +18,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -27,7 +27,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "synthetic"}
+                        "knot": {"fiber": "synthetic"},
                     },
                 },
             },
@@ -56,7 +56,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Declaration", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -76,7 +76,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -85,7 +85,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "synthetic"}
+                        "knot": {"fiber": "synthetic"},
                     },
                 },
             },
@@ -110,7 +110,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -201,7 +201,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -210,7 +210,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -219,7 +219,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "synthetic"}
+                        "knot": {"fiber": "synthetic"},
                     },
                 },
             },
@@ -228,7 +228,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -237,7 +237,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "synthetic"}
+                        "knot": {"fiber": "synthetic"},
                     },
                 },
             },
@@ -300,7 +300,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -309,7 +309,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -318,7 +318,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -348,7 +348,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -357,7 +357,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -366,7 +366,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -389,7 +389,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "badger"}
+                        "knot": {"fiber": "badger"},
                     },
                 },
             },
@@ -398,7 +398,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "boar"}
+                        "knot": {"fiber": "boar"},
                     },
                 },
             },
@@ -407,7 +407,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "synthetic"}
+                        "knot": {"fiber": "synthetic"},
                     },
                 },
             },
@@ -416,7 +416,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "horse"}
+                        "knot": {"fiber": "horse"},
                     },
                 },
             },
@@ -425,7 +425,7 @@ class TestBrushFiberUserAggregator:
                 "brush": {
                     "matched": {
                         "handle": {"brand": "Test Brand", "model": "Test Model"},
-                        "knot": {"fiber": "mixed"}
+                        "knot": {"fiber": "mixed"},
                     },
                 },
             },

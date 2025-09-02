@@ -47,11 +47,11 @@ class BrushFiberUserAggregator(BaseAggregator):
                 fiber = knot.get("fiber")
             else:
                 fiber = None
-            
+
             # Fallback to root level for backward compatibility
             if not fiber:
                 fiber = matched.get("fiber")
-                
+
             author = record.get("author")
 
             # Skip if no fiber or author

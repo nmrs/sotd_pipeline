@@ -190,7 +190,7 @@ class TestDualSingleComponentOptimization:
         )
 
         # Test with no results - should be allowed (REQUIRES_ANY allows execution when no deps checked)
-        can_execute = dependency_manager.can_execute_strategy("HandleOnlyStrategy", {})
+        can_execute = dependency_manager.can_execute_strategy("HandleComponentStrategy", {})
         assert (
             can_execute is True
         ), "Single component should be allowed when no dependencies have run"
@@ -206,7 +206,7 @@ class TestDualSingleComponentOptimization:
             )
         }
         can_execute = dependency_manager.can_execute_strategy(
-            "HandleOnlyStrategy", strategy_results
+            "HandleComponentStrategy", strategy_results
         )
         assert can_execute is True, "Single component should execute when HandleMatcher succeeded"
 
@@ -220,7 +220,7 @@ class TestDualSingleComponentOptimization:
                 strategy="KnotMatcher",
             )
         }
-        can_execute = dependency_manager.can_execute_strategy("KnotOnlyStrategy", strategy_results)
+        can_execute = dependency_manager.can_execute_strategy("KnotComponentStrategy", strategy_results)
         assert can_execute is True, "Single component should execute when KnotMatcher succeeded"
 
         # Test with both HandleMatcher and KnotMatcher success
@@ -232,7 +232,7 @@ class TestDualSingleComponentOptimization:
             strategy="HandleMatcher",
         )
         can_execute = dependency_manager.can_execute_strategy(
-            "HandleOnlyStrategy", strategy_results
+            "HandleComponentStrategy", strategy_results
         )
         assert (
             can_execute is True
@@ -247,7 +247,7 @@ class TestDualSingleComponentOptimization:
             "HandleMatcher",
             "KnotMatcher",
             "FullInputComponentMatchingStrategy",
-            "HandleOnlyStrategy",
+            "HandleComponentStrategy",
         ]
         execution_order = dependency_manager.get_execution_order(strategy_names)
 
@@ -255,7 +255,7 @@ class TestDualSingleComponentOptimization:
         handle_index = execution_order.index("HandleMatcher")
         knot_index = execution_order.index("KnotMatcher")
         dual_index = execution_order.index("FullInputComponentMatchingStrategy")
-        single_index = execution_order.index("HandleOnlyStrategy")
+        single_index = execution_order.index("HandleComponentStrategy")
 
         assert handle_index < dual_index, "HandleMatcher should come before dual component"
         assert handle_index < single_index, "HandleMatcher should come before single component"

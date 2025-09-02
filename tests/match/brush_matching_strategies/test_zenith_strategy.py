@@ -14,8 +14,13 @@ def test_zenith_b_series_match(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b26"
-    assert result.matched["fiber"] == "Boar"
-    assert result.matched["knot_size_mm"] is None
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["knot"]["knot_size_mm"] is None
+    assert result.matched["handle"]["brand"] == "Zenith"
+    assert result.matched["handle"]["model"] is None
     assert result.pattern == r"zenith\s+(b\d{1,2})\b"  # Actual pattern used by strategy
 
 
@@ -26,8 +31,11 @@ def test_zenith_with_synthetic_fiber(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b26"
-    assert result.matched["fiber"] == "Boar"  # Strategy always returns default fiber
-    assert result.matched["knot_size_mm"] is None
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Boar"  # Strategy always returns default fiber
+    assert result.matched["knot"]["knot_size_mm"] is None
 
 
 def test_zenith_with_badger_fiber(strategy):
@@ -37,8 +45,11 @@ def test_zenith_with_badger_fiber(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b26"
-    assert result.matched["fiber"] == "Boar"  # Strategy always returns default fiber
-    assert result.matched["knot_size_mm"] is None
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Boar"  # Strategy always returns default fiber
+    assert result.matched["knot"]["knot_size_mm"] is None
 
 
 def test_zenith_case_insensitive(strategy):
@@ -48,7 +59,9 @@ def test_zenith_case_insensitive(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b26"  # Strategy returns lowercase model names
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
 
 
 def test_zenith_various_letters(strategy):
@@ -74,7 +87,9 @@ def test_zenith_single_digit_model(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b3"
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
 
 
 def test_zenith_no_match_three_digit_model(strategy):
@@ -93,7 +108,9 @@ def test_zenith_with_extra_text(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Zenith"
     assert result.matched["model"] == "b26"
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
 
 
 def test_zenith_no_match_x_series(strategy):
@@ -142,10 +159,15 @@ def test_invalid_input_types(strategy):
 def test_zenith_fiber_detection_priority(strategy):
     """Test that default fiber is always Boar (strategy doesn't detect fiber from input)."""
     result = strategy.match("Zenith B26")  # No fiber mentioned
-    assert result.matched["fiber"] == "Boar"  # Default
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"  # Default
 
     result = strategy.match("Zenith B26 horse")  # Horse fiber mentioned but not detected
-    assert result.matched["fiber"] == "Boar"  # Still default since strategy doesn't parse fiber
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    # Still default since strategy doesn't parse fiber
+    assert result.matched["knot"]["fiber"] == "Boar"
 
 
 def test_zenith_lowercase_model_conversion(strategy):

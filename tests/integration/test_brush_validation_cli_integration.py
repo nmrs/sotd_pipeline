@@ -50,10 +50,10 @@ class TestBrushValidationCLIIntegration:
                         "name": "Semogue 1305",
                         "normalized": "Semogue 1305",
                         "matched": {
-                            "brand": "Semogue", 
-                            "model": "1305", 
+                            "brand": "Semogue",
+                            "model": "1305",
                             "handle": {"brand": "Semogue", "model": "1305"},
-                            "knot": {"brand": "Semogue", "model": "1305", "fiber": "boar"}
+                            "knot": {"brand": "Semogue", "model": "1305", "fiber": "boar"},
                         },
                         "match_type": "regex",
                     },
@@ -100,10 +100,10 @@ class TestBrushValidationCLIIntegration:
                             "model": "B35",
                             "handle": {"brand": "Zenith", "model": "B35"},
                             "knot": {
-                                "brand": "Zenith", 
-                                "model": "B35", 
-                                "fiber": "boar", 
-                                "knot_size_mm": 28
+                                "brand": "Zenith",
+                                "model": "B35",
+                                "fiber": "boar",
+                                "knot_size_mm": 28,
                             },
                         },
                         "all_strategies": [

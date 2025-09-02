@@ -1,201 +1,176 @@
-#!/usr/bin/env python3
-"""Tests for KnotComponentStrategy for knot-only matching."""
-
 from unittest.mock import Mock
+
 from sotd.match.brush_matching_strategies.knot_component_strategy import KnotComponentStrategy
 from sotd.match.types import MatchResult
-import pytest
 
 
 class TestKnotComponentStrategy:
-    """Test KnotComponentStrategy for knot-only component matching."""
+    """Test the KnotComponentStrategy class."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Create mock KnotMatcher
         self.mock_knot_matcher = Mock()
         self.strategy = KnotComponentStrategy(self.mock_knot_matcher)
 
-    def test_knot_component_strategy_matches_knot_only(self):
-        """Test that KnotComponentStrategy matches knot components only."""
-        # Setup mock knot match
-        mock_knot_result = MatchResult(
-            original="Omega 10098 Boar",
-            matched={
-                "brand": "Omega",
-                "model": "10098",
-                "fiber": "boar",
-                "knot_size_mm": 26.0,
-            },
-            match_type="regex",
-            pattern="omega.*10098",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+    def test_init(self):
+        """Test strategy initialization."""
+        assert self.strategy.knot_matcher == self.mock_knot_matcher
 
-        # Test with composite brush input
-        result = self.strategy.match("Summer Break Soaps Maize 26mm Timberwolf")
+    def test_match_with_empty_input(self):
+        """Test matching with empty or whitespace input."""
+        assert self.strategy.match("") is None
+        assert self.strategy.match("   ") is None
 
-        # Should return partial result with knot information only
-        assert result is not None, "Should return a result when knot is found"
-        assert result.matched is not None, "Should have matched data"
-        assert result.matched["brand"] == "Omega", "Should match knot brand"
-        assert result.matched["model"] == "10098", "Should match knot model"
-        assert result.matched["fiber"] == "boar", "Should match knot fiber"
-        assert result.matched["knot_size_mm"] == 26.0, "Should match knot size"
-        assert result.matched["_matched_by"] == "KnotMatcher", "Should indicate KnotMatcher source"
-        assert result.matched["_pattern"] == "omega.*10098", "Should preserve pattern"
+    def test_match_with_knot_match(self):
+        """Test successful knot matching."""
+        # Mock knot strategy response
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Declaration Grooming",
+            "model": "B2",
+            "fiber": "badger",
+            "knot_size_mm": 26.0,
+            "knot_maker": "Declaration Grooming",
+            "fiber_strategy": "yaml",
+            "fiber_conflict": None,
+        }
+        mock_result.pattern = "declaration.*b2"
+        mock_result.match_type = "regex"
 
-        # Should be partial result (no top-level brand/model)
-        assert "handle_maker" not in result.matched, "Should not have handle_maker (partial result)"
-        assert "handle_model" not in result.matched, "Should not have handle_model (partial result)"
-        assert "handle" not in result.matched, "Should not have handle section (partial result)"
+        # Mock the knot matcher strategies
+        mock_strategy = Mock()
+        mock_strategy.match.return_value = mock_result
+        self.mock_knot_matcher.strategies = [mock_strategy]
 
-    def test_knot_component_strategy_has_correct_strategy_name(self):
-        """Test that KnotComponentStrategy has correct strategy name for scoring."""
-        # Setup mock knot match
-        mock_knot_result = MatchResult(
-            original="Timberwolf knot",
-            matched={
-                "brand": "Generic",
-                "model": "Timberwolf",
-                "fiber": "synthetic",
-                "knot_size_mm": 26.0,
-            },
-            match_type="regex",
-            pattern="timberwolf",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        result = self.strategy.match("Declaration B2")
 
-        # Test strategy name
-        result = self.strategy.match("Timberwolf knot")
-        assert result is not None, "Should return a result"
-        assert result.strategy == "knot_component", "Strategy name should be 'knot_component'"
+        assert result is not None
+        assert isinstance(result, MatchResult)
+        assert result.original == "Declaration B2"
+        assert result.strategy == "knot_only"
+        assert result.pattern == "declaration.*b2"
+        assert result.match_type == "knot_only"
 
-    def test_knot_component_strategy_no_match_returns_none(self):
-        """Test that KnotComponentStrategy returns None when no knot found."""
-        # Setup mock to return None (no knot match)
-        self.mock_knot_matcher.match.return_value = None
+        # Check matched data structure (simplified component data)
+        matched = result.matched
+        assert matched is not None
+        assert matched["brand"] == "Declaration Grooming"
+        assert matched["model"] == "B2"
+        assert matched["fiber"] == "badger"
+        assert matched["knot_size_mm"] == 26.0
+        assert matched["source_text"] == "Declaration B2"
+        assert matched["_matched_by"] == "KnotComponentStrategy"
+        assert matched["_pattern"] == "declaration.*b2"
 
-        # Test with input that has no knot component
-        result = self.strategy.match("Unknown Brush XYZ")
+        # Component strategies no longer create nested structure
+        assert "handle" not in matched
+        assert "knot" not in matched
 
-        # Should return None (no knot component found)
-        assert result is None, "Should return None when no knot component found"
+    def test_match_with_knot_match_no_pattern(self):
+        """Test knot matching when no pattern is provided."""
+        # Mock knot strategy response without pattern
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Zenith",
+            "model": "B15",
+            "fiber": "boar",
+            "knot_size_mm": 28.0,
+            "knot_maker": "Zenith",
+            "fiber_strategy": "yaml",
+            "fiber_conflict": None,
+        }
+        mock_result.pattern = None
+        mock_result.match_type = "regex"
 
-    def test_knot_component_strategy_handles_empty_matched_data(self):
-        """Test that KnotComponentStrategy handles empty matched data gracefully."""
-        # Setup mock knot result with empty matched data
-        mock_knot_result = MatchResult(
-            original="Test input",
-            matched={},  # Empty matched data
-            match_type="regex",
-            pattern="test",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        # Mock the knot matcher strategies
+        mock_strategy = Mock()
+        mock_strategy.match.return_value = mock_result
+        self.mock_knot_matcher.strategies = [mock_strategy]
 
-        # Should return None when matched data is empty
-        result = self.strategy.match("Test input")
-        assert result is None, "Should return None when matched data is empty"
+        result = self.strategy.match("Zenith B15")
 
-    def test_knot_component_strategy_handles_none_matched_data(self):
-        """Test that KnotComponentStrategy handles None matched data gracefully."""
-        # Setup mock knot result with None matched data
-        mock_knot_result = MatchResult(
-            original="Test input",
-            matched=None,  # None matched data
-            match_type="regex",
-            pattern="test",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        assert result is not None
+        assert result.pattern == "knot_only"  # Default pattern when none provided
+        assert result.matched is not None
+        assert result.matched["_pattern"] == "knot_only"
 
-        # Should return None when matched data is None
-        result = self.strategy.match("Test input")
-        assert result is None, "Should return None when matched data is None"
+    def test_match_with_no_knot_match(self):
+        """Test matching when no knot strategies return a match."""
+        # Mock knot matcher strategies that return no match
+        mock_strategy = Mock()
+        mock_strategy.match.return_value = None
+        self.mock_knot_matcher.strategies = [mock_strategy]
 
-    def test_knot_component_strategy_preserves_metadata(self):
-        """Test that KnotComponentStrategy preserves all knot metadata."""
-        # Setup mock knot result with full metadata
-        mock_knot_result = MatchResult(
-            original="Declaration B2 Washington",
-            matched={
-                "brand": "Declaration Grooming",
-                "model": "B2",
-                "fiber": "badger",
-                "knot_size_mm": 26.0,
-            },
-            match_type="regex",
-            pattern="declaration.*b2",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        result = self.strategy.match("Some random text")
 
-        # Test metadata preservation
-        result = self.strategy.match("Declaration B2 Washington")
-        assert result is not None, "Should return a result"
-        assert (
-            result.matched["_source_text"] == "Declaration B2 Washington"
-        ), "Should preserve source text"
+        assert result is None
 
-    def test_knot_component_strategy_handles_invalid_input(self):
-        """Test that KnotComponentStrategy handles invalid input gracefully."""
-        # Test with None input
-        result = self.strategy.match(None)
-        assert result is None, "Should return None for None input"
+    def test_match_with_strategy_exception(self):
+        """Test matching when a strategy throws an exception."""
+        # Mock knot matcher strategies that throw exceptions
+        mock_strategy = Mock()
+        mock_strategy.match.side_effect = Exception("Strategy error")
+        self.mock_knot_matcher.strategies = [mock_strategy]
 
-        # Test with empty string
-        result = self.strategy.match("")
-        assert result is None, "Should return None for empty string"
+        result = self.strategy.match("Some text")
 
-        # Test with non-string input
-        result = self.strategy.match(123)
-        assert result is None, "Should return None for non-string input"
+        assert result is None
 
-    def test_knot_component_strategy_fail_fast_on_knot_matcher_error(self):
-        """Test that KnotComponentStrategy fails fast on KnotMatcher errors."""
-        # Setup mock to raise exception
-        self.mock_knot_matcher.match.side_effect = ValueError("Knot matcher error")
+    def test_match_with_multiple_strategies(self):
+        """Test matching with multiple knot strategies."""
+        # Mock first strategy that returns no match
+        mock_strategy1 = Mock()
+        mock_strategy1.match.return_value = None
 
-        # Should raise exception (fail fast)
-        with pytest.raises(ValueError, match="Knot component matching failed"):
-            self.strategy.match("Test input")
+        # Mock second strategy that returns a match
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Omega",
+            "model": "10049",
+            "fiber": "boar",
+            "knot_size_mm": 24.0,
+            "knot_maker": "Omega",
+            "fiber_strategy": "yaml",
+            "fiber_conflict": None,
+        }
+        mock_result.pattern = "omega.*10049"
+        mock_result.match_type = "regex"
 
-    def test_knot_component_strategy_match_type(self):
-        """Test that KnotComponentStrategy has correct match_type."""
-        # Setup mock knot result
-        mock_knot_result = MatchResult(
-            original="Test input",
-            matched={
-                "brand": "Test Brand",
-                "model": "Test Model",
-                "fiber": "badger",
-                "knot_size_mm": 26.0,
-            },
-            match_type="regex",
-            pattern="test.*pattern",
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        mock_strategy2 = Mock()
+        mock_strategy2.match.return_value = mock_result
 
-        # Test match_type
-        result = self.strategy.match("Test input")
-        assert result is not None, "Should return a result"
-        assert result.match_type == "knot_component", "Match type should be 'knot_component'"
+        self.mock_knot_matcher.strategies = [mock_strategy1, mock_strategy2]
 
-    def test_knot_component_strategy_handles_missing_pattern(self):
-        """Test that KnotComponentStrategy handles missing pattern gracefully."""
-        # Setup mock knot result with missing pattern
-        mock_knot_result = MatchResult(
-            original="Test input",
-            matched={
-                "brand": "Test Brand",
-                "model": "Test Model",
-                "fiber": "badger",
-                "knot_size_mm": 26.0,
-            },
-            match_type="regex",
-            pattern=None,  # Missing pattern
-        )
-        self.mock_knot_matcher.match.return_value = mock_knot_result
+        result = self.strategy.match("Omega 10049")
 
-        # Should handle missing pattern gracefully
-        result = self.strategy.match("Test input")
-        assert result is not None, "Should return a result"
-        assert result.matched["_pattern"] == "unknown", "Should use 'unknown' for missing pattern"
+        assert result is not None
+        assert result.matched is not None
+        assert result.matched["brand"] == "Omega"
+        assert result.matched["model"] == "10049"
+
+    def test_match_preserves_original_input(self):
+        """Test that the strategy preserves the original input text."""
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Test Brand",
+            "model": "Test Model",
+            "fiber": "synthetic",
+            "knot_size_mm": 26.0,
+            "knot_maker": "Test Brand",
+            "fiber_strategy": "yaml",
+            "fiber_conflict": None,
+        }
+        mock_result.pattern = "test_pattern"
+        mock_result.match_type = "regex"
+
+        mock_strategy = Mock()
+        mock_strategy.match.return_value = mock_result
+        self.mock_knot_matcher.strategies = [mock_strategy]
+
+        input_text = "Test Brand Test Model with special characters!@#"
+        result = self.strategy.match(input_text)
+
+        assert result is not None
+        assert result.original == input_text
+        assert result.matched is not None
+        assert result.matched["source_text"] == input_text

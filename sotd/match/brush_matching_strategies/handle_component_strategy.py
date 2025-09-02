@@ -1,64 +1,82 @@
-#!/usr/bin/env python3
-"""HandleComponentStrategy for Phase 3.3 dual component breakdown."""
-
 from typing import Optional
 
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.types import MatchResult
+from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.types import MatchResult, create_match_result
 
 
 class HandleComponentStrategy(BaseBrushMatchingStrategy):
-    """Strategy for matching handle components only (partial result)."""
+    """
+    Strategy for extracting handle components from brush input.
 
-    def __init__(self, handle_matcher):
-        """
-        Initialize handle component strategy.
+    This strategy extracts handle component from unified strategy result and creates
+    handle component data without re-running matching logic. Works with both
+    handle-only input and composite brushes.
+    """
 
-        Args:
-            handle_matcher: HandleMatcher instance to use for handle matching
-        """
-        super().__init__()
+    def __init__(self, handle_matcher: HandleMatcher):
         self.handle_matcher = handle_matcher
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, cached_results: Optional[dict] = None) -> Optional[MatchResult]:
         """
-        Try to match handle component in the input string.
+        Attempt to match the input as a handle-only component.
 
         Args:
-            value: The brush string to match
+            value: The input string to match
+            cached_results: Optional cached results from other strategies
 
         Returns:
-            MatchResult with handle information only (partial result) if found, None otherwise
+            MatchResult with handle populated, knot null, or None if no match
         """
-        if not value or not isinstance(value, str):
+        if not value or not value.strip():
             return None
 
-        try:
-            # Use HandleMatcher to find handle component
-            handle_match = self.handle_matcher.match_handle_maker(value)
+        # Try to use cached unified result first
+        if cached_results and "full_input_component_matching_result" in cached_results:
+            unified_result = cached_results["full_input_component_matching_result"]
+            if unified_result and unified_result.matched:
+                # Extract handle component from unified result
+                handle_data = unified_result.matched.get("handle", {})
+                if handle_data and handle_data.get("brand"):
+                    # Return only component-specific data, let parent strategies handle structure
+                    matched_data = {
+                        "handle_maker": handle_data.get("brand"),
+                        "handle_model": handle_data.get("model"),
+                        "source_text": value,
+                        "_matched_by": "HandleComponentStrategy",
+                        "_pattern": handle_data.get("_pattern", "handle_only"),
+                    }
 
-            if handle_match and handle_match.get("handle_maker"):
-                # Create partial result with handle information only
-                matched_data = {
-                    "handle_maker": handle_match.get("handle_maker"),
-                    "handle_model": handle_match.get("handle_model"),
-                    "_matched_by": handle_match.get("_matched_by", "HandleMatcher"),
-                    "_pattern": handle_match.get("_pattern_used", "unknown"),
-                    "_source_text": value,
-                }
+                    return create_match_result(
+                        original=value,
+                        matched=matched_data,
+                        match_type="handle_only",
+                        pattern=handle_data.get("_pattern", "handle_only"),
+                        strategy="handle_only",
+                    )
 
-                return MatchResult(
-                    original=value,
-                    matched=matched_data,
-                    match_type="handle_component",
-                    pattern=handle_match.get("_pattern_used", "unknown"),
-                    strategy="handle_component",
-                )
+        # Fallback to original logic if no cached unified result
+        # Try to match as a handle using HandleMatcher
+        handle_match = self.handle_matcher.match_handle_maker(value)
 
-            return None
+        if handle_match and handle_match.get("handle_maker"):
+            # Return only component-specific data, let parent strategies handle structure
+            matched_data = {
+                "handle_maker": handle_match.get("handle_maker"),
+                "handle_model": handle_match.get("handle_model"),
+                "source_text": value,
+                "_matched_by": "HandleComponentStrategy",
+                "_pattern": handle_match.get("_pattern_used", "handle_only"),
+            }
 
-        except Exception as e:
-            # Fail fast for debugging
-            raise ValueError(f"Handle component matching failed for '{value}': {e}")
+            return create_match_result(
+                original=value,
+                matched=matched_data,
+                match_type="handle_only",
+                pattern=handle_match.get("_pattern_used", "handle_only"),
+                strategy="handle_only",
+            )
+
+        return None

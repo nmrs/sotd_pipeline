@@ -52,8 +52,13 @@ class TestKnownBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
-        assert result.matched["fiber"] == "Badger"
-        assert result.matched["knot_size_mm"] == 27
+        # Check nested structure (no redundant root fields)
+        assert "fiber" not in result.matched, "Should not have root-level fiber"
+        assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+        assert result.matched["knot"]["fiber"] == "Badger"
+        assert result.matched["knot"]["knot_size_mm"] == 27
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] is None
         assert result.strategy == "known_brush"
 
     def test_known_brush_strategy_returns_none_for_no_match(self):
@@ -105,7 +110,9 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Omega"
         assert result.matched["model"] == "10049"
-        assert result.matched["fiber"] == "Boar"
+        # Check nested structure (no redundant root fields)
+        assert "fiber" not in result.matched, "Should not have root-level fiber"
+        assert result.matched["knot"]["fiber"] == "Boar"
         assert result.strategy == "omega_semogue_brush"
 
     def test_omega_semogue_strategy_matches_semogue_c3(self):
@@ -121,7 +128,9 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Semogue"
         assert result.matched["model"] == "c3"  # Fixed: lowercase as returned by strategy
-        assert result.matched["fiber"] == "Boar"
+        # Check nested structure (no redundant root fields)
+        assert "fiber" not in result.matched, "Should not have root-level fiber"
+        assert result.matched["knot"]["fiber"] == "Boar"
         assert result.strategy == "omega_semogue_brush"
 
     def test_omega_semogue_strategy_returns_none_for_no_match(self):
@@ -163,7 +172,10 @@ class TestZenithBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Zenith"
         assert result.matched["model"] == "b2"  # Strategy returns lowercase model names
-        assert result.matched["fiber"] == "Boar"  # Fixed: capitalized as returned by strategy
+        # Check nested structure (no redundant root fields)
+        assert "fiber" not in result.matched, "Should not have root-level fiber"
+        # Fixed: capitalized as returned by strategy
+        assert result.matched["knot"]["fiber"] == "Boar"
         assert result.strategy == "zenith_brush"
 
     def test_zenith_strategy_returns_none_for_no_match(self):
@@ -218,7 +230,9 @@ class TestOtherBrushMatchingStrategy:
         assert result is not None
         assert result.matched is not None
         assert result.matched["brand"] == "Elite"
-        assert result.matched["fiber"] == "Badger"
+        # Check nested structure (no redundant root fields)
+        assert "fiber" not in result.matched, "Should not have root-level fiber"
+        assert result.matched["knot"]["fiber"] == "Badger"
         # Fixed: strategy name is now set to "other_brush"
         assert result.strategy == "other_brush"
 
@@ -314,5 +328,10 @@ class TestIndividualBrushStrategyIntegration:
         if result.matched:
             assert "brand" in result.matched
             assert "model" in result.matched
-            assert "fiber" in result.matched
-            assert "knot_size_mm" in result.matched
+            # Check nested structure (no redundant root fields)
+            assert "fiber" not in result.matched, "Should not have root-level fiber"
+            assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+            assert "handle" in result.matched
+            assert "knot" in result.matched
+            assert result.matched["knot"]["fiber"] == "Badger"
+            assert result.matched["knot"]["knot_size_mm"] == 27

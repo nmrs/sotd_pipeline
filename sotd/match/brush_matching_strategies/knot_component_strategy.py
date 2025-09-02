@@ -1,66 +1,110 @@
-#!/usr/bin/env python3
-"""KnotComponentStrategy for Phase 3.3 dual component breakdown."""
-
 from typing import Optional
 
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.types import MatchResult
+from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.types import MatchResult, create_match_result
 
 
 class KnotComponentStrategy(BaseBrushMatchingStrategy):
-    """Strategy for matching knot components only (partial result)."""
+    """
+    Strategy for extracting knot components from brush input.
 
-    def __init__(self, knot_matcher):
-        """
-        Initialize knot component strategy.
+    This strategy extracts knot component from unified strategy result and creates
+    knot component data without re-running matching logic. Works with both
+    knot-only input and composite brushes.
+    """
 
-        Args:
-            knot_matcher: KnotMatcher instance to use for knot matching
-        """
-        super().__init__()
+    def __init__(self, knot_matcher: KnotMatcher):
         self.knot_matcher = knot_matcher
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(
+        self,
+        value: str,
+        cached_results: Optional[dict] = None,
+        unified_result: Optional[MatchResult] = None,
+    ) -> Optional[MatchResult]:
         """
-        Try to match knot component in the input string.
+        Attempt to match the input as a knot-only component.
 
         Args:
-            value: The brush string to match
+            value: The input string to match
+            cached_results: Optional cached results from other strategies
+            unified_result: Result from unified strategy (if available) to reuse (legacy parameter)
 
         Returns:
-            MatchResult with knot information only (partial result) if found, None otherwise
+            MatchResult with knot populated from unified result, handle null,
+            or None if no match
         """
-        if not value or not isinstance(value, str):
+        if not value or not value.strip():
             return None
 
-        try:
-            # Use KnotMatcher to find knot component
-            knot_match = self.knot_matcher.match(value)
+        # Try to use cached unified result first
+        if cached_results and "full_input_component_matching_result" in cached_results:
+            unified_result = cached_results["full_input_component_matching_result"]
 
-            if knot_match and knot_match.matched:
-                # Create partial result with knot information only
+        # If we have a unified result, extract knot component from it
+        if unified_result and unified_result.matched:
+            # Extract knot information from unified result
+            knot_brand = unified_result.matched.get("knot", {}).get("brand")
+            knot_model = unified_result.matched.get("knot", {}).get("model")
+            knot_fiber = unified_result.matched.get("knot", {}).get("fiber")
+            knot_size = unified_result.matched.get("knot", {}).get("knot_size_mm")
+            knot_pattern = unified_result.matched.get("knot", {}).get("_pattern")
+
+            if knot_brand and knot_model:
+                # Return only component-specific data, let parent strategies handle structure
                 matched_data = {
-                    "brand": knot_match.matched.get("brand"),
-                    "model": knot_match.matched.get("model"),
-                    "fiber": knot_match.matched.get("fiber"),
-                    "knot_size_mm": knot_match.matched.get("knot_size_mm"),
-                    "_matched_by": "KnotMatcher",
-                    "_pattern": knot_match.pattern or "unknown",
-                    "_source_text": value,
+                    "brand": knot_brand,
+                    "model": knot_model,
+                    "fiber": knot_fiber,
+                    "knot_size_mm": knot_size,
+                    "source_text": value,
+                    "_matched_by": "KnotComponentStrategy",
+                    "_pattern": knot_pattern or "knot_only",
                 }
 
-                return MatchResult(
+                return create_match_result(
                     original=value,
                     matched=matched_data,
-                    match_type="knot_component",
-                    pattern=knot_match.pattern or "unknown",
-                    strategy="knot_component",
+                    match_type="knot_only",
+                    pattern=knot_pattern or "knot_only",
+                    strategy="knot_only",
                 )
 
-            return None
+        # Fallback: try to match as a knot using all knot strategies
+        best_match = None
 
-        except Exception as e:
-            # Fail fast for debugging
-            raise ValueError(f"Knot component matching failed for '{value}': {e}")
+        for strategy in self.knot_matcher.strategies:
+            try:
+                result = strategy.match(value)
+                if result and result.matched:
+                    # Use the first valid match as fallback
+                    best_match = result
+                    break
+            except Exception:
+                # Continue to next strategy if one fails
+                continue
+
+        if best_match and best_match.matched:
+            # Return only component-specific data, let parent strategies handle structure
+            matched_data = {
+                "brand": best_match.matched.get("brand"),
+                "model": best_match.matched.get("model"),
+                "fiber": best_match.matched.get("fiber"),
+                "knot_size_mm": best_match.matched.get("knot_size_mm"),
+                "source_text": value,
+                "_matched_by": "KnotComponentStrategy",
+                "_pattern": best_match.pattern or "knot_only",
+            }
+
+            return create_match_result(
+                original=value,
+                matched=matched_data,
+                match_type="knot_only",
+                pattern=best_match.pattern or "knot_only",
+                strategy="knot_only",
+            )
+
+        return None

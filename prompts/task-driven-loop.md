@@ -26,31 +26,33 @@ Pick task → Update/Review plan → Run quality checks → Capture/record new w
 2. ☐ Update and review the implementation plan.  
 2a. ☐ Re-read the plan top to bottom.  
 2b. ☐ If not internally consistent or complete, update it and restart 2a–2b (do not proceed until consistent and complete).  
-3. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and record them as new tasks in the implementation plan.  
+3. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and **immediately record** them as new tasks in the implementation plan. **Do not skip upating the plan with the new tasks.**
 4. ☐ Reconcile the implementation plan after recording new tasks.  
 4a. ☐ Re-read the plan top to bottom.  
-4b. ☐ If not internally consistent or complete, update it and restart 5a–5b (do not proceed until consistent and complete).  
-5. ☐ Commit changes with a clear message summarizing the task (per `.cursor/rules/git-and-cleanup.mdc`).  
-6. ☐ Report progress to the user using the structured format below.  
+4b. ☐ If not internally consistent or complete, update it and restart 4a–4b (do not proceed until consistent and complete).  
+5. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and **immediately record** them as new tasks in the implementation plan. **Do not skip upating the plan with the new tasks.**
+6. ☐ Commit changes with a clear message summarizing the task (per `.cursor/rules/git-and-cleanup.mdc`).  
+7. ☐ Report progress to the user using the structured format below.  
    - **Task Completed:** …  
    - **Plan Updates:** …  
    - **New Tasks Discovered:** …  
    *(If none, print “None” explicitly)*  
-7. ☐ Move to the next **plan task**.  
+8. ☐ Move to the next **plan task**.  
 
 **Checklist Template (reset to this at the start of each new plan task, or if you ever get lost):**  
 1. ☐ Pick the next **plan task** from the implementation plan.  
 2. ☐ Update and review the implementation plan.  
 2a. ☐ Re-read the plan top to bottom.  
 2b. ☐ If not internally consistent or complete, update it and restart 2a–2b (do not proceed until consistent and complete).  
-3. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and record them as new tasks in the implementation plan.  
+3. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and **immediately record** them as new tasks in the implementation plan. **Do not skip upating the plan with the new tasks.**
 4. ☐ Reconcile the implementation plan after recording new tasks.  
 4a. ☐ Re-read the plan top to bottom.  
-4b. ☐ If not internally consistent or complete, update it and restart 5a–5b (do not proceed until consistent and complete).  
-5. ☐ Commit changes with a clear message summarizing the task (per `.cursor/rules/git-and-cleanup.mdc`).  
-6. ☐ Report progress to the user using the structured format below.  
+4b. ☐ If not internally consistent or complete, update it and restart 4a–4b (do not proceed until consistent and complete).  
+5. ☐ If new work items are discovered — such as failing tests, architectural direction changes, gaps in requirements, or other tasks we had not considered — communicate them to the user and **immediately record** them as new tasks in the implementation plan. **Do not skip upating the plan with the new tasks.**
+6. ☐ Commit changes with a clear message summarizing the task (per `.cursor/rules/git-and-cleanup.mdc`).  
+7. ☐ Report progress to the user using the structured format below.  
    - **Task Completed:** …  
    - **Plan Updates:** …  
    - **New Tasks Discovered:** …  
    *(If none, print “None” explicitly)*  
-7. ☐ Move to the next **plan task**.  
+8. ☐ Move to the next **plan task**.  

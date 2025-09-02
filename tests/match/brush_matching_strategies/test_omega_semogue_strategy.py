@@ -16,7 +16,11 @@ def test_omega_with_model_number(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Omega"
     assert result.matched["model"] == "10049"
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["handle"]["brand"] == "Omega"
+    assert result.matched["handle"]["model"] is None
     assert result.matched["source_type"] == "exact"
 
 
@@ -36,7 +40,11 @@ def test_semogue_with_c_model(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Semogue"
     assert result.matched["model"] == "c3"  # Preserves case from regex
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["handle"]["brand"] == "Semogue"
+    assert result.matched["handle"]["model"] is None
 
 
 def test_semogue_with_numeric_model(strategy):

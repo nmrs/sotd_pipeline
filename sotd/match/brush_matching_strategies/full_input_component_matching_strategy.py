@@ -209,8 +209,6 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
         brush_data = {
             "brand": knot_data.get("brand"),
             "model": knot_data.get("model"),
-            "fiber": knot_data.get("fiber"),
-            "knot_size_mm": knot_data.get("knot_size_mm"),
             "source_text": knot_data.get("source_text", ""),
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),

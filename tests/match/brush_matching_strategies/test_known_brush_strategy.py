@@ -49,8 +49,13 @@ def test_known_brush_exact_match(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Simpson"
     assert result.matched["model"] == "Chubby 2"
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 27
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 27
+    assert result.matched["handle"]["brand"] == "Simpson"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "regex"
 
 
@@ -61,8 +66,13 @@ def test_known_brush_with_user_knot_size(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Simpson"
     assert result.matched["model"] == "Chubby 2"
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 27  # YAML default, not user override
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 27  # YAML default, not user override
+    assert result.matched["handle"]["brand"] == "Simpson"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "regex"
 
 
@@ -72,8 +82,13 @@ def test_known_brush_omega_match(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Omega"
     assert result.matched["model"] == "Pro 48"
-    assert result.matched["fiber"] == "Boar"
-    assert result.matched["knot_size_mm"] == 48
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["knot"]["knot_size_mm"] == 48
+    assert result.matched["handle"]["brand"] == "Omega"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "regex"
 
 
@@ -91,8 +106,13 @@ def test_known_brush_with_user_fiber_conflict(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Simpson"
     assert result.matched["model"] == "Chubby 2"
-    assert result.matched["fiber"] == "Badger"  # YAML default, not user override
-    assert result.matched["knot_size_mm"] == 27
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"  # YAML default, not user override
+    assert result.matched["knot"]["knot_size_mm"] == 27
+    assert result.matched["handle"]["brand"] == "Simpson"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "regex"
 
 
@@ -103,6 +123,11 @@ def test_known_brush_ap_shave_co_g5c(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "AP Shave Co"
     assert result.matched["model"] == "G5C"
-    assert result.matched["fiber"] == "Synthetic"
-    assert result.matched["knot_size_mm"] == 24
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Synthetic"
+    assert result.matched["knot"]["knot_size_mm"] == 24
+    assert result.matched["handle"]["brand"] == "AP Shave Co"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "regex"

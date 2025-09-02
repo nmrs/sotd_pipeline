@@ -97,7 +97,14 @@ class TestDataQuality:
                 "author": "user1",
                 "razor": {"matched": {"brand": "Test", "model": "Test", "format": "DE"}},
                 "blade": {"matched": {"brand": "Test", "model": "Test", "format": "DE"}},
-                "brush": {"matched": {"brand": "Test", "model": "Test", "fiber": "Synthetic"}},
+                "brush": {
+                    "matched": {
+                        "brand": "Test",
+                        "model": "Test",
+                        "handle": {"brand": "Test", "model": "Test"},
+                        "knot": {"fiber": "Synthetic"},
+                    }
+                },
                 "soap": {"matched": {"brand": "Test", "scent": "Test"}},
             }
         ]
@@ -132,14 +139,28 @@ class TestDataQuality:
                 "author": "user1",
                 "razor": {"matched": {"brand": "Test1", "model": "Test1", "format": "DE"}},
                 "blade": {"matched": {"brand": "Test1", "model": "Test1", "format": "DE"}},
-                "brush": {"matched": {"brand": "Test1", "model": "Test1", "fiber": "Synthetic"}},
+                "brush": {
+                    "matched": {
+                        "brand": "Test1",
+                        "model": "Test1",
+                        "handle": {"brand": "Test1", "model": "Test1"},
+                        "knot": {"fiber": "Synthetic"},
+                    }
+                },
                 "soap": {"matched": {"brand": "Test1", "scent": "Test1"}},
             },
             {
                 "author": "user2",
                 "razor": {"matched": {"brand": "Test2", "model": "Test2", "format": "DE"}},
                 "blade": {"matched": {"brand": "Test2", "model": "Test2", "format": "DE"}},
-                "brush": {"matched": {"brand": "Test2", "model": "Test2", "fiber": "Synthetic"}},
+                "brush": {
+                    "matched": {
+                        "brand": "Test2",
+                        "model": "Test2",
+                        "handle": {"brand": "Test2", "model": "Test2"},
+                        "knot": {"fiber": "Synthetic"},
+                    }
+                },
                 "soap": {"matched": {"brand": "Test2", "scent": "Test2"}},
             },
         ]
@@ -202,7 +223,14 @@ class TestDataQuality:
                 "author": "user1",
                 "razor": {"matched": {"brand": "Test1", "model": "Test1", "format": "DE"}},
                 "blade": {"matched": {"brand": "Test1", "model": "Test1", "format": "DE"}},
-                "brush": {"matched": {"brand": "Test1", "model": "Test1", "fiber": "Synthetic"}},
+                "brush": {
+                    "matched": {
+                        "brand": "Test1",
+                        "model": "Test1",
+                        "handle": {"brand": "Test1", "model": "Test1"},
+                        "knot": {"fiber": "Synthetic"},
+                    }
+                },
                 "soap": {"matched": {"brand": "Test1", "scent": "Test1"}},
             },
             {

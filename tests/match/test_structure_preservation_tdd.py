@@ -510,7 +510,7 @@ class TestStructurePreservationTDD:
         # Check that we have the expected structure from CorrectMatchesStrategy
         assert "brand" in rehydrated, "Should have top-level brand"
         assert "model" in rehydrated, "Should have top-level model"
-        
+
         # Check that we have the required metadata fields
         assert (
             rehydrated["_matched_by"] == "CorrectMatchesStrategy"
@@ -519,9 +519,7 @@ class TestStructurePreservationTDD:
         assert rehydrated["strategy"] == "correct_matches", "Should indicate correct matches"
 
         # Check that we DON'T have redundant root-level fields (per plan specification)
-        assert (
-            "fiber" not in rehydrated
-        ), "Should NOT have root-level fiber (only in knot)"
+        assert "fiber" not in rehydrated, "Should NOT have root-level fiber (only in knot)"
         assert (
             "knot_size_mm" not in rehydrated
         ), "Should NOT have root-level knot_size_mm (only in knot)"

@@ -78,17 +78,38 @@ class KnownBrushMatchingStrategy(BaseBrushMatchingStrategy):
         return False
 
     def _create_match_result_from_pattern(self, value: str, pattern_data: dict) -> dict:
-        """Create matched data from pattern data."""
-        result = {
-            "brand": pattern_data.get("brand"),
-            "model": pattern_data.get("model"),
-            "_pattern_used": pattern_data.get("pattern", "unknown"),
-        }
+        """Create matched data from pattern data with nested structure."""
+        # Get basic brush information
+        brand = pattern_data.get("brand")
+        model = pattern_data.get("model")
 
         # Apply fiber and size detection logic
         fiber_info, size_info = self._detect_fiber_and_size(value, pattern_data)
-        result.update(fiber_info)
-        result.update(size_info)
+
+        # Create result with nested structure (no redundant root fields)
+        result = {
+            "brand": brand,
+            "model": model,
+            "_pattern_used": pattern_data.get("pattern", "unknown"),
+            # Create nested handle section
+            "handle": {
+                "brand": brand,  # Handle brand same as brush brand for complete brushes
+                "model": None,  # Handle model not specified in catalog
+            },
+            # Create nested knot section with fiber and size info
+            "knot": {
+                "brand": brand,  # Knot brand same as brush brand for complete brushes
+                "model": model,  # Knot model same as brush model for complete brushes
+                "fiber": fiber_info.get("fiber"),
+                "knot_size_mm": size_info.get("knot_size_mm"),
+            },
+        }
+
+        # Add strategy information to root level
+        if fiber_info.get("fiber_strategy"):
+            result["fiber_strategy"] = fiber_info["fiber_strategy"]
+        if size_info.get("knot_size_strategy"):
+            result["knot_size_strategy"] = size_info["knot_size_strategy"]
 
         return result
 

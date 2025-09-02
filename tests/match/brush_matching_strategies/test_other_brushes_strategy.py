@@ -40,8 +40,13 @@ def test_other_brush_with_user_fiber(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Elite"
     assert result.matched["model"] == "Boar"  # User fiber
-    assert result.matched["fiber"] == "Boar"
-    assert result.matched["knot_size_mm"] == 26
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["knot"]["knot_size_mm"] == 26
+    assert result.matched["handle"]["brand"] == "Elite"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -52,8 +57,13 @@ def test_other_brush_with_default_fiber(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Elite"
     assert result.matched["model"] == "Badger"  # Default fiber
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 26
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 26
+    assert result.matched["handle"]["brand"] == "Elite"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -64,7 +74,11 @@ def test_other_brush_alpha_synthetic(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Alpha"
     assert result.matched["model"] == "Synthetic"  # Default fiber
-    assert result.matched["fiber"] == "Synthetic"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Synthetic"
+    assert result.matched["handle"]["brand"] == "Alpha"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -75,8 +89,13 @@ def test_other_brush_with_knot_size_from_yaml(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Groomatorium"
     assert result.matched["model"] == "Badger"  # Default fiber
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 24  # From YAML
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 24  # From YAML
+    assert result.matched["handle"]["brand"] == "Groomatorium"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -87,8 +106,13 @@ def test_other_brush_cf_pattern(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Groomatorium"
     assert result.matched["model"] == "Badger"  # Default fiber
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 22  # User override
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 22  # User override
+    assert result.matched["handle"]["brand"] == "Groomatorium"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -99,7 +123,11 @@ def test_other_brush_omega_boar_default(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Omega"
     assert result.matched["model"] == "Boar"  # Default fiber
-    assert result.matched["fiber"] == "Boar"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Boar"
+    assert result.matched["handle"]["brand"] == "Omega"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -110,7 +138,11 @@ def test_other_brush_user_fiber_overrides_default(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Omega"
     assert result.matched["model"] == "Synthetic"  # User fiber
-    assert result.matched["fiber"] == "Synthetic"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Synthetic"
+    assert result.matched["handle"]["brand"] == "Omega"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -129,7 +161,11 @@ def test_other_brush_case_insensitive(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Elite"
     assert result.matched["model"] == "Synthetic"  # User fiber
-    assert result.matched["fiber"] == "Synthetic"
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert result.matched["knot"]["fiber"] == "Synthetic"
+    assert result.matched["handle"]["brand"] == "Elite"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 
@@ -140,8 +176,13 @@ def test_other_brush_multiple_patterns(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Chiseled Face"
     assert result.matched["model"] == "Badger"  # Default fiber
-    assert result.matched["fiber"] == "Badger"
-    assert result.matched["knot_size_mm"] == 24
+    # Check nested structure (no redundant root fields)
+    assert "fiber" not in result.matched, "Should not have root-level fiber"
+    assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
+    assert result.matched["knot"]["fiber"] == "Badger"
+    assert result.matched["knot"]["knot_size_mm"] == 24
+    assert result.matched["handle"]["brand"] == "Chiseled Face"
+    assert result.matched["handle"]["model"] is None
     assert result.match_type == "brand_default"
 
 

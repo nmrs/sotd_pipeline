@@ -84,20 +84,28 @@ class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
                 else:
                     model = default_fiber
 
+                # Create result with nested structure (no redundant root fields)
                 result = {
                     "brand": brand,
                     "model": model,
-                    "fiber": final_fiber,
                     "_pattern_used": pattern,
                     "fiber_strategy": "user_input" if user_fiber else "default",
                     "_matched_by_strategy": self.__class__.__name__,
+                    # Create nested handle section
+                    "handle": {
+                        "brand": brand,  # Handle brand same as brush brand for other brushes
+                        "model": None,  # Handle model not specified for other brushes
+                    },
+                    # Create nested knot section with fiber and size info
+                    "knot": {
+                        "brand": brand,  # Knot brand same as brush brand for other brushes
+                        "model": model,  # Knot model same as brush model for other brushes
+                        "fiber": final_fiber,
+                        "knot_size_mm": (
+                            user_knot_size if user_knot_size is not None else default_knot_size
+                        ),
+                    },
                 }
-
-                # Add knot size - preserve catalog data for enrich phase
-                if user_knot_size is not None:
-                    result["knot_size_mm"] = user_knot_size
-                elif default_knot_size is not None:
-                    result["knot_size_mm"] = default_knot_size
 
                 return create_match_result(
                     original=value.get("original", text) if isinstance(value, dict) else value,

@@ -1,161 +1,114 @@
-#!/usr/bin/env python3
-"""Tests for HandleComponentStrategy for handle-only matching."""
-
 from unittest.mock import Mock
+
 from sotd.match.brush_matching_strategies.handle_component_strategy import HandleComponentStrategy
 from sotd.match.types import MatchResult
-import pytest
 
 
 class TestHandleComponentStrategy:
-    """Test HandleComponentStrategy for handle-only component matching."""
+    """Test the HandleComponentStrategy class."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Create mock HandleMatcher
         self.mock_handle_matcher = Mock()
         self.strategy = HandleComponentStrategy(self.mock_handle_matcher)
 
-    def test_handle_component_strategy_matches_handle_only(self):
-        """Test that HandleComponentStrategy matches handle components only."""
-        # Setup mock handle match
+    def test_init(self):
+        """Test strategy initialization."""
+        assert self.strategy.handle_matcher == self.mock_handle_matcher
+
+    def test_match_with_empty_input(self):
+        """Test matching with empty or whitespace input."""
+        assert self.strategy.match("") is None
+        assert self.strategy.match("   ") is None
+
+    def test_match_with_handle_match(self):
+        """Test successful handle matching."""
+        # Mock handle matcher response
         mock_handle_match = {
-            "handle_maker": "Summer Break",
-            "handle_model": "Maize",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "summer.*break",
+            "handle_maker": "Chisel and Hound",
+            "handle_model": "Padauk Wood",
+            "_pattern_used": "chisel.*hound.*padauk",
         }
         self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
 
-        # Test with composite brush input
-        result = self.strategy.match("Summer Break Soaps Maize 26mm Timberwolf")
+        result = self.strategy.match("Chisel and Hound Padauk Wood handle")
 
-        # Should return partial result with handle information only
-        assert result is not None, "Should return a result when handle is found"
-        assert result.matched is not None, "Should have matched data"
-        assert result.matched["handle_maker"] == "Summer Break", "Should match handle maker"
-        assert result.matched["handle_model"] == "Maize", "Should match handle model"
-        assert (
-            result.matched["_matched_by"] == "HandleMatcher"
-        ), "Should indicate HandleMatcher source"
-        assert result.matched["_pattern"] == "summer.*break", "Should preserve pattern"
+        assert result is not None
+        assert isinstance(result, MatchResult)
+        assert result.original == "Chisel and Hound Padauk Wood handle"
+        assert result.strategy == "handle_only"
+        assert result.pattern == "chisel.*hound.*padauk"
+        assert result.match_type == "handle_only"
 
-        # Should be partial result (no top-level brand/model)
-        assert "brand" not in result.matched, "Should not have top-level brand (partial result)"
-        assert "model" not in result.matched, "Should not have top-level model (partial result)"
-        assert "knot" not in result.matched, "Should not have knot section (partial result)"
+        # Check matched data structure (simplified component data)
+        matched = result.matched
+        assert matched is not None
+        assert matched["handle_maker"] == "Chisel and Hound"
+        assert matched["handle_model"] == "Padauk Wood"
+        assert matched["source_text"] == "Chisel and Hound Padauk Wood handle"
+        assert matched["_matched_by"] == "HandleComponentStrategy"
+        assert matched["_pattern"] == "chisel.*hound.*padauk"
 
-    def test_handle_component_strategy_has_correct_strategy_name(self):
-        """Test that HandleComponentStrategy has correct strategy name for scoring."""
-        # Setup mock handle match
-        mock_handle_match = {
-            "handle_maker": "Chisel & Hound",
-            "handle_model": "The Duke",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "chisel.*hound",
-        }
+        # Component strategies no longer create nested structure
+        assert "handle" not in matched
+        assert "knot" not in matched
+        assert "brand" not in matched
+        assert "model" not in matched
+
+    def test_match_with_handle_match_no_pattern(self):
+        """Test handle matching when no pattern is provided."""
+        # Mock handle matcher response without pattern
+        mock_handle_match = {"handle_maker": "Declaration Grooming", "handle_model": "Washington"}
         self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
 
-        # Test strategy name
-        result = self.strategy.match("Chisel & Hound 'The Duke' / Omega 10098 Boar")
-        assert result is not None, "Should return a result"
-        assert result.strategy == "handle_component", "Strategy name should be 'handle_component'"
+        result = self.strategy.match("Declaration Grooming Washington")
 
-    def test_handle_component_strategy_no_match_returns_none(self):
-        """Test that HandleComponentStrategy returns None when no handle found."""
-        # Setup mock to return None (no handle match)
+        assert result is not None
+        assert result.pattern == "handle_only"  # Default pattern when none provided
+        assert result.matched is not None
+        assert result.matched["_pattern"] == "handle_only"
+
+    def test_match_with_no_handle_match(self):
+        """Test matching when handle matcher returns no match."""
         self.mock_handle_matcher.match_handle_maker.return_value = None
 
-        # Test with input that has no handle component
-        result = self.strategy.match("Omega 10098 Boar")
+        result = self.strategy.match("Some random text")
 
-        # Should return None (no handle component found)
-        assert result is None, "Should return None when no handle component found"
+        assert result is None
 
-    def test_handle_component_strategy_handles_empty_handle_maker(self):
-        """Test that HandleComponentStrategy handles empty handle_maker gracefully."""
-        # Setup mock handle match with empty handle_maker
+    def test_match_with_empty_handle_match(self):
+        """Test matching when handle matcher returns empty dict."""
+        self.mock_handle_matcher.match_handle_maker.return_value = {}
+
+        result = self.strategy.match("Some random text")
+
+        assert result is None
+
+    def test_match_with_handle_match_no_handle_maker(self):
+        """Test matching when handle matcher returns match without handle_maker."""
         mock_handle_match = {
-            "handle_maker": "",  # Empty handle maker
-            "handle_model": "Test",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "test",
+            "handle_model": "Some Model"
+            # Missing handle_maker
         }
         self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
 
-        # Should return None when handle_maker is empty
-        result = self.strategy.match("Test input")
-        assert result is None, "Should return None when handle_maker is empty"
+        result = self.strategy.match("Some text")
 
-    def test_handle_component_strategy_handles_none_handle_maker(self):
-        """Test that HandleComponentStrategy handles None handle_maker gracefully."""
-        # Setup mock handle match with None handle_maker
-        mock_handle_match = {
-            "handle_maker": None,  # None handle maker
-            "handle_model": "Test",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "test",
-        }
-        self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
+        assert result is None
 
-        # Should return None when handle_maker is None
-        result = self.strategy.match("Test input")
-        assert result is None, "Should return None when handle_maker is None"
-
-    def test_handle_component_strategy_preserves_metadata(self):
-        """Test that HandleComponentStrategy preserves all handle metadata."""
-        # Setup mock handle match with full metadata
-        mock_handle_match = {
-            "handle_maker": "Declaration Grooming",
-            "handle_model": "Washington",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "declaration.*washington",
-            "_source_text": "Declaration Grooming Washington handle",
-        }
-        self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
-
-        # Test metadata preservation
-        result = self.strategy.match("Declaration Grooming Washington handle")
-        assert result is not None, "Should return a result"
-        assert (
-            result.matched["_source_text"] == "Declaration Grooming Washington handle"
-        ), "Should preserve source text"
-
-    def test_handle_component_strategy_handles_invalid_input(self):
-        """Test that HandleComponentStrategy handles invalid input gracefully."""
-        # Test with None input
-        result = self.strategy.match(None)
-        assert result is None, "Should return None for None input"
-
-        # Test with empty string
-        result = self.strategy.match("")
-        assert result is None, "Should return None for empty string"
-
-        # Test with non-string input
-        result = self.strategy.match(123)
-        assert result is None, "Should return None for non-string input"
-
-    def test_handle_component_strategy_fail_fast_on_handle_matcher_error(self):
-        """Test that HandleComponentStrategy fails fast on HandleMatcher errors."""
-        # Setup mock to raise exception
-        self.mock_handle_matcher.match_handle_maker.side_effect = ValueError("Handle matcher error")
-
-        # Should raise exception (fail fast)
-        with pytest.raises(ValueError, match="Handle component matching failed"):
-            self.strategy.match("Test input")
-
-    def test_handle_component_strategy_match_type(self):
-        """Test that HandleComponentStrategy has correct match_type."""
-        # Setup mock handle match
+    def test_match_preserves_original_input(self):
+        """Test that the strategy preserves the original input text."""
         mock_handle_match = {
             "handle_maker": "Test Maker",
             "handle_model": "Test Model",
-            "_matched_by": "HandleMatcher",
-            "_pattern_used": "test.*pattern",
+            "_pattern_used": "test_pattern",
         }
         self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
 
-        # Test match_type
-        result = self.strategy.match("Test input")
-        assert result is not None, "Should return a result"
-        assert result.match_type == "handle_component", "Match type should be 'handle_component'"
+        input_text = "Test Maker Test Model with special characters!@#"
+        result = self.strategy.match(input_text)
+
+        assert result is not None
+        assert result.original == input_text
+        assert result.matched is not None
+        assert result.matched["source_text"] == input_text

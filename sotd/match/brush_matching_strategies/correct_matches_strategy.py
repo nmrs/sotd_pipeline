@@ -80,7 +80,7 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
                 # This is a composite brush - reconstruct the full structure
                 matched_data = self._reconstruct_composite_brush_structure(value, match_data)
             else:
-                # Handle-only or knot-only entry - reconstruct nested structure to match regex result
+                # Handle-only or knot-only entry - reconstruct nested structure
                 if match_data.handle_maker:
                     matched_data = self._reconstruct_handle_only_structure(value, match_data)
                 elif match_data.knot_info:
@@ -116,6 +116,9 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
                         )
                         if catalog_data:
                             matched_data.update(catalog_data)
+        elif match_data.match_type == "complete_brush":
+            # Complete brush match - reconstruct nested structure
+            matched_data = self._reconstruct_complete_brush_structure(value, match_data)
         else:
             # Fallback for unknown match types
             matched_data = {
@@ -148,8 +151,25 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
         Returns:
             Dictionary with complete brush specifications
         """
+        # Always create nested structure for complete brushes, even without catalogs
+        matched_data = {
+            "brand": brand,
+            "model": model,
+            # Always create nested sections for complete brushes
+            "handle": {
+                "brand": brand,  # Handle brand same as brush brand for complete brushes
+                "model": None,  # Handle model not specified in catalog
+            },
+            "knot": {
+                "brand": brand,  # Knot brand same as brush brand for complete brushes
+                "model": model,  # Knot model same as brush model for complete brushes
+                "fiber": None,  # Fiber not specified without catalog
+                "knot_size_mm": None,  # Knot size not specified without catalog
+            },
+        }
+
         if not self.catalogs:
-            return {"brand": brand, "model": model}
+            return matched_data
 
         # Look up in brushes catalog
         brushes_catalog = self.catalogs.get("brushes", {})
@@ -163,21 +183,30 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
         if not brush_data:
             return {"brand": brand, "model": model}
 
-        # Build complete data structure
+        # Build complete data structure with nested sections (NO redundant root fields)
         matched_data = {
             "brand": brand,
             "model": model,
-            "fiber": brush_data.get("fiber"),
-            "knot_size_mm": brush_data.get("knot_size_mm"),
             "handle_maker": brush_data.get("handle_maker"),
+            # Always create nested sections for complete brushes
+            "handle": {
+                "brand": brand,  # Handle brand same as brush brand for complete brushes
+                "model": None,  # Handle model not specified in catalog
+            },
+            "knot": {
+                "brand": brand,  # Knot brand same as brush brand for complete brushes
+                "model": model,  # Knot model same as brush model for complete brushes
+                "fiber": brush_data.get("fiber"),
+                "knot_size_mm": brush_data.get("knot_size_mm"),
+            },
         }
 
-        # Add nested sections if they exist
+        # Override nested sections if they exist in catalog
         if "handle" in brush_data:
-            matched_data["handle"] = brush_data["handle"]
+            matched_data["handle"].update(brush_data["handle"])
 
         if "knot" in brush_data:
-            matched_data["knot"] = brush_data["knot"]
+            matched_data["knot"].update(brush_data["knot"])
 
         return matched_data
 
@@ -329,6 +358,51 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
         # Merge in any additional catalog data
         if knot_catalog_data:
             matched_data["knot"].update(knot_catalog_data)
+
+        return matched_data
+
+    def _reconstruct_complete_brush_structure(self, value: str, match_data) -> dict:
+        """
+        Reconstruct the nested structure for complete brush entries to match regex result.
+
+        Args:
+            value: Original input string
+            match_data: CorrectMatchData from CorrectMatchesChecker with complete brush info
+
+        Returns:
+            Dictionary with the nested structure matching the original regex result
+        """
+        # Extract brush information from CorrectMatchData attributes
+        brush_brand = match_data.brand
+        brush_model = match_data.model
+
+        # For complete brushes, we need to look up the actual brush data from catalogs
+        # since correct_matches.yaml only stores the brand/model mapping
+        brush_data = self._get_complete_brush_data(brush_brand, brush_model)
+
+        # Reconstruct the nested structure to match regex result
+        matched_data = {
+            # Top-level fields (required for aggregation compatibility)
+            "brand": brush_brand,
+            "model": brush_model,
+            # Handle section (nested)
+            "handle": {
+                "brand": brush_brand,  # Handle brand same as brush brand for complete brushes
+                "model": None,  # Handle model not specified in correct_matches.yaml
+            },
+            # Knot section (nested)
+            "knot": {
+                "brand": brush_brand,  # Knot brand same as brush brand for complete brushes
+                "model": brush_model,  # Knot model same as brush model for complete brushes
+                "fiber": brush_data.get("fiber"),
+                "knot_size_mm": brush_data.get("knot_size_mm"),
+            },
+            # Match metadata
+            "source_text": value,  # Original input string
+            "_matched_by": "CorrectMatchesStrategy",
+            "_pattern": "exact_match",
+            "strategy": "correct_matches",
+        }
 
         return matched_data
 
