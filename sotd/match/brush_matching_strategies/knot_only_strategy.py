@@ -53,28 +53,15 @@ class KnotOnlyStrategy(BaseBrushMatchingStrategy):
             knot_pattern = unified_result.matched.get("knot", {}).get("_pattern")
 
             if knot_brand and knot_model:
-                # Create structure compatible with existing system
+                # Return only component-specific data, let parent strategies handle structure
                 matched_data = {
                     "brand": knot_brand,
                     "model": knot_model,
-                    "handle": {
-                        "brand": None,
-                        "model": None,
-                        "source_text": value,
-                        "_matched_by": "KnotOnlyStrategy",
-                        "_pattern": "knot_only",
-                    },
-                    "knot": {
-                        "brand": knot_brand,
-                        "model": knot_model,
-                        "fiber": knot_fiber,
-                        "knot_size_mm": knot_size,
-                        "source_text": value,
-                        "_matched_by": "KnotOnlyStrategy",
-                        "_pattern": knot_pattern or "knot_only",
-                    },
-                    "_matched_by_strategy": "knot_only",
-                    "_pattern_used": knot_pattern or "knot_only",
+                    "fiber": knot_fiber,
+                    "knot_size_mm": knot_size,
+                    "source_text": value,
+                    "_matched_by": "KnotOnlyStrategy",
+                    "_pattern": knot_pattern or "knot_only",
                 }
 
                 return create_match_result(
@@ -100,28 +87,15 @@ class KnotOnlyStrategy(BaseBrushMatchingStrategy):
                 continue
 
         if best_match and best_match.matched:
-            # Create structure compatible with existing system
+            # Return only component-specific data, let parent strategies handle structure
             matched_data = {
                 "brand": best_match.matched.get("brand"),
                 "model": best_match.matched.get("model"),
-                "handle": {
-                    "brand": None,
-                    "model": None,
-                    "source_text": value,
-                    "_matched_by": "KnotOnlyStrategy",
-                    "_pattern": "knot_only",
-                },
-                "knot": {
-                    "brand": best_match.matched.get("brand"),
-                    "model": best_match.matched.get("model"),
-                    "fiber": best_match.matched.get("fiber"),
-                    "knot_size_mm": best_match.matched.get("knot_size_mm"),
-                    "source_text": value,
-                    "_matched_by": "KnotOnlyStrategy",
-                    "_pattern": best_match.pattern or "knot_only",
-                },
-                "_matched_by_strategy": "knot_only",
-                "_pattern_used": best_match.pattern or "knot_only",
+                "fiber": best_match.matched.get("fiber"),
+                "knot_size_mm": best_match.matched.get("knot_size_mm"),
+                "source_text": value,
+                "_matched_by": "KnotOnlyStrategy",
+                "_pattern": best_match.pattern or "knot_only",
             }
 
             return create_match_result(

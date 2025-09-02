@@ -51,33 +51,20 @@ class TestKnotOnlyStrategy:
         assert result.pattern == "declaration.*b2"
         assert result.match_type == "knot_only"
 
-        # Check matched data structure
+        # Check matched data structure (simplified component data)
         matched = result.matched
         assert matched is not None
         assert matched["brand"] == "Declaration Grooming"
         assert matched["model"] == "B2"
-        assert matched["_matched_by_strategy"] == "knot_only"
-        assert matched["_pattern_used"] == "declaration.*b2"
+        assert matched["fiber"] == "badger"
+        assert matched["knot_size_mm"] == 26.0
+        assert matched["source_text"] == "Declaration B2"
+        assert matched["_matched_by"] == "KnotOnlyStrategy"
+        assert matched["_pattern"] == "declaration.*b2"
 
-        # Check handle section
-        assert "handle" in matched
-        handle = matched["handle"]
-        assert handle["brand"] is None
-        assert handle["model"] is None
-        assert handle["source_text"] == "Declaration B2"
-        assert handle["_matched_by"] == "KnotOnlyStrategy"
-        assert handle["_pattern"] == "knot_only"
-
-        # Check knot section
-        assert "knot" in matched
-        knot = matched["knot"]
-        assert knot["brand"] == "Declaration Grooming"
-        assert knot["model"] == "B2"
-        assert knot["fiber"] == "badger"
-        assert knot["knot_size_mm"] == 26.0
-        assert knot["source_text"] == "Declaration B2"
-        assert knot["_matched_by"] == "KnotOnlyStrategy"
-        assert knot["_pattern"] == "declaration.*b2"
+        # Component strategies no longer create nested structure
+        assert "handle" not in matched
+        assert "knot" not in matched
 
     def test_match_with_knot_match_no_pattern(self):
         """Test knot matching when no pattern is provided."""
@@ -105,7 +92,7 @@ class TestKnotOnlyStrategy:
         assert result is not None
         assert result.pattern == "knot_only"  # Default pattern when none provided
         assert result.matched is not None
-        assert result.matched["_pattern_used"] == "knot_only"
+        assert result.matched["_pattern"] == "knot_only"
 
     def test_match_with_no_knot_match(self):
         """Test matching when no knot strategies return a match."""
@@ -186,4 +173,4 @@ class TestKnotOnlyStrategy:
         assert result is not None
         assert result.original == input_text
         assert result.matched is not None
-        assert result.matched["knot"]["source_text"] == input_text
+        assert result.matched["source_text"] == input_text

@@ -39,28 +39,13 @@ class HandleOnlyStrategy(BaseBrushMatchingStrategy):
                 # Extract handle component from unified result
                 handle_data = unified_result.matched.get("handle", {})
                 if handle_data and handle_data.get("brand"):
-                    # Create structure compatible with existing system
+                    # Return only component-specific data, let parent strategies handle structure
                     matched_data = {
-                        "brand": None,
-                        "model": None,
-                        "handle": {
-                            "brand": handle_data.get("brand"),
-                            "model": handle_data.get("model"),
-                            "source_text": value,
-                            "_matched_by": "HandleOnlyStrategy",
-                            "_pattern": handle_data.get("_pattern", "handle_only"),
-                        },
-                        "knot": {
-                            "brand": None,
-                            "model": None,
-                            "fiber": None,
-                            "knot_size_mm": None,
-                            "source_text": value,
-                            "_matched_by": "HandleOnlyStrategy",
-                            "_pattern": "handle_only",
-                        },
-                        "_matched_by_strategy": "handle_only",
-                        "_pattern_used": handle_data.get("_pattern", "handle_only"),
+                        "handle_maker": handle_data.get("brand"),
+                        "handle_model": handle_data.get("model"),
+                        "source_text": value,
+                        "_matched_by": "HandleOnlyStrategy",
+                        "_pattern": handle_data.get("_pattern", "handle_only"),
                     }
 
                     return create_match_result(
@@ -76,28 +61,13 @@ class HandleOnlyStrategy(BaseBrushMatchingStrategy):
         handle_match = self.handle_matcher.match_handle_maker(value)
 
         if handle_match and handle_match.get("handle_maker"):
-            # Create structure compatible with existing system
+            # Return only component-specific data, let parent strategies handle structure
             matched_data = {
-                "brand": None,
-                "model": None,
-                "handle": {
-                    "brand": handle_match.get("handle_maker"),
-                    "model": handle_match.get("handle_model"),
-                    "source_text": value,
-                    "_matched_by": "HandleOnlyStrategy",
-                    "_pattern": handle_match.get("_pattern_used", "handle_only"),
-                },
-                "knot": {
-                    "brand": None,
-                    "model": None,
-                    "fiber": None,
-                    "knot_size_mm": None,
-                    "source_text": value,
-                    "_matched_by": "HandleOnlyStrategy",
-                    "_pattern": "handle_only",
-                },
-                "_matched_by_strategy": "handle_only",
-                "_pattern_used": handle_match.get("_pattern_used", "handle_only"),
+                "handle_maker": handle_match.get("handle_maker"),
+                "handle_model": handle_match.get("handle_model"),
+                "source_text": value,
+                "_matched_by": "HandleOnlyStrategy",
+                "_pattern": handle_match.get("_pattern_used", "handle_only"),
             }
 
             return create_match_result(

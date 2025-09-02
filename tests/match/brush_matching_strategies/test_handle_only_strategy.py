@@ -40,33 +40,20 @@ class TestHandleOnlyStrategy:
         assert result.pattern == "chisel.*hound.*padauk"
         assert result.match_type == "handle_only"
 
-        # Check matched data structure
+        # Check matched data structure (simplified component data)
         matched = result.matched
         assert matched is not None
-        assert matched["brand"] is None
-        assert matched["model"] is None
-        assert matched["_matched_by_strategy"] == "handle_only"
-        assert matched["_pattern_used"] == "chisel.*hound.*padauk"
+        assert matched["handle_maker"] == "Chisel and Hound"
+        assert matched["handle_model"] == "Padauk Wood"
+        assert matched["source_text"] == "Chisel and Hound Padauk Wood handle"
+        assert matched["_matched_by"] == "HandleOnlyStrategy"
+        assert matched["_pattern"] == "chisel.*hound.*padauk"
 
-        # Check handle section
-        assert "handle" in matched
-        handle = matched["handle"]
-        assert handle["brand"] == "Chisel and Hound"
-        assert handle["model"] == "Padauk Wood"
-        assert handle["source_text"] == "Chisel and Hound Padauk Wood handle"
-        assert handle["_matched_by"] == "HandleOnlyStrategy"
-        assert handle["_pattern"] == "chisel.*hound.*padauk"
-
-        # Check knot section
-        assert "knot" in matched
-        knot = matched["knot"]
-        assert knot["brand"] is None
-        assert knot["model"] is None
-        assert knot["fiber"] is None
-        assert knot["knot_size_mm"] is None
-        assert knot["source_text"] == "Chisel and Hound Padauk Wood handle"
-        assert knot["_matched_by"] == "HandleOnlyStrategy"
-        assert knot["_pattern"] == "handle_only"
+        # Component strategies no longer create nested structure
+        assert "handle" not in matched
+        assert "knot" not in matched
+        assert "brand" not in matched
+        assert "model" not in matched
 
     def test_match_with_handle_match_no_pattern(self):
         """Test handle matching when no pattern is provided."""
@@ -79,7 +66,7 @@ class TestHandleOnlyStrategy:
         assert result is not None
         assert result.pattern == "handle_only"  # Default pattern when none provided
         assert result.matched is not None
-        assert result.matched["_pattern_used"] == "handle_only"
+        assert result.matched["_pattern"] == "handle_only"
 
     def test_match_with_no_handle_match(self):
         """Test matching when handle matcher returns no match."""
@@ -124,4 +111,4 @@ class TestHandleOnlyStrategy:
         assert result is not None
         assert result.original == input_text
         assert result.matched is not None
-        assert result.matched["handle"]["source_text"] == input_text
+        assert result.matched["source_text"] == input_text
