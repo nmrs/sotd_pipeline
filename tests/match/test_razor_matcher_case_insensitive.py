@@ -6,6 +6,8 @@ lookups for correct matches, which was a critical bug fix.
 """
 
 import pytest
+import tempfile
+import yaml
 from pathlib import Path
 
 from sotd.match.razor_matcher import RazorMatcher
@@ -14,9 +16,40 @@ from sotd.match.razor_matcher import RazorMatcher
 class TestRazorMatcherCaseInsensitive:
     """Test case-insensitive correct matches functionality."""
 
+    def setup_method(self):
+        """Set up test fixtures with temporary correct_matches file."""
+        # Create temporary directory for test files
+        self.test_dir = tempfile.mkdtemp()
+
+        # Create temporary correct_matches.yaml with test data
+        self.correct_matches_path = Path(self.test_dir) / "correct_matches.yaml"
+        test_correct_matches = {
+            "razor": {
+                "Gillette": {
+                    "Super Speed": [
+                        "gillette superspeed",
+                        "gillette - superspeed",
+                        "1951 gillette black tip superspeed",
+                        "1956 gillette red tip superspeed",
+                        "1957 gillette flare tip superspeed",
+                        "1967 vintage gillette superspeed",
+                        "gillette 40's-style superspeed",
+                        "gillette black-handled superspeed",
+                        "gillette flair-tip superspeed",
+                        "gillette superspeed 40s ndc",
+                        "gillette superspeed red tip",
+                    ]
+                },
+                "Above the Tie": {"Atlas S1": ["att s1", "above the tie atlas s1"]},
+            }
+        }
+
+        with open(self.correct_matches_path, "w") as f:
+            yaml.dump(test_correct_matches, f)
+
     def test_superspeed_case_variations(self):
         """Test that Superspeed matches work with different case variations."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test cases with different case variations
         test_cases = [
@@ -45,7 +78,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_black_tip_superspeed_variations(self):
         """Test that Black Tip Superspeed matches work with different case variations."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         test_cases = [
             "1951 Gillette Black Tip SuperSpeed",
@@ -68,7 +101,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_att_razor_variations(self):
         """Test that Above the Tie razor matches work with different case variations."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         test_cases = [
             "ATT S1",
@@ -90,7 +123,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_case_sensitive_exact_match_priority(self):
         """Test that exact case matches are found first before case-insensitive fallback."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test with exact case match (should be found first)
         result = matcher.match("gillette superspeed")
@@ -100,7 +133,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_no_match_for_unknown_razor(self):
         """Test that unknown razors don't match in correct matches."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test with a razor that's not in correct_matches.yaml
         result = matcher.match("Unknown Brand Unknown Model")
@@ -110,7 +143,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_bypass_correct_matches(self):
         """Test that bypass_correct_matches parameter works correctly."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test with bypass_correct_matches=True
         result = matcher.match("gillette superspeed", bypass_correct_matches=True)
@@ -120,7 +153,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_check_correct_matches_method(self):
         """Test the _check_correct_matches method directly."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test case-insensitive lookup
         result = matcher._check_correct_matches("Gillette Superspeed")
@@ -141,7 +174,7 @@ class TestRazorMatcherCaseInsensitive:
 
     def test_performance_with_case_variations(self):
         """Test that case-insensitive lookup doesn't significantly impact performance."""
-        matcher = RazorMatcher()
+        matcher = RazorMatcher(correct_matches_path=self.correct_matches_path)
 
         # Test multiple case variations to ensure performance is reasonable
         test_cases = [
