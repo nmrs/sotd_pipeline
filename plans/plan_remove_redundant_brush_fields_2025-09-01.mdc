@@ -1,7 +1,7 @@
 # Plan: Remove Redundant Brush Fields and Fix Rehydration
 
 **Date:** 2025-09-01  
-**Status:** IN PROGRESS - Phase 2.2 (Comprehensive Test Update Requirements) ✅ **COMPLETE**  
+**Status:** IN PROGRESS - Phase 2.10 (Remove Unnecessary JSON Writing from Component Strategies)  
 **Priority:** Medium  
 **Type:** Refactoring + Bug Fix  
 
@@ -196,6 +196,11 @@ The redundant fields are primarily introduced by two strategies:
 - **Benefit**: Tests now verify the actual strategy output, not processed output
 - **Status**: All brush strategy tests already updated to expect nested structure in Phase 1.8. Knot strategy tests remain unchanged as they test individual components, not complete brush structures.
 
+**Architecture Clarification**: 
+- **Parent strategies** (FullInputComponentMatchingStrategy, AutomatedSplitStrategy, KnownSplitWrapperStrategy) create complete nested JSON structure
+- **Component strategies** (KnotOnlyStrategy, HandleOnlyStrategy) only return component data, not JSON structure
+- **Separation of concerns**: Component strategies focus on matching, parent strategies handle structure
+
 #### 2.3 Update Structure Preservation Tests
 - **File**: `tests/match/test_structure_preservation_tdd.py`
 - **Action**: Update tests to expect correct structure directly from strategies
@@ -251,6 +256,20 @@ The redundant fields are primarily introduced by two strategies:
   - Files containing `"handle"` or `"knot"` structure tests
 - **Command**: `grep -r "fiber\|knot_size_mm" tests/ --include="*.py"`
 - **Goal**: Find any test files that might have been missed in the above categories
+
+#### 2.10 Remove Unnecessary JSON Writing from Component Strategies
+- **Action**: Remove JSON structure creation from KnotOnlyStrategy and HandleOnlyStrategy
+- **Rationale**: Component strategies should only return component data, not create complete JSON structure
+- **Files**: 
+  - `sotd/match/brush_matching_strategies/knot_only_strategy.py`
+  - `sotd/match/brush_matching_strategies/handle_only_strategy.py`
+- **Changes**:
+  - Remove nested `handle`/`knot` section creation
+  - Remove `ComponentScoreCalculator.calculate_component_scores()` calls
+  - Return only the component-specific data (brand, model, fiber, etc.)
+  - Let parent strategies handle JSON structure creation
+- **Tests**: Update any tests that expect nested structure from component strategies
+- **Benefit**: Cleaner separation of concerns, component strategies focus only on matching
 
 ### Phase 3: Verify Rehydration Works with New Structure
 
