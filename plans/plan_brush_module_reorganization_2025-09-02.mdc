@@ -10,13 +10,22 @@
 
 ## 🧩 Component Steps
 
+**⚠️ CRITICAL: Test after each step to maintain working system**
+
 1. **Create Module Structure** - Set up the new directory structure and `__init__.py` files ✅
+   - **Test**: Verify system still works after directory creation
 2. **Move Strategy Files** - Reorganize 19 strategy files into logical subdirectories ✅
+   - **Test**: Verify system still works after strategy file moves
 3. **Move Scoring Components** - Reorganize 9 scoring component files ✅
+   - **Test**: Verify system still works after scoring component moves
 4. **Move Validation Files** - Reorganize 3 validation files ✅
+   - **Test**: Verify system still works after validation file moves
 5. **Move Comparison Files** - Reorganize 3 comparison files ✅
+   - **Test**: Verify system still works after comparison file moves
 6. **Move Core Files** - Reorganize 6 core brush matching files ✅
+   - **Test**: Verify system still works after core file moves
 7. **Update Entry Point** - Create simple `brush_matcher.py` entry point ✅
+   - **Test**: Verify entry point works and system remains functional
 8. **Update All Imports** - Update imports across the entire codebase (broken into 12 sub-steps)
    - 8.1 Update Imports in Moved Strategy Files
    - 8.2 Update Imports in Moved Scoring Files
@@ -36,6 +45,13 @@
 11. **Run Comprehensive Tests** - Verify no regressions after reorganization
 
 ## 🔁 Implementation Prompts
+
+**⚠️ CRITICAL: Test Frequently Throughout ENTIRE Reorganization Process**
+- **After each major step: Run tests to verify system still works**
+- **Use `python -m pytest tests/match/ -x --tb=short` to catch issues early**
+- **If tests fail, fix immediately before continuing to next step**
+- **Goal: Keep system in "partially working" state throughout entire process**
+- **This prevents cascading failures and makes debugging much easier**
 
 ### Step 1: Create Module Structure
 
@@ -64,6 +80,11 @@ sotd/match/brush/
 ```
 
 Create all necessary `__init__.py` files with appropriate imports to maintain the existing API surface. The main `sotd/match/brush/__init__.py` should export `BrushMatcher` so that `from sotd.match.brush import BrushMatcher` continues to work.
+
+**CRITICAL: Test after creating structure:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 2
+- Goal: Ensure directory creation doesn't break existing functionality
 
 Verify the structure is created correctly and all directories exist.
 ```
@@ -107,6 +128,11 @@ Move all strategy files from `sotd/match/brush_matching_strategies/` to the new 
 - Move entire `utils/` directory contents
 
 Update all relative imports within the moved files to reflect the new structure. Ensure all strategy files can be imported correctly from their new locations.
+
+**CRITICAL: Test after moving strategy files:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 3
+- Goal: Ensure strategy file moves don't break existing functionality
 ```
 
 ### Step 3: Move Scoring Components
@@ -129,6 +155,11 @@ Move all scoring component files from `sotd/match/brush_scoring_components/` to 
 - `strategy_dependency_manager.py`
 
 Update all relative imports within the moved files. Ensure the scoring system can be imported and used correctly from the new locations.
+
+**CRITICAL: Test after moving scoring components:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 4
+- Goal: Ensure scoring component moves don't break existing functionality
 ```
 
 ### Step 4: Move Validation Files
@@ -142,6 +173,11 @@ Move validation files to the new organized structure:
 - `brush_user_actions.py` → `user_actions.py`
 
 Update all relative imports within the moved files. Ensure validation functionality continues to work from the new locations.
+
+**CRITICAL: Test after moving validation files:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 5
+- Goal: Ensure validation file moves don't break existing functionality
 ```
 
 ### Step 5: Move Comparison Files
@@ -155,6 +191,11 @@ Move comparison files to the new organized structure:
 - `brush_splits_loader.py` → `splits_loader.py`
 
 Update all relative imports within the moved files. Ensure comparison functionality continues to work from the new locations.
+
+**CRITICAL: Test after moving comparison files:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 6
+- Goal: Ensure comparison file moves don't break existing functionality
 ```
 
 ### Step 6: Move Core Files
@@ -171,6 +212,11 @@ Move core brush matching files to the new organized structure:
 - `knot_matcher_factory.py` → `knot_matcher_factory.py`
 
 Update all relative imports within the moved files. Ensure the core brush matching system continues to work from the new locations.
+
+**CRITICAL: Test after moving core files:**
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 7
+- Goal: Ensure core file moves don't break existing functionality
 ```
 
 ### Step 7: Update Entry Point
@@ -194,6 +240,12 @@ __all__ = ['BrushMatcher', 'BrushMatcherConfig']
 ```
 
 This ensures that existing code using `from sotd.match.brush_matcher import BrushMatcher` continues to work without modification.
+
+**CRITICAL: Test after creating entry point:**
+- Run `python -c "from sotd.match.brush_matcher import BrushMatcher; print('✅ Entry point works!')"` to verify
+- Run `python -m pytest tests/match/ -x --tb=short` to verify system still works
+- If tests fail, fix immediately before proceeding to Step 8
+- Goal: Ensure entry point works and system remains functional
 
 Verify that the entry point works correctly and maintains the same API.
 ```
