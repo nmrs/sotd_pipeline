@@ -40,10 +40,16 @@ class TestBrushValidationInvestigation:
             "matched": {
                 "brand": "Rad Dinosaur Creations",
                 "model": "Jetson",
-                "fiber": "synthetic",
-                "knot_size_mm": 25.0,
-                "handle_maker": "Muhle",
-                "handle_model": "STF",
+                "handle": {
+                    "brand": "Muhle",
+                    "model": "STF",
+                },
+                "knot": {
+                    "brand": "Rad Dinosaur Creations",
+                    "model": "Jetson",
+                    "fiber": "synthetic",
+                    "knot_size_mm": 25.0,
+                },
                 "score": 95.0,
             },
             "strategy": "automated_split",
@@ -54,10 +60,16 @@ class TestBrushValidationInvestigation:
                     "result": {
                         "brand": "Rad Dinosaur Creations",
                         "model": "Jetson",
-                        "fiber": "synthetic",
-                        "knot_size_mm": 25.0,
-                        "handle_maker": "Muhle",
-                        "handle_model": "STF",
+                        "handle": {
+                            "brand": "Muhle",
+                            "model": "STF",
+                        },
+                        "knot": {
+                            "brand": "Rad Dinosaur Creations",
+                            "model": "Jetson",
+                            "fiber": "synthetic",
+                            "knot_size_mm": 25.0,
+                        },
                     },
                 }
             ],
@@ -366,10 +378,16 @@ class TestBrushValidationInvestigation:
             "matched": {
                 "brand": "Rad Dinosaur Creations",
                 "model": "Jetson",
-                "fiber": "synthetic",
-                "knot_size_mm": 25.0,
-                "handle_maker": "Muhle",
-                "handle_model": "STF",
+                "handle": {
+                    "brand": "Muhle",
+                    "model": "STF",
+                },
+                "knot": {
+                    "brand": "Rad Dinosaur Creations",
+                    "model": "Jetson",
+                    "fiber": "synthetic",
+                    "knot_size_mm": 25.0,
+                },
                 "score": 95.0,
             },
             "strategy": "automated_split",
@@ -380,10 +398,16 @@ class TestBrushValidationInvestigation:
                     "result": {
                         "brand": "Rad Dinosaur Creations",
                         "model": "Jetson",
-                        "fiber": "synthetic",
-                        "knot_size_mm": 25.0,
-                        "handle_maker": "Muhle",
-                        "handle_model": "STF",
+                        "handle": {
+                            "brand": "Muhle",
+                            "model": "STF",
+                        },
+                        "knot": {
+                            "brand": "Rad Dinosaur Creations",
+                            "model": "Jetson",
+                            "fiber": "synthetic",
+                            "knot_size_mm": 25.0,
+                        },
                     },
                 }
             ],

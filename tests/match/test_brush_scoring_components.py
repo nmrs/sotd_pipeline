@@ -7,7 +7,7 @@ Tests individual components with single responsibilities and improved architectu
 from unittest.mock import Mock
 
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
-from sotd.match.brush_scoring_components.result_processor import ResultProcessor
+
 from sotd.match.brush_scoring_components.correct_matches_matcher import CorrectMatchesMatcher
 from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
 from sotd.match.brush_scoring_components.performance_monitor import PerformanceMonitor
@@ -198,7 +198,11 @@ class TestScoringEngine:
 
         result = MatchResult(
             original="test",
-            matched={"brand": "Test", "fiber": "badger"},
+            matched={
+                "brand": "Test",
+                "handle": {"brand": None, "model": None},
+                "knot": {"brand": "Test", "model": None, "fiber": "badger", "knot_size_mm": None}
+            },
             match_type="exact",
             pattern="test",
             strategy="test_strategy",
@@ -806,51 +810,6 @@ class TestScoringEngine:
         assert len(scored_results) == 1
         # Base score (40.0) + handle_brand_without_knot_brand (25.0) + knot_brand_without_handle_brand (0.0) = 65.0
         assert scored_results[0].score == 65.0
-
-
-class TestResultProcessor:
-    """Test the ResultProcessor component."""
-
-    def test_process_result_with_valid_result(self):
-        """Test processing a valid result."""
-        processor = ResultProcessor()
-
-        result = MatchResult(
-            original="test brush",
-            matched={"brand": "Test", "model": "Brush"},
-            match_type="exact",
-            pattern="test",
-        )
-
-        processed_result = processor.process_result(result, "test brush")
-
-        assert processed_result == result
-        assert processed_result.original == "test brush"
-
-    def test_process_result_with_none(self):
-        """Test processing None result."""
-        processor = ResultProcessor()
-
-        processed_result = processor.process_result(None, "test brush")
-
-        assert processed_result is None
-
-    def test_process_result_ensures_consistency(self):
-        """Test that processing ensures output format consistency."""
-        processor = ResultProcessor()
-
-        # Create result with missing fields
-        result = MatchResult(
-            original="test brush", matched={"brand": "Test"}, match_type="exact", pattern="test"
-        )
-
-        processed_result = processor.process_result(result, "test brush")
-
-        # Should have consistent structure
-        assert hasattr(processed_result, "original")
-        assert hasattr(processed_result, "matched")
-        assert hasattr(processed_result, "match_type")
-        assert hasattr(processed_result, "pattern")
 
 
 class TestPerformanceMonitor:

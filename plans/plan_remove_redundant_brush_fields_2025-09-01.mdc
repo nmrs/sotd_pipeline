@@ -277,13 +277,13 @@ The redundant fields are primarily introduced by two strategies:
   - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - ✅ **CORRECT** - Component strategy should return root-level fields
 - **Note**: Most test files already have correct nested structure or use aggregated data format
 
-#### 2.10 Update Discovered Test Files (New Task from Phase 2.9)
+#### 2.10 Update Discovered Test Files (New Task from Phase 2.9) ✅ **COMPLETE**
 - **Action**: Update the test files discovered in Phase 2.9 that contain root-level fiber/knot_size_mm fields
 - **Files to Update**:
-  - `tests/match/test_brush_validation_investigation.py` - Update test data to use nested structure
-  - `tests/match/test_brush_scoring_components.py` - Update MatchResult creation to use nested structure
+  - `tests/match/test_brush_validation_investigation.py` - ✅ **UPDATED** - Test data now uses nested structure
+  - `tests/match/test_brush_scoring_components.py` - ✅ **UPDATED** - MatchResult creation now uses nested structure
   - `tests/match/brush_matching_strategies/test_known_knot_strategy.py` - ✅ **NO UPDATE NEEDED** - Component strategy correctly returns root-level fields
-- **Status**: ⏳ **PENDING** - Files identified, updates needed
+- **Status**: ✅ **COMPLETE** - All identified files updated to use nested structure
 - **Priority**: Medium - These are test files that need to match the new nested structure
 
 #### 2.11 Comprehensive Test File Search ✅ **COMPLETE**
@@ -414,6 +414,18 @@ The redundant fields are primarily introduced by two strategies:
 - 2.15: Knot Matcher Factory Refactoring (High Priority)
 - 2.16: Handle Strategy Analysis (Medium Priority)  
 - 2.17: Component Strategy Testing Requirements (Medium Priority)
+- 2.18: Fix Strategy Naming (Medium Priority)
+
+### **Phase 2.18: Fix Strategy Naming** (Medium Priority)
+- **Objective**: Rename misleading strategy names to reflect actual functionality
+- **Tasks**:
+  - Rename `HandleOnlyStrategy` → `HandleComponentStrategy` (after removing deprecated one)
+  - Rename `KnotOnlyStrategy` → `KnotComponentStrategy` (after removing deprecated one)
+  - Update all references and imports
+  - Update test files and documentation
+  - Verify naming consistency across codebase
+- **Dependencies**: Phase 2.16 (Handle Strategy Analysis)
+- **Status**: ⏳ PENDING
 
 ### Phase 3: Verify Rehydration Works with New Structure
 
