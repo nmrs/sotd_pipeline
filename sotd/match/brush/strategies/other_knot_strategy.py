@@ -1,5 +1,5 @@
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
-from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+from .utils.fiber_utils import match_fiber
+from .utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )

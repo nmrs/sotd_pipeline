@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )

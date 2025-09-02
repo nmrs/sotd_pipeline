@@ -7,6 +7,6 @@ for strategies, scoring, validation, and comparison functionality.
 
 # Import main classes for backward compatibility
 from .matcher import BrushMatcher
-from .config import BrushMatcherConfig
+from sotd.match.config import BrushMatcherConfig
 
 __all__ = ['BrushMatcher', 'BrushMatcherConfig']

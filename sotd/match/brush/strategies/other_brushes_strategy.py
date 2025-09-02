@@ -1,9 +1,9 @@
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
-from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
-from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+from .utils.fiber_utils import match_fiber
+from .utils.knot_size_utils import parse_knot_size
+from .utils.pattern_utils import (
     validate_catalog_structure,
 )
-from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+from .base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 

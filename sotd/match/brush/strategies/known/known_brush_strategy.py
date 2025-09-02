@@ -1,14 +1,14 @@
 import re
 from pathlib import Path
 
-from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+from ..utils.pattern_utils import (
     compile_catalog_patterns,
 )
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
-from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+from ..utils.fiber_utils import match_fiber
+from ..utils.knot_size_utils import parse_knot_size
 from sotd.match.types import MatchResult, create_match_result
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
