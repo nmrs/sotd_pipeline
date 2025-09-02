@@ -7,7 +7,7 @@ import yaml
 import json
 from unittest.mock import Mock
 
-from sotd.match.brush_validation_cli import BrushValidationCLI
+from sotd.match.brush.validation.cli import BrushValidationCLI
 
 
 class TestBrushValidationCLIIntegration:

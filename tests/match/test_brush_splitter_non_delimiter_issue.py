@@ -8,8 +8,8 @@ delimiter detection when non-delimiter tokens are present in the text.
 import pytest
 from pathlib import Path
 
-from sotd.match.brush_splitter import BrushSplitter
-from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.brush.splitter import BrushSplitter
+from sotd.match.brush.handle_matcher import HandleMatcher
 
 
 class TestBrushSplitterNonDelimiterIssue:

@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.brush.handle_matcher import HandleMatcher
 
 
 class TestHandleMatcherNewStructure:

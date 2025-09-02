@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch
 
-from sotd.match.brush_validation_counting_service import BrushValidationCountingService
+from sotd.match.brush.validation.counting import BrushValidationCountingService
 
 
 class TestBrushValidationCountingService:

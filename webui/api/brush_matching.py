@@ -528,7 +528,7 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
 
                 # Get detailed scoring breakdown using the ScoringEngine
                 from sotd.match.brush.scoring.engine import ScoringEngine
-                from sotd.match.brush_scoring_config import BrushScoringConfig
+                from sotd.match.brush.config import BrushScoringConfig
 
                 config_path = (
                     Path(__file__).parent.parent.parent / "data" / "brush_scoring_config.yaml"

@@ -26,7 +26,7 @@ sys.path.insert(0, str(project_root))
 try:
     from sotd.enrich.brush_enricher import BrushEnricher
     from sotd.match.brush.scoring.engine import ScoringEngine
-    from sotd.match.brush_scoring_config import BrushScoringConfig
+    from sotd.match.brush.config import BrushScoringConfig
     from sotd.match.brush_matcher import BrushMatcher
 except ImportError:
     print(
@@ -608,7 +608,7 @@ def _show_simplified_component_modifier_details(
 ):
     """Show simplified modifier details for handle/knot components when engine fails."""
     # Load actual config values instead of using hardcoded ones
-    from sotd.match.brush_scoring_config import BrushScoringConfig
+    from sotd.match.brush.config import BrushScoringConfig
 
     config = BrushScoringConfig()
     if component_type == "knot":

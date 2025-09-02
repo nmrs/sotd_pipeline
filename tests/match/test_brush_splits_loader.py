@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from sotd.match.brush_splits_loader import BrushSplitsLoader, BrushSplit
+from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader, BrushSplit
 
 
 class TestBrushSplitsLoader:

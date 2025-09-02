@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from sotd.match.brush_user_actions import BrushUserActionsManager
+from sotd.match.brush.validation.user_actions import BrushUserActionsManager
 
 
 class TestBrushValidationFailFastFix:

@@ -6,8 +6,8 @@ to ensure consistent counts and proper mathematical relationships.
 
 import pytest
 
-from sotd.match.brush_validation_cli import BrushValidationCLI
-from sotd.match.brush_validation_counting_service import BrushValidationCountingService
+from sotd.match.brush.validation.cli import BrushValidationCLI
+from sotd.match.brush.validation.counting import BrushValidationCountingService
 
 
 class TestBrushValidationCountingIntegration:

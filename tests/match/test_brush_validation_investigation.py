@@ -12,7 +12,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from sotd.match.brush_user_actions import BrushUserAction, BrushUserActionsManager
+from sotd.match.brush.validation.user_actions import BrushUserAction, BrushUserActionsManager
 
 
 class TestBrushValidationInvestigation:

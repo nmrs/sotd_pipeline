@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 import yaml
 
-from sotd.match.brush_user_actions import BrushUserActionsManager
+from sotd.match.brush.validation.user_actions import BrushUserActionsManager
 
 
 class TestBrushUserActionsIntegration:

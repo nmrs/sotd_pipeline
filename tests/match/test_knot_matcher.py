@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from sotd.match.knot_matcher import KnotMatcher
+from sotd.match.brush.knot_matcher import KnotMatcher
 from sotd.match.types import MatchResult
 
 

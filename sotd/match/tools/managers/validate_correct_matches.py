@@ -20,7 +20,7 @@ from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.correct_matches_updater import CorrectMatchesUpdater
-from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.brush.config import BrushScoringConfig
 
 
 # Compatibility layer for BrushMatcherConfig

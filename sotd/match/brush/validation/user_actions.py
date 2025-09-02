@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from .correct_matches_updater import CorrectMatchesUpdater
+from ...correct_matches_updater import CorrectMatchesUpdater
 
 
 class ValidationError(Exception):
