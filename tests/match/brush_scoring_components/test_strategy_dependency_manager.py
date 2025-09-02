@@ -7,7 +7,7 @@ Tests strategy dependency management functionality for the brush scoring system.
 import pytest
 from unittest.mock import Mock, MagicMock
 
-from sotd.match.brush_scoring_components.strategy_dependency_manager import (
+from sotd.match.brush.scoring.dependencies.strategy_dependency_manager import (
     StrategyDependencyManager,
     StrategyDependency,
     DependencyType,

@@ -2,7 +2,7 @@
 
 import pytest
 from typing import List, Dict, Any
-from sotd.match.brush_scoring_components.result_conflict_resolver import (
+from sotd.match.brush.scoring.resolver import (
     ResultConflictResolver,
     ConflictType,
     ConflictResolution,

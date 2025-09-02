@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
+from sotd.match.brush.scoring.performance.strategy_performance_optimizer import (
     PerformanceMetrics,
     StrategyPerformance,
     StrategyPerformanceOptimizer,
