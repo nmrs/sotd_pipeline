@@ -3,8 +3,8 @@
 from unittest.mock import Mock
 import pytest
 
-from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
-from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.brush.scoring.engine import ScoringEngine
+from sotd.match.brush.config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
