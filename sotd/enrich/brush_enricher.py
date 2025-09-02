@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 
 from sotd.enrich.enricher import BaseEnricher
 from sotd.enrich.utils.catalog_loader import CatalogLoader
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
-from sotd.match.brush_matching_strategies.utils.pattern_utils import extract_knot_size
+from sotd.match.brush.strategies.utils.fiber_utils import match_fiber
+from sotd.match.brush.strategies.utils.pattern_utils import extract_knot_size
 
 
 class BrushEnricher(BaseEnricher):

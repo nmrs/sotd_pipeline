@@ -172,7 +172,7 @@ class BrushMatchingAnalyzer:
         try:
             # For now, just extract fiber information
             # In the future, this could call the actual enrichment phase
-            from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+            from sotd.match.brush.strategies.utils.fiber_utils import match_fiber
 
             fiber = match_fiber(brush_string)
             return {

@@ -25,7 +25,7 @@ sys.path.insert(0, str(project_root))
 
 try:
     from sotd.enrich.brush_enricher import BrushEnricher
-    from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+    from sotd.match.brush.scoring.engine import ScoringEngine
     from sotd.match.brush_scoring_config import BrushScoringConfig
     from sotd.match.brush_matcher import BrushMatcher
 except ImportError:
