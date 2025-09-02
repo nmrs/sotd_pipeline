@@ -326,7 +326,7 @@ class BrushMatcher:
         # strategies.append(FiberFallbackStrategy(catalogs["brushes"].get("fiber_fallback_brushes", {})))
 
         # Add the automated split strategy for high/medium priority splitting
-        from sotd.match.brush_matching_strategies.automated_split_strategy import (
+        from .strategies.automated.automated_split_strategy import (
             AutomatedSplitStrategy,
         )
 
@@ -335,7 +335,7 @@ class BrushMatcher:
         )
 
         # Add the unified component matching strategy
-        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+        from .strategies.full_input_component_matching_strategy import (
             FullInputComponentMatchingStrategy,
         )
 
@@ -628,7 +628,7 @@ class BrushMatcher:
         # Pre-compute FullInputComponentMatchingStrategy result for unified strategy caching
         try:
             # Create a temporary instance of the unified strategy to avoid circular dependency
-            from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+            from .strategies.full_input_component_matching_strategy import (
                 FullInputComponentMatchingStrategy,
             )
 

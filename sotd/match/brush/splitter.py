@@ -1,8 +1,8 @@
 import re
 from typing import Optional
 
-from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
-from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+from .strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
+from .strategies.utils.knot_size_utils import parse_knot_size
 
 
 class BrushSplitter:
