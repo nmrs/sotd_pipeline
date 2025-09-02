@@ -7,8 +7,8 @@ that can adjust scores based on input characteristics.
 
 from unittest.mock import Mock
 
-from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
-from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.brush.scoring.engine import ScoringEngine
+from sotd.match.brush.config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
@@ -352,7 +352,7 @@ class TestModifierConfiguration:
         }
 
         # Create config from test data
-        from sotd.match.brush_scoring_config import BrushScoringConfig
+        from sotd.match.brush.config import BrushScoringConfig
         import tempfile
         import yaml
         from pathlib import Path
@@ -434,7 +434,7 @@ class TestModifierConfiguration:
         }
 
         # Create config from test data
-        from sotd.match.brush_scoring_config import BrushScoringConfig
+        from sotd.match.brush.config import BrushScoringConfig
         import tempfile
         import yaml
         from pathlib import Path
