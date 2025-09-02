@@ -9,10 +9,10 @@ scoring modifiers to differentiate between high and medium priority delimiters.
 import re
 from typing import Optional
 
-from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.brush_scoring_components.component_score_calculator import ComponentScoreCalculator
+from ...scoring.calculator import ComponentScoreCalculator
 from sotd.match.types import MatchResult
 
 

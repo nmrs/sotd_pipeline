@@ -6,7 +6,7 @@ of search logic while maintaining the strategy pattern interface.
 """
 
 from typing import Optional
-from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+from .base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 from sotd.match.types import MatchResult

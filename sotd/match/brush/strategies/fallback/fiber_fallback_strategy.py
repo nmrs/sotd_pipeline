@@ -8,10 +8,10 @@ strategies fail to match.
 
 from typing import Optional
 
-from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+from ..utils.fiber_utils import match_fiber
 from sotd.match.types import MatchResult, create_match_result
 
 

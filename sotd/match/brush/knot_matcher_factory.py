@@ -7,16 +7,16 @@ by extracting knot strategy creation logic.
 
 from typing import List
 
-from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
+from .strategies.fallback.fiber_fallback_strategy import (
     FiberFallbackStrategy,
 )
-from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+from .strategies.fallback.knot_size_fallback_strategy import (
     KnotSizeFallbackStrategy,
 )
-from sotd.match.brush_matching_strategies.known_knot_strategy import (
+from .strategies.known.known_knot_strategy import (
     KnownKnotMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.other_knot_strategy import (
+from .strategies.other_knot_strategy import (
     OtherKnotMatchingStrategy,
 )
 

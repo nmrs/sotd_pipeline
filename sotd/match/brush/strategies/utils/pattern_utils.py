@@ -7,7 +7,7 @@ used across brush matching strategies to ensure consistency and maintainability.
 import re
 from typing import Any, Dict, List, Optional
 
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+from .fiber_utils import match_fiber
 from sotd.match.types import MatchResult, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
