@@ -34,7 +34,7 @@ from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
 from sotd.match.brush_scoring_components.correct_matches_matcher import CorrectMatchesMatcher
 from sotd.match.brush_scoring_components.performance_monitor import PerformanceMonitor
 from sotd.match.brush_scoring_components.result_conflict_resolver import ResultConflictResolver
-from sotd.match.brush_scoring_components.result_processor import ResultProcessor
+
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
 from sotd.match.brush_scoring_components.strategy_dependency_manager import (
     StrategyDependencyManager,
@@ -136,7 +136,7 @@ class BrushMatcher:
         self.correct_matches_matcher = CorrectMatchesMatcher(correct_matches_data)
         self.strategy_orchestrator = StrategyOrchestrator(self._create_strategies())
         self.scoring_engine = ScoringEngine(self.config, debug=self.debug)
-        self.result_processor = ResultProcessor(self.knot_matcher)
+
         self.performance_monitor = PerformanceMonitor()
         self.conflict_resolver = ResultConflictResolver()
         self.performance_optimizer = StrategyPerformanceOptimizer()
@@ -294,6 +294,9 @@ class BrushMatcher:
         from sotd.match.brush_matching_strategies.other_knot_strategy import (
             OtherKnotMatchingStrategy,
         )
+        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
+            FiberFallbackStrategy,
+        )
         from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
             KnotSizeFallbackStrategy,
         )
@@ -306,6 +309,7 @@ class BrushMatcher:
         return [
             KnownKnotMatchingStrategy(known_knots),
             OtherKnotMatchingStrategy(other_knots),
+            FiberFallbackStrategy(),
             KnotSizeFallbackStrategy(),
         ]
 
@@ -771,8 +775,8 @@ class BrushMatcher:
             # Note: We no longer create separate best_result_data since strategy and score
             # are now added directly to the matched data
 
-            # Process and return the result with strategy data
-            final_result = self.result_processor.process_result(best_result, value)
+            # Return the result directly (no processing needed since strategies produce correct structure)
+            final_result = best_result
 
             # Add strategy persistence fields
             if final_result:
