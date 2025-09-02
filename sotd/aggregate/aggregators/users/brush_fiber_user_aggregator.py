@@ -41,7 +41,17 @@ class BrushFiberUserAggregator(BaseAggregator):
                 continue
 
             # Extract fiber and author
-            fiber = matched.get("fiber")
+            # Look for fiber in nested knot section first, then fallback to root level
+            knot = matched.get("knot", {})
+            if isinstance(knot, dict):
+                fiber = knot.get("fiber")
+            else:
+                fiber = None
+            
+            # Fallback to root level for backward compatibility
+            if not fiber:
+                fiber = matched.get("fiber")
+                
             author = record.get("author")
 
             # Skip if no fiber or author

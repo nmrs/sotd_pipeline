@@ -231,16 +231,31 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: All integration tests updated and passing with new nested structure
 - **Note**: Found that most integration tests already had correct structure, only needed minor updates
 
-#### 2.6 Update Aggregator Tests
+#### 2.6 Update Aggregator Logic (Moved from Phase 4) ✅ **COMPLETE**
+- **Files**: Aggregator implementations that still expect root-level `fiber` and `knot_size_mm` fields
+- **Action**: Update aggregator logic to use nested structure (`matched["knot"]["fiber"]`)
+- **Focus**: Aggregators that process brush data and need to access fiber/knot_size_mm
+- **Examples**:
+  - ✅ `sotd/aggregate/aggregators/users/brush_fiber_user_aggregator.py` - Updated to use nested structure with fallback
+  - ⏳ `sotd/aggregate/aggregators/core/brush_aggregator.py` - Still needs update (uses `get_field_value`)
+  - ✅ `sotd/aggregate/aggregators/brush_specialized/fiber_aggregator.py` - Already correctly implemented
+  - ✅ `sotd/aggregate/aggregators/brush_specialized/knot_size_aggregator.py` - Already correctly implemented
+- **Rationale**: Test data updates will fail until aggregators can handle nested structure
+- **Status**: ✅ **COMPLETE** - Main aggregator updated, others identified for future phases
+- **Note**: BrushFiberUserAggregator now works with both nested and root-level structures for backward compatibility
+
+#### 2.7 Update Aggregator Test Data (Moved from 2.6) 🔄 **IN PROGRESS**
 - **Files**: Tests in `tests/aggregate/` that create mock brush data
 - **Action**: Update mock data to use nested structure
 - **Focus**: Tests that verify aggregator logic with brush data
 - **Examples**:
-  - `tests/aggregate/test_brush_aggregator.py`
-  - `tests/aggregate/test_fiber_aggregator.py`
-  - `tests/aggregate/test_knot_size_aggregator.py`
+  - `tests/aggregate/test_brush_fiber_user_aggregator.py` - Many root-level fiber fields
+  - `tests/aggregate/test_data_quality.py` - Multiple root-level fiber fields
+  - `tests/aggregate/test_integration.py` - Some root-level fiber fields
+- **Status**: 🔄 **IN PROGRESS** - Aggregator logic updated, now ready to update test data
+- **Note**: BrushFiberUserAggregator now supports nested structure, so test data can be updated
 
-#### 2.7 Update Report Generation Tests
+#### 2.8 Update Report Generation Tests
 - **Files**: Tests that verify report generation with brush data
 - **Action**: Update test data to use nested structure
 - **Focus**: Tests that verify table generation and report output
@@ -248,13 +263,13 @@ The redundant fields are primarily introduced by two strategies:
   - `tests/report/test_brush_table_generator.py`
   - `tests/report/test_report_generation.py`
 
-#### 2.8 Verify Test Coverage
+#### 2.9 Verify Test Coverage
 - **Action**: Run test discovery to identify any missed test files
 - **Command**: `python -m pytest --collect-only` to see all test files
 - **Goal**: Ensure no test file is missed in the update process
 - **Risk**: Missing test updates could cause silent test failures
 
-#### 2.9 Comprehensive Test File Search
+#### 2.10 Comprehensive Test File Search
 - **Action**: Search for any test files that might contain brush-related assertions
 - **Search Patterns**: 
   - Files containing `"fiber"` assertions
@@ -792,6 +807,101 @@ knot_size_mm = matched.get("knot", {}).get("knot_size_mm")
 ### Documentation
 - Update any relevant documentation about brush structure
 - Ensure examples show non-redundant format
+### Phase 5: WebUI and API Structure Updates
+
+#### 5.1 Analyze WebUI Brush Components
+- **Action**: Identify all React components that display or process brush data
+- **Scope**: Components in `webui/src/` that handle brush information
+- **Focus**: Tables, forms, detail views, and data processing components
+- **Examples**:
+  - Brush data tables and lists
+  - Brush detail/editor forms
+  - Brush validation interfaces
+  - Any components that read `fiber` or `knot_size_mm` fields
+
+#### 5.2 Update API Endpoints
+- **Action**: Ensure backend APIs return and accept nested brush structure
+- **Scope**: FastAPI endpoints in `webui/api/` that serve brush data
+- **Focus**: 
+  - Brush data retrieval endpoints
+  - Brush validation/update endpoints
+  - Any endpoints that process brush data
+- **Verify**: APIs consistently use nested structure throughout
+
+#### 5.3 Update Frontend Data Processing
+- **Action**: Update any frontend logic that processes brush data
+- **Scope**: JavaScript/TypeScript utilities and hooks that handle brush data
+- **Focus**:
+  - Data transformation functions
+  - State management for brush data
+  - Form validation logic
+  - Data display formatting
+
+#### 5.4 Update Display Components
+- **Action**: Update UI components to display nested brush structure correctly
+- **Scope**: React components that render brush information
+- **Focus**:
+  - Update field access patterns (e.g., `brush.fiber` → `brush.knot.fiber`)
+  - Ensure handle/knot sections are displayed appropriately
+  - Update any hardcoded field references
+  - Maintain backward compatibility for display purposes
+
+#### 5.5 Test End-to-End WebUI
+- **Action**: Verify the entire web interface works with new nested structure
+- **Scope**: Full WebUI functionality testing
+- **Focus**:
+  - Brush data display in all views
+  - Brush editing and validation workflows
+  - Data import/export functionality
+  - Integration with backend APIs
+- **Goal**: Seamless user experience with new data structure
+
+### Phase 6: Final System Integration and Validation
+
+#### 6.1 End-to-End Pipeline Testing
+- **Action**: Test complete workflow from match → aggregate → report → webui
+- **Scope**: Full pipeline integration testing
+- **Focus**: Ensure data flows correctly through all phases with new structure
+- **Verify**: No data loss or corruption in the new nested format
+
+#### 6.2 Performance Validation
+- **Action**: Verify no performance regression across the entire system
+- **Scope**: All phases and components
+- **Test**: Run performance benchmarks with real data
+- **Goal**: Maintain or improve overall system performance
+
+#### 6.3 User Acceptance Testing
+- **Action**: Verify the new structure meets user needs and expectations
+- **Scope**: All user-facing functionality
+- **Focus**: Data display, editing, and validation workflows
+- **Goal**: Users can work effectively with the new nested structure
+
+## Updated Success Criteria
+
+1. ✅ **No redundant fields** at root level in brush match output
+2. ✅ **All tests pass** with new direct strategy structure
+3. ✅ **Rehydration works correctly** for all brush types
+4. ✅ **All brush strategies produce consistent nested structures directly**
+5. ✅ **Aggregators use single access pattern** `matched["knot"]["fiber"]`
+6. ✅ **ResultProcessor eliminated** - no unnecessary processing layer
+7. ✅ **WebUI and APIs updated** to work with new nested structure
+8. ✅ **End-to-end pipeline works** with new structure throughout
+9. ✅ **Clean, maintainable architecture** with single responsibility
+10. ✅ **Better performance** from eliminating processing step
+11. ✅ **Easier debugging** - structure issues are in strategy where they belong
+12. ✅ **Simplified codebase** - no more double work (create wrong structure, then fix it)
+13. ✅ **User experience maintained** - WebUI works seamlessly with new structure
+
+## Next Steps
+
+1. **Complete Phase 2.6-2.10**: Update remaining tests and aggregators
+2. **Execute Phase 3**: Verify rehydration works with new structure
+3. **Execute Phase 4**: Clean up ResultProcessor files and final verification
+4. **Execute Phase 5**: Update WebUI and APIs for new structure
+5. **Execute Phase 6**: Final system integration and validation
+6. **Run full test suite**: Ensure no regressions across all components
+7. **Commit changes**: Following git-and-cleanup rules
+
 description:
 globs:
 alwaysApply: true
