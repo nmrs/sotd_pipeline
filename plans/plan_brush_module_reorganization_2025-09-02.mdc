@@ -17,14 +17,19 @@
 5. **Move Comparison Files** - Reorganize 3 comparison files ✅
 6. **Move Core Files** - Reorganize 6 core brush matching files ✅
 7. **Update Entry Point** - Create simple `brush_matcher.py` entry point ✅
-8. **Update All Imports** - Update imports across the entire codebase (broken into 8 sub-steps)
+8. **Update All Imports** - Update imports across the entire codebase (broken into 12 sub-steps)
    - 8.1 Update Imports in Moved Strategy Files
    - 8.2 Update Imports in Moved Scoring Files
    - 8.3 Update Imports in Moved Validation and Comparison Files
    - 8.4 Update Imports in Core Brush Files
    - 8.5 Update Imports in External Files (sotd/ directory)
    - 8.6 Update Imports in WebUI Files
-   - 8.7 Update Imports in Test Files
+   - 8.7 Update Imports in Test Files (broken into 5 sub-steps)
+     - 8.7.1 Update Imports in Strategy Test Files
+     - 8.7.2 Update Imports in Scoring Test Files
+     - 8.7.3 Update Imports in Core Brush Test Files
+     - 8.7.4 Update Imports in Integration Test Files
+     - 8.7.5 Update Imports in Remaining Test Files
    - 8.8 Update Imports in Script Files
 9. **Update Test Structure** - Reorganize test files to match new structure
 10. **Verify Backward Compatibility** - Ensure existing imports continue to work
@@ -348,17 +353,64 @@ Update imports in webui files that use brush matching functionality:
 This ensures the webui can still access brush matching functionality.
 ```
 
-#### Step 8.7: Update Imports in Test Files
+#### Step 8.7: Update Imports in Test Files (Broken Down into Sub-steps)
+
+This step has been broken down due to the large number of test files and their complexity:
+
+##### Step 8.7.1: Update Imports in Strategy Test Files
 
 ```text
-Update imports in all test files to use the new module structure:
+Update imports in strategy test files:
 
 **Files to update:**
 - All files in `tests/match/brush_matching_strategies/`
+- All files in `tests/match/test_*strategy*` (strategy-specific tests)
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+
+**Process:**
+1. Update strategy test files in batches by subdirectory
+2. Run strategy tests after each batch
+3. Commit changes after each batch
+4. Verify strategy tests can import and run correctly
+
+This ensures all strategy tests can import the reorganized strategy modules.
+```
+
+##### Step 8.7.2: Update Imports in Scoring Test Files
+
+```text
+Update imports in scoring component test files:
+
+**Files to update:**
 - All files in `tests/match/brush_scoring_components/`
-- All files in `tests/match/test_*brush*`
-- All files in `tests/integration/test_*brush*`
-- Any other test files that import brush modules
+- All files in `tests/brush_scoring_components/` (if any)
+- All files in `tests/match/test_*scoring*` (scoring-specific tests)
+
+**Import patterns to update:**
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+
+**Process:**
+1. Update scoring test files in batches by subdirectory
+2. Run scoring tests after each batch
+3. Commit changes after each batch
+4. Verify scoring tests can import and run correctly
+
+This ensures all scoring tests can import the reorganized scoring modules.
+```
+
+##### Step 8.7.3: Update Imports in Core Brush Test Files
+
+```text
+Update imports in core brush matching test files:
+
+**Files to update:**
+- All files in `tests/match/test_*brush*` (excluding strategy/scoring specific)
+- All files in `tests/match/test_*matcher*` (brush matcher tests)
+- All files in `tests/match/test_*splitter*` (brush splitter tests)
 
 **Import patterns to update:**
 - `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
@@ -367,12 +419,64 @@ Update imports in all test files to use the new module structure:
 - `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
 
 **Process:**
-1. Update test files in batches by directory
-2. Run tests after each batch to catch issues early
-3. Commit changes after each batch
-4. Verify all tests can import and run correctly
+1. Update core brush test files individually
+2. Run core brush tests after each file
+3. Commit changes after completion
+4. Verify core brush tests can import and run correctly
 
-This ensures all tests can import the reorganized brush modules.
+This ensures all core brush tests can import the reorganized brush modules.
+```
+
+##### Step 8.7.4: Update Imports in Integration Test Files
+
+```text
+Update imports in integration test files:
+
+**Files to update:**
+- All files in `tests/integration/test_*brush*`
+- All files in `tests/integration/test_*validation*` (brush validation)
+- Any other integration tests that import brush modules
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
+- `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
+
+**Process:**
+1. Update integration test files individually
+2. Run integration tests after each file
+3. Commit changes after completion
+4. Verify integration tests can import and run correctly
+
+This ensures all integration tests can import the reorganized brush modules.
+```
+
+##### Step 8.7.5: Update Imports in Remaining Test Files
+
+```text
+Update imports in any remaining test files that import brush modules:
+
+**Files to update:**
+- Any other test files that import brush modules
+- Performance test files
+- Debug test files
+- Any test files missed in previous sub-steps
+
+**Import patterns to update:**
+- `from sotd.match.brush_matching_strategies.` → `from sotd.match.brush.strategies.`
+- `from sotd.match.brush_scoring_components.` → `from sotd.match.brush.scoring.`
+- `from sotd.match.brush_validation_` → `from sotd.match.brush.validation.`
+- `from sotd.match.brush_comparison_` → `from sotd.match.brush.comparison.`
+
+**Process:**
+1. Search for any remaining test files with old imports
+2. Update remaining test files individually
+3. Run all tests to verify no regressions
+4. Commit changes after completion
+5. Verify all tests can import and run correctly
+
+This ensures all remaining test files can import the reorganized brush modules.
 ```
 
 #### Step 8.8: Update Imports in Script Files
