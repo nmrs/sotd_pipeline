@@ -244,16 +244,16 @@ The redundant fields are primarily introduced by two strategies:
 - **Status**: ✅ **COMPLETE** - Main aggregator updated, others identified for future phases
 - **Note**: BrushFiberUserAggregator now works with both nested and root-level structures for backward compatibility
 
-#### 2.7 Update Aggregator Test Data (Moved from 2.6) 🔄 **IN PROGRESS**
+#### 2.7 Update Aggregator Test Data (Moved from 2.6) ✅ **COMPLETE**
 - **Files**: Tests in `tests/aggregate/` that create mock brush data
 - **Action**: Update mock data to use nested structure
 - **Focus**: Tests that verify aggregator logic with brush data
 - **Examples**:
-  - `tests/aggregate/test_brush_fiber_user_aggregator.py` - Many root-level fiber fields
-  - `tests/aggregate/test_data_quality.py` - Multiple root-level fiber fields
-  - `tests/aggregate/test_integration.py` - Some root-level fiber fields
-- **Status**: 🔄 **IN PROGRESS** - Aggregator logic updated, now ready to update test data
-- **Note**: BrushFiberUserAggregator now supports nested structure, so test data can be updated
+  - ✅ `tests/aggregate/test_brush_fiber_user_aggregator.py` - All test data updated to nested structure
+  - ✅ `tests/aggregate/test_data_quality.py` - All test data updated to nested structure (linter issues fixed)
+  - ✅ `tests/aggregate/test_integration.py` - All test data updated to nested structure
+- **Status**: ✅ **COMPLETE** - All 3 files completed with nested structure
+- **Note**: All updated tests pass with new nested structure, aggregator supports both formats
 
 #### 2.8 Update Report Generation Tests
 - **Files**: Tests that verify report generation with brush data
@@ -278,7 +278,25 @@ The redundant fields are primarily introduced by two strategies:
 - **Command**: `grep -r "fiber\|knot_size_mm" tests/ --include="*.py"`
 - **Goal**: Find any test files that might have been missed in the above categories
 
-#### 2.10 Remove Unnecessary JSON Writing from Component Strategies ✅ **COMPLETE**
+#### 2.11 Update BrushAggregator Logic (New Task Discovered)
+- **File**: `sotd/aggregate/aggregators/core/brush_aggregator.py`
+- **Action**: Update aggregator to use nested structure for fiber field access
+- **Current Issue**: Uses `get_field_value(matched, "fiber")` which looks for root-level fields
+- **Required Change**: Update to look for `fiber` in `matched.knot.fiber` with fallback
+- **Status**: ⏳ **PENDING** - Identified during Phase 2.6 analysis
+- **Priority**: High - Core aggregator that processes all brush data
+
+#### 2.12 Additional Aggregator Analysis (New Task Discovered)
+- **Action**: Search for other aggregators that might expect root-level brush fields
+- **Search Patterns**: 
+  - Files using `matched.get("fiber")` or `matched.get("knot_size_mm")`
+  - Files using `get_field_value(matched, "fiber")` or similar patterns
+  - Any aggregator that processes brush data
+- **Command**: `grep -r "matched.*fiber\|matched.*knot_size_mm" sotd/aggregate/ --include="*.py"`
+- **Goal**: Identify all aggregators that need updates for nested structure
+- **Status**: ⏳ **PENDING** - Comprehensive analysis needed
+
+#### 2.13 Remove Unnecessary JSON Writing from Component Strategies ✅ **COMPLETE**
 - **Action**: Remove JSON structure creation from KnotOnlyStrategy and HandleOnlyStrategy
 - **Rationale**: Component strategies should only return component data, not create complete JSON structure
 - **Files**: 
