@@ -1,0 +1,771 @@
+# Plan: Remove Redundant Brush Fields and Fix Rehydration
+
+**Date:** 2025-09-01  
+**Status:** IN PROGRESS - Phase 2.1 (ResultProcessor Tests Removal) ✅ **COMPLETE**  
+**Priority:** Medium  
+**Type:** Refactoring + Bug Fix  
+
+## Overview
+
+The current brush matching structure has redundant fields at the root level (`fiber`, `knot_size_mm`) that duplicate data already present in the nested `knot` section. This redundancy adds complexity and potential for inconsistency. We need to:
+
+1. Remove redundant root-level fields from regex match output
+2. Fix any tests that assert these redundant fields
+3. Handle rehydration properly for complete brushes
+
+## Problem Analysis
+
+### Current Redundant Structure
+The redundant fields are primarily introduced by two strategies:
+
+#### Known Brush Strategy (Primary Source)
+- **File**: `known_brush_strategy.py`
+- **When**: Matches complete brushes from the main catalog (e.g., Simpson Chubby 2, BFM)
+- **Problem**: Populates both root-level and nested `knot` fields with same data
+- **Example 1**: Simpson Chubby 2 gets `fiber: "Badger"` and `knot_size_mm: 27` at root AND `knot.fiber: "Badger"` and `knot.knot_size_mm: 27`
+- **Example 2**: BFM gets `fiber: "Synthetic"` and `knot_size_mm: 50` at root AND `knot.fiber: "Synthetic"` and `knot.knot_size_mm: 50`
+
+#### Other Brush Strategy (Secondary Source)  
+- **File**: `other_brush_strategy.py`
+- **When**: Matches brushes not in main catalog but with recognizable patterns
+- **Problem**: May also populate redundant root fields
+- **Example**: Custom brushes with fiber/knot size information
+
+#### Omega/Semogue Strategy (Brand-Specific)
+- **File**: `omega_semogue_strategy.py`
+- **When**: Matches Omega and Semogue brand brushes with specific patterns
+- **Problem**: May introduce redundant root fields due to brand-specific matching logic
+- **Example**: Omega brushes with fiber/knot size information
+
+#### Zenith Strategy (Brand-Specific)
+- **File**: `zenith_strategy.py`
+- **When**: Matches Zenith brand brushes with specific patterns
+- **Problem**: May introduce redundant root fields due to brand-specific matching logic
+- **Example**: Zenith brushes with fiber/knot size information
+
+### Redundant Field Structure
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "fiber": "Badger",           // ← REDUNDANT with knot.fiber
+  "knot_size_mm": 27,         // ← REDUNDANT with knot.knot_size_mm
+  "handle": { ... },
+  "knot": {
+    "brand": "Simpson", 
+    "model": "Chubby 2",
+    "fiber": "Badger",         // ← SAME DATA as root level
+    "knot_size_mm": 27        // ← SAME DATA as root level
+  }
+}
+```
+
+### Why This is Problematic
+- **Data Duplication**: Same values stored in two places
+- **Inconsistency Risk**: Values could diverge if not updated together
+- **Maintenance Overhead**: Need to ensure both locations stay in sync
+- **Confusion**: Unclear which field is the "source of truth"
+
+### Aggregator Usage Analysis
+- **Fiber Aggregator**: Only reads from `knot.fiber`, never from root `fiber`
+- **Knot Size Aggregator**: Only reads from `knot.knot_size_mm`, never from root `knot_size_mm`
+- **Core Brush Aggregator**: Only reads from `knot.fiber` and `knot.knot_size_mm`
+
+**Conclusion**: Root-level `fiber` and `knot_size_mm` fields are **completely unused** by aggregators.
+
+## Implementation Plan
+
+### Phase 1: Eliminate ResultProcessor and Fix Strategies Directly
+
+#### 1.1 Architectural Analysis and Decision
+- **Current Problem**: ResultProcessor exists as a "band-aid" to convert flat structures to nested structures
+- **Root Cause**: Strategies produce wrong structure, then processor fixes it
+- **Better Approach**: Strategies should produce correct nested structure directly
+- **Benefits**: Simpler architecture, better performance, easier debugging, single responsibility
+
+#### 1.2 Eliminate ResultProcessor Dependency ✅ **COMPLETE**
+- **File**: `sotd/match/brush_scoring_components/result_processor.py`
+- **Action**: Remove entire ResultProcessor class
+- **Rationale**: No longer needed when strategies produce correct structure
+- **Impact**: Eliminates unnecessary processing layer and performance overhead
+- **Status**: ResultProcessor class deleted, imports removed from all files
+
+#### 1.3 Update BrushMatcher to Remove ResultProcessor ✅ **COMPLETE**
+- **File**: `sotd/match/brush_matcher.py`
+- **Action**: Remove ResultProcessor import, initialization, and calls
+- **Remove**: `self.result_processor = ResultProcessor(self.knot_matcher)`
+- **Remove**: `final_result = self.result_processor.process_result(best_result, value)`
+- **Result**: Cleaner, more direct data flow
+- **Status**: All ResultProcessor references removed from BrushMatcher
+
+#### 1.4 Fix Known Brush Strategy to Produce Correct Structure ✅ **COMPLETE**
+- **File**: `sotd/match/brush_matching_strategies/known_brush_strategy.py`
+- **Action**: Update `_create_match_result_from_pattern` to create nested structure directly
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested `handle` and `knot` sections with correct data placement
+- **Structure**: 
+  ```python
+  {
+      "brand": "Simpson",
+      "model": "Chubby 2", 
+      "handle": {"brand": "Simpson", "model": None},
+      "knot": {"brand": "Simpson", "model": "Chubby 2", "fiber": "Badger", "knot_size_mm": 27}
+  }
+  ```
+- **Status**: Strategy now produces correct nested structure, all tests updated and passing
+
+#### 1.5 Fix Other Brush Strategy to Use Nested Structure ✅ **COMPLETE**
+- **File**: `sotd/match/brush_matching_strategies/other_brushes_strategy.py`
+- **Action**: Convert from flat structure to nested structure
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested `handle`/`knot` sections with correct data placement
+- **Focus**: This strategy currently creates flat structures, needs conversion to nested
+- **Status**: Strategy now produces correct nested structure, all tests updated and passing
+
+#### 1.6 Fix Omega/Semogue Strategy to Use Nested Structure ✅ **COMPLETE**
+- **File**: `sotd/match/brush_matching_strategies/omega_semogue_strategy.py`
+- **Action**: Convert from flat structure to nested structure
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested `handle`/`knot` sections with correct data placement
+- **Focus**: These brands currently create flat structures, need conversion to nested
+- **Status**: Strategy now produces correct nested structure, all tests updated and passing
+
+#### 1.7 Fix Zenith Strategy to Use Nested Structure ✅ **COMPLETE**
+- **File**: `sotd/match/brush_matching_strategies/zenith_strategy.py`
+- **Action**: Convert from flat structure to nested structure
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested `handle`/`knot` sections with correct data placement
+- **Focus**: Zenith brushes currently create flat structures, need conversion to nested
+- **Status**: Strategy now produces correct nested structure, all tests updated and passing
+
+#### 1.8 Verify All Strategies Produce Consistent Structure ✅ **COMPLETE**
+- **Action**: Ensure all brush strategies produce identical nested structure format
+- **Goal**: Single, consistent data access pattern: `matched["knot"]["fiber"]` for all brush types
+- **Benefit**: Aggregators can use uniform access pattern regardless of strategy used
+- **Status**: All 6 main strategies verified to produce consistent nested structure
+
+#### 1.4 Update Other Brush Strategy  
+- **File**: `sotd/match/brush_matching_strategies/other_brush_strategy.py`
+- **Action**: **CONVERT TO NESTED STRUCTURE** - Create nested `handle`/`knot` sections
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested structure with `handle.brand`, `knot.brand`, `knot.model`, `knot.fiber`, `knot.knot_size_mm`
+- **Focus**: This strategy currently creates flat structures, needs conversion to nested for consistency
+
+#### 1.5 Update Omega/Semogue Strategy
+- **File**: `sotd/match/brush_matching_strategies/omega_semogue_strategy.py`
+- **Action**: **CONVERT TO NESTED STRUCTURE** - Create nested `handle`/`knot` sections
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested structure with `handle.brand`, `knot.brand`, `knot.model`, `knot.fiber`, `knot.knot_size_mm`
+- **Focus**: These brands currently create flat structures, need conversion to nested for consistency
+
+#### 1.6 Update Zenith Strategy
+- **File**: `sotd/match/brush_matching_strategies/zenith_strategy.py`
+- **Action**: **CONVERT TO NESTED STRUCTURE** - Create nested `handle`/`knot` sections
+- **Remove**: Root-level `fiber` and `knot_size_mm` fields
+- **Add**: Nested structure with `handle.brand`, `knot.brand`, `knot.model`, `knot.fiber`, `knot.knot_size_mm`
+- **Focus**: Zenith brushes currently create flat structures, need conversion to nested for consistency
+
+#### 1.7 Update Remaining Brush Strategies
+- **Files**: All other brush matching strategies
+- **Action**: Ensure no redundant field population at root level
+- **Verify**: Only nested structures contain these fields
+- **Note**: Most other strategies (composite, handle-only, knot-only) already have correct structure
+
+#### 1.8 Verify Aggregator Compatibility
+- **Action**: Ensure all aggregators can use consistent access pattern: `matched["knot"]["fiber"]`
+- **Test**: Verify aggregators work with both existing nested structures and newly converted nested structures
+- **Goal**: Single, consistent data access pattern across all brush types
+
+### Phase 2: Fix Tests and Remove ResultProcessor
+
+#### 2.1 Remove ResultProcessor Tests ✅ **COMPLETE**
+- **Files**: Any tests that test ResultProcessor functionality
+- **Action**: Remove tests for ResultProcessor since the class is being eliminated
+- **Rationale**: No need to test functionality that's being removed
+- **Status**: All ResultProcessor references removed from test files, tests now pass
+
+#### 2.2 Comprehensive Test Update Requirements
+- **Action**: Update ALL tests to expect correct nested structure directly from strategies
+- **Change**: Tests must expect nested `handle`/`knot` structure from strategy output
+- **Examples**: 
+  - Old: `assert result.matched["fiber"] == "Synthetic"`
+  - New: `assert result.matched["knot"]["fiber"] == "Synthetic"`
+  - Old: `assert result.matched["knot_size_mm"] == 26`
+  - New: `assert result.matched["knot"]["knot_size_mm"] == 26`
+- **Files**: All test files that test strategy output structure
+- **Benefit**: Tests now verify the actual strategy output, not processed output
+
+#### 2.3 Update Structure Preservation Tests
+- **File**: `tests/match/test_structure_preservation_tdd.py`
+- **Action**: Update tests to expect correct structure directly from strategies
+- **Verify**: Tests pass with new direct nested structure (no processing step)
+
+#### 2.4 Update Strategy-Specific Tests
+- **Files**: All strategy test files in `tests/match/brush_matching_strategies/`
+- **Focus**: Tests for `known_brush_strategy`, `other_brush_strategy`, `omega_semogue_strategy`, `zenith_strategy`
+- **Action**: Update assertions to expect nested structure instead of flat structure
+- **Examples**:
+  - `tests/match/brush_matching_strategies/test_known_brush_strategy.py`
+  - `tests/match/brush_matching_strategies/test_other_brush_strategy.py`
+  - `tests/match/brush_matching_strategies/test_omega_semogue_strategy.py`
+  - `tests/match/brush_matching_strategies/test_zenith_strategy.py`
+
+#### 2.5 Update Integration Tests
+- **Files**: Tests that verify end-to-end brush matching workflow
+- **Action**: Update mock data creation to use nested structure
+- **Focus**: Tests that create mock brush data for testing
+- **Examples**:
+  - `tests/test_brush_matcher.py`
+  - `tests/test_brush_matching_integration.py`
+  - Any other integration tests with brush data
+
+#### 2.6 Update Aggregator Tests
+- **Files**: Tests in `tests/aggregate/` that create mock brush data
+- **Action**: Update mock data to use nested structure
+- **Focus**: Tests that verify aggregator logic with brush data
+- **Examples**:
+  - `tests/aggregate/test_brush_aggregator.py`
+  - `tests/aggregate/test_fiber_aggregator.py`
+  - `tests/aggregate/test_knot_size_aggregator.py`
+
+#### 2.7 Update Report Generation Tests
+- **Files**: Tests that verify report generation with brush data
+- **Action**: Update test data to use nested structure
+- **Focus**: Tests that verify table generation and report output
+- **Examples**:
+  - `tests/report/test_brush_table_generator.py`
+  - `tests/report/test_report_generation.py`
+
+#### 2.8 Verify Test Coverage
+- **Action**: Run test discovery to identify any missed test files
+- **Command**: `python -m pytest --collect-only` to see all test files
+- **Goal**: Ensure no test file is missed in the update process
+- **Risk**: Missing test updates could cause silent test failures
+
+#### 2.9 Comprehensive Test File Search
+- **Action**: Search for any test files that might contain brush-related assertions
+- **Search Patterns**: 
+  - Files containing `"fiber"` assertions
+  - Files containing `"knot_size_mm"` assertions  
+  - Files containing `"handle"` or `"knot"` structure tests
+- **Command**: `grep -r "fiber\|knot_size_mm" tests/ --include="*.py"`
+- **Goal**: Find any test files that might have been missed in the above categories
+
+### Phase 3: Verify Rehydration Works with New Structure
+
+#### 3.1 Verify Rehydration Compatibility
+- **Status**: ✅ **COMPLETE** - Rehydration functionality already working
+- **File**: `tests/match/test_structure_preservation_tdd.py`
+- **Action**: Ensure rehydration tests still pass with new direct strategy structure
+- **Verify**: Rehydrated structure matches strategy output structure exactly
+
+#### 3.2 Update Rehydration Tests if Needed
+- **Action**: Update any rehydration tests that might expect old structure
+- **Focus**: Ensure tests verify rehydration produces identical structure to strategy output
+- **Benefit**: Rehydration now works directly with strategy output, no processing step needed
+
+#### 3.3 Test End-to-End Workflow
+- **Action**: Verify complete workflow: strategy output → correct_matches.yaml → rehydration
+- **Result**: Consistent nested structure throughout entire pipeline
+- **Benefit**: No more structure conversion steps, cleaner data flow
+
+### Phase 4: Cleanup and Final Verification
+
+#### 4.1 Remove ResultProcessor Files
+- **File**: `sotd/match/brush_scoring_components/result_processor.py`
+- **Action**: Delete entire file
+- **Rationale**: No longer needed, strategies produce correct structure directly
+
+#### 4.2 Update Import Statements
+- **Files**: Any files that import ResultProcessor
+- **Action**: Remove ResultProcessor imports
+- **Verify**: No compilation errors after removal
+
+#### 4.3 Final Integration Testing
+- **Action**: Run full test suite to ensure all changes work together
+- **Focus**: Verify no regressions in brush matching functionality
+- **Goal**: All tests pass with new direct strategy structure
+
+#### 4.4 Performance Verification
+- **Action**: Verify no performance regression from removing ResultProcessor
+- **Benefit**: Should see slight performance improvement from eliminating processing step
+- **Test**: Run performance benchmarks if available
+
+## Rehydration Format Specification
+
+### Complete Brush Rehydration Requirements
+
+When rehydrating complete brushes from `correct_matches.yaml`, the `CorrectMatchesStrategy` must produce structures that are **identical** to the non-redundant regex match output.
+
+#### Simpson Chubby 2 (Simple Case) Rehydration
+
+**Input in `correct_matches.yaml`:**
+```yaml
+"simpson chubby 2":
+  brand: "Simpson"
+  model: "Chubby 2"
+  fiber: "Badger"
+  knot_size_mm: 27
+```
+
+**Expected Rehydrated Output:**
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "handle": {
+    "brand": "Simpson",
+    "model": null
+  },
+  "knot": {
+    "brand": "Simpson",
+    "model": "Chubby 2",
+    "fiber": "Badger",
+    "knot_size_mm": 27
+  },
+  "source_text": "simpson chubby 2",
+  "_matched_by": "CorrectMatchesStrategy",
+  "_pattern": "exact_match",
+  "strategy": "correct_matches"
+}
+```
+
+**Key Points:**
+- **No redundant fields**: No root-level `fiber` or `knot_size_mm`
+- **Handle section**: Populated with brand info, model set to `null`
+- **Knot section**: Contains all fiber and size information
+- **Metadata**: Root-level metadata fields for tracking
+
+#### BFM (Complex Case) Rehydration
+
+**Input in `correct_matches.yaml`:**
+```yaml
+"bfm":
+  brand: "EldrormR Industries/Muninn Woodworks"
+  model: "BFM"
+  fiber: "Synthetic"
+  knot_size_mm: 50
+  handle:
+    brand: "Muninn Woodworks"
+    model: null
+  knot:
+    brand: "Moti"
+    model: "Motherlode"
+    fiber: "Synthetic"
+    knot_size_mm: 50
+```
+
+**Expected Rehydrated Output:**
+```json
+{
+  "brand": "EldrormR Industries/Muninn Woodworks",
+  "model": "BFM",
+  "handle": {
+    "brand": "Muninn Woodworks",
+    "model": null
+  },
+  "knot": {
+    "brand": "Moti",
+    "model": "Motherlode",
+    "fiber": "Synthetic",
+    "knot_size_mm": 50
+  },
+  "source_text": "bfm",
+  "_matched_by": "CorrectMatchesStrategy",
+  "_pattern": "exact_match",
+  "strategy": "correct_matches"
+}
+```
+
+**Key Points:**
+- **No redundant fields**: No root-level `fiber` or `knot_size_mm`
+- **Complex structure**: Handle and knot have different brands than root
+- **Preserved relationships**: All brand/model relationships maintained
+- **Single source of truth**: Fiber and size only in knot section
+
+### Rehydration Implementation Requirements
+
+#### CorrectMatchesStrategy Updates
+- **Method**: `_reconstruct_complete_brush_structure()` for complete brushes
+- **Logic**: Extract handle/knot info from `correct_matches.yaml` structure
+- **Validation**: Ensure no redundant root fields are created
+- **Fallback**: Handle cases where handle/knot sections are missing
+
+**Implementation Details:**
+```python
+def _reconstruct_complete_brush_structure(self, value: str, match_data) -> dict:
+    """
+    Reconstruct the nested structure for complete brush entries.
+    
+    Args:
+        value: Original input string
+        match_data: Result from CorrectMatchesChecker with complete brush info
+        
+    Returns:
+        Dictionary with the nested structure matching the non-redundant regex result
+    """
+    # Extract basic brush information
+    brand = match_data.get("brand")
+    model = match_data.get("model")
+    
+    # Extract handle information (may be nested or inferred)
+    handle_info = match_data.get("handle", {})
+    if not handle_info:
+        # Fallback: create handle section from root brand
+        handle_info = {"brand": brand, "model": None}
+    
+    # Extract knot information (may be nested or inferred)
+    knot_info = match_data.get("knot", {})
+    if not knot_info:
+        # Fallback: create knot section from root data
+        knot_info = {
+            "brand": brand,
+            "model": model,
+            "fiber": match_data.get("fiber"),
+            "knot_size_mm": match_data.get("knot_size_mm")
+        }
+    
+    # Build the non-redundant structure
+    result = {
+        "brand": brand,
+        "model": model,
+        "handle": handle_info,
+        "knot": knot_info,
+        "source_text": value,
+        "_matched_by": "CorrectMatchesStrategy",
+        "_pattern": "exact_match",
+        "strategy": "correct_matches"
+    }
+    
+    # CRITICAL: Do NOT add redundant root-level fiber/knot_size_mm fields
+    # These fields should ONLY exist in the nested knot section
+    
+    return result
+```
+
+#### Structure Validation
+- **Identical format**: Rehydrated structure must match regex match exactly
+- **No field duplication**: Verify no redundant `fiber` or `knot_size_mm` at root
+- **Metadata consistency**: Root-level metadata fields properly set
+- **Nested integrity**: Handle and knot sections contain all required data
+
+### Complete Rehydration Workflow
+
+#### 1. Regex Match (Non-Redundant)
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "handle": { "brand": "Simpson", "model": null },
+  "knot": { "brand": "Simpson", "model": "Chubby 2", "fiber": "Badger", "knot_size_mm": 27 }
+}
+```
+
+#### 2. Save to `correct_matches.yaml`
+```yaml
+"simpson chubby 2":
+  brand: "Simpson"
+  model: "Chubby 2"
+  fiber: "Badger"
+  knot_size_mm: 27
+```
+
+#### 3. Rehydrate via `CorrectMatchesStrategy`
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "handle": { "brand": "Simpson", "model": null },
+  "knot": { "brand": "Simpson", "model": "Chubby 2", "fiber": "Badger", "knot_size_mm": 27 }
+}
+```
+
+**Result**: Structure is **identical** before and after rehydration, with no redundant fields.
+
+## Test Strategy
+
+### TDD Approach for Rehydration Cases
+- **Priority**: HIGHEST
+- **Method**: Test-Driven Development (Red-Green-Refactor cycle)
+- **Rationale**: Rehydration is new functionality that must be thoroughly tested
+
+#### TDD Phase 1: Write Failing Tests (Red)
+- **File**: `tests/match/test_structure_preservation_tdd.py`
+- **Test Cases**:
+  - **Simpson Chubby 2**: Simple complete brush rehydration with non-redundant structure
+  - **BFM**: Complex complete brush rehydration with different brands for handle/knot
+- **Expected Result**: Tests should FAIL initially (red phase)
+- **Failure Reasons**:
+  - `CorrectMatchesStrategy` doesn't handle complete brushes yet
+  - No `_reconstruct_complete_brush_structure` method exists
+  - Rehydration produces incorrect or missing structure
+
+#### TDD Phase 2: Implement Minimal Code (Green)
+- **Goal**: Make all rehydration tests pass
+- **Implementation**: Add `_reconstruct_complete_brush_structure` method
+- **Result**: Tests should PASS (green phase)
+
+#### TDD Phase 3: Refactor (Clean)
+- **Goal**: Clean up code while keeping tests green
+- **Focus**: Code quality, performance, maintainability
+
+### Unit Tests
+- **Priority**: HIGH
+- **Scope**: All brush matching strategies, CorrectMatchesStrategy
+- **Focus**: Ensure no redundant fields are populated at root level
+- **Coverage**: Complete brush, composite brush, handle-only, knot-only cases
+
+### Integration Tests
+- **Priority**: MEDIUM
+- **Scope**: End-to-end brush matching workflow
+- **Focus**: Verify non-redundant structure is maintained through all phases
+- **Data**: Use realistic brush examples (Simpson Chubby 2, etc.)
+
+### Structure Validation Tests
+- **Priority**: HIGH
+- **Scope**: Structure preservation tests
+- **Focus**: Verify identical structure before/after rehydration
+- **Format**: Non-redundant, clean structure
+
+## Expected Outcomes
+
+### Before (Current)
+
+#### Simple Complete Brush (Simpson Chubby 2)
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "fiber": "Badger",           // ← REDUNDANT
+  "knot_size_mm": 27,         // ← REDUNDANT
+  "handle": { ... },
+  "knot": {
+    "brand": "Simpson", 
+    "model": "Chubby 2",
+    "fiber": "Badger",         // ← SOURCE OF TRUTH
+    "knot_size_mm": 27        // ← SOURCE OF TRUTH
+  }
+}
+```
+
+#### Complex Complete Brush (BFM)
+```json
+{
+  "brand": "EldrormR Industries/Muninn Woodworks",
+  "model": "BFM",
+  "fiber": "Synthetic",           // ← REDUNDANT
+  "knot_size_mm": 50,            // ← REDUNDANT
+  "handle": {
+    "brand": "Muninn Woodworks",  // Different from root brand
+    "model": null
+  },
+  "knot": {
+    "brand": "Moti",              // Different from root brand
+    "model": "Motherlode",        // Different from root model
+    "fiber": "Synthetic",         // ← SOURCE OF TRUTH
+    "knot_size_mm": 50           // ← SOURCE OF TRUTH
+  }
+}
+```
+
+### After (Target)
+
+#### Simple Complete Brush (Simpson Chubby 2)
+```json
+{
+  "brand": "Simpson",
+  "model": "Chubby 2",
+  "handle": { ... },
+  "knot": {
+    "brand": "Simpson", 
+    "model": "Chubby 2",
+    "fiber": "Badger",         // ← ONLY LOCATION
+    "knot_size_mm": 27        // ← ONLY LOCATION
+  }
+}
+```
+
+#### Complex Complete Brush (BFM)
+```json
+{
+  "brand": "EldrormR Industries/Muninn Woodworks",
+  "model": "BFM",
+  "handle": {
+    "brand": "Muninn Woodworks",  // Different from root brand
+    "model": null
+  },
+  "knot": {
+    "brand": "Moti",              // Different from root brand
+    "model": "Motherlode",        // Different from root model
+    "fiber": "Synthetic",         // ← ONLY LOCATION
+    "knot_size_mm": 50           // ← ONLY LOCATION
+  }
+}
+```
+
+#### Standardized Simple Brush (Alpha, Omega, Zenith, etc.)
+```json
+{
+  "brand": "Alpha",
+  "model": "Synthetic",
+  "handle": {
+    "brand": "Alpha",
+    "model": null
+  },
+  "knot": {
+    "brand": "Alpha",
+    "model": "Synthetic",
+    "fiber": "Synthetic",         // ← ONLY LOCATION
+    "knot_size_mm": null         // ← ONLY LOCATION
+  }
+}
+```
+
+## Benefits
+
+1. **Cleaner Data Structure**: No duplication, single source of truth
+2. **Reduced Maintenance**: No need to keep multiple fields in sync
+3. **Consistency**: Eliminates risk of divergent values
+4. **Clarity**: Clear where to find fiber and knot size information
+5. **Performance**: Slightly reduced memory usage and serialization overhead
+6. **Unified Aggregator Logic**: Single access pattern `matched["knot"]["fiber"]` works for all brush types
+7. **Simplified Maintenance**: One structure pattern instead of flat + nested variations
+8. **Future Extensibility**: Easy to add handle information to any brush type
+9. **Reduced Bugs**: No risk of missing data due to wrong access pattern
+10. **Consistent API**: All brush data follows the same structure regardless of complexity
+
+## Why BFM Case is Important
+
+The BFM case demonstrates a **complex complete brush structure** that's different from simple cases like Simpson Chubby 2:
+
+- **Different brands**: Root brand (`EldrormR Industries/Muninn Woodworks`) vs handle brand (`Muninn Woodworks`) vs knot brand (`Moti`)
+- **Different models**: Root model (`BFM`) vs knot model (`Motherlode`)
+- **Complex relationships**: Handle and knot come from different manufacturers than the main brush brand
+- **Real-world complexity**: Represents actual brush configurations in the community
+
+This case ensures our redundant field removal handles **all** complete brush patterns, not just the simple ones where handle/knot brands match the root brand.
+
+## Why Standardize on Nested Structures
+
+### **Current Problem: Inconsistent Data Access Patterns**
+Different brush strategies create different data structures, forcing aggregators to handle multiple access patterns:
+
+```python
+# For nested structures (most strategies)
+if "knot" in matched and isinstance(matched["knot"], dict):
+    fiber = matched["knot"].get("fiber")
+    knot_size_mm = matched["knot"].get("knot_size_mm")
+
+# For flat structures (other_brushes, omega_semogue, zenith)
+else:
+    fiber = matched.get("fiber")  # Different access pattern
+    knot_size_mm = matched.get("knot_size_mm")  # Different access pattern
+```
+
+### **Solution: Unified Nested Structure**
+All strategies produce consistent nested structures:
+
+```python
+# Universal access pattern for all brush types
+fiber = matched.get("knot", {}).get("fiber")
+knot_size_mm = matched.get("knot", {}).get("knot_size_mm")
+```
+
+### **Benefits of Standardization**
+1. **Simpler aggregator logic**: No conditional branching needed
+2. **Consistent data access**: Same pattern works for all brush types
+3. **Easier maintenance**: One structure pattern instead of two
+4. **Future extensibility**: Easy to add handle information later
+5. **Reduced bugs**: No risk of missing data due to wrong access pattern
+
+## Risks and Mitigation
+
+### Risk: Breaking Existing Code
+- **Mitigation**: Thorough testing of all aggregators and consumers
+- **Verification**: Ensure no code actually reads from root-level fields
+
+### Risk: Test Failures
+- **Mitigation**: Comprehensive test updates before removing fields
+- **Approach**: Update tests first, then remove fields
+
+### Risk: Rehydration Inconsistency
+- **Mitigation**: Update CorrectMatchesStrategy to maintain non-redundant structure
+- **Testing**: Verify rehydration produces identical structure
+
+## Success Criteria
+
+1. ✅ **No redundant fields** at root level in brush match output
+2. ✅ **All tests pass** with new direct strategy structure
+3. ✅ **Rehydration works correctly** for all brush types
+4. ✅ **All brush strategies produce consistent nested structures directly**
+5. ✅ **Aggregators use single access pattern** `matched["knot"]["fiber"]`
+6. ✅ **ResultProcessor eliminated** - no unnecessary processing layer
+7. ✅ **Clean, maintainable architecture** with single responsibility
+8. ✅ **Better performance** from eliminating processing step
+9. ✅ **Easier debugging** - structure issues are in strategy where they belong
+10. ✅ **Simplified codebase** - no more double work (create wrong structure, then fix it)
+
+## Next Steps
+
+1. **Start with Phase 1.1**: Analyze current architecture and confirm ResultProcessor elimination approach
+2. **Execute Phase 1.2-1.3**: Remove ResultProcessor from BrushMatcher
+3. **Execute Phase 1.4-1.7**: Fix all strategies to produce correct nested structure directly
+4. **Execute Phase 2**: Update all tests to expect correct structure from strategies
+5. **Execute Phase 3**: Verify rehydration still works with new structure
+6. **Execute Phase 4**: Clean up ResultProcessor files and final verification
+7. **Run full test suite**: Ensure no regressions
+8. **Commit changes**: Following git-and-cleanup rules
+
+## Phase 4: Rationalize Aggregators and Their Tests
+
+### **Rationale**: After standardizing all brush strategies on nested structures, we need to ensure aggregators and their tests are updated to use the consistent access pattern.
+
+#### 4.1 Update Aggregator Logic
+- **Action**: Remove any conditional logic that handles both flat and nested structures
+- **Goal**: All aggregators use single access pattern: `matched["knot"]["fiber"]`
+- **Files**: All aggregator files in `sotd/aggregate/` that process brush data
+- **Benefit**: Simpler, more maintainable aggregator code
+
+#### 4.2 Update Aggregator Tests
+- **Action**: Update tests that create mock brush data to use nested structure
+- **Change**: Mock data should follow new standardized nested format
+- **Examples**:
+  - Old: `{"brand": "Alpha", "fiber": "Synthetic", "knot_size_mm": 26}`
+  - New: `{"brand": "Alpha", "knot": {"fiber": "Synthetic", "knot_size_mm": 26}}`
+- **Files**: All aggregator test files that create mock brush data
+
+#### 4.3 Verify Aggregator Performance
+- **Action**: Ensure aggregators still perform well with nested structure
+- **Test**: Run performance tests with real data to verify no regression
+- **Goal**: Maintain or improve performance while simplifying logic
+
+#### 4.4 Update Integration Tests
+- **Action**: Update any integration tests that verify end-to-end brush processing
+- **Scope**: Tests that go from match → aggregate → report phases
+- **Verify**: Complete workflow works with standardized brush structures
+
+## Files to Modify
+
+### Core Implementation
+- `sotd/match/brush_matcher.py` - Main orchestrator, may need updates for field handling
+- `sotd/match/brush_matching_strategies/known_brush_strategy.py` - **PRIMARY TARGET** for removing redundant root fields
+- `sotd/match/brush_matching_strategies/other_brush_strategy.py` - **SECONDARY TARGET** for removing redundant root fields  
+- `sotd/match/brush_matching_strategies/omega_semogue_strategy.py` - **BRAND-SPECIFIC TARGET** for removing redundant root fields
+- `sotd/match/brush_matching_strategies/zenith_strategy.py` - **BRAND-SPECIFIC TARGET** for removing redundant root fields
+- `sotd/match/brush_matching_strategies/correct_matches_strategy.py` - Ensure rehydration maintains non-redundant structure
+- Other brush matching strategies - Verify they don't introduce redundant fields
+
+### Tests
+- `tests/match/test_structure_preservation_tdd.py`
+- Any other tests that assert redundant fields
+- Integration tests for brush matching workflow
+- **Aggregator tests** that create mock brush data
+- **Integration tests** that verify match → aggregate → report workflow
+
+### Documentation
+- Update any relevant documentation about brush structure
+- Ensure examples show non-redundant format
+description:
+globs:
+alwaysApply: true
+---

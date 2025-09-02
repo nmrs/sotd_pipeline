@@ -22,7 +22,6 @@ class TestCompleteCoordinationIntegration:
         # Check that all components are properly integrated
         assert hasattr(self.matcher, "strategy_orchestrator")
         assert hasattr(self.matcher, "scoring_engine")
-        assert hasattr(self.matcher, "result_processor")
         assert hasattr(self.matcher, "conflict_resolver")
         assert hasattr(self.matcher, "performance_optimizer")
         assert hasattr(self.matcher, "strategy_dependency_manager")
@@ -137,8 +136,8 @@ class TestCompleteCoordinationIntegration:
         best_result = self.matcher.scoring_engine.get_best_result(scored_results)
         assert best_result is not None
 
-        # Step 7: Result processing
-        final_result = self.matcher.result_processor.process_result(best_result, input_value)
+        # Step 7: Result processing (ResultProcessor eliminated, use result directly)
+        final_result = best_result
         assert final_result is not None
 
     def test_coordination_component_isolation(self):
@@ -146,7 +145,6 @@ class TestCompleteCoordinationIntegration:
         # Test that each component can be accessed independently
         assert self.matcher.strategy_orchestrator is not None
         assert self.matcher.scoring_engine is not None
-        assert self.matcher.result_processor is not None
         assert self.matcher.conflict_resolver is not None
         assert self.matcher.performance_optimizer is not None
         assert self.matcher.strategy_dependency_manager is not None
@@ -246,8 +244,8 @@ class TestCompleteCoordinationIntegration:
         dependency_info = self.matcher.get_dependency_info()
         assert "dependency_manager" in dependency_info
 
-        # 7. Result processing
-        final_result = self.matcher.result_processor.process_result(best_result, "Declaration B2")
+        # 7. Result processing (ResultProcessor eliminated, use result directly)
+        final_result = best_result
         assert final_result is not None
         assert hasattr(final_result, "matched")
         assert hasattr(final_result, "match_type")
