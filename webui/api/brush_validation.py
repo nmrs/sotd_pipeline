@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Literal, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
-from sotd.match.brush_validation_cli import BrushValidationCLI
+from sotd.match.brush.validation.cli import BrushValidationCLI
 from webui.api.files import get_available_months
 
 logger = logging.getLogger(__name__)
@@ -148,7 +148,7 @@ async def get_brush_validation_data(
         # Use counting service as single source of truth instead of CLI
         from pathlib import Path
 
-        from sotd.match.brush_validation_counting_service import (
+        from sotd.match.brush.validation.counting import (
             BrushValidationCountingService,
         )
 
@@ -230,7 +230,7 @@ async def get_brush_validation_data(
             try:
                 # Use the counting service to get the actual unique brush strings with this strategy count
                 # This ensures we're counting the same way as the strategy distribution endpoint
-                from sotd.match.brush_validation_counting_service import (
+                from sotd.match.brush.validation.counting import (
                     BrushValidationCountingService,
                 )
 
@@ -397,7 +397,7 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
         # Use counting service as single source of truth instead of CLI
         from pathlib import Path
 
-        from sotd.match.brush_validation_counting_service import (
+        from sotd.match.brush.validation.counting import (
             BrushValidationCountingService,
         )
 

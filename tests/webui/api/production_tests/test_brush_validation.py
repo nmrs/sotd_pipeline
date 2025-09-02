@@ -47,7 +47,7 @@ class TestBrushValidationAPI:
         # Mock the counting service instead of CLI since that's what the API
         # actually uses
         with patch(
-            "sotd.match.brush_validation_counting_service.BrushValidationCountingService"
+            "sotd.match.brush.validation.counting.BrushValidationCountingService"
         ) as mock_service_class:
             mock_service = Mock()
             mock_service_class.return_value = mock_service
@@ -385,7 +385,7 @@ class TestBrushValidationAPI:
     def test_dual_component_brush_stored_in_correct_sections(self):
         """Test that dual-component brushes are stored in handle and knot sections, not split_brush."""
         # Import the actual classes to test the real logic
-        from sotd.match.brush_user_actions import BrushUserActionsManager
+        from sotd.match.brush.validation.user_actions import BrushUserActionsManager
         from sotd.match.correct_matches_updater import CorrectMatchesUpdater
 
         # Create a temporary manager instance

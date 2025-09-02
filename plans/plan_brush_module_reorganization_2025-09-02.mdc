@@ -69,8 +69,10 @@
     - 14.1 Run full test suite and identify remaining failures ✅ **COMPLETED** (55 failed, 3242 passed)
     - 14.2 Fix remaining import issues in test files ❌ **IN PROGRESS**
         - 14.2.1 Fix @patch decorators in test_brush_validation_cli.py ✅ **COMPLETED**
-    - 14.3 Fix brush validation CLI import issues ❌ **PENDING**
-    - 14.4 Fix webui API import issues ❌ **PENDING**
+        - 14.2.2 Fix @patch decorators in webui API tests ✅ **COMPLETED**
+        - 14.2.3 Fix import statements in webui API code ✅ **COMPLETED**
+    - 14.3 Fix brush validation CLI import issues ✅ **COMPLETED**
+    - 14.4 Fix webui API import issues ✅ **COMPLETED**
     - 14.5 Fix other test failures (fetch, enrich, report, etc.) ❌ **PENDING**
     - 14.6 Run final comprehensive test to confirm 100% success ❌ **PENDING**
 
