@@ -296,12 +296,12 @@ The redundant fields are primarily introduced by two strategies:
 - **Goal**: Find any test files that might have been missed in the above categories
 - **Status**: ✅ **COMPLETE** - Comprehensive search completed, files identified in Phase 2.9
 
-#### 2.12 Update BrushAggregator Logic (New Task Discovered)
+#### 2.12 Update BrushAggregator Logic (New Task Discovered) ✅ **COMPLETE**
 - **File**: `sotd/aggregate/aggregators/core/brush_aggregator.py`
 - **Action**: Update aggregator to use nested structure for fiber field access
 - **Current Issue**: Uses `get_field_value(matched, "fiber")` which looks for root-level fields
 - **Required Change**: Update to look for `fiber` in `matched.knot.fiber` with fallback
-- **Status**: ⏳ **PENDING** - Identified during Phase 2.6 analysis
+- **Status**: ✅ **COMPLETE** - Updated to look for fiber in nested knot structure with backward compatibility fallback
 - **Priority**: High - Core aggregator that processes all brush data
 
 #### 2.13 Additional Aggregator Analysis (New Task Discovered)

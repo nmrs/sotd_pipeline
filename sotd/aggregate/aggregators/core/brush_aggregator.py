@@ -45,7 +45,9 @@ class BrushAggregator(BaseAggregator):
 
             brand = get_field_value(matched, "brand")
             model = get_field_value(matched, "model")
-            fiber = get_field_value(matched, "fiber")
+            # Look for fiber in nested knot structure, with fallback to root level
+            knot = matched.get("knot", {})
+            fiber = get_field_value(knot, "fiber") or get_field_value(matched, "fiber")
             author = get_field_value(record, "author")
 
             if brand and author:  # model and fiber can be empty strings, which is valid
