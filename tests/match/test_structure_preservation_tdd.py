@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.brush_matching_strategies.correct_matches_strategy import CorrectMatchesStrategy
+from sotd.match.brush.strategies.correct_matches_strategy import CorrectMatchesStrategy
 
 
 class TestStructurePreservationTDD:

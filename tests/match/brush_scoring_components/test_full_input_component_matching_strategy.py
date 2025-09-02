@@ -3,7 +3,7 @@
 
 from unittest.mock import Mock
 
-from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+from sotd.match.brush.strategies.full_input_component_matching_strategy import (
     FullInputComponentMatchingStrategy,
 )
 from sotd.match.types import MatchResult

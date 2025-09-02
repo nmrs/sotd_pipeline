@@ -1,6 +1,6 @@
 """Test that component-level scoring is properly integrated with strategy-level scoring."""
 
-from sotd.match.brush_scoring_components.component_score_calculator import ComponentScoreCalculator
+from sotd.match.brush.scoring.calculator import ComponentScoreCalculator
 
 
 class TestComponentScoringIntegration:
@@ -11,8 +11,8 @@ class TestComponentScoringIntegration:
         # This test should FAIL if the double weight application bug returns
         # It validates that modifier functions return raw scores, not weighted scores
 
-        from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
-        from sotd.match.brush_scoring_config import BrushScoringConfig
+        from sotd.match.brush.scoring.engine import ScoringEngine
+        from sotd.match.brush.config import BrushScoringConfig
         from unittest.mock import Mock
 
         # Arrange - Create a real strategy result with component scores
