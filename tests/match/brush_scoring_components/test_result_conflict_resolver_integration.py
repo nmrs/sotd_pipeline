@@ -1,6 +1,6 @@
 """Integration tests for ResultConflictResolver in scoring engine."""
 
-from sotd.match.brush_scoring_components.result_conflict_resolver import (
+from sotd.match.brush.scoring.resolver import (
     ConflictType,
     ResultConflictResolver,
 )

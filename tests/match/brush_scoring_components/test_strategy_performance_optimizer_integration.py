@@ -1,6 +1,6 @@
 """Integration tests for StrategyPerformanceOptimizer in scoring engine."""
 
-from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
+from sotd.match.brush.scoring.performance.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
 from sotd.match.brush_matcher import BrushMatcher

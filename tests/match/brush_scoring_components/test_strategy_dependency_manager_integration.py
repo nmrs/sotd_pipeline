@@ -1,6 +1,6 @@
 """Integration tests for StrategyDependencyManager in scoring engine."""
 
-from sotd.match.brush_scoring_components.strategy_dependency_manager import (
+from sotd.match.brush.scoring.dependencies.strategy_dependency_manager import (
     StrategyDependencyManager,
     DependencyType,
     StrategyDependency,

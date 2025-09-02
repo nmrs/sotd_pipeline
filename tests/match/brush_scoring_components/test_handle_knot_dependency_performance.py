@@ -9,7 +9,7 @@ import time
 import pytest
 
 from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.brush_scoring_components.strategy_dependency_manager import (
+from sotd.match.brush.scoring.dependencies.strategy_dependency_manager import (
     StrategyDependency,
     DependencyType,
 )
