@@ -12,7 +12,8 @@ from typing import Optional
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from ...scoring.calculator import ComponentScoreCalculator
+
+# ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
 
 
@@ -257,9 +258,8 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
             strategy="automated_split",
         )
 
-        # Calculate component scores using the utility
-        if result.matched:
-            result.matched = ComponentScoreCalculator.calculate_component_scores(result.matched)
+        # Component scores are now calculated externally by the scoring engine
+        # No need to pre-calculate scores here
 
         return result
 

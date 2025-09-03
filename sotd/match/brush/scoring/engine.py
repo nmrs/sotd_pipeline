@@ -523,11 +523,11 @@ class ScoringEngine:
         self, input_text: str, result: MatchResult, strategy_name: str
     ) -> float:
         """
-        Return raw handle score for component strategies.
+        Calculate and return raw handle score for component strategies.
 
         The scoring engine will apply the weight multiplier to this raw score.
-        This prevents double-weighting where both the modifier function and
-        scoring engine multiply by the weight.
+        This function calculates the component score externally instead of
+        expecting it to be pre-calculated.
 
         Args:
             input_text: Original input string
@@ -541,31 +541,40 @@ class ScoringEngine:
         if strategy_name not in ["automated_split", "full_input_component_matching"]:
             return 0.0
 
-        # Calculate handle matching score using actual matcher score
+        # Get handle data from result
         handle_data = result.matched.get("handle", {}) if result.matched else {}
         if not handle_data:
             return 0.0
 
-        # Use actual score from handle matcher if available, otherwise FAIL FAST
-        actual_score = handle_data.get("score")
-        if actual_score is None:
-            raise ValueError(
-                f"Handle matcher missing score for strategy {strategy_name}. "
-                "Score must be explicitly set to 0 if not applicable."
-            )
+        # Calculate handle score externally using the same logic as ComponentScoreCalculator
+        score = 0.0
 
-        # Return raw score - scoring engine will apply weight multiplier
-        return float(actual_score)
+        # Brand match (5 points)
+        if handle_data.get("brand"):
+            score += 5.0
+
+        # Model match (5 points)
+        if handle_data.get("model"):
+            score += 5.0
+
+        # Priority bonus (2 points for priority 1, 1 point for priority 2)
+        priority = handle_data.get("priority")
+        if priority == 1:
+            score += 2.0
+        elif priority == 2:
+            score += 1.0
+
+        return score
 
     def _modifier_knot_weight(
         self, input_text: str, result: MatchResult, strategy_name: str
     ) -> float:
         """
-        Return raw knot score for component strategies.
+        Calculate and return raw knot score for component strategies.
 
         The scoring engine will apply the weight multiplier to this raw score.
-        This prevents double-weighting where both the modifier function and
-        scoring engine multiply by the weight.
+        This function calculates the component score externally instead of
+        expecting it to be pre-calculated.
 
         Args:
             input_text: Original input string
@@ -579,21 +588,38 @@ class ScoringEngine:
         if strategy_name not in ["automated_split", "full_input_component_matching"]:
             return 0.0
 
-        # Calculate knot matching score using actual matcher score
+        # Get knot data from result
         knot_data = result.matched.get("knot", {}) if result.matched else {}
         if not knot_data:
             return 0.0
 
-        # Use actual score from knot matcher if available, otherwise FAIL FAST
-        actual_score = knot_data.get("score")
-        if actual_score is None:
-            raise ValueError(
-                f"Knot matcher missing score for strategy {strategy_name}. "
-                "Score must be explicitly set to 0 if not applicable."
-            )
+        # Calculate knot score externally using the same logic as ComponentScoreCalculator
+        score = 0.0
 
-        # Return raw score - scoring engine will apply weight multiplier
-        return float(actual_score)
+        # Brand match (5 points)
+        if knot_data.get("brand"):
+            score += 5.0
+
+        # Model match (5 points)
+        if knot_data.get("model"):
+            score += 5.0
+
+        # Fiber match (5 points)
+        if knot_data.get("fiber"):
+            score += 5.0
+
+        # Size match (2 points)
+        if knot_data.get("knot_size_mm"):
+            score += 2.0
+
+        # Priority bonus (2 points for priority 1, 1 point for priority 2)
+        priority = knot_data.get("priority")
+        if priority == 1:
+            score += 2.0
+        elif priority == 2:
+            score += 1.0
+
+        return score
 
     def _modifier_handle_brand_without_knot_brand(
         self, input_text: str, result: MatchResult, strategy_name: str
