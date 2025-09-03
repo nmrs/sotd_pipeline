@@ -7,7 +7,7 @@ scoring modifiers to differentiate between high and medium priority delimiters.
 """
 
 import re
-from typing import Optional, List
+from typing import Optional
 
 from ..base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
@@ -73,7 +73,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
 
         except Exception as e:
             # Fail fast for debugging
-            raise ValueError(f"Automated split matching failed for '{value}': {e}")
+            raise ValueError(f"Automated split matching failed for '{value}': {e}") from e
 
     def match_all(self, value: str) -> list[MatchResult]:
         """
@@ -143,12 +143,11 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 # Check if the delimiter is preceded by "made" or followed by Reddit references
                 delimiter_index = value.find(delimiter)
                 before_delimiter = value[:delimiter_index].strip()
-                after_delimiter = value[delimiter_index + len(delimiter) :].strip()
+                after_delimiter = value[delimiter_index + len(delimiter):].strip()
 
-                # If before delimiter ends with "made" or after delimiter starts with r/, u/, don't split
-                if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
-                    ("r/", "u/")
-                ):
+                # Skip if before delimiter ends with "made" or after delimiter starts with r/, u/
+                if (before_delimiter.lower().endswith("made") or
+                        after_delimiter.lower().startswith(("r/", "u/"))):
                     continue
 
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
@@ -401,7 +400,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
 
         # Generate all possible splits
         seen_splits = set()  # Track seen splits to avoid duplicates
-        for i, delim_info in enumerate(delimiter_positions):
+        for delim_info in delimiter_positions:
             delimiter = delim_info["delimiter"]
             priority = delim_info["priority"]
 
@@ -457,7 +456,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         if delimiter == " in ":
             # Check if preceded by "made" or followed by Reddit references
             before_delimiter = value[:position].strip()
-            after_delimiter = value[position + len(delimiter) :].strip()
+            after_delimiter = value[position + len(delimiter):].strip()
 
             if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
                 ("r/", "u/")
@@ -491,7 +490,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             Tuple of (handle, knot) or (None, None) if split is invalid
         """
         part1 = value[:position].strip()
-        part2 = value[position + len(delimiter) :].strip()
+        part2 = value[position + len(delimiter):].strip()
 
         if part1 and part2:
             # Score both parts to determine which is handle vs knot
