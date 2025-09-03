@@ -44,8 +44,8 @@ class TestExternalScoringConsistency:
         scored_result = scored_results[0]
 
         # Complete brush strategies should only get base score (no modifiers)
-        # Base score for known_brush is 80.0
-        expected_score = 80.0
+        # Base score for known_brush is 90.0 (updated from 80.0)
+        expected_score = 90.0
         assert (
             scored_result.score == expected_score
         ), f"Complete brush strategy should get base score {expected_score}, got {scored_result.score}"

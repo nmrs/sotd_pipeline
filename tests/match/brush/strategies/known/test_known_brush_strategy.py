@@ -109,7 +109,7 @@ def test_known_brush_with_user_fiber_conflict(strategy):
     # Check nested structure (no redundant root fields)
     assert "fiber" not in result.matched, "Should not have root-level fiber"
     assert "knot_size_mm" not in result.matched, "Should not have root-level knot_size_mm"
-    assert result.matched["knot"]["fiber"] == "Badger"  # YAML default, not user override
+    assert result.matched["knot"]["fiber"] == "Synthetic"  # User input override, not YAML default
     assert result.matched["knot"]["knot_size_mm"] == 27
     assert result.matched["handle"]["brand"] == "Simpson"
     assert result.matched["handle"]["model"] is None
