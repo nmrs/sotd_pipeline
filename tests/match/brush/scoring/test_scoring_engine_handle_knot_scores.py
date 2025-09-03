@@ -16,15 +16,14 @@ class TestScoringEngineHandleKnotScores:
         self.config = BrushScoringConfig()
         self.engine = ScoringEngine(self.config)
 
-    def test_handle_weight_modifier_uses_actual_handle_score(self):
-        """Test that handle_weight modifier returns raw handle score."""
-        # Create a mock result with handle data that has an actual score
+    def test_handle_weight_modifier_calculates_handle_score_externally(self):
+        """Test that handle_weight modifier calculates handle score externally."""
+        # Create a mock result with handle data (no pre-calculated score)
         mock_result = Mock(spec=MatchResult)
         mock_result.matched = {
             "handle": {
                 "brand": "Test Brand",
                 "model": "Test Model",
-                "score": 15.0,  # Actual score from handle matcher
                 "priority": 1,
                 "_matched_by": "HandleMatcher",
                 "_pattern_used": "test_pattern",
@@ -34,21 +33,19 @@ class TestScoringEngineHandleKnotScores:
         # Calculate the handle weight modifier
         result = self.engine._modifier_handle_weight("test input", mock_result, "automated_split")
 
-        # Should return raw score (15.0), not weighted score
-        # Scoring engine will apply weight: 15.0 * 0.5 = 7.5
-        expected_score = 15.0
+        # Should calculate score externally: brand(5) + model(5) + priority1(2) = 12
+        expected_score = 12.0
         assert result == expected_score, f"Expected {expected_score}, got {result}"
 
-    def test_knot_weight_modifier_uses_actual_knot_score(self):
-        """Test that knot_weight modifier returns raw knot score."""
-        # Create a mock result with knot data that has an actual score
+    def test_knot_weight_modifier_calculates_knot_score_externally(self):
+        """Test that knot_weight modifier calculates knot score externally."""
+        # Create a mock result with knot data (no pre-calculated score)
         mock_result = Mock(spec=MatchResult)
         mock_result.matched = {
             "knot": {
                 "brand": "Test Brand",
                 "model": "Test Model",
                 "fiber": "Badger",
-                "score": 25.0,  # Actual score from knot matcher
                 "priority": 2,
                 "_matched_by": "KnotMatcher",
                 "_pattern_used": "test_pattern",
@@ -58,9 +55,8 @@ class TestScoringEngineHandleKnotScores:
         # Calculate the knot weight modifier
         result = self.engine._modifier_knot_weight("test input", mock_result, "automated_split")
 
-        # Should return raw score (25.0), not weighted score
-        # Scoring engine will apply weight: 25.0 * 0.5 = 12.5
-        expected_score = 25.0
+        # Should calculate score externally: brand(5) + model(5) + fiber(5) + priority2(1) = 16
+        expected_score = 16.0
         assert result == expected_score, f"Expected {expected_score}, got {result}"
 
     def test_handle_weight_modifier_with_zero_score(self):
@@ -106,43 +102,41 @@ class TestScoringEngineHandleKnotScores:
         expected_score = 0.0
         assert result == expected_score, f"Expected {expected_score}, got {result}"
 
-    def test_handle_weight_modifier_fails_fast_without_score_field(self):
-        """Test that handle_weight modifier fails fast when score field is missing."""
+    def test_handle_weight_modifier_calculates_score_without_score_field(self):
+        """Test that handle_weight modifier calculates score even without pre-calculated score field."""
         mock_result = Mock(spec=MatchResult)
         mock_result.matched = {
             "handle": {
                 "brand": "Test Brand",
                 "model": "Test Model",
-                # No score field - should fail fast
+                # No score field - should calculate externally
                 "priority": 1,
                 "_matched_by": "HandleMatcher",
                 "_pattern_used": "test_pattern",
             }
         }
 
-        # Should raise ValueError when score field is missing
-        with pytest.raises(
-            ValueError, match="Handle matcher missing score for strategy automated_split"
-        ):
-            self.engine._modifier_handle_weight("test input", mock_result, "automated_split")
+        # Should calculate score externally: brand(5) + model(5) + priority1(2) = 12
+        result = self.engine._modifier_handle_weight("test input", mock_result, "automated_split")
+        expected_score = 12.0
+        assert result == expected_score, f"Expected {expected_score}, got {result}"
 
-    def test_knot_weight_modifier_fails_fast_without_score_field(self):
-        """Test that knot_weight modifier fails fast when score field is missing."""
+    def test_knot_weight_modifier_calculates_score_without_score_field(self):
+        """Test that knot_weight modifier calculates score even without pre-calculated score field."""
         mock_result = Mock(spec=MatchResult)
         mock_result.matched = {
             "knot": {
                 "brand": "Test Brand",
                 "model": "Test Model",
                 "fiber": "Badger",
-                # No score field - should fail fast
+                # No score field - should calculate externally
                 "priority": 2,
                 "_matched_by": "KnotMatcher",
                 "_pattern_used": "test_pattern",
             }
         }
 
-        # Should raise ValueError when score field is missing
-        with pytest.raises(
-            ValueError, match="Knot matcher missing score for strategy automated_split"
-        ):
-            self.engine._modifier_knot_weight("test input", mock_result, "automated_split")
+        # Should calculate score externally: brand(5) + model(5) + fiber(5) + priority2(1) = 16
+        result = self.engine._modifier_knot_weight("test input", mock_result, "automated_split")
+        expected_score = 16.0
+        assert result == expected_score, f"Expected {expected_score}, got {result}"
