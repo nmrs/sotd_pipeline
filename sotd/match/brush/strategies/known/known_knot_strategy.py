@@ -2,7 +2,6 @@ from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
-from ..utils.knot_size_utils import parse_knot_size
 from sotd.match.types import MatchResult
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
@@ -80,20 +79,13 @@ class KnownKnotMatchingStrategy:
 
         for pattern_data in self.patterns:
             if pattern_data["compiled"].search(value):
-                # Extract size from input text if available
-                extracted_size = parse_knot_size(value)
-
-                # Use extracted size if found, otherwise fall back to catalog size
-                final_size = (
-                    extracted_size if extracted_size is not None else pattern_data["knot_size_mm"]
-                )
                 return create_strategy_result(
                     original_value=value,
                     matched_data={
                         "brand": pattern_data["brand"],
                         "model": pattern_data["model"],
                         "fiber": pattern_data["fiber"],
-                        "knot_size_mm": final_size,
+                        "knot_size_mm": pattern_data["knot_size_mm"],
                     },
                     pattern=pattern_data["pattern"],
                     strategy_name="KnownKnotMatchingStrategy",
