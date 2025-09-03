@@ -16,12 +16,12 @@ class TestComponentScoringIntegration:
 
         # Arrange - Create a mock config with known values for testing
         mock_config = MagicMock()
-        mock_config.get_all_modifier_names.return_value = ['handle_weight', 'knot_weight']
+        mock_config.get_all_modifier_names.return_value = ["handle_weight", "knot_weight"]
         mock_config.get_strategy_modifier.side_effect = lambda strategy, modifier: {
-            'handle_weight': 0.5,
-            'knot_weight': 0.5
+            "handle_weight": 0.5,
+            "knot_weight": 0.5,
         }.get(modifier, 0.0)
-        
+
         engine = ScoringEngine(mock_config)
 
         # Create a mock result that matches what the automated_split strategy produces

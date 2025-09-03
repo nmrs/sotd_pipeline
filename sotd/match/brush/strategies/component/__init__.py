@@ -8,7 +8,4 @@ This module contains strategies for matching individual brush components.
 from .handle_component_strategy import HandleComponentStrategy
 from .knot_component_strategy import KnotComponentStrategy
 
-__all__ = [
-    'HandleComponentStrategy',
-    'KnotComponentStrategy'
-]
+__all__ = ["HandleComponentStrategy", "KnotComponentStrategy"]

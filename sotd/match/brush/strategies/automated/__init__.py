@@ -10,7 +10,7 @@ from .high_priority_automated_split_strategy import HighPriorityAutomatedSplitSt
 from .medium_priority_automated_split_strategy import MediumPriorityAutomatedSplitStrategy
 
 __all__ = [
-    'AutomatedSplitStrategy',
-    'HighPriorityAutomatedSplitStrategy', 
-    'MediumPriorityAutomatedSplitStrategy'
+    "AutomatedSplitStrategy",
+    "HighPriorityAutomatedSplitStrategy",
+    "MediumPriorityAutomatedSplitStrategy",
 ]

@@ -220,7 +220,9 @@ class TestDualSingleComponentOptimization:
                 strategy="KnotMatcher",
             )
         }
-        can_execute = dependency_manager.can_execute_strategy("KnotComponentStrategy", strategy_results)
+        can_execute = dependency_manager.can_execute_strategy(
+            "KnotComponentStrategy", strategy_results
+        )
         assert can_execute is True, "Single component should execute when KnotMatcher succeeded"
 
         # Test with both HandleMatcher and KnotMatcher success

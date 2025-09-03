@@ -108,12 +108,15 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
         # Check handle-primary delimiters (first part is knot, second part is handle)
         for delimiter in handle_primary_delimiters:
             if delimiter in value:
-                # Check if the delimiter is followed by a Reddit reference
+                # Check if the delimiter is preceded by "made" or followed by Reddit references
                 delimiter_index = value.find(delimiter)
+                before_delimiter = value[:delimiter_index].strip()
                 after_delimiter = value[delimiter_index + len(delimiter) :].strip()
 
-                # If after delimiter starts with r/ or u/, don't split
-                if after_delimiter.startswith(("r/", "u/")):
+                # If before delimiter ends with "made" or after delimiter starts with r/, u/, don't split
+                if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
+                    ("r/", "u/")
+                ):
                     continue
 
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)

@@ -130,9 +130,7 @@ class BrushDiversityAggregator(BaseAggregator):
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add rank rankings."""
         grouped = grouped.sort_values(["unique_brushes", "shaves"], ascending=[False, False])
-        grouped = grouped.reset_index(drop=True).assign(
-            rank=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # OPTIMIZED: Use pandas operations to rename and convert types
         # Rename columns using pandas operations

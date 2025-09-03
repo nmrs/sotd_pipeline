@@ -251,18 +251,22 @@ class TestBrushMatchingAPIIntegration:
             # Check for nested structure fields
             assert "handle" in response.enrichedData, "Handle section should be present in response"
             assert "knot" in response.enrichedData, "Knot section should be present in response"
-            
+
             # Verify that fiber information is in the knot section
             knot_section = response.enrichedData["knot"]
             assert "fiber" in knot_section, "Fiber field should be present in knot section"
-            assert "knot_size_mm" in knot_section, "Knot size field should be present in knot section"
-            
+            assert (
+                "knot_size_mm" in knot_section
+            ), "Knot size field should be present in knot section"
+
             # Verify that handle information is in the handle section
             handle_section = response.enrichedData["handle"]
             assert "brand" in handle_section, "Handle brand should be present in handle section"
-            
+
             # Verify that source text is at the root level
-            assert "source_text" in response.enrichedData, "Source text field should be present in response"
+            assert (
+                "source_text" in response.enrichedData
+            ), "Source text field should be present in response"
 
 
 if __name__ == "__main__":

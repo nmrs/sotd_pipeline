@@ -9,8 +9,4 @@ from .framework import BrushComparisonFramework
 from .system import BrushSystemComparator
 from .splits_loader import BrushSplitsLoader
 
-__all__ = [
-    'BrushComparisonFramework',
-    'BrushSystemComparator',
-    'BrushSplitsLoader'
-]
+__all__ = ["BrushComparisonFramework", "BrushSystemComparator", "BrushSplitsLoader"]

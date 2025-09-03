@@ -194,7 +194,7 @@ class CorrectMatchesChecker:
         self._case_insensitive_lookup = {
             "brush": brush_lookup,
             "handle": handle_lookup,
-            "knot": knot_lookup
+            "knot": knot_lookup,
         }
         return self._case_insensitive_lookup
 

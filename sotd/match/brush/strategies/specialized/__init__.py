@@ -8,7 +8,4 @@ This module contains specialized strategies for specific brush brands.
 from .omega_semogue_strategy import OmegaSemogueBrushMatchingStrategy
 from .zenith_strategy import ZenithBrushMatchingStrategy
 
-__all__ = [
-    'OmegaSemogueBrushMatchingStrategy',
-    'ZenithBrushMatchingStrategy'
-]
+__all__ = ["OmegaSemogueBrushMatchingStrategy", "ZenithBrushMatchingStrategy"]

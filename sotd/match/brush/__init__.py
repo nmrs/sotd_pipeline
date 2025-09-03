@@ -9,4 +9,4 @@ for strategies, scoring, validation, and comparison functionality.
 from .matcher import BrushMatcher
 from sotd.match.config import BrushMatcherConfig
 
-__all__ = ['BrushMatcher', 'BrushMatcherConfig']
+__all__ = ["BrushMatcher", "BrushMatcherConfig"]

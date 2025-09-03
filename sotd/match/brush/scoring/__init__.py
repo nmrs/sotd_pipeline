@@ -12,9 +12,9 @@ from .resolver import ResultConflictResolver
 from .matcher import CorrectMatchesMatcher
 
 __all__ = [
-    'ScoringEngine',
-    'StrategyOrchestrator',
-    'ComponentScoreCalculator',
-    'ResultConflictResolver',
-    'CorrectMatchesMatcher'
+    "ScoringEngine",
+    "StrategyOrchestrator",
+    "ComponentScoreCalculator",
+    "ResultConflictResolver",
+    "CorrectMatchesMatcher",
 ]
