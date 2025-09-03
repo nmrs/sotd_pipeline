@@ -51,75 +51,6 @@ known_brushes:
       fiber: Badger
       patterns:
         - all[ -]?star.*grooming
-  AP Shave Co:
-    APLuxury:
-      fiber: Mixed Badger/Boar
-      knot_size_mm: 24
-      patterns:
-        - apluxury
-        - \bap\b.*luxury
-    Cashmere:
-      fiber: Synthetic
-      patterns:
-        - \ba[\s.]*p\b.*cashmere
-    Silksmoke:
-      fiber: Synthetic
-      patterns:
-        - silksmoke
-    Gelousy:
-      fiber: Badger
-      patterns:
-        - gea?lousy
-    MiG:
-      fiber: Synthetic
-      patterns:
-        - \bmig\b
-    Synbad:
-      fiber: Synthetic
-      patterns:
-        - synbad
-    G5A:
-      fiber: Synthetic
-      patterns:
-        - \ba[\s.]*p\b.*g5a
-        - \bg5a\b
-    G5B:
-      fiber: Synthetic
-      patterns:
-        - \ba[\s.]*p\b.*g5b
-        - \bg5b\b
-    G5C:
-      fiber: Synthetic
-      patterns:
-        - \ba[\s.]*p\b.*g5c
-        - \bg5c\b
-    Pure Bliss:
-      fiber: Synthetic
-      patterns:
-        - pure\s*bliss(?!.*shd)
-        - \bpb\b(?!.*shd)
-    Pure Bliss SHD:
-      fiber: Synthetic
-      patterns:
-        - pure\s*bliss.*shd
-        - \bpb\b.*shd
-    Timberwolf:
-      fiber: Synthetic
-      patterns:
-        - ap.*timberwolf
-    Titanium:
-      fiber: Synthetic
-      patterns:
-        - (?:\ba ?p\b.*)?titanium
-    Tuxedo:
-      fiber: Synthetic
-      patterns:
-        - \ba[\s.]*p\b.*tuxedo
-        - apshave.*tuxedo
-    2Bed:
-      fiber: Synthetic
-      patterns:
-        - \b2\s*bed\b
   Aurora Grooming:
     default: Synthetic
     patterns:
@@ -172,111 +103,6 @@ known_brushes:
       knot_size_mm: 25
       patterns:
         - rob's.*finest.*syn
-    v8:
-      patterns:
-        - chis.*[fh]ou.*v8
-        - \bc(?:\&|and|\+)h\b.*v8
-        - \bch\b.*v8
-    v9:
-      patterns:
-        - chis.*[fh]ou.*v9
-        - \bc(?:\&|and|\+)h\b.*v9
-        - \bch\b.*v9
-    v10:
-      patterns:
-        - chis.*[fh]ou.*v10
-        - \bc(?:\&|and|\+)h\b.*v10
-        - \bch\b.*v10
-    v11:
-      patterns:
-        - chis.*[fh]ou.*v11
-        - \bc(?:\&|and|\+)h\b.*v11
-        - \bch\b.*v11
-    v12:
-      patterns:
-        - chis.*[fh]ou.*v12
-        - \bc(?:\&|and|\+)h\b.*v12
-        - \bch\b.*v12
-    v13:
-      patterns:
-        - chis.*[fh]ou.*v13
-        - \bc(?:\&|and|\+)h\b.*v13
-        - \bch\b.*v13
-    v14:
-      patterns:
-        - chis.*[fh]ou.*v14
-        - \bc(?:\&|and|\+)h\b.*v14
-        - \bch\b.*v14
-    v15:
-      patterns:
-        - chis.*[fh]ou.*v15
-        - \bc(?:\&|and|\+)h\b.*v15
-        - \bch\b.*v15
-    v16:
-      patterns:
-        - chis.*[fh]ou.*v16
-        - \bc(?:\&|and|\+)h\b.*v16
-        - \bch\b.*v16
-    v17:
-      patterns:
-        - chis.*[fh]ou.*v17
-        - \bc(?:\&|and|\+)h\b.*v17
-        - \bch\b.*v17
-    v18:
-      patterns:
-        - chis.*[fh]ou.*v18
-        - \bc(?:\&|and|\+)h\b.*v18
-        - \bch\b.*v18
-    v19:
-      patterns:
-        - chis.*[fh]ou.*v19
-        - \bc(?:\&|and|\+)h\b.*v19
-        - \bch\b.*v19
-    v20:
-      patterns:
-        - chis.*[fh]ou.*v20
-        - \bc(?:\&|and|\+)h\b.*v20
-        - \bch\b.*v20
-    v21:
-      patterns:
-        - chis.*[fh]ou.*v21
-        - \bc(?:\&|and|\+)h\b.*v21
-        - \bch\b.*v21
-    v22:
-      patterns:
-        - chis.*[fh]ou.*v22
-        - \bc(?:\&|and|\+)h\b.*v22
-        - \bch\b.*v22
-    v23:
-      patterns:
-        - chis.*[fh]ou.*v23
-        - \bc(?:\&|and|\+)h\b.*v23
-        - \bch\b.*v23
-    v24:
-      patterns:
-        - chis.*[fh]ou.*v24
-        - \bc(?:\&|and|\+)h\b.*v24
-        - \bch\b.*v24
-    v25:
-      patterns:
-        - chis.*[fh]ou.*v25
-        - \bc(?:\&|and|\+)h\b.*v25
-        - \bch\b.*v25
-    v26:
-      patterns:
-        - chis.*[fh]ou.*v26
-        - \bc(?:\&|and|\+)h\b.*v26
-        - \bch\b.*v26
-    v27:
-      patterns:
-        - chis.*[fh]ou.*v27
-        - \bc(?:\&|and|\+)h\b.*v27
-        - \bch\b.*v27
-    v28:
-      patterns:
-        - chis.*[fh]ou.*v28
-        - \bc(?:\&|and|\+)h\b.*v28
-        - \bch\b.*v28
   Clubman:
     Pinaud:
       fiber: Synthetic
@@ -288,122 +114,6 @@ known_brushes:
       fiber: Badger
       patterns:
         - odin'?s.*beard
-  Declaration Grooming:
-    fiber: Badger
-    handle_matching: true
-    knot_size_mm: 28
-    B1:
-      patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
-        - ^(?!.*dog).*\bb1\b
-    B2:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb2\b
-        - ^(?!.*dog|zen).*\bb2\b
-    B3:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
-        - ^(?!.*dog|zen).*\bb3\b
-    B4:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb4\b
-        - ^(?!.*dog|zen).*\bb4\b
-    B5:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb5\b
-        - ^(?!.*dog|zen).*\bb5\b
-    B6:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
-        - ^(?!.*dog|zen).*\bb6\b
-    B7:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
-        - ^(?!.*dog|zen).*\bb7\b
-    B8:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
-        - ^(?!.*dog|zen).*\bb8\b
-    B9A:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
-        - ^(?!.*dog|zen).*\bb9a\+?\b
-    B9B:
-      patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b
-        - ^(?!.*dog).*\bb9b\+?\b
-    B10:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb10\b
-        - ^(?!.*dog|zen).*\bb10\b
-    B11:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb11\b
-        - ^(?!.*dog|zen).*\bb11\b
-    B12:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb12\b
-        - ^(?!.*dog|zen).*\bb12\b
-    B13:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
-        - ^(?!.*dog|zen).*\bb13\b
-    B14:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
-        - ^(?!.*dog|zen).*\bb14\b
-    B15:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
-        - ^(?!.*dog|zen).*\bb15\b
-    B16:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
-        - ^(?!.*dog|zen).*\bb16\b
-    B17:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb17\b
-        - ^(?!.*dog|zen).*\bb17\b
-    B18:
-      patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
-        - ^(?!.*dog|zen).*\bb18\b
-  Dogwood:
-    Boar:
-      patterns:
-        - dogwood.*boar
-      knot:
-        brand: Maggard
-        fiber: Boar
-        model: Boar
-    SHD Badger:
-      patterns:
-        - dogwood.*\bshd\b
-      knot:
-        brand: Maggard
-        fiber: Badger
-        model: SHD Badger
-    Synthetic:
-      patterns:
-        - dogwood.*syn
-      knot:
-        brand: Maggard
-        fiber: Synthetic
-        model: Synthetic
-    Timberwolf:
-      patterns:
-        - dogwood.*timberwolf
-      knot:
-        brand: Maggard
-        fiber: Synthetic
-        model: Timberwolf
-    Tuxedo:
-      patterns:
-        - dogwood.*tuxedo
-      knot:
-        brand: Maggard
-        fiber: Synthetic
-        model: Tuxedo
   Dreadnought:
     Avenger:
       fiber: Boar
@@ -1273,6 +983,301 @@ known_brushes:
       handle:
         brand: Zenith
 
+known_knot_based_brushes:
+  AP Shave Co:
+    APLuxury:
+      fiber: Mixed Badger/Boar
+      knot_size_mm: 24
+      patterns:
+        - apluxury
+        - \bap\b.*luxury
+    Cashmere:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*cashmere
+    Silksmoke:
+      fiber: Synthetic
+      patterns:
+        - silksmoke
+    Gelousy:
+      fiber: Badger
+      patterns:
+        - gea?lousy
+    MiG:
+      fiber: Synthetic
+      patterns:
+        - \bmig\b
+    Synbad:
+      fiber: Synthetic
+      patterns:
+        - synbad
+    G5A:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5a
+        - \bg5a\b
+    G5B:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5b
+        - \bg5b\b
+    G5C:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*g5c
+        - \bg5c\b
+    Pure Bliss:
+      fiber: Synthetic
+      patterns:
+        - pure\s*bliss(?!.*shd)
+        - \bpb\b(?!.*shd)
+    Pure Bliss SHD:
+      fiber: Synthetic
+      patterns:
+        - pure\s*bliss.*shd
+        - \bpb\b.*shd
+    Timberwolf:
+      fiber: Synthetic
+      patterns:
+        - ap.*timberwolf
+    Titanium:
+      fiber: Synthetic
+      patterns:
+        - (?:\ba ?p\b.*)?titanium
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - \ba[\s.]*p\b.*tuxedo
+        - apshave.*tuxedo
+    2Bed:
+      fiber: Synthetic
+      patterns:
+        - \b2\s*bed\b
+  Chisel & Hound:
+    fiber: Badger
+    knot_size_mm: 26
+    v8:
+      patterns:
+        - chis.*[fh]ou.*v8
+        - \bc(?:\&|and|\+)h\b.*v8
+        - \bch\b.*v8
+    v9:
+      patterns:
+        - chis.*[fh]ou.*v9
+        - \bc(?:\&|and|\+)h\b.*v9
+        - \bch\b.*v9
+    v10:
+      patterns:
+        - chis.*[fh]ou.*v10
+        - \bc(?:\&|and|\+)h\b.*v10
+        - \bch\b.*v10
+    v11:
+      patterns:
+        - chis.*[fh]ou.*v11
+        - \bc(?:\&|and|\+)h\b.*v11
+        - \bch\b.*v11
+    v12:
+      patterns:
+        - chis.*[fh]ou.*v12
+        - \bc(?:\&|and|\+)h\b.*v12
+        - \bch\b.*v12
+    v13:
+      patterns:
+        - chis.*[fh]ou.*v13
+        - \bc(?:\&|and|\+)h\b.*v13
+        - \bch\b.*v13
+    v14:
+      patterns:
+        - chis.*[fh]ou.*v14
+        - \bc(?:\&|and|\+)h\b.*v14
+        - \bch\b.*v14
+    v15:
+      patterns:
+        - chis.*[fh]ou.*v15
+        - \bc(?:\&|and|\+)h\b.*v15
+        - \bch\b.*v15
+    v16:
+      patterns:
+        - chis.*[fh]ou.*v16
+        - \bc(?:\&|and|\+)h\b.*v16
+        - \bch\b.*v16
+    v17:
+      patterns:
+        - chis.*[fh]ou.*v17
+        - \bc(?:\&|and|\+)h\b.*v17
+        - \bch\b.*v17
+    v18:
+      patterns:
+        - chis.*[fh]ou.*v18
+        - \bc(?:\&|and|\+)h\b.*v18
+        - \bch\b.*v18
+    v19:
+      patterns:
+        - chis.*[fh]ou.*v19
+        - \bc(?:\&|and|\+)h\b.*v19
+        - \bch\b.*v19
+    v20:
+      patterns:
+        - chis.*[fh]ou.*v20
+        - \bc(?:\&|and|\+)h\b.*v20
+        - \bch\b.*v20
+    v21:
+      patterns:
+        - chis.*[fh]ou.*v21
+        - \bc(?:\&|and|\+)h\b.*v21
+        - \bch\b.*v21
+    v22:
+      patterns:
+        - chis.*[fh]ou.*v22
+        - \bc(?:\&|and|\+)h\b.*v22
+        - \bch\b.*v22
+    v23:
+      patterns:
+        - chis.*[fh]ou.*v23
+        - \bc(?:\&|and|\+)h\b.*v23
+        - \bch\b.*v23
+    v24:
+      patterns:
+        - chis.*[fh]ou.*v24
+        - \bc(?:\&|and|\+)h\b.*v24
+        - \bch\b.*v24
+    v25:
+      patterns:
+        - chis.*[fh]ou.*v25
+        - \bc(?:\&|and|\+)h\b.*v25
+        - \bch\b.*v25
+    v26:
+      patterns:
+        - chis.*[fh]ou.*v26
+        - \bc(?:\&|and|\+)h\b.*v26
+        - \bch\b.*v26
+    v27:
+      patterns:
+        - chis.*[fh]ou.*v27
+        - \bc(?:\&|and|\+)h\b.*v27
+        - \bch\b.*v27
+    v28:
+      patterns:
+        - chis.*[fh]ou.*v28
+        - \bc(?:\&|and|\+)h\b.*v28
+        - \bch\b.*v28
+  Declaration Grooming:
+    fiber: Badger
+    handle_matching: true
+    knot_size_mm: 28
+    B1:
+      patterns:
+        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
+        - ^(?!.*dog).*\bb1\b
+    B2:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb2\b
+        - ^(?!.*dog|zen).*\bb2\b
+    B3:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+        - ^(?!.*dog|zen).*\bb3\b
+    B4:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb4\b
+        - ^(?!.*dog|zen).*\bb4\b
+    B5:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb5\b
+        - ^(?!.*dog|zen).*\bb5\b
+    B6:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
+        - ^(?!.*dog|zen).*\bb6\b
+    B7:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
+        - ^(?!.*dog|zen).*\bb7\b
+    B8:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
+        - ^(?!.*dog|zen).*\bb8\b
+    B9A:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
+        - ^(?!.*dog|zen).*\bb9a\+?\b
+    B9B:
+      patterns:
+        - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b
+        - ^(?!.*dog).*\bb9b\+?\b
+    B10:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb10\b
+        - ^(?!.*dog|zen).*\bb10\b
+    B11:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb11\b
+        - ^(?!.*dog|zen).*\bb11\b
+    B12:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb12\b
+        - ^(?!.*dog|zen).*\bb12\b
+    B13:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
+        - ^(?!.*dog|zen).*\bb13\b
+    B14:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+        - ^(?!.*dog|zen).*\bb14\b
+    B15:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
+        - ^(?!.*dog|zen).*\bb15\b
+    B16:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+        - ^(?!.*dog|zen).*\bb16\b
+    B17:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb17\b
+        - ^(?!.*dog|zen).*\bb17\b
+    B18:
+      patterns:
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
+        - ^(?!.*dog|zen).*\bb18\b
+  Dogwood:
+    Boar:
+      patterns:
+        - dogwood.*boar
+      knot:
+        brand: Maggard
+        fiber: Boar
+        model: Boar
+    SHD Badger:
+      patterns:
+        - dogwood.*\bshd\b
+      knot:
+        brand: Maggard
+        fiber: Badger
+        model: SHD Badger
+    Synthetic:
+      patterns:
+        - dogwood.*syn
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Synthetic
+    Timberwolf:
+      patterns:
+        - dogwood.*timberwolf
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Timberwolf
+    Tuxedo:
+      patterns:
+        - dogwood.*tuxedo
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Tuxedo
+
 other_brushes:
   AKA Brushworx:
     default: Synthetic
@@ -1390,19 +1395,3 @@ other_brushes:
     default: Boar
     patterns:
       - zenith
-
-known_knot_based_brushes:
-  Chisel & Hound:
-    v23:
-      fiber: Badger
-      knot_size_mm: 26
-      patterns:
-        - chis.*[fh]ou.*v23
-        - \bc(?:\&|and|\+)h\b.*v23
-        - \bch\b.*v23
-  Declaration Grooming:
-    B1:
-      fiber: Badger
-      knot_size_mm: 28
-      patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
