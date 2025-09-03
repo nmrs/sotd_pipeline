@@ -16,6 +16,9 @@ from sotd.match.types import MatchResult
 from .strategies.known.known_brush_strategy import (
     KnownBrushMatchingStrategy,
 )
+from .strategies.known.known_knot_based_brush_strategy import (
+    KnownKnotBasedBrushMatchingStrategy,
+)
 from .strategies.correct_matches_strategy import (
     CorrectMatchesStrategy,
 )
@@ -202,6 +205,7 @@ class BrushMatcher:
         # Validate that all required strategies have base scores
         required_strategies = [
             "known_brush",
+            "known_knot_based_brush",
             "other_brush",
             "omega_semogue_brush",
             "zenith_brush",
@@ -310,6 +314,13 @@ class BrushMatcher:
         strategies.append(
             KnownBrushMatchingStrategy(
                 catalogs["brushes"].get("known_brushes", {}), self.handle_matcher
+            )
+        )
+
+        # Add the known knot-based brush matching strategy for knot-based brushes
+        strategies.append(
+            KnownKnotBasedBrushMatchingStrategy(
+                catalogs["brushes"].get("known_knot_based_brushes", {}), self.handle_matcher
             )
         )
 
