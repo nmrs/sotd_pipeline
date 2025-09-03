@@ -137,6 +137,11 @@ known_knots:
       patterns:
         - black.*eag.*ht2
         - (?:black.*eag)?.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  Boti:
+    N3C:
+      fiber: Synthetic
+      patterns:
+        - boti.*n3c
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
