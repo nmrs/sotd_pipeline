@@ -148,9 +148,11 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
     # Extract handle component details
     if "handle" in matched_data and matched_data["handle"]:
         handle = matched_data["handle"]
+        handle_breakdown = _calculate_handle_score_breakdown(handle)
+        handle_score = sum(handle_breakdown.values())
         component_details["handle"] = {
-            "score": handle.get("score", 0.0),
-            "breakdown": _calculate_handle_score_breakdown(handle),
+            "score": handle_score,
+            "breakdown": handle_breakdown,
             "metadata": {
                 "brand": handle.get("brand"),
                 "model": handle.get("model"),
@@ -167,9 +169,11 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
     # Extract knot component details
     if "knot" in matched_data and matched_data["knot"]:
         knot = matched_data["knot"]
+        knot_breakdown = _calculate_knot_score_breakdown(knot)
+        knot_score = sum(knot_breakdown.values())
         component_details["knot"] = {
-            "score": knot.get("score", 0.0),
-            "breakdown": _calculate_knot_score_breakdown(knot),
+            "score": knot_score,
+            "breakdown": knot_breakdown,
             "metadata": {
                 "brand": knot.get("brand"),
                 "model": knot.get("model"),
