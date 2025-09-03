@@ -2,6 +2,7 @@
 brush_scoring_weights:
   base_strategies:
     known_brush: 80.0
+    known_knot_based_brush: 85.0
     other_brush: 70.0
     omega_semogue_brush: 75.0
     zenith_brush: 75.0
