@@ -36,6 +36,10 @@ brush_scoring_weights:
     full_input_component_matching: 50.0
     known_split: 50.0
 
+    #component strategies
+    handle_matching: 30.0
+    knot_matching: 30.0
+
   # Strategy Modifiers:
   # - Modifiers provide additional points for specific achievements within each strategy
   strategy_modifiers:
@@ -50,7 +54,7 @@ brush_scoring_weights:
     automated_split:
       multiple_brands: 35.0
       handle_weight: 0
-      knot_weight: 0
+      knot_weight: 1
       handle_brand_without_knot_brand: -15.0
       high_confidence: 15.0
 
@@ -73,7 +77,6 @@ brush_scoring_weights:
       fiber_match: -5.0
       size_match: -5.0
       handle_indicators: 20.0
-      knot_indicators: -10.0
       priority_score: 5.0
       brand_match: 5.0
 
