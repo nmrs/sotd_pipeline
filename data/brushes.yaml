@@ -1390,3 +1390,19 @@ other_brushes:
     default: Boar
     patterns:
       - zenith
+
+known_knot_based_brushes:
+  Chisel & Hound:
+    v23:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - chis.*[fh]ou.*v23
+        - \bc(?:\&|and|\+)h\b.*v23
+        - \bch\b.*v23
+  Declaration Grooming:
+    B1:
+      fiber: Badger
+      knot_size_mm: 28
+      patterns:
+        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
