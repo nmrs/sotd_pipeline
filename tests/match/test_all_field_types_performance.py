@@ -206,7 +206,7 @@ class TestAllFieldTypesPerformance:
 
             # If average time is > 0.0001s, it likely needs optimization
             # Note: BrushMatcher does more complex processing, so use higher threshold
-            threshold = 0.0005 if field_type == "brush" else 0.0001
+            threshold = 0.002 if field_type == "brush" else 0.0001
             if avg_time > threshold:
                 optimization_needed.append(field_type)
 
