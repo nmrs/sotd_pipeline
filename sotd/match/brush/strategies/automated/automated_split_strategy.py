@@ -143,11 +143,12 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 # Check if the delimiter is preceded by "made" or followed by Reddit references
                 delimiter_index = value.find(delimiter)
                 before_delimiter = value[:delimiter_index].strip()
-                after_delimiter = value[delimiter_index + len(delimiter):].strip()
+                after_delimiter = value[delimiter_index + len(delimiter) :].strip()
 
                 # Skip if before delimiter ends with "made" or after delimiter starts with r/, u/
-                if (before_delimiter.lower().endswith("made") or
-                        after_delimiter.lower().startswith(("r/", "u/"))):
+                if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
+                    ("r/", "u/")
+                ):
                     continue
 
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
@@ -456,7 +457,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         if delimiter == " in ":
             # Check if preceded by "made" or followed by Reddit references
             before_delimiter = value[:position].strip()
-            after_delimiter = value[position + len(delimiter):].strip()
+            after_delimiter = value[position + len(delimiter) :].strip()
 
             if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
                 ("r/", "u/")
@@ -490,7 +491,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             Tuple of (handle, knot) or (None, None) if split is invalid
         """
         part1 = value[:position].strip()
-        part2 = value[position + len(delimiter):].strip()
+        part2 = value[position + len(delimiter) :].strip()
 
         if part1 and part2:
             # Score both parts to determine which is handle vs knot
