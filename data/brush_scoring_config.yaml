@@ -26,8 +26,8 @@ brush_scoring_weights:
   # - Modifiers provide additional points for specific achievements within each strategy
   base_strategies:
     #complete brushes
-    known_brush: 90.0                    # Bumped up from 80.0 for highest priority
-    known_knot_based_brush: 80.0         # New category for knot-based brushes (e.g., "DB B3 Chisel & Hound v23")
+    known_brush: 90.0 # Bumped up from 80.0 for highest priority
+    known_knot_based_brush: 85.0 # New category for knot-based brushes (e.g., "DB B3 Chisel & Hound v23")
     other_brush: 70.0
     omega_semogue_brush: 75.0
     zenith_brush: 75.0
