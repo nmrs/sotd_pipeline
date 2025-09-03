@@ -42,7 +42,7 @@ class TestBaseBrushMatchingStrategy:
 
         strategy = ConcreteStrategy()
         result = strategy.match("test brush")
-        
+
         assert result is not None
         assert result.original == "test brush"
         assert result.matched is not None
@@ -97,7 +97,7 @@ class TestBaseMultiResultBrushMatchingStrategy:
                 ]
 
         strategy = ConcreteMultiStrategy()
-        
+
         # Test match_all method
         results = strategy.match_all("test brush")
         assert len(results) == 2
@@ -105,7 +105,7 @@ class TestBaseMultiResultBrushMatchingStrategy:
         assert results[0].matched["brand"] == "Test1"
         assert results[1].matched is not None
         assert results[1].matched["brand"] == "Test2"
-        
+
         # Test match method (backward compatibility)
         single_result = strategy.match("test brush")
         assert single_result is not None

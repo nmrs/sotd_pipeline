@@ -1,0 +1,217 @@
+# Multi-Split Automated Strategy Implementation Plan
+
+## 📘 Project Summary
+Implement a multi-split feature for the AutomatedSplitStrategy that returns all possible split combinations instead of just the first successful split. This will allow the scoring engine to evaluate multiple split candidates and select the best one, while the BrushMatchingAnalyzer UI shows all candidates to users for analysis.
+
+## 🧩 Component Steps
+
+### Step 1: Abstract Base Class Design
+Create two distinct base classes to make the single vs multi-result strategy distinction explicit and type-safe.
+
+### Step 2: AutomatedSplitStrategy Refactoring  
+Refactor AutomatedSplitStrategy to inherit from the multi-result base class and implement the new interface.
+
+### Step 3: Orchestrator Integration
+Update the strategy orchestrator to detect and handle multi-result strategies using the base class interface.
+
+### Step 4: Testing Implementation
+Create comprehensive tests for the multi-split functionality with various delimiter combinations.
+
+### Step 5: UI Verification
+Verify that the BrushMatchingAnalyzer correctly displays all split candidates to users.
+
+## 🔁 Implementation Prompts
+
+### Step 1: Abstract Base Class Design
+
+```text
+**Context**: We need to create a clear distinction between strategies that return single results vs multiple results. Currently, the orchestrator uses hardcoded class name checks which is fragile and not extensible.
+
+**Task**: Create two abstract base classes in `sotd/match/brush/strategies/base_brush_matching_strategy.py`:
+
+1. `BaseBrushMatchingStrategy` - for strategies that return a single result
+   - Keep existing `match(value: str) -> Optional[MatchResult]` method
+   - Add clear docstring indicating single result behavior
+
+2. `BaseMultiResultBrushMatchingStrategy` - for strategies that can return multiple results  
+   - Inherit from `BaseBrushMatchingStrategy` or create separate hierarchy
+   - Add `match_all(value: str) -> List[MatchResult]` abstract method
+   - Keep `match()` method for backward compatibility (should return best single result)
+   - Add clear docstrings explaining the interface
+
+**Requirements**:
+- Use proper ABC imports and abstractmethod decorators
+- Include comprehensive docstrings explaining when to use each base class
+- Ensure type hints are correct (List[MatchResult], Optional[MatchResult])
+- Follow existing code style and patterns
+
+**Testing**: Write unit tests for both base classes to ensure they cannot be instantiated and have the correct abstract methods.
+```
+
+### Step 2: AutomatedSplitStrategy Refactoring
+
+```text
+**Context**: The AutomatedSplitStrategy currently inherits from BaseBrushMatchingStrategy and has a custom `match_all_splits()` method. We need to refactor it to use the new multi-result base class interface.
+
+**Task**: Refactor `sotd/match/brush/strategies/automated/automated_split_strategy.py`:
+
+1. Change inheritance from `BaseBrushMatchingStrategy` to `BaseMultiResultBrushMatchingStrategy`
+2. Rename `match_all_splits()` method to `match_all()` to match the interface
+3. Ensure `match()` method still works for backward compatibility (returns first/best result)
+4. Update imports to include the new base class
+5. Add proper type hints for the new method signature
+
+**Requirements**:
+- Maintain all existing functionality in the `match()` method
+- The `match_all()` method should return all possible split combinations
+- Handle edge cases (empty strings, no delimiters, invalid splits)
+- Preserve all existing logic for delimiter detection and splitting
+- Follow existing error handling patterns (fail fast with clear messages)
+
+**Testing**: 
+- Write tests for `match_all()` method with various input scenarios
+- Test backward compatibility of `match()` method
+- Test edge cases: empty strings, strings with no delimiters, strings with multiple delimiters
+- Verify that all returned results have proper MatchResult structure
+```
+
+### Step 3: Orchestrator Integration
+
+```text
+**Context**: The strategy orchestrator currently uses hardcoded class name checks to detect AutomatedSplitStrategy. We need to update it to use the base class interface for better extensibility.
+
+**Task**: Update `sotd/match/brush/scoring/orchestrator.py`:
+
+1. Remove hardcoded class name check for "AutomatedSplitStrategy"
+2. Add isinstance check for `BaseMultiResultBrushMatchingStrategy`
+3. Call `match_all()` method instead of `match_all_splits()`
+4. Ensure all results are properly added to the results list
+5. Maintain backward compatibility for single-result strategies
+
+**Requirements**:
+- Import the new base class properly
+- Use isinstance() check instead of hasattr() and class name comparison
+- Handle the case where multi-result strategies return empty lists
+- Ensure the orchestrator still works with existing single-result strategies
+- Maintain all existing functionality for cached_results parameter passing
+
+**Testing**:
+- Write tests for orchestrator with multi-result strategies
+- Test that single-result strategies still work correctly
+- Test edge cases: empty results, mixed strategy types
+- Verify that all results are properly collected and returned
+```
+
+### Step 4: Testing Implementation
+
+```text
+**Context**: We need comprehensive tests for the multi-split functionality to ensure it works correctly with various delimiter combinations and edge cases.
+
+**Task**: Create comprehensive test suite in `tests/match/brush/strategies/automated/test_automated_split_strategy.py`:
+
+1. Test `match_all()` method with various input scenarios:
+   - Single delimiter: "handle w/ knot"
+   - Multiple delimiters: "handle w/ knot / size"
+   - Mixed priorities: "handle with knot - size"
+   - Complex cases: "brand model w/ fiber / size in handle"
+
+2. Test edge cases:
+   - Empty strings
+   - Strings with no delimiters
+   - Strings with only invalid delimiters (Reddit references, "made" context)
+   - Strings with multiple valid delimiters
+
+3. Test result structure:
+   - Verify all results are MatchResult objects
+   - Check that each result has proper strategy name
+   - Verify handle/knot splitting is correct
+   - Test priority assignment (high/medium)
+
+4. Test backward compatibility:
+   - Verify `match()` method still returns single result
+   - Ensure `match()` returns the same result as first result from `match_all()`
+
+**Requirements**:
+- Use realistic test data that mirrors production scenarios
+- Test with actual brush strings from the domain
+- Verify that all split combinations are generated correctly
+- Test that invalid splits are filtered out properly
+- Follow existing test patterns and naming conventions
+
+**Test Data**: Use strings like:
+- "Declaration B2 w/ Mozingo handle"
+- "Simpson Chubby 2 / 26mm / Super Badger"
+- "Dogwood Handcrafts / Zenith B2 Boar"
+- "Custom handle with synthetic knot"
+```
+
+### Step 5: UI Verification
+
+```text
+**Context**: The BrushMatchingAnalyzer UI should display all split candidates to users for analysis. We need to verify that the UI correctly handles multiple results from the same strategy.
+
+**Task**: Verify and test the BrushMatchingAnalyzer UI integration:
+
+1. Test that multiple AutomatedSplitStrategy results are displayed:
+   - Each split should appear as a separate result card
+   - Results should be properly ranked by score
+   - All results should show the same strategy name ("automated_split")
+
+2. Test UI behavior with multiple splits:
+   - Verify that split information is displayed correctly
+   - Check that handle/knot text is shown for each split
+   - Ensure priority information is displayed
+   - Test that scoring breakdown is shown for each result
+
+3. Test edge cases in UI:
+   - What happens when no splits are found
+   - How are results ordered when scores are equal
+   - Verify that the winner selection works correctly
+
+**Requirements**:
+- Test with actual brush strings that generate multiple splits
+- Verify that the UI doesn't break with multiple results from same strategy
+- Ensure that all split candidates are visible to users
+- Test that the scoring and ranking system works correctly
+- Verify that the "bypass correct_matches" functionality works with multiple splits
+
+**Test Scenarios**:
+- "Declaration B2 w/ Mozingo handle / 26mm" (should show 2 splits)
+- "Custom handle with synthetic knot - 24mm" (should show 2 splits)
+- "Brand model / fiber / size" (should show 2 splits)
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+The plan follows a logical progression from abstract design to concrete implementation:
+
+1. **Step 1** establishes the foundation with proper abstractions
+2. **Step 2** refactors the existing strategy to use the new interface
+3. **Step 3** updates the orchestrator to use the abstraction
+4. **Step 4** ensures comprehensive test coverage
+5. **Step 5** verifies end-to-end functionality
+
+### Design Decisions
+- **Two base classes**: Provides clear distinction and type safety
+- **Backward compatibility**: Maintains existing `match()` method
+- **Extensible design**: Future strategies can easily implement multi-result behavior
+- **Type safety**: Uses isinstance() checks instead of string comparisons
+
+### Risk Mitigation
+- **Incremental approach**: Each step builds on the previous one
+- **Comprehensive testing**: Each step includes specific test requirements
+- **Backward compatibility**: Existing functionality is preserved
+- **Clear interfaces**: Abstract base classes make the contract explicit
+
+### Potential Issues
+- **Performance**: Multiple splits could generate many results - no limits implemented
+- **UI complexity**: Multiple results from same strategy might confuse users
+- **Scoring**: Need to ensure scoring engine handles multiple results correctly
+
+### Success Criteria
+- All existing tests continue to pass
+- New multi-split functionality works correctly
+- UI displays all split candidates clearly
+- Performance remains acceptable
+- Code is maintainable and extensible

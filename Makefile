@@ -1,4 +1,4 @@
-.PHONY: all lint format typecheck test coverage fetch extract match enrich aggregate pipeline performance-test install install-dev preprocess test-all test-python test-react test-e2e test-watch test-coverage test-parallel test-slow test-fast test-unit test-integration test-api start-servers stop-servers server-status restart-servers
+.PHONY: all lint format typecheck test coverage fetch extract match enrich aggregate pipeline performance-test install install-dev preprocess test-all test-python test-react test-e2e test-watch test-coverage test-parallel test-slow test-fast test-unit test-integration test-api start-servers stop-servers server-status restart-servers lint-count lint-e501 lint-f401 lint-f841 lint-auto-fix lint-format lint-systematic
 
 all: preprocess lint format typecheck test
 
@@ -9,6 +9,56 @@ preprocess:
 # Lint with Ruff
 lint:
 	ruff check .
+
+# Enhanced linting targets for systematic error fixing
+lint-count:
+	@echo "=== LINTER ERROR COUNTS ==="
+	@echo "Total errors: $$(ruff check . | wc -l)"
+	@echo "E501 (line length): $$(ruff check . --select E501 | wc -l)"
+	@echo "F401 (unused imports): $$(ruff check . --select F401 | wc -l)"
+	@echo "F841 (unused variables): $$(ruff check . --select F841 | wc -l)"
+	@echo "E401 (multiple imports): $$(ruff check . --select E401 | wc -l)"
+	@echo "I001 (import sorting): $$(ruff check . --select I001 | wc -l)"
+
+lint-e501:
+	@echo "=== E501 LINE LENGTH ERRORS ==="
+	ruff check . --select E501
+
+lint-f401:
+	@echo "=== F401 UNUSED IMPORT ERRORS ==="
+	ruff check . --select F401
+
+lint-f841:
+	@echo "=== F841 UNUSED VARIABLE ERRORS ==="
+	ruff check . --select F841
+
+lint-auto-fix:
+	@echo "=== AUTO-FIXING FIXABLE ERRORS ==="
+	ruff check . --fix
+
+lint-format:
+	@echo "=== FORMATTING FILES (fixes most E501 errors) ==="
+	ruff format .
+	black .
+
+# Systematic linter error fixing workflow
+lint-systematic:
+	@echo "=== SYSTEMATIC LINTER ERROR FIXING WORKFLOW ==="
+	@echo "Step 1: Getting current error counts..."
+	@$(MAKE) lint-count
+	@echo ""
+	@echo "Step 2: Auto-fixing fixable errors..."
+	@$(MAKE) lint-auto-fix
+	@echo ""
+	@echo "Step 3: Formatting files (fixes most E501 errors)..."
+	@$(MAKE) lint-format
+	@echo ""
+	@echo "Step 4: Getting updated error counts..."
+	@$(MAKE) lint-count
+	@echo ""
+	@echo "=== WORKFLOW COMPLETE ==="
+	@echo "Check linter_errors_todo.md for progress tracking"
+	@echo "Run 'make lint-e501', 'make lint-f401', 'make lint-f841' for remaining errors"
 
 # Format code: Black first, then Ruff's auto-formatter (optional)
 format: ruff-format

@@ -52,9 +52,7 @@ class TestAutomatedSplitStrategyMulti:
         return matcher
 
     @pytest.fixture
-    def strategy(
-        self, mock_catalogs, mock_scoring_config, mock_handle_matcher, mock_knot_matcher
-    ):
+    def strategy(self, mock_catalogs, mock_scoring_config, mock_handle_matcher, mock_knot_matcher):
         """Create AutomatedSplitStrategy instance for testing."""
         return AutomatedSplitStrategy(
             mock_catalogs, mock_scoring_config, mock_handle_matcher, mock_knot_matcher
@@ -64,7 +62,7 @@ class TestAutomatedSplitStrategyMulti:
         """Test match_all with a single delimiter."""
         # Test case: "string one / string two"
         results = strategy.match_all("string one / string two")
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.original == "string one / string two"
@@ -77,17 +75,17 @@ class TestAutomatedSplitStrategyMulti:
         """Test match_all with multiple delimiters."""
         # Test case: "string one / string two / string three"
         results = strategy.match_all("string one / string two / string three")
-        
+
         # Should return 2 results:
         # 1. "string one" vs "string two / string three"
         # 2. "string one / string two" vs "string three"
         assert len(results) == 2
-        
+
         # First split: "string one" / "string two / string three"
         result1 = results[0]
         assert result1.matched["handle_text"] == "string one"
         assert result1.matched["knot_text"] == "string two / string three"
-        
+
         # Second split: "string one / string two" / "string three"
         result2 = results[1]
         assert result2.matched["handle_text"] == "string one / string two"
@@ -97,7 +95,7 @@ class TestAutomatedSplitStrategyMulti:
         """Test match_all with high priority delimiter."""
         # Test case: "handle with knot"
         results = strategy.match_all("handle with knot")
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.matched["handle_text"] == "handle"
@@ -108,12 +106,12 @@ class TestAutomatedSplitStrategyMulti:
         """Test match_all with mixed priority delimiters."""
         # Test case: "handle with knot / extra"
         results = strategy.match_all("handle with knot / extra")
-        
+
         # Should return 2 results:
         # 1. High priority: "handle" with "knot / extra"
         # 2. Medium priority: "handle with knot" / "extra"
         assert len(results) == 2
-        
+
         # Find high priority result
         high_priority_result = next(
             (r for r in results if r.matched["split_priority"] == "high"), None
@@ -121,7 +119,7 @@ class TestAutomatedSplitStrategyMulti:
         assert high_priority_result is not None
         assert high_priority_result.matched["handle_text"] == "handle"
         assert high_priority_result.matched["knot_text"] == "knot / extra"
-        
+
         # Find medium priority result
         medium_priority_result = next(
             (r for r in results if r.matched["split_priority"] == "medium"), None
@@ -150,7 +148,7 @@ class TestAutomatedSplitStrategyMulti:
         # Test case: "r/wetshaving" should not be split
         results = strategy.match_all("r/wetshaving")
         assert len(results) == 0
-        
+
         # Test case: "u/username" should not be split
         results = strategy.match_all("u/username")
         assert len(results) == 0
@@ -159,7 +157,7 @@ class TestAutomatedSplitStrategyMulti:
         """Test that 'w/' patterns are not split by '/'."""
         # Test case: "brush w/ knot" should only split on 'w/', not '/'
         results = strategy.match_all("brush w/ knot")
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.matched["handle_text"] == "brush"
@@ -176,10 +174,10 @@ class TestAutomatedSplitStrategyMulti:
         """Test match_all with complex multi-delimiter scenario."""
         # Test case: "handle with knot / extra - more"
         results = strategy.match_all("handle with knot / extra - more")
-        
+
         # Should return multiple results based on different delimiter combinations
         assert len(results) >= 2
-        
+
         # Verify all results have proper structure
         for result in results:
             assert result.original == "handle with knot / extra - more"
@@ -192,7 +190,7 @@ class TestAutomatedSplitStrategyMulti:
         """Test that handle/knot scoring works correctly for '/' delimiter."""
         # Test case where first part scores higher as handle
         results = strategy.match_all("custom handle / badger knot")
-        
+
         assert len(results) >= 1
         result = results[0]
         # Should score "custom handle" as handle (higher score)
@@ -204,7 +202,7 @@ class TestAutomatedSplitStrategyMulti:
         # Test that the single match method still returns the first result
         single_result = strategy.match("handle with knot")
         all_results = strategy.match_all("handle with knot")
-        
+
         assert single_result is not None
         assert len(all_results) >= 1
         # The single result should match the first result from match_all
@@ -215,13 +213,13 @@ class TestAutomatedSplitStrategyMulti:
         """Test that results are ordered by delimiter position."""
         # Test case: "a / b / c" should return splits in left-to-right order
         results = strategy.match_all("a / b / c")
-        
+
         assert len(results) == 2
-        
+
         # First split should be "a" / "b / c"
         assert results[0].matched["handle_text"] == "a"
         assert results[0].matched["knot_text"] == "b / c"
-        
+
         # Second split should be "a / b" / "c"
         assert results[1].matched["handle_text"] == "a / b"
         assert results[1].matched["knot_text"] == "c"
@@ -232,7 +230,7 @@ class TestAutomatedSplitStrategyMulti:
         assert strategy.match_all(None) == []
         assert strategy.match_all(123) == []  # Non-string input
         assert strategy.match_all("") == []
-        
+
         # Test that normal input doesn't raise errors
         results = strategy.match_all("normal input")
         assert isinstance(results, list)

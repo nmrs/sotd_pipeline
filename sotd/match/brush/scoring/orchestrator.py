@@ -42,6 +42,20 @@ class StrategyOrchestrator:
         results = []
 
         for strategy in self.strategies:
+            # Special handling for multi-result strategies
+            from ..strategies.base_brush_matching_strategy import (
+                BaseMultiResultBrushMatchingStrategy,
+            )
+
+            if isinstance(strategy, BaseMultiResultBrushMatchingStrategy):
+                # Get all possible results from multi-result strategies
+                multi_results = strategy.match_all(value)
+                if multi_results:
+                    # Add all results to the main results list
+                    results.extend(multi_results)
+                continue
+
+            # Standard strategy execution for all other strategies
             # Pass cached results to strategies that support them
             if cached_results is not None:
                 # Check if the strategy's match method accepts cached_results parameter

@@ -78,13 +78,13 @@ class TestStrategyOrchestrator:
         """Test running single result strategies."""
         orchestrator = StrategyOrchestrator([mock_single_result_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.matched["brand"] == "TestBrand"
         assert result.matched["model"] == "TestModel"
         assert result.strategy == "mock_single_strategy"
-        
+
         # Verify the strategy was called correctly
         mock_single_result_strategy.match.assert_called_once_with("test brush")
 
@@ -92,21 +92,21 @@ class TestStrategyOrchestrator:
         """Test running multi result strategies."""
         orchestrator = StrategyOrchestrator([mock_multi_result_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 2
-        
+
         # First result
         result1 = results[0]
         assert result1.matched["handle_text"] == "handle1"
         assert result1.matched["knot_text"] == "knot1"
         assert result1.strategy == "mock_multi_strategy"
-        
+
         # Second result
         result2 = results[1]
         assert result2.matched["handle_text"] == "handle2"
         assert result2.matched["knot_text"] == "knot2"
         assert result2.strategy == "mock_multi_strategy"
-        
+
         # Verify the strategy was called correctly
         mock_multi_result_strategy.match_all.assert_called_once_with("test brush")
         # Should not call match() for multi-result strategies
@@ -116,40 +116,42 @@ class TestStrategyOrchestrator:
         self, mock_single_result_strategy, mock_multi_result_strategy
     ):
         """Test running mixed single and multi result strategies."""
-        orchestrator = StrategyOrchestrator([mock_single_result_strategy, mock_multi_result_strategy])
+        orchestrator = StrategyOrchestrator(
+            [mock_single_result_strategy, mock_multi_result_strategy]
+        )
         results = orchestrator.run_all_strategies("test brush")
-        
+
         # Should have 1 result from single strategy + 2 results from multi strategy = 3 total
         assert len(results) == 3
-        
+
         # Verify both strategies were called
         mock_single_result_strategy.match.assert_called_once_with("test brush")
         mock_multi_result_strategy.match_all.assert_called_once_with("test brush")
 
-    def test_run_all_strategies_with_cached_results(
-        self, mock_strategy_with_cached_results
-    ):
+    def test_run_all_strategies_with_cached_results(self, mock_strategy_with_cached_results):
         """Test running strategies with cached results."""
         orchestrator = StrategyOrchestrator([mock_strategy_with_cached_results])
         cached_results = {"some": "cached data"}
         results = orchestrator.run_all_strategies("test brush", cached_results)
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.matched["brand"] == "CachedBrand"
         assert result.matched["model"] == "CachedModel"
-        
+
         # Verify the strategy was called with cached results
-        mock_strategy_with_cached_results.match.assert_called_once_with("test brush", cached_results)
+        mock_strategy_with_cached_results.match.assert_called_once_with(
+            "test brush", cached_results
+        )
 
     def test_run_all_strategies_no_results(self):
         """Test running strategies that return no results."""
         mock_strategy = Mock(spec=BaseBrushMatchingStrategy)
         mock_strategy.match.return_value = None
-        
+
         orchestrator = StrategyOrchestrator([mock_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 0
         mock_strategy.match.assert_called_once_with("test brush")
 
@@ -157,10 +159,10 @@ class TestStrategyOrchestrator:
         """Test running multi result strategies that return no results."""
         mock_strategy = Mock(spec=BaseMultiResultBrushMatchingStrategy)
         mock_strategy.match_all.return_value = []
-        
+
         orchestrator = StrategyOrchestrator([mock_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 0
         mock_strategy.match_all.assert_called_once_with("test brush")
 
@@ -172,10 +174,10 @@ class TestStrategyOrchestrator:
             "match_type": "dict_test",
             "pattern": "dict_pattern",
         }
-        
+
         orchestrator = StrategyOrchestrator([mock_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, MatchResult)
@@ -189,10 +191,10 @@ class TestStrategyOrchestrator:
         """Test that invalid results are skipped."""
         mock_strategy = Mock(spec=BaseBrushMatchingStrategy)
         mock_strategy.match.return_value = "invalid_result"  # Not MatchResult or dict
-        
+
         orchestrator = StrategyOrchestrator([mock_strategy])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 0
         mock_strategy.match.assert_called_once_with("test brush")
 
@@ -204,16 +206,17 @@ class TestStrategyOrchestrator:
 
     def test_get_strategy_names(self):
         """Test getting strategy names."""
+
         class TestStrategy1:
             pass
-        
+
         class TestStrategy2:
             pass
-        
+
         strategy1 = TestStrategy1()
         strategy2 = TestStrategy2()
         orchestrator = StrategyOrchestrator([strategy1, strategy2])
-        
+
         names = orchestrator.get_strategy_names()
         assert len(names) == 2
         assert "TestStrategy1" in names
@@ -221,6 +224,7 @@ class TestStrategyOrchestrator:
 
     def test_strategy_without_cached_results_parameter(self):
         """Test strategy that doesn't accept cached_results parameter."""
+
         # Create a custom strategy class that only accepts 'value' parameter
         class NoCachedStrategy(BaseBrushMatchingStrategy):
             def match(self, value: str):
@@ -232,12 +236,12 @@ class TestStrategyOrchestrator:
                     pattern="no_cached_pattern",
                     strategy="no_cached_strategy",
                 )
-        
+
         strategy = NoCachedStrategy()
         orchestrator = StrategyOrchestrator([strategy])
         cached_results = {"some": "cached data"}
         results = orchestrator.run_all_strategies("test brush", cached_results)
-        
+
         assert len(results) == 1
         result = results[0]
         assert result.matched["brand"] == "NoCachedBrand"
@@ -247,7 +251,7 @@ class TestStrategyOrchestrator:
         """Test orchestrator with empty strategies list."""
         orchestrator = StrategyOrchestrator([])
         results = orchestrator.run_all_strategies("test brush")
-        
+
         assert len(results) == 0
         assert orchestrator.get_strategy_count() == 0
         assert orchestrator.get_strategy_names() == []

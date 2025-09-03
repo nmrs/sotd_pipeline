@@ -1,0 +1,3980 @@
+[
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 337
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 337
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 338
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 338
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 339
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 339
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 344
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 344
+    },
+    "message": "Line too long (131 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 345
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 345
+    },
+    "message": "Line too long (131 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 113,
+      "row": 346
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 346
+    },
+    "message": "Line too long (112 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 347
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 347
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 273,
+      "row": 355
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 355
+    },
+    "message": "Line too long (272 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 228,
+      "row": 356
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 356
+    },
+    "message": "Line too long (227 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 219,
+      "row": 357
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 357
+    },
+    "message": "Line too long (218 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 209,
+      "row": 358
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 358
+    },
+    "message": "Line too long (208 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 235,
+      "row": 359
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 359
+    },
+    "message": "Line too long (234 > 100)",
+    "noqa_row": 365,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 392
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 392
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 392,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 404
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 404
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 404,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 439
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 439
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 439,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 479
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 479
+    },
+    "message": "Line too long (121 > 100)",
+    "noqa_row": 479,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 641
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_catalog_quality.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 641
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 641,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 147
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 147
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 155,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 186
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 186
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 190,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 187
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 187
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 190,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 151,
+      "row": 241
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 241
+    },
+    "message": "Line too long (150 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 242
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 242
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 243
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 243
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 133,
+      "row": 246
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 246
+    },
+    "message": "Line too long (132 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 194,
+      "row": 248
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 248
+    },
+    "message": "Line too long (193 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 251
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 251
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 253
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 253
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 130,
+      "row": 258
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 258
+    },
+    "message": "Line too long (129 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 259
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 259
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 164,
+      "row": 263
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_match_distribution.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 263
+    },
+    "message": "Line too long (163 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 177,
+      "row": 294
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 294
+    },
+    "message": "Line too long (176 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 126,
+      "row": 295
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 295
+    },
+    "message": "Line too long (125 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 203,
+      "row": 296
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 296
+    },
+    "message": "Line too long (202 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 181,
+      "row": 304
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 304
+    },
+    "message": "Line too long (180 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 179,
+      "row": 305
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 305
+    },
+    "message": "Line too long (178 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 163,
+      "row": 306
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 306
+    },
+    "message": "Line too long (162 > 100)",
+    "noqa_row": 312,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 326
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 326
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 326,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 332
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 332
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 332,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 361
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 361
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 362,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 121,
+      "row": 367
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 367
+    },
+    "message": "Line too long (120 > 100)",
+    "noqa_row": 367,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 370
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 370
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 371,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 121,
+      "row": 376
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 376
+    },
+    "message": "Line too long (120 > 100)",
+    "noqa_row": 376,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 379
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 379
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 380,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 389
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 389
+    },
+    "message": "Line too long (133 > 100)",
+    "noqa_row": 389,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 206,
+      "row": 398
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 398
+    },
+    "message": "Line too long (205 > 100)",
+    "noqa_row": 409,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 257,
+      "row": 399
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 399
+    },
+    "message": "Line too long (256 > 100)",
+    "noqa_row": 409,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 215,
+      "row": 400
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 400
+    },
+    "message": "Line too long (214 > 100)",
+    "noqa_row": 409,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 406
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 406
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 409,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 162,
+      "row": 557
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 557
+    },
+    "message": "Line too long (161 > 100)",
+    "noqa_row": 557,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 560
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 560
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 560,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 563
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 563
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 563,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 566
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_quality_indicators.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 566
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 566,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 375
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 375
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 382
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 382
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 384
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 384
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 388
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 388
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 389
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 389
+    },
+    "message": "Line too long (139 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 390
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 390
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 398,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 174,
+      "row": 552
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 552
+    },
+    "message": "Line too long (173 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 177,
+      "row": 553
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 553
+    },
+    "message": "Line too long (176 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 133,
+      "row": 554
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 554
+    },
+    "message": "Line too long (132 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 559
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 559
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 561
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 561
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 602
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 602
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 607,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 655
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/analyze_user_feedback_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 655
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 655,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 224
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 224
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 224,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 308
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 308
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 308,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 142,
+      "row": 372
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 372
+    },
+    "message": "Line too long (141 > 100)",
+    "noqa_row": 372,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 386
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 386
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 386,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 185,
+      "row": 436
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 436
+    },
+    "message": "Line too long (184 > 100)",
+    "noqa_row": 465,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 449
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 449
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 465,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 450
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 450
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 465,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 122,
+      "row": 451
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 451
+    },
+    "message": "Line too long (121 > 100)",
+    "noqa_row": 465,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 452
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 452
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 465,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 505
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 505
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 505,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 515
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 515
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 515,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 525
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 525
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 525,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 535
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 535
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 535,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 543
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 543
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 550,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 214,
+      "row": 556
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 556
+    },
+    "message": "Line too long (213 > 100)",
+    "noqa_row": 556,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 605
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/analysis/define_quality_metrics.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 605
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 715,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 142
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/analyze_blade_count_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 142
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 142,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 425
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/analyze_normalized_patterns.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 425
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 425,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 174
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/extract_blade_count_strings.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 174
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 174,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 150
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/extract_remainders.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 150
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 150,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 141,
+      "row": 162
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/extract_remainders.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 162
+    },
+    "message": "Line too long (140 > 100)",
+    "noqa_row": 162,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 135,
+      "row": 396
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/extract_remainders.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 396
+    },
+    "message": "Line too long (134 > 100)",
+    "noqa_row": 396,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 121
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/validate_brush_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 121
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 121,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 133,
+      "row": 133
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/validate_brush_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 133
+    },
+    "message": "Line too long (132 > 100)",
+    "noqa_row": 133,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 154
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/validate_brush_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 154
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 154,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 202
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/validate_correct_matches_user_intent.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 202
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 202,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 250
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/scripts/validate_correct_matches_user_intent.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 250
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 250,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 79
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/extract/override_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 79
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 79,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 85
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/extract/override_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 85
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 85,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 92
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/extract/override_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 92
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 92,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 101
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/extract/override_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 101
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 101,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 155
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/extract/override_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 155
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 155,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 209
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/learning/brush_chatgpt_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 209
+    },
+    "message": "Line too long (145 > 100)",
+    "noqa_row": 217,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 265
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/learning/brush_chatgpt_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 265
+    },
+    "message": "Line too long (145 > 100)",
+    "noqa_row": 273,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 323
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/learning/brush_chatgpt_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 323
+    },
+    "message": "Line too long (139 > 100)",
+    "noqa_row": 334,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 350
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/learning/brush_chatgpt_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 350
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 350,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 280
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/learning/brush_configuration_updater.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 280
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 280,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 96
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/comparison/splits_loader.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 96
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 96,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 189
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/config.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 189
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 189,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 335
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 335
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 335,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 336
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 336
+    },
+    "message": "Line too long (116 > 100)",
+    "noqa_row": 336,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 337
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 337
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 337,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 113,
+      "row": 357
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 357
+    },
+    "message": "Line too long (112 > 100)",
+    "noqa_row": 357,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 358
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 358
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 358,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 701
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 701
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 705,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 763
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/matcher.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 763
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 763,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 148
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/brush/strategies/automated/automated_split_strategy.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 148
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 148,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 160
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/correct_matches_updater.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 160
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 160,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 189
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/correct_matches_updater.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 189
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 189,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 150,
+      "row": 200
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/run.py",
+    "fix": null,
+    "location": {
+      "column": 100,
+      "row": 200
+    },
+    "message": "Line too long (150 > 100)",
+    "noqa_row": 200,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 154,
+      "row": 234
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/run.py",
+    "fix": null,
+    "location": {
+      "column": 100,
+      "row": 234
+    },
+    "message": "Line too long (154 > 100)",
+    "noqa_row": 234,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 150,
+      "row": 245
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/run.py",
+    "fix": null,
+    "location": {
+      "column": 100,
+      "row": 245
+    },
+    "message": "Line too long (150 > 100)",
+    "noqa_row": 245,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 139,
+      "row": 275
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/run.py",
+    "fix": null,
+    "location": {
+      "column": 100,
+      "row": 275
+    },
+    "message": "Line too long (139 > 100)",
+    "noqa_row": 275,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 205,
+      "row": 315
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/run.py",
+    "fix": null,
+    "location": {
+      "column": 100,
+      "row": 315
+    },
+    "message": "Line too long (205 > 100)",
+    "noqa_row": 315,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 222
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 222
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 222,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 408
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 408
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 408,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 411
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 411
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 411,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 414
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 414
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 414,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 417
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 417
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 417,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 677
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_brush_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 677
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 677,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 15
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_product_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 15
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 16,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 115,
+      "row": 234
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/analyze_product_matching.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 234
+    },
+    "message": "Line too long (114 > 100)",
+    "noqa_row": 234,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 2084
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/mismatch_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 2084
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 2084,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 2090
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/analyzers/mismatch_analyzer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 2090
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 2090,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 100
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/correct_matches_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 100
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 100,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 117
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/correct_matches_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 117
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 117,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 118
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/correct_matches_manager.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 118
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 118,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 113
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 113
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 113,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 161
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 161
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 161,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 175
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 175
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 175,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 241
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 241
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 241,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 111,
+      "row": 296
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 296
+    },
+    "message": "Line too long (110 > 100)",
+    "noqa_row": 296,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 349
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 349
+    },
+    "message": "Line too long (116 > 100)",
+    "noqa_row": 349,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 128,
+      "row": 357
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 357
+    },
+    "message": "Line too long (127 > 100)",
+    "noqa_row": 357,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 377
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 377
+    },
+    "message": "Line too long (133 > 100)",
+    "noqa_row": 377,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 448
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 448
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 448,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 508
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 508
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 508,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 657
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 657
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 657,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 731
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 731
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 731,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 741
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 741
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 741,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 190,
+      "row": 762
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 762
+    },
+    "message": "Line too long (189 > 100)",
+    "noqa_row": 762,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 192,
+      "row": 775
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 775
+    },
+    "message": "Line too long (191 > 100)",
+    "noqa_row": 775,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 784
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 784
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 784,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 124,
+      "row": 791
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 791
+    },
+    "message": "Line too long (123 > 100)",
+    "noqa_row": 791,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 126,
+      "row": 814
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 814
+    },
+    "message": "Line too long (125 > 100)",
+    "noqa_row": 814,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 856
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 856
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 856,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 119,
+      "row": 857
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 857
+    },
+    "message": "Line too long (118 > 100)",
+    "noqa_row": 857,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 869
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 869
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 869,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 149,
+      "row": 870
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 870
+    },
+    "message": "Line too long (148 > 100)",
+    "noqa_row": 870,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 143,
+      "row": 929
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 929
+    },
+    "message": "Line too long (142 > 100)",
+    "noqa_row": 929,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 930
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 930
+    },
+    "message": "Line too long (139 > 100)",
+    "noqa_row": 930,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 1002
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1002
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 1002,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 1066
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1066
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 1066,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 1080
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1080
+    },
+    "message": "Line too long (131 > 100)",
+    "noqa_row": 1080,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 1099
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1099
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 1099,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 1124
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1124
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 1124,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 1129
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1129
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 1129,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 1143
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1143
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 1143,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 1471
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/match/tools/managers/validate_correct_matches.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1471
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 1471,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 443
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/brush_scoring_optimizer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 443
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 443,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 552
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/brush_scoring_optimizer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 552
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 552,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 617
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/brush_scoring_optimizer.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 617
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 617,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 119,
+      "row": 343
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 343
+    },
+    "message": "Line too long (118 > 100)",
+    "noqa_row": 343,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 146,
+      "row": 381
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 381
+    },
+    "message": "Line too long (145 > 100)",
+    "noqa_row": 381,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 405
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 405
+    },
+    "message": "Line too long (135 > 100)",
+    "noqa_row": 405,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 415
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 415
+    },
+    "message": "Line too long (126 > 100)",
+    "noqa_row": 415,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 129,
+      "row": 421
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 421
+    },
+    "message": "Line too long (128 > 100)",
+    "noqa_row": 421,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 142,
+      "row": 458
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 458
+    },
+    "message": "Line too long (141 > 100)",
+    "noqa_row": 458,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 495
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/optimization/test_harness.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 495
+    },
+    "message": "Line too long (131 > 100)",
+    "noqa_row": 495,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 240
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/report/annual_delta_calculator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 240
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 240,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 133,
+      "row": 362
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/report/table_generators/table_generator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 362
+    },
+    "message": "Line too long (132 > 100)",
+    "noqa_row": 362,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 502
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/report/table_generators/table_generator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 502
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 509,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 532
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/report/table_generators/table_generator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 532
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 532,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 635
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/sotd/report/table_generators/table_generator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 635
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 635,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 121,
+      "row": 31
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/test_validation_data.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 31
+    },
+    "message": "Line too long (120 > 100)",
+    "noqa_row": 31,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 140,
+      "row": 38
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/test_validation_data.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 38
+    },
+    "message": "Line too long (139 > 100)",
+    "noqa_row": 38,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 1405
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/analysis.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 1405
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 1405,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 231
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/brush_validation.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 231
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 231,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 281
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/brush_validation.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 281
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 281,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 283
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/brush_validation.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 283
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 283,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 335
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/brush_validation.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 335
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 335,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 33
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 33
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 33,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 76
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 76
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 76,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 79
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 79
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 79,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 94
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 94
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 94,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 116
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 116
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 116,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 117
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 117
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 117,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 125,
+      "row": 118
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 118
+    },
+    "message": "Line too long (124 > 100)",
+    "noqa_row": 118,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 122
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 122
+    },
+    "message": "Line too long (122 > 100)",
+    "noqa_row": 122,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 163
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 163
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 163,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 176
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 176
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 176,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 110,
+      "row": 177
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 177
+    },
+    "message": "Line too long (109 > 100)",
+    "noqa_row": 177,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 132,
+      "row": 178
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 178
+    },
+    "message": "Line too long (131 > 100)",
+    "noqa_row": 178,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 179
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 179
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 179,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 182
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 182
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 182,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 183
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 183
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 183,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 112,
+      "row": 209
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 209
+    },
+    "message": "Line too long (111 > 100)",
+    "noqa_row": 209,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 213
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 213
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 213,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 117,
+      "row": 214
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 214
+    },
+    "message": "Line too long (116 > 100)",
+    "noqa_row": 214,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 104,
+      "row": 237
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 237
+    },
+    "message": "Line too long (103 > 100)",
+    "noqa_row": 237,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 241
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 241
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 241,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 242
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 242
+    },
+    "message": "Line too long (122 > 100)",
+    "noqa_row": 242,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 131,
+      "row": 247
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 247
+    },
+    "message": "Line too long (130 > 100)",
+    "noqa_row": 247,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 248
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 248
+    },
+    "message": "Line too long (126 > 100)",
+    "noqa_row": 248,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 127,
+      "row": 266
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 266
+    },
+    "message": "Line too long (126 > 100)",
+    "noqa_row": 266,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 267
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 267
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 267,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 106,
+      "row": 303
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 303
+    },
+    "message": "Line too long (105 > 100)",
+    "noqa_row": 303,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 316
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 316
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 316,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 114,
+      "row": 317
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 317
+    },
+    "message": "Line too long (113 > 100)",
+    "noqa_row": 317,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 136,
+      "row": 318
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 318
+    },
+    "message": "Line too long (135 > 100)",
+    "noqa_row": 318,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 319
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 319
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 319,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 116,
+      "row": 322
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 322
+    },
+    "message": "Line too long (115 > 100)",
+    "noqa_row": 322,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 120,
+      "row": 323
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 323
+    },
+    "message": "Line too long (119 > 100)",
+    "noqa_row": 323,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 108,
+      "row": 328
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 328
+    },
+    "message": "Line too long (107 > 100)",
+    "noqa_row": 328,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 134,
+      "row": 349
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 349
+    },
+    "message": "Line too long (133 > 100)",
+    "noqa_row": 349,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 380
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 380
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 380,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 102,
+      "row": 385
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 385
+    },
+    "message": "Line too long (101 > 100)",
+    "noqa_row": 385,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 387
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 387
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 387,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 388
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 388
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 388,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 105,
+      "row": 389
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 389
+    },
+    "message": "Line too long (104 > 100)",
+    "noqa_row": 389,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 120,
+      "row": 392
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 392
+    },
+    "message": "Line too long (119 > 100)",
+    "noqa_row": 392,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 107,
+      "row": 393
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 393
+    },
+    "message": "Line too long (106 > 100)",
+    "noqa_row": 393,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 408
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 408
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 408,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 118,
+      "row": 409
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 409
+    },
+    "message": "Line too long (117 > 100)",
+    "noqa_row": 409,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 120,
+      "row": 413
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 413
+    },
+    "message": "Line too long (119 > 100)",
+    "noqa_row": 413,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 103,
+      "row": 414
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 414
+    },
+    "message": "Line too long (102 > 100)",
+    "noqa_row": 414,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 109,
+      "row": 429
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 429
+    },
+    "message": "Line too long (108 > 100)",
+    "noqa_row": 429,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 123,
+      "row": 432
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 432
+    },
+    "message": "Line too long (122 > 100)",
+    "noqa_row": 432,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  },
+  {
+    "cell": null,
+    "code": "E501",
+    "end_location": {
+      "column": 119,
+      "row": 451
+    },
+    "filename": "/Users/jmoore/Documents/Projects/sotd_pipeline/webui/api/validators/catalog_validator.py",
+    "fix": null,
+    "location": {
+      "column": 101,
+      "row": 451
+    },
+    "message": "Line too long (118 > 100)",
+    "noqa_row": 451,
+    "url": "https://docs.astral.sh/ruff/rules/line-too-long"
+  }
+]
