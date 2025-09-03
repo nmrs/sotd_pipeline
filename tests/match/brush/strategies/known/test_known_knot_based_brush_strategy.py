@@ -1,7 +1,9 @@
 # pylint: disable=redefined-outer-name
 import pytest
 
-from sotd.match.brush.strategies.known.known_knot_based_brush_strategy import KnownKnotBasedBrushMatchingStrategy
+from sotd.match.brush.strategies.known.known_knot_based_brush_strategy import (
+    KnownKnotBasedBrushMatchingStrategy,
+)
 
 
 @pytest.fixture
@@ -23,10 +25,16 @@ def strategy():
             "handle_matching": True,
             "knot_size_mm": 28,
             "B1": {
-                "patterns": ["^(?!.*dog).*(declaration|\\bdg\\b).*\\bb1\\b", "^(?!.*dog).*\\bb1\\b"],
+                "patterns": [
+                    "^(?!.*dog).*(declaration|\\bdg\\b).*\\bb1\\b",
+                    "^(?!.*dog).*\\bb1\\b",
+                ],
             },
             "B2": {
-                "patterns": ["^(?!.*dog|zen).*(declaration|\\bdg\\b).*\\bb2\\b", "^(?!.*dog|zen).*\\bb2\\b"],
+                "patterns": [
+                    "^(?!.*dog|zen).*(declaration|\\bdg\\b).*\\bb2\\b",
+                    "^(?!.*dog|zen).*\\bb2\\b",
+                ],
             },
         },
         "Dogwood": {
@@ -159,7 +167,7 @@ def test_known_knot_based_brush_multiple_patterns(strategy):
         "c&h v23",
         "ch v23",
     ]
-    
+
     for test_case in test_cases:
         result = strategy.match(test_case)
         assert result.matched is not None
@@ -174,7 +182,7 @@ def test_known_knot_based_brush_negative_lookahead(strategy):
     result = strategy.match("declaration grooming b1")
     assert result.matched is not None
     assert result.matched["model"] == "B1"
-    
+
     # B1 should NOT match if it contains "dog" (negative lookahead)
     result = strategy.match("dogwood declaration grooming b1")
     assert result.matched is None
