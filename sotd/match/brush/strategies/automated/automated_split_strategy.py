@@ -7,17 +7,17 @@ scoring modifiers to differentiate between high and medium priority delimiters.
 """
 
 import re
-from typing import Optional
+from typing import Optional, List
 
 from ..base_brush_matching_strategy import (
-    BaseBrushMatchingStrategy,
+    BaseMultiResultBrushMatchingStrategy,
 )
 
 # ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
 
 
-class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
+class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
     """Unified strategy for automated split handling with priority-based scoring."""
 
     def __init__(self, catalogs, scoring_config, handle_matcher, knot_matcher):
@@ -74,6 +74,38 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
         except Exception as e:
             # Fail fast for debugging
             raise ValueError(f"Automated split matching failed for '{value}': {e}")
+
+    def match_all(self, value: str) -> list[MatchResult]:
+        """
+        Try to match using all possible automated split combinations.
+
+        Args:
+            value: The brush string to match
+
+        Returns:
+            List of MatchResult objects for all possible splits, empty list if no splits found
+        """
+        if not value or not isinstance(value, str):
+            return []
+
+        try:
+            all_results = []
+
+            # Get all possible splits regardless of priority
+            all_splits = self._get_all_possible_splits(value)
+
+            for split_info in all_splits:
+                result = self._create_split_result(
+                    split_info["handle"], split_info["knot"], value, split_info["priority"]
+                )
+                result.strategy = "automated_split"
+                all_results.append(result)
+
+            return all_results
+
+        except Exception as e:
+            # Fail fast for debugging
+            raise ValueError(f"Automated split matching failed for '{value}': {e}") from e
 
     def _try_high_priority_split(self, value: str) -> Optional[MatchResult]:
         """Try splitting using high priority delimiters."""
@@ -157,7 +189,7 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
                     # Score both parts to determine which is handle vs knot
                     part1_handle_score = self._score_as_handle(part1)
                     part2_handle_score = self._score_as_handle(part2)
-                    if part1_handle_score > part2_handle_score:
+                    if part1_handle_score >= part2_handle_score:
                         return self._create_split_result(part1, part2, value, "medium")
                     else:
                         return self._create_split_result(part2, part1, value, "medium")
@@ -324,3 +356,151 @@ class AutomatedSplitStrategy(BaseBrushMatchingStrategy):
             score -= 6
 
         return score
+
+    def _get_all_possible_splits(self, value: str) -> list[dict]:
+        """
+        Get all possible split combinations for a given string.
+
+        Args:
+            value: The brush string to split
+
+        Returns:
+            List of dictionaries containing handle, knot, and priority information
+        """
+        all_splits = []
+
+        # Find all delimiter positions
+        delimiter_positions = []
+
+        # High priority delimiters
+        for delimiter in self.high_priority_delimiters:
+            pos = 0
+            while True:
+                pos = value.find(delimiter, pos)
+                if pos == -1:
+                    break
+                delimiter_positions.append(
+                    {"delimiter": delimiter, "position": pos, "priority": "high"}
+                )
+                pos += len(delimiter)
+
+        # Medium priority delimiters
+        for delimiter in self.medium_priority_delimiters:
+            pos = 0
+            while True:
+                pos = value.find(delimiter, pos)
+                if pos == -1:
+                    break
+                delimiter_positions.append(
+                    {"delimiter": delimiter, "position": pos, "priority": "medium"}
+                )
+                pos += len(delimiter)
+
+        # Sort by position to process left to right
+        delimiter_positions.sort(key=lambda x: x["position"])
+
+        # Generate all possible splits
+        seen_splits = set()  # Track seen splits to avoid duplicates
+        for i, delim_info in enumerate(delimiter_positions):
+            delimiter = delim_info["delimiter"]
+            priority = delim_info["priority"]
+
+            # Skip if this delimiter is part of a Reddit reference or "made" context
+            if self._should_skip_delimiter(value, delimiter, delim_info["position"]):
+                continue
+
+            # Split based on delimiter type
+            if delimiter in [" w/ ", " w/", " with "]:
+                # Smart splitting for these delimiters
+                handle, knot = self._split_by_delimiter_smart(value, delimiter)
+            elif delimiter == " in ":
+                # Positional splitting for "in" (knot in handle)
+                handle, knot = self._split_by_delimiter_positional(value, delimiter)
+            elif delimiter == "/":
+                # Special handling for "/" to avoid Reddit references
+                handle, knot = self._split_by_slash_delimiter(
+                    value, delimiter, delim_info["position"]
+                )
+            else:
+                # Default smart splitting
+                handle, knot = self._split_by_delimiter_smart(value, delimiter)
+
+            if handle and knot:
+                # Create a unique key for this split to avoid duplicates
+                split_key = (handle, knot)
+                if split_key not in seen_splits:
+                    seen_splits.add(split_key)
+                    all_splits.append(
+                        {
+                            "handle": handle,
+                            "knot": knot,
+                            "priority": priority,
+                            "delimiter": delimiter,
+                            "position": delim_info["position"],
+                        }
+                    )
+
+        return all_splits
+
+    def _should_skip_delimiter(self, value: str, delimiter: str, position: int) -> bool:
+        """
+        Check if a delimiter should be skipped due to context.
+
+        Args:
+            value: The full string
+            delimiter: The delimiter to check
+            position: Position of the delimiter
+
+        Returns:
+            True if delimiter should be skipped, False otherwise
+        """
+        if delimiter == " in ":
+            # Check if preceded by "made" or followed by Reddit references
+            before_delimiter = value[:position].strip()
+            after_delimiter = value[position + len(delimiter) :].strip()
+
+            if before_delimiter.lower().endswith("made") or after_delimiter.lower().startswith(
+                ("r/", "u/")
+            ):
+                return True
+
+        elif delimiter == "/":
+            # Check if it's part of "w/" or Reddit references
+            before_delimiter = value[:position].strip()
+            if (
+                before_delimiter.lower().endswith("w")
+                or before_delimiter.lower().endswith("r")
+                or before_delimiter.lower().endswith("u")
+            ):
+                return True
+
+        return False
+
+    def _split_by_slash_delimiter(
+        self, value: str, delimiter: str, position: int
+    ) -> tuple[Optional[str], Optional[str]]:
+        """
+        Split by "/" delimiter with special handling for Reddit references.
+
+        Args:
+            value: The string to split
+            delimiter: The "/" delimiter
+            position: Position of the delimiter
+
+        Returns:
+            Tuple of (handle, knot) or (None, None) if split is invalid
+        """
+        part1 = value[:position].strip()
+        part2 = value[position + len(delimiter) :].strip()
+
+        if part1 and part2:
+            # Score both parts to determine which is handle vs knot
+            part1_handle_score = self._score_as_handle(part1)
+            part2_handle_score = self._score_as_handle(part2)
+
+            if part1_handle_score >= part2_handle_score:
+                return part1, part2  # handle, knot
+            else:
+                return part2, part1  # handle, knot
+
+        return None, None
