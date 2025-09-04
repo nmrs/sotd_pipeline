@@ -551,8 +551,26 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             ]
             examples = [info.get("file", "") for info in file_infos]
 
-            # Deduplicate and limit to 5 (same as command line tool)
-            unique_comment_ids = list(set(comment_ids))[:5] if comment_ids else []
+            # Sort comment IDs by month (newest first) and limit to 5
+            unique_comment_ids = []
+            if comment_ids:
+                # Get all comment IDs with their source files, prioritizing newer months
+                comment_files = {}
+                for info in file_infos:
+                    comment_id = info.get("comment_id", "")
+                    if comment_id:
+                        # Get source file (month) for sorting
+                        source_file = info.get("file", "")
+                        # Only keep if we haven't seen this comment_id, or if this month is newer
+                        if comment_id not in comment_files or source_file > comment_files[comment_id]:
+                            comment_files[comment_id] = source_file
+
+                # Sort by filename (month) newest first and take first 5
+                sorted_comments = sorted(
+                    comment_files.items(), key=lambda x: x[1], reverse=True
+                )
+                unique_comment_ids = [comment_id for comment_id, _ in sorted_comments[:5]]
+
             unique_examples = list(set(examples))[:5] if examples else []
 
             # Extract unmatched components data for brush field

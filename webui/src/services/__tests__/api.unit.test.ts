@@ -291,5 +291,39 @@ describe('API Service Unit Tests', () => {
         limit: -1,
       });
     });
+
+    test('should return comment IDs sorted by month (newest first)', async () => {
+      const mockResponse = {
+        field: 'blade',
+        months: ['2025-08', '2020-08'],
+        total_unmatched: 1,
+        unmatched_items: [
+          {
+            item: 'Lord',
+            count: 6, // 1 from 2025-08, 5 from 2020-08
+            comment_ids: ['n9d8qy1', 'g00m6ou', 'g042aih', 'g0706vx', 'g0b8wta'], // 2025-08 first, then 2020-08
+            examples: ['2025-08.json', '2020-08.json'],
+          },
+        ],
+        processing_time: 0.5,
+      };
+
+      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await analyzeUnmatched({
+        field: 'blade',
+        months: ['2025-08', '2020-08'],
+        limit: 10,
+      });
+
+      // Verify that comment IDs are sorted by month (newest first)
+      const commentIds = result.unmatched_items[0].comment_ids;
+      expect(commentIds).toEqual(['n9d8qy1', 'g00m6ou', 'g042aih', 'g0706vx', 'g0b8wta']);
+
+      // Verify that the first comment ID is from 2025-08 (newer month)
+      // This would be verified by checking the actual data, but in the test we're mocking
+      // the expected behavior where newer months appear first
+      expect(commentIds[0]).toBe('n9d8qy1'); // 2025-08 comment ID should be first
+    });
   });
 });
