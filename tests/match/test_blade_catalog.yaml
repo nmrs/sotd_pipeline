@@ -1,0 +1,38 @@
+# Test blade catalog with predictable patterns for testing
+# This ensures tests are not coupled to production data changes
+# Structure: Format -> Brand -> Model -> patterns
+
+Hair Shaper:
+  Personna:
+    Hair Shaper:
+      patterns:
+        - person+a.*hair.*shaper
+        - person.*specimen
+
+DE:
+  Personna:
+    Lab Blue:
+      patterns:
+        - person+a.*lab.*blue
+        - personn*a.*blue
+    Generic:
+      patterns:
+        - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*personn*a
+  Feather:
+    DE:
+      patterns:
+        - feather.*de
+        - feather.*double.*edge
+
+Artist Club:
+  Feather:
+    Artist Club:
+      patterns:
+        - feather.*artist.*club
+        - feather.*ac
+
+Injector:
+  Gillette:
+    Injector:
+      patterns:
+        - gillette.*inject
