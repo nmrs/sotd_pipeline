@@ -22,7 +22,7 @@ def extract_blade_use_count(text: str, blade_model: Optional[str] = None) -> Opt
     if not isinstance(text, str) or not text:
         return None
 
-    # Pattern 1: (3x), [x3], {2x}, (x2), (x3), etc.
+    # Pattern 1: (3x), [x3], {2x}, etc.
     pattern1 = r"(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     match = re.search(pattern1, text, re.IGNORECASE)
     if match:
@@ -167,7 +167,7 @@ def extract_blade_count(text: str) -> Optional[int]:
     if not isinstance(text, str) or not text:
         return None
 
-    # Pattern for blade count: [2x], (2x), {2x}, (x2), (x3), etc.
+    # Pattern for blade count: [2x], (2x), {2x}, etc.
     pattern = r"(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
@@ -246,15 +246,12 @@ def extract_blade_use_count_via_normalization(
     # Find the position of the normalized text in the original
     pos = original_lower.find(normalized_lower)
     if pos == -1:
-        # Normalized text not found in original - this can happen when
-        # the order of parenthetical groups changes during normalization
-        # In this case, try to extract count patterns directly from the original text
-        # by looking for patterns that would have been stripped during normalization
-        return extract_blade_use_count(original_stripped, blade_model), original_stripped
+        # Normalized text not found in original - this shouldn't happen in normal operation
+        return None, None
 
     # Extract the remainder text (what comes before and after the normalized text)
     before_normalized = original_stripped[:pos]
-    after_normalized = original_stripped[pos + len(normalized_stripped):]
+    after_normalized = original_stripped[pos + len(normalized_stripped) :]
 
     # Combine the remainder parts
     remainder = (before_normalized + after_normalized).strip()
@@ -265,33 +262,24 @@ def extract_blade_use_count_via_normalization(
 
     # Try to extract a number from the remainder
     # Look for common count patterns in the remainder
+    import re
 
-    # Pattern 0: Number followed by x (2x, 3x, etc.) or x followed by number (x2, x3, etc.)
-    number_x_match = re.search(r"(\d+)x|x(\d+)", remainder, re.IGNORECASE)
+    # Pattern 0: Number followed by x (2x, 3x, etc.)
+    number_x_match = re.search(r"(\d+)x", remainder, re.IGNORECASE)
     if number_x_match:
         try:
-            # Check which group matched
-            if number_x_match.group(1):
-                return int(number_x_match.group(1)), remainder
-            elif number_x_match.group(2):
-                return int(number_x_match.group(2)), remainder
+            return int(number_x_match.group(1)), remainder
         except ValueError:
             pass
 
-    # Pattern 1: Simple parentheses with number (39), (2x), (x2), etc.
-    paren_match = re.search(r"\((\d+(?:x)?|x\d+)\)", remainder)
+    # Pattern 1: Simple parentheses with number (39), (2x), etc.
+    paren_match = re.search(r"\((\d+(?:x)?)\)", remainder)
     if paren_match:
         count_str = paren_match.group(1)
         if count_str.endswith("x"):
             # Handle "2x" format
             try:
                 return int(count_str[:-1]), remainder
-            except ValueError:
-                pass
-        elif count_str.startswith("x"):
-            # Handle "x2" format
-            try:
-                return int(count_str[1:]), remainder
             except ValueError:
                 pass
         else:
@@ -301,18 +289,13 @@ def extract_blade_use_count_via_normalization(
             except ValueError:
                 pass
 
-    # Pattern 2: Square brackets with number [5], [2x], [x2], etc.
-    bracket_match = re.search(r"\[(\d+(?:x)?|x\d+)\]", remainder)
+    # Pattern 2: Square brackets with number [5], [2x], etc.
+    bracket_match = re.search(r"\[(\d+(?:x)?)\]", remainder)
     if bracket_match:
         count_str = bracket_match.group(1)
         if count_str.endswith("x"):
             try:
                 return int(count_str[:-1]), remainder
-            except ValueError:
-                pass
-        elif count_str.startswith("x"):
-            try:
-                return int(count_str[1:]), remainder
             except ValueError:
                 pass
         else:
@@ -321,18 +304,13 @@ def extract_blade_use_count_via_normalization(
             except ValueError:
                 pass
 
-    # Pattern 3: Curly braces with number {3}, {1x}, {x2}, etc.
-    brace_match = re.search(r"\{(\d+(?:x)?|x\d+)\}", remainder)
+    # Pattern 3: Curly braces with number {3}, {1x}, etc.
+    brace_match = re.search(r"\{(\d+(?:x)?)\}", remainder)
     if brace_match:
         count_str = brace_match.group(1)
         if count_str.endswith("x"):
             try:
                 return int(count_str[:-1]), remainder
-            except ValueError:
-                pass
-        elif count_str.startswith("x"):
-            try:
-                return int(count_str[1:]), remainder
             except ValueError:
                 pass
         else:

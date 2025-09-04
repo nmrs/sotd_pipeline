@@ -56,10 +56,6 @@ def strip_blade_count_patterns(value: str) -> str:
     usage_x_pattern = r"(?:[\(\[\{])\s*\d+x\s*[\)\]\}]"
     cleaned = re.sub(usage_x_pattern, "", cleaned)
 
-    # Pattern for usage counts with 'x' prefix: (x2), (x3), [x4], etc.
-    usage_x_prefix_pattern = r"(?:[\(\[\{])\s*x\d+\s*[\)\]\}]"
-    cleaned = re.sub(usage_x_prefix_pattern, "", cleaned)
-
     # Pattern for usage counts with 'use': (1 use), (2 use), etc.
     usage_use_pattern = r"(?:[\(\[\{])\s*\d+\s+use\s*[\)\]\}]"
     cleaned = re.sub(usage_use_pattern, "", cleaned, flags=re.IGNORECASE)
@@ -106,23 +102,19 @@ def strip_blade_count_patterns(value: str) -> str:
     partial_usage_pattern = r"(?:[\(\[\{])\s*<\s*\d+\s+and\s+done\s*[\)\]\}]"
     cleaned = re.sub(partial_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for condition indicators: (new), (old), (vintage), (sample), (test)
-    # These should be stripped during extraction normalization
-    condition_pattern = r"(?:[\(\[\{])\s*(?:new|old|vintage|sample|test)\s*[\)\]\}]"
-    cleaned = re.sub(condition_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for location indicators: (Thailand), (India), (China), etc.
-    # These should be preserved for enrichment phase
-    # location_pattern = (
-    #     r"(?:[\(\[\{])\s*(?:Thailand|India|China|Russia|Turkey|Germany|Japan|USA|UK)\s*[\)\]\}]"
-    # )
-    # cleaned = re.sub(location_pattern, "", cleaned, flags=re.IGNORECASE)
+    # Pattern for location/condition indicators: (Thailand, new), (India), etc.
+    # Only match specific location/condition patterns, not all parenthetical content
+    location_condition_pattern = (
+        r"(?:[\(\[\{])\s*(?:Thailand|India|China|Russia|Turkey|Germany|Japan|USA|UK|"
+        r"new|old|vintage|sample|test)(?:\s*,\s*[^\)\]\}]+)*\s*[\)\]\}]"
+    )
+    cleaned = re.sub(location_condition_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # OPTIMIZED: Pattern for country of origin indicators using combined regex
-    # These should be stripped during extraction normalization
+    # Combine all country origin patterns into a single regex for better performance
     country_origin_pattern = (
         r"(?:[\(\[\{])\s*(?:"
-        r"Indian|Russian|Russia|Made\s+in\s+Germany|Made\s+in\s+China|"
+        r"Indian|Russian|Made\s+in\s+Germany|Made\s+in\s+China|"
         r"russia\s+green|Czechoslovakian|Poland"
         r")\s*[\)\]\}]"
     )
