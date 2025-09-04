@@ -373,6 +373,7 @@ Cartridge/Disposable:
       - '\blidl\b'
       - pace.*6
       - simply (?:max|smooth)
+      - next bic thing
 Charcoal Goods:
   Everyday:
     patterns:
@@ -1383,6 +1384,11 @@ M. Jung:
     format: Straight
     patterns:
       - \bm\.?\s*jung(?:.*\d{1,2}/(8|16))?
+M. Karam:
+  Straight:
+    format: Straight
+    patterns:
+      - m\.?\s*karam(?:.*\d{1,2}/(8|16))?
 Maggard:
   Shavette:
     format: Shavette

@@ -3,6 +3,8 @@ blade:
     Cloud:
       A77:
       - cloud a77 full blade
+      - cloud a77 mini blade
+      - cloud a77 mini blade flipped
     RhinoceRos:
       A77:
       - rhinoceros a77 blade
@@ -21,10 +23,13 @@ blade:
       - feather artist club pro
       - feather artist club professional (se)
       - feather pro
+      - feather pro ac
+      - feather pro injector
       - feather professional
       - feather professional artist club
       Pro Super:
       - feather - super professional
+      - feather professional super
       - feather super
       - feather super (?)
       ProGuard:
@@ -40,8 +45,15 @@ blade:
       - kai protouch mg blade
       Captain Titan Mild:
       - kai captain mild
+      - kai captain titan mild pink (se)
+      Salon Select Premium Guard:
+      - kai salon select premium guard
+    Kamisori:
+      AC:
+      - kamisori artist club
     Schick:
       Proline (AC):
+      - prolines
       - schick p-30 proline artist club (se)
       - schick proline
       - schick proline p-series artist club
@@ -54,6 +66,7 @@ blade:
       Sharpedge (Yellow):
       - 7 o'clock - sharpedge (yellow)
       - 7 o'clock sharpedge
+      - 7 o'clock sharpedge (yellow)
       - 7'o clock - yellow
       - gillette - 7 o'clock - sharpedge
       - gillette - 7 o'clock sharp edge
@@ -80,6 +93,7 @@ blade:
       - gillette 7 o'clock platinum
       - gillette 7o'clock black
       - gillette 7oc super platinum
+      - gillette 7sp
       - gillette seven o'clock super platinum
       - gillette super platinum (black)
       Super Stainless (Green):
@@ -88,6 +102,7 @@ blade:
       - gillette - 7 o'clock
       - gillette 7 o clock green
       - gillette 7 o'clock (g)
+      - gillette 7 o'clock stainless
       - gillette 7 o'clock stainless (green)
       - gillette 7 o'clock stainless green
       - gillette 7 o'clock super stainless (green)
@@ -218,6 +233,7 @@ blade:
       - feather new hi stainless
       - feather new hi-stainless
       - feather stainless
+      - feather stainless steel
     Filoso:
       Platinum:
       - filoso
@@ -245,6 +261,7 @@ blade:
       - gillette minora stainless
       Nacet:
       - gillette - nacet
+      - gillette - nacet (marathon)
       - gillette - nacet stainless
       - gillette nacet
       - gillette- nacet
@@ -288,6 +305,7 @@ blade:
       - gillette wilkinson sword
       - gws
       - gws chinese
+      - gws india
       Winner:
       - gillette winner
       - gillette winner stainless
@@ -348,6 +366,7 @@ blade:
       - ok (stainless steel, manufactured by lord, )
     Parker:
       Premium Platinum:
+      - parker
       - parker stainless steel
     Personna:
       '74':
@@ -361,6 +380,7 @@ blade:
       - gilette lab blue
       - persona
       - persona - lab blue
+      - persona blue
       - personna - comfort coated (lab blue)
       - personna - lab blue
       - personna comfort coat
@@ -387,6 +407,8 @@ blade:
       - person super stainless
       - personna super stainless
       - personne super stainless
+      Super+ Platinum:
+      - personna crystal super
     Polsilver:
       Super Iridium:
       - polsilver si
@@ -412,6 +434,7 @@ blade:
       Swedish Stainless:
       - rockwell stainless steel
       - rockwell swedish stainless steel
+      - rockwell swedish steel
     Schick:
       Stainless (DE):
       - schick de
@@ -511,6 +534,11 @@ blade:
     Van Der Hagen:
       Stainless:
       - van der hagen stainless
+    Vi-John:
+      Chrome Platinum:
+      - vi john chrome platinum
+      Super Stainless:
+      - vijohn
     Viking's Sword:
       Stainless:
       - viking
@@ -526,6 +554,8 @@ blade:
       - walgreens 2 edge
     Wilkinson Sword:
       Classic:
+      - wilkinson
+      - wilkinson india
       - wilkinson sword
       - wilkinson sword (german)
       - wilkinson sword - germany
@@ -552,14 +582,23 @@ blade:
     Feather:
       FHS-1:
       - feather fhs-10
+    OneBlade:
+      HiCarbon SE:
+      - oneblade hicarbon se
   GEM:
+    GEM:
+      Blue Star:
+      - gem blue star
     Personna:
       GEM PTFE:
       - accuforge - gem microcoat
       - accuforge gem microcoat
+      - accutec - gem stainless
+      - accutec pro
       - accutec pro premium
       - accutec pro premium (gem)
       - gem
+      - gem accuforge
       - gem ptfe
       - gem ptfe (?)
       - gem ptfe coated
@@ -568,10 +607,13 @@ blade:
       - gem ss ptfe-coated
       - personna - gem ptfe
       - personna - gem ptfe coated
+      - personna gem
       - personna gem ptfe
       - personna gem ptfe coated
+      - personna gem single edge
       - personna gem stainless ptfe
       - personna ptfe
+      - personna ptfe stainless steel gem
       - ptfe
   Hair Shaper:
     Annie:
@@ -1893,6 +1935,7 @@ razor:
     - aylsworth drakkant+
     - aylsworth kopparkant
     - aylsworth kopperkant
+    - aylsworth kopperkant plus
     - aylsworth razors - drakkant ss
     - aylsworth razors - frank-kant, drakkant ss
     - aylsworth razors drakkant plus
@@ -2781,6 +2824,7 @@ razor:
     - henson razors - ti-22 "++"
     - henson ti22
     - henson ti22 +++
+    - henson ti22 med
     - henson ti22 mild
     - henson ti22+
     - titanium henson +++, polished, tattooed ("dark age mechanicus shaver")
@@ -3053,6 +3097,7 @@ razor:
     Futur:
     - merkur - futur (matte finish)
     - merkur futur
+    - merkur futur (# 3)
     - merkur futur (matte finish)
     Progress:
     - merkur - progress
@@ -3435,6 +3480,7 @@ razor:
     - rockwell 6c (3 plate)
     - rockwell 6c (plate 3)
     - rockwell 6c (r4)
+    - rockwell 6c (r6)
     - rockwell r6
     - stahly live blade vibrating razor handle + rockwell 6c r2 plate
     6S:
@@ -3443,6 +3489,7 @@ razor:
     - rockwell 6s $six
     - rockwell 6s (4 plate)
     - rockwell 6s (plate 3)
+    - rockwell 6s (r4)
     - rockwell 6s, 6
     - 'rockwell 6s: 6'
     - rockwell 6s:6

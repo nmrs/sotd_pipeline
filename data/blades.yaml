@@ -441,6 +441,9 @@ DE:
     Tajam:
       patterns:
         - tajam
+    Unspecified:
+      patterns:
+        - lord
   Manscaped:
     The Plow 2.0:
       patterns:
@@ -486,8 +489,8 @@ DE:
         - (person+a)?.*lab *blue
         - personn*a.*blue
         - personn*a.*c.*c
-        - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*personn*a
-        - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*accuforge
+        - ^(?!.*(atra|gem|pfte|plat|stain|ss|crystal)).*personn*a
+        - ^(?!.*(atra|gem|pfte|plat|stain|ss|crystal)).*accuforge
     Med Prep:
       patterns:
         - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -501,7 +504,11 @@ DE:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?!.*(comfort|lab)).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*(comfort|lab|plat|crystal)).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    Super+ Platinum:
+      patterns:
+        - person.*super.*plat
+        - person.*crystal
     TOMY:
       patterns:
         - \btomy\b
