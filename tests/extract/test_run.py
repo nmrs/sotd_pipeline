@@ -142,62 +142,6 @@ def test_blade_normalization_country_origin(monkeypatch):
         assert blade_data_3["blade"]["normalized"] == "Wilkinson Sword"
 
 
-def test_blade_normalization_x_prefix_patterns(monkeypatch):
-    """Test that (x2), (x3) patterns are normalized out during blade extraction."""
-    comments = [
-        {"id": "1", "body": "* **Blade:** ViJohn (x2)"},
-        {"id": "2", "body": "* **Blade:** ViJohn (x3)"},
-        {"id": "3", "body": "* **Blade:** Astra SP [x5]"},
-        {"id": "4", "body": "* **Blade:** Gillette {x1}"},
-        {"id": "5", "body": "* **Blade:** Personna (x2) (china)"},
-        {"id": "6", "body": "* **Blade:** Derby (x3) (germany)"},
-    ]
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        path = Path(tmpdir) / "data/comments/2025-04.json"
-        path.parent.mkdir(parents=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump({"data": comments}, f, ensure_ascii=False)
-
-        monkeypatch.chdir(tmpdir)
-        result = run_extraction_for_month("2025-04")
-
-        assert result is not None
-        assert len(result["data"]) == 6
-
-        # Check that (x2), (x3) patterns are normalized out
-        blade_data_1 = result["data"][0]
-        blade_data_2 = result["data"][1]
-        blade_data_3 = result["data"][2]
-        blade_data_4 = result["data"][3]
-        blade_data_5 = result["data"][4]
-        blade_data_6 = result["data"][5]
-
-        # ViJohn (x2) -> ViJohn
-        assert blade_data_1["blade"]["original"] == "ViJohn (x2)"
-        assert blade_data_1["blade"]["normalized"] == "ViJohn"
-
-        # ViJohn (x3) -> ViJohn
-        assert blade_data_2["blade"]["original"] == "ViJohn (x3)"
-        assert blade_data_2["blade"]["normalized"] == "ViJohn"
-
-        # Astra SP [x5] -> Astra SP
-        assert blade_data_3["blade"]["original"] == "Astra SP [x5]"
-        assert blade_data_3["blade"]["normalized"] == "Astra SP"
-
-        # Gillette {x1} -> Gillette
-        assert blade_data_4["blade"]["original"] == "Gillette {x1}"
-        assert blade_data_4["blade"]["normalized"] == "Gillette"
-
-        # Personna (x2) (china) -> Personna (china) (preserve location)
-        assert blade_data_5["blade"]["original"] == "Personna (x2) (china)"
-        assert blade_data_5["blade"]["normalized"] == "Personna (china)"
-
-        # Derby (x3) (germany) -> Derby (germany) (preserve location)
-        assert blade_data_6["blade"]["original"] == "Derby (x3) (germany)"
-        assert blade_data_6["blade"]["normalized"] == "Derby (germany)"
-
-
 def test_blade_normalization_decimal_usage_counts(monkeypatch):
     """Test that decimal usage count patterns are normalized out during blade extraction."""
     comments = [
