@@ -56,6 +56,10 @@ def strip_blade_count_patterns(value: str) -> str:
     usage_x_pattern = r"(?:[\(\[\{])\s*\d+x\s*[\)\]\}]"
     cleaned = re.sub(usage_x_pattern, "", cleaned)
 
+    # Pattern for usage counts with 'x' prefix: (x2), (x3), [x4], etc.
+    usage_x_prefix_pattern = r"(?:[\(\[\{])\s*x\d+\s*[\)\]\}]"
+    cleaned = re.sub(usage_x_prefix_pattern, "", cleaned)
+
     # Pattern for usage counts with 'use': (1 use), (2 use), etc.
     usage_use_pattern = r"(?:[\(\[\{])\s*\d+\s+use\s*[\)\]\}]"
     cleaned = re.sub(usage_use_pattern, "", cleaned, flags=re.IGNORECASE)
