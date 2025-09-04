@@ -238,7 +238,9 @@ class TestBrushMatchingAPIIntegration:
                     else "No keys"
                 )
                 print(f"enrichedData keys: {keys}")
-        dict_method = response.model_dump() if hasattr(response, "model_dump") else "No model_dump method"
+        dict_method = (
+            response.model_dump() if hasattr(response, "model_dump") else "No model_dump method"
+        )
         print(f"Response dict: {dict_method}")
 
         # Verify enriched data is present

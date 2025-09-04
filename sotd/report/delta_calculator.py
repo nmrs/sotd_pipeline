@@ -112,7 +112,9 @@ class DeltaCalculator:
 
         # Filter to only include items that have both name and rank values
         # Create a copy to avoid SettingWithCopyWarning
-        valid_current = current_df[(current_df[name_key].notna()) & (current_df["rank"].notna())].copy()
+        valid_current = current_df[
+            (current_df[name_key].notna()) & (current_df["rank"].notna())
+        ].copy()
 
         if valid_current.empty:
             if self.debug:
