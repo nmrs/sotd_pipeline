@@ -172,34 +172,59 @@ def match_record(
             if debug:
                 print("    ⏭️  Blade filtered, skipping")
         else:
-            # Check if razor is cartridge/disposable/straight and clear blade if so
+            # Check razor format and handle blade matching accordingly
             razor_result = result.get("razor")
             if isinstance(razor_result, MatchResult) and razor_result.matched:
                 razor_format = razor_result.matched.get("format", "").upper()
-                irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
 
-                if razor_format in irrelevant_formats:
-                    # Clear blade info since it's irrelevant for these razor formats
+                # Handle Cartridge/Disposable razors - auto-match to Cartridge/Disposable blade
+                if razor_format in ["CARTRIDGE/DISPOSABLE", "CARTRIDGE", "DISPOSABLE"]:
+                    blade_result = blade_matcher.match_cartridge_auto(normalized_text)
+                    # Update the MatchResult to include normalized field
+                    blade_result.normalized = result["blade"]["normalized"]
+                    result["blade"] = blade_result
+                    if debug:
+                        print(
+                            f"    ✅ Blade auto-matched to Cartridge/Disposable for {razor_format}"
+                        )
+
+                # Handle other irrelevant formats - clear blade info
+                elif razor_format in ["SHAVETTE (DISPOSABLE)", "STRAIGHT"]:
                     result["blade"] = MatchResult(
                         original=result["blade"]["original"],
+                        normalized=result["blade"]["normalized"],
                         matched=None,
                         match_type="irrelevant_razor_format",
                         pattern=None,
                     )
                     if debug:
                         print(f"    ⏭️  Blade irrelevant for {razor_format}")
+
+                # For other formats, use context-aware matching to ensure correct format
                 else:
-                    # For other formats, use context-aware matching to ensure correct format
                     blade_result = blade_matcher.match_with_context(
                         normalized_text, razor_format, result["blade"]["original"]
                     )
-                    result["blade"] = blade_result
-                    if debug:
-                        if blade_result and blade_result.matched:
-                            print(
-                                f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
-                            )
-                        else:
+                    # Update the MatchResult to include normalized field
+                    if blade_result is not None:
+                        blade_result.normalized = result["blade"]["normalized"]
+                        result["blade"] = blade_result
+                        if debug:
+                            if blade_result.matched:
+                                print(
+                                    f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
+                                )
+                            else:
+                                print(f"    ❌ Blade no match")
+                    else:
+                        result["blade"] = MatchResult(
+                            original=result["blade"]["original"],
+                            normalized=result["blade"]["normalized"],
+                            matched=None,
+                            match_type=None,
+                            pattern=None,
+                        )
+                        if debug:
                             print(f"    ❌ Blade no match")
             else:
                 # Handle legacy dict format for razor

@@ -1029,3 +1029,30 @@ class BladeMatcher(BaseMatcher):
             match_type=None,
             pattern=None,
         )
+
+    def match_cartridge_auto(self, original_text: str) -> MatchResult:
+        """
+        Automatically match blade to Cartridge/Disposable format.
+
+        This method is called when the razor format is Cartridge/Disposable,
+        and the blade should automatically be matched to the Cartridge/Disposable
+        blade entry regardless of the blade text.
+
+        Args:
+            original_text: The original blade text (preserved for reference)
+
+        Returns:
+            MatchResult with Cartridge/Disposable blade match
+        """
+        cartridge_match = {
+            "brand": "Cartridge/Disposable",
+            "model": "",
+            "format": "Cartridge/Disposable",
+        }
+
+        return create_match_result(
+            original=original_text,
+            matched=cartridge_match,
+            match_type="auto_cartridge",
+            pattern="cartridge_razor_format",
+        )
