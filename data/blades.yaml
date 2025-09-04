@@ -856,6 +856,10 @@ Half DE:
       patterns:
         - misak[ia]
 Injector:
+  Feather:
+    Professional Injector:
+      patterns:
+        - feather.*inject
   Generic:
     Injector:
       patterns:
