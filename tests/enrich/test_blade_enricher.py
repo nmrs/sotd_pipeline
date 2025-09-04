@@ -90,6 +90,67 @@ class TestBladeCountEnricher:
         assert result["use_count"] == 4
         assert result["extraction_remainder"] == "x4"
 
+    def test_enrich_with_x_prefix_parentheses(self, enricher):
+        """Test extraction of use count in (x2), (x3) format."""
+        field_data = {
+            "original": "ViJohn (x2)",
+            "normalized": "ViJohn",
+            "matched": {"brand": "ViJohn", "model": "Super Stainless"},
+        }
+        original_comment = "ViJohn (x2)"
+
+        result = enricher.enrich(field_data, original_comment)
+
+        assert result is not None
+        assert result["use_count"] == 2
+        assert result["extraction_remainder"] == "(x2)"
+
+    def test_enrich_with_x_prefix_brackets(self, enricher):
+        """Test extraction of use count in [x3] format."""
+        field_data = {
+            "original": "ViJohn [x3]",
+            "normalized": "ViJohn",
+            "matched": {"brand": "ViJohn", "model": "Super Stainless"},
+        }
+        original_comment = "ViJohn [x3]"
+
+        result = enricher.enrich(field_data, original_comment)
+
+        assert result is not None
+        assert result["use_count"] == 3
+        assert result["extraction_remainder"] == "[x3]"
+
+    def test_enrich_with_x_prefix_braces(self, enricher):
+        """Test extraction of use count in {x5} format."""
+        field_data = {
+            "original": "Astra SP {x5}",
+            "normalized": "Astra SP",
+            "matched": {"brand": "Astra", "model": "SP"},
+        }
+        original_comment = "Astra SP {x5}"
+
+        result = enricher.enrich(field_data, original_comment)
+
+        assert result is not None
+        assert result["use_count"] == 5
+        assert result["extraction_remainder"] == "{x5}"
+
+    def test_enrich_with_x_prefix_and_location(self, enricher):
+        """Test extraction of use count in (x2) format with location preservation."""
+        field_data = {
+            "original": "Personna (x2) (china)",
+            "normalized": "Personna (china)",
+            "matched": {"brand": "Personna", "model": "Blue"},
+        }
+        original_comment = "Personna (x2) (china)"
+
+        result = enricher.enrich(field_data, original_comment)
+
+        assert result is not None
+        assert result["use_count"] == 2
+        # When normalized text order differs from original, fallback returns original text
+        assert result["extraction_remainder"] == "Personna (x2) (china)"
+
     def test_enrich_with_x_suffix(self, enricher):
         """Test extraction of use count with x suffix."""
         field_data = {
