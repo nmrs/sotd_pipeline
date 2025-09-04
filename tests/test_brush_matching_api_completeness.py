@@ -353,9 +353,9 @@ class TestBrushMatchingAPICompleteness:
         )
 
         # Verify response structure
-        assert "results" in response.dict()
-        assert "winner" in response.dict()
-        assert "enrichedData" in response.dict()
+        assert "results" in response.model_dump()
+        assert "winner" in response.model_dump()
+        assert "enrichedData" in response.model_dump()
 
         # Verify results array
         assert len(response.results) == 1

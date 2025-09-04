@@ -111,7 +111,8 @@ class DeltaCalculator:
             return []
 
         # Filter to only include items that have both name and rank values
-        valid_current = current_df[(current_df[name_key].notna()) & (current_df["rank"].notna())]
+        # Create a copy to avoid SettingWithCopyWarning
+        valid_current = current_df[(current_df[name_key].notna()) & (current_df["rank"].notna())].copy()
 
         if valid_current.empty:
             if self.debug:
@@ -120,7 +121,7 @@ class DeltaCalculator:
 
         # Create vectorized delta calculation using pandas operations
         # Map historical ranks to current data
-        valid_current["historical_rank"] = valid_current[name_key].map(historical_ranks)
+        valid_current.loc[:, "historical_rank"] = valid_current[name_key].map(historical_ranks)
 
         # Calculate deltas using vectorized operations
         def calculate_delta_vectorized(row):
@@ -151,15 +152,16 @@ class DeltaCalculator:
         # Apply vectorized delta calculation
         delta_results = valid_current.apply(calculate_delta_vectorized, axis=1)
 
-        # Add delta fields to DataFrame
-        valid_current["delta"] = delta_results.apply(lambda x: x[0])
-        valid_current["delta_symbol"] = delta_results.apply(lambda x: x[1])
-        valid_current["delta_text"] = delta_results.apply(lambda x: x[2])
+        # Add delta fields to DataFrame using .loc to avoid SettingWithCopyWarning
+        # Set dtype to object from the start to allow None values
+        valid_current.loc[:, "delta"] = delta_results.apply(lambda x: x[0]).astype(object)
+        valid_current.loc[:, "delta_symbol"] = delta_results.apply(lambda x: x[1]).astype(object)
+        valid_current.loc[:, "delta_text"] = delta_results.apply(lambda x: x[2]).astype(object)
 
         # Convert NaN values back to None for consistency
-        valid_current["delta"] = valid_current["delta"].replace({np.nan: None})
-        valid_current["delta_symbol"] = valid_current["delta_symbol"].replace({np.nan: None})
-        valid_current["delta_text"] = valid_current["delta_text"].replace({np.nan: None})
+        valid_current.loc[:, "delta"] = valid_current["delta"].replace({np.nan: None})
+        valid_current.loc[:, "delta_symbol"] = valid_current["delta_symbol"].replace({np.nan: None})
+        valid_current.loc[:, "delta_text"] = valid_current["delta_text"].replace({np.nan: None})
 
         # Convert back to list of dictionaries with string keys for type compatibility
         results = [
