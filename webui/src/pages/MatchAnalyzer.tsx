@@ -14,6 +14,7 @@ import {
   updateFilteredEntries,
   handleApiError,
   saveBrushSplit,
+  loadYamlBrushSplits,
 } from '@/services/api';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
@@ -67,6 +68,9 @@ const MatchAnalyzer: React.FC = () => {
   >(null);
   const [existingBrushSplit, setExistingBrushSplit] = useState<BrushSplit | undefined>(undefined);
   const [savingBrushSplit, setSavingBrushSplit] = useState(false);
+  
+  // YAML brush splits state for lookup
+  const [yamlBrushSplits, setYamlBrushSplits] = useState<BrushSplit[]>([]);
 
   // Keyboard navigation state
   const [activeRowIndex, setActiveRowIndex] = useState<number>(-1);
@@ -93,6 +97,16 @@ const MatchAnalyzer: React.FC = () => {
     }
   }, [selectedField]);
 
+  const loadYamlBrushSplitsData = useCallback(async () => {
+    try {
+      const data = await loadYamlBrushSplits();
+      setYamlBrushSplits(data.brush_splits);
+    } catch (err: unknown) {
+      console.warn('Failed to load YAML brush splits:', err);
+      // Don't show error to user, just log it
+    }
+  }, []);
+
   // Load correct matches when field changes
   useEffect(() => {
     if (selectedField) {
@@ -101,6 +115,11 @@ const MatchAnalyzer: React.FC = () => {
       setSelectedItems(new Set());
     }
   }, [selectedField, loadCorrectMatches]);
+
+  // Load YAML brush splits on component mount
+  useEffect(() => {
+    loadYamlBrushSplitsData();
+  }, [loadYamlBrushSplitsData]);
 
   const handleAnalyze = async () => {
     if (selectedMonths.length === 0) {
@@ -254,12 +273,23 @@ const MatchAnalyzer: React.FC = () => {
       }
     }
 
+    // Look up existing split from YAML data
+    const existingYamlSplit = yamlBrushSplits.find(split => split.original === item.original);
+    
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
-    if (
+    
+    if (existingYamlSplit) {
+      // Use existing YAML split data
+      existingSplit = {
+        ...existingYamlSplit,
+        occurrences: occurrences, // Use current occurrences
+      };
+    } else if (
       (item as any).is_split_brush &&
       ((item as any).handle_component || (item as any).knot_component)
     ) {
+      // Use split data from the item itself
       existingSplit = {
         original: item.original,
         handle: (item as any).handle_component || null,
@@ -309,6 +339,9 @@ const MatchAnalyzer: React.FC = () => {
       if (response.success) {
         // Close modal after successful save
         handleBrushSplitClose();
+
+        // Refresh YAML brush splits data
+        await loadYamlBrushSplitsData();
 
         // Re-run analysis to get updated data
         if (selectedMonths.length > 0) {
