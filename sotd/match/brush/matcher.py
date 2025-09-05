@@ -278,6 +278,7 @@ class BrushMatcher:
         catalogs["handles"] = self._load_yaml_file(self.handles_path)
         catalogs["knots"] = self._load_yaml_file(self.knots_path)
         catalogs["correct_matches"] = self._load_yaml_file(self.correct_matches_path)
+        catalogs["brush_splits"] = self._load_yaml_file(Path("data/brush_splits.yaml"))
 
         # Cache the catalogs for future use
         _catalog_cache = catalogs
@@ -308,7 +309,11 @@ class BrushMatcher:
         # It runs first with highest priority when not bypassed
 
         # Add the known split wrapper strategy for brush splits
-        strategies.append(KnownSplitWrapperStrategy(catalogs.get("brush_splits", {})))
+        strategies.append(
+            KnownSplitWrapperStrategy(
+                catalogs.get("brush_splits", {}), self.handle_matcher, self.knot_matcher
+            )
+        )
 
         # Add the known brush matching strategy for complete brushes
         strategies.append(
