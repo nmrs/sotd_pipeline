@@ -361,11 +361,11 @@ class TestCorrectMatchesManagerNewStructure:
         assert match_key not in correct_matches_manager._correct_matches
 
         # Check that handle component was saved
-        handle_key = "handle:alpha outlaw"
+        handle_key = "handle:alpha outlaw silver stf++"
         assert handle_key in correct_matches_manager._correct_matches
 
         # Check that knot component was saved
-        knot_key = "knot:silver stf++"
+        knot_key = "knot:alpha outlaw silver stf++"
         assert knot_key in correct_matches_manager._correct_matches
 
         # Verify the structure is correct:
@@ -554,16 +554,16 @@ class TestCorrectMatchesManagerNewStructure:
             print(f"🔍 DEBUG: Handle data structure: {handle_data}")
             print(f"🔍 DEBUG: Knot data structure: {knot_data}")
 
-            # Verify that the original match data is preserved
+            # Verify that the original match data is preserved (normalized)
             assert "original" in handle_data, "Handle data missing 'original' field"
-            assert handle_data["original"] == test_case["original"]
+            assert handle_data["original"] == test_case["original"].lower()
             assert "matched" in handle_data, "Handle data missing 'matched' field"
             assert handle_data["matched"]["brand"] == test_case["handle"]["brand"]
             assert handle_data["matched"]["model"] == test_case["handle"]["model"]
 
-            # Verify that the original match data is preserved for knot
+            # Verify that the original match data is preserved for knot (normalized)
             assert "original" in knot_data, "Knot data missing 'original' field"
-            assert knot_data["original"] == test_case["original"]
+            assert knot_data["original"] == test_case["original"].lower()
             assert "matched" in knot_data, "Knot data missing 'matched' field"
             assert knot_data["matched"]["brand"] == test_case["knot"]["brand"]
             assert knot_data["matched"]["model"] == test_case["knot"]["model"]
@@ -580,3 +580,248 @@ class TestCorrectMatchesManagerNewStructure:
             "handle/knot sections"
         )
         print("Each section gets the full original text for proper lookup functionality")
+
+    def test_no_brand_handle_saving(self, correct_matches_manager):
+        """Test saving handle with no brand information using _no_brand section."""
+        # Test data for automated split with no brand
+        match_data = {
+            "original": "Custom Irish Bog Oak Handle 30mm Synthetic Knot",
+            "matched": {
+                "handle": {
+                    "brand": None,
+                    "model": None,
+                    "source_text": "Custom Irish Bog Oak Handle",
+                },
+                "knot": {
+                    "brand": None,
+                    "model": "Synthetic",
+                    "source_text": "30mm Synthetic Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Create match key
+        match_key = correct_matches_manager.create_match_key(
+            "brush", "Custom Irish Bog Oak Handle 30mm Synthetic Knot", match_data["matched"]
+        )
+
+        # Mark as correct
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save to file
+        correct_matches_manager.save_correct_matches()
+
+        # Reload to verify structure
+        correct_matches_manager.load_correct_matches()
+
+        # Check that handle was saved to _no_brand section
+        handle_key = "handle:custom irish bog oak handle 30mm synthetic knot"
+        assert handle_key in correct_matches_manager._correct_matches
+
+        # Verify the structure is correct: handle -> _no_brand -> _no_model -> [original]
+        handle_data = correct_matches_manager._correct_matches_data[handle_key]
+        assert handle_data["matched"]["brand"] == "_no_brand"
+        assert handle_data["matched"]["model"] == "_no_model"
+
+    def test_no_brand_knot_saving(self, correct_matches_manager):
+        """Test saving knot with no brand information using _no_brand section."""
+        # Test data for automated split with no brand
+        match_data = {
+            "original": "Custom Irish Bog Oak Handle 30mm Synthetic Knot",
+            "matched": {
+                "handle": {
+                    "brand": None,
+                    "model": None,
+                    "source_text": "Custom Irish Bog Oak Handle",
+                },
+                "knot": {
+                    "brand": None,
+                    "model": "Synthetic",
+                    "source_text": "30mm Synthetic Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Create match key
+        match_key = correct_matches_manager.create_match_key(
+            "brush", "Custom Irish Bog Oak Handle 30mm Synthetic Knot", match_data["matched"]
+        )
+
+        # Mark as correct
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save to file
+        correct_matches_manager.save_correct_matches()
+
+        # Reload to verify structure
+        correct_matches_manager.load_correct_matches()
+
+        # Check that knot was saved to _no_brand section
+        knot_key = "knot:custom irish bog oak handle 30mm synthetic knot"
+        assert knot_key in correct_matches_manager._correct_matches
+
+        # Verify the structure is correct: knot -> _no_brand -> Synthetic -> [original]
+        knot_data = correct_matches_manager._correct_matches_data[knot_key]
+        assert knot_data["matched"]["brand"] == "_no_brand"
+        assert knot_data["matched"]["model"] == "Synthetic"
+
+    def test_no_brand_yaml_structure(self, correct_matches_manager):
+        """Test that _no_brand entries create correct YAML structure."""
+        # Test data for automated split
+        match_data = {
+            "original": "Custom Irish Bog Oak Handle 30mm Synthetic Knot",
+            "matched": {
+                "handle": {
+                    "brand": None,
+                    "model": None,
+                    "source_text": "Custom Irish Bog Oak Handle",
+                },
+                "knot": {
+                    "brand": None,
+                    "model": "Synthetic",
+                    "source_text": "30mm Synthetic Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Create match key and save
+        match_key = correct_matches_manager.create_match_key(
+            "brush", "Custom Irish Bog Oak Handle 30mm Synthetic Knot", match_data["matched"]
+        )
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+        correct_matches_manager.save_correct_matches()
+
+        # Read the YAML file to verify structure
+        import yaml
+
+        with correct_matches_manager._correct_matches_file.open("r", encoding="utf-8") as f:
+            yaml_data = yaml.safe_load(f)
+
+        # Verify handle section structure
+        assert "handle" in yaml_data
+        assert "_no_brand" in yaml_data["handle"]
+        assert "_no_model" in yaml_data["handle"]["_no_brand"]
+        assert (
+            "custom irish bog oak handle 30mm synthetic knot"
+            in yaml_data["handle"]["_no_brand"]["_no_model"]
+        )
+
+        # Verify knot section structure
+        assert "knot" in yaml_data
+        assert "_no_brand" in yaml_data["knot"]
+        assert "Synthetic" in yaml_data["knot"]["_no_brand"]
+        assert (
+            "custom irish bog oak handle 30mm synthetic knot"
+            in yaml_data["knot"]["_no_brand"]["Synthetic"]
+        )
+
+    def test_mixed_brand_no_brand_entries(self, correct_matches_manager):
+        """Test saving both regular brand entries and _no_brand entries."""
+        # Regular brand entry
+        regular_match_data = {
+            "original": "Declaration Grooming Washington handle",
+            "matched": {
+                "handle": {
+                    "brand": "Declaration Grooming",
+                    "model": "Washington",
+                    "source_text": "Declaration Grooming Washington handle",
+                },
+            },
+            "field": "handle",
+        }
+
+        # No brand entry
+        no_brand_match_data = {
+            "original": "Custom Handle 30mm Synthetic Knot",
+            "matched": {
+                "handle": {
+                    "brand": None,
+                    "model": None,
+                    "source_text": "Custom Handle",
+                },
+                "knot": {
+                    "brand": None,
+                    "model": "Synthetic",
+                    "source_text": "30mm Synthetic Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Save both entries
+        regular_key = correct_matches_manager.create_match_key(
+            "handle", "Declaration Grooming Washington handle", regular_match_data["matched"]
+        )
+        correct_matches_manager.mark_match_as_correct(regular_key, regular_match_data)
+
+        no_brand_key = correct_matches_manager.create_match_key(
+            "brush", "Custom Handle 30mm Synthetic Knot", no_brand_match_data["matched"]
+        )
+        correct_matches_manager.mark_match_as_correct(no_brand_key, no_brand_match_data)
+
+        correct_matches_manager.save_correct_matches()
+
+        # Reload and verify both entries exist
+        correct_matches_manager.load_correct_matches()
+
+        # Regular entry should exist
+        assert regular_key in correct_matches_manager._correct_matches
+
+        # No brand entries should exist
+        handle_key = "handle:custom handle 30mm synthetic knot"
+        knot_key = "knot:custom handle 30mm synthetic knot"
+        assert handle_key in correct_matches_manager._correct_matches
+        assert knot_key in correct_matches_manager._correct_matches
+
+    def test_automated_split_mark_correct_integration(self, correct_matches_manager):
+        """Test that automated splits can be marked as correct and stop appearing as unconfirmed."""
+        # Simulate the exact data structure from the MatchAnalyzer
+        automated_split_data = {
+            "original": "Custom Irish Bog Oak Handle 30mm Synthetic Knot",
+            "matched": {
+                "handle": {
+                    "brand": None,
+                    "model": None,
+                    "source_text": "Custom Irish Bog Oak Handle",
+                },
+                "knot": {
+                    "brand": None,
+                    "model": "Synthetic",
+                    "source_text": "30mm Synthetic Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Create match key (this is what the MatchAnalyzer would do)
+        match_key = correct_matches_manager.create_match_key(
+            "brush",
+            "Custom Irish Bog Oak Handle 30mm Synthetic Knot",
+            automated_split_data["matched"],
+        )
+
+        # Mark as correct (this is what happens when "Mark as Correct" is clicked)
+        correct_matches_manager.mark_match_as_correct(match_key, automated_split_data)
+
+        # Save to file (this is what the API does)
+        correct_matches_manager.save_correct_matches()
+
+        # Reload to verify it was saved correctly
+        correct_matches_manager.load_correct_matches()
+
+        # For split brushes, the original brush key is not marked as correct
+        # Instead, the handle and knot components are marked as correct
+        # This is the correct behavior for automated splits
+
+        # Verify the split components are saved to handle/knot sections
+        handle_key = "handle:custom irish bog oak handle 30mm synthetic knot"
+        knot_key = "knot:custom irish bog oak handle 30mm synthetic knot"
+
+        assert correct_matches_manager.is_match_correct(handle_key)
+        assert correct_matches_manager.is_match_correct(knot_key)
+
+        # This test verifies that the automated split will no longer appear as unconfirmed
+        # because its components are now marked as correct in the correct_matches.yaml file

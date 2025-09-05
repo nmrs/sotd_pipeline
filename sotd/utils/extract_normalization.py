@@ -460,6 +460,12 @@ def normalize_remainder_text_preserve_locations(value: str) -> str:
     # Normalize whitespace inside parentheses/brackets/braces
     cleaned = normalize_parentheses_whitespace(cleaned)
 
+    # Normalize spacing around common delimiters for consistency
+    # Standardize "w/ 30mm" and "w/30mm" to "w/ 30mm" (with space after /)
+    cleaned = re.sub(r"\bw/\s*(\d)", r"w/ \1", cleaned)
+    # Standardize "w/ " to "w/" (remove space before /)
+    cleaned = re.sub(r"\bw\s+/(\d)", r"w/\1", cleaned)
+
     # Final cleanup: normalize whitespace and strip
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 

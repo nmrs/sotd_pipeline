@@ -549,7 +549,7 @@ class MismatchAnalyzer(AnalysisTool):
             # Check if this match was previously marked as correct
             if field == "brush" and is_split_brush:
                 # For split brushes, check if both handle and knot components are confirmed
-                is_confirmed = self._is_split_brush_confirmed(matched)
+                is_confirmed = self._is_split_brush_confirmed(matched, record)
             else:
                 # For regular matches, check the standard way
                 is_confirmed = match_key in self._correct_matches
@@ -2136,7 +2136,7 @@ class MismatchAnalyzer(AnalysisTool):
 
         return handle_component, knot_component
 
-    def _is_split_brush_confirmed(self, matched: Dict) -> bool:
+    def _is_split_brush_confirmed(self, matched: Dict, record: Dict) -> bool:
         """Check if a split brush is confirmed by checking handle and knot sections."""
         if not matched:
             return False
@@ -2148,33 +2148,31 @@ class MismatchAnalyzer(AnalysisTool):
         if not handle or not knot:
             return False
 
-        # Check if handle component is confirmed
+        # For automated splits, we need to get the full original text from the record
+        # The source_text in handle/knot components is just the individual component text
+        # but we save the full original text in correct_matches.yaml
+        field_data = record.get("brush", {})
+        original_text = field_data.get("original", "")
+        if not original_text:
+            return False
+
+        # Check if handle component is confirmed using full original text
         handle_confirmed = False
         if isinstance(handle, dict):
-            handle_source_text = handle.get("source_text")
+            # Use the full original text, normalized for handle matching
+            handle_normalized = (
+                self._normalize_for_matching(original_text, "handle").lower().strip()
+            )
+            handle_key = f"handle:{handle_normalized}"
+            handle_confirmed = handle_key in self._correct_matches
 
-            if handle_source_text:
-                # Use the same key format as CorrectMatchesManager
-                # Normalize and convert to lowercase for consistent key generation
-                handle_normalized = (
-                    self._normalize_for_matching(handle_source_text, "handle").lower().strip()
-                )
-                handle_key = f"handle:{handle_normalized}"
-                handle_confirmed = handle_key in self._correct_matches
-
-        # Check if knot component is confirmed
+        # Check if knot component is confirmed using full original text
         knot_confirmed = False
         if isinstance(knot, dict):
-            knot_source_text = knot.get("source_text")
-
-            if knot_source_text:
-                # Use the same key format as CorrectMatchesManager
-                # Normalize and convert to lowercase for consistent key generation
-                knot_normalized = (
-                    self._normalize_for_matching(knot_source_text, "knot").lower().strip()
-                )
-                knot_key = f"knot:{knot_normalized}"
-                knot_confirmed = knot_key in self._correct_matches
+            # Use the full original text, normalized for knot matching
+            knot_normalized = self._normalize_for_matching(original_text, "knot").lower().strip()
+            knot_key = f"knot:{knot_normalized}"
+            knot_confirmed = knot_key in self._correct_matches
 
         # Both components must be confirmed
         return handle_confirmed and knot_confirmed

@@ -239,13 +239,13 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             "model": None,  # Composite brushes don't have top-level model
             # Handle section (nested)
             "handle": {
-                "brand": handle_maker,
-                "model": handle_model,
+                "brand": self._convert_placeholder_to_none(handle_maker),
+                "model": self._convert_placeholder_to_none(handle_model),
             },
             # Knot section (nested)
             "knot": {
-                "brand": knot_info.get("brand"),
-                "model": knot_info.get("model"),
+                "brand": self._convert_placeholder_to_none(knot_info.get("brand")),
+                "model": self._convert_placeholder_to_none(knot_info.get("model")),
                 "fiber": knot_info.get("fiber"),
                 "knot_size_mm": knot_info.get("knot_size_mm"),
             },
@@ -289,8 +289,8 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             "model": None,  # Handle-only entries don't have top-level model
             # Handle section (nested)
             "handle": {
-                "brand": handle_maker,
-                "model": handle_model,
+                "brand": self._convert_placeholder_to_none(handle_maker),
+                "model": self._convert_placeholder_to_none(handle_model),
             },
             # Knot section (nested but null values)
             "knot": {
@@ -343,8 +343,8 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             },
             # Knot section (nested with actual data)
             "knot": {
-                "brand": knot_brand,
-                "model": knot_model,
+                "brand": self._convert_placeholder_to_none(knot_brand),
+                "model": self._convert_placeholder_to_none(knot_model),
                 "fiber": knot_info.get("fiber"),
                 "knot_size_mm": knot_info.get("knot_size_mm"),
             },
@@ -473,6 +473,20 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
                 return {k: v for k, v in knot_data.items() if k not in ["patterns"]}
 
         return {}
+
+    def _convert_placeholder_to_none(self, value: str | None) -> str | None:
+        """
+        Convert placeholder values back to None for proper data representation.
+
+        Args:
+            value: The value to check for placeholders
+
+        Returns:
+            None if value is a placeholder, otherwise the original value
+        """
+        if value == "_no_brand" or value == "_no_model":
+            return None
+        return value
 
     def _get_complete_knot_data(self, brand: str, model: str) -> dict:
         """

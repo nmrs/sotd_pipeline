@@ -266,11 +266,14 @@ class CorrectMatchesChecker:
                 continue
 
             for knot_model, knot_data in knot_models.items():
-                if not isinstance(knot_data, dict):
-                    continue
-
-                strings = knot_data.get("strings", [])
-                if not isinstance(strings, list):
+                # Handle both old structure (dict with strings key) and new structure (direct list)
+                if isinstance(knot_data, dict):
+                    strings = knot_data.get("strings", [])
+                    if not isinstance(strings, list):
+                        continue
+                elif isinstance(knot_data, list):
+                    strings = knot_data
+                else:
                     continue
 
                 # Check if normalized value matches any of the correct strings
@@ -278,13 +281,24 @@ class CorrectMatchesChecker:
                 for correct_string in strings:
                     normalized_correct = self._normalize_with_cache(correct_string)
                     if normalized_correct.lower() == normalized_value.lower():
-                        return {
-                            "brand": knot_maker,
-                            "model": knot_model,
-                            "fiber": knot_data.get("fiber"),
-                            "knot_size_mm": knot_data.get("knot_size_mm"),
-                            "strings": strings,
-                        }
+                        # Handle both old and new data structures
+                        if isinstance(knot_data, dict):
+                            return {
+                                "brand": knot_maker,
+                                "model": knot_model,
+                                "fiber": knot_data.get("fiber"),
+                                "knot_size_mm": knot_data.get("knot_size_mm"),
+                                "strings": strings,
+                            }
+                        else:
+                            # New structure - minimal knot info
+                            return {
+                                "brand": knot_maker,
+                                "model": knot_model,
+                                "fiber": None,
+                                "knot_size_mm": None,
+                                "strings": strings,
+                            }
 
         return None
 

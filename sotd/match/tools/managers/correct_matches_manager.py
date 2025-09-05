@@ -262,54 +262,64 @@ class CorrectMatchesManager:
                         if handle:
                             handle_brand = handle.get("brand")
                             handle_model = handle.get("model")
-                            if handle_brand and handle_model:
-                                # Save to handle section
-                                if "handle" not in field_data:
-                                    field_data["handle"] = {}
-                                if handle_brand not in field_data["handle"]:
-                                    field_data["handle"][handle_brand] = {}
-                                if handle_model not in field_data["handle"][handle_brand]:
-                                    field_data["handle"][handle_brand][handle_model] = []
 
-                                # Use source_text if available, otherwise use original
-                                handle_text = handle.get("source_text", original)
-                                normalized_handle_text = self._normalize_for_matching(
-                                    handle_text, "handle"
-                                )
-                                if (
+                            # Use _no_brand and _no_model when brand/model is missing
+                            if not handle_brand:
+                                handle_brand = "_no_brand"
+                            if not handle_model:
+                                handle_model = "_no_model"
+
+                            # Save to handle section
+                            if "handle" not in field_data:
+                                field_data["handle"] = {}
+                            if handle_brand not in field_data["handle"]:
+                                field_data["handle"][handle_brand] = {}
+                            if handle_model not in field_data["handle"][handle_brand]:
+                                field_data["handle"][handle_brand][handle_model] = []
+
+                            # Always use the full normalized text for handle/knot sections
+                            # This ensures the CorrectMatchesStrategy can find the full string
+                            normalized_handle_text = self._normalize_for_matching(
+                                original, "handle"
+                            )
+                            if (
+                                normalized_handle_text
+                                and normalized_handle_text
+                                not in field_data["handle"][handle_brand][handle_model]
+                            ):
+                                field_data["handle"][handle_brand][handle_model].append(
                                     normalized_handle_text
-                                    and normalized_handle_text
-                                    not in field_data["handle"][handle_brand][handle_model]
-                                ):
-                                    field_data["handle"][handle_brand][handle_model].append(
-                                        normalized_handle_text
-                                    )
+                                )
 
                         if knot:
                             knot_brand = knot.get("brand")
                             knot_model = knot.get("model")
-                            if knot_brand and knot_model:
-                                # Save to knot section
-                                if "knot" not in field_data:
-                                    field_data["knot"] = {}
-                                if knot_brand not in field_data["knot"]:
-                                    field_data["knot"][knot_brand] = {}
-                                if knot_model not in field_data["knot"][knot_brand]:
-                                    field_data["knot"][knot_brand][knot_model] = []
 
-                                # Use source_text if available, otherwise use original
-                                knot_text = knot.get("source_text", original)
-                                normalized_knot_text = self._normalize_for_matching(
-                                    knot_text, "knot"
-                                )
-                                if (
+                            # Use _no_brand when brand is missing, keep actual model or use _no_model
+                            if not knot_brand:
+                                knot_brand = "_no_brand"
+                            if not knot_model:
+                                knot_model = "_no_model"
+
+                            # Save to knot section
+                            if "knot" not in field_data:
+                                field_data["knot"] = {}
+                            if knot_brand not in field_data["knot"]:
+                                field_data["knot"][knot_brand] = {}
+                            if knot_model not in field_data["knot"][knot_brand]:
+                                field_data["knot"][knot_brand][knot_model] = []
+
+                            # Always use the full normalized text for handle/knot sections
+                            # This ensures the CorrectMatchesStrategy can find the full string
+                            normalized_knot_text = self._normalize_for_matching(original, "knot")
+                            if (
+                                normalized_knot_text
+                                and normalized_knot_text
+                                not in field_data["knot"][knot_brand][knot_model]
+                            ):
+                                field_data["knot"][knot_brand][knot_model].append(
                                     normalized_knot_text
-                                    and normalized_knot_text
-                                    not in field_data["knot"][knot_brand][knot_model]
-                                ):
-                                    field_data["knot"][knot_brand][knot_model].append(
-                                        normalized_knot_text
-                                    )
+                                )
                     else:
                         # This is a regular brush - save to brush section
                         brand = match_data["matched"]["brand"]
@@ -458,7 +468,31 @@ class CorrectMatchesManager:
 
     def is_match_correct(self, match_key: str) -> bool:
         """Check if a match is marked as correct."""
-        return match_key in self._correct_matches
+        # First check if it's directly in the correct matches set
+        if match_key in self._correct_matches:
+            return True
+
+        # For brush field, also check if it can be found by the CorrectMatchesChecker
+        # This handles cases where automated splits are saved to handle/knot sections
+        if match_key.startswith("brush:"):
+            try:
+                from sotd.match.correct_matches import CorrectMatchesChecker
+                import yaml
+
+                # Load the YAML data structure for the checker
+                if self._correct_matches_file.exists():
+                    with self._correct_matches_file.open("r", encoding="utf-8") as f:
+                        yaml_data = yaml.safe_load(f)
+
+                    checker = CorrectMatchesChecker(yaml_data)
+                    original_text = match_key.split(":", 1)[1]  # Extract original text from key
+                    result = checker.check(original_text)
+                    return result is not None
+            except Exception:
+                # If there's an error with the checker, fall back to the original behavior
+                return False
+
+        return False
 
     def mark_match_as_correct(self, match_key: str, match_data: Dict) -> None:
         """Mark a match as correct."""
