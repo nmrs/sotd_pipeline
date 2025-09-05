@@ -809,13 +809,26 @@ brush:
     - c&h x briar brushworks
     - chisel & hound commodore 26mm badger knot
     - chisel and hound "everett"
+    - chisel and hound 5474gc peridot smoke
     Boar:
-    - chisel & hound - 'broomstick' boar
+    - chisel & hound "vitae taper" / 26mm chisel & hound white boar
     - chisel & hound - padauk wood handle with 26mm boar knot
     - chisel & hound padauk wood handle with 26mm boar knot
+    - chisel and hound 5474gc peridot smoke w/ ch boar knot
     - chisel and hound bloodoath boar
+    - chisel and hound dog's breakfast / 26 mm white boar
+    - chisel and hound dog's breakfast~~ 26 mm white boar
+    Broomstick:
+    - barrister & hound broomhandle boar
+    - barrister and hound broom handle
+    - barrister and hound broomhandle boar
+    - chisel & hound - 'broomstick' boar
     Rob's Finest Boar:
+    - chisel & hound 'rob's finest' boaar
     - chisel & hound 'rob's finest' boar
+    - chisel & hound - "rob's finest" boar 25mm
+    - chisel & hound rob's finest
+    - chisel & hound rob's finest (2)
     - chisel and hound 'rob's finest' boar
     - chisel and hound - rob's finest boar
     - chisel and hound resolute v20 - rob's finest boar
@@ -902,10 +915,14 @@ brush:
     - chisel and hound bulldog v26
     v27:
     - chisel & hound - green velvet (5356gc) - 26mm v27 fanchurian
+    - chisel & hound burnished copper v27 fanchurian badger
+    - chisel & hound butterhibe with v27
+    - chisel & hound fanchurian v27 (oumo compass ivory white)
     - chisel and hound - deep night w/v27 fanchurian 26mm badger
     - chisel and hound - dinos'mores / v27 fanchurian
     - chisel and hound - dinos'mores v27 fanchurian
     - chisel and hound bulldog v27
+    - chisel and hound butterhive v27
     - chisel and hound deep night handle/ 26mm v27 fanchurian knot
     - chisel and hound dino'smores / v27 fanchurian
     - chisel and hound dinos'mores / v27 fanchurian
@@ -913,10 +930,18 @@ brush:
     - chisel and hound dinos'mores w/v27 fanchurian
     - chisel and hound saphire & pearl v27
     v28:
+    - chisel & hound fanchurian v28 (oumo compass frosted white)
+    - chisel and hound - 5582gc "voices" w/ v28 fanchurian badger
     - chisel and hound bloodoath v28
+  Common Wealth:
+    CW Badger:
+    - commonwealth 'cw' badger (first shaving brush, purchased on ebay)
   Commonwealth 'CW':
     Badger:
     - commonwealth 'cw' badger bought on ebay
+  Craving Shaving:
+    Synthetic:
+    - cravingshaving 26mm synthetic splendore cyborg
   Declaration Grooming:
     B11:
     - dg b11 jefferson pearl of the stars 28mm 2 band badger
@@ -953,14 +978,18 @@ brush:
     - declaration grooming washington blood of kings b3
     - dg unicorn ivory b3
     - dg unicorn ivory og b3
+    B5:
+    - declaration "greatness" b5
     B6:
     - declaration grooming washington b6
     - declaration grooming washington unicorn ivory b6
     B7:
     - declaration grooming jefferson b7 badger
+    - declaration grooming unicorn ivory b7
     - dg b7 badger
     B8:
     - declaration grooming fae b8
+    - declaration grooming magic hour 28mm b8 badger knot
     B9A:
     - declaration grooming - lavender jefferson - 28mm b9a+
     - dg b9a
@@ -968,10 +997,12 @@ brush:
     Boar:
     - dogwood handcrafts - faux ivory - 26mm boar
     SHD Badger:
+    - dogwood 28mm green/white super high density badger
     - dogwood handcrafts ebony 28mm shd badger fan
     - dogwood handcrafts green white swirl w/ griffith 26mm high mountain shd fan
     - dogwood handcrafts kyle shd
     Synthetic:
+    - dogwood 30mm synthetic orange/white
     - dogwood handcrafts 26mm quartermoon synthetic
   Dreadnought:
     Avenger:
@@ -1037,6 +1068,7 @@ brush:
     - omega - 10048 boar
     - omega pro48
     '10049':
+    - boar omega 10049 pro boar black handle
     - omega - 10049
     - omega - 10049 - white
     - omega 10049
@@ -1044,6 +1076,7 @@ brush:
     '10065':
     - omega 10065
     '10066':
+    - boar omega 10066
     - omega 10066
     '10077':
     - omega - 10077 boar
@@ -1212,7 +1245,10 @@ brush:
     - stirling 2 band synthetic
     - stirling 2-band synthetic brush
     - stirling two band synthetic
+    Boar Brush:
+    - boar stirling 24mm boar
     Finest Badger:
+    - stirling - finest badger shave brush badger
     - stirling finest badger brush
   Stirling/Zenith:
     31mmx50mm Boar (510SE-XL):
@@ -1251,6 +1287,8 @@ brush:
     - zenith b37
     Barberpole:
     - zenith barberpole xse 26mm
+    Butterscotch Chubby (B34):
+    - boar zenith 505b bleached boar butterscotch handle
     r/wetshaving MOAR BOAR:
     - moar boar
     - moar f'n boar
@@ -1385,6 +1423,8 @@ handle:
     - chisel & hound strata tns m8 fan badger
     - chisel & hound strata turnnshave m8 fan badger
     - chisel & hound t&s quartermoon
+    - chisel & hound verdant
+    - chisel & hound verdant oumo rorschach badger
     - chisel and hound
     - chisel and hound "rob's finest" - paragon synthetic 25mm synthetic
     - chisel and hound "ruby"
@@ -1393,6 +1433,7 @@ handle:
     - chisel and hound azurite with 26 mm maggard tuxedo knot
     - chisel and hound padauk wood handle
     - chisel and hound tahitian pearl 26mm maggard shd fan
+    - chisel and hound the hive
   Craving Shaving:
     Unspecified:
     - craving shaving
@@ -1444,6 +1485,7 @@ handle:
     - dogwood hybrid / declaration b13 28mm
     - dogwood hybrid / declaration b18 28mm
     - dogwood maggards 26mm shd
+    - dogwood stag b9a 28mm
     - dogwood w/28mm dg b11 badger
   Dubl Duck:
     Unspecified:
@@ -1452,7 +1494,10 @@ handle:
     Unspecified:
     - elite razors
   Ever Ready:
+    100T:
+    - ever ready 100t (synthetic re-knot)
     Unspecified:
+    - ever ready unnumbered synth
     - ever-ready shaving brush, reknotted
   Farvour Turn Craft:
     Unspecified:
@@ -1486,6 +1531,8 @@ handle:
     - old spice root beer ap shave co. g5c 20mm
   Oumo:
     Unspecified:
+    - (oumo warhammer frosted white)
+    - (oumo warhammer ivory white)
     - oumo destiny - 轻盈- glaze
     - oumo glaze 轻盈
   PerFectWoodworks:
@@ -1517,6 +1564,9 @@ handle:
   Rubberset:
     Unspecified:
     - rubberset 400-4
+  Rudy Vey:
+    Unspecified:
+    - rudy vey b&b forum brush
   Summer Break:
     Unspecified:
     - summer break demaranville b15
@@ -1535,6 +1585,7 @@ knot:
     - cirrostratus w./ ap shave co. cashmere 28mm synth
     G5A:
     - ap shave co g5a 26mm
+    - ap shave co. g5a 26mm synthetic
     - dogwood handcrafts gully g5a
     G5B:
     - 26 mm g5b
@@ -1565,6 +1616,7 @@ knot:
     Pure Bliss:
     - 26mm ap shave co. pure bliss
     - 26mm ap shave co. pure bliss 26mm synthetic
+    - 28mm pure bliss
     - chisel & hound 5449sc w/ ap shave co pure bliss
     - dogwood handcrafts 26mm apsc pure bliss
     - sapelle taper 5110rc - 26mm ap shave co pure bliss
@@ -1587,6 +1639,7 @@ knot:
     - 28mm timberwolf
     - 28mm timberwolf synthetic
     - 30mm timberwolf synthetic
+    - 30mm timberwolf synthetic. (stag brush)
     - chisel & hound "rainbow" 26mm timberwolf
     - dogwood handcrafts arcane abyss timberwolf
     Titanium:
@@ -1616,6 +1669,10 @@ knot:
     v25:
     - chisel & hound v25 fanchurian 26mm
     - v25 fanchurian knot
+    v27:
+    - chisel & hound v27 fanchurian
+    v28:
+    - chisel & hound v28 fanchurian
     v8:
     - house of mammoth tobacconist chisel & hound v8 fanchurian badger knot
   Cornfed Viking:
@@ -1628,6 +1685,7 @@ knot:
     B10:
     - dogwood handcrafts with declaration grooming b10
     B11:
+    - dg b11 26mm
     - dogwood handcrafts - b11 28mm badger
     - dogwood handcrafts b11 badger
     - dogwood handcrafts dark red 28mm dg b11 badger
@@ -1662,6 +1720,7 @@ knot:
     - dogclaration 30mm b9a
     - dogwood handcrafts 26mm b9a+
     - dogwood handcrafts 26mm declaration b9a+
+    - dogwood stag b9a 28mm
     B9B:
     - hucklaration b9b
   Dogwood:
@@ -1753,7 +1812,9 @@ knot:
     - oumo sr-2
     Rorschach:
     - chisel & hound esmeralda w/oumo rorschach badger
+    - chisel & hound verdant oumo rorschach badger
     - dogwood handcrafts oumo rorschach two band badger badger
+    - oumo rorschach badger
     - oumo rorschach two-band badger
     - rad dino 27mm rorschach fan
     - rorschach
@@ -1769,6 +1830,8 @@ knot:
     Raptor:
     - rad dinosaur creations >!expunged!< w/ raptor synthetic
   Semogue:
+    Boar:
+    - boar rv semogue knot
     Mixed Badger/Boar:
     - 24mm semogue mistura
     - embered phoenix - 24mm semogue mistura mixed knot
@@ -1793,6 +1856,7 @@ knot:
     - chisel & hound t&s quartermoon
     - turnnshave quartermoon 26mm synthetic
     Shoat:
+    - 26mm tns shoat
     - chisel & hound 26mm tns shoat (boar)
     - tns shoat
     - turnnshave 26mm shoat
@@ -1810,6 +1874,7 @@ knot:
     - chisel & hound mccann redux w/ tns tip v8 badger
     - emerald peak tns v9 tip badger
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
+    - tns tip v8 28mm
     - tns v8 tip
     - turn n shave tip v9 fan 26mm
     Tuxedo:

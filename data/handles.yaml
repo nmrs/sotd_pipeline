@@ -85,6 +85,7 @@ artisan_handles:
         - chisel.*hound(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - chis.*fou
         - \bc(?:\&|and|\+\s)?h\b
+        - broomstick
   Cool Dog:
     Unspecified:
       patterns:
@@ -490,13 +491,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - certifyd
-  Chisel & Hound:
-    Unspecified:
-      patterns:
-        - chisel.*hound
-        - chis.*fou
-        - \bc(?:\&|and|\+)h\b
-        - broomstick
   Cremo:
     Unspecified:
       patterns:

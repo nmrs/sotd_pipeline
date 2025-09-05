@@ -1,13 +1,38 @@
-
-Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar:
-  handle: null
-  knot: null
-  match_type: known_brush
+Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
+  handle: Boar RV Semogue Knot
+  knot: Rudy Vey B&B Forum Brush
+  match_type: null
   corrected: false
-  validated_at: '2025-07-30T18:23:12.478825'
-  should_not_split: true
+  validated_at: null
+  should_not_split: false
   occurrences:
-  - file: 2025-06.json
+  - file: 2025-08.json
     comment_ids:
-    - mx1ywlu
-    - n0axwpr
+    - nafpmja
+Chisel & Hound v27 Fanchurian (Oumo Warhammer Ivory White):
+  handle: (Oumo Warhammer Ivory White)
+  knot: Chisel & Hound v27 Fanchurian
+  match_type: null
+  corrected: true
+  validated_at: '2025-09-05T08:05:03.371525'
+  should_not_split: false
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n6cwt72
+    - n8tee16
+  system_handle: Oumo Warhammer Ivory White
+  system_knot: Chisel & Hound v27 Fanchurian
+  system_confidence: medium
+  system_reasoning: Unknown split type with good component quality
+Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
+  handle: (Oumo Warhammer Frosted White)
+  knot: Chisel & Hound v28 Fanchurian
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n788u5j

@@ -720,11 +720,6 @@ other_knots:
     default: Badger
     patterns:
       - col.*\bconk\b
-  Commonwealth 'CW':
-    default: Badger
-    patterns:
-      - commonwealth
-      - \bcw\b
   Cool Dog:
     default: Badger
     patterns:

@@ -472,11 +472,9 @@ class BrushEnricher(BaseEnricher):
             return False
         matched_data = brush_data.get("matched")
         if matched_data and isinstance(matched_data, dict):
-            # Check for either top-level brand (legacy) or knot section brand (new format)
-            top_level_brand = matched_data.get("brand") is not None
-            knot_section = matched_data.get("knot", {})
-            knot_brand = knot_section.get("brand") if isinstance(knot_section, dict) else None
-            return top_level_brand or (knot_brand is not None)
+            # Apply to any brush that has matched data, regardless of brand match
+            # This allows extraction of specifications from user comments even for unmatched brushes
+            return True
         return False
 
     def enrich(self, field_data: dict, original_comment: str) -> Optional[dict]:

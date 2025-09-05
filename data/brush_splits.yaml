@@ -1,0 +1,42 @@
+Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
+  handle: Rudy Vey B&B Forum Brush
+  knot: Boar RV Semogue Knot
+  match_type: null
+  corrected: true
+  validated_at: '2025-09-05T09:10:36.616824'
+  should_not_split: false
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - nafpmja
+  system_handle: Boar RV Semogue Knot
+  system_knot: Rudy Vey B&B Forum Brush
+  system_confidence: high
+  system_reasoning: 'Fiber-hint split: knot contains fiber indicator'
+Chisel & Hound v27 Fanchurian (Oumo Warhammer Ivory White):
+  handle: (Oumo Warhammer Ivory White)
+  knot: Chisel & Hound v27 Fanchurian
+  match_type: null
+  corrected: true
+  validated_at: '2025-09-05T08:05:03.371525'
+  should_not_split: false
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n6cwt72
+    - n8tee16
+  system_handle: Oumo Warhammer Ivory White
+  system_knot: Chisel & Hound v27 Fanchurian
+  system_confidence: medium
+  system_reasoning: Unknown split type with good component quality
+Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
+  handle: (Oumo Warhammer Frosted White)
+  knot: Chisel & Hound v28 Fanchurian
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n788u5j

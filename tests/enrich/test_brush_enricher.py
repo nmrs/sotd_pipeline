@@ -37,9 +37,9 @@ class TestBrushEnricher:
         assert enricher.applies_to(record) is False
 
     def test_applies_to_without_brand(self, enricher):
-        """Test that enricher doesn't apply to brush data without brand."""
+        """Test that enricher applies to brush data without brand (for user comment extraction)."""
         record = {"brush": {"matched": {"model": "Chubby 2", "fiber": "Badger"}}}
-        assert enricher.applies_to(record) is False
+        assert enricher.applies_to(record) is True
 
     def test_enrich_with_catalog_knot_size_only(self, enricher):
         """Test enrichment when only catalog has knot size."""

@@ -91,13 +91,21 @@ known_brushes:
       patterns:
         - certifyd.*boar
   Chisel & Hound:
-    fiber: Badger
-    knot_size_mm: 26
+    Broomstick:
+      fiber: Boar
+      format: 25mm
+      patterns:
+        - (chisel|hound).*broom
+    Broomstick Synth:
+      fiber: Synthetic
+      format: 25mm
+      patterns:
+        - (chisel|hound).*broom.*syn
     Rob's Finest Boar:
       fiber: Boar
       knot_size_mm: 25
       patterns:
-        - rob's.*finest.*boar
+        - rob's.*finest
     Rob's Finest Synthetic:
       fiber: Synthetic
       knot_size_mm: 25
@@ -109,6 +117,11 @@ known_brushes:
       knot_size_mm: 23
       patterns:
         - clubman pinaud
+  Common Wealth:
+    CW Badger:
+      fiber: Badger
+      patterns:
+        - (common.*wealth|\bcw\b).*badger
   Cornfed Viking:
     Odin's Beard:
       fiber: Badger
@@ -594,6 +607,12 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - stirl.*(?:2|two)(?:-|\s)+band
+    Boar Brush:
+      fiber: Boar
+      knot_size_mm: 24
+      knot_loft_mm: 57
+      patterns:
+        - stirling.*boar
     Finest Badger:
       fiber: Badger
       knot_size_mm: 24
@@ -1251,7 +1270,7 @@ known_knot_based_brushes:
         model: Boar
     SHD Badger:
       patterns:
-        - dogwood.*\bshd\b
+        - dogwood.*(\bshd\b|super.*dens)
       knot:
         brand: Maggard
         fiber: Badger
@@ -1332,6 +1351,10 @@ other_brushes:
     default: Badger
     patterns:
       - cineen
+  Craving Shaving:
+    default: Synthetic
+    patterns:
+      - crav.*shav
   DSCosmetics:
     default: Synthetic
     patterns:
