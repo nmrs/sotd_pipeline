@@ -106,6 +106,11 @@ const getBrushType = (
     }
   }
 
+  // Single component: has top-level model but no brand (fiber detection)
+  if (!hasTopLevelBrand && hasTopLevelModel) {
+    return { type: 'Unknown Maker', isValid: true };
+  }
+
   // Composite: no top-level brand/model, but has handle/knot sections
   if (!hasTopLevelBrand && !hasTopLevelModel && hasHandle && hasKnot) {
     // Check if handle and knot brands are the same
