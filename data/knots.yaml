@@ -380,6 +380,11 @@ known_knots:
       patterns:
         - m[uü]hle.*stf
         - stf
+    STF XL:
+      knot_size_mm: 25
+      patterns:
+        - m[uü]hle.*stf.*xl
+        - stf.*xl
   Omega:
     fiber: Boar
     "10049":

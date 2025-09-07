@@ -267,11 +267,16 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - omega.*40033
-    "46206":
+    46206 HI-BRUSH Synthetic:
       fiber: Synthetic
       knot_size_mm: 25
       patterns:
         - omega.*46206
+    46138 HI-BRUSH Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 25
+      patterns:
+        - omega.*46138
     "50068 Bambino":
       fiber: Synthetic
       knot_size_mm: 18
@@ -338,24 +343,6 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - power.*rangers.*syn
-  Rad Dinosaur Creations:
-    knot_size_mm: 26
-    DinoBoar:
-      fiber: Boar
-      patterns:
-        - rad.*dinosaur.*dino.*boar
-    High Mountain Rex:
-      fiber: Badger
-      patterns:
-        - rad.*dinosaur.*high.*mountain.*rex
-    Raptor:
-      fiber: Synthetic
-      patterns:
-        - raptor
-    Tuxedo:
-      fiber: Synthetic
-      patterns:
-        - rad.*dinosaur.*tuxedo
   RazoRock:
     Big Bruce:
       fiber: Synthetic
@@ -1296,6 +1283,40 @@ known_knot_based_brushes:
         brand: Maggard
         fiber: Synthetic
         model: Tuxedo
+  Mühle:
+    fiber: Synthetic
+    STF:
+      patterns:
+        - m[uü]hle.*stf
+        - stf
+    STF XL:
+      knot_size_mm: 25
+      patterns:
+        - m[uü]hle.*stf.*xl
+        - stf.*xl
+  Rad Dinosaur Creations:
+    knot_size_mm: 26
+    Black Boarty:
+      fiber: Boar
+      knot_size_mm: 28
+      patterns:
+        - rad.*dinosaur.*black.*boarty
+    DinoBoar:
+      fiber: Boar
+      patterns:
+        - rad.*dinosaur.*dino.*boar
+    High Mountain Rex:
+      fiber: Badger
+      patterns:
+        - rad.*dinosaur.*high.*mountain.*rex
+    Raptor:
+      fiber: Synthetic
+      patterns:
+        - raptor
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+        - rad.*dinosaur.*tuxedo
 
 other_brushes:
   AKA Brushworx:
@@ -1360,6 +1381,10 @@ other_brushes:
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
+  Lentfer Custom Woodworks:
+    default: Synthetic
+    patterns:
+      - lentfer
   London Razors:
     default: Badger
     patterns:

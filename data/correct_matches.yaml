@@ -828,7 +828,6 @@ brush:
     - chisel & hound 'rob's finest' boar
     - chisel & hound - "rob's finest" boar 25mm
     - chisel & hound rob's finest
-    - chisel & hound rob's finest (2)
     - chisel and hound 'rob's finest' boar
     - chisel and hound - rob's finest boar
     - chisel and hound resolute v20 - rob's finest boar
@@ -1026,6 +1025,9 @@ brush:
   Leavitt & Pierce:
     Badger:
     - leavitt & peirce 22mm silvertip
+  Lentfer Custom Woodworks:
+    Synthetic:
+    - lentfer custom woodworks red and black synth
   London Razors:
     Badger:
     - london razors hand-tied silvertip badger 27mm
@@ -1051,6 +1053,9 @@ brush:
     - maggards 22mm b&w synthetic
     - unbranded vintage marble w/ maggard g5
   Mühle:
+    STF XL:
+    - muhle classic stf xl
+    - muhle stf xl 25mm
     Travel:
     - muhle 31m530 travel
     - muhle travel shaving brush
@@ -1076,6 +1081,8 @@ brush:
     - omega - 10049 - white
     - omega 10049
     - omega 10049 - 100% boar bristle - red
+    - omega 49 pro
+    - omega 49 professional
     '10065':
     - omega 10065
     '10066':
@@ -1089,6 +1096,7 @@ brush:
     '11047':
     - omega 11047 "mixed midget"
     - omega 11047 - 20mm boar/badger mix
+    - omega 11047 mighty midget
     - omega 11047 mighty midget badger mix
     - omega 11047 mighty midget mixed badger
     - omega 11047 mixed midget
@@ -1105,6 +1113,7 @@ brush:
     '146818':
     - omega 146818
     '20102':
+    - omega - 20102 - 28mm bleached boar
     - omega 20102
     - omega boar 20102
     '20106':
@@ -1114,6 +1123,8 @@ brush:
     '40033':
     - omega - 40033
     - omega - model 40033 24mm boar
+    46138 HI-BRUSH Synthetic:
+    - omega 0146138 hi-brush, 25mm synthetic shaving brush
     '46206':
     - omega hi-brush 146206
     - omega hi-brush 146206 - 25mm synth
@@ -1134,15 +1145,19 @@ brush:
     GT Series:
     - omega gt series (gulf racing livery) 29mm synth
     Hi-Brush Synthetic:
+    - omega hi black synthetic
     - omega roma 22mm synthetic
     - omega synthetic
     Proraso Professional:
+    - proraso - professional boar
     - proraso omega boar
     - proraso pro
     - proraso professional
     - proraso professional by omega
     - proraso professional shaving brush 28mm
   Rad Dinosaur Creations:
+    Black Boarty:
+    - rad dinosaur creations - x-626 - 28mm black boarty
     High Mountain Rex:
     - rad dinosaur creations "dazzle" w/ 26mm high mountain rex
     Raptor:
@@ -1170,7 +1185,7 @@ brush:
     - semogue 830
     - semogue 830 premium boar bristle
     Boar:
-    - semogue - barbear classico cerda boar 22mm (2 uses)
+    - semogue - barbear classico cerda boar 22mm
     - semogue spanish shavers le boar 24mm
     Galahad C3:
     - semogue - galahad c3 premium boar (ib) bristle
@@ -1301,7 +1316,7 @@ brush:
     - zenith - moar boar
     - zenith - moar boar 31mm boar
     - zenith - moar boar b35 31mm boar
-    - zenith - r/wetshaving moar boar b35/508a xl (60 uses)
+    - zenith - r/wetshaving moar boar b35/508a xl
     - zenith 31mm moar boar
     - zenith 508 moar boar
     - zenith b35 moar boar 31mm boar
@@ -1523,10 +1538,12 @@ handle:
     - grizzly bay
     - grizzly bay "blacksmith"
     - grizzly bay "simpleretro" 28mm 2bed
+    - grizzly bay - chisel & hound v24 fanchurian 28mm badger
     - grizzly bay barbear space magic 26mm synthetic
     - grizzly bay chub cub xl deep space
     - grizzly bay chubcub
     - grizzly bay v23
+    - grizzly bay w/ tns tip v8 28mm
   Heritage Collection:
     Unspecified:
     - ap shave co. - heritage collection ever-ready 200
@@ -1565,7 +1582,9 @@ handle:
     - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
     - rad dinosaur creations "mackie". 26mm apshaveco synbad
     - rad dinosaur creations "nebulagance"
+    - rad dinosaur creations "nebulagance" - turnnshave quartermoon 26mm synthetic
     - rad dinosaur creations "stardust"
+    - rad dinosaur creations "stardust" - turnnshave 26mm shoat
     - rad dinosaur creations 'ester'
     - rad dinosaur creations - copper inferno
     - rad dinosaur creations - jetson - 25mm muhle stf
@@ -1574,6 +1593,8 @@ handle:
     - rad dinosaur creations blue sky 26mm g5c synthetic
     - rad dinosaur creations borealis
     - rad dinosaur creations glory
+    - rad dinosaur creations glory - oumo rorschach two-band badger
+    - rad dinosaur creations glory oumo rorschach two-band badger
     - rad dinosaur creations gold mine
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
     - rad dinosaur creations ore-not handle (#43)
@@ -1597,6 +1618,7 @@ handle:
     _no_model:
     - custom irish bog oak handle w/ 30mm synthetic knot
     - generic badger
+    - generic ivory brush w/ 30mm timberwolf synthetic. (stag brush)
 knot:
   AP Shave Co:
     2Bed:
@@ -1667,6 +1689,7 @@ knot:
     - cayuen copper ore w/ 30mm timberwolf synthetic
     - chisel & hound "rainbow" 26mm timberwolf
     - dogwood handcrafts arcane abyss timberwolf
+    - generic ivory brush w/ 30mm timberwolf synthetic. (stag brush)
     Titanium:
     - ap shave co 24mm titanium synthetic
     - maggard midnight blue titanium 26mm
@@ -1691,6 +1714,7 @@ knot:
     v24:
     - chisel & hound v24 fanchurian 28mm badger
     - chisel & hound v24 fanchurian badger
+    - grizzly bay - chisel & hound v24 fanchurian 28mm badger
     v25:
     - chisel & hound v25 fanchurian 26mm
     - v25 fanchurian knot
@@ -1848,6 +1872,8 @@ knot:
     - oumo rorschach badger
     - oumo rorschach two-band badger
     - rad dino 27mm rorschach fan
+    - rad dinosaur creations glory - oumo rorschach two-band badger
+    - rad dinosaur creations glory oumo rorschach two-band badger
     - rorschach
     - rorschach knot
     Synthetic:
@@ -1886,12 +1912,14 @@ knot:
     - bristle brush werks tns quarter moon
     - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
     - chisel & hound t&s quartermoon
+    - rad dinosaur creations "nebulagance" - turnnshave quartermoon 26mm synthetic
     - turnnshave quartermoon 26mm synthetic
     Shoat:
     - 26mm tns shoat
     - aurora grooming mad hatter mauricio w/ tns shoat
     - chisel & hound 26mm tns shoat (boar)
     - chisel and hound the hive w/ 26mm tns shoat
+    - rad dinosaur creations "stardust" - turnnshave 26mm shoat
     - tns shoat
     - turnnshave 26mm shoat
     Synthetic:
@@ -1908,6 +1936,7 @@ knot:
     - chisel & hound mccann redux w/ tns tip v8 badger
     - chisel & hound w/ tns v8 tip
     - emerald peak tns v9 tip badger
+    - grizzly bay w/ tns tip v8 28mm
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
     - tns tip v8 28mm
     - tns v8 tip
