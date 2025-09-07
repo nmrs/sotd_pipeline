@@ -465,42 +465,20 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                     "knot": knot_data,
                 }
 
-            if request.bypass_correct_matches:
-                # If bypassing, run all strategies EXCEPT CorrectMatchesStrategy
-                # Filter out CorrectMatchesStrategy to avoid running correct matches logic
-                filtered_strategies = [
-                    s
-                    for s in matcher.strategy_orchestrator.strategies
-                    if s.__class__.__name__ != "CorrectMatchesStrategy"
-                ]
+            # Use the matcher's built-in bypass functionality
+            result = matcher.match(
+                request.brushString, bypass_correct_matches=request.bypass_correct_matches
+            )
 
-                # Create a temporary orchestrator with filtered strategies
-                from sotd.match.brush.scoring.orchestrator import (
-                    StrategyOrchestrator,
-                )
-
-                temp_orchestrator = StrategyOrchestrator(filtered_strategies)
-
-                strategy_results = temp_orchestrator.run_all_strategies(request.brushString)
-
-                # Convert to expected format
+            # Convert to expected format
+            if result and hasattr(result, "all_strategies"):
                 analysis_result = {
-                    "all_strategies": strategy_results,
-                    "enriched_data": {},
+                    "all_strategies": result.all_strategies,
+                    "enriched_data": result.matched if result.matched else {},
                 }
             else:
-                # Use normal matching (will return early if correct match found)
-                result = matcher.match(request.brushString)
-
-                # Convert to expected format
-                if result and hasattr(result, "all_strategies"):
-                    analysis_result = {
-                        "all_strategies": result.all_strategies,
-                        "enriched_data": result.matched if result.matched else {},
-                    }
-                else:
-                    # Fallback if no results
-                    analysis_result = {"all_strategies": [], "enriched_data": {}}
+                # Fallback if no results
+                analysis_result = {"all_strategies": [], "enriched_data": {}}
         finally:
             # Restore original working directory
             os.chdir(original_cwd)
@@ -530,6 +508,9 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 # Transform flat brush data to nested structure for React component
                 transformed_matched_data = transform_brush_data(matched_data)
 
+                # Use the actual score from the MatchResult instead of recalculating
+                total_score = strategy_result.score if strategy_result.score is not None else 0.0
+
                 # Get detailed scoring breakdown using the ScoringEngine
                 from sotd.match.brush.scoring.engine import ScoringEngine
                 from sotd.match.brush.config import BrushScoringConfig
@@ -540,13 +521,13 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 config = BrushScoringConfig(config_path=config_path)
                 engine = ScoringEngine(config)
 
-                # Calculate base score and modifiers
+                # Calculate base score and modifiers for breakdown display
                 base_score = engine.config.get_base_strategy_score(strategy_name)
 
                 modifier_score = engine._calculate_modifiers(
                     strategy_result, request.brushString, strategy_name
                 )
-                total_score = base_score + modifier_score
+                # Use actual score as total, but keep base_score and modifier_score for breakdown
 
                 # Get modifier details
                 modifier_details = []
@@ -596,21 +577,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 formatted_results.append(formatted_result)
 
             except Exception as e:
-                # Add a fallback result for failed strategies
-                fallback_result = BrushMatchResult(
-                    strategy="error",
-                    score=0.0,
-                    matchType="error",
-                    pattern="error",
-                    scoreBreakdown={
-                        "baseScore": 0.0,
-                        "modifiers": 0.0,
-                        "modifierDetails": [],
-                        "total": 0.0,
-                    },
-                    matchedData={"error": str(e)},
-                )
-                formatted_results.append(fallback_result)
+                # Fail fast - let the exception bubble up
+                raise Exception(f"Error processing strategy {strategy_name}: {str(e)}") from e
 
         # If no strategies, create a basic result
         if not formatted_results:
