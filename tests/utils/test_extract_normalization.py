@@ -3,18 +3,17 @@
 
 from sotd.utils.extract_normalization import (
     normalize_for_matching,
-    strip_blade_count_patterns,
+    strip_usage_count_patterns,
     strip_handle_indicators,
-    strip_razor_use_counts,
     strip_soap_patterns,
     strip_trailing_periods,
 )
 
 
-class TestStripBladeCountPatterns:
-    """Test blade count pattern stripping."""
+class TestStripUsageCountPatterns:
+    """Test usage count pattern stripping for all product types."""
 
-    def test_strip_blade_count_patterns_basic(self):
+    def test_strip_usage_count_patterns_basic(self):
         """Test basic blade count pattern stripping."""
         test_cases = [
             ("Astra Superior Platinum (5)", "Astra Superior Platinum"),
@@ -23,12 +22,12 @@ class TestStripBladeCountPatterns:
             ("Personna Platinum (20)", "Personna Platinum"),
         ]
         for input_str, expected in test_cases:
-            result = strip_blade_count_patterns(input_str)
+            result = strip_usage_count_patterns(input_str)
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
 
-    def test_strip_blade_count_patterns_with_brackets(self):
+    def test_strip_usage_count_patterns_with_brackets(self):
         """Test blade count pattern stripping with bracket notation."""
         test_cases = [
             ("Astra Superior Platinum [5]", "Astra Superior Platinum"),
@@ -36,12 +35,12 @@ class TestStripBladeCountPatterns:
             ("Gillette Silver Blue [15]", "Gillette Silver Blue"),
         ]
         for input_str, expected in test_cases:
-            result = strip_blade_count_patterns(input_str)
+            result = strip_usage_count_patterns(input_str)
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
 
-    def test_strip_blade_count_patterns_no_match(self):
+    def test_strip_usage_count_patterns_no_match(self):
         """Test strings that don't contain blade count patterns."""
         test_cases = [
             "Astra Superior Platinum",
@@ -50,25 +49,25 @@ class TestStripBladeCountPatterns:
             "Blade without count",
         ]
         for input_str in test_cases:
-            result = strip_blade_count_patterns(input_str)
+            result = strip_usage_count_patterns(input_str)
             assert result == input_str, f"Should not change '{input_str}', but got '{result}'"
 
-    def test_strip_blade_count_patterns_edge_cases(self):
+    def test_strip_usage_count_patterns_edge_cases(self):
         """Test blade count pattern stripping with edge cases."""
         # Empty string
-        assert strip_blade_count_patterns("") == ""
+        assert strip_usage_count_patterns("") == ""
 
         # None input
-        assert strip_blade_count_patterns(None) is None  # type: ignore
+        assert strip_usage_count_patterns(None) is None  # type: ignore
 
         # Only count pattern
-        assert strip_blade_count_patterns("(5)") == ""
-        assert strip_blade_count_patterns("[10]") == ""
+        assert strip_usage_count_patterns("(5)") == ""
+        assert strip_usage_count_patterns("[10]") == ""
 
         # Multiple count patterns
-        assert strip_blade_count_patterns("Astra (5) (10)") == "Astra"
+        assert strip_usage_count_patterns("Astra (5) (10)") == "Astra"
 
-    def test_strip_blade_count_patterns_comma_ordinal_usage(self):
+    def test_strip_usage_count_patterns_comma_ordinal_usage(self):
         """Test blade count pattern stripping with ordinal usage patterns."""
         test_cases = [
             ("treet platinum , 1st use", "treet platinum ,"),  # Cleanup handles trailing comma
@@ -82,7 +81,7 @@ class TestStripBladeCountPatterns:
             ("feather 2nd use", "feather"),  # No trailing punctuation
         ]
         for input_str, expected in test_cases:
-            result = strip_blade_count_patterns(input_str)
+            result = strip_usage_count_patterns(input_str)
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
@@ -402,75 +401,3 @@ class TestStripSoapPatterns:
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
 
 
-class TestStripRazorUseCounts:
-    """Test razor use count stripping."""
-
-    def test_strip_razor_use_counts_basic(self):
-        """Test basic razor use count stripping."""
-        test_cases = [
-            ("Gold Dollar Straight Razor (6)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor (12)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor (23)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor [5]", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor [10]", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor (new)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor (NEW)", "Gold Dollar Straight Razor"),
-        ]
-        for input_str, expected in test_cases:
-            result = strip_razor_use_counts(input_str)
-            assert (
-                result == expected
-            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
-
-    def test_strip_razor_use_counts_multiple_patterns(self):
-        """Test razor use count stripping with multiple patterns."""
-        test_cases = [
-            ("Gold Dollar Straight Razor (6) (new)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor [5] (new)", "Gold Dollar Straight Razor"),
-            ("Gold Dollar Straight Razor (new) (12)", "Gold Dollar Straight Razor"),
-        ]
-        for input_str, expected in test_cases:
-            result = strip_razor_use_counts(input_str)
-            assert (
-                result == expected
-            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
-
-    def test_strip_razor_use_counts_edge_cases(self):
-        """Test razor use count stripping with edge cases."""
-        # No patterns
-        assert strip_razor_use_counts("Gold Dollar Straight Razor") == "Gold Dollar Straight Razor"
-
-        # Empty string
-        assert strip_razor_use_counts("") == ""
-
-        # None input
-        assert strip_razor_use_counts(None) is None  # type: ignore
-
-        # Only patterns
-        assert strip_razor_use_counts("(6)") == ""
-        assert strip_razor_use_counts("[5]") == ""
-        assert strip_razor_use_counts("(new)") == ""
-
-    def test_strip_razor_use_counts_preserves_model_names(self):
-        """Test that actual model names are preserved, only use counts are stripped."""
-        # Real model names should be preserved
-        assert strip_razor_use_counts("Gillette New") == "Gillette New"
-        assert strip_razor_use_counts("iKon X3") == "iKon X3"
-        assert strip_razor_use_counts("Gillette Tech") == "Gillette Tech"
-        assert strip_razor_use_counts("Merkur 34C") == "Merkur 34C"
-
-        # Use counts should be stripped from real model names
-        assert strip_razor_use_counts("Gillette New (6)") == "Gillette New"
-        assert strip_razor_use_counts("iKon X3 (12)") == "iKon X3"
-        assert strip_razor_use_counts("Gillette Tech [5]") == "Gillette Tech"
-        assert strip_razor_use_counts("Merkur 34C (new)") == "Merkur 34C"
-
-        # Multiple use counts should all be stripped
-        assert strip_razor_use_counts("Gillette New (6) (new)") == "Gillette New"
-        assert strip_razor_use_counts("iKon X3 [10] (new)") == "iKon X3"
-
-        # Complex model names should be preserved completely
-        assert strip_razor_use_counts("Gillette New Standard") == "Gillette New Standard"
-        assert strip_razor_use_counts("Gillette New Long Comb") == "Gillette New Long Comb"
-        assert strip_razor_use_counts("Gillette New Short Comb") == "Gillette New Short Comb"
-        assert strip_razor_use_counts("Gillette New Big Boy") == "Gillette New Big Boy"

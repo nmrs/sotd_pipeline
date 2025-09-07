@@ -39,8 +39,8 @@ def normalize_parentheses_whitespace(value: str) -> str:
     return re.sub(pattern, normalize_match, value)
 
 
-def strip_blade_count_patterns(value: str) -> str:
-    """Strip blade count patterns and other non-product information from blade names."""
+def strip_usage_count_patterns(value: str) -> str:
+    """Strip usage count patterns and other non-product information from product names."""
     if not value or not isinstance(value, str):
         return value
 
@@ -63,6 +63,10 @@ def strip_blade_count_patterns(value: str) -> str:
     # Pattern for usage counts with 'use': (1 use), (2 use), etc.
     usage_use_pattern = r"(?:[\(\[\{])\s*\d+\s+use\s*[\)\]\}]"
     cleaned = re.sub(usage_use_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for usage counts with 'uses': (107 uses), (108 uses), etc.
+    usage_uses_pattern = r"(?:[\(\[\{])\s*\d+\s+uses\s*[\)\]\}]"
+    cleaned = re.sub(usage_uses_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for ordinal usage: (1st shave), (2nd shave), (10th shave), etc.
     ordinal_shave_pattern = r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s+shave\s*[\)\]\}]"
@@ -187,37 +191,6 @@ def strip_handle_indicators(value: str) -> str:
 
     cleaned = value
     cleaned = re.sub(handle_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Clean up extra whitespace
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
-
-    return cleaned
-
-
-def strip_razor_use_counts(value: str) -> str:
-    """
-    Strip razor use count patterns from razor strings.
-
-    This removes patterns like:
-    - Use counts: (3rd use), (5th use), etc.
-    - Usage indicators: (used), (worn), etc.
-
-    Args:
-        value: Input string that may contain razor use count patterns
-
-    Returns:
-        String with razor use count patterns removed
-    """
-    if not isinstance(value, str):
-        return value
-
-    # OPTIMIZED: Combine razor use count patterns into a single regex for better performance
-    use_count_pattern = (
-        r"\s*(?:\(\d+(?:st|nd|rd|th)\s+use\)|\((?:used|worn|old|\d+|new|NEW)\)|\[\d+\])"
-    )
-
-    cleaned = value
-    cleaned = re.sub(use_count_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up extra whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
@@ -363,14 +336,12 @@ def normalize_for_matching(
     # Strip link markup
     normalized = strip_link_markup(normalized)
 
-    # For blade strings, also strip blade count and usage patterns (including 'new')
-    if field == "blade":
-        normalized = strip_blade_count_patterns(normalized)
+    # For all product types, strip usage count patterns
+    normalized = strip_usage_count_patterns(normalized)
 
-    # For razor strings, also strip handle indicators and use counts
+    # For razor strings, also strip handle indicators
     if field == "razor":
         normalized = strip_handle_indicators(normalized)
-        normalized = strip_razor_use_counts(normalized)
 
     # For soap strings, also strip soap-related patterns
     if field == "soap":
@@ -459,12 +430,6 @@ def normalize_remainder_text_preserve_locations(value: str) -> str:
 
     # Normalize whitespace inside parentheses/brackets/braces
     cleaned = normalize_parentheses_whitespace(cleaned)
-
-    # Normalize spacing around common delimiters for consistency
-    # Standardize "w/ 30mm" and "w/30mm" to "w/ 30mm" (with space after /)
-    cleaned = re.sub(r"\bw/\s*(\d)", r"w/ \1", cleaned)
-    # Standardize "w/ " to "w/" (remove space before /)
-    cleaned = re.sub(r"\bw\s+/(\d)", r"w/\1", cleaned)
 
     # Final cleanup: normalize whitespace and strip
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
