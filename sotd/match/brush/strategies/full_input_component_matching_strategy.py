@@ -70,9 +70,8 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         if not text or not isinstance(text, str):
             return []
 
-        # For now, implement basic single result logic
-        # This will be enhanced in Step 3 to generate multiple brand combinations
         results = []
+        seen_combinations = set()
 
         # Run both matchers once
         handle_result = None
@@ -90,14 +89,29 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             # Knot matcher failed, continue with None
             pass
 
-        # Determine match type and create result
+        # Determine match type and create results
         if handle_result and knot_result:
             # Both matched - dual component
-            result = self._create_dual_component_result(handle_result, knot_result, text)
-            if result:
-                result.strategy = "full_input_component_matching"  # Base score 75 + modifiers
-                result.match_type = "composite"
-                results.append(result)
+            # Extract brands for comparison
+            handle_brand = self._extract_brand_from_result(handle_result)
+            knot_brand = self._extract_brand_from_result(knot_result)
+
+            # Always include the original combination
+            combination_key = (handle_brand, knot_brand)
+            if combination_key not in seen_combinations:
+                result = self._create_dual_component_result(handle_result, knot_result, text)
+                if result:
+                    result.strategy = "full_input_component_matching"
+                    result.match_type = "composite"
+                    results.append(result)
+                    seen_combinations.add(combination_key)
+
+            # Check if both components have the same brand
+            if handle_brand and knot_brand and handle_brand == knot_brand:
+                # Same brand - generate alternative combinations
+                self._generate_alternative_combinations(
+                    text, handle_result, knot_result, results, seen_combinations
+                )
         elif handle_result or knot_result:
             # Only one matched - single component
             if handle_result:
@@ -108,11 +122,69 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
                 return []
 
             if result:
-                result.strategy = "full_input_component_matching"  # Base score 75
+                result.strategy = "full_input_component_matching"
                 result.match_type = "single_component"
                 results.append(result)
 
         return results
+
+    def _generate_alternative_combinations(
+        self,
+        text: str,
+        original_handle_result,
+        original_knot_result,
+        results: List[MatchResult],
+        seen_combinations: set,
+    ) -> None:
+        """
+        Generate alternative brand combinations when both components have the same brand.
+
+        Args:
+            text: Original text to match against
+            original_handle_result: Original handle match result
+            original_knot_result: Original knot match result
+            results: List to add new results to
+            seen_combinations: Set to track seen combinations for deduplication
+        """
+        original_handle_brand = self._extract_brand_from_result(original_handle_result)
+        original_knot_brand = self._extract_brand_from_result(original_knot_result)
+
+        # Try to find alternative handle with different brand
+        alternative_handle_result = self._match_handle_with_exclusions(
+            text, {original_handle_brand}
+        )
+
+        # Try to find alternative knot with different brand
+        alternative_knot_result = self._match_knot_with_exclusions(text, {original_knot_brand})
+
+        # Generate all possible combinations
+        combinations_to_try = []
+
+        # Original + alternative knot
+        if alternative_knot_result:
+            combinations_to_try.append((original_handle_result, alternative_knot_result))
+
+        # Alternative handle + original knot
+        if alternative_handle_result:
+            combinations_to_try.append((alternative_handle_result, original_knot_result))
+
+        # Alternative handle + alternative knot
+        if alternative_handle_result and alternative_knot_result:
+            combinations_to_try.append((alternative_handle_result, alternative_knot_result))
+
+        # Create results for valid combinations
+        for handle_res, knot_res in combinations_to_try:
+            handle_brand = self._extract_brand_from_result(handle_res)
+            knot_brand = self._extract_brand_from_result(knot_res)
+            combination_key = (handle_brand, knot_brand)
+
+            if combination_key not in seen_combinations:
+                result = self._create_dual_component_result(handle_res, knot_res, text)
+                if result:
+                    result.strategy = "full_input_component_matching"
+                    result.match_type = "composite"
+                    results.append(result)
+                    seen_combinations.add(combination_key)
 
     def _match_handle_with_exclusions(
         self, text: str, excluded_brands: set[str]
@@ -131,16 +203,16 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             result = self.handle_matcher.match_handle_maker(text)
             if result is None:
                 return None
-            
+
             # Extract brand from result
             brand = self._extract_brand_from_result(result)
             if not brand:
                 return result  # No brand to exclude
-            
+
             # Check if brand is in excluded set (case-insensitive)
             if brand.lower() in {b.lower() for b in excluded_brands}:
                 return None
-            
+
             return result
         except Exception:
             # Handle matcher failed, return None
@@ -163,16 +235,16 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             result = self.knot_matcher.match(text)
             if result is None:
                 return None
-            
+
             # Extract brand from result
             brand = self._extract_brand_from_result(result)
             if not brand:
                 return result  # No brand to exclude
-            
+
             # Check if brand is in excluded set (case-insensitive)
             if brand.lower() in {b.lower() for b in excluded_brands}:
                 return None
-            
+
             return result
         except Exception:
             # Knot matcher failed, return None
@@ -190,14 +262,14 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         """
         if result is None:
             return ""
-        
+
         # Handle MatchResult objects
         if hasattr(result, "matched"):
             matched_data = result.matched or {}
         else:
             # Handle dict results
             matched_data = result or {}
-        
+
         # Extract brand based on result type
         # Handle results have "handle_maker" field
         if "handle_maker" in matched_data:
@@ -207,7 +279,7 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             brand = matched_data.get("brand", "")
         else:
             brand = ""
-        
+
         # Return lowercase for consistent comparison
         return brand.lower() if brand else ""
 

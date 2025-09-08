@@ -374,9 +374,7 @@ class TestFullInputComponentMatchingStrategy:
         # Mock no handle match
         self.handle_matcher.match_handle_maker.return_value = None
 
-        result = self.strategy._match_handle_with_exclusions(
-            "Invalid Handle", {"Some Brand"}
-        )
+        result = self.strategy._match_handle_with_exclusions("Invalid Handle", {"Some Brand"})
         assert result is None
 
     def test_match_handle_with_exclusions_exception_handling(self):
@@ -384,9 +382,7 @@ class TestFullInputComponentMatchingStrategy:
         # Mock handle matcher exception
         self.handle_matcher.match_handle_maker.side_effect = Exception("Handle matcher error")
 
-        result = self.strategy._match_handle_with_exclusions(
-            "Test Handle", {"Some Brand"}
-        )
+        result = self.strategy._match_handle_with_exclusions("Test Handle", {"Some Brand"})
         assert result is None
 
     def test_match_knot_with_exclusions_excludes_matching_brand(self):
@@ -449,9 +445,7 @@ class TestFullInputComponentMatchingStrategy:
         # Mock no knot match
         self.knot_matcher.match.return_value = None
 
-        result = self.strategy._match_knot_with_exclusions(
-            "Invalid Knot", {"Some Brand"}
-        )
+        result = self.strategy._match_knot_with_exclusions("Invalid Knot", {"Some Brand"})
         assert result is None
 
     def test_match_knot_with_exclusions_exception_handling(self):
@@ -459,9 +453,7 @@ class TestFullInputComponentMatchingStrategy:
         # Mock knot matcher exception
         self.knot_matcher.match.side_effect = Exception("Knot matcher error")
 
-        result = self.strategy._match_knot_with_exclusions(
-            "Test Knot", {"Some Brand"}
-        )
+        result = self.strategy._match_knot_with_exclusions("Test Knot", {"Some Brand"})
         assert result is None
 
     def test_extract_brand_from_handle_result(self):
@@ -472,7 +464,7 @@ class TestFullInputComponentMatchingStrategy:
             match_type="handle_match",
             strategy="HandleMatcher",
         )
-        
+
         brand = self.strategy._extract_brand_from_result(handle_result)
         assert brand == "declaration grooming"
 
@@ -485,21 +477,21 @@ class TestFullInputComponentMatchingStrategy:
             pattern="declaration.*b2",
             strategy="KnotMatcher",
         )
-        
+
         brand = self.strategy._extract_brand_from_result(knot_result)
         assert brand == "declaration grooming"
 
     def test_extract_brand_from_dict_result(self):
         """Test brand extraction from dict result."""
         handle_dict = {"handle_maker": "Declaration Grooming", "handle_model": "Washington"}
-        
+
         brand = self.strategy._extract_brand_from_result(handle_dict)
         assert brand == "declaration grooming"
 
     def test_extract_brand_from_knot_dict_result(self):
         """Test brand extraction from knot dict result."""
         knot_dict = {"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"}
-        
+
         brand = self.strategy._extract_brand_from_result(knot_dict)
         assert brand == "declaration grooming"
 
@@ -511,14 +503,14 @@ class TestFullInputComponentMatchingStrategy:
     def test_extract_brand_from_empty_result(self):
         """Test brand extraction from empty result."""
         empty_dict = {}
-        
+
         brand = self.strategy._extract_brand_from_result(empty_dict)
         assert brand == ""
 
     def test_extract_brand_from_result_without_brand_fields(self):
         """Test brand extraction from result without brand fields."""
         result_without_brand = {"some_field": "some_value"}
-        
+
         brand = self.strategy._extract_brand_from_result(result_without_brand)
         assert brand == ""
 
@@ -530,6 +522,249 @@ class TestFullInputComponentMatchingStrategy:
             match_type="handle_match",
             strategy="HandleMatcher",
         )
-        
+
         brand = self.strategy._extract_brand_from_result(handle_result)
         assert brand == "declaration grooming"
+
+    def test_match_all_generates_multiple_results_for_same_brand(self):
+        """Test that match_all generates multiple results when both components have same brand."""
+        # Mock handle match with specific brand
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match with same brand
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Mock alternative handle with different brand
+        alternative_handle_result = MatchResult(
+            original="AP Shave Co Handle",
+            matched={"handle_maker": "AP Shave Co", "handle_model": "Handle"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.side_effect = [
+            handle_result,  # First call returns original
+            alternative_handle_result,  # Second call returns alternative
+        ]
+
+        # Mock alternative knot with different brand
+        alternative_knot_result = MatchResult(
+            original="AP Shave Co Knot",
+            matched={"brand": "AP Shave Co", "model": "Knot", "fiber": "Synthetic"},
+            match_type="exact",
+            pattern="ap shave co.*knot",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.side_effect = [
+            knot_result,  # First call returns original
+            alternative_knot_result,  # Second call returns alternative
+        ]
+
+        results = self.strategy.match_all("Declaration Grooming Washington B2")
+
+        # Should have multiple results
+        assert len(results) >= 1  # At least the original combination
+        assert all(isinstance(result, MatchResult) for result in results)
+        assert all(result.strategy == "full_input_component_matching" for result in results)
+        assert all(result.match_type == "composite" for result in results)
+
+    def test_match_all_deduplicates_identical_combinations(self):
+        """Test that match_all deduplicates identical brand combinations."""
+        # Mock handle match
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        results = self.strategy.match_all("Declaration Grooming Washington B2")
+
+        # Should have exactly one result (no duplicates)
+        assert len(results) == 1
+        assert results[0].strategy == "full_input_component_matching"
+        assert results[0].match_type == "composite"
+
+    def test_match_all_preserves_single_component_matching(self):
+        """Test that match_all preserves single component matching logic."""
+        # Mock handle match only
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock no knot match
+        self.knot_matcher.match.return_value = None
+
+        results = self.strategy.match_all("Declaration Grooming Washington")
+
+        # Should have one single component result
+        assert len(results) == 1
+        assert results[0].strategy == "full_input_component_matching"
+        assert results[0].match_type == "single_component"
+
+    def test_match_all_handles_no_matches(self):
+        """Test that match_all handles no matches correctly."""
+        # Mock no matches
+        self.handle_matcher.match_handle_maker.return_value = None
+        self.knot_matcher.match.return_value = None
+
+        results = self.strategy.match_all("Invalid Brush String")
+
+        # Should return empty list
+        assert results == []
+
+    def test_match_all_handles_empty_input(self):
+        """Test that match_all handles empty input correctly."""
+        results = self.strategy.match_all("")
+        assert results == []
+
+    def test_match_all_handles_dict_input(self):
+        """Test that match_all handles dict input correctly."""
+        # Mock handle match
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Test with dict input
+        dict_input = {
+            "normalized": "Declaration Grooming Washington B2",
+            "original": "Declaration Grooming Washington B2",
+        }
+        results = self.strategy.match_all(dict_input)
+
+        # Should work the same as string input
+        assert len(results) >= 1
+        assert all(isinstance(result, MatchResult) for result in results)
+
+    def test_generate_alternative_combinations_creates_alternatives(self):
+        """Test that _generate_alternative_combinations creates alternative combinations."""
+        # Mock original handle result
+        original_handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+
+        # Mock original knot result
+        original_knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+
+        # Mock alternative handle result
+        alternative_handle_result = MatchResult(
+            original="AP Shave Co Handle",
+            matched={"handle_maker": "AP Shave Co", "handle_model": "Handle"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+
+        # Mock alternative knot result
+        alternative_knot_result = MatchResult(
+            original="AP Shave Co Knot",
+            matched={"brand": "AP Shave Co", "model": "Knot", "fiber": "Synthetic"},
+            match_type="exact",
+            pattern="ap shave co.*knot",
+            strategy="KnotMatcher",
+        )
+
+        # Mock the exclusion methods to return alternatives
+        self.strategy._match_handle_with_exclusions = lambda text, excluded: (
+            alternative_handle_result if "declaration grooming" in excluded else None
+        )
+        self.strategy._match_knot_with_exclusions = lambda text, excluded: (
+            alternative_knot_result if "declaration grooming" in excluded else None
+        )
+
+        results = []
+        seen_combinations = set()
+
+        # Call the method
+        self.strategy._generate_alternative_combinations(
+            "test text", original_handle_result, original_knot_result, results, seen_combinations
+        )
+
+        # Should have created alternative combinations
+        assert len(results) >= 1  # At least one alternative combination
+        assert all(isinstance(result, MatchResult) for result in results)
+        assert all(result.strategy == "full_input_component_matching" for result in results)
+        assert all(result.match_type == "composite" for result in results)
+
+    def test_generate_alternative_combinations_handles_no_alternatives(self):
+        """Test that _generate_alternative_combinations handles no alternatives gracefully."""
+        # Mock original handle result
+        original_handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+
+        # Mock original knot result
+        original_knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+
+        # Mock the exclusion methods to return None (no alternatives)
+        self.strategy._match_handle_with_exclusions = lambda text, excluded: None
+        self.strategy._match_knot_with_exclusions = lambda text, excluded: None
+
+        results = []
+        seen_combinations = set()
+
+        # Call the method
+        self.strategy._generate_alternative_combinations(
+            "test text", original_handle_result, original_knot_result, results, seen_combinations
+        )
+
+        # Should not have created any new combinations
+        assert len(results) == 0
