@@ -1,0 +1,301 @@
+---
+description: Fix "Synthetic" showing as "Unconfirmed" in MatchAnalyzer frontend
+globs: webui/src/pages/MatchAnalyzer.tsx,webui/api/analysis.py,sotd/match/tools/analyzers/mismatch_analyzer.py
+alwaysApply: false
+---
+
+# Synthetic "Unconfirmed" Bug Fix Implementation Plan
+
+## 📘 Project Summary
+Fix a bug where "Synthetic" brush items are showing as "Unconfirmed" in the MatchAnalyzer frontend UI, despite being correctly processed by the backend as confirmed split brush components. The backend logic has been fixed, but there's a disconnect between the backend API response and frontend display.
+
+## 🚀 Progress Status
+**Current Status**: Backend fixes completed, frontend investigation needed
+**Last Updated**: 2025-09-08
+
+### ✅ Completed Work
+1. **Backend Split Brush Logic Fixed** - Updated `_is_split_brush` method to correctly identify knot-only components like "Synthetic"
+2. **Backend Confirmation Logic Fixed** - Updated `_is_split_brush_confirmed` method to properly check correct matches
+3. **Test Suite Updated** - All split brush tests are passing (17/17)
+4. **API Response Verified** - Backend correctly processes "Synthetic" and does NOT return it as a mismatch (correct behavior)
+5. **Data Structure Analysis** - Confirmed "Synthetic" has correct structure: `brand=null, model="Synthetic"` with knot component
+
+### 🔍 Key Findings
+- **Backend Working Correctly**: "Synthetic" is properly identified as a confirmed split brush
+- **API Not Returning Mismatch**: "Synthetic" does not appear in mismatch items (expected behavior)
+- **Frontend Issue**: UI still shows "Synthetic" as "Unconfirmed" despite backend being correct
+- **Root Cause**: Disconnect between backend API response and frontend display logic
+
+### 📚 Lessons Learned
+1. **Split Brush Detection**: Knot-only components need special handling in `_is_split_brush` logic
+2. **Confirmation Logic**: Must use full original text for correct matches key construction
+3. **Data Structure**: Split brushes have nested `handle`/`knot` components under `matched` field
+4. **API Behavior**: Correctly matched items don't appear in mismatch analysis (by design)
+5. **Frontend-Backend Disconnect**: Backend fixes don't automatically resolve frontend display issues
+
+### 🔧 Technical Details
+**"Synthetic" Data Structure**:
+```json
+{
+  "original": "Synthetic",
+  "normalized": "Synthetic", 
+  "matched": {
+    "brand": null,
+    "model": "Synthetic",
+    "handle": {"brand": null, "model": null},
+    "knot": {"brand": null, "model": "Synthetic", "fiber": "Synthetic"}
+  }
+}
+```
+
+**Backend Fixes Applied**:
+- `_is_split_brush()`: Now correctly identifies knot-only components
+- `_is_split_brush_confirmed()`: Now properly checks correct matches using `knot:synthetic` key
+- Key construction: Uses `{field}:{normalized_text}` format for correct matches lookup
+
+**API Response Status**:
+- Total matches: 2275
+- Total mismatches: 359
+- "Synthetic" does NOT appear in mismatch items (correct behavior)
+
+## 🧩 Component Steps
+
+### Step 1: Frontend Data Flow Investigation ⚠️ IN PROGRESS
+**Goal**: Understand how the frontend receives and processes mismatch data from the backend API
+
+**Context**: Backend is working correctly - "Synthetic" is properly identified as confirmed and does NOT appear in mismatch items. The issue is in the frontend display logic.
+
+**Acceptance Criteria**:
+- Identify the exact API endpoint being called by MatchAnalyzer.tsx
+- Verify the data structure being received from the backend
+- Check if there are any data transformation steps between API and UI
+- Document the current data flow from backend to frontend
+- **CRITICAL**: Determine why frontend shows "Synthetic" as "Unconfirmed" when it's not in mismatch data
+
+### Step 2: Frontend Caching and State Management Analysis
+**Goal**: Identify potential caching issues or stale state that might be causing the UI to display outdated information
+
+**Acceptance Criteria**:
+- Check for browser caching issues
+- Verify React state management and re-rendering logic
+- Identify any local storage or session storage usage
+- Test with hard refresh and cache clearing
+
+### Step 3: API Response Verification and Debugging ✅ COMPLETED
+**Goal**: Ensure the backend API is returning the correct data structure and that the frontend is receiving it properly
+
+**Status**: COMPLETED - Backend API is working correctly
+- ✅ API does NOT return "Synthetic" as a mismatch item (correct behavior)
+- ✅ Backend correctly identifies "Synthetic" as a confirmed split brush
+- ✅ All split brush logic is working properly
+- ✅ Tests are passing (17/17)
+
+**Acceptance Criteria**:
+- ✅ Verify API response includes correct `is_confirmed` status for split brushes
+- ✅ Check if `is_split_brush`, `handle_component`, and `knot_component` fields are present
+- ✅ Test API response with curl and compare with frontend network requests
+- ✅ Add debugging logs to track data flow
+
+**Key Finding**: The issue is NOT in the backend - it's in the frontend display logic.
+
+### Step 4: Frontend Display Logic Fix
+**Goal**: Fix the frontend logic to correctly display confirmation status for split brush components
+
+**Acceptance Criteria**:
+- Update MatchAnalyzer.tsx to properly handle split brush confirmation logic
+- Ensure `isItemConfirmed` function works correctly for split brushes
+- Add proper handling for `is_split_brush`, `handle_component`, and `knot_component` fields
+- Test with various split brush scenarios
+
+### Step 5: Integration Testing and Validation
+**Goal**: Verify the complete fix works end-to-end and test with real data
+
+**Acceptance Criteria**:
+- Test "Synthetic" shows as "Confirmed" in the UI
+- Test other split brush components work correctly
+- Verify no regressions in regular brush display
+- Test with different months and field combinations
+
+## 🔁 Implementation Prompts
+
+```text
+# Step 1: Frontend Data Flow Investigation
+
+Investigate the data flow in MatchAnalyzer.tsx to understand how mismatch data is received and processed from the backend API.
+
+**Context**: We have a bug where "Synthetic" brush items show as "Unconfirmed" in the frontend despite being correctly processed by the backend. The backend has been fixed to properly identify split brushes and set confirmation status, but the frontend is not reflecting this.
+
+**Tasks**:
+1. Examine MatchAnalyzer.tsx to identify:
+   - Which API endpoint is being called for mismatch data
+   - How the data is fetched and stored in React state
+   - The data structure expected by the component
+   - Any data transformation or filtering logic
+
+2. Check the API integration:
+   - Verify the correct endpoint is being called
+   - Check if there are any query parameters or filters applied
+   - Identify any error handling or fallback logic
+
+3. Document the current data flow:
+   - API call → data processing → state update → UI rendering
+   - Identify any potential points where data might be lost or transformed incorrectly
+
+**Deliverables**:
+- Clear documentation of the current data flow
+- Identification of the exact API endpoint and data structure
+- List of any potential issues in the current implementation
+```
+
+```text
+# Step 2: Frontend Caching and State Management Analysis
+
+Analyze potential caching issues and React state management that might be causing stale data to be displayed.
+
+**Context**: The backend is working correctly, but the frontend is showing outdated information. This suggests either a caching issue or a problem with React state management.
+
+**Tasks**:
+1. Check for caching issues:
+   - Browser cache (hard refresh test)
+   - Service worker cache
+   - API response caching
+   - React component memoization
+
+2. Analyze React state management:
+   - Check if state is being updated correctly when new data arrives
+   - Verify re-rendering triggers
+   - Look for stale closure issues
+   - Check for race conditions in data fetching
+
+3. Test cache clearing:
+   - Hard refresh the browser
+   - Clear browser cache completely
+   - Test in incognito/private mode
+   - Check if the issue persists
+
+**Deliverables**:
+- Identification of any caching issues
+- Analysis of React state management problems
+- Test results for cache clearing
+- Recommendations for fixing any identified issues
+```
+
+```text
+# Step 3: API Response Verification and Debugging
+
+Verify that the backend API is returning the correct data and that the frontend is receiving it properly.
+
+**Context**: We need to ensure the API is returning the correct data structure with proper confirmation status for split brushes, and that the frontend is receiving and processing this data correctly.
+
+**Tasks**:
+1. Test API response directly:
+   - Use curl to test the mismatch API endpoint
+   - Verify the response includes correct `is_confirmed` status
+   - Check for presence of `is_split_brush`, `handle_component`, and `knot_component` fields
+   - Test with different months and field combinations
+
+2. Add debugging to frontend:
+   - Add console.log statements to track API responses
+   - Log the data received in React components
+   - Add network request monitoring
+   - Compare API response with what the component receives
+
+3. Verify data structure:
+   - Ensure the API response matches what the frontend expects
+   - Check for any data transformation issues
+   - Verify field names and data types
+
+**Deliverables**:
+- Verified API response structure
+- Debugging logs showing data flow
+- Identification of any data structure mismatches
+- Confirmation that the API is working correctly
+```
+
+```text
+# Step 4: Frontend Display Logic Fix
+
+Fix the frontend logic to correctly display confirmation status for split brush components.
+
+**Context**: Once we've identified the data flow and verified the API is working, we need to fix the frontend logic to properly handle split brush confirmation status.
+
+**Tasks**:
+1. Update MatchAnalyzer.tsx:
+   - Fix the `isItemConfirmed` function to handle split brushes correctly
+   - Add proper handling for `is_split_brush`, `handle_component`, and `knot_component` fields
+   - Ensure the UI displays the correct confirmation status
+
+2. Add split brush specific logic:
+   - Handle cases where items are split brushes
+   - Display appropriate confirmation status based on component confirmation
+   - Add visual indicators for split brush components
+
+3. Test the updated logic:
+   - Test with "Synthetic" specifically
+   - Test with other split brush scenarios
+   - Ensure no regressions in regular brush display
+
+**Deliverables**:
+- Updated MatchAnalyzer.tsx with correct split brush handling
+- Working confirmation status display for split brushes
+- Test results showing "Synthetic" displays as "Confirmed"
+```
+
+```text
+# Step 5: Integration Testing and Validation
+
+Verify the complete fix works end-to-end and test with real data to ensure no regressions.
+
+**Context**: After implementing the frontend fixes, we need to thoroughly test the complete solution to ensure it works correctly and doesn't introduce any regressions.
+
+**Tasks**:
+1. End-to-end testing:
+   - Test "Synthetic" shows as "Confirmed" in the UI
+   - Test other split brush components work correctly
+   - Test regular brushes still work as expected
+   - Test with different months and field combinations
+
+2. Regression testing:
+   - Verify existing functionality still works
+   - Test edge cases and error scenarios
+   - Ensure performance is not impacted
+
+3. User acceptance testing:
+   - Verify the fix meets the original requirements
+   - Test the complete user workflow
+   - Ensure the UI is intuitive and clear
+
+**Deliverables**:
+- Complete end-to-end test results
+- Verification that "Synthetic" displays correctly
+- Confirmation of no regressions
+- Documentation of the final solution
+```
+
+## 🧠 Critical Analysis
+
+**Current Status Update**:
+The plan has been updated to reflect significant progress. Backend investigation and fixes are complete, and we've identified that the issue is purely in the frontend display logic.
+
+**Key Insights from Investigation**:
+1. **Backend is Working Correctly**: All backend logic has been fixed and tested
+2. **API Behavior is Correct**: "Synthetic" not appearing in mismatches is expected behavior
+3. **Frontend is the Issue**: The UI is displaying incorrect status despite correct backend processing
+4. **Data Flow Disconnect**: There's a mismatch between what the backend provides and what the frontend displays
+
+**Updated Risk Assessment**:
+- **Very Low Risk**: Frontend-only changes, easily revertible
+- **No Backend Risk**: Backend changes are complete and tested
+- **Frontend Focus**: All remaining work is in React components
+
+**Refined Success Criteria**:
+- "Synthetic" displays as "Confirmed" in the UI (not "Unconfirmed")
+- Frontend correctly handles split brush confirmation logic
+- No regressions in existing functionality
+- Clear understanding of why frontend was showing incorrect status
+
+**Next Steps Priority**:
+1. **IMMEDIATE**: Investigate frontend data flow and display logic
+2. **HIGH**: Identify why UI shows "Unconfirmed" when item isn't in mismatch data
+3. **MEDIUM**: Fix frontend confirmation logic for split brushes
+4. **LOW**: Add comprehensive testing and documentation
