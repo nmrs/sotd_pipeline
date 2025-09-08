@@ -1068,6 +1068,7 @@ brush:
     '10005':
     - omega 10005
     '10048':
+    - omega - 10048
     - omega - 10048 (pro 48) 28mm boar
     - omega - 10048 28mm boar
     - omega - 10048 boar
@@ -1175,6 +1176,8 @@ brush:
     '610':
     - semogue 610
     - semogue 610 21mm boar
+    '820':
+    - semogue - 820
     '830':
     - semogue - semogue 830, boar bristle 22mm
     - semogue 830
@@ -1230,6 +1233,7 @@ brush:
     - simpson - 'chubby 2' silvertip
     - simpson ch2 super badger super badger
     - simpson chubby 2 manchurian
+    - simpson's chubby two ebony manchurian badger
     Chubby 2 Synthetic:
     - simpsons chubby 2 synthetic
     Chubby 3:

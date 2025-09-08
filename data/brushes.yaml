@@ -418,7 +418,7 @@ known_brushes:
     "820":
       knot_size_mm: 22
       patterns:
-        - semogue\s*820
+        - semogue.*820
     "830":
       knot_size_mm: 22
       patterns:
@@ -496,7 +496,7 @@ known_brushes:
       knot_size_mm: 27
       patterns:
         - simp.*chubby\s*2\b
-        - simp.*chubby*two
+        - simp.*chubby.*two
         - simp.*ch2\b
     Chubby 2 Synthetic:
       fiber: Synthetic
