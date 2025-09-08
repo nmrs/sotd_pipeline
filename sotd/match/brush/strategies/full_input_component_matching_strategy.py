@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Unified component matching strategy that handles both dual and single component matches."""
 
-from typing import Optional
+from typing import Optional, List
 
 from .base_brush_matching_strategy import (
-    BaseBrushMatchingStrategy,
+    BaseMultiResultBrushMatchingStrategy,
 )
 
 # ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
 
 
-class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
+class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
     """
     Unified strategy for component matching that handles both dual and single component scenarios.
 
@@ -38,12 +38,26 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
     def match(self, value: str | dict) -> Optional[MatchResult]:
         """
         Match a brush string using unified component matching logic.
+        Returns the best single result for backward compatibility.
 
         Args:
             value: The brush string or field data object to match
 
         Returns:
             MatchResult or None
+        """
+        all_results = self.match_all(value)
+        return all_results[0] if all_results else None
+
+    def match_all(self, value: str | dict) -> List[MatchResult]:
+        """
+        Match a brush string and return all possible brand combination results.
+
+        Args:
+            value: The brush string or field data object to match
+
+        Returns:
+            List of MatchResult objects for all possible matches
         """
         # Handle both string and field data object inputs
         if isinstance(value, dict):
@@ -54,7 +68,11 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             text = value
 
         if not text or not isinstance(text, str):
-            return None
+            return []
+
+        # For now, implement basic single result logic
+        # This will be enhanced in Step 3 to generate multiple brand combinations
+        results = []
 
         # Run both matchers once
         handle_result = None
@@ -79,7 +97,7 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             if result:
                 result.strategy = "full_input_component_matching"  # Base score 75 + modifiers
                 result.match_type = "composite"
-            return result
+                results.append(result)
         elif handle_result or knot_result:
             # Only one matched - single component
             if handle_result:
@@ -87,15 +105,59 @@ class FullInputComponentMatchingStrategy(BaseBrushMatchingStrategy):
             elif knot_result:
                 result = self._convert_knot_result_to_brush_result(knot_result)
             else:
-                return None
+                return []
 
             if result:
                 result.strategy = "full_input_component_matching"  # Base score 75
                 result.match_type = "single_component"
-            return result
-        else:
-            # Neither matched
-            return None
+                results.append(result)
+
+        return results
+
+    def _match_handle_with_exclusions(
+        self, text: str, excluded_brands: set[str]
+    ) -> Optional[MatchResult]:
+        """
+        Match handle while excluding specific brands.
+
+        Args:
+            text: Text to match against
+            excluded_brands: Set of brand names to exclude (case-insensitive)
+
+        Returns:
+            MatchResult if match found and brand not excluded, None otherwise
+        """
+        # TODO: Implement in Step 2
+        pass
+
+    def _match_knot_with_exclusions(
+        self, text: str, excluded_brands: set[str]
+    ) -> Optional[MatchResult]:
+        """
+        Match knot while excluding specific brands.
+
+        Args:
+            text: Text to match against
+            excluded_brands: Set of brand names to exclude (case-insensitive)
+
+        Returns:
+            MatchResult if match found and brand not excluded, None otherwise
+        """
+        # TODO: Implement in Step 2
+        pass
+
+    def _extract_brand_from_result(self, result) -> str:
+        """
+        Extract brand name from a match result for consistent comparison.
+
+        Args:
+            result: MatchResult or dict containing match data
+
+        Returns:
+            Lowercase brand name for consistent comparison
+        """
+        # TODO: Implement in Step 2
+        pass
 
     def _create_dual_component_result(self, handle_result, knot_result, value: str) -> MatchResult:
         """Create a dual component result combining handle and knot."""

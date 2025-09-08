@@ -211,3 +211,106 @@ class TestFullInputComponentMatchingStrategy:
         assert result.matched["knot"]["brand"] == "AP Shave Co"
         assert result.matched["knot"]["model"] == "G5C"
         assert result.matched["knot"]["fiber"] == "Synthetic"
+
+    def test_match_all_returns_list(self):
+        """Test that match_all() returns a list of MatchResult objects."""
+        # Mock handle match
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match
+        knot_result = MatchResult(
+            original="Declaration Grooming Washington B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        results = self.strategy.match_all("Declaration Grooming Washington B2")
+
+        assert isinstance(results, list)
+        assert len(results) == 1
+        assert isinstance(results[0], MatchResult)
+        assert results[0].strategy == "full_input_component_matching"
+
+    def test_match_all_empty_input_returns_empty_list(self):
+        """Test that match_all() returns empty list for empty input."""
+        results = self.strategy.match_all("")
+        assert results == []
+
+    def test_match_all_no_match_returns_empty_list(self):
+        """Test that match_all() returns empty list when no matches found."""
+        # Mock no handle match
+        self.handle_matcher.match_handle_maker.return_value = None
+        # Mock no knot match
+        self.knot_matcher.match.return_value = None
+
+        results = self.strategy.match_all("Invalid Brush String")
+        assert results == []
+
+    def test_match_still_returns_single_result(self):
+        """Test that match() still returns a single result for backward compatibility."""
+        # Mock handle match
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Mock knot match
+        knot_result = MatchResult(
+            original="Declaration Grooming Washington B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        result = self.strategy.match("Declaration Grooming Washington B2")
+
+        assert isinstance(result, MatchResult)
+        assert result.strategy == "full_input_component_matching"
+
+    def test_match_returns_none_when_no_results(self):
+        """Test that match() returns None when no results found."""
+        # Mock no handle match
+        self.handle_matcher.match_handle_maker.return_value = None
+        # Mock no knot match
+        self.knot_matcher.match.return_value = None
+
+        result = self.strategy.match("Invalid Brush String")
+        assert result is None
+
+    def test_brand_exclusion_methods_exist(self):
+        """Test that brand exclusion methods exist and have correct signatures."""
+        # Test that methods exist
+        assert hasattr(self.strategy, "_match_handle_with_exclusions")
+        assert hasattr(self.strategy, "_match_knot_with_exclusions")
+        assert hasattr(self.strategy, "_extract_brand_from_result")
+
+        # Test method signatures (they should be callable)
+        assert callable(self.strategy._match_handle_with_exclusions)
+        assert callable(self.strategy._match_knot_with_exclusions)
+        assert callable(self.strategy._extract_brand_from_result)
+
+    def test_brand_exclusion_methods_placeholder_behavior(self):
+        """Test that brand exclusion methods return None as placeholders."""
+        # These methods are placeholders and should return None
+        result = self.strategy._match_handle_with_exclusions("test", {"brand1"})
+        assert result is None
+
+        result = self.strategy._match_knot_with_exclusions("test", {"brand1"})
+        assert result is None
+
+        result = self.strategy._extract_brand_from_result(None)
+        assert result is None
