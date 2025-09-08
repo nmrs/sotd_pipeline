@@ -57,7 +57,7 @@ class MismatchAnalysisRequest(BaseModel):
 
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
     months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
-    threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
+    threshold: int = Field(default=3, ge=0, le=10, description="Levenshtein distance threshold")
     use_enriched_data: bool = Field(
         default=False, description="Use enriched data instead of matched data"
     )
