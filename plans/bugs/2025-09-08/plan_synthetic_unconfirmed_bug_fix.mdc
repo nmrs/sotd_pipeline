@@ -10,7 +10,7 @@ alwaysApply: false
 Fix a bug where "Synthetic" brush items are showing as "Unconfirmed" in the MatchAnalyzer frontend UI, despite being correctly processed by the backend as confirmed split brush components. The backend logic has been fixed, but there's a disconnect between the backend API response and frontend display.
 
 ## 🚀 Progress Status
-**Current Status**: Backend fixes completed, frontend investigation needed
+**Current Status**: Bug fixed - API response creation updated to include split brush fields
 **Last Updated**: 2025-09-08
 
 ### ✅ Completed Work
@@ -19,19 +19,21 @@ Fix a bug where "Synthetic" brush items are showing as "Unconfirmed" in the Matc
 3. **Test Suite Updated** - All split brush tests are passing (17/17)
 4. **API Response Verified** - Backend correctly processes "Synthetic" and does NOT return it as a mismatch (correct behavior)
 5. **Data Structure Analysis** - Confirmed "Synthetic" has correct structure: `brand=null, model="Synthetic"` with knot component
+6. **API Response Fix** - Fixed API response creation to include split brush fields (`is_split_brush`, `handle_component`, `knot_component`)
 
 ### 🔍 Key Findings
 - **Backend Working Correctly**: "Synthetic" is properly identified as a confirmed split brush
-- **API Not Returning Mismatch**: "Synthetic" does not appear in mismatch items (expected behavior)
-- **Frontend Issue**: UI still shows "Synthetic" as "Unconfirmed" despite backend being correct
-- **Root Cause**: Disconnect between backend API response and frontend display logic
+- **API Response Issue**: Split brush fields were missing from `MismatchItem` creation in API
+- **Root Cause**: API was not passing split brush fields from analyzer results to frontend
+- **Fix Applied**: Updated API response creation to include split brush fields from analyzer results
 
 ### 📚 Lessons Learned
 1. **Split Brush Detection**: Knot-only components need special handling in `_is_split_brush` logic
 2. **Confirmation Logic**: Must use full original text for correct matches key construction
 3. **Data Structure**: Split brushes have nested `handle`/`knot` components under `matched` field
 4. **API Behavior**: Correctly matched items don't appear in mismatch analysis (by design)
-5. **Frontend-Backend Disconnect**: Backend fixes don't automatically resolve frontend display issues
+5. **API Response Creation**: Must explicitly pass all fields from analyzer results to API response
+6. **Frontend-Backend Data Flow**: Backend fixes don't automatically resolve frontend display issues if API response is incomplete
 
 ### 🔧 Technical Details
 **"Synthetic" Data Structure**:
@@ -57,20 +59,28 @@ Fix a bug where "Synthetic" brush items are showing as "Unconfirmed" in the Matc
 - Total matches: 2275
 - Total mismatches: 359
 - "Synthetic" does NOT appear in mismatch items (correct behavior)
+- "Synthetic" appears in "all" display mode with `is_confirmed: true`
+- Split brush fields now properly populated: `is_split_brush: true`, `knot_component: "Synthetic"`
+
+**API Fix Applied**:
+- Updated `MismatchItem` creation in `webui/api/analysis.py` to include split brush fields
+- Added `is_split_brush=item.get("is_split_brush")`, `handle_component=item.get("handle_component")`, `knot_component=item.get("knot_component")`
 
 ## 🧩 Component Steps
 
-### Step 1: Frontend Data Flow Investigation ⚠️ IN PROGRESS
+### Step 1: Frontend Data Flow Investigation ✅ COMPLETED
 **Goal**: Understand how the frontend receives and processes mismatch data from the backend API
 
-**Context**: Backend is working correctly - "Synthetic" is properly identified as confirmed and does NOT appear in mismatch items. The issue is in the frontend display logic.
+**Context**: Backend is working correctly - "Synthetic" is properly identified as confirmed and does NOT appear in mismatch items. The issue was in the API response creation.
 
-**Acceptance Criteria**:
-- Identify the exact API endpoint being called by MatchAnalyzer.tsx
-- Verify the data structure being received from the backend
-- Check if there are any data transformation steps between API and UI
-- Document the current data flow from backend to frontend
-- **CRITICAL**: Determine why frontend shows "Synthetic" as "Unconfirmed" when it's not in mismatch data
+**Results**:
+- ✅ Identified API endpoint: `/api/analyze/mismatch` with `display_mode: "all"`
+- ✅ Verified data structure: "Synthetic" appears in "all" mode with `is_confirmed: true`
+- ✅ Found root cause: Split brush fields (`is_split_brush`, `handle_component`, `knot_component`) were not being passed from analyzer results to API response
+- ✅ Fixed API response creation to include split brush fields
+- ✅ Verified fix: API now returns proper split brush field values
+
+**Key Finding**: The issue was NOT in the frontend display logic, but in the API response creation where split brush fields were missing from the `MismatchItem` creation.
 
 ### Step 2: Frontend Caching and State Management Analysis
 **Goal**: Identify potential caching issues or stale state that might be causing the UI to display outdated information
