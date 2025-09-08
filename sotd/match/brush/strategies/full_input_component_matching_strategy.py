@@ -127,8 +127,24 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         Returns:
             MatchResult if match found and brand not excluded, None otherwise
         """
-        # TODO: Implement in Step 2
-        pass
+        try:
+            result = self.handle_matcher.match_handle_maker(text)
+            if result is None:
+                return None
+            
+            # Extract brand from result
+            brand = self._extract_brand_from_result(result)
+            if not brand:
+                return result  # No brand to exclude
+            
+            # Check if brand is in excluded set (case-insensitive)
+            if brand.lower() in {b.lower() for b in excluded_brands}:
+                return None
+            
+            return result
+        except Exception:
+            # Handle matcher failed, return None
+            return None
 
     def _match_knot_with_exclusions(
         self, text: str, excluded_brands: set[str]
@@ -143,8 +159,24 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         Returns:
             MatchResult if match found and brand not excluded, None otherwise
         """
-        # TODO: Implement in Step 2
-        pass
+        try:
+            result = self.knot_matcher.match(text)
+            if result is None:
+                return None
+            
+            # Extract brand from result
+            brand = self._extract_brand_from_result(result)
+            if not brand:
+                return result  # No brand to exclude
+            
+            # Check if brand is in excluded set (case-insensitive)
+            if brand.lower() in {b.lower() for b in excluded_brands}:
+                return None
+            
+            return result
+        except Exception:
+            # Knot matcher failed, return None
+            return None
 
     def _extract_brand_from_result(self, result) -> str:
         """
@@ -156,8 +188,28 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         Returns:
             Lowercase brand name for consistent comparison
         """
-        # TODO: Implement in Step 2
-        pass
+        if result is None:
+            return ""
+        
+        # Handle MatchResult objects
+        if hasattr(result, "matched"):
+            matched_data = result.matched or {}
+        else:
+            # Handle dict results
+            matched_data = result or {}
+        
+        # Extract brand based on result type
+        # Handle results have "handle_maker" field
+        if "handle_maker" in matched_data:
+            brand = matched_data.get("handle_maker", "")
+        # Knot results have "brand" field
+        elif "brand" in matched_data:
+            brand = matched_data.get("brand", "")
+        else:
+            brand = ""
+        
+        # Return lowercase for consistent comparison
+        return brand.lower() if brand else ""
 
     def _create_dual_component_result(self, handle_result, knot_result, value: str) -> MatchResult:
         """Create a dual component result combining handle and knot."""

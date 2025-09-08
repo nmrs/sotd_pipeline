@@ -304,13 +304,232 @@ class TestFullInputComponentMatchingStrategy:
         assert callable(self.strategy._extract_brand_from_result)
 
     def test_brand_exclusion_methods_placeholder_behavior(self):
-        """Test that brand exclusion methods return None as placeholders."""
-        # These methods are placeholders and should return None
+        """Test that brand exclusion methods work correctly (no longer placeholders)."""
+        # These methods are now implemented and should work correctly
+        # Test with no mocks - should return None due to no matches
         result = self.strategy._match_handle_with_exclusions("test", {"brand1"})
         assert result is None
 
         result = self.strategy._match_knot_with_exclusions("test", {"brand1"})
         assert result is None
 
+        # _extract_brand_from_result returns empty string for None input
         result = self.strategy._extract_brand_from_result(None)
+        assert result == ""
+
+    def test_match_handle_with_exclusions_excludes_matching_brand(self):
+        """Test that handle matching excludes brands in excluded set."""
+        # Mock handle match with specific brand
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Test exclusion of matching brand
+        result = self.strategy._match_handle_with_exclusions(
+            "Declaration Grooming Washington", {"Declaration Grooming"}
+        )
         assert result is None
+
+    def test_match_handle_with_exclusions_allows_non_matching_brand(self):
+        """Test that handle matching allows brands not in excluded set."""
+        # Mock handle match with specific brand
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Test allowing non-matching brand
+        result = self.strategy._match_handle_with_exclusions(
+            "Declaration Grooming Washington", {"Different Brand"}
+        )
+        assert result is not None
+        assert result == handle_result
+
+    def test_match_handle_with_exclusions_case_insensitive(self):
+        """Test that handle matching exclusion is case-insensitive."""
+        # Mock handle match with specific brand
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        # Test case-insensitive exclusion
+        result = self.strategy._match_handle_with_exclusions(
+            "Declaration Grooming Washington", {"declaration grooming"}
+        )
+        assert result is None
+
+    def test_match_handle_with_exclusions_no_match_returns_none(self):
+        """Test that handle matching returns None when no match found."""
+        # Mock no handle match
+        self.handle_matcher.match_handle_maker.return_value = None
+
+        result = self.strategy._match_handle_with_exclusions(
+            "Invalid Handle", {"Some Brand"}
+        )
+        assert result is None
+
+    def test_match_handle_with_exclusions_exception_handling(self):
+        """Test that handle matching handles exceptions gracefully."""
+        # Mock handle matcher exception
+        self.handle_matcher.match_handle_maker.side_effect = Exception("Handle matcher error")
+
+        result = self.strategy._match_handle_with_exclusions(
+            "Test Handle", {"Some Brand"}
+        )
+        assert result is None
+
+    def test_match_knot_with_exclusions_excludes_matching_brand(self):
+        """Test that knot matching excludes brands in excluded set."""
+        # Mock knot match with specific brand
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Test exclusion of matching brand
+        result = self.strategy._match_knot_with_exclusions(
+            "Declaration Grooming B2", {"Declaration Grooming"}
+        )
+        assert result is None
+
+    def test_match_knot_with_exclusions_allows_non_matching_brand(self):
+        """Test that knot matching allows brands not in excluded set."""
+        # Mock knot match with specific brand
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Test allowing non-matching brand
+        result = self.strategy._match_knot_with_exclusions(
+            "Declaration Grooming B2", {"Different Brand"}
+        )
+        assert result is not None
+        assert result == knot_result
+
+    def test_match_knot_with_exclusions_case_insensitive(self):
+        """Test that knot matching exclusion is case-insensitive."""
+        # Mock knot match with specific brand
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Test case-insensitive exclusion
+        result = self.strategy._match_knot_with_exclusions(
+            "Declaration Grooming B2", {"declaration grooming"}
+        )
+        assert result is None
+
+    def test_match_knot_with_exclusions_no_match_returns_none(self):
+        """Test that knot matching returns None when no match found."""
+        # Mock no knot match
+        self.knot_matcher.match.return_value = None
+
+        result = self.strategy._match_knot_with_exclusions(
+            "Invalid Knot", {"Some Brand"}
+        )
+        assert result is None
+
+    def test_match_knot_with_exclusions_exception_handling(self):
+        """Test that knot matching handles exceptions gracefully."""
+        # Mock knot matcher exception
+        self.knot_matcher.match.side_effect = Exception("Knot matcher error")
+
+        result = self.strategy._match_knot_with_exclusions(
+            "Test Knot", {"Some Brand"}
+        )
+        assert result is None
+
+    def test_extract_brand_from_handle_result(self):
+        """Test brand extraction from handle MatchResult."""
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        
+        brand = self.strategy._extract_brand_from_result(handle_result)
+        assert brand == "declaration grooming"
+
+    def test_extract_brand_from_knot_result(self):
+        """Test brand extraction from knot MatchResult."""
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        
+        brand = self.strategy._extract_brand_from_result(knot_result)
+        assert brand == "declaration grooming"
+
+    def test_extract_brand_from_dict_result(self):
+        """Test brand extraction from dict result."""
+        handle_dict = {"handle_maker": "Declaration Grooming", "handle_model": "Washington"}
+        
+        brand = self.strategy._extract_brand_from_result(handle_dict)
+        assert brand == "declaration grooming"
+
+    def test_extract_brand_from_knot_dict_result(self):
+        """Test brand extraction from knot dict result."""
+        knot_dict = {"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"}
+        
+        brand = self.strategy._extract_brand_from_result(knot_dict)
+        assert brand == "declaration grooming"
+
+    def test_extract_brand_from_none_result(self):
+        """Test brand extraction from None result."""
+        brand = self.strategy._extract_brand_from_result(None)
+        assert brand == ""
+
+    def test_extract_brand_from_empty_result(self):
+        """Test brand extraction from empty result."""
+        empty_dict = {}
+        
+        brand = self.strategy._extract_brand_from_result(empty_dict)
+        assert brand == ""
+
+    def test_extract_brand_from_result_without_brand_fields(self):
+        """Test brand extraction from result without brand fields."""
+        result_without_brand = {"some_field": "some_value"}
+        
+        brand = self.strategy._extract_brand_from_result(result_without_brand)
+        assert brand == ""
+
+    def test_extract_brand_case_insensitive(self):
+        """Test that brand extraction returns lowercase."""
+        handle_result = MatchResult(
+            original="DECLARATION GROOMING Washington",
+            matched={"handle_maker": "DECLARATION GROOMING", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        
+        brand = self.strategy._extract_brand_from_result(handle_result)
+        assert brand == "declaration grooming"
