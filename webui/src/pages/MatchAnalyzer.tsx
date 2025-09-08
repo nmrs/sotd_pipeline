@@ -1184,7 +1184,7 @@ const MatchAnalyzer: React.FC = () => {
               <input
                 id='levenshtein-threshold'
                 type='number'
-                min='1'
+                min='0'
                 max='10'
                 value={threshold}
                 onChange={e => setThreshold(Number(e.target.value))}
