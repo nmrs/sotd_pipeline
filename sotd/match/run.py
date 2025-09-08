@@ -324,7 +324,7 @@ def match_record(
         else:
             if debug:
                 print(f"    🎯 Running brush matcher strategies...")
-            brush_result = brush_matcher.match(normalized_text)
+            brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
             # Convert MatchResult to dict for consistency
             if brush_result is not None:
                 result["brush"] = {

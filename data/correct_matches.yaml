@@ -935,9 +935,6 @@ brush:
   Common Wealth:
     CW Badger:
     - commonwealth 'cw' badger (first shaving brush, purchased on ebay)
-  Commonwealth 'CW':
-    Badger:
-    - commonwealth 'cw' badger bought on ebay
   Craving Shaving:
     Synthetic:
     - cravingshaving 26mm synthetic splendore cyborg
@@ -1125,14 +1122,6 @@ brush:
     - omega - model 40033 24mm boar
     46138 HI-BRUSH Synthetic:
     - omega 0146138 hi-brush, 25mm synthetic shaving brush
-    '46206':
-    - omega hi-brush 146206
-    - omega hi-brush 146206 - 25mm synth
-    - omega hi-brush 146206, 25mm synth
-    - omega hi-brush 46206
-    - omega hi-brush 46206 - made in italy
-    - omega hi-brush 46206 synth
-    - omega hi-brush, 146206, 25mm synth
     '50014':
     - omega 50014 travel boar
     50068 Bambino:
@@ -1165,6 +1154,12 @@ brush:
     - rad dinosaur creations -322- rdc 26mm raptor synth
     - rad dinosaur creations atlas ii 26mm raptor synthentic knot
     - rad dinosaur creations buckeye burl with 26mm raptor knot
+  Runeman Nordic Shave Design:
+    Badger:
+    - runeman nordic shave design
+  Sawdust Creation Studios:
+    Boar:
+    - sawdust creation studios "mallard" 26mm boar
   Semogue:
     '1305':
     - semogue 1305
@@ -1191,11 +1186,13 @@ brush:
     - semogue - galahad c3 premium boar (ib) bristle
     - semogue galahad c3 premium boar
     Pharos C3 Horse:
+    - semogue - pharos c3 pure black horse
     - semogue - pharos-c3, black horse hair 21mm, ocean green beechwood
     - semogue pharos c3 pure black horse hair
     SOC Boar:
     - semogue - owner's club c5 24mm badger/boar
     - semogue - owner's club c5 24mm boar
+    - semogue - owner's club taj
     - semogue - owners club 24mm boar
     - semogue - owners club boar 24mm
     - semogue - owners club taj
@@ -1244,10 +1241,12 @@ brush:
     M7:
     - simpson - 'm7' manchurian
     Trafalgar T2:
+    - simpson simpson trafalgar fibre synthetic t2 (24 mm)
     - simpson trafalgar t2
     - simpsons trafalgar t2
     Trafalgar T3:
     - simpson - trafalgar t3
+    - simpson t3
     - simpson trafalgar t3
     - simpson trafalgar t3 synthetic 26mm
     Wee Scot:
@@ -1597,7 +1596,7 @@ handle:
     - rad dinosaur creations glory oumo rorschach two-band badger
     - rad dinosaur creations gold mine
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
-    - rad dinosaur creations ore-not handle (#43)
+    - rad dinosaur creations ore-not handle
   Rubberset:
     Unspecified:
     - rubberset 400-4
@@ -2318,9 +2317,8 @@ razor:
     - chiseled face legacy
     - chiseled face legacy (aluminum)
     - chiseled face legacy aluminum
-    - chiseled face legacy raw titanium - (#69)
+    - chiseled face legacy raw titanium -
     - chiseled face legacy ti
-    - chiseled face legacy ti (#4)
     - chiseled face legacy titanium
     - chiseled face titanium legacy razor
     - legacy razor
@@ -2504,7 +2502,7 @@ razor:
     - filarmonica 14 7/8 dt
     - filarmonica 14 doble temple (8/8", extra full hollow, carbon steel)
     - filarmonica 14 epbd 1st gen
-    - filarmónica 14 doble temple (2nd gen)
+    - filarmónica 14 doble temple
     - filarmónica doble temple 14
   Fine Accoutrements:
     DE5:
@@ -2610,7 +2608,7 @@ razor:
   Gillette:
     Aristocrat:
     - gillette - aristocrat - no.20
-    - gillette - aristocrat 16 (uk)
+    - gillette - aristocrat 16
     - gillette aristocrat
     - gillette aristocrat '47/'48
     - gillette aristocrat (1948-50)
@@ -3549,7 +3547,7 @@ razor:
     - razorock lupo.58
     - rr lupo 58
     Mamba:
-    - razor rock mamba (.53)
+    - razor rock mamba
     - razor rock mamba .70
     - razorock mamba
     - razorock mamba 70
@@ -3878,7 +3876,7 @@ razor:
     - wade & butcher - 5/8" square point hollow ground
     - wade & butcher - 6/8" barber's notch wedge
     - wade & butcher - 6/8" wedge barber's notch
-    - wade & butcher - straight razor (vintage)
+    - wade & butcher - straight razor
     - wade & butcher 5/8
     - wade & butcher 5/8" hollow ground square point
     - wade & butcher 6/8 extra hollow ground improved tang w/ pre-ban ivory scales

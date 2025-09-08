@@ -568,6 +568,7 @@ known_brushes:
       patterns:
         - simp.*traf.*\bt3
         - trafalgar.*\bt3
+        - simp.*\bt3\b
     Tulip T1:
       fiber: Synthetic
       knot_size_mm: 19
@@ -1405,6 +1406,14 @@ other_brushes:
     default: Badger
     patterns:
       - qshave
+  Runeman Nordic Shave Design:
+    default: Badger
+    patterns:
+      - runeman
+  Sawdust Creation Studios:
+    default: Synthetic
+    patterns:
+      - sawdust
   Semogue:
     default: Boar
     patterns:

@@ -399,5 +399,3 @@ class TestStripSoapPatterns:
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
-
-

@@ -697,12 +697,18 @@ class BrushMatcher:
         # No correct match found
         return None
 
-    def match(self, value: str, bypass_correct_matches: bool = None) -> Optional[MatchResult]:
+    def match(
+        self,
+        value: str,
+        original: Optional[str] = None,
+        bypass_correct_matches: Optional[bool] = None,
+    ) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
 
         Args:
-            value: The brush string to match
+            value: The normalized brush string to match
+            original: The original brush string (defaults to value if not provided)
             bypass_correct_matches: If True, bypass correct_matches.yaml. If None or False, use correct_matches.yaml.
 
         Returns:
@@ -726,6 +732,8 @@ class BrushMatcher:
                 correct_match_result = self._try_correct_matches_strategies(value, cached_results)
                 if correct_match_result:
                     # Correct match found - return immediately, don't run other strategies
+                    if original is not None:
+                        correct_match_result.original = original
                     return correct_match_result
 
             # PHASE 2: Run all other strategies (excluding correct matches if bypassed)
@@ -770,6 +778,10 @@ class BrushMatcher:
 
             # Add strategy persistence fields
             if final_result:
+                # Update the original field to use the provided original text
+                if original is not None:
+                    final_result.original = original
+
                 final_result.all_strategies = all_strategies
 
                 # Add strategy and score directly to the matched data instead of

@@ -335,7 +335,7 @@ def test_blade_normalization_asterisk_stripping(monkeypatch):
 
 def test_blade_normalization_x_usage_counts():
     """Test normalization of X usage count patterns like (16X), (17X)"""
-    from sotd.utils.extract_normalization import strip_blade_count_patterns
+    from sotd.utils.extract_normalization import strip_usage_count_patterns
 
     test_cases = [
         ("FROMM Hair Shaper Blade (16X)", "FROMM Hair Shaper Blade"),
@@ -348,13 +348,13 @@ def test_blade_normalization_x_usage_counts():
     ]
 
     for original, expected in test_cases:
-        result = strip_blade_count_patterns(original)
+        result = strip_usage_count_patterns(original)
         assert result == expected, f"Expected '{expected}', got '{result}' for '{original}'"
 
 
 def test_blade_normalization_maybe_usage_counts():
     """Test normalization of maybe usage count patterns like (17 maybe)"""
-    from sotd.utils.extract_normalization import strip_blade_count_patterns
+    from sotd.utils.extract_normalization import strip_usage_count_patterns
 
     test_cases = [
         ("Gillette Silver Blue (17 maybe)", "Gillette Silver Blue"),
@@ -363,7 +363,7 @@ def test_blade_normalization_maybe_usage_counts():
     ]
 
     for original, expected in test_cases:
-        result = strip_blade_count_patterns(original)
+        result = strip_usage_count_patterns(original)
         assert result == expected, f"Expected '{expected}', got '{result}' for '{original}'"
 
 
