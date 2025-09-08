@@ -360,6 +360,11 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         os.chdir(parent_dir)
 
         try:
+            # Clear catalog cache to ensure fresh data on every analysis
+            from sotd.match.base_matcher import clear_catalog_cache
+
+            clear_catalog_cache()
+
             # Use the brush matcher directly
             from sotd.match.brush_matcher import BrushMatcher
 
