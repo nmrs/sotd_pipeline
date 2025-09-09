@@ -113,4 +113,3 @@ analysis/*.txt
 analysis/*.yaml
 
 # Report archives - generated reports that shouldn't be tracked
-report_archive/
