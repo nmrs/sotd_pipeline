@@ -819,10 +819,11 @@ other_handles:
     Unspecified:
       patterns:
         - djundjila.*brushworx
-  Generic:
+  Unknown:
     Unspecified:
       patterns:
         - burl
+        - unknown
   Marco Rinaldi:
     Unspecified:
       patterns:

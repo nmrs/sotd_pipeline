@@ -795,6 +795,7 @@ brush:
     - the body shop brush
   Boti:
     Boar:
+    - boti boar
     - boti white boar
     Synthetic:
     - boti - sunrise
@@ -828,6 +829,7 @@ brush:
     - chisel & hound 'rob's finest' boar
     - chisel & hound - "rob's finest" boar 25mm
     - chisel & hound rob's finest
+    - chisel & hound rob's finest boar
     - chisel and hound 'rob's finest' boar
     - chisel and hound - rob's finest boar
     - chisel and hound resolute v20 - rob's finest boar
@@ -932,6 +934,8 @@ brush:
     - chisel & hound fanchurian v28 (oumo compass frosted white)
     - chisel and hound - 5582gc "voices" w/ v28 fanchurian badger
     - chisel and hound bloodoath v28
+    v5:
+    - that darn rob (chisel & hound) verdant v5 fanchurian badger
   Common Wealth:
     CW Badger:
     - commonwealth 'cw' badger (first shaving brush, purchased on ebay)
@@ -995,7 +999,6 @@ brush:
     SHD Badger:
     - dogwood 28mm green/white super high density badger
     - dogwood handcrafts ebony 28mm shd badger fan
-    - dogwood handcrafts green white swirl w/ griffith 26mm high mountain shd fan
     - dogwood handcrafts kyle shd
     Synthetic:
     - dogwood 30mm synthetic orange/white
@@ -1131,6 +1134,7 @@ brush:
     '81151':
     - omega 81151
     Boar:
+    - omega boar
     - omega boar one i've had all my life now
     GT Series:
     - omega gt series (gulf racing livery) 29mm synth
@@ -1145,6 +1149,9 @@ brush:
     - proraso professional
     - proraso professional by omega
     - proraso professional shaving brush 28mm
+  Parker:
+    Blue Storm:
+    - parker blue storm
   Rad Dinosaur Creations:
     Black Boarty:
     - rad dinosaur creations - x-626 - 28mm black boarty
@@ -1189,8 +1196,10 @@ brush:
     - semogue - galahad c3 premium boar (ib) bristle
     - semogue galahad c3 premium boar
     Pharos C3 Horse:
+    - semogue - pharos c3 horse
     - semogue - pharos c3 pure black horse
     - semogue - pharos-c3, black horse hair 21mm, ocean green beechwood
+    - semogue pharos c3 horse
     - semogue pharos c3 pure black horse hair
     SOC Boar:
     - semogue - owner's club c5 24mm badger/boar
@@ -1228,7 +1237,15 @@ brush:
     - semogue pegasus c7
     r/wetshaving Brushbutt Boar:
     - semogue 2017 ws exclusive
+  Shave Factory:
+    Boar:
+    - shaving factory xs
+  Shor Shave:
+    Boar:
+    - shore shave - player custom with 24mm blond boar
   Simpson:
+    Berkeley 46:
+    - simpson berkeley 46 best
     Chubby 2:
     - simpson - 'chubby 2' silvertip
     - simpson ch2 super badger super badger
@@ -1239,9 +1256,14 @@ brush:
     Chubby 3:
     - simpson butterscotch ch3 manchurian badger
     Classic 1 Synthetic:
+    - simpson 1 classic synthetic
     - 'simpson classic # 1 synthetic bristle'
     Colonel X2L:
     - simpson - 'colonel' best
+    Commodore X2:
+    - simpsons commodore x2 best badger
+    Farringdon:
+    - simpson farringdon
     M7:
     - simpson - 'm7' manchurian
     Trafalgar T2:
@@ -1265,20 +1287,54 @@ brush:
     2-Band Synthetic:
     - stirling 2 band synthetic
     - stirling 2-band synthetic brush
+    - stirling synthetic 2 band
+    - stirling synthetic two-band brush 24 green
     - stirling two band synthetic
     Boar Brush:
     - boar stirling 24mm boar
+    - stirling boar 24mm
+    - stirling soap co. boar brush 24mm
     Finest Badger:
     - stirling - finest badger shave brush badger
     - stirling finest badger brush
+    Kong Synthetic:
+    - stirling kong
+    Li'l Brudder:
+    - stirling soap company - li'l brudder, synthetic 22mm
+    Synthetic:
+    - stirling - 24mm synthetic
   Stirling/Zenith:
+    28mmx50mm Boar (510SE):
+    - zenith 510se 28mm x 46mm bleached boar knot set in stirling green resin handle
+      (aka less boar stirling edition)
     31mmx50mm Boar (510SE-XL):
+    - stirling x zenith 510se-xl
     - stirling/zenith 510se-xl 31 mm
+    - zenith/stirling - 510se-xl 31mm boar
     Boar:
     - stirling x zenith 508se-xl
+  Supply:
+    Silvertip Synthetic:
+    - supply silvertip synthetic gold
+  Surrey:
+    Boar:
+    - surrey boar
+  Tatara:
+    Masamune Finest Badger:
+    - tatara masamune finest badger
+  Trotter:
+    T1 Manchurian Badger:
+    - trotter handcrafts souls 26mm manchurian t1 badger knot
+  Turn-N-Shave:
+    Tuxedo:
+    - turn n shave custom w/ a tuxedo synth
+  Vie-Long:
+    Spanish Barber Pro:
+    - vie-long spanish barber professional
   Wald:
     A1:
     - wald a1
+    - wald bloodline wave a1 og
     - wald shaving "nimbus werther's/ivory" 29mm a1 fan
   Walfront:
     Travel Brush:
@@ -1286,39 +1342,93 @@ brush:
   West Coast Shaving:
     Synthetic:
     - wcs 26mm synth
+    - wcs tortoise shell torch (synthetic)
+  Wild West Brushworks:
+    Badger:
+    - wildwest blemish dewey silvertip badger
+  Wolf Whiskers:
+    Badger:
+    - wolfe whiskers zydeco
   Yaqi:
+    Cashmere:
+    - yaqi cashmere synthetic shaving brush, dandelion green handle, 24mm
     Ferrari:
     - yaqi ferrari 26mm
     Sagrada:
     - yaqi sagrada
+    - yaqi sagrada familia tuxedo 24 mm
     Synthetic:
+    - yaqi
     - yaqi 22mm synth
+    - yaqi 24mm naples tuxedo knot (synthetic)
+    - yaqi 25mm defect
+    - yaqi 25mm synth
+    - yaqi 25mm synth (defect)
+    - yaqi 25mm synth - defect
+    - yaqi 25mm synth defect
     - yaqi cola 22mm synthetic three band
+    - yaqi defect 25mm synth
+    - yaqi defect, 25mm synth
+    - yaqi mysterious space
+    - yaqi ocean
+    - yaqi panda tuxedo knot 24mm
+    Timberwolf:
+    - yaqi metal timberwolf
+    - yaqi timberwolf
   Zenith:
     505BC SE:
     - zenith 505bc
+    506N XS:
+    - zenith - 506 n xs (extra soft horse)
     506U N:
     - zenith 506u n (50/50 horse mane/tail) $horsesass
-    506U SE:
+    506U XSE:
     - zenith 506u xse
+    - zenith unbleached 28mm boar in olive wood handle
+    507N XSE:
+    - zenith ub1
+    80N XSE:
+    - zenith 80n xse - unbleached boar
+    B10:
+    - zenith b10
     B15:
     - zenith b15
     - zenith olive wood / b15 boar
+    B18:
+    - zenith 26mm b18 boar
     B37:
     - zenith b37
+    B44:
+    - zenith b44 28mm boar
+    Badger:
+    - zenith manchurian
     Barberpole:
     - zenith barberpole xse 26mm
+    Big Scrubby Chromed (B21):
+    - zenith big scrubby chrome (b21 28x50mm boar)
+    Boar:
+    - zenith 24mm boar
     Butterscotch Chubby (B34):
     - boar zenith 505b bleached boar butterscotch handle
+    - zenith chubby boar
+    Copper Manchurian Badger:
+    - zenith copper manchurian
+    Pro Aluminum B2:
+    - zenith pro aluminum
+    - zenith pro aluminum boar
     r/wetshaving MOAR BOAR:
     - moar boar
     - moar f'n boar
     - r/wetshaving moar boar
     - r/wetshaving zenith moar boar
     - r/wetshaving zentih moar boar 31mm
+    - zenith - moar baor
     - zenith - moar boar
     - zenith - moar boar 31mm boar
     - zenith - moar boar b35 31mm boar
+    - zenith - moarboar
+    - zenith - r/wetshaving exclusive moar boar
+    - zenith - r/wetshaving exclusive moar boar (31 mm x 57 mm bleached boar)
     - zenith - r/wetshaving moar boar b35/508a xl
     - zenith 31mm moar boar
     - zenith 508 moar boar
@@ -1330,6 +1440,7 @@ brush:
     - zenith moar boar sub-exclusive (508a xl) 31mm boar knot
     - zenith r/wetshaving 2022 moar boar
     - zenith r/wetshaving 31mm x 57mm moar boar
+    - zenith r/wetshaving boar
     - zenith r/wetshaving exclusive moar boar
     - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
     - zenith r/wetshaving exclusive moar boar 31 mm
@@ -1610,13 +1721,37 @@ handle:
     - rudy vey b&b forum brush
   Summer Break:
     Unspecified:
+    - summer break confidence b9a
     - summer break demaranville b15
+    - summer break gp b11
+    - summer break kearney b10
     - summer break soaps
+    - summer break soaps "elyria" - turnnshave v9 tip 28mm badger
+    - summer break soaps "verdel" w/ turnnshave shoat fan 26mm
     - summer break soaps 26mm maggard 2-band fan
+    - summer break soaps grant w/maggard boar
+    - summer break soaps hardy with 28mm turn n shave shoat
+    - summer break soaps sprague 28mm griffith high mountain hd fan
+  TanZ:
+    Unspecified:
+    - tanz custom stf
+  Timeless:
+    Unspecified:
+    - timeless turn-n-shave 28mm shoat
+  Trotter Handcrafts:
+    Unspecified:
+    - trotter nocturnal gold stf
+  Unknown:
+    Unspecified:
+    - unknown travel brush, reknotted w/ maggard razors shaving brush knot 20mm timberwolf
+      grey synthetic
   Wolf Whiskers:
     Unspecified:
     - wolf whiskers - "gianmaria"
+    - wolf whiskers - "gianmaria" w/maggard 26mm synthetic
     - wolf whiskers rce 1301
+    - wolf whiskers/paragon synthetic
+    - ww aged butterscotch beehive 26mm maggard's boar
   _no_brand:
     _no_model:
     - custom irish bog oak handle w/ 30mm synthetic knot
@@ -1738,6 +1873,7 @@ knot:
   Declaration Grooming:
     B10:
     - dogwood handcrafts with declaration grooming b10
+    - summer break kearney b10
     B11:
     - dg b11 26mm
     - dogwood handcrafts - b11 28mm badger
@@ -1745,6 +1881,7 @@ knot:
     - dogwood handcrafts b11 badger
     - dogwood handcrafts dark red 28mm dg b11 badger
     - dogwood w/28mm dg b11 badger
+    - summer break gp b11
     B13:
     - dogwood handcrafts - good gully - b13
     - dogwood handcrafts hybrid 28mm declaration grooming b13 badger knot
@@ -1776,6 +1913,7 @@ knot:
     - dogwood handcrafts 26mm b9a+
     - dogwood handcrafts 26mm declaration b9a+
     - dogwood stag b9a 28mm
+    - summer break confidence b9a
     B9B:
     - hucklaration b9b
   Dogwood:
@@ -1789,6 +1927,9 @@ knot:
   Frank Shaving:
     Badger:
     - 26mm frank shaving finest hd
+  Griffith:
+    High Mountain Badger HD:
+    - summer break soaps sprague 28mm griffith high mountain hd fan
   Heritage Collection:
     Badger:
     - heritage shaving c-mon 28 mm
@@ -1825,6 +1966,8 @@ knot:
     - 'dubl duck #3 22mm maggard boar'
     - maggard boar 26mm
     - maggard boar 28mm
+    - summer break soaps grant w/maggard boar
+    - ww aged butterscotch beehive 26mm maggard's boar
     G5:
     - chisel & hound "espresso" 26mm maggard razors g5
     Mixed Badger/Boar:
@@ -1845,14 +1988,19 @@ knot:
     - maggard razors shaving brush knot 20mm black and white synthetic
     - mountain laurel, synthetic 26mm maggard knot (from london razors mountain laurel
       release pif)
+    - wolf whiskers - "gianmaria" w/maggard 26mm synthetic
     Timberwolf:
     - chisel & hound hot mess 26mm mags timberwolf
     - maggard timberwolf
+    - unknown travel brush, reknotted w/ maggard razors shaving brush knot 20mm timberwolf
+      grey synthetic
   Mühle:
     STF:
     - alpha outlaw silver stf++
     - chisel & hound "cadbury" w/ mühle stf 37% plant based dense++ 25mm
     - rad dinosaur creations - jetson - 25mm muhle stf
+    - tanz custom stf
+    - trotter nocturnal gold stf
   Omega:
     '10049':
     - farvour turncraft "ocean blue" 26mm omega pro 49 boar
@@ -1886,6 +2034,7 @@ knot:
     - chisel & hound season of the witch w/ 26mm paragon boar
     Synthetic:
     - chisel and hound "rob's finest" - paragon synthetic 25mm synthetic
+    - wolf whiskers/paragon synthetic
   Rad Dinosaur Creations:
     Raptor:
     - rad dinosaur creations >!expunged!< w/ raptor synthetic
@@ -1923,6 +2072,9 @@ knot:
     - chisel & hound 26mm tns shoat (boar)
     - chisel and hound the hive w/ 26mm tns shoat
     - rad dinosaur creations "stardust" - turnnshave 26mm shoat
+    - summer break soaps "verdel" w/ turnnshave shoat fan 26mm
+    - summer break soaps hardy with 28mm turn n shave shoat
+    - timeless turn-n-shave 28mm shoat
     - tns shoat
     - turnnshave 26mm shoat
     Synthetic:
@@ -1941,6 +2093,7 @@ knot:
     - emerald peak tns v9 tip badger
     - grizzly bay w/ tns tip v8 28mm
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
+    - summer break soaps "elyria" - turnnshave v9 tip 28mm badger
     - tns tip v8 28mm
     - tns v8 tip
     - turn n shave tip v9 fan 26mm
@@ -1958,6 +2111,7 @@ knot:
     - generic badger
     Synthetic:
     - custom irish bog oak handle w/ 30mm synthetic knot
+    - synthetic
 razor:
   3D Printed:
     DE:

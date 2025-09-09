@@ -113,7 +113,7 @@ known_knots:
     Timberwolf:
       fiber: Synthetic
       patterns:
-        - timberwolf
+        - \bap\b.*timberwolf
     Titanium:
       fiber: Synthetic
       patterns:
@@ -289,78 +289,85 @@ known_knots:
     fiber: Badger
     B1:
       patterns:
-        - (declaration|\bdg\b).*\bb1\b
-        - \bb1\b
+        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
+        - ^(?!.*dog).*\bb1\b
     B2:
       patterns:
-        - (declaration|\bdg\b).*\bb2\b
-        - \bb2\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb2\b
+        - ^(?!.*dog|zen).*\bb2\b
     B3:
       patterns:
-        - (declaration|\bdg\b).*\bb3\b
-        - \bb3\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+        - ^(?!.*dog|zen).*\bb3\b
     B4:
       patterns:
-        - (declaration|\bdg\b).*\bb4\b
-        - \bb4\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb4\b
+        - ^(?!.*dog|zen).*\bb4\b
     B5:
       patterns:
-        - (declaration|\bdg\b).*\bb5\b
-        - \bb5\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb5\b
+        - ^(?!.*dog|zen).*\bb5\b
     B6:
       patterns:
-        - (declaration|\bdg\b).*\bb6\b
-        - \bb6\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
+        - ^(?!.*dog|zen).*\bb6\b
     B7:
       patterns:
-        - (declaration|\bdg\b).*\bb7\b
-        - \bb7\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
+        - ^(?!.*dog|zen).*\bb7\b
     B8:
       patterns:
-        - (declaration|\bdg\b).*\bb8\b
-        - \bb8\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
+        - ^(?!.*dog|zen).*\bb8\b
     B9A:
       patterns:
-        - (declaration|\bdg\b)?.*\bb9a\+?\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
+        - ^(?!.*dog|zen).*\bb9a\+?\b
     B9B:
       patterns:
-        - (declaration|\bdg\b)?.*\bb9b\+?\b
+        - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b
+        - ^(?!.*dog).*\bb9b\+?\b
     B10:
       patterns:
-        - (declaration|\bdg\b).*\bb10\b
-        - \bb10\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb10\b
+        - ^(?!.*dog|zen).*\bb10\b
     B11:
       patterns:
-        - (declaration|\bdg\b).*\bb11\b
-        - \bb11\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb11\b
+        - ^(?!.*dog|zen).*\bb11\b
     B12:
       patterns:
-        - (declaration|\bdg\b).*\bb12\b
-        - \bb12\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb12\b
+        - ^(?!.*dog|zen).*\bb12\b
     B13:
       patterns:
-        - (declaration|\bdg\b).*\bb13\b
-        - \bb13\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
+        - ^(?!.*dog|zen).*\bb13\b
     B14:
       patterns:
-        - (declaration|\bdg\b).*\bb14\b
-        - \bb14\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+        - ^(?!.*dog|zen).*\bb14\b
     B15:
       patterns:
-        - (declaration|\bdg\b).*\bb15\b
-        - \bb15\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
+        - ^(?!.*dog|zen).*\bb15\b
     B16:
       patterns:
-        - (declaration|\bdg\b).*\bb16\b
-        - \bb16\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+        - ^(?!.*dog|zen).*\bb16\b
     B17:
       patterns:
-        - (declaration|\bdg\b).*\bb17\b
-        - \bb17\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb17\b
+        - ^(?!.*dog|zen).*\bb17\b
     B18:
       patterns:
-        - (declaration|\bdg\b).*\bb18\b
-        - \bb18\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
+        - ^(?!.*dog|zen).*\bb18\b
+  Griffith:
+    High Mountain Badger HD:
+      fiber: Badger
+      patterns:
+        - griffith.*high.*mountain
   Maggard:
     2-Band Badger:
       fiber: Badger
