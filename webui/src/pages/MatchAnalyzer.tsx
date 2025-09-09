@@ -68,7 +68,7 @@ const MatchAnalyzer: React.FC = () => {
   >(null);
   const [existingBrushSplit, setExistingBrushSplit] = useState<BrushSplit | undefined>(undefined);
   const [savingBrushSplit, setSavingBrushSplit] = useState(false);
-  
+
   // YAML brush splits state for lookup
   const [yamlBrushSplits, setYamlBrushSplits] = useState<BrushSplit[]>([]);
 
@@ -275,10 +275,10 @@ const MatchAnalyzer: React.FC = () => {
 
     // Look up existing split from YAML data
     const existingYamlSplit = yamlBrushSplits.find(split => split.original === item.original);
-    
+
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
-    
+
     if (existingYamlSplit) {
       // Use existing YAML split data
       existingSplit = {
