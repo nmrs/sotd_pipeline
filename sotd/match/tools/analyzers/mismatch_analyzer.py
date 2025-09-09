@@ -494,9 +494,9 @@ class MismatchAnalyzer(AnalysisTool):
             is_split_brush = False
             handle_component = None
             knot_component = None
-            if field == "brush" and self._is_split_brush(matched):
+            if field == "brush" and self._is_split_brush(field_data):
                 is_split_brush = True
-                handle_component, knot_component = self._extract_split_brush_components(matched)
+                handle_component, knot_component = self._extract_split_brush_components(field_data)
 
             # Handle intentionally unmatched items (match_type: "filtered")
             if match_type == "filtered":
@@ -2081,14 +2081,36 @@ class MismatchAnalyzer(AnalysisTool):
         if not isinstance(field_data, dict):
             return False
 
-        # Check for split brush criteria: brand=null AND model=null AND presence of handle/knot sections
-        brand = field_data.get("brand")
-        model = field_data.get("model")
-        handle = field_data.get("handle")
-        knot = field_data.get("knot")
+        # Get the matched data where handle/knot sections are stored
+        matched = field_data.get("matched", {})
+        if not isinstance(matched, dict):
+            return False
 
-        # Primary conditions: brand=null AND model=null AND presence of handle section AND/OR knot section
-        return brand is None and model is None and (handle is not None or knot is not None)
+        # Check for split brush criteria: presence of handle/knot sections
+        handle = matched.get("handle")
+        knot = matched.get("knot")
+        brand = matched.get("brand")
+        model = matched.get("model")
+
+        # Primary conditions: presence of handle/knot sections
+        # This handles both full split brushes (handle + knot) and single component brushes (handle-only or knot-only)
+        if handle is not None or knot is not None:
+            # If this is a full split brush (brand=null AND model=null), it's a split brush
+            if brand is None and model is None:
+                return True
+            # If this is a single component brush (knot-only or handle-only), it's also a split brush
+            # This handles cases like "Synthetic" where model="Synthetic" but it's a knot-only component
+            # The key is that it should NOT have a brand (which would make it a regular brush)
+            # AND it should have only one component with data (not both handle and knot)
+            if brand is None:
+                # Check if only one component has meaningful data
+                handle_has_data = handle and isinstance(handle, dict) and (handle.get("brand") or handle.get("model"))
+                knot_has_data = knot and isinstance(knot, dict) and (knot.get("brand") or knot.get("model"))
+                # If only one component has data, it's a single component brush (split brush)
+                if (handle_has_data and not knot_has_data) or (knot_has_data and not handle_has_data):
+                    return True
+        
+        return False
 
     def _extract_split_brush_components(
         self, field_data: Dict
@@ -2100,8 +2122,13 @@ class MismatchAnalyzer(AnalysisTool):
         handle_component = None
         knot_component = None
 
+        # Get the matched data where handle/knot sections are stored
+        matched = field_data.get("matched", {})
+        if not isinstance(matched, dict):
+            return None, None
+
         # Extract handle component
-        handle = field_data.get("handle")
+        handle = matched.get("handle")
         if handle:
             if isinstance(handle, dict):
                 # Use source_text if available, otherwise construct from brand/model
@@ -2111,14 +2138,19 @@ class MismatchAnalyzer(AnalysisTool):
                     handle_brand = handle.get("brand", "")
                     handle_model = handle.get("model", "")
                     if handle_model:
-                        handle_component = f"{handle_brand} {handle_model}".strip()
+                        if handle_brand and handle_brand != "None":
+                            handle_component = f"{handle_brand} {handle_model}".strip()
+                        else:
+                            handle_component = handle_model
                     else:
-                        handle_component = handle_brand
+                        handle_component = (
+                            handle_brand if handle_brand and handle_brand != "None" else ""
+                        )
             elif isinstance(handle, str):
                 handle_component = handle
 
         # Extract knot component
-        knot = field_data.get("knot")
+        knot = matched.get("knot")
         if knot:
             if isinstance(knot, dict):
                 # Use source_text if available, otherwise construct from brand/model
@@ -2128,9 +2160,12 @@ class MismatchAnalyzer(AnalysisTool):
                     knot_brand = knot.get("brand", "")
                     knot_model = knot.get("model", "")
                     if knot_model:
-                        knot_component = f"{knot_brand} {knot_model}".strip()
+                        if knot_brand and knot_brand != "None":
+                            knot_component = f"{knot_brand} {knot_model}".strip()
+                        else:
+                            knot_component = knot_model
                     else:
-                        knot_component = knot_brand
+                        knot_component = knot_brand if knot_brand and knot_brand != "None" else ""
             elif isinstance(knot, str):
                 knot_component = knot
 
@@ -2144,8 +2179,8 @@ class MismatchAnalyzer(AnalysisTool):
         handle = matched.get("handle")
         knot = matched.get("knot")
 
-        # Both handle and knot must be present for a split brush to be confirmed
-        if not handle or not knot:
+        # For split brushes, we need at least one component (handle or knot)
+        if not handle and not knot:
             return False
 
         # For automated splits, we need to get the full original text from the record
@@ -2157,24 +2192,52 @@ class MismatchAnalyzer(AnalysisTool):
             return False
 
         # Check if handle component is confirmed using full original text
-        handle_confirmed = False
-        if isinstance(handle, dict):
-            # Use the full original text, normalized for handle matching
-            handle_normalized = (
-                self._normalize_for_matching(original_text, "handle").lower().strip()
-            )
-            handle_key = f"handle:{handle_normalized}"
-            handle_confirmed = handle_key in self._correct_matches
+        handle_confirmed = True  # Default to True if no handle component
+        if handle and isinstance(handle, dict):
+            # Only check handle confirmation if it has meaningful data
+            handle_brand = handle.get("brand")
+            handle_model = handle.get("model")
+            if handle_brand or handle_model:
+                # Use the full original text, normalized for handle matching
+                handle_normalized = (
+                    self._normalize_for_matching(original_text, "handle").lower().strip()
+                )
+                handle_key = f"handle:{handle_normalized}"
+                handle_confirmed = handle_key in self._correct_matches
+            else:
+                # No meaningful data, consider it confirmed (not present)
+                handle_confirmed = True
+        elif handle is None:
+            # No handle component, consider it confirmed (not present)
+            handle_confirmed = True
+        else:
+            # Handle exists but is not a dict, consider it not confirmed
+            handle_confirmed = False
 
         # Check if knot component is confirmed using full original text
-        knot_confirmed = False
-        if isinstance(knot, dict):
-            # Use the full original text, normalized for knot matching
-            knot_normalized = self._normalize_for_matching(original_text, "knot").lower().strip()
-            knot_key = f"knot:{knot_normalized}"
-            knot_confirmed = knot_key in self._correct_matches
+        knot_confirmed = True  # Default to True if no knot component
+        if knot and isinstance(knot, dict):
+            # Only check knot confirmation if it has meaningful data
+            knot_brand = knot.get("brand")
+            knot_model = knot.get("model")
+            if knot_brand or knot_model:
+                # Use the full original text, normalized for knot matching
+                knot_normalized = (
+                    self._normalize_for_matching(original_text, "knot").lower().strip()
+                )
+                knot_key = f"knot:{knot_normalized}"
+                knot_confirmed = knot_key in self._correct_matches
+            else:
+                # No meaningful data, consider it confirmed (not present)
+                knot_confirmed = True
+        elif knot is None:
+            # No knot component, consider it confirmed (not present)
+            knot_confirmed = True
+        else:
+            # Knot exists but is not a dict, consider it not confirmed
+            knot_confirmed = False
 
-        # Both components must be confirmed
+        # All present components must be confirmed
         return handle_confirmed and knot_confirmed
 
 
