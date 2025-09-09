@@ -26,8 +26,8 @@ data/threads/*.json
 data/aggregated/*.json
 data/aggregated/annual/*.json
 data/correct_matches.yaml.backup
-# Ignore generated report files (but track published reports in report_archive/)
-# data/reports/*.md - REMOVED: these are published reports with user content
+# Ignore generated report files
+data/reports/*.md
 # Ignore learning data files
 data/learning/brush_user_actions/*.yaml
 
