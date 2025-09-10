@@ -46,7 +46,7 @@ async def get_soap_duplicates(
     similarity_threshold: float = Query(
         0.8, ge=0.0, le=1.0, description="Similarity threshold for duplicates"
     ),
-    limit: Optional[int] = Query(None, ge=1, le=100, description="Maximum number of results"),
+    limit: Optional[int] = Query(None, ge=1, description="Maximum number of results"),
 ):
     """Get potential duplicate soap matches"""
     try:
@@ -110,7 +110,7 @@ async def get_soap_duplicates(
 @router.get("/pattern-suggestions")
 async def get_soap_pattern_suggestions(
     months: str = Query(..., description="Comma-separated months (e.g., '2025-05,2025-06')"),
-    limit: Optional[int] = Query(None, ge=1, le=100, description="Maximum number of results"),
+    limit: Optional[int] = Query(None, ge=1, description="Maximum number of results"),
 ):
     """Get soap pattern suggestions"""
     try:
@@ -178,7 +178,7 @@ async def get_soap_neighbor_similarity(
     similarity_threshold: float = Query(
         0.5, ge=0.0, le=1.0, description="Similarity threshold for filtering results"
     ),
-    limit: Optional[int] = Query(None, ge=1, le=100, description="Maximum number of results"),
+    limit: Optional[int] = Query(None, ge=1, description="Maximum number of results"),
 ):
     """Get soap neighbor similarity analysis"""
     try:
@@ -453,7 +453,17 @@ def analyze_soap_neighbor_similarity_web(
             brand = match.get("brand", "")
             scent = match.get("scent", "")
 
-        if brand and scent:  # Only add if both fields exist
+        # Mode-specific validation
+        should_include = False
+        if mode == "brands" and brand:
+            should_include = True
+        elif mode == "brand_scent" and brand:
+            # Include entries with brand (even if scent is empty) - this is what we want to analyze
+            should_include = True
+        elif mode == "scents" and scent:
+            should_include = True
+
+        if should_include:
             comment_id = match.get("comment_id", "")
             entry = ""
             normalized = ""

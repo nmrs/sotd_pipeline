@@ -49,7 +49,7 @@ class UnmatchedAnalysisRequest(BaseModel):
 
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap, soap_brand)")
     months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
-    limit: int = Field(default=50, ge=1, le=1000, description="Maximum number of results to return")
+    limit: int = Field(default=50, ge=1, description="Maximum number of results to return")
 
 
 class MismatchAnalysisRequest(BaseModel):

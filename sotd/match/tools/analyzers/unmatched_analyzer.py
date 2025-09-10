@@ -171,34 +171,35 @@ class UnmatchedAnalyzer(AnalysisTool):
                     all_unmatched[normalized].append(file_info)
                     return
 
-                maker = matched.get("maker")
+                # Use 'brand' instead of 'maker' to match the actual data structure
+                brand = matched.get("brand")
                 scent = matched.get("scent")
                 match_type = field_val.get("match_type")
 
-                # If no maker at all, it's unmatched
-                if not maker:
+                # If no brand at all, it's unmatched
+                if not brand:
                     normalized = extract_text(field_val, field)
                     all_unmatched[normalized].append(file_info)
                     return
 
-                # If we have a maker but no scent, it's a brand-only fallback
-                if maker and not scent:
+                # If we have a brand but no scent, it's a brand-only fallback
+                if brand and not scent:
                     normalized = extract_text(field_val, field)
                     all_unmatched[normalized].append(
-                        {**file_info, "brand_only": True, "maker": maker, "match_type": match_type}
+                        {**file_info, "brand_only": True, "brand": brand, "match_type": match_type}
                     )
                     return
 
-                # If we have both maker and scent but match_type is "brand", it's a brand-only
+                # If we have both brand and scent but match_type is "brand", it's a brand-only
                 # fallback that successfully matched both fields - this should be counted as
                 # unmatched for soap field
-                if maker and scent and match_type == "brand":
+                if brand and scent and match_type == "brand":
                     normalized = extract_text(field_val, field)
                     all_unmatched[normalized].append(
                         {
                             **file_info,
                             "brand_only": True,
-                            "maker": maker,
+                            "brand": brand,
                             "scent": scent,
                             "match_type": match_type,
                         }
