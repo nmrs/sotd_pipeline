@@ -85,18 +85,18 @@ def test_aggregate_highest_use_count_per_blade():
 
 
 def test_aggregate_highest_use_count_per_blade_multiple_users_same_blade():
-    """Test that when multiple users have the same blade, the user with highest use count
-    is correctly attributed."""
+    """Test that when multiple users have the same blade type, each physical blade
+    is tracked separately."""
     records = [
         {
-            "author": "AdWorried2804",  # Alphabetically first
+            "author": "AdWorried2804",  # First user with Gillette Platinum
             "blade": {
                 "matched": {"brand": "Gillette", "model": "Platinum", "format": "DE"},
                 "enriched": {"use_count": 7},
             },
         },
         {
-            "author": "B_S80",  # Alphabetically second, but has higher use count
+            "author": "B_S80",  # Second user with Gillette Platinum
             "blade": {
                 "matched": {"brand": "Gillette", "model": "Platinum", "format": "DE"},
                 "enriched": {"use_count": 275},
@@ -113,21 +113,18 @@ def test_aggregate_highest_use_count_per_blade_multiple_users_same_blade():
 
     result = aggregate_highest_use_count_per_blade(records)
 
-    # Should have 2 unique blades
-    assert len(result) == 2
+    # Should have 3 individual physical blades (2 Gillette Platinum + 1 Personna Lab Blue)
+    assert len(result) == 3
 
-    # Gillette Platinum should be first (highest use count: 275)
-    gillette_platinum = next(item for item in result if item["blade"] == "Gillette Platinum")
-    assert gillette_platinum["uses"] == 275
-    # BUG: This should be "B_S80" but currently returns "AdWorried2804"
-    # due to alphabetical ordering
-    expected_user = "B_S80"
-    actual_user = gillette_platinum["user"]
-    assert (
-        actual_user == expected_user
-    ), f"Expected user '{expected_user}' but got '{actual_user}' - this exposes the bug!"
+    # Results should be sorted by use count descending
+    assert result[0]["uses"] == 275  # B_S80's Gillette Platinum
+    assert result[0]["user"] == "B_S80"
+    assert result[0]["blade"] == "Gillette Platinum"
 
-    # Personna Lab Blue should be second
-    personna_lab_blue = next(item for item in result if item["blade"] == "Personna Lab Blue")
-    assert personna_lab_blue["uses"] == 50
-    assert personna_lab_blue["user"] == "user3"
+    assert result[1]["uses"] == 50  # user3's Personna Lab Blue
+    assert result[1]["user"] == "user3"
+    assert result[1]["blade"] == "Personna Lab Blue"
+
+    assert result[2]["uses"] == 7  # AdWorried2804's Gillette Platinum
+    assert result[2]["user"] == "AdWorried2804"
+    assert result[2]["blade"] == "Gillette Platinum"
