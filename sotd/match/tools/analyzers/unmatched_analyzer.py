@@ -335,18 +335,18 @@ class UnmatchedAnalyzer(AnalysisTool):
             all_unmatched[normalized].append(file_info)
             return
 
-        # For soap_brand analysis, we ONLY want truly unmatched items (no maker at all)
+        # For soap_brand analysis, we ONLY want truly unmatched items (no brand at all)
         # We do NOT want brand-only fallbacks - those go in the regular soap field
 
-        maker = matched.get("maker")
+        brand = matched.get("brand")
 
-        # If no maker at all, it's truly unmatched
-        if not maker:
+        # If no brand at all, it's truly unmatched
+        if not brand:
             normalized = extract_text(soap, "soap")
             all_unmatched[normalized].append(file_info)
             return
 
-        # If we have a maker (even if no scent), it's NOT truly unmatched
+        # If we have a brand (even if no scent), it's NOT truly unmatched
         # Brand-only fallbacks are handled by the regular soap field
         # So we don't add anything to the unmatched list
 
