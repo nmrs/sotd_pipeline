@@ -24,10 +24,12 @@ import CommentModal from '@/components/domain/CommentModal';
 import BrushSplitModal from '@/components/forms/BrushSplitModal';
 import { BrushSplit } from '@/types/brushSplit';
 import { structureBrushDataForAPI } from '@/utils/brushDataUtils';
+import { calculateDeltaMonths, formatDeltaMonths } from '@/utils/deltaMonths';
 
 const MatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
@@ -75,6 +77,11 @@ const MatchAnalyzer: React.FC = () => {
   // Keyboard navigation state
   const [activeRowIndex, setActiveRowIndex] = useState<number>(-1);
   const [keyboardNavigationEnabled, setKeyboardNavigationEnabled] = useState<boolean>(false);
+
+  // Callback for delta months
+  const handleDeltaMonthsChange = useCallback((months: string[]) => {
+    setDeltaMonths(months);
+  }, []);
 
   // Clear selections on component mount to ensure clean state
   useEffect(() => {
@@ -133,9 +140,12 @@ const MatchAnalyzer: React.FC = () => {
       setResults(null);
       setSelectedItems(new Set()); // Clear selections
 
+      // Combine selected months with delta months if enabled
+      const allMonths = [...selectedMonths, ...deltaMonths];
+
       const result = await analyzeMismatch({
         field: selectedField,
-        months: selectedMonths, // Pass full months array instead of just first month
+        months: allMonths, // Pass combined months array
         threshold,
         use_enriched_data: useEnrichedData,
         display_mode: displayMode,
@@ -168,7 +178,9 @@ const MatchAnalyzer: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const comment = await getCommentDetail(commentId, selectedMonths);
+      // Combine selected months with delta months if enabled (same as analysis)
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
       setCommentModalOpen(true);
@@ -204,7 +216,9 @@ const MatchAnalyzer: React.FC = () => {
         try {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
-          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
+          // Combine selected months with delta months if enabled (same as analysis)
+          const allMonths = [...selectedMonths, ...deltaMonths];
+          const nextComment = await getCommentDetail(nextCommentId, allMonths);
 
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
@@ -1137,6 +1151,40 @@ const MatchAnalyzer: React.FC = () => {
           </div>
         )}
 
+        {/* Delta Months Info Panel */}
+        {deltaMonths.length > 0 && (
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4'>
+            <div className='flex items-start'>
+              <div className='flex-shrink-0'>
+                <svg className='h-5 w-5 text-blue-400' fill='currentColor' viewBox='0 0 20 20'>
+                  <path
+                    fillRule='evenodd'
+                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </div>
+              <div className='ml-3'>
+                <h3 className='text-sm font-medium text-blue-800'>📊 Delta Months Analysis</h3>
+                <div className='mt-2 text-sm text-blue-700'>
+                  <p className='mb-2'>
+                    <strong>Historical Comparison:</strong> Including delta months for comprehensive analysis:
+                  </p>
+                  <ul className='list-disc list-inside ml-4 space-y-1'>
+                    <li><strong>Primary months:</strong> {selectedMonths.join(', ')}</li>
+                    <li><strong>Delta months:</strong> {deltaMonths.join(', ')}</li>
+                    <li><strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}</li>
+                  </ul>
+                  <p className='mt-2'>
+                    <strong>Delta months include:</strong> month-1, month-1year, month-5years for each selected month.
+                    This provides the same comprehensive view as the CLI <code>--delta</code> flag.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Controls Section - Made responsive */}
         <div className='space-y-4 mb-4'>
           {/* First row - Basic controls */}
@@ -1172,6 +1220,8 @@ const MatchAnalyzer: React.FC = () => {
                 onMonthsChange={handleMonthChange}
                 label='Select Month'
                 multiple={true}
+                enableDeltaMonths={true}
+                onDeltaMonthsChange={handleDeltaMonthsChange}
               />
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>

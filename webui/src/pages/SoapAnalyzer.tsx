@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -10,6 +10,7 @@ import MonthSelector from '../components/forms/MonthSelector';
 import CommentModal from '../components/domain/CommentModal';
 import { CommentDisplay } from '../components/domain/CommentDisplay';
 import { getCommentDetail, CommentDetail } from '../services/api';
+import { calculateDeltaMonths, formatDeltaMonths } from '../utils/deltaMonths';
 
 interface SoapDuplicateResult {
   text1: string;
@@ -59,6 +60,7 @@ interface ApiResponse {
 
 const SoapAnalyzer: React.FC = () => {
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.8);
   const [limit, setLimit] = useState(10);
   const [duplicatesResult, setDuplicatesResult] = useState<ApiResponse | null>(null);
@@ -76,6 +78,11 @@ const SoapAnalyzer: React.FC = () => {
 
   // Filter state
   const [filterText, setFilterText] = useState<string>('');
+
+  // Callback for delta months
+  const handleDeltaMonthsChange = useCallback((months: string[]) => {
+    setDeltaMonths(months);
+  }, []);
 
   const analyzeDuplicates = async () => {
     if (selectedMonths.length === 0) {
@@ -99,7 +106,9 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      const monthsParam = selectedMonths.join(',');
+      // Combine selected months with delta months if enabled
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/soap-analyzer/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
 
       const response = await fetch(url);
@@ -143,7 +152,9 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      const monthsParam = selectedMonths.join(',');
+      // Combine selected months with delta months if enabled
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/soap-analyzer/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
 
       const response = await fetch(url);
@@ -199,7 +210,9 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      const monthsParam = selectedMonths.join(',');
+      // Combine selected months with delta months if enabled
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/soap-analyzer/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
 
       const response = await fetch(url);
@@ -254,7 +267,9 @@ const SoapAnalyzer: React.FC = () => {
 
     try {
       setCommentLoading(true);
-      const comment = await getCommentDetail(commentId, selectedMonths);
+      // Combine selected months with delta months if enabled (same as analysis)
+      const allMonths = [...selectedMonths, ...deltaMonths];
+      const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCommentModalOpen(true);
     } catch (err) {
@@ -317,9 +332,36 @@ const SoapAnalyzer: React.FC = () => {
             onMonthsChange={setSelectedMonths}
             multiple={true}
             label='Analysis Months'
+            enableDeltaMonths={true}
+            onDeltaMonthsChange={handleDeltaMonthsChange}
           />
         </CardContent>
       </Card>
+
+      {/* Delta Months Info Panel */}
+      {deltaMonths.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-blue-900'>📊 Delta Months Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-sm text-blue-700 space-y-1'>
+              <p>
+                <strong>Historical Comparison:</strong> Including delta months for comprehensive analysis:
+              </p>
+              <ul className='list-disc list-inside ml-4 space-y-1'>
+                <li><strong>Primary months:</strong> {selectedMonths.join(', ')}</li>
+                <li><strong>Delta months:</strong> {deltaMonths.join(', ')}</li>
+                <li><strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}</li>
+              </ul>
+              <p className='mt-2'>
+                <strong>Delta months include:</strong> month-1, month-1year, month-5years for each selected month.
+                This provides the same comprehensive view as the CLI <code>--delta</code> flag.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Analysis Controls */}
       <Card>
@@ -1017,7 +1059,7 @@ const SoapAnalyzer: React.FC = () => {
           onClose={handleCloseCommentModal}
           comments={[selectedComment]}
           currentIndex={0}
-          onNavigate={async () => {}} // No navigation needed for single comment
+          onNavigate={async () => { }} // No navigation needed for single comment
           remainingCommentIds={[]}
         />
       )}
