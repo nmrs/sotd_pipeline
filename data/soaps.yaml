@@ -160,7 +160,7 @@ Ariana & Evans:
         - ariana.*monte carlo
     Ouddiction:
       patterns:
-        - oud+iction
+        - o[ud]+iction(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Peach & Cognac:
       patterns:
         - peach.*cognac
@@ -227,7 +227,8 @@ Art of Shaving:
         - 'art of shaving.*\boud\b'
     Sandalwood:
       patterns:
-        - art of shaving.*sandalwood
+        - art of shaving.*sand\w+wood
+        - aos.*sand\w+wood
 Asylum Shave Works:
   patterns:
     - asylum shave works
@@ -351,8 +352,8 @@ Barrister and Mann:
         - "cluster ?fig"
     Cologne Russe:
       patterns:
-        - '\bb ?(and|&|\+) ?m\b.*colog.*russe'
-        - barris.*colog.*russe
+        - \bb ?(and|&|\+) ?m\b.*colog.*rus+e
+        - barris.*colog.*rus+e
     Cool:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*cool'
@@ -1356,6 +1357,10 @@ First Line Shave:
 Fitjar Islands:
   patterns:
     - fitjar islands
+  scents:
+    Melderskin:
+      patterns:
+        - fitjar.*melderskin
 Floris London:
   patterns:
     - floris london
@@ -1985,10 +1990,10 @@ Martin de Candre:
       patterns:
         - agrumes
         - argumes
-    "Fougère":
+    Fougère:
       patterns:
-        - "martin.*foug.re"
-        - '\bmdc\b.*foug.re'
+        - martin.*foug.re
+        - \bmdc\b.*foug.re
     Nature:
       patterns:
         - candre.*nature
@@ -2000,7 +2005,8 @@ Martin de Candre:
         - candre.*rose
     Vetyver:
       patterns:
-        - "martin.*candre.*v(e|é)t(i|y)ver"
+        - martin.*candre.*v[eé]t[iy]ver
+        - mdc.*v[eé]t[iy]ver
 Marting Soaps:
   patterns:
     - "marting( soaps)?"
@@ -2822,7 +2828,7 @@ Stirling Soap Co.:
         - stirling.*christmas eve
     Deep Blue Sea:
       patterns:
-        - deep blue sea
+        - (?:stirling.*)?deep blue sea
     Electric Sheep:
       patterns:
         - '(?<!glacial\s)electric shr?eep'
@@ -2865,6 +2871,9 @@ Stirling Soap Co.:
     Margaritas in the Arctic:
       patterns:
         - "marg.*arc?tic"
+    Mountain Man:
+      patterns:
+        - ^(?=.*st[ie]rling)(?=.*mountain man).*
     Naked & Smooth:
       patterns:
         - naked.*smooth
@@ -2904,6 +2913,9 @@ Stirling Soap Co.:
     Stirling Black:
       patterns:
         - stirling black$
+    Stirling Blu:
+      patterns:
+        - st[ie]rling.*blue?\b
     Stirling Green:
       patterns:
         - stirling.*green$

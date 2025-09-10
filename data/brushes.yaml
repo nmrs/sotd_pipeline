@@ -1560,7 +1560,7 @@ other_brushes:
     patterns:
       - shave.*factory
       - shaving.*factory
-  Shor Shave:
+  Shore Shave:
     default: Synthetic
     patterns:
       - shore.*shav
