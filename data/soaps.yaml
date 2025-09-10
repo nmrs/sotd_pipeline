@@ -643,7 +643,7 @@ Campbell's:
     - campbell'?s
 Captain Nemo's:
   patterns:
-    - "(captain )?nemo(?:'s)?"
+    - (?:captain )?nemo(?:'s)?.*(?:shaving)?
   scents:
     Absolute Zero:
       patterns:
@@ -3425,6 +3425,10 @@ Wet Shaving Products:
       patterns:
         - "wet ?shaving products.*gaelic"
         - '^\W*wsp\b.*gaelic'
+    Olympus:
+      patterns:
+        - "wet ?shaving products.*olympus"
+        - '^\W*wsp\b.*olympus'
     Olympus (Cream):
       format: Cream
       patterns:
