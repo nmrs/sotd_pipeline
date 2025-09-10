@@ -1,41 +1,34 @@
 # Hardware Report - August 2025
 
-**Total Shaves:** 2,275
-**Unique Shavers:** 120
-
 Welcome to your SOTD Hardware Report for August 2025
 
 * 2,275 shave reports from 120 distinct shavers during the month of August 2025 were analyzed to produce this report, for an average of 19.0 (median 23.5) shaves per user.
 
 ## Observations
 
-* [Observations will be generated based on data analysis]
+* Zenith rode the $RawHoggin wave straight to a hat trick: #1 in brushes, handle makers, and knot makers. When in doubt, boar out.  
+
+* And yes, Boar easily took the fiber crown (936 shaves, 53 users), nearly doubling Synthetic this month and firmly pushing aside Badger who was last seen nervously asking Horse if it could sit with them at lunch now that the cool kids table was full.
+
+* Straights and GEMs use their annual Auster August boost to rack up nearly 900 shaves between them and almost manage to keep DE below 50% of total shaves. 
+
+* The top of the razor table is equally shaken up, with the MMOC and Moarteen shoving aside the standard podium of Christopher Bradley, Game Changer, and Blackbird; Blackbird fell not only off the podium but all the way down to 9th.
+
+* Kudos to Fine Accoutrements for making its inaugural debut on the hardware report, proving once again that if you’re determined enough you can get anything onto the board.
+
+* Top Shavers? Engineered_Shave kept the crown with 36, but 45 other users cleared 31/31 — Austere August is nothing if not consistent.  
 
 ## Notes & Caveats
 
-* I only show the top n results per category to keep the tables readable and avoid max post length issues.
-
-* Blade Format stats now differentiate between DE and half DE razors.
+* Most tables are row-limited to keep them readable and avoid max post length issues. If the final row is part of a tie, the entire tied group is included in the report.
 
 * "Other" in the Blade Format table includes vintage reusable blades (including Rolls, Valet Auto Strop, and old-style lather catchers with wedge blades) as well as other antique proprietary blade formats (e.g. Enders Speed Blade)
 
 * Blades recorded as just 'GEM' will be matched to 'Personna GEM PTFE' per guidance [here](https://www.reddit.com/r/Wetshaving/comments/19a43q7/comment/kil95r8/)
 
-* The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for this report. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
+* The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for the time being. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
 
-    * Personna GEM PTFE is now Accutec Pro Premium (GEM)
-  
-    * Personna Lab Blue is now Accuforge Super Stainless MicroCoat
-  
-    * Personna Med Prep is now Accuthrive Super Med Prep
-
-    * The German-made Personna Platinums (aka "Personna Reds") will continue to use the Personna brand
-
-* In the case of most brush makers (eg Maggard) - knots are split into synthetic / badger / boar and attributed to the maker - eg 'Maggard Synthetic', though for particularly popular brush models (e.g. specific models from Semogue and Omega) or knots (e.g. DG, Chisel & Hound, or AP Shave Co.) they are reported on indvidually.
-
-* The unique user column shows the number of different users who used a given razor / brush etc in the month. We can combine this with the total number of shaves to get the average number of times a user used a razor / brush etc
-
-* The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
+* The Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
 ## Razor Formats
 
@@ -343,7 +336,7 @@ Welcome to your SOTD Hardware Report for August 2025
 
 |   Rank |   Knot Size MM |   Shaves |   Unique Users | Δ vs Jul 2025   | Δ vs Aug 2024   | Δ vs Aug 2020   |
 |-------:|---------------:|---------:|---------------:|:----------------|:----------------|:----------------|
-|      1 |           24   |      278 |             21 | =               | =               | =               |
+|      1 |           24   |      279 |             22 | =               | =               | =               |
 |      2 |           28   |      261 |             21 | ↑1              | =               | ↑1              |
 |      3 |           31   |      218 |             11 | ↑1              | ↑2              | n/a             |
 |      4 |           26   |      162 |             15 | ↓2              | =               | ↓2              |
@@ -448,38 +441,23 @@ Welcome to your SOTD Hardware Report for August 2025
 
 ## Highest Use Count per Blade
 
-| Rank   | Blade                             | Format      | User                   |   Uses |
-|:-------|:----------------------------------|:------------|:-----------------------|-------:|
-| 1      | Gillette Nacet                    | DE          | u/sgrdddy              |    606 |
-| 2      | Gillette Platinum                 | DE          | u/B_S80                |    327 |
-| 3      | Kismet Hair Shaper                | Hair Shaper | u/Old_Hiker            |    148 |
-| 4      | Gillette Nacet                    | DE          | u/chronnoisseur42O     |     96 |
-| 5      | Gillette Platinum                 | DE          | u/wyze0ne              |     67 |
-| 6      | Personna Lab Blue                 | DE          | u/RedMosquitoMM        |     54 |
-| 7=     | GEM Blue Star                     | GEM         | u/Impressive_Donut114  |     34 |
-| 7=     | Polsilver Super Iridium           | DE          | u/VisceralWatch        |     34 |
-| 9      | Personna GEM PTFE                 | GEM         | u/AdWorried2804        |     33 |
-| 10     | Personna GEM PTFE                 | GEM         | u/Tetriside            |     32 |
-| 11=    | 7 O'Clock Sharpedge (Yellow)      | DE          | u/Crisp_Mango          |     31 |
-| 11=    | Astra Superior Platinum (Green)   | DE          | u/partyman97_3         |     31 |
-| 11=    | Astra Superior Platinum (Green)   | DE          | u/loudmusicboy         |     31 |
-| 11=    | Astra Superior Platinum (Green)   | DE          | u/jwoods23             |     31 |
-| 11=    | Gillette Nacet                    | DE          | u/FredBikes9876        |     31 |
-| 11=    | Gillette Nacet                    | DE          | u/35048467             |     31 |
-| 11=    | Gillette Perma-Sharp              | DE          | u/lakes1964            |     31 |
-| 11=    | Gillette Silver Blue              | DE          | u/putneycj3            |     31 |
-| 11=    | Gillette Silver Blue              | DE          | u/wallygator88         |     31 |
-| 11=    | Kismet Hair Shaper                | Hair Shaper | u/Environmental-Gap380 |     31 |
-| 11=    | Personna GEM PTFE                 | GEM         | u/oswald_heist         |     31 |
-| 11=    | Personna GEM PTFE                 | GEM         | u/tsrblke              |     31 |
-| 11=    | Personna GEM PTFE                 | GEM         | u/expoqeteer           |     31 |
-| 11=    | Personna GEM PTFE                 | GEM         | u/Lob-Star             |     31 |
-| 25     | Personna GEM PTFE                 | GEM         | u/snoo-ting            |     29 |
-| 26     | 7 O'Clock Super Stainless (Green) | DE          | u/partyman97_3         |     26 |
-| 27=    | Cloud A77                         | A77         | u/anchovie7468         |     22 |
-| 27=    | Personna Platinum                 | DE          | u/el_charminman        |     22 |
-| 27=    | Rapira Super Stainless            | DE          | u/el_charminman        |     22 |
-| 30     | Personna GEM PTFE                 | GEM         | u/Jill_Lett_Slim       |     20 |
+| Rank   | Blade                             | Format      |   Uses | User                  |
+|:-------|:----------------------------------|:------------|-------:|:----------------------|
+| 1      | Gillette Nacet                    | DE          |    606 | u/sgrdddy             |
+| 2      | Gillette Platinum                 | DE          |    327 | u/B_S80               |
+| 3      | Kismet Hair Shaper                | Hair Shaper |    148 | u/Old_Hiker           |
+| 4      | Personna Lab Blue                 | DE          |     54 | u/RedMosquitoMM       |
+| 5=     | GEM Blue Star                     | GEM         |     34 | u/Impressive_Donut114 |
+| 5=     | Polsilver Super Iridium           | DE          |     34 | u/VisceralWatch       |
+| 7      | Personna GEM PTFE                 | GEM         |     33 | u/AdWorried2804       |
+| 8=     | 7 O'Clock Sharpedge (Yellow)      | DE          |     31 | u/Crisp_Mango         |
+| 8=     | Astra Superior Platinum (Green)   | DE          |     31 | u/jwoods23            |
+| 8=     | Gillette Perma-Sharp              | DE          |     31 | u/lakes1964           |
+| 8=     | Gillette Silver Blue              | DE          |     31 | u/putneycj3           |
+| 12     | 7 O'Clock Super Stainless (Green) | DE          |     26 | u/partyman97_3        |
+| 13=    | Cloud A77                         | A77         |     22 | u/anchovie7468        |
+| 13=    | Personna Platinum                 | DE          |     22 | u/el_charminman       |
+| 13=    | Rapira Super Stainless            | DE          |     22 | u/el_charminman       |
 
 ## Top Shavers
 

@@ -5,7 +5,7 @@
 
 Welcome to your SOTD Lather Log for August 2025
 
-* 2,275 shave reports from 120 distinct shavers during the month of August 2025 were analyzed to produce this report. Collectively, these shavers used 150 distinct soaps from 50 distinct brands. 0 of those shaves used samples of 0 unique soaps.
+* 2,275 shave reports from 120 distinct shavers during the month of August 2025 were analyzed to produce this report. Collectively, these shavers used 151 distinct soaps from 50 distinct brands. 0 of those shaves used samples of 0 unique soaps.
 
 ## Observations
 
@@ -82,7 +82,7 @@ Welcome to your SOTD Lather Log for August 2025
 |:-------|:---------------------------------------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Stirling Soap Co. - I, Rich Moose                        |      264 |             14 | =               | n/a             | n/a             |
 | 2      | Chiseled Face - Midnight Stag                            |      186 |              6 | ↑161            | ↓1              | ↓1              |
-| 3      | House of Mammoth - Kryptonite                            |      125 |              4 | ↑14             | ↑2              | ↑48             |
+| 3      | House of Mammoth - Kryptonite                            |      125 |              4 | ↑14             | ↑2              | ↑49             |
 | 4      | Mike's Natural Soaps - Orange, Cedarwood, & Black Pepper |       85 |              6 | ↓1              | n/a             | n/a             |
 | 5      | Mike's Natural Soaps - Vetiver                           |       80 |              3 | ↑85             | n/a             | n/a             |
 | 6      | Stirling Soap Co. - Scots Pine Sheep                     |       73 |              3 | ↑84             | ↑5              | n/a             |
@@ -95,7 +95,7 @@ Welcome to your SOTD Lather Log for August 2025
 | 13     | Mike's Natural Soaps - Lime                              |       52 |              2 | ↑253            | n/a             | n/a             |
 | 14     | Mike's Natural Soaps - Bay Rum                           |       49 |              4 | ↑17             | n/a             | n/a             |
 | 15     | Stirling Soap Co. - Electric Sheep                       |       42 |              2 | ↑95             | ↑17             | n/a             |
-| 16     | Mitchell's - Wool Fat                                    |       39 |              2 | ↑10             | n/a             | ↓3              |
+| 16     | Mitchell's - Wool Fat                                    |       39 |              2 | ↑10             | n/a             | ↓4              |
 | 17     | Stirling Soap Co. - Sheep                                |       35 |              2 | ↑23             | ↓11             | n/a             |
 | 18     | House of Mammoth - Indigo                                |       33 |              2 | ↑36             | ↓11             | n/a             |
 | 19     | Henri et Victoria - Coeur de Vetiver                     |       32 |              1 | ↑194            | ↑33             | n/a             |
@@ -109,7 +109,7 @@ Welcome to your SOTD Lather Log for August 2025
 | 20=    | Stirling Soap Co. - Glacial Iceberg Island               |       31 |              1 | n/a             | n/a             | n/a             |
 | 20=    | Taylor of Old Bond Street - Royal Forest                 |       31 |              1 | ↑193            | n/a             | n/a             |
 | 20=    | Wholly Kaw - Hiatus                                      |       31 |              1 | ↑246            | n/a             | n/a             |
-| 30     | Stirling Soap Co. - Executive Man                        |       30 |              2 | ↓19             | n/a             | ↓15             |
+| 30     | Stirling Soap Co. - Executive Man                        |       30 |              2 | ↓19             | n/a             | ↓16             |
 | 31     | Stirling Soap Co. - Stirling Clubman                     |       30 |              1 | ↑182            | n/a             | n/a             |
 | 32     | Henri et Victoria - Duc de Santal                        |       29 |              1 | ↑234            | n/a             | n/a             |
 | 33=    | Declaration Grooming - The Muse                          |       26 |              1 | n/a             | n/a             | n/a             |
@@ -137,7 +137,7 @@ Welcome to your SOTD Lather Log for August 2025
 | Rank   | Brand                |   Unique Soaps | Δ vs Jul 2025   | Δ vs Aug 2024   | Δ vs Aug 2020   |
 |:-------|:---------------------|---------------:|:----------------|:----------------|:----------------|
 | 1      | Stirling Soap Co.    |             20 | =               | ↑2              | =               |
-| 2      | Barrister and Mann   |             15 | ↑1              | =               | ↑2              |
+| 2      | Barrister and Mann   |             15 | ↑1              | =               | ↑1              |
 | 3      | House of Mammoth     |             14 | ↑2              | ↓2              | ↓1              |
 | 4=     | Declaration Grooming |              9 | ↑2              | =               | ↓1              |
 | 4=     | Mike's Natural Soaps |              9 | ↑5              | n/a             | n/a             |
@@ -159,35 +159,35 @@ Welcome to your SOTD Lather Log for August 2025
 | 8      | u/Key_Sock4870         |              6 |        6 |                  1    | ↑48             | n/a             | n/a             |
 | 9      | u/seanpjohns           |              5 |       11 |                  2.2  | ↑50             | n/a             | n/a             |
 | 10     | u/AmusedStew           |              5 |        7 |                  1.4  | n/a             | n/a             | n/a             |
-| 11     | u/truebill47           |              4 |        7 |                  1.75 | ↑53             | n/a             | n/a             |
-| 12     | u/Letitroll13          |              4 |        6 |                  1.5  | ↑68             | n/a             | n/a             |
-| 13     | u/Low-Communication798 |              4 |        5 |                  1.25 | n/a             | n/a             | n/a             |
+| 11     | u/Low-Communication798 |              5 |        5 |                  1    | n/a             | n/a             | n/a             |
+| 12     | u/truebill47           |              4 |        7 |                  1.75 | ↑52             | n/a             | n/a             |
+| 13     | u/Letitroll13          |              4 |        6 |                  1.5  | ↑67             | n/a             | n/a             |
 | 14=    | u/PhilosphicalZombie   |              4 |        4 |                  1    | ↓11             | ↓3              | n/a             |
 | 14=    | u/schontzm             |              4 |        4 |                  1    | ↑66             | ↑76             | n/a             |
 | 14=    | u/tcainerr             |              4 |        4 |                  1    | n/a             | n/a             | n/a             |
 | 17     | u/Raz0r-               |              3 |       10 |                  3.33 | n/a             | n/a             | n/a             |
 | 18     | u/SufficientKnee       |              3 |        6 |                  2    | ↑48             | ↑37             | n/a             |
 | 19     | u/sahenders            |              3 |        3 |                  1    | ↑15             | ↓7              | n/a             |
-| 20=    | u/rocketk455           |              2 |       31 |                 15.5  | ↑10             | ↓14             | ↑23             |
-| 20=    | u/wallygator88         |              2 |       31 |                 15.5  | ↓15             | ↓14             | ↓15             |
+| 20=    | u/rocketk455           |              2 |       31 |                 15.5  | ↑10             | ↓14             | ↑25             |
+| 20=    | u/wallygator88         |              2 |       31 |                 15.5  | ↓15             | ↓14             | ↓13             |
 | 20=    | u/wyze0ne              |              2 |       31 |                 15.5  | ↓3              | ↓8              | n/a             |
 | 23     | u/B_S80                |              2 |       30 |                 15    | ↓5              | ↓21             | n/a             |
 | 24     | u/sandstorm99          |              2 |       28 |                 14    | ↑39             | ↑66             | n/a             |
-| 25=    | u/el_charminman        |              2 |        2 |                  1    | ↑50             | ↓13             | ↓20             |
+| 25=    | u/el_charminman        |              2 |        2 |                  1    | ↑50             | ↓13             | ↓18             |
 | 25=    | u/raymoonie            |              2 |        2 |                  1    | ↑54             | n/a             | n/a             |
 | 25=    | u/redwingzfandave      |              2 |        2 |                  1    | ↑65             | n/a             | n/a             |
 | 28=    | u/FireDragonMonkey     |              1 |       32 |                 32    | ↓9              | ↓27             | n/a             |
-| 28=    | u/OBeardWanKenobe      |              1 |       32 |                 32    | n/a             | ↓16             | ↑15             |
+| 28=    | u/OBeardWanKenobe      |              1 |       32 |                 32    | n/a             | ↓16             | ↑17             |
 | 28=    | u/RedMosquitoMM        |              1 |       32 |                 32    | ↓4              | ↑41             | n/a             |
 | 28=    | u/SamIAmShepard        |              1 |       32 |                 32    | ↓19             | ↑56             | n/a             |
 | 28=    | u/brokenjaw622         |              1 |       32 |                 32    | ↓27             | ↓16             | n/a             |
 | 28=    | u/partyman97_3         |              1 |       32 |                 32    | ↓16             | n/a             | n/a             |
 | 34=    | u/2SaintsDude          |              1 |       31 |                 31    | ↑12             | ↓22             | n/a             |
-| 34=    | u/35048467             |              1 |       31 |                 31    | ↓24             | ↓22             | ↓29             |
+| 34=    | u/35048467             |              1 |       31 |                 31    | ↓24             | ↓22             | ↓27             |
 | 34=    | u/AdWorried2804        |              1 |       31 |                 31    | ↓32             | ↓22             | n/a             |
 | 34=    | u/BossHoggins10        |              1 |       31 |                 31    | ↓6              | ↓30             | n/a             |
 | 34=    | u/Breadheater9876      |              1 |       31 |                 31    | ↑16             | ↓22             | n/a             |
-| 34=    | u/Crisp_Mango          |              1 |       31 |                 31    | n/a             | ↓22             | ↓29             |
+| 34=    | u/Crisp_Mango          |              1 |       31 |                 31    | n/a             | ↓22             | ↓27             |
 | 34=    | u/Crossan1983          |              1 |       31 |                 31    | ↑36             | ↓22             | n/a             |
 | 34=    | u/EldrormR             |              1 |       31 |                 31    | ↓8              | ↓22             | n/a             |
 | 34=    | u/Environmental-Gap380 |              1 |       31 |                 31    | ↓22             | ↓22             | n/a             |
@@ -197,14 +197,14 @@ Welcome to your SOTD Lather Log for August 2025
 | 34=    | u/KerblimeySkal        |              1 |       31 |                 31    | ↑44             | ↓22             | n/a             |
 | 34=    | u/Lob-Star             |              1 |       31 |                 31    | ↑32             | n/a             | n/a             |
 | 34=    | u/Marquis90            |              1 |       31 |                 31    | ↓12             | ↓28             | n/a             |
-| 34=    | u/Old_Hiker            |              1 |       31 |                 31    | ↓19             | ↓22             | ↓29             |
+| 34=    | u/Old_Hiker            |              1 |       31 |                 31    | ↓19             | ↓22             | ↓27             |
 | 34=    | u/Priusaurus           |              1 |       31 |                 31    | n/a             | ↓22             | n/a             |
 | 34=    | u/Ramjet615            |              1 |       31 |                 31    | ↑5              | ↑21             | n/a             |
 | 34=    | u/SirKravsALot         |              1 |       31 |                 31    | n/a             | ↓22             | n/a             |
-| 34=    | u/Tetriside            |              1 |       31 |                 31    | ↑11             | ↑31             | ↓29             |
+| 34=    | u/Tetriside            |              1 |       31 |                 31    | ↑11             | ↑31             | ↓27             |
 | 34=    | u/anchovie7468         |              1 |       31 |                 31    | ↓28             | n/a             | n/a             |
 | 34=    | u/bmac92               |              1 |       31 |                 31    | ↑28             | ↓22             | n/a             |
-| 34=    | u/chronnoisseur42O     |              1 |       31 |                 31    | ↑37             | ↓22             | ↑19             |
+| 34=    | u/chronnoisseur42O     |              1 |       31 |                 31    | ↑37             | ↓22             | ↑20             |
 | 34=    | u/coco_for_cocoapuffs  |              1 |       31 |                 31    | ↑27             | n/a             | n/a             |
 | 34=    | u/djundjila            |              1 |       31 |                 31    | ↑3              | ↓22             | n/a             |
 | 34=    | u/expoqeteer           |              1 |       31 |                 31    | ↓13             | n/a             | n/a             |
@@ -214,8 +214,8 @@ Welcome to your SOTD Lather Log for August 2025
 | 34=    | u/lakes1964            |              1 |       31 |                 31    | ↑19             | n/a             | n/a             |
 | 34=    | u/loudmusicboy         |              1 |       31 |                 31    | ↓12             | ↓28             | n/a             |
 | 34=    | u/oswald_heist         |              1 |       31 |                 31    | ↓18             | ↓22             | n/a             |
-| 34=    | u/scribe__             |              1 |       31 |                 31    | ↑7              | ↑56             | ↓29             |
-| 34=    | u/sgrdddy              |              1 |       31 |                 31    | ↑46             | ↓22             | ↑18             |
+| 34=    | u/scribe__             |              1 |       31 |                 31    | ↑7              | ↑56             | ↓27             |
+| 34=    | u/sgrdddy              |              1 |       31 |                 31    | ↑46             | ↓22             | ↑19             |
 | 34=    | u/socialkittielynx     |              1 |       31 |                 31    | ↓20             | ↑24             | n/a             |
 | 34=    | u/solongamerica        |              1 |       31 |                 31    | ↑51             | ↑53             | n/a             |
 
