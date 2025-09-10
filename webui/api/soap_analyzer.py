@@ -429,6 +429,20 @@ def analyze_soap_patterns_web(matches: List[dict], limit: Optional[int] = None) 
     return results
 
 
+def symmetric_similarity(text1: str, text2: str) -> float:
+    """Calculate symmetric similarity between two strings.
+    
+    SequenceMatcher is inherently asymmetric, but we want symmetric similarity scores.
+    This function ensures that similarity(A, B) == similarity(B, A) by taking the
+    maximum of both directions.
+    """
+    from difflib import SequenceMatcher
+    
+    score_1_to_2 = SequenceMatcher(None, text1, text2).ratio()
+    score_2_to_1 = SequenceMatcher(None, text2, text1).ratio()
+    return max(score_1_to_2, score_2_to_1)
+
+
 def analyze_soap_neighbor_similarity_web(
     matches: list[dict], mode: str, similarity_threshold: float = 0.5, limit: Optional[int] = None
 ) -> list[dict]:
@@ -532,9 +546,9 @@ def analyze_soap_neighbor_similarity_web(
             above = unique_entries[i - 1]
             above_normalized = above["normalized_string"]
             current_normalized = current["normalized_string"]
-            similarity_to_above = SequenceMatcher(
-                None, current_normalized, above_normalized
-            ).ratio()
+            similarity_to_above = symmetric_similarity(
+                current_normalized, above_normalized
+            )
 
         # Calculate similarity to entry below (if exists)
         similarity_to_below = None
@@ -542,9 +556,9 @@ def analyze_soap_neighbor_similarity_web(
             below = unique_entries[i + 1]
             below_normalized = below["normalized_string"]
             current_normalized = current["normalized_string"]
-            similarity_to_below = SequenceMatcher(
-                None, current_normalized, below_normalized
-            ).ratio()
+            similarity_to_below = symmetric_similarity(
+                current_normalized, below_normalized
+            )
 
         # Check if this entry meets the similarity threshold with either neighbor
         meets_threshold = (
@@ -575,9 +589,9 @@ def analyze_soap_neighbor_similarity_web(
             above = entries_with_similarities[i - 1]
             above_normalized = above["normalized_string"]
             current_normalized = current["normalized_string"]
-            similarity_to_above = SequenceMatcher(
-                None, current_normalized, above_normalized
-            ).ratio()
+            similarity_to_above = symmetric_similarity(
+                current_normalized, above_normalized
+            )
 
         # Calculate similarity to entry below (if exists) in the filtered dataset
         similarity_to_below = None
@@ -585,9 +599,9 @@ def analyze_soap_neighbor_similarity_web(
             below = entries_with_similarities[i + 1]
             below_normalized = below["normalized_string"]
             current_normalized = current["normalized_string"]
-            similarity_to_below = SequenceMatcher(
-                None, current_normalized, below_normalized
-            ).ratio()
+            similarity_to_below = symmetric_similarity(
+                current_normalized, below_normalized
+            )
 
         # Determine pattern and normalized string from the first occurrence
         first_match = current["original_matches"][0]
