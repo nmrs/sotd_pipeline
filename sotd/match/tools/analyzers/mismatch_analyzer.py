@@ -2104,12 +2104,20 @@ class MismatchAnalyzer(AnalysisTool):
             # AND it should have only one component with data (not both handle and knot)
             if brand is None:
                 # Check if only one component has meaningful data
-                handle_has_data = handle and isinstance(handle, dict) and (handle.get("brand") or handle.get("model"))
-                knot_has_data = knot and isinstance(knot, dict) and (knot.get("brand") or knot.get("model"))
+                handle_has_data = (
+                    handle
+                    and isinstance(handle, dict)
+                    and (handle.get("brand") or handle.get("model"))
+                )
+                knot_has_data = (
+                    knot and isinstance(knot, dict) and (knot.get("brand") or knot.get("model"))
+                )
                 # If only one component has data, it's a single component brush (split brush)
-                if (handle_has_data and not knot_has_data) or (knot_has_data and not handle_has_data):
+                if (handle_has_data and not knot_has_data) or (
+                    knot_has_data and not handle_has_data
+                ):
                     return True
-        
+
         return False
 
     def _extract_split_brush_components(
