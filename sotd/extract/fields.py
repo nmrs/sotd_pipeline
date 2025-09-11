@@ -44,4 +44,6 @@ def get_patterns(alias: str) -> list[str]:
         # more specific cases
         rf"^[^\w\s]\s*\*+\s*{alias}[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
         rf"^[^\w\s]\s*\*+\s*{alias}\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
+        # simple space format: Field product name
+        rf"^{alias}\s+(.+)$",  # Field product name (no colon/dash)
     ]
