@@ -37,6 +37,9 @@ Abbate Y La Mantia:
     Blue Tobacco:
       patterns:
         - abbate.*blue.*tobacco
+    Don Jose:
+      patterns:
+        - (abbate|aylm).*don jos\w\b
     Fufluns:
       patterns:
         - 'abbate.*fuf\w+ns'
@@ -49,13 +52,22 @@ Abbate Y La Mantia:
     Koke:
       patterns:
         - abbate.*kok[eé]
+    Krokos:
+      patterns:
+        - abbate.*krokos
     Magnifico:
       patterns:
         - abbate.*magnifico
+    Matteo 9-11:
+      patterns:
+        - abbate.*matteo
     Verbena Toscana:
       patterns:
         - verbena t(o|u)scana
         - tuscana verbana
+    Vulcano:
+      patterns:
+        - abbate.*v[uo]lcano
 Ach Brito:
   patterns:
     - '\bach.*britos?\b'
@@ -83,6 +95,13 @@ Aion Skincare:
     Raspberry Gateau:
       patterns:
         - raspb?erry gateau
+Alexandria Grooming:
+  patterns:
+    - alexandria grooming
+  scents:
+    Fructus Virginis:
+      patterns:
+        - fructus virginis
 Alvarez Gomez:
   patterns:
     - alvarez gomez
@@ -128,18 +147,27 @@ Ariana & Evans:
     60's Cologne:
       patterns:
         - 60'?s cologne
+    Asian Pear:
+      patterns:
+        - (arian|a&e).*asian pear
     Asian Plum:
       patterns:
         - asian plum
     Barbiere Classico:
       patterns:
         - barbiere? clas+ico
+    Cafe au Lait:
+      patterns:
+        - (arian|a&e).*caf.*lait
     Cannabliss Santal:
       patterns:
-        - cannabliss santal
+        - can+ablis+ santal
     Cuban Highball:
       patterns:
         - cuban highball
+    Forbidden Fruit:
+      patterns:
+        - (arian|a&e).*forb+id+en fruit
     Kaizen:
       patterns:
         - '\bkaizen\b'
@@ -167,6 +195,9 @@ Ariana & Evans:
     Pedro Fiasco Pomegranate & Wood:
       patterns:
         - pedro f(ia|ai)sco.*pomegranate
+    SoCal Hipster:
+      patterns:
+        - (arian|a&e).*so ?cal hipster
     Spartacus:
       patterns:
         - arian+a?.*spartacus
@@ -1484,6 +1515,9 @@ Grooming Dept:
   patterns:
     - 'grooming.*dep\w*t\b'
   scents:
+    Aion:
+      patterns:
+        - grooming.*aion
     Earl Grey Gelato:
       patterns:
         - "early? grey gelato"
