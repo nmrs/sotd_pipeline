@@ -228,8 +228,14 @@ def search_threads(
                 print(f"[DEBUG] Day {day}: {count} threads")
 
         # Find days that are missing threads
+        # For current month, only check up to current date
+        from datetime import date
+        today = date.today()
+        is_current_month = (year == today.year and month == today.month)
+        max_day_to_check = today.day if is_current_month else 31
+        
         missing_days = []
-        for day in range(1, 32):  # Check all possible days in the month
+        for day in range(1, max_day_to_check + 1):  # Only check up to current date for current month
             current_count = len(threads_by_day[day])
             if current_count < max_threads_per_day:
                 missing_count = max_threads_per_day - current_count
