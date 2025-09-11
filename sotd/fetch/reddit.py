@@ -162,14 +162,19 @@ def search_threads(
 
     month_abbr = calendar.month_abbr[month].lower()
     month_name = calendar.month_name[month].lower()
-    # Two search patterns: normal and "yearSOTD" style
-    queries = [
+
+    # Improved search strategy: use day-specific queries to avoid 100-result limit
+    # First try broad searches, then fall back to day-specific if we hit the limit
+    broad_queries = [
         f"flair:SOTD {month_abbr} {month_name} {year}",
         f"flair:SOTD {month_abbr} {month_name} {year}SOTD",
     ]
 
     all_results = {}
-    for query in queries:
+    hit_limit = False
+
+    # Try broad searches first
+    for query in broad_queries:
         if debug:
             print(f"[DEBUG] Search query: {query!r}")
         raw_results = safe_call(subreddit.search, query, sort="relevance", syntax="lucene")
@@ -178,8 +183,89 @@ def search_threads(
         raw_results = list(raw_results)
         if debug:
             print(f"[DEBUG] PRAW raw results for {query!r}: {len(raw_results)}")
+
+        # Check if we hit the 100-result limit (indicates there might be more results)
+        if len(raw_results) >= 100:
+            hit_limit = True
+            if debug:
+                print(
+                    f"[DEBUG] Hit 100-result limit with {query!r}, will use day-specific searches"
+                )
+
         for sub in raw_results:
             all_results[sub.id] = sub  # dedupe by Reddit submission ID
+
+    # If we hit the limit, use smart pattern detection to find missing threads
+    if hit_limit:
+        if debug:
+            print(f"[DEBUG] Analyzing thread patterns to identify missing days")
+
+        # First filter the broad results to only current year/month
+        filtered_results = filter_valid_threads(
+            list(all_results.values()), year, month, debug=debug
+        )
+
+        # Analyze filtered results to determine expected threads per day
+        from sotd.utils import parse_thread_date
+        from collections import defaultdict
+
+        # Group filtered threads by day
+        threads_by_day = defaultdict(list)
+        for sub in filtered_results:
+            d = parse_thread_date(sub.title, year)
+            if d is not None and d.month == month:
+                threads_by_day[d.day].append(sub)
+
+        # Find the maximum number of threads per day
+        max_threads_per_day = (
+            max(len(threads) for threads in threads_by_day.values()) if threads_by_day else 0
+        )
+
+        if debug:
+            print(f"[DEBUG] Found max {max_threads_per_day} threads per day")
+            for day in sorted(threads_by_day.keys()):
+                count = len(threads_by_day[day])
+                print(f"[DEBUG] Day {day}: {count} threads")
+
+        # Find days that are missing threads
+        missing_days = []
+        for day in range(1, 32):  # Check all possible days in the month
+            current_count = len(threads_by_day[day])
+            if current_count < max_threads_per_day:
+                missing_count = max_threads_per_day - current_count
+                missing_days.append((day, missing_count))
+                if debug:
+                    print(
+                        f"[DEBUG] Day {day}: missing {missing_count} threads (has {current_count}, need {max_threads_per_day})"
+                    )
+
+        # Search for missing threads on specific days
+        if missing_days:
+            if debug:
+                print(f"[DEBUG] Searching for missing threads on {len(missing_days)} days")
+
+            for day, missing_count in missing_days:
+                day_queries = [
+                    f"flair:SOTD {month_abbr} {day:02d} {year}",
+                    f"flair:SOTD {month_abbr} {day} {year}",
+                    f"flair:SOTD {month_name} {day:02d} {year}",
+                    f"flair:SOTD {month_name} {day} {year}",
+                ]
+
+                for query in day_queries:
+                    if debug:
+                        print(f"[DEBUG] Missing thread query: {query!r}")
+                    raw_results = safe_call(
+                        subreddit.search, query, sort="relevance", syntax="lucene"
+                    )
+                    if raw_results is None:
+                        raw_results = []
+                    raw_results = list(raw_results)
+                    if debug:
+                        print(f"[DEBUG] PRAW raw results for {query!r}: {len(raw_results)}")
+
+                    for sub in raw_results:
+                        all_results[sub.id] = sub  # dedupe by Reddit submission ID
 
     combined = list(all_results.values())
     if debug:
