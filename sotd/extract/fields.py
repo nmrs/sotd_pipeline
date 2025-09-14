@@ -9,6 +9,10 @@ def extract_field(line: str, field: str) -> Optional[str]:
 
 
 def _extract_field_line(line: str, field: str) -> Optional[str]:
+    # Special handling for soap field: ignore "lather" when followed by "games"
+    if field == "soap" and re.match(r"^lather\s+games", line, flags=re.IGNORECASE):
+        return None
+
     aliases = FIELD_ALIASES.get(field, [field])
 
     patterns = []

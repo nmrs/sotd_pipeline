@@ -100,6 +100,14 @@ def test_extract_field_lines():
             ("‣ **Lather**: Bullet Lather", "Bullet Lather"),  # Different bullet
             ("* **Soap** - Dash Separated Soap", "Dash Separated Soap"),  # Dash separated
             ("* **Lather** - Dash Separated Lather", "Dash Separated Lather"),  # Dash separated
+            # Lather Games should be ignored (not treated as soap field)
+            ("Lather Games Day 1 - Spring into Lather Games", None),
+            ("* **Lather Games** - Some Event", None),
+            ("Lather games are fun", None),
+            ("LATHER GAMES EVENT", None),
+            # But normal lather should still work
+            ("* **Lather:** B&M Seville", "B&M Seville"),
+            ("Lather: Tabac", "Tabac"),
         ],
     }
 
