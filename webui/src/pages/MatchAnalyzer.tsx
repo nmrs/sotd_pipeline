@@ -491,6 +491,28 @@ const MatchAnalyzer: React.FC = () => {
             };
           }
 
+          // For soap field, no mapping needed - brand and scent fields are already correct
+          if (selectedField === 'soap' && item.matched) {
+            // Soap data already has brand and scent fields, no mapping needed
+            const soapData = {
+              ...item.matched,
+            };
+
+            // Debug logging for soap field data
+            console.log('Soap match data:', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: soapData,
+              brand: item.matched.brand,
+              scent: item.matched.scent,
+            });
+
+            return {
+              original: item.original,
+              matched: soapData,
+            };
+          }
+
           // For non-brush fields, return as-is
           return {
             original: item.original,
@@ -589,6 +611,28 @@ const MatchAnalyzer: React.FC = () => {
             return {
               original: item.original,
               matched: bladeData,
+            };
+          }
+
+          // For soap field, no mapping needed - brand and scent fields are already correct
+          if (selectedField === 'soap' && item.matched) {
+            // Soap data already has brand and scent fields, no mapping needed
+            const soapData = {
+              ...item.matched,
+            };
+
+            // Debug logging for soap field mapping
+            console.log('Soap match data (remove):', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: soapData,
+              brandToMaker: item.matched.brand,
+              modelToScent: item.matched.model,
+            });
+
+            return {
+              original: item.original,
+              matched: soapData,
             };
           }
 
@@ -763,6 +807,28 @@ const MatchAnalyzer: React.FC = () => {
             return {
               original: item.original,
               matched: bladeData,
+            };
+          }
+
+          // For soap field, no mapping needed - brand and scent fields are already correct
+          if (selectedField === 'soap' && item.matched) {
+            // Soap data already has brand and scent fields, no mapping needed
+            const soapData = {
+              ...item.matched,
+            };
+
+            // Debug logging for soap field mapping
+            console.log('Soap match data (incorrect):', {
+              original: item.original,
+              originalMatched: item.matched,
+              processedMatched: soapData,
+              brandToMaker: item.matched.brand,
+              modelToScent: item.matched.model,
+            });
+
+            return {
+              original: item.original,
+              matched: soapData,
             };
           }
 
