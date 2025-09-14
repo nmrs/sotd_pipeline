@@ -196,7 +196,7 @@ class CorrectMatchesManager:
                                                             if field in ("razor", "blade", "brush")
                                                             else None
                                                         ),
-                                                        "maker": brand if field == "soap" else None,
+                                                        "brand": brand if field == "soap" else None,
                                                         "scent": model if field == "soap" else None,
                                                     },
                                                     "field": field,
@@ -239,19 +239,19 @@ class CorrectMatchesManager:
                         field_data[field][format_name][brand][model].append(normalized_original)
 
                 elif field == "soap":
-                    maker = match_data["matched"]["maker"]
+                    brand = match_data["matched"]["brand"]
                     scent = match_data["matched"]["scent"]
-                    if maker not in field_data[field]:
-                        field_data[field][maker] = {}
-                    if scent not in field_data[field][maker]:
-                        field_data[field][maker][scent] = []
+                    if brand not in field_data[field]:
+                        field_data[field][brand] = {}
+                    if scent not in field_data[field][brand]:
+                        field_data[field][brand][scent] = []
                     # Normalize the original string before storing to prevent bloat
                     normalized_original = self._normalize_for_matching(original, field)
                     if (
                         normalized_original
-                        and normalized_original not in field_data[field][maker][scent]
+                        and normalized_original not in field_data[field][brand][scent]
                     ):
-                        field_data[field][maker][scent].append(normalized_original)
+                        field_data[field][brand][scent].append(normalized_original)
                 elif field == "brush":
                     # Check if this is a split brush (composite brush with handle/knot components)
                     handle = match_data["matched"].get("handle")
