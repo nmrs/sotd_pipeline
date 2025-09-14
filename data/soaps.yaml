@@ -164,6 +164,12 @@ Ariana & Evans:
     Barbiere Classico:
       patterns:
         - barbiere? clas+ico
+    Boca Negra:
+      patterns:
+        - (ariana|a&e|club).*boca
+    Boo!!:
+      patterns:
+        - (ariana|a&e|club).*boo
     Cafe au Lait:
       patterns:
         - (arian|a&e).*caf.*lait
@@ -173,24 +179,39 @@ Ariana & Evans:
     Cha Cha Matcha:
       patterns:
         - (arian|a&e).*cha cha matcha
+    Club Baccara:
+      patterns:
+        - club.*baccara
     Cuban Highball:
       patterns:
         - cuban highball
-    Forbidden Fruit:
+    Dirty Ginger:
+      patterns:
+        - (ariana|a&e|club).*ginger
+    Forbidoden Fruit:
       patterns:
         - (arian|a&e).*forb+id+en fruit
+    Fruit de la Passion:
+      patterns:
+        - (ariana|a&e|club).*passion
     Indo Ink:
       patterns:
         - (arian|a&e).*indo[ -]ink
     Kaizen:
       patterns:
         - \bkaizen\b
+    Khalifa:
+      patterns:
+        - (ariana|a&e|club).*khalifa
     L'Orange Verte:
       patterns:
         - orange.*vert
     London Gin Club:
       patterns:
         - arian+a?.*london
+    Low Scent Skeleton:
+      patterns:
+        - (ariana|a&e|club).*skele
     Lurch & Fester:
       patterns:
         - lurch.*fester
@@ -220,6 +241,9 @@ Ariana & Evans:
     Plum & Bliss:
       patterns:
         - plum.*bliss
+    Signature:
+      patterns:
+        - (aria na|a&e|club).*signat
     SoCal Hipster:
       patterns:
         - (arian|a&e).*so ?cal hipster
@@ -235,40 +259,19 @@ Ariana & Evans:
     Sylvan Fog:
       patterns:
         - sylvan fog
-    The Club - Boca Negra:
-      patterns:
-        - (ariana|a&e|club).*boca
-    The Club - Boo!!:
-      patterns:
-        - (ariana|a&e|club).*boo
-    The Club - Dirty Ginger:
-      patterns:
-        - (ariana|a&e|club).*ginger
-    The Club - Fruit de la Passion:
-      patterns:
-        - (ariana|a&e|club).*passion
-    The Club - Khalifa:
-      patterns:
-        - (ariana|a&e|club).*khalifa
-    The Club - Low Scent Skeleton:
-      patterns:
-        - (ariana|a&e|club).*skele
-    The Club - Signature:
-      patterns:
-        - (aria na|a&e|club).*signat
-    The Club - The Graveyand:
+    The Graveyand:
       patterns:
         - (ariana|a&e|club).*grave
-    The Club - Vacanza Romana:
-      patterns:
-        - vacanza romana
-    The Club - Vanille Vendetta:
-      patterns:
-        - (ariana|a&e|club).*vanil
     The Undersea:
       patterns:
         - undersea
         - (ariana|a&e).*under.*sea
+    Vacanza Romana:
+      patterns:
+        - vacanza romana
+    Vanille Vendetta:
+      patterns:
+        - (ariana|a&e|club).*vanil
     Which One's Pink:
       patterns:
         - which one'?s pink
@@ -777,7 +780,7 @@ Catie's Bubbles:
       patterns:
         - 'catie.*bubbles.*b\w+g\w+t bay'
         - '\bcb\b.*b\w+g\w+t bay'
-    Blugere:
+    Blugère:
       patterns:
         - "blug(e|è)re"
     Cape Code Cranberry:
@@ -947,7 +950,7 @@ Chiseled Face:
         - '\bcf\b.*banana'
     Bay Rum:
       patterns:
-        - (cf|chisel).*bay rum
+        - ^(?!.*monica).*(cf|chisel).*bay rum
     Cedar & Spice:
       patterns:
         - cedar.*spice
@@ -966,6 +969,9 @@ Chiseled Face:
     Midnight Stag:
       patterns:
         - midnight stag
+    Santa Monica Bay Rum:
+      patterns:
+        - santa monica bay rum
     Trade Winds:
       patterns:
         - chisel.*trade winds
@@ -1104,6 +1110,9 @@ Declaration Grooming:
     - declaration
     - declaratiøn grøøming
   scents:
+    "?":
+      patterns:
+        - (declaration|dg).*\b\?\b
     88 Chestnut St.:
       patterns:
         - 88 chestnut
@@ -1188,6 +1197,9 @@ Declaration Grooming:
     Mayflower:
       patterns:
         - mayflower
+    Original:
+      patterns:
+        - (declaration|dg).*original
     Peaches & Scream:
       patterns:
         - peaches.*scream
@@ -1398,6 +1410,9 @@ Fanzine Saponifications:
   patterns:
     - fanzine( saponifications?)?
   scents:
+    This is not a Test:
+      patterns:
+        - fanzine.*this is not a test
     Testing... Testing:
       patterns:
         - fanzine.*test(ing)?
@@ -1489,6 +1504,9 @@ Gentleman's Nod:
     Ernest:
       patterns:
         - ^gentl.*ernest
+    Jackie:
+      patterns:
+        - (gentlem|gn).*jackie
     Juniper Reverie:
       patterns:
         - gentlem.*juniper
@@ -2177,15 +2195,24 @@ Mike's Natural Soaps:
     Barber Shop:
       patterns:
         - "^mike.*barber ?shop"
+    Bergamot, Orange, Ylang-ylang:
+      patterns:
+        - mike.*bergamot.*ylang
     Honey & Grapefruit:
       patterns:
         - mike.*honey.*grapefruit
     Hungarian Lavender:
       patterns:
         - mike.*hungarian.*lavend
+    Lavandin & Eucalyptus:
+      patterns:
+        - mike.*lavandin.*eucalyptus
     Lemongrass & Eucalyptus:
       patterns:
         - mike.*lemongrass.*euc
+    Lime:
+      patterns:
+        - mike.*lime
     Orange, Cedarwood, & Black Pepper:
       patterns:
         - "mike.*orange.*pepper"
@@ -2319,7 +2346,7 @@ Noble Otter:
     Bare:
       patterns:
         - noble.*\bbare\b
-    BarrBarr:
+    Barrbarr:
       patterns:
         - "bar+ ?bar"
     Batters Up:
@@ -3171,7 +3198,7 @@ Summer Break Soaps:
     Remote Learning:
       patterns:
         - remote learning
-    Trouble Makler:
+    Trouble Maker:
       patterns:
         - "trouble ?maker"
     Valedictorian:

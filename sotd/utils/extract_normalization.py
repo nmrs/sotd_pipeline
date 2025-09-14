@@ -300,9 +300,10 @@ def strip_trailing_periods(value: str | None) -> str:
     if not isinstance(value, str):
         return ""
 
-    # Remove trailing periods, exclamation marks, question marks, commas, semicolons, colons
+    # Remove trailing periods, exclamation marks, commas, semicolons, colons
     # Also remove trailing spaces that might be left after punctuation removal
-    cleaned = re.sub(r"[\.\!\?\,\;\:\s]+$", "", value)
+    # Note: Question marks are preserved as they can be part of product names (e.g., "Declaration Grooming - ?")
+    cleaned = re.sub(r"[\.\!\,\;\:\s]+$", "", value)
 
     return cleaned
 
