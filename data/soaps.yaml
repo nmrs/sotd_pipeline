@@ -1112,7 +1112,7 @@ Declaration Grooming:
   scents:
     "?":
       patterns:
-        - (declaration|dg).*\b\?\b
+        - (declaration|dg).*\?
     88 Chestnut St.:
       patterns:
         - 88 chestnut
