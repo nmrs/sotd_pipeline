@@ -9,6 +9,9 @@
     Cairn:
       patterns:
         - 345.*cairn
+    Estes:
+      patterns:
+        - 345.*estes
     Jet Setter:
       patterns:
         - 345.*jet setter
@@ -118,7 +121,11 @@ Apex Alchemy:
     - "apex alchemy( shaving)?"
 Acqua Di Parma:
   patterns:
-    - "acqua di parma"
+    - acqua di parma
+  scents:
+    Barbiere:
+      patterns:
+        - acqua di parma.*(?:barbiere)?
 Adopted Acres:
   patterns:
     - adopted acres
@@ -141,7 +148,8 @@ Areffa Soap:
     - "areffa( soaps?)?"
 Ariana & Evans:
   patterns:
-    - \ba ?(and|&|\+) ?e\b
+    - \ba ?[&\+] ?e\b
+    - \ba and e\b
     - ad?rian+a?.*evans
   scents:
     60's Cologne:
@@ -162,30 +170,44 @@ Ariana & Evans:
     Cannabliss Santal:
       patterns:
         - can+ablis+ santal
+    Cha Cha Matcha:
+      patterns:
+        - (arian|a&e).*cha cha matcha
     Cuban Highball:
       patterns:
         - cuban highball
     Forbidden Fruit:
       patterns:
         - (arian|a&e).*forb+id+en fruit
+    Indo Ink:
+      patterns:
+        - (arian|a&e).*indo[ -]ink
     Kaizen:
       patterns:
-        - '\bkaizen\b'
+        - \bkaizen\b
     L'Orange Verte:
       patterns:
-        - oran.*vert
+        - orange.*vert
     London Gin Club:
       patterns:
         - arian+a?.*london
+    Lurch & Fester:
+      patterns:
+        - lurch.*fester
     Matcha Tea:
       patterns:
         - matcha tea
-    Maullu:
-      patterns:
-        - \bmaullu\b
     Monte Carlo:
       patterns:
         - ariana.*monte carlo
+    Maullu - Latte e Menta:
+      patterns:
+        - (arian|a&e).*latte.*ment
+        - maul+u.*latte
+    Maullu - Legacy:
+      patterns:
+        - (arian|a&e).*legacy
+        - maul+u.*(?:legacy)? #make Legacy the default Maullu scent if no other detail is provided
     Ouddiction:
       patterns:
         - o[ud]+iction(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -195,15 +217,21 @@ Ariana & Evans:
     Pedro Fiasco Pomegranate & Wood:
       patterns:
         - pedro f(ia|ai)sco.*pomegranate
+    Plum & Bliss:
+      patterns:
+        - plum.*bliss
     SoCal Hipster:
       patterns:
         - (arian|a&e).*so ?cal hipster
     Spartacus:
       patterns:
-        - arian+a?.*spartacus
+        - (arian|a&e).*spartacus
     St. Barts:
       patterns:
-        - ariana.*barts
+        - (arian|a&e).*barts
+    Stateside Sonata:
+      patterns:
+        - stateside sonata
     Sylvan Fog:
       patterns:
         - sylvan fog
@@ -231,6 +259,9 @@ Ariana & Evans:
     The Club - The Graveyand:
       patterns:
         - (ariana|a&e|club).*grave
+    The Club - Vacanza Romana:
+      patterns:
+        - vacanza romana
     The Club - Vanille Vendetta:
       patterns:
         - (ariana|a&e|club).*vanil
@@ -238,6 +269,9 @@ Ariana & Evans:
       patterns:
         - undersea
         - (ariana|a&e).*under.*sea
+    Which One's Pink:
+      patterns:
+        - which one'?s pink
 Arko:
   patterns:
     - '\barko+\b'
@@ -253,13 +287,18 @@ Art of Shaving:
     - (?:the )?art of shaving
     - '\baos\b'
   scents:
+    Lavender:
+      patterns:
+        - (aos|art of shaving).*lavender
+    Lavender (Cream):
+      patterns:
+        - (aos|art of shaving).*lavender.*cream
     Oud:
       patterns:
-        - 'art of shaving.*\boud\b'
+        - (aos|art of shaving).*\boud\b'
     Sandalwood:
       patterns:
-        - art of shaving.*sand\w+wood
-        - aos.*sand\w+wood
+        - (aos|art of shaving).*sand\w+wood
 Asylum Shave Works:
   patterns:
     - asylum shave works
@@ -431,8 +470,8 @@ Barrister and Mann:
         - "foug.?re imperiale"
     Hallows:
       patterns:
-        - '\bb ?(and|&|\+) ?m\b.*h|oallows'
-        - barris.*ha|ollows
+        - '\bb ?(and|&|\+) ?m\b.*h[oa]l+ows'
+        - barris.*h[ao]l+ows
     Kalyptos:
       patterns:
         - kalyp[st]os
@@ -1765,7 +1804,7 @@ Hwayeon Soap Co.:
         - hwayeon
 I Coloniali:
   patterns:
-    - '(?:\bi\b )?.*colonia(?:li)?\b'
+    - '\bi\b colonia(?:li)?\b'
 Itakha:
   patterns:
     - itakha
@@ -2347,7 +2386,7 @@ Noble Otter:
         - toons.*spoons
     Two Kings:
       patterns:
-        - noble.*two kings
+        - (two|2) kings
 Nõberu of Sweden:
   patterns:
     - "n[õo]beru( of sweden)?"
