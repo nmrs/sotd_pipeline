@@ -821,9 +821,18 @@ Catie's Bubbles:
     Literal Lilac:
       patterns:
         - literal lilac
+    Maggards MeetUp 2019:
+      patterns:
+        - cat.*bubb.*(mag.*2019|2019.*mag)
     Maggards MeetUp 2023:
       patterns:
-        - cat.*bubb.*maggard
+        - cat.*bubb.*(mag.*2023|2023.*mag)
+    Maggards MeetUp 2024:
+      patterns:
+        - cat.*bubb.*(mag.*2024|2024.*mag)
+    Maggards MeetUp 2025:
+      patterns:
+        - cat.*bubb.*(mag.*2025|2025.*mag)
     Massepain:
       patterns:
         - "(catie|cb).*mass(e|é)pain"
@@ -2939,6 +2948,9 @@ Stirling Soap Co.:
     Christmas Eve:
       patterns:
         - stirling.*christmas eve
+    Cool Blue:
+      patterns:
+        - st[ie]rling.*cool.*blue
     Deep Blue Sea:
       patterns:
         - (?:stirling.*)?deep blue sea
