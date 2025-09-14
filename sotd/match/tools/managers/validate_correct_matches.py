@@ -593,7 +593,8 @@ class ValidateCorrectMatches:
             elif field == "blade":
                 # BladeMatcher expects: match_with_context(normalized_text, format_name)
                 # for format-aware matching
-                if hasattr(matcher, "match_with_context"):
+                if hasattr(matcher, "match_with_context") and len(args) >= 3:
+                    format_name = args[0]  # First arg is format_name for blades
                     result = matcher.match_with_context(
                         test_text.lower(), format_name, strict_format=True
                     )
@@ -618,8 +619,8 @@ class ValidateCorrectMatches:
                         "type": "unmatchable_entry",
                         "field": field,
                         "format": format_name,
-                        "brand": brand_name,
-                        "model": model_name,
+                        "expected_brand": brand_name,
+                        "expected_model": model_name,
                         "pattern": test_text,
                         "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
                     }
@@ -628,8 +629,8 @@ class ValidateCorrectMatches:
                     return {
                         "type": "unmatchable_entry",
                         "field": field,
-                        "brand": brand_name,
-                        "model": model_name,
+                        "expected_brand": brand_name,
+                        "expected_model": model_name,
                         "pattern": test_text,
                         "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
                     }
@@ -638,17 +639,23 @@ class ValidateCorrectMatches:
             if hasattr(result, "matched") and result.matched:
                 matched_data = result.matched
                 actual_brand = matched_data.get("brand")
-                actual_model = matched_data.get("model")
+                # For soap matcher, use 'scent' field instead of 'model'
+                actual_model = (
+                    matched_data.get("model") if field != "soap" else matched_data.get("scent")
+                )
 
                 if field == "blade" and len(args) >= 3:
                     expected_format, expected_brand, expected_model = args[0], args[1], args[2]
-                    if actual_brand != expected_brand or actual_model != expected_model:
+                    # Accept brand fallback matches that produce the same result (case-insensitive)
+                    if (actual_brand or "").lower() != (expected_brand or "").lower() or (
+                        actual_model or ""
+                    ).lower() != (expected_model or "").lower():
                         return {
                             "type": "mismatched_result",
                             "field": field,
                             "format": expected_format,
-                            "brand": expected_brand,
-                            "model": expected_model,
+                            "expected_brand": expected_brand,
+                            "expected_model": expected_model,
                             "pattern": test_text,
                             "actual_brand": actual_brand or "Unknown",
                             "actual_model": actual_model or "Unknown",
@@ -660,12 +667,16 @@ class ValidateCorrectMatches:
                         }
                 elif len(args) >= 2:
                     expected_brand, expected_model = args[0], args[1]
-                    if actual_brand != expected_brand or actual_model != expected_model:
+                    # Accept brand fallback matches that produce the same result (case-insensitive)
+                    # This allows brand fallback to be considered valid if it produces the same brand/model
+                    if (actual_brand or "").lower() != (expected_brand or "").lower() or (
+                        actual_model or ""
+                    ).lower() != (expected_model or "").lower():
                         return {
                             "type": "mismatched_result",
                             "field": field,
-                            "brand": expected_brand,
-                            "model": expected_model,
+                            "expected_brand": expected_brand,
+                            "expected_model": expected_model,
                             "pattern": test_text,
                             "actual_brand": actual_brand,
                             "actual_model": actual_model,
