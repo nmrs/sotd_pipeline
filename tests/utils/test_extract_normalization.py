@@ -7,6 +7,7 @@ from sotd.utils.extract_normalization import (
     strip_handle_indicators,
     strip_soap_patterns,
     strip_trailing_periods,
+    strip_link_markup,
 )
 
 
@@ -396,6 +397,90 @@ class TestStripSoapPatterns:
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+
+class TestStripLinkMarkup:
+    """Test link markup stripping functionality."""
+
+    def test_strip_link_markup_standard_format(self):
+        """Test standard markdown link format [text](url)."""
+        test_cases = [
+            ("[Barrister and Mann Reserve Lavender](https://trythatsoap.com/collection/820/?product_type=soap)", "Barrister and Mann Reserve Lavender"),
+            ("[Summer Break Soaps Field Day](https://trythatsoap.com/collection/928/?product_type=soap)", "Summer Break Soaps Field Day"),
+            ("[Declaration Grooming Original](https://trythatsoap.com/collection/123/?product_type=soap)", "Declaration Grooming Original"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_link_markup(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_link_markup_with_space(self):
+        """Test markdown link format with space [text] (url)."""
+        test_cases = [
+            ("[Barrister and Mann Reserve Lavender] (https://trythatsoap.com/collection/820/?product_type=soap)", "Barrister and Mann Reserve Lavender"),
+            ("[Summer Break Soaps Field Day] (https://trythatsoap.com/collection/928/?product_type=soap)", "Summer Break Soaps Field Day"),
+            ("[Declaration Grooming Original] (https://trythatsoap.com/collection/123/?product_type=soap)", "Declaration Grooming Original"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_link_markup(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_link_markup_plain_urls(self):
+        """Test plain URL stripping."""
+        test_cases = [
+            ("Barrister and Mann Reserve Lavender https://trythatsoap.com/collection/820/?product_type=soap", "Barrister and Mann Reserve Lavender"),
+            ("Summer Break Soaps Field Day http://example.com", "Summer Break Soaps Field Day"),
+            ("https://trythatsoap.com/collection/820/?product_type=soap", ""),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_link_markup(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_link_markup_link_indicators(self):
+        """Test link indicator stripping."""
+        test_cases = [
+            ("Barrister and Mann Reserve Lavender (link)", "Barrister and Mann Reserve Lavender"),
+            ("Summer Break Soaps Field Day (url)", "Summer Break Soaps Field Day"),
+            ("Declaration Grooming Original (LINK)", "Declaration Grooming Original"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_link_markup(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_link_markup_no_links(self):
+        """Test strings without any link markup."""
+        test_cases = [
+            "Barrister and Mann Reserve Lavender",
+            "Summer Break Soaps Field Day",
+            "Declaration Grooming Original",
+            "Plain text without any links",
+        ]
+        for input_str in test_cases:
+            result = strip_link_markup(input_str)
+            assert (
+                result == input_str
+            ), f"Failed for '{input_str}': got '{result}', expected '{input_str}'"
+
+    def test_strip_link_markup_edge_cases(self):
+        """Test edge cases for link markup stripping."""
+        test_cases = [
+            ("", ""),
+            (None, None),
+            ("[text] (url) and [text2](url2)", "text and text2"),
+            ("[text] (url) https://example.com (link)", "text"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_link_markup(input_str)
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"

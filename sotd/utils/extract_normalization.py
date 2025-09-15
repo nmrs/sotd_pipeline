@@ -256,7 +256,7 @@ def strip_link_markup(value: str) -> str:
     Strip link markup from strings.
 
     This removes patterns like:
-    - Markdown links: [text](url)
+    - Markdown links: [text](url) and [text] (url) (with space)
     - Plain URLs: http://example.com
     - Link indicators: (link), (url), etc.
 
@@ -269,8 +269,8 @@ def strip_link_markup(value: str) -> str:
     if not isinstance(value, str):
         return value
 
-    # Pattern for markdown links
-    markdown_link_pattern = r"\[([^\]]+)\]\([^)]+\)"
+    # Pattern for markdown links (both [text](url) and [text] (url) with space)
+    markdown_link_pattern = r"\[([^\]]+)\]\s*\([^)]+\)"
     cleaned = re.sub(markdown_link_pattern, r"\1", value)
 
     # Pattern for plain URLs
@@ -302,7 +302,8 @@ def strip_trailing_periods(value: str | None) -> str:
 
     # Remove trailing periods, exclamation marks, commas, semicolons, colons
     # Also remove trailing spaces that might be left after punctuation removal
-    # Note: Question marks are preserved as they can be part of product names (e.g., "Declaration Grooming - ?")
+    # Note: Question marks are preserved as they can be part of product names
+    # (e.g., "Declaration Grooming - ?")
     cleaned = re.sub(r"[\.\!\,\;\:\s]+$", "", value)
 
     return cleaned
