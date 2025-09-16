@@ -6,6 +6,7 @@ import { MismatchItem, BrushMatchedData, isBrushMatchedData, AnalyzerDataItem, i
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
+import ExpandablePatterns from '../ui/ExpandablePatterns';
 
 // Helper function to extract brush component patterns
 const getBrushComponentPattern = (
@@ -1032,19 +1033,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         }
 
         return (
-          <div className="space-y-1">
-            {item.top_patterns.map((pattern, index) => (
-              <div key={index} className="text-sm text-gray-700">
-                <span className="font-medium">{pattern.original}</span>
-                <span className="ml-2 text-gray-500">({pattern.count})</span>
-              </div>
-            ))}
-            {item.remaining_count > 0 && (
-              <div className="text-sm text-blue-600 font-medium">
-                + {item.remaining_count} more
-              </div>
-            )}
-          </div>
+          <ExpandablePatterns
+            topPatterns={item.top_patterns}
+            allPatterns={item.all_patterns}
+            remainingCount={item.remaining_count}
+            maxInitial={3}
+          />
         );
       },
       enableSorting: false,
