@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/soap-analyzer", tags=["soap-analyzer"])
+router = APIRouter(prefix="/api/soap-analyzer", tags=["soap-analyzer"])
 
 
 # Pydantic models for response
@@ -679,7 +679,7 @@ async def get_soap_group_by_matched(
         # Load soap match data for the specified months
         matches = []
         for month in month_list:
-            month_file = Path(f"data/matched/{month}.json")
+            month_file = Path(f"../data/matched/{month}.json")
             if not month_file.exists():
                 logger.warning(f"Month file not found: {month_file}")
                 continue
