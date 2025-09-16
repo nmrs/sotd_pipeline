@@ -32,6 +32,7 @@ const MatchAnalyzer: React.FC = () => {
   const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
+  const [groupByMatched, setGroupByMatched] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
     | 'mismatches'
     | 'all'
@@ -1062,8 +1063,9 @@ const MatchAnalyzer: React.FC = () => {
       item => item.mismatch_type === 'intentionally_unmatched'
     ).length;
     const matchesCount = returnedItems.filter(item => isItemConfirmed(item)).length;
-    const completeBrushesCount = returnedItems.filter(item => (item as any).is_complete_brush === true)
-      .length;
+    const completeBrushesCount = returnedItems.filter(
+      item => (item as any).is_complete_brush === true
+    ).length;
 
     // Debug logging for count calculations
     // console.log('🔍 DEBUG: Display mode count calculations:', {
@@ -1234,16 +1236,24 @@ const MatchAnalyzer: React.FC = () => {
                 <h3 className='text-sm font-medium text-blue-800'>📊 Delta Months Analysis</h3>
                 <div className='mt-2 text-sm text-blue-700'>
                   <p className='mb-2'>
-                    <strong>Historical Comparison:</strong> Including delta months for comprehensive analysis:
+                    <strong>Historical Comparison:</strong> Including delta months for comprehensive
+                    analysis:
                   </p>
                   <ul className='list-disc list-inside ml-4 space-y-1'>
-                    <li><strong>Primary months:</strong> {selectedMonths.join(', ')}</li>
-                    <li><strong>Delta months:</strong> {deltaMonths.join(', ')}</li>
-                    <li><strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}</li>
+                    <li>
+                      <strong>Primary months:</strong> {selectedMonths.join(', ')}
+                    </li>
+                    <li>
+                      <strong>Delta months:</strong> {deltaMonths.join(', ')}
+                    </li>
+                    <li>
+                      <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
+                    </li>
                   </ul>
                   <p className='mt-2'>
-                    <strong>Delta months include:</strong> month-1, month-1year, month-5years for each selected month.
-                    This provides the same comprehensive view as the CLI <code>--delta</code> flag.
+                    <strong>Delta months include:</strong> month-1, month-1year, month-5years for
+                    each selected month. This provides the same comprehensive view as the CLI{' '}
+                    <code>--delta</code> flag.
                   </p>
                 </div>
               </div>
@@ -1374,8 +1384,9 @@ const MatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -1392,10 +1403,11 @@ const MatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'mismatches'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -1412,10 +1424,11 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'unconfirmed'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -1432,8 +1445,9 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -1450,10 +1464,11 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'intentionally_unmatched'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -1471,10 +1486,11 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Matches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'matches'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'matches'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().matches}
                 </span>
@@ -1493,10 +1509,11 @@ const MatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                      displayMode === 'complete_brushes'
+                        ? 'bg-white text-blue-600'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>
@@ -1507,6 +1524,57 @@ const MatchAnalyzer: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Group by Matched toggle - only show when soap field is selected */}
+          {selectedField === 'soap' && (
+            <div className='min-w-0'>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Grouping Options
+              </label>
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  id='groupByMatched'
+                  checked={groupByMatched}
+                  onChange={e => setGroupByMatched(e.target.checked)}
+                  className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+                  aria-label='Group results by matched string (brand + scent) instead of original string'
+                />
+                <label htmlFor='groupByMatched' className='text-sm text-gray-700'>
+                  Group by Matched
+                </label>
+                <div className='relative group'>
+                  <button
+                    type='button'
+                    className='ml-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
+                    title='Learn about Group by Matched'
+                  >
+                    <svg className='h-4 w-4' fill='currentColor' viewBox='0 0 20 20'>
+                      <path
+                        fillRule='evenodd'
+                        d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z'
+                        clipRule='evenodd'
+                      />
+                    </svg>
+                  </button>
+                  <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm max-w-xs'>
+                    <div className='font-medium mb-1'>Group by Matched:</div>
+                    <div className='space-y-1'>
+                      <div>
+                        <strong>Enabled:</strong> Groups results by brand + scent combinations
+                      </div>
+                      <div>
+                        <strong>Disabled:</strong> Groups results by original input strings
+                      </div>
+                      <div className='text-gray-600'>
+                        Helps identify which scent-specific regexes to add to the catalog
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
