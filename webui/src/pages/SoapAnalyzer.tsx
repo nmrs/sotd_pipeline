@@ -347,16 +347,24 @@ const SoapAnalyzer: React.FC = () => {
           <CardContent>
             <div className='text-sm text-blue-700 space-y-1'>
               <p>
-                <strong>Historical Comparison:</strong> Including delta months for comprehensive analysis:
+                <strong>Historical Comparison:</strong> Including delta months for comprehensive
+                analysis:
               </p>
               <ul className='list-disc list-inside ml-4 space-y-1'>
-                <li><strong>Primary months:</strong> {selectedMonths.join(', ')}</li>
-                <li><strong>Delta months:</strong> {deltaMonths.join(', ')}</li>
-                <li><strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}</li>
+                <li>
+                  <strong>Primary months:</strong> {selectedMonths.join(', ')}
+                </li>
+                <li>
+                  <strong>Delta months:</strong> {deltaMonths.join(', ')}
+                </li>
+                <li>
+                  <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
+                </li>
               </ul>
               <p className='mt-2'>
-                <strong>Delta months include:</strong> month-1, month-1year, month-5years for each selected month.
-                This provides the same comprehensive view as the CLI <code>--delta</code> flag.
+                <strong>Delta months include:</strong> month-1, month-1year, month-5years for each
+                selected month. This provides the same comprehensive view as the CLI{' '}
+                <code>--delta</code> flag.
               </p>
             </div>
           </CardContent>
@@ -1059,7 +1067,7 @@ const SoapAnalyzer: React.FC = () => {
           onClose={handleCloseCommentModal}
           comments={[selectedComment]}
           currentIndex={0}
-          onNavigate={async () => { }} // No navigation needed for single comment
+          onNavigate={async () => {}} // No navigation needed for single comment
           remainingCommentIds={[]}
         />
       )}

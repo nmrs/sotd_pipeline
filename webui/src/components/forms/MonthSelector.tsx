@@ -33,11 +33,8 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   // Calculate delta months when enabled
   const deltaCalculation = deltaMonthsEnabled ? calculateDeltaMonths(selectedMonths) : null;
   // Note: effectiveSelectedMonths is only used for display, not for filtering delta months
-  const effectiveSelectedMonths = deltaMonthsEnabled && deltaCalculation ? deltaCalculation.allMonths : selectedMonths;
-
-
-
-
+  const effectiveSelectedMonths =
+    deltaMonthsEnabled && deltaCalculation ? deltaCalculation.allMonths : selectedMonths;
 
   // Generate months from 2016-05 to current month
   const generatePrepopulatedMonths = (): string[] => {

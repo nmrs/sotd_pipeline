@@ -32,7 +32,10 @@ export interface BrushMatchedData {
  * @param matched - The matched brush data from the matcher
  * @returns Properly structured data for the API
  */
-export function structureBrushDataForAPI(matched: BrushMatchedData, original?: string): {
+export function structureBrushDataForAPI(
+  matched: BrushMatchedData,
+  original?: string
+): {
   field: 'brush' | 'handle' | 'knot';
   data: Record<string, unknown>;
 } {

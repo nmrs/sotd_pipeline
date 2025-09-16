@@ -31,9 +31,6 @@ const UnmatchedAnalyzer: React.FC = () => {
     setDeltaMonths(months);
   }, []);
 
-
-
-
   const [limit, setLimit] = useState<number>(500);
   const [loading, setLoading] = useState(false);
   const [matchPhaseOutput, setMatchPhaseOutput] = useState<string | null>(null);
@@ -141,7 +138,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-            'Only available data is shown.'
+              'Only available data is shown.'
           );
         }
 
@@ -549,16 +546,18 @@ const UnmatchedAnalyzer: React.FC = () => {
           {results && (
             <div className='flex items-center justify-between'>
               <div className='text-sm text-gray-600'>
-                {results.field} | {[...selectedMonths, ...deltaMonths].join(', ')} | {results.total_unmatched || 0}{' '}
-                items | {results.processing_time?.toFixed(2) || '0.00'}s
+                {results.field} | {[...selectedMonths, ...deltaMonths].join(', ')} |{' '}
+                {results.total_unmatched || 0} items |{' '}
+                {results.processing_time?.toFixed(2) || '0.00'}s
               </div>
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
-                    ? 'bg-gray-600 text-white hover:bg-gray-700'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    viewState.showFiltered
+                      ? 'bg-gray-600 text-white hover:bg-gray-700'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -619,16 +618,24 @@ const UnmatchedAnalyzer: React.FC = () => {
               <h3 className='text-sm font-medium text-blue-900 mb-2'>📊 Delta Months Analysis</h3>
               <div className='text-xs text-blue-700 space-y-1'>
                 <p>
-                  <strong>Historical Comparison:</strong> Including delta months for comprehensive analysis:
+                  <strong>Historical Comparison:</strong> Including delta months for comprehensive
+                  analysis:
                 </p>
                 <ul className='list-disc list-inside ml-4 space-y-1'>
-                  <li><strong>Primary months:</strong> {selectedMonths.join(', ')}</li>
-                  <li><strong>Delta months:</strong> {deltaMonths.join(', ')}</li>
-                  <li><strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}</li>
+                  <li>
+                    <strong>Primary months:</strong> {selectedMonths.join(', ')}
+                  </li>
+                  <li>
+                    <strong>Delta months:</strong> {deltaMonths.join(', ')}
+                  </li>
+                  <li>
+                    <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
+                  </li>
                 </ul>
                 <p className='mt-2'>
-                  <strong>Delta months include:</strong> month-1, month-1year, month-5years for each selected month.
-                  This provides the same comprehensive view as the CLI <code>--delta</code> flag.
+                  <strong>Delta months include:</strong> month-1, month-1year, month-5years for each
+                  selected month. This provides the same comprehensive view as the CLI{' '}
+                  <code>--delta</code> flag.
                 </p>
               </div>
             </div>
@@ -719,10 +726,11 @@ const UnmatchedAnalyzer: React.FC = () => {
                           <button
                             onClick={handleApplyFilteredChanges}
                             disabled={loading || visibleChangesCount === 0}
-                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
-                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                              }`}
+                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
+                              loading || visibleChangesCount === 0
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                            }`}
                           >
                             {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                           </button>

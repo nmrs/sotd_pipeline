@@ -496,7 +496,9 @@ describe('MonthSelector', () => {
       await userEvent.click(button);
 
       // Check the delta months checkbox
-      const deltaCheckbox = screen.getByText('Include Delta Months').previousElementSibling?.querySelector('input');
+      const deltaCheckbox = screen
+        .getByText('Include Delta Months')
+        .previousElementSibling?.querySelector('input');
       if (deltaCheckbox) {
         await userEvent.click(deltaCheckbox);
         expect(onDeltaMonthsChange).toHaveBeenCalled();
@@ -506,8 +508,15 @@ describe('MonthSelector', () => {
     it('should calculate correct delta months for Jan-Sep 2025 YTD scenario', async () => {
       const onDeltaMonthsChange = jest.fn();
       const selectedMonths = [
-        '2025-01', '2025-02', '2025-03', '2025-04', '2025-05',
-        '2025-06', '2025-07', '2025-08', '2025-09'
+        '2025-01',
+        '2025-02',
+        '2025-03',
+        '2025-04',
+        '2025-05',
+        '2025-06',
+        '2025-07',
+        '2025-08',
+        '2025-09',
       ];
 
       await act(async () => {
@@ -526,7 +535,9 @@ describe('MonthSelector', () => {
       await userEvent.click(button);
 
       // Check the delta months checkbox to enable delta months
-      const deltaCheckbox = screen.getByText('Include Delta Months').previousElementSibling?.querySelector('input');
+      const deltaCheckbox = screen
+        .getByText('Include Delta Months')
+        .previousElementSibling?.querySelector('input');
       if (deltaCheckbox) {
         await userEvent.click(deltaCheckbox);
 

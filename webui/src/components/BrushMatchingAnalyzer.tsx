@@ -243,7 +243,9 @@ function ComponentDetailsDisplay({
                     {componentDetails.handle.patterns?.brand_pattern && (
                       <div className='flex justify-between'>
                         <span className='text-gray-600'>pattern:</span>
-                        <span className='font-mono'>{componentDetails.handle.patterns.brand_pattern}</span>
+                        <span className='font-mono'>
+                          {componentDetails.handle.patterns.brand_pattern}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -287,7 +289,9 @@ function ComponentDetailsDisplay({
                     {componentDetails.knot.patterns?.brand_pattern && (
                       <div className='flex justify-between'>
                         <span className='text-gray-600'>pattern:</span>
-                        <span className='font-mono'>{componentDetails.knot.patterns.brand_pattern}</span>
+                        <span className='font-mono'>
+                          {componentDetails.knot.patterns.brand_pattern}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -481,27 +485,46 @@ export function BrushMatchingAnalyzer() {
                           result.matchedData &&
                           (result.matchedData.brand ||
                             (result.matchedData.handle &&
-                              (result.matchedData.handle.brand || result.matchedData.handle.model)) ||
+                              (result.matchedData.handle.brand ||
+                                result.matchedData.handle.model)) ||
                             (result.matchedData.knot &&
-                              (result.matchedData.knot.brand || result.matchedData.knot.model || result.matchedData.knot.fiber)));
+                              (result.matchedData.knot.brand ||
+                                result.matchedData.knot.model ||
+                                result.matchedData.knot.fiber)));
 
                         return hasValidData;
                       })
                       .map((result, index) => {
                         const isWinner = result.strategy === results.winner.strategy;
                         return (
-                          <Card key={result.strategy} className={isWinner ? 'border-green-200 bg-green-50' : 'border-gray-200'}>
+                          <Card
+                            key={result.strategy}
+                            className={
+                              isWinner ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                            }
+                          >
                             <CardContent className='pt-6'>
                               <div className='flex items-center justify-between mb-4'>
                                 <div className='flex items-center gap-2'>
-                                  {isWinner ? <Trophy className='w-4 h-4 text-yellow-500' /> : getStrategyIcon(index + 1)}
+                                  {isWinner ? (
+                                    <Trophy className='w-4 h-4 text-yellow-500' />
+                                  ) : (
+                                    getStrategyIcon(index + 1)
+                                  )}
                                   <Badge variant='outline' className='font-mono'>
                                     {isWinner ? 'WINNER' : `#${index + 1}`}
                                   </Badge>
                                   <h3 className='font-semibold text-lg'>
                                     {result.strategy.toUpperCase()}
                                   </h3>
-                                  <Badge variant={isWinner ? 'default' : 'secondary'} className={isWinner ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                                  <Badge
+                                    variant={isWinner ? 'default' : 'secondary'}
+                                    className={
+                                      isWinner
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-blue-100 text-blue-800'
+                                    }
+                                  >
                                     {isWinner ? '✓ Winner' : '✓ Matched'}
                                   </Badge>
                                 </div>
@@ -561,9 +584,12 @@ export function BrushMatchingAnalyzer() {
                           result.matchedData &&
                           (result.matchedData.brand ||
                             (result.matchedData.handle &&
-                              (result.matchedData.handle.brand || result.matchedData.handle.model)) ||
+                              (result.matchedData.handle.brand ||
+                                result.matchedData.handle.model)) ||
                             (result.matchedData.knot &&
-                              (result.matchedData.knot.brand || result.matchedData.knot.model || result.matchedData.knot.fiber)));
+                              (result.matchedData.knot.brand ||
+                                result.matchedData.knot.model ||
+                                result.matchedData.knot.fiber)));
 
                         return !hasValidData;
                       })
@@ -575,7 +601,9 @@ export function BrushMatchingAnalyzer() {
                               (r.matchedData.handle &&
                                 (r.matchedData.handle.brand || r.matchedData.handle.model)) ||
                               (r.matchedData.knot &&
-                                (r.matchedData.knot.brand || r.matchedData.knot.model || r.matchedData.knot.fiber)));
+                                (r.matchedData.knot.brand ||
+                                  r.matchedData.knot.model ||
+                                  r.matchedData.knot.fiber)));
                           return hasValidData;
                         }).length;
 
