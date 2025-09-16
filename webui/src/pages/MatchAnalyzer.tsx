@@ -430,10 +430,10 @@ const MatchAnalyzer: React.FC = () => {
     return visibleRows.map(item => {
       if (isGroupedDataItem(item)) {
         // For grouped data, use matched_string as the key
-        return `${selectedField}:${item.matched_string.toLowerCase()}`;
+        return `${selectedField}:${item.matched_string?.toLowerCase() || 'unknown'}`;
       } else {
         // For regular data, use original text as the key
-        return `${selectedField}:${item.original.toLowerCase()}`;
+        return `${selectedField}:${item.original?.toLowerCase() || 'unknown'}`;
       }
     });
   }, [visibleRows, selectedField]);
@@ -1440,8 +1440,8 @@ const MatchAnalyzer: React.FC = () => {
                 Mismatches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().mismatches}
@@ -1460,8 +1460,8 @@ const MatchAnalyzer: React.FC = () => {
                 Unconfirmed
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
@@ -1498,8 +1498,8 @@ const MatchAnalyzer: React.FC = () => {
                 Intentionally Unmatched
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
@@ -1519,8 +1519,8 @@ const MatchAnalyzer: React.FC = () => {
                 Matches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'matches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().matches}
@@ -1541,8 +1541,8 @@ const MatchAnalyzer: React.FC = () => {
                   Complete Brushes
                   <span
                     className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                        ? 'bg-white text-blue-600'
-                        : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                       }`}
                   >
                     {getDisplayModeCounts().complete_brushes}

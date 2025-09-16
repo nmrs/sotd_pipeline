@@ -428,12 +428,20 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Convert selected rows to item keys
       const selectedKeys = new Set(
-        selectedRows.map(item => `${field}:${item.original.toLowerCase()}`)
+        selectedRows.map(item => {
+          if (isGroupedDataItem(item)) {
+            return `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`;
+          } else {
+            return `${field}:${item.original?.toLowerCase() || 'unknown'}`;
+          }
+        })
       );
 
       // Update all items to match the new selection state
       filteredData.forEach(item => {
-        const itemKey = `${field}:${item.original.toLowerCase()}`;
+        const itemKey = isGroupedDataItem(item)
+          ? `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`
+          : `${field}:${item.original?.toLowerCase() || 'unknown'}`;
         const shouldBeSelected = selectedKeys.has(itemKey);
         const isCurrentlySelected = selectedItems.has(itemKey);
 
@@ -450,9 +458,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     const selection: Record<string, boolean> = {};
     filteredData.forEach((item, index) => {
       // Generate key based on data type
-      const itemKey = isGroupedDataItem(item) 
-        ? `${field}:${item.matched_string.toLowerCase()}`
-        : `${field}:${item.original.toLowerCase()}`;
+      const itemKey = isGroupedDataItem(item)
+        ? `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`
+        : `${field}:${item.original?.toLowerCase() || 'unknown'}`;
       if (selectedItems.has(itemKey)) {
         selection[index.toString()] = true;
       }
@@ -465,9 +473,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     const selection: Record<string, boolean> = {};
     filteredData.forEach((item, index) => {
       // Generate key based on data type
-      const itemKey = isGroupedDataItem(item) 
-        ? `${field}:${item.matched_string.toLowerCase()}`
-        : `${field}:${item.original.toLowerCase()}`;
+      const itemKey = isGroupedDataItem(item)
+        ? `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`
+        : `${field}:${item.original?.toLowerCase() || 'unknown'}`;
       if (selectedItems.has(itemKey)) {
         selection[index.toString()] = true;
       }
@@ -483,69 +491,69 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
-                const item = row.original;
-                // Generate key based on data type
-                const itemKey = isGroupedDataItem(item) 
-                  ? `${field}:${item.matched_string.toLowerCase()}`
-                  : `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
+              const item = row.original;
+              // Generate key based on data type
+              const itemKey = isGroupedDataItem(item)
+                ? `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`
+                : `${field}:${item.original?.toLowerCase() || 'unknown'}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
-                const item = row.original;
-                // Only show status for regular items, not grouped data
-                if (isGroupedDataItem(item)) {
-                  return <span className="text-gray-400">N/A</span>;
-                }
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
+              const item = row.original;
+              // Only show status for regular items, not grouped data
+              if (isGroupedDataItem(item)) {
+                return <span className="text-gray-400">N/A</span>;
+              }
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
@@ -818,9 +826,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${
-                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {brushType.type}
               </span>
@@ -1020,7 +1027,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentDisplay
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => {})}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
             />
           );
