@@ -408,9 +408,18 @@ class TestStripLinkMarkup:
     def test_strip_link_markup_standard_format(self):
         """Test standard markdown link format [text](url)."""
         test_cases = [
-            ("[Barrister and Mann Reserve Lavender](https://trythatsoap.com/collection/820/?product_type=soap)", "Barrister and Mann Reserve Lavender"),
-            ("[Summer Break Soaps Field Day](https://trythatsoap.com/collection/928/?product_type=soap)", "Summer Break Soaps Field Day"),
-            ("[Declaration Grooming Original](https://trythatsoap.com/collection/123/?product_type=soap)", "Declaration Grooming Original"),
+            (
+                "[Barrister and Mann Reserve Lavender](https://trythatsoap.com/collection/820/?product_type=soap)",
+                "Barrister and Mann Reserve Lavender",
+            ),
+            (
+                "[Summer Break Soaps Field Day](https://trythatsoap.com/collection/928/?product_type=soap)",
+                "Summer Break Soaps Field Day",
+            ),
+            (
+                "[Declaration Grooming Original](https://trythatsoap.com/collection/123/?product_type=soap)",
+                "Declaration Grooming Original",
+            ),
         ]
         for input_str, expected in test_cases:
             result = strip_link_markup(input_str)
@@ -421,9 +430,18 @@ class TestStripLinkMarkup:
     def test_strip_link_markup_with_space(self):
         """Test markdown link format with space [text] (url)."""
         test_cases = [
-            ("[Barrister and Mann Reserve Lavender] (https://trythatsoap.com/collection/820/?product_type=soap)", "Barrister and Mann Reserve Lavender"),
-            ("[Summer Break Soaps Field Day] (https://trythatsoap.com/collection/928/?product_type=soap)", "Summer Break Soaps Field Day"),
-            ("[Declaration Grooming Original] (https://trythatsoap.com/collection/123/?product_type=soap)", "Declaration Grooming Original"),
+            (
+                "[Barrister and Mann Reserve Lavender] (https://trythatsoap.com/collection/820/?product_type=soap)",
+                "Barrister and Mann Reserve Lavender",
+            ),
+            (
+                "[Summer Break Soaps Field Day] (https://trythatsoap.com/collection/928/?product_type=soap)",
+                "Summer Break Soaps Field Day",
+            ),
+            (
+                "[Declaration Grooming Original] (https://trythatsoap.com/collection/123/?product_type=soap)",
+                "Declaration Grooming Original",
+            ),
         ]
         for input_str, expected in test_cases:
             result = strip_link_markup(input_str)
@@ -434,7 +452,10 @@ class TestStripLinkMarkup:
     def test_strip_link_markup_plain_urls(self):
         """Test plain URL stripping."""
         test_cases = [
-            ("Barrister and Mann Reserve Lavender https://trythatsoap.com/collection/820/?product_type=soap", "Barrister and Mann Reserve Lavender"),
+            (
+                "Barrister and Mann Reserve Lavender https://trythatsoap.com/collection/820/?product_type=soap",
+                "Barrister and Mann Reserve Lavender",
+            ),
             ("Summer Break Soaps Field Day http://example.com", "Summer Break Soaps Field Day"),
             ("https://trythatsoap.com/collection/820/?product_type=soap", ""),
         ]
