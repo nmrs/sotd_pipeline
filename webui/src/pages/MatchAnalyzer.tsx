@@ -15,6 +15,11 @@ import {
   handleApiError,
   saveBrushSplit,
   loadYamlBrushSplits,
+  getSoapGroupByMatched,
+  GroupByMatchedResult,
+  GroupedDataItem,
+  AnalyzerDataItem,
+  isGroupedDataItem,
 } from '@/services/api';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
@@ -45,6 +50,7 @@ const MatchAnalyzer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MismatchAnalysisResult | null>(null);
+  const [groupedResults, setGroupedResults] = useState<GroupByMatchedResult | null>(null);
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
@@ -58,7 +64,7 @@ const MatchAnalyzer: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [markingCorrect, setMarkingCorrect] = useState(false);
   const [removingCorrect, setRemovingCorrect] = useState(false);
-  const [visibleRows, setVisibleRows] = useState<MismatchAnalysisResult['mismatch_items']>([]);
+  const [visibleRows, setVisibleRows] = useState<AnalyzerDataItem[]>([]);
 
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
@@ -139,32 +145,42 @@ const MatchAnalyzer: React.FC = () => {
       setLoading(true);
       setError(null);
       setResults(null);
+      setGroupedResults(null);
       setSelectedItems(new Set()); // Clear selections
 
       // Combine selected months with delta months if enabled
       const allMonths = [...selectedMonths, ...deltaMonths];
 
-      const result = await analyzeMismatch({
-        field: selectedField,
-        months: allMonths, // Pass combined months array
-        threshold,
-        use_enriched_data: useEnrichedData,
-        display_mode: displayMode,
-      });
+      // Check if we should use grouped data (soap field with groupByMatched enabled)
+      if (selectedField === 'soap' && groupByMatched) {
+        const groupedResult = await getSoapGroupByMatched({
+          months: allMonths.join(','),
+          group_by_matched: true,
+        });
+        setGroupedResults(groupedResult);
+      } else {
+        const result = await analyzeMismatch({
+          field: selectedField,
+          months: allMonths, // Pass combined months array
+          threshold,
+          use_enriched_data: useEnrichedData,
+          display_mode: displayMode,
+        });
 
-      // console.log('🔍 DEBUG: handleAnalyze returned result:', {
-      //   field: result.field,
-      //   totalItems: result.mismatch_items?.length || 0,
-      //   hasData: !!result.mismatch_items,
-      //   sampleItems: result.mismatch_items?.slice(0, 3).map(item => ({
-      //     original: item.original,
-      //     match_type: item.match_type,
-      //     mismatch_type: item.mismatch_type,
-      //     is_confirmed: item.is_confirmed,
-      //   })) || [],
-      // });
+        // console.log('🔍 DEBUG: handleAnalyze returned result:', {
+        //   field: result.field,
+        //   totalItems: result.mismatch_items?.length || 0,
+        //   hasData: !!result.mismatch_items,
+        //   sampleItems: result.mismatch_items?.slice(0, 3).map(item => ({
+        //     original: item.original,
+        //     match_type: item.match_type,
+        //     mismatch_type: item.mismatch_type,
+        //     is_confirmed: item.is_confirmed,
+        //   })) || [],
+        // });
 
-      setResults(result);
+        setResults(result);
+      }
     } catch (err: unknown) {
       setError(handleApiError(err));
     } finally {
@@ -403,7 +419,7 @@ const MatchAnalyzer: React.FC = () => {
     setSelectedItems(new Set());
   }, []);
 
-  const handleVisibleRowsChange = useCallback((rows: MismatchAnalysisResult['mismatch_items']) => {
+  const handleVisibleRowsChange = useCallback((rows: AnalyzerDataItem[]) => {
     setVisibleRows(rows);
     // Reset active row index when visible rows change
     setActiveRowIndex(-1);
@@ -412,8 +428,13 @@ const MatchAnalyzer: React.FC = () => {
   // Memoize item keys to avoid repeated operations
   const visibleItemKeys = useMemo(() => {
     return visibleRows.map(item => {
-      // Since backend groups by case-insensitive original text, use that as the key
-      return `${selectedField}:${item.original.toLowerCase()}`;
+      if (isGroupedDataItem(item)) {
+        // For grouped data, use matched_string as the key
+        return `${selectedField}:${item.matched_string.toLowerCase()}`;
+      } else {
+        // For regular data, use original text as the key
+        return `${selectedField}:${item.original.toLowerCase()}`;
+      }
     });
   }, [visibleRows, selectedField]);
 
@@ -870,7 +891,23 @@ const MatchAnalyzer: React.FC = () => {
   }, []);
 
   // Memoized filtered results for performance
-  const filteredResults = useMemo(() => {
+  const filteredResults = useMemo((): AnalyzerDataItem[] => {
+    // Handle grouped data (soap field with groupByMatched enabled)
+    if (groupedResults?.groups) {
+      // For grouped data, we show all groups (no filtering by display mode)
+      return groupedResults.groups.map(group => ({
+        matched_string: group.matched_string,
+        total_count: group.total_count,
+        top_patterns: group.top_patterns,
+        remaining_count: group.remaining_count,
+        all_patterns: group.all_patterns,
+        pattern_count: group.pattern_count,
+        // Add a flag to indicate this is grouped data
+        is_grouped: true,
+      } as GroupedDataItem));
+    }
+
+    // Handle regular data (existing logic)
     if (!results?.mismatch_items) return [];
 
     switch (displayMode) {
@@ -916,7 +953,7 @@ const MatchAnalyzer: React.FC = () => {
       default:
         return results.mismatch_items;
     }
-  }, [results?.mismatch_items, displayMode, isItemConfirmed]);
+  }, [results?.mismatch_items, groupedResults?.groups, displayMode, isItemConfirmed]);
 
   // Keyboard navigation handlers
 
@@ -1384,9 +1421,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -1403,11 +1439,10 @@ const MatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -1424,11 +1459,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'unconfirmed'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -1445,9 +1479,8 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -1464,11 +1497,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'intentionally_unmatched'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -1486,11 +1518,10 @@ const MatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Matches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'matches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'matches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().matches}
                 </span>
@@ -1509,11 +1540,10 @@ const MatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'complete_brushes'
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
                         ? 'bg-white text-blue-600'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>
@@ -1593,7 +1623,7 @@ const MatchAnalyzer: React.FC = () => {
       )}
 
       {/* Results Table */}
-      {results && (
+      {(results || groupedResults) && (
         <div className='bg-white rounded-lg shadow'>
           <div className='px-6 py-4 border-b border-gray-200'>
             <div className='flex items-center justify-between'>
@@ -1601,35 +1631,53 @@ const MatchAnalyzer: React.FC = () => {
                 <h3 className='text-lg font-medium text-gray-900'>Analysis Results</h3>
                 <div className='mt-2 text-sm text-gray-600 flex flex-wrap gap-4'>
                   <span className='whitespace-nowrap'>
-                    Field: <span className='font-medium'>{results.field}</span>
+                    Field: <span className='font-medium'>{selectedField}</span>
                   </span>
                   <span className='whitespace-nowrap'>
-                    Month{results.months.length > 1 ? 's' : ''}:{' '}
-                    <span className='font-medium'>{results.months.join(', ')}</span>
+                    Month{(selectedMonths.length + deltaMonths.length) > 1 ? 's' : ''}:{' '}
+                    <span className='font-medium'>{(selectedMonths.length + deltaMonths.length) > 1 ? 'Multiple' : selectedMonths[0] || deltaMonths[0]}</span>
                   </span>
-                  <span className='whitespace-nowrap'>
-                    Total Matches:{' '}
-                    <span className='font-medium'>{results.mismatch_items?.length || 0}</span>
-                  </span>
-                  <span className='whitespace-nowrap'>
-                    Total Mismatches:{' '}
-                    <span className='font-medium'>
-                      {
-                        (results.mismatch_items || []).filter(
-                          item =>
-                            item.mismatch_type !== 'good_match' &&
-                            item.mismatch_type !== 'exact_matches' &&
-                            item.mismatch_type !== 'intentionally_unmatched'
-                        ).length
-                      }
-                    </span>
-                  </span>
+                  {groupedResults ? (
+                    <>
+                      <span className='whitespace-nowrap'>
+                        Total Groups:{' '}
+                        <span className='font-medium'>{groupedResults.total_groups}</span>
+                      </span>
+                      <span className='whitespace-nowrap'>
+                        Total Matches:{' '}
+                        <span className='font-medium'>{groupedResults.total_matches}</span>
+                      </span>
+                      <span className='whitespace-nowrap'>
+                        Grouping: <span className='font-medium'>By Matched String</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className='whitespace-nowrap'>
+                        Total Matches:{' '}
+                        <span className='font-medium'>{results?.mismatch_items?.length || 0}</span>
+                      </span>
+                      <span className='whitespace-nowrap'>
+                        Total Mismatches:{' '}
+                        <span className='font-medium'>
+                          {
+                            (results?.mismatch_items || []).filter(
+                              item =>
+                                item.mismatch_type !== 'good_match' &&
+                                item.mismatch_type !== 'exact_matches' &&
+                                item.mismatch_type !== 'intentionally_unmatched'
+                            ).length
+                          }
+                        </span>
+                      </span>
+                      <span className='whitespace-nowrap'>
+                        Processing Time:{' '}
+                        <span className='font-medium'>{results?.processing_time?.toFixed(2)}s</span>
+                      </span>
+                    </>
+                  )}
                   <span className='whitespace-nowrap'>
                     Displayed: <span className='font-medium'>{filteredResults.length}</span>
-                  </span>
-                  <span className='whitespace-nowrap'>
-                    Processing Time:{' '}
-                    <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
                   </span>
                 </div>
                 {/* Keyboard Navigation Indicator */}

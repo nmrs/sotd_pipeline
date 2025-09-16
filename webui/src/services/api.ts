@@ -252,6 +252,74 @@ export const analyzeMismatch = async (
   }
 };
 
+// Group by matched API for soap analyzer
+export interface GroupByMatchedRequest {
+  months: string;
+  group_by_matched: boolean;
+  limit?: number;
+}
+
+export interface GroupByMatchedResult {
+  groups: Array<{
+    matched_string: string;
+    total_count: number;
+    top_patterns: Array<{
+      original: string;
+      count: number;
+    }>;
+    remaining_count: number;
+    all_patterns: Array<{
+      original: string;
+      count: number;
+    }>;
+    pattern_count: number;
+  }>;
+  total_groups: number;
+  total_matches: number;
+  months_processed: string[];
+  group_by_matched: boolean;
+}
+
+// Individual grouped data item for display in data table
+export interface GroupedDataItem {
+  matched_string: string;
+  total_count: number;
+  top_patterns: Array<{
+    original: string;
+    count: number;
+  }>;
+  remaining_count: number;
+  all_patterns: Array<{
+    original: string;
+    count: number;
+  }>;
+  pattern_count: number;
+  // Add a flag to indicate this is grouped data
+  is_grouped: true;
+}
+
+// Union type for data that can be either regular mismatch items or grouped data
+export type AnalyzerDataItem = MismatchItem | GroupedDataItem;
+
+// Type guard to check if data is grouped
+export const isGroupedDataItem = (item: AnalyzerDataItem): item is GroupedDataItem => {
+  return 'is_grouped' in item && item.is_grouped === true;
+};
+
+export const getSoapGroupByMatched = async (
+  request: GroupByMatchedRequest
+): Promise<GroupByMatchedResult> => {
+  try {
+    const response = await api.get('/soap-analyzer/group-by-matched', {
+      params: request,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get soap group by matched:', error);
+    throw error;
+  }
+};
+
 // Match phase operations
 export interface MatchPhaseRequest {
   months: string[];

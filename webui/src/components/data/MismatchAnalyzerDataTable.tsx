@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { CommentDisplay } from '../domain/CommentDisplay';
-import { MismatchItem, BrushMatchedData, isBrushMatchedData } from '../../services/api';
+import { MismatchItem, BrushMatchedData, isBrushMatchedData, AnalyzerDataItem, isGroupedDataItem } from '../../services/api';
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
@@ -131,14 +131,14 @@ const getBrushType = (
 };
 
 interface MismatchAnalyzerDataTableProps {
-  data: MismatchItem[];
+  data: AnalyzerDataItem[];
   field: string; // Add field prop
   onCommentClick?: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading?: boolean;
   selectedItems?: Set<string>;
   onItemSelection?: (itemKey: string, selected: boolean) => void;
   isItemConfirmed?: (item: MismatchItem) => boolean;
-  onVisibleRowsChange?: (visibleRows: MismatchItem[]) => void;
+  onVisibleRowsChange?: (visibleRows: AnalyzerDataItem[]) => void;
   matched_data_map?: Record<string, Record<string, any>>;
   onBrushSplitClick?: (item: MismatchItem) => void;
   activeRowIndex?: number;
@@ -472,76 +472,83 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const stableData = useMemo(() => filteredData, [filteredData]);
 
   const columns = useMemo(() => {
-    const baseColumns: ColumnDef<MismatchItem>[] = [
+    const baseColumns: ColumnDef<AnalyzerDataItem>[] = [
       // Selection column
       ...(onItemSelection
         ? [
-          {
-            id: 'selection',
-            header: () => {
-              // For now, use all data since we can't easily access visible rows from header
-              // This will be fixed in a future update when we can pass table context
-              return (
-                <div className='flex items-center gap-2'>
-                  <span>Select</span>
-                </div>
-              );
-            },
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              // Since backend groups by case-insensitive original text, use that as the key
-              const itemKey = `${field}:${item.original.toLowerCase()}`;
-              const isSelected = selectedItems.has(itemKey);
+            {
+              id: 'selection',
+              header: () => {
+                // For now, use all data since we can't easily access visible rows from header
+                // This will be fixed in a future update when we can pass table context
+                return (
+                  <div className='flex items-center gap-2'>
+                    <span>Select</span>
+                  </div>
+                );
+              },
+              cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
+                const item = row.original;
+                // Generate key based on data type
+                const itemKey = isGroupedDataItem(item) 
+                  ? `${field}:${item.matched_string.toLowerCase()}`
+                  : `${field}:${item.original.toLowerCase()}`;
+                const isSelected = selectedItems.has(itemKey);
 
-              return (
-                <input
-                  type='checkbox'
-                  checked={isSelected}
-                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                />
-              );
+                return (
+                  <input
+                    type='checkbox'
+                    checked={isSelected}
+                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                  />
+                );
+              },
+              enableSorting: false,
             },
-            enableSorting: false,
-          },
-        ]
+          ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-          {
-            id: 'status',
-            header: 'Status',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              const isConfirmed = isItemConfirmed(item);
+            {
+              id: 'status',
+              header: 'Status',
+              cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
+                const item = row.original;
+                // Only show status for regular items, not grouped data
+                if (isGroupedDataItem(item)) {
+                  return <span className="text-gray-400">N/A</span>;
+                }
+                const isConfirmed = isItemConfirmed(item);
 
-              return (
-                <div className='flex items-center'>
-                  {isConfirmed ? (
-                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                      ✅ Confirmed
-                    </span>
-                  ) : (
-                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                      ⚠️ Unconfirmed
-                    </span>
-                  )}
-                </div>
-              );
+                return (
+                  <div className='flex items-center'>
+                    {isConfirmed ? (
+                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                        ✅ Confirmed
+                      </span>
+                    ) : (
+                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                        ⚠️ Unconfirmed
+                      </span>
+                    )}
+                  </div>
+                );
+              },
             },
-          },
-        ]
+          ]
         : []),
       {
         accessorKey: 'count',
         header: 'Count',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
+          const count = isGroupedDataItem(item) ? item.total_count : (item.count || 1);
           return (
             <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'>
-              {item.count || 1}
+              {count}
             </span>
           );
         },
@@ -549,8 +556,19 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       {
         accessorKey: 'mismatch_type',
         header: 'Type',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
+          // For grouped data, show a different icon and text
+          if (isGroupedDataItem(item)) {
+            return (
+              <div className='flex items-center'>
+                <span className='text-lg mr-2'>📊</span>
+                <span className='text-sm font-medium text-blue-600'>
+                  Grouped
+                </span>
+              </div>
+            );
+          }
           return (
             <div className='flex items-center'>
               <span className='text-lg mr-2'>{getMismatchTypeIcon(item.mismatch_type)}</span>
@@ -564,8 +582,16 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       {
         accessorKey: 'original',
         header: 'Original',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
+          // For grouped data, show matched_string instead of original
+          if (isGroupedDataItem(item)) {
+            return (
+              <div className='font-medium text-gray-900'>
+                {item.matched_string}
+              </div>
+            );
+          }
 
           // For brush field, add click-to-edit functionality
           if (field === 'brush' && onBrushSplitClick) {
@@ -785,8 +811,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${
+                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}
               >
                 {brushType.type}
               </span>
@@ -986,13 +1013,42 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentDisplay
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => { })}
+              onCommentClick={onCommentClick || (() => {})}
               commentLoading={commentLoading}
             />
           );
         },
       }
     );
+
+    // Add patterns column for grouped data
+    baseColumns.push({
+      id: 'patterns',
+      header: 'Original Patterns',
+      cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
+        const item = row.original;
+        if (!isGroupedDataItem(item)) {
+          return <span className="text-gray-400">N/A</span>;
+        }
+
+        return (
+          <div className="space-y-1">
+            {item.top_patterns.map((pattern, index) => (
+              <div key={index} className="text-sm text-gray-700">
+                <span className="font-medium">{pattern.original}</span>
+                <span className="ml-2 text-gray-500">({pattern.count})</span>
+              </div>
+            ))}
+            {item.remaining_count > 0 && (
+              <div className="text-sm text-blue-600 font-medium">
+                + {item.remaining_count} more
+              </div>
+            )}
+          </div>
+        );
+      },
+      enableSorting: false,
+    });
 
     return baseColumns;
   }, [
