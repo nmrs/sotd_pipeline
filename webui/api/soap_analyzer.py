@@ -655,7 +655,7 @@ async def get_soap_group_by_matched(
     """
     Group soap matches by matched string (brand + scent) to identify which scent-specific
     regexes are most important to add.
-    
+
     When group_by_matched=True:
     - Groups results by matched string (brand + scent) instead of original string
     - Shows matched string, total count, and top 3 most common original patterns with
@@ -663,7 +663,7 @@ async def get_soap_group_by_matched(
     - Includes brand, exact, and alias matches (excludes regex since those already have
       scent entries)
     - Helps identify which scent-specific regexes to add to the catalog
-    
+
     When group_by_matched=False:
     - Groups results by original string (existing behavior)
     """
@@ -679,16 +679,19 @@ async def get_soap_group_by_matched(
         # Load soap match data for the specified months
         matches = []
         for month in month_list:
-            month_file = Path(f"data/match/{month}.json")
+            month_file = Path(f"data/matched/{month}.json")
             if not month_file.exists():
                 logger.warning(f"Month file not found: {month_file}")
                 continue
-                
+
             try:
                 with open(month_file, "r", encoding="utf-8") as f:
                     month_data = json.load(f)
-                    if "soap" in month_data:
-                        matches.extend(month_data["soap"])
+                    # Extract soap data from the data array
+                    if "data" in month_data and isinstance(month_data["data"], list):
+                        for record in month_data["data"]:
+                            if "soap" in record and record["soap"]:
+                                matches.append(record["soap"])
             except Exception as e:
                 logger.error(f"Error loading month {month}: {e}")
                 continue
@@ -726,180 +729,166 @@ async def get_soap_group_by_matched(
 def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = None) -> List[dict]:
     """
     Group soap matches by matched string (brand + scent) with original pattern aggregation.
-    
+
     Returns groups sorted by total count (descending) with top 3 original patterns per group.
     """
     from collections import defaultdict, Counter
-    
+
     # Group by matched string (brand + scent)
     matched_groups = defaultdict(list)
-    
+
     for match in matches:
         # Skip regex matches since they already have scent entries
         if match.get("match_type") == "regex":
             continue
-            
+
         # Extract matched data
         matched_data = match.get("matched", {})
         if not matched_data:
             continue
-            
+
         brand = matched_data.get("brand", "").strip()
         scent = matched_data.get("scent", "").strip()
-        
+
         if not brand or not scent:
             continue
-            
+
         # Create matched string key
         matched_key = f"{brand} - {scent}"
-        
+
         # Store original pattern and match type
         original = match.get("original", "").strip()
         match_type = match.get("match_type", "unknown")
-        
+
         if original:
-            matched_groups[matched_key].append({
-                "original": original,
-                "match_type": match_type,
-                "count": match.get("count", 1)
-            })
-    
+            matched_groups[matched_key].append(
+                {"original": original, "match_type": match_type, "count": match.get("count", 1)}
+            )
+
     # Convert to result format
     results = []
     for matched_string, patterns in matched_groups.items():
         # Count total occurrences
         total_count = sum(pattern["count"] for pattern in patterns)
-        
+
         # Count original patterns
         pattern_counts = Counter()
         for pattern in patterns:
             pattern_counts[pattern["original"]] += pattern["count"]
-        
+
         # Get top 3 most common original patterns
         top_patterns = pattern_counts.most_common(3)
         remaining_count = len(pattern_counts) - 3
-        
+
         # Format top patterns
         top_patterns_formatted = [
-            {
-                "original": pattern,
-                "count": count
-            }
-            for pattern, count in top_patterns
+            {"original": pattern, "count": count} for pattern, count in top_patterns
         ]
-        
+
         # Get all patterns for "+ n more" functionality
         all_patterns = [
-            {
-                "original": pattern,
-                "count": count
-            }
-            for pattern, count in pattern_counts.most_common()
+            {"original": pattern, "count": count} for pattern, count in pattern_counts.most_common()
         ]
-        
-        results.append({
-            "matched_string": matched_string,
-            "total_count": total_count,
-            "top_patterns": top_patterns_formatted,
-            "remaining_count": max(0, remaining_count),
-            "all_patterns": all_patterns,
-            "pattern_count": len(pattern_counts)
-        })
-    
+
+        results.append(
+            {
+                "matched_string": matched_string,
+                "total_count": total_count,
+                "top_patterns": top_patterns_formatted,
+                "remaining_count": max(0, remaining_count),
+                "all_patterns": all_patterns,
+                "pattern_count": len(pattern_counts),
+            }
+        )
+
     # Sort by total count (descending)
     results.sort(key=lambda x: x["total_count"], reverse=True)
-    
+
     # Apply limit if specified
     if limit:
         results = results[:limit]
-    
+
     return results
 
 
 def group_soap_matches_by_original(matches: List[dict], limit: Optional[int] = None) -> List[dict]:
     """
     Group soap matches by original string (existing behavior).
-    
+
     This maintains backward compatibility when group_by_matched=False.
     """
     from collections import defaultdict, Counter
-    
+
     # Group by original string
     original_groups = defaultdict(list)
-    
+
     for match in matches:
         original = match.get("original", "").strip()
         if not original:
             continue
-            
+
         matched_data = match.get("matched", {})
         if not matched_data:
             continue
-            
+
         brand = matched_data.get("brand", "").strip()
         scent = matched_data.get("scent", "").strip()
-        
+
         if brand and scent:
             matched_string = f"{brand} - {scent}"
         else:
             matched_string = "Unknown"
-            
+
         match_type = match.get("match_type", "unknown")
         count = match.get("count", 1)
-        
-        original_groups[original].append({
-            "matched_string": matched_string,
-            "match_type": match_type,
-            "count": count
-        })
-    
+
+        original_groups[original].append(
+            {"matched_string": matched_string, "match_type": match_type, "count": count}
+        )
+
     # Convert to result format
     results = []
     for original_string, matches_list in original_groups.items():
         # Count total occurrences
         total_count = sum(match["count"] for match in matches_list)
-        
+
         # Count matched strings
         matched_counts = Counter()
         for match in matches_list:
             matched_counts[match["matched_string"]] += match["count"]
-        
+
         # Get top 3 most common matched strings
         top_matched = matched_counts.most_common(3)
         remaining_count = len(matched_counts) - 3
-        
+
         # Format top matched strings
         top_matched_formatted = [
-            {
-                "matched_string": matched_string,
-                "count": count
-            }
+            {"matched_string": matched_string, "count": count}
             for matched_string, count in top_matched
         ]
-        
+
         # Get all matched strings for "+ n more" functionality
         all_matched = [
-            {
-                "matched_string": matched_string,
-                "count": count
-            }
+            {"matched_string": matched_string, "count": count}
             for matched_string, count in matched_counts.most_common()
         ]
-        
-        results.append({
-            "original_string": original_string,
-            "total_count": total_count,
-            "top_matched": top_matched_formatted,
-            "remaining_count": max(0, remaining_count),
-            "all_matched": all_matched,
-            "matched_count": len(matched_counts)
-        })
-    
+
+        results.append(
+            {
+                "original_string": original_string,
+                "total_count": total_count,
+                "top_matched": top_matched_formatted,
+                "remaining_count": max(0, remaining_count),
+                "all_matched": all_matched,
+                "matched_count": len(matched_counts),
+            }
+        )
+
     # Sort by total count (descending)
     results.sort(key=lambda x: x["total_count"], reverse=True)
-    
+
     # Apply limit if specified
     if limit:
         results = results[:limit]
-    
+
     return results
