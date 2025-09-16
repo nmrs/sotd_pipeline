@@ -955,6 +955,18 @@ async def get_correct_matches(field: str):
         with correct_matches_file.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
 
+        # Check for malformed YAML with None keys and fail fast
+        def check_for_none_keys(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if k is None:
+                        raise ValueError(f"Malformed YAML: Found None key in correct_matches.yaml at path '{path}'. This indicates a corrupted YAML file that needs to be fixed.")
+                    check_for_none_keys(v, f"{path}.{k}" if path else str(k))
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    check_for_none_keys(item, f"{path}[{i}]")
+
+        check_for_none_keys(data)
         logger.info(f"Loaded data keys: {list(data.keys())}")
 
         # For brush field, combine data from brush, handle, and knot sections
