@@ -449,7 +449,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const initialRowSelection = useMemo(() => {
     const selection: Record<string, boolean> = {};
     filteredData.forEach((item, index) => {
-      const itemKey = `${field}:${item.original.toLowerCase()}`;
+      // Generate key based on data type
+      const itemKey = isGroupedDataItem(item) 
+        ? `${field}:${item.matched_string.toLowerCase()}`
+        : `${field}:${item.original.toLowerCase()}`;
       if (selectedItems.has(itemKey)) {
         selection[index.toString()] = true;
       }
@@ -461,7 +464,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const externalRowSelection = useMemo(() => {
     const selection: Record<string, boolean> = {};
     filteredData.forEach((item, index) => {
-      const itemKey = `${field}:${item.original.toLowerCase()}`;
+      // Generate key based on data type
+      const itemKey = isGroupedDataItem(item) 
+        ? `${field}:${item.matched_string.toLowerCase()}`
+        : `${field}:${item.original.toLowerCase()}`;
       if (selectedItems.has(itemKey)) {
         selection[index.toString()] = true;
       }
