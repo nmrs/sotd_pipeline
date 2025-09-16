@@ -32,10 +32,11 @@ class SoapMatcher(BaseMatcher):
         )
         # Override catalog and correct_matches from BaseMatcher with direct loading
         self.catalog = load_yaml_with_nfc(catalog_path)
+        # Use default path if not provided
+        if correct_matches_path is None:
+            correct_matches_path = Path("data/correct_matches.yaml")
         self.correct_matches = (
-            load_yaml_with_nfc(correct_matches_path)
-            if correct_matches_path and not bypass_correct_matches
-            else {}
+            load_yaml_with_nfc(correct_matches_path) if not bypass_correct_matches else {}
         )
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
         self._match_cache = {}
