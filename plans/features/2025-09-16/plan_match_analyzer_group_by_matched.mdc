@@ -1,0 +1,257 @@
+# Match Analyzer Group by Matched Feature
+
+## 📘 Project Summary
+Add a "Group by Matched" toggle to MatchAnalyzer.tsx that groups soap match results by the matched string (brand + scent) instead of the original string. This will help identify which scent-specific regexes are most important to add to the catalog by showing the most common brand+scent combinations and the original patterns that lead to those matches.
+
+**Key Requirements:**
+- Toggle only appears when soap field is selected
+- Groups by matched string (brand + scent) instead of original string
+- Shows matched string, total count, and top 3 most common original patterns with individual counts
+- Includes "+ n more" expandable list for all original patterns
+- Includes brand, exact, and alias matches (excludes regex)
+- Maintains existing functionality when toggle is off
+
+## 🧩 Component Steps
+
+### Step 1: Add Group by Matched Toggle UI ✅ **COMPLETED**
+Add the toggle control to the display mode section, visible only when soap field is selected.
+
+**Status**: ✅ **FULLY IMPLEMENTED**
+- Toggle implemented in `MatchAnalyzer.tsx` (lines 1550-1599)
+- Only appears when `selectedField === 'soap'`
+- Properly positioned in display mode section with tooltip
+- Uses consistent ShadCN UI styling
+- Proper state management with `groupByMatched` state
+
+### Step 2: Implement Backend Grouping Logic ✅ **COMPLETED**
+Create API endpoint to group soap matches by matched string with original pattern aggregation.
+
+**Status**: ✅ **FULLY IMPLEMENTED**
+- API endpoint `/soap-analyzer/group-by-matched` implemented in `soap_analyzer.py` (lines 649-723)
+- Groups by matched string (brand + scent) with original pattern aggregation
+- Includes brand, exact, and alias matches (excludes regex)
+- Returns top 3 patterns with remaining count for "+ n more" functionality
+- Handles both grouped and ungrouped modes for backward compatibility
+
+### Step 3: Update Frontend Data Processing ✅ **COMPLETED**
+Modify the frontend to handle grouped data and display the new format.
+
+**Status**: ✅ **FULLY IMPLEMENTED**
+- `MatchAnalyzer.tsx` handles grouped data (lines 151-157, 887-900)
+- Conditional API call based on `groupByMatched` state
+- Proper state management with `groupedResults` state
+- Maintains existing functionality when toggle is off
+- API service functions implemented in `api.ts`
+
+### Step 4: Add Expandable Original Patterns Display ❌ **NOT IMPLEMENTED**
+Implement the expandable list component for showing all original patterns.
+
+**Status**: ❌ **MISSING - CRITICAL GAP**
+- Data table component (`MismatchAnalyzerDataTable.tsx`) doesn't handle grouped data format
+- No expandable component for showing all original patterns
+- No "+ n more" functionality implemented
+- Type mismatch: grouped data structure doesn't match what data table expects
+- UI likely won't display grouped data properly
+
+**New Work Items Discovered:**
+- **4a. Type System Update**: Create union type for data that can be either `MismatchItem[]` or grouped data
+- **4b. Data Table Refactoring**: Update component to support conditional rendering based on data type
+- **4c. Expandable Patterns Component**: Create new component for displaying expandable original patterns with "+ n more" functionality
+- **4d. TypeScript Type Definitions**: Add proper type definitions for grouped data structure
+
+### Step 5: Integration Testing and Validation ❌ **NOT IMPLEMENTED**
+Test the complete feature with real soap data and ensure existing functionality remains intact.
+
+**Status**: ❌ **MISSING**
+- No unit tests for toggle behavior
+- No integration tests for API endpoint
+- No tests for data processing logic
+- No E2E tests for complete workflow
+- No performance testing with large datasets
+
+## 🔁 Implementation Prompts
+
+### Step 1: Add Group by Matched Toggle UI
+
+```text
+Add a "Group by Matched" toggle to MatchAnalyzer.tsx in the display mode section. The toggle should:
+
+1. Only appear when selectedField === 'soap'
+2. Be positioned alongside the existing display mode buttons
+3. Have a clear label and tooltip explaining its purpose
+4. Use consistent styling with existing UI components
+5. Include proper state management with useState
+
+Requirements:
+- Toggle should be disabled when not on soap field
+- Add proper TypeScript types for the new state
+- Include accessibility attributes (aria-label, etc.)
+- Use ShadCN UI components for consistency
+- Position it logically in the display mode section
+
+Test requirements:
+- Unit test: Toggle visibility based on selectedField
+- Unit test: Toggle state management
+- Unit test: Proper disabled state when not on soap field
+- Integration test: Toggle appears/disappears when switching fields
+```
+
+### Step 2: Implement Backend Grouping Logic
+
+```text
+Create a new API endpoint in webui/api/soap_analyzer.py for grouping soap matches by matched string:
+
+1. Add new endpoint `/soap-analyzer/group-by-matched`
+2. Accept months parameter and group_by_matched boolean
+3. Group soap matches by matched string (brand + scent)
+4. Aggregate original patterns with counts for each group
+5. Return data in format suitable for frontend display
+
+Requirements:
+- Group by matched string: f"{brand} - {scent}"
+- Include brand, exact, and alias matches only (exclude regex)
+- Count occurrences of each original pattern per group
+- Sort groups by total count (descending)
+- Limit to top 3 original patterns per group initially
+- Include total count of additional patterns for "+ n more" functionality
+
+Test requirements:
+- Unit test: Grouping logic with mock data
+- Unit test: Filtering out regex matches
+- Unit test: Counting original patterns correctly
+- Integration test: Endpoint with real soap data
+- Integration test: Verify data format matches frontend expectations
+```
+
+### Step 3: Update Frontend Data Processing
+
+```text
+Modify MatchAnalyzer.tsx to handle grouped data when the toggle is enabled:
+
+1. Add new state for grouped data
+2. Modify handleAnalyze to call different API endpoint when grouping is enabled
+3. Update data processing logic to handle both grouped and ungrouped data
+4. Ensure existing functionality works when toggle is off
+
+Requirements:
+- Conditional API call based on groupByMatched state
+- Proper error handling for both data formats
+- Maintain existing data structure when grouping is disabled
+- Update loading states and error messages appropriately
+
+Test requirements:
+- Unit test: Conditional API call logic
+- Unit test: Data processing for grouped vs ungrouped data
+- Unit test: Error handling for both modes
+- Integration test: Switching between grouped and ungrouped modes
+- Integration test: Data display in both modes
+```
+
+### Step 4: Add Expandable Original Patterns Display
+
+```text
+Create an expandable component to display original patterns with counts:
+
+1. Show top 3 original patterns with individual counts
+2. Add "+ n more" button to expand and show all patterns
+3. Implement smooth expand/collapse animation
+4. Use consistent styling with existing UI components
+
+Requirements:
+- Display format: "Original Pattern (count)"
+- Smooth expand/collapse with CSS transitions
+- Proper keyboard navigation support
+- Consistent with existing expandable components in the codebase
+- Handle edge cases (no additional patterns, single pattern, etc.)
+
+Test requirements:
+- Unit test: Expand/collapse functionality
+- Unit test: Display of pattern counts
+- Unit test: Edge case handling
+- Integration test: Expandable behavior in grouped data table
+- Visual test: Smooth animations and proper styling
+```
+
+### Step 5: Integration Testing and Validation
+
+```text
+Comprehensive testing of the complete feature:
+
+1. Test with real soap data from multiple months
+2. Verify grouping accuracy and data integrity
+3. Ensure existing functionality remains unchanged
+4. Performance testing with large datasets
+5. User experience validation
+
+Requirements:
+- Test with various soap match scenarios
+- Verify correct grouping by brand+scent combinations
+- Ensure original pattern counts are accurate
+- Test expandable functionality with large datasets
+- Validate that existing MatchAnalyzer features still work
+
+Test requirements:
+- E2E test: Complete workflow from field selection to data display
+- E2E test: Switching between grouped and ungrouped modes
+- Performance test: Large dataset handling
+- Integration test: Real soap data validation
+- User acceptance test: Feature usability and data accuracy
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence and Structure
+The plan follows a logical progression from UI to backend to integration, ensuring each step builds on the previous one. The prompts are sized appropriately - not too large to be overwhelming, but substantial enough to show meaningful progress.
+
+### Key Design Decisions
+1. **Backend-first approach**: Implementing the API endpoint before frontend changes ensures data integrity and proper separation of concerns
+2. **Conditional visibility**: Only showing the toggle for soap field keeps the UI clean and focused
+3. **Incremental testing**: Each step includes both unit and integration tests to catch issues early
+4. **Maintainability**: Preserving existing functionality while adding new features
+
+### Potential Risks and Mitigations
+1. **Data format changes**: Risk of breaking existing functionality - mitigated by maintaining backward compatibility
+2. **Performance impact**: Large datasets could slow down grouping - mitigated by efficient backend processing
+3. **UI complexity**: Adding more controls could clutter the interface - mitigated by conditional visibility and clean design
+
+### Success Criteria
+- Toggle appears only when soap field is selected
+- Grouping accurately shows brand+scent combinations with counts
+- Original patterns display correctly with expandable functionality
+- Existing MatchAnalyzer functionality remains unchanged
+- Performance is acceptable with large datasets
+- All tests pass and code quality standards are met
+
+This plan provides a solid foundation for implementing the feature while maintaining code quality and ensuring comprehensive testing coverage.
+
+## 📊 Implementation Status Summary
+
+**Overall Progress**: 60% Complete (3 of 5 steps implemented)
+
+### ✅ **Completed Steps** (3/5)
+1. **Step 1: Toggle UI** - Fully implemented with proper conditional visibility and styling
+2. **Step 2: Backend Logic** - Complete API endpoint with grouping and aggregation logic
+3. **Step 3: Frontend Processing** - State management and conditional API calls implemented
+
+### ❌ **Critical Gaps** (2/5)
+4. **Step 4: Data Display** - **BLOCKING ISSUE**: Data table component doesn't handle grouped data format
+5. **Step 5: Testing** - No tests written despite comprehensive test requirements in plan
+
+### 🚨 **Critical Issues Identified**
+1. **Type Mismatch**: `MismatchAnalyzerDataTable.tsx` expects `MismatchItem[]` but grouped data has different structure
+2. **Missing UI Components**: No expandable patterns display or "+ n more" functionality
+3. **No Test Coverage**: Zero tests for this feature despite plan requirements
+4. **UI Won't Work**: Current implementation will likely fail to display grouped data properly
+
+### 🎯 **Next Steps Required**
+1. **IMMEDIATE**: Update `MismatchAnalyzerDataTable.tsx` to handle grouped data format
+2. **IMMEDIATE**: Implement expandable patterns component with "+ n more" functionality
+3. **HIGH PRIORITY**: Write comprehensive test suite as specified in plan
+4. **MEDIUM PRIORITY**: Fix TypeScript type definitions for grouped data
+5. **LOW PRIORITY**: Performance testing with large datasets
+
+### 📝 **Implementation Notes**
+- Backend API is fully functional and returns correct data format
+- Frontend state management is properly implemented
+- Main blocker is data table component not supporting grouped data display
+- Feature is partially functional but UI display is broken due to type mismatch
