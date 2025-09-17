@@ -250,7 +250,11 @@ This plan provides a solid foundation for implementing the feature while maintai
 ### 🎯 **Feature Complete - Ready for Production**
 1. **COMPLETED**: Comprehensive test suite implemented and passing
 2. **COMPLETED**: Feature tested with mock data and validated functionality
-3. **OPTIONAL**: Performance testing with large datasets (if needed)
+3. **COMPLETED**: Match Type column display fixed - now shows correct match types (exact, brand, alias)
+4. **COMPLETED**: Backend grouping function updated to include primary match type for each group
+5. **COMPLETED**: TypeScript interface updated to include match_type field
+6. **COMPLETED**: Data table component updated to handle both regular and grouped data types
+7. **OPTIONAL**: Performance testing with large datasets (if needed)
 
 ### 📝 **Implementation Notes**
 - Backend API is fully functional and returns correct data format
@@ -260,3 +264,11 @@ This plan provides a solid foundation for implementing the feature while maintai
 - Comprehensive test suite implemented with unit and integration tests
 - Feature is fully functional, tested, and ready for production use
 - All 5 steps completed successfully with 100% implementation status
+
+### 🔧 **Bug Fixes Applied**
+- **Match Type Column Display**: Fixed issue where Match Type column showed "N/A" for grouped data
+- **Backend Response**: Updated `group_soap_matches_by_matched` function to include primary match type for each group
+- **TypeScript Interface**: Added `match_type` field to `GroupedDataItem` interface
+- **Data Table Types**: Updated all `Row<MismatchItem>` references to `Row<AnalyzerDataItem>` for proper type handling
+- **Filtering Logic**: Updated to include all match types (exact, brand, alias, regex) to show complete usage counts
+- **Approach Change**: Changed from excluding regex matches to including all match types to show total usage counts per soap
