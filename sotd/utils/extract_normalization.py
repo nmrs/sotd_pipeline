@@ -228,9 +228,15 @@ def strip_soap_patterns(value: str) -> str:
     )
     cleaned = re.sub(shaving_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Then remove individual product type indicators
-    product_pattern = r"\b(?:soap|cream|splash|balm|aftershave|puck|croap)\b"
-    cleaned = re.sub(product_pattern, "", cleaned, flags=re.IGNORECASE)
+    # Remove individual product type indicators, but be careful with "soap"
+    # Only strip "soap" when it's at the end after delimiters (generic product type)
+    # Preserve "soap" when it's part of brand names like "Soap Commander", "Storybook Soapworks"
+    trailing_soap_pattern = r"\s*[-:*/_,~`\\\.]+\s*soap\s*$"
+    cleaned = re.sub(trailing_soap_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Strip other product types anywhere (these are safer to strip)
+    other_product_pattern = r"\b(?:cream|splash|balm|aftershave|puck|croap)\b"
+    cleaned = re.sub(other_product_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # OPTIMIZED: Combine soap-related indicators in parentheses
     soap_pattern = r"\s*\((?:sample|tester|travel\s+size|mini|small)\)"

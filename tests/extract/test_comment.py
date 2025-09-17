@@ -210,7 +210,7 @@ def test_parse_comment_with_special_characters():
         "brush": {"original": "Omega 10049", "normalized": "Omega 10049"},
         "soap": {
             "original": "Stirling Soap Co. Executive Man",
-            "normalized": "Stirling Co. Executive Man",
+            "normalized": "Stirling Soap Co. Executive Man",
         },
     }
 

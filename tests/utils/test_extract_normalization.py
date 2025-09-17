@@ -192,12 +192,17 @@ class TestNormalizeForMatching:
     def test_normalize_for_matching_soap_patterns(self):
         """Test that normalize_for_matching strips soap patterns for soap field."""
         # Test soap-related patterns
-        assert normalize_for_matching("B&M Seville soap", field="soap") == "B&M Seville"
+        assert (
+            normalize_for_matching("B&M Seville soap", field="soap") == "B&M Seville soap"
+        )  # "soap" preserved (not at end after delimiter)
         assert normalize_for_matching("Stirling Bay Rum sample", field="soap") == "Stirling Bay Rum"
         assert (
             normalize_for_matching("Declaration Grooming (sample)", field="soap")
             == "Declaration Grooming"
         )
+        # Test trailing soap stripping
+        assert normalize_for_matching("B&M Seville - Soap", field="soap") == "B&M Seville"
+        assert normalize_for_matching("Stirling Bay Rum - Soap", field="soap") == "Stirling Bay Rum"
 
     def test_normalize_for_matching_soap_no_patterns(self):
         """Test that normalize_for_matching doesn't affect soaps without patterns."""
@@ -218,15 +223,18 @@ class TestStripSoapPatterns:
     def test_strip_soap_patterns_basic(self):
         """Test basic soap pattern stripping."""
         test_cases = [
-            ("B&M Seville soap", "B&M Seville"),  # "soap" is stripped
+            (
+                "B&M Seville soap",
+                "B&M Seville soap",
+            ),  # "soap" is NOT stripped (not at end after delimiter)
             (
                 "Stirling Bay Rum sample",
                 "Stirling Bay Rum",
             ),  # "sample" is stripped (standalone at end)
             (
                 "Declaration Grooming soap sample",
-                "Declaration Grooming",
-            ),  # Both "soap" and "sample" stripped
+                "Declaration Grooming soap",
+            ),  # Only "sample" stripped, "soap" preserved
             ("Cella croap", "Cella"),  # "croap" is stripped
             ("Proraso cream", "Proraso"),  # "cream" is stripped
             ("MWF puck", "MWF"),  # "puck" is stripped
@@ -289,8 +297,8 @@ class TestStripSoapPatterns:
         test_cases = [
             (
                 "B&M Seville soap (sample) (23)",
-                "B&M Seville (23)",
-            ),  # Both "soap" and "(sample)" stripped
+                "B&M Seville soap (23)",
+            ),  # Only "(sample)" stripped, "soap" preserved
             (
                 "Stirling Bay Rum cream (SAMPLE) (5)",
                 "Stirling Bay Rum (5)",
@@ -312,15 +320,15 @@ class TestStripSoapPatterns:
             "B&M Seville",
             "Stirling Bay Rum",
             "Declaration Grooming",
-            "Product without soap patterns",  # "soap" is stripped
+            "Product without soap patterns",  # "soap" is NOT stripped (not at end after delimiter)
         ]
         for input_str in test_cases:
             result = strip_soap_patterns(input_str)
-            if "soap" in input_str.lower():
-                # If "soap" is in the input, it should be stripped
+            if "soap" in input_str.lower() and not input_str.lower().endswith("soap"):
+                # If "soap" is in the input but not at the end, it should be preserved
                 assert (
-                    "soap" not in result.lower()
-                ), f"Expected 'soap' to be stripped from '{input_str}', but got '{result}'"
+                    "soap" in result.lower()
+                ), f"Expected 'soap' to be preserved in '{input_str}', but got '{result}'"
             else:
                 # Otherwise, should not change
                 assert result == input_str, f"Should not change '{input_str}', but got '{result}'"
@@ -330,8 +338,8 @@ class TestStripSoapPatterns:
         test_cases = [
             (
                 "B&M Seville   soap   (sample)   ",
-                "B&M Seville",
-            ),  # Both "soap" and "(sample)" stripped
+                "B&M Seville soap",
+            ),  # Only "(sample)" stripped, "soap" preserved
             (
                 "Stirling Bay Rum  cream  (23)  ",
                 "Stirling Bay Rum (23)",
@@ -394,6 +402,61 @@ class TestStripSoapPatterns:
             ("B&M - Seville - Shaving Soap", "B&M - Seville"),
             ("House of Mammoth : Alive : Shave Soap", "House of Mammoth : Alive"),
             ("Declaration Grooming / Original / Shave Soap", "Declaration Grooming / Original"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_preserves_brand_names_with_soap(self):
+        """Test that brand names containing 'soap' are preserved."""
+        test_cases = [
+            ("Soap Commander - Viva", "Soap Commander - Viva"),  # Brand name preserved
+            (
+                "Storybook Soapworks - Visions and Revisions",
+                "Storybook Soapworks - Visions and Revisions",
+            ),
+            ("Summer Break Soaps - Shh!", "Summer Break Soaps - Shh!"),
+            (
+                "CBL Soaps - Hombres Dos Spaghetti Western",
+                "CBL Soaps - Hombres Dos Spaghetti Western",
+            ),
+            ("Bufflehead Soap Co. - Tishomingo", "Bufflehead Soap Co. - Tishomingo"),
+            ("Stirling Soap Co. - Executive Man", "Stirling Soap Co. - Executive Man"),
+            ("Shannon's Soaps - Lady Luck", "Shannon's Soaps - Lady Luck"),
+            ("Signature Soaps - A Britannia", "Signature Soaps - A Britannia"),
+            ("Siliski Soaps - Apothecary Cellars", "Siliski Soaps - Apothecary Cellars"),
+            ("Smitten Soapery - Hipster", "Smitten Soapery - Hipster"),
+            ("Reef Point Soaps - Fougère", "Reef Point Soaps - Fougère"),
+            ("Rock Bottom Soap - Barber Shoppe", "Rock Bottom Soap - Barber Shoppe"),
+            ("The Artisan Soap Shoppe - Lavender", "The Artisan Soap Shoppe - Lavender"),
+            ("Wickham Soap Co. - Classic 24", "Wickham Soap Co. - Classic 24"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_strips_trailing_soap(self):
+        """Test that generic 'soap' at the end after delimiters is stripped."""
+        test_cases = [
+            ("Chiseled Face - Midnight Stag - Soap", "Chiseled Face - Midnight Stag"),
+            (
+                "Storybook Soapworks - Visions and Revisions - Soap",
+                "Storybook Soapworks - Visions and Revisions",
+            ),
+            ("Summer Break Soaps - Shh! - Soap", "Summer Break Soaps - Shh!"),
+            ("Mammoth Soaps - Shire - Soap", "Mammoth Soaps - Shire"),
+            ("Oleo Soapworks - Polar - Soap", "Oleo Soapworks - Polar"),
+            ("Barrister and Mann - Seville - Soap", "Barrister and Mann - Seville"),
+            ("Declaration Grooming - Trismegistus - Soap", "Declaration Grooming - Trismegistus"),
+            ("Noble Otter - Monarch - Soap", "Noble Otter - Monarch"),
+            ("Wholly Kaw - King of Oud - Soap", "Wholly Kaw - King of Oud"),
+            ("B&M Seville: Soap", "B&M Seville"),  # Different delimiter
+            ("Stirling Bay Rum/Soap", "Stirling Bay Rum"),  # Different delimiter
+            ("Declaration Grooming_Soap", "Declaration Grooming"),  # Different delimiter
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)
