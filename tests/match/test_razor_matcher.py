@@ -10,7 +10,11 @@ from sotd.match.types import MatchResult
 @pytest.fixture
 def matcher():
     """Create a RazorMatcher instance for testing."""
-    return RazorMatcher()
+    # Use test-specific correct matches file instead of production data
+    from pathlib import Path
+
+    test_correct_matches_path = Path(__file__).parent / "test_razor_correct_matches.yaml"
+    return RazorMatcher(correct_matches_path=test_correct_matches_path)
 
 
 def test_razor_matcher_still_works_with_unified_match_result(matcher):

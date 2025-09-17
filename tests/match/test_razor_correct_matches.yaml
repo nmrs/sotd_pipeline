@@ -1,0 +1,28 @@
+# Test-specific correct matches for razor matcher tests
+# This file provides predictable test data instead of depending on production data
+
+razor:
+  "Koraat Moarteen":
+    brand: "Koraat"
+    model: "Moarteen (r/Wetshaving exclusive)"
+    format: "Straight"
+
+  "Wolfman WR2":
+    brand: "Wolfman"
+    model: "WR2"
+    format: "DE"
+
+  "Gillette Fatboy":
+    brand: "Gillette"
+    model: "Fatboy"
+    format: "DE"
+
+  "Merkur 34C":
+    brand: "Merkur"
+    model: "34C"
+    format: "DE"
+
+  "Karve Christopher Bradley":
+    brand: "Karve"
+    model: "Christopher Bradley"
+    format: "DE"

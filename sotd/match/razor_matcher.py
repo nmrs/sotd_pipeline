@@ -48,36 +48,48 @@ class RazorMatcher(BaseMatcher):
 
         lookup = {}
 
-        for brand, models in self.correct_matches.items():
-            for model, entries in models.items():
-                if isinstance(entries, list):
-                    # Simple string list format
-                    for entry in entries:
-                        key = entry.lower()
-                        # Get format from catalog entry
-                        fmt = "DE"  # Default format
-                        if brand in self.catalog and model in self.catalog[brand]:
-                            model_data = self.catalog[brand][model]
-                            if isinstance(model_data, dict):
-                                fmt = model_data.get("format", "DE")
-                        lookup[key] = {"brand": brand, "model": model, "format": fmt}
-                elif isinstance(entries, dict):
-                    # Nested format with additional data
-                    strings = entries.get("strings", [])
-                    for entry in strings:
-                        key = entry.lower()
-                        # Get format from catalog entry
-                        fmt = "DE"  # Default format
-                        if brand in self.catalog and model in self.catalog[brand]:
-                            model_data = self.catalog[brand][model]
-                            if isinstance(model_data, dict):
-                                fmt = model_data.get("format", "DE")
-                        matched_data = {"brand": brand, "model": model, "format": fmt}
-                        # Copy additional fields from the entry
-                        for key_field, val in entries.items():
-                            if key_field != "strings":
-                                matched_data[key_field] = val
-                        lookup[key] = matched_data
+        # Check if correct_matches has a flat structure (key -> dict) or nested structure (brand -> models)
+        first_key = next(iter(self.correct_matches.keys()), None)
+        if (
+            first_key
+            and isinstance(self.correct_matches[first_key], dict)
+            and "brand" in self.correct_matches[first_key]
+        ):
+            # Flat structure: direct key -> match data
+            for key, match_data in self.correct_matches.items():
+                lookup[key.lower()] = match_data
+        else:
+            # Nested structure: brand -> models -> entries
+            for brand, models in self.correct_matches.items():
+                for model, entries in models.items():
+                    if isinstance(entries, list):
+                        # Simple string list format
+                        for entry in entries:
+                            key = entry.lower()
+                            # Get format from catalog entry
+                            fmt = "DE"  # Default format
+                            if brand in self.catalog and model in self.catalog[brand]:
+                                model_data = self.catalog[brand][model]
+                                if isinstance(model_data, dict):
+                                    fmt = model_data.get("format", "DE")
+                            lookup[key] = {"brand": brand, "model": model, "format": fmt}
+                    elif isinstance(entries, dict):
+                        # Nested format with additional data
+                        strings = entries.get("strings", [])
+                        for entry in strings:
+                            key = entry.lower()
+                            # Get format from catalog entry
+                            fmt = "DE"  # Default format
+                            if brand in self.catalog and model in self.catalog[brand]:
+                                model_data = self.catalog[brand][model]
+                                if isinstance(model_data, dict):
+                                    fmt = model_data.get("format", "DE")
+                            matched_data = {"brand": brand, "model": model, "format": fmt}
+                            # Copy additional fields from the entry
+                            for key_field, val in entries.items():
+                                if key_field != "strings":
+                                    matched_data[key_field] = val
+                            lookup[key] = matched_data
 
         self._case_insensitive_lookup = lookup
         return lookup
