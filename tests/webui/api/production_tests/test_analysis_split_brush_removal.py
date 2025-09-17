@@ -27,6 +27,16 @@ class TestAnalysisAPISplitBrushRemoval:
         with patch("webui.api.analysis.get_comment_detail") as mock:
             yield mock
 
+    @pytest.fixture
+    def mock_yaml_load(self):
+        """Mock the YAML loading to avoid production data corruption"""
+        with patch("yaml.safe_load") as mock:
+            # Return valid test data structure
+            mock.return_value = {
+                "brush": {"test_brush": {"brand": "Test Brand", "model": "Test Model"}}
+            }
+            yield mock
+
     def test_analyze_mismatch_response_without_split_brush(self):
         """Test that analyze_mismatch endpoint returns data without split_brush fields"""
 
@@ -60,7 +70,9 @@ class TestAnalysisAPISplitBrushRemoval:
             assert "handle_component" not in first_item
             assert "knot_component" not in first_item
 
-    def test_brush_field_processing_without_split_brush(self, mock_analyze_mismatch):
+    def test_brush_field_processing_without_split_brush(
+        self, mock_analyze_mismatch, mock_yaml_load
+    ):
         """Test that brush field processing works without split_brush section"""
 
         # Mock analyze_mismatch response
