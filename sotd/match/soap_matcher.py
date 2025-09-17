@@ -306,20 +306,37 @@ class SoapMatcher(BaseMatcher):
         return value
 
     def match(
-        self, value: str, original: str | None = None, bypass_correct_matches: bool = False
+        self, value: str | dict, original: str | None = None, bypass_correct_matches: bool = False
     ) -> MatchResult:
         """
         Main orchestration method for soap matching.
         Ensures 'brand' and 'scent' are always present in the 'matched' dict for all match types.
 
         Args:
-            value: Normalized text string for matching
+            value: Normalized text string or field data dict for matching
             original: Original text string for debugging (defaults to value if not provided)
             bypass_correct_matches: If True, skip correct matches check and go directly to regex
         """
-        # Use provided original text or default to normalized text
-        original_text = original if original is not None else value
-        normalized_text = value
+        # Handle both string and field data object inputs
+        if isinstance(value, dict):
+            # Extract normalized text from field data object
+            normalized_text = value.get("normalized", value.get("original", ""))
+            # Use provided original text or extract from dict
+            original_text = (
+                original if original is not None else value.get("original", normalized_text)
+            )
+        elif isinstance(value, str):
+            # Direct string input
+            normalized_text = value
+            original_text = original if original is not None else value
+        else:
+            # Non-string, non-dict input - return no match
+            return create_match_result(
+                original=str(value) if original is None else original,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
 
         if not normalized_text:
             return create_match_result(

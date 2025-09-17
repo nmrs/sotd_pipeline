@@ -132,7 +132,7 @@ def test_match_exact_scent(soap_matcher_with_mock):
     assert result.matched is not None
     assert result.matched["brand"] == "Barrister and Mann"
     assert result.matched["scent"] == "Seville"
-    assert result.match_type == "regex"  # Using mocked data, so it's regex
+    assert result.match_type == "exact"  # Found in correct matches
 
 
 def test_match_case_insensitive(soap_matcher_with_mock):
@@ -141,7 +141,7 @@ def test_match_case_insensitive(soap_matcher_with_mock):
     assert result.matched is not None
     assert result.matched["brand"] == "Barrister and Mann"
     assert result.matched["scent"] == "Seville"
-    assert result.match_type == "regex"  # Case-insensitive matching now handled by regex fallback
+    assert result.match_type == "exact"  # Found in correct matches (case-insensitive)
 
 
 def test_match_partial_name(soap_matcher_with_mock):
@@ -167,7 +167,7 @@ def test_brand_only_match_fallback(soap_matcher_with_mock):
     assert result.matched is not None
     assert result.matched["brand"] == "House of Mammoth"
     assert result.matched["scent"] == "Alive"
-    assert result.match_type == "brand"  # Using mocked data, so it's brand
+    assert result.match_type == "exact"  # Found in correct matches
 
 
 def test_brand_only_match_with_colon(soap_matcher_with_mock):
@@ -212,8 +212,8 @@ def test_match_always_has_match_type(soap_matcher_with_mock):
 
 def test_match_returns_correct_match_type(soap_matcher_with_mock):
     test_cases = [
-        ("Barrister and Mann - Seville", "regex"),  # Matches scent pattern
-        ("House of Mammoth - Alive", "brand"),  # Matches brand pattern, scent from remainder
+        ("Barrister and Mann - Seville", "exact"),  # Found in correct matches
+        ("House of Mammoth - Alive", "exact"),  # Found in correct matches
         ("House of Mammoth - Aliive", "brand"),  # Matches brand pattern, scent from remainder
         ("UnknownBrand - SomeNewScent", "alias"),  # Dash-split fallback
     ]

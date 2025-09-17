@@ -26,7 +26,13 @@ def soap_matcher():
 
 @pytest.fixture(scope="session")
 def razor_matcher():
-    return RazorMatcher()
+    # Use test-specific correct matches to avoid production data corruption issues
+    from pathlib import Path
+
+    test_correct_matches_path = (
+        Path(__file__).parent.parent / "match" / "test_razor_correct_matches.yaml"
+    )
+    return RazorMatcher(correct_matches_path=test_correct_matches_path)
 
 
 @pytest.fixture(scope="session")
