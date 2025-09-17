@@ -383,8 +383,8 @@ class ParallelMonthProcessor:
                 print(f"    Present: {field_total:,}")
                 print(f"    Success Rate: {success_rate:.1f}%")
 
-                # Show top match types for this field
-                for match_type, count in field_matches.most_common(3):
+                # Show all match types for this field
+                for match_type, count in field_matches.most_common():
                     if count > 0:
                         percentage = (count / field_total * 100) if field_total > 0 else 0
                         print(f"      {match_type}: {count:,} ({percentage:.1f}%)")

@@ -515,6 +515,9 @@ def process_month(
 
             # Display enhanced match statistics
             print("\n" + format_match_statistics_for_display(match_statistics))
+            import sys
+
+            sys.stdout.flush()
 
         return {
             "status": "completed",
