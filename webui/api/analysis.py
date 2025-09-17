@@ -143,10 +143,6 @@ class MismatchItem(BaseModel):
     is_confirmed: Optional[bool] = None
     # Strategy field for brush matching
     matched_by_strategy: Optional[str] = None
-    # Split brush fields
-    is_split_brush: Optional[bool] = None
-    handle_component: Optional[str] = None
-    knot_component: Optional[str] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -774,7 +770,8 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         continue
                 elif request.display_mode == "complete_brushes":
                     # For complete brushes mode, only show split brush items
-                    items = [item for item in items if item.get("is_split_brush", False)]
+                    # Filter out items that don't meet the threshold
+                    items = [item for item in items if item.get("count", 0) >= threshold]
                     if not items:
                         continue
                 # 'all' mode shows everything, so no filtering needed
@@ -875,9 +872,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     is_confirmed=is_confirmed,
                     matched_by_strategy=matched_by_strategy,
                     # Split brush fields from analyzer results
-                    is_split_brush=item.get("is_split_brush"),
-                    handle_component=item.get("handle_component"),
-                    knot_component=item.get("knot_component"),
                 )
 
                 all_items.append(api_item)
@@ -960,7 +954,9 @@ async def get_correct_matches(field: str):
             if isinstance(obj, dict):
                 for k, v in obj.items():
                     if k is None:
-                        raise ValueError(f"Malformed YAML: Found None key in correct_matches.yaml at path '{path}'. This indicates a corrupted YAML file that needs to be fixed.")
+                        raise ValueError(
+                            f"Malformed YAML: Found None key in correct_matches.yaml at path '{path}'. This indicates a corrupted YAML file that needs to be fixed."
+                        )
                     check_for_none_keys(v, f"{path}.{k}" if path else str(k))
             elif isinstance(obj, list):
                 for i, item in enumerate(obj):
