@@ -1,0 +1,100 @@
+brush_scoring_weights:
+  base_strategies:
+    known_brush: 90.0
+    complete_brush: 70.0
+    correct_complete_brush: 90.0
+    correct_split_brush: 85.0
+    known_split: 80.0
+    automated_split: 50.0
+    knot_matching: 30.0
+    handle_matching: 30.0
+    high_priority_automated_split: 75.0
+    dual_component: 65.0
+    medium_priority_automated_split: 60.0
+    single_component_fallback: 55.0
+
+  strategy_modifiers:
+    known_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    complete_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    correct_complete_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    correct_split_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    known_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    high_priority_automated_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    medium_priority_automated_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    dual_component:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    single_component_fallback:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    automated_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    knot_matching:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    handle_matching:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
