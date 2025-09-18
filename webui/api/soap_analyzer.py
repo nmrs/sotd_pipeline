@@ -762,8 +762,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
                 print(f"🔍 DEBUG: Skipping alias match due to missing brand/scent: {match}")
             continue
 
-        # Create matched string key
-        matched_key = f"{brand} - {scent}"
+        # Create matched string key (case-insensitive for grouping)
+        matched_key = f"{brand} - {scent}".lower()
 
         # Store original pattern and match type
         original = match.get("original", "").strip()
@@ -771,16 +771,35 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
 
         if original:
             matched_groups[matched_key].append(
-                {"original": original, "match_type": match_type, "count": match.get("count", 1)}
+                {
+                    "original": original,
+                    "match_type": match_type,
+                    "count": match.get("count", 1),
+                    "brand": brand,  # Store original case brand
+                    "scent": scent,  # Store original case scent
+                }
             )
 
     # Convert to result format
     results = []
-    for matched_string, patterns in matched_groups.items():
-        # Extract brand and scent from matched_string (format: "Brand - Scent")
-        brand, scent = (
-            matched_string.split(" - ", 1) if " - " in matched_string else (matched_string, "")
-        )
+    for matched_string_lower, patterns in matched_groups.items():
+        # Get the proper case from the first pattern's stored brand/scent
+        # This preserves the original case from the catalog data
+        if patterns and "brand" in patterns[0] and "scent" in patterns[0]:
+            brand = patterns[0]["brand"]  # Use original case from catalog
+            scent = patterns[0]["scent"]  # Use original case from catalog
+        else:
+            # Fallback to title case if no stored data
+            brand_lower, scent_lower = (
+                matched_string_lower.split(" - ", 1)
+                if " - " in matched_string_lower
+                else (matched_string_lower, "")
+            )
+            brand = brand_lower.title()
+            scent = scent_lower.title()
+
+        # Create display version of matched_string with proper case
+        matched_string = f"{brand} - {scent}"
 
         # Count total occurrences
         total_count = sum(pattern["count"] for pattern in patterns)
