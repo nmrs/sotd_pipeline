@@ -451,18 +451,43 @@ const MatchAnalyzer: React.FC = () => {
       return;
     }
 
-    if (!results?.mismatch_items) return;
-
     try {
       setMarkingCorrect(true);
 
-      // Send the complete match data directly
-      const matches = results.mismatch_items
-        .filter(item => {
-          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+      let matches: Array<{ original: string; matched: any }> = [];
+
+      // Handle grouped data (soap field with groupByMatched enabled)
+      if (groupedResults?.groups) {
+        // For grouped data, extract all patterns from selected groups
+        const selectedGroups = groupedResults.groups.filter(group => {
+          const itemKey = `${selectedField}:${group.matched_string?.toLowerCase() || 'unknown'}`;
           return selectedItems.has(itemKey);
-        })
-        .map(item => {
+        });
+
+        for (const group of selectedGroups) {
+          // Extract brand and scent from matched_string (format: "Brand - Scent")
+          const [brand, ...scentParts] = group.matched_string.split(' - ');
+          const scent = scentParts.join(' - ');
+
+          // Create matches for all patterns in this group
+          for (const pattern of group.all_patterns) {
+            matches.push({
+              original: pattern.original,
+              matched: {
+                brand: brand,
+                scent: scent,
+              },
+            });
+          }
+        }
+      } else if (results?.mismatch_items) {
+        // Handle regular data (existing logic)
+        matches = results.mismatch_items
+          .filter(item => {
+            const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+            return selectedItems.has(itemKey);
+          })
+          .map(item => {
           // For brush field, use the shared utility to structure data correctly
           if (selectedField === 'brush' && item.matched) {
             const { data } = structureBrushDataForAPI(item.matched, item.original);
@@ -541,6 +566,12 @@ const MatchAnalyzer: React.FC = () => {
             matched: item.matched,
           };
         });
+      }
+
+      if (matches.length === 0) {
+        setError('No valid matches found to mark as correct');
+        return;
+      }
 
       const response = await markMatchesAsCorrect({
         field: selectedField,
@@ -574,18 +605,43 @@ const MatchAnalyzer: React.FC = () => {
       return;
     }
 
-    if (!results?.mismatch_items) return;
-
     try {
       setRemovingCorrect(true);
 
-      // Send the complete match data directly
-      const matches = results.mismatch_items
-        .filter(item => {
-          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+      let matches: Array<{ original: string; matched: any }> = [];
+
+      // Handle grouped data (soap field with groupByMatched enabled)
+      if (groupedResults?.groups) {
+        // For grouped data, extract all patterns from selected groups
+        const selectedGroups = groupedResults.groups.filter(group => {
+          const itemKey = `${selectedField}:${group.matched_string?.toLowerCase() || 'unknown'}`;
           return selectedItems.has(itemKey);
-        })
-        .map(item => {
+        });
+
+        for (const group of selectedGroups) {
+          // Extract brand and scent from matched_string (format: "Brand - Scent")
+          const [brand, ...scentParts] = group.matched_string.split(' - ');
+          const scent = scentParts.join(' - ');
+
+          // Create matches for all patterns in this group
+          for (const pattern of group.all_patterns) {
+            matches.push({
+              original: pattern.original,
+              matched: {
+                brand: brand,
+                scent: scent,
+              },
+            });
+          }
+        }
+      } else if (results?.mismatch_items) {
+        // Handle regular data (existing logic)
+        matches = results.mismatch_items
+          .filter(item => {
+            const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+            return selectedItems.has(itemKey);
+          })
+          .map(item => {
           // For brush field, use the shared utility to structure data correctly
           if (selectedField === 'brush' && item.matched) {
             const { data } = structureBrushDataForAPI(item.matched, item.original);
@@ -664,6 +720,12 @@ const MatchAnalyzer: React.FC = () => {
             matched: item.matched,
           };
         });
+      }
+
+      if (matches.length === 0) {
+        setError('No valid matches found to remove from correct matches');
+        return;
+      }
 
       const response = await removeMatchesFromCorrect({
         field: selectedField,
