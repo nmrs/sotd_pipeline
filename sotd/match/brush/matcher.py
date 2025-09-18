@@ -58,7 +58,7 @@ _catalog_cache = None
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file or directory structure using CatalogLoader."""
     from sotd.match.loaders import CatalogLoader
-    
+
     loader = CatalogLoader()
     return loader.load_correct_matches(correct_matches_path)
 
@@ -257,29 +257,39 @@ class BrushMatcher:
 
         # Validate correct_matches (can be directory or file)
         if not self.correct_matches_path.exists():
-            raise FileNotFoundError(f"Correct matches path not found at: {self.correct_matches_path.absolute()}")
-        
+            raise FileNotFoundError(
+                f"Correct matches path not found at: {self.correct_matches_path.absolute()}"
+            )
+
         if self.correct_matches_path.is_file():
             # Legacy single file mode
             try:
                 with open(self.correct_matches_path, "r", encoding="utf-8") as f:
                     f.read(1)
             except (PermissionError, UnicodeDecodeError) as e:
-                raise ValueError(f"Correct matches file is not readable: {self.correct_matches_path.absolute()} - {e}")
+                raise ValueError(
+                    f"Correct matches file is not readable: {self.correct_matches_path.absolute()} - {e}"
+                )
         elif self.correct_matches_path.is_dir():
             # New directory structure mode - validate required files exist
             required_files = ["brush.yaml", "handle.yaml", "knot.yaml"]
             for filename in required_files:
                 file_path = self.correct_matches_path / filename
                 if not file_path.exists():
-                    raise FileNotFoundError(f"Required correct matches file '{filename}' not found at: {file_path.absolute()}")
+                    raise FileNotFoundError(
+                        f"Required correct matches file '{filename}' not found at: {file_path.absolute()}"
+                    )
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         f.read(1)
                 except (PermissionError, UnicodeDecodeError) as e:
-                    raise ValueError(f"Correct matches file '{filename}' is not readable: {file_path.absolute()} - {e}")
+                    raise ValueError(
+                        f"Correct matches file '{filename}' is not readable: {file_path.absolute()} - {e}"
+                    )
         else:
-            raise ValueError(f"Correct matches path is neither file nor directory: {self.correct_matches_path.absolute()}")
+            raise ValueError(
+                f"Correct matches path is neither file nor directory: {self.correct_matches_path.absolute()}"
+            )
 
         if self.debug:
             print("✅ All catalog paths validated successfully:")
@@ -318,7 +328,7 @@ class BrushMatcher:
     def _load_correct_matches_catalog(self) -> dict:
         """Load correct matches catalog from directory structure or legacy file using CatalogLoader."""
         from sotd.match.loaders import CatalogLoader
-        
+
         loader = CatalogLoader()
         return loader.load_correct_matches(self.correct_matches_path)
 

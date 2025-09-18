@@ -565,8 +565,10 @@ Barrister and Mann:
         - red letter
     Roam (I):
       patterns:
-        - '\bb ?(and|&|\+) ?m\b.*roam.*(?:1|i|one)'
-        - "barrister.*roam.*(?:1|i|one)"
+        - '\bb ?(and|&|\+) ?m\b.*roam.*(?:1|i|one|og|orig|2014)'
+        - "barrister.*roam.*(?:1|i|one|og|orig|2014)"
+        - '\bb ?(and|&|\+) ?m\b.*(?:og|orig).*roam'
+        - "barrister.*(?:og|orig).*roam"
     Roam Two:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*roam.*(2|II|two)?'

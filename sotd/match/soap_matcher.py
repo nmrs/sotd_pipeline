@@ -35,7 +35,7 @@ class SoapMatcher(BaseMatcher):
         # Use default path if not provided
         if correct_matches_path is None:
             correct_matches_path = Path("data/correct_matches")
-        
+
         # Load correct matches using the new directory structure
         if not bypass_correct_matches:
             if correct_matches_path.is_file():
