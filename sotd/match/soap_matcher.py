@@ -243,6 +243,11 @@ class SoapMatcher(BaseMatcher):
                 remainder = re.sub(r"[\s\-:*/_,~`\\]+$", "", remainder).strip()
                 remainder = self._normalize_scent_text(remainder)
                 remainder = self._remove_sample_marker(remainder)
+
+                # Handle "by" case: if remainder ends with "by", strip it out
+                if remainder.lower().endswith(" by"):
+                    remainder = remainder[:-3].strip()
+
                 return {
                     "original": original,
                     "matched": {"brand": pattern_info["brand"], "scent": remainder},

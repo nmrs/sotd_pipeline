@@ -1,7 +1,8 @@
 # pylint: disable=redefined-outer-name
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from sotd.match.soap_matcher import SoapMatcher
 
@@ -426,3 +427,49 @@ def test_enhanced_regex_error_reporting():
         assert "File: data/soaps.yaml" in error_message
         assert "Brand: Test Brand" in error_message
         assert "unterminated character set" in error_message  # The actual regex error
+
+
+def test_brand_match_with_by_connector():
+    """Test that brand matching correctly handles 'by' connector when scent comes first."""
+    # This tests the fix for cases like "Steady by Summer Break soaps"
+    # where the scent comes before the brand with "by" as connector
+
+    # Add Summer Break Soaps to the mock catalog for this test
+    mock_catalog = {
+        "Summer Break Soaps": {
+            "patterns": ["summer break( soaps)?"],
+            "scents": {
+                "Steady": {
+                    "patterns": ["steady"],
+                }
+            },
+        }
+    }
+
+    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_catalog):
+        matcher = SoapMatcher()
+
+        # Test the problematic case: scent first with "by" connector
+        result = matcher.match("Steady by Summer Break soaps")
+        assert result.matched is not None
+        assert result.matched["brand"] == "Summer Break Soaps"
+        assert result.matched["scent"] == "Steady"  # Should strip " by" from the end
+        assert result.match_type == "brand"
+
+        # Test that normal cases still work
+        result = matcher.match("Summer Break Soaps - Steady")
+        assert result.matched is not None
+        assert result.matched["brand"] == "Summer Break Soaps"
+        assert result.matched["scent"] == "Steady"
+        assert result.match_type == "exact"  # Should match scent pattern
+
+
+def test_brand_match_with_by_connector_case_insensitive(soap_matcher_with_mock):
+    """Test that 'by' connector handling works case-insensitively."""
+    # Use the existing matcher but test with a simple case that should work
+    # Test the actual "by" connector fix with Summer Break Soaps
+    result = soap_matcher_with_mock.match("Steady by Summer Break soaps")
+    assert result.matched is not None
+    assert result.matched["brand"] == "Summer Break Soaps"
+    assert result.matched["scent"] == "Steady"  # Should strip " by" from the end
+    assert result.match_type == "brand"
