@@ -186,8 +186,17 @@ class CorrectMatchesManager:
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
                                                     "matched": {
-                                                        "brand": brand if field in ("razor", "blade", "brush", "soap") else None,
-                                                        "model": model if field in ("razor", "blade", "brush") else None,
+                                                        "brand": (
+                                                            brand
+                                                            if field
+                                                            in ("razor", "blade", "brush", "soap")
+                                                            else None
+                                                        ),
+                                                        "model": (
+                                                            model
+                                                            if field in ("razor", "blade", "brush")
+                                                            else None
+                                                        ),
                                                         "scent": model if field == "soap" else None,
                                                     },
                                                     "field": field,
