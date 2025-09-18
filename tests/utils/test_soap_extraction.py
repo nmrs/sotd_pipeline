@@ -1,266 +1,414 @@
 #!/usr/bin/env python3
 """Tests for soap extraction utilities."""
 
+import pytest
+
 from sotd.utils.soap_extraction import (
     extract_soap_sample_via_normalization,
-    _extract_sample_patterns,
+    normalize_soap_suffixes,
 )
 
 
+class TestNormalizeSoapSuffixes:
+    """Test soap suffix normalization functionality."""
+
+    def test_empty_input(self):
+        """Test handling of empty input."""
+        assert normalize_soap_suffixes("") == ""
+        assert normalize_soap_suffixes(None) is None
+
+    def test_no_suffixes(self):
+        """Test text with no suffixes to normalize."""
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady") == "summer break soaps - steady"
+        )
+        assert normalize_soap_suffixes("barrister and mann - roam") == "barrister and mann - roam"
+
+    def test_product_type_suffixes(self):
+        """Test removal of product type suffixes."""
+        # - soap suffix
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - soap")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady"
+        )
+
+        # - puck suffix
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - puck")
+            == "summer break soaps - steady"
+        )
+
+        # - croap suffix
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - croap")
+            == "summer break soaps - steady"
+        )
+
+        # - shaving soap suffix
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - shaving soap")
+            == "summer break soaps - steady"
+        )
+
+        # standalone soap
+        assert (
+            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady"
+        )
+
+    def test_container_type_suffixes(self):
+        """Test removal of container type suffixes."""
+        # - stick suffix
+        assert normalize_soap_suffixes("arko - shave stick") == "arko"
+        assert normalize_soap_suffixes("la toja stick") == "la toja"
+
+        # - shave stick suffix
+        assert normalize_soap_suffixes("la toja shave stick") == "la toja"
+
+        # - tube suffix
+        assert normalize_soap_suffixes("proraso green tube") == "proraso green"
+
+        # - hard suffix
+        assert normalize_soap_suffixes("tabac - hard") == "tabac"
+
+    def test_preserves_version_indicators(self):
+        """Test that version indicators are preserved (not normalized)."""
+        # These should NOT be normalized as they distinguish different products
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam 2") == "barrister and mann - roam 2"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (v2)")
+            == "barrister and mann - roam (v2)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (2024a)")
+            == "barrister and mann - roam (2024a)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (og)")
+            == "barrister and mann - roam (og)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (original)")
+            == "barrister and mann - roam (original)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (1)")
+            == "barrister and mann - roam (1)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (one)")
+            == "barrister and mann - roam (one)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam (i)")
+            == "barrister and mann - roam (i)"
+        )
+        assert (
+            normalize_soap_suffixes("barrister and mann - roam ii")
+            == "barrister and mann - roam ii"
+        )
+
+    def test_case_insensitive(self):
+        """Test that normalization is case insensitive."""
+        assert (
+            normalize_soap_suffixes("SUMMER BREAK SOAPS - STEADY - SOAP")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("Summer Break Soaps - Steady - Soap")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - PUCK")
+            == "summer break soaps - steady"
+        )
+
+    def test_size_indicators(self):
+        """Test removal of size indicators in parentheses."""
+        # oz indicators
+        assert (
+            normalize_soap_suffixes("catie's bubbles - le marche du rasage (2oz)")
+            == "catie's bubbles - le marche du rasage"
+        )
+        assert (
+            normalize_soap_suffixes(
+                "catie's bubbles - le marche du rasage (big ass og 8oz pour - french style)"
+            )
+            == "catie's bubbles - le marche du rasage"
+        )
+
+    def test_base_formula_indicators(self):
+        """Test removal of base/formula indicators in parentheses."""
+        # premium base
+        assert (
+            normalize_soap_suffixes("catie's bubbles - blugère (premium base)")
+            == "catie's bubbles - blugère"
+        )
+
+        # luxury base
+        assert (
+            normalize_soap_suffixes("catie's bubbles - maggard meet exclusive (luxury base)")
+            == "catie's bubbles - maggard meet exclusive"
+        )
+
+        # omnibus base
+        assert (
+            normalize_soap_suffixes("barrister and mann - adagio - omnibus")
+            == "barrister and mann - adagio"
+        )
+
+        # milksteak
+        assert (
+            normalize_soap_suffixes("declaration grooming - puzzle (milksteak)")
+            == "declaration grooming - puzzle"
+        )
+
+        # tusk
+        assert (
+            normalize_soap_suffixes("house of mammoth - kryptonite (tusk)")
+            == "house of mammoth - kryptonite"
+        )
+
+        # professional
+        assert (
+            normalize_soap_suffixes("cella - buongiorno al sandalo - (professional)")
+            == "cella - buongiorno al sandalo"
+        )
+
+        # tallow base
+        assert (
+            normalize_soap_suffixes("mäurer & wirtz - tabac (tallow base)")
+            == "mäurer & wirtz - tabac"
+        )
+
+        # tallow formulation
+        assert (
+            normalize_soap_suffixes("mauer and wirtz - tabac (tallow formulation)")
+            == "mauer and wirtz - tabac"
+        )
+
+        # vegan
+        assert (
+            normalize_soap_suffixes("southern witchcrafts - druantia - (vegan)")
+            == "southern witchcrafts - druantia"
+        )
+
+    def test_whitespace_cleanup(self):
+        """Test cleanup of extra whitespace and dashes."""
+        # Remove trailing dash
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady -")
+            == "summer break soaps - steady"
+        )
+
+        # Normalize whitespace
+        assert (
+            normalize_soap_suffixes("summer  break   soaps   -   steady")
+            == "summer break soaps - steady"
+        )
+
+        # Strip leading/trailing whitespace
+        assert (
+            normalize_soap_suffixes("  summer break soaps - steady  ")
+            == "summer break soaps - steady"
+        )
+
+    def test_multiple_suffixes(self):
+        """Test handling of multiple suffixes (should remove all)."""
+        # Multiple product type suffixes
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - soap - puck")
+            == "summer break soaps - steady"
+        )
+
+        # Product type + container type
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - soap - stick")
+            == "summer break soaps - steady"
+        )
+
+        # Product type + size
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - soap (2oz)")
+            == "summer break soaps - steady"
+        )
+
+    def test_real_world_examples(self):
+        """Test with real examples from soap.yaml."""
+        # Summer Break Soaps examples
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - soap (sample -- thanks!!)")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - puck")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - croap")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - shaving soap")
+            == "summer break soaps - steady"
+        )
+
+        # Cella examples
+        assert normalize_soap_suffixes("cella - crema da barba") == "cella"
+        assert (
+            normalize_soap_suffixes("cella - milano crema da barba - (est. 1899)")
+            == "cella - milano"
+        )
+        assert (
+            normalize_soap_suffixes("cella - buongiorno al sandalo - (professional)")
+            == "cella - buongiorno al sandalo"
+        )
+
+        # Tabac examples
+        assert (
+            normalize_soap_suffixes("mäurer & wirtz - tabac original (tallow)")
+            == "mäurer & wirtz - tabac original"
+        )
+        assert normalize_soap_suffixes("tabac - shave stick") == "tabac"
+        assert normalize_soap_suffixes("tabac - hard") == "tabac"
+
+
 class TestExtractSoapSampleViaNormalization:
-    """Test the main soap sample extraction function."""
+    """Test soap sample extraction functionality."""
 
-    def test_basic_sample_detection(self):
-        """Test basic sample detection with parentheses."""
-        original = "B&M Seville (sample)"
-        normalized = "B&M Seville"
+    def test_empty_input(self):
+        """Test handling of empty input."""
+        result = extract_soap_sample_via_normalization("", "")
+        assert result == (None, None, None, None)
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+        result = extract_soap_sample_via_normalization("text", "")
+        assert result == (None, None, None, None)
 
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder == "(sample)"
+        result = extract_soap_sample_via_normalization("", "text")
+        assert result == (None, None, None, None)
 
-    def test_numbered_sample_detection(self):
-        """Test numbered sample detection."""
-        original = "Stirling Bay Rum (sample #23)"
-        normalized = "Stirling Bay Rum"
+    def test_no_sample_indicators(self):
+        """Test text with no sample indicators."""
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady", "summer break soaps - steady"
+        )
+        assert result == (None, None, None, "")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+    def test_basic_sample_patterns(self):
+        """Test basic sample pattern extraction."""
+        # (sample)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(sample)")
 
-        assert sample_type == "sample"
-        assert sample_number == 23
-        assert total_samples is None
-        assert remainder == "(sample #23)"
+        # (tester)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (tester)", "summer break soaps - steady"
+        )
+        assert result == ("tester", None, None, "(tester)")
 
-    def test_range_sample_detection(self):
-        """Test range sample detection (sample X of Y)."""
-        original = "Declaration Grooming (sample 5 of 10)"
-        normalized = "Declaration Grooming"
+        # (samp) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (samp)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(samp)")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+    def test_numbered_sample_patterns(self):
+        """Test numbered sample pattern extraction."""
+        # (sample #23)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample #23)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 23, None, "(sample #23)")
 
-        assert sample_type == "sample"
-        assert sample_number == 5
-        assert total_samples == 10
-        assert remainder == "(sample 5 of 10)"
+        # (sample 5 of 10)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample 5 of 10)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 5, 10, "(sample 5 of 10)")
 
-    def test_fraction_sample_detection(self):
-        """Test fraction sample detection (sample X/Y)."""
-        original = "Zingari Man (sample 3/15)"
-        normalized = "Zingari Man"
+        # (sample 3/15)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample 3/15)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 3, 15, "(sample 3/15)")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+    def test_trailing_sample_patterns(self):
+        """Test trailing sample pattern extraction."""
+        # - sample at end
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady - sample", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "- sample")
 
-        assert sample_type == "sample"
-        assert sample_number == 3
-        assert total_samples == 15
-        assert remainder == "(sample 3/15)"
+        # - tester at end
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady - tester", "summer break soaps - steady"
+        )
+        assert result == ("tester", None, None, "- tester")
 
-    def test_trailing_sample_detection(self):
-        """Test trailing sample detection."""
-        original = "H&M - Seville - sample"
-        normalized = "H&M - Seville"
+    def test_loose_sample_patterns(self):
+        """Test loose sample pattern extraction with whitespace variations."""
+        # ( sample ) with spaces
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady ( sample )", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "( sample )")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+        # (tester) with spaces
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady ( tester )", "summer break soaps - steady"
+        )
+        assert result == ("tester", None, None, "( tester )")
 
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder == "- sample"
+    def test_gratitude_sample_patterns(self):
+        """Test sample patterns with gratitude expressions."""
+        # (sample -- thanks!!)
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample -- thanks!!)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(sample -- thanks!!)")
 
-    def test_tester_detection(self):
-        """Test tester detection."""
-        original = "Zingari Man (tester)"
-        normalized = "Zingari Man"
+    def test_case_insensitive(self):
+        """Test that sample extraction is case insensitive."""
+        # SAMPLE
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (SAMPLE)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(SAMPLE)")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+        # Sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (Sample)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(Sample)")
 
-        assert sample_type == "tester"
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder == "(tester)"
+    def test_real_world_examples(self):
+        """Test with real examples from soap.yaml."""
+        # Summer Break Soaps examples
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady - soap (sample -- thanks!!)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "- soap (sample -- thanks!!)")
 
-    def test_samp_abbreviation(self):
-        """Test samp abbreviation detection."""
-        original = "B&M Seville (samp)"
-        normalized = "B&M Seville"
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (sample)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(sample)")
 
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady - sample", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "- sample")
 
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder == "(samp)"
-
-    def test_no_sample_detected(self):
-        """Test when no sample is detected."""
-        original = "B&M Seville"
-        normalized = "B&M Seville"
-
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
-
-        assert sample_type is None
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder == ""
-
-    def test_normalized_not_found_in_original(self):
+    def test_normalized_text_not_found(self):
         """Test when normalized text is not found in original."""
-        original = "B&M Seville (sample)"
-        normalized = "Different Soap"
-
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
-
-        assert sample_type is None
-        assert sample_number is None
-        assert total_samples is None
-        assert remainder is None
-
-    def test_empty_inputs(self):
-        """Test with empty inputs."""
-        result = extract_soap_sample_via_normalization("", "")
+        result = extract_soap_sample_via_normalization(
+            "completely different text", "summer break soaps - steady"
+        )
         assert result == (None, None, None, None)
-
-        # Test with None inputs - these should be handled gracefully
-        result = extract_soap_sample_via_normalization("", "")
-        assert result == (None, None, None, None)
-
-    def test_case_insensitive_matching(self):
-        """Test case insensitive matching."""
-        original = "B&M Seville (SAMPLE)"
-        normalized = "B&M Seville"
-
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
-
-        assert sample_type == "sample"
-        assert remainder == "(SAMPLE)"
-
-    def test_whitespace_variations(self):
-        """Test whitespace variations in sample patterns."""
-        original = "B&M Seville ( sample )"
-        normalized = "B&M Seville"
-
-        result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, remainder = result
-
-        assert sample_type == "sample"
-        assert remainder == "( sample )"
-
-
-class TestExtractSamplePatterns:
-    """Test the internal sample pattern extraction function."""
-
-    def test_basic_sample_pattern(self):
-        """Test basic sample pattern detection."""
-        remainder = "(sample)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_numbered_sample_pattern(self):
-        """Test numbered sample pattern detection."""
-        remainder = "(sample #23)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number == 23
-        assert total_samples is None
-
-    def test_range_sample_pattern(self):
-        """Test range sample pattern detection."""
-        remainder = "(sample 5 of 10)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number == 5
-        assert total_samples == 10
-
-    def test_fraction_sample_pattern(self):
-        """Test fraction sample pattern detection."""
-        remainder = "(sample 3/15)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number == 3
-        assert total_samples == 15
-
-    def test_trailing_sample_pattern(self):
-        """Test trailing sample pattern detection."""
-        remainder = "Brand - Scent - sample"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_tester_pattern(self):
-        """Test tester pattern detection."""
-        remainder = "(tester)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "tester"
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_samp_abbreviation_pattern(self):
-        """Test samp abbreviation pattern detection."""
-        remainder = "(samp)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_loose_whitespace_pattern(self):
-        """Test loose whitespace pattern detection."""
-        remainder = "( sample )"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_no_pattern_found(self):
-        """Test when no pattern is found."""
-        remainder = "some other text"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type is None
-        assert sample_number is None
-        assert total_samples is None
-
-    def test_empty_remainder(self):
-        """Test with empty remainder."""
-        result = _extract_sample_patterns("")
-        assert result == (None, None, None)
-
-    def test_case_insensitive_patterns(self):
-        """Test case insensitive pattern matching."""
-        remainder = "(SAMPLE)"
-        result = _extract_sample_patterns(remainder)
-
-        sample_type, sample_number, total_samples = result
-        assert sample_type == "sample"
