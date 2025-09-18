@@ -113,14 +113,14 @@ class TestNormalizeSoapSuffixes:
         )
 
     def test_case_insensitive(self):
-        """Test that normalization is case insensitive."""
+        """Test that normalization is case insensitive but preserves original case."""
         assert (
             normalize_soap_suffixes("SUMMER BREAK SOAPS - STEADY - SOAP")
-            == "summer break soaps - steady"
+            == "SUMMER BREAK SOAPS - STEADY"
         )
         assert (
             normalize_soap_suffixes("Summer Break Soaps - Steady - Soap")
-            == "summer break soaps - steady"
+            == "Summer Break Soaps - Steady"
         )
         assert (
             normalize_soap_suffixes("summer break soaps - steady - PUCK")
