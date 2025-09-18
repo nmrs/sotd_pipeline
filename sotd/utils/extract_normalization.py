@@ -351,9 +351,11 @@ def normalize_for_matching(
     if field == "razor":
         normalized = strip_handle_indicators(normalized)
 
-    # For soap strings, also strip soap-related patterns
+    # For soap strings, use comprehensive soap suffix normalization
     if field == "soap":
-        normalized = strip_soap_patterns(normalized)
+        from .soap_extraction import normalize_soap_suffixes
+
+        normalized = normalize_soap_suffixes(normalized)
         # Remove empty parentheses, brackets, and braces for soap fields
         normalized = re.sub(r"\(\s*\)", "", normalized)  # Empty parentheses
         normalized = re.sub(r"\[\s*\]", "", normalized)  # Empty brackets
