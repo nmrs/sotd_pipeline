@@ -111,7 +111,7 @@ export const getCommentDetail = async (
 ): Promise<CommentDetail> => {
   try {
     const monthsParam = months.join(',');
-    const response = await api.get(`/analyze/comment/${commentId}?months=${monthsParam}`);
+    const response = await api.get(`/analysis/comment/${commentId}?months=${monthsParam}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch comment ${commentId}:`, error);
@@ -152,7 +152,7 @@ export const analyzeUnmatched = async (
   request: UnmatchedAnalysisRequest
 ): Promise<UnmatchedAnalysisResult> => {
   try {
-    const response = await api.post('/analyze/unmatched', request);
+    const response = await api.post('/analysis/unmatched', request);
     return response.data;
   } catch (error) {
     console.error('Failed to analyze unmatched items:', error);
@@ -244,7 +244,7 @@ export const analyzeMismatch = async (
   request: MismatchAnalysisRequest
 ): Promise<MismatchAnalysisResult> => {
   try {
-    const response = await api.post('/analyze/mismatch', request);
+    const response = await api.post('/analysis/mismatch', request);
     return response.data;
   } catch (error) {
     console.error('Failed to analyze mismatches:', error);
@@ -319,7 +319,7 @@ export const getSoapGroupByMatched = async (
   request: GroupByMatchedRequest
 ): Promise<GroupByMatchedResult> => {
   try {
-    const response = await api.get('/soap-analyzer/group-by-matched', {
+    const response = await api.get('/soaps/group-by-matched', {
       params: request,
     });
     return response.data;
@@ -346,7 +346,7 @@ export interface MatchPhaseResult {
 
 export const runMatchPhase = async (request: MatchPhaseRequest): Promise<MatchPhaseResult> => {
   try {
-    const response = await api.post('/analyze/match-phase', request);
+    const response = await api.post('/analysis/match-phase', request);
     return response.data;
   } catch (error) {
     console.error('Failed to run match phase:', error);
@@ -396,7 +396,7 @@ export const loadBrushSplits = async (
   unmatchedOnly: boolean = true
 ): Promise<LoadBrushSplitsResponse> => {
   try {
-    const response = await api.get('/brush-splits/load', {
+    const response = await api.get('/brushes/splits/load', {
       params: {
         months: months.join(','),
         unmatched_only: unmatchedOnly,
@@ -411,7 +411,7 @@ export const loadBrushSplits = async (
 
 export const loadYamlBrushSplits = async (): Promise<LoadBrushSplitsResponse> => {
   try {
-    const response = await api.get('/brush-splits/yaml');
+    const response = await api.get('/brushes/splits/yaml');
     return response.data;
   } catch (error) {
     console.error('Failed to load YAML brush splits:', error);
@@ -423,7 +423,7 @@ export const saveBrushSplit = async (
   brushSplit: SaveBrushSplitRequest
 ): Promise<SaveBrushSplitResponse> => {
   try {
-    const response = await api.post('/brush-splits/save-split', {
+    const response = await api.post('/brushes/splits/save-split', {
       ...brushSplit,
       validated_at: brushSplit.validated_at || new Date().toISOString(),
     });
@@ -457,7 +457,7 @@ export const saveBrushSplits = async (
         })) || [],
     }));
 
-    const response = await api.post('/brush-splits/save', {
+    const response = await api.post('/brushes/splits/save', {
       brush_splits: formattedSplits,
     });
     return response.data;
@@ -591,7 +591,7 @@ export interface CorrectMatchesResponse {
 
 export const getCorrectMatches = async (field: string): Promise<CorrectMatchesResponse> => {
   try {
-    const response = await api.get(`/analyze/correct-matches/${field}`);
+    const response = await api.get(`/analysis/correct-matches/${field}`);
     return response.data;
   } catch (error) {
     console.error('Failed to get correct matches:', error);
@@ -605,7 +605,7 @@ export const markMatchesAsCorrect = async (
   try {
     console.log('🔍 DEBUG: markMatchesAsCorrect called with:', request);
 
-    const response = await api.post('/analyze/mark-correct', request);
+    const response = await api.post('/analysis/mark-correct', request);
 
     console.log('🔍 DEBUG: markMatchesAsCorrect response:', response.data);
 
@@ -620,7 +620,7 @@ export const clearCorrectMatchesByField = async (
   field: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.delete(`/analyze/correct-matches/${field}`);
+    const response = await api.delete(`/analysis/correct-matches/${field}`);
     return response.data;
   } catch (error) {
     console.error('Failed to clear correct matches:', error);
@@ -648,7 +648,7 @@ export const removeMatchesFromCorrect = async (
   request: RemoveCorrectRequest
 ): Promise<RemoveCorrectResponse> => {
   try {
-    const response = await api.post('/analyze/remove-correct', request);
+    const response = await api.post('/analysis/remove-correct', request);
     return response.data;
   } catch (error) {
     console.error('Failed to remove matches from correct matches:', error);
@@ -658,7 +658,7 @@ export const removeMatchesFromCorrect = async (
 
 export const clearAllCorrectMatches = async (): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.delete('/analyze/correct-matches');
+    const response = await api.delete('/analysis/correct-matches');
     return response.data;
   } catch (error) {
     console.error('Failed to clear all correct matches:', error);
@@ -668,7 +668,7 @@ export const clearAllCorrectMatches = async (): Promise<{ success: boolean; mess
 
 export const clearValidatorCache = async (): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.post('/analyze/clear-validator-cache');
+    const response = await api.post('/analysis/clear-validator-cache');
     return response.data;
   } catch (error) {
     console.error('Failed to clear validator cache:', error);
@@ -710,7 +710,7 @@ export const validateCatalogAgainstCorrectMatches = async (
   request: CatalogValidationRequest
 ): Promise<CatalogValidationResult> => {
   try {
-    const response = await api.post('/analyze/validate-catalog', request);
+    const response = await api.post('/analysis/validate-catalog', request);
     return response.data;
   } catch (error) {
     console.error('Failed to validate catalog against correct matches:', error);
@@ -732,7 +732,7 @@ export const removeCatalogValidationEntries = async (request: {
   errors: string[];
 }> => {
   try {
-    const response = await api.post('/analyze/remove-catalog-entries', {
+    const response = await api.post('/analysis/remove-catalog-entries', {
       field: request.field,
       matches: request.entries,
     });
@@ -850,7 +850,7 @@ export const getBrushValidationData = async (
     if (options.showMultipleStrategy !== undefined)
       params.append('show_multiple_strategy', options.showMultipleStrategy.toString());
 
-    const response = await api.get(`/brush-validation/data/${month}/${system}?${params}`);
+    const response = await api.get(`/brushes/validation/data/${month}/${system}?${params}`);
     return response.data;
   } catch (error) {
     console.error('Error loading brush validation data:', error);
@@ -862,7 +862,7 @@ export const getBrushValidationStatistics = async (
   month: string
 ): Promise<BrushValidationStatistics> => {
   try {
-    const response = await api.get(`/brush-validation/statistics/${month}`);
+    const response = await api.get(`/brushes/validation/statistics/${month}`);
     return response.data;
   } catch (error) {
     console.error('Error loading brush validation statistics:', error);
@@ -874,7 +874,7 @@ export const getStrategyDistributionStatistics = async (
   month: string
 ): Promise<StrategyDistributionStatistics> => {
   try {
-    const response = await api.get(`/brush-validation/statistics/${month}/strategy-distribution`);
+    const response = await api.get(`/brushes/validation/statistics/${month}/strategy-distribution`);
     return response.data;
   } catch (error) {
     console.error('Error loading strategy distribution statistics:', error);
@@ -886,7 +886,7 @@ export const recordBrushValidationAction = async (
   actionData: BrushValidationActionRequest
 ): Promise<BrushValidationActionResponse> => {
   try {
-    const response = await api.post('/brush-validation/action', actionData);
+    const response = await api.post('/brushes/validation/action', actionData);
     return response.data;
   } catch (error) {
     console.error('Error recording brush validation action:', error);
@@ -898,7 +898,7 @@ export const undoLastValidationAction = async (
   month: string
 ): Promise<BrushValidationActionResponse> => {
   try {
-    const response = await api.post(`/brush-validation/undo?month=${month}`);
+    const response = await api.post(`/brushes/validation/undo?month=${month}`);
     return response.data;
   } catch (error) {
     console.error('Error undoing last validation action:', error);
