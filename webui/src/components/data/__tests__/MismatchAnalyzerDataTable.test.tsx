@@ -532,8 +532,8 @@ describe('MismatchAnalyzerDataTable', () => {
 
       // Should show "Complete" for the first item
       expect(screen.getByText('Complete')).toBeInTheDocument();
-      // Should show "ERROR" for the second item (same brands but no top-level brand/model)
-      expect(screen.getByText('ERROR')).toBeInTheDocument();
+      // Should show "Composite (Same Brand)" for the second item (same brands but no top-level brand/model)
+      expect(screen.getByText('Composite (Same Brand)')).toBeInTheDocument();
     });
 
     test('does not show enrich adjustment icon when there are no changes', async () => {

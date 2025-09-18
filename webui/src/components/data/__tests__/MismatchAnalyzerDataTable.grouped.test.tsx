@@ -135,15 +135,15 @@ describe('MismatchAnalyzerDataTable with Grouped Data', () => {
             />
         );
 
-        // Should show top patterns in the patterns column (cell-0-9 and cell-1-9)
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('Barrister and Mann - Seville');
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('Barrister and Mann - Seville Soap');
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('B&M Seville');
+        // Should show top patterns in the patterns column (cell-0-8 and cell-1-8)
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('Barrister and Mann - Seville');
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('Barrister and Mann - Seville Soap');
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('B&M Seville');
 
         // Should show pattern counts
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('(5)');
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('(3)');
-        expect(screen.getByTestId('cell-0-9')).toHaveTextContent('(2)');
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('(5)');
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('(3)');
+        expect(screen.getByTestId('cell-0-8')).toHaveTextContent('(2)');
     });
 
     it('shows expandable patterns for items with remaining patterns', () => {
