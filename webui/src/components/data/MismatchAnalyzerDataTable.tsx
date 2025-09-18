@@ -595,8 +595,15 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
       },
       {
-        accessorKey: 'original',
-        header: 'Original',
+        accessorFn: (row: AnalyzerDataItem) => {
+          // For grouped data, use matched_string for sorting
+          if (isGroupedDataItem(row)) {
+            return row.matched_string;
+          }
+          // For regular data, use original
+          return row.original;
+        },
+        header: 'Matched',
         cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           // For grouped data, show matched_string instead of original
@@ -628,7 +635,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           );
         },
       },
-      {
+      // Only show matched column for non-grouped data
+      ...(data.some(item => !isGroupedDataItem(item)) ? [{
         accessorKey: 'matched',
         header: 'Matched',
         sortingFn: (rowA, rowB) => {
@@ -636,8 +644,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const b = formatMatchedData(rowB.original.matched, field);
           return a.localeCompare(b);
         },
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
+
+          // Only show for non-grouped data
+          if (isGroupedDataItem(item)) {
+            return null;
+          }
+
           const formattedData = formatMatchedData(item.matched, field);
 
           // Check if there are enrich-phase changes using the enriched data from the API response
@@ -694,7 +708,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           return content;
         },
-      },
+      }] : []),
     ];
 
     // Add format column for blade field to show which format section the entry will be placed in
@@ -716,7 +730,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             </span>
           </div>
         ),
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const matched = item.matched as Record<string, unknown>;
           const format = matched?.format || 'DE';
@@ -781,7 +795,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           })()}
         />
       ),
-      cell: ({ row }: { row: Row<MismatchItem> }) => {
+      cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
         const item = row.original;
         return (
           <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
@@ -819,7 +833,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             })()}
           />
         ),
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const brushType = getBrushType(item.matched);
 
@@ -864,7 +878,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             })()}
           />
         ),
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const strategy = getStrategyField(item);
 
@@ -910,7 +924,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return row.pattern || '';
         },
         header: 'Brush Pattern',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const patternText = item.pattern || '';
           return (
@@ -932,7 +946,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return formatBrushComponent(row.matched, 'handle');
           },
           header: 'Handle',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
+          cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
             const item = row.original;
             const handleText = formatBrushComponent(item.matched, 'handle');
             return (
@@ -948,7 +962,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return getBrushComponentPattern(row.matched, 'handle');
           },
           header: 'Handle Pattern',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
+          cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
             const item = row.original;
             const patternText = getBrushComponentPattern(item.matched, 'handle');
             return (
@@ -964,7 +978,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return formatBrushComponent(row.matched, 'knot');
           },
           header: 'Knot',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
+          cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
             const item = row.original;
             const knotText = formatBrushComponent(item.matched, 'knot');
             return (
@@ -980,7 +994,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return getBrushComponentPattern(row.matched, 'knot');
           },
           header: 'Knot Pattern',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
+          cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
             const item = row.original;
             const patternText = getBrushComponentPattern(item.matched, 'knot');
             return (
@@ -996,7 +1010,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       baseColumns.push({
         accessorKey: 'pattern',
         header: 'Pattern',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           return <div className='text-sm text-gray-500 font-mono'>{item.pattern}</div>;
         },
@@ -1008,7 +1022,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       {
         accessorKey: 'confidence',
         header: 'Confidence',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           return (
             <span className='text-sm text-gray-900'>
@@ -1020,7 +1034,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       {
         accessorKey: 'comment_ids',
         header: 'Comments',
-        cell: ({ row }: { row: Row<MismatchItem> }) => {
+        cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const commentIds = item.comment_ids || [];
 
@@ -1038,7 +1052,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     // Add patterns column for grouped data
     baseColumns.push({
       id: 'patterns',
-      header: 'Original Patterns',
+      header: 'Original',
       cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
         const item = row.original;
         if (!isGroupedDataItem(item)) {
