@@ -264,6 +264,9 @@ Ariana & Evans:
     The Graveyand:
       patterns:
         - (ariana|a&e|club).*grave
+    The Novelist:
+      patterns:
+        - (ariana|a&e|club).*novelist
     The Undersea:
       patterns:
         - undersea
@@ -995,6 +998,9 @@ Chiseled Face:
     Santa Monica Bay Rum:
       patterns:
         - santa monica bay rum
+    Summer Storm:
+      patterns:
+        - (cf|chisel).*summer storm
     Trade Winds:
       patterns:
         - chisel.*trade winds
@@ -1605,6 +1611,13 @@ Goli Soda:
 Green Mountain:
   patterns:
     - green mountain
+Grey Lab:
+  patterns:
+    - grey lab
+  scents:
+    Kyoto:
+      patterns:
+        - gr[ae]y lab.*kyoto
 Grooming Dept:
   patterns:
     - 'grooming.*dep\w*t\b'
@@ -1778,6 +1791,9 @@ House of Mammoth:
     - ^mammoth
     - mammoth soaps
   scents:
+    Alive:
+      patterns:
+        - (hom|mamm).*alive
     Almond Leather:
       patterns:
         - almond leather
@@ -1790,6 +1806,9 @@ House of Mammoth:
     Beloved:
       patterns:
         - (hom|mamm).*beloved
+    Dammusi:
+      patterns:
+        - dammusi
     DinoS'mores:
       patterns:
         - dino.*s'mores
@@ -2500,6 +2519,13 @@ Old Spice:
     Classic:
       patterns:
         - old spi?ce
+Oliver Blossom Soap Co.:
+  patterns:
+    - "oliver blossom(?: soap(?: co.?)?)?"
+  scents:
+    Banana Cabana:
+      patterns:
+        - olive.*banana.*cabana
 Omega:
   patterns:
     - '^\W*omega'
@@ -3002,6 +3028,9 @@ Stirling Soap Co.:
     Baker Street:
       patterns:
         - stirling.*baker street
+    Barbershop:
+      patterns:
+        - stirling.*barbershop
     Bash:
       patterns:
         - st(i|e)rling.*bash
