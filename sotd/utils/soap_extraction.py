@@ -231,6 +231,10 @@ def normalize_soap_suffixes(text: str) -> str:
         # Standalone base/formula indicators (without parentheses)
         r"\s*-\s*omnibus\s*$",  # "- omnibus" at end
         r"\s+omnibus\s*$",  # "omnibus" at end (without dash)
+        
+        # Additional product type suffixes
+        r"\s*-\s*shaving\s*[.!?]*\s*$",  # "- shaving" at end (with optional punctuation)
+        r"\s+shaving\s*[.!?]*\s*$",  # "shaving" at end (without dash, with optional punctuation)
     ]
 
     # Apply normalization iteratively until no more changes occur
