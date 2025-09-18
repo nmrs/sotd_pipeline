@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-"""Soap sample enricher for the SOTD pipeline."""
-
 from typing import Any, Dict
 
 from sotd.utils.soap_extraction import extract_soap_sample_via_normalization
@@ -12,15 +9,12 @@ class SoapSampleEnricher(BaseEnricher):
     """Enricher for extracting soap sample information from user comments.
 
     Extracts sample information from patterns like:
-    - "B&M Seville (sample)" -> sample_type: "sample"
-    - "Stirling Bay Rum (sample #23)" -> sample_type: "sample", sample_number: 23
-    - "Declaration Grooming (sample 5 of 10)" -> sample_type: "sample",
-      sample_number: 5, total_samples: 10
-    - "H&M - Seville - sample" -> sample_type: "sample"
-    - "Zingari Man (tester)" -> sample_type: "tester"
+    - "Summer Break Soaps - Steady (sample)" -> sample_type: "sample"
+    - "Summer Break Soaps - Steady - soap (sample -- thanks!!)" -> sample_type: "sample"
+    - "Summer Break Soaps - Steady (sample 3 of 10)" -> sample_type: "sample", sample_number: 3, total_samples: 10
 
-    Uses the normalization-difference approach to avoid confusion by leveraging the
-    already-done normalization work.
+    Uses the normalization-difference approach to avoid confusion between product names
+    and sample indicators by leveraging the already-done normalization work.
     """
 
     @property
@@ -42,7 +36,10 @@ class SoapSampleEnricher(BaseEnricher):
 
         # Extract sample information using normalization-difference method
         result = extract_soap_sample_via_normalization(original, normalized)
-        sample_type, sample_number, total_samples, extraction_remainder = result
+        sample_type = result[0] if result else None
+        sample_number = result[1] if result else None
+        total_samples = result[2] if result else None
+        extraction_remainder = result[3] if result else None
 
         # Create enriched data
         enriched_data = {
