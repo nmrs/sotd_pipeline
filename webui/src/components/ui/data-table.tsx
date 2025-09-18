@@ -103,6 +103,20 @@ export function DataTable<TData, TValue>({
     const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
     return new Set(allColumnIds);
   });
+
+  // Update selected search columns when columns change (e.g., when switching between regular and grouped data)
+  useEffect(() => {
+    const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
+    const newColumnSet = new Set(allColumnIds);
+
+    // Only update if the columns have actually changed
+    const currentColumns = Array.from(selectedSearchColumns).sort();
+    const newColumns = Array.from(newColumnSet).sort();
+
+    if (JSON.stringify(currentColumns) !== JSON.stringify(newColumns)) {
+      setSelectedSearchColumns(newColumnSet);
+    }
+  }, [columns, selectedSearchColumns]);
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -163,17 +177,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-          // When using external selection, we need to call onSelectionChange directly
-          // since the table's internal state won't be updated
-          const newSelection =
-            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-          if (onSelectionChange) {
-            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-            onSelectionChange(selectedRows);
-          }
-          // Also update the internal state so the UI reflects the change immediately
-          setRowSelection(newSelection);
+        // When using external selection, we need to call onSelectionChange directly
+        // since the table's internal state won't be updated
+        const newSelection =
+          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+        if (onSelectionChange) {
+          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+          onSelectionChange(selectedRows);
         }
+        // Also update the internal state so the UI reflects the change immediately
+        setRowSelection(newSelection);
+      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -201,7 +215,49 @@ export function DataTable<TData, TValue>({
       const searchTerm = filterValue.toLowerCase();
       const rowData = row.original as Record<string, unknown>;
 
-      // Only search in selected columns
+      // Check if this is grouped data (has is_grouped property)
+      const isGroupedData = 'is_grouped' in rowData && rowData.is_grouped === true;
+
+      // Handle grouped data with special search logic
+      if (isGroupedData) {
+        // For grouped data, search in specific properties regardless of column selection
+        if (rowData.matched_string && typeof rowData.matched_string === 'string' && rowData.matched_string.toLowerCase().includes(searchTerm)) {
+          return true;
+        }
+        if (rowData.total_count && typeof rowData.total_count === 'number' && rowData.total_count.toString().includes(searchTerm)) {
+          return true;
+        }
+        if (rowData.match_type && typeof rowData.match_type === 'string' && rowData.match_type.toLowerCase().includes(searchTerm)) {
+          return true;
+        }
+        // Search in top_patterns array
+        if (rowData.top_patterns && Array.isArray(rowData.top_patterns)) {
+          if (rowData.top_patterns.some((pattern: any) =>
+            pattern.original && String(pattern.original).toLowerCase().includes(searchTerm)
+          )) {
+            return true;
+          }
+        }
+        // Search in all_patterns array
+        if (rowData.all_patterns && Array.isArray(rowData.all_patterns)) {
+          if (rowData.all_patterns.some((pattern: any) =>
+            pattern.original && String(pattern.original).toLowerCase().includes(searchTerm)
+          )) {
+            return true;
+          }
+        }
+        // Search in match_type_breakdown object
+        if (rowData.match_type_breakdown && typeof rowData.match_type_breakdown === 'object') {
+          for (const [_nestedKey, nestedValue] of Object.entries(rowData.match_type_breakdown as Record<string, unknown>)) {
+            if (String(nestedValue).toLowerCase().includes(searchTerm)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      // Handle regular data with column selection
       for (const [key, value] of Object.entries(rowData)) {
         // Skip if this column is not selected for search
         if (!selectedSearchColumns.has(key)) continue;
@@ -574,9 +630,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -619,11 +674,10 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
-                      keyboardNavigationEnabled && activeRowIndex === index
-                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                        : ''
-                    }`}
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
+                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                      : ''
+                      }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell

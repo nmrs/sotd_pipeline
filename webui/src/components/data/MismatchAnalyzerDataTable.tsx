@@ -595,6 +595,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
       },
       {
+        id: 'matched_content',
         accessorFn: (row: AnalyzerDataItem) => {
           // For grouped data, use matched_string for sorting
           if (isGroupedDataItem(row)) {

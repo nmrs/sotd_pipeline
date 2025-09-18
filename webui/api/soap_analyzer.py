@@ -778,8 +778,10 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
     results = []
     for matched_string, patterns in matched_groups.items():
         # Extract brand and scent from matched_string (format: "Brand - Scent")
-        brand, scent = matched_string.split(' - ', 1) if ' - ' in matched_string else (matched_string, '')
-        
+        brand, scent = (
+            matched_string.split(" - ", 1) if " - " in matched_string else (matched_string, "")
+        )
+
         # Count total occurrences
         total_count = sum(pattern["count"] for pattern in patterns)
 

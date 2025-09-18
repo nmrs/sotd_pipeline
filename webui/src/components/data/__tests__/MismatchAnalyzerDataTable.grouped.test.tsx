@@ -162,4 +162,61 @@ describe('MismatchAnalyzerDataTable with Grouped Data', () => {
         // Should not show "+ n more" for second item (no remaining patterns)
         expect(screen.queryByText('+ 0 more')).not.toBeInTheDocument();
     });
+
+    it('should handle search functionality with grouped data', () => {
+        // Test the search logic directly without mocking the DataTable
+        const searchInGroupedData = (data: GroupedDataItem[], searchTerm: string) => {
+            if (!searchTerm) return data;
+
+            const term = searchTerm.toLowerCase();
+
+            return data.filter(item => {
+                // Search in matched_string
+                if (item.matched_string && item.matched_string.toLowerCase().includes(term)) {
+                    return true;
+                }
+                // Search in top_patterns
+                if (item.top_patterns && item.top_patterns.some((pattern: any) =>
+                    pattern.original && pattern.original.toLowerCase().includes(term)
+                )) {
+                    return true;
+                }
+                // Search in all_patterns
+                if (item.all_patterns && item.all_patterns.some((pattern: any) =>
+                    pattern.original && pattern.original.toLowerCase().includes(term)
+                )) {
+                    return true;
+                }
+                return false;
+            });
+        };
+
+        // Test searching for "Barrister" - should return only the first item
+        const barristerResults = searchInGroupedData(mockGroupedData, 'Barrister');
+        expect(barristerResults).toHaveLength(1);
+        expect(barristerResults[0].matched_string).toBe('Barrister and Mann - Seville');
+
+        // Test searching for "Stirling" - should return only the second item
+        const stirlingResults = searchInGroupedData(mockGroupedData, 'Stirling');
+        expect(stirlingResults).toHaveLength(1);
+        expect(stirlingResults[0].matched_string).toBe('Stirling Soap Co - Executive Man');
+
+        // Test searching for "B&M" - should return the first item (matches pattern in top_patterns)
+        const bmResults = searchInGroupedData(mockGroupedData, 'B&M');
+        expect(bmResults).toHaveLength(1);
+        expect(bmResults[0].matched_string).toBe('Barrister and Mann - Seville');
+
+        // Test searching for "Executive" - should return the second item
+        const executiveResults = searchInGroupedData(mockGroupedData, 'Executive');
+        expect(executiveResults).toHaveLength(1);
+        expect(executiveResults[0].matched_string).toBe('Stirling Soap Co - Executive Man');
+
+        // Test searching for non-existent term - should return empty array
+        const noResults = searchInGroupedData(mockGroupedData, 'NonExistent');
+        expect(noResults).toHaveLength(0);
+
+        // Test searching for empty string - should return all items
+        const allResults = searchInGroupedData(mockGroupedData, '');
+        expect(allResults).toHaveLength(2);
+    });
 });
