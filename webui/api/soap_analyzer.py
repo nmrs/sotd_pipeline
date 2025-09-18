@@ -805,13 +805,21 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         total_count = sum(pattern["count"] for pattern in patterns)
 
         # Count original patterns with match type information
+        # Use case-insensitive grouping for original patterns to avoid duplicates like "sample" vs "Sample"
         pattern_data = {}
         for pattern in patterns:
             original = pattern["original"]
-            if original not in pattern_data:
-                pattern_data[original] = {"count": 0, "match_types": Counter()}
-            pattern_data[original]["count"] += pattern["count"]
-            pattern_data[original]["match_types"][pattern["match_type"]] += pattern["count"]
+            # Create a normalized key for grouping (case-insensitive)
+            normalized_key = original.lower()
+
+            if normalized_key not in pattern_data:
+                pattern_data[normalized_key] = {
+                    "count": 0,
+                    "match_types": Counter(),
+                    "original_display": original,  # Store original case for display
+                }
+            pattern_data[normalized_key]["count"] += pattern["count"]
+            pattern_data[normalized_key]["match_types"][pattern["match_type"]] += pattern["count"]
 
         # Get top 3 most common original patterns
         top_patterns = sorted(pattern_data.items(), key=lambda x: x[1]["count"], reverse=True)[:3]
@@ -820,7 +828,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Format top patterns with match type
         top_patterns_formatted = [
             {
-                "original": pattern,
+                "original": data["original_display"],  # Use original case for display
                 "count": data["count"],
                 "match_type": (
                     data["match_types"].most_common(1)[0][0] if data["match_types"] else "unknown"
@@ -832,7 +840,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Get all patterns for "+ n more" functionality
         all_patterns = [
             {
-                "original": pattern,
+                "original": data["original_display"],  # Use original case for display
                 "count": data["count"],
                 "match_type": (
                     data["match_types"].most_common(1)[0][0] if data["match_types"] else "unknown"
