@@ -1053,7 +1053,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     // Add patterns column for grouped data
     baseColumns.push({
       id: 'patterns',
-      header: 'Original',
+      header: 'Normalized Patterns',
       cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
         const item = row.original;
         if (!isGroupedDataItem(item)) {

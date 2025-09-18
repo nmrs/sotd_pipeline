@@ -765,14 +765,14 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Create matched string key (case-insensitive for grouping)
         matched_key = f"{brand} - {scent}".lower()
 
-        # Store original pattern and match type
-        original = match.get("original", "").strip()
+        # Store normalized pattern and match type (for Group by Matched we want normalized patterns)
+        normalized = match.get("normalized", "").strip()
         match_type = match.get("match_type", "unknown")
 
-        if original:
+        if normalized:
             matched_groups[matched_key].append(
                 {
-                    "original": original,
+                    "original": normalized,  # Use normalized field for pattern display
                     "match_type": match_type,
                     "count": match.get("count", 1),
                     "brand": brand,  # Store original case brand
@@ -805,7 +805,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         total_count = sum(pattern["count"] for pattern in patterns)
 
         # Count original patterns with match type information
-        # Use case-insensitive grouping for original patterns to avoid duplicates like "sample" vs "Sample"
+        # Use case-insensitive grouping for original patterns to avoid duplicates like
+        # "sample" vs "Sample"
         pattern_data = {}
         for pattern in patterns:
             original = pattern["original"]

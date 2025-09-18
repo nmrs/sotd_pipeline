@@ -174,14 +174,25 @@ def normalize_soap_suffixes(text: str) -> str:
     # This prevents partial matches from interfering with complete matches
 
     # Remove sample indicators in parentheses (most specific first)
-    sample_patterns = [
+    # First remove sample patterns at the end
+    sample_patterns_end = [
         r"\s*\(sample[^)]*\)\s*$",  # (sample), (sample -- thanks!!), etc.
         r"\s*\(tester[^)]*\)\s*$",  # (tester), etc.
         r"\s*\(samp[^)]*\)\s*$",  # (samp), etc.
     ]
 
-    for pattern in sample_patterns:
+    for pattern in sample_patterns_end:
         text_lower = re.sub(pattern, "", text_lower)
+
+    # Then remove sample patterns anywhere in the string
+    sample_patterns_anywhere = [
+        r"\s*\(sample[^)]*\)\s*",  # (sample), (sample -- thanks!!), etc.
+        r"\s*\(tester[^)]*\)\s*",  # (tester), etc.
+        r"\s*\(samp[^)]*\)\s*",  # (samp), etc.
+    ]
+
+    for pattern in sample_patterns_anywhere:
+        text_lower = re.sub(pattern, " ", text_lower)
 
     # Remove size indicators in parentheses
     text_lower = re.sub(r"\s*\(\d+oz\)\s*$", "", text_lower)
@@ -205,6 +216,19 @@ def normalize_soap_suffixes(text: str) -> str:
     ]
 
     for pattern in base_patterns:
+        text_lower = re.sub(pattern, "", text_lower)
+
+    # Remove trailing sample indicators (without parentheses) - MUST be before product suffixes
+    trailing_sample_patterns = [
+        r"\s*-\s*sample\s*$",  # "- sample" at end
+        r"\s*-\s*tester\s*$",  # "- tester" at end
+        r"\s*-\s*samp\s*$",  # "- samp" at end
+        r"\s+sample\s*$",  # "sample" at end (without dash)
+        r"\s+tester\s*$",  # "tester" at end (without dash)
+        r"\s+samp\s*$",  # "samp" at end (without dash)
+    ]
+
+    for pattern in trailing_sample_patterns:
         text_lower = re.sub(pattern, "", text_lower)
 
     # Remove container type suffixes (longer patterns first)
@@ -251,19 +275,6 @@ def normalize_soap_suffixes(text: str) -> str:
     ]
 
     for pattern in standalone_base_patterns:
-        text_lower = re.sub(pattern, "", text_lower)
-
-    # Remove trailing sample indicators (without parentheses)
-    trailing_sample_patterns = [
-        r"\s*-\s*sample\s*$",  # "- sample" at end
-        r"\s*-\s*tester\s*$",  # "- tester" at end
-        r"\s*-\s*samp\s*$",  # "- samp" at end
-        r"\s+sample\s*$",  # "sample" at end (without dash)
-        r"\s+tester\s*$",  # "tester" at end (without dash)
-        r"\s+samp\s*$",  # "samp" at end (without dash)
-    ]
-
-    for pattern in trailing_sample_patterns:
         text_lower = re.sub(pattern, "", text_lower)
 
     # Clean up extra whitespace and dashes
