@@ -253,6 +253,7 @@ def normalize_soap_suffixes(text: str) -> str:
         r"\s+crema\s+da\s+barba\s*$",  # "crema da barba" at end (without dash)
         r"\s*-\s*soap\s*$",  # "- soap" at end
         r"\s*-\s*puck\s*$",  # "- puck" at end
+        r"\s+puck\s*$",  # "puck" at end (without dash)
         r"\s*-\s*croap\s*$",  # "- croap" at end
         r"\s+soap\s*$",  # "soap" at end (standalone)
     ]
