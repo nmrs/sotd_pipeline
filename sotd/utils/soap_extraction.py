@@ -206,24 +206,24 @@ def normalize_soap_suffixes(text: str) -> str:
         r"\s+samp\s*$",  # "samp" at end (without dash)
 
         # Container type suffixes
-        r"\s*-\s*shave\s+stick\s*$",  # "- shave stick" at end
-        r"\s+shave\s+stick\s*$",  # "shave stick" at end (without dash)
-        r"\s*-\s*stick\s*$",  # "- stick" at end
-        r"\s+stick\s*$",  # "stick" at end (without dash)
-        r"\s*-\s*tube\s*$",  # "- tube" at end
-        r"\s+tube\s*$",  # "tube" at end (without dash)
-        r"\s*-\s*hard\s*$",  # "- hard" at end
-        r"\s+hard\s*$",  # "hard" at end (without dash)
-
+        r"\s*-\s*shave\s+stick\s*[.!?]*\s*$",  # "- shave stick" at end (with optional punctuation)
+        r"\s+shave\s+stick\s*[.!?]*\s*$",  # "shave stick" at end (without dash, with optional punctuation)
+        r"\s*-\s*stick\s*[.!?]*\s*$",  # "- stick" at end (with optional punctuation)
+        r"\s+stick\s*[.!?]*\s*$",  # "stick" at end (without dash, with optional punctuation)
+        r"\s*-\s*tube\s*[.!?]*\s*$",  # "- tube" at end (with optional punctuation)
+        r"\s+tube\s*[.!?]*\s*$",  # "tube" at end (without dash, with optional punctuation)
+        r"\s*-\s*hard\s*[.!?]*\s*$",  # "- hard" at end (with optional punctuation)
+        r"\s+hard\s*[.!?]*\s*$",  # "hard" at end (without dash, with optional punctuation)
+        
         # Product type suffixes
-        r"\s*-\s*shaving\s+soap\s*$",  # "- shaving soap" at end
-        r"\s*-\s*crema\s+da\s+barba\s*$",  # "- crema da barba" at end
-        r"\s+crema\s+da\s+barba\s*$",  # "crema da barba" at end (without dash)
-        r"\s*-\s*soap\s*$",  # "- soap" at end
-        r"\s*-\s*puck\s*$",  # "- puck" at end
-        r"\s+puck\s*$",  # "puck" at end (without dash)
-        r"\s*-\s*croap\s*$",  # "- croap" at end
-        r"\s+soap\s*$",  # "soap" at end (standalone)
+        r"\s*-\s*shaving\s+soap\s*[.!?]*\s*$",  # "- shaving soap" at end (with optional punctuation)
+        r"\s*-\s*crema\s+da\s+barba\s*[.!?]*\s*$",  # "- crema da barba" at end (with optional punctuation)
+        r"\s+crema\s+da\s+barba\s*[.!?]*\s*$",  # "crema da barba" at end (without dash, with optional punctuation)
+        r"\s*-\s*soap\s*[.!?]*\s*$",  # "- soap" at end (with optional punctuation)
+        r"\s*-\s*puck\s*[.!?]*\s*$",  # "- puck" at end (with optional punctuation)
+        r"\s+puck\s*[.!?]*\s*$",  # "puck" at end (without dash, with optional punctuation)
+        r"\s*-\s*croap\s*[.!?]*\s*$",  # "- croap" at end (with optional punctuation)
+        r"\s+soap\s*[.!?]*\s*$",  # "soap" at end (standalone, with optional punctuation)
 
         # General product suffixes that can appear anywhere
         r"\s+crema\s+da\s+barba\s+",  # "crema da barba" anywhere (with spaces)
