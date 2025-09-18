@@ -45,7 +45,7 @@ def extract_soap_sample_via_normalization(
 
     # Extract the remainder text (what comes before and after the normalized text)
     before_normalized = original_stripped[:pos]
-    after_normalized = original_stripped[pos + len(normalized_stripped):]
+    after_normalized = original_stripped[pos + len(normalized_stripped) :]
 
     # Combine the remainder parts
     remainder = (before_normalized + after_normalized).strip()
@@ -178,14 +178,11 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s*\(sample[^)]*\)\s*", re.IGNORECASE),  # (sample), (sample -- thanks!!), etc.
         (r"\s*\(tester[^)]*\)\s*", re.IGNORECASE),  # (tester), etc.
         (r"\s*\(samp[^)]*\)\s*", re.IGNORECASE),  # (samp), etc.
-
         # Size indicators in parentheses
         (r"\s*\(\d+oz\)\s*", re.IGNORECASE),  # (2oz), (4oz), etc.
         (r"\s*\(big\s+ass\s+og\s+\d+oz[^)]*\)\s*", re.IGNORECASE),  # (big ass og 4oz), etc.
-
         # Establishment date indicators
         (r"\s*\(est\.\s*\d+[^)]*\)\s*", re.IGNORECASE),  # (est. 1899), etc.
-
         # Base/formula indicators in parentheses
         (r"\s*\(premium\s+base\)\s*", re.IGNORECASE),
         (r"\s*\(luxury\s+base\)\s*", re.IGNORECASE),
@@ -197,7 +194,6 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s*\(tallow\s+formulation\)\s*", re.IGNORECASE),
         (r"\s*\(tallow\)\s*", re.IGNORECASE),  # (tallow) standalone
         (r"\s*\(vegan\)\s*", re.IGNORECASE),
-
         # Trailing sample indicators (without parentheses)
         (r"\s*-\s*sample\s*$", re.IGNORECASE),  # "- sample" at end
         (r"\s*-\s*tester\s*$", re.IGNORECASE),  # "- tester" at end
@@ -205,37 +201,74 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s+sample\s*$", re.IGNORECASE),  # "sample" at end (without dash)
         (r"\s+tester\s*$", re.IGNORECASE),  # "tester" at end (without dash)
         (r"\s+samp\s*$", re.IGNORECASE),  # "samp" at end (without dash)
-
         # Container type suffixes
-        (r"\s*-\s*shave\s+stick\s*[.!?]*\s*$", re.IGNORECASE),  # "- shave stick" at end (with optional punctuation)
-        (r"\s+shave\s+stick\s*[.!?]*\s*$", re.IGNORECASE),  # "shave stick" at end (without dash, with optional punctuation)
-        (r"\s*-\s*stick\s*[.!?]*\s*$", re.IGNORECASE),  # "- stick" at end (with optional punctuation)
-        (r"\s+stick\s*[.!?]*\s*$", re.IGNORECASE),  # "stick" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*shave\s+stick\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- shave stick" at end (with optional punctuation)
+        (
+            r"\s+shave\s+stick\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "shave stick" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*stick\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- stick" at end (with optional punctuation)
+        (
+            r"\s+stick\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "stick" at end (without dash, with optional punctuation)
         (r"\s*-\s*tube\s*[.!?]*\s*$", re.IGNORECASE),  # "- tube" at end (with optional punctuation)
-        (r"\s+tube\s*[.!?]*\s*$", re.IGNORECASE),  # "tube" at end (without dash, with optional punctuation)
+        (
+            r"\s+tube\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "tube" at end (without dash, with optional punctuation)
         (r"\s*-\s*hard\s*[.!?]*\s*$", re.IGNORECASE),  # "- hard" at end (with optional punctuation)
-        (r"\s+hard\s*[.!?]*\s*$", re.IGNORECASE),  # "hard" at end (without dash, with optional punctuation)
-        
+        (
+            r"\s+hard\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "hard" at end (without dash, with optional punctuation)
         # Product type suffixes
-        (r"\s*-\s*shaving\s+soap\s*[.!?]*\s*$", re.IGNORECASE),  # "- shaving soap" at end (with optional punctuation)
-        (r"\s*-\s*crema\s+da\s+barba\s*[.!?]*\s*$", re.IGNORECASE),  # "- crema da barba" at end (with optional punctuation)
-        (r"\s+crema\s+da\s+barba\s*[.!?]*\s*$", re.IGNORECASE),  # "crema da barba" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*shaving\s+soap\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- shaving soap" at end (with optional punctuation)
+        (
+            r"\s*-\s*crema\s+da\s+barba\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- crema da barba" at end (with optional punctuation)
+        (
+            r"\s+crema\s+da\s+barba\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "crema da barba" at end (without dash, with optional punctuation)
         (r"\s*-\s*soap\s*[.!?]*\s*$", re.IGNORECASE),  # "- soap" at end (with optional punctuation)
         (r"\s*-\s*puck\s*[.!?]*\s*$", re.IGNORECASE),  # "- puck" at end (with optional punctuation)
-        (r"\s+puck\s*[.!?]*\s*$", re.IGNORECASE),  # "puck" at end (without dash, with optional punctuation)
-        (r"\s*-\s*croap\s*[.!?]*\s*$", re.IGNORECASE),  # "- croap" at end (with optional punctuation)
-        (r"\s+soap\s*[.!?]*\s*$", re.IGNORECASE),  # "soap" at end (standalone, with optional punctuation)
-
+        (
+            r"\s+puck\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "puck" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*croap\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- croap" at end (with optional punctuation)
+        (
+            r"\s+soap\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "soap" at end (standalone, with optional punctuation)
         # General product suffixes that can appear anywhere
         (r"\s+crema\s+da\s+barba\s+", re.IGNORECASE),  # "crema da barba" anywhere (with spaces)
-
         # Standalone base/formula indicators (without parentheses)
         (r"\s*-\s*omnibus\s*$", re.IGNORECASE),  # "- omnibus" at end
         (r"\s+omnibus\s*$", re.IGNORECASE),  # "omnibus" at end (without dash)
-        
         # Additional product type suffixes
-        (r"\s*-\s*shaving\s*[.!?]*\s*$", re.IGNORECASE),  # "- shaving" at end (with optional punctuation)
-        (r"\s+shaving\s*[.!?]*\s*$", re.IGNORECASE),  # "shaving" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*shaving\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- shaving" at end (with optional punctuation)
+        (
+            r"\s+shaving\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "shaving" at end (without dash, with optional punctuation)
     ]
 
     # Apply normalization iteratively until no more changes occur
