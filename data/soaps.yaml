@@ -1619,6 +1619,9 @@ Grey Lab:
     Kyoto:
       patterns:
         - gr[ae]y lab.*kyoto
+Grooming Cult:
+  patterns:
+    - grooming cult
 Grooming Dept:
   patterns:
     - 'grooming.*dep\w*t\b'
@@ -1626,6 +1629,9 @@ Grooming Dept:
     Aion:
       patterns:
         - grooming.*aion
+    Cascade:
+      patterns:
+        - grooming.*cascade
     Earl Grey Gelato:
       patterns:
         - "early? grey gelato"
@@ -3276,6 +3282,9 @@ Summer Break Soaps:
     Remote Learning:
       patterns:
         - remote learning
+    Steady:
+      patterns:
+        - summer ?break.*steady
     Trouble Maker:
       patterns:
         - "trouble ?maker"
