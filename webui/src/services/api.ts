@@ -287,13 +287,20 @@ export interface GroupedDataItem {
   top_patterns: Array<{
     original: string;
     count: number;
+    match_type: string;
   }>;
   remaining_count: number;
   all_patterns: Array<{
     original: string;
     count: number;
+    match_type: string;
   }>;
   pattern_count: number;
+  match_type: string;
+  match_type_breakdown: {
+    exact: number;
+    [key: string]: number; // regex, brand, or alias
+  };
   // Add a flag to indicate this is grouped data
   is_grouped: true;
 }

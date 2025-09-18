@@ -902,6 +902,8 @@ const MatchAnalyzer: React.FC = () => {
         remaining_count: group.remaining_count,
         all_patterns: group.all_patterns,
         pattern_count: group.pattern_count,
+        match_type: group.match_type,
+        match_type_breakdown: group.match_type_breakdown,
         // Add a flag to indicate this is grouped data
         is_grouped: true,
       } as GroupedDataItem));

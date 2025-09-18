@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 interface Pattern {
     original: string;
     count: number;
+    match_type: string;
 }
 
 interface ExpandablePatternsProps {
@@ -27,12 +28,30 @@ const ExpandablePatterns: React.FC<ExpandablePatternsProps> = ({
 
     const displayPatterns = isExpanded ? allPatterns : topPatterns;
 
+    const getMatchTypeColor = (matchType: string) => {
+        switch (matchType) {
+            case 'exact':
+                return 'bg-green-100 text-green-800';
+            case 'regex':
+                return 'bg-blue-100 text-blue-800';
+            case 'brand':
+                return 'bg-orange-100 text-orange-800';
+            case 'alias':
+                return 'bg-purple-100 text-purple-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
     return (
         <div className="space-y-1">
             {displayPatterns.map((pattern, index) => (
-                <div key={index} className="text-sm text-gray-700">
+                <div key={index} className="text-sm text-gray-700 flex items-center gap-2">
                     <span className="font-medium">{pattern.original}</span>
-                    <span className="ml-2 text-gray-500">({pattern.count})</span>
+                    <span className="text-gray-500">({pattern.count})</span>
+                    <span className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold rounded-full ${getMatchTypeColor(pattern.match_type)}`}>
+                        {pattern.match_type}
+                    </span>
                 </div>
             ))}
 

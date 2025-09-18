@@ -653,16 +653,15 @@ async def get_soap_group_by_matched(
     limit: Optional[int] = Query(None, ge=1, description="Maximum number of results"),
 ):
     """
-    Group soap matches by matched string (brand + scent) to identify which scent-specific
-    regexes are most important to add.
+    Group soap matches by matched string (brand + scent) to show total usage counts
+    for each soap across all match types.
 
     When group_by_matched=True:
     - Groups results by matched string (brand + scent) instead of original string
     - Shows matched string, total count, and top 3 most common original patterns with
       individual counts
-    - Includes brand, exact, and alias matches (excludes regex since those already have
-      scent entries)
-    - Helps identify which scent-specific regexes to add to the catalog
+    - Includes all match types (exact, brand, alias, regex) to show complete usage
+    - Helps identify which soaps are most commonly mentioned and need better patterns
 
     When group_by_matched=False:
     - Groups results by original string (existing behavior)
@@ -705,6 +704,14 @@ async def get_soap_group_by_matched(
                 "group_by_matched": group_by_matched,
             }
 
+        # Debug: Log match types being processed
+        match_types = {}
+        for match in matches:
+            match_type = match.get("match_type", "unknown")
+            match_types[match_type] = match_types.get(match_type, 0) + 1
+        print(f"🔍 DEBUG: Processing {len(matches)} matches with types: {match_types}")
+        logger.info(f"🔍 DEBUG: Processing {len(matches)} matches with types: {match_types}")
+
         # Group the matches
         if group_by_matched:
             groups = group_soap_matches_by_matched(matches, limit)
@@ -738,9 +745,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
     matched_groups = defaultdict(list)
 
     for match in matches:
-        # Skip regex matches since they already have scent entries
-        if match.get("match_type") == "regex":
-            continue
+        # Include all match types (exact, brand, alias, regex) to show total counts
+        # This helps identify which soaps are most commonly mentioned regardless of match type
 
         # Extract matched data
         matched_data = match.get("matched", {})
@@ -749,8 +755,11 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
 
         brand = matched_data.get("brand", "").strip()
         scent = matched_data.get("scent", "").strip()
+        match_type = match.get("match_type", "unknown")
 
         if not brand or not scent:
+            if match_type == "alias":
+                print(f"🔍 DEBUG: Skipping alias match due to missing brand/scent: {match}")
             continue
 
         # Create matched string key
@@ -771,24 +780,73 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Count total occurrences
         total_count = sum(pattern["count"] for pattern in patterns)
 
-        # Count original patterns
-        pattern_counts = Counter()
+        # Count original patterns with match type information
+        pattern_data = {}
         for pattern in patterns:
-            pattern_counts[pattern["original"]] += pattern["count"]
+            original = pattern["original"]
+            if original not in pattern_data:
+                pattern_data[original] = {"count": 0, "match_types": Counter()}
+            pattern_data[original]["count"] += pattern["count"]
+            pattern_data[original]["match_types"][pattern["match_type"]] += pattern["count"]
 
         # Get top 3 most common original patterns
-        top_patterns = pattern_counts.most_common(3)
-        remaining_count = len(pattern_counts) - 3
+        top_patterns = sorted(pattern_data.items(), key=lambda x: x[1]["count"], reverse=True)[:3]
+        remaining_count = len(pattern_data) - 3
 
-        # Format top patterns
+        # Format top patterns with match type
         top_patterns_formatted = [
-            {"original": pattern, "count": count} for pattern, count in top_patterns
+            {
+                "original": pattern,
+                "count": data["count"],
+                "match_type": (
+                    data["match_types"].most_common(1)[0][0] if data["match_types"] else "unknown"
+                ),
+            }
+            for pattern, data in top_patterns
         ]
 
         # Get all patterns for "+ n more" functionality
         all_patterns = [
-            {"original": pattern, "count": count} for pattern, count in pattern_counts.most_common()
+            {
+                "original": pattern,
+                "count": data["count"],
+                "match_type": (
+                    data["match_types"].most_common(1)[0][0] if data["match_types"] else "unknown"
+                ),
+            }
+            for pattern, data in sorted(
+                pattern_data.items(), key=lambda x: x[1]["count"], reverse=True
+            )
         ]
+
+        # Aggregate match types for this group
+        match_type_counts = Counter()
+        for pattern in patterns:
+            match_type_counts[pattern["match_type"]] += pattern["count"]
+
+        # Determine primary match type with priority: regex > brand > alias > exact
+        # If a soap has regex matches, it should be categorized as regex regardless of other counts
+        if "regex" in match_type_counts:
+            primary_match_type = "regex"
+        elif "brand" in match_type_counts:
+            primary_match_type = "brand"
+        elif "alias" in match_type_counts:
+            primary_match_type = "alias"
+        else:
+            # If only exact matches, use exact as primary
+            primary_match_type = "exact"
+
+        # Debug: Log match type counts for groups with alias matches
+        if "alias" in match_type_counts:
+            print(
+                f"🔍 DEBUG: Group '{matched_string}' has alias matches: {dict(match_type_counts)} -> primary: {primary_match_type}"
+            )
+
+        # Create match type breakdown (exact + primary)
+        match_type_breakdown = {
+            "exact": match_type_counts.get("exact", 0),
+            primary_match_type: match_type_counts.get(primary_match_type, 0),
+        }
 
         results.append(
             {
@@ -797,7 +855,10 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
                 "top_patterns": top_patterns_formatted,
                 "remaining_count": max(0, remaining_count),
                 "all_patterns": all_patterns,
-                "pattern_count": len(pattern_counts),
+                "pattern_count": len(pattern_data),
+                "match_type": primary_match_type,
+                "match_type_breakdown": match_type_breakdown,
+                "is_grouped": True,
             }
         )
 
