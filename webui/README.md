@@ -85,6 +85,49 @@ npm run format:check
 
 The frontend is designed to work with the FastAPI backend running on port 8000. The Vite dev server is configured to proxy API requests to the backend.
 
+### API Endpoints
+
+The backend provides a standardized REST API with the following endpoint structure:
+
+#### Analysis Endpoints (`/api/analysis/`)
+- `GET /api/analysis/comment/{comment_id}` - Get comment detail
+- `POST /api/analysis/match-phase` - Run match phase analysis
+- `POST /api/analysis/unmatched` - Run unmatched analysis
+- `POST /api/analysis/mismatch` - Run mismatch analysis
+- `GET /api/analysis/correct-matches/{field}` - Get correct matches
+- `POST /api/analysis/mark-correct` - Mark matches as correct
+- `POST /api/analysis/remove-correct` - Remove from correct matches
+- `DELETE /api/analysis/correct-matches/{field}` - Delete correct matches
+- `DELETE /api/analysis/correct-matches` - Delete all correct matches
+- `POST /api/analysis/validate-catalog` - Validate catalog
+- `POST /api/analysis/remove-catalog-entries` - Remove catalog entries
+
+#### Soap Endpoints (`/api/soaps/`)
+- `GET /api/soaps/duplicates` - Get soap duplicates
+- `GET /api/soaps/pattern-suggestions` - Get pattern suggestions
+- `GET /api/soaps/neighbor-similarity` - Get neighbor similarity
+- `GET /api/soaps/group-by-matched` - Group by matched string
+
+#### Brush Endpoints (`/api/brushes/`)
+- `GET /api/brushes/splits/load` - Load brush splits
+- `GET /api/brushes/splits/validate` - Validate brush splits
+- `POST /api/brushes/splits/save` - Save brush splits
+- `GET /api/brushes/splits/yaml` - Get YAML brush splits
+- `GET /api/brushes/validation/months` - Get validation months
+- `GET /api/brushes/validation/data/{month}/{system}` - Get validation data
+- `GET /api/brushes/validation/statistics/{month}` - Get validation statistics
+- `POST /api/brushes/validation/action` - Perform validation action
+- `POST /api/brushes/matching/analyze` - Analyze brush matching
+
+#### Other Endpoints
+- `GET /api/catalogs/` - Get all catalogs
+- `GET /api/catalogs/{field}` - Get specific catalog
+- `GET /api/files/available-months` - Get available months
+- `GET /api/files/{month}` - Get month data
+- `GET /api/filtered/` - Get filtered entries
+- `GET /api/users/months` - Get user months
+- `GET /api/users/users/{month}` - Get users for month
+
 ## Next Steps
 
 - Implement DateRangePicker component
