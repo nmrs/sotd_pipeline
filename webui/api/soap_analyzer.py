@@ -777,6 +777,9 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
     # Convert to result format
     results = []
     for matched_string, patterns in matched_groups.items():
+        # Extract brand and scent from matched_string (format: "Brand - Scent")
+        brand, scent = matched_string.split(' - ', 1) if ' - ' in matched_string else (matched_string, '')
+        
         # Count total occurrences
         total_count = sum(pattern["count"] for pattern in patterns)
 
@@ -839,7 +842,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Debug: Log match type counts for groups with alias matches
         if "alias" in match_type_counts:
             print(
-                f"🔍 DEBUG: Group '{matched_string}' has alias matches: {dict(match_type_counts)} -> primary: {primary_match_type}"
+                f"🔍 DEBUG: Group '{matched_string}' has alias matches: "
+                f"{dict(match_type_counts)} -> primary: {primary_match_type}"
             )
 
         # Create match type breakdown (exact + primary)
@@ -851,6 +855,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         results.append(
             {
                 "matched_string": matched_string,
+                "brand": brand,
+                "scent": scent,
                 "total_count": total_count,
                 "top_patterns": top_patterns_formatted,
                 "remaining_count": max(0, remaining_count),

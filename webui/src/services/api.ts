@@ -283,6 +283,8 @@ export interface GroupByMatchedResult {
 // Individual grouped data item for display in data table
 export interface GroupedDataItem {
   matched_string: string;
+  brand: string;
+  scent: string;
   total_count: number;
   top_patterns: Array<{
     original: string;

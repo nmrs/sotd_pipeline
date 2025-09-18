@@ -465,9 +465,9 @@ const MatchAnalyzer: React.FC = () => {
         });
 
         for (const group of selectedGroups) {
-          // Extract brand and scent from matched_string (format: "Brand - Scent")
-          const [brand, ...scentParts] = group.matched_string.split(' - ');
-          const scent = scentParts.join(' - ');
+          // Use the actual brand and scent fields from the grouped data
+          const brand = group.brand;
+          const scent = group.scent;
 
           // Create matches for all patterns in this group
           for (const pattern of group.all_patterns) {
@@ -488,84 +488,84 @@ const MatchAnalyzer: React.FC = () => {
             return selectedItems.has(itemKey);
           })
           .map(item => {
-          // For brush field, use the shared utility to structure data correctly
-          if (selectedField === 'brush' && item.matched) {
-            const { data } = structureBrushDataForAPI(item.matched, item.original);
-            return {
-              original: item.original,
-              matched: data,
-            };
-          }
+            // For brush field, use the shared utility to structure data correctly
+            if (selectedField === 'brush' && item.matched) {
+              const { data } = structureBrushDataForAPI(item.matched, item.original);
+              return {
+                original: item.original,
+                matched: data,
+              };
+            }
 
-          // For blade field, include razor format context for correct section placement
-          if (selectedField === 'blade' && item.matched) {
-            // Ensure the format field is present for correct section placement in correct_matches.yaml
-            // The backend expects a 'format' field to determine which section to place the entry in
-            const bladeData = {
-              ...item.matched,
-              // Use existing format field, but warn if it's missing
-              format:
-                item.matched.format ||
-                (() => {
-                  console.warn(
-                    `Blade match missing format field for "${item.original}". This may cause incorrect placement in correct_matches.yaml.`
-                  );
-                  // Try to infer format from other fields or use a more specific default
-                  if (item.matched.brand && item.matched.model) {
-                    // Check if we can infer the format from the brand/model combination
+            // For blade field, include razor format context for correct section placement
+            if (selectedField === 'blade' && item.matched) {
+              // Ensure the format field is present for correct section placement in correct_matches.yaml
+              // The backend expects a 'format' field to determine which section to place the entry in
+              const bladeData = {
+                ...item.matched,
+                // Use existing format field, but warn if it's missing
+                format:
+                  item.matched.format ||
+                  (() => {
                     console.warn(
-                      `Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`
+                      `Blade match missing format field for "${item.original}". This may cause incorrect placement in correct_matches.yaml.`
                     );
-                  }
-                  // For now, use 'DE' as fallback, but this should be fixed in the backend
-                  return 'DE';
-                })(),
-            };
+                    // Try to infer format from other fields or use a more specific default
+                    if (item.matched.brand && item.matched.model) {
+                      // Check if we can infer the format from the brand/model combination
+                      console.warn(
+                        `Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`
+                      );
+                    }
+                    // For now, use 'DE' as fallback, but this should be fixed in the backend
+                    return 'DE';
+                  })(),
+              };
 
-            // Debug logging for blade format handling
-            console.log('Blade match data:', {
-              original: item.original,
-              originalMatched: item.matched,
-              processedMatched: bladeData,
-              format: bladeData.format,
-              hasFormatField: 'format' in item.matched,
-              formatFieldValue: item.matched.format,
-            });
+              // Debug logging for blade format handling
+              console.log('Blade match data:', {
+                original: item.original,
+                originalMatched: item.matched,
+                processedMatched: bladeData,
+                format: bladeData.format,
+                hasFormatField: 'format' in item.matched,
+                formatFieldValue: item.matched.format,
+              });
 
+              return {
+                original: item.original,
+                matched: bladeData,
+              };
+            }
+
+            // For soap field, no mapping needed - brand and scent fields are already correct
+            if (selectedField === 'soap' && item.matched) {
+              // Soap data already has brand and scent fields, no mapping needed
+              const soapData = {
+                ...item.matched,
+              };
+
+              // Debug logging for soap field data
+              console.log('Soap match data:', {
+                original: item.original,
+                originalMatched: item.matched,
+                processedMatched: soapData,
+                brand: item.matched.brand,
+                scent: item.matched.scent,
+              });
+
+              return {
+                original: item.original,
+                matched: soapData,
+              };
+            }
+
+            // For non-brush fields, return as-is
             return {
               original: item.original,
-              matched: bladeData,
+              matched: item.matched,
             };
-          }
-
-          // For soap field, no mapping needed - brand and scent fields are already correct
-          if (selectedField === 'soap' && item.matched) {
-            // Soap data already has brand and scent fields, no mapping needed
-            const soapData = {
-              ...item.matched,
-            };
-
-            // Debug logging for soap field data
-            console.log('Soap match data:', {
-              original: item.original,
-              originalMatched: item.matched,
-              processedMatched: soapData,
-              brand: item.matched.brand,
-              scent: item.matched.scent,
-            });
-
-            return {
-              original: item.original,
-              matched: soapData,
-            };
-          }
-
-          // For non-brush fields, return as-is
-          return {
-            original: item.original,
-            matched: item.matched,
-          };
-        });
+          });
       }
 
       if (matches.length === 0) {
@@ -619,9 +619,9 @@ const MatchAnalyzer: React.FC = () => {
         });
 
         for (const group of selectedGroups) {
-          // Extract brand and scent from matched_string (format: "Brand - Scent")
-          const [brand, ...scentParts] = group.matched_string.split(' - ');
-          const scent = scentParts.join(' - ');
+          // Use the actual brand and scent fields from the grouped data
+          const brand = group.brand;
+          const scent = group.scent;
 
           // Create matches for all patterns in this group
           for (const pattern of group.all_patterns) {
@@ -642,84 +642,84 @@ const MatchAnalyzer: React.FC = () => {
             return selectedItems.has(itemKey);
           })
           .map(item => {
-          // For brush field, use the shared utility to structure data correctly
-          if (selectedField === 'brush' && item.matched) {
-            const { data } = structureBrushDataForAPI(item.matched, item.original);
-            return {
-              original: item.original,
-              matched: data,
-            };
-          }
+            // For brush field, use the shared utility to structure data correctly
+            if (selectedField === 'brush' && item.matched) {
+              const { data } = structureBrushDataForAPI(item.matched, item.original);
+              return {
+                original: item.original,
+                matched: data,
+              };
+            }
 
-          // For blade field, include razor format context for correct section placement
-          if (selectedField === 'blade' && item.matched) {
-            // Ensure the format field is present for correct section placement in correct_matches.yaml
-            // The backend expects a 'format' field to determine which section to place the entry in
-            const bladeData = {
-              ...item.matched,
-              // Use existing format field, but warn if it's missing
-              format:
-                item.matched.format ||
-                (() => {
-                  console.warn(
-                    `Blade match missing format field for "${item.original}" (remove). This may cause incorrect placement in correct_matches.yaml.`
-                  );
-                  // Try to infer format from other fields or use a more specific default
-                  if (item.matched.brand && item.matched.model) {
-                    // Check if we can infer the format from the brand/model combination
+            // For blade field, include razor format context for correct section placement
+            if (selectedField === 'blade' && item.matched) {
+              // Ensure the format field is present for correct section placement in correct_matches.yaml
+              // The backend expects a 'format' field to determine which section to place the entry in
+              const bladeData = {
+                ...item.matched,
+                // Use existing format field, but warn if it's missing
+                format:
+                  item.matched.format ||
+                  (() => {
                     console.warn(
-                      `Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`
+                      `Blade match missing format field for "${item.original}" (remove). This may cause incorrect placement in correct_matches.yaml.`
                     );
-                  }
-                  // For now, use 'DE' as fallback, but this should be fixed in the backend
-                  return 'DE';
-                })(),
-            };
+                    // Try to infer format from other fields or use a more specific default
+                    if (item.matched.brand && item.matched.model) {
+                      // Check if we can infer the format from the brand/model combination
+                      console.warn(
+                        `Attempting to infer format from brand: ${item.matched.brand}, model: ${item.matched.model}`
+                      );
+                    }
+                    // For now, use 'DE' as fallback, but this should be fixed in the backend
+                    return 'DE';
+                  })(),
+              };
 
-            // Debug logging for blade format handling
-            console.log('Blade match data (remove):', {
-              original: item.original,
-              originalMatched: item.matched,
-              processedMatched: bladeData,
-              format: bladeData.format,
-              hasFormatField: 'format' in item.matched,
-              formatFieldValue: item.matched.format,
-            });
+              // Debug logging for blade format handling
+              console.log('Blade match data (remove):', {
+                original: item.original,
+                originalMatched: item.matched,
+                processedMatched: bladeData,
+                format: bladeData.format,
+                hasFormatField: 'format' in item.matched,
+                formatFieldValue: item.matched.format,
+              });
 
+              return {
+                original: item.original,
+                matched: bladeData,
+              };
+            }
+
+            // For soap field, no mapping needed - brand and scent fields are already correct
+            if (selectedField === 'soap' && item.matched) {
+              // Soap data already has brand and scent fields, no mapping needed
+              const soapData = {
+                ...item.matched,
+              };
+
+              // Debug logging for soap field mapping
+              console.log('Soap match data (remove):', {
+                original: item.original,
+                originalMatched: item.matched,
+                processedMatched: soapData,
+                brandToMaker: item.matched.brand,
+                modelToScent: item.matched.model,
+              });
+
+              return {
+                original: item.original,
+                matched: soapData,
+              };
+            }
+
+            // For non-brush fields, return as-is
             return {
               original: item.original,
-              matched: bladeData,
+              matched: item.matched,
             };
-          }
-
-          // For soap field, no mapping needed - brand and scent fields are already correct
-          if (selectedField === 'soap' && item.matched) {
-            // Soap data already has brand and scent fields, no mapping needed
-            const soapData = {
-              ...item.matched,
-            };
-
-            // Debug logging for soap field mapping
-            console.log('Soap match data (remove):', {
-              original: item.original,
-              originalMatched: item.matched,
-              processedMatched: soapData,
-              brandToMaker: item.matched.brand,
-              modelToScent: item.matched.model,
-            });
-
-            return {
-              original: item.original,
-              matched: soapData,
-            };
-          }
-
-          // For non-brush fields, return as-is
-          return {
-            original: item.original,
-            matched: item.matched,
-          };
-        });
+          });
       }
 
       if (matches.length === 0) {
@@ -959,6 +959,8 @@ const MatchAnalyzer: React.FC = () => {
       // For grouped data, we show all groups (no filtering by display mode)
       return groupedResults.groups.map(group => ({
         matched_string: group.matched_string,
+        brand: group.brand,
+        scent: group.scent,
         total_count: group.total_count,
         top_patterns: group.top_patterns,
         remaining_count: group.remaining_count,
