@@ -34,10 +34,22 @@ class SoapMatcher(BaseMatcher):
         self.catalog = load_yaml_with_nfc(catalog_path)
         # Use default path if not provided
         if correct_matches_path is None:
-            correct_matches_path = Path("data/correct_matches.yaml")
-        self.correct_matches = (
-            load_yaml_with_nfc(correct_matches_path) if not bypass_correct_matches else {}
-        )
+            correct_matches_path = Path("data/correct_matches")
+        
+        # Load correct matches using the new directory structure
+        if not bypass_correct_matches:
+            if correct_matches_path.is_file():
+                # Legacy single file mode
+                self.correct_matches = load_yaml_with_nfc(correct_matches_path).get("soap", {})
+            else:
+                # New directory structure mode
+                soap_file = correct_matches_path / "soap.yaml"
+                if soap_file.exists():
+                    self.correct_matches = load_yaml_with_nfc(soap_file)
+                else:
+                    self.correct_matches = {}
+        else:
+            self.correct_matches = {}
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
         self._match_cache = {}
         # O(1) case-insensitive lookup dictionary

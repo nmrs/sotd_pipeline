@@ -47,7 +47,7 @@ class BaseMatcher:
         return _catalog_cache[cache_key]
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
-        """Load correct matches for this field type from correct_matches directory or legacy file."""
+        """Load correct matches for this field type from correct_matches directory or legacy file with caching."""
         if self.bypass_correct_matches:
             return {}
 
@@ -55,26 +55,39 @@ class BaseMatcher:
         if self.correct_matches_path.is_file():
             # Legacy single file mode
             return self._load_legacy_correct_matches()
-        
-        # New directory structure mode
+
+        # New directory structure mode with caching
         field_file = self.correct_matches_path / f"{self.field_type}.yaml"
         if not field_file.exists():
             return {}
 
         try:
-            data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
-            return data
+            # Use global cache to avoid repeated YAML loads
+            global _catalog_cache
+            cache_key = str(field_file.resolve())
+            if cache_key not in _catalog_cache:
+                _catalog_cache[cache_key] = load_yaml_with_nfc(
+                    field_file, loader_cls=UniqueKeyLoader
+                )
+            return _catalog_cache[cache_key]
         except Exception:
             # If correct matches file is corrupted or can't be loaded, continue without it
             return {}
 
     def _load_legacy_correct_matches(self) -> Dict[str, Dict[str, Any]]:
-        """Load correct matches from legacy single file format."""
+        """Load correct matches from legacy single file format with caching."""
         if not self.correct_matches_path.exists():
             return {}
 
         try:
-            data = load_yaml_with_nfc(self.correct_matches_path, loader_cls=UniqueKeyLoader)
+            # Use global cache to avoid repeated YAML loads
+            global _catalog_cache
+            cache_key = str(self.correct_matches_path.resolve())
+            if cache_key not in _catalog_cache:
+                _catalog_cache[cache_key] = load_yaml_with_nfc(
+                    self.correct_matches_path, loader_cls=UniqueKeyLoader
+                )
+            data = _catalog_cache[cache_key]
             return data.get(self.field_type, {})
         except Exception:
             # If correct matches file is corrupted or can't be loaded, continue without it

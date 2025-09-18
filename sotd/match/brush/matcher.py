@@ -56,34 +56,11 @@ _catalog_cache = None
 
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
-    """Load correct matches data from YAML file or directory structure."""
-    if correct_matches_path is None:
-        # Use default directory path
-        correct_matches_path = Path("data/correct_matches")
+    """Load correct matches data from YAML file or directory structure using CatalogLoader."""
+    from sotd.match.loaders import CatalogLoader
     
-    # Handle both new directory structure and legacy single file
-    if correct_matches_path.is_file():
-        # Legacy single file mode
-        try:
-            with open(correct_matches_path, "r", encoding="utf-8") as f:
-                return yaml.safe_load(f) or {}
-        except (FileNotFoundError, yaml.YAMLError):
-            return {}
-    
-    # New directory structure mode - load all brush-related sections
-    result = {}
-    for field in ["brush", "handle", "knot", "split_brush"]:
-        field_file = correct_matches_path / f"{field}.yaml"
-        if field_file.exists():
-            try:
-                with open(field_file, "r", encoding="utf-8") as f:
-                    result[field] = yaml.safe_load(f) or {}
-            except (FileNotFoundError, yaml.YAMLError):
-                result[field] = {}
-        else:
-            result[field] = {}
-    
-    return result
+    loader = CatalogLoader()
+    return loader.load_correct_matches(correct_matches_path)
 
 
 class BrushMatcher:
@@ -339,18 +316,11 @@ class BrushMatcher:
             return {}
 
     def _load_correct_matches_catalog(self) -> dict:
-        """Load correct matches catalog from directory structure or legacy file."""
-        if self.correct_matches_path.is_file():
-            # Legacy single file mode
-            return self._load_yaml_file(self.correct_matches_path)
+        """Load correct matches catalog from directory structure or legacy file using CatalogLoader."""
+        from sotd.match.loaders import CatalogLoader
         
-        # New directory structure mode - load all brush-related sections
-        result = {}
-        for field in ["brush", "handle", "knot", "split_brush"]:
-            field_file = self.correct_matches_path / f"{field}.yaml"
-            result[field] = self._load_yaml_file(field_file)
-        
-        return result
+        loader = CatalogLoader()
+        return loader.load_correct_matches(self.correct_matches_path)
 
     def _create_strategies(self) -> List:
         """

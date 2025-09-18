@@ -87,7 +87,7 @@ class CatalogLoader:
         self, correct_matches_path: Optional[Path] = None, field_type: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Load correct matches with graceful error handling.
+        Load correct matches with graceful error handling and caching.
         Uses the new directory structure: data/correct_matches/{field_type}.yaml
 
         Args:
@@ -101,7 +101,7 @@ class CatalogLoader:
         if correct_matches_path and correct_matches_path.is_file():
             # Legacy single file mode - load the entire file
             return self._load_legacy_correct_matches(correct_matches_path, field_type)
-        
+
         # New directory structure mode
         base_path = correct_matches_path or Path("data/correct_matches")
         base_path = base_path.resolve()
@@ -112,23 +112,35 @@ class CatalogLoader:
 
         try:
             if field_type:
-                # Load specific field type file
+                # Load specific field type file with caching
                 field_file = base_path / f"{field_type}.yaml"
                 if not field_file.exists():
                     return {}
-                
+
+                # Use global cache to avoid repeated YAML loads
+                abs_path = str(field_file.resolve())
+                if abs_path in _yaml_catalog_cache:
+                    return _yaml_catalog_cache[abs_path]
+
                 data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+                _yaml_catalog_cache[abs_path] = data
                 self.load_stats["catalogs_loaded"] += 1  # type: ignore
                 return data
             else:
-                # Load all sections (for brush matcher)
+                # Load all sections (for brush matcher) with caching
                 result = {}
                 for field in ["brush", "handle", "knot", "split_brush"]:
                     field_file = base_path / f"{field}.yaml"
                     if field_file.exists():
-                        data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+                        # Use global cache to avoid repeated YAML loads
+                        abs_path = str(field_file.resolve())
+                        if abs_path in _yaml_catalog_cache:
+                            data = _yaml_catalog_cache[abs_path]
+                        else:
+                            data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+                            _yaml_catalog_cache[abs_path] = data
+                            self.load_stats["catalogs_loaded"] += 1  # type: ignore
                         result[field] = data
-                        self.load_stats["catalogs_loaded"] += 1  # type: ignore
                     else:
                         result[field] = {}
                 return result
