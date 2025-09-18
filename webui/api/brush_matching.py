@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 # Import SOTD modules - will be handled in the function
 
-router = APIRouter(prefix="/api/brush-matching", tags=["brush-matching"])
+router = APIRouter(prefix="/api/brushes/matching", tags=["brushes", "matching"])
 
 
 class BrushAnalysisRequest(BaseModel):

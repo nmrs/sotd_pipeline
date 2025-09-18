@@ -41,7 +41,7 @@ except ImportError as e:
     MismatchAnalyzer = None
     ValidateCorrectMatches = None
 
-router = APIRouter(prefix="/api/analyze", tags=["analysis"])
+router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
 
 class UnmatchedAnalysisRequest(BaseModel):

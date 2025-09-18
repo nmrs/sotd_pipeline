@@ -54,7 +54,7 @@ class ProcessingError(BrushSplitError):
 
 
 # Create router for brush split endpoints
-router = APIRouter(prefix="/api/brush-splits", tags=["brush-splits"])
+router = APIRouter(prefix="/api/brushes/splits", tags=["brushes", "splits"])
 
 
 def normalize_brush_string(brush_string: str) -> Optional[str]:

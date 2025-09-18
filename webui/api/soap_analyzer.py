@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/soap-analyzer", tags=["soap-analyzer"])
+router = APIRouter(prefix="/api/soaps", tags=["soaps"])
 
 
 # Pydantic models for response

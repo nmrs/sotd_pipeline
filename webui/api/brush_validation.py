@@ -13,7 +13,7 @@ from webui.api.files import get_available_months
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/brush-validation", tags=["brush-validation"])
+router = APIRouter(prefix="/api/brushes/validation", tags=["brushes", "validation"])
 
 
 class ValidationActionRequest(BaseModel):
