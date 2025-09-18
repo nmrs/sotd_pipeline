@@ -56,15 +56,34 @@ _catalog_cache = None
 
 
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
-    """Load correct matches data from YAML file."""
+    """Load correct matches data from YAML file or directory structure."""
     if correct_matches_path is None:
-        # Use default path directly instead of legacy config
-        correct_matches_path = Path("data/correct_matches.yaml")
-    try:
-        with open(correct_matches_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    except (FileNotFoundError, yaml.YAMLError):
-        return {}
+        # Use default directory path
+        correct_matches_path = Path("data/correct_matches")
+    
+    # Handle both new directory structure and legacy single file
+    if correct_matches_path.is_file():
+        # Legacy single file mode
+        try:
+            with open(correct_matches_path, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f) or {}
+        except (FileNotFoundError, yaml.YAMLError):
+            return {}
+    
+    # New directory structure mode - load all brush-related sections
+    result = {}
+    for field in ["brush", "handle", "knot", "split_brush"]:
+        field_file = correct_matches_path / f"{field}.yaml"
+        if field_file.exists():
+            try:
+                with open(field_file, "r", encoding="utf-8") as f:
+                    result[field] = yaml.safe_load(f) or {}
+            except (FileNotFoundError, yaml.YAMLError):
+                result[field] = {}
+        else:
+            result[field] = {}
+    
+    return result
 
 
 class BrushMatcher:
@@ -97,7 +116,7 @@ class BrushMatcher:
         if self.knots_path is None:
             self.knots_path = Path("data/knots.yaml")
         if self.correct_matches_path is None:
-            self.correct_matches_path = Path("data/correct_matches.yaml")
+            self.correct_matches_path = Path("data/correct_matches")
 
         # FAIL FAST: Validate that all catalog files exist and are readable
         # Only validate if all paths are set (not None)
@@ -241,9 +260,9 @@ class BrushMatcher:
             ("brushes", self.brushes_path),
             ("handles", self.handles_path),
             ("knots", self.knots_path),
-            ("correct_matches", self.correct_matches_path),
         ]
 
+        # Validate single file catalogs
         for name, path in catalog_paths:
             if not path.exists():
                 raise FileNotFoundError(f"Catalog file '{name}' not found at: {path.absolute()}")
@@ -259,10 +278,37 @@ class BrushMatcher:
             except (PermissionError, UnicodeDecodeError) as e:
                 raise ValueError(f"Catalog file '{name}' is not readable: {path.absolute()} - {e}")
 
+        # Validate correct_matches (can be directory or file)
+        if not self.correct_matches_path.exists():
+            raise FileNotFoundError(f"Correct matches path not found at: {self.correct_matches_path.absolute()}")
+        
+        if self.correct_matches_path.is_file():
+            # Legacy single file mode
+            try:
+                with open(self.correct_matches_path, "r", encoding="utf-8") as f:
+                    f.read(1)
+            except (PermissionError, UnicodeDecodeError) as e:
+                raise ValueError(f"Correct matches file is not readable: {self.correct_matches_path.absolute()} - {e}")
+        elif self.correct_matches_path.is_dir():
+            # New directory structure mode - validate required files exist
+            required_files = ["brush.yaml", "handle.yaml", "knot.yaml"]
+            for filename in required_files:
+                file_path = self.correct_matches_path / filename
+                if not file_path.exists():
+                    raise FileNotFoundError(f"Required correct matches file '{filename}' not found at: {file_path.absolute()}")
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        f.read(1)
+                except (PermissionError, UnicodeDecodeError) as e:
+                    raise ValueError(f"Correct matches file '{filename}' is not readable: {file_path.absolute()} - {e}")
+        else:
+            raise ValueError(f"Correct matches path is neither file nor directory: {self.correct_matches_path.absolute()}")
+
         if self.debug:
             print("✅ All catalog paths validated successfully:")
             for name, path in catalog_paths:
                 print(f"   {name}: {path.absolute()}")
+            print(f"   correct_matches: {self.correct_matches_path.absolute()}")
 
     def _load_catalogs_directly(self) -> dict:
         """Load catalogs directly without legacy config dependencies."""
@@ -277,7 +323,7 @@ class BrushMatcher:
         catalogs["brushes"] = self._load_yaml_file(self.brushes_path)
         catalogs["handles"] = self._load_yaml_file(self.handles_path)
         catalogs["knots"] = self._load_yaml_file(self.knots_path)
-        catalogs["correct_matches"] = self._load_yaml_file(self.correct_matches_path)
+        catalogs["correct_matches"] = self._load_correct_matches_catalog()
         catalogs["brush_splits"] = self._load_yaml_file(Path("data/brush_splits.yaml"))
 
         # Cache the catalogs for future use
@@ -291,6 +337,20 @@ class BrushMatcher:
                 return yaml.safe_load(f) or {}
         except (FileNotFoundError, yaml.YAMLError):
             return {}
+
+    def _load_correct_matches_catalog(self) -> dict:
+        """Load correct matches catalog from directory structure or legacy file."""
+        if self.correct_matches_path.is_file():
+            # Legacy single file mode
+            return self._load_yaml_file(self.correct_matches_path)
+        
+        # New directory structure mode - load all brush-related sections
+        result = {}
+        for field in ["brush", "handle", "knot", "split_brush"]:
+            field_file = self.correct_matches_path / f"{field}.yaml"
+            result[field] = self._load_yaml_file(field_file)
+        
+        return result
 
     def _create_strategies(self) -> List:
         """

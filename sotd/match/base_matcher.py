@@ -26,7 +26,7 @@ class BaseMatcher:
     ):
         self.catalog_path = catalog_path
         self.field_type = field_type  # "razor", "blade", "brush", "soap"
-        self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
+        self.correct_matches_path = correct_matches_path or Path("data/correct_matches")
         self.bypass_correct_matches = bypass_correct_matches
         self.catalog = self._load_catalog()
         self.correct_matches = self._load_correct_matches()
@@ -47,10 +47,29 @@ class BaseMatcher:
         return _catalog_cache[cache_key]
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
-        """Load correct matches for this field type from correct_matches.yaml (or injected path)."""
+        """Load correct matches for this field type from correct_matches directory or legacy file."""
         if self.bypass_correct_matches:
             return {}
 
+        # Handle both new directory structure and legacy single file
+        if self.correct_matches_path.is_file():
+            # Legacy single file mode
+            return self._load_legacy_correct_matches()
+        
+        # New directory structure mode
+        field_file = self.correct_matches_path / f"{self.field_type}.yaml"
+        if not field_file.exists():
+            return {}
+
+        try:
+            data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+            return data
+        except Exception:
+            # If correct matches file is corrupted or can't be loaded, continue without it
+            return {}
+
+    def _load_legacy_correct_matches(self) -> Dict[str, Dict[str, Any]]:
+        """Load correct matches from legacy single file format."""
         if not self.correct_matches_path.exists():
             return {}
 

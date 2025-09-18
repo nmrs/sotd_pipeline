@@ -88,32 +88,68 @@ class CatalogLoader:
     ) -> Dict[str, Any]:
         """
         Load correct matches with graceful error handling.
-        Uses the same logic as BaseMatcher for consistency.
+        Uses the new directory structure: data/correct_matches/{field_type}.yaml
 
         Args:
-            correct_matches_path: Path to correct_matches.yaml file
+            correct_matches_path: Path to correct_matches directory (or legacy single file)
             field_type: Specific field type to extract (e.g., 'razor', 'blade', 'brush', 'soap')
 
         Returns:
             Dictionary with correct matches data
         """
-        # Use the same path resolution logic as BaseMatcher for consistency
-        path = correct_matches_path or Path("data/correct_matches.yaml")
+        # Handle both new directory structure and legacy single file
+        if correct_matches_path and correct_matches_path.is_file():
+            # Legacy single file mode - load the entire file
+            return self._load_legacy_correct_matches(correct_matches_path, field_type)
+        
+        # New directory structure mode
+        base_path = correct_matches_path or Path("data/correct_matches")
+        base_path = base_path.resolve()
 
-        # Resolve to absolute path to ensure consistent behavior regardless of working directory
-        path = path.resolve()
-
-        if not path.exists():
+        if not base_path.exists():
             # Use the same fallback behavior as BaseMatcher
             return {}
 
         try:
-            # Use the exact same loading logic as BaseMatcher
-            data = load_yaml_with_nfc(path, loader_cls=UniqueKeyLoader)
+            if field_type:
+                # Load specific field type file
+                field_file = base_path / f"{field_type}.yaml"
+                if not field_file.exists():
+                    return {}
+                
+                data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+                self.load_stats["catalogs_loaded"] += 1  # type: ignore
+                return data
+            else:
+                # Load all sections (for brush matcher)
+                result = {}
+                for field in ["brush", "handle", "knot", "split_brush"]:
+                    field_file = base_path / f"{field}.yaml"
+                    if field_file.exists():
+                        data = load_yaml_with_nfc(field_file, loader_cls=UniqueKeyLoader)
+                        result[field] = data
+                        self.load_stats["catalogs_loaded"] += 1  # type: ignore
+                    else:
+                        result[field] = {}
+                return result
+
+        except Exception:
+            # Use the same error handling as BaseMatcher - return empty dict on any error
+            return {}
+
+    def _load_legacy_correct_matches(
+        self, correct_matches_path: Path, field_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Load correct matches from legacy single file format.
+        Maintains backward compatibility with existing correct_matches.yaml.
+        """
+        try:
+            data = load_yaml_with_nfc(correct_matches_path, loader_cls=UniqueKeyLoader)
             self.load_stats["catalogs_loaded"] += 1  # type: ignore
 
             if field_type:
-                # Return field-specific section - same as BaseMatcher
+                # Return field-specific section
                 return data.get(field_type, {})
             else:
                 # Return all sections (for brush matcher)
