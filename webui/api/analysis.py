@@ -551,7 +551,7 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             ]
             examples = [info.get("file", "") for info in file_infos]
 
-            # Sort comment IDs by month (newest first) and limit to 5
+            # Sort comment IDs by month (newest first) - return ALL comment IDs
             unique_comment_ids = []
             if comment_ids:
                 # Get all comment IDs with their source files, prioritizing newer months
@@ -568,9 +568,9 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                         ):
                             comment_files[comment_id] = source_file
 
-                # Sort by filename (month) newest first and take first 5
+                # Sort by filename (month) newest first - return ALL comment IDs
                 sorted_comments = sorted(comment_files.items(), key=lambda x: x[1], reverse=True)
-                unique_comment_ids = [comment_id for comment_id, _ in sorted_comments[:5]]
+                unique_comment_ids = [comment_id for comment_id, _ in sorted_comments]
 
             unique_examples = list(set(examples))[:5] if examples else []
 
