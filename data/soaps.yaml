@@ -3934,6 +3934,9 @@ Zingari Man:
     The Distiller:
       patterns:
         - zingari.*dist
+    The Explorer:
+      patterns:
+        - zingari.*explorer
     The Gatherer:
       patterns:
         - "zina?gari.*gather"
@@ -3975,3 +3978,6 @@ Zingari Man:
       patterns:
         - zingari.*watchm(a|e)n
         - the watchman
+    Unscented:
+      patterns:
+        - zingari.*unscented
