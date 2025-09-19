@@ -19,7 +19,9 @@ class MatchResult:
     matched: Optional[Dict[str, Any]] = None
     match_type: Optional[str] = None
     pattern: Optional[str] = None
-    strategy: Optional[str] = None  # Name of the strategy that produced this result
+    strategy: Optional[str] = (
+        None  # Name of the strategy that produced this result (None for simple matchers)
+    )
 
     # DRY scoring fields (optional, for section-based matchers)
     section: Optional[str] = None  # "known_knots", "other_knots", etc.
@@ -260,6 +262,23 @@ def create_match_result(
         strategy=strategy,
         best_result=best_result,
         all_strategies=all_strategies,
+    )
+
+
+def create_simple_match_result(
+    original: str,
+    matched: Optional[Dict[str, Any]],
+    match_type: Optional[str],
+    pattern: Optional[str],
+) -> "MatchResult":
+    """Create a MatchResult for simple matchers that don't use strategies (soap, razor, blade)."""
+    # Create MatchResult without strategy field to avoid null values
+    return MatchResult(
+        original=original,
+        matched=matched,
+        match_type=match_type,
+        pattern=pattern,
+        # Explicitly omit strategy field - it will be None by default
     )
 
 

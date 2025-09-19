@@ -456,8 +456,12 @@ def process_month(
                         "matched": value.matched,
                         "match_type": value.match_type,
                         "pattern": value.pattern,
-                        "strategy": getattr(value, "strategy", None),
                     }
+
+                    # Only include strategy field if it's not None (for brush matcher)
+                    strategy = getattr(value, "strategy", None)
+                    if strategy is not None:
+                        base_fields["strategy"] = strategy
 
                     # Add brush-specific strategy scoring fields only for brush records
                     if key == "brush":
