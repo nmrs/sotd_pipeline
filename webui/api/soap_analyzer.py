@@ -677,8 +677,10 @@ async def get_soap_group_by_matched(
 
         # Load soap match data for the specified months
         matches = []
+        # Get the project root directory (3 levels up from this file)
+        project_root = Path(__file__).parent.parent.parent
         for month in month_list:
-            month_file = Path(f"../data/matched/{month}.json")
+            month_file = project_root / "data" / "matched" / f"{month}.json"
             if not month_file.exists():
                 logger.warning(f"Month file not found: {month_file}")
                 continue
