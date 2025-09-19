@@ -338,6 +338,9 @@ def normalize_for_matching(
     # Start with competition tag stripping
     normalized = strip_competition_tags(value, competition_tags)
 
+    # Strip social media handles (@ symbols from the beginning)
+    normalized = strip_social_media_handles(normalized)
+
     # Strip asterisk markup (leading asterisks, asterisk separators, etc.)
     normalized = strip_asterisk_markup(normalized)
 
@@ -509,6 +512,58 @@ def normalize_remainder_text(value: str) -> str:
 
     # Final cleanup: normalize whitespace and strip
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    return cleaned
+
+
+def strip_social_media_handles(value: str) -> str:
+    """
+    Strip @ symbols from the beginning of strings (social media handles).
+
+    This removes patterns like:
+    - Social media handles: @hendrixclassics Lavender → Lavender
+    - Handle-only strings: @karveshavingco → (empty string)
+    - Preserves @ symbols in the middle: Product @setting → Product @setting
+
+    Args:
+        value: Input string that may contain social media handles at the beginning
+
+    Returns:
+        String with @ symbols and handles removed from the beginning
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Handle edge cases first
+    if value == "@":
+        return "@"
+
+    # If it's just whitespace, return as-is
+    if value.strip() == "":
+        return value
+
+    # Strip all @ symbols and spaces from the beginning until we hit a handle character
+    # This handles cases like "@ @ @karveshavingco" by stripping everything until "karveshavingco"
+    cleaned = re.sub(r"^[@\s]+", "", value)
+
+    # If we didn't strip anything, return original
+    if cleaned == value:
+        return value
+
+    # Now look for handle pattern at the beginning
+    # Pattern: handle characters followed by space and more content, or just handle
+    match = re.match(r"^([a-zA-Z0-9_.-]+)(?:\s+(.*))?$", cleaned)
+
+    if match:
+        handle = match.group(1)
+        product = match.group(2)
+
+        # If there's a product after the handle, return handle + product
+        if product is not None:
+            return f"{handle} {product}"
+        else:
+            # If it's just a handle with no product, return the handle (without @)
+            return handle
 
     return cleaned
 
