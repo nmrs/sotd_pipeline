@@ -1308,7 +1308,7 @@ Declaration Grooming:
         - unconditional surrender
     Unscented:
       patterns:
-        - '(declaration grooming|\bdg\b).*unscented'
+        - '(declaration|\bdg\b).*unscented'
     Vide Poche:
       patterns:
         - vide poche
@@ -1332,6 +1332,10 @@ DentonMajik:
 Derby:
   patterns:
     - derby
+  scents:
+    Shaving Soap:
+      patterns:
+        - derby
 Desmond's Barrow:
   patterns:
     - desmond.*barrow
@@ -2335,6 +2339,7 @@ Mike's Natural Soaps:
     Orange, Cedarwood, & Black Pepper:
       patterns:
         - "mike.*orange.*pepper"
+        - mike.*ocbp
     Rose, Patchouli, Cedarwood:
       patterns:
         - ^mike.*rose.*cedar
