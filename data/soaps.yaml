@@ -154,6 +154,7 @@ Ariana & Evans:
     - ariana and evans the club
     - a&e / the club
     - the club
+    - "pedro fiasco''?s?(?: shave(?: soap)?)?"
   scents:
     60's Cologne:
       patterns:
@@ -333,6 +334,9 @@ Australian Private Reserve:
     General Ledger:
       patterns:
         - general ledger
+Aveeno:
+  patterns:
+    - aveeno
 Azalea City Suds:
   patterns:
     - "azalea city(?: suds)?"
@@ -354,6 +358,9 @@ Back to Basics Log Cabin:
     Glycerin Shave Soap:
       patterns:
         - back to basics log cabin.*glycerin
+Badger Creek:
+  patterns:
+    - badger creek
 Ballenclaugh:
   patterns:
     - ballenclaugh
@@ -654,6 +661,9 @@ Beak & Snout:
 Bedlingtom Supplies:
   patterns:
     - "bedlington( supplies)?"
+Biggis Seifenküche:
+  patterns:
+    - biggis seifenk[üu]e?che
 Bioderma:
   default format: Foam
   patterns:
@@ -721,6 +731,13 @@ Burke Avenue:
 Buzzz Honey:
   patterns:
     - "buzzz ?honey"
+Bvlgari:
+  patterns:
+    - b[vu]lgari
+  scents:
+    Man in Black:
+      patterns:
+        - b[vu]lgari.*man in black
 CBL Soaps:
   patterns:
     - "cbl(?: soaps)?"
@@ -866,6 +883,10 @@ Catie's Bubbles:
     Miracle:
       patterns:
         - ^catie.*miracle
+    Parma Inspiration:
+      patterns:
+        - parma inspiration
+        - inspirazione di parma
     Pine Barrens:
       patterns:
         - catie.*pine barrens
@@ -992,12 +1013,16 @@ Chiseled Face:
     Ghost Town Barber:
       patterns:
         - ghost town barber
+    Guy Noir:
+      patterns:
+        - guy noir
     Járnviðr:
       patterns:
         - jarnvi\wr
     Midnight Stag:
       patterns:
         - midnight stag
+        - (chisel|cf).*stag
     Santa Monica Bay Rum:
       patterns:
         - santa monica bay rum
@@ -1016,7 +1041,7 @@ Cloud Shave:
     - cloud shav(e|ing)
 Clubman Pinaud:
   patterns:
-    - "(clubman )?pinaud"
+    - "(clubman )?pin[au]+d"
   scents:
     Classic Barber Shave Cream:
       format: Crea
@@ -1025,6 +1050,9 @@ Clubman Pinaud:
     Shave Soap:
       patterns:
         - "(clubman )?pinaud"
+Coast Fragrance:
+  patterns:
+    - coast fragrance
 Coco Nutty:
   patterns:
     - "coco(?:'?s)? nutty(?: soaps?)?"
@@ -1516,13 +1544,6 @@ Floris London:
 Fresh Thyme Farmacy:
   patterns:
     - fresh thyme farmacy
-GROOM:
-  patterns:
-    - les industries groom
-  scents:
-    Shaving Soap:
-      patterns:
-        - les industries groom
 GZD:
   patterns:
     - '\bgzd\b'
@@ -1621,6 +1642,10 @@ Grey Lab:
     Kyoto:
       patterns:
         - gr[ae]y lab.*kyoto
+GROOM:
+  patterns:
+    - \bgroom\b
+    - les industries groom
 Grooming Cult:
   patterns:
     - grooming cult
@@ -1669,6 +1694,9 @@ HAGS:
 Hajamat:
   patterns:
     - hajamat
+Happy Chap:
+  patterns:
+    - happy chap
 Haslinger:
   patterns:
     - haslinger
@@ -1891,6 +1919,13 @@ Hwayeon Soap Co.:
 I Coloniali:
   patterns:
     - '\bi\b colonia(?:li)?\b'
+Imaginary Authors:
+  patterns:
+    - imaginary authors
+  scents:
+    Telegrama:
+      patterns:
+        - imagin.*telegrama
 Itakha:
   patterns:
     - itakha
@@ -1912,6 +1947,9 @@ Jack Black:
   default format: Cream
   patterns:
     - jack black
+Jilek's:
+  patterns:
+    - '(?:p\.?|patrick) ?jilek''?s?'
 Jordan's:
   patterns:
     - "jordan''?s"
@@ -1928,6 +1966,13 @@ Jordan's:
 K Shave Worx:
   patterns:
     - "k shave ?wor(ks|x)"
+Karve:
+  patterns:
+    - 'karve(?: shaving (?: co\.?)?)?'
+  scents:
+    Semois Valley:
+      patterns:
+        - karve.*semois valley
 Kell's Original Soap:
   patterns:
     - kell'?s original
@@ -2029,6 +2074,13 @@ L'Occitane:
     Cade:
       patterns:
         - \bcade\b
+Lockhart's:
+  patterns:
+    - 'lockhart''?s(?: authentic(?: grooming)?(?: co\.?,?(?: llc)?)?)?'
+  scents:
+    Sex Machine:
+      patterns:
+        - lockhart'?s.*sex machine
 Lodrino:
   patterns:
     - "lodrino(.*pasteur pharmacy)?"
@@ -2213,6 +2265,7 @@ Master Soap Creations:
       patterns:
         - master soap creations.*bloom
         - '\bmsc\b.*bloom'
+        - pasteur.*bloom
     Only the Brave:
       patterns:
         - master.*only the brave
@@ -2258,6 +2311,9 @@ Mike's Natural Soaps:
     Barber Shop:
       patterns:
         - "^mike.*barber ?shop"
+    Bay Rum:
+      patterns:
+        - mike.*bay rum
     Bergamot, Orange, Ylang-ylang:
       patterns:
         - mike.*bergamot.*ylang
@@ -2714,6 +2770,13 @@ RazoRock:
 Razor Emporium:
   patterns:
     - razor emporium
+Razor Master:
+  patterns:
+    - razor master
+  scents:
+    Santtu:
+      patterns:
+        - santtu
 Red House Farm:
   patterns:
     - "red house farms?"
@@ -2796,6 +2859,9 @@ Saponificio Varesino:
     Opuntia:
       patterns:
         - op+[iu]ntia
+Savonnerie du Bon Berger:
+  patterns:
+    - (?:savonnerie du )?bon berger
 Savonniere du Moulin:
   patterns:
     - savonniere du moulin
@@ -2877,6 +2943,9 @@ Siliski Soaps:
     Apothecary Cellars:
       patterns:
         - siliski.*apothecary cellars
+    Unscented:
+      patterns:
+        - siliski.*unscented
 Sir Hare:
   patterns:
     - "sir hare"
@@ -3018,6 +3087,9 @@ St. James of London:
     Mandarin & Patchouli:
       patterns:
         - james.*mandarin.*patch
+STEM Handmade Soap:
+  patterns:
+    - '\bstem\b(?: handmade)?(?:  soap)?'
 Stirling Soap Co.:
   patterns:
     - 'st[ie]rling((?: soaps?)?(?: co\.?(?:mpany)?)?)?'
@@ -3284,6 +3356,9 @@ Summer Break Soaps:
     Remote Learning:
       patterns:
         - remote learning
+    Rope Swing:
+      patterns:
+        - rope swing
     Steady:
       patterns:
         - summer ?break.*steady
@@ -3455,7 +3530,10 @@ Tcheon Fung Sing:
         - tcheon.*torino
 The Artisan Soap Shoppe:
   patterns:
-    - 'the artisan(?: (soap|shav\w+))? shoppe'
+    - '(?:the )?artisan(?: (soap|shav\w+))? shoppe'
+The Black Stuff:
+  patterns:
+    - (the )?black stuff
 The Body Shop:
   default format: Cream
   patterns:
@@ -3547,6 +3625,9 @@ Tiki Bar Soap:
     The Captain:
       patterns:
         - tiki.*captain
+Tim's Soap:
+  patterns:
+    - "tim'?s(?: soap)?"
 Truefitt & Hill:
   patterns:
     - true?fit.*hill
@@ -3798,6 +3879,9 @@ Wooly Wash Soapery:
 Xabons Xavieiro:
   patterns:
     - xabons xavieiro
+Xpec:
+  patterns:
+    - xpec
 Yaqi:
   patterns:
     - yaqi
