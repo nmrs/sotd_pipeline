@@ -190,20 +190,11 @@ class UnmatchedAnalyzer(AnalysisTool):
                     )
                     return
 
-                # If we have both brand and scent but match_type is "brand", it's a brand-only
-                # fallback that successfully matched both fields - this should be counted as
-                # unmatched for soap field
-                if brand and scent and match_type == "brand":
-                    normalized = extract_text(field_val, field)
-                    all_unmatched[normalized].append(
-                        {
-                            **file_info,
-                            "brand_only": True,
-                            "brand": brand,
-                            "scent": scent,
-                            "match_type": match_type,
-                        }
-                    )
+                # If we have both brand and scent, it's a complete match regardless of match_type
+                # This includes both "regex" (scent patterns) and "brand" (brand patterns + remainder)
+                # These are properly matched soaps and should NOT be in the unmatched list
+                if brand and scent:
+                    # This is a complete match - don't add to unmatched list
                     return
 
                 # If we have both maker and scent with match_type other than "brand", it's a
