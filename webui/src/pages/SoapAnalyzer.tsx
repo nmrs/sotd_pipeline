@@ -109,7 +109,7 @@ const SoapAnalyzer: React.FC = () => {
       // Combine selected months with delta months if enabled
       const allMonths = [...selectedMonths, ...deltaMonths];
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/soap-analyzer/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
+      const url = `http://localhost:8000/api/soaps/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -155,7 +155,7 @@ const SoapAnalyzer: React.FC = () => {
       // Combine selected months with delta months if enabled
       const allMonths = [...selectedMonths, ...deltaMonths];
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/soap-analyzer/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
+      const url = `http://localhost:8000/api/soaps/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -213,7 +213,7 @@ const SoapAnalyzer: React.FC = () => {
       // Combine selected months with delta months if enabled
       const allMonths = [...selectedMonths, ...deltaMonths];
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/soap-analyzer/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
+      const url = `http://localhost:8000/api/soaps/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -1067,7 +1067,7 @@ const SoapAnalyzer: React.FC = () => {
           onClose={handleCloseCommentModal}
           comments={[selectedComment]}
           currentIndex={0}
-          onNavigate={async () => {}} // No navigation needed for single comment
+          onNavigate={async () => { }} // No navigation needed for single comment
           remainingCommentIds={[]}
         />
       )}
