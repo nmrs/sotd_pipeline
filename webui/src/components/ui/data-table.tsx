@@ -293,12 +293,13 @@ export function DataTable<TData, TValue>({
           try {
             const columnValue = (column as any).accessorFn(row);
             // Debug logging for search
-            if (searchTerm === 'b-20' && column.id === 'matched_content') {
+            if (searchTerm === 'b-20') {
               console.log('Search debug:', {
                 searchTerm,
                 columnId: column.id,
                 columnValue,
-                includes: columnValue && String(columnValue).toLowerCase().includes(searchTerm)
+                includes: columnValue && String(columnValue).toLowerCase().includes(searchTerm),
+                selectedSearchColumns: Array.from(selectedSearchColumns)
               });
             }
             if (columnValue && String(columnValue).toLowerCase().includes(searchTerm)) {
