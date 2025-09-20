@@ -98,25 +98,7 @@ export function DataTable<TData, TValue>({
   field,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
-  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(() => {
-    // Default to all columns for search instead of hardcoded specific columns
-    const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
-    return new Set(allColumnIds);
-  });
-
-  // Update selected search columns when columns change (e.g., when switching between regular and grouped data)
-  useEffect(() => {
-    const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
-    const newColumnSet = new Set(allColumnIds);
-
-    // Only update if the columns have actually changed
-    const currentColumns = Array.from(selectedSearchColumns).sort();
-    const newColumns = Array.from(newColumnSet).sort();
-
-    if (JSON.stringify(currentColumns) !== JSON.stringify(newColumns)) {
-      setSelectedSearchColumns(newColumnSet);
-    }
-  }, [columns, selectedSearchColumns]);
+  // Simple search - no column selection needed
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const columnDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -215,93 +197,26 @@ export function DataTable<TData, TValue>({
       const searchTerm = filterValue.toLowerCase();
       const rowData = row.original as Record<string, unknown>;
 
-      // Check if this is grouped data (has is_grouped property)
-      const isGroupedData = 'is_grouped' in rowData && rowData.is_grouped === true;
+      // Simple search: just search in the most important string fields
+      const searchableFields = ['original', 'matched_string', 'brand', 'model', 'match_type', 'mismatch_type'];
+      
+      for (const field of searchableFields) {
+        const value = rowData[field];
+        if (value && typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
+          return true;
+        }
+      }
 
-      // Handle grouped data with special search logic
-      if (isGroupedData) {
-        // For grouped data, search in specific properties regardless of column selection
-        if (rowData.matched_string && typeof rowData.matched_string === 'string' && rowData.matched_string.toLowerCase().includes(searchTerm)) {
-          return true;
-        }
-        if (rowData.total_count && typeof rowData.total_count === 'number' && rowData.total_count.toString().includes(searchTerm)) {
-          return true;
-        }
-        if (rowData.match_type && typeof rowData.match_type === 'string' && rowData.match_type.toLowerCase().includes(searchTerm)) {
-          return true;
-        }
-        // Search in top_patterns array
-        if (rowData.top_patterns && Array.isArray(rowData.top_patterns)) {
-          if (rowData.top_patterns.some((pattern: any) =>
-            pattern.original && String(pattern.original).toLowerCase().includes(searchTerm)
-          )) {
+      // Search in matched object if it exists
+      if (rowData.matched && typeof rowData.matched === 'object') {
+        const matched = rowData.matched as Record<string, unknown>;
+        for (const [key, value] of Object.entries(matched)) {
+          if (value && typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
             return true;
           }
         }
-        // Search in all_patterns array
-        if (rowData.all_patterns && Array.isArray(rowData.all_patterns)) {
-          if (rowData.all_patterns.some((pattern: any) =>
-            pattern.original && String(pattern.original).toLowerCase().includes(searchTerm)
-          )) {
-            return true;
-          }
-        }
-        // Search in match_type_breakdown object
-        if (rowData.match_type_breakdown && typeof rowData.match_type_breakdown === 'object') {
-          for (const [_nestedKey, nestedValue] of Object.entries(rowData.match_type_breakdown as Record<string, unknown>)) {
-            if (String(nestedValue).toLowerCase().includes(searchTerm)) {
-              return true;
-            }
-          }
-        }
-        return false;
       }
 
-      // Handle regular data with column selection
-      // First, search in raw row data properties
-      for (const [key, value] of Object.entries(rowData)) {
-        // Skip if this column is not selected for search
-        if (!selectedSearchColumns.has(key)) continue;
-
-        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
-          return true;
-        }
-        if (typeof value === 'number' && value.toString().includes(searchTerm)) {
-          return true;
-        }
-        if (Array.isArray(value) && value.some(v => String(v).toLowerCase().includes(searchTerm))) {
-          return true;
-        }
-        if (value && typeof value === 'object') {
-          // Search in nested objects (like matched data)
-          for (const [_nestedKey, nestedValue] of Object.entries(
-            value as Record<string, unknown>
-          )) {
-            if (String(nestedValue).toLowerCase().includes(searchTerm)) {
-              return true;
-            }
-          }
-        }
-      }
-
-      // Also search in columns that use accessorFn (like the "Original" column)
-      for (const column of columns) {
-        const columnId = column.id || (column as any).accessorKey;
-        if (!selectedSearchColumns.has(columnId)) continue;
-
-        // If column has accessorFn, evaluate it and search in the result
-        if ((column as any).accessorFn) {
-          try {
-            const columnValue = (column as any).accessorFn(row);
-            if (columnValue && String(columnValue).toLowerCase().includes(searchTerm)) {
-              return true;
-            }
-          } catch (error) {
-            // Skip columns that can't be evaluated
-            continue;
-          }
-        }
-      }
       return false;
     },
     state: {
