@@ -258,6 +258,7 @@ export function DataTable<TData, TValue>({
       }
 
       // Handle regular data with column selection
+      // First, search in raw row data properties
       for (const [key, value] of Object.entries(rowData)) {
         // Skip if this column is not selected for search
         if (!selectedSearchColumns.has(key)) continue;
@@ -279,6 +280,24 @@ export function DataTable<TData, TValue>({
             if (String(nestedValue).toLowerCase().includes(searchTerm)) {
               return true;
             }
+          }
+        }
+      }
+
+      // Also search in columns that use accessorFn (like the "Original" column)
+      for (const column of columns) {
+        if (!selectedSearchColumns.has(column.id || (column as any).accessorKey)) continue;
+        
+        // If column has accessorFn, evaluate it and search in the result
+        if ((column as any).accessorFn) {
+          try {
+            const columnValue = (column as any).accessorFn(row);
+            if (columnValue && String(columnValue).toLowerCase().includes(searchTerm)) {
+              return true;
+            }
+          } catch (error) {
+            // Skip columns that can't be evaluated
+            continue;
           }
         }
       }
