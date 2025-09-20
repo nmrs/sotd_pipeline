@@ -286,7 +286,8 @@ export function DataTable<TData, TValue>({
 
       // Also search in columns that use accessorFn (like the "Original" column)
       for (const column of columns) {
-        if (!selectedSearchColumns.has(column.id || (column as any).accessorKey)) continue;
+        const columnId = column.id || (column as any).accessorKey;
+        if (!selectedSearchColumns.has(columnId)) continue;
         
         // If column has accessorFn, evaluate it and search in the result
         if ((column as any).accessorFn) {
