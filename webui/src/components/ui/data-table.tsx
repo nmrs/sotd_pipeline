@@ -101,7 +101,6 @@ export function DataTable<TData, TValue>({
   const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(() => {
     // Default to all columns for search instead of hardcoded specific columns
     const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
-    console.log('Initial selectedSearchColumns:', allColumnIds);
     return new Set(allColumnIds);
   });
 
@@ -215,11 +214,6 @@ export function DataTable<TData, TValue>({
     globalFilterFn: (row, _columnId, filterValue) => {
       const searchTerm = filterValue.toLowerCase();
       const rowData = row.original as Record<string, unknown>;
-      
-      // Debug logging for all searches
-      if (searchTerm) {
-        console.log('Global filter called:', { searchTerm, filterValue, rowData });
-      }
 
       // Check if this is grouped data (has is_grouped property)
       const isGroupedData = 'is_grouped' in rowData && rowData.is_grouped === true;
@@ -298,16 +292,6 @@ export function DataTable<TData, TValue>({
         if ((column as any).accessorFn) {
           try {
             const columnValue = (column as any).accessorFn(row);
-            // Debug logging for search
-            if (searchTerm === 'b-20') {
-              console.log('Search debug:', {
-                searchTerm,
-                columnId: column.id,
-                columnValue,
-                includes: columnValue && String(columnValue).toLowerCase().includes(searchTerm),
-                selectedSearchColumns: Array.from(selectedSearchColumns)
-              });
-            }
             if (columnValue && String(columnValue).toLowerCase().includes(searchTerm)) {
               return true;
             }
