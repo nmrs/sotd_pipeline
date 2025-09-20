@@ -18,6 +18,9 @@ Welcome to your SOTD Lather Log for August 2025
 
 * 49 users posted 31/31, with u/Engineered_Shave grabbing the brass ring with 38 shaves and 0 missed days.
 
+* No samples were used this month which I guess makes sense for Austere August -- it's hard to squeeze 31 shaves out of a sample.
+
+
 ## Notes & Caveats
 
 * The unique user column shows the number of different users who used a given brand/soap/etc in the month.
