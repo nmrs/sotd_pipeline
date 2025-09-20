@@ -100,6 +100,13 @@ Alshabab:
   Razor:
     patterns:
       - al ?shabab
+Anton Wingen Jr.:
+  Red Point:
+    format: Straight
+    patterns:
+      - wingen.*red point
+    straight:
+      - ^(?!.*red point).*wingen.*(straight|\d{1,2}/(8|16)|ground)
 A.R. Justice:
   Straight:
     format: Straight
@@ -192,6 +199,11 @@ Baili:
     patterns:
       - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{1}[79]'
       - bail[ie].*(tto|butterfly)
+Baikal:
+  Straight:
+    format: Straight
+    patterns:
+      - bai?kal.*(?:(straight|\d{1,2}/(8|16)))?
 Bakelite:
   Slant:
     patterns:
@@ -244,7 +256,7 @@ Blackland:
     format: Half DE
     patterns:
       - blackland.*batch[0\s-]*2
-      - blackland.*square
+      - blackland.*(square|rectangle)
   Blackbird:
     patterns:
       - 'bb\s*(sb|oc)'
@@ -257,6 +269,7 @@ Blackland:
       - Blackland\s*Tb?ird
       - blackland
       - the bird
+      - \bbb\b
   Dart:
     patterns:
       - (?:blackland)?.*\bdart\b
@@ -475,6 +488,7 @@ Design94:
   Aviation94:
     patterns:
       - aviation94
+      - design ?94.*(space|aviation)
 Diane:
   Double Edge Shaver:
     patterns:
@@ -518,6 +532,13 @@ Dovo:
     width: 5/8
     patterns:
       - dovo.*\b41\b(?:.*\d{1,2}/(8|16))?
+  Runde Sache:
+    format: Straight
+    grind: Full Hollow
+    point: Square
+    width: 5/8
+    patterns:
+      - dovo.*runde.*sache
   Shavette:
     format: Shavette
     patterns:
@@ -525,7 +546,8 @@ Dovo:
   Straight:
     format: Straight
     patterns:
-      - dovo.*(straight|\d{1,2}/(8|16)|ground)
+      - ^(?!.*runde).*dovo.*(straight|\d{1,2}/(8|16)|ground)
+      - dovo.*inox
 Dubl Duck:
   Goldedge:
     format: Straight
@@ -584,7 +606,7 @@ Enders:
   Speed Shaver:
     format: Other
     patterns:
-      - enders
+      - enders.*(?:speed)
 ERN:
   Straight:
     format: Straight
@@ -708,6 +730,13 @@ Feather:
       - feather.*artist.*clu
       - feather.*ac(?:.*(shavette|kami))?
 Filarmonica:
+  14 Doble Temple:
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 15/16
+    patterns:
+      - filarmonica.*14.*(dou?b|temp)
   Straight:
     format: Straight
     patterns:
@@ -1183,6 +1212,11 @@ J.A. Henckels:
     format: Straight
     patterns:
       - hen[ck]+[el]+s?(?:.*\d{1,2}/(8|16))?
+J. Koester's Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - koester(?:.*\d{1,2}/(8|16))?
 J.R. Torrey Razor Co.:
   Straight:
     format: Straight
@@ -1241,7 +1275,7 @@ Kai:
   Captain Kamisori:
     format: Shavette
     patterns:
-      - kai.*captain.*(kami|cloneisori)
+      - kai.*captain.*kami
   Excelia Kamisori:
     format: Shavette
     patterns:
@@ -1353,6 +1387,10 @@ Lee Mfg Co.:
     format: Straight
     patterns:
       - lee.*(mfg|manufac|warrant)
+Leresche:
+  "700":
+    patterns:
+      - leresche.*700
 L'Essor:
   SE:
     format: Other
@@ -1619,6 +1657,7 @@ Other Shavette:
       - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
       - chopstick kamisori
       - ice ?pick kamisori
+      - "[ck]lon(?:e[nm])?isori"
 Other Shavette (A77):
   "":
     format: Shavette (A77)
@@ -1796,6 +1835,7 @@ Parker:
     patterns:
       - parker.*srw
   SRX:
+    format: Shavette (Half DE)
     patterns:
       - parker.*srx
   Semi Slant:
@@ -1841,6 +1881,12 @@ Personna:
     patterns:
       - bbs-0
       - person.*bbs.*0
+Piedmont:
+  Straight:
+    format: Straight
+    patterns:
+      - piedmont.*(straight|\d{1,2}/(8|16)|ground)
+      - piedmont.*perkaise
 PILS:
   "":
     patterns:
@@ -2048,6 +2094,15 @@ Robert Klaas:
     format: Straight
     patterns:
       - robert.*klaas(?:.*\d{1,2}/(8|16))?
+Robeson:
+  Shure-Edge:
+    format: Straight
+    patterns:
+      - robeson.*(shure|sheer)[ -]?edge
+  Straight:
+    format: Straight
+    patterns:
+      - robeson.*(straight|\d{1,2}/(8|16)|ground)
 Robin:
   Snap 2.0:
     patterns:
@@ -2234,6 +2289,10 @@ Spornette:
     format: Shavette (Hair Shaper)
     patterns:
       - sp(o|e)rnette
+Stahly:
+  Live Blade:
+    patterns:
+      - stahly.*live.*blade
 Standard Razors:
   Aluminum Series:
     patterns:
@@ -2410,6 +2469,7 @@ Utica Knife & Razor:
     format: Straight
     patterns:
       - utica.*straight(?:.*\d{1,2}/(8|16))?
+      - utica
 Utopia:
   Shavette:
     format: Shavette (Half DE)
@@ -2500,6 +2560,14 @@ Wade & Butcher:
       - wade.*butcher.*(straight|celebrated)?.*
       - w&b.*(straight|celebrated)?.*
       - butcher.*wade.*(straight|celebrated)?.*
+Wadsworth Razor:
+  Straight:
+    format: Straight
+    patterns:
+      - wadsworth.*(straight|\d{1,2}/(8|16)|ground)
+  XLNT:
+    patterns:
+      - wadsworth.*xlnt
 Wardonia:
   "":
     patterns:
