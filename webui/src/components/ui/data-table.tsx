@@ -292,6 +292,15 @@ export function DataTable<TData, TValue>({
         if ((column as any).accessorFn) {
           try {
             const columnValue = (column as any).accessorFn(row);
+            // Debug logging for search
+            if (searchTerm === 'b-20' && column.id === 'matched_content') {
+              console.log('Search debug:', {
+                searchTerm,
+                columnId: column.id,
+                columnValue,
+                includes: columnValue && String(columnValue).toLowerCase().includes(searchTerm)
+              });
+            }
             if (columnValue && String(columnValue).toLowerCase().includes(searchTerm)) {
               return true;
             }
