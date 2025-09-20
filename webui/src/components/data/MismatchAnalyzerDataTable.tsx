@@ -487,6 +487,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const stableData = useMemo(() => filteredData, [filteredData]);
 
   const columns = useMemo(() => {
+    // Check if any items are grouped to determine header label
+    const hasGroupedItems = data.some(item => isGroupedDataItem(item));
+    const firstColumnHeader = hasGroupedItems ? 'Matched' : 'Original';
+
     const baseColumns: ColumnDef<AnalyzerDataItem>[] = [
       // Selection column
       ...(onItemSelection
@@ -604,7 +608,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           // For regular data, use original
           return row.original;
         },
-        header: 'Matched',
+        header: firstColumnHeader,
         cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           // For grouped data, show matched_string instead of original
@@ -1074,6 +1078,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
     return baseColumns;
   }, [
+    data,
     onCommentClick,
     commentLoading,
     selectedItems,
