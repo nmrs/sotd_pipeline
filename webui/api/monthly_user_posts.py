@@ -21,7 +21,7 @@ from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/users", tags=["users"])
+router = APIRouter(prefix="/api/monthly-user-posts", tags=["monthly-user-posts"])
 
 
 class UserPostingAnalysis(BaseModel):
