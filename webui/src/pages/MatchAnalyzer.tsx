@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Button } from '@/components/ui/button';
 import { Filter, Eye, EyeOff } from 'lucide-react';
 import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
+import GroupedDataTable from '@/components/data/GroupedDataTable';
 import {
   analyzeMismatch,
   MismatchAnalysisResult,
@@ -1816,21 +1817,39 @@ const MatchAnalyzer: React.FC = () => {
 
           <div className='p-6'>
             {filteredResults.length > 0 ? (
-              <MismatchAnalyzerDataTable
-                key={`match-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
-                data={filteredResults}
-                field={selectedField}
-                onCommentClick={handleCommentClick}
-                commentLoading={commentLoading}
-                selectedItems={selectedItems}
-                onItemSelection={handleItemSelection}
-                isItemConfirmed={isItemConfirmed}
-                onVisibleRowsChange={handleVisibleRowsChange}
-                matched_data_map={results?.matched_data_map}
-                onBrushSplitClick={handleBrushSplitClick}
-                activeRowIndex={activeRowIndex}
-                keyboardNavigationEnabled={keyboardNavigationEnabled}
-              />
+              // Use GroupedDataTable for grouped view, MismatchAnalyzerDataTable for normal view
+              groupByMatched && selectedField === 'soap' ? (
+                <GroupedDataTable
+                  key={`grouped-${displayMode}-${filteredResults.length}`}
+                  data={filteredResults as GroupedDataItem[]}
+                  field={selectedField}
+                  onCommentClick={handleCommentClick}
+                  commentLoading={commentLoading}
+                  selectedItems={selectedItems}
+                  onItemSelection={handleItemSelection}
+                  isItemConfirmed={isItemConfirmed}
+                  onVisibleRowsChange={handleVisibleRowsChange}
+                  onBrushSplitClick={handleBrushSplitClick}
+                  activeRowIndex={activeRowIndex}
+                  keyboardNavigationEnabled={keyboardNavigationEnabled}
+                />
+              ) : (
+                <MismatchAnalyzerDataTable
+                  key={`match-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
+                  data={filteredResults}
+                  field={selectedField}
+                  onCommentClick={handleCommentClick}
+                  commentLoading={commentLoading}
+                  selectedItems={selectedItems}
+                  onItemSelection={handleItemSelection}
+                  isItemConfirmed={isItemConfirmed}
+                  onVisibleRowsChange={handleVisibleRowsChange}
+                  matched_data_map={results?.matched_data_map}
+                  onBrushSplitClick={handleBrushSplitClick}
+                  activeRowIndex={activeRowIndex}
+                  keyboardNavigationEnabled={keyboardNavigationEnabled}
+                />
+              )
             ) : (
               <div className='text-center py-8'>
                 <div className='text-green-600 text-4xl mb-2'>✅</div>
