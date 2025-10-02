@@ -503,6 +503,7 @@ known_knots:
       patterns:
         - turn.{1,5}shave.*shoat
         - t[&n]s.*shoat
+        - shoat
     Tip (Badger):
       fiber: Badger
       patterns:

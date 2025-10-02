@@ -83,6 +83,12 @@ blade:
     - file: 2024-07.json
       id: lfjrr79
       source: user
+  naniwa 1k - norton 4-8-12k:
+    added_date: '2025-10-02'
+    comment_ids:
+    - file: 2025-09.json
+      id: ngu2m1r
+      source: user
   not sure, didn't take it apart to see:
     added_date: '2025-07-19'
     comment_ids:
@@ -222,6 +228,12 @@ brush:
     - file: 2025-06.json
       id: mxjuhmv
       source: user
+  my hands:
+    added_date: '2025-10-02'
+    comment_ids:
+    - file: 2025-09.json
+      id: nevccp5
+      source: user
   n/a:
     added_date: '2025-08-10'
     comment_ids:
@@ -287,6 +299,12 @@ brush:
     comment_ids:
     - file: 2025-06.json
       id: mx6lwpn
+      source: user
+  unmarked mystery brush:
+    added_date: '2025-10-02'
+    comment_ids:
+    - file: 2025-09.json
+      id: ndxp6mm
       source: user
 razor:
   .:

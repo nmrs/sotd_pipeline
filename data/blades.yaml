@@ -80,6 +80,7 @@ AC:
       patterns:
         - (schick.*)?proline
         - (schick.*)?(proline.*)?p[ -]?[23]0
+        - schick.*\bac\b
 Cartridge/Disposable:
   Cartridge/Disposable:
     "":
@@ -139,6 +140,10 @@ DE:
       patterns:
         - amc.*de[-\s]*luxe?
         - amc.*thin
+  American Razor Blades:
+    DE:
+      patterns:
+        - american.*razor.*blades
   Asco:
     Platinum:
       patterns:
@@ -359,6 +364,9 @@ DE:
     Stainless:
       patterns:
         - gil.*stain
+    Super Silver:
+      patterns:
+        - gil.*super.*silver
     Super Stainless:
       patterns:
         - gil.*super.*stain
@@ -395,6 +403,10 @@ DE:
     Double Edge:
       patterns:
         - goodline
+  Inglish:
+    Super Stainless:
+      patterns:
+        - \binglish\b
   Kai:
     DE:
       patterns:
@@ -406,6 +418,7 @@ DE:
         - king.*c.*gil.*et
         - gil.*et.*king.*c
         - \bkcg\b
+        - kc gillette
   Ladas:
     Super Stainless:
       patterns:
@@ -488,9 +501,9 @@ DE:
       patterns:
         - (person+a)?.*lab *blue
         - personn*a.*blue
-        - personn*a.*c.*c
-        - ^(?!.*(atra|gem|pfte|plat|stain|ss|crystal)).*personn*a
-        - ^(?!.*(atra|gem|pfte|plat|stain|ss|crystal)).*accuforge
+        - personn*a.*comf.*coat
+        - personn*a
+        - accuforge
     Med Prep:
       patterns:
         - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -498,8 +511,8 @@ DE:
         - accu-?thrive
     Platinum:
       patterns:
-        - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*plat
+        - person.*red
     Super Stainless:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -841,6 +854,10 @@ Hair Shaper:
       patterns:
         - weck
 Half DE:
+  American Razor Blades:
+    SE:
+      patterns:
+        - american.*razor.*blades
   Crown:
     Super Stainless SE:
       patterns:
@@ -849,6 +866,10 @@ Half DE:
     HST-300:
       patterns:
         - dorco.*hst.*300
+  Facón:
+    SE:
+      patterns:
+        - fac[oōó]n
   Gillette:
     Perma-Sharp SE:
       patterns:
@@ -899,6 +920,11 @@ Injector:
       patterns:
         - supply.*(?:inject)?
         - black label
+  Taconic:
+    Injector:
+      patterns:
+        - taconic.*injector
+        - parker.*taconic
   Ted Pella:
     Injector:
       patterns:

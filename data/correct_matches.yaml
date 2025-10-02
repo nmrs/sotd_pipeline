@@ -1,3 +1,356 @@
+blade:
+  AC:
+    Feather:
+      ProGuard:
+      - feather proguard
+    Schick:
+      Proline (AC):
+      - schick ac
+      - schick p30
+      - schick proline p-30
+      - shick p30
+      - shick proline
+  DE:
+    7 O'Clock:
+      Super Platinum (Black):
+      - 7sp black
+      - gillette - 7 o'clock (black) super platinum
+      - gillette 7 o'clock super platinum
+      - gillette 7 o'clock super platinum black
+    Astra:
+      Superior Platinum (Green):
+      - astra platium (green)
+      Superior Stainless (Blue):
+      - astra stainless (blue russian)
+      - astra superior stainless
+    Bolzano:
+      Superinox:
+      - bolzano superinox (german)
+    Dorco:
+      Prime Platinum:
+      - dorco prime
+      ST-300:
+      - dorco platinum
+      - dorco st300
+    Feather:
+      DE:
+      - feather - new-hi
+      - feather platinum
+    FlyDear:
+      Super Platinum:
+      - flydear ($0.057/blade, )
+    Gillette:
+      '365':
+      - gillette 365 (chinese)
+      Minora:
+      - gillette minora og
+      Nacet:
+      - gillette - nacet stainless
+      - gillette nacet half blade
+      - nacet, gillette
+      Perma-Sharp:
+      - gillette 7 o'clock permasharp stainless
+      - gillette- perma sharp
+      - perma sharp ($0.099/blade)
+      Super Silver:
+      - english gillette super silver 1980
+      - gillette super silver
+    Inglish:
+      Super Stainless:
+      - inglish stainless
+    King C Gillette:
+      DE:
+      - kc gillette
+      - kc gillette (aka gillette platinum)
+      - kc gillette, aka gillette platinum
+    Laser:
+      Ultra:
+      - laser ultra triple coated
+    Lord:
+      Platinum:
+      - lord platinum
+    Personna:
+      '74':
+      - p-74
+      Lab Blue:
+      - persona comfort coat
+      - personna double edge comfrot coated super platinum
+      Super Stainless:
+      - personna super blue
+    Polsilver:
+      Super Iridium:
+      - polsilver
+    RK:
+      Stainless:
+      - rk chromium
+    Rapira:
+      Swedish:
+      - rapira swedish super steel
+    Tiger:
+      Platinum:
+      - czech blades tiger
+    Timor:
+      Stainless Steel:
+      - timor - stainless
+    Wilkinson Sword:
+      Classic:
+      - wilkinson sword germany
+      - wilkinson sword, germany
+  GEM:
+    PAL:
+      Blue Blade:
+      - pal - single edge carbon steel blue
+    Personna:
+      GEM PTFE:
+      - accutec - pro single edge
+      - accutec pro single edge
+      - accutek pro gem blades
+      - gem ptfe (use 5 or so)
+      - gem stainless ptfe
+      GEM Stainless:
+      - gem - coated single edge stainless steel
+      - gem ss
+  Hair Shaper:
+    Kismet:
+      Hair Shaper:
+      - kismet blade
+      - kismet hair shaper blade
+    Personna:
+      Hair Shaper:
+      - personna hair shaper
+  Half DE:
+    American Razor Blades:
+      SE:
+      - american razor blades
+    Facón:
+      SE:
+      - facōn
+    Gillette:
+      Perma-Sharp SE:
+      - permasharp
+  Injector:
+    Personna:
+      Injector:
+      - personna injector
+    Schick:
+      Proline (Injector):
+      - schick proline b-20 blade
+    Taconic:
+      Injector:
+      - parker parker taconic
+    Ted Pella:
+      Injector:
+      - ted pella - injector
+      - ted pella ptfe
+brush:
+  AP Shave Co:
+    APLuxury:
+    - ap shaveco 24mm luxury mixed knot
+    Cashmere:
+    - ap shave co cashmere 26mm
+    G5A:
+    - ap shave co black 26mm g5a
+    G5C:
+    - a p shaveco g5c synthetic
+    - ap shave co. - g5c
+    - ap shave co. 26mm g5c fan synthetic (gdmg night sky resin)
+    MiG:
+    - a p shaveco mig knot synthetic
+    Mixed Badger/Boar:
+    - a p shaveco luxury mixed knot
+    Pure Bliss:
+    - a p shaveco pure bliss synthetic
+    - ap shave co. - honeyhive pure bliss
+    - ap shaveco 24mm pure bliss synthetic
+    Silksmoke:
+    - a p shaveco 26mm silksmoke synthetic
+    Synbad:
+    - a p shaveco synbad synthetic
+    - ap shave co synbad fan 24mm
+    Synthetic:
+    - a p shaveco 30mm faux boar
+    - ap shave co. a4 26mm
+    Titanium:
+    - ap shave co. black green handle w/ 26mm titanium synthetic fan knot
+  Alpha:
+    Synthetic:
+    - alpha shaving big red
+  Aurora Grooming:
+    Synthetic:
+    - aurora grooming yellow sparkle - 28mm synthetic
+  Black Eagle:
+    HT2:
+    - black eagle beetle (buffalo) ht2
+  Chisel & Hound:
+    v11:
+    - chisel & hound "cyndi" 26mm v11 fanchurian
+    v14:
+    - chisel & hound "chakte viga" 26mm v14 fanchurian
+    v19:
+    - chisel and hound x hom dammusi 26mm v19 fanchurian
+    v21:
+    - chisel & hound acer pearl v21
+    v23:
+    - chisel & hound spice blow handle (4815cc) w/ 26mm v23 fanchurian badger knot
+    - chisel & hound strata v23 fanchurian badger
+    v24:
+    - chiseled hound - strawberry fields w. v24 fanchurian badger
+    v27:
+    - chisel & hound polar bear v27 fanchurian badger
+    - chisel and hound "deep night" - 26mm fanchurian v27
+    - chisel and hound - deep night - v27 fanchurian 26mm badger
+    v28:
+    - chisel & hound - frosted milkglass (5564gc) - 26mm v28 fanchurian
+    - chisel and hound lather games prize v28
+    v9:
+    - chisel & hound - fanchurian v9 blue-green pearlized
+  Clubman:
+    Pinaud:
+    - clubman pinaud synthetic
+  Declaration Grooming:
+    B11:
+    - 2dg b11 jefferson pearl of the stars 28mm 2 band badger
+    B13:
+    - declaration grooming - b13 prometheus 26mm
+    B15:
+    - 5dg b15 all might true form washington badger
+    B3:
+    - 1dg b3 jeffington blood of kings 2 band badger
+    - declaration grooming b3 washington prototype
+    - declaration grooming prototype b3
+  Mühle:
+    STF:
+    - muhle stf
+    STF XL:
+    - mühle stf xlarge 25mm - silvertip fibre synthetic (sea voyager etched series
+      red handle)
+  Omega:
+    '10005':
+    - omega 24mm model 10005
+    '10049':
+    - omega pro 49
+    - omega professional 49
+    '11137':
+    - omega 11137 - 25mm boar (face lathered; no bowl)
+    46206 HI-BRUSH Synthetic:
+    - omega hi-brush 146206
+    - omega hi-brush 146206, 25mm synth
+    - omega hi-brush, 146206, 25mm synth
+    Proraso Professional:
+    - proraso boar
+  Rad Dinosaur Creations:
+    High Mountain Rex:
+    - rad dinosaur creations - leo - 26mm high mountain rex silvertip badger fan knot
+    Raptor:
+    - rad dinosaur creations - tattoo - 26mm rdc raptor synthetic
+    - rad dinosaur creations raptor synthetic
+  RazoRock:
+    Big Bruce:
+    - razorock big bruce plissoft
+    - razorock plissoft big bruce
+  Semogue:
+    SOC Mixed Badger/Boar:
+    - rad dinosaur creations "elsa" w/ 24mm semogue mistura
+    - semogue soc-c5mf cer 1063 (cherry) - 24mm 50% special grade 90% tops boar /
+      50% two band badger
+  Stirling:
+    Boar Brush:
+    - boar stirling boar
+    Synthetic:
+    - stirling synthetic 24x51mm
+  Stirling/Zenith:
+    Boar:
+    - boar stirling/zenith
+  Wald:
+    J4:
+    - wald - 'deep sea' j4
+  Yaqi:
+    Cashmere:
+    - yaqi dandelion green 24mm cashmere
+    Sagrada:
+    - yaqi sagrada familia 24mm ap 2bed (re-knot)
+  Zenith:
+    B26:
+    - zenith b26 retro
+    Butterscotch Chubby (B34):
+    - boar zenith 505b bleached butterscotch handle
+    r/wetshaving MOAR BOAR:
+    - moar
+    - moar boar sub exclusive
+    - zenith - r/wetshaving "moar boar" (b35/508a xl) - 31mm bleached boar
+    - zenith r/wetshaving exclusive moar badger (silvertip)
+    - zenith r/wetshaving exclusive moar boar (31 mm x 57 mm bleached boar)
+handle:
+  3D Printed:
+    Unspecified:
+    - ap shave co g5b w/ 3d-printed bronze handle
+    - ap shave co. 3d print w/ 26mm pure bliss
+  AP Shave Co:
+    Unspecified:
+    - a p shaveco stf synthetic
+    - ap shave co mühle stf dense++ 37% plant fiber
+    - ap shave co. sea voyager w/ maggards's 26mm wolfhair
+  Arno:
+    Unspecified:
+    - arno clock - ti, st-2
+  Aurora Grooming:
+    LG 2024:
+    - auroa grooming - lg 2024 with 26mm ap shave co. pure bliss 26mm synthetic
+    Unspecified:
+    - aurora grooming mad hatter mauricio w/ shoat
+  Chisel & Hound:
+    Unspecified:
+    - chisel & hound "midnight run" w/v28 fanchurian
+    - chisel & hound "swamper" / 26mm turnnshave tip badger
+    - chisel & hound - tahitian pearl 26mm maggard shd
+    - chisel & hound - tahitian pearl 26mm maggard shd fan
+    - chisel & hound / ap shave morado w/ g5c
+    - chisel & hound tahitian pearl 26mm maggard shd
+    - chisel & hound tahitian pearl 26mm maggard shd fan
+    - chisel & hound w/ tns v8 tip fan
+  Dogwood:
+    Unspecified:
+    - 4dogwood w/ dg b14 hybrid 2 band badger
+    - dogwood forest vibes boti silvertip 26mm
+knot:
+  AP Shave Co:
+    G5B:
+    - ap shave co g5b w/ 3d-printed bronze handle
+    G5C:
+    - chisel & hound / ap shave morado w/ g5c
+    Pure Bliss:
+    - ap shave co. 3d print w/ 26mm pure bliss
+    - auroa grooming - lg 2024 with 26mm ap shave co. pure bliss 26mm synthetic
+  Boti:
+    Badger:
+    - dogwood forest vibes boti silvertip 26mm
+  Chisel & Hound:
+    v28:
+    - chisel & hound "midnight run" w/v28 fanchurian
+  Declaration Grooming:
+    B14:
+    - 4dogwood w/ dg b14 hybrid 2 band badger
+  Maggard:
+    Badger:
+    - chisel & hound - tahitian pearl 26mm maggard shd
+    - chisel & hound - tahitian pearl 26mm maggard shd fan
+    - chisel & hound tahitian pearl 26mm maggard shd
+    - chisel & hound tahitian pearl 26mm maggard shd fan
+    Synthetic:
+    - ap shave co. sea voyager w/ maggards's 26mm wolfhair
+  Mühle:
+    STF:
+    - a p shaveco stf synthetic
+    - ap shave co mühle stf dense++ 37% plant fiber
+  Oumo:
+    Synthetic:
+    - arno clock - ti, st-2
+  Turn-N-Shave:
+    Shoat:
+    - aurora grooming mad hatter mauricio w/ shoat
+    Tip (Badger):
+    - chisel & hound "swamper" / 26mm turnnshave tip badger
+    - chisel & hound w/ tns v8 tip fan
 razor:
   3D Printed:
     DE:
@@ -5,6 +358,8 @@ razor:
   Above the Tie:
     S1:
     - above the tie - s1 slant razor
+    S2:
+    - above the tie s2 slant
   Ale Razors:
     Straight:
     - ale razors 8/8
@@ -19,6 +374,8 @@ razor:
   Art Razor:
     Straight:
     - art razors (yurii kravchenko) dolphin 8/8 full hollow with mammoth ivory scales
+    - straight art razor cardinal 11/8 hollow
+    - straight art_razor_ua dolphin by yurii kravchenko 8/8
   Atelier Durdan:
     Le Faulx:
     - atelier durdan le faux + plate
@@ -28,6 +385,13 @@ razor:
   Baikal:
     Straight:
     - straight bakal 15/16 full hollow from griffiths shaving goods
+  Baili:
+    TTO:
+    - baili br177
+    - baili tto
+  Baxter:
+    Safety Razor:
+    - baxter de
   Blackland:
     Blackbird:
     - bb ti - personna
@@ -56,6 +420,8 @@ razor:
       edge
     - böker - abalone (6/8", full hollow, carbon steel, french point) unknown, but
       other edge
+    King Cutter:
+    - heinrich böker & co. king cutter 5/8
     Straight:
     - boker 226 our own - full hollow - square point - 11/16
   C-Mon:
@@ -63,11 +429,15 @@ razor:
     - c-mon special 5/8 hollow ground square point
   C.V. Heljestrand:
     Straight:
+    - c.v. heljestrand mk31 11/16 unstamped tang full hollow
     - cvh - 5/8" square tip hollow ground
   Campobasso:
     Straight:
     - campobasso, 6/8 full hollow round point
     - campobasso, 6/8 hollow round point
+  Cartridge/Disposable:
+    ? ''
+    : - penny shaver
   Charcoal Goods:
     Lvl 2:
     - cg gen 1 lvl 2 on woflman wrh1 with wrh2 knurling
@@ -83,122 +453,414 @@ razor:
     - dscosmetic t7se
   Design94:
     Aviation94:
+    - design 94 , aviation 94 space aluminium
     - design 94 space aluminium
+    - design 94, aviation94 space aluminum
   Dovo:
     Runde Sache:
     - dovo runde sache - red scales
     - dovo runde sache 5/8 razor
     Straight:
+    - dovo astrale (ebony & m.o.p.) - full hollow - round point - 6/8
     - dovo inox
   Dubl Duck:
     Straight:
     - dubl duck 5/8" full hollow
+  ERN:
+    Ator:
+    - ern 5/8 full hollow, ator 5/8 full hollow
+    Straight:
+    - ern - 6/8" round tip extra hollow
+    - ern 207, 6/8 hollow round point
+    - ern 22 7/8, square point extra hollow
+    - ern 6/8 french point full hollow
+    - straight ern ye ole straight n strop
+  Edmond Roffler:
+    Straight:
+    - edmond roffler
+    - edmond roffler razor
   Edwin Jagger:
     DE89:
     - edwin jagger diffusion w/ feather blade
+  EldrormR Industries:
+    MM24:
+    - u/eldrormr industries 2 tone mm24
+    Scrubty-four:
+    - no scrub industries - onionty-four
   Enders:
     Speed Shaver:
     - enders speed razor with injector blade adaptor
+  Ever-Ready:
+    '1912':
+    - ever-ready "sun ray" 1912
+    '1924':
+    - ever -ready shovelhead
+    - ever-ready shovelhead 1924
+    Streamline:
+    - ever ready streamline, gen 2
+  Fatip:
+    Lo Storto:
+    - fatip - lo storto gentile
+    Olive Wood:
+    - fatip oc olive wood handle
   Feather:
     AS-D2:
     - feather - as-d2
   Filarmonica:
+    '13':
+    - filly 13
+    '14':
+    - filarmonica 14 especial gen 1
     Straight:
     - filarmónica 14 doble temple
+  Focus:
+    Slim AL:
+    - focus slim al
   GEM:
+    Featherweight:
+    - gem feather weight
     Micromatic:
     - gem - 1930s micromatic - gen 2
     Micromatic Open Comb:
     - gem - 1930s micromatic open comb gen 2
+    - gem mmoc (special djudge engraving)
     - micromatic open comb
+    - mmoc
+  Geneva Cutlery Co.:
+    Straight:
+    - geneva cutlery co. heavy 5/8 hollow ground square point
   Geo. Wostenholm & Son:
     Straight:
+    - geo. wostenholm & son original pipe razor, 5/8 square point
     - geo. wostenholm superb pipe razor
+    - wostenholm & sons pipe razor 6/8 and joseph elliot 13/16
   Gillette:
+    Fatboy:
+    - fatboy w/ nacet
+    Heritage:
+    - gillette heritage
     King C. Gillette:
     - kc gillette w/ razorock mission baseplate
     NEW:
     - gillette new
+    - gillette new oc
+    Old Type:
+    - gillette old type (open comb, nickel, e838523, 1918) w/ wcs 175s handle
+    - gillette old type (open comb, nickel, e838523, 1918), wcs 175s handle
     Slim:
     - 1962 gillette slim
+    - gillette slim (original nickel, i-1)
+    - gillette slim adjustable (l4, 1966)
+    - gillette slim adjustable 1966
+    Super Adjustable:
+    - 1982 gillette black beauty 109 pd
+    - gillette super adjustable 1970
+    - gillette super adjustable 89 (original nickel, p4)
     Super Speed:
     - 1960 gillette flare tip super speed
     - 1969 super speed
+    - english gillette rocket 1953
+    - gilette rocket c.1949
+    - gillette 1951 black tip super speed
+    - gillette 1952 blacktip
+    - gillette 1953 superspeed
+    - gillette 40s superspeed
+    - gillette blacktip 1952
+    - gillette flairtip 1962
+    - gillette super speed (tto)
     - gillette super speed red tip (original nickel, e2)
+    - gillette super speed red tip b-1
     Tech:
     - 1952 gillette tech bakelite
+    - gillette ball end tech early 50s made in england
+    - gillette tech oc
+  Greencult:
+    GC 2.0:
+    - green cult plate iii
+  Hendrix Classics & Co:
+    Van Winkle:
+    - the van winkle, hc&c
   Henson:
     AL13:
     - hensen al13
+    - hensen al13+++
+    - henson al ++
+    - henson al-13 medium
+    - henson al13 - aggressive
+    - henson al13 - agressive (gray) / yaqi stainless steel handle
+    - henson al13 - agressive (gray) w/ yaqi ss handle
     - henson al13 medium - gray
     - henson al13+++
+    Ti22:
+    - henson ti22 med
+  J.A. Henckels:
+    Friodur Straight:
+    - henckels friodur 17 15/16 with scales by muninn woodworks
+    - henckels friodur 472 13/16 with weru burl scales by muninn woodworks
+    - j.a. henckels friodur 17 15/16
+    - j.a. henckels friodur 472 13/16 full hollow square point with weru burl scales
+      by muninn woodworks
+    - j.a. henckels friodur 472 13/16 with wuru burl scales by u/whosgotthepudding
+    Straight:
+    - henckels 26 5/8 hollow barbers point
+    - j. a. henckels 34 7/8 half hollow spanish point
+    - j. a. henckels zwillingswerk 78 5/8
+  Joseph Rodgers & Sons:
+    Straight:
+    - joseph rodgers & son "royal"
+  Jön Engström:
+    Straight:
+    - straight 1 engstrom frameback
   Karve:
     Christopher Bradley:
+    - karve cb oc-f
+    - karve cb sb c plate
+    - karve cb sb d plate
     - karve cristopher bradley
+  Kikuboshi:
+    Straight:
+    - kikuboshi - 6/8" frameback
   Koraat:
     Moarteen (r/Wetshaving exclusive):
+    - koraat moarteen (15/16", full hollow, square point, r/wetshaving exclusive)
     - moarteen
   Kropp:
     Straight:
     - kropp 6/8 full hollow round point
+  Lambda:
+    Athena:
+    - lambda athena ti
+  Leaf:
+    Thorn:
+    - leaf thorn
+  Leresche:
+    '700':
+    - leresche 700 (1930s)
+  Lion Razor Works:
+    Straight:
+    - lion razor works - the magnetic razor
+  M. Jung:
+    Straight:
+    - m. jung no. 80
   Maggard:
     Slant:
     - maggard razors - slant + mrt travel handle
+  Maxwell June:
+    MJ Double Edge:
+    - mj double edge
   Merkur:
     23C:
     - merkur - 23c
+    - merkur- 23c
+    34C:
+    - merkur 34c two-piece tto (modified, removed safety bar from one side)
+    37C:
+    - merkur - 37c
+  Mongoose:
+    Alumigoose:
+    - 'mongoose blue alumigoose #3'
+  Mühle:
+    Rocca:
+    - mühle rocca
   Other Kamisori:
     ? ''
     : - ale kamisori-style 13/16
+  Other Shavette:
+    ? ''
+    : - asgard shavette
   Other Straight Razor:
     ? ''
     : - ator, 6/8 hollow round point
+      - bowdins wedge razor
       - coma - the barber - half hollow - round point - 13/16
       - coma the barber - half hollow - round point - 13/16
       - cracker jack 6/8 full hollow square point
       - dorko 43 - near wedge - square point - 13 /16
+      - focus 217 - full hollow - round point - 13/16
+      - g&w - 6/8" square tip hollow ground
       - heinrich klein chronik 4/8
+      - john h. albright hanover razor
+      - joseph elliot 13/16
+      - reliable razor - manganese steel
+      - sheffield cutlery - red stripe scales
   Parker:
+    22R:
+    - parker 22r gunmetal
+    65R:
+    - parker 65r
+    Adjustable Injector:
+    - injector parker
     SRX:
     - parker srx shavette
+  Piedmont:
+    Straight:
+    - piedmont - perkaise pa
   Portland Razor Co.:
     Straight:
     - portland razor co. hydra 7/8 wedge
+    - portland razor co. the gryphon 13/16 wedge barber's notch
+  Proof:
+    Razor:
+    - proof
+    - proof reserve
   Raido Star:
     Straight:
+    - raido star eva 10/8, full hollow french point
     - raido star ikigal 15/16 bellied hollow
+  Ralf Aust:
+    Straight:
+    - ralf aust - ralf-121npks-s-e - 6/8 spanish point
+    - ralf aust 5/8 full hollow spanish point
+    - ralf aust 5/8 stainless full hollow spanish point
+    - ralf aust 7/8
   RazoRock:
     GOAT:
     - razorock - goat
+    Game Changer:
+    - razorock game changer .84-p (razorock thick bar)
+    - razorock gamechanger 1.05
+    Superslant:
+    - superslant l2
+  Razorine:
+    ? ''
+    : - razorine premium (matte brass special edition)
+      - razorine premium brass shavette
+  Red Imp:
+    '132':
+    - red imp 132 5/8 square point near wedge
+    Straight:
+    - red imp - 5/8 wedge
+  Rex:
+    Konsul:
+    - rex konsul adjustable
+  River Razors:
+    Straight:
+    - river razors 6/8 3/4 hollow
+  Robert Klaas:
+    Straight:
+    - robert klaas 207 "north carolina cutlery club" 1984 1 of 86 - full hollow -
+      round point - 11/16
+  Robeson:
+    Shure-Edge:
+    - pipe razor/robeson shure-edge
+    - robeson sheer edge
+    - robeson sheer edge razor
   Rockwell:
     6C:
     - rockwell 6c (3 plate)
+    6S:
+    - rockwell 6s plate 6
+    - rockwell 6s:6
   Schick:
     Adjustable Injector:
     - shick adjustable
+    Golden 500:
+    - schick golden 500
+    Injector:
+    - injector schick
+    - schick type e3
+    Stick:
+    - stick schick
   Shield:
+    Predator:
+    - shield predator gem se
     SE AC:
     - shield ac ti
+  Shumate:
+    Straight:
+    - shumates imp - carbon fiber scales
+  Snail Forge:
+    Straight:
+    - snailforge 15/16
+  Stahly:
+    Live Blade:
+    - stahly live blade head w/ wcs 175s handle
+  Tanifuji:
+    Straight:
+    - tanifuji spalding 0411 6/8" full hollow
+  Tatara:
+    Masamune:
+    - tatara - masamune
+    Masamune Nodachi:
+    - tatara masamune nodachi ti edition
+    - tatara nodachi ti
+  The Holy Black:
+    SR-71:
+    - the holy black sr-71
   Thiers Issard:
     Straight:
     - thiers-issard spartacus 7/8
+    - thiers-issart spartacus 7/8
+  Thomas Turner & Co.:
+    Straight:
+    - thomas turner & co. - cutlers to his majesty - 6/8 square point
   Timeless:
     Razor:
     - timeless - stainless steel .68 open comb
+    - timeless aluminum slant
+    - timeless bronze razor
+    - timeless bronze sb 38
+    - timeless polished stainless 68
+    - timeless ss .68 gap
     - timeless ti95 .95 dc matte
+  Utica Knife & Razor:
+    Straight:
+    - utica drop forge & tool bo-ra-sic
+  Wade & Butcher:
+    Straight:
+    - w&b - 5/8 square point hollow ground
+    - w&b celebrated hollow
+    - w&b fbu 8/8
+    - w&b fbu, 8/8
+    - wade & butcher 7/8" fine india steel
+  Wadsworth Razor:
+    XLNT:
+    - wadsworth razor company xlnt
+  Weck:
+    Sextoblade:
+    - weck gold scale shavette
+    - weck trade sample - black scales
+  Werner Breidenbach:
+    Monte Rosa 14:
+    - werner breidenbach monte rosa 14
   Wilkinson Sword:
     Butterfly:
     - wilkinson sword razor (aka sticky)
   Wolfman:
     Guerilla:
+    - guerilla razors titanium .84 solid bar
     - guerrilla razors titanium .84 solid bar
     - guerrilla razors titanium .84mm sb
     - guerrilla razors titanium .84mm solid bar
+    - guerrilla razors titanium 84mm sb
+    WR1:
+    - wolfman - wr1 solid bar .46
+    WR2:
+    - wolfman razors wr2 1.05
+    - wolfman wr2 1.05 bronze
+    - wolfman wr2 1.25 dual comb
+    - wolfman wr2-sb ti
     WR3:
     - wolfman razors wr3 prototype
+    - wolfman wr3 0.23 oc
+  Woolfblades:
+    Straight:
+    - woolfblades 6/8 full hollow square point
+  Yaqi:
+    Top Aggressive:
+    - yaqi top agressive, wcs 175s handle
+  Zomchí:
+    ? ''
+    : - zomchi a blue one
+  iKon:
+    Tek:
+    - ikon razors - tek head / base plate with bulldog 80 mm handle
   j. Koester's Sons:
     Straight:
     - j. koester's sons 11/16", full hollow, square point
+  Консул (Konsul):
+    Adjustable:
+    - ussr консул (konsul) adjustable (original nickel, unknown)
 soap:
   Arko:
     Shaving Soap:

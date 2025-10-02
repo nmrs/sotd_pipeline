@@ -387,6 +387,7 @@ Cartridge/Disposable:
       - pace.*6
       - simply (?:max|smooth)
       - next bic thing
+      - penny shaver
 Charcoal Goods:
   Everyday:
     patterns:
@@ -580,6 +581,11 @@ Efendi:
     format: Straight
     patterns:
       - efendi(?:.*\d{1,2}/(8|16))?
+Edmond Roffler:
+  Straight:
+    format: Straight
+    patterns:
+      - edmond.*roffler(?:.*\d{1,2}/(8|16))?
 Edwin Jagger:
   3one6:
     patterns:
@@ -608,6 +614,9 @@ Enders:
     patterns:
       - enders.*(?:speed)
 ERN:
+  Ator:
+    patterns:
+      - ern.*\bator\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Straight:
     format: Straight
     patterns:
@@ -730,13 +739,28 @@ Feather:
       - feather.*artist.*clu
       - feather.*ac(?:.*(shavette|kami))?
 Filarmonica:
-  14 Doble Temple:
+  "12":
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 5/8
+    patterns:
+      - filarmonica.*\b12\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  "13":
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 6/8
+    patterns:
+      - filarmonica.*\b13\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - filly.*\b13\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  "14":
     format: Straight
     grind: Extra Hollow
     point: Square
     width: 15/16
     patterns:
-      - filarmonica.*14.*(dou?b|temp)
+      - filarmonica.*\b14\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Straight:
     format: Straight
     patterns:
@@ -774,6 +798,10 @@ Focus:
     format: Shavette (Half DE)
     patterns:
       - focus.*r21
+  Slim AL:
+    format: Shavette (Half DE)
+    patterns:
+      - focus.*slim
   Tritok Slant:
     patterns:
       - focus.*slant
@@ -906,7 +934,6 @@ Gillette:
       - Gil.*et.*heritage
   King C. Gillette:
     patterns:
-      - (merkur.*)?34-*[cg]
       - ^king c.? gillette.*
       - king.*gil.*et
       - gil.*et.*king(.*c)?
@@ -1122,6 +1149,9 @@ Hendrix Classics & Co:
   Garand:
     patterns:
       - garand
+  Van Winkle:
+    patterns:
+      - van.*winkle
 Henkotsu:
   Kamisori:
     format: Straight
@@ -1325,7 +1355,7 @@ Kobar:
   Adjustable:
     patterns:
       - Консул
-      - (?:ussr)?.*konsul.*adjust
+      - ^(?!.*rex).*(?:ussr)?.*konsul.*adjust
 Koraat:
   Moarteen (r/Wetshaving exclusive):
     format: Straight
@@ -1404,6 +1434,10 @@ Lion:
   DE:
     patterns:
       - lion.*\bde\b
+Lion Razor Works:
+  Straight:
+    patterns:
+      - lion.*razor.*works
 Lord:
   L122:
     patterns:
@@ -1466,11 +1500,15 @@ Master Barber:
     format: Shavette (Half DE)
     patterns:
       - (?:master|magic) barber.*magic
-Maxwell:
-  June:
+Maxwell June:
+  Twin Blade:
+    format: Half DE (multi-blade)
+    patterns:
+      - maxwell june.*twin
+  MJ Double Edge:
     format: Half DE
     patterns:
-      - maxwell june
+      - mj.*double
 Max Sprecher:
   Straight:
     format: Straight
@@ -1696,6 +1734,8 @@ Other Straight Razor:
       - barber.*notch
       - solingen
       - sheffield
+      - albright.*hanover
+      - reliable.*manganese
 PAA:
   Alpha Ecliptic:
     patterns:
@@ -1823,7 +1863,8 @@ Parker:
   Adjustable Injector:
     format: Injector
     patterns:
-      - parker.*adjustable.*injector
+      - parker.*injector
+      - injector.*parker
   SR1:
     patterns:
       - parker.*sr1
@@ -2040,8 +2081,9 @@ RazoRock:
       - wunderbar
 Razorine:
   "":
+    format: Shavette (DE)
     patterns:
-      - razorine
+      - razorine(?:.*shavette)?
 Red Imp:
   "132":
     format: Straight
@@ -2208,6 +2250,10 @@ Schick:
     format: Injector
     patterns:
       - 'ever\s*sharp'
+  Golden 500:
+    format: Injector
+    patterns:
+      - golden.*500
   Hydromagic:
     format: Injector
     patterns:
@@ -2215,7 +2261,6 @@ Schick:
   Injector:
     format: Injector
     patterns:
-      - golden.*500
       - sc?hl?ick
       - lad(y.|ies)*eversharp
       - injector
@@ -2226,6 +2271,11 @@ Schick:
     format: Other
     patterns:
       - magazine.*repeating.*razor
+  Stick:
+    format: Injector
+    patterns:
+      - schick.*stick
+      - stick.*schick
 Segal:
   Unitary:
     patterns:
@@ -2437,7 +2487,8 @@ Thiers Issard:
   Straight:
     format: Straight
     patterns:
-      - th.*iss?ard(?:.*\d{1,2}/(8|16))?
+      - thiers.*issard
+      - th.*iss?ar[dt](?:.*\d{1,2}/(8|16))?
 Thomas Turner & Co.:
   Straight:
     format: Straight
@@ -2566,6 +2617,7 @@ Wadsworth Razor:
     patterns:
       - wadsworth.*(straight|\d{1,2}/(8|16)|ground)
   XLNT:
+    format: Straight
     patterns:
       - wadsworth.*xlnt
 Wardonia:
@@ -2657,6 +2709,11 @@ Wolfman:
     format: AC
     patterns:
       - '(Wolfman)?.*WR[\s-]*4'
+Woolfblades:
+  Straight:
+    format: Straight
+    patterns:
+      - woolf.*blades(?:.*\d{1,2}/(8|16))?
 Wüsthof:
   Straight:
     format: Straight
@@ -2734,6 +2791,9 @@ Yaqi:
   Telstar:
     patterns:
       - yaqi.*telstar
+  Top Aggressive:
+    patterns:
+      - yaqi.*top.*ag+res+ive
   Torqx:
     patterns:
       - torqx(.*adjust)?

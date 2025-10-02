@@ -51,6 +51,12 @@ known_brushes:
       fiber: Badger
       patterns:
         - all[ -]?star.*grooming
+  Art of Shaving:
+    Pure Badger:
+      fiber: Badger
+      patterns:
+        - aos.*pure
+        - art of shaving.*pure
   Aurora Grooming:
     default: Synthetic
     patterns:
@@ -358,7 +364,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 26
       patterns:
-        - big.*bruce
+        - razo.*big.*bruce
     Bruce:
       fiber: Synthetic
       knot_size_mm: 24
