@@ -1,0 +1,176 @@
+# Blade Extraction Field Accuracy Fix
+
+## 📘 Project Summary
+Fix blade field extraction accuracy by preventing incorrect extraction of "Blade Uses: X" and similar patterns while preserving legitimate blade extractions. The current extraction logic incorrectly captures usage count fields instead of actual blade names, leading to poor matching results in downstream phases.
+
+## 🧩 Component Steps
+
+### Step 1: Baseline Analysis and A/B Testing Framework
+**Goal**: Establish current extraction accuracy baseline and create comprehensive testing framework
+
+### Step 2: Pattern Analysis and Root Cause Investigation  
+**Goal**: Identify specific patterns causing incorrect extractions and understand the scope of the problem
+
+### Step 3: Targeted Pattern Fix Implementation
+**Goal**: Implement precise fixes that address incorrect extractions without breaking legitimate patterns
+
+### Step 4: Comprehensive A/B Testing and Validation
+**Goal**: Validate that fixes improve accuracy while maintaining data completeness across multiple months
+
+### Step 5: Integration Testing and Performance Validation
+**Goal**: Ensure changes work correctly in full pipeline context with performance monitoring
+
+## 🔁 Implementation Prompts
+
+### Step 1: Baseline Analysis and A/B Testing Framework
+
+```text
+**Context**: We need to establish a baseline for blade extraction accuracy and create a comprehensive A/B testing framework to measure the impact of our fixes.
+
+**Task**: Create a comprehensive analysis tool that:
+1. Extracts blade data from multiple months (2025-08, 2025-09, 2025-10) using current extraction logic
+2. Identifies and categorizes different blade extraction patterns found in the data
+3. Counts instances of incorrect extractions (like "Uses: 1", "Count: 5", etc.)
+4. Counts instances of correct extractions (actual blade names)
+5. Generates a detailed report showing extraction accuracy metrics
+6. Creates test fixtures with representative examples of both correct and incorrect extractions
+
+**Requirements**:
+- Use existing pipeline infrastructure (run.py extract)
+- Analyze at least 3 months of data for statistical significance
+- Create categorized test cases for unit testing
+- Generate before/after comparison reports
+- Include performance metrics (extraction time, memory usage)
+- Save results in structured format (JSON) for comparison
+
+**Output**: Analysis script, baseline metrics, test fixtures, and comparison framework
+```
+
+### Step 2: Pattern Analysis and Root Cause Investigation
+
+```text
+**Context**: We have baseline data showing blade extraction issues. Now we need to understand the root cause and scope of incorrect extractions.
+
+**Task**: Create a detailed pattern analysis tool that:
+1. Analyzes the regex patterns in sotd/extract/fields.py for blade extraction
+2. Identifies which specific patterns are matching incorrect text
+3. Tests each pattern against known problematic cases (like "Blade Uses: 1")
+4. Tests each pattern against known correct cases (like "Blade: Persona Comfort Coat")
+5. Identifies edge cases and boundary conditions
+6. Documents the specific changes needed to fix each problematic pattern
+
+**Requirements**:
+- Test all 16+ blade extraction patterns individually
+- Use real data examples from the baseline analysis
+- Identify the minimum set of changes needed
+- Document impact of each potential change
+- Create comprehensive test cases for each pattern
+- Generate pattern effectiveness report
+
+**Output**: Pattern analysis report, specific fix recommendations, comprehensive test cases
+```
+
+### Step 3: Targeted Pattern Fix Implementation
+
+```text
+**Context**: We have identified the specific patterns causing issues and understand the scope of changes needed. Now implement targeted fixes.
+
+**Task**: Implement precise fixes to blade extraction patterns that:
+1. Prevent extraction of "Blade Uses: X", "Blade Count: Y", etc.
+2. Preserve extraction of legitimate blade names with and without colons
+3. Maintain compatibility with all existing valid formats
+4. Use word boundaries and more specific pattern matching
+5. Include comprehensive unit tests for all edge cases
+6. Follow the project's fail-fast error handling principles
+
+**Requirements**:
+- Modify patterns in sotd/extract/fields.py
+- Add comprehensive unit tests covering all identified cases
+- Ensure no regression in legitimate extractions
+- Use word boundaries (\b) to prevent partial word matches
+- Test with both real data and synthetic test cases
+- Follow existing code style and patterns
+
+**Output**: Updated extraction patterns, comprehensive unit tests, validation of fixes
+```
+
+### Step 4: Comprehensive A/B Testing and Validation
+
+```text
+**Context**: We have implemented targeted fixes. Now we need to validate that they improve accuracy while maintaining data completeness.
+
+**Task**: Run comprehensive A/B testing that:
+1. Extracts blade data using both old and new extraction logic
+2. Compares extraction accuracy between old and new approaches
+3. Measures data completeness (no legitimate extractions lost)
+4. Analyzes performance impact of changes
+5. Validates fixes across multiple months of data
+6. Generates detailed before/after comparison reports
+
+**Requirements**:
+- Test on at least 3 months of data (2025-08, 2025-09, 2025-10)
+- Compare extraction counts, accuracy rates, and performance
+- Identify any legitimate extractions that were lost
+- Measure improvement in correct extractions
+- Generate statistical significance analysis
+- Create visual comparison reports
+
+**Output**: A/B testing results, accuracy improvement metrics, performance analysis
+```
+
+### Step 5: Integration Testing and Performance Validation
+
+```text
+**Context**: We have validated that our fixes improve extraction accuracy. Now ensure they work correctly in the full pipeline context.
+
+**Task**: Run full pipeline integration testing that:
+1. Tests the complete extract → match → enrich → aggregate pipeline
+2. Validates that improved blade extraction leads to better matching results
+3. Ensures no performance regressions in the full pipeline
+4. Tests with both corrected and uncorrected data
+5. Validates that downstream phases benefit from improved extraction
+6. Creates final validation report with recommendations
+
+**Requirements**:
+- Run full pipeline on test months with both old and new extraction
+- Compare matching accuracy and downstream results
+- Measure end-to-end performance impact
+- Validate that improved extraction leads to better overall results
+- Test error handling and edge cases
+- Generate final recommendation report
+
+**Output**: Integration test results, performance validation, final recommendations
+```
+
+## 🧠 Critical Analysis
+
+**Prompt Sequence Review**:
+- **Step 1** establishes a solid baseline and testing framework - essential for measuring improvement
+- **Step 2** provides deep understanding of the root cause - prevents over-engineering the solution
+- **Step 3** implements targeted fixes based on data-driven analysis - minimizes risk of breaking existing functionality
+- **Step 4** validates improvements with comprehensive A/B testing - ensures we actually improve accuracy
+- **Step 5** validates full pipeline integration - ensures changes work in production context
+
+**Risk Mitigation**:
+- Each step builds incrementally on the previous one
+- Comprehensive testing at each stage prevents regressions
+- A/B testing framework allows safe rollback if issues are discovered
+- Real data testing ensures changes work with actual user content
+
+**Success Criteria**:
+- Reduction in incorrect blade extractions (e.g., "Uses: 1" patterns)
+- No loss of legitimate blade extractions
+- Improved downstream matching accuracy
+- No performance regressions
+- Comprehensive test coverage for all edge cases
+
+**Potential Issues**:
+- Some legitimate patterns might be affected by overly strict matching
+- Performance impact of more complex regex patterns
+- Edge cases not covered in initial analysis
+
+**Mitigation Strategies**:
+- Comprehensive A/B testing will catch any legitimate extractions that are lost
+- Performance testing will identify any significant regressions
+- Incremental approach allows for course correction if issues arise
+- Extensive test coverage ensures edge cases are handled properly
