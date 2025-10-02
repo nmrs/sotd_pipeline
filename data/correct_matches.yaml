@@ -170,6 +170,8 @@ brush:
     Synthetic:
     - a p shaveco 30mm faux boar
     - ap shave co. a4 26mm
+    Timberwolf:
+    - summer break soaps maize 26mm timberwolf
     Titanium:
     - ap shave co. black green handle w/ 26mm titanium synthetic fan knot
   Alpha:
@@ -184,8 +186,12 @@ brush:
   Chisel & Hound:
     v11:
     - chisel & hound "cyndi" 26mm v11 fanchurian
+    v13:
+    - chisel & hound lost nativ 26mm fanchurian v13
     v14:
     - chisel & hound "chakte viga" 26mm v14 fanchurian
+    v15:
+    - chisel and hound - fu dao v15 fanchurian 26mm badger
     v19:
     - chisel and hound x hom dammusi 26mm v19 fanchurian
     v21:
@@ -196,17 +202,23 @@ brush:
     v24:
     - chiseled hound - strawberry fields w. v24 fanchurian badger
     v27:
+    - chisel & hound - deep night - v27 fanchurian 26mm badger
     - chisel & hound polar bear v27 fanchurian badger
     - chisel and hound "deep night" - 26mm fanchurian v27
     - chisel and hound - deep night - v27 fanchurian 26mm badger
     v28:
     - chisel & hound - frosted milkglass (5564gc) - 26mm v28 fanchurian
+    - chisel and hound lather games prize custom handle v28
     - chisel and hound lather games prize v28
     v9:
     - chisel & hound - fanchurian v9 blue-green pearlized
   Clubman:
     Pinaud:
     - clubman pinaud synthetic
+  Cornfed Viking:
+    Odin's Beard:
+    - farvour turn craft 26mm "458 herringbone" v.6 odin's beard
+    - farvour turn craft 26mm v.6 odin's beard
   Declaration Grooming:
     B11:
     - 2dg b11 jefferson pearl of the stars 28mm 2 band badger
@@ -218,8 +230,13 @@ brush:
     - 1dg b3 jeffington blood of kings 2 band badger
     - declaration grooming b3 washington prototype
     - declaration grooming prototype b3
+  Dogwood:
+    SHD Badger:
+    - dogwood handcrafts shd
+    - dogwood shd
   Mühle:
     STF:
+    - muhle rocca stf 21mm
     - muhle stf
     STF XL:
     - mühle stf xlarge 25mm - silvertip fibre synthetic (sea voyager etched series
@@ -228,20 +245,28 @@ brush:
     '10005':
     - omega 24mm model 10005
     '10049':
+    - omega 10049 red handle boar
     - omega pro 49
     - omega professional 49
+    '10065':
+    - omega 10065 boar
     '11137':
     - omega 11137 - 25mm boar (face lathered; no bowl)
     46206 HI-BRUSH Synthetic:
     - omega hi-brush 146206
     - omega hi-brush 146206, 25mm synth
     - omega hi-brush, 146206, 25mm synth
+    - 'omega hi-brush: 146206, 25mm synth'
+    Hi-Brush Synthetic:
+    - omega synthetic bristle green
     Proraso Professional:
     - proraso boar
   Rad Dinosaur Creations:
     High Mountain Rex:
     - rad dinosaur creations - leo - 26mm high mountain rex silvertip badger fan knot
+    - rad dinosaur creations - pastime with high mountain rex 26mm badger
     Raptor:
+    - rad dinosaur creations "go birds" w/ raptor synthetic
     - rad dinosaur creations - tattoo - 26mm rdc raptor synthetic
     - rad dinosaur creations raptor synthetic
   RazoRock:
@@ -249,19 +274,73 @@ brush:
     - razorock big bruce plissoft
     - razorock plissoft big bruce
   Semogue:
+    Pharos C3 Horse:
+    - semogue pharos c3 horse hair
+    SOC Boar:
+    - semogue - owner's club - butterscotch handle - 24mm boar
+    - semogue - owner's club - butterscotch resin handle - 24mm boar
+    - semogue - owner's club 24mm boar
+    - semogue - owner's club butterscotch handle - 24mm boar
+    - semogue - owners club - butterscotch handle - 24mm boar
+    - semogue - soc 24mm c2 boar
+    - semogue soc-c5csp taj 1056 (taj) - 24mm special grade 90% tops boar
     SOC Mixed Badger/Boar:
     - rad dinosaur creations "elsa" w/ 24mm semogue mistura
+    - semogue - owner's club - taj handle - 24mm mistura
+    - semogue - owner's club - taj handle - 24mm mistura (badger/boar mix)
+    - semogue - owner's club - taj handle - 24mm mistura (badger/boar)
+    - semogue - soc 24mm c2 mistura
+    - semogue owner's club - 24mm mistura - taj handle
     - semogue soc-c5mf cer 1063 (cherry) - 24mm 50% special grade 90% tops boar /
       50% two band badger
+    Torga C5:
+    - semogue torga c5 onyx knot
+  Simpson:
+    Chubby 2:
+    - simpson ch2 super badger
+    - simpson chubby 2 italian marble
+    - simpson's chubby two best badger best badger badger
+    Chubby 2 Synthetic:
+    - simpson chubby 2 synthetic fibre shaving brush, 27mm
+    Trafalgar T1:
+    - simpsons trafalgar t1 synthetic
+    Trafalgar T2:
+    - simpson - trafalgar t2 - 24mm synthetic
+    - simpson - trafalgar t2 synthetic
+    - simpson trafalgar t2 24mm
+    - simpson trafalgar t2 24mm synth
+    - simpson trafalgar t2 synthetic
+    - simpsons trafalgar t2 - 24mm synthetic
+    - simpsons trafalgar t2 24mm synthetic
   Stirling:
     Boar Brush:
     - boar stirling boar
+    Kong Synthetic:
+    - stirling 26mm synthetic (kong)
     Synthetic:
+    - stirling 26mm synthetic
+    - stirling pro synthetic
+    - stirling soap co. - 26mm synthetic
+    - stirling soap company - 24mm synthetic shave brush
     - stirling synthetic 24x51mm
   Stirling/Zenith:
     Boar:
     - boar stirling/zenith
+  Trotter:
+    T1 Manchurian Badger:
+    - trotter handcrafts nocturnal classic 26mm t1 manchurian badger
+  Turn-N-Shave:
+    Medium Density Badger (M*):
+    - turn n shave skarbide breeze 28mm m8
+    - turn n shave skarbide breeze 28mm m8 fan
   Wald:
+    A1:
+    - wald 29mm a1 nimbus
+    - wald a1 synthetic
+    - wald flare "viola" - lapis colorway - 28mm a1
+    - wald nimbus chryselephantine 29mm a1 fan
+    - wald shaving 29mm a1 fan
+    - wald stratos goldvein 29mm a1 fan
     J4:
     - wald - 'deep sea' j4
   Yaqi:
@@ -269,11 +348,22 @@ brush:
     - yaqi dandelion green 24mm cashmere
     Sagrada:
     - yaqi sagrada familia 24mm ap 2bed (re-knot)
+    Timberwolf:
+    - yaqi m150801-s2 - 24mm 'timberwolf' synthetic
   Zenith:
+    507N XSE:
+    - zenith 507n xse 27.5mm x 47mm unbleached boar bristle w/ retro black handle
+    507U:
+    - zenith 507u xs 27mm extra soft horse
     B26:
     - zenith b26 retro
     Butterscotch Chubby (B34):
     - boar zenith 505b bleached butterscotch handle
+    - zenith 502b xse butterscotch
+    - zenith butterscotch chubby boar
+    - zenith chubby butterscotch
+    Copper Scrubby (B36):
+    - zenith b36
     r/wetshaving MOAR BOAR:
     - moar
     - moar boar sub exclusive
@@ -297,6 +387,7 @@ handle:
     LG 2024:
     - auroa grooming - lg 2024 with 26mm ap shave co. pure bliss 26mm synthetic
     Unspecified:
+    - aurora grooming gentleman's reserve w/ rorschach
     - aurora grooming mad hatter mauricio w/ shoat
   Chisel & Hound:
     Unspecified:
@@ -343,6 +434,8 @@ knot:
     - a p shaveco stf synthetic
     - ap shave co mühle stf dense++ 37% plant fiber
   Oumo:
+    Rorschach:
+    - aurora grooming gentleman's reserve w/ rorschach
     Synthetic:
     - arno clock - ti, st-2
   Turn-N-Shave:
