@@ -1406,21 +1406,34 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             print(f"🔍 API DEBUG: Issue {i + 1} details: {details}")
             print(f"🔍 API DEBUG: Issue {i + 1} suggested action: {suggested_action}")
 
-            # Use the actual issue types from ValidateCorrectMatches (eliminates DRY violation)
-            # The frontend should adapt to the validation system, not the other way around
-            mapped_issue_type = issue_type
+            # Map issue types from ValidateCorrectMatches to frontend expected types
+            if issue_type == "unmatchable_entry":
+                mapped_issue_type = "catalog_pattern_no_match"
+            elif issue_type == "mismatched_result":
+                mapped_issue_type = "catalog_pattern_mismatch"
+            elif issue_type == "format_mismatch":
+                mapped_issue_type = "format_mismatch"
+            else:
+                # Keep other issue types as-is
+                mapped_issue_type = issue_type
 
             # Create the processed issue with all required fields
             # Extract brand/model info directly from the issue data, preserving None values
-            expected_brand = issue.get("expected_brand")
-            expected_model = issue.get("expected_model")
+            # Map field names from ValidateCorrectMatches to API response format
+            expected_brand = issue.get("expected_brand") or issue.get("brand")
+            expected_model = issue.get("expected_model") or issue.get("model")
             actual_brand = issue.get("actual_brand")
             actual_model = issue.get("actual_model")
+
+            # Handle format mismatch issues that use different field names
+            if issue_type == "format_mismatch":
+                expected_brand = issue.get("brand")
+                expected_model = issue.get("model")
 
             processed_issue = {
                 "issue_type": mapped_issue_type,
                 "field": request.field,
-                "format": None,  # Not applicable for brush validation
+                "format": issue.get("format"),  # Include format for blade validation
                 "correct_match": pattern,
                 "expected_brand": expected_brand,
                 "expected_model": expected_model,
@@ -1429,8 +1442,12 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "severity": issue.get("severity", "medium"),
                 "suggested_action": suggested_action or f"Investigate issue with '{pattern}'",
                 "details": details or f"Validation issue for pattern '{pattern}'",
-                "catalog_format": None,  # Not applicable for brush validation
-                "matched_pattern": None,  # Not applicable for brush validation
+                "catalog_format": issue.get(
+                    "catalog_format"
+                ),  # Include catalog format for blade validation
+                "matched_pattern": issue.get(
+                    "matched_pattern"
+                ),  # Include matched pattern for blade validation
             }
 
             print(f"🔍 API DEBUG: Created processed issue {i + 1}: {processed_issue}")

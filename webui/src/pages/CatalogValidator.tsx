@@ -183,7 +183,9 @@ const CatalogValidator: React.FC = () => {
         <p className='text-gray-600 mb-4'>
           Validate that entries in correct_matches.yaml still map to the same brand/model
           combinations using current catalog regex patterns. This helps identify when catalog
-          updates have broken existing correct matches.
+          updates have broken existing correct matches. The validator tests each pattern from
+          correct_matches.yaml against the current matchers to see if they still produce the
+          expected brand/model results.
         </p>
 
         <div className='flex flex-wrap gap-4 items-end mb-4'>
@@ -211,9 +213,8 @@ const CatalogValidator: React.FC = () => {
               >
                 All Issues
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -225,11 +226,10 @@ const CatalogValidator: React.FC = () => {
               >
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
                       ? 'bg-white text-orange-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -242,11 +242,10 @@ const CatalogValidator: React.FC = () => {
                 >
                   Format Mismatches
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'format_mismatches'
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'format_mismatches'
                         ? 'bg-white text-purple-600'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {getDisplayModeCounts().format_mismatches}
                   </span>
@@ -259,11 +258,10 @@ const CatalogValidator: React.FC = () => {
               >
                 No Match
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'no_match'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'no_match'
                       ? 'bg-white text-red-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().no_match}
                 </span>
@@ -349,9 +347,8 @@ const CatalogValidator: React.FC = () => {
                 {getFilteredIssues().map((issue, index) => (
                   <div
                     key={index}
-                    className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)} ${
-                      selectedIssues.has(index) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                    }`}
+                    className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)} ${selectedIssues.has(index) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                      }`}
                   >
                     <div className='flex items-start gap-3'>
                       {/* Checkbox for selection */}
@@ -374,13 +371,12 @@ const CatalogValidator: React.FC = () => {
                                   : 'Validation Issue'}
                           </h4>
                           <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              issue.severity === 'high'
+                            className={`px-2 py-1 text-xs rounded-full ${issue.severity === 'high'
                                 ? 'bg-red-100 text-red-800'
                                 : issue.severity === 'medium'
                                   ? 'bg-orange-100 text-orange-800'
                                   : 'bg-yellow-100 text-yellow-800'
-                            }`}
+                              }`}
                           >
                             {issue.severity}
                           </span>
@@ -393,7 +389,7 @@ const CatalogValidator: React.FC = () => {
 
                         <div className='mb-3'>
                           <p className='text-sm text-gray-700 mb-2'>
-                            <strong>Correct Match:</strong>{' '}
+                            <strong>Pattern Being Tested:</strong>{' '}
                             <code className='bg-gray-100 px-1 rounded'>{issue.correct_match}</code>
                           </p>
 
@@ -414,23 +410,32 @@ const CatalogValidator: React.FC = () => {
                           {issue.issue_type === 'catalog_pattern_mismatch' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
                               <div>
-                                <p className='font-medium text-gray-700'>Currently Placed:</p>
+                                <p className='font-medium text-gray-700'>Currently Stored Under:</p>
                                 <p className='text-gray-600'>
                                   {issue.expected_brand} {issue.expected_model}
                                 </p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  (in correct_matches.yaml)
+                                </p>
                               </div>
                               <div>
-                                <p className='font-medium text-gray-700'>Should Be:</p>
+                                <p className='font-medium text-gray-700'>Matcher Suggests:</p>
                                 <p className='text-gray-600'>
                                   {issue.actual_brand} {issue.actual_model}
+                                </p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  (based on current catalog patterns)
                                 </p>
                               </div>
                             </div>
                           ) : (
                             <div>
-                              <p className='font-medium text-gray-700'>Expected Mapping:</p>
+                              <p className='font-medium text-gray-700'>Currently Stored Under:</p>
                               <p className='text-gray-600'>
                                 {issue.expected_brand} {issue.expected_model}
+                              </p>
+                              <p className='text-xs text-gray-500 mt-1'>
+                                (in correct_matches.yaml)
                               </p>
                             </div>
                           )}
@@ -468,7 +473,12 @@ const CatalogValidator: React.FC = () => {
                           <p className='text-sm font-medium text-gray-700 mb-1'>
                             Suggested Action:
                           </p>
-                          <p className='text-sm text-gray-600'>{issue.suggested_action}</p>
+                          <p className='text-sm text-gray-600'>
+                            {issue.issue_type === 'catalog_pattern_mismatch'
+                              ? `Move pattern from '${issue.expected_brand} ${issue.expected_model}' to '${issue.actual_brand} ${issue.actual_model}' in correct_matches.yaml`
+                              : issue.suggested_action
+                            }
+                          </p>
                         </div>
 
                         <div>
