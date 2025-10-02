@@ -31,23 +31,24 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
 def get_patterns(alias: str) -> list[str]:
     return [
         # Checkmark format: ✓Field: Value
-        rf"^✓\s*{alias}\s*[-:]\s*(.+)$",  # ✓Field: Value
-        rf"^✓\s*{alias}\s*[-:]\s*(.+)$",  # ✓ Field: Value (with space)
+        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value
+        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓ Field: Value (with space)
         # Emoji bold format: * **Field** Value
-        rf"^\*\s*\*\*{alias}\*\*\s*[-:]\s*(.+)$",  # * **Field** - Value
-        rf"^\*\s*\*\*{alias}\*\*\s*(.+)$",  # * **Field** Value (no separator)
+        rf"^\*\s*\*\*\b{alias}\b\*\*\s*[-:]\s*(.+)$",  # * **Field** - Value
+        rf"^\*\s*\*\*\b{alias}\b\*\*\s*(.+)$",  # * **Field** Value (no separator)
         # common more generic cases
-        rf"^(?:[-*]\s*)?\*\*{alias}\*\*\s*[-:]?\s*(.+)$",  # * **alias**: value
-        rf"^(?:[-*]\s*)?\*\*{alias}\s*[-:]?\*\*\s*(.+)$",  # * **alias:** value
-        rf"^(?:[-*]\s*)?\*\*{alias}\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
-        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?{alias}\s*[-:]\s*(.+)$",  # * alias: value
-        rf"^[^\w\s]?\s*\*{alias}\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
-        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#{alias}\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
-        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value
-        rf"^(?:[-*]\s*)?\*\*{alias}\s*//\*\*\s*(.+)$",  # **alias //** value
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\*\*\s*[-:]?\s*(.+)$",  # * **alias**: value
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]?\*\*\s*(.+)$",  # * **alias:** value
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
+        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s*[-:]\s*(.+)$",  # * alias: value (word boundary)
+        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
+        rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
+        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
+        rf"^(?:[-*]\s*)?__\b{alias}\b:\__\s*(.+)$",  # __alias:__ value
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+)$",  # **alias //** value
         # more specific cases
-        rf"^[^\w\s]\s*\*+\s*{alias}[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
-        rf"^[^\w\s]\s*\*+\s*{alias}\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
-        # simple space format: Field product name
-        rf"^{alias}\s+(.+)$",  # Field product name (no colon/dash)
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
+        # simple space format: Field product name (no colon/dash) - only when no other words between field and value
+        rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product name (no colon/dash, no other words)
     ]

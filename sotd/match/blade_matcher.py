@@ -857,9 +857,9 @@ class BladeMatcher(BaseMatcher):
 
         # 4. General fallback system: try format-appropriate blades first
         if normalized_text:
-            # Check if this is generic "Shavette" (case-insensitive)
-            if razor_format.lower() == "shavette":
-                # Use global pattern specificity approach for generic Shavette
+            # Check if this is generic "Shavette" or "Other" format (case-insensitive)
+            if razor_format.lower() in ["shavette", "other"]:
+                # Use global pattern specificity approach for generic formats
                 return self._find_best_global_match(normalized_text, original)
 
             # Determine if this is a Shavette razor for special fallback logic
