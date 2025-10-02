@@ -6,8 +6,8 @@
 # Composite Brush Strategies (automated_split, full_input_component_matching, known_split):
 # - multiple_brands: Awarded when the strategy detects multiple brands in handle/knot components
 # - handle_brand_without_knot_brand: Awarded when the strategy detects a handle brand without a knot brand
-# - handle_weight: Multiplier for handle matching score (base + priority)
-# - knot_weight: Multiplier for knot matching score (base + priority)
+# - handle_weight: Multiplier for handle matching score (base + priority) - SHOULD BE 0
+# - knot_weight: Multiplier for knot matching score (base + priority) - SHOULD BE 0
 # - high_confidence: Awarded when the strategy uses high-priority delimiters (w/, with, in) (automated_split only)
 # - dual_component: Awarded when the strategy successfully matches both handle and knot components (full_input_component_matching only)
 #
@@ -55,7 +55,7 @@ brush_scoring_weights:
     automated_split:
       multiple_brands: 35.0
       handle_weight: 0
-      knot_weight: 1
+      knot_weight: 0
       handle_brand_without_knot_brand: -15.0
       high_confidence: 15.0
 

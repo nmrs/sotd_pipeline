@@ -467,6 +467,80 @@ export function BrushMatchingAnalyzer() {
                       <p className='font-mono text-sm'>{results.winner.pattern}</p>
                     </div>
                   </div>
+
+                  {/* Winner Matched Brush Details */}
+                  {results.winner.matchedData && (
+                    <div className='mt-4 p-3 bg-white border border-green-200 rounded'>
+                      <h4 className='font-medium mb-2 flex items-center gap-2 text-green-800'>
+                        <Target className='w-4 h-4' />
+                        Matched Brush
+                      </h4>
+                      <div className='grid grid-cols-2 gap-4 text-sm'>
+                        {/* Top-level brush info */}
+                        {(results.winner.matchedData.brand || results.winner.matchedData.model) && (
+                          <div>
+                            <p className='text-gray-600 font-medium'>Brush:</p>
+                            <p className='font-semibold text-green-800'>
+                              {results.winner.matchedData.brand || 'Unknown Brand'}{' '}
+                              {results.winner.matchedData.model || ''}
+                            </p>
+                            {results.winner.matchedData.fiber && (
+                              <p className='text-xs text-gray-500'>
+                                Fiber: {results.winner.matchedData.fiber}
+                              </p>
+                            )}
+                            {results.winner.matchedData.size && (
+                              <p className='text-xs text-gray-500'>
+                                Size: {results.winner.matchedData.size}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Handle component */}
+                        {results.winner.matchedData.handle && (
+                          <div>
+                            <p className='text-gray-600 font-medium'>Handle:</p>
+                            <p className='font-semibold text-green-800'>
+                              {results.winner.matchedData.handle.brand || 'Unknown Brand'}{' '}
+                              {results.winner.matchedData.handle.model || ''}
+                            </p>
+                            {results.winner.matchedData.handle.source_text && (
+                              <p className='text-xs text-gray-500'>
+                                Source: {results.winner.matchedData.handle.source_text}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Knot component */}
+                        {results.winner.matchedData.knot && (
+                          <div>
+                            <p className='text-gray-600 font-medium'>Knot:</p>
+                            <p className='font-semibold text-green-800'>
+                              {results.winner.matchedData.knot.brand || 'Unknown Brand'}{' '}
+                              {results.winner.matchedData.knot.model || ''}
+                            </p>
+                            {results.winner.matchedData.knot.fiber && (
+                              <p className='text-xs text-gray-500'>
+                                Fiber: {results.winner.matchedData.knot.fiber}
+                              </p>
+                            )}
+                            {results.winner.matchedData.knot.knot_size_mm && (
+                              <p className='text-xs text-gray-500'>
+                                Size: {results.winner.matchedData.knot.knot_size_mm}mm
+                              </p>
+                            )}
+                            {results.winner.matchedData.knot.source_text && (
+                              <p className='text-xs text-gray-500'>
+                                Source: {results.winner.matchedData.knot.source_text}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -550,6 +624,80 @@ export function BrushMatchingAnalyzer() {
                                   </p>
                                 </div>
                               </div>
+
+                              {/* Matched Brush Details */}
+                              {result.matchedData && (
+                                <div className='mb-4 p-3 bg-gray-50 border border-gray-200 rounded'>
+                                  <h4 className='font-medium mb-2 flex items-center gap-2'>
+                                    <Target className='w-4 h-4' />
+                                    Matched Brush
+                                  </h4>
+                                  <div className='grid grid-cols-2 gap-4 text-sm'>
+                                    {/* Top-level brush info */}
+                                    {(result.matchedData.brand || result.matchedData.model) && (
+                                      <div>
+                                        <p className='text-gray-600 font-medium'>Brush:</p>
+                                        <p className='font-semibold'>
+                                          {result.matchedData.brand || 'Unknown Brand'}{' '}
+                                          {result.matchedData.model || ''}
+                                        </p>
+                                        {result.matchedData.fiber && (
+                                          <p className='text-xs text-gray-500'>
+                                            Fiber: {result.matchedData.fiber}
+                                          </p>
+                                        )}
+                                        {result.matchedData.size && (
+                                          <p className='text-xs text-gray-500'>
+                                            Size: {result.matchedData.size}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Handle component */}
+                                    {result.matchedData.handle && (
+                                      <div>
+                                        <p className='text-gray-600 font-medium'>Handle:</p>
+                                        <p className='font-semibold'>
+                                          {result.matchedData.handle.brand || 'Unknown Brand'}{' '}
+                                          {result.matchedData.handle.model || ''}
+                                        </p>
+                                        {result.matchedData.handle.source_text && (
+                                          <p className='text-xs text-gray-500'>
+                                            Source: {result.matchedData.handle.source_text}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Knot component */}
+                                    {result.matchedData.knot && (
+                                      <div>
+                                        <p className='text-gray-600 font-medium'>Knot:</p>
+                                        <p className='font-semibold'>
+                                          {result.matchedData.knot.brand || 'Unknown Brand'}{' '}
+                                          {result.matchedData.knot.model || ''}
+                                        </p>
+                                        {result.matchedData.knot.fiber && (
+                                          <p className='text-xs text-gray-500'>
+                                            Fiber: {result.matchedData.knot.fiber}
+                                          </p>
+                                        )}
+                                        {result.matchedData.knot.knot_size_mm && (
+                                          <p className='text-xs text-gray-500'>
+                                            Size: {result.matchedData.knot.knot_size_mm}mm
+                                          </p>
+                                        )}
+                                        {result.matchedData.knot.source_text && (
+                                          <p className='text-xs text-gray-500'>
+                                            Source: {result.matchedData.knot.source_text}
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
 
                               {/* Score Breakdown - Reusable Component */}
                               <ScoreBreakdownDisplay
