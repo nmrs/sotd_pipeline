@@ -320,7 +320,7 @@ export function BrushMatchingAnalyzer() {
     setResults(null);
 
     try {
-      const response = await fetch('/api/brush-matching/analyze', {
+      const response = await fetch('/api/brushes/matching/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
