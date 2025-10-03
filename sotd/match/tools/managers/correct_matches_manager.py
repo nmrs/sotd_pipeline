@@ -51,6 +51,87 @@ class CorrectMatchesManager:
         """
         return normalize_for_matching(value, None, field)
 
+    def _sort_key(self, text: str) -> str:
+        """
+        Create a sort key that handles Cyrillic characters properly.
+
+        This converts Cyrillic characters to their Latin equivalents for
+        proper alphabetical sorting.
+        """
+        text_lower = text.lower()
+        # Map common Cyrillic characters to Latin equivalents for sorting
+        cyrillic_to_latin = {
+            "а": "a",
+            "б": "b",
+            "в": "v",
+            "г": "g",
+            "д": "d",
+            "е": "e",
+            "ё": "e",
+            "ж": "zh",
+            "з": "z",
+            "и": "i",
+            "й": "y",
+            "к": "k",
+            "л": "l",
+            "м": "m",
+            "н": "n",
+            "о": "o",
+            "п": "p",
+            "р": "r",
+            "с": "s",
+            "т": "t",
+            "у": "u",
+            "ф": "f",
+            "х": "h",
+            "ц": "ts",
+            "ч": "ch",
+            "ш": "sh",
+            "щ": "sch",
+            "ъ": "",
+            "ы": "y",
+            "ь": "",
+            "э": "e",
+            "ю": "yu",
+            "я": "ya",
+            "А": "A",
+            "Б": "B",
+            "В": "V",
+            "Г": "G",
+            "Д": "D",
+            "Е": "E",
+            "Ё": "E",
+            "Ж": "Zh",
+            "З": "Z",
+            "И": "I",
+            "Й": "Y",
+            "К": "K",
+            "Л": "L",
+            "М": "M",
+            "Н": "N",
+            "О": "O",
+            "П": "P",
+            "Р": "R",
+            "С": "S",
+            "Т": "T",
+            "У": "U",
+            "Ф": "F",
+            "Х": "H",
+            "Ц": "Ts",
+            "Ч": "Ch",
+            "Ш": "Sh",
+            "Щ": "Sch",
+            "Ъ": "",
+            "Ы": "Y",
+            "Ь": "",
+            "Э": "E",
+            "Ю": "Yu",
+            "Я": "Ya",
+        }
+        for cyr, lat in cyrillic_to_latin.items():
+            text_lower = text_lower.replace(cyr, lat)
+        return text_lower
+
     def load_correct_matches(self) -> None:
         """Load previously marked correct matches from file."""
         self._correct_matches = set()
@@ -380,31 +461,69 @@ class CorrectMatchesManager:
                         field_data[field][brand][model].append(normalized_original)
 
             # Alphabetize entries within each field/brand/model (or field/format/brand/model)
+            # First, sort the top-level field structure
+            field_data = dict(sorted(field_data.items(), key=lambda x: self._sort_key(x[0])))
+
             for field_name, field_section in field_data.items():
                 if isinstance(field_section, dict):
                     if field_name == "blade":
                         # For blade field, sort by format -> brand -> model
-                        for format_name, format_data in field_section.items():
+                        # Sort formats first
+                        field_data[field_name] = dict(
+                            sorted(field_section.items(), key=lambda x: self._sort_key(x[0]))
+                        )
+                        for format_name, format_data in field_data[field_name].items():
                             if isinstance(format_data, dict):
-                                for brand, brand_data in format_data.items():
+                                # Sort brands within each format
+                                field_data[field_name][format_name] = dict(
+                                    sorted(format_data.items(), key=lambda x: self._sort_key(x[0]))
+                                )
+                                for brand, brand_data in field_data[field_name][
+                                    format_name
+                                ].items():
                                     if isinstance(brand_data, dict):
-                                        for model, entries in brand_data.items():
+                                        # Sort models within each brand
+                                        field_data[field_name][format_name][brand] = dict(
+                                            sorted(
+                                                brand_data.items(),
+                                                key=lambda x: self._sort_key(x[0]),
+                                            )
+                                        )
+                                        for model, entries in field_data[field_name][format_name][
+                                            brand
+                                        ].items():
                                             if isinstance(entries, list):
                                                 # Sort entries alphabetically (case-insensitive)
                                                 entries.sort(key=str.lower)
                     elif field_name in ["handle", "knot"]:
                         # For handle and knot sections, sort by brand -> model
-                        for brand, brand_data in field_section.items():
+                        # Sort brands first
+                        field_data[field_name] = dict(
+                            sorted(field_section.items(), key=lambda x: self._sort_key(x[0]))
+                        )
+                        for brand, brand_data in field_data[field_name].items():
                             if isinstance(brand_data, dict):
-                                for model, entries in brand_data.items():
+                                # Sort models within each brand
+                                field_data[field_name][brand] = dict(
+                                    sorted(brand_data.items(), key=lambda x: self._sort_key(x[0]))
+                                )
+                                for model, entries in field_data[field_name][brand].items():
                                     if isinstance(entries, list):
                                         # Sort entries alphabetically (case-insensitive)
                                         entries.sort(key=str.lower)
                     else:
                         # For other fields, sort by brand -> model
-                        for brand, brand_data in field_section.items():
+                        # Sort brands first
+                        field_data[field_name] = dict(
+                            sorted(field_section.items(), key=lambda x: self._sort_key(x[0]))
+                        )
+                        for brand, brand_data in field_data[field_name].items():
                             if isinstance(brand_data, dict):
-                                for model, entries in brand_data.items():
+                                # Sort models within each brand
+                                field_data[field_name][brand] = dict(
+                                    sorted(brand_data.items(), key=lambda x: self._sort_key(x[0]))
+                                )
+                                for model, entries in field_data[field_name][brand].items():
                                     if isinstance(entries, list):
                                         # Sort entries alphabetically (case-insensitive)
                                         # Handle both strings and dictionaries
@@ -420,7 +539,7 @@ class CorrectMatchesManager:
             # Save to file
             with self._correct_matches_file.open("w", encoding="utf-8") as f:
                 yaml.dump(
-                    field_data, f, default_flow_style=False, sort_keys=True, allow_unicode=True
+                    field_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True
                 )
 
             self.console.print(

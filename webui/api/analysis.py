@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import traceback
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 # Add project root to Python path for imports
@@ -19,27 +19,24 @@ project_root = Path(__file__).parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# Import the existing FilteredEntriesManager instead of duplicating logic
-from sotd.utils.filtered_entries import FilteredEntriesManager
-
 # Get logger for this module
 logger = logging.getLogger(__name__)
+
+# Import the existing FilteredEntriesManager instead of duplicating logic
+from sotd.utils.filtered_entries import FilteredEntriesManager
 
 
 try:
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
     from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
-    from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 
     logger.info("✅ MismatchAnalyzer imported successfully")
     logger.info("✅ UnmatchedAnalyzer imported successfully")
-    logger.info("✅ ValidateCorrectMatches imported successfully")
 except ImportError as e:
     # Fallback for development
     logger.error(f"❌ Failed to import analyzers: {e}")
     UnmatchedAnalyzer = None
     MismatchAnalyzer = None
-    ValidateCorrectMatches = None
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -222,6 +219,8 @@ class CatalogValidationIssue(BaseModel):
     expected_model: Optional[str]
     actual_brand: Optional[str]
     actual_model: Optional[str]
+    expected_section: Optional[str] = None  # Expected section for structural changes
+    actual_section: Optional[str] = None  # Actual section for structural changes
     severity: str
     suggested_action: str
     details: str
@@ -631,9 +630,11 @@ async def clear_validator_cache():
     try:
         from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 
-        # Create a validator instance and clear its caches
-        validator = ValidateCorrectMatches()
-        validator.force_refresh()
+        # Clear validator cache - this endpoint is no longer needed with actual matching validation
+        # but keeping for backward compatibility
+        logger.info(
+            "Validator cache clear requested - no longer needed with actual matching validation"
+        )
 
         logger.info("✅ Validator cache cleared successfully")
         return {"success": True, "message": "Validator cache cleared successfully"}
@@ -771,7 +772,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 elif request.display_mode == "complete_brushes":
                     # For complete brushes mode, only show split brush items
                     # Filter out items that don't meet the threshold
-                    items = [item for item in items if item.get("count", 0) >= threshold]
+                    items = [item for item in items if item.get("count", 0) >= request.threshold]
                     if not items:
                         continue
                 # 'all' mode shows everything, so no filtering needed
@@ -1266,213 +1267,94 @@ async def clear_all_correct_matches():
 
 @router.post("/validate-catalog", response_model=CatalogValidationResponse)
 async def validate_catalog_against_correct_matches(request: CatalogValidationRequest):
-    """Validate catalog entries against correct_matches.yaml."""
-    print(f"🔍 API DEBUG: Starting validation for field: {request.field}")
-    print(f"🔍 API DEBUG: Request object: {request}")
-    print(f"🔍 API DEBUG: Request field: {request.field}")
+    """Validate catalog entries against correct_matches.yaml using actual matching validation."""
+    logger.info(f"🔍 Starting actual matching validation for field: {request.field}")
 
     try:
-        # Use the unified ValidateCorrectMatches class for all field validations
-        # Fix the path issue: API runs from webui/ but needs project root data/
-        project_root = Path(__file__).parent.parent.parent
-        print(f"🔍 API DEBUG: Project root: {project_root}")
-        correct_matches_path = project_root / "data" / "correct_matches.yaml"
-        print(f"🔍 API DEBUG: Correct matches path: {correct_matches_path}")
-        print(f"🔍 API DEBUG: Path exists: {correct_matches_path.exists()}")
+        # Import the new ActualMatchingValidator
+        from sotd.validate.actual_matching_validator import ActualMatchingValidator
+
+        # Set up paths
+        api_project_root = Path(__file__).parent.parent.parent
+        correct_matches_path = api_project_root / "data" / "correct_matches.yaml"
+
+        logger.info(f"Project root: {api_project_root}")
+        logger.info(f"Correct matches path: {correct_matches_path}")
+        logger.info(f"Path exists: {correct_matches_path.exists()}")
 
         # Change to project root directory to fix path resolution issues
-        # This ensures BrushMatcher can find catalog files using relative paths
+        # This ensures matchers can find catalog files using relative paths
         original_cwd = Path.cwd()
-        os.chdir(project_root)
-        print(f"🔍 API DEBUG: Changed working directory from {original_cwd} to {Path.cwd()}")
+        os.chdir(api_project_root)
+        logger.info(f"Changed working directory from {original_cwd} to {Path.cwd()}")
 
-        validator = ValidateCorrectMatches(correct_matches_path=correct_matches_path)
-        validator._data_dir = project_root / "data"
-        print(f"🔍 API DEBUG: Created validator: {type(validator)}")
-        print(f"🔍 API DEBUG: Validator object ID: {id(validator)}")
-        print(f"🔍 API DEBUG: Validator correct_matches_path: {validator.correct_matches_path}")
-        print(f"🔍 API DEBUG: Validator _data_dir: {validator._data_dir}")
-        correct_matches_keys = (
-            list(validator.correct_matches.keys()) if validator.correct_matches else "None"
-        )
-        print(f"🔍 API DEBUG: Validator correct_matches keys: {correct_matches_keys}")
-        correct_matches_length = len(validator.correct_matches) if validator.correct_matches else 0
-        print(f"🔍 API DEBUG: Validator correct_matches length: {correct_matches_length}")
+        # Create the actual matching validator
+        validator = ActualMatchingValidator(data_path=api_project_root / "data")
+        logger.info(f"Created ActualMatchingValidator: {type(validator)}")
 
-        # Count total entries in correct_matches.yaml for the requested field
-        def count_total_entries(data: dict, field: str) -> int:
-            """Count total entries in correct_matches.yaml for a specific field."""
-            if field not in data:
-                return 0
+        # Run validation
+        logger.info(f"Running actual matching validation for field: {request.field}")
+        start_time = time.time()
+        validation_result = validator.validate(request.field)
+        processing_time = time.time() - start_time
 
-            field_data = data[field]
-            total_entries = 0
-
-            if field == "blade":
-                # Blade can have either format -> brand -> model -> strings structure
-                # or brand -> model -> strings structure (flat)
-                for first_level in field_data.values():
-                    if isinstance(first_level, dict):
-                        # Check if this is format structure (has brands as values)
-                        # or brand structure (has models as values)
-                        sample_value = next(iter(first_level.values())) if first_level else None
-                        if isinstance(sample_value, dict):
-                            # Format structure: format -> brand -> model -> strings
-                            for brand_data in first_level.values():
-                                if isinstance(brand_data, dict):
-                                    for model_data in brand_data.values():
-                                        if isinstance(model_data, list):
-                                            total_entries += len(model_data)
-                        else:
-                            # Brand structure: brand -> model -> strings
-                            for model_data in first_level.values():
-                                if isinstance(model_data, list):
-                                    total_entries += len(model_data)
-            elif field == "brush":
-                # For brush field, count entries from all sections (brush, handle, knot)
-                # Count brush section entries
-                brush_data = field_data
-                total_entries += sum(
-                    len(strings) if isinstance(strings, list) else 0
-                    for brand_data in brush_data.values()
-                    if isinstance(brand_data, dict)
-                    for strings in brand_data.values()
-                )
-
-                # Count handle section entries
-                handle_data = data.get("handle", {})
-                total_entries += sum(
-                    len(strings) if isinstance(strings, list) else 0
-                    for brand_data in handle_data.values()
-                    if isinstance(brand_data, dict)
-                    for strings in brand_data.values()
-                )
-
-                # Count knot section entries
-                knot_data = data.get("knot", {})
-                total_entries += sum(
-                    len(strings) if isinstance(strings, list) else 0
-                    for brand_data in knot_data.values()
-                    if isinstance(brand_data, dict)
-                    for strings in brand_data.values()
-                )
-            else:
-                # Other fields have brand -> model -> strings structure
-                total_entries = sum(
-                    len(strings) if isinstance(strings, list) else 0
-                    for brand_data in field_data.values()
-                    if isinstance(brand_data, dict)
-                    for strings in brand_data.values()
-                )
-
-            return total_entries
-
-        # Count total entries before validation
-        total_entries = count_total_entries(validator.correct_matches, request.field)
-        print(f"🔍 API DEBUG: Total entries in {request.field} field: {total_entries}")
-
-        # Validate the field
-        print(f"🔍 API DEBUG: About to call validator.validate_field('{request.field}')...")
-        issues, expected_structure = validator.validate_field(request.field)
-        print(f"🔍 API DEBUG: Validation returned {len(issues)} issues")
-        print(f"🔍 API DEBUG: Issues type: {type(issues)}")
-        print(f"🔍 API DEBUG: Expected structure type: {type(expected_structure)}")
-        print(f"🔍 API DEBUG: First few issues: {issues[:3] if issues else 'No issues'}")
-        issue_types = [issue.get("type", "NO_TYPE") for issue in issues] if issues else "No issues"
-        print(f"🔍 API DEBUG: All issue types: {issue_types}")
-        issue_patterns = (
-            [issue.get("pattern", "NO_PATTERN") for issue in issues] if issues else "No issues"
-        )
-        print(f"🔍 API DEBUG: All issue patterns: {issue_patterns}")
+        logger.info(f"Validation completed in {processing_time:.2f}s")
+        logger.info(f"Found {len(validation_result.issues)} issues")
 
         # Process issues for frontend consumption
         processed_issues = []
-        print(f"🔍 API DEBUG: Starting to process {len(issues)} issues...")
-
-        for i, issue in enumerate(issues):
-            issue_type = issue.get("type", "NO_TYPE")
-            pattern = issue.get("pattern", "NO_PATTERN")
-            print(f"🔍 API DEBUG: Processing issue {i + 1}/{len(issues)}: {issue_type} - {pattern}")
-
-            # Extract issue details
-            issue_type = issue.get("type", "unknown")
-            pattern = issue.get("pattern", "unknown")
-            message = issue.get("message", "")
-            details = issue.get("details", "")
-            suggested_action = issue.get("suggested_action", "")
-
-            print(f"🔍 API DEBUG: Issue {i + 1} type: {issue_type}, Pattern: {pattern}")
-            print(f"🔍 API DEBUG: Issue {i + 1} message: {message}")
-            print(f"🔍 API DEBUG: Issue {i + 1} details: {details}")
-            print(f"🔍 API DEBUG: Issue {i + 1} suggested action: {suggested_action}")
-
-            # Map issue types from ValidateCorrectMatches to frontend expected types
-            if issue_type == "unmatchable_entry":
-                mapped_issue_type = "catalog_pattern_no_match"
-            elif issue_type == "mismatched_result":
-                mapped_issue_type = "catalog_pattern_mismatch"
-            elif issue_type == "format_mismatch":
-                mapped_issue_type = "format_mismatch"
+        for issue in validation_result.issues:
+            # Map issue types from ActualMatchingValidator to frontend expected types
+            if issue.issue_type == "no_match":
+                mapped_issue_type = "no_match"
+            elif issue.issue_type == "data_mismatch":
+                mapped_issue_type = "data_mismatch"
+            elif issue.issue_type == "structural_change":
+                mapped_issue_type = "structural_change"
+            elif issue.issue_type == "duplicate_string":
+                mapped_issue_type = "duplicate_string"
+            elif issue.issue_type == "cross_section_conflict":
+                mapped_issue_type = "cross_section_conflict"
             else:
                 # Keep other issue types as-is
-                mapped_issue_type = issue_type
-
-            # Create the processed issue with all required fields
-            # Extract brand/model info directly from the issue data, preserving None values
-            # Map field names from ValidateCorrectMatches to API response format
-            expected_brand = issue.get("expected_brand") or issue.get("brand")
-            expected_model = issue.get("expected_model") or issue.get("model")
-            actual_brand = issue.get("actual_brand")
-            actual_model = issue.get("actual_model")
-
-            # Handle format mismatch issues that use different field names
-            if issue_type == "format_mismatch":
-                expected_brand = issue.get("brand")
-                expected_model = issue.get("model")
+                mapped_issue_type = issue.issue_type
 
             processed_issue = {
                 "issue_type": mapped_issue_type,
                 "field": request.field,
-                "format": issue.get("format"),  # Include format for blade validation
-                "correct_match": pattern,
-                "expected_brand": expected_brand,
-                "expected_model": expected_model,
-                "actual_brand": actual_brand,
-                "actual_model": actual_model,
-                "severity": issue.get("severity", "medium"),
-                "suggested_action": suggested_action or f"Investigate issue with '{pattern}'",
-                "details": details or f"Validation issue for pattern '{pattern}'",
-                "catalog_format": issue.get(
-                    "catalog_format"
-                ),  # Include catalog format for blade validation
-                "matched_pattern": issue.get(
-                    "matched_pattern"
-                ),  # Include matched pattern for blade validation
+                "format": None,  # Format not available in actual matching validation
+                "correct_match": issue.correct_match,
+                "expected_brand": issue.expected_brand,
+                "expected_model": issue.expected_model,
+                "actual_brand": issue.actual_brand,
+                "actual_model": issue.actual_model,
+                "expected_section": issue.expected_section,
+                "actual_section": issue.actual_section,
+                "severity": issue.severity,
+                "suggested_action": issue.suggested_action,
+                "details": issue.details,
+                "catalog_format": None,  # Format not available in actual matching validation
+                "matched_pattern": None,  # Pattern not available in actual matching validation
             }
 
-            print(f"🔍 API DEBUG: Created processed issue {i + 1}: {processed_issue}")
             processed_issues.append(processed_issue)
 
-        print(f"🔍 API DEBUG: Returning {len(processed_issues)} processed issues")
-        response_info = f"field={request.field}, total_entries={total_entries}, issues_count={len(processed_issues)}"
-        print(f"🔍 API DEBUG: Final response structure: {response_info}")
+        logger.info(f"Returning {len(processed_issues)} processed issues")
 
         # Restore original working directory
         os.chdir(original_cwd)
-        print(f"🔍 API DEBUG: Restored working directory to {Path.cwd()}")
+        logger.info(f"Restored working directory to {Path.cwd()}")
 
         return {
             "field": request.field,
-            "total_entries": total_entries,  # Total entries in correct_matches.yaml for this field
+            "total_entries": validation_result.total_entries,
             "issues": processed_issues,
-            "processing_time": 0.0,  # Placeholder for now
+            "processing_time": processing_time,
         }
 
     except Exception as e:
-        print(f"🔍 API DEBUG: Exception during validation: {e}")
-        print(f"🔍 API DEBUG: Exception type: {type(e)}")
-        print(f"🔍 API DEBUG: Exception traceback: {traceback.format_exc()}")
         logger.error(f"Error validating catalog: {e}")
+        logger.error(f"Exception traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
 
 
@@ -1532,11 +1414,27 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                         "model": expected_model or "unknown",
                     }
 
-                # Try to remove the match
-                if manager.remove_match(request.field, correct_match, matched_data):
-                    removed_count += 1
+                # Handle structural changes - remove from where it currently is (actual_section)
+                actual_section = entry.get("actual_section")
+                if actual_section == "handle_knot":
+                    # Remove from both handle and knot sections
+                    handle_removed = manager.remove_match("handle", correct_match, matched_data)
+                    knot_removed = manager.remove_match("knot", correct_match, matched_data)
+                    if handle_removed or knot_removed:
+                        removed_count += 1
+                    else:
+                        errors.append(
+                            f"Entry not found in handle or knot sections: {correct_match}"
+                        )
                 else:
-                    errors.append(f"Entry not found: {correct_match}")
+                    # Remove from the current section
+                    section_to_remove = actual_section or request.field
+                    if manager.remove_match(section_to_remove, correct_match, matched_data):
+                        removed_count += 1
+                    else:
+                        errors.append(
+                            f"Entry not found in {section_to_remove} section: {correct_match}"
+                        )
 
             except Exception as e:
                 errors.append(f"Error removing entry {entry}: {e}")
