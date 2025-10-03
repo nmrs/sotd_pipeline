@@ -223,15 +223,12 @@ class TestActualMatchingValidator:
         assert issues[0].expected_model == "Moarteen"
         assert issues[0].actual_model == "Different Model"
 
-    @patch("pathlib.Path.open")
+    @patch("yaml.safe_load")
     @patch("sotd.validate.actual_matching_validator.BrushMatcher")
-    def test_validate_brush_field(self, mock_brush_matcher_class, mock_open):
+    def test_validate_brush_field(self, mock_brush_matcher_class, mock_yaml_load):
         """Test validation for brush field."""
-        import yaml
-        mock_file = Mock()
-        mock_file.read.return_value = yaml.dump(self.mock_correct_matches)
-        mock_open.return_value.__enter__.return_value = mock_file
-        
+        mock_yaml_load.return_value = self.mock_correct_matches
+
         mock_matcher = Mock()
         mock_result = Mock()
         mock_result.matched = {"brand": "AP Shave Co", "model": "Mixed Badger/Boar"}
@@ -246,15 +243,12 @@ class TestActualMatchingValidator:
         assert result.total_entries == 1
         assert len(result.issues) == 0  # No issues since data matches
 
-    @patch("pathlib.Path.open")
+    @patch("yaml.safe_load")
     @patch("sotd.validate.actual_matching_validator.RazorMatcher")
-    def test_validate_razor_field(self, mock_razor_matcher_class, mock_open):
+    def test_validate_razor_field(self, mock_razor_matcher_class, mock_yaml_load):
         """Test validation for razor field."""
-        import yaml
-        mock_file = Mock()
-        mock_file.read.return_value = yaml.dump(self.mock_correct_matches)
-        mock_open.return_value.__enter__.return_value = mock_file
-        
+        mock_yaml_load.return_value = self.mock_correct_matches
+
         mock_matcher = Mock()
         mock_result = Mock()
         mock_result.matched = {"brand": "Koraat", "model": "Moarteen"}

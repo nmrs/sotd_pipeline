@@ -134,6 +134,7 @@ class ActualMatchingValidator:
     def _validate_data_structure(self, correct_matches: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate data structure rules for correct_matches.yaml."""
         issues = []
+        within_section_duplicates = set()
 
         # Check for duplicate strings within same section
         for section_name, section_data in correct_matches.items():
@@ -149,6 +150,7 @@ class ActualMatchingValidator:
                         continue
                     for string in strings:
                         if string in seen_strings:
+                            within_section_duplicates.add(string)
                             issues.append(
                                 ValidationIssue(
                                     issue_type="duplicate_string",
@@ -160,37 +162,114 @@ class ActualMatchingValidator:
                             )
                         seen_strings.add(string)
 
-        # Check for cross-section conflicts (brush AND handle/knot)
-        brush_strings = set()
-        handle_knot_strings = set()
-
-        # Collect brush strings
-        brush_section = correct_matches.get("brush", {})
-        for brand_data in brush_section.values():
-            if isinstance(brand_data, dict):
-                for strings in brand_data.values():
-                    if isinstance(strings, list):
-                        brush_strings.update(strings)
-
-        # Collect handle/knot strings
-        for section_name in ["handle", "knot"]:
-            section_data = correct_matches.get(section_name, {})
+        # Check for duplicate strings across different sections (excluding handle/knot which can share)
+        all_strings = {}
+        for section_name, section_data in correct_matches.items():
+            if not isinstance(section_data, dict):
+                continue
             for brand_data in section_data.values():
                 if isinstance(brand_data, dict):
                     for strings in brand_data.values():
                         if isinstance(strings, list):
-                            handle_knot_strings.update(strings)
+                            for string in strings:
+                                if string in all_strings:
+                                    # Handle/knot can share the same string, so only flag if it's not handle/knot
+                                    # Also skip if already flagged as within-section duplicate
+                                    if (
+                                        section_name not in ["handle", "knot"]
+                                        and all_strings[string] not in ["handle", "knot"]
+                                        and string not in within_section_duplicates
+                                    ):
+                                        issues.append(
+                                            ValidationIssue(
+                                                issue_type="duplicate_string",
+                                                severity="low",
+                                                correct_match=string,
+                                                details=f"Duplicate string '{string}' found across multiple sections",
+                                                suggested_action=f"Remove duplicate entry for '{string}' from one of the sections",
+                                            )
+                                        )
+                                else:
+                                    all_strings[string] = section_name
 
-        # Check for conflicts
-        conflicts = brush_strings.intersection(handle_knot_strings)
-        for conflict_string in conflicts:
+        # Check for cross-section conflicts
+        brush_strings = set()
+        handle_strings = set()
+        knot_strings = set()
+
+        # Collect brush strings
+        brush_section = correct_matches.get("brush", {})
+        if isinstance(brush_section, dict):
+            for brand_data in brush_section.values():
+                if isinstance(brand_data, dict):
+                    for strings in brand_data.values():
+                        if isinstance(strings, list):
+                            brush_strings.update(strings)
+
+        # Collect handle strings
+        handle_section = correct_matches.get("handle", {})
+        if isinstance(handle_section, dict):
+            for brand_data in handle_section.values():
+                if isinstance(brand_data, dict):
+                    for strings in brand_data.values():
+                        if isinstance(strings, list):
+                            handle_strings.update(strings)
+
+        # Collect knot strings
+        knot_section = correct_matches.get("knot", {})
+        if isinstance(knot_section, dict):
+            for brand_data in knot_section.values():
+                if isinstance(brand_data, dict):
+                    for strings in brand_data.values():
+                        if isinstance(strings, list):
+                            knot_strings.update(strings)
+
+        # Check for conflicts between brush and handle/knot
+        # Note: handle AND knot is valid (composite brush), so we don't flag that as a conflict
+        brush_handle_conflicts = brush_strings.intersection(handle_strings)
+        brush_knot_conflicts = brush_strings.intersection(knot_strings)
+
+        # Check for triple conflicts (brush AND handle AND knot)
+        all_sections = brush_strings.union(handle_strings).union(knot_strings)
+        triple_conflicts = set()
+        for string in all_sections:
+            in_brush = string in brush_strings
+            in_handle = string in handle_strings
+            in_knot = string in knot_strings
+            if in_brush and in_handle and in_knot:
+                triple_conflicts.add(string)
+
+        # Report conflicts
+        for conflict_string in brush_handle_conflicts:
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
-                    details=f"String '{conflict_string}' appears in both brush section and handle/knot sections",
-                    suggested_action=f"Remove '{conflict_string}' from either brush section or handle/knot sections",
+                    details=f"String '{conflict_string}' appears in both brush and handle sections",
+                    suggested_action=f"Remove '{conflict_string}' from either brush or handle section",
+                )
+            )
+
+        for conflict_string in brush_knot_conflicts:
+            issues.append(
+                ValidationIssue(
+                    issue_type="cross_section_conflict",
+                    severity="high",
+                    correct_match=conflict_string,
+                    details=f"String '{conflict_string}' appears in both brush and knot sections",
+                    suggested_action=f"Remove '{conflict_string}' from either brush or knot section",
+                )
+            )
+
+        for conflict_string in triple_conflicts:
+            issues.append(
+                ValidationIssue(
+                    issue_type="cross_section_conflict",
+                    severity="high",
+                    correct_match=conflict_string,
+                    details=f"String '{conflict_string}' appears in brush, handle, and knot sections",
+                    suggested_action=f"Remove '{conflict_string}' from brush section (keep in handle and knot for composite brush)",
                 )
             )
 
@@ -225,26 +304,46 @@ class ActualMatchingValidator:
             matched_data = result.matched
 
             # Determine actual section based on result structure
+            # Check for complete brush (has top-level brand/model)
             if matched_data.get("brand") and matched_data.get("model"):
                 actual_section = "brush"
-            elif matched_data.get("handle") and matched_data.get("knot"):
+            # Check for composite brush (has nested handle and knot with data)
+            elif (
+                matched_data.get("handle")
+                and matched_data.get("knot")
+                and matched_data["handle"].get("brand")
+                and matched_data["knot"].get("brand")
+            ):
                 actual_section = "handle_knot"
-            elif matched_data.get("handle"):
+            # Check for handle-only (has nested handle with data, but no knot data)
+            elif (
+                matched_data.get("handle")
+                and matched_data["handle"].get("brand")
+                and (not matched_data.get("knot") or not matched_data["knot"].get("brand"))
+            ):
                 actual_section = "handle"
-            elif matched_data.get("knot"):
+            # Check for knot-only (has nested knot with data, but no handle data)
+            elif (
+                matched_data.get("knot")
+                and matched_data["knot"].get("brand")
+                and (not matched_data.get("handle") or not matched_data["handle"].get("brand"))
+            ):
                 actual_section = "knot"
             else:
                 actual_section = "unknown"
 
             # Check for structural changes
             if expected_section != actual_section:
+                logger.debug(
+                    f"Structural change detected: {brush_string} from {expected_section} to {actual_section}"
+                )
                 issues.append(
                     ValidationIssue(
                         issue_type="structural_change",
                         severity="high",
                         correct_match=brush_string,
-                        expected_section=expected_section,
-                        actual_section=actual_section,
+                        expected_section=actual_section,  # Where it should be (current matching system)
+                        actual_section=expected_section,  # Where it currently is (correct_matches.yaml)
                         details=f"Brush type changed from {expected_section} to {actual_section}",
                         suggested_action=f"Move '{brush_string}' from {expected_section} section to {actual_section} section",
                     )
@@ -384,6 +483,137 @@ class ActualMatchingValidator:
 
         return issues
 
+    def _collect_brush_string_locations(
+        self, correct_matches: Dict[str, Any]
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """Collect all brush strings and their locations in correct_matches.yaml."""
+        brush_string_locations = {}
+
+        # Check brush section
+        brush_section = correct_matches.get("brush", {})
+        if isinstance(brush_section, dict):
+            for brand, brand_data in brush_section.items():
+                if isinstance(brand_data, dict):
+                    for model, strings in brand_data.items():
+                        if isinstance(strings, list):
+                            for brush_string in strings:
+                                if brush_string not in brush_string_locations:
+                                    brush_string_locations[brush_string] = []
+                                brush_string_locations[brush_string].append(
+                                    {
+                                        "section": "brush",
+                                        "brand": brand,
+                                        "model": model,
+                                        "data": {"brand": brand, "model": model},
+                                    }
+                                )
+
+        # Check handle section
+        handle_section = correct_matches.get("handle", {})
+        if isinstance(handle_section, dict):
+            for handle_maker, handle_models in handle_section.items():
+                if isinstance(handle_models, dict):
+                    for handle_model, strings in handle_models.items():
+                        if isinstance(strings, list):
+                            for brush_string in strings:
+                                if brush_string not in brush_string_locations:
+                                    brush_string_locations[brush_string] = []
+                                brush_string_locations[brush_string].append(
+                                    {
+                                        "section": "handle",
+                                        "brand": handle_maker,
+                                        "model": handle_model,
+                                        "data": {
+                                            "handle_maker": handle_maker,
+                                            "handle_model": handle_model,
+                                        },
+                                    }
+                                )
+
+        # Check knot section
+        knot_section = correct_matches.get("knot", {})
+        if isinstance(knot_section, dict):
+            for knot_brand, knot_models in knot_section.items():
+                if isinstance(knot_models, dict):
+                    for knot_model, strings in knot_models.items():
+                        if isinstance(strings, list):
+                            for brush_string in strings:
+                                if brush_string not in brush_string_locations:
+                                    brush_string_locations[brush_string] = []
+                                brush_string_locations[brush_string].append(
+                                    {
+                                        "section": "knot",
+                                        "brand": knot_brand,
+                                        "model": knot_model,
+                                        "data": {
+                                            "knot_brand": knot_brand,
+                                            "knot_model": knot_model,
+                                        },
+                                    }
+                                )
+
+        return brush_string_locations
+
+    def _determine_expected_section(self, locations: List[Dict[str, Any]]) -> str:
+        """Determine the expected section based on where the string appears."""
+        sections = [loc["section"] for loc in locations]
+
+        # If it appears in brush section, it's a complete brush
+        if "brush" in sections:
+            return "brush"
+
+        # If it appears in both handle and knot, it's a composite brush
+        if "handle" in sections and "knot" in sections:
+            return "handle_knot"
+
+        # If it appears in only handle, it's handle-only
+        if "handle" in sections and "knot" not in sections:
+            return "handle"
+
+        # If it appears in only knot, it's knot-only
+        if "knot" in sections and "handle" not in sections:
+            return "knot"
+
+        # Fallback
+        return sections[0] if sections else "unknown"
+
+    def _build_expected_data(
+        self, brush_string: str, locations: List[Dict[str, Any]], expected_section: str
+    ) -> Dict[str, Any]:
+        """Build expected data based on the expected section and locations."""
+        if expected_section == "brush":
+            # Use the brush section data
+            brush_location = next((loc for loc in locations if loc["section"] == "brush"), None)
+            if brush_location:
+                return brush_location["data"]
+
+        elif expected_section == "handle_knot":
+            # Combine handle and knot data
+            handle_location = next((loc for loc in locations if loc["section"] == "handle"), None)
+            knot_location = next((loc for loc in locations if loc["section"] == "knot"), None)
+
+            expected_data = {}
+            if handle_location:
+                expected_data.update(handle_location["data"])
+            if knot_location:
+                expected_data.update(knot_location["data"])
+            return expected_data
+
+        elif expected_section == "handle":
+            # Use handle section data
+            handle_location = next((loc for loc in locations if loc["section"] == "handle"), None)
+            if handle_location:
+                return handle_location["data"]
+
+        elif expected_section == "knot":
+            # Use knot section data
+            knot_location = next((loc for loc in locations if loc["section"] == "knot"), None)
+            if knot_location:
+                return knot_location["data"]
+
+        # Fallback
+        return locations[0]["data"] if locations else {}
+
     def validate(self, field: str) -> ValidationResult:
         """
         Validate correct_matches.yaml entries for the specified field using actual matching.
@@ -411,50 +641,22 @@ class ActualMatchingValidator:
 
             # Validate field-specific entries
             if field == "brush":
-                # Validate brush entries (complete and composite)
-                brush_section = correct_matches.get("brush", {})
-                for brand, brand_data in brush_section.items():
-                    if isinstance(brand_data, dict):
-                        for model, strings in brand_data.items():
-                            if isinstance(strings, list):
-                                for brush_string in strings:
-                                    expected_data = {"brand": brand, "model": model}
-                                    entry_issues = self._validate_brush_entry(
-                                        brush_string, expected_data, "brush"
-                                    )
-                                    issues.extend(entry_issues)
+                # First, collect all brush strings and their locations
+                brush_string_locations = self._collect_brush_string_locations(correct_matches)
 
-                # Validate handle entries
-                handle_section = correct_matches.get("handle", {})
-                for handle_maker, handle_models in handle_section.items():
-                    if isinstance(handle_models, dict):
-                        for handle_model, strings in handle_models.items():
-                            if isinstance(strings, list):
-                                for brush_string in strings:
-                                    expected_data = {
-                                        "handle_maker": handle_maker,
-                                        "handle_model": handle_model,
-                                    }
-                                    entry_issues = self._validate_brush_entry(
-                                        brush_string, expected_data, "handle"
-                                    )
-                                    issues.extend(entry_issues)
+                # Validate each unique brush string
+                for brush_string, locations in brush_string_locations.items():
+                    # Determine expected structure based on locations
+                    expected_section = self._determine_expected_section(locations)
+                    expected_data = self._build_expected_data(
+                        brush_string, locations, expected_section
+                    )
 
-                # Validate knot entries
-                knot_section = correct_matches.get("knot", {})
-                for knot_brand, knot_models in knot_section.items():
-                    if isinstance(knot_models, dict):
-                        for knot_model, strings in knot_models.items():
-                            if isinstance(strings, list):
-                                for brush_string in strings:
-                                    expected_data = {
-                                        "knot_brand": knot_brand,
-                                        "knot_model": knot_model,
-                                    }
-                                    entry_issues = self._validate_brush_entry(
-                                        brush_string, expected_data, "knot"
-                                    )
-                                    issues.extend(entry_issues)
+                    # Validate the brush string
+                    entry_issues = self._validate_brush_entry(
+                        brush_string, expected_data, expected_section
+                    )
+                    issues.extend(entry_issues)
 
             else:
                 # Validate simple entries (razor, blade, soap)
