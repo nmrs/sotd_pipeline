@@ -18,7 +18,7 @@ const CatalogValidator: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<CatalogValidationResult | null>(null);
   const [displayMode, setDisplayMode] = useState<
-    'all' | 'mismatches' | 'no_match' | 'format_mismatches'
+    'all' | 'mismatches' | 'no_match' | 'format_mismatches' | 'data_mismatch' | 'structural_change' | 'duplicate_string' | 'cross_section_conflict'
   >('all');
 
   // New state for multi-select functionality
@@ -119,6 +119,10 @@ const CatalogValidator: React.FC = () => {
         mismatches: 0,
         no_match: 0,
         format_mismatches: 0,
+        data_mismatch: 0,
+        structural_change: 0,
+        duplicate_string: 0,
+        cross_section_conflict: 0,
       };
     }
 
@@ -126,9 +130,17 @@ const CatalogValidator: React.FC = () => {
 
     return {
       all: issues.length,
-      mismatches: issues.filter(issue => issue.issue_type === 'catalog_pattern_mismatch').length,
-      no_match: issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match').length,
+      mismatches: issues.filter(issue =>
+        issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
+      ).length,
+      no_match: issues.filter(issue =>
+        issue.issue_type === 'catalog_pattern_no_match' || issue.issue_type === 'no_match'
+      ).length,
       format_mismatches: issues.filter(issue => issue.issue_type === 'format_mismatch').length,
+      data_mismatch: issues.filter(issue => issue.issue_type === 'data_mismatch').length,
+      structural_change: issues.filter(issue => issue.issue_type === 'structural_change').length,
+      duplicate_string: issues.filter(issue => issue.issue_type === 'duplicate_string').length,
+      cross_section_conflict: issues.filter(issue => issue.issue_type === 'cross_section_conflict').length,
     };
   };
 
@@ -137,11 +149,23 @@ const CatalogValidator: React.FC = () => {
 
     switch (displayMode) {
       case 'mismatches':
-        return results.issues.filter(issue => issue.issue_type === 'catalog_pattern_mismatch');
+        return results.issues.filter(issue =>
+          issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
+        );
       case 'no_match':
-        return results.issues.filter(issue => issue.issue_type === 'catalog_pattern_no_match');
+        return results.issues.filter(issue =>
+          issue.issue_type === 'catalog_pattern_no_match' || issue.issue_type === 'no_match'
+        );
       case 'format_mismatches':
         return results.issues.filter(issue => issue.issue_type === 'format_mismatch');
+      case 'data_mismatch':
+        return results.issues.filter(issue => issue.issue_type === 'data_mismatch');
+      case 'structural_change':
+        return results.issues.filter(issue => issue.issue_type === 'structural_change');
+      case 'duplicate_string':
+        return results.issues.filter(issue => issue.issue_type === 'duplicate_string');
+      case 'cross_section_conflict':
+        return results.issues.filter(issue => issue.issue_type === 'cross_section_conflict');
       default:
         return results.issues;
     }
@@ -150,9 +174,16 @@ const CatalogValidator: React.FC = () => {
   const getIssueIcon = (issue: CatalogValidationIssue) => {
     switch (issue.issue_type) {
       case 'catalog_pattern_mismatch':
+      case 'data_mismatch':
         return <AlertTriangle className='h-4 w-4 text-orange-500' />;
       case 'catalog_pattern_no_match':
+      case 'no_match':
         return <XCircle className='h-4 w-4 text-red-500' />;
+      case 'structural_change':
+        return <AlertTriangle className='h-4 w-4 text-purple-500' />;
+      case 'duplicate_string':
+      case 'cross_section_conflict':
+        return <Info className='h-4 w-4 text-yellow-500' />;
       default:
         return <Info className='h-4 w-4 text-blue-500' />;
     }
@@ -227,8 +258,8 @@ const CatalogValidator: React.FC = () => {
                 Mismatches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                      ? 'bg-white text-orange-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-orange-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().mismatches}
@@ -243,8 +274,8 @@ const CatalogValidator: React.FC = () => {
                   Format Mismatches
                   <span
                     className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'format_mismatches'
-                        ? 'bg-white text-purple-600'
-                        : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-purple-600'
+                      : 'bg-gray-100 text-gray-700'
                       }`}
                   >
                     {getDisplayModeCounts().format_mismatches}
@@ -259,11 +290,71 @@ const CatalogValidator: React.FC = () => {
                 No Match
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'no_match'
-                      ? 'bg-white text-red-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-red-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().no_match}
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('data_mismatch')}
+                className={`flex items-center gap-1 text-sm ${displayMode === 'data_mismatch' ? 'bg-orange-600 text-white' : ''}`}
+              >
+                Data Mismatch
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'data_mismatch'
+                    ? 'bg-white text-orange-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().data_mismatch}
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('structural_change')}
+                className={`flex items-center gap-1 text-sm ${displayMode === 'structural_change' ? 'bg-purple-600 text-white' : ''}`}
+              >
+                Structural Change
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'structural_change'
+                    ? 'bg-white text-purple-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().structural_change}
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('duplicate_string')}
+                className={`flex items-center gap-1 text-sm ${displayMode === 'duplicate_string' ? 'bg-yellow-600 text-white' : ''}`}
+              >
+                Duplicates
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'duplicate_string'
+                    ? 'bg-white text-yellow-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().duplicate_string}
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('cross_section_conflict')}
+                className={`flex items-center gap-1 text-sm ${displayMode === 'cross_section_conflict' ? 'bg-yellow-600 text-white' : ''}`}
+              >
+                Conflicts
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'cross_section_conflict'
+                    ? 'bg-white text-yellow-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().cross_section_conflict}
                 </span>
               </Button>
             </div>
@@ -289,7 +380,7 @@ const CatalogValidator: React.FC = () => {
       {/* Loading Spinner */}
       {loading && (
         <div className='mb-4'>
-          <LoadingSpinner message='Validating catalog patterns...' />
+          <LoadingSpinner message='Running actual matching validation...' />
         </div>
       )}
 
@@ -368,14 +459,24 @@ const CatalogValidator: React.FC = () => {
                                 ? 'Pattern Mismatch'
                                 : issue.issue_type === 'catalog_pattern_no_match'
                                   ? 'No Match Found'
-                                  : 'Validation Issue'}
+                                  : issue.issue_type === 'data_mismatch'
+                                    ? 'Data Mismatch'
+                                    : issue.issue_type === 'structural_change'
+                                      ? 'Structural Change'
+                                      : issue.issue_type === 'duplicate_string'
+                                        ? 'Duplicate String'
+                                        : issue.issue_type === 'cross_section_conflict'
+                                          ? 'Cross-Section Conflict'
+                                          : issue.issue_type === 'no_match'
+                                            ? 'No Match Found'
+                                            : 'Validation Issue'}
                           </h4>
                           <span
                             className={`px-2 py-1 text-xs rounded-full ${issue.severity === 'high'
-                                ? 'bg-red-100 text-red-800'
-                                : issue.severity === 'medium'
-                                  ? 'bg-orange-100 text-orange-800'
-                                  : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-red-100 text-red-800'
+                              : issue.severity === 'medium'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-yellow-100 text-yellow-800'
                               }`}
                           >
                             {issue.severity}
@@ -407,7 +508,7 @@ const CatalogValidator: React.FC = () => {
                             </div>
                           )}
 
-                          {issue.issue_type === 'catalog_pattern_mismatch' ? (
+                          {issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
                               <div>
                                 <p className='font-medium text-gray-700'>Currently Stored Under:</p>
@@ -424,9 +525,40 @@ const CatalogValidator: React.FC = () => {
                                   {issue.actual_brand} {issue.actual_model}
                                 </p>
                                 <p className='text-xs text-gray-500 mt-1'>
-                                  (based on current catalog patterns)
+                                  (based on current matching system)
                                 </p>
                               </div>
+                            </div>
+                          ) : issue.issue_type === 'structural_change' ? (
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
+                              <div>
+                                <p className='font-medium text-gray-700'>Current Structure:</p>
+                                <p className='text-gray-600'>
+                                  {issue.expected_section || 'Unknown'}
+                                </p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  (in correct_matches.yaml)
+                                </p>
+                              </div>
+                              <div>
+                                <p className='font-medium text-gray-700'>Expected Structure:</p>
+                                <p className='text-gray-600'>
+                                  {issue.actual_section || 'Unknown'}
+                                </p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  (based on current matching system)
+                                </p>
+                              </div>
+                            </div>
+                          ) : issue.issue_type === 'duplicate_string' || issue.issue_type === 'cross_section_conflict' ? (
+                            <div>
+                              <p className='font-medium text-gray-700'>Issue Type:</p>
+                              <p className='text-gray-600'>
+                                {issue.issue_type === 'duplicate_string' ? 'Duplicate string found' : 'Cross-section conflict detected'}
+                              </p>
+                              <p className='text-xs text-gray-500 mt-1'>
+                                (data structure validation)
+                              </p>
                             </div>
                           ) : (
                             <div>
@@ -474,9 +606,15 @@ const CatalogValidator: React.FC = () => {
                             Suggested Action:
                           </p>
                           <p className='text-sm text-gray-600'>
-                            {issue.issue_type === 'catalog_pattern_mismatch'
-                              ? `Move pattern from '${issue.expected_brand} ${issue.expected_model}' to '${issue.actual_brand} ${issue.actual_model}' in correct_matches.yaml`
-                              : issue.suggested_action
+                            {issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
+                              ? `Update correct_matches.yaml to reflect new brand/model: '${issue.actual_brand} ${issue.actual_model}'`
+                              : issue.issue_type === 'structural_change'
+                                ? `Update correct_matches.yaml structure: move from '${issue.expected_section}' section to '${issue.actual_section}' section`
+                                : issue.issue_type === 'duplicate_string'
+                                  ? `Remove duplicate entry for '${issue.correct_match}' from correct_matches.yaml`
+                                  : issue.issue_type === 'cross_section_conflict'
+                                    ? `Resolve cross-section conflict for '${issue.correct_match}' in correct_matches.yaml`
+                                    : issue.suggested_action
                             }
                           </p>
                         </div>
@@ -496,7 +634,7 @@ const CatalogValidator: React.FC = () => {
                 <h3 className='text-lg font-medium text-gray-900 mb-2'>No Issues Found</h3>
                 <p className='text-gray-600'>
                   All {results.total_entries} entries in correct_matches.yaml are still valid with
-                  current catalog patterns.
+                  the current matching system.
                 </p>
               </div>
             )}
