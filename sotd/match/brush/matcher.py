@@ -247,13 +247,17 @@ class BrushMatcher:
             if not path.is_file():
                 raise ValueError(f"Catalog path '{name}' is not a file: {path.absolute()}")
 
-            # Test if we can actually read the file
+            # Test if we can actually read and parse the YAML file
             try:
                 with open(path, "r", encoding="utf-8") as f:
-                    # Just read first few bytes to test readability
-                    f.read(1)
+                    # Test YAML parsing to catch syntax errors early
+                    yaml.safe_load(f)
             except (PermissionError, UnicodeDecodeError) as e:
                 raise ValueError(f"Catalog file '{name}' is not readable: {path.absolute()} - {e}")
+            except yaml.YAMLError as e:
+                raise ValueError(
+                    f"YAML syntax error in catalog file '{name}': {path.absolute()} - {e}"
+                )
 
         # Validate correct_matches (can be directory or file)
         if not self.correct_matches_path.exists():
@@ -322,8 +326,11 @@ class BrushMatcher:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
-        except (FileNotFoundError, yaml.YAMLError):
+        except FileNotFoundError:
             return {}
+        except yaml.YAMLError as e:
+            # FAIL FAST: YAML syntax errors should cause immediate failure
+            raise ValueError(f"YAML syntax error in {path.absolute()}: {e}")
 
     def _load_correct_matches_catalog(self) -> dict:
         """Load correct matches catalog from directory structure or legacy file using CatalogLoader."""
