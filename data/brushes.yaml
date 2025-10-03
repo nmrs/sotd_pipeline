@@ -365,6 +365,15 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - razo.*big.*bruce
+    Blondie:
+      patterns:
+        - razo.*blondie
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 26
+      handle:
+        brand: Zenith
     Bruce:
       fiber: Synthetic
       knot_size_mm: 24
@@ -878,7 +887,7 @@ known_brushes:
       knot_size_mm: 26
       knot_loft_mm: 57
       patterns:
-        - zen.*pro.*aluminum
+        - zen.*\bpro\b
     r/wetshaving MOAR BOAR:
       patterns:
         - moar(.*boar)?
@@ -1485,14 +1494,14 @@ other_brushes:
     default: Synthetic
     patterns:
       - aurora\s*grooming
+  Barrister and Mann:
+    default: Synthetic
+    patterns:
+      - barrister.*and.*mann
   Black Eagle:
     default: Badger
     patterns:
       - black.*eag
-  Gilette:
-    default: Synthetic
-    patterns:
-      - gillette
   Body Shop:
     default: Synthetic
     knot_size_mm: 22
@@ -1507,6 +1516,18 @@ other_brushes:
     default: Synthetic
     patterns:
       - boti
+  Brad Sears:
+    default: Badger
+    patterns:
+      - brad.*sears
+  Bristle Brushwerks:
+    default: Badger
+    patterns:
+      - bristle.*brush
+  CaYuen:
+    default: Badger
+    patterns:
+      - ca\s?yuen
   Chisel & Hound:
     default: Badger
     patterns:
@@ -1525,6 +1546,10 @@ other_brushes:
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
+  Gilette:
+    default: Synthetic
+    patterns:
+      - gillette
   Lentfer Custom Woodworks:
     default: Synthetic
     patterns:

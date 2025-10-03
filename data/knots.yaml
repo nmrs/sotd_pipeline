@@ -289,80 +289,61 @@ known_knots:
     fiber: Badger
     B1:
       patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b).*\bb1\b
-        - ^(?!.*dog).*\bb1\b
+        - \bb1\b
     B2:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb2\b
-        - ^(?!.*dog|zen).*\bb2\b
+        - \bb2\b
     B3:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
-        - ^(?!.*dog|zen).*\bb3\b
+        - b3
     B4:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb4\b
-        - ^(?!.*dog|zen).*\bb4\b
+        - b4
     B5:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb5\b
-        - ^(?!.*dog|zen).*\bb5\b
+        - b5
     B6:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
-        - ^(?!.*dog|zen).*\bb6\b
+        - b6
     B7:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
-        - ^(?!.*dog|zen).*\bb7\b
+        - b7
     B8:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
-        - ^(?!.*dog|zen).*\bb8\b
+        - b8
     B9A:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
-        - ^(?!.*dog|zen).*\bb9a\+?\b
+        - b9a\+?
     B9B:
       patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b
-        - ^(?!.*dog).*\bb9b\+?\b
+        - b9b\+?
     B10:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb10\b
-        - ^(?!.*dog|zen).*\bb10\b
+        - b10
     B11:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb11\b
-        - ^(?!.*dog|zen).*\bb11\b
+        - b11
     B12:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb12\b
-        - ^(?!.*dog|zen).*\bb12\b
+        - b12
     B13:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
-        - ^(?!.*dog|zen).*\bb13\b
+        - b13
     B14:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
-        - ^(?!.*dog|zen).*\bb14\b
+        - b14
     B15:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
-        - ^(?!.*dog|zen).*\bb15\b
+        - b15
     B16:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
-        - ^(?!.*dog|zen).*\bb16\b
+        - b16
     B17:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb17\b
-        - ^(?!.*dog|zen).*\bb17\b
+        - b17
     B18:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
-        - ^(?!.*dog|zen).*\bb18\b
+        - b18
   Griffith:
     High Mountain Badger HD:
       fiber: Badger
@@ -689,7 +670,6 @@ other_knots:
   Bristle Brushwerks:
     default: Badger
     patterns:
-      - huck
       - bristle.*brush
   Brushcraft:
     default: Synthetic
@@ -759,7 +739,7 @@ other_knots:
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
-  Declaration Grooming (batch not specified):
+  Declaration Grooming:
     default: Badger
     patterns:
       - (declaration|\bdg\b)

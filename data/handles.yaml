@@ -75,7 +75,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - catalin
-  Century:
+  CaYuen:
+    Unspecified:
+      patterns:
+        - ca\s?yuen
+    Century:
     Unspecified:
       patterns:
         - century
@@ -483,10 +487,6 @@ manufacturer_handles:
       patterns:
         - bund\wbeard
         - boendoebaard
-  CaYuen:
-    Unspecified:
-      patterns:
-        - ca\s?yuen
   Certifyd:
     Unspecified:
       patterns:
