@@ -1,0 +1,259 @@
+# Catalog Validator Actual Matching Refactoring Plan
+
+## 📘 Project Summary
+
+**Refactor Catalog Validator to use actual matching validation instead of pattern-only validation**
+
+The current Catalog Validator only tests if regex patterns in catalogs still work correctly. We need to refactor it to run each entry in `correct_matches.yaml` through the actual matching systems (razor, blade, brush, soap) and validate that the results match what's stored. This provides more comprehensive validation that catches issues with strategy changes, scoring changes, and catalog updates.
+
+## 🧩 Component Steps
+
+1. **Create validation service for actual matching**
+2. **Update API endpoint to support actual matching validation**
+3. **Enhance UI to display actual matching results**
+4. **Add comprehensive error handling and logging**
+5. **Add performance monitoring and metrics**
+6. **Update tests for actual matching validation**
+
+## 🔁 Implementation Prompts
+
+### Step 1: Create validation service for actual matching
+
+```text
+Create a new validation service that runs actual matching validation for all field types (razor, blade, brush, soap).
+
+**Context**: We need to replace pattern-only validation with actual matching validation that runs each entry in `correct_matches.yaml` through the real matching systems.
+
+**Requirements**:
+- Create `sotd/validate/actual_matching_validator.py`
+- Support all field types: razor, blade, brush, soap
+- Run each entry through the actual matcher with `bypass_correct_matches=True`
+- Compare actual results with expected results from `correct_matches.yaml`
+- Flag differences in: brand, model, handle.brand, handle.model, knot.brand, knot.model
+- Flag structural changes: complete ↔ composite brush type changes
+- Flag section placement issues: results stored in different sections than expected
+- Flag missing matches: previously matched entries now return no match
+- Don't flag differences in: strategy, match_type, pattern, fiber, knot_size_mm
+- Validate data structure rules: valid combinations, invalid combinations, duplicates
+- Fail fast on internal errors, handle external failures gracefully
+- Include comprehensive logging and performance monitoring
+
+**Test Requirements**:
+- Unit tests for each field type validation
+- Unit tests for data structure validation
+- Unit tests for error handling scenarios
+- Integration tests with real `correct_matches.yaml` data
+- Performance tests for large datasets
+
+**Files to create/modify**:
+- `sotd/validate/actual_matching_validator.py` (new)
+- `tests/validate/test_actual_matching_validator.py` (new)
+- `tests/validate/test_data_structure_validation.py` (new)
+```
+
+### Step 2: Update API endpoint to support actual matching validation
+
+```text
+Update the existing `/api/validate-catalog` endpoint to use actual matching validation instead of pattern-only validation.
+
+**Context**: The current endpoint only does pattern validation. We need to replace it with actual matching validation while maintaining the same API interface.
+
+**Requirements**:
+- Modify `webui/api/catalog_validation.py` to use `ActualMatchingValidator`
+- Keep the same API response format for backward compatibility
+- Add new fields: `validation_mode`, `strategy_stats`, `performance_metrics`
+- Support all field types: razor, blade, brush, soap
+- Keep the same display modes: all, mismatches, no_match, format_mismatches
+- Keep the same multi-select and removal functionality
+- Keep the same bypass functionality (essential for testing)
+- Keep the same error handling and logging patterns
+- Add enhanced logging for actual matching process
+- Add performance monitoring for actual matching vs pattern validation
+
+**Test Requirements**:
+- Unit tests for API endpoint changes
+- Integration tests with real matching systems
+- API response format validation tests
+- Error handling tests for matching system failures
+- Performance tests for large datasets
+
+**Files to modify**:
+- `webui/api/catalog_validation.py`
+- `tests/api/test_catalog_validation.py`
+```
+
+### Step 3: Enhance UI to display actual matching results
+
+```text
+Update the CatalogValidator UI to display actual matching validation results while maintaining the same user experience.
+
+**Context**: The UI needs to show actual matching validation results instead of pattern validation results, but keep the same familiar interface.
+
+**Requirements**:
+- Update `webui/src/pages/CatalogValidator.tsx` to handle actual matching results
+- Keep the same display modes but update their meanings:
+  - All Issues: shows all validation issues
+  - Mismatches: shows when actual matching produces different data
+  - No Match: shows when previously matched entries now return no match
+  - Format Mismatches: shows blade format mismatches (blade-specific)
+- Keep the same multi-select and removal functionality
+- Keep the same bypass functionality
+- Update issue display to show actual matching details:
+  - Strategy information (which strategy won)
+  - Data comparison (expected vs actual)
+  - Structural changes (complete ↔ composite)
+  - Section placement issues
+- Add performance metrics display
+- Keep the same error handling and user feedback
+
+**Test Requirements**:
+- React component unit tests for UI changes
+- Integration tests with actual matching API
+- User interaction tests for multi-select and removal
+- Error handling tests for API failures
+- Performance tests for large result sets
+
+**Files to modify**:
+- `webui/src/pages/CatalogValidator.tsx`
+- `webui/src/components/feedback/ErrorDisplay.tsx` (if needed)
+- `webui/src/components/layout/LoadingSpinner.tsx` (if needed)
+```
+
+### Step 4: Add comprehensive error handling and logging
+
+```text
+Enhance error handling and logging for actual matching validation to provide better debugging and monitoring.
+
+**Context**: Actual matching validation is more complex than pattern validation and needs robust error handling and comprehensive logging.
+
+**Requirements**:
+- Add brush matching specific error handling in `ActualMatchingValidator`
+- Add validation-specific error handling for data structure issues
+- Add performance monitoring for actual matching vs pattern validation
+- Enhance logging with:
+  - Strategy selection logging (which strategy won for each entry)
+  - Data comparison logging (what changed between expected vs actual)
+  - Performance logging (actual matching vs pattern validation timing)
+  - Error logging (brush matching errors, validation errors)
+- Keep existing error handling patterns:
+  - Fail fast on internal errors
+  - Handle external failures gracefully
+  - Use specific exception types
+- Add new error types for actual matching validation
+- Add comprehensive debug information for troubleshooting
+
+**Test Requirements**:
+- Unit tests for error handling scenarios
+- Unit tests for logging functionality
+- Integration tests for error recovery
+- Performance tests for logging overhead
+- Error message validation tests
+
+**Files to modify**:
+- `sotd/validate/actual_matching_validator.py`
+- `webui/api/catalog_validation.py`
+- `webui/src/pages/CatalogValidator.tsx`
+- `tests/validate/test_actual_matching_validator.py`
+```
+
+### Step 5: Add performance monitoring and metrics
+
+```text
+Add comprehensive performance monitoring and metrics for actual matching validation to track performance and identify bottlenecks.
+
+**Context**: Actual matching validation is more resource-intensive than pattern validation and needs performance monitoring to ensure acceptable performance.
+
+**Requirements**:
+- Add performance metrics collection in `ActualMatchingValidator`
+- Track timing for each field type validation
+- Track timing for each strategy execution
+- Track memory usage during validation
+- Add performance thresholds and warnings
+- Add performance metrics to API response
+- Add performance display in UI
+- Add performance logging for analysis
+- Add performance tests for large datasets
+- Add performance optimization for common cases
+
+**Test Requirements**:
+- Unit tests for performance metrics collection
+- Performance tests for large datasets
+- Performance threshold validation tests
+- Memory usage tests
+- Performance optimization tests
+
+**Files to modify**:
+- `sotd/validate/actual_matching_validator.py`
+- `webui/api/catalog_validation.py`
+- `webui/src/pages/CatalogValidator.tsx`
+- `tests/validate/test_actual_matching_validator.py`
+```
+
+### Step 6: Update tests for actual matching validation
+
+```text
+Update and enhance all tests to support actual matching validation while maintaining existing test coverage.
+
+**Context**: We need comprehensive test coverage for actual matching validation to ensure reliability and catch regressions.
+
+**Requirements**:
+- Update existing tests to work with actual matching validation
+- Add new tests for actual matching specific functionality
+- Add tests for data structure validation
+- Add tests for error handling scenarios
+- Add tests for performance monitoring
+- Add tests for UI changes
+- Add tests for API changes
+- Add integration tests with real matching systems
+- Add performance tests for large datasets
+- Add edge case tests for complex scenarios
+
+**Test Requirements**:
+- Unit tests for all new functionality
+- Integration tests with real data
+- Performance tests for large datasets
+- Error handling tests
+- UI interaction tests
+- API response validation tests
+- Edge case tests
+- Regression tests
+
+**Files to modify**:
+- `tests/validate/test_actual_matching_validator.py`
+- `tests/api/test_catalog_validation.py`
+- `tests/pages/test_CatalogValidator.tsx`
+- `tests/validate/test_data_structure_validation.py`
+- `tests/validate/test_performance_monitoring.py`
+```
+
+## 🧠 Critical Analysis
+
+### **Prompt Sequence Analysis**
+The plan follows a logical progression from core validation logic to UI integration, with each step building on the previous one. The sequence ensures that the fundamental validation service is solid before moving to API and UI changes.
+
+### **Strengths**
+- **Incremental approach**: Each step is self-contained and builds logically
+- **Test-first**: Every step includes comprehensive test requirements
+- **Backward compatibility**: Maintains existing API and UI patterns
+- **Comprehensive coverage**: Addresses all aspects of actual matching validation
+- **Performance focus**: Includes performance monitoring and optimization
+
+### **Potential Issues**
+- **Complexity**: Actual matching validation is more complex than pattern validation
+- **Performance**: May be slower than pattern validation for large datasets
+- **Error handling**: More edge cases to handle with actual matching systems
+- **Testing**: More complex test scenarios with real matching systems
+
+### **Refinements Needed**
+- **Step 1**: Could be split into smaller steps for each field type
+- **Step 3**: UI changes might be minimal if we keep the same response format
+- **Step 6**: Test updates could be integrated into previous steps
+
+### **Overall Assessment**
+This plan provides a solid foundation for implementing actual matching validation while maintaining the existing user experience. The incremental approach allows for safe implementation and testing at each step.
+
+## Status
+- **Created**: 2025-10-03
+- **Status**: TODO
+- **Priority**: High
+- **Category**: Refactoring
