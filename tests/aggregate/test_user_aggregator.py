@@ -35,7 +35,7 @@ class TestUserAggregator:
         assert result[1]["rank"] == 2
 
     def test_aggregate_users_competition_ranking(self):
-        """Test that competition ranking correctly handles ties based on shaves and missed_days."""
+        """Test that competition ranking correctly handles ties based on missed_days and shaves."""
         records = [
             # User1: 3 shaves, 28 missed days (rank 1)
             {
@@ -50,7 +50,7 @@ class TestUserAggregator:
                 "author": "user1",
                 "thread_title": "Friday SOTD Thread - Mar 03, 2025",
             },
-            # User2: 3 shaves, 29 missed days (rank 3 - posted twice on same day)
+            # User2: 3 shaves, 29 missed days (rank 1 - more missed days)
             {
                 "author": "user2",
                 "thread_title": "Wednesday SOTD Thread - Mar 01, 2025",
@@ -63,7 +63,7 @@ class TestUserAggregator:
                 "author": "user2",
                 "thread_title": "Thursday SOTD Thread - Mar 02, 2025",
             },
-            # User3: 3 shaves, 28 missed days (rank 1 - posted on 3 different days)
+            # User3: 3 shaves, 28 missed days (rank 3 - tied with user1, alphabetically second)
             {
                 "author": "user3",
                 "thread_title": "Wednesday SOTD Thread - Mar 01, 2025",
@@ -76,7 +76,7 @@ class TestUserAggregator:
                 "author": "user3",
                 "thread_title": "Friday SOTD Thread - Mar 03, 2025",
             },
-            # User4: 2 shaves, 29 missed days (rank 4 - different shaves)
+            # User4: 2 shaves, 29 missed days (rank 3 - tied with user2, alphabetically second)
             {
                 "author": "user4",
                 "thread_title": "Wednesday SOTD Thread - Mar 01, 2025",
@@ -90,7 +90,7 @@ class TestUserAggregator:
         result = aggregate_users(records)
 
         # Check competition ranking: 1, 1, 3, 4 (user1, user3, user2, user4)
-        # User1: 3 shaves, 28 missed days -> rank 1
+        # User1: 3 shaves, 28 missed days -> rank 1 (fewer missed days)
         assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 3
@@ -102,13 +102,13 @@ class TestUserAggregator:
         assert result[1]["shaves"] == 3
         assert result[1]["missed_days"] == 28
 
-        # User2: 3 shaves, 29 missed days -> rank 3 (different missed_days)
+        # User2: 3 shaves, 29 missed days -> rank 3 (more missed days)
         assert result[2]["rank"] == 3
         assert result[2]["user"] == "user2"
         assert result[2]["shaves"] == 3
         assert result[2]["missed_days"] == 29
 
-        # User4: 2 shaves, 29 missed days -> rank 4 (different shaves)
+        # User4: 2 shaves, 29 missed days -> rank 4 (same missed days, fewer shaves)
         assert result[3]["rank"] == 4
         assert result[3]["user"] == "user4"
         assert result[3]["shaves"] == 2

@@ -212,9 +212,10 @@ class TestDataQuality:
                         current["shaves"] >= next_item["shaves"]
                     ), f"Shaves not in descending order in {category_name}"
                     if current["shaves"] == next_item["shaves"]:
-                        assert (
-                            current["unique_users"] >= next_item["unique_users"]
-                        ), f"Unique users not in descending order for equal shaves in {category_name}"
+                        assert current["unique_users"] >= next_item["unique_users"], (
+                            f"Unique users not in descending order for equal shaves in "
+                            f"{category_name}"
+                        )
 
     def test_sort_order_correctness(self):
         """Test that sort orders are correct for different categories."""
@@ -252,12 +253,12 @@ class TestDataQuality:
         result = aggregate_all(records, "2025-01")
         data = result["data"]
 
-        # Test users sort order (shaves desc, missed_days desc)
+        # Test users sort order (missed_days asc, shaves desc)
         users = data["users"]
         if len(users) >= 2:
-            assert users[0]["shaves"] >= users[1]["shaves"]
-            if users[0]["shaves"] == users[1]["shaves"]:
-                assert users[0]["missed_days"] >= users[1]["missed_days"]
+            assert users[0]["missed_days"] <= users[1]["missed_days"]
+            if users[0]["missed_days"] == users[1]["missed_days"]:
+                assert users[0]["shaves"] >= users[1]["shaves"]
 
         # Test default sort order (shaves desc, unique_users desc)
         for category in ["razors", "blades", "brushes", "soaps"]:

@@ -52,7 +52,7 @@ class UserAggregator(BaseAggregator):
     @property
     def RANKING_FIELDS(self) -> List[str]:
         """Fields used for sorting/ranking."""
-        return ["shaves", "missed_days"]
+        return ["missed_days", "shaves"]
 
     def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Extract user data from records for aggregation."""
@@ -90,7 +90,7 @@ class UserAggregator(BaseAggregator):
 def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Aggregate user data from enriched records.
 
-    Returns a list of user aggregations sorted by shaves desc, missed_days asc.
+    Returns a list of user aggregations sorted by missed_days asc, shaves desc.
     Each item includes rank field for delta calculations.
     Calculates missed days by comparing user's posted dates against all dates in the month.
 
@@ -174,18 +174,18 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     # Convert to DataFrame for sorting
     result_df = pd.DataFrame(results)
 
-    # Sort by shaves desc, missed_days asc
-    result_df = result_df.sort_values(["shaves", "missed_days"], ascending=[False, True])
+    # Sort by missed_days asc, shaves desc
+    result_df = result_df.sort_values(["missed_days", "shaves"], ascending=[True, False])
 
-    # Add competition ranking based on both shaves and missed_days
-    # Users with same shaves AND same missed_days get tied ranks
-    # Users with different shaves or different missed_days get different ranks
+    # Add competition ranking based on both missed_days and shaves
+    # Users with same missed_days AND same shaves get tied ranks
+    # Users with different missed_days or different shaves get different ranks
     result_df = result_df.reset_index(drop=True)
 
     # Create a composite key for ranking that preserves the order
-    # Use sequential ranks, then group by shaves+missed_days to get same rank for ties
+    # Use sequential ranks, then group by missed_days+shaves to get same rank for ties
     result_df["temp_rank"] = range(1, len(result_df) + 1)
-    result_df["rank"] = result_df.groupby(["shaves", "missed_days"], sort=False)[
+    result_df["rank"] = result_df.groupby(["missed_days", "shaves"], sort=False)[
         "temp_rank"
     ].transform("min")
     result_df = result_df.drop("temp_rank", axis=1)
