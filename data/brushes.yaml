@@ -218,6 +218,11 @@ known_brushes:
       knot_size_mm: 21
       patterns:
         - m[uü]hle.*hexagon
+    Neo:
+      fiber: Synthetic
+      knot_size_mm: 21
+      patterns:
+        - m[uü]hle.*neo
     Purist:
       knot_size_mm: 21
       patterns:
@@ -239,6 +244,17 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - noble.*otter.*synthetic
+  NOM:
+    Marten Badger:
+      fiber: Badger
+      knot_size_mm: 21
+      patterns:
+        - nom.*marten.*badger
+    Marten Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 21
+      patterns:
+        - nom.*marten
   OKU:
     Caceres:
       fiber: Badger
@@ -627,7 +643,7 @@ known_brushes:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-        - simp.*chubby\s*2\b
+        - simp.*chu?bby\s*2\b
         - simp.*chubby.*two
         - simp.*ch2\b
     Chubby 2 Synthetic:
@@ -756,7 +772,7 @@ known_brushes:
       fiber: Badger
       knot_size_mm: 24
       patterns:
-        - stirling.*finest.*badger
+        - stirling.*finest
     Kong Synthetic:
       fiber: Synthetic
       knot_size_mm: 26
@@ -1391,6 +1407,19 @@ known_knot_based_brushes:
       patterns:
         - m[uü]hle.*stf.*xl
         - stf.*xl
+  Oumo:
+    Pigsy:
+      fiber: Boar
+      patterns:
+        - oumo.*pigsy
+    Rorschach:
+      fiber: Badger
+      patterns:
+        - (oumo.*)?rorschach
+    ST-2:
+      fiber: Synthetic
+      patterns:
+        - \bst-?2\b
   Rad Dinosaur Creations:
     knot_size_mm: 26
     Black Boarty:
@@ -1768,10 +1797,38 @@ other_brushes:
     default: Synthetic
     patterns:
       - maggard
+  Marshall Made Woodshop:
+    default: Synthetic
+    patterns:
+      - marshall.*made
+  Mistic Brush:
+    default: Synthetic
+    patterns:
+      - mistic
+  Mountain Hare Shaving:
+    default: Badger
+    patterns:
+      - mountain.*hare
+  MRed:
+    default: badger
+    patterns:
+      - \bmred\b
   Omega:
     default: Boar
     patterns:
       - omega
+  Opus Brushworks:
+    default: Synthetic
+    patterns:
+      - \bopus\b
+  Oumo:
+    default: Badger
+    patterns:
+      - oumo
+  Paragon:
+    default: Synthetic
+    patterns:
+      - paragon
   Pearl:
     default: Synthetic
     patterns:
@@ -1780,10 +1837,20 @@ other_brushes:
     default: Synthetic
     patterns:
       - perporo
+  Prometheus Handcrafts:
+    default: Badger
+    patterns:
+      - promethe
   QSHAVE:
     default: Badger
     patterns:
       - qshave
+  Rad Dinosaur Creations:
+    default: Synthetic
+    patterns:
+      - rad dino(saur)?
+      - priusaurus
+      - rdc
   Runeman Nordic Shave Design:
     default: Badger
     patterns:
@@ -1796,6 +1863,10 @@ other_brushes:
     default: Boar
     patterns:
       - semogue
+  Sir Hare:
+    default: Synthetic
+    patterns:
+      - sir.*hare
   Shave Factory:
     default: Boar
     patterns:
@@ -1813,6 +1884,11 @@ other_brushes:
     default: Synthetic
     patterns:
       - spokar
+  Summer Break Soaps:
+    default: Badger
+    patterns:
+      - summer.*break
+      - \bsbs\b
   Surrey:
     default: Boar
     patterns:
@@ -1821,6 +1897,15 @@ other_brushes:
     default: Badger
     patterns:
       - th[aä]ter
+  Vie-Long:
+    default: Horse
+    patterns:
+      - vie.*long
+  Voigt & Cop:
+    default: Badger
+    patterns:
+      - v&c
+      - voigt
   West Coast Shaving:
     default: Synthetic
     patterns:

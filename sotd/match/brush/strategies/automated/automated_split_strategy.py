@@ -133,7 +133,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         # These delimiters use smart splitting to determine handle vs knot based on content
         for delimiter in high_reliability_delimiters:
             if delimiter in value:
-                handle, knot = self._split_by_delimiter_smart(value, delimiter)
+                handle, knot = self._split_by_delimiter_positional(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "high")
 
@@ -170,7 +170,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
             if delimiter in value:
-                handle, knot = self._split_by_delimiter_smart(value, delimiter)
+                handle, knot = self._split_by_delimiter_positional(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "medium")
 
@@ -205,9 +205,14 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             part1 = parts[0].strip()
             part2 = parts[1].strip()
             if part1 and part2:
-                # Simple heuristic: assume first part is handle, second is knot
-                # This can be enhanced with more sophisticated logic later
-                return part1, part2
+                # Use scoring to determine which part is handle vs knot
+                part1_handle_score = self._score_as_handle(part1)
+                part2_handle_score = self._score_as_handle(part2)
+
+                if part1_handle_score >= part2_handle_score:
+                    return part1, part2  # part1 is handle, part2 is knot
+                else:
+                    return part2, part1  # part2 is handle, part1 is knot
         return None, None
 
     def _split_by_delimiter_positional(
@@ -423,7 +428,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 )
             else:
                 # Default smart splitting
-                handle, knot = self._split_by_delimiter_smart(value, delimiter)
+                handle, knot = self._split_by_delimiter_positional(value, delimiter)
 
             if handle and knot:
                 # Create a unique key for this split to avoid duplicates

@@ -321,7 +321,6 @@ brush:
     V21:
     - grizzly bay v21 fanchurian
     V25:
-    - grizzly bay - sophisticated kaos bar-bear - w/ v25 fanchurian
     - grizzly bay - sophisticated kaos bar-bear w/ v25
   Holzleute:
     Badger:
@@ -349,7 +348,22 @@ brush:
     - maggard razors 24mm synthetic
     - maggard synthetic
     - maggard timber wolf synthetic
+  Marshall Made Woodshop:
+    Synthetic:
+    - marshall made woodshop "the reds" 26mm synthetic
+    - marshall made woodshop - the reds 26mm synthetic
+  Mistic Brush:
+    Synthetic:
+    - mistic brush cashmere synthetic 24mm - baby yoda
+  Mountain Hare Shaving:
+    Badger:
+    - mountain hare shaving - maple burl and resin, 26mm badger
+  MRed:
+    Badger:
+    - mred 26 mm badger
   Mühle:
+    Neo:
+    - muhle neo
     STF:
     - muhle rocca stf 21mm
     - muhle stf
@@ -360,6 +374,9 @@ brush:
     Synthetic Shave Brush:
     - noble otter 26mm synthetic
     - noble otter 26mm synthetic red
+  NOM:
+    Marten Synthetic:
+    - nom marten 21mm synthetic
   Omega:
     '10005':
     - omega 24mm model 10005
@@ -394,11 +411,27 @@ brush:
     - proraso boar
     Roma:
     - omega roma
+  Opus Brushworks:
+    Badger:
+    - opus short barbershop high mountain white badger badger
+  Oumo:
+    Badger:
+    - oumo - 26mm shd hmw
+    - oumo passion warhammer 29mm 5th anniversary fan
+    Pigsy:
+    - oumo pigsy knot
+    Rorschach:
+    - olivewood oumo rorschach badger
+    ST-2:
+    - oumo metal new chubby with 27mm st2 synthetic bulb knot
   PAA:
     Green Ray:
     - synthetic paa green ray
     Solar Flare:
     - paa solar flare
+  Paragon:
+    Synthetic:
+    - paragon shaving plisson knot (28mm) with paragon handle
   Parker:
     Olivewood Handle Silvertip Badger:
     - parker olive wood silvertip badger
@@ -406,6 +439,10 @@ brush:
   Pearl:
     Synthetic:
     - pearl synthetic brush
+  Prometheus Handcrafts:
+    Badger:
+    - prometheus handcrafts "liquid rainbow" 28mm prometheus p2
+    - prometheus handcrafts liquid rainbow 26mm manchurian
   Rad Dinosaur Creations:
     High Mountain Rex:
     - rad dinosaur creations - leo - 26mm high mountain rex silvertip badger fan knot
@@ -414,6 +451,8 @@ brush:
     - rad dinosaur creations "go birds" w/ raptor synthetic
     - rad dinosaur creations - tattoo - 26mm rdc raptor synthetic
     - rad dinosaur creations raptor synthetic
+    Synthetic:
+    - rad dinosaur creations - glacial grove
   RazoRock:
     '400':
     - razorock 400 - 24mm noir plissoft synthetic
@@ -425,6 +464,10 @@ brush:
     - boar razorock the blondie
     Bruce:
     - razorock bruce
+  Sawdust Creation Studios:
+    Synthetic:
+    - sawdust creation studios - floyd 26mm synthetic
+    - sawdust creations 25mm g7 knot
   Semogue:
     '1250':
     - semogue - 1250
@@ -469,6 +512,7 @@ brush:
     - simpson ch2 super badger
     - simpson chubby 2 italian marble
     - simpson's chubby two best badger best badger badger
+    - simpsons chbby 2 italian marble
     Chubby 2 Synthetic:
     - simpson chubby 2 synthetic fibre shaving brush, 27mm
     Trafalgar T1:
@@ -481,11 +525,16 @@ brush:
     - simpson trafalgar t2 synthetic
     - simpsons trafalgar t2 - 24mm synthetic
     - simpsons trafalgar t2 24mm synthetic
+  Sir Hare:
+    Badger:
+    - sir hare badger brush
   Stirling:
     Boar Brush:
     - boar stirling boar
     Finest Badger:
     - stirling - finest badger
+    - stirling - finest cravingtshaving blue slate 26mm
+    - stirling - finest fan 24 gen 1
     Kong Synthetic:
     - stirling 26mm synthetic (kong)
     Synthetic:
@@ -498,6 +547,11 @@ brush:
   Stirling/Zenith:
     Boar:
     - boar stirling/zenith
+  Summer Break Soaps:
+    Badger:
+    - summer break soaps otoe 26mm shd badger
+    Synthetic:
+    - summer break soaps kimball synthetic
   Surrey:
     Boar:
     - surrey blue handle boar
@@ -508,6 +562,14 @@ brush:
     Medium Density Badger (M*):
     - turn n shave skarbide breeze 28mm m8
     - turn n shave skarbide breeze 28mm m8 fan
+  Vie-Long:
+    Horse:
+    - vie-long - butterscotch handle - 26mm horsehair
+    - vie-long - butterscotch resin handle 26mm brown horsehair
+    - vie-long alfil
+  Voigt & Cop:
+    Badger:
+    - mammoth x voigt & cop smash 28mm vc01 super badger
   Wald:
     A1:
     - wald 29mm a1 nimbus
@@ -595,6 +657,9 @@ handle:
     Unspecified:
     - ap shave co g5b w/ 3d-printed bronze handle
     - ap shave co. 3d print w/ 26mm pure bliss
+  _no_brand:
+    _no_model:
+    - mühle silvertip badger with fine resin handle
   AP Shave Co:
     Unspecified:
     - a p shaveco stf synthetic
@@ -625,6 +690,7 @@ handle:
     - chisel & hound tahitian pearl 26mm maggard shd
     - chisel & hound tahitian pearl 26mm maggard shd fan
     - chisel & hound w/ tns v8 tip fan
+    - that darn rob green & ivory w/v24 fanchurian badger
   Dogwood:
     Unspecified:
     - 4dogwood w/ dg b14 hybrid 2 band badger
@@ -664,6 +730,7 @@ handle:
     - frank shaving g5 onyx synthetic
   Grizzly Bay:
     Unspecified:
+    - grizzly bay - sophisticated kaos bar-bear - w/ v25 fanchurian
     - grizzly bay chub cub xl deep space w/ long reserve viii
   Made Rite:
     Unspecified:
@@ -681,6 +748,9 @@ handle:
     - muninn woodworks w/ v19 fanchurian
     - muninn woodworks w/ap shave co 24mm titanium synthetic
     - muninn woodworks weru burl w/ 24mm b16 badger
+  Prometheus Handcrafts:
+    Unspecified:
+    - prometheus handcrafts "chaos" 24mm maggard razors shd
   Rad Dinosaur Creations:
     Unspecified:
     - rad dino creations - g5c
@@ -701,18 +771,63 @@ handle:
     - rad dinosaur creations mackie 26mmap synbad fan
     - rad dinosaur creations ore-not handle w/ ap shave co. 26mm pure bliss shd premium
       synthetic knot
+  Rubberset:
+    Unspecified:
+    - rubberset - 400 w/ maggard shd badger
+    - rubberset 200-4 w/26mm declaration grooming b3
+    - rubberset 400 26mm soft tuxedo
+    - rubberset 400-4 w/24mm maggard shd
+    - rubberset b-14 20mm synthetic
+    - rubberset b-14 synthetic 20mm
+  Sawdust Creation Studios:
+    Unspecified:
+    - sawdust creation studios "the emerald crown" 26mm g5c
+  Shore Shaving:
+    Unspecified:
+    - shoreshave w/ 26mm maggard boar
   Summer Break:
     Unspecified:
     - rad dinosaur creations + summer break soaps - joy - 26mm high mountain rex silvertip
       badger
     - sbs w/ unbleached zenith
     - sbs w/unbleached zenith
+    - summer break "rosalie" w/ 28 mm tns tip v8
+    - summer break 28mm dg b3 badger
+    - summer break soaps "burton" / 26mm g5 fan synthetic
+    - summer break soaps "tekamah" / 26mm ap shave co. g5c
+    - summer break soaps 'mood indigo' / maggard synthetic 28mm
+    - summer break soaps - memphis, with 26mm maggard razors shd badger knot
+    - summer break soaps - nemaha (custom resin handle 28mm & maggards shd 2-band
+      badger buld)
+    - summer break soaps - ord w/ tns quartermoon synthetic
+    - summer break soaps - w/maggard silvertip 28mm badger
+    - summer break soaps 26mm apsc synbad fan
+    - summer break soaps 26mm griffith high mountain hd fan
+    - summer break soaps 26mm maggard fan
+    - summer break soaps 26mm tns tip v9
+    - summer break soaps 26mm tns tip v9 fan
+    - summer break soaps boyd dg b13 dg b13 badger
+    - summer break soaps handle, 28mm declaration grooming
+    - summer break soaps handle, 28mm declaration grooming b11
+    - summer break soaps murdock v25 fanchurian badger
     - summer breaks/rad dinosaur "honesty" 26mm high mountain rex badger
   Trotter Handcrafts:
     Unspecified:
+    - trotter handcrafts "matte cornflower blue" / v14 fanchurian
+    - trotter handcrafts "sea glass no.3" 28mm synbad
+    - trotter handcrafts - muhle stf xl
+    - trotter handcrafts distorted space maggard shd 26mm
     - trotter handcrafts pearl rose venus w/ 25mm bulb muhle stf xl synthetic ++
+  Wild West Brushworks:
+    Unspecified:
+    - wild west brush works purple swirl 28mm oumo shd manchuria
+    - wild west brushworks sioux / dg b09a badger
+  Wolf Whiskers:
+    Unspecified:
+    - wolf whiskers 26mm maggard razors shd badger fan
 knot:
   _no_brand:
+    Badger: []
     Boar:
     - eterna "natural" brush (boar?) the one of the left
     - eterna - boar
@@ -724,9 +839,14 @@ knot:
     - made rite badger - boar mix
     - made rite badger boar mix
     - made rite badger/boar mix
+    Synthetic:
+    - rubberset 400 26mm soft tuxedo
+    - rubberset b-14 20mm synthetic
+    - rubberset b-14 synthetic 20mm
   Alpha:
     G5:
     - frank shaving g5 onyx synthetic
+    - summer break soaps "burton" / 26mm g5 fan synthetic
   AP Shave Co:
     Cashmere:
     - rad dinosaur creations -cirrostratus w./ ap shave co. cashmere fan
@@ -738,6 +858,8 @@ knot:
     - rad dino creations - g5c
     - rad dinosaur creations - stars w/ ap g5c synthetic
     - rad dinosaur creations black river w/ ap shave co g5c
+    - sawdust creation studios "the emerald crown" 26mm g5c
+    - summer break soaps "tekamah" / 26mm ap shave co. g5c
     Gelousy:
     - dogwood arcane abyss w/ gelousy
     MiG:
@@ -751,6 +873,8 @@ knot:
     Synbad:
     - rad dinosaur creations 26mm synbad
     - rad dinosaur creations mackie 26mmap synbad fan
+    - summer break soaps 26mm apsc synbad fan
+    - trotter handcrafts "sea glass no.3" 28mm synbad
     Titanium:
     - muninn woodworks w/ap shave co 24mm titanium synthetic
   Boti:
@@ -763,10 +887,21 @@ knot:
     v12:
     - farvour turncrafts handle with fanchurian v12
     - farvour turncrafts handle with v12 fanchurian
+    v14:
+    - trotter handcrafts "matte cornflower blue" / v14 fanchurian
     v19:
     - muninn woodworks w/ v19 fanchurian
     - rad dinosaur creations gold mine w/v19 fanchurian badger
+    v24:
+    - that darn rob green & ivory w/v24 fanchurian badger
+    v25:
+    - grizzly bay - sophisticated kaos bar-bear - w/ v25 fanchurian
+    - summer break soaps murdock v25 fanchurian badger
   Declaration Grooming:
+    B11:
+    - summer break soaps handle, 28mm declaration grooming b11
+    B13:
+    - summer break soaps boyd dg b13 dg b13 badger
     B14:
     - 4dogwood w/ dg b14 hybrid 2 band badger
     - muninn woodworks amboyna burl b14
@@ -779,8 +914,14 @@ knot:
     - dogwood handcrafts - declaration b18 badger
     B3:
     - bristle brushwerks 28mm amber hucklaration b3
+    - rubberset 200-4 w/26mm declaration grooming b3
+    - summer break 28mm dg b3 badger
+    B9A:
+    - wild west brushworks sioux / dg b09a badger
     B9B:
     - dogwood handcrafts purple with 28mm dg b9b badger
+    Badger:
+    - summer break soaps handle, 28mm declaration grooming
   Elite:
     Badger:
     - dogwood handcrafts 26mm elite manchurian white fan
@@ -791,36 +932,55 @@ knot:
   Griffith:
     High Mountain Badger HD:
     - dogwood handcrafts green white swirl w/ griffith 26mm high mountain shd fan
+    - summer break soaps 26mm griffith high mountain hd fan
   Long Shaving:
     Badger:
     - grizzly bay chub cub xl deep space w/ long reserve viii
   Maggard:
+    2-Band Badger:
+    - summer break soaps - nemaha (custom resin handle 28mm & maggards shd 2-band
+      badger buld)
+    - summer break soaps 26mm maggard fan
     Badger:
     - chisel & hound - tahitian pearl 26mm maggard shd
     - chisel & hound - tahitian pearl 26mm maggard shd fan
     - chisel & hound tahitian pearl 26mm maggard shd
     - chisel & hound tahitian pearl 26mm maggard shd fan
     - dogwood handcrafts 26mm maggard shd bulb
+    - prometheus handcrafts "chaos" 24mm maggard razors shd
     - rad dinosaur creations 'ester' with maggards silvertip
     - rad dinosaur creations 'ester' with magggards silvertip
     - rad dinosaur creations handle with maggards silvertip
+    - rubberset - 400 w/ maggard shd badger
+    - rubberset 400-4 w/24mm maggard shd
+    - summer break soaps - memphis, with 26mm maggard razors shd badger knot
+    - summer break soaps - w/maggard silvertip 28mm badger
+    - trotter handcrafts distorted space maggard shd 26mm
+    - wolf whiskers 26mm maggard razors shd badger fan
+    Boar:
+    - shoreshave w/ 26mm maggard boar
     Synthetic:
     - ap shave co. sea voyager w/ maggards's 26mm wolfhair
     - dogwood handcrafts 30mm maggard's silver tip
     - ever-ready shaving brush, reknotted w/ maggard razors 20mm black and white synthetic
       shaving brush knot
     - farvour turn craft "worm" 26mm maggards razors brown synthetic
+    - summer break soaps 'mood indigo' / maggard synthetic 28mm
     Timberwolf:
     - dogwood handcrafts / maggard timberwolf
   Mühle:
+    Badger:
+    - mühle silvertip badger with fine resin handle
     STF:
     - a p shaveco stf synthetic
     - ap shave co mühle stf dense++ 37% plant fiber
     STF XL:
+    - trotter handcrafts - muhle stf xl
     - trotter handcrafts pearl rose venus w/ 25mm bulb muhle stf xl synthetic ++
   Oumo:
     Badger:
     - made rite - 500 pb (oumo - 26mm shd)
+    - wild west brush works purple swirl 28mm oumo shd manchuria
     Rorschach:
     - aurora grooming gentleman's reserve w/ rorschach
     - rad dino creations dilemma w/ rorschach
@@ -840,6 +1000,7 @@ knot:
     - muninn woodworks w/ tns m7 fan
     Quartermoon:
     - maggard razors - midnight blue - 26mm turn n shave quartermoon
+    - summer break soaps - ord w/ tns quartermoon synthetic
     Shoat:
     - aurora grooming mad hatter mauricio w/ shoat
     Tip (Badger):
@@ -847,6 +1008,9 @@ knot:
     - chisel & hound good & plenty 28mm tns v8 badger
     - chisel & hound w/ tns v8 tip fan
     - rad dinosaur creations - emerald peak tns v9 tip badger
+    - summer break "rosalie" w/ 28 mm tns tip v8
+    - summer break soaps 26mm tns tip v9
+    - summer break soaps 26mm tns tip v9 fan
   Zenith:
     Boar:
     - sbs w/ unbleached zenith

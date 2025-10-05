@@ -250,6 +250,7 @@ known_knots:
         - chis.*[fh]ou.*v25
         - \bc(?:\&|and|\+)h\b.*v25
         - \bch\b.*v25
+        - \bv25\b.*fanchurian
         # - \bv25\b #this was competing with grizzly bay - sophisticated kaos bar-bear w/ v25
     v26:
       patterns:
@@ -313,10 +314,10 @@ known_knots:
         - \bb8\b
     B9A:
       patterns:
-        - \bb9a\+?\b
+        - \bb0?9a\+?\b
     B9B:
       patterns:
-        - \bb9b\+?\b
+        - \bb0?9b\+?\b
     B10:
       patterns:
         - \bb10\b
@@ -414,6 +415,7 @@ known_knots:
       fiber: Badger
       patterns:
         - maggard.*2.*band
+        - maggard.*\bfan\b
     G5:
       default: Synthetic
       patterns:
@@ -457,6 +459,10 @@ known_knots:
       fiber: Badger
       patterns:
         - (oumo.*)?rorschach
+    ST-2:
+      fiber: Synthetic
+      patterns:
+        - \bst-?2\b
   Rad Dinosaur Creations:
     knot_size_mm: 26
     DinoBoar:
@@ -1062,7 +1068,7 @@ other_knots:
     patterns:
       - plisson
   Prometheus Handcrafts:
-    default: Synthetic
+    default: Badger
     patterns:
       - promethe
   Rad Dinosaur Creations:

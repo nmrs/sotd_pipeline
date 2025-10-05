@@ -239,7 +239,7 @@ class CatalogValidationResponse(BaseModel):
 
 def validate_field(field: str) -> None:
     """Validate that the field is supported."""
-    supported_fields = ["razor", "blade", "brush", "soap", "soap_brand"]
+    supported_fields = ["razor", "blade", "brush", "soap", "soap_brand", "knot", "handle"]
     if field not in supported_fields:
         raise HTTPException(
             status_code=400,
@@ -1369,22 +1369,26 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                 success=False, message="No entries provided", removed_count=0
             )
 
-        # Import the correct matches manager
+        # Import required modules for direct YAML manipulation
         try:
-            from rich.console import Console
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            import yaml
         except ImportError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            raise HTTPException(status_code=500, detail=f"Could not import required modules: {e}")
+
+        # Load and manipulate YAML directly
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+
+        if not correct_matches_file.exists():
+            return RemoveCorrectResponse(
+                success=False, message="Correct matches file not found", removed_count=0
             )
 
-        # Create manager instance with correct file path
-        console = Console()
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        manager = CorrectMatchesManager(console, correct_matches_file)
-
-        # Load existing correct matches
-        manager.load_correct_matches()
+        # Load the YAML file
+        try:
+            with open(correct_matches_file, "r", encoding="utf-8") as f:
+                yaml_data = yaml.safe_load(f) or {}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error loading correct matches file: {e}")
 
         removed_count = 0
         errors = []
@@ -1392,56 +1396,64 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
         for entry in request.matches:
             try:
                 correct_match = entry.get("correct_match", "")
-                expected_brand = entry.get("expected_brand", "")
-                expected_model = entry.get("expected_model", "")
+                actual_section = entry.get("actual_section", request.field)
 
                 if not correct_match:
                     errors.append(f"Invalid entry data: {entry}")
                     continue
 
-                # Create the matched data structure expected by remove_match
-                # The structure depends on the field type
-                if request.field == "brush":
-                    # For brush entries, create the expected structure
-                    matched_data = {
-                        "brand": expected_brand or "unknown",
-                        "model": expected_model or "unknown",
-                    }
-                else:
-                    # For other fields, use a simpler structure
-                    matched_data = {
-                        "brand": expected_brand or "unknown",
-                        "model": expected_model or "unknown",
-                    }
+                # Remove from the hierarchical structure
+                removed = False
 
-                # Handle structural changes - remove from where it currently is (actual_section)
-                actual_section = entry.get("actual_section")
-                if actual_section == "handle_knot":
-                    # Remove from both handle and knot sections
-                    handle_removed = manager.remove_match("handle", correct_match, matched_data)
-                    knot_removed = manager.remove_match("knot", correct_match, matched_data)
-                    if handle_removed or knot_removed:
-                        removed_count += 1
-                    else:
-                        errors.append(
-                            f"Entry not found in handle or knot sections: {correct_match}"
-                        )
+                # For brush field, search across brush, knot, and handle sections
+                if request.field == "brush":
+                    sections_to_search = ["brush", "knot", "handle"]
                 else:
-                    # Remove from the current section
-                    section_to_remove = actual_section or request.field
-                    if manager.remove_match(section_to_remove, correct_match, matched_data):
-                        removed_count += 1
-                    else:
-                        errors.append(
-                            f"Entry not found in {section_to_remove} section: {correct_match}"
-                        )
+                    sections_to_search = [actual_section]
+
+                for section in sections_to_search:
+                    if section in yaml_data:
+                        section_data = yaml_data[section]
+
+                        # Search through all brands and models in the section
+                        for brand, brand_data in section_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, patterns in brand_data.items():
+                                    if isinstance(patterns, list):
+                                        # Look for the exact match (case-insensitive) and remove ALL occurrences
+                                        i = 0
+                                        while i < len(patterns):
+                                            pattern = patterns[i]
+                                            if (
+                                                isinstance(pattern, str)
+                                                and pattern.lower() == correct_match.lower()
+                                            ):
+                                                # Found the match, remove it
+                                                patterns.pop(i)
+                                                removed = True
+                                                removed_count += 1
+                                                # Don't increment i since we removed an element
+                                            else:
+                                                i += 1
+
+                if not removed:
+                    sections_str = ", ".join(sections_to_search)
+                    errors.append(f"Entry not found in {sections_str} sections: {correct_match}")
 
             except Exception as e:
                 errors.append(f"Error removing entry {entry}: {e}")
 
-        # Save to file
+        # Save the updated YAML file
         if removed_count > 0:
-            manager.save_correct_matches()
+            try:
+                with open(correct_matches_file, "w", encoding="utf-8") as f:
+                    yaml.dump(
+                        yaml_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+                    )
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500, detail=f"Error saving correct matches file: {e}"
+                )
 
         return RemoveCorrectResponse(
             success=removed_count > 0,

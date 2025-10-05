@@ -90,6 +90,8 @@ artisan_handles:
         - chis.*fou
         - \bc(?:\&|and|\+\s)?h\b
         - broomstick
+        - darn.*rob
+        - tdr
   Cool Dog:
     Unspecified:
       patterns:
@@ -227,6 +229,10 @@ artisan_handles:
       patterns:
         - morris
         - m\s*&\s*f
+  Mountain Hare Shaving:
+    Unspecified:
+      patterns:
+        - mountain.*hare
   Mozingo:
     Unspecified:
       patterns:
@@ -240,6 +246,10 @@ artisan_handles:
       patterns:
         - мужской
         - материк
+  Opus Brushworks:
+    Unspecified:
+      patterns:
+        - \bopus\b
   Paladin:
     Unspecified:
       patterns:
@@ -342,11 +352,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - teton
-  That Darn Rob:
-    Unspecified:
-      patterns:
-        - darn.*rob
-        - tdr
+  # That Darn Rob:
+  #   Unspecified:
+  #     patterns:
+  #       - darn.*rob
+  #       - tdr
   Thater:
     Unspecified:
       patterns:
@@ -598,6 +608,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - maritime\sbrush
+  Marshall Made Woodshop:
+    Unspecified:
+      patterns:
+        - marshall.*made
   Maseto:
     Unspecified:
       patterns:
@@ -716,7 +730,7 @@ manufacturer_handles:
       patterns:
         - simpson
         - duke
-        - chubby.*(1|2|3)
+        # - chubby.*(1|2|3)
         - trafalgar
   Spiffo:
     Unspecified:
