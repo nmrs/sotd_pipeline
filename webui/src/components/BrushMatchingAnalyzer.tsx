@@ -41,11 +41,24 @@ interface BrushMatchResult {
       score: number;
       breakdown: Record<string, number>;
       metadata: Record<string, any>;
+      patterns?: {
+        brand_pattern?: string;
+        model_pattern?: string;
+        handle_pattern?: string;
+        source?: string;
+      };
     };
     knot?: {
       score: number;
       breakdown: Record<string, number>;
       metadata: Record<string, any>;
+      patterns?: {
+        brand_pattern?: string;
+        model_pattern?: string;
+        fiber_pattern?: string;
+        size_pattern?: string;
+        source?: string;
+      };
     };
   };
   splitInformation?: {
@@ -159,8 +172,29 @@ function ComponentDetailsDisplay({
   splitInformation,
 }: {
   componentDetails?: {
-    handle?: { score: number; breakdown: Record<string, number>; metadata: Record<string, any> };
-    knot?: { score: number; breakdown: Record<string, number>; metadata: Record<string, any> };
+    handle?: {
+      score: number;
+      breakdown: Record<string, number>;
+      metadata: Record<string, any>;
+      patterns?: {
+        brand_pattern?: string;
+        model_pattern?: string;
+        handle_pattern?: string;
+        source?: string;
+      };
+    };
+    knot?: {
+      score: number;
+      breakdown: Record<string, number>;
+      metadata: Record<string, any>;
+      patterns?: {
+        brand_pattern?: string;
+        model_pattern?: string;
+        fiber_pattern?: string;
+        size_pattern?: string;
+        source?: string;
+      };
+    };
   };
   splitInformation?: { handleText: string; knotText: string; splitPriority?: string };
 }) {

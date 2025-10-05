@@ -324,7 +324,11 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
                 "knot_size_mm": knot_data.get("knot_size_mm"),
                 "source_text": knot_data.get("source_text", value),
                 "_matched_by": "KnotMatcher",
-                "_pattern": knot_data.get("_pattern_used"),
+                "_pattern": (
+                    knot_result.pattern
+                    if hasattr(knot_result, "pattern")
+                    else knot_data.get("_pattern_used")
+                ),
             },
         }
 
@@ -392,20 +396,24 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
     def _convert_knot_result_to_brush_result(self, knot_result: MatchResult) -> MatchResult:
         """Convert KnotMatcher result to brush format."""
         knot_data = knot_result.matched or {}
+        # Get pattern from MatchResult.pattern, not from matched data
+        knot_pattern = (
+            knot_result.pattern or knot_data.get("_pattern_used") or knot_data.get("_pattern")
+        )
 
         brush_data = {
             "brand": knot_data.get("brand"),
             "model": knot_data.get("model"),
             "source_text": knot_data.get("source_text", ""),
             "_matched_by": "KnotMatcher",
-            "_pattern": knot_data.get("_pattern_used"),
+            "_pattern": knot_pattern,
             # Add nested handle and knot sections for modifier functions
             "handle": {
                 "brand": None,
                 "model": None,
                 "source_text": "",
                 "_matched_by": "KnotMatcher",
-                "_pattern": knot_data.get("_pattern_used"),
+                "_pattern": knot_pattern,
             },
             "knot": {
                 "brand": knot_data.get("brand"),
@@ -414,7 +422,7 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
                 "knot_size_mm": knot_data.get("knot_size_mm"),
                 "source_text": knot_data.get("source_text", ""),
                 "_matched_by": "KnotMatcher",
-                "_pattern": knot_data.get("_pattern_used"),
+                "_pattern": knot_pattern,
             },
         }
 
@@ -425,6 +433,6 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             original="",  # Knot matcher doesn't provide original text
             matched=brush_data,
             match_type="knot",
-            pattern=knot_data.get("_pattern_used"),
+            pattern=knot_pattern,
             strategy="full_input_component_matching",
         )

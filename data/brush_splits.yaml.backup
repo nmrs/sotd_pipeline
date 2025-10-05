@@ -1,14 +1,18 @@
 Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
-  handle: Boar RV Semogue Knot
-  knot: Rudy Vey B&B Forum Brush
+  handle: Rudy Vey B&B Forum Brush
+  knot: Boar RV Semogue Knot
   match_type: null
-  corrected: false
-  validated_at: null
+  corrected: true
+  validated_at: '2025-09-05T09:10:36.616824'
   should_not_split: false
   occurrences:
   - file: 2025-08.json
     comment_ids:
     - nafpmja
+  system_handle: Boar RV Semogue Knot
+  system_knot: Rudy Vey B&B Forum Brush
+  system_confidence: high
+  system_reasoning: 'Fiber-hint split: knot contains fiber indicator'
 Chisel & Hound v27 Fanchurian (Oumo Warhammer Ivory White):
   handle: (Oumo Warhammer Ivory White)
   knot: Chisel & Hound v27 Fanchurian

@@ -133,6 +133,12 @@ known_brushes:
       fiber: Badger
       patterns:
         - odin'?s.*beard
+  Dovo:
+    Synthetic Badger:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+        - dovo.*synth.*badger
   Dreadnought:
     Avenger:
       fiber: Boar
@@ -151,6 +157,13 @@ known_brushes:
         model: Motherlode
       handle:
         brand: Muninn Woodworks
+  Fendrihan:
+    Pure Grey Badger:
+      fiber: Badger
+      knot_size_mm: 22
+      knot_loft_mm: 55
+      patterns:
+        - fendrihan.*pure.*grey
   Groomatorium:
     Synthetic:
       fiber: Synthetic
@@ -162,13 +175,35 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - \bhot ?wheels\b
+  Imperial:
+    Travel Shave Brush:
+      fiber: Boar
+      knot_size_mm: 20
+      patterns:
+        - imperial.*travel
   Kent:
+    BK8:
+      fiber: Badger
+      knot_size_mm: 27
+      knot_loft_mm: 55
+      patterns:
+        - kent.*bk8
     INF1:
       fiber: Synthetic
       knot_size_mm: 22
       patterns:
         - kent.*inf1
         - kent.*infinity
+  Lea:
+    Boar:
+      patterns:
+        - \blea\b
+      knot:
+        brand: Omega
+        fiber: Boar
+        knot_size_mm: 24
+      handle:
+        brand: Omega
   Menesia:
     Badger:
       fiber: Badger
@@ -198,6 +233,12 @@ known_brushes:
       knot_size_mm: 21
       patterns:
         - m[uü]hle.*vivo
+  Noble Otter:
+    Synthetic Shave Brush:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - noble.*otter.*synthetic
   OKU:
     Caceres:
       fiber: Badger
@@ -219,14 +260,6 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - omega.*10029
-    "10048":
-      knot_size_mm: 28
-      patterns:
-        - omeg\w.*(pro)?.*48
-    "10049":
-      knot_size_mm: 26
-      patterns:
-        - omega.*(pro)*.*49
     "10065":
       knot_size_mm: 23
       patterns:
@@ -298,6 +331,23 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - omega.*81151
+    B6206:
+      fiber: Badger
+      knot_size_mm: 24
+      knot_loft_mm: 53
+      patterns:
+        - omega.*b6206
+    Elements Elite:
+      fiber: Synthetic
+      knot_size_mm: 29
+      patterns:
+        - omega.*elements
+        - omega.*elite
+        - omega.*air
+        - omega.*earth
+        - omega.*fire
+        - omega.*passion
+        - omega.*water
     EVO Sythetic:
       fiber: Synthetic
       patterns:
@@ -313,6 +363,16 @@ known_brushes:
       patterns:
         - hi-?brush
         - omega.*syn
+    Pro 48:
+      fiber: Boar
+      knot_size_mm: 28
+      patterns:
+        - omeg\w.*(pro)?.*48
+    Pro 49:
+      fiber: Boar
+      knot_size_mm: 26
+      patterns:
+        - omeg\w.*(pro)?.*49
     Proraso Professional:
       knot_maker: Omega
       knot_size_mm: 28
@@ -320,12 +380,41 @@ known_brushes:
         - proraso.*(pro)?
         - omega.*proraso
         - proraso.*omega
+    Roma:
+      fiber: Synthetic
+      patterns:
+        - omega.*roma
+    Roma Capitoline Lupa:
+      fiber: Synthetic
+      knot_size_mm: 26
+      knot_loft_mm: 45
+      patterns:
+        - omega.*roma.*capitol
+        - omega.*roma.*lupe
+    Roma Colosseo:
+      fiber: Synthetic
+      knot_size_mm: 31
+      knot_loft_mm: 53
+      patterns:
+        - omega.*roma.*colosseo
+        - omega.*roma.*coliseum
     Special Veteran - E1860:
       fiber: Synthetic
       knot_size_mm: 28
       patterns:
         - omega.*evo.*e1860
         - e1860
+  PAA:
+    Green Ray:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - paa.*green.*ray
+    Solar Flare:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - paa.*solar.*flare
   Parker:
     Arctic Storm:
       fiber: Synthetic
@@ -342,6 +431,12 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - solar storm
+    Olivewood Handle Silvertip Badger:
+      fiber: Badger
+      knot_size_mm: 22
+      patterns:
+        - parker.*olive.*badger
+        - parker.*badger.*olive
   Pearl:
     SBB-97:
       fiber: Synthetic
@@ -360,6 +455,12 @@ known_brushes:
       patterns:
         - power.*rangers.*syn
   RazoRock:
+    "400":
+      fiber: Synthetic
+      knot_size_mm: 24
+      knot_loft_mm: 57
+      patterns:
+        - razorock.*400
     Big Bruce:
       fiber: Synthetic
       knot_size_mm: 26
@@ -786,6 +887,11 @@ known_brushes:
       patterns:
         - sagrada
   Zenith:
+    205 SE:
+      fiber: Boar
+      knot_size_mm: 24
+      patterns:
+        - zenith.*\b205\b
     2006 XSE:
       fiber: Boar
       knot_size_mm: 21
@@ -888,6 +994,12 @@ known_brushes:
       knot_loft_mm: 57
       patterns:
         - zen.*\bpro\b
+    The Big One:
+      fiber: Badger
+      knot_size_mm: 31
+      knot_loft_mm: 52
+      patterns:
+        - zenith.*(?:the)?\s*big\s*one
     r/wetshaving MOAR BOAR:
       patterns:
         - moar(.*boar)?
@@ -1208,6 +1320,66 @@ known_knot_based_brushes:
         brand: Maggard
         fiber: Synthetic
         model: Tuxedo
+  Grizzly Bay:
+    fiber: Badger
+    knot_size_mm: 26
+    V10:
+      patterns:
+        - grizz.*v10\b
+    V11:
+      patterns:
+        - grizz.*v11\b
+    V12:
+      patterns:
+        - grizz.*v12\b
+    V13:
+      patterns:
+        - grizz.*v13\b
+    V14:
+      patterns:
+        - grizz.*v14\b
+    V15:
+      patterns:
+        - grizz.*v15\b
+    V16:
+      patterns:
+        - grizz.*v16\b
+    V17:
+      patterns:
+        - grizz.*v17\b
+    V18:
+      patterns:
+        - grizz.*v18\b
+    V19:
+      patterns:
+        - grizz.*v19\b
+    V20:
+      patterns:
+        - grizz.*v20\b
+    V21:
+      patterns:
+        - grizz.*v21\b
+    V22:
+      patterns:
+        - grizz.*v22\b
+    V23:
+      patterns:
+        - grizz.*v23\b
+    V24:
+      patterns:
+        - grizz.*v24\b
+    V25:
+      patterns:
+        - grizz.*v25\b
+    V26:
+      patterns:
+        - grizz.*v26\b
+    V27:
+      patterns:
+        - grizz.*v27\b
+    V28:
+      patterns:
+        - grizz.*v28\b
   Mühle:
     fiber: Synthetic
     STF:
@@ -1375,7 +1547,7 @@ known_knot_based_brushes:
       knot_size_mm: 24
       knot_loft_mm: 57
       patterns:
-        - zenith.*\bb7\b
+        - zenith.*\bb0?7\b
     B8:
       fiber: Boar
       knot_size_mm: 28
@@ -1541,15 +1713,45 @@ other_brushes:
     default: Synthetic
     patterns:
       - crav.*shav
-  DSCosmetics:
+  Declaration Grooming:
+    default: Badger
+    patterns:
+      - declaration
+      - \bdg\b
+  Dogwood:
+    default: Badger
+    patterns:
+      - dogwood
+  Dovo:
+    default: Synthetic
+    patterns:
+      - dovo
+  DS Cosmetics:
     default: Synthetic
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
+  Elite:
+    default: Badger
+    patterns:
+      - elite
+  Farvour Turn Craft:
+    default: Synthetic
+    patterns:
+      - farvour.*(?:turn).*(?:craft)
+      - farvour
   Gilette:
     default: Synthetic
     patterns:
       - gillette
+  Grizzly Bay:
+    default: Badger
+    patterns:
+      - grizzly.*bay.*(?:v\d{1,2})?
+  Holzleute:
+    default: Badger
+    patterns:
+      - holzleute
   Lentfer Custom Woodworks:
     default: Synthetic
     patterns:
@@ -1558,6 +1760,10 @@ other_brushes:
     default: Badger
     patterns:
       - london.*razors
+  Long Shaving:
+    default: Badger
+    patterns:
+      - long ?shaving
   Maggard:
     default: Synthetic
     patterns:
@@ -1566,6 +1772,10 @@ other_brushes:
     default: Boar
     patterns:
       - omega
+  Pearl:
+    default: Synthetic
+    patterns:
+      - pearl
   PerPoro:
     default: Synthetic
     patterns:

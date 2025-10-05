@@ -250,7 +250,7 @@ known_knots:
         - chis.*[fh]ou.*v25
         - \bc(?:\&|and|\+)h\b.*v25
         - \bch\b.*v25
-        - \bv25\b
+        # - \bv25\b #this was competing with grizzly bay - sophisticated kaos bar-bear w/ v25
     v26:
       patterns:
         - chis.*[fh]ou.*v26
@@ -295,60 +295,120 @@ known_knots:
         - \bb2\b
     B3:
       patterns:
-        - b3
+        - \bb3\b
     B4:
       patterns:
-        - b4
+        - \bb4\b
     B5:
       patterns:
-        - b5
+        - \bb5\b
     B6:
       patterns:
-        - b6
+        - \bb6\b
     B7:
       patterns:
-        - b7
+        - \bb7\b
     B8:
       patterns:
-        - b8
+        - \bb8\b
     B9A:
       patterns:
-        - b9a\+?
+        - \bb9a\+?\b
     B9B:
       patterns:
-        - b9b\+?
+        - \bb9b\+?\b
     B10:
       patterns:
-        - b10
+        - \bb10\b
     B11:
       patterns:
-        - b11
+        - \bb11\b
     B12:
       patterns:
-        - b12
+        - \bb12\b
     B13:
       patterns:
-        - b13
+        - \bb13\b
     B14:
       patterns:
-        - b14
+        - \bb14\b
     B15:
       patterns:
-        - b15
+        - \bb15\b
     B16:
       patterns:
-        - b16
+        - \bb16\b
     B17:
       patterns:
-        - b17
+        - \bb17\b
     B18:
       patterns:
-        - b18
+        - \bb18\b
   Griffith:
     High Mountain Badger HD:
       fiber: Badger
       patterns:
         - griffith.*high.*mountain
+  Grizzly Bay:
+    fiber: Badger
+    knot_size_mm: 26
+    V10:
+      patterns:
+        - grizz.*v10\b
+    V11:
+      patterns:
+        - grizz.*v11\b
+    V12:
+      patterns:
+        - grizz.*v12\b
+    V13:
+      patterns:
+        - grizz.*v13\b
+    V14:
+      patterns:
+        - grizz.*v14\b
+    V15:
+      patterns:
+        - grizz.*v15\b
+    V16:
+      patterns:
+        - grizz.*v16\b
+    V17:
+      patterns:
+        - grizz.*v17\b
+    V18:
+      patterns:
+        - grizz.*v18\b
+    V19:
+      patterns:
+        - grizz.*v19\b
+    V20:
+      patterns:
+        - grizz.*v20\b
+    V21:
+      patterns:
+        - grizz.*v21\b
+    V22:
+      patterns:
+        - grizz.*v22\b
+    V23:
+      patterns:
+        - grizz.*v23\b
+    V24:
+      patterns:
+        - grizz.*v24\b
+    V25:
+      patterns:
+        - grizz.*v25\b
+    V26:
+      patterns:
+        - grizz.*v26\b
+    V27:
+      patterns:
+        - grizz.*v27\b
+    V28:
+      patterns:
+        - grizz.*v28\b
   Maggard:
     2-Band Badger:
       fiber: Badger
@@ -389,6 +449,10 @@ known_knots:
         - hi-?brush
         - omega.*syn
   Oumo:
+    Pigsy:
+      fiber: Boar
+      patterns:
+        - oumo.*pigsy
     Rorschach:
       fiber: Badger
       patterns:
@@ -660,7 +724,7 @@ other_knots:
     patterns:
       - b[oö]ker
   Boti:
-    default: Badger
+    default: Synthetic
     patterns:
       - boti
   Brad Sears:
@@ -734,7 +798,7 @@ other_knots:
     default: Badger
     patterns:
       - cumberbatch
-  DSCosmetics:
+  DS Cosmetics:
     default: Synthetic
     patterns:
       - DSC?\s*Cosmetic
@@ -794,10 +858,6 @@ other_knots:
     default: Badger
     patterns:
       - fendri
-  Fine:
-    default: Synthetic
-    patterns:
-      - fine\b
   Firehouse Potter:
     default: Synthetic
     patterns:

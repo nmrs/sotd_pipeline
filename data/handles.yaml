@@ -516,6 +516,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - envy.*(?:shave)?
+  Eterna:
+    Unspecified:
+      patterns:
+        - \beterna\b
   Executive Shaving:
     Unspecified:
       patterns:
@@ -529,10 +533,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - fendri
-  Fine:
-    Unspecified:
-      patterns:
-        - fine\b
   Geo F. Trumper:
     Unspecified:
       patterns:

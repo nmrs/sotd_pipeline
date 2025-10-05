@@ -312,7 +312,11 @@ class ActualMatchingValidator:
                 matched_data.get("handle")
                 and matched_data.get("knot")
                 and matched_data["handle"].get("brand")
-                and matched_data["knot"].get("brand")
+                and (
+                    matched_data["knot"].get("brand")
+                    or matched_data["knot"].get("model")
+                    or matched_data["knot"].get("fiber")
+                )
             ):
                 actual_section = "handle_knot"
             # Check for handle-only (has nested handle with data, but no knot data)
@@ -325,7 +329,11 @@ class ActualMatchingValidator:
             # Check for knot-only (has nested knot with data, but no handle data)
             elif (
                 matched_data.get("knot")
-                and matched_data["knot"].get("brand")
+                and (
+                    matched_data["knot"].get("brand")
+                    or matched_data["knot"].get("model")
+                    or matched_data["knot"].get("fiber")
+                )
                 and (not matched_data.get("handle") or not matched_data["handle"].get("brand"))
             ):
                 actual_section = "knot"
@@ -342,8 +350,8 @@ class ActualMatchingValidator:
                         issue_type="structural_change",
                         severity="high",
                         correct_match=brush_string,
-                        expected_section=actual_section,  # Where it should be (current matching system)
-                        actual_section=expected_section,  # Where it currently is (correct_matches.yaml)
+                        expected_section=expected_section,  # Where it currently is (correct_matches.yaml)
+                        actual_section=actual_section,  # Where it should be (current matching system)
                         details=f"Brush type changed from {expected_section} to {actual_section}",
                         suggested_action=f"Move '{brush_string}' from {expected_section} section to {actual_section} section",
                     )

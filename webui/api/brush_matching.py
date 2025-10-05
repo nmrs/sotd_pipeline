@@ -171,6 +171,8 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
         knot = matched_data["knot"]
         knot_breakdown = _calculate_knot_score_breakdown(knot)
         knot_score = sum(knot_breakdown.values())
+        # Get pattern from knot data, fallback to None if not available
+        knot_pattern = knot.get("_pattern") or knot.get("_pattern_used") or knot.get("pattern")
         component_details["knot"] = {
             "score": knot_score,
             "breakdown": knot_breakdown,
@@ -181,10 +183,10 @@ def _extract_component_details(strategy_result, strategy_name: str) -> Optional[
                 "source": knot.get("source_text", ""),
             },
             "patterns": {
-                "brand_pattern": knot.get("_pattern"),
-                "model_pattern": knot.get("_pattern"),
-                "fiber_pattern": knot.get("_pattern"),
-                "size_pattern": knot.get("_pattern"),
+                "brand_pattern": knot_pattern,
+                "model_pattern": knot_pattern,
+                "fiber_pattern": knot_pattern,
+                "size_pattern": knot_pattern,
                 "source": knot.get("source_text", ""),
             },
         }
@@ -513,8 +515,15 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                 # Transform flat brush data to nested structure for React component
                 transformed_matched_data = transform_brush_data(matched_data)
 
-                # Use the actual score from the MatchResult instead of recalculating
-                total_score = strategy_result.score if strategy_result.score is not None else 0.0
+                # Use the actual score from the matched data, which contains the
+                # strategy's calculated score. This is more reliable than
+                # strategy_result.score which may be modified by the scoring engine
+                total_score = 0.0
+                if matched_data and isinstance(matched_data, dict) and "score" in matched_data:
+                    total_score = matched_data["score"] or 0.0
+                elif strategy_result.score is not None:
+                    # Fallback to strategy_result.score if no score in matched data
+                    total_score = strategy_result.score
 
                 # Get detailed scoring breakdown using the ScoringEngine
                 from sotd.match.brush.scoring.engine import ScoringEngine
