@@ -307,35 +307,15 @@ class ActualMatchingValidator:
             # Check for complete brush (has top-level brand/model)
             if matched_data.get("brand") and matched_data.get("model"):
                 actual_section = "brush"
-            # Check for composite brush (has nested handle and knot with data)
-            elif (
-                matched_data.get("handle")
-                and matched_data.get("knot")
-                and matched_data["handle"].get("brand")
-                and (
-                    matched_data["knot"].get("brand")
-                    or matched_data["knot"].get("model")
-                    or matched_data["knot"].get("fiber")
-                )
-            ):
+            # Check for composite brush (has nested handle and knot sections, regardless of brand content)
+            # This matches the logic in structureBrushDataForAPI: if both handle and knot exist, it's composite
+            elif matched_data.get("handle") and matched_data.get("knot"):
                 actual_section = "handle_knot"
-            # Check for handle-only (has nested handle with data, but no knot data)
-            elif (
-                matched_data.get("handle")
-                and matched_data["handle"].get("brand")
-                and (not matched_data.get("knot") or not matched_data["knot"].get("brand"))
-            ):
+            # Check for handle-only (has nested handle section, but no knot section)
+            elif matched_data.get("handle") and not matched_data.get("knot"):
                 actual_section = "handle"
-            # Check for knot-only (has nested knot with data, but no handle data)
-            elif (
-                matched_data.get("knot")
-                and (
-                    matched_data["knot"].get("brand")
-                    or matched_data["knot"].get("model")
-                    or matched_data["knot"].get("fiber")
-                )
-                and (not matched_data.get("handle") or not matched_data["handle"].get("brand"))
-            ):
+            # Check for knot-only (has nested knot section, but no handle section)
+            elif matched_data.get("knot") and not matched_data.get("handle"):
                 actual_section = "knot"
             else:
                 actual_section = "unknown"
