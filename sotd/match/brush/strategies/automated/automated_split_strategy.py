@@ -12,6 +12,7 @@ from typing import Optional
 from ..base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
+from ...delimiter_patterns import BrushDelimiterPatterns
 
 # ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
@@ -38,8 +39,8 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         self.strategy_name = "automated_split"
 
         # Define delimiter priorities based on BrushSplitter logic
-        self.high_priority_delimiters = [" w/ ", " w/", " with ", " in "]
-        self.medium_priority_delimiters = [" - ", " + ", "/"]
+        self.high_priority_delimiters = BrushDelimiterPatterns.get_high_priority_delimiters()
+        self.medium_priority_delimiters = BrushDelimiterPatterns.get_medium_priority_delimiters()
 
     def match(self, value: str) -> Optional[MatchResult]:
         """
@@ -125,9 +126,9 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         replacing the dependency on the legacy matcher.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
-        high_reliability_delimiters = [" w/ ", " w/", " with "]
+        high_reliability_delimiters = BrushDelimiterPatterns.get_smart_splitting_delimiters()
         # Handle-primary delimiters (first part is handle)
-        handle_primary_delimiters = [" in "]
+        handle_primary_delimiters = BrushDelimiterPatterns.get_positional_splitting_delimiters()
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         # These delimiters use smart splitting to determine handle vs knot based on content
@@ -165,7 +166,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         replacing the dependency on the legacy matcher.
         """
         # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [" - ", " + "]
+        medium_reliability_delimiters = [d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"]
 
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
@@ -415,10 +416,10 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 continue
 
             # Split based on delimiter type
-            if delimiter in [" w/ ", " w/", " with "]:
+            if BrushDelimiterPatterns.is_smart_splitting_delimiter(delimiter):
                 # Smart splitting for these delimiters
                 handle, knot = self._split_by_delimiter_smart(value, delimiter)
-            elif delimiter == " in ":
+            elif BrushDelimiterPatterns.is_positional_splitting_delimiter(delimiter):
                 # Positional splitting for "in" (knot in handle)
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
             elif delimiter == "/":

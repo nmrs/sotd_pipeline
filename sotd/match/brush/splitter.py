@@ -1,6 +1,7 @@
 import re
 from typing import Optional
 
+from .delimiter_patterns import BrushDelimiterPatterns
 from .strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
 from .strategies.utils.knot_size_utils import parse_knot_size
 
@@ -150,9 +151,9 @@ class BrushSplitter:
         before known brush validation.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
-        high_reliability_delimiters = [" w/ ", " w/", " with "]
+        high_reliability_delimiters = BrushDelimiterPatterns.get_smart_splitting_delimiters()
         # Handle-primary delimiters (first part is handle)
-        handle_primary_delimiters = [" in "]
+        handle_primary_delimiters = BrushDelimiterPatterns.get_positional_splitting_delimiters()
         # Other high-priority delimiters
         other_high_priority_delimiters = (
             []
@@ -185,7 +186,7 @@ class BrushSplitter:
         indicate a split (e.g., "Zenith - MOAR BOAR" should not split).
         """
         # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [" - ", " + "]
+        medium_reliability_delimiters = [d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"]
 
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:

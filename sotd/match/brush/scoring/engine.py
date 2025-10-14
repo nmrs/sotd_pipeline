@@ -10,6 +10,7 @@ from pathlib import Path
 import yaml
 
 from sotd.match.types import MatchResult
+from ..delimiter_patterns import BrushDelimiterPatterns
 
 
 class ScoringEngine:
@@ -450,31 +451,9 @@ class ScoringEngine:
         if strategy_name != "automated_split":
             return 0.0
 
-        # High-priority delimiters that indicate strong component separation
-        high_priority_delimiters = [
-            r"\bw/\b",  # "w/" (with)
-            r"\bwith\b",  # "with"
-            r"\bin\b",  # "in"
-        ]
-
-        # Lower-priority delimiters
-        low_priority_delimiters = [
-            r"\s/\s",  # " / "
-            r"\s-\s",  # " - "
-            r"\s\+\s",  # " + "
-        ]
-
-        input_lower = input_text.lower()
-
-        # Check for high-priority delimiters
-        for delimiter in high_priority_delimiters:
-            if re.search(delimiter, input_lower):
-                return 1.0
-
-        # Check for low-priority delimiters (no bonus)
-        for delimiter in low_priority_delimiters:
-            if re.search(delimiter, input_lower):
-                return 0.0
+        # Check if this specific result used a high-priority delimiter
+        if result.get("high_priority_delimiter", False):
+            return 1.0
 
         return 0.0
 
