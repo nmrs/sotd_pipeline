@@ -396,31 +396,59 @@ class TestScoringEngine:
         assert scored_results[0].score == 40.0
 
     def test_brand_balance_modifiers(self):
-        """Test that brand balance modifiers work correctly with cached results."""
+        """Test that brand balance modifiers work correctly with result data."""
         mock_config = Mock()
         engine = ScoringEngine(mock_config)
 
         # Test handle_brand_without_knot_brand modifier
-        mock_unified_result = Mock()
-        mock_unified_result.matched = {
-            "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
-            "knot": {"brand": None, "fiber": "badger"},
-        }
-        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
+        result_with_handle_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
+                "knot": {"brand": None, "fiber": "badger"},
+            },
+            match_type="handle_only",
+            pattern=None,
+            strategy="handle_only",
+        )
 
         # Should return 1.0 when handle brand is populated but knot brand is not
-        assert engine._modifier_handle_brand_without_knot_brand("test", None, "handle_only") == 1.0
-        assert engine._modifier_handle_brand_without_knot_brand("test", None, "knot_only") == 1.0
+        assert (
+            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "handle_only")
+            == 1.0
+        )
+        assert (
+            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "knot_only")
+            == 1.0
+        )
+
+        # Test automated_split strategy as well
+        assert (
+            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "automated_split")
+            == 1.0
+        )
 
         # Test knot_brand_without_handle_brand modifier
-        mock_unified_result.matched = {
-            "handle": {"brand": None, "model": None},
-            "knot": {"brand": "Declaration Grooming", "model": "B2"},
-        }
+        result_with_knot_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": None, "model": None},
+                "knot": {"brand": "Declaration Grooming", "model": "B2"},
+            },
+            match_type="knot_only",
+            pattern=None,
+            strategy="knot_only",
+        )
 
         # Should return 1.0 when knot brand is populated but handle brand is not
-        assert engine._modifier_knot_brand_without_handle_brand("test", None, "handle_only") == 1.0
-        assert engine._modifier_knot_brand_without_handle_brand("test", None, "knot_only") == 1.0
+        assert (
+            engine._modifier_knot_brand_without_handle_brand("test", result_with_knot_brand, "handle_only")
+            == 1.0
+        )
+        assert (
+            engine._modifier_knot_brand_without_handle_brand("test", result_with_knot_brand, "knot_only")
+            == 1.0
+        )
 
     def test_brand_balance_modifier_math_scenarios(self):
         """Test comprehensive math scenarios for brand balance modifiers."""

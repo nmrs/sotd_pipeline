@@ -25,6 +25,12 @@ class ScoringEngine:
     _knots_cache = None
     _knots_cache_timestamp = 0
 
+    @classmethod
+    def clear_knots_cache(cls):
+        """Clear the knots cache."""
+        cls._knots_cache = None
+        cls._knots_cache_timestamp = 0
+
     def __init__(self, config, debug: bool = False):
         """
         Initialize the scoring engine.
@@ -625,16 +631,12 @@ class ScoringEngine:
         if strategy_name not in allowed_strategies:
             return 0.0
 
-        # We need cached_results to check brand balance
-        if not hasattr(self, "cached_results") or not self.cached_results:
+        # Check the current result's handle and knot data
+        if not result or not result.matched:
             return 0.0
 
-        unified_result = self.cached_results.get("full_input_component_matching_result")
-        if not unified_result or not unified_result.matched:
-            return 0.0
-
-        handle_data = unified_result.matched.get("handle", {})
-        knot_data = unified_result.matched.get("knot", {})
+        handle_data = result.matched.get("handle", {})
+        knot_data = result.matched.get("knot", {})
 
         handle_brand = handle_data.get("brand") if handle_data else None
         knot_brand = knot_data.get("brand") if knot_data else None
@@ -746,19 +748,23 @@ class ScoringEngine:
         if strategy_name not in ["handle_only", "knot_only"]:
             return 0.0
 
-        # We need cached_results to check brand balance
-        if not hasattr(self, "cached_results") or not self.cached_results:
+        # Check the current result's handle and knot data
+        if not result or (hasattr(result, "matched") and not result.matched):
             return 0.0
 
-        unified_result = self.cached_results.get("full_input_component_matching_result")
-        if not unified_result or not unified_result.matched:
-            return 0.0
+        # Handle both MatchResult objects and dicts
+        if hasattr(result, "matched"):
+            matched = result.matched
+        else:
+            matched = result.get("matched", {}) if isinstance(result, dict) else {}
+            if not matched:
+                return 0.0
 
-        handle_data = unified_result.matched.get("handle", {})
-        knot_data = unified_result.matched.get("knot", {})
+        handle_data = matched.get("handle", {})
+        knot_data = matched.get("knot", {})
 
-        handle_brand = handle_data.get("brand")
-        knot_brand = knot_data.get("brand")
+        handle_brand = handle_data.get("brand") if handle_data else None
+        knot_brand = knot_data.get("brand") if knot_data else None
 
         # Return 1.0 if knot brand is populated but handle brand is not
         return 1.0 if knot_brand and not handle_brand else 0.0
