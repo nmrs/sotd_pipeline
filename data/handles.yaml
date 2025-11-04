@@ -79,7 +79,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - ca\s?yuen
-    Century:
+  Century:
     Unspecified:
       patterns:
         - century
@@ -96,6 +96,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - cool dog
+  Cornfed Viking:
+    Unspecified:
+      patterns:
+        - cornfed.*viking
+        - viking.*odin
   Craving Shaving:
     Unspecified:
       patterns:
@@ -250,6 +255,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - \bopus\b
+  Oumo:
+    Unspecified:
+      patterns:
+        - oumo
   Paladin:
     Unspecified:
       patterns:
@@ -281,6 +290,7 @@ artisan_handles:
         - rad dino(saur)?
         - priusaurus
         - rdc
+        - rad dinosaur creations x summer break soaps
   Rick Montalvo:
     Unspecified:
       patterns:
@@ -318,10 +328,18 @@ artisan_handles:
     Unspecified:
       patterns:
         - shavemac
+  Shave Revolution:
+    Unspecified:
+      patterns:
+        - shave.*revolution
   Shore Shaving:
     Unspecified:
       patterns:
         - shore.*shav
+  Solid Set:
+    Unspecified:
+      patterns:
+        - solid.*\bset\b
   Some Making Required:
     Unspecified:
       patterns:
@@ -337,7 +355,7 @@ artisan_handles:
   Summer Break:
     Unspecified:
       patterns:
-        - summer.*break(?:.*soaps)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - summer.*break(?:.*soaps)?
         - \bsbs\b
   Surrey:
     Unspecified:
@@ -346,7 +364,6 @@ artisan_handles:
   TanZ:
     Unspecified:
       patterns:
-        - tobs
         - tanz
   Teton Shaves:
     Unspecified:
@@ -418,7 +435,7 @@ artisan_handles:
   Wolfman:
     Unspecified:
       patterns:
-        - wolfman.*(?:wrb\d)+
+        - wolfman
 
 manufacturer_handles:
   AKA Brushworx:
@@ -684,6 +701,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - ^pearl\b
+  Peerless:
+    Unspecified:
+      patterns:
+        - peerless
   Perfecto:
     Unspecified:
       patterns:
@@ -696,7 +717,7 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - promethe
-  Razorock:
+  RazoRock:
     Unspecified:
       patterns:
         - Razorr*ock
@@ -752,7 +773,7 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - terra ?firma
-  TOBS:
+  Taylor of Old Bond Street:
     Unspecified:
       patterns:
         - tobs

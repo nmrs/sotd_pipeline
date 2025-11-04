@@ -1,4 +1,4 @@
-A77:
+oA77:
   Cloud:
     A77:
       patterns:
@@ -144,6 +144,7 @@ DE:
     DE:
       patterns:
         - american.*razor.*blades
+        - american
   Asco:
     Platinum:
       patterns:
@@ -173,6 +174,9 @@ DE:
     Platinum:
       patterns:
         - baili.*plat
+    Super Stainless:
+      patterns:
+        - baili.*(ss|stain)
   Bevel:
     Double Edge:
       patterns:
@@ -201,6 +205,10 @@ DE:
     DE:
       patterns:
         - bulimica
+  Carlton:
+    DE:
+      patterns:
+        - carlton
   Centwin:
     Super Platinum:
       patterns:
@@ -345,6 +353,7 @@ DE:
     Platinum:
       patterns:
         - gil.*pla
+        - gil.*\bswede\b
     Rubie:
       patterns:
         - rubie
@@ -432,6 +441,10 @@ DE:
       patterns:
         - ленинград
         - leningrad
+  LOI:
+    Titanium:
+      patterns:
+        - \bloi\b
   Lord:
     Blue Sword Platinum:
       patterns:
@@ -497,6 +510,9 @@ DE:
         - p(?:ersonn*a)?.*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - pseventy-four
         - p74
+    Comfort Coated Super Platinum Chrome:
+      patterns:
+        - comf.*coat.*super.*plat
     Lab Blue:
       patterns:
         - (person+a)?.*lab *blue
@@ -561,7 +577,7 @@ DE:
   Rockwell:
     Swedish Stainless:
       patterns:
-        - rockwell
+        - ro[cv]kwell
   Saimax:
     Stainless:
       patterns:
@@ -709,6 +725,13 @@ DE:
     Stainless:
       patterns:
         - hagen
+  Veesta:
+    Super Platinum:
+      patterns:
+        - veesta.*super
+    Ultra Platinum:
+      patterns:
+        - veesta.*ultra
   Vi-John:
     Chrome Platinum:
       patterns:
@@ -858,6 +881,7 @@ Half DE:
     SE:
       patterns:
         - american.*razor.*blades
+        - american 1/2 de
   Crown:
     Super Stainless SE:
       patterns:
@@ -899,7 +923,7 @@ Injector:
   Personna:
     74 Injector:
       patterns:
-        - person.*74.*inject
+        - person+a.*74.*(?:.*inject)?
     Injector:
       patterns:
         - person+a(?:.*inject)?

@@ -98,15 +98,23 @@ known_brushes:
         - certifyd.*boar
   Chisel & Hound:
     Broomstick:
-      fiber: Boar
-      format: 25mm
+      fiber: Badger
+      format: 26mm
       patterns:
         - (chisel|hound).*broom
+        - (chisel|hound).*season.*witch
+    Broomstick Boar:
+      fiber: Boar
+      format: 24mm
+      patterns:
+        - (chisel|hound).*broom.*boar
+        - (chisel|hound).*season.*witch.*boar
     Broomstick Synth:
       fiber: Synthetic
       format: 25mm
       patterns:
         - (chisel|hound).*broom.*syn
+        - (chisel|hound).*season.*witch.*syn
     Rob's Finest Boar:
       fiber: Boar
       knot_size_mm: 25
@@ -150,6 +158,7 @@ known_brushes:
       patterns:
         - \bbfm\b(.*50mm)?
         - bigfuckingmotherload
+        - ^redacted$
       knot:
         brand: Moti
         fiber: Synthetic
@@ -170,6 +179,15 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - groomatorium
+  Hendrix Classics & Co.:
+    Dickel:
+      patterns:
+        - hendrix.*dickel
+        - dickel.*hendrix
+      knot:
+        brand: Oumo
+        fiber: Synthetic
+        model: ST-1
   Hot Wheels:
     Synthetic:
       fiber: Synthetic
@@ -194,6 +212,10 @@ known_brushes:
       patterns:
         - kent.*inf1
         - kent.*infinity
+    VS70:
+      fiber: Boar
+      patterns:
+        - kent.*vs70
   Lea:
     Boar:
       patterns:
@@ -384,11 +406,13 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - omeg\w.*(pro)?.*48
+        - omeg\w.*pro.*28mm
     Pro 49:
       fiber: Boar
       knot_size_mm: 26
       patterns:
         - omeg\w.*(pro)?.*49
+        - omeg\w.*pro.*26mm
     Proraso Professional:
       knot_maker: Omega
       knot_size_mm: 28
@@ -470,6 +494,16 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - power.*rangers.*syn
+  Rad Dinosaur Creations x Summer Break Soaps:
+    Optimism:
+      patterns:
+        - rad.*dinosaur.*optimism
+      knot:
+        brand: Rad Dinosaur Creations
+        fiber: Badger
+        knot_size_mm: 28
+      handle:
+        brand: Rad Dinosaur Creations
   RazoRock:
     "400":
       fiber: Synthetic
@@ -501,6 +535,12 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - razo.*monster
+  Rex:
+    Deco:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+        - rex.*deco
   Rich Man Shaving:
     Mojo Maker:
       fiber: Badger
@@ -512,6 +552,21 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - rich.*man.*ultraluxe*
+  Rubberset:
+    "203":
+      fiber: Boar
+      knot_size_mm: 23
+      patterns:
+        - rubberset.*203
+    400:
+      fiber: Boar
+      patterns:
+        - rubberset.*400.*original knot
+    400-4:
+      fiber: Boar
+      knot_size_mm: 27
+      patterns:
+        - rubberset.*400-4
   Semogue:
     fiber: Boar
     "1250":
@@ -590,6 +645,7 @@ known_brushes:
         - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
         - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*)
         - owner.*club
+        - sem\w+g.*taj
     SOC Mixed Badger/Boar:
       fiber: Mixed Badger/Boar
       knot_size_mm: 24
@@ -622,6 +678,12 @@ known_brushes:
         - brushbutt
         - 2017 ws
   Simpson:
+    "57":
+      fiber: Badger
+      knot_size_mm: 23
+      knot_loft_mm: 55
+      patterns:
+        - simp.*57
     Berkeley 46:
       fiber: Badger
       knot_size_mm: 19
@@ -755,7 +817,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-        - supply.*silvertip.*synth
+        - 'supply(?: silvertip)? synthetic'
   Stirling:
     2-Band Synthetic:
       fibether: Synthetic
@@ -773,6 +835,7 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - stirling.*finest
+        - stirling.*24.*badger
     Kong Synthetic:
       fiber: Synthetic
       knot_size_mm: 26
@@ -918,11 +981,22 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - 502B
+    502NK SE:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 60
+      patterns:
+        - 502NK
     505BC SE:
       fiber: Boar
       knot_size_mm: 28
       patterns:
         - 505BC
+    506 MB:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+        - \b506\w?\b.*mb
     506U SE:
       fiber: Boar
       knot_size_mm: 27
@@ -1010,6 +1084,7 @@ known_brushes:
       knot_loft_mm: 57
       patterns:
         - zen.*\bpro\b
+        - b03-a26
     The Big One:
       fiber: Badger
       knot_size_mm: 31
@@ -1023,6 +1098,7 @@ known_brushes:
         - wetshaving.*exc
         - maor boar
         - zen.*wetshaving
+        - zen.*\bmb\b
       knot:
         brand: Zenith
         fiber: Boar
@@ -1444,15 +1520,6 @@ known_knot_based_brushes:
       patterns:
         - rad.*dinosaur.*tuxedo
   Trotter:
-    Boar:
-      knot:
-        brand: Oumo
-        fiber: Boar
-        model: Boar
-        knot_size_mm: 28
-      patterns:
-        - trotter.*boar
-        - trotter.*oumo
     STF XL:
       knot:
         brand: Mühle
@@ -1465,7 +1532,7 @@ known_knot_based_brushes:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-        - trotter.*t1
+        - trotter(?:.*t1)?
   Turn-N-Shave:
     Angel:
       fiber: Synthetic
@@ -1617,6 +1684,12 @@ known_knot_based_brushes:
       knot_loft_mm: 64
       patterns:
         - zenith.*\bb18\b
+    B25:
+      fiber: Boar
+      knot_size_mm: 27.5
+      knot_loft_mm: 57
+      patterns:
+        - zenith.*\bb25\b
     B26:
       fiber: Boar
       knot_size_mm: 27
@@ -1687,6 +1760,10 @@ other_brushes:
       - A\.? ?P\.? ?\s*shave\s*(co)?
       - \bap\b
       - \bapsc\b
+  Art of Shaving:
+    default: Synthetic
+    patterns:
+      - art of shaving
   Artesania Romera:
     default: Badger
     patterns:
@@ -1725,6 +1802,12 @@ other_brushes:
     default: Badger
     patterns:
       - bristle.*brush
+      - huck
+  Bundubeard:
+    default: Badger
+    patterns:
+      - bund\wbeard
+      - boendoebaard
   CaYuen:
     default: Badger
     patterns:
@@ -1769,6 +1852,15 @@ other_brushes:
     patterns:
       - farvour.*(?:turn).*(?:craft)
       - farvour
+  Fine Accoutrements:
+    default: Synthetic
+    patterns:
+      - fine.*accout
+      - ^fine synthetic$
+  Frank Shaving:
+    default: Badger
+    patterns:
+      - frank.*sha
   Gilette:
     default: Synthetic
     patterns:
@@ -1777,10 +1869,25 @@ other_brushes:
     default: Badger
     patterns:
       - grizzly.*bay.*(?:v\d{1,2})?
+  Hendrix Classics & Co.:
+    default: Synthetic
+    patterns:
+      - hendrix.*classics
+      - hc&c
+  HJM:
+    default: Boar
+    patterns:
+      - \bhjm\b
   Holzleute:
     default: Badger
     patterns:
       - holzleute
+  Jequil & Corenveo:
+    default: Synthetic
+    patterns:
+      - jequil
+      - corenveo
+      - je&co
   Lentfer Custom Woodworks:
     default: Synthetic
     patterns:
@@ -1813,6 +1920,14 @@ other_brushes:
     default: badger
     patterns:
       - \bmred\b
+  Muninn Woodworks:
+    default: badger
+    patterns:
+      - muninn
+  Mühle:
+    default: Synthetic
+    patterns:
+      - m[uü]hle
   Omega:
     default: Boar
     patterns:
@@ -1829,10 +1944,18 @@ other_brushes:
     default: Synthetic
     patterns:
       - paragon
+  Parker:
+    default: Badger
+    patterns:
+      - parker
   Pearl:
     default: Synthetic
     patterns:
       - pearl
+  Peneuf:
+    default: Badger
+    patterns:
+      - peneuf
   PerPoro:
     default: Synthetic
     patterns:
@@ -1851,6 +1974,10 @@ other_brushes:
       - rad dino(saur)?
       - priusaurus
       - rdc
+  Rich Man Shaving:
+    default: Badger
+    patterns:
+      - rich.*man
   Runeman Nordic Shave Design:
     default: Badger
     patterns:
@@ -1880,6 +2007,10 @@ other_brushes:
     default: Badger
     patterns:
       - smile.*mile
+  Some Making Required:
+    default: Badger
+    patterns:
+      - some ?making ?required
   Spokar:
     default: Synthetic
     patterns:
@@ -1893,10 +2024,28 @@ other_brushes:
     default: Boar
     patterns:
       - surrey
+  Taylor of Old Bond Street:
+    default: Badger
+    patterns:
+      - tobs
+      - taylor.*bond
   Thäter:
     default: Badger
     patterns:
       - th[aä]ter
+  The Razor Company:
+    default: Synthetic
+    patterns:
+      - razor.*co
+      - trc
+  Van der Hagen:
+    default: Boar
+    patterns:
+      - van.*hag.*
+  Varlet:
+    default: Badger
+    patterns:
+      - varlet
   Vie-Long:
     default: Horse
     patterns:
@@ -1906,11 +2055,19 @@ other_brushes:
     patterns:
       - v&c
       - voigt
+  Vulfix:
+    default: Badger
+    patterns:
+      - vul?fix
   West Coast Shaving:
     default: Synthetic
     patterns:
       - wcs
       - west.*coast
+  Whipped Dog:
+    default: Badger
+    patterns:
+      - whipped.*dog
   Wild West Brushworks:
     default: Synthetic
     patterns:

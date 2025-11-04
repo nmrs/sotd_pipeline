@@ -68,6 +68,10 @@ Above the Tie:
   Windsor SSRH2:
     patterns:
       - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
+  X1 Slant:
+    format: AC
+    patterns:
+      - \b(?:att|tie)\b.*\bx1\b
 Ale Razors:
   Straight:
     format: Straight
@@ -81,6 +85,10 @@ Alpha:
   Futura:
     patterns:
       - alpha.*futura
+  Lone Star:
+    patterns:
+      - alpha.*lone.*star
+      - texan shaves.*alpha
   Outlaw:
     patterns:
       - alpha.*outl
@@ -190,6 +198,11 @@ BBNY:
   Safety Razor:
     patterns:
       - bbny
+Backal:
+  Straight:
+    format: Straight
+    patterns:
+      - backal(?:.*\d{1,2}/(8|16))?
 Baili:
   3-Piece:
     patterns:
@@ -299,6 +312,11 @@ Blutt Rasur:
   BR-1:
     patterns:
       - blutt?
+BO-RAS-IC:
+  Straight:
+    format: Straight
+    patterns:
+      - bo-?ras-?ic(?:.*\d{1,2}/(8|16))?
 Bombay Shavimg Company:
   DE:
     patterns:
@@ -533,6 +551,13 @@ Dovo:
     width: 5/8
     patterns:
       - dovo.*\b41\b(?:.*\d{1,2}/(8|16))?
+  Carpe Diem:
+    format: Straight
+    grind: Hollow
+    point: Round
+    width: 5/8
+    patterns:
+      - dovo.*carpe.*diem
   Runde Sache:
     format: Straight
     grind: Full Hollow
@@ -863,6 +888,7 @@ GEM:
     patterns:
       - bullet.*tip(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - flying.*wing(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - gem.*(flying|bullet)
   G-Bar:
     format: GEM
     patterns:
@@ -995,6 +1021,7 @@ Gillette:
       - (?:gil.*)slim.*art?istocrat
       - (?:gil.*)art?istocrat.*slim
       - gillette.*slim.*tto
+      - year.*(quarter|qtr).*slim
   Super Adjustable:
     patterns:
       - Black.*Beauty
@@ -1013,7 +1040,7 @@ Gillette:
       - (red|black|blue|flare|flair).*tip
       - gillette.*tto
       - 'gil.*\bss\b'
-      - \b(?:\d{2}|19\d{2})\b \bss\b
+      - (?<!\.)\b(?:\d{2}|19\d{2})\b \bss\b
       - TV special
       - gil.*rocket
       - rocket.*hd
@@ -1030,6 +1057,7 @@ Gillette:
       - 'triangle\s*slot'
       - \btech\b
       - gil.*travel
+      - gill.*ball tip
   Toggle:
     patterns:
       - (gil.*)?toggle
@@ -1095,7 +1123,7 @@ Griffith:
   Straight:
     format: Straight
     patterns:
-      - griffith(?:.*\d{1,2}/(8|16))?
+      - (?<!from\s)griffith(?:.*\d{1,2}/(8|16))?
 Griffon:
   Straight:
     format: Straight
@@ -1133,6 +1161,11 @@ Headblade:
     format: Cartridge/Disposable
     patterns:
       - headbl.*atx
+Hederi & Joseph:
+  Straight:
+    format: Straight
+    patterns:
+      - hederi.*joseph
 Henson:
   AL13:
     patterns:
@@ -1167,6 +1200,11 @@ HERO:
     format: Straight
     patterns:
       - \bhero\b(?:.*\d{1,2}/(8|16))?
+Hibbard Spencer Bartlett & Co:
+  Straight:
+    format: Straight
+    patterns:
+      - hibbard.*spencer
 Hoffritz:
   Slant:
     patterns:
@@ -1566,6 +1604,11 @@ Merkur:
   Vision:
     patterns:
       - vision
+Minerva Cutlery:
+  Straight:
+    format: Straight
+    patterns:
+      - minerva.*cutlery
 Mongoose:
   Alumigoose:
     format: AC
@@ -1641,10 +1684,11 @@ Occams Razor:
 OliWorks:
   M3teorite:
     patterns:
-      - oliworks.*m3teorite
+      - oliworks.*m[e3]t\w+rite
+      - oliworks
   OliBlade:
     patterns:
-      - oli(works|blade)
+      - oliblade
 OneBlade:
   Core:
     format: FHS
@@ -1917,11 +1961,18 @@ Pearl:
   OC:
     patterns:
       - pearl.*oc
+Peneuf:
+  Safety Razor:
+    patterns:
+      - peneuf
 Personna:
   BBS-0:
     patterns:
       - bbs-0
       - person.*bbs.*0
+  Prep DE:
+    patterns:
+      - person.*prep     
 Piedmont:
   Straight:
     format: Straight
@@ -1984,6 +2035,13 @@ Raido Star:
     format: Straight
     patterns:
       - raido[ -_]?(star|razor).*(?:\d{1,2}/(8|16))?
+  Degenerate Kamisori:
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 8/8
+    patterns:
+      - raido star.*(depravity|degenerat).*(?:\d{1,2}/(8|16))?
 Ralf Aust:
   Straight:
     format: Straight
@@ -2126,6 +2184,10 @@ RigaRazor:
     format: Straight
     patterns:
       - \briga(.?razor)?\b(?:.*\d{1,2}/(8|16))?
+Rimei:
+  A2001:
+    patterns:
+      - rimei.*a2001
 River Razors:
   Straight:
     format: Straight
@@ -2202,8 +2264,7 @@ Romer-7:
       - ricardo oc
   Shivira:
     patterns:
-      - romer.*shivira
-      - shivira.*romer
+      - \bshivira\b
   Wazir:
     patterns:
       - wazir
@@ -2271,6 +2332,10 @@ Schick:
     format: Other
     patterns:
       - magazine.*repeating.*razor
+  Proline BBR-S:
+    format: Shavette (AC)
+    patterns:
+      - schick.*bbr.*s
   Stick:
     format: Injector
     patterns:
@@ -2290,6 +2355,15 @@ Shavent:
     patterns:
       - shavent
       - ^haven't$
+Shemeld & Co:
+  Rocket:
+    format: Straight
+    patterns:
+      - shemeld.*rocket
+  Straight:
+    format: Straight
+    patterns:
+      - shemeld.*(straight|\d{1,2}/(8|16)|ground)
 Shield:
   Avenger:
     format: AC
@@ -2321,6 +2395,11 @@ Silver STAR:
   Model 100:
     patterns:
       - silver star
+Simmons Hardware Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - simmons.*hardware
 Smart-Helix:
   Apollo:
     patterns:
@@ -2339,6 +2418,11 @@ Spornette:
     format: Shavette (Hair Shaper)
     patterns:
       - sp(o|e)rnette
+St. Louis Razor Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - st.*louis.*razor
 Stahly:
   Live Blade:
     patterns:
@@ -2426,6 +2510,11 @@ Supply:
       - supply.*sing.*edge
       - supply razor
       - ^supply$
+T. Noonan & Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - t\. noonan
 TRC:
   DE:
     patterns:
@@ -2537,6 +2626,10 @@ Van Der Hagen:
     patterns:
       - Van Der Haa*gen
       - '\bvdh\b'
+Varukh:
+  Slant:
+    patterns:
+      - varukh
 Vikings Blade:
   Chieftain:
     patterns:
@@ -2562,6 +2655,11 @@ W. Greaves & Sons:
     format: Straight
     patterns:
       - greaves(?:.*\d{1,2}/(8|16))?
+W.R. Humphreys & Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - 'w\.?r\.? humphreys(?: & co)?(?:.*\d{1,2}/(8|16))?'
 WCS:
   "77":
     patterns:
@@ -2599,6 +2697,9 @@ WCS:
   Multi Titanium Collection Razor:
     patterns:
       - '(W\.?C\.?S\.?|West Coast Shaving).*titanium'
+  Slant:
+    patterns:
+      - wcs.*slant
 Wacker:
   Straight:
     format: Straight

@@ -459,6 +459,10 @@ known_knots:
       fiber: Badger
       patterns:
         - (oumo.*)?rorschach
+    ST-1:
+      fiber: Synthetic
+      patterns:
+        - \bst-?1\b
     ST-2:
       fiber: Synthetic
       patterns:
@@ -487,6 +491,12 @@ known_knots:
       knot_size_mm: 26
       patterns:
         - rich.*man.*shav.*s-?2.*innovator
+  Trotter Handcrafts:
+    T1 Manchurian Badger:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - trotter.*t1
   Turn-N-Shave:
     Angel:
       fiber: Synthetic
@@ -1032,7 +1042,6 @@ other_knots:
     patterns:
       - \bo(o|u)+mo\b
       - rorschach
-      - st-2
   Oz Shaving:
     default: Synthetic
     patterns:
@@ -1137,15 +1146,11 @@ other_knots:
     default: Synthetic
     patterns:
       - strike.*gold
-  Supply:
-    default: Synthetic
-    patterns:
-      - supply
   Surrey:
     default: Boar
     patterns:
       - surrey
-  TOBS:
+  Taylor of Old Bond Street:
     default: Badger
     patterns:
       - tobs
@@ -1195,7 +1200,7 @@ other_knots:
     patterns:
       - tony.*fors
   Trotter Handcrafts:
-    default: Synthetic
+    default: Badger
     patterns:
       - trotter
   Turn-N-Shave:
