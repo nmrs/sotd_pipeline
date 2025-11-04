@@ -102,6 +102,30 @@ class ActualMatchingValidator:
         self._matchers = {}
         self._correct_matches_checker = None
         self._performance_metrics = {}
+        self._splits_loader = None
+        
+        # Clear caches on initialization to ensure fresh data
+        self._clear_all_caches()
+
+    def _clear_all_caches(self):
+        """Clear all caches to ensure fresh data on every validation."""
+        from sotd.match.base_matcher import clear_catalog_cache
+        from sotd.match.loaders import clear_yaml_cache
+        from sotd.match.brush.matcher import clear_brush_catalog_cache
+        
+        clear_catalog_cache()
+        clear_yaml_cache()
+        clear_brush_catalog_cache()
+        
+        # Clear any matcher-specific caches
+        for matcher in self._matchers.values():
+            if hasattr(matcher, 'clear_cache'):
+                matcher.clear_cache()
+        
+        # Clear internal caches
+        self._matchers.clear()
+        self._correct_matches_checker = None
+        self._splits_loader = None
 
     def _get_matcher(self, field: str):
         """Get or create matcher for the specified field."""
@@ -130,6 +154,13 @@ class ActualMatchingValidator:
             # Note: CorrectMatchesChecker not used in current implementation
             self._correct_matches_checker = correct_matches_data
         return self._correct_matches_checker
+
+    def _get_splits_loader(self):
+        """Get or create brush splits loader."""
+        if self._splits_loader is None:
+            from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader
+            self._splits_loader = BrushSplitsLoader(self.data_path / "brush_splits.yaml")
+        return self._splits_loader
 
     def _validate_data_structure(self, correct_matches: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate data structure rules for correct_matches.yaml."""
@@ -282,6 +313,10 @@ class ActualMatchingValidator:
         issues = []
 
         try:
+            # Check if this brush should not be split (from brush_splits.yaml)
+            splits_loader = self._get_splits_loader()
+            should_not_split = splits_loader.should_not_split(brush_string)
+
             matcher = self._get_matcher("brush")
 
             # Run actual matching with bypass_correct_matches=True
@@ -320,11 +355,107 @@ class ActualMatchingValidator:
             else:
                 actual_section = "unknown"
 
+            # Validate that should_not_split entries are NOT split
+            if should_not_split and actual_section in ["handle_knot", "handle", "knot"]:
+                issues.append(
+                    ValidationIssue(
+                        issue_type="structural_change",
+                        severity="high",
+                        correct_match=brush_string,
+                        expected_section=expected_section,
+                        actual_section=actual_section,
+                        details=f"Brush string '{brush_string}' has should_not_split: true in brush_splits.yaml but matcher split it into {actual_section}",
+                        suggested_action=f"Fix matching logic to respect should_not_split flag for '{brush_string}'",
+                    )
+                )
+                # Return early since this is a critical issue
+                return issues
+
+            # Validate that explicit splits from brush_splits.yaml are being used
+            curated_split = splits_loader.find_split(brush_string)
+            if curated_split and not curated_split.should_not_split:
+                # This brush has an explicit split in brush_splits.yaml
+                # Check if the matcher used KnownSplitWrapperStrategy (known_split strategy)
+                actual_strategy = result.strategy if result else None
+                if actual_strategy != "known_split":
+                    issues.append(
+                        ValidationIssue(
+                            issue_type="data_mismatch",
+                            severity="medium",
+                            correct_match=brush_string,
+                            expected_section=expected_section,
+                            actual_section=actual_section,
+                            details=f"Brush string '{brush_string}' has explicit split in brush_splits.yaml but matcher used '{actual_strategy}' strategy instead of 'known_split'. Expected handle: '{curated_split.handle}', knot: '{curated_split.knot}'",
+                            suggested_action=f"Fix matching logic to use KnownSplitWrapperStrategy for explicit splits from brush_splits.yaml",
+                        )
+                    )
+                else:
+                    # Strategy is correct, but also validate that handle/knot match the curated split
+                    if actual_section in ["handle_knot", "handle", "knot"]:
+                        handle_data = matched_data.get("handle", {})
+                        knot_data = matched_data.get("knot", {})
+                        actual_handle_text = handle_data.get("source_text", "") if handle_data else ""
+                        actual_knot_text = knot_data.get("source_text", "") if knot_data else ""
+                        
+                        # Check if handle/knot text matches curated split (allowing for case/whitespace differences)
+                        expected_handle = curated_split.handle or ""
+                        expected_knot = curated_split.knot or ""
+                        
+                        if expected_handle and actual_handle_text.lower().strip() != expected_handle.lower().strip():
+                            issues.append(
+                                ValidationIssue(
+                                    issue_type="data_mismatch",
+                                    severity="medium",
+                                    correct_match=brush_string,
+                                    expected_section=expected_section,
+                                    actual_section=actual_section,
+                                    details=f"Brush string '{brush_string}' uses known_split strategy but handle text '{actual_handle_text}' doesn't match brush_splits.yaml handle '{expected_handle}'",
+                                    suggested_action=f"Update brush_splits.yaml or fix KnownSplitWrapperStrategy to use correct handle text",
+                                )
+                            )
+                        
+                        if expected_knot and actual_knot_text.lower().strip() != expected_knot.lower().strip():
+                            issues.append(
+                                ValidationIssue(
+                                    issue_type="data_mismatch",
+                                    severity="medium",
+                                    correct_match=brush_string,
+                                    expected_section=expected_section,
+                                    actual_section=actual_section,
+                                    details=f"Brush string '{brush_string}' uses known_split strategy but knot text '{actual_knot_text}' doesn't match brush_splits.yaml knot '{expected_knot}'",
+                                    suggested_action=f"Update brush_splits.yaml or fix KnownSplitWrapperStrategy to use correct knot text",
+                                )
+                            )
+
             # Check for structural changes
             if expected_section != actual_section:
                 logger.debug(
                     f"Structural change detected: {brush_string} from {expected_section} to {actual_section}"
                 )
+
+                # Extract handle and knot details for structural changes
+                actual_handle_brand = None
+                actual_handle_model = None
+                actual_knot_brand = None
+                actual_knot_model = None
+
+                if actual_section == "handle_knot":
+                    # Extract handle and knot details from matched_data
+                    handle_data = matched_data.get("handle", {})
+                    knot_data = matched_data.get("knot", {})
+
+                    # Fail fast if handle/knot data is missing when it should be present
+                    if not handle_data or not knot_data:
+                        raise ValueError(
+                            f"Structural change to handle_knot detected but missing data: "
+                            f"handle={bool(handle_data)}, knot={bool(knot_data)}"
+                        )
+
+                    actual_handle_brand = handle_data.get("brand")
+                    actual_handle_model = handle_data.get("model")
+                    actual_knot_brand = knot_data.get("brand")
+                    actual_knot_model = knot_data.get("model")
+
                 issues.append(
                     ValidationIssue(
                         issue_type="structural_change",
@@ -332,6 +463,16 @@ class ActualMatchingValidator:
                         correct_match=brush_string,
                         expected_section=expected_section,  # Where it currently is (correct_matches.yaml)
                         actual_section=actual_section,  # Where it should be (current matching system)
+                        expected_brand=(
+                            expected_data.get("brand") if expected_section == "brush" else None
+                        ),
+                        expected_model=(
+                            expected_data.get("model") if expected_section == "brush" else None
+                        ),
+                        actual_handle_brand=actual_handle_brand,
+                        actual_handle_model=actual_handle_model,
+                        actual_knot_brand=actual_knot_brand,
+                        actual_knot_model=actual_knot_model,
                         details=f"Brush type changed from {expected_section} to {actual_section}",
                         suggested_action=f"Move '{brush_string}' from {expected_section} section to {actual_section} section",
                     )
@@ -616,6 +757,9 @@ class ActualMatchingValidator:
         issues = []
 
         try:
+            # Clear all caches before validation to ensure fresh data
+            self._clear_all_caches()
+            
             # Load correct_matches.yaml
             import yaml
 
@@ -679,18 +823,34 @@ class ActualMatchingValidator:
 
             processing_time = time.time() - start_time
 
+            # Suppress data_mismatch issues when structural_change exists for same entry
+            structural_change_patterns = {
+                issue.correct_match.lower()
+                for issue in issues
+                if issue.issue_type == "structural_change"
+            }
+
+            filtered_issues = [
+                issue
+                for issue in issues
+                if not (
+                    issue.issue_type == "data_mismatch"
+                    and issue.correct_match.lower() in structural_change_patterns
+                )
+            ]
+
             # Update performance metrics
             self._performance_metrics[field] = {
                 "processing_time": processing_time,
                 "total_entries": total_entries,
-                "issues_found": len(issues),
+                "issues_found": len(filtered_issues),
                 "validation_mode": "actual_matching",
             }
 
             return ValidationResult(
                 field=field,
                 total_entries=total_entries,
-                issues=issues,
+                issues=filtered_issues,
                 processing_time=processing_time,
                 validation_mode="actual_matching",
                 strategy_stats={},  # TODO: Add strategy statistics

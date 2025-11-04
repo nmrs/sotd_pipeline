@@ -1,395 +1,292 @@
 #!/usr/bin/env python3
-"""Blade pattern extraction utilities for the SOTD pipeline.
-
-This module provides priority-based extraction of blade counts and use counts
-from user comments, reusing existing patterns and adding validation logic.
-"""
+"""Shared regex patterns for blade use count extraction and normalization."""
 
 import re
-from typing import Optional, Tuple
+from typing import Pattern
 
 
-def extract_simple_delimiters(text: str) -> Optional[int]:
-    """Extract use count from simple delimiter patterns: (3), [4], {5}.
+def get_incomplete_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for incomplete usage counts: (1, [2, {3, etc. (missing closing bracket)
+ 
+    This pattern matches incomplete parentheses/brackets/braces with numbers that are likely
+    blade use counts, but only when we're confident they're actually incomplete (at end of string
+    or followed by space and end of string). This prevents matching legitimate specifications
+    like "(27 mm × 51 mm Manchurian badger)".
+ 
+    Returns:
+        Compiled regex pattern for incomplete usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*(?!19\d{2}|20\d{2})\d+\s*$")
 
-    Args:
-        text: Input string that may contain simple delimiter patterns
+
+def get_complete_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for complete usage counts: (1), [2], {3}, etc.
+
+    This pattern matches complete parentheses/brackets/braces with numbers that are likely
+    blade use counts, excluding 4-digit numbers that are likely years (1900-2099).
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for complete usage counts
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for simple delimiters: (3), [4], {5}, (X3), [X5], etc.
-    simple_pattern = r"[\(\[\{]\s*(?:[A-Za-z]*)?(\d+)\s*[\)\]\}]"
-    match = re.search(simple_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*(?!19\d{2}|20\d{2})\d+\s*[\)\]\}]")
 
 
-def extract_explicit_usage(text: str) -> Optional[int]:
-    """Extract use count from explicit usage patterns: (3rd use), (10th shave).
-
-    Args:
-        text: Input string that may contain explicit usage patterns
+def get_usage_x_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for usage counts with 'x': (2x), (3x), [4x], etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for usage counts with 'x'
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for explicit usage: (3rd use), (10th shave), etc.
-    usage_pattern = r"[\(\[\{]\s*(\d+)(?:st|nd|rd|th)\s+(?:use|shave)\s*[\)\]\}]"
-    match = re.search(usage_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    # Pattern for ordinal use without brackets: 3rd use, 2nd use, etc.
-    # Must have some text before the pattern to indicate it's a blade description
-    ordinal_pattern = r".+\b(\d+)(?:st|nd|rd|th)\s+(?:use|shave)\b"
-    match = re.search(ordinal_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+x\s*[\)\]\}]")
 
 
-def extract_multipliers(text: str) -> Optional[int]:
-    """Extract count from multiplier patterns: (2x), (x3).
-
-    Args:
-        text: Input string that may contain multiplier patterns
+def get_usage_x_prefix_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for usage counts with 'x' prefix: (x2), (x3), [x4], etc.
 
     Returns:
-        The count as an integer, or None if no pattern is found
+        Compiled regex pattern for usage counts with 'x' prefix
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for multipliers: (2x), (x3), [4x], {x5}
-    multiplier_pattern = r"[\(\[\{]\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
-    match = re.search(multiplier_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    # Pattern for standalone multipliers: x4, 2x
-    # Must have some text before the pattern to indicate it's a blade description
-    standalone_pattern = r".+(?:\s|^)(?:x)?(\d+)(?:x)?(?:\s|$)"
-    match = re.search(standalone_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*x\d+\s*[\)\]\}]")
 
 
-def extract_hash_numbers(text: str) -> Optional[int]:
-    """Extract count from hash number patterns: #15, #2.
-
-    Args:
-        text: Input string that may contain hash number patterns
+def get_usage_use_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for usage counts with 'use': (1 use), (2 use), etc.
 
     Returns:
-        The count as an integer, or None if no pattern is found
+        Compiled regex pattern for usage counts with 'use'
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for hash numbers: #15, #2
-    # Must have some text before the pattern to indicate it's a blade description
-    hash_pattern = r".+#(\d+)"
-    match = re.search(hash_pattern, text)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+\s+use\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_semantic_patterns(text: str) -> Optional[int]:
-    """Extract use count from semantic patterns: (NEW), (fresh).
-
-    Args:
-        text: Input string that may contain semantic patterns
+def get_usage_uses_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for usage counts with 'uses': (107 uses), (108 uses), etc.
 
     Returns:
-        The use count as 1 for semantic patterns, or None if no pattern is found
+        Compiled regex pattern for usage counts with 'uses'
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for semantic usage (equivalent to first use)
-    semantic_patterns = [
-        r"[\(\[]\s*new\s*[\)\]]",  # (NEW), [new]
-        r"[\(\[]\s*fresh\s*[\)\]]",  # (Fresh), [fresh]
-        r"[\(\[]\s*new\s+blade\s*[\)\]]",  # (new blade)
-        r"[\(\[]\s*fresh\s+blade\s*[\)\]]",  # (fresh blade)
-        r"[\(\[]\s*first\s+time\s*[\)\]]",  # (first time)
-        r"[\(\[]\s*brand\s+new\s*[\)\]]",  # (brand new)
-    ]
-
-    for pattern in semantic_patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            return 1
-
-    # Standalone semantic words
-    # Must have some text before the pattern to indicate it's a blade description
-    standalone_patterns = [
-        r".+\bnew\b",
-        r".+\bfresh\b",
-        r".+\bfirst\s+time\b",
-        r".+\bbrand\s+new\b",
-    ]
-
-    for pattern in standalone_patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            return 1
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+\s+uses\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_month_usage(text: str) -> Optional[int]:
-    """Extract use count from month usage patterns: 15/31, 20/31.
-
-    Args:
-        text: Input string that may contain month usage patterns
+def get_ordinal_shave_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for ordinal usage: (1st shave), (2nd shave), (10th shave), etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for ordinal shave usage
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for month-based usage tracking: n/31, n/30, n/28, n/29
-    # Must have some text before the pattern to indicate it's a blade description
-    month_pattern = r".+\b(\d+)/(?:28|29|30|31)\b"
-    match = re.search(month_pattern, text)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s+shave\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_ordinal_patterns(text: str) -> Optional[int]:
-    """Extract use count from ordinal patterns: 3rd, 2nd.
-
-    Args:
-        text: Input string that may contain ordinal patterns
+def get_ordinal_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for ordinal usage: (1st), (2nd), (10th), etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for ordinal usage
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for ordinal numbers: 3rd, 2nd, 1st, etc.
-    # Must have some text before the pattern to indicate it's a blade description
-    ordinal_pattern = r".+\b(\d+)(?:st|nd|rd|th)\b"
-    match = re.search(ordinal_pattern, text)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_escaped_brackets(text: str) -> Optional[int]:
-    """Extract use count from escaped bracket patterns: [2\], [3\].
-
-    Args:
-        text: Input string that may contain escaped bracket patterns
+def get_superscript_ordinal_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for superscript ordinal usage: (2^(nd)), (3^(rd)), (1^(st)), etc.
+    Also handles patterns like (2^(nd) use), (3^(rd) use), etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for superscript ordinal usage
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for escaped brackets: [2\], [3\]
-    # Must have some text before the pattern to indicate it's a blade description
-    escaped_pattern = r".+\[(\d+)\\\]"
-    match = re.search(escaped_pattern, text)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(
+        r"(?:[\(\[\{])\s*\d+\^?\(?(?:st|nd|rd|th)\)?" r"(?:\s+[^\)\]\}]+)?\s*[\)\]\}]",
+        re.IGNORECASE,
+    )
 
 
-def extract_superscript_ordinals(text: str) -> Optional[int]:
-    """Extract use count from superscript ordinal patterns: (2^(nd)), (3^(rd)).
-
-    Args:
-        text: Input string that may contain superscript ordinal patterns
+def get_completion_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for completion indicators: (1 and done), (1 and last), (1st and final), etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for completion indicators
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for superscript ordinals with "use": (2^(nd) use), (3^(rd) use)
-    # Must have some text before the pattern to indicate it's a blade description
-    superscript_use_pattern = r".+[\(\[\{]\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s+use\s*[\)\]\}]"
-    match = re.search(superscript_use_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    # Pattern for superscript ordinals without "use": (2^(nd)), (3^(rd))
-    # Must have some text before the pattern to indicate it's a blade description
-    superscript_pattern = r".+[\(\[\{]\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s*[\)\]\}]"
-    match = re.search(superscript_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(
+        r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)?(?:\s+[^\)\]\}]+)?\s+"
+        r"(?:and\s+(?:done|last|final|probably\s+last))\s*[\)\]\}]",
+        re.IGNORECASE,
+    )
 
 
-def validate_usage_count(count: int) -> bool:
-    """Validate that a usage count is realistic.
-
-    Args:
-        count: The usage count to validate
+def get_speculation_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for user speculation: (10 I think), (3 I think), (7, I think), (30+ I think), etc.
 
     Returns:
-        True if the count is valid, False otherwise
-
-    Business Rules:
-    - Must be less than 800 (realistic blade usage)
-    - Must not be 4+ digits (likely model numbers, not usage counts)
+        Compiled regex pattern for user speculation
     """
-    if count < 1:
-        return False
-
-    if count >= 800:
-        return False
-
-    # Check for 4+ digit numbers (likely model numbers)
-    if count >= 1000:
-        return False
-
-    return True
+    return re.compile(r"(?:[\(\[\{])\s*\d+[+,\s]+\s*I\s+think\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_blade_count(text: str) -> Optional[int]:
-    """Extract blade count (number of blades) from text.
-
-    This looks for patterns at the very beginning of the text that indicate
-    multiple blades are loaded.
-
-    Args:
-        text: Input string that may contain blade count patterns
+def get_speculation_question_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for user speculation with question marks: (5? I think), etc.
 
     Returns:
-        The blade count as an integer, or None if no pattern is found
+        Compiled regex pattern for user speculation with question marks
     """
-    if not isinstance(text, str) or not text:
-        return None
-
-    # Pattern for leading blade count: e.g. [2x], (2x), {2x}, [X2], (x2), etc.
-    leading_blade_count_pattern = r"^\s*[\(\[\{]\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
-    match = re.match(leading_blade_count_pattern, text, re.IGNORECASE)
-    if match:
-        count = int(match.group(1))
-        if validate_usage_count(count):
-            return count
-
-    return None
+    return re.compile(r"(?:[\(\[\{])\s*\d+\?\s*I\s+think\s*[\)\]\}]", re.IGNORECASE)
 
 
-def extract_blade_counts(text: str) -> Tuple[Optional[int], Optional[int]]:
-    """Extract both blade count and use count from text with priority logic.
-
-    This function implements priority-based extraction that reuses existing
-    patterns and adds validation logic.
-
-    Priority Order (highest to lowest):
-    1. Simple delimiters: (3), [4], {5}
-    2. Explicit usage: (3rd use), (10th shave)
-    3. Multipliers: (2x), (x3)
-    4. Hash numbers: #15, #2
-    5. Semantic patterns: (NEW), (fresh)
-    6. Month usage: 15/31, 20/31
-    7. Ordinal patterns: 3rd, 2nd
-    8. Escaped brackets: [2\], [3\]
-    9. Superscript ordinals: (2^(nd)), (3^(rd))
-
-    Args:
-        text: Input string that may contain blade count and use count patterns
+def get_complex_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for complex usage descriptions: (10+?; At least four months old), etc.
 
     Returns:
-        Tuple of (blade_count, use_count), where each can be None
+        Compiled regex pattern for complex usage descriptions
     """
-    if not isinstance(text, str) or not text:
-        return None, None
-
-    # First extract blade count from the beginning
-    blade_count = extract_blade_count(text)
-
-    # If we found a blade count, strip it from the front before looking for use count
-    if blade_count is not None:
-        # Strip the leading blade count pattern
-        leading_blade_count_pattern = r"^\s*[\(\[\{]\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
-        stripped = re.sub(leading_blade_count_pattern, "", text, flags=re.IGNORECASE)
-        stripped = stripped.strip()
-        use_count = _extract_use_count_with_priority(stripped)
-    else:
-        # No blade count found, look for use count in the original text
-        use_count = _extract_use_count_with_priority(text)
-
-    return blade_count, use_count
+    return re.compile(r"(?:[\(\[\{])\s*\d+\+?\?[^\)\]\}]*[\)\]\}]", re.IGNORECASE)
 
 
-def _extract_use_count_with_priority(text: str) -> Optional[int]:
-    """Extract use count using priority-based pattern matching.
-
-    This is an internal function that implements the priority logic
-    for use count extraction.
-
-    Args:
-        text: Input string that may contain use count patterns
+def get_celebration_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for celebration patterns: (100...woohoo!), etc.
 
     Returns:
-        The use count as an integer, or None if no pattern is found
+        Compiled regex pattern for celebration patterns
     """
-    # Try patterns in priority order
-    extractors = [
-        extract_simple_delimiters,
-        extract_explicit_usage,
-        extract_multipliers,
-        extract_hash_numbers,
-        extract_semantic_patterns,
-        extract_month_usage,
-        extract_ordinal_patterns,
-        extract_escaped_brackets,
-        extract_superscript_ordinals,
-    ]
+    return re.compile(r"(?:[\(\[\{])\s*\d+\.{3}[^\)\]\}]*[\)\]\}]", re.IGNORECASE)
 
-    for extractor in extractors:
-        result = extractor(text)
-        if result is not None:
-            return result
 
-    return None
+def get_partial_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for partial usage: (<1 and done), etc.
+
+    Returns:
+        Compiled regex pattern for partial usage
+    """
+    return re.compile(r"(?:[\(\[\{])\s*<\s*\d+\s+and\s+done\s*[\)\]\}]", re.IGNORECASE)
+
+
+def get_location_condition_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for location/condition indicators: (Thailand, new), (India), etc.
+    Only matches specific location/condition patterns, not all parenthetical content.
+
+    Returns:
+        Compiled regex pattern for location/condition indicators
+    """
+    return re.compile(
+        r"(?:[\(\[\{])\s*(?:Thailand|India|China|Russia|Turkey|Germany|Japan|USA|UK|"
+        r"new|old|vintage|sample|test)(?:\s*,\s*[^\)\]\}]+)*\s*[\)\]\}]",
+        re.IGNORECASE,
+    )
+
+
+def get_country_origin_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for country of origin indicators using combined regex.
+    Combine all country origin patterns into a single regex for better performance.
+
+    Returns:
+        Compiled regex pattern for country of origin indicators
+    """
+    return re.compile(
+        r"(?:[\(\[\{])\s*(?:"
+        r"Indian|Russian|Made\s+in\s+Germany|Made\s+in\s+China|"
+        r"russia\s+green|Czechoslovakian|Poland"
+        r")\s*[\)\]\}]",
+        re.IGNORECASE,
+    )
+
+
+def get_decimal_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
+
+    Returns:
+        Compiled regex pattern for decimal usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]")
+
+
+def get_hash_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for hash usage counts: (#3), (#12), (#2 use), etc.
+    These are semantically equivalent to (3), (12) - blade usage counts that should be stripped.
+
+    Returns:
+        Compiled regex pattern for hash usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*#\d+(?:\s+[^\)\]\}]+)?\s*[\)\]\}]")
+
+
+def get_shave_hash_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
+
+    Returns:
+        Compiled regex pattern for "shave #n" usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*shave\s+#\d+(?:\s+[^\)\]\}]+)?\s*[\)\]\}]")
+
+
+def get_x_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for "X" usage counts: (16X), (17X), etc.
+    These are semantically equivalent to (16), (17) - blade usage counts that should be stripped.
+
+    Returns:
+        Compiled regex pattern for "X" usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*\d+X\s*[\)\]\}]")
+
+
+def get_maybe_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for "maybe" usage counts: (17 maybe), etc.
+
+    Returns:
+        Compiled regex pattern for "maybe" usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*\d+\s+maybe\s*[\)\]\}]", re.IGNORECASE)
+
+
+def get_approximate_number_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for approximate number patterns: (10ish), (5ish?), (11-ish), ( 10ish ?), etc.
+    These are user approximations that should be normalized out.
+    Catches variations like: (10ish), (5ish?), (11-ish), ( 10ish ?), [3ish], {2ish}, etc.
+
+    Returns:
+        Compiled regex pattern for approximate number patterns
+    """
+    return re.compile(r"[\(\[\{]\s*\d+\s*[-]?\s*ish\s*\??\s*[\)\]\}]", re.IGNORECASE)
+
+
+def get_ordinal_use_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for ordinal usage without brackets: "1st use", "2nd use", etc.
+    This catches patterns like "treet platinum , 1st use" -> "treet platinum , "
+    (cleanup handles trailing punctuation)
+
+    Returns:
+        Compiled regex pattern for ordinal usage without brackets
+    """
+    return re.compile(r"\d+(?:st|nd|rd|th)\s+use\b", re.IGNORECASE)
+
+
+def get_basic_usage_pattern() -> Pattern[str]:
+    """
+    Get regex pattern for basic usage counts: (1), (2), [3], {4}, etc.
+
+    This pattern matches complete parentheses/brackets/braces with numbers that are likely
+    blade use counts, excluding 4-digit numbers that are likely years (1900-2099).
+
+    Returns:
+        Compiled regex pattern for basic usage counts
+    """
+    return re.compile(r"(?:[\(\[\{])\s*(?!19\d{2}|20\d{2})\d+\s*[\)\]\}]")

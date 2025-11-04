@@ -50,8 +50,12 @@ class ParameterValidator:
         "razor-blade-combinations": ["shaves", "unique_users"],
         "highest-use-count-per-blade": ["uses"],
         # User tables
+        "users": ["shaves", "missed_days"],
         "top-shavers": ["shaves", "missed_days"],
         # Format and fiber tables
+        "razor-formats": ["shaves", "unique_users"],
+        "brush-fibers": ["shaves", "unique_users"],
+        "brush-knot-sizes": ["shaves", "unique_users"],
         "razor-format-users": ["format", "shaves"],
         "brush-fiber-users": ["fiber", "shaves"],
         # Software tables
@@ -64,7 +68,7 @@ class ParameterValidator:
     }
 
     # Universal parameters that are always valid
-    UNIVERSAL_PARAMETERS = ["rows", "ranks"]
+    UNIVERSAL_PARAMETERS = ["rows", "ranks", "deltas", "columns"]
 
     def get_available_columns(self, table_name: str) -> List[str]:
         """Get available columns for a table.

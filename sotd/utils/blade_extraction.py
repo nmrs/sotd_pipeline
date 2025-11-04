@@ -4,6 +4,8 @@
 import re
 from typing import Optional, Tuple
 
+from .blade_patterns import get_incomplete_usage_pattern
+
 
 def extract_blade_use_count(text: str, blade_model: Optional[str] = None) -> Optional[int]:
     """
@@ -288,6 +290,30 @@ def extract_blade_use_count_via_normalization(
                 return int(count_str), remainder
             except ValueError:
                 pass
+
+    # Pattern 1.5: Incomplete parentheses with number (3, (2x, etc. (missing closing paren)
+    # Use shared pattern for consistency
+    incomplete_pattern = get_incomplete_usage_pattern()
+    incomplete_match = incomplete_pattern.search(remainder)
+    if incomplete_match:
+        # Extract the number from the match
+        match_text = incomplete_match.group(0)
+        # Extract just the number part
+        number_match = re.search(r"(\d+(?:x)?)", match_text)
+        if number_match:
+            count_str = number_match.group(1)
+            if count_str.endswith("x"):
+                # Handle "2x" format
+                try:
+                    return int(count_str[:-1]), remainder
+                except ValueError:
+                    pass
+            else:
+                # Handle simple number
+                try:
+                    return int(count_str), remainder
+                except ValueError:
+                    pass
 
     # Pattern 2: Square brackets with number [5], [2x], etc.
     bracket_match = re.search(r"\[(\d+(?:x)?)\]", remainder)

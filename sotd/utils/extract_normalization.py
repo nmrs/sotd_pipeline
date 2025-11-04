@@ -5,6 +5,32 @@ import re
 from typing import Dict, List
 
 from .competition_tags import strip_competition_tags
+from .blade_patterns import (
+    get_basic_usage_pattern,
+    get_incomplete_usage_pattern,
+    get_usage_x_pattern,
+    get_usage_x_prefix_pattern,
+    get_usage_use_pattern,
+    get_usage_uses_pattern,
+    get_ordinal_shave_pattern,
+    get_ordinal_pattern,
+    get_superscript_ordinal_pattern,
+    get_completion_pattern,
+    get_speculation_pattern,
+    get_speculation_question_pattern,
+    get_complex_usage_pattern,
+    get_celebration_pattern,
+    get_partial_usage_pattern,
+    get_location_condition_pattern,
+    get_country_origin_pattern,
+    get_decimal_usage_pattern,
+    get_hash_usage_pattern,
+    get_shave_hash_pattern,
+    get_x_usage_pattern,
+    get_maybe_usage_pattern,
+    get_approximate_number_pattern,
+    get_ordinal_use_pattern,
+)
 
 
 def normalize_parentheses_whitespace(value: str) -> str:
@@ -48,119 +74,50 @@ def strip_usage_count_patterns(value: str) -> str:
     # Remove all asterisks (markdown formatting and product name asterisks)
     cleaned = re.sub(r"\*+", "", cleaned)
 
-    # Pattern for basic usage counts: (1), (2), [3], {4}, etc.
-    basic_usage_pattern = r"(?:[\(\[\{])\s*\d+\s*[\)\]\}]"
-    cleaned = re.sub(basic_usage_pattern, "", cleaned)
+    # Use shared patterns for consistency
+    patterns = [
+        get_basic_usage_pattern(),
+        get_incomplete_usage_pattern(),
+        get_usage_x_pattern(),
+        get_usage_x_prefix_pattern(),
+        get_usage_use_pattern(),
+        get_usage_uses_pattern(),
+    ]
 
-    # Pattern for usage counts with 'x': (2x), (3x), [4x], etc.
-    usage_x_pattern = r"(?:[\(\[\{])\s*\d+x\s*[\)\]\}]"
-    cleaned = re.sub(usage_x_pattern, "", cleaned)
+    for pattern in patterns:
+        cleaned = pattern.sub("", cleaned)
 
-    # Pattern for usage counts with 'x' prefix: (x2), (x3), [x4], etc.
-    usage_x_prefix_pattern = r"(?:[\(\[\{])\s*x\d+\s*[\)\]\}]"
-    cleaned = re.sub(usage_x_prefix_pattern, "", cleaned)
+    # Use additional shared patterns for consistency
+    additional_patterns = [
+        get_ordinal_shave_pattern(),
+        get_ordinal_pattern(),
+        get_superscript_ordinal_pattern(),
+        get_completion_pattern(),
+        get_speculation_pattern(),
+        get_speculation_question_pattern(),
+        get_complex_usage_pattern(),
+        get_celebration_pattern(),
+        get_partial_usage_pattern(),
+    ]
 
-    # Pattern for usage counts with 'use': (1 use), (2 use), etc.
-    usage_use_pattern = r"(?:[\(\[\{])\s*\d+\s+use\s*[\)\]\}]"
-    cleaned = re.sub(usage_use_pattern, "", cleaned, flags=re.IGNORECASE)
+    for pattern in additional_patterns:
+        cleaned = pattern.sub("", cleaned)
 
-    # Pattern for usage counts with 'uses': (107 uses), (108 uses), etc.
-    usage_uses_pattern = r"(?:[\(\[\{])\s*\d+\s+uses\s*[\)\]\}]"
-    cleaned = re.sub(usage_uses_pattern, "", cleaned, flags=re.IGNORECASE)
+    # Use final shared patterns for consistency
+    final_patterns = [
+        get_location_condition_pattern(),
+        get_country_origin_pattern(),
+        get_decimal_usage_pattern(),
+        get_hash_usage_pattern(),
+        get_shave_hash_pattern(),
+        get_x_usage_pattern(),
+        get_maybe_usage_pattern(),
+        get_approximate_number_pattern(),
+        get_ordinal_use_pattern(),
+    ]
 
-    # Pattern for ordinal usage: (1st shave), (2nd shave), (10th shave), etc.
-    ordinal_shave_pattern = r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s+shave\s*[\)\]\}]"
-    cleaned = re.sub(ordinal_shave_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for ordinal usage: (1st), (2nd), (10th), etc.
-    ordinal_pattern = r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s*[\)\]\}]"
-    cleaned = re.sub(ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for superscript ordinal usage: (2^(nd)), (3^(rd)), (1^(st)), etc.
-    # Also handles patterns like (2^(nd) use), (3^(rd) use), etc.
-    superscript_ordinal_pattern = (
-        r"(?:[\(\[\{])\s*\d+\^?\(?(?:st|nd|rd|th)\)?" r"(?:\s+[^\)\]\}]+)?\s*[\)\]\}]"
-    )
-    cleaned = re.sub(superscript_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for completion indicators: (1 and done), (1 and last), (1st and final), etc.
-    completion_pattern = (
-        r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)?(?:\s+[^\)\]\}]+)?\s+"
-        r"(?:and\s+(?:done|last|final|probably\s+last))\s*[\)\]\}]"
-    )
-    cleaned = re.sub(completion_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for user speculation: (10 I think), (3 I think), (7, I think), (30+ I think), etc.
-    speculation_pattern = r"(?:[\(\[\{])\s*\d+[+,\s]+\s*I\s+think\s*[\)\]\}]"
-    cleaned = re.sub(speculation_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for user speculation with question marks: (5? I think), etc.
-    speculation_question_pattern = r"(?:[\(\[\{])\s*\d+\?\s*I\s+think\s*[\)\]\}]"
-    cleaned = re.sub(speculation_question_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for complex usage descriptions: (10+?; At least four months old), etc.
-    complex_usage_pattern = r"(?:[\(\[\{])\s*\d+\+?\?[^\)\]\}]*[\)\]\}]"
-    cleaned = re.sub(complex_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for celebration patterns: (100...woohoo!), etc.
-    celebration_pattern = r"(?:[\(\[\{])\s*\d+\.{3}[^\)\]\}]*[\)\]\}]"
-    cleaned = re.sub(celebration_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for partial usage: (<1 and done), etc.
-    partial_usage_pattern = r"(?:[\(\[\{])\s*<\s*\d+\s+and\s+done\s*[\)\]\}]"
-    cleaned = re.sub(partial_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for location/condition indicators: (Thailand, new), (India), etc.
-    # Only match specific location/condition patterns, not all parenthetical content
-    location_condition_pattern = (
-        r"(?:[\(\[\{])\s*(?:Thailand|India|China|Russia|Turkey|Germany|Japan|USA|UK|"
-        r"new|old|vintage|sample|test)(?:\s*,\s*[^\)\]\}]+)*\s*[\)\]\}]"
-    )
-    cleaned = re.sub(location_condition_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # OPTIMIZED: Pattern for country of origin indicators using combined regex
-    # Combine all country origin patterns into a single regex for better performance
-    country_origin_pattern = (
-        r"(?:[\(\[\{])\s*(?:"
-        r"Indian|Russian|Made\s+in\s+Germany|Made\s+in\s+China|"
-        r"russia\s+green|Czechoslovakian|Poland"
-        r")\s*[\)\]\}]"
-    )
-    cleaned = re.sub(country_origin_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
-    decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
-    cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for hash usage counts: (#3), (#12), (#2 use), etc.
-    # These are semantically equivalent to (3), (12) - blade usage counts that should be stripped
-    hash_usage_pattern = r"(?:[\(\[\{])\s*#\d+(?:\s+[^\)\]\}]+)?\s*[\)\]\}]"
-    cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
-    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+(?:\s+[^\)\]\}]+)?\s*[\)\]\}]"
-    cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for "X" usage counts: (16X), (17X), etc.
-    # These are semantically equivalent to (16), (17) - blade usage counts that should be stripped
-    x_usage_pattern = r"(?:[\(\[\{])\s*\d+X\s*[\)\]\}]"
-    cleaned = re.sub(x_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for "maybe" usage counts: (17 maybe), etc.
-    maybe_usage_pattern = r"(?:[\(\[\{])\s*\d+\s+maybe\s*[\)\]\}]"
-    cleaned = re.sub(maybe_usage_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for approximate number patterns: (10ish), (5ish?), (11-ish), ( 10ish ?), etc.
-    # These are user approximations that should be normalized out
-    # Catches variations like: (10ish), (5ish?), (11-ish), ( 10ish ?), [3ish], {2ish}, etc.
-    approximate_number_pattern = r"[\(\[\{]\s*\d+\s*[-]?\s*ish\s*\??\s*[\)\]\}]"
-    cleaned = re.sub(approximate_number_pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Pattern for ordinal usage without brackets: "1st use", "2nd use", etc.
-    # This catches patterns like "treet platinum , 1st use" -> "treet platinum , "
-    # (cleanup handles trailing punctuation)
-    ordinal_use_pattern = r"\d+(?:st|nd|rd|th)\s+use\b"
-    cleaned = re.sub(ordinal_use_pattern, "", cleaned, flags=re.IGNORECASE)
+    for pattern in final_patterns:
+        cleaned = pattern.sub("", cleaned)
 
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
