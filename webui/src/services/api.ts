@@ -682,7 +682,7 @@ export interface CatalogValidationRequest {
 }
 
 export interface CatalogValidationIssue {
-  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match' | 'format_mismatch';
+  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match' | 'format_mismatch' | 'structural_change';
   field: string;
   correct_match: string;
   expected_brand: string;
@@ -697,6 +697,26 @@ export interface CatalogValidationIssue {
   matched_pattern?: string;
   // Additional fields for brush validation
   version?: string; // For brush version (e.g., v26, v27)
+  // Structural change fields
+  expected_section?: string; // Where it currently is (correct_matches.yaml)
+  actual_section?: string; // Where it should be (current matching system)
+  // Brush-specific match details
+  current_match_details?: {
+    brand?: string;
+    model?: string;
+    fiber?: string;
+    knot_size_mm?: number;
+  };
+  expected_handle_match?: {
+    brand?: string;
+    model?: string;
+  };
+  expected_knot_match?: {
+    brand?: string;
+    model?: string;
+    fiber?: string;
+    knot_size_mm?: number;
+  };
 }
 
 export interface CatalogValidationResult {

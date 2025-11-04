@@ -99,7 +99,7 @@ start_frontend() {
     print_status $BLUE "Starting frontend server (Vite) on port $FRONTEND_PORT..."
     
     cd "$FRONTEND_DIR"
-    npm run dev > "$FRONTEND_LOG_FILE" 2>&1 &
+    ./node_modules/.bin/vite --port $FRONTEND_PORT --host 127.0.0.1 > "$FRONTEND_LOG_FILE" 2>&1 &
     local pid=$!
     echo $pid > "$FRONTEND_PID_FILE"
     
@@ -141,7 +141,8 @@ start_backend() {
     cd "$FRONTEND_DIR"
     # Set test environment for CORS to allow all origins during testing
     # Set debug environment for enhanced logging
-    ENVIRONMENT=test DEBUG=true PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port $BACKEND_PORT --reload --log-level debug > "$BACKEND_LOG_FILE" 2>&1 &
+    # Activate virtual environment and run backend server
+    source ../.venv/bin/activate && ENVIRONMENT=test DEBUG=true PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port $BACKEND_PORT --reload --log-level debug > "$BACKEND_LOG_FILE" 2>&1 &
     local pid=$!
     echo $pid > "$BACKEND_PID_FILE"
     

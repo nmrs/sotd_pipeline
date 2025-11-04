@@ -531,23 +531,64 @@ const CatalogValidator: React.FC = () => {
                             </div>
                           ) : issue.issue_type === 'structural_change' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-                              <div>
-                                <p className='font-medium text-gray-700'>Current Structure:</p>
-                                <p className='text-gray-600'>
-                                  {issue.expected_section || 'Unknown'}
-                                </p>
-                                <p className='text-xs text-gray-500 mt-1'>
-                                  (in correct_matches.yaml)
-                                </p>
+                              <div className='p-3 bg-gray-50 rounded border border-gray-200'>
+                                <p className='font-medium text-gray-700 mb-2'>Currently Matched As (Brush):</p>
+                                {issue.current_match_details ? (
+                                  <div className='space-y-1'>
+                                    <p className='text-gray-600'>
+                                      <span className='font-medium'>Brand:</span> {issue.current_match_details.brand || 'Unknown'}
+                                    </p>
+                                    <p className='text-gray-600'>
+                                      <span className='font-medium'>Model:</span> {issue.current_match_details.model || 'Unknown'}
+                                    </p>
+                                    {issue.current_match_details.fiber && (
+                                      <p className='text-gray-600'>
+                                        <span className='font-medium'>Fiber:</span> {issue.current_match_details.fiber}
+                                      </p>
+                                    )}
+                                    {issue.current_match_details.knot_size_mm && (
+                                      <p className='text-gray-600'>
+                                        <span className='font-medium'>Knot Size:</span> {issue.current_match_details.knot_size_mm}mm
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p className='text-gray-600'>{issue.expected_brand} {issue.expected_model}</p>
+                                )}
+                                <p className='text-xs text-gray-500 mt-2'>(in correct_matches.yaml)</p>
                               </div>
-                              <div>
-                                <p className='font-medium text-gray-700'>Expected Structure:</p>
-                                <p className='text-gray-600'>
-                                  {issue.actual_section || 'Unknown'}
-                                </p>
-                                <p className='text-xs text-gray-500 mt-1'>
-                                  (based on current matching system)
-                                </p>
+                              
+                              <div className='p-3 bg-blue-50 rounded border border-blue-200'>
+                                <p className='font-medium text-blue-800 mb-2'>Should Match As (Handle + Knot):</p>
+                                <div className='space-y-2'>
+                                  {issue.expected_handle_match && (
+                                    <div className='bg-white p-2 rounded border border-blue-100'>
+                                      <p className='text-xs font-semibold text-blue-700 mb-1'>HANDLE:</p>
+                                      <p className='text-sm text-gray-700'>
+                                        {issue.expected_handle_match.brand} {issue.expected_handle_match.model}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {issue.expected_knot_match && (
+                                    <div className='bg-white p-2 rounded border border-blue-100'>
+                                      <p className='text-xs font-semibold text-blue-700 mb-1'>KNOT:</p>
+                                      <p className='text-sm text-gray-700'>
+                                        {issue.expected_knot_match.brand} {issue.expected_knot_match.model}
+                                      </p>
+                                      {issue.expected_knot_match.fiber && (
+                                        <p className='text-xs text-gray-600 mt-1'>
+                                          Fiber: {issue.expected_knot_match.fiber}
+                                        </p>
+                                      )}
+                                      {issue.expected_knot_match.knot_size_mm && (
+                                        <p className='text-xs text-gray-600'>
+                                          Size: {issue.expected_knot_match.knot_size_mm}mm
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                <p className='text-xs text-blue-600 mt-2'>(based on current matching system)</p>
                               </div>
                             </div>
                           ) : issue.issue_type === 'duplicate_string' || issue.issue_type === 'cross_section_conflict' ? (

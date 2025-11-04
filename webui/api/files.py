@@ -71,8 +71,10 @@ async def get_available_months() -> AvailableMonths:
         # Extract month names from filenames (YYYY-MM.json format)
         months = []
         for file_path in json_files:
-            if file_path.stem and validate_json_file(file_path):
-                months.append(file_path.stem)
+            if file_path.stem:
+                # Skip validation for performance - just check if file exists and has content
+                if file_path.stat().st_size > 0:
+                    months.append(file_path.stem)
 
         # Sort months chronologically
         months.sort()

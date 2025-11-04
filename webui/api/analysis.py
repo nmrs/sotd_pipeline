@@ -226,6 +226,10 @@ class CatalogValidationIssue(BaseModel):
     details: str
     catalog_format: Optional[str] = None  # Catalog format for format mismatch issues
     matched_pattern: Optional[str] = None  # Pattern that caused the match for mismatched results
+    # Brush-specific match details
+    current_match_details: Optional[dict] = None  # Current brush match details
+    expected_handle_match: Optional[dict] = None  # Expected handle match details
+    expected_knot_match: Optional[dict] = None  # Expected knot match details
 
 
 class CatalogValidationResponse(BaseModel):
@@ -1077,9 +1081,10 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
             )
 
         # Create manager instance with correct file path
+        # Use directory structure for field-specific files
         console = Console()
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        manager = CorrectMatchesManager(console, correct_matches_file)
+        correct_matches_path = project_root / "data" / "correct_matches"
+        manager = CorrectMatchesManager(console, correct_matches_path)
 
         # Load existing correct matches
         manager.load_correct_matches()
@@ -1162,9 +1167,10 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
             )
 
         # Create manager instance with correct file path
+        # Use directory structure for field-specific files
         console = Console()
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        manager = CorrectMatchesManager(console, correct_matches_file)
+        correct_matches_path = project_root / "data" / "correct_matches"
+        manager = CorrectMatchesManager(console, correct_matches_path)
 
         # Load existing correct matches
         manager.load_correct_matches()
@@ -1288,6 +1294,16 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         os.chdir(api_project_root)
         logger.info(f"Changed working directory from {original_cwd} to {Path.cwd()}")
 
+        # Clear ALL caches to ensure fresh data on every validation
+        from sotd.match.base_matcher import clear_catalog_cache
+        from sotd.match.loaders import clear_yaml_cache
+        from sotd.match.brush.matcher import clear_brush_catalog_cache
+        
+        clear_catalog_cache()
+        clear_yaml_cache()
+        clear_brush_catalog_cache()
+        logger.info("Cleared all catalog caches for fresh data")
+
         # Create the actual matching validator
         validator = ActualMatchingValidator(data_path=api_project_root / "data")
         logger.info(f"Created ActualMatchingValidator: {type(validator)}")
@@ -1336,6 +1352,37 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "catalog_format": None,  # Format not available in actual matching validation
                 "matched_pattern": None,  # Pattern not available in actual matching validation
             }
+
+            # For structural_change issues with brush data, add match details
+            if issue.issue_type == "structural_change":
+                # Add current brush match details (from correct_matches.yaml)
+                if issue.expected_section == "brush":
+                    processed_issue["current_match_details"] = {
+                        "brand": issue.expected_brand,
+                        "model": issue.expected_model,
+                    }
+
+                # Add expected handle/knot match details (from current matcher)
+                if issue.actual_section == "handle_knot":
+                    if hasattr(issue, "actual_handle_brand") and issue.actual_handle_brand:
+                        processed_issue["expected_handle_match"] = {
+                            "brand": issue.actual_handle_brand,
+                            "model": issue.actual_handle_model,
+                        }
+                    if hasattr(issue, "actual_knot_brand") and issue.actual_knot_brand:
+                        processed_issue["expected_knot_match"] = {
+                            "brand": issue.actual_knot_brand,
+                            "model": issue.actual_knot_model,
+                        }
+                        # Add fiber and knot size if available
+                        if hasattr(issue, "actual_knot_fiber") and issue.actual_knot_fiber:
+                            processed_issue["expected_knot_match"][
+                                "fiber"
+                            ] = issue.actual_knot_fiber
+                        if hasattr(issue, "actual_knot_size_mm") and issue.actual_knot_size_mm:
+                            processed_issue["expected_knot_match"][
+                                "knot_size_mm"
+                            ] = issue.actual_knot_size_mm
 
             processed_issues.append(processed_issue)
 

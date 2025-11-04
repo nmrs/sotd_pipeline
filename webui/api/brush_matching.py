@@ -5,11 +5,14 @@ This endpoint provides a web interface to the brush matching analysis tool,
 allowing users to test brush strings and see detailed scoring results.
 """
 
+import logging
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 # Import SOTD modules - will be handled in the function
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/brushes/matching", tags=["brushes", "matching"])
 
@@ -362,10 +365,15 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         os.chdir(parent_dir)
 
         try:
-            # Clear catalog cache to ensure fresh data on every analysis
+            # Clear ALL caches to ensure fresh data on every analysis
             from sotd.match.base_matcher import clear_catalog_cache
+            from sotd.match.loaders import clear_yaml_cache
+            from sotd.match.brush.matcher import clear_brush_catalog_cache
 
             clear_catalog_cache()
+            clear_yaml_cache()
+            clear_brush_catalog_cache()
+            logger.info("Cleared all catalog caches for fresh data")
 
             # Use the brush matcher directly
             from sotd.match.brush_matcher import BrushMatcher

@@ -94,20 +94,20 @@ function ScoreBreakdownDisplay({
       <div className='grid grid-cols-3 gap-4 text-sm'>
         <div>
           <p className='text-gray-600'>Base Score</p>
-          <p className='font-semibold'>{baseScore}</p>
+          <p className='font-semibold'>{baseScore.toFixed(2)}</p>
           <p className='text-xs text-gray-500'>Strategy match</p>
         </div>
         <div>
           <p className='text-gray-600'>Modifiers</p>
           <p className='font-semibold'>
             {modifiers > 0 ? '+' : ''}
-            {modifiers}
+            {modifiers.toFixed(2)}
           </p>
           <p className='text-xs text-gray-500'>{modifiers > 0 ? 'Bonus points' : 'No bonuses'}</p>
         </div>
         <div>
           <p className='text-gray-600'>Total</p>
-          <p className='font-semibold'>{finalTotal}</p>
+          <p className='font-semibold'>{finalTotal.toFixed(2)}</p>
           <p className='text-xs text-gray-500'>Final score</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ function ModifierDetailsDisplay({
             <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
               <div className='flex justify-between items-center'>
                 <span className='font-medium'>{detail.name}</span>
-                <span className='text-green-600 font-semibold'>+{detail.weight}</span>
+                <span className='text-green-600 font-semibold'>+{detail.weight.toFixed(2)}</span>
               </div>
               <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
             </div>
@@ -154,7 +154,7 @@ function ModifierDetailsDisplay({
         <div className='text-sm text-gray-500 italic'>
           {modifiers > 0 ? (
             <>
-              <p>Modifiers applied: +{modifiers}</p>
+              <p>Modifiers applied: +{modifiers.toFixed(2)}</p>
               <p className='text-xs mt-1'>(Detailed breakdown not available from backend)</p>
             </>
           ) : (
@@ -249,7 +249,7 @@ function ComponentDetailsDisplay({
               <div className='grid grid-cols-2 gap-4 text-sm'>
                 <div>
                   <p className='text-green-600 font-medium'>Score:</p>
-                  <p className='font-semibold'>{componentDetails.handle.score}</p>
+                  <p className='font-semibold'>{componentDetails.handle.score.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className='text-green-600 font-medium'>Breakdown:</p>
@@ -257,7 +257,7 @@ function ComponentDetailsDisplay({
                     {Object.entries(componentDetails.handle.breakdown).map(([key, value]) => (
                       <div key={key} className='flex justify-between text-xs'>
                         <span className='text-gray-600'>{key}:</span>
-                        <span className='font-medium'>+{value}</span>
+                        <span className='font-medium'>+{value.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -295,7 +295,7 @@ function ComponentDetailsDisplay({
               <div className='grid grid-cols-2 gap-4 text-sm'>
                 <div>
                   <p className='text-purple-600 font-medium'>Score:</p>
-                  <p className='font-semibold'>{componentDetails.knot.score}</p>
+                  <p className='font-semibold'>{componentDetails.knot.score.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className='text-purple-600 font-medium'>Breakdown:</p>
@@ -303,7 +303,7 @@ function ComponentDetailsDisplay({
                     {Object.entries(componentDetails.knot.breakdown).map(([key, value]) => (
                       <div key={key} className='flex justify-between text-xs'>
                         <span className='text-gray-600'>{key}:</span>
-                        <span className='font-medium'>+{value}</span>
+                        <span className='font-medium'>+{value.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -354,10 +354,14 @@ export function BrushMatchingAnalyzer() {
     setResults(null);
 
     try {
-      const response = await fetch('/api/brushes/matching/analyze', {
+      // Use the API service for cache-busting and consistent error handling
+      const response = await fetch(`/api/brushes/matching/analyze?_t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
         body: JSON.stringify({
           brushString: brushString.trim(),
@@ -479,17 +483,17 @@ export function BrushMatchingAnalyzer() {
                         <span
                           className={`font-bold text-2xl ${getScoreColor(results.winner.score)}`}
                         >
-                          {results.winner.score}
+                          {results.winner.score.toFixed(2)}
                         </span>
                         {results.winner.scoreBreakdown.modifiers > 0 && (
                           <span className='text-sm text-green-600 font-medium'>
-                            (+{results.winner.scoreBreakdown.modifiers})
+                            (+{results.winner.scoreBreakdown.modifiers.toFixed(2)})
                           </span>
                         )}
                       </div>
                       <div className='text-xs text-gray-500 mt-1'>
-                        {results.winner.scoreBreakdown.baseScore} base +{' '}
-                        {results.winner.scoreBreakdown.modifiers} modifiers
+                        {results.winner.scoreBreakdown.baseScore.toFixed(2)} base +{' '}
+                        {results.winner.scoreBreakdown.modifiers.toFixed(2)} modifiers
                       </div>
                     </div>
                     <div>
@@ -641,11 +645,11 @@ export function BrushMatchingAnalyzer() {
                                     <span
                                       className={`text-2xl font-bold ${getScoreColor(result.score)}`}
                                     >
-                                      {result.score}
+                                      {result.score.toFixed(2)}
                                     </span>
                                     {result.scoreBreakdown.modifiers > 0 && (
                                       <span className='text-sm text-green-600 font-medium'>
-                                        (+{result.scoreBreakdown.modifiers})
+                                        (+{result.scoreBreakdown.modifiers.toFixed(2)})
                                       </span>
                                     )}
                                   </div>
@@ -653,8 +657,8 @@ export function BrushMatchingAnalyzer() {
                                     {result.matchType || 'None'}
                                   </p>
                                   <p className='text-xs text-gray-500'>
-                                    {result.scoreBreakdown.baseScore} +{' '}
-                                    {result.scoreBreakdown.modifiers}
+                                    {result.scoreBreakdown.baseScore.toFixed(2)} +{' '}
+                                    {result.scoreBreakdown.modifiers.toFixed(2)}
                                   </p>
                                 </div>
                               </div>
@@ -808,11 +812,11 @@ export function BrushMatchingAnalyzer() {
                                 <div className='text-right'>
                                   <div className='flex items-baseline gap-2 justify-end'>
                                     <span className='text-2xl font-bold text-gray-400'>
-                                      {result.score}
+                                      {result.score.toFixed(2)}
                                     </span>
                                     {result.scoreBreakdown.modifiers > 0 && (
                                       <span className='text-sm text-gray-500 font-medium'>
-                                        (+{result.scoreBreakdown.modifiers})
+                                        (+{result.scoreBreakdown.modifiers.toFixed(2)})
                                       </span>
                                     )}
                                   </div>
@@ -820,8 +824,8 @@ export function BrushMatchingAnalyzer() {
                                     {result.matchType || 'None'}
                                   </p>
                                   <p className='text-xs text-gray-400'>
-                                    {result.scoreBreakdown.baseScore} +{' '}
-                                    {result.scoreBreakdown.modifiers}
+                                    {result.scoreBreakdown.baseScore.toFixed(2)} +{' '}
+                                    {result.scoreBreakdown.modifiers.toFixed(2)}
                                   </p>
                                 </div>
                               </div>
@@ -862,7 +866,7 @@ export function BrushMatchingAnalyzer() {
                                     <li>Strategy-specific logic rejected the input</li>
                                   </ul>
                                   <p className='text-xs text-red-600 mt-2'>
-                                    Score: {result.score} (below threshold or invalid result)
+                                    Score: {result.score.toFixed(2)} (below threshold or invalid result)
                                   </p>
                                 </div>
                               </div>
