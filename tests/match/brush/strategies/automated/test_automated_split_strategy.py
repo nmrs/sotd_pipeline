@@ -99,16 +99,14 @@ class TestAutomatedSplitStrategy:
         assert result is None
 
     def test_unsplittable_string_no_match(self):
-        """Test that strings marked as 'do not split' return None."""
-        # This would need to be in brush_splits.yaml as a do-not-split entry
-        test_input = "Simpson Chubby 2 w/ some unsplittable text"
+        """Test that strings marked as 'should_not_split: true' in brush_splits.yaml return None."""
+        # This test uses the actual entry from brush_splits.yaml that has should_not_split: true
+        test_input = "Zenith 510SE 28mm x 56mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition)"
 
         result = self.strategy.match(test_input)
 
-        # For now, this should still split since we don't have the do-not-split logic
-        # implemented yet
-        assert result is not None
-        assert result.strategy == "automated_split"
+        # Should return None because should_not_split is True in brush_splits.yaml
+        assert result is None, f"Expected None for should_not_split entry, got: {result}"
 
     def test_reddit_references_not_split(self):
         """Test that Reddit subreddit and user references are not treated as delimiters."""

@@ -241,3 +241,81 @@ class TestBrushSplitterSmartAnalysis:
                     None,
                     "not_known_brush",
                 ], f"Should not have delimiter type: {input_text}"
+
+    def test_parentheses_delimiter_handle_knot_pattern(self, brush_splitter):
+        """Test that ' (' delimiter handles handle (knot) pattern correctly."""
+        # Basic pattern - handle (knot) - content-based scoring determines handle vs knot
+        test_cases = [
+            (
+                "TurnNShave Shoat 28mm (Oumo Compass Avocado)",
+                "Oumo Compass Avocado",  # Content scoring determines this is handle
+                "TurnNShave Shoat 28mm",  # Content scoring determines this is knot
+            ),
+            (
+                "Wolf Whiskers Custom Handle (Declaration B15)",
+                "Wolf Whiskers Custom Handle",  # Handle description scores higher as handle
+                "Declaration B15",  # B15 pattern scores higher as knot
+            ),
+            (
+                "Elite Razor Handle (Zenith B2 Boar)",
+                "Elite Razor Handle",  # Handle description scores higher as handle
+                "Zenith B2 Boar",  # B2 Boar pattern scores higher as knot
+            ),
+        ]
+
+        for input_text, expected_handle, expected_knot in test_cases:
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(input_text)
+            assert handle is not None, f"Failed to split: {input_text}"
+            assert knot is not None, f"Failed to split: {input_text}"
+            assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
+            assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
+            assert delimiter_type == "medium_reliability", f"Wrong delimiter type for: {input_text}"
+
+    def test_parentheses_delimiter_knot_handle_pattern(self, brush_splitter):
+        """Test that ' (' delimiter handles knot (handle) pattern correctly."""
+        # Reverse pattern - knot (handle) - content-based scoring determines handle vs knot
+        test_cases = [
+            (
+                "Oumo Compass 28mm (TurnNShave Shoat)",
+                "TurnNShave Shoat",  # Brand name scores higher as handle
+                "Oumo Compass 28mm",  # Size pattern scores higher as knot
+            ),
+            (
+                "Declaration B15 (Wolf Whiskers Custom)",
+                "Wolf Whiskers Custom",  # Brand name scores higher as handle
+                "Declaration B15",  # B15 pattern scores higher as knot
+            ),
+            (
+                "Zenith B2 Boar (Elite Razor Handle)",
+                "Elite Razor Handle",  # Handle description scores higher as handle
+                "Zenith B2 Boar",  # B2 Boar pattern scores higher as knot
+            ),
+        ]
+
+        for input_text, expected_handle, expected_knot in test_cases:
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(input_text)
+            assert handle is not None, f"Failed to split: {input_text}"
+            assert knot is not None, f"Failed to split: {input_text}"
+            assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
+            assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
+            assert delimiter_type == "medium_reliability", f"Wrong delimiter type for: {input_text}"
+
+    def test_parentheses_delimiter_edge_cases(self, brush_splitter):
+        """Test parentheses delimiter edge cases."""
+        # Edge cases that should not split on parentheses
+        edge_cases = [
+            "TurnNShave Shoat 28mm",  # No parentheses
+            "TurnNShave Shoat(",  # No leading space before parentheses
+            "TurnNShave Shoat (",  # Missing closing parenthesis
+            "TurnNShave Shoat ()",  # Empty content inside parentheses
+            "TurnNShave Shoat (Oumo Compass",  # Missing closing parenthesis
+        ]
+
+        for input_text in edge_cases:
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(input_text)
+            # These should not split on parentheses, may split on other delimiters or not at all
+            if handle is not None and knot is not None:
+                # If it does split, it shouldn't be due to parentheses
+                assert delimiter_type != "medium_reliability" or " (" not in input_text, (
+                    f"Unexpected parentheses split for: {input_text}"
+                )

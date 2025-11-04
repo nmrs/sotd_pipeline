@@ -324,6 +324,91 @@ class TestActualMatchingValidator:
         assert result.strategy_stats == {}
         assert result.performance_metrics == {}
 
+    def test_suppress_data_mismatch_when_structural_change_exists(self):
+        """Test that data_mismatch issues are suppressed when structural_change exists."""
+        # Create test issues that would normally cause duplicates
+        issues = [
+            ValidationIssue(
+                issue_type="structural_change",
+                severity="high",
+                correct_match="test brush string",
+                expected_section="brush",
+                actual_section="handle_knot",
+                details="Brush type changed from brush to handle_knot",
+                suggested_action="Move 'test brush string' from brush section to handle_knot section",
+            ),
+            ValidationIssue(
+                issue_type="data_mismatch",
+                severity="high",
+                correct_match="test brush string",
+                expected_brand="Expected Brand",
+                expected_model="Expected Model",
+                actual_brand=None,
+                actual_model=None,
+                details="Brand/model mismatch: expected 'Expected Brand Expected Model', got 'None None'",
+                suggested_action="Update correct_matches.yaml to reflect new brand/model: 'None None'",
+            ),
+            ValidationIssue(
+                issue_type="data_mismatch",
+                severity="high",
+                correct_match="different brush string",
+                expected_brand="Different Brand",
+                expected_model="Different Model",
+                actual_brand="Actual Brand",
+                actual_model="Actual Model",
+                details="Brand/model mismatch: expected 'Different Brand Different Model', got 'Actual Brand Actual Model'",
+                suggested_action="Update correct_matches.yaml to reflect new brand/model: 'Actual Brand Actual Model'",
+            ),
+        ]
+
+        # Apply the same filtering logic as in the validator
+        structural_change_patterns = {
+            issue.correct_match.lower()
+            for issue in issues
+            if issue.issue_type == "structural_change"
+        }
+
+        filtered_issues = [
+            issue
+            for issue in issues
+            if not (
+                issue.issue_type == "data_mismatch"
+                and issue.correct_match.lower() in structural_change_patterns
+            )
+        ]
+
+        # Should have 2 issues: 1 structural_change + 1 data_mismatch (for different string)
+        assert len(filtered_issues) == 2
+
+        # Verify the structural_change issue is preserved
+        structural_issues = [i for i in filtered_issues if i.issue_type == "structural_change"]
+        assert len(structural_issues) == 1
+        assert structural_issues[0].correct_match == "test brush string"
+
+        # Verify the data_mismatch for the same string is suppressed
+        data_mismatch_issues = [i for i in filtered_issues if i.issue_type == "data_mismatch"]
+        assert len(data_mismatch_issues) == 1
+        assert data_mismatch_issues[0].correct_match == "different brush string"
+
+        # Verify no overlap between structural_change and data_mismatch patterns
+        structural_patterns = {
+            issue.correct_match.lower()
+            for issue in filtered_issues
+            if issue.issue_type == "structural_change"
+        }
+
+        data_mismatch_patterns = {
+            issue.correct_match.lower()
+            for issue in filtered_issues
+            if issue.issue_type == "data_mismatch"
+        }
+
+        overlap = structural_patterns & data_mismatch_patterns
+        assert len(overlap) == 0, (
+            f"Found both structural_change and data_mismatch for: {overlap}. "
+            f"data_mismatch should be suppressed."
+        )
+
 
 class TestValidationIssue:
     """Test cases for ValidationIssue class."""

@@ -839,6 +839,165 @@ class TestScoringEngine:
         # Base score (40.0) + handle_brand_without_knot_brand (25.0) + knot_brand_without_handle_brand (0.0) = 65.0
         assert scored_results[0].score == 65.0
 
+    def test_modifier_neither_brand(self):
+        """Test that neither_brand modifier returns correct values."""
+        mock_config = Mock()
+        engine = ScoringEngine(mock_config)
+
+        # Test when neither brand exists
+        result_with_no_brands = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": None, "model": "Custom"},
+                "knot": {"brand": None, "fiber": "badger"},
+            },
+            match_type="handle_only",
+            pattern=None,
+            strategy="handle_only",
+        )
+
+        # Should return 1.0 when neither handle brand nor knot brand is populated
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "handle_only")
+            == 1.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "knot_only")
+            == 1.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "automated_split")
+            == 1.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "full_input_component_matching")
+            == 1.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "known_split")
+            == 1.0
+        )
+
+        # Should return 0.0 when at least one brand exists
+        result_with_handle_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
+                "knot": {"brand": None, "fiber": "badger"},
+            },
+            match_type="handle_only",
+            pattern=None,
+            strategy="handle_only",
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_handle_brand, "handle_only")
+            == 0.0
+        )
+
+        result_with_knot_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": None, "model": None},
+                "knot": {"brand": "Declaration Grooming", "model": "B2"},
+            },
+            match_type="knot_only",
+            pattern=None,
+            strategy="knot_only",
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_knot_brand, "knot_only")
+            == 0.0
+        )
+
+        result_with_both_brands = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
+                "knot": {"brand": "Declaration Grooming", "model": "B2"},
+            },
+            match_type="automated_split",
+            pattern=None,
+            strategy="automated_split",
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_both_brands, "automated_split")
+            == 0.0
+        )
+
+    def test_modifier_neither_brand_wrong_strategy(self):
+        """Test that neither_brand modifier returns 0.0 for unsupported strategies."""
+        mock_config = Mock()
+        engine = ScoringEngine(mock_config)
+
+        result_with_no_brands = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": None, "model": "Custom"},
+                "knot": {"brand": None, "fiber": "badger"},
+            },
+            match_type="known_brush",
+            pattern=None,
+            strategy="known_brush",
+        )
+
+        # Should return 0.0 for unsupported strategies even if neither brand exists
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "known_brush")
+            == 0.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "other_brush")
+            == 0.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "handle_matching")
+            == 0.0
+        )
+        assert (
+            engine._modifier_neither_brand("test", result_with_no_brands, "knot_matching")
+            == 0.0
+        )
+
+    def test_neither_brand_modifier_integration(self):
+        """Test integration showing neither_brand modifier affects final score calculation."""
+        mock_config = Mock()
+        mock_config.get_base_strategy_score.return_value = 50.0
+        mock_config.get_strategy_modifier.side_effect = lambda strategy, modifier: {
+            "neither_brand": -20.0,
+        }.get(modifier, 0.0)
+        mock_config.get_all_modifier_names.return_value = [
+            "neither_brand",
+        ]
+
+        engine = ScoringEngine(mock_config)
+
+        # Mock cached_results
+        mock_unified_result = Mock()
+        mock_unified_result.matched = {
+            "handle": {"brand": None, "model": "Custom"},
+            "knot": {"brand": None, "fiber": "badger"},
+        }
+        engine.cached_results = {"full_input_component_matching_result": mock_unified_result}
+
+        result = MatchResult(
+            original="Custom 26mm badger",
+            matched={
+                "handle": {"brand": None, "model": "Custom"},
+                "knot": {"brand": None, "fiber": "badger"},
+            },
+            match_type="automated_split",
+            pattern="automated_split",
+            strategy="automated_split",
+        )
+
+        scored_results = engine.score_results(
+            [result], "Custom 26mm badger", engine.cached_results
+        )
+
+        assert len(scored_results) == 1
+        # Base score (50.0) + neither_brand (-20.0) = 30.0
+        assert scored_results[0].score == 30.0
+
 
 class TestPerformanceMonitor:
     """Test the PerformanceMonitor component."""

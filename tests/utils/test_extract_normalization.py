@@ -68,6 +68,34 @@ class TestStripUsageCountPatterns:
         # Multiple count patterns
         assert strip_usage_count_patterns("Astra (5) (10)") == "Astra"
 
+    def test_strip_usage_count_patterns_preserve_years(self):
+        """Test that years (4-digit numbers) are preserved and not stripped as usage counts."""
+        test_cases = [
+            # Years should be preserved
+            (
+                "Catie's Bubbles - Maggard Meetup (2025) - Soap",
+                "Catie's Bubbles - Maggard Meetup (2025) - Soap",
+            ),
+            ("Brand - Scent (2024)", "Brand - Scent (2024)"),
+            ("Brand - Scent (2023)", "Brand - Scent (2023)"),
+            ("Brand - Scent (1999)", "Brand - Scent (1999)"),
+            ("Brand - Scent (2000)", "Brand - Scent (2000)"),
+            ("Brand - Scent (2099)", "Brand - Scent (2099)"),
+            # Non-year numbers should still be stripped
+            ("Brand - Scent (2100)", "Brand - Scent"),  # Outside year range
+            ("Brand - Scent (1)", "Brand - Scent"),
+            ("Brand - Scent (100)", "Brand - Scent"),
+            ("Brand - Scent (999)", "Brand - Scent"),
+            # Mixed cases
+            ("Brand - Scent (5) (2024)", "Brand - Scent (2024)"),  # Usage count + year
+            ("Brand - Scent (2024) (5)", "Brand - Scent (2024)"),  # Year + usage count
+        ]
+        for input_str, expected in test_cases:
+            result = strip_usage_count_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
     def test_strip_usage_count_patterns_comma_ordinal_usage(self):
         """Test blade count pattern stripping with ordinal usage patterns."""
         test_cases = [
@@ -209,6 +237,30 @@ class TestNormalizeForMatching:
         test_cases = [
             ("B&M Seville", "B&M Seville"),
             ("Stirling Bay Rum", "Stirling Bay Rum"),
+        ]
+        for input_str, expected in test_cases:
+            result = normalize_for_matching(input_str, field="soap")
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_normalize_for_matching_soap_preserve_years(self):
+        """Test that years are preserved in soap normalization."""
+        test_cases = [
+            # Years should be preserved through full normalization
+            (
+                "Catie's Bubbles - Maggard Meetup (2025) - Soap",
+                "Catie's Bubbles - Maggard Meetup (2025)",
+            ),
+            ("Brand - Scent (2024) - Sample", "Brand - Scent (2024)"),
+            ("Brand - Scent (2023) - Tester", "Brand - Scent (2023)"),
+            ("Brand - Scent (1999) - Soap", "Brand - Scent (1999)"),
+            ("Brand - Scent (2000) - Soap", "Brand - Scent (2000)"),
+            ("Brand - Scent (2099) - Soap", "Brand - Scent (2099)"),
+            # Non-year numbers should still be stripped
+            ("Brand - Scent (2100) - Soap", "Brand - Scent"),
+            ("Brand - Scent (5) - Soap", "Brand - Scent"),
+            ("Brand - Scent (100) - Soap", "Brand - Scent"),
         ]
         for input_str, expected in test_cases:
             result = normalize_for_matching(input_str, field="soap")
@@ -472,15 +524,18 @@ class TestStripLinkMarkup:
         """Test standard markdown link format [text](url)."""
         test_cases = [
             (
-                "[Barrister and Mann Reserve Lavender](https://trythatsoap.com/collection/820/?product_type=soap)",
+                "[Barrister and Mann Reserve Lavender]"
+                "(https://trythatsoap.com/collection/820/?product_type=soap)",
                 "Barrister and Mann Reserve Lavender",
             ),
             (
-                "[Summer Break Soaps Field Day](https://trythatsoap.com/collection/928/?product_type=soap)",
+                "[Summer Break Soaps Field Day]"
+                "(https://trythatsoap.com/collection/928/?product_type=soap)",
                 "Summer Break Soaps Field Day",
             ),
             (
-                "[Declaration Grooming Original](https://trythatsoap.com/collection/123/?product_type=soap)",
+                "[Declaration Grooming Original]"
+                "(https://trythatsoap.com/collection/123/?product_type=soap)",
                 "Declaration Grooming Original",
             ),
         ]
@@ -494,15 +549,18 @@ class TestStripLinkMarkup:
         """Test markdown link format with space [text] (url)."""
         test_cases = [
             (
-                "[Barrister and Mann Reserve Lavender] (https://trythatsoap.com/collection/820/?product_type=soap)",
+                "[Barrister and Mann Reserve Lavender] "
+                "(https://trythatsoap.com/collection/820/?product_type=soap)",
                 "Barrister and Mann Reserve Lavender",
             ),
             (
-                "[Summer Break Soaps Field Day] (https://trythatsoap.com/collection/928/?product_type=soap)",
+                "[Summer Break Soaps Field Day] "
+                "(https://trythatsoap.com/collection/928/?product_type=soap)",
                 "Summer Break Soaps Field Day",
             ),
             (
-                "[Declaration Grooming Original] (https://trythatsoap.com/collection/123/?product_type=soap)",
+                "[Declaration Grooming Original] "
+                "(https://trythatsoap.com/collection/123/?product_type=soap)",
                 "Declaration Grooming Original",
             ),
         ]
@@ -516,7 +574,8 @@ class TestStripLinkMarkup:
         """Test plain URL stripping."""
         test_cases = [
             (
-                "Barrister and Mann Reserve Lavender https://trythatsoap.com/collection/820/?product_type=soap",
+                "Barrister and Mann Reserve Lavender "
+                "https://trythatsoap.com/collection/820/?product_type=soap",
                 "Barrister and Mann Reserve Lavender",
             ),
             ("Summer Break Soaps Field Day http://example.com", "Summer Break Soaps Field Day"),
