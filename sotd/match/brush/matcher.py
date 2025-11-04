@@ -55,6 +55,19 @@ from .config import BrushScoringConfig
 _catalog_cache = None
 
 
+def clear_brush_catalog_cache() -> None:
+    """Clear the module-level catalog cache for brush matcher."""
+    global _catalog_cache
+    _catalog_cache = None
+    
+    # Also clear related caches
+    from .splitter import BrushSplitter
+    from .scoring.engine import ScoringEngine
+    
+    BrushSplitter.clear_brands_cache()
+    ScoringEngine.clear_knots_cache()
+
+
 def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file or directory structure using CatalogLoader."""
     from sotd.match.loaders import CatalogLoader
@@ -376,6 +389,17 @@ class BrushMatcher:
             )
         )
 
+        # Add the automated split strategy for high/medium priority splitting
+        # This should run BEFORE OtherBrushMatchingStrategy to allow splitting
+        # of strings like "Elite Razor Trustone W/Long Shaving 26mm Reserve VI Badger"
+        from .strategies.automated.automated_split_strategy import (
+            AutomatedSplitStrategy,
+        )
+
+        strategies.append(
+            AutomatedSplitStrategy(catalogs, self.config, self.handle_matcher, self.knot_matcher)
+        )
+
         # Add strategies that expect the correct catalog structure
         strategies.append(OtherBrushMatchingStrategy(catalogs["brushes"].get("other_brushes", {})))
 
@@ -387,15 +411,6 @@ class BrushMatcher:
         # strategies.append(ZenithBrushMatchingStrategy(catalogs["brushes"].get("zenith_brushes", {})))
         # strategies.append(OmegaSemogueBrushMatchingStrategy(catalogs["brushes"].get("omega_semogue_brushes", {})))
         # strategies.append(FiberFallbackStrategy(catalogs["brushes"].get("fiber_fallback_brushes", {})))
-
-        # Add the automated split strategy for high/medium priority splitting
-        from .strategies.automated.automated_split_strategy import (
-            AutomatedSplitStrategy,
-        )
-
-        strategies.append(
-            AutomatedSplitStrategy(catalogs, self.config, self.handle_matcher, self.knot_matcher)
-        )
 
         # Add the unified component matching strategy
         from .strategies.full_input_component_matching_strategy import (

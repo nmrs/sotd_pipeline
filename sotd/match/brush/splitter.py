@@ -12,6 +12,11 @@ class BrushSplitter:
     # Class-level cache for brands with slashes to avoid repeated YAML loading
     _brands_with_slash_cache = None
 
+    @classmethod
+    def clear_brands_cache(cls):
+        """Clear the brands with slash cache."""
+        cls._brands_with_slash_cache = None
+
     def __init__(self, handle_matcher=None, strategies=None):
         self.handle_matcher = handle_matcher
         self.strategies = strategies or []
@@ -155,9 +160,7 @@ class BrushSplitter:
         # Handle-primary delimiters (first part is handle)
         handle_primary_delimiters = BrushDelimiterPatterns.get_positional_splitting_delimiters()
         # Other high-priority delimiters
-        other_high_priority_delimiters = (
-            []
-        )  # "+" requires smart analysis, not high-priority splitting
+        other_high_priority_delimiters = []  # "+" requires smart analysis, not high-priority splitting
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         # These delimiters use smart splitting to determine handle vs knot based on content
@@ -186,13 +189,18 @@ class BrushSplitter:
         indicate a split (e.g., "Zenith - MOAR BOAR" should not split).
         """
         # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"]
+        medium_reliability_delimiters = [
+            d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"
+        ]
 
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
             if delimiter in text:
+                # Special handling for parentheses
+                if delimiter == " (":
+                    return self._split_by_parentheses(text, "medium_reliability")
                 # For " - " and " + " delimiters, use smart analysis
-                if delimiter in [" - ", " + "]:
+                elif delimiter in [" - ", " + "]:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
                 else:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
@@ -889,6 +897,44 @@ class BrushSplitter:
             return handle_match is not None
         except (AttributeError, KeyError, TypeError, re.error):
             return False
+
+    def _split_by_parentheses(
+        self, text: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text using parentheses pattern: handle (knot) or knot (handle).
+
+        Uses content-based scoring to determine which part is handle vs knot.
+        Expects format: "Part1 (Part2)" or "Part1 (Part2 with spaces)"
+        """
+        # Match pattern: text before '(' and text between '(' and ')'
+        # Handle cases where closing paren might be missing or have extra text after
+        match = re.search(r"^(.+?)\s+\(([^)]+)\)", text)
+        if not match:
+            return None, None, None
+
+        part1 = match.group(1).strip()  # Outside parentheses
+        part2 = match.group(2).strip()  # Inside parentheses
+
+        if not part1 or not part2:
+            return None, None, None
+
+        # Use content-based scoring to determine handle vs knot
+        part1_handle_score = self._score_as_handle(part1)
+        part1_knot_score = self._score_as_knot(part1)
+        part2_handle_score = self._score_as_handle(part2)
+        part2_knot_score = self._score_as_knot(part2)
+
+        # Determine best assignment based on scores
+        if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
+            return part1, part2, delimiter_type  # part1=handle, part2=knot
+        elif part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score:
+            return part2, part1, delimiter_type  # part2=handle, part1=knot
+        else:
+            # Tie-breaking: prioritize knot scores
+            if part2_knot_score > part1_knot_score:
+                return part1, part2, delimiter_type
+            else:
+                return part2, part1, delimiter_type
 
     def _is_known_brush(self, text: str) -> bool:
         """Check if the text matches a known brush in the catalog.

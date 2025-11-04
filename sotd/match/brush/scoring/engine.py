@@ -769,6 +769,52 @@ class ScoringEngine:
         # Return 1.0 if knot brand is populated but handle brand is not
         return 1.0 if knot_brand and not handle_brand else 0.0
 
+    def _modifier_neither_brand(
+        self, input_text: str, result, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for neither brand detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object or dict
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if neither handle brand nor knot brand detected, 0.0 otherwise)
+        """
+        # Apply to composite brush strategies and individual component strategies
+        allowed_strategies = [
+            "automated_split",
+            "full_input_component_matching",
+            "known_split",
+            "handle_only",
+            "knot_only",
+        ]
+        if strategy_name not in allowed_strategies:
+            return 0.0
+
+        # Check the current result's handle and knot data
+        if not result or (hasattr(result, "matched") and not result.matched):
+            return 0.0
+
+        # Handle both MatchResult objects and dicts
+        if hasattr(result, "matched"):
+            matched = result.matched
+        else:
+            matched = result.get("matched", {}) if isinstance(result, dict) else {}
+            if not matched:
+                return 0.0
+
+        handle_data = matched.get("handle", {})
+        knot_data = matched.get("knot", {})
+
+        handle_brand = handle_data.get("brand") if handle_data else None
+        knot_brand = knot_data.get("brand") if knot_data else None
+
+        # Return 1.0 if neither handle brand nor knot brand is populated
+        return 1.0 if not handle_brand and not knot_brand else 0.0
+
     def _modifier_brand_match(self, input_text: str, result, strategy_name: str) -> float:
         """
         Return score modifier for brand matching (knot_matching strategy only).

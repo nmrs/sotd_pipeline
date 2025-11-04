@@ -75,6 +75,11 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
             if pattern_info["regex"].search(value):
                 split_data = pattern_info["data"]
 
+                # Check if this brush should not be split (from brush_splits.yaml)
+                if split_data.get("should_not_split", False):
+                    # Skip all split strategies if should_not_split is True
+                    return None
+
                 # Extract handle and knot from the split data
                 handle = split_data.get("handle", "")
                 knot = split_data.get("knot", "")

@@ -7,12 +7,14 @@ scoring modifiers to differentiate between high and medium priority delimiters.
 """
 
 import re
+from pathlib import Path
 from typing import Optional
 
 from ..base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
 from ...delimiter_patterns import BrushDelimiterPatterns
+from ...comparison.splits_loader import BrushSplitsLoader
 
 # ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
@@ -38,6 +40,9 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         self.knot_matcher = knot_matcher
         self.strategy_name = "automated_split"
 
+        # Initialize BrushSplitsLoader to check should_not_split flag
+        self.splits_loader = BrushSplitsLoader(Path("data/brush_splits.yaml"))
+
         # Define delimiter priorities based on BrushSplitter logic
         self.high_priority_delimiters = BrushDelimiterPatterns.get_high_priority_delimiters()
         self.medium_priority_delimiters = BrushDelimiterPatterns.get_medium_priority_delimiters()
@@ -53,6 +58,11 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             MatchResult if successful split and component matching, None otherwise
         """
         if not value or not isinstance(value, str):
+            return None
+
+        # Check if this brush should not be split (from brush_splits.yaml)
+        if self.splits_loader.should_not_split(value):
+            # Skip all split strategies if should_not_split is True
             return None
 
         try:
@@ -87,6 +97,11 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             List of MatchResult objects for all possible splits, empty list if no splits found
         """
         if not value or not isinstance(value, str):
+            return []
+
+        # Check if this brush should not be split (from brush_splits.yaml)
+        if self.splits_loader.should_not_split(value):
+            # Skip all split strategies if should_not_split is True
             return []
 
         try:
@@ -132,15 +147,17 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         # These delimiters use smart splitting to determine handle vs knot based on content
+        # Use case-insensitive matching per @match-phase.mdc rules
         for delimiter in high_reliability_delimiters:
-            if delimiter in value:
+            if delimiter.lower() in value.lower():
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "high")
 
         # Check handle-primary delimiters (first part is knot, second part is handle)
+        # Use case-insensitive matching per @match-phase.mdc rules
         for delimiter in handle_primary_delimiters:
-            if delimiter in value:
+            if delimiter.lower() in value.lower():
                 # Check if the delimiter is preceded by "made" or followed by Reddit references
                 delimiter_index = value.find(delimiter)
                 before_delimiter = value[:delimiter_index].strip()
@@ -166,11 +183,14 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         replacing the dependency on the legacy matcher.
         """
         # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"]
+        medium_reliability_delimiters = [
+            d for d in BrushDelimiterPatterns.get_medium_priority_delimiters() if d != "/"
+        ]
 
         # Check medium-reliability delimiters (use smart analysis)
+        # Use case-insensitive matching per @match-phase.mdc rules
         for delimiter in medium_reliability_delimiters:
-            if delimiter in value:
+            if delimiter.lower() in value.lower():
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "medium")
@@ -363,6 +383,43 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
 
         return score
 
+    def _score_as_knot(self, text: str) -> int:
+        """
+        Score text as likely being a knot component.
+
+        Higher scores indicate the text is more likely to be a knot.
+        Lower scores indicate the text is more likely to be a handle.
+
+        Args:
+            text: Text to score
+
+        Returns:
+            Score (positive = knot likely, negative = handle likely)
+        """
+        if not text:
+            return 0
+
+        text_lower = text.lower()
+        score = 0
+
+        # Strong knot indicators (positive score)
+        if any(word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon", "shoat"]):
+            score += 8
+        if re.search(r"\d+\s*mm", text_lower):
+            score += 6
+        if re.search(r"[vV]\d+|[bB]\d+", text_lower):
+            score += 6
+
+        # Strong handle indicators (negative score)
+        if "handle" in text_lower:
+            score -= 10
+        if any(
+            word in text_lower for word in ["stock", "custom", "artisan", "turned", "wood", "resin"]
+        ):
+            score -= 2
+
+        return score
+
     def _get_all_possible_splits(self, value: str) -> list[dict]:
         """
         Get all possible split combinations for a given string.
@@ -378,11 +435,11 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         # Find all delimiter positions
         delimiter_positions = []
 
-        # High priority delimiters
+        # High priority delimiters - use case-insensitive matching per @match-phase.mdc rules
         for delimiter in self.high_priority_delimiters:
             pos = 0
             while True:
-                pos = value.find(delimiter, pos)
+                pos = value.lower().find(delimiter.lower(), pos)
                 if pos == -1:
                     break
                 delimiter_positions.append(
@@ -390,11 +447,11 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 )
                 pos += len(delimiter)
 
-        # Medium priority delimiters
+        # Medium priority delimiters - use case-insensitive matching per @match-phase.mdc rules
         for delimiter in self.medium_priority_delimiters:
             pos = 0
             while True:
-                pos = value.find(delimiter, pos)
+                pos = value.lower().find(delimiter.lower(), pos)
                 if pos == -1:
                     break
                 delimiter_positions.append(
@@ -427,6 +484,9 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 handle, knot = self._split_by_slash_delimiter(
                     value, delimiter, delim_info["position"]
                 )
+            elif delimiter == " (":
+                # Special handling for parentheses with content-based scoring
+                handle, knot = self._split_by_parentheses(value, delimiter)
             else:
                 # Default smart splitting
                 handle, knot = self._split_by_delimiter_positional(value, delimiter)
@@ -510,3 +570,47 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 return part2, part1  # handle, knot
 
         return None, None
+
+    def _split_by_parentheses(
+        self, value: str, delimiter: str
+    ) -> tuple[Optional[str], Optional[str]]:
+        """
+        Split by parentheses delimiter with content-based scoring.
+
+        Args:
+            value: The string to split
+            delimiter: The " (" delimiter
+
+        Returns:
+            Tuple of (handle, knot) or (None, None) if split is invalid
+        """
+        import re
+
+        # Match pattern: text before '(' and text between '(' and ')'
+        match = re.search(r"^(.+?)\s+\(([^)]+)\)", value)
+        if not match:
+            return None, None
+
+        part1 = match.group(1).strip()  # Outside parentheses
+        part2 = match.group(2).strip()  # Inside parentheses
+
+        if not part1 or not part2:
+            return None, None
+
+        # Use content-based scoring to determine handle vs knot
+        part1_handle_score = self._score_as_handle(part1)
+        part1_knot_score = self._score_as_knot(part1)
+        part2_handle_score = self._score_as_handle(part2)
+        part2_knot_score = self._score_as_knot(part2)
+
+        # Determine best assignment based on scores
+        if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
+            return part1, part2  # part1=handle, part2=knot
+        elif part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score:
+            return part2, part1  # part2=handle, part1=knot
+        else:
+            # Tie-breaking: prioritize knot scores
+            if part2_knot_score > part1_knot_score:
+                return part1, part2
+            else:
+                return part2, part1

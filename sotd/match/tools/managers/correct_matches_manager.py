@@ -133,9 +133,20 @@ class CorrectMatchesManager:
         return text_lower
 
     def load_correct_matches(self) -> None:
-        """Load previously marked correct matches from file."""
+        """Load previously marked correct matches from file or directory structure."""
         self._correct_matches = set()
         self._correct_matches_data = {}
+        
+        # Check if path is a directory (new structure) or file (legacy)
+        # If path ends with .yaml, treat as legacy file; otherwise treat as directory
+        is_directory = self._correct_matches_file.suffix != ".yaml"
+        
+        if is_directory:
+            # New directory structure: load from field-specific files
+            self._load_from_directory()
+            return
+        
+        # Legacy single file structure
         if not self._correct_matches_file.exists():
             return
 
@@ -284,6 +295,133 @@ class CorrectMatchesManager:
                                                 }
         except Exception as e:
             self.console.print(f"[red]Error loading correct matches: {e}[/red]")
+
+    def _load_from_directory(self) -> None:
+        """Load correct matches from directory structure (field-specific files)."""
+        if not self._correct_matches_file.exists():
+            return
+
+        try:
+            # Load all field-specific files
+            for field_file in self._correct_matches_file.glob("*.yaml"):
+                field_name = field_file.stem
+                # Skip backup and report files
+                if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                    continue
+                
+                with field_file.open("r", encoding="utf-8") as f:
+                    field_data = yaml.safe_load(f)
+                    if not field_data:
+                        continue
+                    
+                    # Process the field data using the same logic as legacy file loading
+                    if field_name == "blade":
+                        # Handle format-aware structure for blade field
+                        for format_name, format_data in field_data.items():
+                            if isinstance(format_data, dict):
+                                for brand, brand_data in format_data.items():
+                                    if isinstance(brand_data, dict):
+                                        for model, strings in brand_data.items():
+                                            if isinstance(strings, list):
+                                                for original in strings:
+                                                    match_key = self.create_match_key(
+                                                        field_name,
+                                                        original,
+                                                        {
+                                                            "brand": brand,
+                                                            "model": model,
+                                                            "format": format_name,
+                                                        },
+                                                    )
+                                                    self._correct_matches.add(match_key)
+                                                    self._correct_matches_data[match_key] = {
+                                                        "original": original,
+                                                        "matched": {
+                                                            "brand": brand,
+                                                            "model": model,
+                                                            "format": format_name,
+                                                        },
+                                                        "field": field_name,
+                                                    }
+                    elif field_name in ["handle", "knot"]:
+                        # Handle handle and knot sections
+                        for brand, brand_data in field_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, strings in brand_data.items():
+                                    if isinstance(strings, list):
+                                        for original in strings:
+                                            match_key = self.create_match_key(
+                                                field_name,
+                                                original,
+                                                {"brand": brand, "model": model},
+                                            )
+                                            self._correct_matches.add(match_key)
+                                            self._correct_matches_data[match_key] = {
+                                                "original": original,
+                                                "matched": {
+                                                    "brand": brand,
+                                                    "model": model,
+                                                    "source_text": original,
+                                                },
+                                                "field": field_name,
+                                            }
+                    elif field_name == "brush":
+                        # Handle brush field
+                        for brand, brand_data in field_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, patterns in brand_data.items():
+                                    if isinstance(patterns, list):
+                                        for pattern in patterns:
+                                            if isinstance(pattern, dict):
+                                                original_text = list(pattern.keys())[0]
+                                                handle_match_enabled = pattern[
+                                                    original_text
+                                                ].get("handle_match", False)
+                                            else:
+                                                original_text = pattern
+                                                handle_match_enabled = False
+                                            
+                                            match_key = self.create_match_key(
+                                                field_name,
+                                                original_text,
+                                                {"brand": brand, "model": model},
+                                            )
+                                            self._correct_matches.add(match_key)
+                                            self._correct_matches_data[match_key] = {
+                                                "original": original_text,
+                                                "matched": {"brand": brand, "model": model},
+                                                "field": field_name,
+                                                "handle_match_enabled": handle_match_enabled,
+                                            }
+                    else:
+                        # Handle other fields (razor, soap, etc.)
+                        for brand, brand_data in field_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, strings in brand_data.items():
+                                    if isinstance(strings, list):
+                                        for original in strings:
+                                            match_key = self.create_match_key(
+                                                field_name,
+                                                original,
+                                                {"brand": brand, "model": model},
+                                            )
+                                            self._correct_matches.add(match_key)
+                                            self._correct_matches_data[match_key] = {
+                                                "original": original,
+                                                "matched": {
+                                                    "brand": brand
+                                                    if field_name
+                                                    in ("razor", "blade", "brush", "soap")
+                                                    else None,
+                                                    "model": model
+                                                    if field_name in ("razor", "blade", "brush")
+                                                    else None,
+                                                    "scent": model if field_name == "soap" else None,
+                                                },
+                                                "field": field_name,
+                                            }
+        except Exception as e:
+            self.console.print(f"[red]Error loading correct matches from directory: {e}[/red]")
 
     def save_correct_matches(self) -> None:
         """Save correct matches to file."""
@@ -536,15 +674,36 @@ class CorrectMatchesManager:
 
                                         entries.sort(key=sort_key)
 
-            # Save to file
-            with self._correct_matches_file.open("w", encoding="utf-8") as f:
-                yaml.dump(
-                    field_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True
+            # Save to file(s) - check if directory structure or legacy single file
+            # If path ends with .yaml, treat as legacy file; otherwise treat as directory
+            is_directory = self._correct_matches_file.suffix != ".yaml"
+            
+            if is_directory:
+                # New directory structure: save each field to its own file
+                self._correct_matches_file.mkdir(parents=True, exist_ok=True)
+                for field_name, field_section in field_data.items():
+                    field_file = self._correct_matches_file / f"{field_name}.yaml"
+                    with field_file.open("w", encoding="utf-8") as f:
+                        yaml.dump(
+                            field_section,
+                            f,
+                            default_flow_style=False,
+                            sort_keys=False,
+                            allow_unicode=True,
+                        )
+                    self.console.print(
+                        f"[green]Correct matches saved to {field_file}[/green]"
+                    )
+            else:
+                # Legacy single file structure
+                self._correct_matches_file.parent.mkdir(parents=True, exist_ok=True)
+                with self._correct_matches_file.open("w", encoding="utf-8") as f:
+                    yaml.dump(
+                        field_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True
+                    )
+                self.console.print(
+                    f"[green]Correct matches saved to {self._correct_matches_file}[/green]"
                 )
-
-            self.console.print(
-                f"[green]Correct matches saved to {self._correct_matches_file}[/green]"
-            )
         except Exception as e:
             self.console.print(f"[red]Error saving correct matches: {e}[/red]")
 
