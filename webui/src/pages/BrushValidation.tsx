@@ -61,7 +61,7 @@ interface ChangeRecord {
  * not the original field. The original field should be preserved for reference but not used in matching logic.
  *
  * Note: Entries with strategies "correct_complete_brush" and "correct_split_brush" are automatically
- * filtered out by the backend since these come from correct_matches.yaml and are already validated.
+ * filtered out by the backend since these come from correct_matches directory and are already validated.
  * Only entries that need user validation are displayed in this interface.
  */
 const BrushValidation: React.FC = () => {
@@ -336,7 +336,7 @@ const BrushValidation: React.FC = () => {
           action: 'validate',
           timestamp: new Date().toISOString(),
           result: `${entry.brand || ''} ${entry.model || ''}`.trim(),
-          storage_file: 'correct_matches.yaml',
+          storage_file: 'correct_matches directory',
         };
 
         // Add to change tracking
@@ -388,7 +388,7 @@ const BrushValidation: React.FC = () => {
           action: 'override',
           timestamp: new Date().toISOString(),
           result: `${entry.brand || ''} ${entry.model || ''}`.trim(),
-          storage_file: 'correct_matches.yaml',
+          storage_file: 'correct_matches directory',
         };
 
         // Add to change tracking
@@ -468,7 +468,7 @@ const BrushValidation: React.FC = () => {
         <CardContent className='p-4'>
           <div className='text-sm text-blue-800'>
             <strong>Note:</strong> Entries that were automatically matched from{' '}
-            <code className='bg-blue-100 px-1 rounded'>correct_matches.yaml</code> (with strategies{' '}
+            <code className='bg-blue-100 px-1 rounded'>correct_matches directory</code> (with strategies{' '}
             <code className='bg-blue-100 px-1 rounded'>correct_complete_brush</code> or{' '}
             <code className='bg-blue-100 px-1 rounded'>correct_split_brush</code>) are filtered out{' '}
             since they are already processed and don't require user review.

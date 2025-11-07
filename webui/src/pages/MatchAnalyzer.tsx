@@ -500,7 +500,7 @@ const MatchAnalyzer: React.FC = () => {
 
             // For blade field, include razor format context for correct section placement
             if (selectedField === 'blade' && item.matched) {
-              // Ensure the format field is present for correct section placement in correct_matches.yaml
+              // Ensure the format field is present for correct section placement in correct_matches directory
               // The backend expects a 'format' field to determine which section to place the entry in
               const bladeData = {
                 ...item.matched,
@@ -509,7 +509,7 @@ const MatchAnalyzer: React.FC = () => {
                   item.matched.format ||
                   (() => {
                     console.warn(
-                      `Blade match missing format field for "${item.original}". This may cause incorrect placement in correct_matches.yaml.`
+                      `Blade match missing format field for "${item.original}". This may cause incorrect placement in correct_matches directory.`
                     );
                     // Try to infer format from other fields or use a more specific default
                     if (item.matched.brand && item.matched.model) {
@@ -572,6 +572,24 @@ const MatchAnalyzer: React.FC = () => {
       if (matches.length === 0) {
         setError('No valid matches found to mark as correct');
         return;
+      }
+
+      // Debug logging for Rubberset 400
+      if (selectedField === 'brush') {
+        const rubbersetMatches = matches.filter(m => 
+          m.original.toLowerCase().includes('rubberset') && 
+          m.original.toLowerCase().includes('400')
+        );
+        if (rubbersetMatches.length > 0) {
+          console.log('🔍 DEBUG MatchAnalyzer: Sending Rubberset 400 matches to API:', {
+            matches: rubbersetMatches,
+            fullRequest: {
+              field: selectedField,
+              matches,
+              force: true,
+            },
+          });
+        }
       }
 
       const response = await markMatchesAsCorrect({
@@ -654,7 +672,7 @@ const MatchAnalyzer: React.FC = () => {
 
             // For blade field, include razor format context for correct section placement
             if (selectedField === 'blade' && item.matched) {
-              // Ensure the format field is present for correct section placement in correct_matches.yaml
+              // Ensure the format field is present for correct section placement in correct_matches directory
               // The backend expects a 'format' field to determine which section to place the entry in
               const bladeData = {
                 ...item.matched,
@@ -663,7 +681,7 @@ const MatchAnalyzer: React.FC = () => {
                   item.matched.format ||
                   (() => {
                     console.warn(
-                      `Blade match missing format field for "${item.original}" (remove). This may cause incorrect placement in correct_matches.yaml.`
+                      `Blade match missing format field for "${item.original}" (remove). This may cause incorrect placement in correct_matches directory.`
                     );
                     // Try to infer format from other fields or use a more specific default
                     if (item.matched.brand && item.matched.model) {
@@ -865,7 +883,7 @@ const MatchAnalyzer: React.FC = () => {
                 item.matched.format ||
                 (() => {
                   console.warn(
-                    `Blade match missing format field for "${item.original}" (incorrect). This may cause incorrect placement in correct_matches.yaml.`
+                    `Blade match missing format field for "${item.original}" (incorrect). This may cause incorrect placement in correct_matches directory.`
                   );
                   // Try to infer format from other fields or use a more specific default
                   if (item.matched.brand && item.matched.model) {

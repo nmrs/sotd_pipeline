@@ -604,6 +604,15 @@ export const markMatchesAsCorrect = async (
 ): Promise<MarkCorrectResponse> => {
   try {
     console.log('🔍 DEBUG: markMatchesAsCorrect called with:', request);
+    console.log('🔍 DEBUG: Full request structure:', JSON.stringify(request, null, 2));
+    if (request.matches && request.matches.length > 0) {
+      console.log('🔍 DEBUG: First match details:', {
+        original: request.matches[0].original,
+        matched: request.matches[0].matched,
+        matchedKeys: Object.keys(request.matches[0].matched || {}),
+        matchedStringified: JSON.stringify(request.matches[0].matched, null, 2),
+      });
+    }
 
     const response = await api.post('/analysis/mark-correct', request);
 
@@ -698,7 +707,7 @@ export interface CatalogValidationIssue {
   // Additional fields for brush validation
   version?: string; // For brush version (e.g., v26, v27)
   // Structural change fields
-  expected_section?: string; // Where it currently is (correct_matches.yaml)
+  expected_section?: string; // Where it currently is (correct_matches directory)
   actual_section?: string; // Where it should be (current matching system)
   // Brush-specific match details
   current_match_details?: {

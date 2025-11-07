@@ -40,24 +40,71 @@ export function structureBrushDataForAPI(
   data: Record<string, unknown>;
 } {
   // Check if this has top-level brand and model populated
-  const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined;
-  const hasTopLevelModel = matched.model && matched.model !== null && matched.model !== undefined;
+  // Handle empty strings as falsy (empty string means not populated)
+  const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined && matched.brand !== '';
+  const hasTopLevelModel = matched.model && matched.model !== null && matched.model !== undefined && matched.model !== '';
+  
+  // Debug logging for troubleshooting
+  if (original && original.toLowerCase().includes('rubberset') && original.toLowerCase().includes('400')) {
+    console.log('🔍 DEBUG structureBrushDataForAPI for Rubberset 400:', {
+      original,
+      hasTopLevelBrand,
+      hasTopLevelModel,
+      brand: matched.brand,
+      model: matched.model,
+      matchedKeys: Object.keys(matched),
+      hasHandle: matched.handle && typeof matched.handle === 'object',
+      hasKnot: matched.knot && typeof matched.knot === 'object',
+    });
+  }
 
   // Check if this has handle/knot components
   const hasHandle = matched.handle && typeof matched.handle === 'object' && matched.handle !== null;
   const hasKnot = matched.knot && typeof matched.knot === 'object' && matched.knot !== null;
 
   // Rule: If top-level brand AND model are populated, save under brush section
+  // Even if handle/knot nested structures exist, if we have top-level brand/model,
+  // it's a complete brush and should be saved as such
+  // IMPORTANT: Preserve handle/knot structures in the data so backend can see them
+  // The backend will check for top-level brand/model FIRST before checking handle/knot
   if (hasTopLevelBrand && hasTopLevelModel) {
+    // Extract fiber from knot section if not at root level (for known_brush strategy)
+    const fiber = matched.fiber || (matched.knot && typeof matched.knot === 'object' ? matched.knot.fiber : null);
+    // Extract knot_size_mm from knot section if not at root level
+    const knot_size_mm = matched.knot_size_mm || (matched.knot && typeof matched.knot === 'object' ? matched.knot.knot_size_mm : null);
+    
+    // Build the data object, preserving handle/knot structures if they exist
+    const data: Record<string, unknown> = {
+      brand: matched.brand || null,
+      model: matched.model || null,
+      fiber: fiber || null,
+      knot_size_mm: knot_size_mm || null,
+      handle_maker: matched.handle_maker || null,
+    };
+    
+    // Preserve handle/knot structures if they exist - backend needs to see them
+    // to properly identify this as a complete brush (not a split brush)
+    if (hasHandle) {
+      data.handle = {
+        brand: matched.handle!.brand,
+        model: matched.handle!.model,
+        source_text: matched.handle!.source_text || original || null,
+      };
+    }
+    
+    if (hasKnot) {
+      data.knot = {
+        brand: matched.knot!.brand,
+        model: matched.knot!.model,
+        fiber: matched.knot!.fiber || null,
+        knot_size_mm: matched.knot!.knot_size_mm || null,
+        source_text: matched.knot!.source_text || original || null,
+      };
+    }
+    
     return {
       field: 'brush',
-      data: {
-        brand: matched.brand || null,
-        model: matched.model || null,
-        fiber: matched.fiber || null,
-        knot_size_mm: matched.knot_size_mm || null,
-        handle_maker: matched.handle_maker || null,
-      },
+      data,
     };
   }
 

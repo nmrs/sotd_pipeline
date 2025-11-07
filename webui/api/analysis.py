@@ -668,7 +668,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     "Please ensure the SOTD pipeline is properly installed."
                 ),
             )
-        analyzer = MismatchAnalyzer()
+        # Create analyzer with console for proper error handling
+        from rich.console import Console
+        console = Console()
+        analyzer = MismatchAnalyzer(console)
 
         # Create args object for the analyzer
         class Args:
@@ -729,8 +732,16 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
 
         # Load correct matches first - this is required for identify_mismatches to work correctly
-        analyzer._load_correct_matches()
-        logger.info(f"Loaded {len(analyzer._correct_matches)} correct matches")
+        # Fail fast per core rules - if loading fails, we want to know immediately
+        try:
+            analyzer._load_correct_matches()
+            logger.info(f"Loaded {len(analyzer._correct_matches)} correct matches")
+        except Exception as e:
+            logger.error(f"Failed to load correct matches: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to load correct matches: {str(e)}. This is required for mismatch analysis."
+            )
 
         # Use the analyzer's logic directly - DRY principle
         mismatches = analyzer.identify_mismatches(data, request.field, args)
@@ -944,35 +955,30 @@ async def get_correct_matches(field: str):
     try:
         validate_field(field)
 
-        # Load correct matches from file
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        if not correct_matches_file.exists():
+        # Load correct matches from directory structure
+        correct_matches_dir = project_root / "data" / "correct_matches"
+        if not correct_matches_dir.exists():
             return CorrectMatchesResponse(field=field, total_entries=0, entries={})
 
         import yaml
 
-        with correct_matches_file.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-
-        # Check for malformed YAML with None keys and fail fast
-        def check_for_none_keys(obj, path=""):
-            if isinstance(obj, dict):
-                for k, v in obj.items():
-                    if k is None:
-                        raise ValueError(
-                            f"Malformed YAML: Found None key in correct_matches.yaml at path '{path}'. This indicates a corrupted YAML file that needs to be fixed."
-                        )
-                    check_for_none_keys(v, f"{path}.{k}" if path else str(k))
-            elif isinstance(obj, list):
-                for i, item in enumerate(obj):
-                    check_for_none_keys(item, f"{path}[{i}]")
-
-        check_for_none_keys(data)
-        logger.info(f"Loaded data keys: {list(data.keys())}")
+        data = {}
 
         # For brush field, combine data from brush, handle, and knot sections
         if field == "brush":
-            brush_data = data.get(field, {})
+            # Load brush, handle, and knot files
+            for section in ["brush", "handle", "knot"]:
+                section_file = correct_matches_dir / f"{section}.yaml"
+                if section_file.exists():
+                    try:
+                        with section_file.open("r", encoding="utf-8") as f:
+                            section_data = yaml.safe_load(f) or {}
+                            if section_data:
+                                data[section] = section_data
+                    except Exception as e:
+                        logger.warning(f"Error loading {section_file}: {e}")
+            
+            brush_data = data.get("brush", {})
             handle_data = data.get("handle", {})
             knot_data = data.get("knot", {})
 
@@ -987,9 +993,36 @@ async def get_correct_matches(field: str):
                 f"Brush field data - brush: {brush_data}, handle: {handle_data}, knot: {knot_data}"
             )
         else:
+            # Load field-specific file
+            field_file = correct_matches_dir / f"{field}.yaml"
+            if field_file.exists():
+                try:
+                    with field_file.open("r", encoding="utf-8") as f:
+                        field_data = yaml.safe_load(f) or {}
+                        if field_data:
+                            data[field] = field_data
+                except Exception as e:
+                    logger.warning(f"Error loading {field_file}: {e}")
+            
             field_data = data.get(field, {})
             combined_data = field_data
             logger.info(f"Field data for '{field}': {field_data}")
+
+        # Check for malformed YAML with None keys and fail fast
+        def check_for_none_keys(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if k is None:
+                        raise ValueError(
+                            f"Malformed YAML: Found None key in correct_matches directory at path '{path}'. This indicates a corrupted YAML file that needs to be fixed."
+                        )
+                    check_for_none_keys(v, f"{path}.{k}" if path else str(k))
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    check_for_none_keys(item, f"{path}[{i}]")
+
+        check_for_none_keys(data)
+        logger.info(f"Loaded data keys: {list(data.keys())}")
 
         # Calculate total entries based on field structure
         total_entries = 0
@@ -1063,7 +1096,7 @@ async def get_correct_matches(field: str):
 
 @router.post("/mark-correct", response_model=MarkCorrectResponse)
 async def mark_matches_as_correct(request: MarkCorrectRequest):
-    """Mark matches as correct and save to correct_matches.yaml."""
+    """Mark matches as correct and save to correct_matches directory."""
     try:
         validate_field(request.field)
 
@@ -1103,6 +1136,9 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
                 # Debug logging
                 logger.info(f"Processing match - original: {original}, matched: {matched}")
+                logger.info(f"DEBUG: Match data structure - field: {request.field}, original: {original}")
+                logger.info(f"DEBUG: Matched data keys: {list(matched.keys()) if matched else 'None'}")
+                logger.info(f"DEBUG: Matched data content: {matched}")
 
                 # For blade field, ensure format is preserved for correct section placement
                 if request.field == "blade" and "format" in matched:
@@ -1123,7 +1159,10 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
                 # Use the proper method to mark as correct
                 match_key = manager.create_match_key(request.field, original, matched)
+                logger.info(f"DEBUG: Created match_key: {match_key}")
+                logger.info(f"DEBUG: Match data to save: {match_data_to_save}")
                 manager.mark_match_as_correct(match_key, match_data_to_save)
+                logger.info(f"DEBUG: Marked match as correct, key stored in manager")
                 marked_count += 1
 
             except Exception as e:
@@ -1131,7 +1170,21 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
         # Save to file
         if marked_count > 0:
+            logger.info(f"DEBUG: Saving {marked_count} matches to correct_matches directory")
             manager.save_correct_matches()
+            logger.info(f"DEBUG: Saved correct matches to file")
+            # Reload to verify it was saved
+            manager.load_correct_matches()
+            logger.info(f"DEBUG: Reloaded correct matches, verifying saved keys...")
+            for match in request.matches:
+                original = match.get("original", "")
+                matched = match.get("matched", {})
+                if original and matched:
+                    verify_key = manager.create_match_key(request.field, original, matched)
+                    is_found = verify_key in manager._correct_matches
+                    logger.info(f"DEBUG: Verification - key: {verify_key}, found: {is_found}")
+                    if not is_found:
+                        logger.warning(f"DEBUG: WARNING - Key {verify_key} not found after save!")
 
         return MarkCorrectResponse(
             success=marked_count > 0,
@@ -1147,7 +1200,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
 @router.post("/remove-correct", response_model=RemoveCorrectResponse)
 async def remove_matches_from_correct(request: RemoveCorrectRequest):
-    """Remove matches from correct matches and save to correct_matches.yaml."""
+    """Remove matches from correct matches and save to correct_matches directory."""
     try:
         validate_field(request.field)
 
@@ -1232,8 +1285,8 @@ async def clear_correct_matches_by_field(field: str):
 
         # Create manager instance and clear field
         console = Console()
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        manager = CorrectMatchesManager(console, correct_matches_file)
+        correct_matches_path = project_root / "data" / "correct_matches"
+        manager = CorrectMatchesManager(console, correct_matches_path)
         manager.load_correct_matches()
         manager.clear_correct_matches_by_field(field)
 
@@ -1260,8 +1313,8 @@ async def clear_all_correct_matches():
 
         # Create manager instance and clear all
         console = Console()
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
-        manager = CorrectMatchesManager(console, correct_matches_file)
+        correct_matches_path = project_root / "data" / "correct_matches"
+        manager = CorrectMatchesManager(console, correct_matches_path)
         manager.clear_correct_matches()
 
         return {"success": True, "message": "Cleared all correct matches"}
@@ -1273,7 +1326,7 @@ async def clear_all_correct_matches():
 
 @router.post("/validate-catalog", response_model=CatalogValidationResponse)
 async def validate_catalog_against_correct_matches(request: CatalogValidationRequest):
-    """Validate catalog entries against correct_matches.yaml using actual matching validation."""
+    """Validate catalog entries against correct_matches directory using actual matching validation."""
     logger.info(f"🔍 Starting actual matching validation for field: {request.field}")
 
     try:
@@ -1282,7 +1335,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         # Set up paths
         api_project_root = Path(__file__).parent.parent.parent
-        correct_matches_path = api_project_root / "data" / "correct_matches.yaml"
+        correct_matches_path = api_project_root / "data" / "correct_matches"
 
         logger.info(f"Project root: {api_project_root}")
         logger.info(f"Correct matches path: {correct_matches_path}")
@@ -1355,7 +1408,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
             # For structural_change issues with brush data, add match details
             if issue.issue_type == "structural_change":
-                # Add current brush match details (from correct_matches.yaml)
+                # Add current brush match details (from correct_matches directory)
                 if issue.expected_section == "brush":
                     processed_issue["current_match_details"] = {
                         "brand": issue.expected_brand,
@@ -1407,7 +1460,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
 @router.post("/remove-catalog-entries", response_model=RemoveCorrectResponse)
 async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
-    """Remove entries from correct_matches.yaml based on catalog validation issues."""
+    """Remove entries from correct_matches directory based on catalog validation issues."""
     try:
         validate_field(request.field)
 
@@ -1422,20 +1475,28 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
         except ImportError as e:
             raise HTTPException(status_code=500, detail=f"Could not import required modules: {e}")
 
-        # Load and manipulate YAML directly
-        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        # Load and manipulate YAML from directory structure
+        correct_matches_dir = project_root / "data" / "correct_matches"
 
-        if not correct_matches_file.exists():
+        if not correct_matches_dir.exists():
             return RemoveCorrectResponse(
-                success=False, message="Correct matches file not found", removed_count=0
+                success=False, message="Correct matches directory not found", removed_count=0
             )
 
-        # Load the YAML file
-        try:
-            with open(correct_matches_file, "r", encoding="utf-8") as f:
-                yaml_data = yaml.safe_load(f) or {}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error loading correct matches file: {e}")
+        # Load YAML files from directory structure
+        yaml_data = {}
+        sections_to_load = ["brush", "handle", "knot"] if request.field == "brush" else [request.field]
+        
+        for section in sections_to_load:
+            section_file = correct_matches_dir / f"{section}.yaml"
+            if section_file.exists():
+                try:
+                    with section_file.open("r", encoding="utf-8") as f:
+                        section_data = yaml.safe_load(f) or {}
+                        if section_data:
+                            yaml_data[section] = section_data
+                except Exception as e:
+                    logger.warning(f"Error loading {section_file}: {e}")
 
         removed_count = 0
         errors = []
@@ -1490,16 +1551,19 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
             except Exception as e:
                 errors.append(f"Error removing entry {entry}: {e}")
 
-        # Save the updated YAML file
+        # Save the updated YAML files to directory structure
         if removed_count > 0:
             try:
-                with open(correct_matches_file, "w", encoding="utf-8") as f:
-                    yaml.dump(
-                        yaml_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
-                    )
+                for section, section_data in yaml_data.items():
+                    if section_data:  # Only save if section has data
+                        section_file = correct_matches_dir / f"{section}.yaml"
+                        with section_file.open("w", encoding="utf-8") as f:
+                            yaml.dump(
+                                section_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+                            )
             except Exception as e:
                 raise HTTPException(
-                    status_code=500, detail=f"Error saving correct matches file: {e}"
+                    status_code=500, detail=f"Error saving correct matches files: {e}"
                 )
 
         return RemoveCorrectResponse(

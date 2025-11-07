@@ -446,7 +446,7 @@ export function BrushMatchingAnalyzer() {
                 className='w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
               />
               <label htmlFor='bypass-correct-matches' className='text-sm text-gray-600'>
-                Bypass correct_matches.yaml to see all strategies
+                Bypass correct_matches directory to see all strategies
               </label>
             </div>
           </div>

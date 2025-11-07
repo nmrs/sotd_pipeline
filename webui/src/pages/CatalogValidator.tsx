@@ -212,10 +212,10 @@ const CatalogValidator: React.FC = () => {
       <div className='mb-4'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Catalog Validator</h1>
         <p className='text-gray-600 mb-4'>
-          Validate that entries in correct_matches.yaml still map to the same brand/model
+          Validate that entries in correct_matches directory still map to the same brand/model
           combinations using current catalog regex patterns. This helps identify when catalog
           updates have broken existing correct matches. The validator tests each pattern from
-          correct_matches.yaml against the current matchers to see if they still produce the
+          correct_matches directory against the current matchers to see if they still produce the
           expected brand/model results.
         </p>
 
@@ -516,7 +516,7 @@ const CatalogValidator: React.FC = () => {
                                   {issue.expected_brand} {issue.expected_model}
                                 </p>
                                 <p className='text-xs text-gray-500 mt-1'>
-                                  (in correct_matches.yaml)
+                                  (in correct_matches directory)
                                 </p>
                               </div>
                               <div>
@@ -608,7 +608,7 @@ const CatalogValidator: React.FC = () => {
                                 {issue.expected_brand} {issue.expected_model}
                               </p>
                               <p className='text-xs text-gray-500 mt-1'>
-                                (in correct_matches.yaml)
+                                (in correct_matches directory)
                               </p>
                             </div>
                           )}
@@ -648,13 +648,13 @@ const CatalogValidator: React.FC = () => {
                           </p>
                           <p className='text-sm text-gray-600'>
                             {issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
-                              ? `Update correct_matches.yaml to reflect new brand/model: '${issue.actual_brand} ${issue.actual_model}'`
+                              ? `Update correct_matches directory to reflect new brand/model: '${issue.actual_brand} ${issue.actual_model}'`
                               : issue.issue_type === 'structural_change'
-                                ? `Update correct_matches.yaml structure: move from '${issue.expected_section}' section to '${issue.actual_section}' section`
+                                ? `Update correct_matches directory structure: move from '${issue.expected_section}' section to '${issue.actual_section}' section`
                                 : issue.issue_type === 'duplicate_string'
-                                  ? `Remove duplicate entry for '${issue.correct_match}' from correct_matches.yaml`
+                                  ? `Remove duplicate entry for '${issue.correct_match}' from correct_matches directory`
                                   : issue.issue_type === 'cross_section_conflict'
-                                    ? `Resolve cross-section conflict for '${issue.correct_match}' in correct_matches.yaml`
+                                    ? `Resolve cross-section conflict for '${issue.correct_match}' in correct_matches directory`
                                     : issue.suggested_action
                             }
                           </p>
@@ -674,7 +674,7 @@ const CatalogValidator: React.FC = () => {
                 <div className='text-green-600 text-4xl mb-2'>✅</div>
                 <h3 className='text-lg font-medium text-gray-900 mb-2'>No Issues Found</h3>
                 <p className='text-gray-600'>
-                  All {results.total_entries} entries in correct_matches.yaml are still valid with
+                  All {results.total_entries} entries in correct_matches directory are still valid with
                   the current matching system.
                 </p>
               </div>
