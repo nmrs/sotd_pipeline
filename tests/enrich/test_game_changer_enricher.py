@@ -203,6 +203,21 @@ class TestGameChangerEnricher:
             assert result is not None
             assert result["gap"] == ".68"
 
+    def test_extract_gap_with_hyphen_format(self):
+        """Test gap extraction with hyphen format like 0.76-P or .76-P."""
+        test_cases = [
+            ("RazoRock Game Changer 0.76-P", ".76"),
+            ("RazoRock Game Changer .76-P", ".76"),
+            ("RazoRock Game Changer 0.84-P", ".84"),
+            ("RazoRock Game Changer .68-P", ".68"),
+        ]
+
+        for model, expected_gap in test_cases:
+            field_data = {"model": model}
+            result = self.enricher.enrich(field_data, model)
+            assert result is not None, f"Failed to extract gap from: {model}"
+            assert result["gap"] == expected_gap, f"Expected {expected_gap}, got {result['gap']} for: {model}"
+
     def test_accept_all_valid_gaps_with_any_variant(self):
         """Test that all valid gaps are accepted with any variant."""
         # Test all four valid gaps with JAWS variant

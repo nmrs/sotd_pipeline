@@ -82,10 +82,11 @@ class GameChangerEnricher(BaseEnricher):
         """
         # Pattern to match gap specifications in various formats
         # Matches 1.05, .68, .76, .84, 0.68, 0.76, 0.84, 105, 68, 76, 84
+        # Also handles formats like "0.76-P" and ".76-P" with hyphens
         pattern = (
             r"(?:GC|Game\s+Changer)?\s*"
             r"((?:1\.05)|(?:0?\.\d{2})|(?:\d{2,3}))"
-            r"(?=\s|$|[A-Za-z]|\(|\)|\[|\]|\{|\})"
+            r"(?=\s|$|[A-Za-z]|\(|\)|\[|\]|\{|\}|-)"
         )
 
         match = re.search(pattern, text, re.IGNORECASE)
