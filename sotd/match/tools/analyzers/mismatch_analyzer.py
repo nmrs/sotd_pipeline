@@ -42,10 +42,11 @@ class MismatchAnalyzer(AnalysisTool):
         self._catalog_patterns = {}  # Cache for catalog patterns
         self._catalog_cache_info = {}  # Cache metadata (timestamps, hashes)
         # Use a more robust path resolution that works regardless of working directory
-        # Look for the file relative to the project root (4 levels up from this module)
+        # Look for the directory relative to the project root (4 levels up from this module)
         module_path = Path(__file__)
         project_root = module_path.parent.parent.parent.parent.parent
-        self._correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        # Use directory structure: data/correct_matches/ (not single file)
+        self._correct_matches_file = project_root / "data" / "correct_matches"
         self._correct_matches: Set[str] = set()
         self._compiled_patterns = {}  # Cache for compiled regex patterns
         self._correct_matches_data = {}  # Added for new _load_correct_matches method
@@ -694,22 +695,32 @@ class MismatchAnalyzer(AnalysisTool):
         return f"{field}:{original_normalized}"
 
     def _load_correct_matches(self) -> None:
-        """Load previously marked correct matches from file."""
-        try:
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+        """Load previously marked correct matches from directory structure.
+        
+        Fail fast if loading fails - this is an internal operation and errors
+        should be surfaced immediately per fail-fast principles.
+        """
+        from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
 
-            # Use the CorrectMatchesManager instead of duplicating logic
-            manager = CorrectMatchesManager(self.console, self._get_correct_matches_file())
-            manager.load_correct_matches()
+        # Use the CorrectMatchesManager instead of duplicating logic
+        # CorrectMatchesManager expects a directory path, not a file path
+        # Convert file path to directory path if needed
+        correct_matches_path = self._get_correct_matches_file()
+        if correct_matches_path.is_file():
+            # If it's a file, use its parent directory
+            correct_matches_path = correct_matches_path.parent
+        elif correct_matches_path.suffix == ".yaml":
+            # If it's a file path (ends with .yaml), use parent directory
+            correct_matches_path = correct_matches_path.parent
+        # Otherwise, assume it's already a directory path
+        
+        # Use the directory structure: data/correct_matches/
+        manager = CorrectMatchesManager(self.console, correct_matches_path)
+        manager.load_correct_matches()
 
-            # Copy the loaded data
-            self._correct_matches = manager._correct_matches
-            self._correct_matches_data = manager._correct_matches_data
-
-        except Exception as e:
-            self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
-            self._correct_matches = set()
-            self._correct_matches_data = {}
+        # Copy the loaded data
+        self._correct_matches = manager._correct_matches
+        self._correct_matches_data = manager._correct_matches_data
 
     def _load_competition_tags(self) -> Dict[str, List[str]]:
         """Load competition tags configuration."""

@@ -19,7 +19,7 @@ class CorrectMatchesManager:
 
     def __init__(self, console: Console, correct_matches_file: Path | None = None):
         self.console = console
-        self._correct_matches_file = correct_matches_file or Path("data/correct_matches.yaml")
+        self._correct_matches_file = correct_matches_file or Path("data/correct_matches")
         self._correct_matches: Set[str] = set()
         self._correct_matches_data = {}
         # Load existing data if file exists
@@ -44,10 +44,10 @@ class CorrectMatchesManager:
 
     def _normalize_for_matching(self, value: str, field: str) -> str:
         """
-        Normalize a string for storage in correct_matches.yaml.
+        Normalize a string for storage in correct_matches directory.
 
         This strips competition tags and normalizes whitespace to prevent
-        bloat and duplicates in the file.
+        bloat and duplicates in the files.
         """
         return normalize_for_matching(value, None, field)
 
@@ -133,168 +133,12 @@ class CorrectMatchesManager:
         return text_lower
 
     def load_correct_matches(self) -> None:
-        """Load previously marked correct matches from file or directory structure."""
+        """Load previously marked correct matches from directory structure."""
         self._correct_matches = set()
         self._correct_matches_data = {}
         
-        # Check if path is a directory (new structure) or file (legacy)
-        # If path ends with .yaml, treat as legacy file; otherwise treat as directory
-        is_directory = self._correct_matches_file.suffix != ".yaml"
-        
-        if is_directory:
-            # New directory structure: load from field-specific files
-            self._load_from_directory()
-            return
-        
-        # Legacy single file structure
-        if not self._correct_matches_file.exists():
-            return
-
-        try:
-            with self._correct_matches_file.open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-                if not data:
-                    return
-                for field, field_data in data.items():
-                    if isinstance(field_data, dict):
-                        if field == "blade":
-                            # Handle format-aware structure for blade field
-                            for format_name, format_data in field_data.items():
-                                if isinstance(format_data, dict):
-                                    for brand, brand_data in format_data.items():
-                                        if isinstance(brand_data, dict):
-                                            for model, strings in brand_data.items():
-                                                if isinstance(strings, list):
-                                                    for original in strings:
-                                                        # Normalize for consistent key generation
-                                                        match_key = self.create_match_key(
-                                                            field,
-                                                            original,
-                                                            {
-                                                                "brand": brand,
-                                                                "model": model,
-                                                                # PRESERVE FORMAT!
-                                                                "format": format_name,
-                                                            },
-                                                        )
-                                                        self._correct_matches.add(match_key)
-                                                        self._correct_matches_data[match_key] = {
-                                                            "original": original,
-                                                            "matched": {
-                                                                "brand": brand,
-                                                                "model": model,
-                                                                # PRESERVE FORMAT!
-                                                                "format": format_name,
-                                                            },
-                                                            "field": field,
-                                                        }
-                        elif field in ["handle", "knot"]:
-                            # Handle handle and knot sections - preserve source_text for composite brushes
-                            for brand, brand_data in field_data.items():
-                                if isinstance(brand_data, dict):
-                                    for model, strings in brand_data.items():
-                                        if isinstance(strings, list):
-                                            for original in strings:
-                                                # Use consistent normalization for key generation
-                                                match_key = self.create_match_key(
-                                                    field,
-                                                    original,
-                                                    {
-                                                        "brand": brand,
-                                                        "model": model,
-                                                    },
-                                                )
-                                                self._correct_matches.add(match_key)
-
-                                                # For composite brushes, preserve the source_text field
-                                                # The source_text should be the full original text from the composite brush
-                                                matched_data = {
-                                                    "brand": brand,
-                                                    "model": model,
-                                                    "source_text": original,  # Preserve source_text
-                                                }
-
-                                                self._correct_matches_data[match_key] = {
-                                                    "original": original,
-                                                    "matched": matched_data,
-                                                    "field": field,
-                                                }
-                        elif field == "brush":
-                            # Handle brush field - support both strings and dictionaries
-                            for brand, brand_data in field_data.items():
-                                if isinstance(brand_data, dict):
-                                    for model, patterns in brand_data.items():
-                                        if isinstance(patterns, list):
-                                            for pattern in patterns:
-                                                if isinstance(pattern, dict):
-                                                    # Dictionary with handle_match flag
-                                                    # YAML format: {key: {handle_match: true}}
-                                                    original_text = list(pattern.keys())[0]
-                                                    handle_match_enabled = pattern[
-                                                        original_text
-                                                    ].get("handle_match", False)
-                                                else:
-                                                    # Simple string pattern
-                                                    original_text = pattern
-                                                    handle_match_enabled = False
-
-                                                # Use consistent normalization for key generation
-                                                match_key = self.create_match_key(
-                                                    field,
-                                                    original_text,
-                                                    {
-                                                        "brand": brand,
-                                                        "model": model,
-                                                    },
-                                                )
-                                                self._correct_matches.add(match_key)
-                                                self._correct_matches_data[match_key] = {
-                                                    "original": original_text,
-                                                    "matched": {
-                                                        "brand": brand,
-                                                        "model": model,
-                                                    },
-                                                    "field": field,
-                                                    "handle_match_enabled": handle_match_enabled,
-                                                }
-
-                        else:
-                            # Handle flat structure for other fields
-                            for brand, brand_data in field_data.items():
-                                if isinstance(brand_data, dict):
-                                    for model, strings in brand_data.items():
-                                        if isinstance(strings, list):
-                                            for original in strings:
-                                                # Use consistent normalization for key generation
-                                                match_key = self.create_match_key(
-                                                    field,
-                                                    original,
-                                                    {
-                                                        "brand": brand,
-                                                        "model": model,
-                                                    },
-                                                )
-                                                self._correct_matches.add(match_key)
-                                                self._correct_matches_data[match_key] = {
-                                                    "original": original,
-                                                    "matched": {
-                                                        "brand": (
-                                                            brand
-                                                            if field
-                                                            in ("razor", "blade", "brush", "soap")
-                                                            else None
-                                                        ),
-                                                        "model": (
-                                                            model
-                                                            if field in ("razor", "blade", "brush")
-                                                            else None
-                                                        ),
-                                                        "scent": model if field == "soap" else None,
-                                                    },
-                                                    "field": field,
-                                                }
-        except Exception as e:
-            self.console.print(f"[red]Error loading correct matches: {e}[/red]")
+        # Directory structure: load from field-specific files
+        self._load_from_directory()
 
     def _load_from_directory(self) -> None:
         """Load correct matches from directory structure (field-specific files)."""
@@ -473,10 +317,55 @@ class CorrectMatchesManager:
                         field_data[field][brand][scent].append(normalized_original)
                 elif field == "brush":
                     # Check if this is a split brush (composite brush with handle/knot components)
+                    self.console.print(f"[cyan]DEBUG: Processing brush match - original: {original}[/cyan]")
+                    self.console.print(f"[cyan]DEBUG: Matched data keys: {list(match_data['matched'].keys())}[/cyan]")
+                    
+                    # IMPORTANT: Check for complete brush (top-level brand AND model) FIRST
+                    # Complete brushes can have nested handle/knot structures but should be saved as brushes
+                    brand = match_data["matched"].get("brand")
+                    model = match_data["matched"].get("model")
                     handle = match_data["matched"].get("handle")
                     knot = match_data["matched"].get("knot")
+                    
+                    # Convert model to string if it's a number (YAML keys must be strings)
+                    if model is not None and not isinstance(model, str):
+                        model = str(model)
+                    
+                    has_top_level_brand = brand and brand != "" and brand is not None
+                    has_top_level_model = model and model != "" and model is not None
+                    
+                    self.console.print(f"[cyan]DEBUG: Top-level - brand: {brand}, model: {model}[/cyan]")
+                    self.console.print(f"[cyan]DEBUG: Has top-level brand: {has_top_level_brand}, Has top-level model: {has_top_level_model}[/cyan]")
+                    self.console.print(f"[cyan]DEBUG: Has handle: {bool(handle)}, Has knot: {bool(knot)}[/cyan]")
 
-                    if handle or knot:
+                    # If this is a complete brush (has top-level brand AND model), save as brush
+                    # Even if it has nested handle/knot structures, complete brushes go to brush section
+                    if has_top_level_brand and has_top_level_model:
+                        self.console.print(f"[cyan]DEBUG: Complete brush detected - saving to brush section[/cyan]")
+                        # Use "_no_model" placeholder when model is None or empty
+                        if not model:
+                            model = "_no_model"
+                            self.console.print(f"[cyan]DEBUG: Model was None/empty, using '_no_model'[/cyan]")
+
+                        # Initialize brand and model dictionaries if they don't exist
+                        if brand not in field_data[field]:
+                            field_data[field][brand] = {}
+                        if model not in field_data[field][brand]:
+                            field_data[field][brand][model] = []
+
+                        # Normalize the original string before storing to prevent bloat
+                        normalized_original = self._normalize_for_matching(original, field)
+                        self.console.print(f"[cyan]DEBUG: Normalized original: '{normalized_original}'[/cyan]")
+                        self.console.print(f"[cyan]DEBUG: Saving to brush/{brand}/{model}[/cyan]")
+                        if (
+                            normalized_original
+                            and normalized_original not in field_data[field][brand][model]
+                        ):
+                            field_data[field][brand][model].append(normalized_original)
+                            self.console.print(f"[green]DEBUG: Added '{normalized_original}' to brush/{brand}/{model}[/green]")
+                        else:
+                            self.console.print(f"[yellow]DEBUG: Normalized original is empty or already exists[/yellow]")
+                    elif handle or knot:
                         # This is a split brush - save to handle and knot sections
                         if handle:
                             handle_brand = handle.get("brand")
@@ -540,23 +429,9 @@ class CorrectMatchesManager:
                                     normalized_knot_text
                                 )
                     else:
-                        # This is a regular brush - save to brush section
-                        brand = match_data["matched"]["brand"]
-                        model = match_data["matched"]["model"]
-
-                        # Initialize brand and model dictionaries if they don't exist
-                        if brand not in field_data[field]:
-                            field_data[field][brand] = {}
-                        if model not in field_data[field][brand]:
-                            field_data[field][brand][model] = []
-
-                        # Normalize the original string before storing to prevent bloat
-                        normalized_original = self._normalize_for_matching(original, field)
-                        if (
-                            normalized_original
-                            and normalized_original not in field_data[field][brand][model]
-                        ):
-                            field_data[field][brand][model].append(normalized_original)
+                        # This is a split brush without top-level brand/model - save to handle/knot sections
+                        # This case should be rare - usually brushes have at least brand
+                        self.console.print(f"[yellow]DEBUG: Split brush without top-level brand/model - saving to handle/knot sections[/yellow]")
                 elif field == "handle":
                     # Handle handle field - support both old and new structures
                     if (
@@ -674,35 +549,20 @@ class CorrectMatchesManager:
 
                                         entries.sort(key=sort_key)
 
-            # Save to file(s) - check if directory structure or legacy single file
-            # If path ends with .yaml, treat as legacy file; otherwise treat as directory
-            is_directory = self._correct_matches_file.suffix != ".yaml"
-            
-            if is_directory:
-                # New directory structure: save each field to its own file
-                self._correct_matches_file.mkdir(parents=True, exist_ok=True)
-                for field_name, field_section in field_data.items():
-                    field_file = self._correct_matches_file / f"{field_name}.yaml"
-                    with field_file.open("w", encoding="utf-8") as f:
-                        yaml.dump(
-                            field_section,
-                            f,
-                            default_flow_style=False,
-                            sort_keys=False,
-                            allow_unicode=True,
-                        )
-                    self.console.print(
-                        f"[green]Correct matches saved to {field_file}[/green]"
-                    )
-            else:
-                # Legacy single file structure
-                self._correct_matches_file.parent.mkdir(parents=True, exist_ok=True)
-                with self._correct_matches_file.open("w", encoding="utf-8") as f:
+            # Save to directory structure: save each field to its own file
+            self._correct_matches_file.mkdir(parents=True, exist_ok=True)
+            for field_name, field_section in field_data.items():
+                field_file = self._correct_matches_file / f"{field_name}.yaml"
+                with field_file.open("w", encoding="utf-8") as f:
                     yaml.dump(
-                        field_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True
+                        field_section,
+                        f,
+                        default_flow_style=False,
+                        sort_keys=False,
+                        allow_unicode=True,
                     )
                 self.console.print(
-                    f"[green]Correct matches saved to {self._correct_matches_file}[/green]"
+                    f"[green]Correct matches saved to {field_file}[/green]"
                 )
         except Exception as e:
             self.console.print(f"[red]Error saving correct matches: {e}[/red]")

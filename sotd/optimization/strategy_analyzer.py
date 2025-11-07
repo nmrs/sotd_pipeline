@@ -1,6 +1,6 @@
 """Strategy Analysis Tool for Brush Matching Optimization.
 
-This tool analyzes which strategies win for each test case in correct_matches.yaml,
+This tool analyzes which strategies win for each test case in correct_matches directory,
 providing empirical data to inform optimal weight configuration.
 """
 
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 class StrategyAnalyzer:
-    """Analyzes which strategies win for each test case in correct_matches.yaml."""
+    """Analyzes which strategies win for each test case in correct_matches directory."""
 
     def __init__(self, config_path: Path, correct_matches_path: Path):
         """Initialize the strategy analyzer.
 
         Args:
             config_path: Path to brush_scoring_config.yaml
-            correct_matches_path: Path to correct_matches.yaml
+            correct_matches_path: Path to correct_matches directory
         """
         self.config_path = config_path
         self.correct_matches_path = correct_matches_path
@@ -48,9 +48,27 @@ class StrategyAnalyzer:
             return yaml.safe_load(f)
 
     def _extract_test_cases(self) -> List[Dict[str, Any]]:
-        """Extract test cases from correct_matches.yaml."""
-        with open(self.correct_matches_path, "r") as f:
-            correct_matches = yaml.safe_load(f)
+        """Extract test cases from correct_matches directory."""
+        correct_matches = {}
+        
+        # Load all field files from directory structure
+        if self.correct_matches_path.is_dir():
+            for field_file in self.correct_matches_path.glob("*.yaml"):
+                field_name = field_file.stem
+                # Skip backup and report files
+                if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                    continue
+                try:
+                    with field_file.open("r", encoding="utf-8") as f:
+                        field_data = yaml.safe_load(f)
+                        if field_data:
+                            correct_matches[field_name] = field_data
+                except Exception as e:
+                    logger.warning(f"Error loading {field_file}: {e}")
+        else:
+            # Legacy single file support (for backward compatibility)
+            with open(self.correct_matches_path, "r") as f:
+                correct_matches = yaml.safe_load(f) or {}
 
         test_cases = []
 
@@ -102,7 +120,7 @@ class StrategyAnalyzer:
                             }
                         )
 
-        logger.info(f"Extracted {len(test_cases)} test cases from correct_matches.yaml")
+        logger.info(f"Extracted {len(test_cases)} test cases from correct_matches directory")
         return test_cases
 
     def _get_strategy_names(self) -> List[str]:
@@ -127,7 +145,7 @@ class StrategyAnalyzer:
         """Analyze which strategies win for each test case."""
         logger.info("Starting strategy analysis...")
 
-        # Create a brush matcher that bypasses correct_matches.yaml
+        # Create a brush matcher that bypasses correct_matches directory
         # so we can see which strategies would win naturally
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(self.config, f)
@@ -337,7 +355,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Analyze brush matching strategies")
     parser.add_argument("config_path", type=Path, help="Path to brush_scoring_config.yaml")
-    parser.add_argument("correct_matches_path", type=Path, help="Path to correct_matches.yaml")
+    parser.add_argument("correct_matches_path", type=Path, help="Path to correct_matches directory")
     parser.add_argument("--output", type=Path, help="Output file for analysis results (JSON)")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 

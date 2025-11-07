@@ -1,7 +1,7 @@
 """
 Actual Matching Validator for Catalog Validation.
 
-This module provides validation that runs each entry in correct_matches.yaml through
+This module provides validation that runs each entry in correct_matches directory through
 the actual matching systems (razor, blade, brush, soap) and validates that the results
 match what's stored. This provides more comprehensive validation than pattern-only validation.
 """
@@ -89,7 +89,7 @@ class ValidationResult:
 
 
 class ActualMatchingValidator:
-    """Validates correct_matches.yaml entries using actual matching systems."""
+    """Validates correct_matches directory entries using actual matching systems."""
 
     def __init__(self, data_path: Optional[Path] = None):
         """
@@ -147,9 +147,23 @@ class ActualMatchingValidator:
         if self._correct_matches_checker is None:
             import yaml
 
-            correct_matches_path = self.data_path / "correct_matches.yaml"
-            with correct_matches_path.open("r", encoding="utf-8") as f:
-                correct_matches_data = yaml.safe_load(f)
+            correct_matches_dir = self.data_path / "correct_matches"
+            correct_matches_data = {}
+            
+            # Load all field files from directory structure
+            if correct_matches_dir.exists():
+                for field_file in correct_matches_dir.glob("*.yaml"):
+                    field_name = field_file.stem
+                    # Skip backup and report files
+                    if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                        continue
+                    try:
+                        with field_file.open("r", encoding="utf-8") as f:
+                            field_data = yaml.safe_load(f)
+                            if field_data:
+                                correct_matches_data[field_name] = field_data
+                    except Exception as e:
+                        logger.warning(f"Error loading {field_file}: {e}")
 
             # Note: CorrectMatchesChecker not used in current implementation
             self._correct_matches_checker = correct_matches_data
@@ -163,7 +177,7 @@ class ActualMatchingValidator:
         return self._splits_loader
 
     def _validate_data_structure(self, correct_matches: Dict[str, Any]) -> List[ValidationIssue]:
-        """Validate data structure rules for correct_matches.yaml."""
+        """Validate data structure rules for correct_matches directory."""
         issues = []
         within_section_duplicates = set()
 
@@ -331,7 +345,7 @@ class ActualMatchingValidator:
                         correct_match=brush_string,
                         expected_section=expected_section,
                         details=f"Brush string '{brush_string}' no longer matches any strategy",
-                        suggested_action=f"Remove '{brush_string}' from correct_matches.yaml or update matching logic",
+                        suggested_action=f"Remove '{brush_string}' from correct_matches directory or update matching logic",
                     )
                 )
                 return issues
@@ -461,7 +475,7 @@ class ActualMatchingValidator:
                         issue_type="structural_change",
                         severity="high",
                         correct_match=brush_string,
-                        expected_section=expected_section,  # Where it currently is (correct_matches.yaml)
+                        expected_section=expected_section,  # Where it currently is (correct_matches directory)
                         actual_section=actual_section,  # Where it should be (current matching system)
                         expected_brand=(
                             expected_data.get("brand") if expected_section == "brush" else None
@@ -497,7 +511,7 @@ class ActualMatchingValidator:
                             actual_brand=actual_brand,
                             actual_model=actual_model,
                             details=f"Brand/model mismatch: expected '{expected_brand} {expected_model}', got '{actual_brand} {actual_model}'",
-                            suggested_action=f"Update correct_matches.yaml to reflect new brand/model: '{actual_brand} {actual_model}'",
+                            suggested_action=f"Update correct_matches directory to reflect new brand/model: '{actual_brand} {actual_model}'",
                         )
                     )
 
@@ -526,7 +540,7 @@ class ActualMatchingValidator:
                                 actual_handle_brand=actual_handle_brand,
                                 actual_handle_model=actual_handle_model,
                                 details=f"Handle brand/model mismatch: expected '{expected_handle_brand} {expected_handle_model}', got '{actual_handle_brand} {actual_handle_model}'",
-                                suggested_action=f"Update correct_matches.yaml handle section to reflect new brand/model: '{actual_handle_brand} {actual_handle_model}'",
+                                suggested_action=f"Update correct_matches directory handle section to reflect new brand/model: '{actual_handle_brand} {actual_handle_model}'",
                             )
                         )
 
@@ -550,7 +564,7 @@ class ActualMatchingValidator:
                                 actual_knot_brand=actual_knot_brand,
                                 actual_knot_model=actual_knot_model,
                                 details=f"Knot brand/model mismatch: expected '{expected_knot_brand} {expected_knot_model}', got '{actual_knot_brand} {actual_knot_model}'",
-                                suggested_action=f"Update correct_matches.yaml knot section to reflect new brand/model: '{actual_knot_brand} {actual_knot_model}'",
+                                suggested_action=f"Update correct_matches directory knot section to reflect new brand/model: '{actual_knot_brand} {actual_knot_model}'",
                             )
                         )
 
@@ -581,7 +595,7 @@ class ActualMatchingValidator:
                         severity="high",
                         correct_match=entry_string,
                         details=f"{field.title()} string '{entry_string}' no longer matches any strategy",
-                        suggested_action=f"Remove '{entry_string}' from correct_matches.yaml or update matching logic",
+                        suggested_action=f"Remove '{entry_string}' from correct_matches directory or update matching logic",
                     )
                 )
                 return issues
@@ -601,7 +615,7 @@ class ActualMatchingValidator:
                         actual_brand=actual_brand,
                         actual_model=actual_model,
                         details=f"Brand/model mismatch: expected '{expected_brand} {expected_model}', got '{actual_brand} {actual_model}'",
-                        suggested_action=f"Update correct_matches.yaml to reflect new brand/model: '{actual_brand} {actual_model}'",
+                        suggested_action=f"Update correct_matches directory to reflect new brand/model: '{actual_brand} {actual_model}'",
                     )
                 )
 
@@ -615,7 +629,7 @@ class ActualMatchingValidator:
     def _collect_brush_string_locations(
         self, correct_matches: Dict[str, Any]
     ) -> Dict[str, List[Dict[str, Any]]]:
-        """Collect all brush strings and their locations in correct_matches.yaml."""
+        """Collect all brush strings and their locations in correct_matches directory."""
         brush_string_locations = {}
 
         # Check brush section
@@ -745,7 +759,7 @@ class ActualMatchingValidator:
 
     def validate(self, field: str) -> ValidationResult:
         """
-        Validate correct_matches.yaml entries for the specified field using actual matching.
+        Validate correct_matches directory entries for the specified field using actual matching.
 
         Args:
             field: Field type to validate (razor, blade, brush, soap)
@@ -760,12 +774,35 @@ class ActualMatchingValidator:
             # Clear all caches before validation to ensure fresh data
             self._clear_all_caches()
             
-            # Load correct_matches.yaml
+            # Load correct_matches from directory structure
             import yaml
 
-            correct_matches_path = self.data_path / "correct_matches.yaml"
-            with correct_matches_path.open("r", encoding="utf-8") as f:
-                correct_matches = yaml.safe_load(f)
+            correct_matches_dir = self.data_path / "correct_matches"
+            correct_matches = {}
+            
+            # Load all field files from directory structure
+            if correct_matches_dir.exists():
+                for field_file in correct_matches_dir.glob("*.yaml"):
+                    field_name = field_file.stem
+                    # Skip backup and report files
+                    if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                        continue
+                    try:
+                        with field_file.open("r", encoding="utf-8") as f:
+                            field_data = yaml.safe_load(f)
+                            if field_data:
+                                correct_matches[field_name] = field_data
+                    except Exception as e:
+                        logger.warning(f"Error loading {field_file}: {e}")
+            
+            # If directory doesn't exist or is empty, return empty result
+            if not correct_matches:
+                return ValidationResult(
+                    field=field,
+                    total_entries=0,
+                    issues=[],
+                    processing_time=time.time() - start_time,
+                )
 
             # Validate data structure first
             structure_issues = self._validate_data_structure(correct_matches)

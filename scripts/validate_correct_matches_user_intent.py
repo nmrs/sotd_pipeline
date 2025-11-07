@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Script to validate and enhance existing correct_matches.yaml entries with user intent data.
+Script to validate and enhance existing correct_matches directory entries with user intent data.
 
 This script:
-1. Extracts all brush entries from data/correct_matches.yaml
+1. Extracts all brush entries from data/correct_matches directory
 2. Runs each entry through BrushMatcher to detect user intent
-3. For successful matches: Augments correct_matches.yaml with user_intent field
+3. For successful matches: Augments correct_matches directory with user_intent field
 4. For failed matches: Documents entries requiring manual validation
 5. Creates a validation report with success/failure statistics
 """
@@ -26,27 +26,42 @@ from sotd.match.config import BrushMatcherConfig
 
 
 class CorrectMatchesValidator:
-    """Validator for correct_matches.yaml entries with user intent enhancement."""
+    """Validator for correct_matches directory entries with user intent enhancement."""
 
     def __init__(self):
         """Initialize the validator with brush matcher."""
         self.config = BrushMatcherConfig.create_default()
         self.brush_matcher = BrushMatcher(config=self.config)
-        self.correct_matches_path = Path("data/correct_matches.yaml")
+        self.correct_matches_path = Path("data/correct_matches")
 
     def load_correct_matches(self) -> Dict[str, Any]:
-        """Load correct_matches.yaml file."""
+        """Load correct_matches from directory structure."""
         if not self.correct_matches_path.exists():
-            raise FileNotFoundError(f"Correct matches file not found: {self.correct_matches_path}")
+            raise FileNotFoundError(f"Correct matches directory not found: {self.correct_matches_path}")
 
-        with open(self.correct_matches_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+        correct_matches = {}
+        
+        # Load all field files from directory structure
+        for field_file in self.correct_matches_path.glob("*.yaml"):
+            field_name = field_file.stem
+            # Skip backup and report files
+            if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                continue
+            try:
+                with field_file.open("r", encoding="utf-8") as f:
+                    field_data = yaml.safe_load(f)
+                    if field_data:
+                        correct_matches[field_name] = field_data
+            except Exception as e:
+                print(f"Warning: Error loading {field_file}: {e}")
+        
+        return correct_matches
 
     def extract_brush_entries(
         self, correct_matches: Dict[str, Any]
     ) -> List[Tuple[str, str, Dict[str, Any]]]:
         """
-        Extract all brush entries from correct_matches.yaml.
+        Extract all brush entries from correct_matches directory.
 
         Returns:
             List of tuples: (entry_type, brush_string, entry_data)
@@ -90,7 +105,7 @@ class CorrectMatchesValidator:
         Args:
             entry_type: Type of entry ("brush", "split_brush", "handle_knot_section")
             brush_string: The brush string to validate
-            entry_data: The entry data from correct_matches.yaml
+            entry_data: The entry data from correct_matches directory
 
         Returns:
             Dictionary with validation results
@@ -142,17 +157,17 @@ class CorrectMatchesValidator:
         self, correct_matches: Dict[str, Any], validation_results: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
-        Enhance correct_matches.yaml with user intent data for successful validations.
+        Enhance correct_matches directory with user intent data for successful validations.
 
         Only composite brushes (split_brush, handle_knot_section) should have user_intent.
         Simple brushes (brush section) should not have user_intent.
 
         Args:
-            correct_matches: Original correct_matches.yaml data
+            correct_matches: Original correct_matches directory data
             validation_results: Results from validation
 
         Returns:
-            Enhanced correct_matches.yaml data
+            Enhanced correct_matches directory data
         """
         enhanced_matches = correct_matches.copy()
 
@@ -285,35 +300,37 @@ class CorrectMatchesValidator:
         self, enhanced_matches: Dict[str, Any], backup: bool = True
     ) -> None:
         """
-        Save enhanced correct_matches.yaml file.
+        Save enhanced correct_matches directory files.
 
         Args:
-            enhanced_matches: Enhanced correct_matches.yaml data
-            backup: Whether to create a backup of the original file
+            enhanced_matches: Enhanced correct_matches directory data
+            backup: Whether to create backups of the original files
         """
         import yaml
+        import shutil
 
-        if backup:
-            # Create backup
-            backup_path = self.correct_matches_path.with_suffix(".yaml.backup")
-            if self.correct_matches_path.exists():
-                import shutil
-
-                shutil.copy2(self.correct_matches_path, backup_path)
+        # Save each field to its own file
+        for field_name, field_data in enhanced_matches.items():
+            field_file = self.correct_matches_path / f"{field_name}.yaml"
+            
+            if backup and field_file.exists():
+                # Create backup
+                backup_path = field_file.with_suffix(".yaml.backup")
+                shutil.copy2(field_file, backup_path)
                 print(f"Created backup: {backup_path}")
 
-        # Save enhanced file with proper unicode handling
-        with open(self.correct_matches_path, "w", encoding="utf-8") as f:
-            yaml.dump(
-                enhanced_matches,
-                f,
-                default_flow_style=False,
-                indent=2,
-                sort_keys=False,
-                allow_unicode=True,
-            )
+            # Save enhanced file with proper unicode handling
+            with field_file.open("w", encoding="utf-8") as f:
+                yaml.dump(
+                    field_data,
+                    f,
+                    default_flow_style=False,
+                    indent=2,
+                    sort_keys=False,
+                    allow_unicode=True,
+                )
 
-        print(f"Saved enhanced correct_matches.yaml: {self.correct_matches_path}")
+        print(f"Saved enhanced correct_matches directory: {self.correct_matches_path}")
 
     def run_validation(self, dry_run: bool = False) -> None:
         """
@@ -322,7 +339,7 @@ class CorrectMatchesValidator:
         Args:
             dry_run: If True, don't save changes, just generate report
         """
-        print("Loading correct_matches.yaml...")
+        print("Loading correct_matches directory...")
         correct_matches = self.load_correct_matches()
 
         print("Extracting brush entries...")
@@ -336,7 +353,7 @@ class CorrectMatchesValidator:
             result = self.validate_brush_entry(entry_type, brush_string, entry_data)
             validation_results.append(result)
 
-        print("Enhancing correct_matches.yaml...")
+        print("Enhancing correct_matches directory...")
         enhanced_matches, enhanced_entries = self.enhance_correct_matches(
             correct_matches, validation_results
         )
@@ -358,7 +375,7 @@ class CorrectMatchesValidator:
         print("=" * 50)
 
         if not dry_run:
-            print("Saving enhanced correct_matches.yaml...")
+            print("Saving enhanced correct_matches directory...")
             self.save_enhanced_correct_matches(enhanced_matches)
         else:
             print("DRY RUN: No changes saved")
@@ -369,7 +386,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Validate and enhance correct_matches.yaml with user intent"
+        description="Validate and enhance correct_matches directory with user intent"
     )
     parser.add_argument(
         "--dry-run", action="store_true", help="Don't save changes, just generate report"
