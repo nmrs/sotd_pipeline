@@ -1164,11 +1164,6 @@ other_knots:
     default: Badger
     patterns:
       - teton
-  That Darn Rob:
-    default: Badger
-    patterns:
-      - darn.*rob
-      - tdr
   Thater:
     default: Badger
     patterns:

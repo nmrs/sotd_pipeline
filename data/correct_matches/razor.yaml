@@ -12,11 +12,6 @@
   - roger quintero 3d printed half de razor
   Lathercatcher:
   - stoll jr. - 3d lathercatcher
-A:
-  R:
-    ' Justice':
-      Straight:
-      - a.r. justice swedish - half hollow - spike point + barber's notch - 6/8
 Above the Tie:
   M2:
   - att m2 oc - gillette silver blue
@@ -43,14 +38,16 @@ Above the Tie:
   Windsor Pro SB90:
   - above the tie - calypso blue v2 sb90, de
   Windsor SSRH2:
-  - above the tie - windsor ssrh2, oc base plate, de - (original version not windsor pro)
+  - above the tie - windsor ssrh2, oc base plate, de - (original version not windsor
+    pro)
   X1 Slant:
   - above the tie x1 slant
 Ale Razors:
   Straight:
   - ale razors 8/8
   - ale razors 8/8 near half hollow barber's notch
-  - ale razors 8/8 near half hollow barber's notch, 32 layer forge welded 1084, etched in coffee with hamon, carbon fiber scales with g10 liners, by alejandro balbis
+  - ale razors 8/8 near half hollow barber's notch, 32 layer forge welded 1084, etched
+    in coffee with hamon, carbon fiber scales with g10 liners, by alejandro balbis
 Alpha:
   Claymore:
   - alpha shaving "claymore"
@@ -74,15 +71,14 @@ Alpha:
 Alshabab:
   Razor:
   - alshabab original
-Anton Wingen Jr:
-  ? ''
-  : Red Point:
-    - anton wingen jr. red point
 Archibald:
   A77 Shavette:
   - archibald a77 shavette
   - archibald a77 stainless scales shavette
   - archibald a77 stainless shavette
+Art of Shaving:
+  Excalibur:
+  - aos excalibur
 Art Razor:
   Straight:
   - art razor gulliver 12/8"
@@ -97,9 +93,6 @@ Art Razor:
   - yurii kravcenko kamisori style razor
   - yurii kravcenko konsul
   - yurii kravcenko konsul 8/8
-Art of Shaving:
-  Excalibur:
-  - aos excalibur
 Assured for Men:
   Dollar Tree Safety Razor:
   - assured for men safety razor
@@ -158,9 +151,6 @@ Aylsworth:
 B. Payne & Sons:
   Straight:
   - b. payne & sons tobacco co. - b&m razor
-BO-RAS-IC:
-  Straight:
-  - bo-ras-ic with bamboo scales
 Backal:
   Straight:
   - straight backal from griffiths backal 15/16
@@ -299,6 +289,9 @@ Blutt Rasur:
   - blutt br-1 1.2
   - blutt rasur - br-1 (0.99 mm gap)
   - blutt rasur br-1 0.99
+BO-RAS-IC:
+  Straight:
+  - bo-ras-ic with bamboo scales
 Bulimica:
   Safety Razor:
   - bulimica - rainbow safety razor (green)
@@ -308,11 +301,10 @@ Böker:
   - böker - abalone (6/8", full hollow, carbon steel, french point) 1 mystery mark
   - böker - abalone (6/8", full hollow, carbon steel, french point) 2 mystery mark
   - böker - abalone (6/8", full hollow, carbon steel, french point) unknown edge
-  - böker - abalone (6/8", full hollow, carbon steel, french point) unknown first edge
-  - böker - abalone (6/8", full hollow, carbon steel, french point) unknown, but other edge
-  Elite Carbon 2:
-    '0':
-    - böker - elite carbon 2.0
+  - böker - abalone (6/8", full hollow, carbon steel, french point) unknown first
+    edge
+  - böker - abalone (6/8", full hollow, carbon steel, french point) unknown, but other
+    edge
   Elite Carbon 2.0:
   - böker elite carbon 2.0
   King Cutter:
@@ -337,14 +329,6 @@ Böker:
   - h. boker "our very own" 6/8 square tip
   - h. boker & co. "our very own" 11/16 hollow ground square tip
   - h. boker kelley-how no. 6702
-C:
-  V:
-    ' Heljestrand':
-      Straight:
-      - c.v. heljestrand mk 10 13/16 half hollow square point
-      - c.v. heljestrand mk31 11/16 unstamped tang full hollow
-      - cvh - 5/8" square tip hollow ground
-      - straight cv heljestrand mk 10
 C-Mon:
   Straight:
   - c-mon special 5/8 hollow ground square point
@@ -361,12 +345,6 @@ C.V. Heljestrand:
   - cvh - 5/8" square point hollow ground
   - cvh - mk 32 5/8" square point hollow ground
   - heljestrand 14 (7/8", full hollow, carbon steel)
-CJB:
-  GR-100B:
-  - greager gr-100b
-  Kamisori Shavette:
-  - cjb gr100b kamisori
-  - cjb kamisori shavette
 Campobasso:
   Straight:
   - campobasso, 6/8 full hollow round point
@@ -462,6 +440,12 @@ Chiseled Face:
   - 'chiseled face ti original #22'
   - chiseled face titanium legacy razor
   - legacy razor
+CJB:
+  GR-100B:
+  - greager gr-100b
+  Kamisori Shavette:
+  - cjb gr100b kamisori
+  - cjb kamisori shavette
 Classic:
   King Cobra:
   - classic shaving - king cobra
@@ -480,14 +464,6 @@ Colonial:
 Cooper:
   Monobilt:
   - cooper - monobilt
-DS Cosmetics:
-  AX:
-  - ds-ax 1.55 "poleaxe"
-  T7SE:
-  - dscosmetic t7se
-DSCosmetic:
-  Mars SE:
-  - ds cosmetic mars single edge razor
 Daune:
   Double Edge Shavette:
   - daune
@@ -524,6 +500,14 @@ Dovo:
 Drew Dick:
   Straight:
   - drew dick - sheffield style 9/8 1/4 hollow
+DS Cosmetics:
+  AX:
+  - ds-ax 1.55 "poleaxe"
+  T7SE:
+  - dscosmetic t7se
+DSCosmetic:
+  Mars SE:
+  - ds cosmetic mars single edge razor
 Dubl Duck:
   Goldedge:
   - dubl duck goldedge
@@ -540,29 +524,6 @@ Durham:
   - durham demonstrator black scales
   - durham duplex open blade system
   - durham duplex straight bar shavette
-ERN:
-  Ator:
-  - ern 5/8 full hollow, ator 5/8 full hollow
-  - ern ator, 5/8 hollow round point
-  Straight:
-  - c. friedr. ern 72 garantie soligen - half hollow - french point - 13/16
-  - ern - 5/8" hollow ground
-  - ern - 6/8" round tip extra hollow
-  - ern 207, 6/8 full hollow round point
-  - ern 207, 6/8 hollow round point
-  - ern 22 7/8
-  - ern 22 7/8, full hollow square point
-  - ern 22 7/8, square point extra hollow
-  - ern 421, 5/8 hollow square point
-  - ern 6/8 french point full hollow
-  - ern 7/8 full hollow round point
-  - ern ator, 6/8 full hollow round point
-  - ern crown & sword
-  - ern ferreteria sardon arequipa 2611, 15/16 full hollow round point
-  - ern ferreteria sardon arequipa 2611, 15/16, full hollow, round point
-  - friedr ern & co. - 6/8" round point hollow ground
-  - friedr ern - 6/8" round tip hollow ground
-  - straight ern ye ole straight n strop
 Edmond Roffler:
   Straight:
   - edmond roffler
@@ -606,6 +567,29 @@ EldrormR Industries:
 Enders:
   Speed Shaver:
   - enders speed razor with injector blade adaptor
+ERN:
+  Ator:
+  - ern 5/8 full hollow, ator 5/8 full hollow
+  - ern ator, 5/8 hollow round point
+  Straight:
+  - c. friedr. ern 72 garantie soligen - half hollow - french point - 13/16
+  - ern - 5/8" hollow ground
+  - ern - 6/8" round tip extra hollow
+  - ern 207, 6/8 full hollow round point
+  - ern 207, 6/8 hollow round point
+  - ern 22 7/8
+  - ern 22 7/8, full hollow square point
+  - ern 22 7/8, square point extra hollow
+  - ern 421, 5/8 hollow square point
+  - ern 6/8 french point full hollow
+  - ern 7/8 full hollow round point
+  - ern ator, 6/8 full hollow round point
+  - ern crown & sword
+  - ern ferreteria sardon arequipa 2611, 15/16 full hollow round point
+  - ern ferreteria sardon arequipa 2611, 15/16, full hollow, round point
+  - friedr ern & co. - 6/8" round point hollow ground
+  - friedr ern - 6/8" round tip hollow ground
+  - straight ern ye ole straight n strop
 Ever-Ready:
   '1912':
   - ever ready - 1912
@@ -809,23 +793,9 @@ GEM:
   - gem - push button
   - gem push button
   - gem pushbutton
-GL Customs:
-  Keystone Light:
-  - gl customs - 'mystic midnight' keystone light razor
-Geneva Cutlery Co:
-  ? ''
-  : Straight:
-    - geneva cutlery co. heavy 5/8 hollow ground square point
 Geneva Cutlery Co.:
   Straight:
   - geneva cutlery co. 6/8" hollow ground round point
-Geo:
-  ' Wostenholm & Son':
-    Straight:
-    - geo. wostenholm & son original pipe razor, 5/8 square point
-    - geo. wostenholm superb pipe razor
-    - wostenholm & sons pipe razor 6/8 and joseph elliot 13/16
-    - wostenholm original pipe razor, 6/8 square point
 Geo. Wostenholm & Son:
   Straight:
   - george wustenholm superb pipe razor
@@ -872,11 +842,6 @@ Gillette:
   Heritage:
   - gillette heritage
   - gillette heritage inspired
-  King C:
-    ' Gillette':
-    - kc gillette w/ razorock mission baseplate
-    - kc gillette with razorock mission baseplate
-    - king c. gillette on barbaros levened handle
   King C. Gillette:
   - gillette - king c chrome
   - gillette - king c gillette
@@ -884,7 +849,8 @@ Gillette:
   - gillette king c gillette on barbaros levened handle
   - kc gillette
   - king c gillette
-  - king c gillette (it has the same head as some merkur one, can't remember exactly what model)
+  - king c gillette (it has the same head as some merkur one, can't remember exactly
+    what model)
   - king c gillette de
   - king c. gillette
   - new king c. gillette
@@ -1177,6 +1143,9 @@ Gillette:
   - gillette tuckaway
   Unspecified:
   - gillette c.1949
+GL Customs:
+  Keystone Light:
+  - gl customs - 'mystic midnight' keystone light razor
 Gold Dollar:
   Straight:
   - gold dollar 208
@@ -1188,11 +1157,6 @@ Goodfellas Smile:
 Greencult:
   GC 1.1:
   - green cult 1.1
-  GC 2:
-    '0':
-    - green cult 2.0 (plate 1)
-    - green cult 2.0 plate i
-    - green cult plate iii
   GC 2.0:
   - green cult 2.0 plate ii
   - greencult 2.0 (plate iii)
@@ -1302,34 +1266,20 @@ Homelike:
 Iberia:
   '14':
   - iberia 14 doble temple 8/8, extra hollow square point
+iKon:
+  B1:
+  - ikon b1 deluxe
+  - ikon b1oss
+  Short Comb:
+  - ikon razors - ikon short comb
+  - ikon razors - ikon short comb with bulldog 80 mm handle
+  Tek:
+  - ikon razors - tek head / base plate with bulldog 80 mm handle
+  X3:
+  - ikon x3
 Iwasaki:
   Straight:
   - iwasaki 13/16" full hollow square point tamahagane
-J:
-  ' Koester''s Sons':
-    Straight:
-    - j. koester's sons 11/16", full hollow, square point
-  A:
-    ' Henckels':
-      Friodur Straight:
-      - henckels friodur 17 15/16 with scales by muninn woodworks
-      - henckels friodur 472 13/16 with weru burl scales by muninn woodworks
-      - j.a. henckels friodur 14 full hollow square point
-      - j.a. henckels friodur 17 15/16
-      - j.a. henckels friodur 472 13/16 full hollow square point with weru burl scales by muninn woodworks
-      - j.a. henckels friodur 472 13/16 full hollow square point with weru scales by muninn woodworks
-      - j.a. henckels friodur 472 13/16 with weru burl scales by muninn woodworks
-      - j.a. henckels friodur 472 13/16 with wuru burl scales by u/whosgotthepudding
-      Straight:
-      - henckels 26 5/8 hollow barbers point
-      - j. a. henckels 34 7/8 half hollow spanish point
-      - j. a. henckels zwillingswerk 78 5/8
-  R:
-    ' Torrey Razor Co':
-      ? ''
-      : Straight:
-        - j r torrey company
-        - straight jr torrey swedish frameback 6/8
 J.A. Henckels:
   Friodur Straight:
   - friodur 14
@@ -1344,9 +1294,12 @@ J.A. Henckels:
   - j.a.henckels friodur 17 - half hollow - square point - 13/16
   - zwilling j. a. henckels friodur 14 (8/8", extra hollow ground, stainless steel)
   - zwilling j. a. henckels friodur 17 (nos, 7/8", hollow ground, stainless steel)
-  - zwilling j. a. henckels friodur 50 (7/8", hollow ground, stainless steel, masonic deco)
-  - zwilling j. a. henckels friodur 72-v (13/16", quarter hollow or near wedge, stainless steel)
-  - zwilling j. a. henckels friodur unnumbered 8/8" ( hollow ground, stainless steel, round point)
+  - zwilling j. a. henckels friodur 50 (7/8", hollow ground, stainless steel, masonic
+    deco)
+  - zwilling j. a. henckels friodur 72-v (13/16", quarter hollow or near wedge, stainless
+    steel)
+  - zwilling j. a. henckels friodur unnumbered 8/8" ( hollow ground, stainless steel,
+    round point)
   Straight:
   - henckels 26, 5/8 hollow
   - henckels 34
@@ -1457,6 +1410,11 @@ Kikuboshi:
   Straight:
   - kikuboshi - 6/8" frameback
   - kikuboshi r. saito 6/8" extra hollow
+Консул (Konsul):
+  Adjustable:
+  - ussr консул (konsul) adjustable
+  - ussr консул (konsul) adjustable (original nickel, unknown)
+  - ussr консул (konsul) adjustable; setting 4 (original nickel, unknown age)
 Koraat:
   Moarteen (r/Wetshaving exclusive):
   - koraat - moarteen
@@ -1504,10 +1462,6 @@ Kropp:
   Straight:
   - kropp 5/8, full hollow round point
   - kropp 6/8 full hollow round point
-LASSCo:
-  BBS-1:
-  - la shaving soap company - bbs1
-  - lassco bbs-1
 Lambda:
   Ares:
   - lambda ares
@@ -1518,6 +1472,10 @@ Lambda:
   - lambda athena ti
   - lambda razors - athena ss
   - lambda razors athena
+LASSCo:
+  BBS-1:
+  - la shaving soap company - bbs1
+  - lassco bbs-1
 Leaf:
   Razor:
   - leaf
@@ -1543,18 +1501,10 @@ Lion Razor Works:
 Lord:
   L122:
   - lord l122
-M:
-  ' Jung':
-    Straight:
-    - m. jung no. 80
 M. Jung:
   Straight:
   - m. jung no. 80 straight razor
 Maggard:
-  SS70:
-  - maggard cnc
-  - maggard razors cnc .70
-  - maggard razors cnc.70
   Shavette:
   - maggard shavette
   Slant:
@@ -1563,6 +1513,10 @@ Maggard:
   - maggard mr11 with slant head
   - maggard razors - slant + mrt travel handle
   - maggard razors - slant + rr ufo handle
+  SS70:
+  - maggard cnc
+  - maggard razors cnc .70
+  - maggard razors cnc.70
   V2:
   - maggard v2
   V3:
@@ -1840,12 +1794,12 @@ Parker:
   Adjustable Injector:
   - injector parker
   - parker adjustable injector
+  Semi Slant:
+  - parker semi slant
   SRB Shavette:
   - parker srb shavette
   SRX:
   - parker srx shavette
-  Semi Slant:
-  - parker semi slant
   Stella:
   - parker stella
   Straight:
@@ -1881,11 +1835,6 @@ Piedmont:
 Polgacrup:
   '45':
   - polgacrup 45 razor
-Portland Razor Co:
-  ? ''
-  : Straight:
-    - portland razor co. hydra 7/8 wedge
-    - portland razor co. the gryphon 13/16 wedge barber's notch
 Portland Razor Co.:
   Straight:
   - portland cutlery co. steinmetz "salamander"
@@ -1904,7 +1853,8 @@ Puma:
 Raido Star:
   Degenerate Kamisori:
   - raido star - degenerate kamisori extra hollow - 8/8
-  - raido star - 堕落の剃刀 razor of depravity (8/8", extra hollow, carbon steel kamisori) 🇺🇦
+  - raido star - 堕落の剃刀 razor of depravity (8/8", extra hollow, carbon steel kamisori)
+    🇺🇦
   - raido star degenerate kamisori
   - raido star degenerate kamisori (folding) 8/8 square point full hollow
   - raido star degenerate kamisori 8/8 extra hollow
@@ -1929,13 +1879,19 @@ Ralf Aust:
   - ralf aust 5/8 round point hollow ground
   - ralf aust 5/8 stainless full hollow spanish point
   - ralf aust 5/8" full hollow, spanish tip, stainless steel
-  - ralf aust 6/8 full hollow round point with mammoth ivory & blue resin scales made by u/whosgotthepudding
+  - ralf aust 6/8 full hollow round point with mammoth ivory & blue resin scales made
+    by u/whosgotthepudding
   - ralf aust 6/8 full hollow spanish point
   - ralf aust 6/8 full hollow square point horn scales
   - ralf aust 6/8 hollow square point horn scales
   - ralf aust 6/8 square point
   - ralf aust 6/8, full hollow square point
   - ralf aust 7/8
+Razorine:
+  ? ''
+  : - razorine
+    - razorine premium (matte brass special edition)
+    - razorine premium brass shavette
 RazoRock:
   Baby Smooth:
   - razorock - bbs standard
@@ -1945,11 +1901,6 @@ RazoRock:
   - razorock / italian barber - cyber razor, mild
   Eco:
   - razorock eco hulk green
-  GOAT:
-  - razorock - goat
-  - razorock goat
-  - razorock goat w/ 82mm hollow hd short handle
-  - razorock the goat
   Game Changer:
   - 84 gamechanger w/ suneko
   - game changer .68p
@@ -2001,6 +1952,11 @@ RazoRock:
   - razorock german 37
   - razorock german 37 / mr5
   - razorock german 37 slant
+  GOAT:
+  - razorock - goat
+  - razorock goat
+  - razorock goat w/ 82mm hollow hd short handle
+  - razorock the goat
   Hawk v2:
   - razorock blue hawk v2
   - razorock hawk v.2
@@ -2066,12 +2022,6 @@ RazoRock:
   - razorock tech ii
   Wunderbar Slant:
   - rr wunderbar
-Razorine:
-  ? ''
-  : - razorine
-    - razorine premium (matte brass special edition)
-    - razorine premium brass shavette
-  format: Shavette (DE)
 Red Imp:
   '132':
   - red imp 132 5/8 square point near wedge
@@ -2109,7 +2059,8 @@ River Razors:
   - river razors 6/8 3/4 hollow
 Robert Klaas:
   Straight:
-  - robert klaas 207 "north carolina cutlery club" 1984 1 of 86 - full hollow - round point - 11/16
+  - robert klaas 207 "north carolina cutlery club" 1984 1 of 86 - full hollow - round
+    point - 11/16
 Robeson:
   Shure-Edge:
   - pipe razor/robeson shure-edge
@@ -2161,9 +2112,6 @@ Romer-7:
 Rubin:
   '1':
   - рубин
-SCS:
-  Model A:
-  - simple clean shave (reb engineering & machine, llc) - scs model a
 Saiver:
   DE:
   - sayver -
@@ -2238,6 +2186,9 @@ Schick:
   - schick proline bbr-s with scales by long shaving
   Stick:
   - stick schick
+SCS:
+  Model A:
+  - simple clean shave (reb engineering & machine, llc) - scs model a
 Segal:
   Unitary:
   - segal gold tone
@@ -2265,10 +2216,6 @@ Silver STAR:
   Model 100:
   - silver star - vintage de
   - silver star vintage de
-Simmons Hardware Co:
-  ? ''
-  : Straight:
-    - simmons hardware company - barbers pet
 Snail Forge:
   Straight:
   - snail forge 8/8 quarter hollow blade with fancy grind
@@ -2277,12 +2224,6 @@ Snail Forge:
 Spornette:
   Hair Shaper:
   - spernette hair shaper shavette
-St:
-  ' Louis Razor Co':
-    ? ''
-    : Straight:
-      - st. louis razor co. - blue steel
-      - st. louis razor co. - velvet edge
 Stahly:
   Live Blade:
   - stahly live blade head w/ wcs 175s handle
@@ -2298,7 +2239,8 @@ Star Reito:
 Stirling:
   Stainless DE Razor:
   - stirling soap co. - 316 stainless steel razor
-  - stirling soap company - stirling stainless steel (austin handle / st plate) serial no. st-01-084
+  - stirling soap company - stirling stainless steel (austin handle / st plate) serial
+    no. st-01-084
   - stirling ss standard plate
   - stirling stainless standard head
 Supply:
@@ -2306,11 +2248,6 @@ Supply:
   - supply - sing edge
   SE Pro:
   - supply adjustable
-TRC:
-  DE:
-  - the razor co. - stainless steel
-  - the razor company - trc al lvl 2
-  - the razor company - trc aluminum lvl 2
 Tanifuji:
   Straight:
   - tanifuji spalding 0411 6/8" full hollow
@@ -2343,32 +2280,33 @@ Tedalus:
   Velocity-ONE:
   - tedalus - velocity one
 The Holy Black:
-  SR-71:
-  - the holy black sr-71
   Shavette:
   - the holy black shavette
+  SR-71:
+  - the holy black sr-71
 Thiers Issard:
   Straight:
   - theirs issard 69 medaille argent - quarter hollow - french point - 6/8
-  - thiers issard 14 médaille d'or 1921 exposition d'algier acier spécial (7/8", extra hollow, square point, carbon steel)
-  - thiers issard 1937 special coiffeur 60 médaille argent - 3/4 hollow - round point - 6/8
-  - thiers issard 1937 special coiffeur 60 médaille argent - half hollow - round point - 6/8
+  - thiers issard 14 médaille d'or 1921 exposition d'algier acier spécial (7/8", extra
+    hollow, square point, carbon steel)
+  - thiers issard 1937 special coiffeur 60 médaille argent - 3/4 hollow - round point
+    - 6/8
+  - thiers issard 1937 special coiffeur 60 médaille argent - half hollow - round point
+    - 6/8
   - thiers issard art of shaving stainless scales
   - thiers issard art of shaving straight
   - thiers issard evide sonnant extra hollow 6/8
   - thiers issard le dandy (5/8", square point, carbon steel)
   - thiers issard le grelot 6/8 full hollow
   - thiers issard le transatlantic 7/8" full hollow round point
-  - thiers issard médaille d'or exposition d'alger - full hollow - half round point - 6/8
+  - thiers issard médaille d'or exposition d'alger - full hollow - half round point
+    - 6/8
   - thiers issard médaille d'or exposition d'alger - full hollow - round point - 6/8
-  - thiers issard médaille d'or exposition d'alger - pistachio wood scaled - full hollow - round point - 6/8
+  - thiers issard médaille d'or exposition d'alger - pistachio wood scaled - full
+    hollow - round point - 6/8
   - thiers issard évidé sonnant 6/8" extra hollow
   - thiers-issard spartacus 7/8
   - thiers-issart spartacus 7/8
-Thomas Turner & Co:
-  ? ''
-  : Straight:
-    - thomas turner & co. - cutlers to his majesty - 6/8 square point
 Thomas Turner & Co.:
   Straight:
   - thomas turner & co cutlers to his majesty - 6/8 square point quarter hollow
@@ -2405,15 +2343,14 @@ Timeless:
   - timeless ti .95
   - timeless ti95 .95 dc matte
   - timeless titanium slim
+TRC:
+  DE:
+  - the razor co. - stainless steel
+  - the razor company - trc al lvl 2
+  - the razor company - trc aluminum lvl 2
 Treet:
   TTO:
   - treet $trickortreat
-Union Razor Co:
-  ? ''
-  : Straight:
-    - union cutlery - spike
-    - union cutlery company - spike
-    - union razor cutlery 5/8 full hollow
 Utica Knife & Razor:
   Red Point 917:
   - utica knife & razor red point no. 917
@@ -2439,17 +2376,6 @@ Vikings Blade:
 Vikings Revolution:
   Long Handle:
   - viking revolution long handle
-W:
-  R:
-    ' Humphreys & Co':
-      ? ''
-      : Straight:
-        - w.r humphreys & co. black cat - full hollow - round point - 13/16
-WCS:
-  Multi Titanium Collection Razor:
-  - w.c.s. multi titanium collection razor, 84m
-  Slant:
-  - wcs x cg slant, yaqi stainless steel handle
 Wacker:
   Straight:
   - wacker jungmeister 6/8 half hollow round point
@@ -2457,7 +2383,8 @@ Wade & Butcher:
   Straight:
   - butcher & wade - 6/8" wedge barber's notch
   - butcher and wade with old type cap - open comb frankenrazor
-  - vintage wade & butcher (late 1800s) straight razor; calvalry called by karve overlander brass
+  - vintage wade & butcher (late 1800s) straight razor; calvalry called by karve overlander
+    brass
   - w&b - 5/8 square point hollow ground
   - w&b celebrated eh 6/8 barber's notch
   - w&b celebrated hollow
@@ -2469,7 +2396,8 @@ Wade & Butcher:
   - w&b fbu, 8/8 celebrated hollow
   - wade & butcher
   - wade & butcher "special"
-  - wade & butcher "the celebrated hollow ground razor for barber's use" 8/8, half hollow barber's notch
+  - wade & butcher "the celebrated hollow ground razor for barber's use" 8/8, half
+    hollow barber's notch
   - wade & butcher - 5/8" square point hollow ground
   - wade & butcher - 6/8" barber's notch wedge
   - wade & butcher - 6/8" wedge barber's notch
@@ -2479,7 +2407,8 @@ Wade & Butcher:
   - wade & butcher - striped scales
   - wade & butcher 5/8
   - wade & butcher 5/8" hollow ground square point
-  - wade & butcher 6/8 extra hollow ground improved tang w/ pre-ban ivory scales saturday from 7 day set
+  - wade & butcher 6/8 extra hollow ground improved tang w/ pre-ban ivory scales saturday
+    from 7 day set
   - wade & butcher 6/8 square point "bow razor"
   - wade & butcher 6/8 wedge barber's notch
   - wade & butcher 7/8" fine india steel
@@ -2487,12 +2416,18 @@ Wade & Butcher:
   - wade & butcher the sheffield (9/8", extra hollow ground)
   - wade and butcher 11/16 wedge
   - wade and butcher celebrated
-  - wade and butcher extra hollow ground improved tang - extra hollow - round point - 5/8
+  - wade and butcher extra hollow ground improved tang - extra hollow - round point
+    - 5/8
   - wade and butcher ylwisw 5/8 near wedge on loan from u/whosgotthepudding
   - wade butcher 6/8 extra hollow ground
 Wadsworth Razor:
   XLNT:
   - wadsworth razor company xlnt
+WCS:
+  Multi Titanium Collection Razor:
+  - w.c.s. multi titanium collection razor, 84m
+  Slant:
+  - wcs x cg slant, yaqi stainless steel handle
 Weck:
   Med Prep:
   - weck sextoblade - med prep
@@ -2627,7 +2562,8 @@ Yaqi:
   - yaqi ghost70sp
   - yaqi stainless .90 ghost
   Knight Helmet:
-  - yaqi knight helmet head + wcs 175s handle (head frozen with blade overnight) - 8/10
+  - yaqi knight helmet head + wcs 175s handle (head frozen with blade overnight) -
+    8/10
   Open Comb:
   - yaqi - open comb head
   Romulus:
@@ -2676,19 +2612,3 @@ Yuma:
 Zomchí:
   ? ''
   : - zomchi a blue one
-iKon:
-  B1:
-  - ikon b1 deluxe
-  - ikon b1oss
-  Short Comb:
-  - ikon razors - ikon short comb
-  - ikon razors - ikon short comb with bulldog 80 mm handle
-  Tek:
-  - ikon razors - tek head / base plate with bulldog 80 mm handle
-  X3:
-  - ikon x3
-Консул (Konsul):
-  Adjustable:
-  - ussr консул (konsul) adjustable
-  - ussr консул (konsul) adjustable (original nickel, unknown)
-  - ussr консул (konsul) adjustable; setting 4 (original nickel, unknown age)

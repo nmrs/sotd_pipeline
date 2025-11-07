@@ -10,7 +10,7 @@ A A Shaving:
   - aa shaving - wapiti
 Abbate Y La Mantia:
   Blue Tobacco:
-  - abbate y la mantia blue tobacco hard
+  - abbate y la mantia blue tobacco
   Buttero:
   - abbate y la mantia - buttero
   Crumiro:
@@ -25,7 +25,7 @@ Adopted Acres:
   Rookie Card:
   - adopted acres - rookie card
 Apothecary 87:
-  Sandalwood & Vanilla cream:
+  Sandalwood & Vanilla:
   - apothecary87 sandalwood & vanilla cream
 Ariana & Evans:
   60's Cologne:
@@ -71,8 +71,6 @@ Ariana & Evans:
   - a&e - tobacco cashmere
   Tobacco Oud:
   - ariana & evans - tobacco oud
-  Vanille Vendetta:
-  - the club - vanille vendetta
   Vanille de Tabac:
   - a&e - vanille de tabac
   - a&e vanille de tabac
@@ -80,6 +78,8 @@ Ariana & Evans:
   - ariana & evans - vanille de tabac
   - ariana and evans - vanille de tabac
   - arianna & evans vanille de tabac
+  Vanille Vendetta:
+  - the club - vanille vendetta
 Arko:
   Shaving Soap:
   - arko
@@ -125,7 +125,6 @@ Barrister and Mann:
   - barrister and mann - 42
   Adagio:
   - barrister & mann - adagio
-  - barrister & mann - adagio - omnibus
   - barrister & mann - adagio - omnibus shaving soap
   - barrister and mann - adagio
   Adumbrare:
@@ -197,6 +196,7 @@ Barrister and Mann:
   - barrister & mann - lavender
   - barrister and mann - lavender
   - barrister and mann - reserve lavender
+  - barrister and mann - reserve lavender soap
   Le Grand Chypre:
   - barrister & mann - le grand chypre
   - barrister & mann le grand chypre
@@ -308,11 +308,6 @@ Bundubeard:
 Böker:
   Tobacco:
   - böker - tobacco
-CBL Soaps:
-  Inconceivable:
-  - cbl - inconceivable
-  - cbl premium - inconceivable
-  - cbl soaps - inconceivable
 Captain's Choice:
   Bay Rum:
   - captain's choice - bay rum
@@ -370,9 +365,9 @@ Catie's Bubbles:
   Literal Lilac:
   - catie's bubbles - literal lilac
   Maggard Meet exclusive (Luxury base):
-  - catie's bubbles - maggard meet exclusive (luxury base)
+  - catie's bubbles - maggard meet exclusive
   Maggards MeetUp 2019:
-  - catie's bubbles - maggard razors 2019 meetup (2oz)
+  - catie's bubbles - maggard razors 2019 meetup
   Maggards MeetUp 2023:
   - catie's bubbles - 2023 maggard meet exclusive
   - catie's bubbles - 2023 maggard meetup
@@ -432,6 +427,11 @@ Catie's Bubbles:
   - catie's bubbles - whack and unwrap
   X:
   - catie's bubbles - x
+CBL Soaps:
+  Inconceivable:
+  - cbl - inconceivable
+  - cbl premium - inconceivable
+  - cbl soaps - inconceivable
 Cella:
   All'Olio Di Mandorla:
   - cella - all'olio di mandorla
@@ -451,6 +451,7 @@ Cella:
   - cella creme da barba
   - cella milano
   - cella milano - almond
+  - cella milano - classic red - almond - cream
   - cella milano - crema de barba
   - cella milano. (ca. 1899 ce)
   - cella original
@@ -471,18 +472,12 @@ Cella:
   - cella - buongiorno al sandalo
   - cella - professionale buongiorno al sandalo
   - cella buongiorno al sandalo
+  - cella milano - buongiorno al sandalo
   - cella milano - buongiorno al sandalo (extra extra professional)
-  - cella milano - buongiorno al sandalo - (professional)
-  - cella milano- buongiorno al sandalo - (professional)
+  - cella milano- buongiorno al sandalo
   Riserva Fresco:
   - cella - riserva fresco
-  - cella milano - riserva fresco - (professional)
-Chicago Grooming Co:
-  ? ''
-  : Discordia:
-    - chicago grooming co - discordia
-    Shiloh:
-    - chicago grooming co - shiloh
+  - cella milano - riserva fresco
 Chicago Grooming Co.:
   '40':
   - chicago grooming co. - 40
@@ -498,7 +493,7 @@ Chicago Grooming Co.:
   Caoba:
   - chicago grooming co. - caoba
   Jacmel Vetiveria:
-  - '[oleo soapworks - jacmel nwa vetiveria (vegan)'
+  - '[oleo soapworks - jacmel nwa vetiveria'
   Montrose Beach:
   - chicago grooming co - montrose beach
   - chicago grooming co. - montrose beach
@@ -577,9 +572,6 @@ De Vergulde Hand:
   Scheerzeepstaaf:
   - de vergulde hand - scheerzeepstaaf
 Declaration Grooming:
-  88 Chestnut St:
-    ? ''
-    : - dg - 88 chestnut st
   88 Chestnut St.:
   - chatillon lux/declaration grooming - 88 chestnut street
   Admiral:
@@ -685,10 +677,6 @@ Declaration Grooming:
   Sweet Lemon:
   - declaration grooming - sweet lemon
   - dg sweet lemon
-  TSM Fougère:
-  - chatillon lux / l&l grooming - tsm fougere
-  - chatillon lux/declaration grooming - tsm fougère
-  - dg/cl tsm fougere
   Taum Sauk:
   - chatillon lux/declaration grooming - taum sauk
   The Muse:
@@ -696,9 +684,10 @@ Declaration Grooming:
   Trismegistus:
   - declaration grooming - trismegistus
   - dg - trismegistus
-  Try This Soap 2:
-    '0':
-    - declaration grooming - try this soap 2.0
+  TSM Fougère:
+  - chatillon lux / l&l grooming - tsm fougere
+  - chatillon lux/declaration grooming - tsm fougère
+  - dg/cl tsm fougere
   Unconditional Surrender:
   - chatillon lux/declaration grooming - unconditional surrender
   - declaration grooming - unconditional surrender
@@ -763,12 +752,6 @@ Fanzine Saponifications:
   - fanzine saponifications - caravaggio soap
   Cool Bro Dude Man:
   - fanzine saponifications - cool bro dude man
-  Testing:
-    ? ''
-    : ? ''
-      : ' Testing':
-        - fanzine saponifications - testing.... testing
-        - fanzine saponifications - testing....testing
   Testing... Testing:
   - fanzine saponifications - testing... testing
   This is not a Test:
@@ -815,10 +798,6 @@ Haslinger:
   Schafmilch:
   - haslinger - schafmilch
   - haslinger schafmilch
-Hendrix Classics & Co:
-  ? ''
-  : Bounty Hunter:
-    - hc&c bounty hunter
 Hendrix Classics & Co.:
   Barbershop:
   - hc&c barbershop
@@ -925,7 +904,7 @@ House of Mann:
   - house of mann - tobacco pushers
 Images in Bloom:
   Tobacco Caramel Shaving:
-  - images in bloom - tobacco caramel shaving
+  - images in bloom - tobacco caramel
 Jordan's:
   Blueberry Muffin:
   - jordan's - blueberry muffin
@@ -946,11 +925,9 @@ Los Jabones de Joserra:
   - los jabones de joserra - noir
   Passion Incense:
   - los jabones de joserra - passion incense
-MacDuff's Soap Co:
-  ? ''
-  : Kananaskis Explorer:
-    - macduff's - kananaskis explorer
 MacDuff's Soap Co.:
+  Rosemary Sea Salt:
+  - macduffs soap company - rosemary sea salt
   Summer Cabin:
   - macduffs - summer cabin
   Trail Tobacco:
@@ -1082,7 +1059,7 @@ Mäurer & Wirtz:
   - maurer & wirtz - tabac
   - maurer & wirtz - tabac original
   - maurer & wirtz tabac
-  - maurer and wirtz - tabac (tallow formulation)
+  - maurer and wirtz - tabac
   - maürer & wirtz - tabac original
   - mäuer & wirtz - tabac
   - mäurer & wirtz - tabac
@@ -1091,7 +1068,7 @@ Mäurer & Wirtz:
   - mäurer & wirtz - tabac original (stick)
   - mäurer & wirtz - tabac original - (stick)
   - mäurer & wirtz - tabac original - vegan base
-  - mäurer & wirtz - tabac original original (tallow)
+  - mäurer & wirtz - tabac original original
   - mäurer & wirtz tabac
   - mäurer & wirtz tabac (tallow formula)
   - mäurer & wirtz tabac original
@@ -1114,10 +1091,10 @@ Mäurer & Wirtz:
   - tabac original tallow base
   - tabac original tallow formula
   - tabac ss
-  - tabac tallow - hard
+  - tabac tallow
   - tabac tallow base
   - tabac tub
-  - tabac vegan 2024 - hard
+  - tabac vegan 2024
 Noble Otter:
   '''Tis the Season':
   - noble otter - 'tis the season
@@ -1199,8 +1176,8 @@ PAA:
   - paa - future fiction
 Palmolive:
   Classic:
+  - palmolive
   - palmolive - classic
-  - palmolive stick
 Proraso:
   Blue (Cream):
   - proraso - aloe and vitamin e
@@ -1244,9 +1221,10 @@ Rock Bottom Soap:
   - rock bottom - barber shoppe
 Santa Maria Novella:
   Tabacco Toscano:
-  - santa maria novella - crema da barba - . so you know i'm not fucking with you, the tub says ", mildly scented with tobaco toscano cologne, for use with a brush"
   - santa maria novella - tabacco toscano
   - santa maria novella - tobacco toscano
+  - santa maria novella -- . so you know i'm not fucking with you, the tub says ",
+    mildly scented with tobaco toscano cologne, for use with a brush"
 Saponificio Varesino:
   70th Anniversary:
   - saponificio varesino - 70th anniversary
@@ -1288,7 +1266,6 @@ Southern Witchcrafts:
   - southern witchcrafts - fougère nemeta
   Gravefruit (with APR):
   - australian private reserve/southern witchcrafts - gravefruit
-  - australian private reserve/southern witchcrafts - gravefruit - (vegan)
   Gravefruit II:
   - southern witchcrafts - gravefruit ii
   Grey Phetiver:
@@ -1309,12 +1286,6 @@ Southern Witchcrafts:
   - southern witchcrafts - tres matres
   Valley of Ashes:
   - southern witchcrafts - valley of ashes
-Spearhead Shaving Co:
-  ? ''
-  : Seaforth! Heather:
-    - spearhead shaving company - heather
-    Seaforth! Roman Spice:
-    - spearhead shaving co - seaforth! roman spice
 Spearhead Shaving Co.:
   Seaforth! 3 Scots:
   - 3 scots
@@ -1331,6 +1302,7 @@ Spearhead Shaving Co.:
   Seaforth! Heather:
   - spearhead - seaforth! heather
   - spearhead shaving - seaforth! heather
+  - spearhead shaving company - heather
   - spearhead shaving company - seaforth heather
   - spearhead shaving company - seaforth! heather
   Seaforth! Leather:
@@ -1365,35 +1337,6 @@ Spearhead Shaving Co.:
 Speick:
   Shaving Cream:
   - speick
-Stirling Soap Co:
-  ? ''
-  : Almond Creme:
-    - stirling soap co. - almond crème
-    Baker Street:
-    - stirling baker street
-    Bash:
-    - stirling soap co. - bash
-    Bergamot Lavender:
-    - stirling soap bergamot lavender
-    Deep Blue Sea:
-    - stirling - deep blue sea - shave
-    - stirling - deep blue sea - shave soap
-    Destination Unknown:
-    - stirling destination unknown
-    Electric Sheep:
-    - stirling electric sheep
-    I, Rich Moose:
-    - stirling - i, rich moose (r/wetshaving mutton tallow version)
-    - stirling - i, rich moose (reddit special) - cream
-    - stirling soap co. - i, rich moose
-    - stirling soap co. - i, rich moose (mutton -r/wetshaving)
-    - stirling soap co. - i, rich moose (r/wetshaving exclusive)
-    - stirling soap co. - i, rich moose - 🐑 edition
-    - stirling soap co. x r/wetshaving - i, rich moose (mutton)
-    - stirling soap company - i, rich moose (/r/wetshaving edition)
-    - stirling soap company - i, rich moose (sub-exclusive sheep tallow)
-    Juniper Breeze:
-    - stirling soap co. - juniper breeze
 Stirling Soap Co.:
   Arkadia:
   - stirling co. - arkadia
@@ -1434,6 +1377,7 @@ Stirling Soap Co.:
   - stirling executive man
   Friends to the End:
   - stirling - friends to the end
+  - stirling - friends to the end - shave soap
   Gatlinburg:
   - stirling co. - gatlinburg
   Gin & Tonic on the Rocks:
@@ -1692,7 +1636,7 @@ Wholly Kaw:
   Aranceto:
   - wholly kaw - aranceto (tallow-siero base)
   Fern Concerto (Mentholated) - (Vegan):
-  - wholly kaw - fern concerto (mentholated) - (vegan)
+  - wholly kaw - fern concerto (mentholated)
   Fougere Bouquet:
   - wholly kaw - fougère bouquet
   Fougere Mania:

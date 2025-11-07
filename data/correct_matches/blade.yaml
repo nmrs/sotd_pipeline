@@ -344,7 +344,6 @@ DE:
     - perma-sharp gillette
     - perma-sharp stainless
     - perma-sharp super
-    - permasharp
     Platinum:
     - gillette - platinum
     - gillette - platinum (half in kamisori new, whole in overlander new)
@@ -412,9 +411,6 @@ DE:
     - kc gillette (last one, hooray!)
     - kc gillette, aka gillette platinum
     - king c. gillette
-  LOI:
-    Titanium:
-    - loi salon blades
   Ladas:
     Super Stainless:
     - ladas
@@ -427,6 +423,9 @@ DE:
   Leningrad:
     DE:
     - ленинград
+  LOI:
+    Titanium:
+    - loi salon blades
   Lord:
     Blue Sword Platinum:
     - blue sword platinum
@@ -523,11 +522,6 @@ DE:
   QShave:
     Titanium:
     - q-shave
-  RK:
-    Stainless:
-    - rk chromium
-    - rk stainless
-    - rk stainless steel (henson)
   Rapira:
     Platinum Lux:
     - rapira
@@ -539,6 +533,11 @@ DE:
     - rapira swedish super steel
     - rapira swedish supersteel
     - rapira sweedish super steel
+  RK:
+    Stainless:
+    - rk chromium
+    - rk stainless
+    - rk stainless steel (henson)
   Rockwell:
     Swedish Stainless:
     - pair of brand new rovkwell blades
@@ -657,7 +656,8 @@ DE:
     Chrome Platinum:
     - vi john chrome platinum
     Super Stainless:
-    - vi-john. that ball tip has an early head on it. tho0se early ones can easily cause damage and the vi-john was the perfect choice
+    - vi-john. that ball tip has an early head on it. tho0se early ones can easily
+      cause damage and the vi-john was the perfect choice
     - vijohn
   Viking's Sword:
     Stainless:

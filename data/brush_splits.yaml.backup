@@ -40,3 +40,37 @@ Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
   - file: 2025-08.json
     comment_ids:
     - n788u5j
+Made Rite - 500 PB (Oumo - 26mm SHD):
+  handle: Made Rite - 500 PB
+  knot: Oumo - 26mm SHD
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-09.json
+    comment_ids:
+    - nfexjs4
+Razorock Boar (Made by Zenith):
+  handle: null
+  knot: Razorock Boar (Made by Zenith)
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-10.json
+    comment_ids:
+    - nkz6qi9
+Zenith 510SE 28mm x 56mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-10.json
+    comment_ids:
+    - nkh3lmx
+    - nlnes0e

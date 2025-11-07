@@ -4,7 +4,7 @@
     - ~~unreleased~~
 345 Soap Co.:
   patterns:
-    - '345(?:\W(?:soap )?co.?)?'
+    - '345(?: soaps?)?(?: co.?)?'
   scents:
     Cairn:
       patterns:
@@ -146,6 +146,10 @@ Adopted Acres:
 Apothecary 87:
   patterns:
     - apothecary ?87
+  scents:
+    Sandalwood & Vanilla:
+      patterns:
+        - apothecary.*sandalwood.*vanilla
 Archaic Alchemy:
   patterns:
     - archaic alchemy
@@ -621,6 +625,9 @@ Barrister and Mann:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*spice'
         - barris.*spice
+    Sunny Lane:
+      patterns:
+        - sunny lane
     Taiga:
       patterns:
         - taiga
@@ -777,6 +784,10 @@ CBL Soaps:
 Campbell's:
   patterns:
     - campbell'?s
+  scents:
+    Shave Cream:
+      patterns:
+        - campbell'?s
 Captain Nemo's:
   patterns:
     - "(?:captain )?nemo(?:'s)?(?: shaving)?"
@@ -866,6 +877,9 @@ Catie's Bubbles:
       patterns:
         - catie.*bubbles.*dftr
         - '\bcb\b.*dftr'
+    Dusk:
+      patterns:
+        - catie.*bubbles.*dusk
     Glace Herbe:
       patterns:
         - "glac(e|é) herbe"
@@ -927,6 +941,9 @@ Catie's Bubbles:
     Purple Grapefruit:
       patterns:
         - catie.*grapefruit
+    Retreat:
+      patterns:
+        - catie.*retreat
     Revolution:
       patterns:
         - '(catie.*bub\w*s|\bcb\b).*revolution'
@@ -1017,6 +1034,9 @@ Chicago Grooming Co.:
     Shiloh:
       patterns:
         - chicago.*shiloh
+    Susurro:
+      patterns:
+        - sus+[uo]r+o
     Windy City Barbershop:
       patterns:
         - windy city barber
@@ -1514,6 +1534,12 @@ Extro Cosmesi:
     - extr.*cosmesi
     - extr[oò]'?
   scents:
+    Caffe:
+      patterns:
+        - extr.*cosmesi.*caf+e
+    Liquirizia & Magnolia:
+      patterns:
+        - liquiriz.*magnolia
     Tabacco:
       patterns:
         - extr.*cosmesi.*t[ao]bac
@@ -1777,7 +1803,7 @@ Haslinger:
 Hendrix Classics & Co.:
   patterns:
     - 'hendri(?:.*classic?)?(.*\bco.?)?'
-    - hc&c
+    - hc&?c
     - hendrix c&c
   scents:
     Barbershop:
@@ -1810,6 +1836,7 @@ Hendrix Classics & Co.:
     Year of the Dragon:
       patterns:
         - year of the dragon
+        - \byod\b
 Henri & Crocket:
   patterns:
     - henri.*crocket
@@ -1848,6 +1875,9 @@ Henry Cavendish:
     Sandalwood:
       patterns:
         - cavendish.*sandalwood
+Henson:
+  patterns:
+    - henson
 Herc Soap Co:
   patterns:
     - 'herc( soap (co\.?)?)?'
@@ -1936,7 +1966,7 @@ House of Mammoth:
         - "福"
     Hygge:
       patterns:
-        - hygge
+        - hyg+e
     Indigo:
       patterns:
         - mammoth.*indigo
@@ -2677,6 +2707,7 @@ Old Spice:
     Classic:
       patterns:
         - old spi?ce
+        - ^all spice cream$ # (https://www.reddit.com/r/Wetshaving/comments/1ofk10b/comment/nl9oest/)
 Oliver Blossom Soap Co.:
   patterns:
     - "oliver blossom(?: soap(?: co.?)?)?"
@@ -3278,6 +3309,9 @@ Stirling Soap Co.:
     Frankincense & Myrrh:
       patterns:
         - stirling.*frankincense
+    Friends to the End:
+      patterns:
+        - stirling.*friends to the end
     Gatlinburg:
       patterns:
         - stirling.*gatlinburg

@@ -139,6 +139,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - dubl.*duck
+  Economy Supply Co.:
+    Unspecified:
+      patterns:
+        - economy.*supply
   El Druida:
     Unspecified:
       patterns:

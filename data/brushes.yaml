@@ -519,6 +519,7 @@ known_brushes:
     Blondie:
       patterns:
         - razo.*blondie
+        - razorock.*zenith
       knot:
         brand: Zenith
         fiber: Boar
@@ -558,7 +559,7 @@ known_brushes:
       knot_size_mm: 23
       patterns:
         - rubberset.*203
-    400:
+    "400":
       fiber: Boar
       patterns:
         - rubberset.*400.*original knot
@@ -1817,6 +1818,7 @@ other_brushes:
     patterns:
       - chisel.*hound
       - \bc(?:\&|and|\+)h\b
+      - darn.*rob
   Cineen:
     default: Badger
     patterns:
@@ -1843,6 +1845,10 @@ other_brushes:
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
+  Economy Supply Co.:
+    default: Boar
+    patterns:
+      - economy.*supply
   Elite:
     default: Badger
     patterns:
@@ -1974,6 +1980,10 @@ other_brushes:
       - rad dino(saur)?
       - priusaurus
       - rdc
+  RazoRock:
+    default: Synthetic
+    patterns:
+      - razor.*rock
   Rich Man Shaving:
     default: Badger
     patterns:
