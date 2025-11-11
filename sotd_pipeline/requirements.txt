@@ -1,1 +1,0 @@
-mdc==0.1.0  # Add dependency for mdc file format 
