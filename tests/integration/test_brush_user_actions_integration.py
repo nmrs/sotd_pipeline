@@ -17,8 +17,10 @@ class TestBrushUserActionsIntegration:
         self.test_dir = tempfile.mkdtemp()
         self.test_data_dir = Path(self.test_dir) / "data"
         self.test_learning_dir = self.test_data_dir / "learning"
-        # Create a temporary correct_matches.yaml file to avoid polluting production
-        test_correct_matches_path = self.test_data_dir / "correct_matches.yaml"
+        # Create a temporary correct_matches directory to avoid polluting production
+        self.test_data_dir.mkdir(parents=True, exist_ok=True)
+        test_correct_matches_path = self.test_data_dir / "correct_matches"
+        test_correct_matches_path.mkdir(exist_ok=True)
         self.manager = BrushUserActionsManager(
             base_path=self.test_learning_dir, correct_matches_path=test_correct_matches_path
         )
@@ -92,13 +94,15 @@ class TestBrushUserActionsIntegration:
             "soap": {"Some Soap": {"brand": "Test", "model": "Soap"}},
         }
 
-        # Save to data directory
-        correct_matches_path = self.test_data_dir / "correct_matches.yaml"
-        with open(correct_matches_path, "w") as f:
-            yaml.dump(correct_matches_data, f)
+        # Save to directory structure (correct_matches/brush.yaml)
+        correct_matches_dir = self.test_data_dir / "correct_matches"
+        correct_matches_dir.mkdir(exist_ok=True)
+        brush_file = correct_matches_dir / "brush.yaml"
+        with open(brush_file, "w") as f:
+            yaml.dump(correct_matches_data["brush"], f)
 
-        # Test migration
-        migrated_count = self.manager.migrate_from_correct_matches(correct_matches_path, "2025-08")
+        # Test migration - migrate_from_correct_matches now uses directory structure
+        migrated_count = self.manager.migrate_from_correct_matches(correct_matches_dir, "2025-08")
 
         # Should only migrate brush entries, not razor/soap
         assert migrated_count == 2

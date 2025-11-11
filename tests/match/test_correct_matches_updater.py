@@ -15,7 +15,7 @@ class TestCorrectMatchesUpdater:
     def setup_method(self):
         """Set up test directory."""
         self.test_dir = tempfile.mkdtemp()
-        self.correct_matches_path = Path(self.test_dir) / "correct_matches.yaml"
+        self.correct_matches_path = Path(self.test_dir) / "correct_matches"
         self.updater = CorrectMatchesUpdater(self.correct_matches_path)
 
     def teardown_method(self):
@@ -26,26 +26,26 @@ class TestCorrectMatchesUpdater:
         """Test initialization with default path."""
         # Create a temporary updater to test the default path behavior
         # without actually using the production file
-        temp_path = Path(self.test_dir) / "default_test.yaml"
+        temp_path = Path(self.test_dir) / "default_test"
         updater = CorrectMatchesUpdater(temp_path)
         # Test that the path is set correctly
         assert updater.correct_matches_path == temp_path
 
     def test_init_with_custom_path(self):
         """Test initialization with custom path."""
-        custom_path = Path(self.test_dir) / "custom" / "path" / "correct_matches.yaml"
+        custom_path = Path(self.test_dir) / "custom" / "path" / "correct_matches"
         updater = CorrectMatchesUpdater(custom_path)
         assert updater.correct_matches_path == custom_path
 
     def test_ensure_directory_exists(self):
         """Test directory creation."""
         # Create updater with nested directory path
-        nested_path = Path(self.test_dir) / "nested" / "deep" / "correct_matches.yaml"
+        nested_path = Path(self.test_dir) / "nested" / "deep" / "correct_matches"
         CorrectMatchesUpdater(nested_path)
 
         # Directory should be created
-        assert nested_path.parent.exists()
-        assert nested_path.parent.is_dir()
+        assert nested_path.exists()
+        assert nested_path.is_dir()
 
     def test_load_correct_matches_empty_file(self):
         """Test loading from non-existent file."""
@@ -57,8 +57,10 @@ class TestCorrectMatchesUpdater:
         # Create test data
         test_data = {"brush": {"Test Brand": {"Test Model": ["test pattern"]}}}
 
-        with open(self.correct_matches_path, "w") as f:
-            yaml.dump(test_data, f)
+        # Write to brush.yaml file within the directory
+        brush_file = self.correct_matches_path / "brush.yaml"
+        with open(brush_file, "w") as f:
+            yaml.dump(test_data["brush"], f)
 
         # Load data
         data = self.updater.load_correct_matches()
@@ -66,11 +68,12 @@ class TestCorrectMatchesUpdater:
 
     def test_load_correct_matches_corrupted_file(self):
         """Test loading from corrupted YAML file."""
-        # Create corrupted YAML
-        with open(self.correct_matches_path, "w") as f:
+        # Create corrupted YAML in brush.yaml file
+        brush_file = self.correct_matches_path / "brush.yaml"
+        with open(brush_file, "w") as f:
             f.write("invalid: yaml: content: [")
 
-        # Should return empty dict
+        # Should return empty dict (corrupted files are skipped)
         data = self.updater.load_correct_matches()
         assert data == {}
 
@@ -163,13 +166,18 @@ class TestCorrectMatchesUpdater:
         # Save data
         self.updater.save_correct_matches(test_data)
 
-        # Verify file was created
+        # Verify directory exists
         assert self.correct_matches_path.exists()
+        assert self.correct_matches_path.is_dir()
+
+        # Verify brush.yaml file was created
+        brush_file = self.correct_matches_path / "brush.yaml"
+        assert brush_file.exists()
 
         # Verify content
-        with open(self.correct_matches_path, "r") as f:
+        with open(brush_file, "r") as f:
             loaded_data = yaml.safe_load(f)
-        assert loaded_data == test_data
+        assert loaded_data == test_data["brush"]
 
     def test_remove_entry_brush_field(self):
         """Test removing brush field entry."""

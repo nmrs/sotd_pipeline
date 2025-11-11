@@ -5,9 +5,10 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from .user_actions import BrushUserActionsManager
-from .counting import BrushValidationCountingService
 from sotd.utils.file_io import load_json_data
+
+from .counting import BrushValidationCountingService
+from .user_actions import BrushUserActionsManager
 
 
 class BrushValidationCLI:
@@ -19,8 +20,8 @@ class BrushValidationCLI:
             data_path = Path("data")
 
         self.data_path = Path(data_path)
-        # Pass the correct correct_matches.yaml path to ensure consistency
-        correct_matches_path = self.data_path / "correct_matches.yaml"
+        # Pass the correct correct_matches directory path to ensure consistency
+        correct_matches_path = self.data_path / "correct_matches"
         self.user_actions_manager = BrushUserActionsManager(
             base_path=self.data_path / "learning", correct_matches_path=correct_matches_path
         )

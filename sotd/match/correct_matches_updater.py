@@ -26,7 +26,7 @@ class CorrectMatchesUpdater:
             return {}
 
         data = {}
-        
+
         if field_type:
             # Load specific field file
             field_file = self.correct_matches_path / f"{field_type}.yaml"
@@ -43,7 +43,10 @@ class CorrectMatchesUpdater:
             for field_file in self.correct_matches_path.glob("*.yaml"):
                 field_name = field_file.stem
                 # Skip backup and report files
-                if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                if (
+                    field_file.name.endswith((".backup", ".bk"))
+                    or "duplicates_report" in field_file.name
+                ):
                     continue
                 try:
                     with field_file.open("r", encoding="utf-8") as f:
@@ -52,7 +55,7 @@ class CorrectMatchesUpdater:
                             data[field_name] = field_data
                 except (yaml.YAMLError, FileNotFoundError):
                     pass
-        
+
         return data
 
     def add_or_update_entry(
@@ -179,7 +182,8 @@ class CorrectMatchesUpdater:
                         ):
                             existing_patterns.append(original_text)
                             logger.debug(
-                                f"Added pattern '{original_text}' to handle/{handle_brand}/{handle_model}"
+                                f"Added pattern '{original_text}' to "
+                                f"handle/{handle_brand}/{handle_model}"
                             )
 
                     # Store knot component in knot section
@@ -208,7 +212,8 @@ class CorrectMatchesUpdater:
                             )
                 else:
                     logger.warning(
-                        f"Missing handle or knot data for split_brush: handle={handle_data}, knot={knot_data}"
+                        f"Missing handle or knot data for split_brush: "
+                        f"handle={handle_data}, knot={knot_data}"
                     )
                     # Fallback: if we can't extract components, store as regular brush
                     # This shouldn't happen with proper dual-component data
@@ -225,15 +230,26 @@ class CorrectMatchesUpdater:
                         )
 
             # Save the updated data
-            logger.debug(f"Saving updated correct_matches/{field_type}.yaml")
-            self.save_correct_matches(data, field_type)
-            logger.debug(f"Successfully saved correct_matches/{field_type}.yaml")
+            # For split_brush, save handle and knot separately (not split_brush field)
+            if field_type == "split_brush":
+                logger.debug("Saving handle and knot sections for split_brush")
+                # Save handle and knot sections separately
+                if "handle" in data:
+                    self.save_correct_matches({"handle": data["handle"]}, "handle")
+                if "knot" in data:
+                    self.save_correct_matches({"knot": data["knot"]}, "knot")
+            else:
+                logger.debug(f"Saving updated correct_matches/{field_type}.yaml")
+                self.save_correct_matches(data, field_type)
+                logger.debug(f"Successfully saved correct_matches/{field_type}.yaml")
 
         except Exception as e:
             logger.error(f"Error in add_or_update_entry: {e}")
             raise
 
-    def save_correct_matches(self, data: Optional[Dict[str, Any]] = None, field_type: Optional[str] = None) -> None:
+    def save_correct_matches(
+        self, data: Optional[Dict[str, Any]] = None, field_type: Optional[str] = None
+    ) -> None:
         """
         Save data to correct_matches directory using atomic write operations.
 
@@ -248,9 +264,9 @@ class CorrectMatchesUpdater:
         for field_name, field_data in data.items():
             if field_type and field_name != field_type:
                 continue
-            
+
             field_file = self.correct_matches_path / f"{field_name}.yaml"
-            
+
             # Create temporary file for atomic write
             temp_file = tempfile.NamedTemporaryFile(
                 mode="w", suffix=".yaml", delete=False, encoding="utf-8"
@@ -374,7 +390,7 @@ class CorrectMatchesUpdater:
         """
         all_data = self.load_correct_matches()
         data = {field_type: all_data.get(field_type, {})}
-        
+
         # For split_brush, also check handle and knot sections
         if field_type == "split_brush":
             if "handle" not in data:

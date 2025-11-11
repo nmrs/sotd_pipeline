@@ -275,8 +275,8 @@ class TestBrushUserActionsManager:
         self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
         self.brush_user_actions_dir.mkdir()
 
-        # Create a temporary correct_matches.yaml for testing
-        self.correct_matches_path = self.test_dir / "correct_matches.yaml"
+        # Create a temporary correct_matches directory for testing
+        self.correct_matches_path = self.test_dir / "correct_matches"
 
         self.manager = BrushUserActionsManager(
             base_path=self.learning_dir, correct_matches_path=self.correct_matches_path
@@ -408,16 +408,19 @@ class TestBrushUserActionsManager:
         assert all_actions[1].input_text == "Test Brush 2"
 
     def test_migrate_from_correct_matches(self):
-        """Test migration from existing correct_matches.yaml."""
-        # Create a temporary correct_matches.yaml file
-        correct_matches_file = Path(self.test_dir) / "correct_matches.yaml"
-        correct_matches_data = {"brush": {"Test Brand": {"Test Model": ["test brush input"]}}}
+        """Test migration from existing correct_matches directory structure."""
+        # Create a temporary correct_matches directory for migration
+        # (separate from the manager's correct_matches directory)
+        old_correct_matches_dir = Path(self.test_dir) / "old_correct_matches"
+        old_correct_matches_dir.mkdir(exist_ok=True)
+        brush_file = old_correct_matches_dir / "brush.yaml"
+        brush_data = {"Test Brand": {"Test Model": ["test brush input"]}}
 
-        with open(correct_matches_file, "w") as f:
-            yaml.dump(correct_matches_data, f)
+        with open(brush_file, "w") as f:
+            yaml.dump(brush_data, f)
 
         # Test migration
-        migrated_count = self.manager.migrate_from_correct_matches(correct_matches_file, "2025-08")
+        migrated_count = self.manager.migrate_from_correct_matches(old_correct_matches_dir, "2025-08")
         assert migrated_count == 1
 
         # Verify action was created
@@ -590,7 +593,7 @@ class TestBrushUserActionsManager:
         temp_dir = tempfile.mkdtemp()
         temp_learning_dir = Path(temp_dir) / "learning"
         temp_learning_dir.mkdir()
-        temp_correct_matches = Path(temp_dir) / "correct_matches.yaml"
+        temp_correct_matches = Path(temp_dir) / "correct_matches"
 
         try:
             # Initialize manager with temporary paths
@@ -646,26 +649,30 @@ class TestBrushUserActionsManager:
                 "Test Brush Real Dual Update" in learning_data
             ), "Learning file should have input_text as key"
 
-            # Verify correct_matches.yaml was created and updated
-            assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
+            # Verify correct_matches directory was created
+            assert temp_correct_matches.exists(), "correct_matches directory should exist"
+            assert temp_correct_matches.is_dir(), "correct_matches should be a directory"
 
-            # Load and verify correct_matches.yaml contents
-            with open(temp_correct_matches, "r") as f:
-                correct_matches_data = yaml.safe_load(f)
+            # Verify brush.yaml file was created within the directory
+            brush_file = temp_correct_matches / "brush.yaml"
+            assert brush_file.exists(), "brush.yaml should exist in correct_matches directory"
 
-            assert "brush" in correct_matches_data, "correct_matches.yaml should have brush section"
+            # Load and verify brush.yaml contents
+            with open(brush_file, "r") as f:
+                brush_data = yaml.safe_load(f)
+
             assert (
-                "Test Brand" in correct_matches_data["brush"]
-            ), "correct_matches.yaml should have Test Brand"
+                "Test Brand" in brush_data
+            ), "brush.yaml should have Test Brand"
             assert (
-                "Test Model" in correct_matches_data["brush"]["Test Brand"]
-            ), "correct_matches.yaml should have Test Model"
+                "Test Model" in brush_data["Test Brand"]
+            ), "brush.yaml should have Test Model"
 
             # Check that the original input text was added (not normalized)
-            patterns = correct_matches_data["brush"]["Test Brand"]["Test Model"]
+            patterns = brush_data["Test Brand"]["Test Model"]
             assert (
                 "Test Brush Real Dual Update" in patterns
-            ), "Original input text should be in correct_matches.yaml"
+            ), "Original input text should be in brush.yaml"
 
         finally:
             # Clean up

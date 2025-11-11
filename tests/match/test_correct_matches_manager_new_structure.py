@@ -17,8 +17,8 @@ class TestCorrectMatchesManagerNewStructure:
     @pytest.fixture
     def correct_matches_manager(self, console_mock, tmp_path):
         """Create CorrectMatchesManager instance for testing."""
-        correct_matches_file = tmp_path / "correct_matches.yaml"
-        return CorrectMatchesManager(console_mock, correct_matches_file)
+        correct_matches_dir = tmp_path / "correct_matches"
+        return CorrectMatchesManager(console_mock, correct_matches_dir)
 
     def test_handle_section_structure_uses_catalog_model_names(self, correct_matches_manager):
         """Test that handle section structure uses catalog model names."""
@@ -694,28 +694,35 @@ class TestCorrectMatchesManagerNewStructure:
         correct_matches_manager.mark_match_as_correct(match_key, match_data)
         correct_matches_manager.save_correct_matches()
 
-        # Read the YAML file to verify structure
+        # Read the YAML files to verify structure (directory structure)
         import yaml
 
-        with correct_matches_manager._correct_matches_file.open("r", encoding="utf-8") as f:
-            yaml_data = yaml.safe_load(f)
+        # Read handle.yaml file
+        handle_file = correct_matches_manager._correct_matches_file / "handle.yaml"
+        assert handle_file.exists(), "handle.yaml should exist"
+        with handle_file.open("r", encoding="utf-8") as f:
+            handle_data = yaml.safe_load(f)
 
         # Verify handle section structure
-        assert "handle" in yaml_data
-        assert "_no_brand" in yaml_data["handle"]
-        assert "_no_model" in yaml_data["handle"]["_no_brand"]
+        assert "_no_brand" in handle_data
+        assert "_no_model" in handle_data["_no_brand"]
         assert (
             "custom irish bog oak handle 30mm synthetic knot"
-            in yaml_data["handle"]["_no_brand"]["_no_model"]
+            in handle_data["_no_brand"]["_no_model"]
         )
 
+        # Read knot.yaml file
+        knot_file = correct_matches_manager._correct_matches_file / "knot.yaml"
+        assert knot_file.exists(), "knot.yaml should exist"
+        with knot_file.open("r", encoding="utf-8") as f:
+            knot_data = yaml.safe_load(f)
+
         # Verify knot section structure
-        assert "knot" in yaml_data
-        assert "_no_brand" in yaml_data["knot"]
-        assert "Synthetic" in yaml_data["knot"]["_no_brand"]
+        assert "_no_brand" in knot_data
+        assert "Synthetic" in knot_data["_no_brand"]
         assert (
             "custom irish bog oak handle 30mm synthetic knot"
-            in yaml_data["knot"]["_no_brand"]["Synthetic"]
+            in knot_data["_no_brand"]["Synthetic"]
         )
 
     def test_mixed_brand_no_brand_entries(self, correct_matches_manager):

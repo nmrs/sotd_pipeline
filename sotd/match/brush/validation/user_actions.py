@@ -540,18 +540,22 @@ class BrushUserActionsManager:
         return all_actions
 
     def migrate_from_correct_matches(self, correct_matches_path: Path, target_month: str) -> int:
-        """Migrate brush data from existing correct_matches.yaml."""
-        if not correct_matches_path.exists():
+        """Migrate brush data from existing correct_matches directory structure."""
+        if not correct_matches_path.exists() or not correct_matches_path.is_dir():
             return 0
 
-        with open(correct_matches_path, "r") as f:
-            data = yaml.safe_load(f)
+        # Load from directory structure: correct_matches/brush.yaml
+        brush_file = correct_matches_path / "brush.yaml"
+        if not brush_file.exists():
+            return 0
 
-        if not data or "brush" not in data:
+        with open(brush_file, "r") as f:
+            brush_data = yaml.safe_load(f)
+
+        if not brush_data:
             return 0
 
         migrated_actions = []
-        brush_data = data["brush"]
 
         for key, value in brush_data.items():
             if isinstance(value, dict) and "brand" in value and "model" in value:

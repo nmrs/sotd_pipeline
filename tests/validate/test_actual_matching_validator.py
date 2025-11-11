@@ -223,11 +223,32 @@ class TestActualMatchingValidator:
         assert issues[0].expected_model == "Moarteen"
         assert issues[0].actual_model == "Different Model"
 
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.glob")
+    @patch("builtins.open")
     @patch("yaml.safe_load")
     @patch("sotd.validate.actual_matching_validator.BrushMatcher")
-    def test_validate_brush_field(self, mock_brush_matcher_class, mock_yaml_load):
+    def test_validate_brush_field(
+        self, mock_brush_matcher_class, mock_yaml_load, mock_open, mock_glob, mock_exists
+    ):
         """Test validation for brush field."""
-        mock_yaml_load.return_value = self.mock_correct_matches
+        # Mock directory exists
+        mock_exists.return_value = True
+        
+        # Mock directory structure: correct_matches/brush.yaml
+        mock_brush_file = Mock()
+        mock_brush_file.stem = "brush"
+        mock_brush_file.name = "brush.yaml"
+        mock_glob.return_value = [mock_brush_file]
+        
+        # Mock file reading - Path.open() returns a context manager
+        mock_file_handle = Mock()
+        mock_file_context = Mock()
+        mock_file_context.__enter__ = Mock(return_value=mock_file_handle)
+        mock_file_context.__exit__ = Mock(return_value=None)
+        mock_brush_file.open.return_value = mock_file_context
+        
+        mock_yaml_load.return_value = self.mock_correct_matches["brush"]
 
         mock_matcher = Mock()
         mock_result = Mock()
@@ -243,11 +264,32 @@ class TestActualMatchingValidator:
         assert result.total_entries == 1
         assert len(result.issues) == 0  # No issues since data matches
 
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.glob")
+    @patch("builtins.open")
     @patch("yaml.safe_load")
     @patch("sotd.validate.actual_matching_validator.RazorMatcher")
-    def test_validate_razor_field(self, mock_razor_matcher_class, mock_yaml_load):
+    def test_validate_razor_field(
+        self, mock_razor_matcher_class, mock_yaml_load, mock_open, mock_glob, mock_exists
+    ):
         """Test validation for razor field."""
-        mock_yaml_load.return_value = self.mock_correct_matches
+        # Mock directory exists
+        mock_exists.return_value = True
+        
+        # Mock directory structure: correct_matches/razor.yaml
+        mock_razor_file = Mock()
+        mock_razor_file.stem = "razor"
+        mock_razor_file.name = "razor.yaml"
+        mock_glob.return_value = [mock_razor_file]
+        
+        # Mock file reading - Path.open() returns a context manager
+        mock_file_handle = Mock()
+        mock_file_context = Mock()
+        mock_file_context.__enter__ = Mock(return_value=mock_file_handle)
+        mock_file_context.__exit__ = Mock(return_value=None)
+        mock_razor_file.open.return_value = mock_file_context
+        
+        mock_yaml_load.return_value = self.mock_correct_matches["razor"]
 
         mock_matcher = Mock()
         mock_result = Mock()
