@@ -450,7 +450,8 @@ def test_brand_match_with_by_connector():
         matcher = SoapMatcher()
 
         # Test the problematic case: scent first with "by" connector
-        result = matcher.match("Steady by Summer Break soaps")
+        # Bypass correct_matches to test the actual brand matching logic
+        result = matcher.match("Steady by Summer Break soaps", bypass_correct_matches=True)
         assert result.matched is not None
         assert result.matched["brand"] == "Summer Break Soaps"
         assert result.matched["scent"] == "Steady"  # Should strip " by" from the end
@@ -467,8 +468,10 @@ def test_brand_match_with_by_connector():
 def test_brand_match_with_by_connector_case_insensitive(soap_matcher_with_mock):
     """Test that 'by' connector handling works case-insensitively."""
     # Use the existing matcher but test with a simple case that should work
+    # Bypass correct_matches to test the actual brand matching logic
     # Test the actual "by" connector fix with Summer Break Soaps
-    result = soap_matcher_with_mock.match("Steady by Summer Break soaps")
+    # Bypass correct_matches to test the actual brand matching logic
+    result = soap_matcher_with_mock.match("Steady by Summer Break soaps", bypass_correct_matches=True)
     assert result.matched is not None
     assert result.matched["brand"] == "Summer Break Soaps"
     assert result.matched["scent"] == "Steady"  # Should strip " by" from the end

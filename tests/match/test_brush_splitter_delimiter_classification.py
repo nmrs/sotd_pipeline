@@ -115,12 +115,12 @@ class TestBrushSplitterDelimiterClassification:
 
     def test_non_delimiters_do_not_trigger_splitting(self, brush_splitter):
         """Test that non-delimiters do not trigger splitting."""
-        # Non-delimiters: " x ", " × ", " & ", "()"
+        # Non-delimiters: " x ", " × ", " & "
+        # Note: Parentheses "()" are now treated as medium-priority delimiters
         test_cases = [
             "Simpson Chubby 2 x 24mm",
             "Zenith B2 × 26mm",
             "Chisel & Hound Sakura",
-            "Declaration Grooming (B15)",
         ]
 
         for input_text in test_cases:

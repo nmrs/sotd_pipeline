@@ -44,11 +44,13 @@ def get_patterns(alias: str) -> list[str]:
         rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
         rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
         rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
-        rf"^(?:[-*]\s*)?__\b{alias}\b:\__\s*(.+)$",  # __alias:__ value
+        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value (no word boundary needed with underscores)
         rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+)$",  # **alias //** value
         # more specific cases
         rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
         rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
-        # simple space format: Field product name (no colon/dash) - only when no other words between field and value
-        rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product name (no colon/dash, no other words)
+        # simple space format: Field product name (no colon/dash) - only
+        # when no other words between field and value
+        rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product
+        # name (no colon/dash, no other words)
     ]

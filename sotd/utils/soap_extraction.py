@@ -251,7 +251,8 @@ def normalize_soap_suffixes(text: str) -> str:
             r"\s*-\s*croap\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "- croap" at end (with optional punctuation)
-        # Removed: standalone "soap" at end - too aggressive, breaks brand names like "Soap Commander"
+        # Removed: standalone "soap" at end - too aggressive, breaks brand
+        # names like "Soap Commander"
         # Only strip "soap" when preceded by delimiters (handled by line 244)
         # General product suffixes that can appear anywhere
         (r"\s+crema\s+da\s+barba\s+", re.IGNORECASE),  # "crema da barba" anywhere (with spaces)

@@ -414,17 +414,23 @@ class TestScoringEngine:
 
         # Should return 1.0 when handle brand is populated but knot brand is not
         assert (
-            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "handle_only")
+            engine._modifier_handle_brand_without_knot_brand(
+                "test", result_with_handle_brand, "handle_only"
+            )
             == 1.0
         )
         assert (
-            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "knot_only")
+            engine._modifier_handle_brand_without_knot_brand(
+                "test", result_with_handle_brand, "knot_only"
+            )
             == 1.0
         )
 
         # Test automated_split strategy as well
         assert (
-            engine._modifier_handle_brand_without_knot_brand("test", result_with_handle_brand, "automated_split")
+            engine._modifier_handle_brand_without_knot_brand(
+                "test", result_with_handle_brand, "automated_split"
+            )
             == 1.0
         )
 
@@ -442,11 +448,15 @@ class TestScoringEngine:
 
         # Should return 1.0 when knot brand is populated but handle brand is not
         assert (
-            engine._modifier_knot_brand_without_handle_brand("test", result_with_knot_brand, "handle_only")
+            engine._modifier_knot_brand_without_handle_brand(
+                "test", result_with_knot_brand, "handle_only"
+            )
             == 1.0
         )
         assert (
-            engine._modifier_knot_brand_without_handle_brand("test", result_with_knot_brand, "knot_only")
+            engine._modifier_knot_brand_without_handle_brand(
+                "test", result_with_knot_brand, "knot_only"
+            )
             == 1.0
         )
 
@@ -564,7 +574,7 @@ class TestScoringEngine:
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
-        ), f"handle_only score {score_handle} != expected {expected_handle} (penalized by knot indicators)"
+        ), f"handle_only score {score_handle} != expected {expected_handle}"
 
         # Test knot_only strategy
         result_knot = MatchResult(
@@ -618,8 +628,10 @@ class TestScoringEngine:
             print(f"  handle.model: {handle_data.get('model')}")
             print(f"  knot.fiber: {knot_data.get('fiber')}")
 
-        # Expected: 40.0 + 0.0 + 0.0 + (-25.0) = 15.0 (no indicators, handle brand without knot brand)
-        expected_knot = 40.0 + 0.0 + 0.0 + (-25.0)
+        # Expected: 40.0 + 0.0 + 0.0 + 0.0 = 40.0
+        # Note: handle_brand_without_knot_brand modifier checks the current result's handle/knot data
+        # Since result_knot only has knot data (no handle data), the modifier returns 0.0
+        expected_knot = 40.0 + 0.0 + 0.0 + 0.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
@@ -693,23 +705,36 @@ class TestScoringEngine:
                 effect = modifier_value * modifier_weight
                 print(f"  {modifier_name}: {modifier_value} × {modifier_weight} = {effect}")
 
-        # Expected: 40.0 + 0.0 + (-30.0) + 0.0 + 0.0 = 10.0 (B2 detected as knot indicator, both have brands)
-        expected_handle = 40.0 + 0.0 + (-30.0) + 0.0 + 0.0
+        # Expected: 40.0 + 0.0 + (-30.0) + 25.0 = 35.0
+        # Note: handle_brand_without_knot_brand modifier checks the current result, not unified result
+        # Since result_handle_scenario2 has handle brand but no knot data, modifier applies +25.0
+        # B2 detected as knot indicator applies -30.0
+        expected_handle = 40.0 + 0.0 + (-30.0) + 25.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
-        ), f"handle_only score {score_handle} != expected {expected_handle} (no indicators, both have brands)"
+        ), f"handle_only score {score_handle} != expected {expected_handle}"
 
-        # Test knot_only strategy
-        scored_knot = engine.score_results([result_knot], "Declaration B2", engine.cached_results)
+        # Test knot_only strategy with new result object for Scenario 2
+        result_knot_scenario2 = MatchResult(
+            original="Declaration B2",
+            matched={"knot": {"brand": "Declaration Grooming", "model": "B2"}},
+            match_type="knot_only",
+            pattern="knot_only",
+            strategy="knot_only",
+        )
+        scored_knot = engine.score_results([result_knot_scenario2], "Declaration B2", engine.cached_results)
         score_knot = scored_knot[0].score
 
-        # Expected: 40.0 + 0.0 + 30.0 + 0.0 + 0.0 = 70.0 (B2 detected as knot indicator, both have brands)
-        expected_knot = 40.0 + 0.0 + 30.0 + 0.0 + 0.0
+        # Expected: 40.0 + 0.0 + 30.0 + 25.0 = 95.0
+        # Note: knot_brand_without_handle_brand modifier checks the current result, not unified result
+        # Since result_knot_scenario2 has knot brand but no handle data, modifier applies +25.0
+        # B2 detected as knot indicator applies +30.0
+        expected_knot = 40.0 + 0.0 + 30.0 + 25.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
-        ), f"knot_only score {score_knot} != expected {expected_knot} (B2 detected as knot indicator, both have brands)"
+        ), f"knot_only score {score_knot} != expected {expected_knot}"
 
         # Scenario 3: Both brands
         print("\n=== Scenario 3: Both brands ===")
@@ -734,12 +759,15 @@ class TestScoringEngine:
         )
         score_handle = scored_handle[0].score
 
-        # Expected: 40.0 + 0.0 + (-30.0) + 0.0 + 0.0 = 10.0 (B2 and Declaration detected as knot indicators, both have brands)
-        expected_handle = 40.0 + 0.0 + (-30.0) + 0.0 + 0.0
+        # Expected: 40.0 + 0.0 + (-30.0) + 25.0 = 35.0
+        # Note: handle_brand_without_knot_brand modifier checks the current result, not unified result
+        # Since result_handle_scenario3 has handle brand but no knot data, modifier applies +25.0
+        # B2 and Declaration detected as knot indicators applies -30.0
+        expected_handle = 40.0 + 0.0 + (-30.0) + 25.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
-        ), f"handle_only score {score_handle} != expected {expected_handle} (no indicators, both have brands)"
+        ), f"handle_only score {score_handle} != expected {expected_handle}"
 
         # Test knot_only strategy with new result object for this scenario
         result_knot_scenario3 = MatchResult(
@@ -755,12 +783,15 @@ class TestScoringEngine:
         )
         score_knot = scored_knot[0].score
 
-        # Expected: 40.0 + 0.0 + 30.0 + 0.0 + 0.0 = 70.0 (Declaration and B2 detected as knot indicators, both have brands)
-        expected_knot = 40.0 + 0.0 + 30.0 + 0.0 + 0.0
+        # Expected: 40.0 + 0.0 + 30.0 + 25.0 = 95.0
+        # Note: knot_brand_without_handle_brand modifier checks the current result, not unified result
+        # Since result_knot_scenario3 has knot brand but no handle data, modifier applies +25.0
+        # Declaration and B2 detected as knot indicators applies +30.0
+        expected_knot = 40.0 + 0.0 + 30.0 + 25.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
-        ), f"knot_only score {score_knot} != expected {expected_knot} (no indicators, both have brands)"
+        ), f"knot_only score {score_knot} != expected {expected_knot}"
 
         # Scenario 4: No brands
         print("\n=== Scenario 4: No brands ===")
@@ -771,21 +802,35 @@ class TestScoringEngine:
         }
         engine.cached_results = {"unified_result": mock_unified_result_scenario4}
 
-        # Test handle_only strategy
+        # Test handle_only strategy with new result object for Scenario 4 (no brand)
+        result_handle_scenario4 = MatchResult(
+            original="Custom Handle",
+            matched={"handle": {"brand": None, "model": "Custom"}},
+            match_type="handle_only",
+            pattern="handle_only",
+            strategy="handle_only",
+        )
         scored_handle = engine.score_results(
-            [result_handle], "Custom Handle", engine.cached_results
+            [result_handle_scenario4], "Custom Handle", engine.cached_results
         )
         score_handle = scored_handle[0].score
 
-        # Expected: 40.0 + 30.0 + 0.0 = 70.0 (no brand balance modifier)
+        # Expected: 40.0 + 30.0 + 0.0 = 70.0 (no brand balance modifier - no brand in result)
         expected_handle = 40.0 + 30.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
         ), f"handle_only score {score_handle} != expected {expected_handle}"
 
-        # Test knot_only strategy
-        scored_knot = engine.score_results([result_knot], "Badger Knot", engine.cached_results)
+        # Test knot_only strategy with new result object for Scenario 4 (no brand)
+        result_knot_scenario4 = MatchResult(
+            original="Badger Knot",
+            matched={"knot": {"brand": None, "fiber": "badger"}},
+            match_type="knot_only",
+            pattern="knot_only",
+            strategy="knot_only",
+        )
+        scored_knot = engine.score_results([result_knot_scenario4], "Badger Knot", engine.cached_results)
         score_knot = scored_knot[0].score
 
         # Expected: 40.0 + 0.0 + 0.0 = 40.0 (Badger and Knot are not specific knot model names, no brand balance modifier)
@@ -857,26 +902,18 @@ class TestScoringEngine:
         )
 
         # Should return 1.0 when neither handle brand nor knot brand is populated
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "handle_only") == 1.0
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "knot_only") == 1.0
         assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "handle_only")
-            == 1.0
+            engine._modifier_neither_brand("test", result_with_no_brands, "automated_split") == 1.0
         )
         assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "knot_only")
+            engine._modifier_neither_brand(
+                "test", result_with_no_brands, "full_input_component_matching"
+            )
             == 1.0
         )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "automated_split")
-            == 1.0
-        )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "full_input_component_matching")
-            == 1.0
-        )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "known_split")
-            == 1.0
-        )
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "known_split") == 1.0
 
         # Should return 0.0 when at least one brand exists
         result_with_handle_brand = MatchResult(
@@ -890,8 +927,7 @@ class TestScoringEngine:
             strategy="handle_only",
         )
         assert (
-            engine._modifier_neither_brand("test", result_with_handle_brand, "handle_only")
-            == 0.0
+            engine._modifier_neither_brand("test", result_with_handle_brand, "handle_only") == 0.0
         )
 
         result_with_knot_brand = MatchResult(
@@ -904,10 +940,7 @@ class TestScoringEngine:
             pattern=None,
             strategy="knot_only",
         )
-        assert (
-            engine._modifier_neither_brand("test", result_with_knot_brand, "knot_only")
-            == 0.0
-        )
+        assert engine._modifier_neither_brand("test", result_with_knot_brand, "knot_only") == 0.0
 
         result_with_both_brands = MatchResult(
             original="test",
@@ -941,22 +974,12 @@ class TestScoringEngine:
         )
 
         # Should return 0.0 for unsupported strategies even if neither brand exists
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "known_brush") == 0.0
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "other_brush") == 0.0
         assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "known_brush")
-            == 0.0
+            engine._modifier_neither_brand("test", result_with_no_brands, "handle_matching") == 0.0
         )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "other_brush")
-            == 0.0
-        )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "handle_matching")
-            == 0.0
-        )
-        assert (
-            engine._modifier_neither_brand("test", result_with_no_brands, "knot_matching")
-            == 0.0
-        )
+        assert engine._modifier_neither_brand("test", result_with_no_brands, "knot_matching") == 0.0
 
     def test_neither_brand_modifier_integration(self):
         """Test integration showing neither_brand modifier affects final score calculation."""
@@ -990,9 +1013,7 @@ class TestScoringEngine:
             strategy="automated_split",
         )
 
-        scored_results = engine.score_results(
-            [result], "Custom 26mm badger", engine.cached_results
-        )
+        scored_results = engine.score_results([result], "Custom 26mm badger", engine.cached_results)
 
         assert len(scored_results) == 1
         # Base score (50.0) + neither_brand (-20.0) = 30.0

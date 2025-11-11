@@ -31,8 +31,10 @@ class TestNormalizeSoapSuffixes:
             normalize_soap_suffixes("summer break soaps - steady - soap")
             == "summer break soaps - steady"
         )
+        # Note: Standalone "soap" at end is NOT removed to avoid breaking brand names like "Soap Commander"
+        # Only "- soap" (with dash) is removed
         assert (
-            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady"
+            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady soap"
         )
 
         # - puck suffix
@@ -53,9 +55,10 @@ class TestNormalizeSoapSuffixes:
             == "summer break soaps - steady"
         )
 
-        # standalone soap
+        # standalone soap - NOT removed to avoid breaking brand names like "Soap Commander"
+        # Only "- soap" (with dash) is removed
         assert (
-            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady"
+            normalize_soap_suffixes("summer break soaps steady soap") == "summer break soaps steady soap"
         )
 
     def test_container_type_suffixes(self):
