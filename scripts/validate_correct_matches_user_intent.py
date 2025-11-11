@@ -21,8 +21,8 @@ import yaml
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.config import BrushMatcherConfig
+from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
+from sotd.match.config import BrushMatcherConfig  # noqa: E402
 
 
 class CorrectMatchesValidator:
@@ -37,15 +37,20 @@ class CorrectMatchesValidator:
     def load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches from directory structure."""
         if not self.correct_matches_path.exists():
-            raise FileNotFoundError(f"Correct matches directory not found: {self.correct_matches_path}")
+            raise FileNotFoundError(
+                f"Correct matches directory not found: {self.correct_matches_path}"
+            )
 
         correct_matches = {}
-        
+
         # Load all field files from directory structure
         for field_file in self.correct_matches_path.glob("*.yaml"):
             field_name = field_file.stem
             # Skip backup and report files
-            if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+            if (
+                field_file.name.endswith((".backup", ".bk"))
+                or "duplicates_report" in field_file.name
+            ):
                 continue
             try:
                 with field_file.open("r", encoding="utf-8") as f:
@@ -54,7 +59,7 @@ class CorrectMatchesValidator:
                         correct_matches[field_name] = field_data
             except Exception as e:
                 print(f"Warning: Error loading {field_file}: {e}")
-        
+
         return correct_matches
 
     def extract_brush_entries(
@@ -214,7 +219,8 @@ class CorrectMatchesValidator:
                                         if "user_intent" in pattern[pattern_string]:
                                             del pattern[pattern_string]["user_intent"]
                                             enhanced_entries.append(
-                                                f"{entry_type}: {brush_string} (removed user_intent)"
+                                                f"{entry_type}: {brush_string} "
+                                                f"(removed user_intent)"
                                             )
                                         break
                                 else:
@@ -262,7 +268,10 @@ class CorrectMatchesValidator:
 
         for result in validation_results:
             if result["status"] == "success":
-                report += f"- {result['entry_type']}: `{result['brush_string']}` → `{result['user_intent']}`\n"
+                report += (
+                    f"- {result['entry_type']}: `{result['brush_string']}` → "
+                    f"`{result['user_intent']}`\n"
+                )
 
         if failed > 0:
             report += f"\n## Failed Validations ({failed})\n"
@@ -306,13 +315,14 @@ class CorrectMatchesValidator:
             enhanced_matches: Enhanced correct_matches directory data
             backup: Whether to create backups of the original files
         """
-        import yaml
         import shutil
+
+        import yaml
 
         # Save each field to its own file
         for field_name, field_data in enhanced_matches.items():
             field_file = self.correct_matches_path / f"{field_name}.yaml"
-            
+
             if backup and field_file.exists():
                 # Create backup
                 backup_path = field_file.with_suffix(".yaml.backup")

@@ -8,12 +8,12 @@ from typing import Pattern
 def get_incomplete_usage_pattern() -> Pattern[str]:
     """
     Get regex pattern for incomplete usage counts: (1, [2, {3, etc. (missing closing bracket)
- 
+
     This pattern matches incomplete parentheses/brackets/braces with numbers that are likely
     blade use counts, but only when we're confident they're actually incomplete (at end of string
     or followed by space and end of string). This prevents matching legitimate specifications
     like "(27 mm × 51 mm Manchurian badger)".
- 
+
     Returns:
         Compiled regex pattern for incomplete usage counts
     """
@@ -123,7 +123,8 @@ def get_completion_pattern() -> Pattern[str]:
 
 def get_speculation_pattern() -> Pattern[str]:
     """
-    Get regex pattern for user speculation: (10 I think), (3 I think), (7, I think), (30+ I think), etc.
+    Get regex pattern for user speculation: (10 I think), (3 I think),
+    (7, I think), (30+ I think), etc.
 
     Returns:
         Compiled regex pattern for user speculation

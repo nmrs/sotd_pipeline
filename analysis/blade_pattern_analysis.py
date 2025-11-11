@@ -8,9 +8,9 @@ which patterns are causing incorrect blade extractions.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List
+
 from sotd.extract.fields import get_patterns
-from sotd.utils.aliases import FIELD_ALIASES
 
 
 class BladePatternAnalyzer:
@@ -88,7 +88,7 @@ class BladePatternAnalyzer:
         report.append("=" * 40)
         report.append("")
 
-        report.append(f"## Summary")
+        report.append("## Summary")
         report.append(f"- Total patterns: {results['total_patterns']}")
         report.append(f"- Problematic patterns: {len(results['problematic_patterns'])}")
         report.append(f"- Correct patterns: {len(results['correct_patterns'])}")
@@ -102,7 +102,7 @@ class BladePatternAnalyzer:
 
             for pattern_info in results["problematic_patterns"]:
                 report.append(f"### Pattern {pattern_info['index']}")
-                report.append(f"```regex")
+                report.append("```regex")
                 report.append(pattern_info["pattern"])
                 report.append("```")
                 report.append("")
@@ -124,7 +124,7 @@ class BladePatternAnalyzer:
         for pattern_info in results["pattern_analysis"]:
             status = "❌ PROBLEMATIC" if pattern_info["is_problematic"] else "✅ OK"
             report.append(f"### Pattern {pattern_info['index']} {status}")
-            report.append(f"```regex")
+            report.append("```regex")
             report.append(pattern_info["pattern"])
             report.append("```")
 
@@ -158,12 +158,13 @@ class BladePatternAnalyzer:
                     "  Alternative: Use more specific patterns that require colons/dashes"
                 )
                 suggestions.append("")
-            elif r"\s*[-:]\s*" in pattern and not r"\b{alias}\b\s*[-:]\s*" in pattern:
+            elif r"\s*[-:]\s*" in pattern and r"\b{alias}\b\s*[-:]\s*" not in pattern:
                 suggestions.append(
                     "  Issue: Pattern allows other words between field name and colon"
                 )
                 suggestions.append(
-                    "  Fix: Use word boundaries to ensure field name is immediately followed by colon"
+                    "  Fix: Use word boundaries to ensure field name is "
+                    "immediately followed by colon"
                 )
                 suggestions.append("")
 

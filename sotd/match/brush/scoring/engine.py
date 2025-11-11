@@ -5,12 +5,12 @@ This component scores strategy results based on configuration weights and criter
 """
 
 import re
-from typing import List, Optional, Any
 from pathlib import Path
+from typing import Any, List, Optional
+
 import yaml
 
 from sotd.match.types import MatchResult
-from ..delimiter_patterns import BrushDelimiterPatterns
 
 
 class ScoringEngine:
@@ -769,9 +769,7 @@ class ScoringEngine:
         # Return 1.0 if knot brand is populated but handle brand is not
         return 1.0 if knot_brand and not handle_brand else 0.0
 
-    def _modifier_neither_brand(
-        self, input_text: str, result, strategy_name: str
-    ) -> float:
+    def _modifier_neither_brand(self, input_text: str, result, strategy_name: str) -> float:
         """
         Return score modifier for neither brand detection.
 

@@ -372,22 +372,34 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
     report = f"""# Phase 4.1 Step 4: User Feedback Pattern Research
 
 **Analysis Date**: {analysis_results["analysis_date"]}  
-**Data Sources**: WebUI validation tools, correct_matches.yaml, analysis tools, validation components  
+ **Data Sources**: WebUI validation tools, correct_matches.yaml, analysis 
+ tools, validation components
 **Total Manual Corrections**: {correct_matches.get("total_corrections", 0):,}  
 **Available Analysis Tools**: {len(analysis_tools.get("available_tools", [])):,}
 
 ## Executive Summary
 
 ### Validation Infrastructure
-- **WebUI Validation Components**: {len(webui_analysis.get("validation_components", [])):,} components identified
-- **API Validation Endpoints**: {len(webui_analysis.get("api_endpoints", [])):,} endpoints available
-- **Manual Correction Entries**: {correct_matches.get("total_corrections", 0):,} patterns in correct_matches.yaml
+ - **WebUI Validation Components**: 
+   {len(webui_analysis.get("validation_components", [])):,} components 
+   identified
+ - **API Validation Endpoints**: 
+   {len(webui_analysis.get("api_endpoints", [])):,} endpoints available
+ - **Manual Correction Entries**: 
+   {correct_matches.get("total_corrections", 0):,} patterns in 
+   correct_matches.yaml
 - **Analysis Tools**: {len(analysis_tools.get("available_tools", [])):,} automated analysis tools
 
 ### Quality Feedback Patterns
-- **High Confidence Corrections**: {len(correct_matches.get("quality_patterns", {}).get("high_confidence", [])):,} entries (4+ fields)
-- **Medium Confidence Corrections**: {len(correct_matches.get("quality_patterns", {}).get("medium_confidence", [])):,} entries (2-3 fields)
-- **Low Confidence Corrections**: {len(correct_matches.get("quality_patterns", {}).get("low_confidence", [])):,} entries (1 field)
+- **High Confidence Corrections**: 
+  {len(correct_matches.get("quality_patterns", {}).get("high_confidence", [])):,} 
+  entries (4+ fields)
+- **Medium Confidence Corrections**: 
+  {len(correct_matches.get("quality_patterns", {}).get("medium_confidence", [])):,} 
+  entries (2-3 fields)
+- **Low Confidence Corrections**: 
+  {len(correct_matches.get("quality_patterns", {}).get("low_confidence", [])):,} 
+  entries (1 field)
 
 ## WebUI Validation Analysis
 
@@ -549,16 +561,24 @@ Based on the WebUI and API analysis, the current validation workflow follows thi
 4. **Analysis Tool Reports**: Automated quality assessment reports
 
 #### User Preference Patterns (from manual corrections)
-1. **Brand Accuracy Priority**: {len(correct_matches.get("correction_categories", {}).get("brand_fixes", [])):,} brand corrections indicate high user focus on brand accuracy
-2. **Specification Completeness**: {len(correct_matches.get("correction_categories", {}).get("specification_fixes", [])):,} specification fixes show importance of complete data
-3. **Quality Over Quantity**: High-confidence corrections ({len(high_confidence):,}) suggest users prefer complete, accurate entries
+1. **Brand Accuracy Priority**: 
+   {len(correct_matches.get("correction_categories", {}).get("brand_fixes", [])):,} 
+   brand corrections indicate high user focus on brand accuracy
+2. **Specification Completeness**: 
+   {len(correct_matches.get("correction_categories", {}).get("specification_fixes", [])):,} 
+   specification fixes show importance of complete data
+3. **Quality Over Quantity**: High-confidence corrections 
+   ({len(high_confidence):,}) suggest users prefer complete, accurate 
+   entries
 
 ## Quality Validation Insights for Scoring System
 
 ### High-Value Quality Indicators
-1. **Manual Correction Frequency**: Brands with frequent corrections indicate problematic automated matching
+1. **Manual Correction Frequency**: Brands with frequent corrections 
+   indicate problematic automated matching
 2. **Specification Completeness**: Users consistently add missing specifications in corrections
-3. **Pattern Specificity**: Complex patterns in correct_matches.yaml indicate need for specific matching
+3. **Pattern Specificity**: Complex patterns in correct_matches.yaml 
+   indicate need for specific matching
 4. **Brand Authority**: Manufacturer brands receive more detailed corrections than artisan brands
 
 ### User Validation Preferences
@@ -599,7 +619,8 @@ Based on the WebUI and API analysis, the current validation workflow follows thi
 1. **Historical accuracy scoring**: Track accuracy of automated matches vs manual corrections
 2. **User confidence weighting**: Weight quality scores by user validation confidence
 3. **Continuous learning**: Update quality scores based on ongoing user feedback
-4. **Expert validation integration**: Prioritize feedback from users with high-quality correction history
+4. **Expert validation integration**: Prioritize feedback from users with 
+   high-quality correction history
 
 ---
 
@@ -651,9 +672,8 @@ def main():
     print(f"- Manual corrections: {total_corrections:,}")
     print(f"- WebUI validation components: {validation_components:,}")
     print(f"- Analysis tools: {analysis_tools_count:,}")
-    print(
-        f"- High confidence corrections: {len(correct_matches_analysis.get('quality_patterns', {}).get('high_confidence', [])):,}"
-    )
+    high_conf = correct_matches_analysis.get("quality_patterns", {}).get("high_confidence", [])
+    print(f"- High confidence corrections: {len(high_conf):,}")
 
 
 if __name__ == "__main__":

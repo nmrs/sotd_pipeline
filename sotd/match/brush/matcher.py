@@ -9,47 +9,46 @@ from typing import List, Optional
 
 import yaml
 
+from sotd.match.types import MatchResult
+
+from .config import BrushScoringConfig
 from .handle_matcher import HandleMatcher
 from .knot_matcher import KnotMatcher
 from .knot_matcher_factory import KnotMatcherFactory
-from sotd.match.types import MatchResult
+from .scoring.dependencies.strategy_dependency_manager import (
+    DependencyType,
+    StrategyDependency,
+    StrategyDependencyManager,
+)
+from .scoring.engine import ScoringEngine
+from .scoring.matcher import CorrectMatchesMatcher
+from .scoring.orchestrator import StrategyOrchestrator
+from .scoring.performance.performance_monitor import PerformanceMonitor
+from .scoring.performance.strategy_performance_optimizer import (
+    StrategyPerformanceOptimizer,
+)
+from .scoring.resolver import ResultConflictResolver
+from .strategies.correct_matches_strategy import (
+    CorrectMatchesStrategy,
+)
 from .strategies.known.known_brush_strategy import (
     KnownBrushMatchingStrategy,
 )
 from .strategies.known.known_knot_based_brush_strategy import (
     KnownKnotBasedBrushMatchingStrategy,
 )
-from .strategies.correct_matches_strategy import (
-    CorrectMatchesStrategy,
-)
-
 from .strategies.known.known_split_wrapper_strategy import (
     KnownSplitWrapperStrategy,
 )
 from .strategies.other_brushes_strategy import (
     OtherBrushMatchingStrategy,
 )
-from .strategies.specialized.zenith_strategy import (
-    ZenithBrushMatchingStrategy,
-)
 from .strategies.specialized.omega_semogue_strategy import (
     OmegaSemogueBrushMatchingStrategy,
 )
-from .scoring.matcher import CorrectMatchesMatcher
-from .scoring.performance.performance_monitor import PerformanceMonitor
-from .scoring.resolver import ResultConflictResolver
-
-from .scoring.engine import ScoringEngine
-from .scoring.dependencies.strategy_dependency_manager import (
-    StrategyDependencyManager,
-    StrategyDependency,
-    DependencyType,
+from .strategies.specialized.zenith_strategy import (
+    ZenithBrushMatchingStrategy,
 )
-from .scoring.orchestrator import StrategyOrchestrator
-from .scoring.performance.strategy_performance_optimizer import (
-    StrategyPerformanceOptimizer,
-)
-from .config import BrushScoringConfig
 
 # Module-level cache for catalogs to avoid redundant loading
 _catalog_cache = None
@@ -59,11 +58,11 @@ def clear_brush_catalog_cache() -> None:
     """Clear the module-level catalog cache for brush matcher."""
     global _catalog_cache
     _catalog_cache = None
-    
+
     # Also clear related caches
-    from .splitter import BrushSplitter
     from .scoring.engine import ScoringEngine
-    
+    from .splitter import BrushSplitter
+
     BrushSplitter.clear_brands_cache()
     ScoringEngine.clear_knots_cache()
 
@@ -285,7 +284,8 @@ class BrushMatcher:
                     f.read(1)
             except (PermissionError, UnicodeDecodeError) as e:
                 raise ValueError(
-                    f"Correct matches file is not readable: {self.correct_matches_path.absolute()} - {e}"
+                    f"Correct matches file is not readable: "
+                    f"{self.correct_matches_path.absolute()} - {e}"
                 )
         elif self.correct_matches_path.is_dir():
             # New directory structure mode - validate required files exist
@@ -294,18 +294,21 @@ class BrushMatcher:
                 file_path = self.correct_matches_path / filename
                 if not file_path.exists():
                     raise FileNotFoundError(
-                        f"Required correct matches file '{filename}' not found at: {file_path.absolute()}"
+                        f"Required correct matches file '{filename}' not found "
+                        f"at: {file_path.absolute()}"
                     )
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         f.read(1)
                 except (PermissionError, UnicodeDecodeError) as e:
                     raise ValueError(
-                        f"Correct matches file '{filename}' is not readable: {file_path.absolute()} - {e}"
+                        f"Correct matches file '{filename}' is not readable: "
+                        f"{file_path.absolute()} - {e}"
                     )
         else:
             raise ValueError(
-                f"Correct matches path is neither file nor directory: {self.correct_matches_path.absolute()}"
+                f"Correct matches path is neither file nor directory: "
+                f"{self.correct_matches_path.absolute()}"
             )
 
         if self.debug:
@@ -346,7 +349,8 @@ class BrushMatcher:
             raise ValueError(f"YAML syntax error in {path.absolute()}: {e}")
 
     def _load_correct_matches_catalog(self) -> dict:
-        """Load correct matches catalog from directory structure or legacy file using CatalogLoader."""
+        """Load correct matches catalog from directory structure or legacy
+        file using CatalogLoader."""
         from sotd.match.loaders import CatalogLoader
 
         loader = CatalogLoader()
@@ -408,9 +412,21 @@ class BrushMatcher:
         strategies.append(OmegaSemogueBrushMatchingStrategy())
 
         # Skip other strategies for now - they may expect different catalog structure
-        # strategies.append(ZenithBrushMatchingStrategy(catalogs["brushes"].get("zenith_brushes", {})))
-        # strategies.append(OmegaSemogueBrushMatchingStrategy(catalogs["brushes"].get("omega_semogue_brushes", {})))
-        # strategies.append(FiberFallbackStrategy(catalogs["brushes"].get("fiber_fallback_brushes", {})))
+        # strategies.append(
+        #     ZenithBrushMatchingStrategy(
+        #         catalogs["brushes"].get("zenith_brushes", {})
+        #     )
+        # )
+        # strategies.append(
+        #     OmegaSemogueBrushMatchingStrategy(
+        #         catalogs["brushes"].get("omega_semogue_brushes", {})
+        #     )
+        # )
+        # strategies.append(
+        #     FiberFallbackStrategy(
+        #         catalogs["brushes"].get("fiber_fallback_brushes", {})
+        #     )
+        # )
 
         # Add the unified component matching strategy
         from .strategies.full_input_component_matching_strategy import (
@@ -421,8 +437,10 @@ class BrushMatcher:
             FullInputComponentMatchingStrategy(self.handle_matcher, self.knot_matcher, catalogs)
         )
 
-        # Skip problematic component strategies for now - they expect component-level data, not brush-level data
-        # These strategies are now deprecated and replaced by component strategies within unified strategies
+        # Skip problematic component strategies for now - they expect
+        # component-level data, not brush-level data
+        # These strategies are now deprecated and replaced by component
+        # strategies within unified strategies
 
         return strategies
 
@@ -771,7 +789,8 @@ class BrushMatcher:
         Args:
             value: The normalized brush string to match
             original: The original brush string (defaults to value if not provided)
-            bypass_correct_matches: If True, bypass correct_matches.yaml. If None or False, use correct_matches.yaml.
+            bypass_correct_matches: If True, bypass correct_matches.yaml.
+                If None or False, use correct_matches.yaml.
 
         Returns:
             MatchResult if found, None otherwise
@@ -835,7 +854,8 @@ class BrushMatcher:
             # Note: We no longer create separate best_result_data since strategy and score
             # are now added directly to the matched data
 
-            # Return the result directly (no processing needed since strategies produce correct structure)
+            # Return the result directly (no processing needed since
+            # strategies produce correct structure)
             final_result = best_result
 
             # Add strategy persistence fields

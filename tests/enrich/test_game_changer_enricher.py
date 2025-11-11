@@ -216,7 +216,9 @@ class TestGameChangerEnricher:
             field_data = {"model": model}
             result = self.enricher.enrich(field_data, model)
             assert result is not None, f"Failed to extract gap from: {model}"
-            assert result["gap"] == expected_gap, f"Expected {expected_gap}, got {result['gap']} for: {model}"
+            assert (
+                result["gap"] == expected_gap
+            ), f"Expected {expected_gap}, got {result['gap']} for: {model}"
 
     def test_accept_all_valid_gaps_with_any_variant(self):
         """Test that all valid gaps are accepted with any variant."""

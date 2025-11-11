@@ -5,18 +5,18 @@ This module provides the core analysis logic that can be used by both the CLI to
 and the web UI API to ensure consistent results and avoid code duplication.
 """
 
-from typing import Dict, Any
-from pathlib import Path
 import sys
+from pathlib import Path
+from typing import Any, Dict
 
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import SOTD modules after path setup
-from sotd.enrich.brush_enricher import BrushEnricher
-from sotd.match.brush.config import BrushScoringConfig
-from sotd.match.brush_matcher import BrushMatcher
+from sotd.enrich.brush_enricher import BrushEnricher  # noqa: E402
+from sotd.match.brush.config import BrushScoringConfig  # noqa: E402
+from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
 
 
 class BrushMatchingAnalyzer:
@@ -128,7 +128,7 @@ class BrushMatchingAnalyzer:
                 results["strategies"] = strategies
 
                 if self.debug:
-                    print(f"DEBUG: Final strategies with scores:")
+                    print("DEBUG: Final strategies with scores:")
                     for s in strategies:
                         print(f"  {s.get('strategy', 'unknown')}: {s.get('score', 0)}")
 

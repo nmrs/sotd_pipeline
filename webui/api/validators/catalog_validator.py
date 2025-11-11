@@ -2,9 +2,10 @@
 """Shared catalog validation logic for CLI and API."""
 
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import yaml
+
 from sotd.match.brush_matcher import BrushMatcher
 
 
@@ -29,9 +30,8 @@ class CatalogValidator:
 
         # Debug logging for brush matcher
         print(f"DEBUG: Brush matcher initialized: {self.brush_matcher}")
-        print(
-            f"DEBUG: Brush matcher config path: {getattr(self.brush_matcher, 'config_path', 'Not set')}"
-        )
+        config_path = getattr(self.brush_matcher, "config_path", "Not set")
+        print(f"DEBUG: Brush matcher config path: {config_path}")
 
     def load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml data."""
@@ -72,12 +72,10 @@ class CatalogValidator:
                                     pattern, bypass_correct_matches=True
                                 )
                                 print(f"DEBUG: Result: {result}")  # Debug log
-                                print(
-                                    f"DEBUG: Has matched: {hasattr(result, 'matched') if result else False}"
-                                )  # Debug log
-                                print(
-                                    f"DEBUG: Matched value: {getattr(result, 'matched', None) if result else None}"
-                                )  # Debug log
+                                has_matched = hasattr(result, "matched") if result else False
+                                print(f"DEBUG: Has matched: {has_matched}")  # Debug log
+                                matched_val = getattr(result, "matched", None) if result else None
+                                print(f"DEBUG: Matched value: {matched_val}")  # Debug log
 
                                 if result and hasattr(result, "matched") and result.matched:
                                     # Extract brand and model from matcher result
@@ -91,7 +89,8 @@ class CatalogValidator:
                                         matched_brand = getattr(result.matched, "brand", None)
                                         matched_model = getattr(result.matched, "model", None)
 
-                                    # Check if this is a composite brush (has handle/knot components)
+                                    # Check if this is a composite brush
+                                    # (has handle/knot components)
                                     has_handle = False
                                     has_knot = False
                                     if hasattr(result.matched, "get"):
@@ -113,13 +112,17 @@ class CatalogValidator:
                                             hasattr(result.matched, "knot") and result.matched.knot
                                         )
 
-                                    # IMPORTANT: Only flag as composite brush if the matcher didn't return a top-level brand/model
-                                    # Known brushes can have both top-level brand/model AND handle/knot components populated
-                                    # This is the correct behavior for catalog-driven brushes according to the specification
+                                    # IMPORTANT: Only flag as composite brush if the matcher
+                                    # didn't return a top-level brand/model
+                                    # Known brushes can have both top-level brand/model AND
+                                    # handle/knot components populated
+                                    # This is the correct behavior for catalog-driven brushes
+                                    # according to the specification
                                     if (has_handle or has_knot) and (
                                         not matched_brand or not matched_model
                                     ):
-                                        # This is a composite brush - check if it should be stored in handle/knot sections
+                                        # This is a composite brush - check if it should be
+                                        # stored in handle/knot sections
                                         # Extract handle/knot information
                                         if hasattr(result.matched, "get"):
                                             # Dictionary-like object
@@ -160,7 +163,8 @@ class CatalogValidator:
                                                 else None
                                             )
 
-                                        # Flag if composite brush is stored in complete brush section
+                                        # Flag if composite brush is stored in complete
+                                        # brush section
                                         issues.append(
                                             {
                                                 "type": "composite_brush_in_wrong_section",
@@ -173,14 +177,21 @@ class CatalogValidator:
                                                 "matched_knot_brand": matched_knot_brand,
                                                 "matched_knot_model": matched_knot_model,
                                                 "message": (
-                                                    f"Pattern '{pattern}' is stored as complete brush under "
-                                                    f"'{brand.strip()} {model.strip()}' but matcher returns "
-                                                    f"composite brush with handle: {matched_handle_brand}/{matched_handle_model}, "
-                                                    f"knot: {matched_knot_brand}/{matched_knot_model}"
+                                                    f"Pattern '{pattern}' is stored as "
+                                                    f"complete brush under "
+                                                    f"'{brand.strip()} {model.strip()}' "
+                                                    f"but matcher returns composite brush "
+                                                    f"with handle: "
+                                                    f"{matched_handle_brand}/"
+                                                    f"{matched_handle_model}, "
+                                                    f"knot: {matched_knot_brand}/"
+                                                    f"{matched_knot_model}"
                                                 ),
                                                 "suggested_action": (
-                                                    f"Move pattern '{pattern}' from complete brush section to "
-                                                    f"handle/knot sections or fix matcher to return complete brush"
+                                                    f"Move pattern '{pattern}' from "
+                                                    f"complete brush section to "
+                                                    f"handle/knot sections or fix matcher "
+                                                    f"to return complete brush"
                                                 ),
                                             }
                                         )
@@ -205,13 +216,18 @@ class CatalogValidator:
                                                     "matched_brand": matched_brand,
                                                     "matched_model": matched_model,
                                                     "message": (
-                                                        f"Pattern '{pattern}' is stored under "
-                                                        f"'{stored_brand} {stored_model}' but matcher returns "
-                                                        f"'{matched_brand} {matched_model}'"
+                                                        f"Pattern '{pattern}' is stored "
+                                                        f"under '{stored_brand} "
+                                                        f"{stored_model}' but matcher "
+                                                        f"returns '{matched_brand} "
+                                                        f"{matched_model}'"
                                                     ),
                                                     "suggested_action": (
-                                                        f"Move from '{stored_brand} {stored_model}' to "
-                                                        f"'{matched_brand} {matched_model}' in correct_matches.yaml"
+                                                        f"Move from '{stored_brand} "
+                                                        f"{stored_model}' to "
+                                                        f"'{matched_brand} "
+                                                        f"{matched_model}' in "
+                                                        f"correct_matches.yaml"
                                                     ),
                                                 }
                                             )
@@ -233,19 +249,23 @@ class CatalogValidator:
                                                     "matched_brand": matched_brand,
                                                     "matched_model": matched_model,
                                                     "message": (
-                                                        f"Pattern '{pattern}' is stored under "
-                                                        f"'{brand.strip()}' but matcher returns brand "
+                                                        f"Pattern '{pattern}' is stored "
+                                                        f"under '{brand.strip()}' but "
+                                                        f"matcher returns brand "
                                                         f"'{matched_brand}'"
                                                     ),
                                                     "suggested_action": (
-                                                        f"Check if pattern '{pattern}' should be moved to "
-                                                        f"'{matched_brand}' section or if the matcher result is incorrect"
+                                                        f"Check if pattern '{pattern}' "
+                                                        f"should be moved to "
+                                                        f"'{matched_brand}' section or "
+                                                        f"if the matcher result is "
+                                                        f"incorrect"
                                                     ),
                                                 }
                                             )
 
-                                        # Now check if this is a composite brush (model is null, but handle/knot components exist)
-                                        # Check if this is a composite brush (model is null, but handle/knot components exist)
+                                        # Now check if this is a composite brush
+                                        # (model is null, but handle/knot components exist)
                                         is_composite = False
                                         if hasattr(result.matched, "get"):
                                             # Dictionary-like object
@@ -263,8 +283,10 @@ class CatalogValidator:
                                             )
 
                                         if is_composite:
-                                            # This is a composite brush - check if it should be stored in handle/knot sections
-                                            # Handle both object and dictionary types for handle/knot
+                                            # This is a composite brush - check if it
+                                            # should be stored in handle/knot sections
+                                            # Handle both object and dictionary types
+                                            # for handle/knot
                                             if hasattr(result.matched, "get"):
                                                 # Dictionary-like object
                                                 handle_data = result.matched.get("handle", {})
@@ -300,7 +322,8 @@ class CatalogValidator:
                                                     result.matched.knot, "model", None
                                                 )
 
-                                            # Flag if composite brush is stored in complete brush section
+                                            # Flag if composite brush is stored in
+                                            # complete brush section
                                             issues.append(
                                                 {
                                                     "type": "composite_brush_in_wrong_section",
@@ -313,19 +336,29 @@ class CatalogValidator:
                                                     "matched_knot_brand": matched_knot_brand,
                                                     "matched_knot_model": matched_knot_model,
                                                     "message": (
-                                                        f"Pattern '{pattern}' is stored as complete brush under "
-                                                        f"'{brand.strip()} {model.strip()}' but matcher returns "
-                                                        f"composite brush with handle: {matched_handle_brand}/{matched_handle_model}, "
-                                                        f"knot: {matched_knot_brand}/{matched_knot_model}"
+                                                        f"Pattern '{pattern}' is stored "
+                                                        f"as complete brush under "
+                                                        f"'{brand.strip()} "
+                                                        f"{model.strip()}' but matcher "
+                                                        f"returns composite brush with "
+                                                        f"handle: "
+                                                        f"{matched_handle_brand}/"
+                                                        f"{matched_handle_model}, "
+                                                        f"knot: {matched_knot_brand}/"
+                                                        f"{matched_knot_model}"
                                                     ),
                                                     "suggested_action": (
-                                                        f"Move pattern '{pattern}' from complete brush section to "
-                                                        f"handle/knot sections or fix matcher to return complete brush"
+                                                        f"Move pattern '{pattern}' from "
+                                                        f"complete brush section to "
+                                                        f"handle/knot sections or fix "
+                                                        f"matcher to return complete "
+                                                        f"brush"
                                                     ),
                                                 }
                                             )
 
-                                        # Now check for single component brushes (handle-only or knot-only)
+                                        # Now check for single component brushes
+                                        # (handle-only or knot-only)
                                         elif not matched_model and (
                                             (
                                                 hasattr(result.matched, "handle")
@@ -346,7 +379,9 @@ class CatalogValidator:
                                                 )
                                             )
                                         ):
-                                            # This is a single component brush - check if it should be stored in handle/knot sections
+                                            # This is a single component brush - check
+                                            # if it should be stored in handle/knot
+                                            # sections
                                             if hasattr(result.matched, "get"):
                                                 # Dictionary-like object
                                                 handle_data = result.matched.get("handle", {})
@@ -377,20 +412,31 @@ class CatalogValidator:
                                                 # Handle-only brush
                                                 issues.append(
                                                     {
-                                                        "type": "handle_only_brush_in_wrong_section",
+                                                        "type": (
+                                                            "handle_only_brush_in_wrong_section"
+                                                        ),
                                                         "field": "brush",
                                                         "pattern": pattern,
                                                         "stored_brand": brand.strip(),
                                                         "stored_model": model.strip(),
-                                                        "matched_handle_brand": matched_handle_brand,
+                                                        "matched_handle_brand": (
+                                                            matched_handle_brand
+                                                        ),
                                                         "message": (
-                                                            f"Pattern '{pattern}' is stored as complete brush under "
-                                                            f"'{brand.strip()} {model.strip()}' but matcher returns "
-                                                            f"handle-only brush: {matched_handle_brand}"
+                                                            f"Pattern '{pattern}' is "
+                                                            f"stored as complete brush "
+                                                            f"under '{brand.strip()} "
+                                                            f"{model.strip()}' but "
+                                                            f"matcher returns "
+                                                            f"handle-only brush: "
+                                                            f"{matched_handle_brand}"
                                                         ),
                                                         "suggested_action": (
-                                                            f"Move pattern '{pattern}' from complete brush section to "
-                                                            f"handle section under {matched_handle_brand}"
+                                                            f"Move pattern '{pattern}' "
+                                                            f"from complete brush "
+                                                            f"section to handle section "
+                                                            f"under "
+                                                            f"{matched_handle_brand}"
                                                         ),
                                                     }
                                                 )
@@ -405,13 +451,20 @@ class CatalogValidator:
                                                         "stored_model": model.strip(),
                                                         "matched_knot_brand": matched_knot_brand,
                                                         "message": (
-                                                            f"Pattern '{pattern}' is stored as complete brush under "
-                                                            f"'{brand.strip()} {model.strip()}' but matcher returns "
-                                                            f"knot-only brush: {matched_knot_brand}"
+                                                            f"Pattern '{pattern}' is "
+                                                            f"stored as complete brush "
+                                                            f"under '{brand.strip()} "
+                                                            f"{model.strip()}' but "
+                                                            f"matcher returns "
+                                                            f"knot-only brush: "
+                                                            f"{matched_knot_brand}"
                                                         ),
                                                         "suggested_action": (
-                                                            f"Move pattern '{pattern}' from complete brush section to "
-                                                            f"knot section under {matched_knot_brand}"
+                                                            f"Move pattern '{pattern}' "
+                                                            f"from complete brush "
+                                                            f"section to knot section "
+                                                            f"under "
+                                                            f"{matched_knot_brand}"
                                                         ),
                                                     }
                                                 )
@@ -426,10 +479,12 @@ class CatalogValidator:
                                             "stored_brand": brand.strip(),
                                             "stored_model": model.strip(),
                                             "message": (
-                                                f"Pattern '{pattern}' could not be matched by brush matcher"
+                                                f"Pattern '{pattern}' could not be "
+                                                f"matched by brush matcher"
                                             ),
                                             "suggested_action": (
-                                                f"Check if pattern '{pattern}' is valid or if brush matcher needs updates"
+                                                f"Check if pattern '{pattern}' is valid "
+                                                f"or if brush matcher needs updates"
                                             ),
                                         }
                                     )
@@ -448,7 +503,8 @@ class CatalogValidator:
                                             f"Error during matching of pattern '{pattern}': {e}"
                                         ),
                                         "suggested_action": (
-                                            f"Investigate error with '{pattern}' - check brush matcher implementation"
+                                            f"Investigate error with '{pattern}' - "
+                                            f"check brush matcher implementation"
                                         ),
                                     }
                                 )

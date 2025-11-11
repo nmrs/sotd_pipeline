@@ -144,7 +144,9 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 - **Total Brush Matches**: {strategy_dist["total_brushes"]:,}
 - **Successful Matches**: {strategy_dist["successful_matches"]:,}
 - **Overall Success Rate**: {strategy_dist["success_rate"]:.1%}
-- **Primary Strategies**: {len(strategy_dist["strategy_counts"])} different strategy types identified
+ - **Primary Strategies**: 
+   {len(strategy_dist["strategy_counts"])} different strategy types 
+   identified
 
 ## Strategy Distribution Analysis
 
@@ -183,8 +185,12 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 
 ### Processing Performance
 - **Total Processing Time**: {performance["total_processing_time"]:.2f} seconds
-- **Brush Processing Time**: {performance["brush_processing_time"].get("total_time_seconds", 0):.2f} seconds
-- **Average Time per Brush**: {performance["brush_processing_time"].get("avg_time_seconds", 0):.4f} seconds
+ - **Brush Processing Time**: 
+   {performance["brush_processing_time"].get("total_time_seconds", 0):.2f} 
+   seconds
+ - **Average Time per Brush**: 
+   {performance["brush_processing_time"].get("avg_time_seconds", 0):.4f} 
+   seconds
 
 ### Cache Performance
 """
@@ -238,29 +244,49 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 ## Key Findings and Observations
 
 ### Strategy Effectiveness
-1. **Primary Strategy**: `{max(strategy_counts.items(), key=lambda x: x[1])[0]}` is the most used strategy ({max(strategy_counts.values()):,} matches)
-2. **Strategy Diversity**: {len([s for s in strategy_counts.keys() if s != "no_strategy"])} different strategies are actively used
-3. **Success Rate**: {strategy_dist["success_rate"]:.1%} overall success rate indicates effective matching
+1. **Primary Strategy**: `{max(strategy_counts.items(), key=lambda x: x[1])[0]}` 
+   is the most used strategy ({max(strategy_counts.values()):,} matches)
+2. **Strategy Diversity**: 
+   {len([s for s in strategy_counts.keys() if s != "no_strategy"])} different 
+   strategies are actively used
+3. **Success Rate**: {strategy_dist["success_rate"]:.1%} overall success rate 
+   indicates effective matching
 
 ### Performance Insights
-1. **Processing Efficiency**: Average {performance["brush_processing_time"].get("avg_time_seconds", 0) * 1000:.1f}ms per brush match
-2. **Cache Effectiveness**: {cache_hit_rate:.1f}% cache hit rate reduces redundant processing
-3. **Bottleneck Analysis**: Brush matching takes {(performance["brush_processing_time"].get("total_time_seconds", 0) / performance["total_processing_time"]) * 100:.1f}% of total processing time
+1. **Processing Efficiency**: Average 
+   {performance["brush_processing_time"].get("avg_time_seconds", 0) * 1000:.1f}ms 
+   per brush match
+2. **Cache Effectiveness**: {cache_hit_rate:.1f}% cache hit rate reduces 
+   redundant processing
+3. **Bottleneck Analysis**: Brush matching takes 
+   {(performance["brush_processing_time"].get("total_time_seconds", 0) / 
+   performance["total_processing_time"]) * 100:.1f}% 
+   of total processing time
 
 ### Quality Indicators
-1. **Pattern Specificity**: {pattern_complexity.get("complex", 0):,} complex patterns suggest high specificity
+1. **Pattern Specificity**: 
+   {pattern_complexity.get("complex", 0):,} complex patterns suggest 
+   high specificity
 2. **Brand Coverage**: {len(brand_specificity)} unique brands matched across all strategies
-3. **Match Type Distribution**: `{max(match_type_counts.items(), key=lambda x: x[1])[0]}` is the primary match type
+3. **Match Type Distribution**: 
+   `{max(match_type_counts.items(), key=lambda x: x[1])[0]}` is the 
+   primary match type
 
 ## Recommendations for Quality Improvements
 
 ### High Priority
-1. **Strategy Optimization**: Focus on improving `{max(strategy_counts.items(), key=lambda x: x[1])[0]}` strategy (highest usage)
-2. **Pattern Enhancement**: {pattern_complexity.get("simple", 0):,} simple patterns could benefit from increased specificity
+1. **Strategy Optimization**: Focus on improving 
+   `{max(strategy_counts.items(), key=lambda x: x[1])[0]}` strategy 
+   (highest usage)
+2. **Pattern Enhancement**: 
+   {pattern_complexity.get("simple", 0):,} simple patterns could benefit 
+   from increased specificity
 3. **Cache Optimization**: Consider cache size increase to improve {cache_hit_rate:.1f}% hit rate
 
 ### Medium Priority  
-1. **Brand-Specific Tuning**: Top brands like `{sorted(brand_specificity.items(), key=lambda x: x[1], reverse=True)[0][0]}` could benefit from specialized handling
+1. **Brand-Specific Tuning**: Top brands like 
+   `{sorted(brand_specificity.items(), key=lambda x: x[1], reverse=True)[0][0]}` 
+   could benefit from specialized handling
 2. **Performance Monitoring**: Track strategy-specific performance for optimization opportunities
 3. **Match Type Balancing**: Consider rebalancing match types for better quality distribution
 

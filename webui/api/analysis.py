@@ -6,11 +6,11 @@ import os
 import subprocess
 import sys
 import time
+import traceback
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import traceback
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -23,12 +23,11 @@ if str(project_root) not in sys.path:
 logger = logging.getLogger(__name__)
 
 # Import the existing FilteredEntriesManager instead of duplicating logic
-from sotd.utils.filtered_entries import FilteredEntriesManager
-
+from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
 
 try:
-    from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
-    from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
+    from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer  # noqa: E402
+    from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer  # noqa: E402
 
     logger.info("✅ MismatchAnalyzer imported successfully")
     logger.info("✅ UnmatchedAnalyzer imported successfully")
@@ -632,8 +631,6 @@ async def debug_version():
 async def clear_validator_cache():
     """Clear the validator cache to force a fresh validation."""
     try:
-        from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
-
         # Clear validator cache - this endpoint is no longer needed with actual matching validation
         # but keeping for backward compatibility
         logger.info(
@@ -670,6 +667,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             )
         # Create analyzer with console for proper error handling
         from rich.console import Console
+
         console = Console()
         analyzer = MismatchAnalyzer(console)
 
@@ -740,7 +738,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             logger.error(f"Failed to load correct matches: {e}", exc_info=True)
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to load correct matches: {str(e)}. This is required for mismatch analysis."
+                detail=(
+                    f"Failed to load correct matches: {str(e)}. "
+                    f"This is required for mismatch analysis."
+                ),
             )
 
         # Use the analyzer's logic directly - DRY principle
@@ -977,7 +978,7 @@ async def get_correct_matches(field: str):
                                 data[section] = section_data
                     except Exception as e:
                         logger.warning(f"Error loading {section_file}: {e}")
-            
+
             brush_data = data.get("brush", {})
             handle_data = data.get("handle", {})
             knot_data = data.get("knot", {})
@@ -1003,7 +1004,7 @@ async def get_correct_matches(field: str):
                             data[field] = field_data
                 except Exception as e:
                     logger.warning(f"Error loading {field_file}: {e}")
-            
+
             field_data = data.get(field, {})
             combined_data = field_data
             logger.info(f"Field data for '{field}': {field_data}")
@@ -1014,7 +1015,10 @@ async def get_correct_matches(field: str):
                 for k, v in obj.items():
                     if k is None:
                         raise ValueError(
-                            f"Malformed YAML: Found None key in correct_matches directory at path '{path}'. This indicates a corrupted YAML file that needs to be fixed."
+                            f"Malformed YAML: Found None key in "
+                            f"correct_matches directory at path '{path}'. "
+                            f"This indicates a corrupted YAML file that "
+                            f"needs to be fixed."
                         )
                     check_for_none_keys(v, f"{path}.{k}" if path else str(k))
             elif isinstance(obj, list):
@@ -1136,8 +1140,12 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
                 # Debug logging
                 logger.info(f"Processing match - original: {original}, matched: {matched}")
-                logger.info(f"DEBUG: Match data structure - field: {request.field}, original: {original}")
-                logger.info(f"DEBUG: Matched data keys: {list(matched.keys()) if matched else 'None'}")
+                logger.info(
+                    f"DEBUG: Match data structure - field: {request.field}, original: {original}"
+                )
+                logger.info(
+                    f"DEBUG: Matched data keys: {list(matched.keys()) if matched else 'None'}"
+                )
                 logger.info(f"DEBUG: Matched data content: {matched}")
 
                 # For blade field, ensure format is preserved for correct section placement
@@ -1162,7 +1170,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                 logger.info(f"DEBUG: Created match_key: {match_key}")
                 logger.info(f"DEBUG: Match data to save: {match_data_to_save}")
                 manager.mark_match_as_correct(match_key, match_data_to_save)
-                logger.info(f"DEBUG: Marked match as correct, key stored in manager")
+                logger.info("DEBUG: Marked match as correct, key stored in manager")
                 marked_count += 1
 
             except Exception as e:
@@ -1172,10 +1180,10 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
         if marked_count > 0:
             logger.info(f"DEBUG: Saving {marked_count} matches to correct_matches directory")
             manager.save_correct_matches()
-            logger.info(f"DEBUG: Saved correct matches to file")
+            logger.info("DEBUG: Saved correct matches to file")
             # Reload to verify it was saved
             manager.load_correct_matches()
-            logger.info(f"DEBUG: Reloaded correct matches, verifying saved keys...")
+            logger.info("DEBUG: Reloaded correct matches, verifying saved keys...")
             for match in request.matches:
                 original = match.get("original", "")
                 matched = match.get("matched", {})
@@ -1326,7 +1334,8 @@ async def clear_all_correct_matches():
 
 @router.post("/validate-catalog", response_model=CatalogValidationResponse)
 async def validate_catalog_against_correct_matches(request: CatalogValidationRequest):
-    """Validate catalog entries against correct_matches directory using actual matching validation."""
+    """Validate catalog entries against correct_matches directory using
+    actual matching validation."""
     logger.info(f"🔍 Starting actual matching validation for field: {request.field}")
 
     try:
@@ -1349,9 +1358,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         # Clear ALL caches to ensure fresh data on every validation
         from sotd.match.base_matcher import clear_catalog_cache
-        from sotd.match.loaders import clear_yaml_cache
         from sotd.match.brush.matcher import clear_brush_catalog_cache
-        
+        from sotd.match.loaders import clear_yaml_cache
+
         clear_catalog_cache()
         clear_yaml_cache()
         clear_brush_catalog_cache()
@@ -1485,8 +1494,10 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
 
         # Load YAML files from directory structure
         yaml_data = {}
-        sections_to_load = ["brush", "handle", "knot"] if request.field == "brush" else [request.field]
-        
+        sections_to_load = (
+            ["brush", "handle", "knot"] if request.field == "brush" else [request.field]
+        )
+
         for section in sections_to_load:
             section_file = correct_matches_dir / f"{section}.yaml"
             if section_file.exists():
@@ -1528,7 +1539,8 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                             if isinstance(brand_data, dict):
                                 for model, patterns in brand_data.items():
                                     if isinstance(patterns, list):
-                                        # Look for the exact match (case-insensitive) and remove ALL occurrences
+                                        # Look for the exact match (case-insensitive) and
+                                        # remove ALL occurrences
                                         i = 0
                                         while i < len(patterns):
                                             pattern = patterns[i]
@@ -1559,7 +1571,11 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                         section_file = correct_matches_dir / f"{section}.yaml"
                         with section_file.open("w", encoding="utf-8") as f:
                             yaml.dump(
-                                section_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+                                section_data,
+                                f,
+                                default_flow_style=False,
+                                allow_unicode=True,
+                                sort_keys=False,
                             )
             except Exception as e:
                 raise HTTPException(

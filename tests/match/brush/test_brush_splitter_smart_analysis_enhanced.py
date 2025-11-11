@@ -316,6 +316,6 @@ class TestBrushSplitterSmartAnalysis:
             # These should not split on parentheses, may split on other delimiters or not at all
             if handle is not None and knot is not None:
                 # If it does split, it shouldn't be due to parentheses
-                assert delimiter_type != "medium_reliability" or " (" not in input_text, (
-                    f"Unexpected parentheses split for: {input_text}"
-                )
+                assert (
+                    delimiter_type != "medium_reliability" or " (" not in input_text
+                ), f"Unexpected parentheses split for: {input_text}"

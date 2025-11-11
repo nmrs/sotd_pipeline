@@ -1,8 +1,8 @@
 """Template processor utility for the SOTD pipeline."""
 
+import re
 from pathlib import Path
 from typing import Any, Dict, Optional
-import re
 
 
 class TemplateProcessor:

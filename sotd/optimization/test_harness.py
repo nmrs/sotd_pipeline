@@ -6,7 +6,7 @@ the optimizer can work with diverse brush matching scenarios.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -170,6 +170,7 @@ class BrushMatchingTestHarness:
         """
         # Create temporary config file
         import tempfile
+
         import yaml
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -340,7 +341,10 @@ class BrushMatchingTestHarness:
             return {
                 "success": False,
                 "partial_match": False,
-                "error": f"Brand/model mismatch: got '{brand} {model}', expected '{expected_brand} {expected_model}'",
+                "error": (
+                    f"Brand/model mismatch: got '{brand} {model}', expected "
+                    f"'{expected_brand} {expected_model}'"
+                ),
             }
 
     def _validate_composite_brush(
@@ -378,7 +382,11 @@ class BrushMatchingTestHarness:
                 handle_validation = {
                     "success": False,
                     "partial_match": False,
-                    "error": f"Handle mismatch: got '{handle_brand} {handle_model}', expected '{expected_handle_brand} {expected_handle_model}'",
+                    "error": (
+                        f"Handle mismatch: got '{handle_brand} {handle_model}', "
+                        f"expected '{expected_handle_brand} "
+                        f"{expected_handle_model}'"
+                    ),
                 }
 
         # Validate knot if expected
@@ -402,7 +410,11 @@ class BrushMatchingTestHarness:
                 knot_validation = {
                     "success": False,
                     "partial_match": False,
-                    "error": f"Knot mismatch: got '{knot_brand} {knot_model}', expected '{expected_knot_brand} {expected_knot_model}'",
+                    "error": (
+                        f"Knot mismatch: got '{knot_brand} {knot_model}', "
+                        f"expected '{expected_knot_brand} "
+                        f"{expected_knot_model}'"
+                    ),
                 }
 
         # Overall success depends on both validations
@@ -412,13 +424,20 @@ class BrushMatchingTestHarness:
             return {
                 "success": False,
                 "partial_match": True,
-                "error": f"Partial composite match: handle={handle_validation['success']}, knot={knot_validation['success']}",
+                "error": (
+                    f"Partial composite match: handle={handle_validation['success']}, "
+                    f"knot={knot_validation['success']}"
+                ),
             }
         else:
             return {
                 "success": False,
                 "partial_match": False,
-                "error": f"Composite brush validation failed: {handle_validation.get('error')}, {knot_validation.get('error')}",
+                "error": (
+                    f"Composite brush validation failed: "
+                    f"{handle_validation.get('error')}, "
+                    f"{knot_validation.get('error')}"
+                ),
             }
 
     def _validate_handle_only(
@@ -455,7 +474,11 @@ class BrushMatchingTestHarness:
             return {
                 "success": False,
                 "partial_match": False,
-                "error": f"Handle mismatch: got '{handle_brand} {handle_model}', expected '{expected_handle_brand} {expected_handle_model}'",
+                "error": (
+                    f"Handle mismatch: got '{handle_brand} {handle_model}', "
+                    f"expected '{expected_handle_brand} "
+                    f"{expected_handle_model}'"
+                ),
             }
 
     def _validate_knot_only(
@@ -492,7 +515,11 @@ class BrushMatchingTestHarness:
             return {
                 "success": False,
                 "partial_match": False,
-                "error": f"Knot mismatch: got '{knot_brand} {knot_model}', expected '{expected_knot_brand} {expected_knot_model}'",
+                "error": (
+                    f"Knot mismatch: got '{knot_brand} {knot_model}', "
+                    f"expected '{expected_knot_brand} "
+                    f"{expected_knot_model}'"
+                ),
             }
 
     def _validate_unknown_brush(
@@ -640,7 +667,7 @@ class BrushMatchingTestHarness:
 
         # Overall results
         overall = self.validation_metrics["improvement"]["overall_improvement"]
-        report.append(f"OVERALL PERFORMANCE:")
+        report.append("OVERALL PERFORMANCE:")
         report.append(f"  Original Success Rate: {overall['original_rate']:.1%}")
         report.append(f"  Optimized Success Rate: {overall['optimized_rate']:.1%}")
         report.append(f"  Absolute Improvement: {overall['absolute']:.1%}")

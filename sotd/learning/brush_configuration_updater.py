@@ -277,7 +277,8 @@ class BrushConfigurationUpdater:
                         if isinstance(weight, (int, float)):
                             strategy_modifiers[strategy_name][modifier_name] = float(weight)
                             logger.info(
-                                f"Added new modifier {modifier_name} to {strategy_name} with weight {weight}"
+                                f"Added new modifier {modifier_name} to "
+                                f"{strategy_name} with weight {weight}"
                             )
                         else:
                             logger.warning(

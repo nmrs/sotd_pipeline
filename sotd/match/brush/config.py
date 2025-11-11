@@ -186,7 +186,8 @@ class BrushScoringConfig:
             for modifier_name, value in modifiers.items():
                 if not isinstance(value, (int, float)):
                     raise ValueError(
-                        f"Invalid modifier value '{modifier_name}' for strategy '{strategy_name}': {value}"
+                        f"Invalid modifier value '{modifier_name}' for "
+                        f"strategy '{strategy_name}': {value}"
                     )
 
     def get_all_strategy_names(self) -> List[str]:

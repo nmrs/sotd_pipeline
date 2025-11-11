@@ -1,5 +1,6 @@
-import pandas as pd
 from typing import Any, Dict, List
+
+import pandas as pd
 
 
 def calculate_shaves(records: List[Dict[str, Any]]) -> int:

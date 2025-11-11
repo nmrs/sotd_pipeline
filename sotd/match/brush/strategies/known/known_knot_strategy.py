@@ -1,10 +1,11 @@
+from sotd.match.types import MatchResult
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+
+from ..utils.knot_size_utils import parse_knot_size
 from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
-from ..utils.knot_size_utils import parse_knot_size
-from sotd.match.types import MatchResult
-from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class KnownKnotMatchingStrategy:

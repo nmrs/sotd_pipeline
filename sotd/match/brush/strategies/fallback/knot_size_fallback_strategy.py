@@ -8,11 +8,12 @@ strategies fail to match and no fiber is detected.
 
 from typing import Optional
 
+from sotd.match.types import MatchResult, create_match_result
+
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 from ..utils.knot_size_utils import parse_knot_size
-from sotd.match.types import MatchResult, create_match_result
 
 
 class KnotSizeFallbackStrategy(BaseBrushMatchingStrategy):

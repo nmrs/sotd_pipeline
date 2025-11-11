@@ -1,10 +1,11 @@
 from typing import Optional
 
+from sotd.match.types import MatchResult, create_match_result
+
+from ...knot_matcher import KnotMatcher
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from ...knot_matcher import KnotMatcher
-from sotd.match.types import MatchResult, create_match_result
 
 
 class KnotComponentStrategy(BaseBrushMatchingStrategy):

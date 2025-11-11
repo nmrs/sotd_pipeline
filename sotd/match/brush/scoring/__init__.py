@@ -5,11 +5,11 @@ This module contains the scoring engine and related components for brush matchin
 """
 
 # Import main scoring classes
-from .engine import ScoringEngine
-from .orchestrator import StrategyOrchestrator
 from .calculator import ComponentScoreCalculator
-from .resolver import ResultConflictResolver
+from .engine import ScoringEngine
 from .matcher import CorrectMatchesMatcher
+from .orchestrator import StrategyOrchestrator
+from .resolver import ResultConflictResolver
 
 __all__ = [
     "ScoringEngine",

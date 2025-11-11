@@ -6,10 +6,11 @@ providing empirical data to inform optimal weight configuration.
 
 import logging
 import tempfile
+from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List
+
 import yaml
-from collections import defaultdict, Counter
 
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -50,13 +51,16 @@ class StrategyAnalyzer:
     def _extract_test_cases(self) -> List[Dict[str, Any]]:
         """Extract test cases from correct_matches directory."""
         correct_matches = {}
-        
+
         # Load all field files from directory structure
         if self.correct_matches_path.is_dir():
             for field_file in self.correct_matches_path.glob("*.yaml"):
                 field_name = field_file.stem
                 # Skip backup and report files
-                if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                if (
+                    field_file.name.endswith((".backup", ".bk"))
+                    or "duplicates_report" in field_file.name
+                ):
                     continue
                 try:
                     with field_file.open("r", encoding="utf-8") as f:
@@ -203,7 +207,7 @@ class StrategyAnalyzer:
                             "matched_data": None,
                         }
 
-                        logger.info(f"  ✗ No match found")
+                        logger.info("  ✗ No match found")
 
                 except Exception as e:
                     logger.error(f"Error analyzing test case '{test_case['input']}': {e}")
@@ -312,21 +316,21 @@ class StrategyAnalyzer:
         successful_cases = sum(1 for r in self.analysis_results.values() if r["success"])
         success_rate = successful_cases / total_cases if total_cases > 0 else 0
 
-        print(f"\nOVERALL PERFORMANCE:")
+        print("\nOVERALL PERFORMANCE:")
         print(f"  Total Test Cases: {total_cases}")
         print(f"  Successful Matches: {successful_cases}")
         print(f"  Success Rate: {success_rate:.1%}")
         print(f"  Failed Matches: {total_cases - successful_cases}")
 
         # Strategy performance
-        print(f"\nSTRATEGY PERFORMANCE:")
+        print("\nSTRATEGY PERFORMANCE:")
         total_wins = sum(self.strategy_wins.values())
         for strategy, wins in sorted(self.strategy_wins.items(), key=lambda x: x[1], reverse=True):
             win_rate = wins / total_wins if total_wins > 0 else 0
             print(f"  {strategy}: {wins} wins ({win_rate:.1%})")
 
         # Input type analysis
-        print(f"\nINPUT TYPE ANALYSIS:")
+        print("\nINPUT TYPE ANALYSIS:")
         for input_type, strategy_counts in self.input_type_analysis.items():
             total_for_type = sum(strategy_counts.values())
             print(f"  {input_type.upper()} inputs ({total_for_type} total):")
@@ -339,7 +343,7 @@ class StrategyAnalyzer:
         # Recommendations
         recommendations = self.generate_recommendations()
         if "base_strategy_weights" in recommendations:
-            print(f"\nRECOMMENDED BASE STRATEGY WEIGHTS:")
+            print("\nRECOMMENDED BASE STRATEGY WEIGHTS:")
             for strategy, weight in sorted(
                 recommendations["base_strategy_weights"].items(), key=lambda x: x[1], reverse=True
             ):

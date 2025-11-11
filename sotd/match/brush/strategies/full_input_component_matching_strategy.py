@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Unified component matching strategy that handles both dual and single component matches."""
 
-from typing import Optional, List
+from typing import List, Optional
+
+# ComponentScoreCalculator no longer needed - scoring is handled externally
+from sotd.match.types import MatchResult
 
 from .base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
-
-# ComponentScoreCalculator no longer needed - scoring is handled externally
-from sotd.match.types import MatchResult
 
 
 class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):

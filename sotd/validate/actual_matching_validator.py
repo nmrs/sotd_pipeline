@@ -11,11 +11,10 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.soap_matcher import SoapMatcher
-
 
 logger = logging.getLogger(__name__)
 
@@ -103,25 +102,25 @@ class ActualMatchingValidator:
         self._correct_matches_checker = None
         self._performance_metrics = {}
         self._splits_loader = None
-        
+
         # Clear caches on initialization to ensure fresh data
         self._clear_all_caches()
 
     def _clear_all_caches(self):
         """Clear all caches to ensure fresh data on every validation."""
         from sotd.match.base_matcher import clear_catalog_cache
-        from sotd.match.loaders import clear_yaml_cache
         from sotd.match.brush.matcher import clear_brush_catalog_cache
-        
+        from sotd.match.loaders import clear_yaml_cache
+
         clear_catalog_cache()
         clear_yaml_cache()
         clear_brush_catalog_cache()
-        
+
         # Clear any matcher-specific caches
         for matcher in self._matchers.values():
-            if hasattr(matcher, 'clear_cache'):
+            if hasattr(matcher, "clear_cache"):
                 matcher.clear_cache()
-        
+
         # Clear internal caches
         self._matchers.clear()
         self._correct_matches_checker = None
@@ -149,13 +148,16 @@ class ActualMatchingValidator:
 
             correct_matches_dir = self.data_path / "correct_matches"
             correct_matches_data = {}
-            
+
             # Load all field files from directory structure
             if correct_matches_dir.exists():
                 for field_file in correct_matches_dir.glob("*.yaml"):
                     field_name = field_file.stem
                     # Skip backup and report files
-                    if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                    if (
+                        field_file.name.endswith((".backup", ".bk"))
+                        or "duplicates_report" in field_file.name
+                    ):
                         continue
                     try:
                         with field_file.open("r", encoding="utf-8") as f:
@@ -173,6 +175,7 @@ class ActualMatchingValidator:
         """Get or create brush splits loader."""
         if self._splits_loader is None:
             from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader
+
             self._splits_loader = BrushSplitsLoader(self.data_path / "brush_splits.yaml")
         return self._splits_loader
 
@@ -201,13 +204,20 @@ class ActualMatchingValidator:
                                     issue_type="duplicate_string",
                                     severity="low",
                                     correct_match=string,
-                                    details=f"Duplicate string '{string}' found in {section_name} section",
-                                    suggested_action=f"Remove duplicate entry for '{string}' in {section_name} section",
+                                    details=(
+                                        f"Duplicate string '{string}' found in "
+                                        f"{section_name} section"
+                                    ),
+                                    suggested_action=(
+                                        f"Remove duplicate entry for '{string}' in "
+                                        f"{section_name} section"
+                                    ),
                                 )
                             )
                         seen_strings.add(string)
 
-        # Check for duplicate strings across different sections (excluding handle/knot which can share)
+        # Check for duplicate strings across different sections
+        # (excluding handle/knot which can share)
         all_strings = {}
         for section_name, section_data in correct_matches.items():
             if not isinstance(section_data, dict):
@@ -218,8 +228,10 @@ class ActualMatchingValidator:
                         if isinstance(strings, list):
                             for string in strings:
                                 if string in all_strings:
-                                    # Handle/knot can share the same string, so only flag if it's not handle/knot
-                                    # Also skip if already flagged as within-section duplicate
+                                    # Handle/knot can share the same string, so only
+                                    # flag if it's not handle/knot
+                                    # Also skip if already flagged as within-section
+                                    # duplicate
                                     if (
                                         section_name not in ["handle", "knot"]
                                         and all_strings[string] not in ["handle", "knot"]
@@ -230,8 +242,14 @@ class ActualMatchingValidator:
                                                 issue_type="duplicate_string",
                                                 severity="low",
                                                 correct_match=string,
-                                                details=f"Duplicate string '{string}' found across multiple sections",
-                                                suggested_action=f"Remove duplicate entry for '{string}' from one of the sections",
+                                                details=(
+                                                    f"Duplicate string '{string}' found "
+                                                    f"across multiple sections"
+                                                ),
+                                                suggested_action=(
+                                                    f"Remove duplicate entry for "
+                                                    f"'{string}' from one of the sections"
+                                                ),
                                             )
                                         )
                                 else:
@@ -291,8 +309,12 @@ class ActualMatchingValidator:
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
-                    details=f"String '{conflict_string}' appears in both brush and handle sections",
-                    suggested_action=f"Remove '{conflict_string}' from either brush or handle section",
+                    details=(
+                        f"String '{conflict_string}' appears in both brush and " f"handle sections"
+                    ),
+                    suggested_action=(
+                        f"Remove '{conflict_string}' from either brush or " f"handle section"
+                    ),
                 )
             )
 
@@ -302,8 +324,12 @@ class ActualMatchingValidator:
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
-                    details=f"String '{conflict_string}' appears in both brush and knot sections",
-                    suggested_action=f"Remove '{conflict_string}' from either brush or knot section",
+                    details=(
+                        f"String '{conflict_string}' appears in both brush and " f"knot sections"
+                    ),
+                    suggested_action=(
+                        f"Remove '{conflict_string}' from either brush or " f"knot section"
+                    ),
                 )
             )
 
@@ -313,8 +339,14 @@ class ActualMatchingValidator:
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
-                    details=f"String '{conflict_string}' appears in brush, handle, and knot sections",
-                    suggested_action=f"Remove '{conflict_string}' from brush section (keep in handle and knot for composite brush)",
+                    details=(
+                        f"String '{conflict_string}' appears in brush, handle, "
+                        f"and knot sections"
+                    ),
+                    suggested_action=(
+                        f"Remove '{conflict_string}' from brush section "
+                        f"(keep in handle and knot for composite brush)"
+                    ),
                 )
             )
 
@@ -344,8 +376,13 @@ class ActualMatchingValidator:
                         severity="high",
                         correct_match=brush_string,
                         expected_section=expected_section,
-                        details=f"Brush string '{brush_string}' no longer matches any strategy",
-                        suggested_action=f"Remove '{brush_string}' from correct_matches directory or update matching logic",
+                        details=(
+                            f"Brush string '{brush_string}' no longer matches " f"any strategy"
+                        ),
+                        suggested_action=(
+                            f"Remove '{brush_string}' from correct_matches "
+                            f"directory or update matching logic"
+                        ),
                     )
                 )
                 return issues
@@ -356,8 +393,10 @@ class ActualMatchingValidator:
             # Check for complete brush (has top-level brand/model)
             if matched_data.get("brand") and matched_data.get("model"):
                 actual_section = "brush"
-            # Check for composite brush (has nested handle and knot sections, regardless of brand content)
-            # This matches the logic in structureBrushDataForAPI: if both handle and knot exist, it's composite
+            # Check for composite brush (has nested handle and knot sections,
+            # regardless of brand content)
+            # This matches the logic in structureBrushDataForAPI: if both
+            # handle and knot exist, it's composite
             elif matched_data.get("handle") and matched_data.get("knot"):
                 actual_section = "handle_knot"
             # Check for handle-only (has nested handle section, but no knot section)
@@ -378,8 +417,15 @@ class ActualMatchingValidator:
                         correct_match=brush_string,
                         expected_section=expected_section,
                         actual_section=actual_section,
-                        details=f"Brush string '{brush_string}' has should_not_split: true in brush_splits.yaml but matcher split it into {actual_section}",
-                        suggested_action=f"Fix matching logic to respect should_not_split flag for '{brush_string}'",
+                        details=(
+                            f"Brush string '{brush_string}' has "
+                            f"should_not_split: true in brush_splits.yaml but "
+                            f"matcher split it into {actual_section}"
+                        ),
+                        suggested_action=(
+                            f"Fix matching logic to respect should_not_split "
+                            f"flag for '{brush_string}'"
+                        ),
                     )
                 )
                 # Return early since this is a critical issue
@@ -399,23 +445,42 @@ class ActualMatchingValidator:
                             correct_match=brush_string,
                             expected_section=expected_section,
                             actual_section=actual_section,
-                            details=f"Brush string '{brush_string}' has explicit split in brush_splits.yaml but matcher used '{actual_strategy}' strategy instead of 'known_split'. Expected handle: '{curated_split.handle}', knot: '{curated_split.knot}'",
-                            suggested_action=f"Fix matching logic to use KnownSplitWrapperStrategy for explicit splits from brush_splits.yaml",
+                            details=(
+                                f"Brush string '{brush_string}' has explicit "
+                                f"split in brush_splits.yaml but matcher used "
+                                f"'{actual_strategy}' strategy instead of "
+                                f"'known_split'. Expected handle: "
+                                f"'{curated_split.handle}', knot: "
+                                f"'{curated_split.knot}'"
+                            ),
+                            suggested_action=(
+                                "Fix matching logic to use "
+                                "KnownSplitWrapperStrategy for explicit splits "
+                                "from brush_splits.yaml"
+                            ),
                         )
                     )
                 else:
-                    # Strategy is correct, but also validate that handle/knot match the curated split
+                    # Strategy is correct, but also validate that handle/knot
+                    # match the curated split
                     if actual_section in ["handle_knot", "handle", "knot"]:
                         handle_data = matched_data.get("handle", {})
                         knot_data = matched_data.get("knot", {})
-                        actual_handle_text = handle_data.get("source_text", "") if handle_data else ""
+                        actual_handle_text = (
+                            handle_data.get("source_text", "") if handle_data else ""
+                        )
                         actual_knot_text = knot_data.get("source_text", "") if knot_data else ""
-                        
-                        # Check if handle/knot text matches curated split (allowing for case/whitespace differences)
+
+                        # Check if handle/knot text matches curated split
+                        # (allowing for case/whitespace differences)
                         expected_handle = curated_split.handle or ""
                         expected_knot = curated_split.knot or ""
-                        
-                        if expected_handle and actual_handle_text.lower().strip() != expected_handle.lower().strip():
+
+                        if (
+                            expected_handle
+                            and actual_handle_text.lower().strip()
+                            != expected_handle.lower().strip()
+                        ):
                             issues.append(
                                 ValidationIssue(
                                     issue_type="data_mismatch",
@@ -423,12 +488,25 @@ class ActualMatchingValidator:
                                     correct_match=brush_string,
                                     expected_section=expected_section,
                                     actual_section=actual_section,
-                                    details=f"Brush string '{brush_string}' uses known_split strategy but handle text '{actual_handle_text}' doesn't match brush_splits.yaml handle '{expected_handle}'",
-                                    suggested_action=f"Update brush_splits.yaml or fix KnownSplitWrapperStrategy to use correct handle text",
+                                    details=(
+                                        f"Brush string '{brush_string}' uses "
+                                        f"known_split strategy but handle text "
+                                        f"'{actual_handle_text}' doesn't match "
+                                        f"brush_splits.yaml handle "
+                                        f"'{expected_handle}'"
+                                    ),
+                                    suggested_action=(
+                                        "Update brush_splits.yaml or fix "
+                                        "KnownSplitWrapperStrategy to use "
+                                        "correct handle text"
+                                    ),
                                 )
                             )
-                        
-                        if expected_knot and actual_knot_text.lower().strip() != expected_knot.lower().strip():
+
+                        if (
+                            expected_knot
+                            and actual_knot_text.lower().strip() != expected_knot.lower().strip()
+                        ):
                             issues.append(
                                 ValidationIssue(
                                     issue_type="data_mismatch",
@@ -436,15 +514,26 @@ class ActualMatchingValidator:
                                     correct_match=brush_string,
                                     expected_section=expected_section,
                                     actual_section=actual_section,
-                                    details=f"Brush string '{brush_string}' uses known_split strategy but knot text '{actual_knot_text}' doesn't match brush_splits.yaml knot '{expected_knot}'",
-                                    suggested_action=f"Update brush_splits.yaml or fix KnownSplitWrapperStrategy to use correct knot text",
+                                    details=(
+                                        f"Brush string '{brush_string}' uses "
+                                        f"known_split strategy but knot text "
+                                        f"'{actual_knot_text}' doesn't match "
+                                        f"brush_splits.yaml knot "
+                                        f"'{expected_knot}'"
+                                    ),
+                                    suggested_action=(
+                                        "Update brush_splits.yaml or fix "
+                                        "KnownSplitWrapperStrategy to use "
+                                        "correct knot text"
+                                    ),
                                 )
                             )
 
             # Check for structural changes
             if expected_section != actual_section:
                 logger.debug(
-                    f"Structural change detected: {brush_string} from {expected_section} to {actual_section}"
+                    f"Structural change detected: {brush_string} from "
+                    f"{expected_section} to {actual_section}"
                 )
 
                 # Extract handle and knot details for structural changes
@@ -475,8 +564,10 @@ class ActualMatchingValidator:
                         issue_type="structural_change",
                         severity="high",
                         correct_match=brush_string,
-                        expected_section=expected_section,  # Where it currently is (correct_matches directory)
-                        actual_section=actual_section,  # Where it should be (current matching system)
+                        # Where it currently is (correct_matches directory)
+                        expected_section=expected_section,
+                        # Where it should be (current matching system)
+                        actual_section=actual_section,
                         expected_brand=(
                             expected_data.get("brand") if expected_section == "brush" else None
                         ),
@@ -488,7 +579,10 @@ class ActualMatchingValidator:
                         actual_knot_brand=actual_knot_brand,
                         actual_knot_model=actual_knot_model,
                         details=f"Brush type changed from {expected_section} to {actual_section}",
-                        suggested_action=f"Move '{brush_string}' from {expected_section} section to {actual_section} section",
+                        suggested_action=(
+                            f"Move '{brush_string}' from {expected_section} "
+                            f"section to {actual_section} section"
+                        ),
                     )
                 )
 
@@ -510,8 +604,16 @@ class ActualMatchingValidator:
                             expected_model=expected_model,
                             actual_brand=actual_brand,
                             actual_model=actual_model,
-                            details=f"Brand/model mismatch: expected '{expected_brand} {expected_model}', got '{actual_brand} {actual_model}'",
-                            suggested_action=f"Update correct_matches directory to reflect new brand/model: '{actual_brand} {actual_model}'",
+                            details=(
+                                f"Brand/model mismatch: expected "
+                                f"'{expected_brand} {expected_model}', got "
+                                f"'{actual_brand} {actual_model}'"
+                            ),
+                            suggested_action=(
+                                f"Update correct_matches directory to reflect "
+                                f"new brand/model: '{actual_brand} "
+                                f"{actual_model}'"
+                            ),
                         )
                     )
 
@@ -539,8 +641,16 @@ class ActualMatchingValidator:
                                 expected_handle_model=expected_handle_model,
                                 actual_handle_brand=actual_handle_brand,
                                 actual_handle_model=actual_handle_model,
-                                details=f"Handle brand/model mismatch: expected '{expected_handle_brand} {expected_handle_model}', got '{actual_handle_brand} {actual_handle_model}'",
-                                suggested_action=f"Update correct_matches directory handle section to reflect new brand/model: '{actual_handle_brand} {actual_handle_model}'",
+                                details=(
+                                    f"Handle brand/model mismatch: expected "
+                                    f"'{expected_handle_brand} {expected_handle_model}', got "
+                                    f"'{actual_handle_brand} {actual_handle_model}'"
+                                ),
+                                suggested_action=(
+                                    f"Update correct_matches directory handle section to reflect "
+                                    f"new brand/model: '{actual_handle_brand} "
+                                    f"{actual_handle_model}'"
+                                ),
                             )
                         )
 
@@ -563,8 +673,19 @@ class ActualMatchingValidator:
                                 expected_knot_model=expected_knot_model,
                                 actual_knot_brand=actual_knot_brand,
                                 actual_knot_model=actual_knot_model,
-                                details=f"Knot brand/model mismatch: expected '{expected_knot_brand} {expected_knot_model}', got '{actual_knot_brand} {actual_knot_model}'",
-                                suggested_action=f"Update correct_matches directory knot section to reflect new brand/model: '{actual_knot_brand} {actual_knot_model}'",
+                                details=(
+                                    f"Knot brand/model mismatch: expected "
+                                    f"'{expected_knot_brand} "
+                                    f"{expected_knot_model}', got "
+                                    f"'{actual_knot_brand} "
+                                    f"{actual_knot_model}'"
+                                ),
+                                suggested_action=(
+                                    f"Update correct_matches directory knot "
+                                    f"section to reflect new brand/model: "
+                                    f"'{actual_knot_brand} "
+                                    f"{actual_knot_model}'"
+                                ),
                             )
                         )
 
@@ -594,8 +715,14 @@ class ActualMatchingValidator:
                         issue_type="no_match",
                         severity="high",
                         correct_match=entry_string,
-                        details=f"{field.title()} string '{entry_string}' no longer matches any strategy",
-                        suggested_action=f"Remove '{entry_string}' from correct_matches directory or update matching logic",
+                        details=(
+                            f"{field.title()} string '{entry_string}' no "
+                            f"longer matches any strategy"
+                        ),
+                        suggested_action=(
+                            f"Remove '{entry_string}' from correct_matches "
+                            f"directory or update matching logic"
+                        ),
                     )
                 )
                 return issues
@@ -614,8 +741,16 @@ class ActualMatchingValidator:
                         expected_model=expected_model,
                         actual_brand=actual_brand,
                         actual_model=actual_model,
-                        details=f"Brand/model mismatch: expected '{expected_brand} {expected_model}', got '{actual_brand} {actual_model}'",
-                        suggested_action=f"Update correct_matches directory to reflect new brand/model: '{actual_brand} {actual_model}'",
+                        details=(
+                            f"Brand/model mismatch: expected "
+                            f"'{expected_brand} {expected_model}', got "
+                            f"'{actual_brand} {actual_model}'"
+                        ),
+                        suggested_action=(
+                            f"Update correct_matches directory to reflect "
+                            f"new brand/model: '{actual_brand} "
+                            f"{actual_model}'"
+                        ),
                     )
                 )
 
@@ -773,19 +908,22 @@ class ActualMatchingValidator:
         try:
             # Clear all caches before validation to ensure fresh data
             self._clear_all_caches()
-            
+
             # Load correct_matches from directory structure
             import yaml
 
             correct_matches_dir = self.data_path / "correct_matches"
             correct_matches = {}
-            
+
             # Load all field files from directory structure
             if correct_matches_dir.exists():
                 for field_file in correct_matches_dir.glob("*.yaml"):
                     field_name = field_file.stem
                     # Skip backup and report files
-                    if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                    if (
+                        field_file.name.endswith((".backup", ".bk"))
+                        or "duplicates_report" in field_file.name
+                    ):
                         continue
                     try:
                         with field_file.open("r", encoding="utf-8") as f:
@@ -794,7 +932,7 @@ class ActualMatchingValidator:
                                 correct_matches[field_name] = field_data
                     except Exception as e:
                         logger.warning(f"Error loading {field_file}: {e}")
-            
+
             # If directory doesn't exist or is empty, return empty result
             if not correct_matches:
                 return ValidationResult(

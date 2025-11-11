@@ -147,7 +147,8 @@ def create_bucketed_yaml(analysis, all_remainders):
         "multiplier": [],  # x4, x1, 3x, 2x, (x4), (4x)
         "ordinal-use": [],  # (1st use), (2nd), (10th use)
         "complex-paren": [],  # (2) (2), (3) (3)
-        "complex-bracket": [],  # Currently empty - [2x] (1) patterns moved to multiplication-plus-simple
+        "complex-bracket": [],  # Currently empty - [2x] (1) patterns moved
+        # to multiplication-plus-simple
         "multiplication-plus-simple": [],  # x2 (1), (2x) (1)
         "location-plus-simple": [],  # (china) (1), (germany) [2], (india) (3)
         "location-plus-new-indicator": [],  # (thailand, new), (india, new)
@@ -159,7 +160,9 @@ def create_bucketed_yaml(analysis, all_remainders):
 
     # Define pattern buckets for non blade count patterns
     non_blade_count_buckets = {
-        "location-indicator": [],  # (china), (germany), (india), (japan), (russia), (thailand), (usa), (uk), (turkey), [usa], [china], etc.
+        # (china), (germany), (india), (japan), (russia), (thailand),
+        # (usa), (uk), (turkey), [usa], [china], etc.
+        "location-indicator": [],
         "condition-indicator": [],  # (vintage), (sample), (test), (old)
         "url-link": [],  # https://..., web links
         "hashtag": [],  # #stainlessless, #foreversafety
@@ -393,7 +396,12 @@ def create_bucketed_yaml(analysis, all_remainders):
                 non_blade_count_buckets["other"].append(normalized_remainder)
 
     # Create the structured YAML data
-    duplication_rate = f"{((analysis['total_remainders'] - analysis['unique_remainders']) / analysis['total_remainders'] * 100):.1f}%"
+    dup_rate = (
+        (analysis["total_remainders"] - analysis["unique_remainders"])
+        / analysis["total_remainders"]
+        * 100
+    )
+    duplication_rate = f"{dup_rate:.1f}%"
 
     # Deduplicate all bucket contents to remove duplicates like (3) appearing multiple times
     for bucket_name, bucket_contents in blade_count_buckets.items():

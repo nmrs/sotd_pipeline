@@ -228,7 +228,8 @@ async def get_brush_validation_data(
         if strategy_count is not None:
             logger.info(f"Strategy count filtering enabled with value: {strategy_count}")
             try:
-                # Use the counting service to get the actual unique brush strings with this strategy count
+                # Use the counting service to get the actual unique brush
+                # strings with this strategy count
                 # This ensures we're counting the same way as the strategy distribution endpoint
                 from sotd.match.brush.validation.counting import (
                     BrushValidationCountingService,
@@ -278,9 +279,11 @@ async def get_brush_validation_data(
                             and entry["brush"].get("all_strategies")
                             and len(entry["brush"]["all_strategies"]) == strategy_count
                         ):
-                            # Apply validation filtering to raw data to match strategy distribution endpoint
+                            # Apply validation filtering to raw data to match
+                            # strategy distribution endpoint
                             if show_validated is not None and not show_validated:
-                                # Exclude validated entries (same logic as strategy distribution endpoint)
+                                # Exclude validated entries (same logic as
+                                # strategy distribution endpoint)
                                 strategy = entry["brush"].get("strategy")
                                 if strategy in ["correct_complete_brush", "correct_split_brush"]:
                                     continue  # Skip validated entries
@@ -332,7 +335,8 @@ async def get_brush_validation_data(
                 filtered_entries = entries
 
         # Sort the filtered entries
-        # The counting service does not have a sort_entries method, so we rely on the CLI for sorting
+        # The counting service does not have a sort_entries method, so we
+        # rely on the CLI for sorting
         # This means we need to re-initialize the CLI to get the sorted data
         project_root = Path(__file__).parent.parent.parent
         cli = BrushValidationCLI(data_path=project_root / "data")

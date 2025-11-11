@@ -5,9 +5,10 @@ This module provides shared functionality for loading brush-related catalog data
 that was previously part of the legacy brush matching system.
 """
 
-import yaml
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
+import yaml
 
 
 class CatalogLoader:

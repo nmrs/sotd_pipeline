@@ -77,7 +77,6 @@ def validate_field_types(
         ValueError: If any fields have incorrect types
     """
     # OPTIMIZED: Use pandas operations for vectorized field type validation
-    import pandas as pd
 
     if not field_types:
         return

@@ -11,7 +11,8 @@ class SoapSampleEnricher(BaseEnricher):
     Extracts sample information from patterns like:
     - "Summer Break Soaps - Steady (sample)" -> sample_type: "sample"
     - "Summer Break Soaps - Steady - soap (sample -- thanks!!)" -> sample_type: "sample"
-    - "Summer Break Soaps - Steady (sample 3 of 10)" -> sample_type: "sample", sample_number: 3, total_samples: 10
+    - "Summer Break Soaps - Steady (sample 3 of 10)" -> sample_type: "sample",
+      sample_number: 3, total_samples: 10
 
     Uses the normalization-difference approach to avoid confusion between product names
     and sample indicators by leveraging the already-done normalization work.

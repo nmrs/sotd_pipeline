@@ -93,7 +93,8 @@ class BrushSplitsLoader:
                                     self._splits[split.original] = split
                                 except (KeyError, ValueError) as e:
                                     print(
-                                        f"Warning: Skipping invalid split data for {brush_name}: {e}"
+                                        f"Warning: Skipping invalid split data "
+                                        f"for {brush_name}: {e}"
                                     )
                                     continue
                         else:

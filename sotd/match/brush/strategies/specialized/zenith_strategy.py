@@ -1,11 +1,12 @@
 import re
 from typing import Optional
 
+from sotd.match.types import MatchResult
+
 from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
-from sotd.match.types import MatchResult
 
 
 class ZenithBrushMatchingStrategy:

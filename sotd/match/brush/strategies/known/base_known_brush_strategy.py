@@ -1,17 +1,18 @@
 import re
-from pathlib import Path
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+from sotd.match.types import MatchResult, create_match_result
+from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from ..utils.fiber_utils import match_fiber
+from ..utils.knot_size_utils import parse_knot_size
 from ..utils.pattern_utils import (
     compile_catalog_patterns,
 )
-from ..utils.fiber_utils import match_fiber
-from ..utils.knot_size_utils import parse_knot_size
-from sotd.match.types import MatchResult, create_match_result
-from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 
 class BaseKnownBrushMatchingStrategy(BaseBrushMatchingStrategy, ABC):

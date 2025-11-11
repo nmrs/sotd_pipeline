@@ -6,11 +6,13 @@ of search logic while maintaining the strategy pattern interface.
 """
 
 from typing import Optional
+
+from sotd.match.correct_matches import CorrectMatchesChecker
+from sotd.match.types import MatchResult
+
 from .base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.types import MatchResult
-from sotd.match.correct_matches import CorrectMatchesChecker
 
 
 class CorrectMatchesStrategy(BaseBrushMatchingStrategy):

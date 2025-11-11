@@ -5,9 +5,9 @@ This module contains utility functions and classes for brush matching strategies
 """
 
 # Import utility functions
-from .pattern_utils import *
+from .pattern_utils import *  # noqa: F403, F405
 
-__all__ = [
+__all__ = [  # noqa: F405
     "validate_string_input",
     "compile_pattern",
     "match_pattern",

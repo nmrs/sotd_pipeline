@@ -5,7 +5,7 @@ This utility calculates scores for handle and knot components based on their
 attributes, following the same scoring logic used in the analyzer.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ComponentScoreCalculator:

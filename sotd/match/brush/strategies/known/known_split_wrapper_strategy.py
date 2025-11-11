@@ -8,12 +8,12 @@ to integrate with the scoring system architecture.
 import re
 from typing import Optional
 
+# ComponentScoreCalculator no longer needed - scoring is handled externally
+from sotd.match.types import MatchResult
+
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-
-# ComponentScoreCalculator no longer needed - scoring is handled externally
-from sotd.match.types import MatchResult
 
 
 class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
@@ -107,8 +107,6 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     handle_data = handle_result.matched
                     handle_maker = handle_data.get("handle_maker")
                     handle_model = handle_data.get("handle_model")
-                    handle_fiber = handle_data.get("fiber")
-                    handle_knot_size = handle_data.get("knot_size_mm")
                 else:
                     # Fallback to simple parsing if matcher failed
                     handle_parts = (
@@ -116,8 +114,6 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     )
                     handle_maker = handle_parts[0] if handle_parts else None
                     handle_model = " ".join(handle_parts[1:]) if len(handle_parts) > 1 else None
-                    handle_fiber = None
-                    handle_knot_size = None
 
                 if knot_result and hasattr(knot_result, "matched") and knot_result.matched:
                     knot_data = knot_result.matched

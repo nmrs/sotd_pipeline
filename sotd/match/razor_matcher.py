@@ -48,7 +48,8 @@ class RazorMatcher(BaseMatcher):
 
         lookup = {}
 
-        # Check if correct_matches has a flat structure (key -> dict) or nested structure (brand -> models)
+        # Check if correct_matches has a flat structure (key -> dict) or
+        # nested structure (brand -> models)
         first_key = next(iter(self.correct_matches.keys()), None)
         if (
             first_key

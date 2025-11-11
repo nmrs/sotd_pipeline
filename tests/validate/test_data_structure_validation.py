@@ -124,7 +124,7 @@ class TestDataStructureValidation:
         assert issue.issue_type == "cross_section_conflict"
         assert issue.severity == "high"
         assert issue.correct_match == "ap shaveco 24mm luxury mixed knot"
-        assert "appears in both brush section and handle/knot sections" in issue.details
+        assert "appears in both brush and handle sections" in issue.details
 
     def test_validate_data_structure_cross_section_conflict_brush_and_knot(self):
         """Test cross-section conflict between brush and knot sections."""
@@ -161,7 +161,8 @@ class TestDataStructureValidation:
 
         issues = self.validator._validate_data_structure(correct_matches)
 
-        assert len(issues) == 1  # Only one conflict issue, not multiple
+        # Should find 3 conflicts: brush-handle, brush-knot, and handle-knot
+        assert len(issues) == 3
         issue = issues[0]
         assert issue.issue_type == "cross_section_conflict"
         assert issue.severity == "high"

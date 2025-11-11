@@ -8,8 +8,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
-from sotd.match.brush_system_comparator import BrushSystemComparator
+from sotd.match.brush_parallel_data_manager import BrushParallelDataManager  # noqa: E402
+from sotd.match.brush_system_comparator import BrushSystemComparator  # noqa: E402
 
 
 def main():

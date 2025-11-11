@@ -8,17 +8,18 @@ This script:
 """
 
 import sys
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+import yaml
 
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import SOTD modules after path setup
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.config import BrushMatcherConfig
+from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
+from sotd.match.config import BrushMatcherConfig  # noqa: E402
 
 
 def load_correct_matches() -> Dict[str, Any]:
@@ -118,7 +119,10 @@ def find_discrepancies(original: Dict[str, Any], fresh: Dict[str, Any]) -> List[
                         "type": "missing_version",
                         "brand": brand,
                         "version": version,
-                        "message": f"Version '{version}' not found for brand '{brand}' in fresh matches",
+                        "message": (
+                            f"Version '{version}' not found for brand "
+                            f"'{brand}' in fresh matches"
+                        ),
                     }
                 )
                 continue
@@ -130,7 +134,10 @@ def find_discrepancies(original: Dict[str, Any], fresh: Dict[str, Any]) -> List[
 
                         # Check if pattern matches what we expect
                         if fresh_result["matched_brand"] != brand:
-                            expected_msg = f"Pattern '{pattern}' expected brand '{brand}' but got '{fresh_result['matched_brand']}'"
+                            expected_msg = (
+                                f"Pattern '{pattern}' expected brand '{brand}' "
+                                f"but got '{fresh_result['matched_brand']}'"
+                            )
                             discrepancies.append(
                                 {
                                     "type": "brand_mismatch",
@@ -151,7 +158,10 @@ def find_discrepancies(original: Dict[str, Any], fresh: Dict[str, Any]) -> List[
                                     "brand": brand,
                                     "version": version,
                                     "pattern": pattern,
-                                    "message": f"Pattern '{pattern}' could not be matched by brush matcher",
+                                    "message": (
+                                        f"Pattern '{pattern}' could not be "
+                                        f"matched by brush matcher"
+                                    ),
                                 }
                             )
                     else:

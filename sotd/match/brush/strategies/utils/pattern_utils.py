@@ -7,9 +7,10 @@ used across brush matching strategies to ensure consistency and maintainability.
 import re
 from typing import Any, Dict, List, Optional
 
-from .fiber_utils import match_fiber
 from sotd.match.types import MatchResult, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+
+from .fiber_utils import match_fiber
 
 
 def validate_string_input(value: Any) -> Optional[str]:

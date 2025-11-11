@@ -191,7 +191,8 @@ class UnmatchedAnalyzer(AnalysisTool):
                     return
 
                 # If we have both brand and scent, it's a complete match regardless of match_type
-                # This includes both "regex" (scent patterns) and "brand" (brand patterns + remainder)
+                # This includes both "regex" (scent patterns) and "brand"
+                # (brand patterns + remainder)
                 # These are properly matched soaps and should NOT be in the unmatched list
                 if brand and scent:
                     # This is a complete match - don't add to unmatched list

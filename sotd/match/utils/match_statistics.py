@@ -6,7 +6,7 @@ field type counts, match type breakdowns, and performance metrics.
 """
 
 from collections import Counter
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 def calculate_match_statistics(records: List[Dict[str, Any]]) -> Dict[str, Any]:

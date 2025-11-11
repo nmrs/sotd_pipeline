@@ -359,7 +359,8 @@ class TableGenerator:
         """Get the aggregator class for a given table name."""
         try:
             # Convert table name to module path
-            # e.g., "user_razor_diversity" -> "sotd.aggregate.aggregators.users.razor_diversity_aggregator.RazorDiversityAggregator"
+            # e.g., "user_razor_diversity" ->
+            # "sotd.aggregate.aggregators.users.razor_diversity_aggregator.RazorDiversityAggregator"
             module_name = f"sotd.aggregate.aggregators.users.{table_name}_aggregator"
             class_name = f"{table_name.replace('_', ' ').title().replace(' ', '')}Aggregator"
 
@@ -499,7 +500,8 @@ class TableGenerator:
 
         Args:
             df: DataFrame to limit
-            numeric_limits: Dictionary of column_name: threshold pairs (should contain only one limit)
+            numeric_limits: Dictionary of column_name: threshold pairs
+                (should contain only one limit)
 
         Returns:
             Limited DataFrame
@@ -529,7 +531,8 @@ class TableGenerator:
             numeric_threshold = float(threshold)
         except (ValueError, TypeError):
             raise ValueError(
-                f"Invalid threshold value '{threshold}' for column '{column_name}' - must be numeric"
+                f"Invalid threshold value '{threshold}' for column "
+                f"'{column_name}' - must be numeric"
             )
 
         # Apply limit (>= threshold) - cut from bottom using pandas boolean indexing
@@ -632,7 +635,8 @@ class TableGenerator:
             # In practice, this should come from the report context
             current_month = self.current_month or "2025-06"  # TODO: Make this configurable
 
-            # Use the data key (with underscore) for delta calculation, not the table name (with hyphen)
+            # Use the data key (with underscore) for delta calculation,
+            # not the table name (with hyphen)
             data_key = table_name.replace("-", "_")
             df = self._calculate_deltas(df, data_key, current_month)
 

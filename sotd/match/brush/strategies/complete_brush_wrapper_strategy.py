@@ -7,10 +7,11 @@ to integrate with the scoring system architecture.
 
 from typing import Optional
 
+from sotd.match.types import MatchResult
+
 from .base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-from sotd.match.types import MatchResult
 
 
 class CompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):

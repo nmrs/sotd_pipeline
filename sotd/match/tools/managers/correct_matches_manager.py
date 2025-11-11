@@ -136,7 +136,7 @@ class CorrectMatchesManager:
         """Load previously marked correct matches from directory structure."""
         self._correct_matches = set()
         self._correct_matches_data = {}
-        
+
         # Directory structure: load from field-specific files
         self._load_from_directory()
 
@@ -150,14 +150,17 @@ class CorrectMatchesManager:
             for field_file in self._correct_matches_file.glob("*.yaml"):
                 field_name = field_file.stem
                 # Skip backup and report files
-                if field_file.name.endswith((".backup", ".bk")) or "duplicates_report" in field_file.name:
+                if (
+                    field_file.name.endswith((".backup", ".bk"))
+                    or "duplicates_report" in field_file.name
+                ):
                     continue
-                
+
                 with field_file.open("r", encoding="utf-8") as f:
                     field_data = yaml.safe_load(f)
                     if not field_data:
                         continue
-                    
+
                     # Process the field data using the same logic as legacy file loading
                     if field_name == "blade":
                         # Handle format-aware structure for blade field
@@ -218,13 +221,13 @@ class CorrectMatchesManager:
                                         for pattern in patterns:
                                             if isinstance(pattern, dict):
                                                 original_text = list(pattern.keys())[0]
-                                                handle_match_enabled = pattern[
-                                                    original_text
-                                                ].get("handle_match", False)
+                                                handle_match_enabled = pattern[original_text].get(
+                                                    "handle_match", False
+                                                )
                                             else:
                                                 original_text = pattern
                                                 handle_match_enabled = False
-                                            
+
                                             match_key = self.create_match_key(
                                                 field_name,
                                                 original_text,
@@ -253,14 +256,20 @@ class CorrectMatchesManager:
                                             self._correct_matches_data[match_key] = {
                                                 "original": original,
                                                 "matched": {
-                                                    "brand": brand
-                                                    if field_name
-                                                    in ("razor", "blade", "brush", "soap")
-                                                    else None,
-                                                    "model": model
-                                                    if field_name in ("razor", "blade", "brush")
-                                                    else None,
-                                                    "scent": model if field_name == "soap" else None,
+                                                    "brand": (
+                                                        brand
+                                                        if field_name
+                                                        in ("razor", "blade", "brush", "soap")
+                                                        else None
+                                                    ),
+                                                    "model": (
+                                                        model
+                                                        if field_name in ("razor", "blade", "brush")
+                                                        else None
+                                                    ),
+                                                    "scent": (
+                                                        model if field_name == "soap" else None
+                                                    ),
                                                 },
                                                 "field": field_name,
                                             }
@@ -317,35 +326,56 @@ class CorrectMatchesManager:
                         field_data[field][brand][scent].append(normalized_original)
                 elif field == "brush":
                     # Check if this is a split brush (composite brush with handle/knot components)
-                    self.console.print(f"[cyan]DEBUG: Processing brush match - original: {original}[/cyan]")
-                    self.console.print(f"[cyan]DEBUG: Matched data keys: {list(match_data['matched'].keys())}[/cyan]")
-                    
-                    # IMPORTANT: Check for complete brush (top-level brand AND model) FIRST
-                    # Complete brushes can have nested handle/knot structures but should be saved as brushes
+                    self.console.print(
+                        f"[cyan]DEBUG: Processing brush match - original: {original}[/cyan]"
+                    )
+                    self.console.print(
+                        f"[cyan]DEBUG: Matched data keys: "
+                        f"{list(match_data['matched'].keys())}[/cyan]"
+                    )
+
+                    # IMPORTANT: Check for complete brush (top-level brand AND
+                    # model) FIRST
+                    # Complete brushes can have nested handle/knot structures
+                    # but should be saved as brushes
                     brand = match_data["matched"].get("brand")
                     model = match_data["matched"].get("model")
                     handle = match_data["matched"].get("handle")
                     knot = match_data["matched"].get("knot")
-                    
+
                     # Convert model to string if it's a number (YAML keys must be strings)
                     if model is not None and not isinstance(model, str):
                         model = str(model)
-                    
+
                     has_top_level_brand = brand and brand != "" and brand is not None
                     has_top_level_model = model and model != "" and model is not None
-                    
-                    self.console.print(f"[cyan]DEBUG: Top-level - brand: {brand}, model: {model}[/cyan]")
-                    self.console.print(f"[cyan]DEBUG: Has top-level brand: {has_top_level_brand}, Has top-level model: {has_top_level_model}[/cyan]")
-                    self.console.print(f"[cyan]DEBUG: Has handle: {bool(handle)}, Has knot: {bool(knot)}[/cyan]")
 
-                    # If this is a complete brush (has top-level brand AND model), save as brush
-                    # Even if it has nested handle/knot structures, complete brushes go to brush section
+                    self.console.print(
+                        f"[cyan]DEBUG: Top-level - brand: {brand}, model: {model}[/cyan]"
+                    )
+                    self.console.print(
+                        f"[cyan]DEBUG: Has top-level brand: "
+                        f"{has_top_level_brand}, Has top-level model: "
+                        f"{has_top_level_model}[/cyan]"
+                    )
+                    self.console.print(
+                        f"[cyan]DEBUG: Has handle: {bool(handle)}, Has knot: {bool(knot)}[/cyan]"
+                    )
+
+                    # If this is a complete brush (has top-level brand AND model),
+                    # save as brush
+                    # Even if it has nested handle/knot structures, complete
+                    # brushes go to brush section
                     if has_top_level_brand and has_top_level_model:
-                        self.console.print(f"[cyan]DEBUG: Complete brush detected - saving to brush section[/cyan]")
+                        self.console.print(
+                            "[cyan]DEBUG: Complete brush detected - saving to brush section[/cyan]"
+                        )
                         # Use "_no_model" placeholder when model is None or empty
                         if not model:
                             model = "_no_model"
-                            self.console.print(f"[cyan]DEBUG: Model was None/empty, using '_no_model'[/cyan]")
+                            self.console.print(
+                                "[cyan]DEBUG: Model was None/empty, using '_no_model'[/cyan]"
+                            )
 
                         # Initialize brand and model dictionaries if they don't exist
                         if brand not in field_data[field]:
@@ -355,16 +385,24 @@ class CorrectMatchesManager:
 
                         # Normalize the original string before storing to prevent bloat
                         normalized_original = self._normalize_for_matching(original, field)
-                        self.console.print(f"[cyan]DEBUG: Normalized original: '{normalized_original}'[/cyan]")
+                        self.console.print(
+                            f"[cyan]DEBUG: Normalized original: '{normalized_original}'[/cyan]"
+                        )
                         self.console.print(f"[cyan]DEBUG: Saving to brush/{brand}/{model}[/cyan]")
                         if (
                             normalized_original
                             and normalized_original not in field_data[field][brand][model]
                         ):
                             field_data[field][brand][model].append(normalized_original)
-                            self.console.print(f"[green]DEBUG: Added '{normalized_original}' to brush/{brand}/{model}[/green]")
+                            self.console.print(
+                                f"[green]DEBUG: Added '{normalized_original}' to "
+                                f"brush/{brand}/{model}[/green]"
+                            )
                         else:
-                            self.console.print(f"[yellow]DEBUG: Normalized original is empty or already exists[/yellow]")
+                            self.console.print(
+                                "[yellow]DEBUG: Normalized original is empty "
+                                "or already exists[/yellow]"
+                            )
                     elif handle or knot:
                         # This is a split brush - save to handle and knot sections
                         if handle:
@@ -403,7 +441,8 @@ class CorrectMatchesManager:
                             knot_brand = knot.get("brand")
                             knot_model = knot.get("model")
 
-                            # Use _no_brand when brand is missing, keep actual model or use _no_model
+                            # Use _no_brand when brand is missing, keep actual
+                            # model or use _no_model
                             if not knot_brand:
                                 knot_brand = "_no_brand"
                             if not knot_model:
@@ -429,9 +468,14 @@ class CorrectMatchesManager:
                                     normalized_knot_text
                                 )
                     else:
-                        # This is a split brush without top-level brand/model - save to handle/knot sections
+                        # This is a split brush without top-level brand/model
+                        # - save to handle/knot sections
                         # This case should be rare - usually brushes have at least brand
-                        self.console.print(f"[yellow]DEBUG: Split brush without top-level brand/model - saving to handle/knot sections[/yellow]")
+                        self.console.print(
+                            "[yellow]DEBUG: Split brush without top-level "
+                            "brand/model - saving to handle/knot "
+                            "sections[/yellow]"
+                        )
                 elif field == "handle":
                     # Handle handle field - support both old and new structures
                     if (
@@ -561,9 +605,7 @@ class CorrectMatchesManager:
                         sort_keys=False,
                         allow_unicode=True,
                     )
-                self.console.print(
-                    f"[green]Correct matches saved to {field_file}[/green]"
-                )
+                self.console.print(f"[green]Correct matches saved to {field_file}[/green]")
         except Exception as e:
             self.console.print(f"[red]Error saving correct matches: {e}[/red]")
 
@@ -614,8 +656,9 @@ class CorrectMatchesManager:
         # This handles cases where automated splits are saved to handle/knot sections
         if match_key.startswith("brush:"):
             try:
-                from sotd.match.correct_matches import CorrectMatchesChecker
                 import yaml
+
+                from sotd.match.correct_matches import CorrectMatchesChecker
 
                 # Load the YAML data structure for the checker
                 if self._correct_matches_file.exists():

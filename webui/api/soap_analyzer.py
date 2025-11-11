@@ -741,7 +741,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
 
     Returns groups sorted by total count (descending) with top 3 original patterns per group.
     """
-    from collections import defaultdict, Counter
+    from collections import Counter, defaultdict
 
     # Group by matched string (brand + scent)
     matched_groups = defaultdict(list)
@@ -916,7 +916,7 @@ def group_soap_matches_by_original(matches: List[dict], limit: Optional[int] = N
 
     This maintains backward compatibility when group_by_matched=False.
     """
-    from collections import defaultdict, Counter
+    from collections import Counter, defaultdict
 
     # Group by original string
     original_groups = defaultdict(list)

@@ -4,33 +4,33 @@
 import re
 from typing import Dict, List
 
-from .competition_tags import strip_competition_tags
 from .blade_patterns import (
+    get_approximate_number_pattern,
     get_basic_usage_pattern,
-    get_incomplete_usage_pattern,
-    get_usage_x_pattern,
-    get_usage_x_prefix_pattern,
-    get_usage_use_pattern,
-    get_usage_uses_pattern,
-    get_ordinal_shave_pattern,
-    get_ordinal_pattern,
-    get_superscript_ordinal_pattern,
-    get_completion_pattern,
-    get_speculation_pattern,
-    get_speculation_question_pattern,
-    get_complex_usage_pattern,
     get_celebration_pattern,
-    get_partial_usage_pattern,
-    get_location_condition_pattern,
+    get_completion_pattern,
+    get_complex_usage_pattern,
     get_country_origin_pattern,
     get_decimal_usage_pattern,
     get_hash_usage_pattern,
-    get_shave_hash_pattern,
-    get_x_usage_pattern,
+    get_incomplete_usage_pattern,
+    get_location_condition_pattern,
     get_maybe_usage_pattern,
-    get_approximate_number_pattern,
+    get_ordinal_pattern,
+    get_ordinal_shave_pattern,
     get_ordinal_use_pattern,
+    get_partial_usage_pattern,
+    get_shave_hash_pattern,
+    get_speculation_pattern,
+    get_speculation_question_pattern,
+    get_superscript_ordinal_pattern,
+    get_usage_use_pattern,
+    get_usage_uses_pattern,
+    get_usage_x_pattern,
+    get_usage_x_prefix_pattern,
+    get_x_usage_pattern,
 )
+from .competition_tags import strip_competition_tags
 
 
 def normalize_parentheses_whitespace(value: str) -> str:

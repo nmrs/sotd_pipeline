@@ -10,14 +10,14 @@ import re
 from pathlib import Path
 from typing import Optional
 
+# ComponentScoreCalculator no longer needed - scoring is handled externally
+from sotd.match.types import MatchResult
+
+from ...comparison.splits_loader import BrushSplitsLoader
+from ...delimiter_patterns import BrushDelimiterPatterns
 from ..base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
-from ...delimiter_patterns import BrushDelimiterPatterns
-from ...comparison.splits_loader import BrushSplitsLoader
-
-# ComponentScoreCalculator no longer needed - scoring is handled externally
-from sotd.match.types import MatchResult
 
 
 class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
@@ -403,7 +403,9 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         score = 0
 
         # Strong knot indicators (positive score)
-        if any(word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon", "shoat"]):
+        if any(
+            word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon", "shoat"]
+        ):
             score += 8
         if re.search(r"\d+\s*mm", text_lower):
             score += 6

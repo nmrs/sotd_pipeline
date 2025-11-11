@@ -52,8 +52,6 @@ def search_reddit_external(date_str):
 
 def search_wayback_machine(date_str):
     """Search Wayback Machine for archived Reddit threads."""
-    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-
     # Create Wayback Machine search URLs
     wayback_urls = [
         f"https://web.archive.org/web/{date_str}*/https://www.reddit.com/r/Wetshaving/",

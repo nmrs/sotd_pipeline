@@ -20,8 +20,8 @@ from rich.table import Table  # noqa: E402
 
 from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
-from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
-from sotd.utils.extract_normalization import normalize_for_matching
+from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags  # noqa: E402
+from sotd.utils.extract_normalization import normalize_for_matching  # noqa: E402
 from sotd.utils.yaml_loader import load_yaml_with_nfc  # noqa: E402
 
 
@@ -696,7 +696,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def _load_correct_matches(self) -> None:
         """Load previously marked correct matches from directory structure.
-        
+
         Fail fast if loading fails - this is an internal operation and errors
         should be surfaced immediately per fail-fast principles.
         """
@@ -713,7 +713,7 @@ class MismatchAnalyzer(AnalysisTool):
             # If it's a file path (ends with .yaml), use parent directory
             correct_matches_path = correct_matches_path.parent
         # Otherwise, assume it's already a directory path
-        
+
         # Use the directory structure: data/correct_matches/
         manager = CorrectMatchesManager(self.console, correct_matches_path)
         manager.load_correct_matches()
@@ -2104,13 +2104,16 @@ class MismatchAnalyzer(AnalysisTool):
         model = matched.get("model")
 
         # Primary conditions: presence of handle/knot sections
-        # This handles both full split brushes (handle + knot) and single component brushes (handle-only or knot-only)
+        # This handles both full split brushes (handle + knot) and single
+        # component brushes (handle-only or knot-only)
         if handle is not None or knot is not None:
             # If this is a full split brush (brand=null AND model=null), it's a split brush
             if brand is None and model is None:
                 return True
-            # If this is a single component brush (knot-only or handle-only), it's also a split brush
-            # This handles cases like "Synthetic" where model="Synthetic" but it's a knot-only component
+            # If this is a single component brush (knot-only or handle-only),
+            # it's also a split brush
+            # This handles cases like "Synthetic" where model="Synthetic"
+            # but it's a knot-only component
             # The key is that it should NOT have a brand (which would make it a regular brush)
             # AND it should have only one component with data (not both handle and knot)
             if brand is None:

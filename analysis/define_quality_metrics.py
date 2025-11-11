@@ -221,7 +221,9 @@ def define_quality_modifiers() -> Dict[str, Any]:
         },
         "catalog_completeness_modifiers": {
             "complete_entry": {
-                "description": "4+ quality fields (knot_fiber, knot_size_mm, handle_material, loft_mm)",
+                "description": (
+                    "4+ quality fields (knot_fiber, knot_size_mm, " "handle_material, loft_mm)"
+                ),
                 "modifier": "+15 points",
                 "confidence_boost": "Complete specifications provide high match confidence",
             },
@@ -305,7 +307,10 @@ def define_confidence_indicators() -> Dict[str, Any]:
 
     confidence_indicators = {
         "confidence_calculation": {
-            "formula": "base_confidence + strategy_confidence + pattern_confidence + catalog_confidence + user_confidence",
+            "formula": (
+                "base_confidence + strategy_confidence + pattern_confidence + "
+                "catalog_confidence + user_confidence"
+            ),
             "max_confidence": 100,
             "min_confidence": 0,
             "confidence_levels": {
@@ -369,7 +374,10 @@ def generate_implementation_scoring_formulas() -> Dict[str, Any]:
 
     scoring_formulas = {
         "base_quality_score": {
-            "formula": "tier_base_score + strategy_modifier + pattern_modifier + catalog_modifier + brand_modifier + user_feedback_modifier",
+            "formula": (
+                "tier_base_score + strategy_modifier + pattern_modifier + "
+                "catalog_modifier + brand_modifier + user_feedback_modifier"
+            ),
             "example_calculation": {
                 "scenario": "Zenith known_brush with complete catalog entry",
                 "tier_base_score": 90,
@@ -383,7 +391,10 @@ def generate_implementation_scoring_formulas() -> Dict[str, Any]:
             },
         },
         "confidence_score": {
-            "formula": "strategy_confidence + pattern_confidence + catalog_confidence + brand_confidence + user_confidence",
+            "formula": (
+                "strategy_confidence + pattern_confidence + catalog_confidence + "
+                "brand_confidence + user_confidence"
+            ),
             "example_calculation": {
                 "scenario": "Zenith known_brush with complete catalog entry",
                 "strategy_confidence": 40,  # known_brush
@@ -433,7 +444,9 @@ def generate_quality_metrics_specification(analysis_results: Dict[str, Any]) -> 
 
 ## Executive Summary
 
-This specification synthesizes research from Phase 4.1 Steps 1-4 to define comprehensive quality metrics for brush matching scoring optimization. The system addresses the key findings:
+This specification synthesizes research from Phase 4.1 Steps 1-4 to define 
+comprehensive quality metrics for brush matching scoring optimization. 
+The system addresses the key findings:
 
 - **70.3% success rate** with 29.7% failures requiring improvement
 - **0% catalog coverage** presenting major enhancement opportunity  
@@ -446,10 +459,14 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 
 | Research Area | Key Finding | Quality Impact |
 |---------------|-------------|----------------|
-| Match Distribution | dual_component dominates (50.6%) but known_brush has highest quality | Strategy-based quality differentiation |
-| Quality Indicators | 0% complete catalog entries, 91.2% minimal | Catalog completeness critical for quality |
-| Catalog Assessment | 0% coverage rate, 66 missing high-volume brands | Brand authority and catalog presence essential |
-| User Feedback | 152 corrections, 29 high-confidence patterns | User validation history predicts quality |
+| Match Distribution | dual_component dominates (50.6%) but known_brush has 
+ highest quality | Strategy-based quality differentiation |
+| Quality Indicators | 0% complete catalog entries, 91.2% minimal | Catalog 
+ completeness critical for quality |
+| Catalog Assessment | 0% coverage rate, 66 missing high-volume brands | 
+ Brand authority and catalog presence essential |
+| User Feedback | 152 corrections, 29 high-confidence patterns | User 
+ validation history predicts quality |
 
 ### Quality Improvement Opportunities
 
@@ -502,7 +519,11 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 """
 
     for level, data in modifiers["pattern_specificity_modifiers"].items():
-        report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
+        level_title = level.replace("_", " ").title()
+        report += (
+            f"| {level_title} | {data['description']} | "
+            f"{data['modifier']} | {data['confidence_boost']} |\n"
+        )
 
     report += """
 ### Brand Authority Modifiers
@@ -512,7 +533,11 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 """
 
     for level, data in modifiers["brand_authority_modifiers"].items():
-        report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
+        level_title = level.replace("_", " ").title()
+        report += (
+            f"| {level_title} | {data['description']} | "
+            f"{data['modifier']} | {data['confidence_boost']} |\n"
+        )
 
     report += """
 ### Catalog Completeness Modifiers
@@ -522,7 +547,11 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 """
 
     for level, data in modifiers["catalog_completeness_modifiers"].items():
-        report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
+        level_title = level.replace("_", " ").title()
+        report += (
+            f"| {level_title} | {data['description']} | "
+            f"{data['modifier']} | {data['confidence_boost']} |\n"
+        )
 
     report += """
 ### Strategy Confidence Modifiers
@@ -532,7 +561,11 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 """
 
     for level, data in modifiers["strategy_confidence_modifiers"].items():
-        report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
+        level_title = level.replace("_", " ").title()
+        report += (
+            f"| {level_title} | {data['description']} | "
+            f"{data['modifier']} | {data['confidence_boost']} |\n"
+        )
 
     report += """
 ## Confidence Indicator System
@@ -540,7 +573,8 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
 ### Confidence Calculation Formula
 
 ```
-Total Confidence = Strategy Confidence + Pattern Confidence + Catalog Confidence + Brand Confidence + User Confidence
+ Total Confidence = Strategy Confidence + Pattern Confidence + 
+ Catalog Confidence + Brand Confidence + User Confidence
 ```
 
 ### Confidence Component Scores
@@ -553,7 +587,12 @@ Total Confidence = Strategy Confidence + Pattern Confidence + Catalog Confidence
     for component_name, component_values in components.items():
         values = list(component_values.values())
         if len(values) >= 5:
-            report += f"| {component_name.replace('_', ' ').title()} | {max(values)} | {sorted(values, reverse=True)[1]} | {sorted(values, reverse=True)[2]} | {sorted(values, reverse=True)[3]} | {min(values)} |\n"
+            component_title = component_name.replace("_", " ").title()
+            sorted_vals = sorted(values, reverse=True)
+            report += (
+                f"| {component_title} | {max(values)} | {sorted_vals[1]} | "
+                f"{sorted_vals[2]} | {sorted_vals[3]} | {min(values)} |\n"
+            )
 
     report += """
 ### Confidence Levels
@@ -602,7 +641,10 @@ def calculate_base_quality_score(match_data):
     user_mod = get_user_feedback_modifier(match_data.brand, match_data.pattern)
     
     # Calculate total (capped at 100)
-    total_score = min(100, tier_score + strategy_mod + pattern_mod + catalog_mod + brand_mod + user_mod)
+    total_score = min(
+        100,
+        tier_score + strategy_mod + pattern_mod + catalog_mod + brand_mod + user_mod
+    )
     
     return total_score
 ```

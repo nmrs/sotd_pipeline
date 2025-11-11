@@ -206,7 +206,8 @@ class BrushChatGPTAnalyzer:
         strategy_performance = report.get("strategy_performance", {})
         win_loss_rates = report.get("win_loss_rates", {})
 
-        prompt = f"""You are an expert brush matching system analyst. I need your help analyzing strategy performance for a brush scoring system.
+        prompt = f"""You are an expert brush matching system analyst. 
+I need your help analyzing strategy performance for a brush scoring system.
 
 SYSTEM CONTEXT:
 - System Type: {system_info.get("system_type", "brush_scoring")}
@@ -262,7 +263,8 @@ GUIDELINES:
         system_info = report.get("system_info", {})
         modifier_effectiveness = report.get("modifier_effectiveness", {})
 
-        prompt = f"""You are an expert brush matching system analyst. I need your help analyzing modifier performance for a brush scoring system.
+        prompt = f"""You are an expert brush matching system analyst. 
+I need your help analyzing modifier performance for a brush scoring system.
 
 SYSTEM CONTEXT:
 - System Type: {system_info.get("system_type", "brush_scoring")}
@@ -320,7 +322,8 @@ GUIDELINES:
         override_patterns = report.get("common_override_patterns", {})
         text_characteristics = report.get("text_characteristics", {})
 
-        prompt = f"""You are an expert brush matching system analyst. I need your help discovering new patterns for a brush scoring system.
+        prompt = f"""You are an expert brush matching system analyst. 
+I need your help discovering new patterns for a brush scoring system.
 
 SYSTEM CONTEXT:
 - System Type: {system_info.get("system_type", "brush_scoring")}
@@ -347,7 +350,10 @@ TEXT CHARACTERISTICS:
             overridden = stats.get("overridden", 0)
             total = validated + overridden
             override_rate = (overridden / total * 100) if total > 0 else 0
-            prompt += f"- Delimiter '{delimiter}': {override_rate:.1f}% override rate ({overridden}/{total})\n"
+            prompt += (
+                f"- Delimiter '{delimiter}': {override_rate:.1f}% override "
+                f"rate ({overridden}/{total})\n"
+            )
 
         prompt += """
 TASK: Based on the pattern analysis, suggest new modifiers that could improve matching accuracy.

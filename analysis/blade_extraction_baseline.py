@@ -7,12 +7,12 @@ a baseline for measuring improvements. Identifies incorrect extractions like
 "Uses: 1" vs correct extractions like "Persona Comfort Coat".
 """
 
+import argparse
 import json
 import re
+from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-from collections import defaultdict, Counter
-import argparse
+from typing import Dict, List, Optional
 
 
 class BladeExtractionAnalyzer:

@@ -237,7 +237,8 @@ class AnnualDeltaCalculator:
 
                     if self.debug:
                         logger.info(
-                            f"Calculated tier-based deltas for {category}: {len(category_deltas)} items"
+                            f"Calculated tier-based deltas for {category}: "
+                            f"{len(category_deltas)} items"
                         )
 
                 except Exception as e:

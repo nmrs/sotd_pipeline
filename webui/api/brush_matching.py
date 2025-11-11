@@ -6,7 +6,8 @@ allowing users to test brush strings and see detailed scoring results.
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -367,8 +368,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         try:
             # Clear ALL caches to ensure fresh data on every analysis
             from sotd.match.base_matcher import clear_catalog_cache
-            from sotd.match.loaders import clear_yaml_cache
             from sotd.match.brush.matcher import clear_brush_catalog_cache
+            from sotd.match.loaders import clear_yaml_cache
 
             clear_catalog_cache()
             clear_yaml_cache()
@@ -534,8 +535,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                     total_score = strategy_result.score
 
                 # Get detailed scoring breakdown using the ScoringEngine
-                from sotd.match.brush.scoring.engine import ScoringEngine
                 from sotd.match.brush.config import BrushScoringConfig
+                from sotd.match.brush.scoring.engine import ScoringEngine
 
                 config_path = (
                     Path(__file__).parent.parent.parent / "data" / "brush_scoring_config.yaml"

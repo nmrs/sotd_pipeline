@@ -160,7 +160,9 @@ class BrushSplitter:
         # Handle-primary delimiters (first part is handle)
         handle_primary_delimiters = BrushDelimiterPatterns.get_positional_splitting_delimiters()
         # Other high-priority delimiters
-        other_high_priority_delimiters = []  # "+" requires smart analysis, not high-priority splitting
+        other_high_priority_delimiters = (
+            []
+        )  # "+" requires smart analysis, not high-priority splitting
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         # These delimiters use smart splitting to determine handle vs knot based on content

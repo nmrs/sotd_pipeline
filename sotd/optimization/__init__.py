@@ -1,9 +1,6 @@
 """Optimization module for SOTD Pipeline.
 
-This module provides tools for optimizing configuration parameters
-using gradient descent and other optimization techniques.
+This module provides tools for analyzing and testing brush matching strategies.
 """
 
-from .brush_scoring_optimizer import BrushScoringOptimizer
-
-__all__ = ["BrushScoringOptimizer"]
+__all__ = []

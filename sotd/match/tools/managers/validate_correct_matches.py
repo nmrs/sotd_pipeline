@@ -3,7 +3,6 @@
 
 import logging
 import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -14,13 +13,12 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from sotd.match.base_matcher import BaseMatcher
-from sotd.match.blade_matcher import BladeMatcher
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.soap_matcher import SoapMatcher
-from sotd.match.correct_matches_updater import CorrectMatchesUpdater
-from sotd.match.brush.config import BrushScoringConfig
+from sotd.match.base_matcher import BaseMatcher  # noqa: E402
+from sotd.match.blade_matcher import BladeMatcher  # noqa: E402
+from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
+from sotd.match.correct_matches_updater import CorrectMatchesUpdater  # noqa: E402
+from sotd.match.razor_matcher import RazorMatcher  # noqa: E402
+from sotd.match.soap_matcher import SoapMatcher  # noqa: E402
 
 
 # Compatibility layer for BrushMatcherConfig
@@ -109,8 +107,10 @@ class ValidateCorrectMatches:
             # The YAML cache uses absolute resolved paths as keys
             if not self._data_dir:
                 raise ValueError(
-                    f"_data_dir not set for validator. This causes path resolution failures. "
-                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                    "_data_dir not set for validator. "
+                    "This causes path resolution failures. "
+                    "Set validator._data_dir to project root / 'data' "
+                    "before calling validate_field."
                 )
             base_dir = self._data_dir
             if field == "razor":
@@ -146,8 +146,8 @@ class ValidateCorrectMatches:
         # Fail fast: _data_dir must be set for proper path resolution
         if not self._data_dir:
             raise ValueError(
-                f"_data_dir not set for validator. This causes path resolution failures. "
-                f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                "_data_dir not set for validator. This causes path resolution failures. "
+                "Set validator._data_dir to project root / 'data' before calling validate_field."
             )
 
         base_dir = self._data_dir
@@ -158,7 +158,8 @@ class ValidateCorrectMatches:
             return BladeMatcher(catalog_path=base_dir / "blades.yaml")
         elif field == "brush":
             # For brush field, use BrushMatcher with absolute paths from _data_dir
-            # This fixes the issue where relative paths were resolving to webui/data/ instead of project/data/
+            # This fixes the issue where relative paths were resolving to
+            # webui/data/ instead of project/data/
             brush_matcher_paths = {
                 "correct_matches_path": base_dir / "correct_matches.yaml",
                 "brushes_path": base_dir / "brushes.yaml",
@@ -171,8 +172,10 @@ class ValidateCorrectMatches:
         elif field == "soap":
             return SoapMatcher(catalog_path=base_dir / "soaps.yaml")
         elif field in ["knot", "handle"]:
-            # For brush-related fields, use BrushMatcher with absolute paths from _data_dir
-            # This fixes the issue where relative paths were resolving to webui/data/ instead of project/data/
+            # For brush-related fields, use BrushMatcher with absolute paths
+            # from _data_dir
+            # This fixes the issue where relative paths were resolving to
+            # webui/data/ instead of project/data/
             return BrushMatcher(
                 correct_matches_path=base_dir / "correct_matches.yaml",
                 brushes_path=base_dir / "brushes.yaml",
@@ -238,7 +241,8 @@ class ValidateCorrectMatches:
                                     actual_model = matched_data.get("model")
 
                                     if actual_brand and actual_model:
-                                        # Add to expected structure based on where matcher thinks it should be
+                                        # Add to expected structure based on where
+                                        # matcher thinks it should be
                                         if (
                                             actual_brand
                                             not in expected_structure[field][format_name]
@@ -293,7 +297,8 @@ class ValidateCorrectMatches:
                                     actual_model = matched_data.get("model")
 
                                     if actual_brand and actual_model:
-                                        # Add to expected structure based on where matcher thinks it should be
+                                        # Add to expected structure based on where
+                                        # matcher thinks it should be
                                         if actual_brand not in expected_structure[field]:
                                             expected_structure[field][actual_brand] = {}
                                         if (
@@ -345,17 +350,21 @@ class ValidateCorrectMatches:
 
         original_section = original[field]
         logger.debug(f"Processing {field} section: {type(original_section)}")
-        logger.debug(
-            f"Section keys: {list(original_section.keys()) if isinstance(original_section, dict) else 'Not a dict'}"
+        section_keys = (
+            list(original_section.keys()) if isinstance(original_section, dict) else "Not a dict"
         )
+        logger.debug(f"Section keys: {section_keys}")
 
         # Debug: Check if we have the problematic entries
         if field == "brush" and "Chisel & Hound" in original_section:
             ch_hound_section = original_section["Chisel & Hound"]
             logger.info(f"Chisel & Hound section: {type(ch_hound_section)}")
-            logger.info(
-                f"Chisel & Hound keys: {list(ch_hound_section.keys()) if isinstance(ch_hound_section, dict) else 'Not a dict'}"
+            ch_hound_keys = (
+                list(ch_hound_section.keys())
+                if isinstance(ch_hound_section, dict)
+                else "Not a dict"
             )
+            logger.info(f"Chisel & Hound keys: {ch_hound_keys}")
 
             if "v26" in ch_hound_section:
                 v26_patterns = original_section["Chisel & Hound"]["v26"]
@@ -374,7 +383,8 @@ class ValidateCorrectMatches:
                             # Test each individual pattern in the list
                             for pattern in original_section[format_name][brand_name][model_name]:
                                 logger.debug(
-                                    f"Testing blade pattern: '{pattern}' in format '{format_name}' under '{brand_name} {model_name}'"
+                                    f"Testing blade pattern: '{pattern}' in format "
+                                    f"'{format_name}' under '{brand_name} {model_name}'"
                                 )
                                 result = self._test_matcher_entry_with_format(
                                     matcher, pattern, field, format_name, brand_name, model_name
@@ -419,7 +429,7 @@ class ValidateCorrectMatches:
                                     logger.debug(f"        Found issue: {result}")
                                     issues.append(result)
                                 else:
-                                    logger.debug(f"        No issue found")
+                                    logger.debug("        No issue found")
                             except Exception as e:
                                 logger.error(f"        Error testing pattern: {e}")
                                 # Add error as an issue
@@ -445,7 +455,8 @@ class ValidateCorrectMatches:
                             issues.append(result)
 
             logger.info(
-                f"Brush validation complete: processed {processed_patterns} patterns out of {total_patterns} total patterns"
+                f"Brush validation complete: processed {processed_patterns} "
+                f"patterns out of {total_patterns} total patterns"
             )
             logger.info(f"Found {len(issues)} issues")
         else:
@@ -469,7 +480,7 @@ class ValidateCorrectMatches:
                                     logger.debug(f"        Found issue: {result}")
                                     issues.append(result)
                                 else:
-                                    logger.debug(f"        No issue found")
+                                    logger.debug("        No issue found")
                             except Exception as e:
                                 logger.error(f"        Error testing pattern: {e}")
                                 # Add error as an issue
@@ -504,8 +515,10 @@ class ValidateCorrectMatches:
             # Fail fast: _data_dir must be set for proper path resolution
             if not self._data_dir:
                 raise ValueError(
-                    f"_data_dir not set for validator. This causes path resolution failures. "
-                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                    "_data_dir not set for validator. "
+                    "This causes path resolution failures. "
+                    "Set validator._data_dir to project root / 'data' "
+                    "before calling validate_field."
                 )
             base_dir = self._data_dir
             # Load the blade catalog
@@ -661,14 +674,18 @@ class ValidateCorrectMatches:
                             "actual_model": actual_model or "Unknown",
                             "matched_pattern": getattr(result, "pattern", "Unknown pattern"),
                             "message": (
-                                f"Entry '{test_text}' matched to '{actual_brand or 'Unknown'} {actual_model or 'Unknown'}' "
-                                f"instead of expected '{expected_brand} {expected_model}'"
+                                f"Entry '{test_text}' matched to "
+                                f"'{actual_brand or 'Unknown'} "
+                                f"{actual_model or 'Unknown'}' instead of "
+                                f"expected '{expected_brand} {expected_model}'"
                             ),
                         }
                 elif len(args) >= 2:
                     expected_brand, expected_model = args[0], args[1]
-                    # Accept brand fallback matches that produce the same result (case-insensitive)
-                    # This allows brand fallback to be considered valid if it produces the same brand/model
+                    # Accept brand fallback matches that produce the same result
+                    # (case-insensitive)
+                    # This allows brand fallback to be considered valid if it
+                    # produces the same brand/model
                     if (actual_brand or "").lower() != (expected_brand or "").lower() or (
                         actual_model or ""
                     ).lower() != (expected_model or "").lower():
@@ -739,7 +756,10 @@ class ValidateCorrectMatches:
                         "brand": brand_name,
                         "model": model_name,
                         "pattern": test_text,
-                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher with format '{format_name}'",
+                        "message": (
+                            f"Entry '{test_text}' cannot be matched by {field} "
+                            f"matcher with format '{format_name}'"
+                        ),
                     }
                 elif len(args) >= 2:
                     brand_name, model_name = args[0], args[1]
@@ -749,7 +769,10 @@ class ValidateCorrectMatches:
                         "brand": brand_name,
                         "model": model_name,
                         "pattern": test_text,
-                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher with format '{format_name}'",
+                        "message": (
+                            f"Entry '{test_text}' cannot be matched by {field} "
+                            f"matcher with format '{format_name}'"
+                        ),
                     }
 
             # Check if the matcher returned the expected brand/model
@@ -770,7 +793,12 @@ class ValidateCorrectMatches:
                             "pattern": test_text,
                             "actual_brand": actual_brand,
                             "actual_model": actual_model,
-                            "message": f"Entry '{test_text}' matched to '{actual_brand} {actual_model}' instead of expected '{expected_brand} {expected_model}' with format '{format_name}'",
+                            "message": (
+                                f"Entry '{test_text}' matched to "
+                                f"'{actual_brand} {actual_model}' instead of "
+                                f"expected '{expected_brand} {expected_model}' "
+                                f"with format '{format_name}'"
+                            ),
                         }
                 elif len(args) >= 2:
                     expected_brand, expected_model = args[0], args[1]
@@ -783,7 +811,12 @@ class ValidateCorrectMatches:
                             "pattern": test_text,
                             "actual_brand": actual_brand,
                             "actual_model": actual_model,
-                            "message": f"Entry '{test_text}' matched to '{actual_brand} {expected_model}' instead of expected '{expected_brand} {expected_model}' with format '{format_name}'",
+                            "message": (
+                                f"Entry '{test_text}' matched to "
+                                f"'{actual_brand} {expected_model}' instead of "
+                                f"expected '{expected_brand} {expected_model}' "
+                                f"with format '{format_name}'"
+                            ),
                         }
 
             # Entry matches successfully and returns expected brand/model - no issue
@@ -792,14 +825,18 @@ class ValidateCorrectMatches:
         except Exception as e:
             # Matcher error - this indicates a problem
             logger.error(
-                f"Error testing entry '{test_text}' with {field} matcher with format '{format_name}': {e}"
+                f"Error testing entry '{test_text}' with {field} matcher "
+                f"with format '{format_name}': {e}"
             )
             return {
                 "type": "matcher_error",
                 "field": field,
                 "format": format_name,
                 "pattern": test_text,
-                "message": f"Error testing entry '{test_text}' with {field} matcher with format '{format_name}': {str(e)}",
+                "message": (
+                    f"Error testing entry '{test_text}' with {field} matcher "
+                    f"with format '{format_name}': {str(e)}"
+                ),
             }
 
     def _test_brush_pattern(
@@ -822,7 +859,10 @@ class ValidateCorrectMatches:
                     "pattern": test_text,
                     "message": f"Pattern '{test_text}' cannot be matched by brush matcher",
                     "details": f"Bypass matcher found no match for '{test_text}'",
-                    "suggested_action": f"Pattern '{test_text}' may need to be updated or removed from correct_matches.yaml",
+                    "suggested_action": (
+                        f"Pattern '{test_text}' may need to be updated or "
+                        f"removed from correct_matches.yaml"
+                    ),
                     "expected_brand": brand_name,
                     "expected_model": version_name,
                     "actual_brand": None,
@@ -864,8 +904,14 @@ class ValidateCorrectMatches:
                     "type": "catalog_pattern_mismatch",
                     "pattern": test_text,
                     "message": f"Pattern '{test_text}' is stored under wrong brand",
-                    "details": f"Pattern mentions '{bypass_brand}' but is stored under '{brand_name}' section",
-                    "suggested_action": f"Move pattern '{test_text}' from '{brand_name}' to '{bypass_brand}' section",
+                    "details": (
+                        f"Pattern mentions '{bypass_brand}' but is stored "
+                        f"under '{brand_name}' section"
+                    ),
+                    "suggested_action": (
+                        f"Move pattern '{test_text}' from '{brand_name}' to "
+                        f"'{bypass_brand}' section"
+                    ),
                     "expected_brand": brand_name,
                     "expected_model": version_name,
                     "actual_brand": bypass_brand,
@@ -877,8 +923,14 @@ class ValidateCorrectMatches:
                     "type": "catalog_pattern_mismatch",
                     "pattern": test_text,
                     "message": f"Pattern '{test_text}' is stored under wrong model",
-                    "details": f"Pattern mentions '{bypass_model}' but is stored under '{version_name}' section",
-                    "suggested_action": f"Move pattern '{test_text}' from '{brand_name} {version_name}' to '{bypass_brand} {bypass_model}' section",
+                    "details": (
+                        f"Pattern mentions '{bypass_model}' but is stored under "
+                        f"'{version_name}' section"
+                    ),
+                    "suggested_action": (
+                        f"Move pattern '{test_text}' from '{brand_name} {version_name}' to "
+                        f"'{bypass_brand} {bypass_model}' section"
+                    ),
                     "expected_brand": brand_name,
                     "expected_model": version_name,
                     "actual_brand": bypass_brand,
@@ -937,8 +989,15 @@ class ValidateCorrectMatches:
                     "stored_model": stored_model,
                     "matched_brand": actual_brand or "Unknown",
                     "matched_model": actual_model or "Unknown",
-                    "message": f"Pattern '{test_text}' is stored under '{brand_name} {stored_model}' but contains model name '{found_model}'",
-                    "suggested_action": f"Move from '{brand_name} {stored_model}' to '{brand_name} {found_model}' in correct_matches.yaml",
+                    "message": (
+                        f"Pattern '{test_text}' is stored under "
+                        f"'{brand_name} {stored_model}' but contains model "
+                        f"name '{found_model}'"
+                    ),
+                    "suggested_action": (
+                        f"Move from '{brand_name} {stored_model}' to "
+                        f"'{brand_name} {found_model}' in correct_matches.yaml"
+                    ),
                 }
 
         return None
@@ -1009,8 +1068,10 @@ class ValidateCorrectMatches:
             # Fail fast: _data_dir must be set for proper path resolution
             if not self._data_dir:
                 raise ValueError(
-                    f"_data_dir not set for validator. This causes path resolution failures. "
-                    f"Set validator._data_dir to project root / 'data' before calling validate_field."
+                    "_data_dir not set for validator. "
+                    "This causes path resolution failures. "
+                    "Set validator._data_dir to project root / 'data' "
+                    "before calling validate_field."
                 )
             base_dir = self._data_dir
 
@@ -1074,7 +1135,9 @@ class ValidateCorrectMatches:
                                 "field": field,
                                 "format": format_name,
                                 "brand": brand_name,
-                                "message": f"Brand '{brand_name}' missing from format '{format_name}'",
+                                "message": (
+                                    f"Brand '{brand_name}' missing from " f"format '{format_name}'"
+                                ),
                             }
                         )
                         continue
@@ -1088,7 +1151,10 @@ class ValidateCorrectMatches:
                                     "format": format_name,
                                     "brand": brand_name,
                                     "model": model_name,
-                                    "message": f"Model '{model_name}' missing from brand '{brand_name}' in format '{format_name}'",
+                                    "message": (
+                                        f"Model '{model_name}' missing from brand "
+                                        f"'{brand_name}' in format '{format_name}'"
+                                    ),
                                 }
                             )
                             continue
@@ -1107,7 +1173,10 @@ class ValidateCorrectMatches:
                                         "brand": brand_name,
                                         "model": model_name,
                                         "pattern": pattern,
-                                        "message": f"Pattern '{pattern}' missing from expected structure",
+                                        "message": (
+                                            f"Pattern '{pattern}' missing from "
+                                            f"expected structure"
+                                        ),
                                     }
                                 )
         else:
@@ -1132,12 +1201,15 @@ class ValidateCorrectMatches:
                                 "field": field,
                                 "brand": brand_name,
                                 "model": model_name,
-                                "message": f"Model '{model_name}' missing from brand '{brand_name}'",
+                                "message": (
+                                    f"Model '{model_name}' missing from " f"brand '{brand_name}'"
+                                ),
                             }
                         )
                         continue
 
-                    # Check patterns - SKIP for handle and knot fields since these are composite references
+                    # Check patterns - SKIP for handle and knot fields since
+                    # these are composite references
                     if field not in ["handle", "knot"]:
                         original_patterns = original_section[brand_name][model_name]
                         expected_patterns = expected_section[brand_name][model_name]
@@ -1151,7 +1223,10 @@ class ValidateCorrectMatches:
                                         "brand": brand_name,
                                         "model": model_name,
                                         "pattern": pattern,
-                                        "message": f"Pattern '{pattern}' missing from expected structure",
+                                        "message": (
+                                            f"Pattern '{pattern}' missing from "
+                                            f"expected structure"
+                                        ),
                                     }
                                 )
 
@@ -1479,7 +1554,8 @@ class ValidateCorrectMatches:
                         normalized[format_name][normalized_brand][normalized_model] = model_section
         elif "known_brushes" in catalog_data:  # Brush format with nested structure
             # LINEAR FALLBACK: Include BOTH known_brushes AND other_brushes for validation
-            # This matches how BrushMatcher actually works - it tries known_brushes first, then other_brushes
+            # This matches how BrushMatcher actually works - it tries
+            # known_brushes first, then other_brushes
             for section_name in ["known_brushes", "other_brushes"]:
                 if section_name in catalog_data:
                     for brand_name, brand_section in catalog_data[section_name].items():

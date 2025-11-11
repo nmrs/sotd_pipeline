@@ -46,7 +46,7 @@ def extract_best_matches(validation_results):
 def deduplicate_overrides(overrides):
     """Remove duplicate URLs from overrides."""
     deduplicated = {}
-    for date, urls in overrides.items():
+    for date_key, urls in overrides.items():
         if urls and isinstance(urls, list):
             # Remove duplicates while preserving order
             seen = set()
@@ -55,9 +55,9 @@ def deduplicate_overrides(overrides):
                 if url not in seen:
                     seen.add(url)
                     unique_urls.append(url)
-            deduplicated[date] = unique_urls
+            deduplicated[date_key] = unique_urls
         else:
-            deduplicated[date] = urls
+            deduplicated[date_key] = urls
     return deduplicated
 
 
@@ -112,24 +112,24 @@ def merge_overrides(existing_overrides, new_overrides, all_missing_dates):
     merged = existing_overrides.copy()
 
     # Add all missing dates first (with empty values if not found)
-    for date in all_missing_dates:
-        if date not in merged:
-            merged[date] = None  # Will be converted to empty entry with comment
+    for date_key in all_missing_dates:
+        if date_key not in merged:
+            merged[date_key] = None  # Will be converted to empty entry with comment
 
     # Add new overrides (these will override empty entries if found)
-    for date, thread_info in new_overrides.items():
-        if date in merged and merged[date] is not None:
+    for date_key, thread_info in new_overrides.items():
+        if date_key in merged and merged[date_key] is not None:
             # Convert to list if it's not already
-            existing_value = merged[date]
+            existing_value = merged[date_key]
             if isinstance(existing_value, list):
                 # Check if URL already exists to avoid duplicates
                 if thread_info["url"] not in existing_value:
-                    merged[date] = existing_value + [thread_info["url"]]
+                    merged[date_key] = existing_value + [thread_info["url"]]
             else:
                 # Convert existing value to list and add new URL
-                merged[date] = [str(existing_value), thread_info["url"]]
+                merged[date_key] = [str(existing_value), thread_info["url"]]
         else:
-            merged[date] = [thread_info["url"]]
+            merged[date_key] = [thread_info["url"]]
 
     return merged
 
@@ -149,15 +149,15 @@ def save_overrides(overrides, filename="data/thread_overrides.yaml"):
             '# Example: 2025-06-25: ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"]\n\n'
         )
 
-        for date in sorted(sorted_overrides.keys()):
-            urls = sorted_overrides[date]
+        for date_key in sorted(sorted_overrides.keys()):
+            urls = sorted_overrides[date_key]
             if urls and isinstance(urls, list) and len(urls) > 0:
-                f.write(f"{date}:\n")
+                f.write(f"{date_key}:\n")
                 for url in urls:
                     f.write(f"  - {url}\n")
                 f.write("\n")
             else:
-                f.write(f"{date}:\n")
+                f.write(f"{date_key}:\n")
                 f.write("  # No threads found for this date\n")
                 f.write("\n")
 
@@ -193,15 +193,15 @@ def main():
 
     # Print summary of new additions
     new_additions = []
-    for date, thread_info in best_matches.items():
-        if date not in existing_overrides:
-            new_additions.append((date, thread_info))
+    for date_key, thread_info in best_matches.items():
+        if date_key not in existing_overrides:
+            new_additions.append((date_key, thread_info))
 
     print("\n=== NEW ADDITIONS TO THREAD_OVERRIDES.YAML ===")
     print(f"Added {len(new_additions)} new dates:")
 
-    for date, thread_info in new_additions:
-        print(f"  {date}: {thread_info['title']}")
+    for date_key, thread_info in new_additions:
+        print(f"  {date_key}: {thread_info['title']}")
         print(f"    URL: {thread_info['url']}")
         print(f"    Author: {thread_info['author']}")
         print(f"    Created: {thread_info['created_utc']}")

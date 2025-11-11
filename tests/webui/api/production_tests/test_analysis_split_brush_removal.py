@@ -41,7 +41,7 @@ class TestAnalysisAPISplitBrushRemoval:
         """Test that analyze_mismatch endpoint returns data without split_brush fields"""
 
         response = client.post(
-            "/api/analyze/mismatch",
+            "/api/analysis/mismatch",
             json={
                 "field": "brush",
                 "months": ["2025-01"],
@@ -102,7 +102,7 @@ class TestAnalysisAPISplitBrushRemoval:
 
         # Test analyze_mismatch endpoint
         response = client.post(
-            "/api/analyze/mismatch",
+            "/api/analysis/mismatch",
             json={
                 "field": "brush",
                 "months": ["2025-01"],
@@ -119,7 +119,7 @@ class TestAnalysisAPISplitBrushRemoval:
         assert "is_split_brush" not in data["mismatch_items"][0]
 
         # Test correct_matches endpoint
-        response = client.get("/api/analyze/correct-matches/brush")
+        response = client.get("/api/analysis/correct-matches/brush")
 
         assert response.status_code == 200
         data = response.json()
@@ -131,7 +131,7 @@ class TestAnalysisAPISplitBrushRemoval:
         """Test that non-brush fields work correctly without split_brush processing"""
 
         response = client.post(
-            "/api/analyze/mismatch",
+            "/api/analysis/mismatch",
             json={
                 "field": "blade",
                 "months": ["2025-01"],
@@ -166,7 +166,7 @@ class TestAnalysisAPISplitBrushRemoval:
         mock_analyze_mismatch.side_effect = Exception("Test error")
 
         response = client.post(
-            "/api/analyze/mismatch",
+            "/api/analysis/mismatch",
             json={
                 "field": "brush",
                 "months": ["2025-01"],
@@ -202,7 +202,7 @@ class TestAnalysisAPISplitBrushRemoval:
             mock_mark.return_value = {"success": True, "message": "Matches marked as correct"}
 
             response = client.post(
-                "/api/analyze/mark-correct",
+                "/api/analysis/mark-correct",
                 json={
                     "field": "brush",
                     "matches": [
@@ -233,7 +233,7 @@ class TestAnalysisAPISplitBrushRemoval:
             mock_remove.return_value = {"success": True, "message": "Matches removed from correct"}
 
             response = client.post(
-                "/api/analyze/remove-correct",
+                "/api/analysis/remove-correct",
                 json={
                     "field": "brush",
                     "matches": [

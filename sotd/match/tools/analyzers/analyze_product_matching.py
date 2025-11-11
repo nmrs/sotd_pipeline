@@ -12,7 +12,8 @@ Usage:
     python tools/analyze_product_matching.py --type blade "product string here"
     python tools/analyze_product_matching.py --type soap "product string here"
     python tools/analyze_product_matching.py --debug --type brush "product string here"
-    python tools/analyze_product_matching.py --bypass-correct-matches --type blade "product string here"
+    python tools/analyze_product_matching.py --bypass-correct-matches
+    --type blade "product string here"
 """
 
 import argparse
@@ -231,7 +232,8 @@ class ProductAnalyzer:
                 matches = []
                 for pattern_info in patterns:
                     if self.product_type in ["razor", "blade"]:
-                        # Razor and blade patterns have (brand, model, format, pattern, compiled, entry) structure
+                        # Razor and blade patterns have (brand, model, format,
+                        # pattern, compiled, entry) structure
                         if len(pattern_info) >= 5:
                             brand, model, fmt, raw_pattern, compiled = pattern_info[:5]
                             if compiled.search(product_string):

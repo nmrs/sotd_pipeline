@@ -1,9 +1,10 @@
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+
 from .utils.fiber_utils import match_fiber
 from .utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
-from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class OtherKnotMatchingStrategy:

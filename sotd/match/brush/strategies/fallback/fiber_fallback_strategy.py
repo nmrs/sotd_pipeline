@@ -8,11 +8,12 @@ strategies fail to match.
 
 from typing import Optional
 
+from sotd.match.types import MatchResult, create_match_result
+
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 from ..utils.fiber_utils import match_fiber
-from sotd.match.types import MatchResult, create_match_result
 
 
 class FiberFallbackStrategy(BaseBrushMatchingStrategy):

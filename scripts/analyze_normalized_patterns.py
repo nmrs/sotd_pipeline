@@ -422,7 +422,10 @@ def create_bucketed_yaml(analysis: Dict[str, Any]) -> Dict[str, Any]:
 def get_parser() -> argparse.ArgumentParser:
     """Get the argument parser for the script."""
     parser = argparse.ArgumentParser(
-        description="Analyze normalized blade patterns to find unhandled cases that should be normalized out"
+        description=(
+            "Analyze normalized blade patterns to find unhandled cases "
+            "that should be normalized out"
+        )
     )
 
     # Add standardized parallel processing arguments

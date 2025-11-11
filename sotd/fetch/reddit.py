@@ -198,7 +198,7 @@ def search_threads(
     # If we hit the limit, use smart pattern detection to find missing threads
     if hit_limit:
         if debug:
-            print(f"[DEBUG] Analyzing thread patterns to identify missing days")
+            print("[DEBUG] Analyzing thread patterns to identify missing days")
 
         # First filter the broad results to only current year/month
         filtered_results = filter_valid_threads(
@@ -206,8 +206,9 @@ def search_threads(
         )
 
         # Analyze filtered results to determine expected threads per day
-        from sotd.utils import parse_thread_date
         from collections import defaultdict
+
+        from sotd.utils import parse_thread_date
 
         # Group filtered threads by day
         threads_by_day = defaultdict(list)
@@ -245,7 +246,8 @@ def search_threads(
                 missing_days.append((day, missing_count))
                 if debug:
                     print(
-                        f"[DEBUG] Day {day}: missing {missing_count} threads (has {current_count}, need {max_threads_per_day})"
+                        f"[DEBUG] Day {day}: missing {missing_count} threads "
+                        f"(has {current_count}, need {max_threads_per_day})"
                     )
 
         # Search for missing threads on specific days

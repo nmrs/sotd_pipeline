@@ -6,13 +6,13 @@ from typing import Any, Optional
 
 from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
-from sotd.match.utils.performance import PerformanceMonitor
 from sotd.match.utils import calculate_match_statistics, format_match_statistics_for_display
+from sotd.match.utils.performance import PerformanceMonitor
 from sotd.utils.filtered_entries import load_filtered_entries
 
 # Load filtered entries at module level for performance
@@ -211,11 +211,11 @@ def match_record(
                         result["blade"] = blade_result
                         if debug:
                             if blade_result.matched:
-                                print(
-                                    f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
-                                )
+                                brand = blade_result.matched.get("brand", "Unknown")
+                                model = blade_result.matched.get("model", "Unknown")
+                                print(f"    ✅ Blade matched: {brand} {model}")
                             else:
-                                print(f"    ❌ Blade no match")
+                                print("    ❌ Blade no match")
                     else:
                         result["blade"] = MatchResult(
                             original=result["blade"]["original"],
@@ -225,7 +225,7 @@ def match_record(
                             pattern=None,
                         )
                         if debug:
-                            print(f"    ❌ Blade no match")
+                            print("    ❌ Blade no match")
             else:
                 # Handle legacy dict format for razor
                 razor_matched = (
@@ -255,22 +255,22 @@ def match_record(
                         result["blade"] = blade_result
                         if debug:
                             if blade_result and blade_result.matched:
-                                print(
-                                    f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
-                                )
+                                brand = blade_result.matched.get("brand", "Unknown")
+                                model = blade_result.matched.get("model", "Unknown")
+                                print(f"    ✅ Blade matched: {brand} {model}")
                             else:
-                                print(f"    ❌ Blade no match")
+                                print("    ❌ Blade no match")
                 else:
                     # No razor context, use basic matching
                     blade_result = blade_matcher.match(normalized_text, result["blade"]["original"])
                     result["blade"] = blade_result
                     if debug:
                         if blade_result and blade_result.matched:
-                            print(
-                                f"    ✅ Blade matched: {blade_result.matched.get('brand', 'Unknown')} {blade_result.matched.get('model', 'Unknown')}"
-                            )
+                            blade_brand = blade_result.matched.get("brand", "Unknown")
+                            blade_model = blade_result.matched.get("model", "Unknown")
+                            print(f"    ✅ Blade matched: {blade_brand} {blade_model}")
                         else:
-                            print(f"    ❌ Blade no match")
+                            print("    ❌ Blade no match")
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result and enable_soap:
@@ -290,17 +290,17 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print(f"    ⏭️  Soap filtered, skipping")
+                print("    ⏭️  Soap filtered, skipping")
         else:
             soap_result = soap_matcher.match(normalized_text, result["soap"]["original"])
             result["soap"] = soap_result
             if debug:
                 if soap_result and soap_result.matched:
-                    print(
-                        f"    ✅ Soap matched: {soap_result.matched.get('brand', 'Unknown')} {soap_result.matched.get('model', 'Unknown')}"
-                    )
+                    soap_brand = soap_result.matched.get("brand", "Unknown")
+                    soap_model = soap_result.matched.get("model", "Unknown")
+                    print(f"    ✅ Soap matched: {soap_brand} {soap_model}")
                 else:
-                    print(f"    ❌ Soap no match")
+                    print("    ❌ Soap no match")
         monitor.record_matcher_timing("soap", time.time() - start_time)
 
     if "brush" in result and enable_brush:
@@ -320,10 +320,10 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print(f"    ⏭️  Brush filtered, skipping")
+                print("    ⏭️  Brush filtered, skipping")
         else:
             if debug:
-                print(f"    🎯 Running brush matcher strategies...")
+                print("    🎯 Running brush matcher strategies...")
             brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
             # Convert MatchResult to dict for consistency
             if brush_result is not None:
@@ -336,11 +336,12 @@ def match_record(
                 }
                 if debug:
                     if brush_result.matched:
-                        print(
-                            f"    ✅ Brush matched: {brush_result.matched.get('brand', 'Unknown')} {brush_result.matched.get('model', 'Unknown')} (strategy: {getattr(brush_result, 'strategy', 'unknown')})"
-                        )
+                        brand = brush_result.matched.get("brand", "Unknown")
+                        model = brush_result.matched.get("model", "Unknown")
+                        strategy = getattr(brush_result, "strategy", "unknown")
+                        print(f"    ✅ Brush matched: {brand} {model} " f"(strategy: {strategy})")
                     else:
-                        print(f"    ❌ Brush no match")
+                        print("    ❌ Brush no match")
             else:
                 result["brush"] = {
                     "original": result["brush"]["original"],
@@ -350,7 +351,7 @@ def match_record(
                     "pattern": None,
                 }
                 if debug:
-                    print(f"    ❌ Brush no match")
+                    print("    ❌ Brush no match")
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
     return result

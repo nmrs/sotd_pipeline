@@ -17,7 +17,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from unittest.mock import Mock
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent.parent.parent.parent
@@ -25,8 +24,8 @@ sys.path.insert(0, str(project_root))
 
 try:
     from sotd.enrich.brush_enricher import BrushEnricher
-    from sotd.match.brush.scoring.engine import ScoringEngine
     from sotd.match.brush.config import BrushScoringConfig
+    from sotd.match.brush.scoring.engine import ScoringEngine
     from sotd.match.brush_matcher import BrushMatcher
 except ImportError:
     print(
@@ -219,7 +218,8 @@ def analyze_brush_matching(
                     _show_modifier_details(strategy_name, brush_string, matched_data)
 
                     if matched_data:
-                        # Only show component details for split strategies that actually have components
+                        # Only show component details for split strategies
+                        # that actually have components
                         if strategy_name in [
                             "automated_split",
                             "full_input_component_matching",
@@ -232,14 +232,14 @@ def analyze_brush_matching(
                             if "handle" in matched_data and matched_data["handle"]:
                                 handle = matched_data["handle"]
                                 handle_score = handle.get("score", 0.0)
-                                print(f"   🖐️  Handle Component")
+                                print("   🖐️  Handle Component")
                                 print(f"        Score: {handle_score:.1f}")
-                                print(f"        Breakdown:")
+                                print("        Breakdown:")
                                 _show_component_modifier_details("handle", brush_string, handle)
 
                                 # Show handle metadata
                                 if handle.get("brand") or handle.get("model"):
-                                    print(f"        Metadata:")
+                                    print("        Metadata:")
                                     if handle.get("brand"):
                                         print(f"        • brand: {handle['brand']}")
                                     if handle.get("model"):
@@ -251,14 +251,14 @@ def analyze_brush_matching(
                             if "knot" in matched_data and matched_data["knot"]:
                                 knot = matched_data["knot"]
                                 knot_score = knot.get("score", 0.0)
-                                print(f"\n   🧶 Knot Component")
+                                print("\n   🧶 Knot Component")
                                 print(f"        Score: {knot_score:.1f}")
-                                print(f"        Breakdown:")
+                                print("        Breakdown:")
                                 _show_component_modifier_details("knot", brush_string, knot)
 
                                 # Show knot metadata
                                 if knot.get("brand") or knot.get("model") or knot.get("fiber"):
-                                    print(f"        Metadata:")
+                                    print("        Metadata:")
                                     if knot.get("brand"):
                                         print(f"        • brand: {knot['brand']}")
                                     if knot.get("model"):
@@ -270,8 +270,8 @@ def analyze_brush_matching(
 
                         # Show split information if this is a split strategy
                         if strategy_name in ["automated_split", "full_input_component_matching"]:
-                            print(f"\n   🔪 Split Information")
-                            print(f"   ──────────────────")
+                            print("\n   🔪 Split Information")
+                            print("   ──────────────────")
                             if "handle" in matched_data and matched_data["handle"]:
                                 handle_text = matched_data["handle"].get("source_text", "unknown")
                                 print(f'   Handle Text: "{handle_text}"')
@@ -286,8 +286,8 @@ def analyze_brush_matching(
                                 )
                         else:
                             # For complete brush strategies, show basic brush information
-                            print(f"\n   🪮 BRUSH INFORMATION")
-                            print(f"   ───────────────────")
+                            print("\n   🪮 BRUSH INFORMATION")
+                            print("   ───────────────────")
                             if "brand" in matched_data and matched_data["brand"]:
                                 print(f"   🏷️  Brand: {matched_data['brand']}")
                             if "model" in matched_data and matched_data["model"]:
@@ -314,7 +314,7 @@ def analyze_brush_matching(
                             strategy_fields.append(("Pattern Used", matched_data["_pattern_used"]))
 
                         if strategy_fields:
-                            print(f"        Strategy Fields:")
+                            print("        Strategy Fields:")
                             for key, value in strategy_fields:
                                 print(f"        • {key}: {value}")
 
@@ -350,7 +350,7 @@ def analyze_brush_matching(
                                 other_fields.append((key, value))
 
                         if other_fields:
-                            print(f"        Other Fields:")
+                            print("        Other Fields:")
                             for key, value in other_fields:
                                 print(f"        • {key.replace('_', ' ').title()}: {value}")
                     else:
@@ -404,18 +404,14 @@ def analyze_brush_matching(
 
                     # Top-level brush info
                     print("       🏷️  TOP-LEVEL")
-                    print(
-                        f"         • Brand: {getattr(best_valid_result, 'matched', {}).get('brand', 'None')}"
-                    )
-                    print(
-                        f"         • Model: {getattr(best_valid_result, 'matched', {}).get('model', 'None')}"
-                    )
-                    print(
-                        f"         • Fiber: {getattr(best_valid_result, 'matched', {}).get('fiber', 'None')}"
-                    )
-                    print(
-                        f"         • Size: {getattr(best_valid_result, 'matched', {}).get('knot_size_mm', 'None')}mm"
-                    )
+                    brand = getattr(best_valid_result, "matched", {}).get("brand", "None")
+                    print(f"         • Brand: {brand}")
+                    model = getattr(best_valid_result, "matched", {}).get("model", "None")
+                    print(f"         • Model: {model}")
+                    fiber = getattr(best_valid_result, "matched", {}).get("fiber", "None")
+                    print(f"         • Fiber: {fiber}")
+                    size = getattr(best_valid_result, "matched", {}).get("knot_size_mm", "None")
+                    print(f"         • Size: {size}mm")
 
                     # Handle component
                     print("       🖐️  HANDLE")
@@ -612,7 +608,7 @@ def _show_simplified_component_modifier_details(
 
     config = BrushScoringConfig()
     if component_type == "knot":
-        print(f"           🧶 Analyzing KNOT component...")
+        print("           🧶 Analyzing KNOT component...")
         # Use actual config values for knot_matching
         knot_config = config.weights.get("strategy_modifiers", {}).get("knot_matching", {})
 
@@ -620,19 +616,19 @@ def _show_simplified_component_modifier_details(
         if component_data.get("fiber"):
             print(f"              fiber_match: +{knot_config.get('fiber_match', 0.0):.1f}")
         else:
-            print(f"              fiber_match: +0.0")
+            print("              fiber_match: +0.0")
 
         # size_match: 5.0
         if component_data.get("knot_size_mm"):
             print(f"              size_match: +{knot_config.get('size_match', 0.0):.1f}")
         else:
-            print(f"              size_match: +0.0")
+            print("              size_match: +0.0")
 
         # brand_match: 5.0
         if component_data.get("brand"):
             print(f"              brand_match: +{knot_config.get('brand_match', 0.0):.1f}")
         else:
-            print(f"              brand_match: +0.0")
+            print("              brand_match: +0.0")
 
         # knot_indicators: 10.0
         knot_indicators = [
@@ -649,18 +645,17 @@ def _show_simplified_component_modifier_details(
         if any(indicator in input_text.lower() for indicator in knot_indicators):
             print(f"              knot_indicators: +{knot_config.get('knot_indicators', 0.0):.1f}")
         else:
-            print(f"              knot_indicators: +0.0")
+            print("              knot_indicators: +0.0")
 
         # priority_score: 5.0
         priority = component_data.get("priority", 0)
         if priority is not None:
-            priority_bonus = max(0, 3 - priority + 1)
             print(f"              priority_score: +{knot_config.get('priority_score', 0.0):.1f}")
         else:
-            print(f"              priority_score: +0.0")
+            print("              priority_score: +0.0")
 
     elif component_type == "handle":
-        print(f"           🖐️  Analyzing HANDLE component...")
+        print("           🖐️  Analyzing HANDLE component...")
         # Use actual config values for handle_matching
         handle_config = config.weights.get("strategy_modifiers", {}).get("handle_matching", {})
 
@@ -668,24 +663,24 @@ def _show_simplified_component_modifier_details(
         if component_data.get("brand"):
             print(f"              brand_match: +{handle_config.get('brand_match', 0.0):.1f}")
         else:
-            print(f"              brand_match: +0.0")
+            print("              brand_match: +0.0")
 
         # Check for handle indicators in text
         handle_indicators = ["wood", "resin", "metal", "turned", "custom", "artisan", "stock"]
         if any(indicator in input_text.lower() for indicator in handle_indicators):
             print(
-                f"              handle_indicators: +{handle_config.get('handle_indicators', 0.0):.1f}"
+                f"              handle_indicators: "
+                f"+{handle_config.get('handle_indicators', 0.0):.1f}"
             )
         else:
-            print(f"              handle_indicators: +0.0")
+            print("              handle_indicators: +0.0")
 
         # priority_score: 0.0 (from config)
         priority = component_data.get("priority", 0)
         if priority is not None:
-            priority_bonus = max(0, 3 - priority + 1)
             print(f"              priority_score: +{handle_config.get('priority_score', 0.0):.1f}")
         else:
-            print(f"              priority_score: +0.0")
+            print("              priority_score: +0.0")
 
 
 def _get_modifier_weights_for_strategy(strategy_name: str) -> dict:

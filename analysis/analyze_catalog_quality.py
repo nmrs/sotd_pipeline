@@ -334,17 +334,28 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
 ## Executive Summary
 
 ### Quality Distribution
-- **Complete Entries** (4+ quality fields): {len(completeness["quality_tiers"]["complete"]):,} entries
-- **Substantial Entries** (3 quality fields): {len(completeness["quality_tiers"]["substantial"]):,} entries  
-- **Moderate Entries** (2 quality fields): {len(completeness["quality_tiers"]["moderate"]):,} entries
+- **Complete Entries** (4+ quality fields): 
+  {len(completeness["quality_tiers"]["complete"]):,} entries
+- **Substantial Entries** (3 quality fields): 
+  {len(completeness["quality_tiers"]["substantial"]):,} entries  
+- **Moderate Entries** (2 quality fields): 
+  {len(completeness["quality_tiers"]["moderate"]):,} entries
 - **Basic Entries** (1 quality field): {len(completeness["quality_tiers"]["basic"]):,} entries
 - **Minimal Entries** (0 quality fields): {len(completeness["quality_tiers"]["minimal"]):,} entries
 
 ### Coverage Metrics
-- **Coverage Rate by Volume**: {coverage["coverage_metrics"]["coverage_rate_by_volume"] * 100:.1f}% of matches have catalog entries
-- **Coverage Rate by Brands**: {coverage["coverage_metrics"]["coverage_rate_by_brands"] * 100:.1f}% of matched brands are cataloged
-- **Missing Brands**: {coverage["coverage_metrics"]["missing_brands_count"]:,} high-volume brands not in catalog
-- **Unused Entries**: {coverage["coverage_metrics"]["unused_entries_count"]:,} catalog brands not seen in matches
+- **Coverage Rate by Volume**: 
+  {coverage["coverage_metrics"]["coverage_rate_by_volume"] * 100:.1f}% of 
+  matches have catalog entries
+- **Coverage Rate by Brands**: 
+  {coverage["coverage_metrics"]["coverage_rate_by_brands"] * 100:.1f}% of 
+  matched brands are cataloged
+- **Missing Brands**: 
+  {coverage["coverage_metrics"]["missing_brands_count"]:,} high-volume brands 
+  not in catalog
+- **Unused Entries**: 
+  {coverage["coverage_metrics"]["unused_entries_count"]:,} catalog brands not 
+  seen in matches
 
 ## Detailed Completeness Analysis
 
@@ -352,11 +363,26 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
 
 | Quality Tier | Count | Percentage | Definition |
 |--------------|-------|------------|------------|
-| Complete | {len(completeness["quality_tiers"]["complete"]):,} | {(len(completeness["quality_tiers"]["complete"]) / (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 4+ quality fields (knot_fiber, knot_size_mm, handle_material, loft_mm) |
-| Substantial | {len(completeness["quality_tiers"]["substantial"]):,} | {(len(completeness["quality_tiers"]["substantial"]) / (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 3 quality fields |
-| Moderate | {len(completeness["quality_tiers"]["moderate"]):,} | {(len(completeness["quality_tiers"]["moderate"]) / (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 2 quality fields |
-| Basic | {len(completeness["quality_tiers"]["basic"]):,} | {(len(completeness["quality_tiers"]["basic"]) / (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 1 quality field |
-| Minimal | {len(completeness["quality_tiers"]["minimal"]):,} | {(len(completeness["quality_tiers"]["minimal"]) / (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 0 quality fields (brand/model only) |
+| Complete | {len(completeness["quality_tiers"]["complete"]):,} | 
+  {(len(completeness["quality_tiers"]["complete"]) / 
+  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  4+ quality fields (knot_fiber, knot_size_mm, handle_material, loft_mm) |
+| Substantial | {len(completeness["quality_tiers"]["substantial"]):,} | 
+  {(len(completeness["quality_tiers"]["substantial"]) / 
+  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  3 quality fields |
+| Moderate | {len(completeness["quality_tiers"]["moderate"]):,} | 
+  {(len(completeness["quality_tiers"]["moderate"]) / 
+  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  2 quality fields |
+| Basic | {len(completeness["quality_tiers"]["basic"]):,} | 
+  {(len(completeness["quality_tiers"]["basic"]) / 
+  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  1 quality field |
+| Minimal | {len(completeness["quality_tiers"]["minimal"]):,} | 
+  {(len(completeness["quality_tiers"]["minimal"]) / 
+  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  0 quality fields (brand/model only) |
 
 ### Brand Quality Scores
 
@@ -389,7 +415,11 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
             for f in ["knot_fiber", "knot_size_mm", "handle_material", "loft_mm"]
             if entry["data"].get(f)
         ]
-        report += f"- **{entry['brand']} {entry['model']}**: {entry['quality_field_count']} fields ({', '.join(fields)})\n"
+        fields_str = ", ".join(fields)
+        report += (
+            f"- **{entry['brand']} {entry['model']}**: "
+            f"{entry['quality_field_count']} fields ({fields_str})\n"
+        )
 
     report += """
 #### Typical Quality Entries
@@ -401,7 +431,11 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
             for f in ["knot_fiber", "knot_size_mm", "handle_material", "loft_mm"]
             if entry["data"].get(f)
         ]
-        report += f"- **{entry['brand']} {entry['model']}**: {entry['quality_field_count']} fields ({', '.join(fields)})\n"
+        fields_str = ", ".join(fields)
+        report += (
+            f"- **{entry['brand']} {entry['model']}**: "
+            f"{entry['quality_field_count']} fields ({fields_str})\n"
+        )
 
     report += """
 ## Coverage Gap Analysis
@@ -436,7 +470,10 @@ These brands have catalog entries but low match volume:
 #### High Priority Additions (Missing High-Volume Brands)
 """
     for brand, count in coverage["high_volume_uncataloged"][:5]:
-        report += f"1. **{brand}**: {count:,} matches - should be added to catalog with full specifications\n"
+        report += (
+            f"1. **{brand}**: {count:,} matches - should be added to catalog "
+            f"with full specifications\n"
+        )
 
     report += """
 #### Medium Priority Reviews (Low-Volume Cataloged)
@@ -476,7 +513,8 @@ These brands have catalog entries but low match volume:
         ]
         avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
 
-        report += f"| {authority_type.replace('_', ' ').title()} | {brand_count} | {model_count} | {avg_quality:.1f} |\n"
+        authority_title = authority_type.replace("_", " ").title()
+        report += f"| {authority_title} | {brand_count} | {model_count} | " f"{avg_quality:.1f} |\n"
 
     report += """
 ### Manufacturer Analysis
@@ -637,9 +675,8 @@ def main():
 
     print("\nSummary:")
     print(f"- Total catalog entries: {total_entries:,}")
-    print(
-        f"- Complete entries: {complete_entries:,} ({(complete_entries / total_entries) * 100:.1f}%)"
-    )
+    complete_pct = (complete_entries / total_entries) * 100
+    print(f"- Complete entries: {complete_entries:,} ({complete_pct:.1f}%)")
     print(f"- Coverage rate: {coverage_rate * 100:.1f}%")
     print(f"- Missing high-volume brands: {missing_brands:,}")
     print(f"- Authority types: {len(authority_analysis['authority_distribution'])}")

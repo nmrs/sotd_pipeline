@@ -2,9 +2,10 @@
 """Override manager for extract phase field corrections."""
 
 import logging
-import yaml
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -76,21 +77,24 @@ class OverrideManager:
                     # Validate override value
                     if not isinstance(value, str):
                         raise ValueError(
-                            f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
-                            f"must be a string, got: {type(value).__name__}"
+                            f"Override value for field '{field}' in comment "
+                            f"'{comment_id}' month '{month}' must be a string, "
+                            f"got: {type(value).__name__}"
                         )
 
                     if not value.strip():
                         raise ValueError(
-                            f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
-                            f"cannot be empty or whitespace-only"
+                            f"Override value for field '{field}' in comment "
+                            f"'{comment_id}' month '{month}' cannot be empty "
+                            f"or whitespace-only"
                         )
 
                     # Check for reasonable length (prevent extremely long values)
                     if len(value.strip()) > 200:
                         raise ValueError(
-                            f"Override value for field '{field}' in comment '{comment_id}' month '{month}' "
-                            f"is too long ({len(value.strip())} characters). "
+                            f"Override value for field '{field}' in comment "
+                            f"'{comment_id}' month '{month}' is too long "
+                            f"({len(value.strip())} characters). "
                             f"Maximum length: 200 characters"
                         )
 
@@ -98,8 +102,10 @@ class OverrideManager:
                     override_key = f"{month}:{comment_id}:{field}"
                     if override_key in duplicate_overrides:
                         raise ValueError(
-                            f"Duplicate override for field '{field}' in comment '{comment_id}' month '{month}'. "
-                            f"Each comment+field combination can only have one override."
+                            f"Duplicate override for field '{field}' in "
+                            f"comment '{comment_id}' month '{month}'. "
+                            f"Each comment+field combination can only have "
+                            f"one override."
                         )
                     duplicate_overrides.append(override_key)
 
@@ -152,7 +158,8 @@ class OverrideManager:
         if missing_ids:
             raise ValueError(
                 f"Override file references non-existent comment IDs: {', '.join(missing_ids)}. "
-                f"This usually means the override file is for a different dataset or the data has changed."
+                f"This usually means the override file is for a different "
+                f"dataset or the data has changed."
             )
 
     def apply_override(

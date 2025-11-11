@@ -291,9 +291,13 @@ def generate_quality_indicators_report(analysis_results: Dict[str, Any]) -> str:
 ## Executive Summary
 
 Quality indicators have been identified across three dimensions:
-1. **Catalog Completeness**: {catalog_analysis["complete_entries"]:,} complete entries ({(catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100:.1f}%)
-2. **Pattern Specificity**: {pattern_analysis["pattern_categories"]["high_specificity"]} high-specificity patterns identified
-3. **Brand Authority**: {brand_analysis["coverage_analysis"]["manufacturer_brands_count"]} manufacturer brands, {brand_analysis["coverage_analysis"]["catalog_coverage_rate"] * 100:.1f}% catalog coverage
+1. **Catalog Completeness**: {catalog_analysis["complete_entries"]:,} complete entries (
+   {(catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100:.1f}%)
+2. **Pattern Specificity**: {pattern_analysis["pattern_categories"]["high_specificity"]} 
+   high-specificity patterns identified
+3. **Brand Authority**: {brand_analysis["coverage_analysis"]["manufacturer_brands_count"]} 
+   manufacturer brands, {brand_analysis["coverage_analysis"]["catalog_coverage_rate"] * 100:.1f}% 
+   catalog coverage
 
 ## Catalog Completeness Analysis
 
@@ -301,9 +305,15 @@ Quality indicators have been identified across three dimensions:
 
 | Quality Level | Count | Percentage | Definition |
 |---------------|-------|------------|------------|
-| Complete | {catalog_analysis["complete_entries"]:,} | {(catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | Brand, model + 3+ quality fields |
-| Partial | {catalog_analysis["partial_entries"]:,} | {(catalog_analysis["partial_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | Brand, model + 1-2 quality fields |
-| Minimal | {catalog_analysis["minimal_entries"]:,} | {(catalog_analysis["minimal_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | Brand, model only |
+| Complete | {catalog_analysis["complete_entries"]:,} | 
+  {(catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | 
+  Brand, model + 3+ quality fields |
+| Partial | {catalog_analysis["partial_entries"]:,} | 
+  {(catalog_analysis["partial_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | 
+  Brand, model + 1-2 quality fields |
+| Minimal | {catalog_analysis["minimal_entries"]:,} | 
+  {(catalog_analysis["minimal_entries"] / catalog_analysis["total_entries"]) * 100:.1f}% | 
+  Brand, model only |
 
 ### Field Coverage Analysis
 
@@ -323,13 +333,19 @@ Quality indicators have been identified across three dimensions:
 #### Complete Entries (High Quality)
 """
     for example in catalog_analysis["quality_examples"]["complete"]:
-        report += f"- **{example['brand']} {example['model']}**: {example['quality_field_count']} quality fields\n"
+        report += (
+            f"- **{example['brand']} {example['model']}**: "
+            f"{example['quality_field_count']} quality fields\n"
+        )
 
     report += """
 #### Partial Entries (Medium Quality)  
 """
     for example in catalog_analysis["quality_examples"]["partial"]:
-        report += f"- **{example['brand']} {example['model']}**: {example['quality_field_count']} quality fields\n"
+        report += (
+            f"- **{example['brand']} {example['model']}**: "
+            f"{example['quality_field_count']} quality fields\n"
+        )
 
     report += """
 ## Pattern Specificity Analysis
@@ -358,25 +374,34 @@ Quality indicators have been identified across three dimensions:
     report += f"""
 ### Confidence Indicators Analysis
 
-#### High Confidence Matches ({len(pattern_analysis["confidence_indicators"]["high_confidence"])} total)
+#### High Confidence Matches (
+    {len(pattern_analysis["confidence_indicators"]["high_confidence"])} total)
 """
 
     # Show top 5 high confidence examples
     for example in pattern_analysis["confidence_indicators"]["high_confidence"][:5]:
         factors = ", ".join(example["confidence_factors"])
-        report += f"- **{example['brand']}** ({example['strategy']}): Score {example['confidence_score']} - {factors}\n"
+        report += (
+            f"- **{example['brand']}** ({example['strategy']}): "
+            f"Score {example['confidence_score']} - {factors}\n"
+        )
 
     report += f"""
-#### Medium Confidence Matches ({len(pattern_analysis["confidence_indicators"]["medium_confidence"])} total)
+ #### Medium Confidence Matches (
+    {len(pattern_analysis["confidence_indicators"]["medium_confidence"])} total)
 """
 
     # Show top 5 medium confidence examples
     for example in pattern_analysis["confidence_indicators"]["medium_confidence"][:5]:
         factors = ", ".join(example["confidence_factors"])
-        report += f"- **{example['brand']}** ({example['strategy']}): Score {example['confidence_score']} - {factors}\n"
+        report += (
+            f"- **{example['brand']}** ({example['strategy']}): "
+            f"Score {example['confidence_score']} - {factors}\n"
+        )
 
     report += f"""
-#### Low Confidence Matches ({len(pattern_analysis["confidence_indicators"]["low_confidence"])} total)
+ #### Low Confidence Matches (
+    {len(pattern_analysis["confidence_indicators"]["low_confidence"])} total)
 """
 
     # Show top 5 low confidence examples
@@ -386,7 +411,10 @@ Quality indicators have been identified across three dimensions:
             if example["confidence_factors"]
             else "No confidence factors"
         )
-        report += f"- **{example['brand'] or 'Unknown'}** ({example['strategy']}): Score {example['confidence_score']} - {factors}\n"
+        report += (
+            f"- **{example['brand'] or 'Unknown'}** ({example['strategy']}): "
+            f"Score {example['confidence_score']} - {factors}\n"
+        )
 
     report += f"""
 ## Brand Authority Analysis
@@ -395,15 +423,27 @@ Quality indicators have been identified across three dimensions:
 
 | Authority Type | Count | Match Volume | Definition |
 |----------------|-------|--------------|------------|
-| Manufacturer | {brand_analysis["coverage_analysis"]["manufacturer_brands_count"]} | {sum(brand_analysis["match_brands"][b] for b in brand_analysis["manufacturer_brands"]):,} | Established manufacturers |
-| Cataloged Artisan | {brand_analysis["coverage_analysis"]["cataloged_artisan_count"]} | {sum(brand_analysis["match_brands"][b] for b, c in brand_analysis["authority_classification"].items() if c == "cataloged_artisan"):,} | Artisans with catalog entries |
-| Uncataloged Artisan | {brand_analysis["coverage_analysis"]["uncataloged_artisan_count"]} | {sum(brand_analysis["match_brands"][b] for b in brand_analysis["artisan_brands"]):,} | Artisans without catalog entries |
+| Manufacturer | 
+  {brand_analysis["coverage_analysis"]["manufacturer_brands_count"]} | 
+  {sum(brand_analysis["match_brands"][b] for b in brand_analysis["manufacturer_brands"]):,} | 
+  Established manufacturers |
+| Cataloged Artisan | 
+  {brand_analysis["coverage_analysis"]["cataloged_artisan_count"]} | 
+  {sum(brand_analysis["match_brands"][b] for b, c in 
+  brand_analysis["authority_classification"].items() 
+  if c == "cataloged_artisan"):,} | 
+  Artisans with catalog entries |
+| Uncataloged Artisan | 
+  {brand_analysis["coverage_analysis"]["uncataloged_artisan_count"]} | 
+  {sum(brand_analysis["match_brands"][b] for b in brand_analysis["artisan_brands"]):,} | 
+  Artisans without catalog entries |
 
 ### Coverage Analysis
 
 - **Total Brands in Catalog**: {brand_analysis["coverage_analysis"]["total_catalog_brands"]:,}
 - **Total Brands in Matches**: {brand_analysis["coverage_analysis"]["total_match_brands"]:,}
-- **Catalog Coverage Rate**: {brand_analysis["coverage_analysis"]["catalog_coverage_rate"] * 100:.1f}%
+ - **Catalog Coverage Rate**: 
+   {brand_analysis["coverage_analysis"]["catalog_coverage_rate"] * 100:.1f}%
 
 ### Top Manufacturer Brands by Volume
 """
@@ -553,18 +593,14 @@ def main():
     # Print summary
     print("\nSummary:")
     print(f"- Catalog entries: {catalog_analysis['total_entries']:,}")
-    print(
-        f"- Complete entries: {catalog_analysis['complete_entries']:,} ({(catalog_analysis['complete_entries'] / catalog_analysis['total_entries']) * 100:.1f}%)"
-    )
-    print(
-        f"- High specificity patterns: {pattern_analysis['pattern_categories']['high_specificity']:,}"
-    )
-    print(
-        f"- Manufacturer brands: {brand_analysis['coverage_analysis']['manufacturer_brands_count']:,}"
-    )
-    print(
-        f"- Catalog coverage: {brand_analysis['coverage_analysis']['catalog_coverage_rate'] * 100:.1f}%"
-    )
+    complete_pct = (catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100
+    print(f"- Complete entries: {catalog_analysis['complete_entries']:,} " f"({complete_pct:.1f}%)")
+    high_spec = pattern_analysis["pattern_categories"]["high_specificity"]
+    print(f"- High specificity patterns: {high_spec:,}")
+    mfg_count = brand_analysis["coverage_analysis"]["manufacturer_brands_count"]
+    print(f"- Manufacturer brands: {mfg_count:,}")
+    coverage_rate = brand_analysis["coverage_analysis"]["catalog_coverage_rate"] * 100
+    print(f"- Catalog coverage: {coverage_rate:.1f}%")
 
 
 if __name__ == "__main__":

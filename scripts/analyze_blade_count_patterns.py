@@ -139,7 +139,8 @@ def generate_markdown_report(
     report.append("# Blade Count Patterns Analysis")
     report.append("")
     report.append(
-        f"**Analysis Date**: {Path('analysis/20250815-blade-use-count-analysis.txt').stat().st_mtime}"
+        f"**Analysis Date**: "
+        f"{Path('analysis/20250815-blade-use-count-analysis.txt').stat().st_mtime}"
     )
     report.append("")
     report.append("## Overview")

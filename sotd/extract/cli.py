@@ -6,6 +6,7 @@ using the BaseCLIParser to eliminate code duplication.
 """
 
 from pathlib import Path
+
 from sotd.cli_utils.base_parser import BaseCLIParser
 
 

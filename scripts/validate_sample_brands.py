@@ -6,8 +6,8 @@ This will help verify that our sample_brands calculation is correct.
 
 import json
 import sys
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 
 def analyze_sample_brands(month: str) -> dict:

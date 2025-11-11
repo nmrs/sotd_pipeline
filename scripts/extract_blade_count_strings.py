@@ -171,7 +171,10 @@ def categorize_known_patterns(strings: List[str]) -> Dict[str, Dict[str, List[st
     }
 
     # Emoji pattern for trailing characters
-    emoji_pattern = r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000027BF]"
+    emoji_pattern = (
+        r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF"
+        r"\U0001F1E0-\U0001F1FF\U00002600-\U000027BF]"
+    )
 
     # Simple pattern for basic numeric usage counts
     simple_pattern = (
