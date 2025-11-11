@@ -46,7 +46,7 @@ class TestCentralizedErrorHandling:
         # Test invalid request to brush-splits endpoint
         # Missing required months parameter should return 422
         try:
-            response = client.get("/api/brush-splits/load")
+            response = client.get("/api/brushes/splits/load")
             # If we get here, the response should be 422
             assert response.status_code == 422
         except Exception as e:
@@ -203,7 +203,7 @@ class TestCentralizedErrorHandling:
         # Test brush-splits endpoint error handling
         # Missing required months parameter
         try:
-            response = client.get("/api/brush-splits/load")
+            response = client.get("/api/brushes/splits/load")
             assert response.status_code == 422
             data = response.json()
             assert "detail" in data
@@ -237,7 +237,7 @@ class TestCentralizedErrorHandling:
         # Test with invalid JSON
         try:
             response = client.post(
-                "/api/brush-splits/save-split",
+                "/api/brushes/splits/save-split",
                 content=b"invalid json",
                 headers={"Content-Type": "application/json"},
             )

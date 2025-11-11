@@ -18,8 +18,9 @@ class TestSoapAnalyzerAPI:
     def test_neighbor_similarity_no_months(self):
         """Test neighbor similarity analysis with no months specified."""
         try:
-            response = client.get("/api/soap-analyzer/neighbor-similarity")
+            response = client.get("/api/soaps/neighbor-similarity")
             # FastAPI returns 422 for validation errors when required query parameters are missing
+            # mode parameter is required (Query(...))
             assert response.status_code == 422
         except Exception as e:
             # Handle FastAPI/Pydantic serialization issue with PydanticUndefined
@@ -36,7 +37,7 @@ class TestSoapAnalyzerAPI:
 
     def test_neighbor_similarity_empty_months(self):
         """Test neighbor similarity analysis with empty months list."""
-        response = client.get("/api/soap-analyzer/neighbor-similarity?months=&mode=brands")
+        response = client.get("/api/soaps/neighbor-similarity?months=&mode=brands")
         # FastAPI treats empty string as valid, so we get 200 with empty results
         assert response.status_code == 200
         data = response.json()
@@ -45,7 +46,7 @@ class TestSoapAnalyzerAPI:
 
     def test_neighbor_similarity_invalid_mode(self):
         """Test neighbor similarity analysis with invalid mode parameter."""
-        response = client.get("/api/soap-analyzer/neighbor-similarity?months=2025-01&mode=invalid")
+        response = client.get("/api/soaps/neighbor-similarity?months=2025-01&mode=invalid")
         assert response.status_code == 400
         assert "Invalid mode" in response.json()["detail"]
 
@@ -107,7 +108,7 @@ class TestSoapAnalyzerAPI:
 
         try:
             response = client.get(
-                "/api/soap-analyzer/neighbor-similarity"
+                "/api/soaps/neighbor-similarity"
                 "?months=2025-01&mode=brands&similarity_threshold=0.3"
             )
         finally:
@@ -172,7 +173,7 @@ class TestSoapAnalyzerAPI:
 
         try:
             response = client.get(
-                "/api/soap-analyzer/neighbor-similarity?months=2025-01&mode=brand_scent"
+                "/api/soaps/neighbor-similarity?months=2025-01&mode=brand_scent"
             )
         finally:
             # Restore original environment
@@ -247,7 +248,7 @@ class TestSoapAnalyzerAPI:
 
         try:
             response = client.get(
-                "/api/soap-analyzer/neighbor-similarity"
+                "/api/soaps/neighbor-similarity"
                 "?months=2025-01&mode=scents&similarity_threshold=0.3"
             )
         finally:
@@ -314,7 +315,7 @@ class TestSoapAnalyzerAPI:
             # Mock the file opening to return our test data
             with patch("builtins.open", return_value=open(temp_file_path, "r")):
                 response = client.get(
-                    "/api/soap-analyzer/neighbor-similarity?months=2025-01&mode=brands&limit=2"
+                    "/api/soaps/neighbor-similarity?months=2025-01&mode=brands&limit=2"
                 )
 
                 assert response.status_code == 200
@@ -355,7 +356,7 @@ class TestSoapAnalyzerAPI:
             # Mock the file opening to return our test data
             with patch("builtins.open", return_value=open(temp_file_path, "r")):
                 response = client.get(
-                    "/api/soap-analyzer/neighbor-similarity?months=2025-01&mode=brands"
+                    "/api/soaps/neighbor-similarity?months=2025-01&mode=brands"
                 )
 
                 assert response.status_code == 200
@@ -416,7 +417,7 @@ class TestSoapAnalyzerAPI:
                 mock_open.side_effect = [open(temp_file_path_1, "r"), open(temp_file_path_2, "r")]
 
                 response = client.get(
-                    "/api/soap-analyzer/neighbor-similarity?months=2025-01,2025-02&mode=brands"
+                    "/api/soaps/neighbor-similarity?months=2025-01,2025-02&mode=brands"
                 )
 
                 assert response.status_code == 200

@@ -18,7 +18,7 @@ class TestBrushSplitsAPI:
     def test_load_brush_splits_no_months(self):
         """Test loading brush splits with no months specified."""
         try:
-            response = client.get("/api/brush-splits/load")
+            response = client.get("/api/brushes/splits/load")
             # FastAPI returns 422 for validation errors when required query parameters are missing
             assert response.status_code == 422
         except Exception as e:
@@ -36,7 +36,7 @@ class TestBrushSplitsAPI:
 
     def test_load_brush_splits_empty_months(self):
         """Test loading brush splits with empty months list."""
-        response = client.get("/api/brush-splits/load?months=")
+        response = client.get("/api/brushes/splits/load?months=")
         # FastAPI treats empty string as valid, so we get 200 with empty results
         assert response.status_code == 200
         data = response.json()
@@ -81,7 +81,7 @@ class TestBrushSplitsAPI:
         try:
             # Mock the file opening to return our test data
             with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get("/api/brush-splits/load?months=2025-01")
+                response = client.get("/api/brushes/splits/load?months=2025-01")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -111,7 +111,7 @@ class TestBrushSplitsAPI:
         """Test loading brush splits when file doesn't exist."""
         mock_exists.return_value = False
 
-        response = client.get("/api/brush-splits/load?months=2025-01")
+        response = client.get("/api/brushes/splits/load?months=2025-01")
 
         assert response.status_code == 200
         data = response.json()
@@ -132,7 +132,7 @@ class TestBrushSplitsAPI:
         mock_file.close()
 
         with patch("builtins.open", return_value=open(mock_file.name, "r")):
-            response = client.get("/api/brush-splits/load?months=2025-01")
+            response = client.get("/api/brushes/splits/load?months=2025-01")
 
             assert response.status_code == 200
             data = response.json()
@@ -146,7 +146,7 @@ class TestBrushSplitsAPI:
 
     def test_load_yaml_endpoint(self):
         """Test loading existing validated splits from YAML."""
-        response = client.get("/api/brush-splits/yaml")
+        response = client.get("/api/brushes/splits/yaml")
 
         assert response.status_code == 200
         data = response.json()
@@ -162,13 +162,13 @@ class TestBrushSplitsAPI:
 
     def test_save_splits_invalid_data(self):
         """Test saving splits with invalid data."""
-        response = client.post("/api/brush-splits/save", json={})
+        response = client.post("/api/brushes/splits/save", json={})
 
         assert response.status_code == 422  # Validation error for missing brush_splits
 
     def test_save_splits_missing_brush_splits(self):
         """Test saving splits with missing brush_splits field."""
-        response = client.post("/api/brush-splits/save", json={"other_field": "value"})
+        response = client.post("/api/brushes/splits/save", json={"other_field": "value"})
 
         assert response.status_code == 422  # Validation error for missing brush_splits
 
@@ -191,7 +191,7 @@ class TestBrushSplitsAPI:
             ]
         }
 
-        response = client.post("/api/brush-splits/save", json=test_data)
+        response = client.post("/api/brushes/splits/save", json=test_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -219,14 +219,14 @@ class TestBrushSplitsAPI:
             ]
         }
 
-        response = client.post("/api/brush-splits/save", json=test_data)
+        response = client.post("/api/brushes/splits/save", json=test_data)
 
         assert response.status_code == 500
         assert "Failed to save splits" in response.json()["detail"]
 
     def test_get_statistics(self):
         """Test getting validation statistics."""
-        response = client.get("/api/brush-splits/statistics")
+        response = client.get("/api/brushes/splits/statistics")
 
         assert response.status_code == 200
         data = response.json()
@@ -289,7 +289,7 @@ class TestBrushSplitsAPI:
     def test_api_response_models(self):
         """Test that API responses conform to Pydantic models."""
         # Test load endpoint response model
-        response = client.get("/api/brush-splits/load?months=2025-01")
+        response = client.get("/api/brushes/splits/load?months=2025-01")
         assert response.status_code == 200
         data = response.json()
 
@@ -300,7 +300,7 @@ class TestBrushSplitsAPI:
         assert isinstance(data["statistics"], dict)
 
         # Test YAML endpoint response model
-        response = client.get("/api/brush-splits/yaml")
+        response = client.get("/api/brushes/splits/yaml")
         assert response.status_code == 200
         data = response.json()
 
@@ -310,7 +310,7 @@ class TestBrushSplitsAPI:
         assert isinstance(data["file_info"], dict)
 
         # Test statistics endpoint response model
-        response = client.get("/api/brush-splits/statistics")
+        response = client.get("/api/brushes/splits/statistics")
         assert response.status_code == 200
         data = response.json()
 
@@ -324,22 +324,22 @@ class TestBrushSplitsAPI:
     def test_error_handling(self):
         """Test error handling for various failure scenarios."""
         # Test with invalid month format
-        response = client.get("/api/brush-splits/load?months=invalid-month")
+        response = client.get("/api/brushes/splits/load?months=invalid-month")
         assert response.status_code == 200  # Should handle gracefully
 
         # Test with non-existent month
-        response = client.get("/api/brush-splits/load?months=9999-99")
+        response = client.get("/api/brushes/splits/load?months=9999-99")
         assert response.status_code == 200  # Should handle gracefully
 
         # Test save with invalid data structure
-        response = client.post("/api/brush-splits/save", json={"invalid": "data"})
+        response = client.post("/api/brushes/splits/save", json={"invalid": "data"})
         assert response.status_code == 422  # Validation error
 
     def test_split_type_breakdown(self):
         """Test that split type breakdown is calculated correctly."""
         # This would be tested through the statistics endpoint
         # The split type breakdown is calculated in the statistics endpoint
-        response = client.get("/api/brush-splits/statistics")
+        response = client.get("/api/brushes/splits/statistics")
         assert response.status_code == 200
         data = response.json()
 

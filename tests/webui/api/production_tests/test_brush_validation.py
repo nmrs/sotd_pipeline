@@ -33,7 +33,7 @@ class TestBrushValidationAPI:
     def test_get_brush_validation_data_scoring_system_works(self):
         """Test getting brush validation data for scoring system works correctly."""
         # The API supports 'scoring' system
-        response = self.client.get("/api/brush-validation/data/2025-08/scoring")
+        response = self.client.get("/api/brushes/validation/data/2025-08/scoring")
 
         # Should get 200 OK for supported system
         assert response.status_code == 200
@@ -85,7 +85,7 @@ class TestBrushValidationAPI:
                 ]
             }
 
-            response = self.client.get("/api/brush-validation/data/2025-08/scoring")
+            response = self.client.get("/api/brushes/validation/data/2025-08/scoring")
 
             assert response.status_code == 200
             data = response.json()
@@ -109,7 +109,7 @@ class TestBrushValidationAPI:
                 "validation_rate": 0.35,
             }
 
-            response = self.client.get("/api/brush-validation/statistics/2025-08")
+            response = self.client.get("/api/brushes/validation/statistics/2025-08")
 
             assert response.status_code == 200
             data = response.json()
@@ -139,7 +139,7 @@ class TestBrushValidationAPI:
             mock_cli.load_brush_data_for_input_text.return_value = {"brush": "data"}
             mock_cli.user_actions_manager.record_validation_with_data = Mock()
 
-            response = self.client.post("/api/brush-validation/action", json=validation_data)
+            response = self.client.post("/api/brushes/validation/action", json=validation_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -165,7 +165,7 @@ class TestBrushValidationAPI:
             mock_cli.load_brush_data_for_input_text.return_value = {"brush": "data"}
             mock_cli.user_actions_manager.record_override_with_data = Mock()
 
-            response = self.client.post("/api/brush-validation/action", json=override_data)
+            response = self.client.post("/api/brushes/validation/action", json=override_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -176,7 +176,7 @@ class TestBrushValidationAPI:
 
     def test_invalid_system_name(self):
         """Test error handling for invalid system name."""
-        response = self.client.get("/api/brush-validation/data/2025-08/invalid")
+        response = self.client.get("/api/brushes/validation/data/2025-08/invalid")
 
         assert response.status_code == 422  # Validation error
         data = response.json()
@@ -184,7 +184,7 @@ class TestBrushValidationAPI:
 
     def test_invalid_month_format(self):
         """Test error handling for invalid month format."""
-        response = self.client.get("/api/brush-validation/data/invalid-month/scoring")
+        response = self.client.get("/api/brushes/validation/data/invalid-month/scoring")
 
         assert response.status_code == 400
         data = response.json()
@@ -198,7 +198,7 @@ class TestBrushValidationAPI:
             mock_cli.load_month_data.return_value = []
             mock_cli.sort_entries.return_value = []
 
-            response = self.client.get("/api/brush-validation/data/2025-08/scoring")
+            response = self.client.get("/api/brushes/validation/data/2025-08/scoring")
 
             assert response.status_code == 200
             data = response.json()
@@ -219,7 +219,7 @@ class TestBrushValidationAPI:
             ]
 
             response = self.client.get(
-                "/api/brush-validation/data/2025-08/scoring?sort_by=ambiguity"
+                "/api/brushes/validation/data/2025-08/scoring?sort_by=ambiguity"
             )
 
             assert response.status_code == 200
@@ -237,7 +237,7 @@ class TestBrushValidationAPI:
             mock_cli.sort_entries.return_value = entries
 
             response = self.client.get(
-                "/api/brush-validation/data/2025-08/scoring?page=1&page_size=20"
+                "/api/brushes/validation/data/2025-08/scoring?page=1&page_size=20"
             )
 
             assert response.status_code == 200
@@ -256,7 +256,7 @@ class TestBrushValidationAPI:
             # Missing required fields
         }
 
-        response = self.client.post("/api/brush-validation/action", json=invalid_data)
+        response = self.client.post("/api/brushes/validation/action", json=invalid_data)
 
         assert response.status_code == 422  # Validation error
 
@@ -268,7 +268,7 @@ class TestBrushValidationAPI:
             mock_months_obj.months = ["2025-07", "2025-08", "2025-09"]
             mock_months.return_value = mock_months_obj
 
-            response = self.client.get("/api/brush-validation/months")
+            response = self.client.get("/api/brushes/validation/months")
 
             assert response.status_code == 200
             data = response.json()
@@ -340,7 +340,7 @@ class TestBrushValidationAPI:
 
             # Make the API call
             response = self.client.post(
-                "/api/brush-validation/action", json=dual_component_validation_data
+                "/api/brushes/validation/action", json=dual_component_validation_data
             )
 
             # Log the response for debugging
@@ -435,9 +435,12 @@ class TestBrushValidationAPI:
         original_save = updater.save_correct_matches
         saved_data = None
 
-        def mock_save(data):
+        def mock_save(data, field_type=None):
             nonlocal saved_data
-            saved_data = data
+            # Merge data into saved_data to track all saves
+            if saved_data is None:
+                saved_data = {}
+            saved_data.update(data)
             # Don't actually save to file during test
 
         updater.save_correct_matches = mock_save

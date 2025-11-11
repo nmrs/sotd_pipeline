@@ -118,7 +118,7 @@ class TestDataIsolationStrategy:
             client = TestClient(app)
 
             # Test the load endpoint with test data (requires months parameter)
-            response = client.get("/api/brush-splits/load", params={"months": ["2025-01"]})
+            response = client.get("/api/brushes/splits/load", params={"months": ["2025-01"]})
 
             # Verify response
             assert response.status_code == 200
@@ -159,7 +159,7 @@ class TestDataIsolationStrategy:
                 "validated_at": "2025-01-27T16:30:00Z",
             }
 
-            response = client.post("/api/brush-splits/save-split", json=save_data)
+            response = client.post("/api/brushes/splits/save-split", json=save_data)
 
             # Verify response
             assert response.status_code == 200
@@ -203,7 +203,7 @@ class TestDataIsolationStrategy:
             client = TestClient(app)
 
             # Test brush splits endpoint (requires months parameter)
-            response = client.get("/api/brush-splits/load", params={"months": ["2025-01"]})
+            response = client.get("/api/brushes/splits/load", params={"months": ["2025-01"]})
             assert response.status_code == 200
             brush_data = response.json()
             assert "brush_splits" in brush_data

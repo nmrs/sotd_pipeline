@@ -950,7 +950,7 @@ class TestAPIErrorHandling:
         """Test load endpoint with missing months parameter."""
         # Test with empty string which gets parsed as a single empty month
         # This should return 200 with error info in the response
-        response = client.get("/api/brush-splits/load?months=")
+        response = client.get("/api/brushes/splits/load?months=")
         assert response.status_code == 200  # Returns 200 with error info
         data = response.json()
         assert "errors" in data
@@ -958,7 +958,7 @@ class TestAPIErrorHandling:
 
     def test_load_endpoint_missing_files(self, client):
         """Test load endpoint with missing files."""
-        response = client.get("/api/brush-splits/load?months=2025-99")
+        response = client.get("/api/brushes/splits/load?months=2025-99")
         assert response.status_code == 200  # Returns 200 with error info in response
         data = response.json()
         assert "errors" in data
@@ -975,7 +975,7 @@ class TestAPIErrorHandling:
         with patch("webui.api.brush_splits.Path") as mock_path:
             mock_path.return_value = corrupted_file
 
-            response = client.get("/api/brush-splits/load?months=2025-01")
+            response = client.get("/api/brushes/splits/load?months=2025-01")
             assert response.status_code == 200  # Returns 200 with error info
             data = response.json()
             assert "errors" in data
@@ -983,12 +983,12 @@ class TestAPIErrorHandling:
 
     def test_save_endpoint_no_data(self, client):
         """Test save endpoint with no data."""
-        response = client.post("/api/brush-splits/save", json={"brush_splits": []})
+        response = client.post("/api/brushes/splits/save", json={"brush_splits": []})
         assert response.status_code == 400
 
     def test_save_endpoint_invalid_data(self, client):
         """Test save endpoint with invalid data."""
-        response = client.post("/api/brush-splits/save", json={"invalid": "data"})
+        response = client.post("/api/brushes/splits/save", json={"invalid": "data"})
         assert response.status_code == 422
 
     def test_save_endpoint_file_error(self, client):
@@ -1013,7 +1013,7 @@ class TestAPIErrorHandling:
             }
 
             # Make request
-            response = client.post("/api/brush-splits/save", json=test_data)
+            response = client.post("/api/brushes/splits/save", json=test_data)
 
             # Should return 500 for file error
             assert response.status_code == 500
@@ -1022,7 +1022,7 @@ class TestAPIErrorHandling:
 
     def test_yaml_endpoint_file_not_found(self, client):
         """Test YAML endpoint with missing file."""
-        response = client.get("/api/brush-splits/yaml")
+        response = client.get("/api/brushes/splits/yaml")
         assert response.status_code == 200  # Returns 200 with file info
         data = response.json()
         assert "file_info" in data
@@ -1032,7 +1032,7 @@ class TestAPIErrorHandling:
 
     def test_statistics_endpoint_error_handling(self, client):
         """Test statistics endpoint error handling."""
-        response = client.get("/api/brush-splits/statistics")
+        response = client.get("/api/brushes/splits/statistics")
         assert response.status_code == 200  # Should always return 200
 
 
@@ -1085,7 +1085,7 @@ class TestSaveSplitEndpoint:
             }
 
             # Make request
-            response = client.post("/api/brush-splits/save-split", json=test_data)
+            response = client.post("/api/brushes/splits/save-split", json=test_data)
 
             # Verify response
             assert response.status_code == 200
@@ -1127,7 +1127,7 @@ class TestSaveSplitEndpoint:
             }
 
             # Make request
-            response = client.post("/api/brush-splits/save-split", json=test_data)
+            response = client.post("/api/brushes/splits/save-split", json=test_data)
 
             # Verify response
             assert response.status_code == 200
@@ -1141,7 +1141,7 @@ class TestSaveSplitEndpoint:
         # Test with invalid data
         test_data = {"original": "", "handle": "Test", "knot": "Test"}  # Invalid empty original
 
-        response = client.post("/api/brush-splits/save-split", json=test_data)
+        response = client.post("/api/brushes/splits/save-split", json=test_data)
 
         # Should return 400 for validation error
         assert response.status_code == 400
