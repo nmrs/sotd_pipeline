@@ -46,7 +46,7 @@ The old `normalize_for_storage` function is **deprecated** and should not be use
 ### Rules for Blade Duplicates
 - The same blade string (e.g., "Accuforge") **may appear under multiple brand/model combinations** in `correct_matches.yaml` **if and only if** those combinations represent different blade formats (e.g., DE, GEM, AC).
 - **Duplicate blade strings under the SAME format** (e.g., both under DE) are **FORBIDDEN** and will be flagged as errors by the validator.
-- Razor and other product types do **NOT** allow duplicates anywhere.
+- The same model name **can legitimately appear across different product types** (e.g., "Muhle Neo" can be both a razor and a brush). This is not considered a duplicate since they represent different products.
 - The validator uses the format from `blades.yaml` to determine if a duplicate is legitimate.
 
 ### Rationale

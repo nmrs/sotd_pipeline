@@ -43,6 +43,7 @@ class ValidationIssue:
         actual_section: Optional[str] = None,
         details: str = "",
         suggested_action: str = "",
+        line_numbers: Optional[Dict[str, List[int]]] = None,
     ):
         self.issue_type = issue_type
         self.severity = severity
@@ -63,6 +64,7 @@ class ValidationIssue:
         self.actual_section = actual_section
         self.details = details
         self.suggested_action = suggested_action
+        self.line_numbers = line_numbers or {}  # Dict mapping section/file to list of line numbers
 
 
 class ValidationResult:
@@ -179,6 +181,45 @@ class ActualMatchingValidator:
             self._splits_loader = BrushSplitsLoader(self.data_path / "brush_splits.yaml")
         return self._splits_loader
 
+    def _find_line_numbers(self, search_string: str, section_name: str) -> List[int]:
+        """Find line numbers where a string appears in a YAML file."""
+        line_numbers = []
+        correct_matches_dir = self.data_path / "correct_matches"
+        field_file = correct_matches_dir / f"{section_name}.yaml"
+        
+        if not field_file.exists():
+            return line_numbers
+        
+        try:
+            with field_file.open("r", encoding="utf-8") as f:
+                lines = f.readlines()
+                for line_num, line in enumerate(lines, start=1):
+                    stripped = line.strip()
+                    # Check if this line contains the search string as a list item
+                    # YAML list items can have various formats:
+                    #   - string_value
+                    #   - "string_value"
+                    #   - 'string_value'
+                    #   - string_value: (if it's a key, but we're looking for values)
+                    
+                    # Check for exact match as list item value
+                    if stripped.startswith("-"):
+                        # Extract the value after the dash
+                        value_part = stripped[1:].strip()
+                        # Remove quotes if present
+                        if value_part.startswith('"') and value_part.endswith('"'):
+                            value_part = value_part[1:-1]
+                        elif value_part.startswith("'") and value_part.endswith("'"):
+                            value_part = value_part[1:-1]
+                        
+                        # Check if this matches our search string (case-insensitive)
+                        if value_part.lower() == search_string.lower():
+                            line_numbers.append(line_num)
+        except Exception as e:
+            logger.warning(f"Error finding line numbers in {field_file}: {e}")
+        
+        return line_numbers
+
     def _validate_data_structure(self, correct_matches: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate data structure rules for correct_matches directory."""
         issues = []
@@ -199,6 +240,9 @@ class ActualMatchingValidator:
                     for string in strings:
                         if string in seen_strings:
                             within_section_duplicates.add(string)
+                            # Find line numbers for this duplicate
+                            line_nums = self._find_line_numbers(string, section_name)
+                            line_numbers = {section_name: line_nums} if line_nums else {}
                             issues.append(
                                 ValidationIssue(
                                     issue_type="duplicate_string",
@@ -212,48 +256,10 @@ class ActualMatchingValidator:
                                         f"Remove duplicate entry for '{string}' in "
                                         f"{section_name} section"
                                     ),
+                                    line_numbers=line_numbers,
                                 )
                             )
                         seen_strings.add(string)
-
-        # Check for duplicate strings across different sections
-        # (excluding handle/knot which can share)
-        all_strings = {}
-        for section_name, section_data in correct_matches.items():
-            if not isinstance(section_data, dict):
-                continue
-            for brand_data in section_data.values():
-                if isinstance(brand_data, dict):
-                    for strings in brand_data.values():
-                        if isinstance(strings, list):
-                            for string in strings:
-                                if string in all_strings:
-                                    # Handle/knot can share the same string, so only
-                                    # flag if it's not handle/knot
-                                    # Also skip if already flagged as within-section
-                                    # duplicate
-                                    if (
-                                        section_name not in ["handle", "knot"]
-                                        and all_strings[string] not in ["handle", "knot"]
-                                        and string not in within_section_duplicates
-                                    ):
-                                        issues.append(
-                                            ValidationIssue(
-                                                issue_type="duplicate_string",
-                                                severity="low",
-                                                correct_match=string,
-                                                details=(
-                                                    f"Duplicate string '{string}' found "
-                                                    f"across multiple sections"
-                                                ),
-                                                suggested_action=(
-                                                    f"Remove duplicate entry for "
-                                                    f"'{string}' from one of the sections"
-                                                ),
-                                            )
-                                        )
-                                else:
-                                    all_strings[string] = section_name
 
         # Check for cross-section conflicts
         brush_strings = set()
@@ -304,6 +310,15 @@ class ActualMatchingValidator:
 
         # Report conflicts
         for conflict_string in brush_handle_conflicts:
+            # Find line numbers in both sections
+            line_numbers = {}
+            line_nums_brush = self._find_line_numbers(conflict_string, "brush")
+            line_nums_handle = self._find_line_numbers(conflict_string, "handle")
+            if line_nums_brush:
+                line_numbers["brush"] = line_nums_brush
+            if line_nums_handle:
+                line_numbers["handle"] = line_nums_handle
+            
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
@@ -315,10 +330,20 @@ class ActualMatchingValidator:
                     suggested_action=(
                         f"Remove '{conflict_string}' from either brush or " f"handle section"
                     ),
+                    line_numbers=line_numbers,
                 )
             )
 
         for conflict_string in brush_knot_conflicts:
+            # Find line numbers in both sections
+            line_numbers = {}
+            line_nums_brush = self._find_line_numbers(conflict_string, "brush")
+            line_nums_knot = self._find_line_numbers(conflict_string, "knot")
+            if line_nums_brush:
+                line_numbers["brush"] = line_nums_brush
+            if line_nums_knot:
+                line_numbers["knot"] = line_nums_knot
+            
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
@@ -330,10 +355,23 @@ class ActualMatchingValidator:
                     suggested_action=(
                         f"Remove '{conflict_string}' from either brush or " f"knot section"
                     ),
+                    line_numbers=line_numbers,
                 )
             )
 
         for conflict_string in triple_conflicts:
+            # Find line numbers in all three sections
+            line_numbers = {}
+            line_nums_brush = self._find_line_numbers(conflict_string, "brush")
+            line_nums_handle = self._find_line_numbers(conflict_string, "handle")
+            line_nums_knot = self._find_line_numbers(conflict_string, "knot")
+            if line_nums_brush:
+                line_numbers["brush"] = line_nums_brush
+            if line_nums_handle:
+                line_numbers["handle"] = line_nums_handle
+            if line_nums_knot:
+                line_numbers["knot"] = line_nums_knot
+            
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
@@ -347,6 +385,7 @@ class ActualMatchingValidator:
                         f"Remove '{conflict_string}' from brush section "
                         f"(keep in handle and knot for composite brush)"
                     ),
+                    line_numbers=line_numbers,
                 )
             )
 

@@ -708,7 +708,7 @@ export interface CatalogValidationRequest {
 }
 
 export interface CatalogValidationIssue {
-  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match' | 'format_mismatch' | 'structural_change';
+  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match' | 'format_mismatch' | 'structural_change' | 'duplicate_string' | 'cross_section_conflict' | 'data_mismatch' | 'no_match';
   field: string;
   correct_match: string;
   expected_brand: string;
@@ -743,6 +743,8 @@ export interface CatalogValidationIssue {
     fiber?: string;
     knot_size_mm?: number;
   };
+  // Line numbers for duplicate/conflict issues
+  line_numbers?: Record<string, number[]>; // Maps section/file name to list of line numbers
 }
 
 export interface CatalogValidationResult {
@@ -770,6 +772,7 @@ export const removeCatalogValidationEntries = async (request: {
     correct_match: string;
     expected_brand: string;
     expected_model: string;
+    issue_type?: string;
   }>;
 }): Promise<{
   success: boolean;

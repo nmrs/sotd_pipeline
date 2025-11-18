@@ -65,6 +65,7 @@ const CatalogValidator: React.FC = () => {
           correct_match: issue.correct_match,
           expected_brand: issue.expected_brand,
           expected_model: issue.expected_model,
+          issue_type: issue.issue_type,
         };
       });
 
@@ -204,6 +205,44 @@ const CatalogValidator: React.FC = () => {
 
   const isFormatMismatch = (issue: CatalogValidationIssue) => {
     return issue.issue_type === 'format_mismatch';
+  };
+
+  // Helper function to get file name from field
+  const getFileName = (field: string): string => {
+    const fieldToFile: Record<string, string> = {
+      razor: 'razor.yaml',
+      blade: 'blade.yaml',
+      brush: 'brush.yaml',
+      soap: 'soap.yaml',
+      handle: 'handle.yaml',
+      knot: 'knot.yaml',
+    };
+    return fieldToFile[field] || `${field}.yaml`;
+  };
+
+  // Helper function to parse sections from details for duplicate/conflict issues
+  const parseSectionsFromDetails = (details: string): string[] => {
+    const sections: string[] = [];
+    
+    // Check for explicit section mentions (case-insensitive, whole word matching)
+    const sectionKeywords: Record<string, string> = {
+      brush: 'brush',
+      handle: 'handle',
+      knot: 'knot',
+      razor: 'razor',
+      blade: 'blade',
+      soap: 'soap',
+    };
+    
+    // Use word boundaries to avoid false matches
+    for (const [key, value] of Object.entries(sectionKeywords)) {
+      const regex = new RegExp(`\\b${key}\\b`, 'i');
+      if (regex.test(details) && !sections.includes(value)) {
+        sections.push(value);
+      }
+    }
+    
+    return sections;
   };
 
   return (
@@ -592,14 +631,134 @@ const CatalogValidator: React.FC = () => {
                               </div>
                             </div>
                           ) : issue.issue_type === 'duplicate_string' || issue.issue_type === 'cross_section_conflict' ? (
-                            <div>
-                              <p className='font-medium text-gray-700'>Issue Type:</p>
-                              <p className='text-gray-600'>
-                                {issue.issue_type === 'duplicate_string' ? 'Duplicate string found' : 'Cross-section conflict detected'}
-                              </p>
-                              <p className='text-xs text-gray-500 mt-1'>
-                                (data structure validation)
-                              </p>
+                            <div className='space-y-3'>
+                              <div>
+                                <p className='font-medium text-gray-700'>Issue Type:</p>
+                                <p className='text-gray-600'>
+                                  {issue.issue_type === 'duplicate_string' ? 'Duplicate string found' : 'Cross-section conflict detected'}
+                                </p>
+                                <p className='text-xs text-gray-500 mt-1'>
+                                  (data structure validation)
+                                </p>
+                              </div>
+                              
+                              {/* Show file and section information */}
+                              <div className='p-3 bg-blue-50 border border-blue-200 rounded-md'>
+                                <p className='text-sm font-medium text-blue-800 mb-2'>Location:</p>
+                                <div className='space-y-1'>
+                                  {issue.issue_type === 'duplicate_string' ? (
+                                    <>
+                                      {(() => {
+                                        const sections = parseSectionsFromDetails(issue.details);
+                                        // Check if details mention "across multiple sections" or specific sections
+                                        const isCrossSection = issue.details.includes('across multiple sections') || sections.length > 1;
+                                        
+                                        if (isCrossSection) {
+                                          // Cross-section duplicate - show all detected files
+                                          const allSections = sections.length > 0 ? sections : [issue.field];
+                                          
+                                          return (
+                                            <>
+                                              <p className='text-sm text-gray-700 mb-2'>
+                                                <strong>Files Containing Duplicate:</strong>
+                                              </p>
+                                              <div className='space-y-1'>
+                                                {allSections.map(section => {
+                                                  const lineNums = issue.line_numbers?.[section];
+                                                  return (
+                                                    <p key={section} className='text-sm text-gray-700'>
+                                                      • <code className='bg-white px-1.5 py-0.5 rounded text-xs'>
+                                                        data/correct_matches/{getFileName(section)}
+                                                      </code>
+                                                      {lineNums && lineNums.length > 0 && (
+                                                        <span className='text-xs text-gray-600 ml-2'>
+                                                          (line{lineNums.length > 1 ? 's' : ''}: {lineNums.join(', ')})
+                                                        </span>
+                                                      )}
+                                                    </p>
+                                                  );
+                                                })}
+                                                {sections.length === 0 && (
+                                                  <p className='text-xs text-gray-500 italic mt-1'>
+                                                    Note: This duplicate appears across multiple field files. Check razor.yaml, brush.yaml, blade.yaml, and soap.yaml files.
+                                                  </p>
+                                                )}
+                                              </div>
+                                              <p className='text-xs text-gray-600 mt-2'>
+                                                This string appears in multiple files. Remove it from all but one appropriate location.
+                                              </p>
+                                            </>
+                                          );
+                                        } else {
+                                          // Within same file/section duplicate
+                                          return (
+                                            <>
+                                              <p className='text-sm text-gray-700'>
+                                                <strong>File:</strong>{' '}
+                                                <code className='bg-white px-1.5 py-0.5 rounded text-xs'>
+                                                  data/correct_matches/{getFileName(issue.field)}
+                                                </code>
+                                                {issue.line_numbers?.[issue.field] && issue.line_numbers[issue.field].length > 0 && (
+                                                  <span className='text-xs text-gray-600 ml-2'>
+                                                    (line{issue.line_numbers[issue.field].length > 1 ? 's' : ''}: {issue.line_numbers[issue.field].join(', ')})
+                                                  </span>
+                                                )}
+                                              </p>
+                                              <p className='text-xs text-gray-600 mt-1'>
+                                                This string appears multiple times in this file. Remove duplicate entries.
+                                              </p>
+                                            </>
+                                          );
+                                        }
+                                      })()}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p className='text-sm text-gray-700 mb-2'>
+                                        <strong>Conflicting Files:</strong>
+                                      </p>
+                                      {(() => {
+                                        const sections = parseSectionsFromDetails(issue.details);
+                                        if (sections.length > 0) {
+                                          return (
+                                              <div className='space-y-1'>
+                                                {sections.map(section => {
+                                                  const lineNums = issue.line_numbers?.[section];
+                                                  return (
+                                                    <p key={section} className='text-sm text-gray-700'>
+                                                      • <code className='bg-white px-1.5 py-0.5 rounded text-xs'>
+                                                        data/correct_matches/{getFileName(section)}
+                                                      </code>
+                                                      {lineNums && lineNums.length > 0 && (
+                                                        <span className='text-xs text-gray-600 ml-2'>
+                                                          (line{lineNums.length > 1 ? 's' : ''}: {lineNums.join(', ')})
+                                                        </span>
+                                                      )}
+                                                    </p>
+                                                  );
+                                                })}
+                                              </div>
+                                          );
+                                        } else {
+                                          // Fallback: show current field and mention it's a cross-section conflict
+                                          return (
+                                            <div className='space-y-1'>
+                                              <p className='text-sm text-gray-700'>
+                                                • <code className='bg-white px-1.5 py-0.5 rounded text-xs'>
+                                                  data/correct_matches/{getFileName(issue.field)}
+                                                </code>
+                                              </p>
+                                              <p className='text-xs text-gray-600 mt-1'>
+                                                (and other section files - see details)
+                                              </p>
+                                            </div>
+                                          );
+                                        }
+                                      })()}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           ) : (
                             <div>

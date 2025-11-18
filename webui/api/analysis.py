@@ -250,6 +250,7 @@ class CatalogValidationIssue(BaseModel):
     current_match_details: Optional[dict] = None  # Current brush match details
     expected_handle_match: Optional[dict] = None  # Expected handle match details
     expected_knot_match: Optional[dict] = None  # Expected knot match details
+    line_numbers: Optional[Dict[str, List[int]]] = None  # Line numbers by section/file for duplicate/conflict issues
 
 
 class CatalogValidationResponse(BaseModel):
@@ -1486,6 +1487,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "details": issue.details,
                 "catalog_format": None,  # Format not available in actual matching validation
                 "matched_pattern": None,  # Pattern not available in actual matching validation
+                "line_numbers": getattr(issue, "line_numbers", None),  # Line numbers for duplicate/conflict issues
             }
 
             # For structural_change issues with brush data, add match details
@@ -1567,9 +1569,20 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
 
         # Load YAML files from directory structure
         yaml_data = {}
-        sections_to_load = (
-            ["brush", "handle", "knot"] if request.field == "brush" else [request.field]
+        
+        # Check if any entries are cross-section conflicts
+        has_cross_section_conflict = any(
+            entry.get("issue_type") == "cross_section_conflict" for entry in request.matches
         )
+        
+        # Determine which sections to load
+        if has_cross_section_conflict:
+            # For cross-section conflicts, load all brush-related sections
+            sections_to_load = ["brush", "handle", "knot"]
+        elif request.field == "brush":
+            sections_to_load = ["brush", "handle", "knot"]
+        else:
+            sections_to_load = [request.field]
 
         for section in sections_to_load:
             section_file = correct_matches_dir / f"{section}.yaml"
@@ -1589,6 +1602,7 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
             try:
                 correct_match = entry.get("correct_match", "")
                 actual_section = entry.get("actual_section", request.field)
+                issue_type = entry.get("issue_type", "")
 
                 if not correct_match:
                     errors.append(f"Invalid entry data: {entry}")
@@ -1597,8 +1611,13 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                 # Remove from the hierarchical structure
                 removed = False
 
-                # For brush field, search across brush, knot, and handle sections
-                if request.field == "brush":
+                # Determine which sections to search based on field and issue type
+                if issue_type == "cross_section_conflict":
+                    # For cross-section conflicts, search in all brush-related sections
+                    # regardless of the selected field
+                    sections_to_search = ["brush", "knot", "handle"]
+                elif request.field == "brush":
+                    # For brush field, search across brush, knot, and handle sections
                     sections_to_search = ["brush", "knot", "handle"]
                 else:
                     sections_to_search = [actual_section]
