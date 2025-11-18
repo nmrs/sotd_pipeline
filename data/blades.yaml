@@ -123,6 +123,7 @@ DE:
         - gil.*et.*green
         - clock.*super.*stain
         - gil.*super.*stain.*green
+        - 7.*oc.*ss
   ABEST:
     Hi Platinum:
       patterns:
@@ -192,12 +193,12 @@ DE:
   Big Ben:
     Super Stainless:
       patterns:
-        - big ben
+        - big ben.*(ss|stain)?
   Bolzano:
     Superinox:
       patterns:
         - b(o|a)la?z(o|a)n(o|a)
-  Böker:
+  Böker:  
     DE:
       patterns:
         - b[oö]ker
@@ -701,10 +702,11 @@ DE:
         - treet.*king
     New Edge:
       patterns:
-        - tre(e|a)t.*new.*edge
+        - tre[ea]t.*new.*edge
     New Steel:
       patterns:
-        - treet.*new.*steel
+        - tre[ea]t.*new.*steel
+        - tre[ea]t.*new
     Platinum:
       patterns:
         - treet
@@ -809,7 +811,7 @@ GEM:
   GEM:
     Blue Star:
       patterns:
-        - gem.*blue.*star
+        - blue.*star
   PAL:
     Blue Blade:
       patterns:
@@ -886,6 +888,10 @@ Half DE:
     Super Stainless SE:
       patterns:
         - crown.*stainless.*\bse\b
+  Derby:
+    Premium:
+      patterns:
+        - derb.*prem
   Dorco:
     HST-300:
       patterns:

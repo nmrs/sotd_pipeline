@@ -34,6 +34,7 @@ AC:
     - feather super (?)
     ProGuard:
     - feather - proguard
+    - feather artist club pro-guard (se)
     - feather artist club proguard
     - feather proguard
   Kai:
@@ -43,10 +44,12 @@ AC:
     - kai proguard mg
     Captain ProTouch:
     - kai captain titan mild pro touch
+    - kai captain titan pro touch mg
     - kai protouch mg
     - kai protouch mg blade
     Captain Titan Mild:
     - kai captain mild
+    - kai captain titan mild
     - kai captain titan mild pink
     - kai captain titan mild pink (se)
     Salon Select Premium Guard:
@@ -76,6 +79,7 @@ DE:
     - 7 o'clock sharpedge
     - 7 o'clock sharpedge (yellow)
     - 7 o'clock sharpedge - yellow
+    - 7 o'clock sharpedge yellow
     - 7'o clock - yellow
     - gillette - 7 o'clock - sharpedge
     - gillette - 7 o'clock sharp edge
@@ -90,8 +94,10 @@ DE:
     - gillette 7 o'clock sharpedge yellow
     - gillette 7 o'clock yellow
     - gillette 7 o'clock yellowddd
+    - gillette sharpedge
     - gillette yellow
     Super Platinum (Black):
+    - 7 o'clock black
     - 7sp
     - 7sp black
     - gilette 7 o'clock - super platinum
@@ -122,6 +128,8 @@ DE:
     - gillette 7 o'clock stainless green
     - gillette 7 o'clock super stainless (green)
     - gillette 7 o'clock super stainless (green), de
+    - gillette 7 o'clock super stainless green
+    - gillette 7'oc-ss
     - gillette green
     - gillette seven o'clock super stainless
     - gillette super stainless (green)
@@ -143,6 +151,7 @@ DE:
   Astra:
     Superior Platinum (Green):
     - astra
+    - astra - green
     - astra - platinum
     - astra - superior platinum
     - astra green
@@ -155,6 +164,7 @@ DE:
     - astra sp (?)
     - astra sp (green)
     - astra sp green
+    - astra sp-
     - astra super platinum (greens)
     - astra superior platinum
     - astra superior platinum (green)
@@ -199,6 +209,8 @@ DE:
     - big ben - super stainless
     - big ben stainless steel
     - big ben super stainless (purple)
+    - big ben super stainless de blade
+    - lord big ben - super stainless
   Bolzano:
     Superinox:
     - bolzano
@@ -221,6 +233,8 @@ DE:
     Super Stainless:
     - crown - super stainless
     - crown super stainless (green), de
+    - crown super stainless, de
+    - lord crown stainless
   Crystal:
     Super:
     - crystal
@@ -269,8 +283,10 @@ DE:
     - feather - hi-stainless, de
     - feather - histainless
     - feather - new hi-stainless
+    - feather - new hi-stainless (de)
     - feather - new-hi
     - feather - new-hi stianless
+    - feather de
     - feather hi-stainless
     - feather hi-stainless double edged razor blade
     - feather hi-stainless steel platinum
@@ -454,6 +470,9 @@ DE:
     - lord - ok (stainless steel)
     - lord - ok stainless steel
     - ok (stainless steel, manufactured by lord, )
+  PAA:
+    Platinum Strangelet Super Sharps:
+    - paa platinum strangelet super sharp
   Parker:
     Premium Platinum:
     - parker
@@ -481,6 +500,7 @@ DE:
     - 'personna - lab blue (use #2)'
     - 'personna - lab blue (use #4)'
     - 'personna - lab blue (use #5ish)'
+    - personna blue
     - personna cc
     - personna comfort coat
     - personna comfort coated
@@ -505,12 +525,15 @@ DE:
     - personna red
     Super Stainless:
     - person super stainless
+    - personna (stainless)
+    - personna (stainless), %th shave on that blade
     - personna - super
     - personna super
     - personna super blue
     - personna super stainless
     - personne super stainless
     Super+ Platinum:
+    - personna (crystal) platinum
     - personna crystal super
     - personna platinum (crystal)
   Polsilver:
@@ -526,6 +549,7 @@ DE:
     Platinum Lux:
     - rapira
     - rapira platinum lux
+    - rapira platinum lux-
     - rapira platnium lux
     Super Stainless:
     - rapira super stainless
@@ -546,6 +570,7 @@ DE:
     - rockwell swedish steel
   Schick:
     Stainless (DE):
+    - schick (?)
     - schick de
     - schick de blade
     - shick de blade
@@ -563,6 +588,7 @@ DE:
     - shark
     - shark (egypt)
     - shark ss
+    - shark stainless
     - shark super stainless
   Sharp Star:
     Platinum:
@@ -596,6 +622,7 @@ DE:
     - tatra carbon steel
     Platinum:
     - czech blades tatra platinum stainless
+    - tatra
     - tatra platinum
   Tiger:
     Platinum:
@@ -635,6 +662,7 @@ DE:
     - treet new edge
     New Steel:
     - treet - new steel
+    - treet new
     Platinum:
     - treet
     - treet - platinum
@@ -712,6 +740,7 @@ FHS:
 GEM:
   GEM:
     Blue Star:
+    - blue star gem
     - gem blue star
   PAL:
     Blue Blade:
@@ -778,6 +807,9 @@ Half DE:
     SE:
     - american 1/2 de
     - american razor blades
+  Derby:
+    Premium:
+    - derby premium 1/2 de
   Dorco:
     HST-300:
     - dorco hst-300-p1 1/2 de
@@ -792,6 +824,9 @@ Half DE:
     SE:
     - leaf super platinum
 Injector:
+  Generic:
+    Injector:
+    - vintage generic injector
   Parker:
     Injector:
     - parker injector

@@ -406,6 +406,7 @@ Cartridge/Disposable:
       - simply (?:max|smooth)
       - next bic thing
       - penny shaver
+      - person.*(single blade|face razor)
 Charcoal Goods:
   Everyday:
     patterns:
@@ -610,7 +611,7 @@ Edmond Roffler:
   Straight:
     format: Straight
     patterns:
-      - edmond.*roffler(?:.*\d{1,2}/(8|16))?
+      - edm[ou]nd.*roffler(?:.*\d{1,2}/(8|16))?
 Edwin Jagger:
   3one6:
     patterns:
@@ -1169,7 +1170,7 @@ Hederi & Joseph:
 Henson:
   AL13:
     patterns:
-      - henson
+      - henson.*(mild|medium|aggressive)?
       - (henson)?.*al13(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - squatch
       - \bal-?13
@@ -1758,6 +1759,11 @@ Other Shavette (Disposable):
     patterns:
       - (?:cvs|kroger).*dermaplane
       - sassy.*eyebrow
+Other Shavette (Half DE):
+  "":
+    format: Shavette (Half DE)
+    patterns:
+      - magic straight
 Other Kamisori:
   "":
     format: Straight
@@ -1780,6 +1786,8 @@ Other Straight Razor:
       - sheffield
       - albright.*hanover
       - reliable.*manganese
+      - perfection.*germany
+      - scales
 PAA:
   Alpha Ecliptic:
     patterns:
@@ -2092,11 +2100,11 @@ RazoRock:
   Hawk v1:
     format: AC
     patterns:
-      - (razorock)?.*hawk.*1
+      - (razorock)?.*hawk.*v?1\b
   Hawk v2:
     format: AC
     patterns:
-      - (razorock)?.*hawk.*v?2
+      - (razorock)?.*hawk.*v?2\b
   Hawk v3:
     format: AC
     patterns:
@@ -2466,16 +2474,10 @@ Star Reito:
     patterns:
       - \breito\b(?:.*\d{1,2}/(8|16))?
 Stirling:
-  DE3P6S:
-    patterns:
-      - DE3P6S
-  DE3P7S:
-    patterns:
-      - DE3P7S
   Slant:
     patterns:
       - stirling.*slant
-  Stainless DE Razor:
+  Stainless Handle DE Razor:
     patterns:
       - st[ei]rling.*stain
       - st[ei]rling.*(ss|hyper|ha|stai)

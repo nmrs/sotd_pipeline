@@ -9,7 +9,31 @@ Welcome to your SOTD Lather Log for October 2025
 
 ## Observations
 
-* [Observations will be generated based on data analysis]
+* Rocktober 2025 was a resounding success, catapulting Fanzine Saponifications to the top of the charts with 281 shaves this month, nearly two thirds of its all-time total shaves. If you’re curious how their usage has trended (I was), here’s every one of Fanzine’s 433 shaves since its first Lather Log appearance in February 2025:
+
+#### Fanzine Saponifications Usage - Month over Month
+
+| Month | Shaves | Unique Users | Rank |
+|:------|-------:|-------------:|-----:|
+| 2025-02 | 1 | 1 | 85 |
+| 2025-03 | 26 | 11 | 16 |
+| 2025-04 | 19 | 6 | 20 |
+| 2025-05 | 8 | 3 | 32 |
+| 2025-06 | 22 | 18 | 24 |
+| 2025-07 | 1 | 1 | 99 |
+| 2025-08 | 1 | 1 | 38 |
+| 2025-09 | 74 | 19 | 7 |
+| 2025-10 | 281 | 27 | 1 |
+
+* Spooky shuttered soapmaker Southern Witchcrafts rises from the grave, zombie-style, to crack the top 10. More than half of its 67 shaves were posted in the week leading up to October 31, with 10 on Halloween itself.
+
+* Brand Diversity photo finish: Catie's Bubbles, Barrister and Mann, and Stirling end in a three-way tie at 37 unique soaps each.
+
+* Tabac isn't just for Tuesdays anymore: only 18 of 80 shaves happened on the alliterative day.
+
+* u/brokenjaw622 wins the diversity challenge by using a different soap every day in October.
+
+* Sample usage cooled from 58 in Sample Semptember to 40 in October.
 
 ## Notes & Caveats
 
@@ -82,39 +106,39 @@ Welcome to your SOTD Lather Log for October 2025
 | 7      | Cella - Almond Shaving Cream                      |       26 |              7 | ↑17             | ↑10             | ↑6              |
 | 8      | Spearhead Shaving Co. - Seaforth! Heather         |       25 |              7 | ↑5              | ↑52             | ↓4              |
 | 9      | Barrister and Mann - Seville                      |       23 |             10 | ↑2              | ↑36             | ↑2              |
-| 10     | Southern Witchcrafts - Samhain                    |       18 |             12 | ↑148            | ↑10             | ↓5              |
+| 10     | Southern Witchcrafts - Samhain                    |       18 |             12 | ↑149            | ↑10             | ↓5              |
 | 11     | Barrister and Mann - Lavender                     |       18 |              3 | ↑34             | ↑87             | ↑111            |
-| 12     | Highland Springs - Green Door                     |       18 |              1 | ↑90             | ↑244            | ↑247            |
+| 12     | Highland Springs - Green Door                     |       18 |              1 | ↑91             | ↑244            | ↑247            |
 | 13     | Spearhead Shaving Co. - Seaforth! Black Watch     |       16 |             12 | ↑9              | =               | n/a             |
 | 14     | Barrister and Mann - Season of the Witch          |       16 |             10 | ↑237            | ↓8              | n/a             |
 | 15     | Barrister and Mann - Spice                        |       16 |              7 | ↑16             | ↓5              | ↑142            |
 | 16=    | Fanzine Saponifications - Almost There            |       16 |              2 | ↑235            | n/a             | n/a             |
 | 16=    | Stirling Soap Co. - Executive Man                 |       16 |              2 | ↑28             | ↑147            | ↑30             |
-| 18     | Fanzine Saponifications - Testing... Testing      |       15 |              5 | ↑106            | n/a             | n/a             |
+| 18     | Fanzine Saponifications - Testing... Testing      |       15 |              5 | ↑107            | n/a             | n/a             |
 | 19     | Henson - Protect Shave Cream                      |       15 |              1 | n/a             | n/a             | n/a             |
-| 20     | Barrister and Mann - Leviathan                    |       14 |             10 | ↑138            | ↑2              | ↓18             |
+| 20     | Barrister and Mann - Leviathan                    |       14 |             10 | ↑139            | ↑2              | ↓18             |
 | 21     | Maggard Razors - Mango Sage Tea                   |       14 |              1 | ↓7              | n/a             | ↑238            |
 | 22     | Martin de Candre - Fougère                        |       13 |              7 | ↑31             | ↑141            | ↑237            |
-| 23     | Summer Break Soaps - History 101                  |       13 |              1 | ↑135            | n/a             | ↑279            |
+| 23     | Summer Break Soaps - History 101                  |       13 |              1 | ↑136            | n/a             | ↑279            |
 | 24     | Spearhead Shaving Co. - Seaforth! Roman Spice     |       12 |             10 | ↑5              | ↓12             | n/a             |
-| 25     | Barrister and Mann - Hallows                      |       12 |              9 | ↑86             | ↓16             | ↓24             |
+| 25     | Barrister and Mann - Hallows                      |       12 |              9 | ↑87             | ↓16             | ↓24             |
 | 26     | Barrister and Mann - Cheshire                     |       12 |              5 | ↑32             | ↑230            | ↑29             |
 | 27     | Taylor of Old Bond Street - Peppermint            |       12 |              2 | ↑30             | n/a             | n/a             |
 | 28     | Summer Break Soaps - Steady                       |       11 |              4 | ↓27             | n/a             | n/a             |
 | 29     | Stirling Soap Co. - Bash                          |       11 |              1 | ↑14             | ↑227            | n/a             |
-| 30=    | Arko - Shaving Soap                               |       10 |              7 | ↑128            | ↑44             | ↑127            |
+| 30=    | Arko - Shaving Soap                               |       10 |              7 | ↑129            | ↑44             | ↑127            |
 | 30=    | Stirling Soap Co. - I, Rich Moose                 |       10 |              7 | ↓26             | n/a             | n/a             |
 | 32     | Barrister and Mann - Fougère Gothique             |       10 |              6 | ↓22             | ↑4              | ↓4              |
 | 33=    | Chiseled Face - Trade Winds                       |       10 |              1 | ↑18             | n/a             | ↑226            |
 | 33=    | Stirling Soap Co. - Scots Pine Sheep              |       10 |              1 | ↑16             | ↑130            | ↑144            |
-| 35     | Southern Witchcrafts - Boonana                    |        9 |              7 | ↑123            | ↓6              | n/a             |
+| 35     | Southern Witchcrafts - Boonana                    |        9 |              7 | ↑124            | ↓6              | n/a             |
 | 36     | Catie's Bubbles - Crangère                        |        9 |              6 | ↑44             | n/a             | n/a             |
 | 37     | Chicago Grooming Co. - Discordia                  |        9 |              4 | n/a             | n/a             | n/a             |
 | 38     | Chiseled Face - Guy Noir                          |        9 |              3 | ↑23             | n/a             | n/a             |
 | 39     | Maggard Razors - Orange Menthol                   |        9 |              1 | ↓13             | n/a             | ↑263            |
-| 40     | Southern Witchcrafts - Autumn Ash                 |        8 |              8 | ↑71             | ↑29             | ↓8              |
+| 40     | Southern Witchcrafts - Autumn Ash                 |        8 |              8 | ↑72             | ↑29             | ↓8              |
 | 41=    | Declaration Grooming - Massacre of the Innocents  |        8 |              6 | n/a             | n/a             | ↓26             |
-| 41=    | House of Mammoth - You & I (Will Die)             |        8 |              6 | ↑70             | ↓39             | n/a             |
+| 41=    | House of Mammoth - You & I (Will Die)             |        8 |              6 | ↑71             | ↓39             | n/a             |
 | 41=    | Spearhead Shaving Co. - Seaforth! 3 Scots         |        8 |              6 | ↓12             | ↓22             | n/a             |
 | 44     | Spearhead Shaving Co. - Seaforth! Leather         |        8 |              4 | ↓5              | n/a             | n/a             |
 | 45=    | Catie's Bubbles - Tonsorium                       |        8 |              2 | ↓19             | n/a             | n/a             |
@@ -122,33 +146,33 @@ Welcome to your SOTD Lather Log for October 2025
 | 47     | Back to Basics Log Cabin - Glycerin Shave Soap    |        8 |              1 | ↓41             | ↑156            | n/a             |
 | 48     | Chiseled Face - Darkfall                          |        7 |              7 | ↑37             | ↑36             | ↓29             |
 | 49=    | Chiseled Face - Midnight Stag                     |        7 |              3 | ↑19             | ↑55             | ↑253            |
-| 49=    | Mitchell's - Wool Fat                             |        7 |              3 | ↑109            | ↑154            | ↓17             |
+| 49=    | Mitchell's - Wool Fat                             |        7 |              3 | ↑110            | ↑154            | ↓17             |
 | 51=    | Bartigan & Stark - Campione                       |        7 |              1 | ↓15             | ↑60             | n/a             |
 | 51=    | Catie's Bubbles - Maggards MeetUp 2024            |        7 |              1 | n/a             | n/a             | n/a             |
 | 51=    | Talent Soap Factory - Switchback                  |        7 |              1 | =               | ↑13             | n/a             |
 | 54=    | Southern Witchcrafts - Desairology                |        6 |              6 | ↑197            | ↑65             | ↑6              |
 | 54=    | Stirling Soap Co. - Varen                         |        6 |              6 | ↑14             | ↓23             | ↑68             |
 | 56=    | Catie's Bubbles - 322                             |        6 |              5 | ↑5              | ↑6              | ↑246            |
-| 56=    | Catie's Bubbles - V                               |        6 |              5 | ↑68             | ↑200            | n/a             |
+| 56=    | Catie's Bubbles - V                               |        6 |              5 | ↑69             | ↑200            | n/a             |
 | 56=    | Spearhead Shaving Co. - Seaforth! Sea Spice Lime  |        6 |              5 | ↓35             | ↓52             | n/a             |
 | 59     | Catie's Bubbles - Porch Drinks                    |        6 |              4 | ↑192            | n/a             | ↑139            |
-| 60=    | Mickey Lee Soapworks - The Kraken                 |        6 |              2 | ↑84             | ↑78             | ↑49             |
+| 60=    | Mickey Lee Soapworks - The Kraken                 |        6 |              2 | ↑85             | ↑78             | ↑49             |
 | 60=    | Stirling Soap Co. - British Leather               |        6 |              2 | n/a             | ↑59             | ↑242            |
 | 60=    | Summer Break Soaps - Daydream                     |        6 |              2 | ↑10             | ↑78             | n/a             |
 | 60=    | Summer Break Soaps - Valedictorian                |        6 |              2 | ↓27             | ↑38             | n/a             |
-| 60=    | Talent Soap Factory - Cola Freak                  |        6 |              2 | ↑84             | n/a             | n/a             |
+| 60=    | Talent Soap Factory - Cola Freak                  |        6 |              2 | ↑85             | n/a             | n/a             |
 | 65=    | Barrister and Mann - Fougère Classique            |        6 |              1 | ↓49             | ↑191            | n/a             |
 | 65=    | Böker - Tobacco                                   |        6 |              1 | n/a             | n/a             | n/a             |
 | 67     | House of Mammoth - Sonder                         |        5 |              5 | ↓55             | ↓7              | ↑42             |
 | 68=    | Henri et Victoria - Cognac and Cuban Cigars       |        5 |              4 | ↓13             | ↓42             | ↑191            |
 | 68=    | House of Mammoth - Alive                          |        5 |              4 | ↑2              | ↑16             | n/a             |
-| 68=    | House of Mammoth - Hygge                          |        5 |              4 | ↑56             | ↓51             | n/a             |
+| 68=    | House of Mammoth - Hygge                          |        5 |              4 | ↑57             | ↓51             | n/a             |
 | 71=    | Barrister and Mann - Bay Rum                      |        5 |              3 | ↓10             | ↑185            | ↑145            |
 | 71=    | Noble Otter - Barrbarr                            |        5 |              3 | ↓18             | ↓47             | ↓19             |
-| 73=    | Mike's Natural Soaps - Rose, Patchouli, Cedarwood |        5 |              2 | ↑51             | n/a             | ↑229            |
-| 73=    | Stirling Soap Co. - Friends to the End            |        5 |              2 | n/a             | n/a             | n/a             |
-| 73=    | Wholly Kaw - Entropy Man                          |        5 |              2 | ↑128            | n/a             | ↑24             |
-| 76=    | Apothecary 87 - Sandalwood & Vanilla              |        5 |              1 | n/a             | n/a             | n/a             |
+| 73=    | Mike's Natural Soaps - Rose, Patchouli, Cedarwood |        5 |              2 | ↑52             | n/a             | ↑229            |
+| 73=    | Stirling Soap Co. - Friends to the End            |        5 |              2 | ↑178            | ↑76             | n/a             |
+| 73=    | Wholly Kaw - Entropy Man                          |        5 |              2 | ↑129            | n/a             | ↑24             |
+| 76=    | Apothecary 87 - Sandalwood & Vanilla              |        5 |              1 | ↑126            | n/a             | n/a             |
 | 76=    | Proraso - Green (Cream)                           |        5 |              1 | ↓53             | ↓47             | ↑62             |
 | 76=    | Stirling Soap Co. - Juniper Breeze                |        5 |              1 | ↑175            | n/a             | n/a             |
 
