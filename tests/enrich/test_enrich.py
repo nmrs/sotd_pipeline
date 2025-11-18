@@ -51,7 +51,10 @@ def test_process_month_missing_file(tmp_path):
     """Test processing a month with missing input file."""
     base_path = Path(tmp_path)
     result = _process_month(2025, 1, base_path, debug=True, force=False)
-    assert result is None
+    assert result is not None
+    assert result["status"] == "error"
+    assert result["month"] == "2025-01"
+    assert "Missing input file" in result["error"]
 
 
 def test_process_month_invalid_json(tmp_path):
@@ -65,7 +68,10 @@ def test_process_month_invalid_json(tmp_path):
     invalid_file.write_text("invalid json")
 
     result = _process_month(2025, 1, base_path, debug=True, force=False)
-    assert result is None
+    assert result is not None
+    assert result["status"] == "error"
+    assert result["month"] == "2025-01"
+    assert "Failed to load matched data" in result["error"]
 
 
 def test_process_month_valid_data(tmp_path):

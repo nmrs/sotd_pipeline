@@ -14,7 +14,7 @@ from .save import save_aggregated_data
 
 def process_months(
     months: Sequence[str], data_dir: Path, debug: bool = False, force: bool = False
-) -> None:
+) -> bool:
     """Main orchestration for aggregating SOTD data for one or more months."""
     # Show progress bar for processing
     print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
@@ -62,16 +62,40 @@ def process_months(
             )
 
         except FileNotFoundError as e:
-            print(f"[WARN] {e}")
+            results.append(
+                {
+                    "status": "error",
+                    "month": month,
+                    "error": f"{e}. Run enrich phase first.",
+                }
+            )
         except Exception as e:
-            print(f"[ERROR] Failed to process {month}: {e}")
+            results.append(
+                {
+                    "status": "error",
+                    "month": month,
+                    "error": f"Failed to process {month}: {e}",
+                }
+            )
+
+    # Filter results and check for errors
+    errors = [r for r in results if "error" in r]
+    completed = [r for r in results if "error" not in r]
+
+    # Display error details for failed months
+    if errors:
+        print("\n❌ Error Details:")
+        for error_result in errors:
+            month = error_result.get("month", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {month}: {error_msg}")
 
     # Print summary using standardized formatter
     if len(months) == 1:
         # Single month summary
         month = months[0]
-        if results:
-            stats = results[0]
+        if completed:
+            stats = completed[0]
             summary = PipelineOutputFormatter.format_single_month_summary("aggregate", month, stats)
             print(summary)
     else:
@@ -80,12 +104,15 @@ def process_months(
         end_month = months[-1]
 
         total_stats = {
-            "total_records": sum(r["record_count"] for r in results),
+            "total_records": sum(r.get("record_count", 0) for r in completed),
         }
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "aggregate", start_month, end_month, total_stats
         )
         print(summary)
+
+    # Return True if there were errors, False otherwise
+    return len(errors) > 0
 
 
 def process_months_parallel(
@@ -94,7 +121,7 @@ def process_months_parallel(
     debug: bool = False,
     force: bool = False,
     max_workers: int = 8,
-) -> None:
+) -> bool:
     """Process multiple months in parallel using ProcessPoolExecutor."""
     print(f"Processing {len(months)} months in parallel...")
 
@@ -121,15 +148,31 @@ def process_months_parallel(
             except Exception as e:
                 print(f"[ERROR] Failed to process {month}: {e}")
 
+    # Filter results and check for errors
+    errors = [r for r in results if r and "error" in r]
+    completed = [r for r in results if r and "error" not in r]
+
+    # Display error details for failed months
+    if errors:
+        print("\n❌ Error Details:")
+        for error_result in errors:
+            month = error_result.get("month", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {month}: {error_msg}")
+
     # Print summary
     wall_clock_time = time.time() - wall_clock_start
-    total_records = sum(r["record_count"] for r in results if r)
+    total_records = sum(r.get("record_count", 0) for r in completed)
 
-    print(
-        f"[INFO] SOTD aggregate complete for {months[0]}…{months[-1]}: "
-        f"{total_records} records processed"
-    )
+    if completed:
+        print(
+            f"[INFO] SOTD aggregate complete for {months[0]}…{months[-1]}: "
+            f"{total_records} records processed"
+        )
     print(f"Parallel processing completed in {wall_clock_time:.2f}s")
+
+    # Return True if there were errors, False otherwise
+    return len(errors) > 0
 
 
 def process_single_month(
@@ -170,8 +213,14 @@ def process_single_month(
         }
 
     except FileNotFoundError as e:
-        print(f"[WARN] {e}")
-        return None
+        return {
+            "status": "error",
+            "month": month,
+            "error": f"{e}. Run enrich phase first.",
+        }
     except Exception as e:
-        print(f"[ERROR] Failed to process {month}: {e}")
-        return None
+        return {
+            "status": "error",
+            "month": month,
+            "error": f"Failed to process {month}: {e}",
+        }

@@ -22,9 +22,11 @@ def _process_month(
     out_path = base_path / "enriched" / f"{year:04d}-{month:02d}.json"
 
     if not in_path.exists():
-        if debug:
-            print(f"Skipping missing input file: {in_path}")
-        return None
+        return {
+            "status": "error",
+            "month": ym,
+            "error": f"Missing input file: {in_path}. Run match phase first.",
+        }
 
     # Check if output already exists and force is not set
     if out_path.exists() and not force:
@@ -35,9 +37,11 @@ def _process_month(
         original_metadata, comments = load_matched_data(in_path)
     except (FileNotFoundError, ValueError, json.JSONDecodeError, OSError) as e:
         monitor.end_file_io_timing()
-        if debug:
-            print(f"Failed to load matched data from {in_path}: {e}")
-        return None
+        return {
+            "status": "error",
+            "month": ym,
+            "error": f"Failed to load matched data from {in_path}: {e}",
+        }
     monitor.end_file_io_timing()
 
     # Extract original comment texts for enrichment - optimized version
@@ -87,7 +91,7 @@ def _process_month(
     }
 
 
-def run(args: argparse.Namespace) -> None:
+def run(args: argparse.Namespace) -> bool:
     """Run the enrich phase for the specified date range."""
     months = list(month_span(args))
     base_path = Path(args.out_dir)
@@ -119,15 +123,36 @@ def run(args: argparse.Namespace) -> None:
             months, _process_month, (base_path, args.debug, args.force), "Months"
         )
 
+    # Filter out None results and check for errors
+    valid_results = [r for r in results if r is not None]
+    errors = [r for r in valid_results if "error" in r]
+    skipped = [r for r in valid_results if r.get("status") == "skipped"]
+    completed = [r for r in valid_results if r.get("status") == "completed"]
+
+    # Display error details for failed months
+    if errors:
+        print("\n❌ Error Details:")
+        for error_result in errors:
+            month = error_result.get("month", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {month}: {error_msg}")
+
+    if skipped:
+        print("\n⚠️  Skipped Months:")
+        for skipped_result in skipped:
+            month = skipped_result.get("month", "unknown")
+            reason = skipped_result.get("reason", "unknown reason")
+            print(f"  {month}: {reason}")
+
     # Print summary using standardized formatter
     if not months:
-        return
+        return len(errors) > 0
     if len(months) == 1:
         # Single month summary
         year, month = months[0]
         month_str = f"{year:04d}-{month:02d}"
-        if results:
-            stats = results[0]
+        if completed:
+            stats = completed[0]
             summary = PipelineOutputFormatter.format_single_month_summary(
                 "enrich", month_str, stats
             )
@@ -140,20 +165,23 @@ def run(args: argparse.Namespace) -> None:
         end_str = f"{end_year:04d}-{end_month:02d}"
 
         total_stats = {
-            "total_records": sum(r["records_processed"] for r in results),
-            "total_enriched": sum(r["total_enriched"] for r in results),
+            "total_records": sum(r.get("records_processed", 0) for r in completed),
+            "total_enriched": sum(r.get("total_enriched", 0) for r in completed),
         }
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "enrich", start_str, end_str, total_stats
         )
         print(summary)
 
-    if args.debug and results:
+    if args.debug and completed:
         print("\nEnrichment Summary:")
-        total_records = sum(r["records_processed"] for r in results)
-        total_enriched = sum(r["total_enriched"] for r in results)
+        total_records = sum(r.get("records_processed", 0) for r in completed)
+        total_enriched = sum(r.get("total_enriched", 0) for r in completed)
         print(f"  Total records processed: {total_records}")
         print(f"  Total records enriched: {total_enriched}")
+
+    # Return True if there were errors, False otherwise
+    return len(errors) > 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -162,8 +190,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser = get_parser()
         args = parser.parse_args(argv)
 
-        run(args)
-        return 0  # Success
+        has_errors = run(args)
+        return 1 if has_errors else 0
     except KeyboardInterrupt:
         print("\n[INFO] Enrich phase interrupted by user")
         return 1  # Interrupted

@@ -339,7 +339,7 @@ def match_record(
                         brand = brush_result.matched.get("brand", "Unknown")
                         model = brush_result.matched.get("model", "Unknown")
                         strategy = getattr(brush_result, "strategy", "unknown")
-                        print(f"    ✅ Brush matched: {brand} {model} " f"(strategy: {strategy})")
+                        print(f"    ✅ Brush matched: {brand} {model} (strategy: {strategy})")
                     else:
                         print("    ❌ Brush no match")
             else:
@@ -379,7 +379,11 @@ def process_month(
         # Load extracted data
         extracted_path = base_path / "extracted" / f"{month}.json"
         if not extracted_path.exists():
-            return {"status": "skipped", "month": month, "reason": "missing input file"}
+            return {
+                "status": "error",
+                "month": month,
+                "error": f"Missing input file: {extracted_path}. Run extract phase first.",
+            }
 
         # Check if output already exists and force is not set
         if data_manager.file_exists(month) and not force:
@@ -606,12 +610,24 @@ def run_match(args):
 
     # Display error details for failed months
     errors = [r for r in results if "error" in r]
+    skipped = [r for r in results if r.get("status") == "skipped"]
+
     if errors:
-        print("\nError Details:")
+        print("\n❌ Error Details:")
         for error_result in errors:
             month = error_result.get("month", "unknown")
             error_msg = error_result.get("error", "unknown error")
             print(f"  {month}: {error_msg}")
+
+    if skipped:
+        print("\n⚠️  Skipped Months:")
+        for skipped_result in skipped:
+            month = skipped_result.get("month", "unknown")
+            reason = skipped_result.get("reason", "unknown reason")
+            print(f"  {month}: {reason}")
+
+    # Return True if there were errors, False otherwise
+    return len(errors) > 0
 
 
 def _process_month_for_parallel(
@@ -660,7 +676,8 @@ def main(argv=None) -> int:
         args = parser.parse_args(argv)
 
         if args.mode == "match":
-            run_match(args)
+            has_errors = run_match(args)
+            return 1 if has_errors else 0
         elif args.mode == "analyze_unmatched_razors":
             run_analysis(args)
 

@@ -16,14 +16,15 @@ __all__ = [
 ]
 
 
-def run(args) -> None:
+def run(args) -> bool:
     """Run the aggregate phase for the specified date range."""
     if args.annual:
-        # Handle annual aggregation
+        # Handle annual aggregation (annual handles missing files gracefully)
         if args.year:
             process_annual(
                 year=args.year, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
+            return False  # Annual aggregation handles missing files gracefully
         elif args.range:
             # Parse year range for annual mode
             start_year, end_year = args.range.split(":")
@@ -31,6 +32,7 @@ def run(args) -> None:
             process_annual_range(
                 years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
+            return False  # Annual aggregation handles missing files gracefully
     else:
         # Handle monthly aggregation with parallel processing support
         # Get months to process
@@ -45,7 +47,7 @@ def run(args) -> None:
         if use_parallel and len(months) > 1:
             # Use parallel processing
             max_workers = getattr(args, "max_workers", 8)
-            process_months_parallel(
+            has_errors = process_months_parallel(
                 months=months,
                 data_dir=args.out_dir,
                 debug=args.debug,
@@ -54,7 +56,11 @@ def run(args) -> None:
             )
         else:
             # Use sequential processing
-            process_months(months=months, data_dir=args.out_dir, debug=args.debug, force=args.force)
+            has_errors = process_months(
+                months=months, data_dir=args.out_dir, debug=args.debug, force=args.force
+            )
+
+        return has_errors
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -62,8 +68,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
-        run(args)
-        return 0  # Success
+        has_errors = run(args)
+        return 1 if has_errors else 0
     except KeyboardInterrupt:
         print("\n[INFO] Aggregate phase interrupted by user")
         return 1  # Interrupted

@@ -31,11 +31,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         # Route to appropriate function based on annual flag
         if args.annual:
+            # Annual reports handle missing files gracefully
             run_annual_report(args)
+            return 0
         else:
-            run_report(args)
-
-        return 0  # Success
+            has_errors = run_report(args)
+            return 1 if has_errors else 0
     except KeyboardInterrupt:
         print("\n[INFO] Report generation interrupted by user")
         return 1  # Interrupted

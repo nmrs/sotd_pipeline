@@ -30,11 +30,11 @@ def _process_month(
     try:
         aggregated_file_path = load.get_aggregated_file_path(data_root, year, month)
         metadata, data = load.load_aggregated_data(aggregated_file_path, debug)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         return {
             "month": month_str,
-            "status": "skipped",
-            "reason": "aggregated data not found",
+            "status": "error",
+            "error": f"Missing aggregated data file. Run aggregate phase first. ({e})",
             "reports_generated": 0,
         }
     except Exception as e:
@@ -101,7 +101,7 @@ def _process_month(
     return {"month": month_str, "status": "success", "reports_generated": reports_generated}
 
 
-def run_report(args) -> None:
+def run_report(args) -> bool:
     """Main report generation logic."""
     monitor = PerformanceMonitor("report")
     monitor.start_total_timing()
@@ -175,23 +175,32 @@ def run_report(args) -> None:
             month_tuples, _process_month, process_args, "Months"
         )
 
-    # Process results and show completion message
-    total_reports_generated = 0
-    successful_months = 0
+    # Filter results and check for errors
+    valid_results = [r for r in results if r is not None]
+    errors = [r for r in valid_results if "error" in r]
+    skipped = [r for r in valid_results if r.get("status") == "skipped"]
+    successful = [r for r in valid_results if r.get("status") == "success"]
 
-    for result in results:
-        if result and result.get("status") == "success":
-            total_reports_generated += result["reports_generated"]
-            successful_months += 1
-        elif result and result.get("status") == "skipped":
-            print(f"  {result['month']}: {result['reason']}")
-        elif result and result.get("status") == "error":
-            print(f"  {result['month']}: {result['error']}")
+    # Display error details for failed months
+    if errors:
+        print("\n❌ Error Details:")
+        for error_result in errors:
+            month = error_result.get("month", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {month}: {error_msg}")
+
+    if skipped:
+        print("\n⚠️  Skipped Months:")
+        for skipped_result in skipped:
+            month = skipped_result.get("month", "unknown")
+            reason = skipped_result.get("reason", "unknown reason")
+            print(f"  {month}: {reason}")
 
     # Show completion message
+    total_reports_generated = sum(r.get("reports_generated", 0) for r in successful)
     if total_reports_generated > 0:
-        print(f"Generated {total_reports_generated} reports across {successful_months} months")
-    else:
+        print(f"Generated {total_reports_generated} reports across {len(successful)} months")
+    elif not errors and not skipped:
         print("No reports were generated")
 
     # End timing and show performance summary
@@ -200,3 +209,6 @@ def run_report(args) -> None:
         print("[DEBUG] Report generation completed")
         print("[DEBUG] Performance summary:")
         monitor.print_summary()
+
+    # Return True if there were errors, False otherwise
+    return len(errors) > 0
