@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { CommentDetail } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductDataTable from './ProductDataTable';
 
 interface CommentModalProps {
   comment: CommentDetail | null;
@@ -180,6 +181,14 @@ const CommentModal: React.FC<CommentModalProps> = ({
               dangerouslySetInnerHTML={{ __html: formatBody(comment.body) }}
             />
           </div>
+
+          {/* Product Data */}
+          {comment.product_data && (
+            <ProductDataTable
+              productData={comment.product_data}
+              dataSource={comment.data_source}
+            />
+          )}
         </div>
 
         {/* Footer */}

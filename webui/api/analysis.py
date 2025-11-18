@@ -85,6 +85,25 @@ class MatchPhaseResponse(BaseModel):
     processing_time: float
 
 
+class ProductFieldData(BaseModel):
+    """Model for product field data (matched and enriched)."""
+
+    original: str
+    matched: Optional[Dict[str, Any]] = None
+    enriched: Optional[Dict[str, Any]] = None
+    match_type: Optional[str] = None
+    pattern: Optional[str] = None
+
+
+class CommentProductData(BaseModel):
+    """Model for all product data in a comment."""
+
+    razor: Optional[ProductFieldData] = None
+    blade: Optional[ProductFieldData] = None
+    brush: Optional[ProductFieldData] = None
+    soap: Optional[ProductFieldData] = None
+
+
 class CommentDetail(BaseModel):
     """Model for comment details."""
 
@@ -95,6 +114,8 @@ class CommentDetail(BaseModel):
     thread_id: str
     thread_title: str
     url: str
+    product_data: Optional[CommentProductData] = None
+    data_source: Optional[str] = None  # "enriched" or "matched"
 
 
 class UnmatchedItem(BaseModel):
@@ -270,27 +291,59 @@ def get_filtered_entries_manager() -> FilteredEntriesManager:
     return manager
 
 
-def find_comment_by_id(comment_id: str, months: List[str]) -> Optional[dict]:
-    """Find a comment by its ID across the specified months."""
+def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dict], Optional[str]]:
+    """Find a comment by its ID across the specified months.
+
+    Returns:
+        Tuple of (comment_record, data_source) where data_source is "enriched" or "matched"
+    """
     import json
 
+    # First, try enriched files (which contain both matched and enriched data)
     for month in months:
-        file_path = project_root / "data" / "matched" / f"{month}.json"
-        if not file_path.exists():
-            continue
+        enriched_path = project_root / "data" / "enriched" / f"{month}.json"
+        if enriched_path.exists():
+            try:
+                with enriched_path.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
 
-        try:
-            with file_path.open("r", encoding="utf-8") as f:
-                data = json.load(f)
+                for record in data.get("data", []):
+                    if record.get("id") == comment_id:
+                        return record, "enriched"
+            except Exception as e:
+                logger.warning(f"Error reading {enriched_path}: {e}")
+                continue
 
-            for record in data.get("data", []):
-                if record.get("id") == comment_id:
-                    return record
-        except Exception as e:
-            logger.warning(f"Error reading {file_path}: {e}")
-            continue
+    # Fallback to matched files
+    for month in months:
+        matched_path = project_root / "data" / "matched" / f"{month}.json"
+        if matched_path.exists():
+            try:
+                with matched_path.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
 
-    return None
+                for record in data.get("data", []):
+                    if record.get("id") == comment_id:
+                        return record, "matched"
+            except Exception as e:
+                logger.warning(f"Error reading {matched_path}: {e}")
+                continue
+
+    return None, None
+
+
+def extract_product_field_data(field_data: Optional[Dict[str, Any]]) -> Optional[ProductFieldData]:
+    """Extract product field data from a comment record field."""
+    if not field_data or not isinstance(field_data, dict):
+        return None
+
+    return ProductFieldData(
+        original=field_data.get("original", ""),
+        matched=field_data.get("matched"),
+        enriched=field_data.get("enriched"),
+        match_type=field_data.get("match_type"),
+        pattern=field_data.get("pattern"),
+    )
 
 
 @router.get("/comment/{comment_id}", response_model=CommentDetail)
@@ -304,12 +357,30 @@ async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
             raise HTTPException(status_code=400, detail="At least one month must be specified")
 
         # Find the comment
-        comment = find_comment_by_id(comment_id, month_list)
+        comment, data_source = find_comment_by_id(comment_id, month_list)
 
         if not comment:
             raise HTTPException(
                 status_code=404, detail=f"Comment {comment_id} not found in the specified months"
             )
+
+        # Extract product data
+        product_data = CommentProductData(
+            razor=extract_product_field_data(comment.get("razor")),
+            blade=extract_product_field_data(comment.get("blade")),
+            brush=extract_product_field_data(comment.get("brush")),
+            soap=extract_product_field_data(comment.get("soap")),
+        )
+
+        # Only include product_data if at least one field has data
+        has_product_data = any(
+            [
+                product_data.razor,
+                product_data.blade,
+                product_data.brush,
+                product_data.soap,
+            ]
+        )
 
         return CommentDetail(
             id=comment.get("id", ""),
@@ -319,6 +390,8 @@ async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
             thread_id=comment.get("thread_id", ""),
             thread_title=comment.get("thread_title", ""),
             url=comment.get("url", ""),
+            product_data=product_data if has_product_data else None,
+            data_source=data_source,
         )
 
     except HTTPException:

@@ -95,6 +95,21 @@ export const getCatalogContent = async (catalogName: string): Promise<Record<str
 };
 
 // Comment operations
+export interface ProductFieldData {
+  original: string;
+  matched: Record<string, any> | null;
+  enriched: Record<string, any> | null;
+  match_type?: string;
+  pattern?: string;
+}
+
+export interface CommentProductData {
+  razor?: ProductFieldData;
+  blade?: ProductFieldData;
+  brush?: ProductFieldData;
+  soap?: ProductFieldData;
+}
+
 export interface CommentDetail {
   id: string;
   author: string;
@@ -103,6 +118,8 @@ export interface CommentDetail {
   thread_id: string;
   thread_title: string;
   url: string;
+  product_data?: CommentProductData;
+  data_source?: 'enriched' | 'matched';
 }
 
 export const getCommentDetail = async (
