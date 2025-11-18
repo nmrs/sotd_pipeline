@@ -1039,6 +1039,12 @@ known_brushes:
       knot_loft_mm: 64
       patterns:
         - \b80n\b.*xse
+    B15:
+      fiber: Boar
+      knot_size_mm: 27.5
+      knot_loft_mm: 57
+      patterns:
+        - zenith.*\bb15\b
     Barberpole:
       fiber: Boar
       knot_size_mm: 26

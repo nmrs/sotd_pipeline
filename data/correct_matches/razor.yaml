@@ -61,8 +61,6 @@ Alpha:
   - alpha outlaw
   - alpha outlaw evolution ti
   - alpha outlaw evolution titanium
-  - alpha shaving works - lone star
-  - alpha shaving works - lone star outlaw
   - alpha shaving works - outlaw evolution titanium
   - alpha shaving works outlaw cu
   Stubble Meets Steel:
@@ -508,7 +506,6 @@ Dovo:
   - dovo shavette
   Straight:
   - dovo - 15/16" round point hollow ground
-  - dovo - runde sache - full hollow 5/8 square point
   - dovo 11/16" hollow ground round point
   - dovo art of shaving 5/8 hollow ground round point
   - dovo astrale (ebony & m.o.p.) - full hollow - round point - 6/8
@@ -522,10 +519,8 @@ Drew Dick:
   Straight:
   - drew dick - sheffield style 9/8 1/4 hollow
 DS Cosmetics:
-  AX:
-  - ds-ax 1.55 "poleaxe"
-  T7SE:
-  - dscosmetic t7se
+  AX: []
+  T7SE: []
 DSCosmetic:
   Mars SE:
   - ds cosmetic mars single edge razor
@@ -605,7 +600,6 @@ ERN:
   - ern 421, 5/8 hollow square point
   - ern 6/8 french point full hollow
   - ern 7/8 full hollow round point
-  - ern ator, 6/8 full hollow round point
   - ern crown & sword
   - ern ferreteria sardon arequipa 2611, 15/16 full hollow round point
   - ern ferreteria sardon arequipa 2611, 15/16, full hollow, round point
@@ -649,8 +643,7 @@ Facón:
   Kamisori Shavette:
   - facón - kamisori-style shavette; karve shaving co. - overlander brass
 Fasan:
-  Bakelite Slant:
-  - fasan - bakelite slant
+  Bakelite Slant: []
 Fatip:
   Grande:
   - fatip - grande classic originale nickel open comb
@@ -714,11 +707,6 @@ Filarmonica:
   - filarmonica 14 especial gen 1
   - filarmonica jmp no. 14 15/16 full hollow
   Straight:
-  - filarmonica 12 doble temple 5/8" full hollow
-  - filarmonica 13 novodur 13/16" para profesionales full hollow
-  - filarmonica 14 7/8 dt
-  - filarmonica 14 doble temple (8/8", extra full hollow, carbon steel)
-  - filarmonica 14 epbd 1st gen
   - filarmónica 14 doble temple
   - filarmónica doble temple 14
 Fine Accoutrements:
@@ -1293,15 +1281,7 @@ Henson:
   - henson shaving al13 +
   - henson- al13 mild
   - v2 henson + ("dr. squatch")
-  Ti22:
-  - henson - ti22 +++
-  - henson razors - ti-22 "++"
-  - henson ti22
-  - henson ti22 +++
-  - henson ti22 med
-  - henson ti22 mild
-  - henson ti22+
-  - titanium henson +++, polished, tattooed ("dark age mechanicus shaver")
+  Ti22: []
 Heritage:
   Adjustable:
   - heritage classics gibbs replica
@@ -1723,8 +1703,7 @@ OliWorks:
   - oliworks m3terorite aluminum, middle plate
   - oliworks m3terorite aluminum, mild plate
   - oliworks meteorite (al)
-  OliBlade:
-  - oliworks adjustable
+  OliBlade: []
 OneBlade:
   Core:
   - one blade
@@ -1810,9 +1789,7 @@ Other Straight Razor:
     - h.m. christensen 5/8 hollow ground round point
     - h.m. christensen 5/8 hollow ground square point
     - heinrich klein chronik 4/8
-    - hibbard-spencer straight
     - ic vincent garanti - half hollow - square point - 6/8
-    - ithica drop forge bo-ras-ic straight
     - john h. albright hanover razor
     - joseph elliot 13/16
     - joseph elliot, 5/8 hollow
@@ -1823,8 +1800,6 @@ Other Straight Razor:
     - reliable razor - manganese steel
     - respec cutlery co. - 5/8" hollow ground square tip
     - respec cutlery co. - 5/8" square point hollow ground
-    - robeson sheer edge straight
-    - robeson shuredge the razor the fits your face - 6/8 spike point hollow
     - sheffield cutlery - red stripe scales
     - solingen best silver steel 6/8
     - straight colonial tool steel co 5/8
@@ -2180,7 +2155,6 @@ Rockwell:
   - rockwell 6c plate 2
   - rockwell 6c plate)
   - rockwell r6
-  - stahly live blade vibrating razor handle + rockwell 6c r2 plate
   6S:
   - rockwell - 6s
   - rockwell 6s
@@ -2241,7 +2215,6 @@ Schick:
   - schick type i2 hydro-magic
   Injector:
   - 1972 schick l7 "championship"
-  - gillette~~ schick l7 "championship" injector
   - injector schick
   - schick "66"
   - schick "66" g4
@@ -2249,7 +2222,6 @@ Schick:
   - schick - injector type g
   - schick - injector type j
   - schick - injector x 6" generic locking pliers
-  - schick - stick schick
   - schick - type i1
   - schick - type l1
   - schick injector
@@ -2268,7 +2240,6 @@ Schick:
   - schick injector type m variant d2,h1,g1 (1968 - 1973)
   - schick injector type n1
   - schick l1
-  - schick stick
   - schick type e2
   - schick type e3
   - schick type g injector
@@ -2348,12 +2319,7 @@ Star Reito:
   - star reito 55 staraet special steel 6/8 half hollow square point (yasuki steel)
   - star reito staraet 55 6/8 special steel half hollow square point
 Stirling:
-  Stainless DE Razor:
-  - stirling soap co. - 316 stainless steel razor
-  - stirling soap company - stirling stainless steel (austin handle / st plate) serial
-    no. st-01-084
-  - stirling ss standard plate
-  - stirling stainless standard head
+  Stainless DE Razor: []
   Stainless Handle DE Razor:
   - stirling soap co. de3p1s
 Supply:

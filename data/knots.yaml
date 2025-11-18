@@ -335,7 +335,7 @@ known_knots:
         - \bb14\b
     B15:
       patterns:
-        - \bb15\b
+        - ^(?!zen).*\bb15\b
     B16:
       patterns:
         - \bb16\b

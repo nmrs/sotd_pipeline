@@ -472,8 +472,7 @@ Rockwell:
   Synthetic:
   - rockwell synthetic
 Rubberset:
-  '400':
-  - rubberset 400-unnumbered w/ original knot
+  '400': []
 Semogue:
   Boar:
   - boar rv semogue knot

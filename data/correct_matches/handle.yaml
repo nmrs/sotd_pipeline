@@ -43,7 +43,6 @@ Aurora Grooming:
   - aurora grooming 2024 lather games maggard boar 26 mm
   - aurora grooming gentleman's reserve
   - aurora grooming gentleman's reserve w/ rorschach
-  - aurora grooming lg24
   - aurora grooming mad hatter mauricio
   - aurora grooming mad hatter mauricio w/ 28mm tns shoat
   - aurora grooming mad hatter mauricio w/ shoat
@@ -417,8 +416,7 @@ Rockwell:
   Unspecified:
   - rockwell synthetic
 Rubberset:
-  _no_model:
-  - rubberset 400-unnumbered w/ original knot
+  _no_model: []
   Unspecified:
   - rubberset - 400 w/ maggard shd badger
   - rubberset 200-4 w/26mm declaration b3

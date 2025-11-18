@@ -141,7 +141,6 @@ Aurora Grooming:
   - aurora grooming lg2024 synthetic ("lux emerald green" handle)
   - aurora grooming lg2024 synthetic ("lux emerald green")
   - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh
-  - aurora grooming lg24
   Synthetic:
   - aurora grooming hulkamaniac 26mm cashmere
   - aurora grooming mauricio 26mm synthetic
@@ -463,6 +462,7 @@ Dogwood:
   - dogwood handcrafts 24mm 2-band bulb
   - dogwood handcrafts 30mm silver tip
   - dogwood handcrafts green white swirl 26mm shd2 band bulb badger
+  - dogwood harambe silvertip 32mm
   Boar:
   - dogwood handcrafts - faux ivory - 26mm boar
   Mixed Badger/Boar:
@@ -881,8 +881,7 @@ Rocky Mountain Barber:
 Rubberset:
   '203':
   - rubberset 203
-  '400':
-  - rubberset 400-unnumbered w/ original knot
+  '400': []
   400-4:
   - rubberset 400-4 w/ original knot
   - rubberset 400-4 with original knot
@@ -964,6 +963,8 @@ Semogue:
   - semogue - owners club 24mm boar
   - semogue - owners club boar 24mm
   - semogue - owners club taj
+  - semogue - owners' club cherry wood boar - 24mm
+  - semogue - owners' club cherry wood boar 24mm boar
   - semogue - soc - boar
   - semogue - soc 24mm c2 boar
   - semogue - soc boar
@@ -1265,6 +1266,7 @@ Yaqi:
   - yaqi 25mm synth defect
   - yaqi 26mm rainbow synthetic
   - yaqi 26mm synth timber wolf (sic)
+  - yaqi caramel cat's whiskers synthetic
   - yaqi cola 22mm synthetic three band
   - yaqi defect 25mm synth
   - yaqi defect, 25mm synth
