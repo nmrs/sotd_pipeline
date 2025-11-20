@@ -1136,7 +1136,7 @@ class ValidateCorrectMatches:
                                 "format": format_name,
                                 "brand": brand_name,
                                 "message": (
-                                    f"Brand '{brand_name}' missing from " f"format '{format_name}'"
+                                    f"Brand '{brand_name}' missing from format '{format_name}'"
                                 ),
                             }
                         )
@@ -1174,8 +1174,7 @@ class ValidateCorrectMatches:
                                         "model": model_name,
                                         "pattern": pattern,
                                         "message": (
-                                            f"Pattern '{pattern}' missing from "
-                                            f"expected structure"
+                                            f"Pattern '{pattern}' missing from expected structure"
                                         ),
                                     }
                                 )
@@ -1202,7 +1201,7 @@ class ValidateCorrectMatches:
                                 "brand": brand_name,
                                 "model": model_name,
                                 "message": (
-                                    f"Model '{model_name}' missing from " f"brand '{brand_name}'"
+                                    f"Model '{model_name}' missing from brand '{brand_name}'"
                                 ),
                             }
                         )
@@ -1224,8 +1223,7 @@ class ValidateCorrectMatches:
                                         "model": model_name,
                                         "pattern": pattern,
                                         "message": (
-                                            f"Pattern '{pattern}' missing from "
-                                            f"expected structure"
+                                            f"Pattern '{pattern}' missing from expected structure"
                                         ),
                                     }
                                 )

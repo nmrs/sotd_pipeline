@@ -4,7 +4,8 @@ from typing import Optional
 _FIBER_PATTERNS = {
     # Most specific patterns first
     "Mixed Badger/Boar": (
-        r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|hybrid|fusion|" r"badger.*cased)"
+        r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|(?:badg|boar).*hybrid|hybrid.*(?:badg|boar)|fusion|"
+        r"badger.*cased)"
     ),
     "Mixed Badger/Synthetic": r"(natural fiber.*synthetic|badger/synth|synth/badger)",
     # Specific fiber types with detailed patterns

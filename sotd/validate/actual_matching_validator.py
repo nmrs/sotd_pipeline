@@ -186,10 +186,10 @@ class ActualMatchingValidator:
         line_numbers = []
         correct_matches_dir = self.data_path / "correct_matches"
         field_file = correct_matches_dir / f"{section_name}.yaml"
-        
+
         if not field_file.exists():
             return line_numbers
-        
+
         try:
             with field_file.open("r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -201,7 +201,7 @@ class ActualMatchingValidator:
                     #   - "string_value"
                     #   - 'string_value'
                     #   - string_value: (if it's a key, but we're looking for values)
-                    
+
                     # Check for exact match as list item value
                     if stripped.startswith("-"):
                         # Extract the value after the dash
@@ -211,13 +211,13 @@ class ActualMatchingValidator:
                             value_part = value_part[1:-1]
                         elif value_part.startswith("'") and value_part.endswith("'"):
                             value_part = value_part[1:-1]
-                        
+
                         # Check if this matches our search string (case-insensitive)
                         if value_part.lower() == search_string.lower():
                             line_numbers.append(line_num)
         except Exception as e:
             logger.warning(f"Error finding line numbers in {field_file}: {e}")
-        
+
         return line_numbers
 
     def _validate_data_structure(self, correct_matches: Dict[str, Any]) -> List[ValidationIssue]:
@@ -318,17 +318,17 @@ class ActualMatchingValidator:
                 line_numbers["brush"] = line_nums_brush
             if line_nums_handle:
                 line_numbers["handle"] = line_nums_handle
-            
+
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
                     details=(
-                        f"String '{conflict_string}' appears in both brush and " f"handle sections"
+                        f"String '{conflict_string}' appears in both brush and handle sections"
                     ),
                     suggested_action=(
-                        f"Remove '{conflict_string}' from either brush or " f"handle section"
+                        f"Remove '{conflict_string}' from either brush or handle section"
                     ),
                     line_numbers=line_numbers,
                 )
@@ -343,17 +343,15 @@ class ActualMatchingValidator:
                 line_numbers["brush"] = line_nums_brush
             if line_nums_knot:
                 line_numbers["knot"] = line_nums_knot
-            
+
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
-                    details=(
-                        f"String '{conflict_string}' appears in both brush and " f"knot sections"
-                    ),
+                    details=(f"String '{conflict_string}' appears in both brush and knot sections"),
                     suggested_action=(
-                        f"Remove '{conflict_string}' from either brush or " f"knot section"
+                        f"Remove '{conflict_string}' from either brush or knot section"
                     ),
                     line_numbers=line_numbers,
                 )
@@ -371,15 +369,14 @@ class ActualMatchingValidator:
                 line_numbers["handle"] = line_nums_handle
             if line_nums_knot:
                 line_numbers["knot"] = line_nums_knot
-            
+
             issues.append(
                 ValidationIssue(
                     issue_type="cross_section_conflict",
                     severity="high",
                     correct_match=conflict_string,
                     details=(
-                        f"String '{conflict_string}' appears in brush, handle, "
-                        f"and knot sections"
+                        f"String '{conflict_string}' appears in brush, handle, and knot sections"
                     ),
                     suggested_action=(
                         f"Remove '{conflict_string}' from brush section "
@@ -415,9 +412,7 @@ class ActualMatchingValidator:
                         severity="high",
                         correct_match=brush_string,
                         expected_section=expected_section,
-                        details=(
-                            f"Brush string '{brush_string}' no longer matches " f"any strategy"
-                        ),
+                        details=(f"Brush string '{brush_string}' no longer matches any strategy"),
                         suggested_action=(
                             f"Remove '{brush_string}' from correct_matches "
                             f"directory or update matching logic"

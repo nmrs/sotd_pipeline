@@ -120,8 +120,7 @@ def find_discrepancies(original: Dict[str, Any], fresh: Dict[str, Any]) -> List[
                         "brand": brand,
                         "version": version,
                         "message": (
-                            f"Version '{version}' not found for brand "
-                            f"'{brand}' in fresh matches"
+                            f"Version '{version}' not found for brand '{brand}' in fresh matches"
                         ),
                     }
                 )
@@ -159,8 +158,7 @@ def find_discrepancies(original: Dict[str, Any], fresh: Dict[str, Any]) -> List[
                                     "version": version,
                                     "pattern": pattern,
                                     "message": (
-                                        f"Pattern '{pattern}' could not be "
-                                        f"matched by brush matcher"
+                                        f"Pattern '{pattern}' could not be matched by brush matcher"
                                     ),
                                 }
                             )
