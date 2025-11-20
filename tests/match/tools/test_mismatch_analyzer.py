@@ -394,12 +394,12 @@ class TestMismatchAnalyzer:
         # Check for all expected columns (check for both full and truncated names)
         assert "Type" in output
         # Check for either full or truncated column names
-        assert ("Original" in output or "Orig…" in output or "Orig" in output)
-        assert ("Matched" in output or "Match…" in output or "Match" in output)
-        assert ("Pattern" in output or "Patt…" in output or "Patt" in output)
+        assert "Original" in output or "Orig…" in output or "Orig" in output
+        assert "Matched" in output or "Match…" in output or "Match" in output
+        assert "Pattern" in output or "Patt…" in output or "Patt" in output
         assert "Reason" in output
-        assert ("Comment IDs" in output or "Comm…" in output or "Comment" in output)
-        assert ("Sources" in output or "Sourc…" in output or "Source" in output)
+        assert "Comment IDs" in output or "Comm…" in output or "Comment" in output
+        assert "Sources" in output or "Sourc…" in output or "Source" in output
 
         # Check for expected values
         assert "Aylsworth Apex" in output
@@ -456,7 +456,7 @@ class TestMismatchAnalyzer:
         output = buf.getvalue()
 
         # Check that comment IDs column is included in the table header (check for both full and truncated)
-        assert ("Comment IDs" in output or "Comme…" in output or "Comment" in output)
+        assert "Comment IDs" in output or "Comme…" in output or "Comment" in output
 
         # Test display_unconfirmed_matches
         buf = io.StringIO()

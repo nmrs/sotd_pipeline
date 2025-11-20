@@ -99,10 +99,15 @@ class TestStructurePreservationTDD:
         assert "knot" in regex_result.matched, "Should have knot section"
         # Note: Actual behavior matches full brand name "Summer Break Soaps" for both handle and knot
         assert regex_result.matched["handle"]["brand"] == "Summer Break Soaps"
-        assert regex_result.matched["handle"]["model"] is None or regex_result.matched["handle"]["model"] == "Unspecified"
+        assert (
+            regex_result.matched["handle"]["model"] is None
+            or regex_result.matched["handle"]["model"] == "Unspecified"
+        )
         # Knot brand matches the same brand when it's a complete brush
         assert regex_result.matched["knot"]["brand"] == "Summer Break Soaps"
-        assert regex_result.matched["knot"]["model"] is not None  # Should have knot model (e.g., "Badger")
+        assert (
+            regex_result.matched["knot"]["model"] is not None
+        )  # Should have knot model (e.g., "Badger")
 
         # Step 2: Create temporary correct_matches.yaml
         temp_correct_matches = {"handle": {"Summer Break": {"Unspecified": ["summer break soaps"]}}}

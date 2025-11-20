@@ -723,7 +723,9 @@ class TestScoringEngine:
             pattern="knot_only",
             strategy="knot_only",
         )
-        scored_knot = engine.score_results([result_knot_scenario2], "Declaration B2", engine.cached_results)
+        scored_knot = engine.score_results(
+            [result_knot_scenario2], "Declaration B2", engine.cached_results
+        )
         score_knot = scored_knot[0].score
 
         # Expected: 40.0 + 0.0 + 30.0 + 25.0 = 95.0
@@ -830,7 +832,9 @@ class TestScoringEngine:
             pattern="knot_only",
             strategy="knot_only",
         )
-        scored_knot = engine.score_results([result_knot_scenario4], "Badger Knot", engine.cached_results)
+        scored_knot = engine.score_results(
+            [result_knot_scenario4], "Badger Knot", engine.cached_results
+        )
         score_knot = scored_knot[0].score
 
         # Expected: 40.0 + 0.0 + 0.0 = 40.0 (Badger and Knot are not specific knot model names, no brand balance modifier)

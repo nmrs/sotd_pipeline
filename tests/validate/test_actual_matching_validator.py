@@ -234,20 +234,20 @@ class TestActualMatchingValidator:
         """Test validation for brush field."""
         # Mock directory exists
         mock_exists.return_value = True
-        
+
         # Mock directory structure: correct_matches/brush.yaml
         mock_brush_file = Mock()
         mock_brush_file.stem = "brush"
         mock_brush_file.name = "brush.yaml"
         mock_glob.return_value = [mock_brush_file]
-        
+
         # Mock file reading - Path.open() returns a context manager
         mock_file_handle = Mock()
         mock_file_context = Mock()
         mock_file_context.__enter__ = Mock(return_value=mock_file_handle)
         mock_file_context.__exit__ = Mock(return_value=None)
         mock_brush_file.open.return_value = mock_file_context
-        
+
         mock_yaml_load.return_value = self.mock_correct_matches["brush"]
 
         mock_matcher = Mock()
@@ -275,20 +275,20 @@ class TestActualMatchingValidator:
         """Test validation for razor field."""
         # Mock directory exists
         mock_exists.return_value = True
-        
+
         # Mock directory structure: correct_matches/razor.yaml
         mock_razor_file = Mock()
         mock_razor_file.stem = "razor"
         mock_razor_file.name = "razor.yaml"
         mock_glob.return_value = [mock_razor_file]
-        
+
         # Mock file reading - Path.open() returns a context manager
         mock_file_handle = Mock()
         mock_file_context = Mock()
         mock_file_context.__enter__ = Mock(return_value=mock_file_handle)
         mock_file_context.__exit__ = Mock(return_value=None)
         mock_razor_file.open.return_value = mock_file_context
-        
+
         mock_yaml_load.return_value = self.mock_correct_matches["razor"]
 
         mock_matcher = Mock()

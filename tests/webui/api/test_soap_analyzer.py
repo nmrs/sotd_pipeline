@@ -172,9 +172,7 @@ class TestSoapAnalyzerAPI:
         os.environ["SOTD_DATA_DIR"] = str(tmp_path)
 
         try:
-            response = client.get(
-                "/api/soaps/neighbor-similarity?months=2025-01&mode=brand_scent"
-            )
+            response = client.get("/api/soaps/neighbor-similarity?months=2025-01&mode=brand_scent")
         finally:
             # Restore original environment
             if original_data_dir:
@@ -355,9 +353,7 @@ class TestSoapAnalyzerAPI:
         try:
             # Mock the file opening to return our test data
             with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get(
-                    "/api/soaps/neighbor-similarity?months=2025-01&mode=brands"
-                )
+                response = client.get("/api/soaps/neighbor-similarity?months=2025-01&mode=brands")
 
                 assert response.status_code == 200
                 data = response.json()

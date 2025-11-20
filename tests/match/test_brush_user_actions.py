@@ -420,7 +420,9 @@ class TestBrushUserActionsManager:
             yaml.dump(brush_data, f)
 
         # Test migration
-        migrated_count = self.manager.migrate_from_correct_matches(old_correct_matches_dir, "2025-08")
+        migrated_count = self.manager.migrate_from_correct_matches(
+            old_correct_matches_dir, "2025-08"
+        )
         assert migrated_count == 1
 
         # Verify action was created
@@ -661,12 +663,8 @@ class TestBrushUserActionsManager:
             with open(brush_file, "r") as f:
                 brush_data = yaml.safe_load(f)
 
-            assert (
-                "Test Brand" in brush_data
-            ), "brush.yaml should have Test Brand"
-            assert (
-                "Test Model" in brush_data["Test Brand"]
-            ), "brush.yaml should have Test Model"
+            assert "Test Brand" in brush_data, "brush.yaml should have Test Brand"
+            assert "Test Model" in brush_data["Test Brand"], "brush.yaml should have Test Model"
 
             # Check that the original input text was added (not normalized)
             patterns = brush_data["Test Brand"]["Test Model"]

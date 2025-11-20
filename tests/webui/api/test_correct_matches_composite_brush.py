@@ -17,34 +17,32 @@ class TestCorrectMatchesCompositeBrush:
     """Test cases for correct-matches endpoint with composite brush logic."""
 
     @patch("yaml.safe_load")
-    def test_get_correct_matches_brush_combines_all_sections(
-        self, mock_yaml_load
-    ):
+    def test_get_correct_matches_brush_combines_all_sections(self, mock_yaml_load):
         """Test that get_correct_matches for brush field combines data from brush, handle, and knot sections."""
 
         # Mock project_root - it's a module-level variable, not a function
         # We need to patch it as a property/attribute
         import webui.api.analysis
+
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
-        
+
         try:
             # Track which file handle corresponds to which file path
             file_handles = {}
             file_open_order = []
-            
+
             # Patch Path.exists and Path.open at the class level
             original_exists = Path.exists
             original_open = Path.open
-            
+
             # Mock Path.exists() to return True for directory and section files
             def mock_exists(self):
                 path_str = str(self)
-                return (
-                    path_str.endswith("correct_matches") or 
-                    path_str.endswith(("brush.yaml", "handle.yaml", "knot.yaml"))
+                return path_str.endswith("correct_matches") or path_str.endswith(
+                    ("brush.yaml", "handle.yaml", "knot.yaml")
                 )
-            
+
             # Mock Path.open() to track which file is opened and create a unique file handle
             def mock_open(self, *args, **kwargs):
                 file_path = str(self)
@@ -58,26 +56,29 @@ class TestCorrectMatchesCompositeBrush:
                 mock_file_context.__enter__ = MagicMock(return_value=mock_file_handle)
                 mock_file_context.__exit__ = MagicMock(return_value=None)
                 return mock_file_context
-            
+
             # Apply the patches
             Path.exists = mock_exists
             Path.open = mock_open
-            
+
             # Mock yaml.safe_load to return section-specific data based on call order
             call_count = [0]  # Use list to allow modification in nested function
+
             def yaml_load_side_effect(file_handle):
                 # Return data based on call order (brush, handle, knot)
                 call_count[0] += 1
                 if call_count[0] == 1:  # First call - brush.yaml
                     return {"AP Shave Co": {"G5C": ["ap shave co g5c 24mm"]}}
                 elif call_count[0] == 2:  # Second call - handle.yaml
-                    return {"AP Shave Co": {"Unspecified": ["ap shave co. - lemon drop 26mm tgn boar"]}}
+                    return {
+                        "AP Shave Co": {"Unspecified": ["ap shave co. - lemon drop 26mm tgn boar"]}
+                    }
                 elif call_count[0] == 3:  # Third call - knot.yaml
                     return {"The Golden Nib": {"Boar": ["ap shave co. - lemon drop 26mm tgn boar"]}}
                 return {}
-            
+
             mock_yaml_load.side_effect = yaml_load_side_effect
-            
+
             # Call the async function
             import asyncio
 
@@ -109,7 +110,7 @@ class TestCorrectMatchesCompositeBrush:
             assert "Boar" in entries["knot"]["The Golden Nib"]
             knot_text = "ap shave co. - lemon drop 26mm tgn boar"
             assert knot_text in entries["knot"]["The Golden Nib"]["Boar"]
-        
+
         finally:
             # Restore original project_root and Path methods
             webui.api.analysis.project_root = original_project_root
@@ -121,21 +122,19 @@ class TestCorrectMatchesCompositeBrush:
         """Test that existing brush section logic is preserved when combining sections."""
         # Mock project_root
         import webui.api.analysis
+
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
-        
+
         try:
             original_exists = Path.exists
             original_open = Path.open
-            
+
             # Mock Path.exists() to return True only for brush.yaml (not handle/knot)
             def mock_exists(self):
                 path_str = str(self)
-                return (
-                    path_str.endswith("correct_matches") or 
-                    path_str.endswith("brush.yaml")
-                )
-            
+                return path_str.endswith("correct_matches") or path_str.endswith("brush.yaml")
+
             # Mock Path.open() to create file handle
             def mock_open(self, *args, **kwargs):
                 mock_file_context = MagicMock()
@@ -143,16 +142,19 @@ class TestCorrectMatchesCompositeBrush:
                 mock_file_context.__enter__ = MagicMock(return_value=mock_file_handle)
                 mock_file_context.__exit__ = MagicMock(return_value=None)
                 return mock_file_context
-            
+
             Path.exists = mock_exists
             Path.open = mock_open
-            
+
             # Mock YAML data - brush.yaml contains data directly (not wrapped in "brush" key)
-            mock_yaml_data = {"AP Shave Co": {"G5C": ["ap shave co g5c 24mm", "ap shave co g5c 26mm"]}}
+            mock_yaml_data = {
+                "AP Shave Co": {"G5C": ["ap shave co g5c 24mm", "ap shave co g5c 26mm"]}
+            }
             mock_yaml_load.return_value = mock_yaml_data
-            
+
             # Call the async function
             import asyncio
+
             result = asyncio.run(get_correct_matches("brush"))
 
             # Verify the result works as before for brush-only data
@@ -166,13 +168,13 @@ class TestCorrectMatchesCompositeBrush:
             assert "AP Shave Co" in entries["brush"]
             assert "G5C" in entries["brush"]["AP Shave Co"]
             assert len(entries["brush"]["AP Shave Co"]["G5C"]) == 2
-            
+
             # Handle and knot sections should be empty
             assert "handle" in entries
             assert "knot" in entries
             assert entries["handle"] == {}
             assert entries["knot"] == {}
-        
+
         finally:
             # Restore original project_root and Path methods
             webui.api.analysis.project_root = original_project_root
@@ -220,21 +222,19 @@ class TestCorrectMatchesCompositeBrush:
         """Test that missing sections are handled gracefully."""
         # Mock project_root
         import webui.api.analysis
+
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
-        
+
         try:
             original_exists = Path.exists
             original_open = Path.open
-            
+
             # Mock Path.exists() to return True only for brush.yaml (not handle/knot)
             def mock_exists(self):
                 path_str = str(self)
-                return (
-                    path_str.endswith("correct_matches") or 
-                    path_str.endswith("brush.yaml")
-                )
-            
+                return path_str.endswith("correct_matches") or path_str.endswith("brush.yaml")
+
             # Mock Path.open() to create file handle
             def mock_open(self, *args, **kwargs):
                 mock_file_context = MagicMock()
@@ -242,16 +242,17 @@ class TestCorrectMatchesCompositeBrush:
                 mock_file_context.__enter__ = MagicMock(return_value=mock_file_handle)
                 mock_file_context.__exit__ = MagicMock(return_value=None)
                 return mock_file_context
-            
+
             Path.exists = mock_exists
             Path.open = mock_open
-            
+
             # Mock YAML data - brush.yaml contains data directly (not wrapped in "brush" key)
             mock_yaml_data = {"AP Shave Co": {"G5C": ["ap shave co g5c 24mm"]}}
             mock_yaml_load.return_value = mock_yaml_data
-            
+
             # Call the async function
             import asyncio
+
             result = asyncio.run(get_correct_matches("brush"))
 
             # Verify the result handles missing sections
@@ -265,13 +266,13 @@ class TestCorrectMatchesCompositeBrush:
             assert "AP Shave Co" in entries["brush"]
             assert "G5C" in entries["brush"]["AP Shave Co"]
             assert len(entries["brush"]["AP Shave Co"]["G5C"]) == 1
-            
+
             # Handle and knot sections should be empty
             assert "handle" in entries
             assert "knot" in entries
             assert entries["handle"] == {}
             assert entries["knot"] == {}
-        
+
         finally:
             # Restore original project_root and Path methods
             webui.api.analysis.project_root = original_project_root
@@ -283,21 +284,19 @@ class TestCorrectMatchesCompositeBrush:
         """Test that non-brush fields are not affected by the composite brush logic."""
         # Mock project_root
         import webui.api.analysis
+
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
-        
+
         try:
             original_exists = Path.exists
             original_open = Path.open
-            
+
             # Mock Path.exists() to return True for directory and razor.yaml only
             def mock_exists(self):
                 path_str = str(self)
-                return (
-                    path_str.endswith("correct_matches") or 
-                    path_str.endswith("razor.yaml")
-                )
-            
+                return path_str.endswith("correct_matches") or path_str.endswith("razor.yaml")
+
             # Mock Path.open() to create file handle
             def mock_open(self, *args, **kwargs):
                 mock_file_context = MagicMock()
@@ -305,16 +304,17 @@ class TestCorrectMatchesCompositeBrush:
                 mock_file_context.__enter__ = MagicMock(return_value=mock_file_handle)
                 mock_file_context.__exit__ = MagicMock(return_value=None)
                 return mock_file_context
-            
+
             Path.exists = mock_exists
             Path.open = mock_open
-            
+
             # Mock YAML data - razor.yaml contains data directly (not wrapped in "razor" key)
             mock_yaml_data = {"Koraat": {"Moarteen": ["koraat moarteen"]}}
             mock_yaml_load.return_value = mock_yaml_data
-            
+
             # Test razor field (should not be affected)
             import asyncio
+
             result = asyncio.run(get_correct_matches("razor"))
 
             # Verify razor field is not affected
@@ -328,7 +328,7 @@ class TestCorrectMatchesCompositeBrush:
             assert "brush" not in entries
             assert "handle" not in entries
             assert "knot" not in entries
-        
+
         finally:
             # Restore original project_root and Path methods
             webui.api.analysis.project_root = original_project_root
@@ -340,22 +340,22 @@ class TestCorrectMatchesCompositeBrush:
         """Test that the combined data enables composite brush confirmation logic."""
         # Mock project_root
         import webui.api.analysis
+
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
-        
+
         try:
             original_exists = Path.exists
             original_open = Path.open
             file_open_order = []
-            
+
             # Mock Path.exists() to return True for all three section files
             def mock_exists(self):
                 path_str = str(self)
-                return (
-                    path_str.endswith("correct_matches") or 
-                    path_str.endswith(("brush.yaml", "handle.yaml", "knot.yaml"))
+                return path_str.endswith("correct_matches") or path_str.endswith(
+                    ("brush.yaml", "handle.yaml", "knot.yaml")
                 )
-            
+
             # Mock Path.open() to track which file is opened
             def mock_open(self, *args, **kwargs):
                 file_path = str(self)
@@ -366,26 +366,30 @@ class TestCorrectMatchesCompositeBrush:
                 mock_file_context.__enter__ = MagicMock(return_value=mock_file_handle)
                 mock_file_context.__exit__ = MagicMock(return_value=None)
                 return mock_file_context
-            
+
             Path.exists = mock_exists
             Path.open = mock_open
-            
+
             # Mock yaml.safe_load to return different data based on call order
             call_count = [0]
+
             def yaml_load_side_effect(file_handle):
                 call_count[0] += 1
                 if call_count[0] == 1:  # brush.yaml
                     return {"AP Shave Co": {"G5C": ["ap shave co g5c 24mm"]}}
                 elif call_count[0] == 2:  # handle.yaml
-                    return {"AP Shave Co": {"Unspecified": ["ap shave co. - lemon drop 26mm tgn boar"]}}
+                    return {
+                        "AP Shave Co": {"Unspecified": ["ap shave co. - lemon drop 26mm tgn boar"]}
+                    }
                 elif call_count[0] == 3:  # knot.yaml
                     return {"The Golden Nib": {"Boar": ["ap shave co. - lemon drop 26mm tgn boar"]}}
                 return {}
-            
+
             mock_yaml_load.side_effect = yaml_load_side_effect
-            
+
             # Call the async function
             import asyncio
+
             result = asyncio.run(get_correct_matches("brush"))
 
             # Verify the result provides data needed for composite brush confirmation
@@ -412,7 +416,7 @@ class TestCorrectMatchesCompositeBrush:
             # is_confirmed = handle_confirmed AND knot_confirmed
             # where handle_confirmed = handle_source_text in handle_section
             # and knot_confirmed = knot_source_text in knot_section
-        
+
         finally:
             # Restore original project_root and Path methods
             webui.api.analysis.project_root = original_project_root

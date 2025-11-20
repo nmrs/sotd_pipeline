@@ -721,8 +721,7 @@ class TestCorrectMatchesManagerNewStructure:
         assert "_no_brand" in knot_data
         assert "Synthetic" in knot_data["_no_brand"]
         assert (
-            "custom irish bog oak handle 30mm synthetic knot"
-            in knot_data["_no_brand"]["Synthetic"]
+            "custom irish bog oak handle 30mm synthetic knot" in knot_data["_no_brand"]["Synthetic"]
         )
 
     def test_mixed_brand_no_brand_entries(self, correct_matches_manager):
