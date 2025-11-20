@@ -307,7 +307,7 @@ Blackland:
   Vector:
     format: AC
     patterns:
-      - (?:black(land|bird))?.*vector
+      - (?:black(land|bird))?.*vector(?! handle)
 Blutt Rasur:
   BR-1:
     patterns:
@@ -392,7 +392,7 @@ Cartridge/Disposable:
       - (?:sc?hic?k).*(disposable|xtreme 2|skintimate|hydro.*5|pla5tik)
       - (mach.?3|trac.?ii|sensor.?[23])
       - gil.*(cartridge|disposable)
-      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
+      - gil.*et.*(labs|fusion|guard|joy|proglide|sensor|venus)
       - bic.*(disposable|metal|sensitive)?
       - disposable
       - atra
@@ -407,6 +407,7 @@ Cartridge/Disposable:
       - next bic thing
       - penny shaver
       - person.*(single blade|face razor)
+      - twinblade
 Charcoal Goods:
   Everyday:
     patterns:
@@ -628,7 +629,7 @@ EldrormR Industries:
   MM24:
     format: GEM
     patterns:
-      - 'mm\s*24'
+      - 'm+\s*24'
   Scrubty-four:
     format: GEM
     patterns:
@@ -771,14 +772,14 @@ Filarmonica:
     point: Square
     width: 5/8
     patterns:
-      - filarmonica.*\b12\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - filarm[oó]nica.*\b12\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   "13":
     format: Straight
     grind: Extra Hollow
     point: Square
     width: 6/8
     patterns:
-      - filarmonica.*\b13\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - filarm[oó]nica.*\b13\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - filly.*\b13\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   "14":
     format: Straight
@@ -786,7 +787,7 @@ Filarmonica:
     point: Square
     width: 15/16
     patterns:
-      - filarmonica.*\b14\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - filarm[oó]nica.*\b14\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Straight:
     format: Straight
     patterns:
@@ -843,7 +844,7 @@ FrankenRazor:
 Futur Clone:
   "":
     patterns:
-      - futur.*clone
+      - futur.*(clone|copy)
       - Ming.*Shi.*(2000|adj)
       - qs?have
 F.W. Engels:
@@ -860,6 +861,10 @@ Gardette:
     patterns:
       - gardette
 GEM:
+  1901 Lather Catcher:
+    format: GEM
+    patterns:
+      - 1901.*lather.*catcher
   "1912":
     format: GEM
     patterns:
@@ -1059,6 +1064,7 @@ Gillette:
       - \btech\b
       - gil.*travel
       - gill.*ball tip
+      - gillette.*\bfat handle\b
   Toggle:
     patterns:
       - (gil.*)?toggle
@@ -1170,14 +1176,14 @@ Hederi & Joseph:
 Henson:
   AL13:
     patterns:
-      - henson.*(mild|medium|aggressive)?
+      - ^(?!.*ti-?22).*henson.*(mild|medium|aggressive)?
       - (henson)?.*al13(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - squatch
       - \bal-?13
   Ti22:
     patterns:
       - henson.*ti
-      - ti22
+      - ti-?22
       - ti.*henson
 Hendrix Classics & Co:
   Garand:
@@ -1324,8 +1330,7 @@ Joseph Rodgers & Sons:
 Junjie:
   Safety Razor:
     patterns:
-      - jungie
-      - junjie
+      - jun[gj]ie
 K.M. Designs:
   Straight:
     format: Straight
@@ -1511,7 +1516,7 @@ Maggard:
       - mr.*slant
   SS70:
     patterns:
-      - ss70
+      - (?:maggard)?.*ss70
       - maggard.*cnc
   V2:
     patterns:
@@ -1667,6 +1672,11 @@ Mühle:
   Unspecified:
     patterns:
       - m[uü]hle
+Nobel:
+  Kamisori:
+    format: Straight
+    patterns:
+      - nobel.*kamisori(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
 Noble Otter:
   DE:
     patterns:
@@ -1754,6 +1764,7 @@ Other Shavette (AC):
     patterns:
       - (shavette|kami).*\bac\b
       - \bac\b.*(shavette|kami)
+      - feather clone.*scales
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
@@ -1769,7 +1780,7 @@ Other Kamisori:
   "":
     format: Straight
     patterns:
-      - ^(?!.*\bac\b|shavette|feather|henkotsu|facón|cjb|kai|yurii|raido).*kami
+      - ^(?!.*\b(shavette|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
 Other Straight Razor:
   "":
     format: Straight
@@ -2093,8 +2104,6 @@ RazoRock:
   German 37 Slant:
     patterns:
       - 'german.*\b37\b'
-      - 'slant.*\b37\b'
-      - '\b37\b.*slant'
   GOAT:
     patterns:
       - razorock.*goat
@@ -2187,7 +2196,7 @@ Rex:
       - rex.*page
   Sentry:
     patterns:
-      - sentry
+      - rex.*sentry
 RigaRazor:
   Straight:
     format: Straight
@@ -2254,6 +2263,11 @@ Rocnel:
     patterns:
       - rocnel.*se\s*50
       - se\s*50.*rocnel
+Rogers Cutlery Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - rogers cutlery
 Rolls:
   Razor:
     format: Other
@@ -2324,6 +2338,10 @@ Schick:
     format: Injector
     patterns:
       - golden.*500
+  Grip:
+    format: Injector
+    patterns:
+      - schick.*grip
   Hydromagic:
     format: Injector
     patterns:
@@ -2334,6 +2352,7 @@ Schick:
       - sc?hl?ick
       - lad(y.|ies)*eversharp
       - injector
+      - schick.*injector
   Krona:
     patterns:
       - (?:schick)?.*kry?ona
@@ -2653,6 +2672,11 @@ Vikings Revolution:
   Long Handle:
     patterns:
       - vik.*rev
+W. Bingham Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - bingham co\.?(?:mpany)?
 W. Greaves & Sons:
   Straight:
     format: Straight
@@ -2801,10 +2825,10 @@ Wolfman:
   WR1:
     patterns:
       - '(Wolfman)?.*WR[\s-]*1'
-      - Wolfman
   WR2:
     patterns:
       - '(Wolfman)?.*WR[\s-]*2'
+      - Wolfman
   WR3:
     format: GEM
     patterns:
@@ -2885,7 +2909,7 @@ Yaqi:
       - yaqi.*slant
   Slant 37:
     patterns:
-      - yaqi.*slant 37\b
+      - (?:yaqi)?.*slant 37
   Slope:
     patterns:
       - yaqi slope
