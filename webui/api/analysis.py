@@ -250,7 +250,9 @@ class CatalogValidationIssue(BaseModel):
     current_match_details: Optional[dict] = None  # Current brush match details
     expected_handle_match: Optional[dict] = None  # Expected handle match details
     expected_knot_match: Optional[dict] = None  # Expected knot match details
-    line_numbers: Optional[Dict[str, List[int]]] = None  # Line numbers by section/file for duplicate/conflict issues
+    line_numbers: Optional[Dict[str, List[int]]] = (
+        None  # Line numbers by section/file for duplicate/conflict issues
+    )
 
 
 class CatalogValidationResponse(BaseModel):
@@ -1487,7 +1489,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "details": issue.details,
                 "catalog_format": None,  # Format not available in actual matching validation
                 "matched_pattern": None,  # Pattern not available in actual matching validation
-                "line_numbers": getattr(issue, "line_numbers", None),  # Line numbers for duplicate/conflict issues
+                "line_numbers": getattr(
+                    issue, "line_numbers", None
+                ),  # Line numbers for duplicate/conflict issues
             }
 
             # For structural_change issues with brush data, add match details
@@ -1569,12 +1573,12 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
 
         # Load YAML files from directory structure
         yaml_data = {}
-        
+
         # Check if any entries are cross-section conflicts
         has_cross_section_conflict = any(
             entry.get("issue_type") == "cross_section_conflict" for entry in request.matches
         )
-        
+
         # Determine which sections to load
         if has_cross_section_conflict:
             # For cross-section conflicts, load all brush-related sections

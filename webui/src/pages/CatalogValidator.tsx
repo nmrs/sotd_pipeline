@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,41 @@ const CatalogValidator: React.FC = () => {
     }
   };
 
+  // Helper function to get filtered issues
+  const getFilteredIssues = () => {
+    if (!results?.issues) return [];
+
+    switch (displayMode) {
+      case 'mismatches':
+        return results.issues.filter(issue =>
+          issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
+        );
+      case 'no_match':
+        return results.issues.filter(issue =>
+          issue.issue_type === 'catalog_pattern_no_match' || issue.issue_type === 'no_match'
+        );
+      case 'format_mismatches':
+        return results.issues.filter(issue => issue.issue_type === 'format_mismatch');
+      case 'data_mismatch':
+        return results.issues.filter(issue => issue.issue_type === 'data_mismatch');
+      case 'structural_change':
+        return results.issues.filter(issue => issue.issue_type === 'structural_change');
+      case 'duplicate_string':
+        return results.issues.filter(issue => issue.issue_type === 'duplicate_string');
+      case 'cross_section_conflict':
+        return results.issues.filter(issue => issue.issue_type === 'cross_section_conflict');
+      default:
+        return results.issues;
+    }
+  };
+
+  // Memoized filtered issues
+  const filteredIssues = useMemo(() => getFilteredIssues(), [results, displayMode]);
+  const areAllSelected = useMemo(
+    () => filteredIssues.length > 0 && filteredIssues.every((_, index) => selectedIssues.has(index)),
+    [filteredIssues, selectedIssues]
+  );
+
   // New functions for multi-select functionality
   const handleRemoveSelected = async () => {
     if (!results || selectedIssues.size === 0) return;
@@ -60,7 +95,7 @@ const CatalogValidator: React.FC = () => {
 
       // Get the selected issues data
       const selectedIssuesData = Array.from(selectedIssues).map(index => {
-        const issue = getFilteredIssues()[index];
+        const issue = filteredIssues[index];
         return {
           correct_match: issue.correct_match,
           expected_brand: issue.expected_brand,
@@ -111,6 +146,19 @@ const CatalogValidator: React.FC = () => {
     });
   };
 
+  const handleSelectAll = () => {
+    if (filteredIssues.length === 0) return;
+
+    if (areAllSelected) {
+      // Deselect all
+      setSelectedIssues(new Set());
+    } else {
+      // Select all
+      const allIndices = new Set(Array.from({ length: filteredIssues.length }, (_, i) => i));
+      setSelectedIssues(allIndices);
+    }
+  };
+
   const isAnyIssueSelected = selectedIssues.size > 0;
 
   const getDisplayModeCounts = () => {
@@ -143,33 +191,6 @@ const CatalogValidator: React.FC = () => {
       duplicate_string: issues.filter(issue => issue.issue_type === 'duplicate_string').length,
       cross_section_conflict: issues.filter(issue => issue.issue_type === 'cross_section_conflict').length,
     };
-  };
-
-  const getFilteredIssues = () => {
-    if (!results?.issues) return [];
-
-    switch (displayMode) {
-      case 'mismatches':
-        return results.issues.filter(issue =>
-          issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
-        );
-      case 'no_match':
-        return results.issues.filter(issue =>
-          issue.issue_type === 'catalog_pattern_no_match' || issue.issue_type === 'no_match'
-        );
-      case 'format_mismatches':
-        return results.issues.filter(issue => issue.issue_type === 'format_mismatch');
-      case 'data_mismatch':
-        return results.issues.filter(issue => issue.issue_type === 'data_mismatch');
-      case 'structural_change':
-        return results.issues.filter(issue => issue.issue_type === 'structural_change');
-      case 'duplicate_string':
-        return results.issues.filter(issue => issue.issue_type === 'duplicate_string');
-      case 'cross_section_conflict':
-        return results.issues.filter(issue => issue.issue_type === 'cross_section_conflict');
-      default:
-        return results.issues;
-    }
   };
 
   const getIssueIcon = (issue: CatalogValidationIssue) => {
@@ -441,7 +462,7 @@ const CatalogValidator: React.FC = () => {
                     Issues Found: <span className='font-medium'>{results.issues.length}</span>
                   </span>
                   <span>
-                    Displayed: <span className='font-medium'>{getFilteredIssues().length}</span>
+                    Displayed: <span className='font-medium'>{filteredIssues.length}</span>
                   </span>
                   <span>
                     Processing Time:{' '}
@@ -455,9 +476,18 @@ const CatalogValidator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Remove Selected Button */}
-              {isAnyIssueSelected && (
-                <div className='flex items-center gap-2'>
+              {/* Select All and Remove Selected Buttons */}
+              <div className='flex items-center gap-2'>
+                {filteredIssues.length > 0 && (
+                  <Button
+                    variant='outline'
+                    onClick={handleSelectAll}
+                    className='flex items-center gap-2'
+                  >
+                    {areAllSelected ? 'Deselect All' : 'Select All'}
+                  </Button>
+                )}
+                {isAnyIssueSelected && (
                   <Button
                     variant='destructive'
                     onClick={handleRemoveSelected}
@@ -466,15 +496,15 @@ const CatalogValidator: React.FC = () => {
                   >
                     {removing ? 'Removing...' : `Remove Selected (${selectedIssues.size})`}
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
           <div className='p-6'>
-            {getFilteredIssues().length > 0 ? (
+            {filteredIssues.length > 0 ? (
               <div className='space-y-4'>
-                {getFilteredIssues().map((issue, index) => (
+                {filteredIssues.map((issue, index) => (
                   <div
                     key={index}
                     className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)} ${selectedIssues.has(index) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
