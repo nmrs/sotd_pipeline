@@ -67,7 +67,7 @@ const ProductDataTable: React.FC<ProductDataTableProps> = ({ productData, dataSo
               const matched = data?.matched || null;
               const enriched = data?.enriched || null;
               const formattedMatched = formatMatchedData(matched, row.key);
-              const formattedEnriched = formatEnrichedData(enriched, row.key);
+              const formattedEnriched = formatEnrichedData(enriched);
 
               return (
                 <tr key={row.key} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>

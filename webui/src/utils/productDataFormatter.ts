@@ -50,8 +50,15 @@ export const formatBrushComponent = (
 
 /**
  * Format matched data for display based on field type.
+ * @param matched - The matched data from the match phase
+ * @param field - The field type (razor, blade, brush, soap)
+ * @param enriched - Optional enriched data from the enrich phase
  */
-export const formatMatchedData = (matched: unknown, field?: string): string => {
+export const formatMatchedData = (
+  matched: unknown,
+  field?: string,
+  enriched?: unknown
+): string => {
   if (!matched) return 'N/A';
 
   if (typeof matched === 'string') {
@@ -60,6 +67,26 @@ export const formatMatchedData = (matched: unknown, field?: string): string => {
 
   if (typeof matched === 'object' && matched !== null) {
     const matchedObj = matched as Record<string, unknown>;
+
+    // Special handling for razor field - prefer enriched format when available
+    if (field === 'razor') {
+      const parts = [];
+      if (matchedObj.brand) parts.push(String(matchedObj.brand));
+      if (matchedObj.model) parts.push(String(matchedObj.model));
+      
+      // Use enriched format if available, otherwise fall back to matched format
+      if (enriched && typeof enriched === 'object' && enriched !== null) {
+        const enrichedObj = enriched as Record<string, unknown>;
+        if (enrichedObj.format) {
+          parts.push(String(enrichedObj.format));
+          return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+        }
+      }
+      
+      // Fall back to matched format if no enriched format
+      if (matchedObj.format) parts.push(String(matchedObj.format));
+      return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+    }
 
     // Special handling for brush field
     if (field === 'brush') {
@@ -129,7 +156,7 @@ export const formatMatchedData = (matched: unknown, field?: string): string => {
  * Format enriched data for display.
  * Similar to formatMatchedData but handles enriched-specific fields.
  */
-export const formatEnrichedData = (enriched: unknown, field?: string): string => {
+export const formatEnrichedData = (enriched: unknown): string => {
   if (!enriched) return 'N/A';
 
   if (typeof enriched === 'string') {

@@ -531,8 +531,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         accessorKey: 'matched',
         header: 'Matched',
         sortingFn: (rowA, rowB) => {
-          const a = formatMatchedData(rowA.original.matched, field);
-          const b = formatMatchedData(rowB.original.matched, field);
+          const a = formatMatchedData(rowA.original.matched, field, rowA.original.enriched);
+          const b = formatMatchedData(rowB.original.matched, field, rowB.original.enriched);
           return a.localeCompare(b);
         },
         cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
@@ -543,7 +543,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             return null;
           }
 
-          const formattedData = formatMatchedData(item.matched, field);
+          const formattedData = formatMatchedData(item.matched, field, item.enriched);
 
           // Check if there are enrich-phase changes using the enriched data from the API response
           const hasChanges =

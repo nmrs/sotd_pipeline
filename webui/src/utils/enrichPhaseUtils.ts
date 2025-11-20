@@ -45,6 +45,13 @@ export const hasEnrichPhaseChanges = (
 
     // No changes detected
     return false;
+  } else if (field === 'razor') {
+    // For razor field, check format changes (enriched format vs matched format)
+    const matchedFormat = matchedData?.format;
+    const enrichedFormat = enrichedData?.format;
+    
+    // Only consider it a change if the enriched format exists and is different
+    return enrichedFormat !== undefined && enrichedFormat !== matchedFormat;
   } else {
     // For other fields, check top-level fields
     const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
@@ -98,6 +105,19 @@ export const getEnrichPhaseChanges = (
         originalValue: matchedKnotSize,
         enrichedValue: enrichedKnotSize,
         displayName: 'Knot Size (mm)',
+      });
+    }
+  } else if (field === 'razor') {
+    // For razor field, check format changes
+    const matchedFormat = matchedData?.format;
+    const enrichedFormat = enrichedData?.format;
+
+    if (enrichedFormat !== undefined && enrichedFormat !== matchedFormat) {
+      changes.push({
+        field: 'format',
+        originalValue: matchedFormat,
+        enrichedValue: enrichedFormat,
+        displayName: 'Format',
       });
     }
   } else {
