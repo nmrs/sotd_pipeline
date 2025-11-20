@@ -5,6 +5,7 @@ from .blade_enricher import BladeCountEnricher
 from .brush_enricher import BrushEnricher
 from .christopher_bradley_enricher import ChristopherBradleyEnricher
 from .game_changer_enricher import GameChangerEnricher
+from .razor_format_enricher import RazorFormatEnricher
 from .registry import enricher_registry
 from .soap_sample_enricher import SoapSampleEnricher
 from .straight_razor_enricher import StraightRazorEnricher
@@ -29,6 +30,7 @@ def setup_enrichers():
     enricher_registry.register(BlackbirdPlateEnricher())
     enricher_registry.register(SoapSampleEnricher())
     enricher_registry.register(SuperSpeedTipEnricher())
+    enricher_registry.register(RazorFormatEnricher())
 
     _enrichers_setup = True
 
