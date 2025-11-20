@@ -5,8 +5,9 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
 
-from sotd.extract.fields import extract_field
+from sotd.extract.fields import extract_field_with_pattern, get_patterns
 from sotd.extract.override_manager import OverrideManager
+from sotd.utils.aliases import FIELD_ALIASES
 from sotd.utils.extract_normalization import normalize_for_matching
 from sotd.utils.text import preprocess_body
 
@@ -25,17 +26,31 @@ def parse_comment(
     lines = [re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", line) for line in lines]
 
     result = {}
-    seen_fields = set()
 
-    for line in lines:
-        for field in ("razor", "blade", "brush", "soap"):
-            if field not in seen_fields:
-                value = extract_field(line, field)
+    # Process fields with pattern priority: try each pattern across all lines
+    # This ensures high-priority patterns (explicit markers) are checked before
+    # low-priority patterns (ambiguous), regardless of line order
+    for field in ("razor", "blade", "brush", "soap"):
+        if field in result:
+            continue  # Already found this field
+
+        # Get all patterns for this field (ordered by priority, 0=highest, 57=lowest)
+        aliases = FIELD_ALIASES.get(field, [field])
+        patterns = []
+        for alias in aliases:
+            patterns.extend(get_patterns(alias))
+
+        # Try each pattern across all lines (pattern priority order)
+        for pattern in patterns:
+            for line in lines:
+                value = extract_field_with_pattern(line, field, pattern)
                 if value:
-                    # Create structured format with original and normalized fields
+                    # Found a match with this priority level - use it
                     normalized_value = normalize_for_matching(value, field=field)
                     result[field] = {"original": value, "normalized": normalized_value}
-                    seen_fields.add(field)
+                    break  # Found match, move to next field
+            if field in result:
+                break  # Found match for this field, try next field
 
     # Apply overrides if override manager is provided
     if override_manager and comment.get("id"):

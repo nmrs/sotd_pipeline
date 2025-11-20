@@ -323,3 +323,42 @@ def test_parse_comment_razor_test_exclusion_2025_06():
     # Should extract the correct razor, not the "Razor Test" line
     assert result["razor"]["original"] == "Lee Manufacturing Co. - Lee's Warranted"
     assert result["razor"]["normalized"] == "Lee Manufacturing Co. - Lee's Warranted"
+
+
+def test_parse_comment_pattern_priority_narrative_vs_explicit():
+    """Test that explicit markers win over ambiguous patterns, even when ambiguous appears first."""
+    # This tests the specific case where narrative text matches ambiguous pattern
+    # but explicit marker on later line should win
+    comment = {
+        "body": "\n".join(
+            [
+                "Wednesday 7/16 Shave",
+                "",
+                "GEM JULY",
+                "",
+                "WECK WEDNESDAY",
+                "",
+                "",
+                "",
+                "Personna Blade on it's 15th use - binned after shave",
+                "",
+                "Razor was still smooth but was not effective cutter",
+                "",
+                "Treet razor with PAL Carbon Steel blade cleaned up well",
+                "",
+                "Overall an acceptable BBS shave result",
+                "",
+                "",
+                "",
+                "Razor: WECK Hair Shaper - Pink Scales",
+                "",
+                "Blade: Personna Hair Shaper (15X)",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "razor" in result
+    # Should extract the explicit marker line, not the narrative text
+    assert result["razor"]["original"] == "WECK Hair Shaper - Pink Scales"
+    assert result["razor"]["normalized"] == "WECK Hair Shaper - Pink Scales"
