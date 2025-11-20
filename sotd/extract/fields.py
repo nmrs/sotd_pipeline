@@ -59,37 +59,48 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
 
 def get_patterns(alias: str) -> list[str]:
     """
-    Get extraction patterns for a field alias, ordered by priority.
-
+    Get extraction patterns for a field alias, ordered by frequency/priority.
+    
     Patterns are tried in order (0=highest priority, last=lowest priority).
-    High-priority patterns (0-13) have explicit markers (colon : or dash -).
-    Low-priority pattern (14) is ambiguous (no explicit markers).
-
+    Patterns 0-13 have explicit markers (colon : or dash -).
+    Pattern 14 is ambiguous (no explicit markers) and must remain last.
+    
+    Order is based on actual usage frequency from 2020-2025 data analysis.
     See docs/extraction_pattern_priorities.md for priority details.
     """
     return [
-        # Pattern 0: Checkmark format: ✓Field: Value
-        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value or ✓ Field: Value
-        # Pattern 1: Emoji bold format: * **Field** - Value
-        rf"^\*\s*\*\*\b{alias}\b\*\*\s*[-:]\s*(.+)$",  # * **Field** - Value
-        # Pattern 2: Emoji bold format: * **Field** Value (no separator)
-        rf"^\*\s*\*\*\b{alias}\b\*\*\s*(.+)$",  # * **Field** Value (no separator)
-        # Patterns 3-5: Markdown bold formats with explicit markers
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\*\*\s*[-:]?\s*(.+)$",  # * **alias**: value
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]?\*\*\s*(.+)$",  # * **alias:** value
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
-        # Pattern 6: Simple explicit format: Field: Value (HIGHEST PRIORITY for explicit markers)
+        # Pattern 0: Markdown bold: * **alias:** value (73.17% usage - most common)
+        # Colon/dash BEFORE second ** (e.g., * **Razor:** Blackbird)
+        # BUG FIX: Require colon/dash (changed from optional [-:]? to required [-:])
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # * **alias:** value
+        # Pattern 1: Simple explicit: Field: Value (20.66% usage - second most common)
         rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s*[-:]\s*(.+)$",  # * alias: value (word boundary)
-        # Pattern 7: Simple explicit format: Field - Value
-        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
-        # Patterns 8-13: Other formats with explicit markers
+        # Pattern 2: Markdown bold: * **alias**: value (2.67% usage)
+        # Colon/dash AFTER second ** (e.g., * **Razor**: Blackbird)
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\*\*\s*[-:]\s*(.+)$",  # * **alias**: value
+        # Pattern 3: Emoji-prefixed: *alias:* value (0.50% usage)
         rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
-        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
+        # Pattern 5: Emoji-prefixed: *alias:* value variant 2 (0.43% usage)
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value (variant 2)
+        # Pattern 6: Markdown bold: * **Field** Value no separator (0.20% usage)
+        # No colon/dash, handles both **razor** and **razor ** (space before closing **)
+        # (e.g., * **Razor** Blackbird, * **Razor**Blackbird, * **razor ** value, - **Razor** Blackbird, **Razor** Blackbird)
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*\*\*\s*(.+)$",  # * **Field** Value (no separator, space optional before closing **)
+        # Pattern 7: Emoji-prefixed: *alias:* value variant (0.16% usage)
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value (variant)
+        # Pattern 8: Markdown bold: * **alias - value** (0.07% usage)
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
+        # Pattern 9: Underscore: __alias:__ value (0.04% usage)
         rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value
+        # Pattern 10: Forward slash: **alias //** value (0.02% usage)
         rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+)$",  # **alias //** value
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
-        # Pattern 14: Ambiguous format (LOWEST PRIORITY - no explicit markers)
+        # Pattern 11: Checkmark: ✓Field: Value (0.00% usage)
+        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value or ✓ Field: Value
+        # Pattern 12: Double hash: ##alias## - value (0.00% usage)
+        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
+        # Pattern 13: Simple explicit: Field - Value (0.00% usage)
+        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
+        # Pattern 14: Ambiguous format (0.08% usage - MUST REMAIN LAST)
         # This pattern is tried last and only matches if no explicit markers found
         rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product (no colon/dash)
     ]
