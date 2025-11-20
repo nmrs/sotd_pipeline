@@ -19,7 +19,8 @@ sotd/enrich/
 ├── blade_count_enricher.py        # Extract blade use count (moved from match)
 ├── straight_razor_enricher.py     # Extract grind, width, point type
 ├── game_changer_enricher.py       # Extract Game Changer plate information
-└── christopher_bradley_enricher.py # Extract Christopher Bradley plate information
+├── christopher_bradley_enricher.py # Extract Christopher Bradley plate information
+└── razor_format_enricher.py       # Determine final razor format from razor and blade
 ```
 
 ### Base Enricher Interface
@@ -250,6 +251,48 @@ All enrichers must include:
     "_extraction_source": "user_comment"
 }
 ```
+
+### 7. Razor Format Enricher
+
+**Purpose**: Determine final razor format from matched razor and blade data. Moves all format determination logic from aggregate phase to enrich phase for consistency.
+
+**Applies To**: All records with a matched razor product
+
+**Format Determination Logic**:
+1. **Cartridge/Disposable**: Always preserved as-is regardless of blade format
+2. **Specific Shavette formats**: Formats like "Shavette (AC)" stay as-is
+3. **Generic Shavette**: Determined from blade format:
+   - DE blade → "Shavette (Half DE)"
+   - Other blade formats → "Shavette ({blade_format})"
+   - No blade format → "Shavette (Unspecified)"
+4. **Half DE formats**: Preserved as-is
+5. **Fallback logic**: Uses blade format if available, otherwise razor format, defaults to "DE"
+
+**Example Output**:
+```python
+# Generic Shavette with AC blade
+"enriched": {
+    "format": "Shavette (AC)",
+    "_enriched_by": "RazorFormatEnricher",
+    "_extraction_source": "blade_format_inference"
+}
+
+# Generic Shavette with DE blade (converts to Half DE)
+"enriched": {
+    "format": "Shavette (Half DE)",
+    "_enriched_by": "RazorFormatEnricher",
+    "_extraction_source": "blade_format_inference"
+}
+
+# Cartridge/Disposable (preserved)
+"enriched": {
+    "format": "Cartridge/Disposable",
+    "_enriched_by": "RazorFormatEnricher",
+    "_extraction_source": "catalog_data"
+}
+```
+
+**Note**: The enriched format is stored in `razor.enriched.format` while the original format is preserved in `razor.matched.format`. The aggregate phase uses the enriched format when available, falling back to matched format for backward compatibility.
 
 ## Brush Data Model Clarification (2024-06)
 

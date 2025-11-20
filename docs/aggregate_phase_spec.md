@@ -325,7 +325,7 @@ All aggregations must be sorted according to the following rules:
 ## Field Mapping
 
 ### Core Product Fields
-- **Razors**: `razor.matched.brand`, `razor.matched.model`, `razor.matched.format`
+- **Razors**: `razor.matched.brand`, `razor.matched.model`, `razor.enriched.format` (falls back to `razor.matched.format` if not enriched)
 - **Blades**: `blade.matched.brand`, `blade.matched.model`, `blade.matched.format`
 - **Brushes**: `brush.matched.brand`, `brush.matched.model`, `brush.matched.fiber`
 - **Soaps**: `soap.matched.maker`, `soap.matched.scent`
@@ -386,6 +386,7 @@ All aggregations must be sorted according to the following rules:
 
 ### Format Aggregations
 - **Razor Formats**: `{"position": N, "format": "Format", "shaves": N, "unique_users": N}`
+  - **Note**: Format determination logic has been moved to the enrich phase (RazorFormatEnricher). The aggregate phase uses `razor.enriched.format` when available, falling back to `razor.matched.format` for backward compatibility with records that haven't been enriched yet.
 
 ### Brush Component Aggregations
 - **Handle Makers**: `{"position": N, "handle_maker": "Maker", "shaves": N, "unique_users": N}`
