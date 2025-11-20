@@ -82,16 +82,22 @@ def test_aggregate_razor_formats_basic():
 
 
 def test_aggregate_razor_formats_shavette_ac():
-    """Test shavette with AC blade format combination."""
+    """Test shavette with AC blade format combination - uses enriched format."""
     records = [
         {
             "author": "user1",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (AC)"},
+            },
             "blade": {"matched": {"format": "AC"}},
         },
         {
             "author": "user2",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (AC)"},
+            },
             "blade": {"matched": {"format": "AC"}},
         },
     ]
@@ -103,11 +109,14 @@ def test_aggregate_razor_formats_shavette_ac():
 
 
 def test_aggregate_razor_formats_shavette_de():
-    """Test shavette with DE blade format (should become Half DE)."""
+    """Test shavette with DE blade format (should become Half DE) - uses enriched format."""
     records = [
         {
             "author": "user1",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (Half DE)"},
+            },
             "blade": {"matched": {"format": "DE"}},
         },
     ]
@@ -118,11 +127,14 @@ def test_aggregate_razor_formats_shavette_de():
 
 
 def test_aggregate_razor_formats_shavette_unspecified():
-    """Test shavette with no blade format."""
+    """Test shavette with no blade format - uses enriched format."""
     records = [
         {
             "author": "user1",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (Unspecified)"},
+            },
             "blade": {"matched": {}},  # No format
         },
     ]
@@ -169,11 +181,14 @@ def test_aggregate_razor_formats_half_de_detection():
 
 
 def test_aggregate_razor_formats_blade_format_fallback():
-    """Test blade format fallback when no razor format."""
+    """Test blade format fallback when no razor format - uses enriched format."""
     records = [
         {
             "author": "user1",
-            "razor": {"matched": {}},  # No format
+            "razor": {
+                "matched": {},  # No format
+                "enriched": {"format": "GEM"},
+            },
             "blade": {"matched": {"format": "GEM"}},
         },
     ]
@@ -184,11 +199,14 @@ def test_aggregate_razor_formats_blade_format_fallback():
 
 
 def test_aggregate_razor_formats_default_de():
-    """Test default to DE when no formats available."""
+    """Test default to DE when no formats available - uses enriched format."""
     records = [
         {
             "author": "user1",
-            "razor": {"matched": {}},  # No format
+            "razor": {
+                "matched": {},  # No format
+                "enriched": {"format": "DE"},
+            },
             "blade": {"matched": {}},  # No format
         },
     ]
@@ -212,28 +230,49 @@ def test_aggregate_razor_formats_no_razor_match():
 
 
 def test_aggregate_razor_formats_complex_scenario():
-    """Test complex scenario with multiple format types."""
+    """Test complex scenario with multiple format types - uses enriched format."""
     records = [
         # Regular DE razor
-        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {
+            "author": "user1",
+            "razor": {
+                "matched": {"format": "DE"},
+                "enriched": {"format": "DE"},
+            },
+        },
         # Shavette with AC blade
         {
             "author": "user2",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (AC)"},
+            },
             "blade": {"matched": {"format": "AC"}},
         },
         # Shavette with DE blade (should become Half DE)
         {
             "author": "user3",
-            "razor": {"matched": {"format": "Shavette"}},
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (Half DE)"},
+            },
             "blade": {"matched": {"format": "DE"}},
         },
         # Straight razor
-        {"author": "user4", "razor": {"matched": {"format": "Straight"}}},
+        {
+            "author": "user4",
+            "razor": {
+                "matched": {"format": "Straight"},
+                "enriched": {"format": "Straight"},
+            },
+        },
         # Half DE razor
         {
             "author": "user5",
-            "razor": {"matched": {"format": "Half DE"}},
+            "razor": {
+                "matched": {"format": "Half DE"},
+                "enriched": {"format": "Half DE"},
+            },
             "blade": {"matched": {"format": "DE"}},
         },
     ]
@@ -247,3 +286,35 @@ def test_aggregate_razor_formats_complex_scenario():
     assert "Shavette (Half DE)" in formats
     assert "Straight" in formats
     assert "Half DE" in formats
+
+
+def test_aggregate_razor_formats_uses_enriched_when_available():
+    """Test that aggregate uses enriched format when available."""
+    records = [
+        {
+            "author": "user1",
+            "razor": {
+                "matched": {"format": "Shavette"},
+                "enriched": {"format": "Shavette (AC)"},
+            },
+        },
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 1
+    assert result[0]["format"] == "Shavette (AC)"
+
+
+def test_aggregate_razor_formats_fallback_to_matched():
+    """Test that aggregate falls back to matched format when no enriched format."""
+    records = [
+        {
+            "author": "user1",
+            "razor": {
+                "matched": {"format": "DE"},
+                # No enriched format
+            },
+        },
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 1
+    assert result[0]["format"] == "DE"
