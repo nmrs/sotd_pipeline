@@ -1,0 +1,68 @@
+---
+description: Extraction phase architecture, pattern priorities, and field extraction rules
+globs: ["sotd/extract/**/*", "tests/extract/**/*"]
+alwaysApply: false
+---
+
+# Extract Phase Rules for SOTD Pipeline
+
+## Pattern Priority System
+
+**MANDATORY**: When working on extraction patterns or field extraction logic, **ALWAYS** reference `docs/extraction_pattern_priorities.md` for the current priority requirements.
+
+### Key Principles
+- **Explicit markers (colon `:` or dash `-`) are ALWAYS higher priority than ambiguous patterns**
+- **Pattern 57 (ambiguous space format) must be tried LAST** - it's the only low-priority pattern
+- **All other patterns (0-56) have explicit markers and are high priority**
+
+### When to Reference
+- Adding new extraction patterns
+- Modifying existing pattern order
+- Debugging extraction issues (wrong field extracted)
+- Implementing pattern priority logic
+- Writing tests for extraction patterns
+
+## Field Extraction Standards
+
+### Extraction Order
+1. Process all lines in comment body sequentially
+2. For each line, try patterns in priority order (0-56 first, then 57)
+3. **Future enhancement**: Collect all matches across all lines, then choose highest priority match
+
+### Pattern Matching Rules
+- Patterns are tried in order until one matches
+- First match wins (current behavior)
+- Pattern 57 should only match when no explicit markers are present
+- Explicit markers (`:`, `-`) are unambiguous and preferred
+
+### Special Exclusions
+- `Razor Test` lines are excluded (similar to `Lather Games` exclusion for soap)
+- These exclusions are checked BEFORE pattern matching
+
+## Field Structure
+Extracted fields follow this structure:
+```python
+{
+    "razor": {
+        "original": "Razor: Game Changer",  # Original extracted text
+        "normalized": "Game Changer"        # Normalized for matching
+    }
+}
+```
+
+## Common Issues
+
+### Problem: Wrong field extracted from narrative text
+- **Symptom**: Extracted value is narrative text (e.g., "was still smooth...") instead of actual product
+- **Cause**: Ambiguous pattern (57) matched before explicit pattern on later line
+- **Solution**: Ensure pattern 57 is last, or implement "collect all matches then choose best" logic
+
+### Problem: Multiple potential matches
+- **Symptom**: Comment has both narrative text and explicit field declaration
+- **Solution**: Reference `docs/extraction_pattern_priorities.md` to ensure explicit markers win
+
+## Testing Requirements
+- Test cases should cover both explicit and ambiguous patterns
+- Test that explicit markers are preferred over ambiguous patterns
+- Test exclusion patterns (Razor Test, Lather Games)
+- Test edge cases with narrative text containing field names
