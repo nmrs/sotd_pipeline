@@ -250,8 +250,7 @@ known_knots:
         - chis.*[fh]ou.*v25
         - \bc(?:\&|and|\+)h\b.*v25
         - \bch\b.*v25
-        - \bv25\b.*fanchurian
-        # - \bv25\b #this was competing with grizzly bay - sophisticated kaos bar-bear w/ v25
+        - ^(?!grizz).*\bv25\b
     v26:
       patterns:
         - chis.*[fh]ou.*v26

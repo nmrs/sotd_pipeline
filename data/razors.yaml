@@ -1599,6 +1599,7 @@ Merkur:
   Futur:
     patterns:
       - ^(?!.*\b(?:clone|copy|style)\b).*?(merkur)?.*?futur\b
+      - mer?kur.*future?
   Progress:
     patterns:
       - (pro|mer|di)gress

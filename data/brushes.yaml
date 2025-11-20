@@ -381,7 +381,7 @@ known_brushes:
       patterns:
         - omega.*elements
         - omega.*elite
-        - omega.*air
+        - omega.*\bair\b
         - omega.*earth
         - omega.*fire
         - omega.*passion
@@ -668,7 +668,7 @@ known_brushes:
     Torga C5:
       knot_size_mm: 24
       patterns:
-        - torga.*c5
+        - torga.*c-?5
     Torga C5 Synth:
       knot_size_mm: 24
       patterns:
@@ -774,6 +774,12 @@ known_brushes:
       patterns:
         - simp.*m7s
         - simp.*m7.*syn
+    Special S1:
+      fiber: Badger
+      knot_size_mm: 20
+      knot_loft_mm: 45
+      patterns:
+        - simp.*\bs1\b
     Trafalgar T1:
       fiber: Synthetic
       knot_size_mm: 23
@@ -784,7 +790,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-        - simp.*traf.*\bt2
+        - simp.*\bt2
         - trafalgar.*\bt2
     Trafalgar T3:
       fiber: Synthetic
@@ -851,30 +857,6 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - st[ie]rling.*syn
-  Stirling/Zenith:
-    28mmx50mm Boar (510SE):
-      knot:
-        brand: Zenith
-        fiber: Boar
-        knot_size_mm: 28
-      patterns:
-        - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
-    31mmx50mm Boar (510SE-XL):
-      knot:
-        brand: Zenith
-        fiber: Boar
-        knot_size_mm: 31
-        model: B35
-      patterns:
-        - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
-    Boar:
-      fiber: Boar
-      handle_maker: Stirling
-      knot_maker: Zenith
-      patterns:
-        - ^(?=.*zenith)(?=.*st(i|e)rling).*
   Tatara:
     Masamune Finest Badger:
       fiber: Badger
@@ -972,6 +954,8 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - zenith.*\b205\b
+        - zenith.*\b205we\b
+        - zenith205\b
     2006 XSE:
       fiber: Boar
       knot_size_mm: 21
@@ -993,6 +977,7 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - 505BC
+        - zen.*\bb40\b
     506 MB:
       fiber: Badger
       knot_size_mm: 27
@@ -1038,7 +1023,13 @@ known_brushes:
       knot_size_mm: 27
       knot_loft_mm: 64
       patterns:
-        - \b80n\b.*xse
+        - \b80n\b
+    80B XSE:
+      fiber: Boar
+      knot_size_mm: 27
+      knot_loft_mm: 64
+      patterns:
+        - \b80b\b
     B15:
       fiber: Boar
       knot_size_mm: 27.5
@@ -1092,6 +1083,24 @@ known_brushes:
       patterns:
         - zen.*\bpro\b
         - b03-a26
+    Stirling 510SE:
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 28
+      patterns:
+        - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
+        - stirl.*less boar
+    Stirling 510SE-XL:
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 31
+        model: B35
+      patterns:
+        - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
     The Big One:
       fiber: Badger
       knot_size_mm: 31
@@ -1238,6 +1247,7 @@ known_knot_based_brushes:
         - chis.*[fh]ou.*v15
         - \bc(?:\&|and|\+)h\b.*v15
         - \bch\b.*v15
+        - darn rob.*v15
     v16:
       patterns:
         - chis.*[fh]ou.*v16
@@ -1283,6 +1293,7 @@ known_knot_based_brushes:
         - chis.*[fh]ou.*v24
         - \bc(?:\&|and|\+)h\b.*v24
         - \bch\b.*v24
+        - darn rob.*v24
     v25:
       patterns:
         - chis.*[fh]ou.*v25
@@ -1952,6 +1963,11 @@ other_brushes:
     default: Badger
     patterns:
       - oumo
+  PAA:
+    default: Synthetic
+    patterns:
+      - paa
+      - phoenix.*art
   Paragon:
     default: Synthetic
     patterns:

@@ -858,6 +858,11 @@ other_handles:
     Unspecified:
       patterns:
         - djundjila.*brushworx
+  Homemade:
+    Unspecified:
+      patterns:
+        - homemade
+        - my own
   Unknown:
     Unspecified:
       patterns:
