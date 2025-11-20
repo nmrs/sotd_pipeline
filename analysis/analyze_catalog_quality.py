@@ -364,24 +364,44 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
 | Quality Tier | Count | Percentage | Definition |
 |--------------|-------|------------|------------|
 | Complete | {len(completeness["quality_tiers"]["complete"]):,} | 
-  {(len(completeness["quality_tiers"]["complete"]) / 
-  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  {
+        (
+            len(completeness["quality_tiers"]["complete"])
+            / (sum(len(tier) for tier in completeness["quality_tiers"].values()))
+        )
+        * 100:.1f}% | 
   4+ quality fields (knot_fiber, knot_size_mm, handle_material, loft_mm) |
 | Substantial | {len(completeness["quality_tiers"]["substantial"]):,} | 
-  {(len(completeness["quality_tiers"]["substantial"]) / 
-  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  {
+        (
+            len(completeness["quality_tiers"]["substantial"])
+            / (sum(len(tier) for tier in completeness["quality_tiers"].values()))
+        )
+        * 100:.1f}% | 
   3 quality fields |
 | Moderate | {len(completeness["quality_tiers"]["moderate"]):,} | 
-  {(len(completeness["quality_tiers"]["moderate"]) / 
-  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  {
+        (
+            len(completeness["quality_tiers"]["moderate"])
+            / (sum(len(tier) for tier in completeness["quality_tiers"].values()))
+        )
+        * 100:.1f}% | 
   2 quality fields |
 | Basic | {len(completeness["quality_tiers"]["basic"]):,} | 
-  {(len(completeness["quality_tiers"]["basic"]) / 
-  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  {
+        (
+            len(completeness["quality_tiers"]["basic"])
+            / (sum(len(tier) for tier in completeness["quality_tiers"].values()))
+        )
+        * 100:.1f}% | 
   1 quality field |
 | Minimal | {len(completeness["quality_tiers"]["minimal"]):,} | 
-  {(len(completeness["quality_tiers"]["minimal"]) / 
-  (sum(len(tier) for tier in completeness["quality_tiers"].values()))) * 100:.1f}% | 
+  {
+        (
+            len(completeness["quality_tiers"]["minimal"])
+            / (sum(len(tier) for tier in completeness["quality_tiers"].values()))
+        )
+        * 100:.1f}% | 
   0 quality fields (brand/model only) |
 
 ### Brand Quality Scores
@@ -514,7 +534,7 @@ These brands have catalog entries but low match volume:
         avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
 
         authority_title = authority_type.replace("_", " ").title()
-        report += f"| {authority_title} | {brand_count} | {model_count} | " f"{avg_quality:.1f} |\n"
+        report += f"| {authority_title} | {brand_count} | {model_count} | {avg_quality:.1f} |\n"
 
     report += """
 ### Manufacturer Analysis

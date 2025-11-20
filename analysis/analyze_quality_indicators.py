@@ -429,9 +429,12 @@ Quality indicators have been identified across three dimensions:
   Established manufacturers |
 | Cataloged Artisan | 
   {brand_analysis["coverage_analysis"]["cataloged_artisan_count"]} | 
-  {sum(brand_analysis["match_brands"][b] for b, c in 
-  brand_analysis["authority_classification"].items() 
-  if c == "cataloged_artisan"):,} | 
+  {
+        sum(
+            brand_analysis["match_brands"][b]
+            for b, c in brand_analysis["authority_classification"].items()
+            if c == "cataloged_artisan"
+        ):,} | 
   Artisans with catalog entries |
 | Uncataloged Artisan | 
   {brand_analysis["coverage_analysis"]["uncataloged_artisan_count"]} | 
@@ -594,7 +597,7 @@ def main():
     print("\nSummary:")
     print(f"- Catalog entries: {catalog_analysis['total_entries']:,}")
     complete_pct = (catalog_analysis["complete_entries"] / catalog_analysis["total_entries"]) * 100
-    print(f"- Complete entries: {catalog_analysis['complete_entries']:,} " f"({complete_pct:.1f}%)")
+    print(f"- Complete entries: {catalog_analysis['complete_entries']:,} ({complete_pct:.1f}%)")
     high_spec = pattern_analysis["pattern_categories"]["high_specificity"]
     print(f"- High specificity patterns: {high_spec:,}")
     mfg_count = brand_analysis["coverage_analysis"]["manufacturer_brands_count"]

@@ -259,8 +259,12 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 2. **Cache Effectiveness**: {cache_hit_rate:.1f}% cache hit rate reduces 
    redundant processing
 3. **Bottleneck Analysis**: Brush matching takes 
-   {(performance["brush_processing_time"].get("total_time_seconds", 0) / 
-   performance["total_processing_time"]) * 100:.1f}% 
+   {
+        (
+            performance["brush_processing_time"].get("total_time_seconds", 0)
+            / performance["total_processing_time"]
+        )
+        * 100:.1f}% 
    of total processing time
 
 ### Quality Indicators

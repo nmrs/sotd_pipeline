@@ -222,7 +222,7 @@ def define_quality_modifiers() -> Dict[str, Any]:
         "catalog_completeness_modifiers": {
             "complete_entry": {
                 "description": (
-                    "4+ quality fields (knot_fiber, knot_size_mm, " "handle_material, loft_mm)"
+                    "4+ quality fields (knot_fiber, knot_size_mm, handle_material, loft_mm)"
                 ),
                 "modifier": "+15 points",
                 "confidence_boost": "Complete specifications provide high match confidence",
