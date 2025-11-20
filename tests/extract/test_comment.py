@@ -234,3 +234,92 @@ def test_parse_comment_empty_strings():
         "blade": {"original": "Feather", "normalized": "Feather"},
         "soap": {"original": "Tabac", "normalized": "Tabac"},
     }
+
+
+def test_parse_comment_razor_test_exclusion():
+    """Test that 'Razor Test' lines are excluded and actual 'Razor:' lines are extracted."""
+    # Simulate the exact comment from 2025-07 that had the bug
+    comment = {
+        "body": "\n".join(
+            [
+                "Monday 7/28 Shave",
+                "",
+                "GEM JULY",
+                "",
+                "MDC MONDAY",
+                "",
+                "MICROMATIC MONDAY",
+                "",
+                "",
+                "",
+                "Razor Test - Received Edge with CrOx Stropping",
+                "",
+                "It shaved OK on WTG and Across the Chin",
+                "",
+                "Against the Grain was a bit tuggy",
+                "",
+                "It's to the stones for a Bevel set",
+                "",
+                "GEM Bullet Tip took it to a nice BBS result",
+                "",
+                "",
+                "",
+                'Razor: Portland Cutlery Steinmetz "Salamander"',
+                "",
+                "Blade: Original Edge Stropped on Green CrOx",
+                "",
+                "Clean Up: GEM MicroMatic Bullet Point",
+                "",
+                "Lather: Martin de Candre Absinthe Sample",
+                "",
+                "Brush: Stirling PRO Synthetic",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "razor" in result
+    # Should extract the correct razor, not the "Razor Test" line
+    assert result["razor"]["original"] == 'Portland Cutlery Steinmetz "Salamander"'
+    assert result["razor"]["normalized"] == 'Portland Cutlery Steinmetz "Salamander"'
+
+
+def test_parse_comment_razor_test_exclusion_2025_06():
+    """Test the other affected comment from 2025-06."""
+    comment = {
+        "body": "\n".join(
+            [
+                "Sunday 6/22 Shave",
+                "",
+                "",
+                "",
+                "Razor Test - 20 Laps on Green CrOx - 50 on Leather",
+                "",
+                "Not too bad but probably needs a bevel set",
+                "",
+                "It will eventually turn out to be a cute little shaver",
+                "",
+                "Parker Semi Slant finished up in one pass",
+                "",
+                "Overall a pretty decent BBS Sunday shave",
+                "",
+                "",
+                "",
+                "Razor: Lee Manufacturing Co. - Lee's Warranted",
+                "",
+                "Blade: Carbon Steel",
+                "",
+                "Clean Up: Parker Semi-Slant",
+                "",
+                "Lather: Abbate Y La Mantia Blue Tobacco",
+                "",
+                "Brush: Ever-Ready Vintage 150 Boar Knot",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "razor" in result
+    # Should extract the correct razor, not the "Razor Test" line
+    assert result["razor"]["original"] == "Lee Manufacturing Co. - Lee's Warranted"
+    assert result["razor"]["normalized"] == "Lee Manufacturing Co. - Lee's Warranted"

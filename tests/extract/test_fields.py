@@ -17,6 +17,17 @@ def test_extract_field_lines():
             ("* **Razor** : Pearl L-55", "Pearl L-55"),
             ("🪒 *Razor:* Dollar Tree Safety Razor", "Dollar Tree Safety Razor"),
             (preprocess_body("\\* \\*\\*Razor:\\*\\* Gillette Superspeed"), "Gillette Superspeed"),
+            # Razor Test should be ignored (not treated as razor field)
+            ("Razor Test - Received Edge with CrOx Stropping", None),
+            ("Razor Test - 20 Laps on Green CrOx - 50 on Leather", None),
+            ("razor test - some description", None),
+            ("RAZOR TEST - Another test", None),
+            # But normal razor should still work
+            ("Razor: Game Changer", "Game Changer"),
+            (
+                'Razor: Portland Cutlery Steinmetz "Salamander"',
+                'Portland Cutlery Steinmetz "Salamander"',
+            ),
         ],
         "blade": [
             ("* **Blade:** Feather", "Feather"),
@@ -30,6 +41,9 @@ def test_extract_field_lines():
             ("- **Blade:** Schick Proline", "Schick Proline"),
             ("* **Blade** : Gillette Winner", "Gillette Winner"),
             ("🧴 *Blade:* Dollar Tree Safety Razor", "Dollar Tree Safety Razor"),
+            # Blade Test should be ignored (not treated as blade field)
+            ("Blade Test - Some test description", None),
+            ("blade test - another test", None),
         ],
         "brush": [
             ("* **Brush:** Simpson T3", "Simpson T3"),
@@ -42,6 +56,9 @@ def test_extract_field_lines():
             ("* **Blade:** Nacet", None),
             ("- **Brush:** C&H Odin's Beard", "C&H Odin's Beard"),
             ("* **Brush** : Zenith Boar", "Zenith Boar"),
+            # Brush Test should be ignored (not treated as brush field)
+            ("Brush Test - Some test description", None),
+            ("brush test - another test", None),
         ],
         "soap": [
             ("* **Soap:** B&M Seville", "B&M Seville"),

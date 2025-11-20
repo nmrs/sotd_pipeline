@@ -13,6 +13,10 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
     if field == "soap" and re.match(r"^lather\s+games", line, flags=re.IGNORECASE):
         return None
 
+    # Special handling for razor field: ignore "razor" when followed by "test"
+    if field == "razor" and re.match(r"^razor\s+test", line, flags=re.IGNORECASE):
+        return None
+
     aliases = FIELD_ALIASES.get(field, [field])
 
     patterns = []
@@ -31,8 +35,7 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
 def get_patterns(alias: str) -> list[str]:
     return [
         # Checkmark format: ✓Field: Value
-        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value
-        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓ Field: Value (with space)
+        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value or ✓ Field: Value
         # Emoji bold format: * **Field** Value
         rf"^\*\s*\*\*\b{alias}\b\*\*\s*[-:]\s*(.+)$",  # * **Field** - Value
         rf"^\*\s*\*\*\b{alias}\b\*\*\s*(.+)$",  # * **Field** Value (no separator)
@@ -44,7 +47,7 @@ def get_patterns(alias: str) -> list[str]:
         rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
         rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
         rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
-        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value (no word boundary needed with underscores)
+        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value
         rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+)$",  # **alias //** value
         # more specific cases
         rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
