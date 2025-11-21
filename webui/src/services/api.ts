@@ -257,6 +257,48 @@ export interface MismatchAnalysisResult {
   matched_data_map?: Record<string, Record<string, any>>;
 }
 
+// Format compatibility analysis
+export interface FormatCompatibilityResult {
+  razor_original: string;
+  razor_matched: Record<string, any>;
+  razor_enriched?: Record<string, any>;
+  blade_original: string;
+  blade_matched: Record<string, any>;
+  severity: 'error' | 'warning';
+  issue_type: string;
+  comment_ids: string[];
+  count: number;
+}
+
+export interface FormatCompatibilityResponse {
+  months: string[];
+  severity_filter: string;
+  total_issues: number;
+  errors: number;
+  warnings: number;
+  results: FormatCompatibilityResult[];
+  processing_time: number;
+}
+
+export const analyzeFormatCompatibility = async (params: {
+  months: string[];
+  severity?: 'error' | 'warning' | 'all';
+}): Promise<FormatCompatibilityResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append('months', params.months.join(','));
+    if (params.severity) {
+      queryParams.append('severity', params.severity);
+    }
+
+    const response = await api.get(`/format-compatibility?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error analyzing format compatibility:', error);
+    throw error;
+  }
+};
+
 export const analyzeMismatch = async (
   request: MismatchAnalysisRequest
 ): Promise<MismatchAnalysisResult> => {

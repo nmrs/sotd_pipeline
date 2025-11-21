@@ -14,6 +14,7 @@ import CatalogValidator from './pages/CatalogValidator';
 import SoapAnalyzer from './pages/SoapAnalyzer';
 import MonthlyUserPosts from './pages/MonthlyUserPosts';
 import { BrushMatchingAnalyzerPage } from './pages/BrushMatchingAnalyzerPage';
+import FormatCompatibilityAnalyzer from './pages/FormatCompatibilityAnalyzer';
 
 function App() {
   const messaging = useMessaging();
@@ -34,6 +35,7 @@ function App() {
             <Route path='/soap-analyzer' element={<SoapAnalyzer />} />
             <Route path='/monthly-user-posts' element={<MonthlyUserPosts />} />
             <Route path='/brush-matching-analyzer' element={<BrushMatchingAnalyzerPage />} />
+            <Route path='/format-compatibility' element={<FormatCompatibilityAnalyzer />} />
           </Routes>
         </main>
         <MessageDisplay messages={messaging.messages} onRemoveMessage={messaging.removeMessage} />
