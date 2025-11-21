@@ -246,6 +246,11 @@ Beard Struggle:
   SEAX:
     patterns:
       - '\bseax\b'
+Bengall:
+  Straight:
+    format: Straight
+    patterns:
+      - bengall(?:.*\d{1,2}/(8|16))?
 Bevel:
   Essential Disposable:
     #this is a disposable razor with a preloaded bevel de blade,
@@ -349,6 +354,11 @@ Bulimica:
   Safety Razor:
     patterns:
       - bulimica
+Burmax:
+  Aristocrat Shavette:
+    format: Shavette
+    patterns:
+      - burmax.*aristocrat(?! PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 C-Mon:
   Straight:
     format: Straight
@@ -764,7 +774,7 @@ Feather:
     patterns:
       - Feather.*(dx|ss|sr)
       - feather.*artist.*clu
-      - feather.*ac(?:.*(shavette|kami))?
+      - feather.*\bac\b(?:.*(shavette|kami))?
 Filarmonica:
   "12":
     format: Straight
@@ -1701,6 +1711,7 @@ OliWorks:
   OliBlade:
     patterns:
       - oliblade
+      - oliworks.*adjustable
 OneBlade:
   Core:
     format: FHS
@@ -1736,7 +1747,7 @@ Other DE:
 Other DE Clone:
   "":
     patterns:
-      - ^(?!.*(futur|eagle|shavette|kami)).*(knockoff|clone)
+      - ^(?!.*(futur|eagle|shavette|kami|scales)).*(knockoff|clone)
       - merkur.*style
 Other Shavette:
   "":
@@ -1780,7 +1791,7 @@ Other Kamisori:
   "":
     format: Straight
     patterns:
-      - ^(?!.*\b(shavette|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
+      - ^(?!.*\b(ice ?pick|chopstick|shavette|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
 Other Straight Razor:
   "":
     format: Straight
@@ -2055,6 +2066,7 @@ Raido Star:
     format: Straight
     patterns:
       - raido[ -_]?(star|razor).*(?:\d{1,2}/(8|16))?
+      - kamlash.*(?:straight|\d{1,2}/(8|16))?
   Degenerate Kamisori:
     format: Straight
     grind: Extra Hollow
@@ -2613,11 +2625,11 @@ Treet:
   TTO:
     patterns:
       - treet
-Union Razor Co.:
+Union Cutlery:
   Straight:
     format: Straight
     patterns:
-      - union(.*razor)?(?:.*\d{1,2}/(8|16))?
+      - union.*(?:(razor|cutlery))?.*(?:\d{1,2}/(8|16))?
 Utica Knife & Razor:
   Red Point 917:
     format: Straight
