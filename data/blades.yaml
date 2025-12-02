@@ -186,7 +186,7 @@ DE:
     Astor Stainless:
       patterns:
         - bic.*(ast|stai)
-    Chrome:
+    Chrome Platinum:
       patterns:
         - bic.*(chr|pla)
         - bic
@@ -396,6 +396,7 @@ DE:
       patterns:
         - gil.*winner
         - winner
+        - gil.*winning
     Winner Platinum:
       patterns:
         - winner.*plat
@@ -908,7 +909,7 @@ Half DE:
   Leaf:
     SE:
       patterns:
-        - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*treet).*leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Misaki:
     Platinum SE:
       patterns:

@@ -40,6 +40,21 @@ Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
   - file: 2025-08.json
     comment_ids:
     - n788u5j
+Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger:
+  handle: null
+  knot: Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger
+  match_type: null
+  corrected: true
+  validated_at: '2025-11-18T14:33:52.022870'
+  should_not_split: true
+  occurrences:
+  - file: 2025-11.json
+    comment_ids:
+    - nod4pe7
+  system_handle: null
+  system_knot: null
+  system_confidence: high
+  system_reasoning: Single component brush
 Made Rite - 500 PB (Oumo - 26mm SHD):
   handle: Made Rite - 500 PB
   knot: Oumo - 26mm SHD

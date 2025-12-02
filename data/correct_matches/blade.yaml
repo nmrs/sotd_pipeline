@@ -33,6 +33,7 @@ AC:
     - feather super
     - feather super (?)
     ProGuard:
+    - feather - artist club proguard
     - feather - proguard
     - feather artist club pro-guard (se)
     - feather artist club proguard
@@ -59,6 +60,7 @@ AC:
     - kamisori artist club
   Schick:
     Proline (AC):
+    - proline
     - prolines
     - schick ac
     - schick p-30 proline artist club (se)
@@ -98,6 +100,7 @@ DE:
     - gillette yellow
     Super Platinum (Black):
     - 7 o'clock black
+    - 7 o'clock super platinum
     - 7sp
     - 7sp black
     - gilette 7 o'clock - super platinum
@@ -107,8 +110,10 @@ DE:
     - gillette - 7 o'clock (black) super platinum
     - gillette - 7 o'clock super platinum
     - gillette 7 o'clock black
+    - gillette 7 o'clock black super platinum
     - gillette 7 o'clock platinum
     - gillette 7 o'clock super platinum
+    - gillette 7 o'clock super platinum (black)
     - gillette 7 o'clock super platinum black
     - gillette 7o'clock black
     - gillette 7oc super platinum
@@ -126,6 +131,7 @@ DE:
     - gillette 7 o'clock stainless
     - gillette 7 o'clock stainless (green)
     - gillette 7 o'clock stainless green
+    - gillette 7 o'clock super stainless
     - gillette 7 o'clock super stainless (green)
     - gillette 7 o'clock super stainless (green), de
     - gillette 7 o'clock super stainless green
@@ -197,12 +203,13 @@ DE:
     - bic astor
     - bic astor stainless
     - bic astor stainless steel
-    Chrome:
+    Chrome Platinum:
     - bic
     - bic - chrome platinum
     - bic chrome
     - bic chrome platinum
     - bic cp
+    - bic platinum
     - bic platinum chrome
   Big Ben:
     Super Stainless:
@@ -310,6 +317,7 @@ DE:
   Gillette:
     '365':
     - gillette 365
+    - gillette 365 (chinese origin)
     - gillette 365 (chinese)
     Blue:
     - gillette blue
@@ -360,6 +368,7 @@ DE:
     - perma-sharp gillette
     - perma-sharp stainless
     - perma-sharp super
+    - permasharp super stainless
     Platinum:
     - gillette - platinum
     - gillette - platinum (half in kamisori new, whole in overlander new)
@@ -369,6 +378,7 @@ DE:
     - gillette rubie
     Silver Blue:
     - gillete silver blue
+    - gillete silver blue (1rst use)
     - gillette - silver blue
     - gillette -silver blue
     - gillette silve blue
@@ -392,17 +402,21 @@ DE:
     Super Thin Platinum:
     - gillet super thin platinum
     - gillette - super thin platinum
+    - gillette super thin platinum
     Wilkinson Sword:
     - gillette wilkinson sword
     - gillette wilkinson sword india
+    - gillette wilkinson sword salon pack ss
     - gws
     - gws chinese
     - gws india
     Winner:
     - gillette winner
     - gillette winner stainless
+    - gillette winning
     Winner Platinum:
     - gillette winner platinum
+    - gillette winner special platinum
     - winner by gillette special platinum
     - winner platinum
   Glätz:
@@ -422,6 +436,7 @@ DE:
   King C Gillette:
     DE:
     - gillette - king c gillette blades
+    - gillette king, platinum, closed-comb 3 piece
     - kc gillette
     - kc gillette (aka gillette platinum)
     - kc gillette (last one, hooray!)
@@ -660,13 +675,16 @@ DE:
     - treet - falcon carbon steel
     New Edge:
     - treet new edge
+    - treet new edge carbon
     New Steel:
+    - 'leaf: treet new'
     - treet - new steel
     - treet new
     Platinum:
     - treet
     - treet - platinum
     - treet platinum
+    - treet platinum super stainless
     - treet stainless
     Silver:
     - treet silver
@@ -696,6 +714,7 @@ DE:
     - voskhod
     - voskhod (sourced before russia-ukraine war)
     - voskhod - teflon coated
+    - voskhod super stainless
     - voskhod teflon coated
   Walgreens:
     2 Edge:
@@ -758,6 +777,7 @@ GEM:
     - accutek pro gem blades
     - gem
     - gem accuforge
+    - gem accutec pro gem
     - gem ptfe
     - gem ptfe (?)
     - gem ptfe (use 5 or so)
@@ -794,6 +814,7 @@ Hair Shaper:
     - kismet - hair shaper
     - kismet - rostfrei
     - kismet blade
+    - kismet hai shaper
     - kismet hair shaper
     - kismet hair shaper blade
     - kismet rostfrei
@@ -839,6 +860,7 @@ Injector:
     - personna injector
   Schick:
     Injector:
+    - schick
     - schick injector
     - schick injector blade
     - schick injector blades

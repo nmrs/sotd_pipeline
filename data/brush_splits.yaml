@@ -42,7 +42,7 @@ Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
     - n788u5j
 Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger:
   handle: null
-  knot: Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger
+  knot: null
   match_type: null
   corrected: true
   validated_at: '2025-11-18T14:33:52.022870'
@@ -66,6 +66,21 @@ Made Rite - 500 PB (Oumo - 26mm SHD):
   - file: 2025-09.json
     comment_ids:
     - nfexjs4
+Unbranded - Marble w/ Maggard G5C Synthetic:
+  handle: Unbranded - Marble
+  knot: Maggard G5C Synthetic
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-11.json
+    comment_ids:
+    - nq3wao7
+    - nqa2bzk
+    - nqm3gtb
+    - nqskvd8
+    - nr4zqp9
 Zenith 510SE 28mm x 56mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
   handle: null
   knot: null

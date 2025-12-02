@@ -678,6 +678,13 @@ known_brushes:
       patterns:
         - brushbutt
         - 2017 ws
+  Shave Boutique:
+    Ivory Satin Fiber:
+      knot_size_mm: 24
+      knot_loft_mm: 52
+      fiber: Synthetic
+      patterns:
+        - shave.*boutique
   Simpson:
     "57":
       fiber: Badger
@@ -799,6 +806,10 @@ known_brushes:
         - simp.*traf.*\bt3
         - trafalgar.*\bt3
         - simp.*\bt3\b
+    Trafalgar (Unspecified):
+      fiber: Synthetic
+      patterns:
+        - trafalgar 
     Tulip T1:
       fiber: Synthetic
       knot_size_mm: 19
@@ -947,15 +958,16 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-        - sagrada
+        - sag?rada
   Zenith:
     205 SE:
       fiber: Boar
       knot_size_mm: 24
       patterns:
         - zenith.*\b205\b
-        - zenith.*\b205we\b
+        - zenith.*\b205wen?\b
         - zenith205\b
+        - zenith.*wen.*24mm
     2006 XSE:
       fiber: Boar
       knot_size_mm: 21
@@ -978,6 +990,11 @@ known_brushes:
       patterns:
         - 505BC
         - zen.*\bb40\b
+    505NK SE:
+      fiber: Boar
+      knot_size_mm: 27
+      patterns:
+        - 505NK
     506 MB:
       fiber: Badger
       knot_size_mm: 27
@@ -1988,6 +2005,14 @@ other_brushes:
     default: Synthetic
     patterns:
       - perporo
+  Pink Woolf:
+    default: Synthetic
+    patterns:
+      - pink ?woolf
+  Plisson:
+    default: Badger
+    patterns:
+      - plisson
   Prometheus Handcrafts:
     default: Badger
     patterns:
@@ -2005,7 +2030,7 @@ other_brushes:
   RazoRock:
     default: Synthetic
     patterns:
-      - razor.*rock
+      - razorock
   Rich Man Shaving:
     default: Badger
     patterns:
@@ -2082,6 +2107,14 @@ other_brushes:
     default: Horse
     patterns:
       - vie.*long
+  Viking Revolution:
+    default: Badger
+    patterns:
+      - viking revolution
+  Vikings Blade:
+    default: Synthetic
+    patterns:
+      - vikings blade
   Voigt & Cop:
     default: Badger
     patterns:

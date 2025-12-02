@@ -418,10 +418,12 @@ Cartridge/Disposable:
       - penny shaver
       - person.*(single blade|face razor)
       - twinblade
+      - ^(?!.*tip).*gil.*blue
 Charcoal Goods:
   Everyday:
     patterns:
-      - '^(?!.*wcs).*\b(char\w*l|cg).*every'
+      - ^(?!.*wcs).*\b(char\w*l|cg).*every
+      - ^(?!.*wcs).*ever.*\b(char\w*l|cg)
   Lithe Head:
     patterns:
       - lithe
@@ -505,6 +507,16 @@ Crescent City:
   Closed Comb 79:
     patterns:
       - cres.*city.*79
+C.W. Dahlgren:
+  Straight:
+    format: Straight
+    patterns:
+      - dahlgren(?:.*\d{1,2}/(8|16))?
+Dairi:
+  Kamisori:
+    format: Straight
+    patterns:
+      - dairi.*kami
 Daune:
   Double Edge Shavette:
     format: Shavette (DE)
@@ -563,6 +575,12 @@ Dovo:
     width: 5/8
     patterns:
       - dovo.*\b41\b(?:.*\d{1,2}/(8|16))?
+  Bergischer Löwe:
+    format: Straight
+    grind: Full Hollow
+    point: Spanish
+    patterns:
+      - dovo bergi
   Carpe Diem:
     format: Straight
     grind: Hollow
@@ -912,7 +930,7 @@ GEM:
   Junior:
     format: GEM
     patterns:
-      - gem.*(junior|jr)
+      - gem.*(ju[mn]ior|jr)
   Micromatic:
     format: GEM
     patterns:
@@ -956,6 +974,7 @@ Gillette:
   Aristocrat:
     patterns:
       - (?:gil)?.*art?istocrat
+      - gil\w*te.*#58
   Blue:
     patterns:
       - 'super\s*blue'
@@ -1370,7 +1389,7 @@ Kampfe:
     patterns:
       - kampfe(.*1902)?
       - 1902.*lather
-      - lather catcher
+      - star.*lather ?catcher
 Kanzy:
   Double Edge Safety Razor:
     patterns:
@@ -1686,7 +1705,7 @@ Nobel:
   Kamisori:
     format: Straight
     patterns:
-      - nobel.*kamisori(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+      - nobel.*kamisori(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
 Noble Otter:
   DE:
     patterns:
@@ -1791,7 +1810,7 @@ Other Kamisori:
   "":
     format: Straight
     patterns:
-      - ^(?!.*\b(ice ?pick|chopstick|shavette|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
+      - ^(?!.*\b(ice ?pick|chopstick|shavette|dairi|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
 Other Straight Razor:
   "":
     format: Straight
@@ -2057,6 +2076,10 @@ QShave:
   Parthenon:
     patterns:
       - parthenon(?:.*\d{1,2}/(8|16))?
+Qiangren:
+  Butterfly:
+    patterns:
+      - qu?iang ?ren
 Raido Star:
   Kamisori:
     format: Straight
@@ -2209,6 +2232,11 @@ Rex:
   Sentry:
     patterns:
       - rex.*sentry
+Rich. Witte:
+  Straight:
+    format: Straight
+    patterns:
+      - rich.*witte(?:.*\d{1,2}/(8|16))?
 RigaRazor:
   Straight:
     format: Straight
@@ -2625,6 +2653,10 @@ Treet:
   TTO:
     patterns:
       - treet
+TryCatch:
+  PL13 (3D Printed Henson clone):
+    patterns:
+      - \bpl13\b
 Union Cutlery:
   Straight:
     format: Straight
@@ -2807,6 +2839,11 @@ Werner Breidenbach:
     width: 15/16
     patterns:
       - monte.*rosa.*14(?:.*\d{1,2}/(8|16))?
+W.H. Morley & Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - w\.? ?h\.? morley(?:.*\d{1,2}/(8|16))?
 Whityle:
   20T Glide Pro 4D:
     format: Dual Half DE

@@ -1155,6 +1155,9 @@ Cremo:
     Bourbon Vanilla:
       patterns:
         - cremo.*bourbon
+    Classic Citrus:
+      patterns:
+        - crea?mo.*citrus
     Coconut Mango Shave Cream:
       patterns:
         - cremo.*mango
@@ -1419,9 +1422,9 @@ Dollar Shave Club:
       format: Cream
       patterns:
         - dollar.*club.*cream
-Dr. Bonner's:
+Dr. Bronner's:
   patterns:
-    - dr\.? br?onner'?s
+    - dr\.? br?onner'?s?
 Dr. Jon's:
   patterns:
     - "dr.*joh?n'?s?"
@@ -2818,7 +2821,7 @@ Proraso:
         - '^(?!.*\btea\b)^proraso.*green'
         - '^(?!.*\btea\b)^proraso.*eucal'
         - '^(?!.*\btea\b)^proraso.*menthol'
-        - '^(?!.*\btea\b)^proraso.*refresh'
+        - '^(?!.*\btea\b)^pro[rs]aso.*refresh'
         - porasso green
         - prosado
     Red (Cream):
@@ -3831,6 +3834,10 @@ Turtleship Shave Co.:
 Uncle Jon's:
   patterns:
     - "uncle jon'?s?( shave)?( soap)?"
+Váli:
+  default format: Cream
+  patterns:
+    - vali
 Valobra:
   patterns:
     - valobra
@@ -3890,10 +3897,13 @@ Vitos:
     Vegetale:
       patterns:
         - vito['’]?s.*vegetale?
-Váli:
-  default format: Cream
+Vitry:
   patterns:
-    - vali
+    - vitry
+  scents:
+    Savon à Barbe:
+      patterns:
+        - vitry.*barbe
 Wars:
   patterns:
     - \bwars\b
@@ -4091,6 +4101,9 @@ Yaqi:
 Yardley:
   patterns:
     - "(?:vintage )?yardley"
+Zartgefühl:
+  patterns:
+    - zartgef[uü]hl
 Zaharoff:
   patterns:
     - zaharoff

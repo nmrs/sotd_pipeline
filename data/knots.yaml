@@ -409,6 +409,11 @@ known_knots:
     V28:
       patterns:
         - grizz.*v28\b
+  Long Shaving:
+    Reserve:
+      fiber: Badger
+      patterns:
+        - reserve vi*
   Maggard:
     2-Band Badger:
       fiber: Badger
@@ -418,7 +423,7 @@ known_knots:
     G5:
       default: Synthetic
       patterns:
-        - mag(g?ard)?s?.*g5\b
+        - mag(g?ard)?s?.*g5c?\b
     Timberwolf:
       fiber: Synthetic
       patterns:
