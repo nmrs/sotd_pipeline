@@ -31,15 +31,19 @@ def validate_list_of_dicts(data: Any, data_name: str = "data") -> List[Dict[str,
         data_series = pd.Series(data)
 
         # Check if all items are dictionaries using vectorized operations
-        is_dict_mask = data_series.apply(lambda x: isinstance(x, dict))
+        is_dict_mask: pd.Series = data_series.apply(lambda x: isinstance(x, dict))  # type: ignore
 
-        if not is_dict_mask.all():
+        # Convert Series to bool for conditional check
+        all_dicts = bool(is_dict_mask.all())
+        if not all_dicts:
             # Find first non-dict item for error reporting
-            first_invalid_idx = (
-                is_dict_mask.idxmin()
-                if not is_dict_mask.any()
-                else is_dict_mask[~is_dict_mask].index[0]
-            )
+            any_dicts = bool(is_dict_mask.any())
+            if not any_dicts:
+                first_invalid_idx = is_dict_mask.idxmin()
+            else:
+                # Get index of first False value
+                false_mask: pd.Series = ~is_dict_mask  # type: ignore
+                first_invalid_idx = false_mask.index[0]
             raise ValueError(f"{data_name} item {first_invalid_idx} must be a dictionary")
 
     return data

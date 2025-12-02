@@ -123,7 +123,9 @@ class DeltaCalculator:
 
         # Create vectorized delta calculation using pandas operations
         # Map historical ranks to current data
-        valid_current.loc[:, "historical_rank"] = valid_current[name_key].map(historical_ranks)
+        # Ensure we're working with a Series for type checking
+        name_series: pd.Series = valid_current[name_key]  # type: ignore
+        valid_current.loc[:, "historical_rank"] = name_series.map(historical_ranks)
 
         # Calculate deltas using vectorized operations
         def calculate_delta_vectorized(row):
@@ -161,14 +163,20 @@ class DeltaCalculator:
         valid_current.loc[:, "delta_text"] = delta_results.apply(lambda x: x[2]).astype(object)
 
         # Convert NaN values back to None for consistency
-        valid_current.loc[:, "delta"] = valid_current["delta"].replace({np.nan: None})
-        valid_current.loc[:, "delta_symbol"] = valid_current["delta_symbol"].replace({np.nan: None})
-        valid_current.loc[:, "delta_text"] = valid_current["delta_text"].replace({np.nan: None})
+        # Ensure we're working with Series for type checking
+        delta_series: pd.Series = valid_current["delta"]  # type: ignore
+        delta_symbol_series: pd.Series = valid_current["delta_symbol"]  # type: ignore
+        delta_text_series: pd.Series = valid_current["delta_text"]  # type: ignore
+        valid_current.loc[:, "delta"] = delta_series.replace({np.nan: None})
+        valid_current.loc[:, "delta_symbol"] = delta_symbol_series.replace({np.nan: None})
+        valid_current.loc[:, "delta_text"] = delta_text_series.replace({np.nan: None})
 
         # Convert back to list of dictionaries with string keys for type compatibility
+        # Type ignore for to_dict overload - pandas supports "records" parameter
+        results_df = valid_current.drop(columns=["historical_rank"])
         results = [
             {str(k): v for k, v in item.items()}
-            for item in valid_current.drop(columns=["historical_rank"]).to_dict("records")
+            for item in results_df.to_dict("records")  # type: ignore
         ]
 
         if self.debug:

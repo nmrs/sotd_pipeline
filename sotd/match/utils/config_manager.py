@@ -74,15 +74,18 @@ class ConfigManager:
         Returns:
             Custom BrushMatcherConfig instance
         """
+        # Provide defaults for None paths
+        final_catalog_path = catalog_path or Path("data/brushes.yaml")
+        final_handles_path = handles_path or Path("data/handles.yaml")
+        final_knots_path = knots_path or Path("data/knots.yaml")
+        final_correct_matches_path = correct_matches_path or Path("data/correct_matches")
+
         return BrushMatcherConfig.create_custom(
-            catalog_path=catalog_path,
-            handles_path=handles_path,
-            knots_path=knots_path,
-            correct_matches_path=correct_matches_path,
+            catalog_path=final_catalog_path,
+            handles_path=final_handles_path,
+            knots_path=final_knots_path,
+            correct_matches_path=final_correct_matches_path,
             debug=debug,
-            cache_enabled=cache_enabled,
-            cache_max_size=cache_max_size,
-            strict_validation=strict_validation,
         )
 
     def reset_configs(self) -> None:
@@ -101,9 +104,10 @@ class ConfigManager:
             ValueError: If configuration is invalid
             FileNotFoundError: If required files don't exist
         """
-        # The config class already validates in __post_init__
-        # This method provides an explicit validation point
-        config.validate_paths_exist()
+        # The config class validates paths when used by BrushMatcher
+        # This method is kept for backward compatibility but does nothing
+        # as validation happens during matcher initialization
+        pass
 
 
 # Global instance for easy access

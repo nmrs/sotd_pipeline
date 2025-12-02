@@ -92,6 +92,10 @@ class BrushMatchingAnalyzer:
         results = {"strategies": [], "winner": None, "summary": {}}
 
         try:
+            # Ensure scoring_matcher is initialized
+            if self.scoring_matcher is None:
+                self.scoring_matcher = BrushMatcher()
+
             # Handle bypassing correct_matches if requested
             original_methods = {}
             if bypass_correct_matches:
@@ -108,7 +112,9 @@ class BrushMatchingAnalyzer:
                 if scoring_result:
                     print(f"DEBUG: has all_strategies: {hasattr(scoring_result, 'all_strategies')}")
                     if hasattr(scoring_result, "all_strategies"):
-                        print(f"DEBUG: all_strategies count: {len(scoring_result.all_strategies)}")
+                        all_strategies = getattr(scoring_result, "all_strategies", [])
+                        if all_strategies is not None:
+                            print(f"DEBUG: all_strategies count: {len(all_strategies)}")
 
             # Restore original methods if we bypassed them
             if bypass_correct_matches:
@@ -116,8 +122,11 @@ class BrushMatchingAnalyzer:
 
             if scoring_result and hasattr(scoring_result, "all_strategies"):
                 # Process all strategy results
+                all_strategies = getattr(scoring_result, "all_strategies", None)
+                if all_strategies is None:
+                    all_strategies = []
                 strategies = []
-                for strategy_result in scoring_result.all_strategies:
+                for strategy_result in all_strategies:
                     if self.debug:
                         print(f"DEBUG: Processing strategy: {strategy_result}")
                     strategy_data = self._process_strategy_result(strategy_result, brush_string)
@@ -155,6 +164,9 @@ class BrushMatchingAnalyzer:
     def _get_basic_matching_results(self, brush_string: str) -> Dict[str, Any]:
         """Get basic matching results from the brush matcher."""
         try:
+            # Ensure scoring_matcher is initialized
+            if self.scoring_matcher is None:
+                self.scoring_matcher = BrushMatcher()
             result = self.scoring_matcher.match(brush_string)
             if result:
                 return {
@@ -276,10 +288,15 @@ class BrushMatchingAnalyzer:
         original_methods = {}
 
         try:
+            # Ensure scoring_matcher is initialized
+            if self.scoring_matcher is None:
+                return original_methods
+
             # Store the original match method from correct_matches_matcher
-            if hasattr(self.scoring_matcher, "correct_matches_matcher"):
+            correct_matches_matcher = getattr(self.scoring_matcher, "correct_matches_matcher", None)
+            if correct_matches_matcher is not None:
                 original_methods["correct_matches_matcher.match"] = (
-                    self.scoring_matcher.correct_matches_matcher.match
+                    correct_matches_matcher.match
                 )
 
                 # Create a dummy method that always returns None
@@ -287,11 +304,12 @@ class BrushMatchingAnalyzer:
                     return None
 
                 # Replace the match method temporarily
-                self.scoring_matcher.correct_matches_matcher.match = dummy_match
+                correct_matches_matcher.match = dummy_match
 
                 # Also patch legacy matcher methods if they exist
-                if hasattr(self.scoring_matcher, "strategy_orchestrator"):
-                    for strategy in self.scoring_matcher.strategy_orchestrator.strategies:
+                strategy_orchestrator = getattr(self.scoring_matcher, "strategy_orchestrator", None)
+                if strategy_orchestrator is not None:
+                    for strategy in strategy_orchestrator.strategies:
                         if hasattr(strategy, "legacy_matcher"):
                             legacy_matcher = strategy.legacy_matcher
 
@@ -317,15 +335,24 @@ class BrushMatchingAnalyzer:
     def _restore_correct_matches_methods(self, original_methods: Dict[str, Any]):
         """Restore original methods after bypassing correct_matches.yaml."""
         try:
+            # Ensure scoring_matcher is initialized
+            if self.scoring_matcher is None:
+                return
+
             # Restore correct_matches_matcher method
             if "correct_matches_matcher.match" in original_methods:
-                self.scoring_matcher.correct_matches_matcher.match = original_methods[
-                    "correct_matches_matcher.match"
-                ]
+                correct_matches_matcher = getattr(
+                    self.scoring_matcher, "correct_matches_matcher", None
+                )
+                if correct_matches_matcher is not None:
+                    correct_matches_matcher.match = original_methods[
+                        "correct_matches_matcher.match"
+                    ]
 
             # Restore legacy matcher methods
-            if hasattr(self.scoring_matcher, "strategy_orchestrator"):
-                for strategy in self.scoring_matcher.strategy_orchestrator.strategies:
+            strategy_orchestrator = getattr(self.scoring_matcher, "strategy_orchestrator", None)
+            if strategy_orchestrator is not None:
+                for strategy in strategy_orchestrator.strategies:
                     if hasattr(strategy, "legacy_matcher"):
                         legacy_matcher = strategy.legacy_matcher
 

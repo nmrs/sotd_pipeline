@@ -79,13 +79,17 @@ class TableGenerator:
         per_mask = words.str.lower() == "per"
 
         # Apply formatting using vectorized operations
-        formatted_words = words.copy()
-        formatted_words[acronym_mask] = words[acronym_mask].str.upper()
-        formatted_words[per_mask] = words[per_mask].str.lower()
+        # Ensure we're working with Series for type checking
+        formatted_words: pd.Series = words.copy()  # type: ignore
+        acronym_words: pd.Series = words[acronym_mask]  # type: ignore
+        per_words: pd.Series = words[per_mask]  # type: ignore
+        formatted_words[acronym_mask] = acronym_words.str.upper()
+        formatted_words[per_mask] = per_words.str.lower()
 
         # Apply title case to remaining words
         other_mask = ~(acronym_mask | per_mask)
-        formatted_words[other_mask] = words[other_mask].str.title()
+        other_words: pd.Series = words[other_mask]  # type: ignore
+        formatted_words[other_mask] = other_words.str.title()
 
         return " ".join(formatted_words)
 
@@ -280,9 +284,10 @@ class TableGenerator:
             # Get the comparison data for this period
             # Handle both tuple format (metadata, data) and direct data format
             period_data = self.comparison_data[period]
-            if isinstance(period_data, tuple) and len(period_data) == 2:
+            if isinstance(period_data, tuple) and len(period_data) >= 2:
                 # Tuple format: (metadata, data)
-                period_data = period_data[1]
+                # Type ignore for tuple indexing - we've verified length >= 2
+                period_data = period_data[1]  # type: ignore
 
             if table_name not in period_data:
                 continue
@@ -334,7 +339,7 @@ class TableGenerator:
 
         return df
 
-    def _get_string_columns(self, columns: list, table_name: str = None) -> list[str]:
+    def _get_string_columns(self, columns: list, table_name: Optional[str] = None) -> list[str]:
         """Get columns suitable for user/entity matching using dynamic field discovery.
 
         Args:
@@ -488,7 +493,12 @@ class TableGenerator:
 
         # Reorder specified columns, then add delta columns at the end
         final_columns = column_order + delta_columns
-        df = df[final_columns].copy()
+        # Ensure result is DataFrame, not Series (if only one column selected)
+        selected_df = df[final_columns]
+        if isinstance(selected_df, pd.Series):
+            df = selected_df.to_frame().T
+        else:
+            df = selected_df.copy()
 
         if rename_mapping:
             df = df.rename(columns=rename_mapping)
@@ -536,7 +546,12 @@ class TableGenerator:
             )
 
         # Apply limit (>= threshold) - cut from bottom using pandas boolean indexing
-        limited_df = limited_df[limited_df[column_name] >= numeric_threshold]
+        # Ensure result is DataFrame, not Series
+        filtered_df = limited_df[limited_df[column_name] >= numeric_threshold]
+        if isinstance(filtered_df, pd.Series):
+            limited_df = filtered_df.to_frame().T
+        else:
+            limited_df = filtered_df
 
         return limited_df
 
@@ -611,7 +626,9 @@ class TableGenerator:
             # Implement tie-aware row limiting
             if "rank" in df.columns:
                 # Sort by rank first to ensure proper ordering
-                df = df.sort_values("rank")
+                # Type ignore for sort_values - pandas supports string key parameter
+                sorted_df = df.sort_values("rank")  # type: ignore
+                df = sorted_df if isinstance(sorted_df, pd.DataFrame) else df
 
                 # Find the rank at the row limit boundary
                 if len(df) > rows:
@@ -620,14 +637,22 @@ class TableGenerator:
 
                     # Include all items with the same rank as the boundary
                     # This ensures ties are respected
-                    df = df[df["rank"] <= boundary_rank]
+                    filtered_df = df[df["rank"] <= boundary_rank]
+                    df = filtered_df if isinstance(filtered_df, pd.DataFrame) else df
             else:
                 # No rank column, use simple head
-                df = df.head(rows)
+                head_df = df.head(rows)
+                df = head_df if isinstance(head_df, pd.DataFrame) else df
+
+        # Ensure df is DataFrame for type checking
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Expected DataFrame but got other type")
 
         # Apply numeric column limits if specified
         if numeric_limits:
-            df = self._apply_numeric_limits(df, numeric_limits)
+            limited_df = self._apply_numeric_limits(df, numeric_limits)
+            if isinstance(limited_df, pd.DataFrame):
+                df = limited_df
 
         # Add delta columns if requested (BEFORE rank formatting so numeric ranks are available)
         if deltas:
@@ -638,23 +663,34 @@ class TableGenerator:
             # Use the data key (with underscore) for delta calculation,
             # not the table name (with hyphen)
             data_key = table_name.replace("-", "_")
-            df = self._calculate_deltas(df, data_key, current_month)
+            delta_df = self._calculate_deltas(df, data_key, current_month)
+            if isinstance(delta_df, pd.DataFrame):
+                df = delta_df
 
             # Format delta column names
             delta_name_mapping = self._format_delta_column_names(current_month)
-            df = df.rename(columns=delta_name_mapping)
+            # Type ignore for rename - pandas supports columns parameter
+            df = df.rename(columns=delta_name_mapping)  # type: ignore
 
         # Apply rank formatting AFTER delta calculation (so deltas use numeric ranks)
-        if "rank" in df.columns and df["rank"].duplicated().any():
-            df = self._format_rank_column(df)
+        if "rank" in df.columns:
+            rank_series: pd.Series = df["rank"]  # type: ignore
+            if rank_series.duplicated().any():
+                formatted_df = self._format_rank_column(df)
+                if isinstance(formatted_df, pd.DataFrame):
+                    df = formatted_df
 
         # Apply column operations AFTER delta calculation (so rank column is available for deltas)
         if columns:
-            df = self._apply_column_operations(df, columns)
+            column_df = self._apply_column_operations(df, columns)
+            if isinstance(column_df, pd.DataFrame):
+                df = column_df
 
         # Format column names to Title Case with acronym preservation BEFORE converting to markdown
         # This ensures clean column names in the final output
-        df = self._format_column_names(df)
+        formatted_df = self._format_column_names(df)
+        if isinstance(formatted_df, pd.DataFrame):
+            df = formatted_df
 
         # Format usernames with "u/" prefix for Reddit display
         df = self._format_usernames(df)

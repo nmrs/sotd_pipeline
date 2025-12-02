@@ -638,15 +638,27 @@ class ValidateCorrectMatches:
                         "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
                     }
                 else:
-                    brand_name, model_name = args[0], args[1]
-                    return {
-                        "type": "unmatchable_entry",
-                        "field": field,
-                        "expected_brand": brand_name,
-                        "expected_model": model_name,
-                        "pattern": test_text,
-                        "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
-                    }
+                    # Ensure args has at least 2 elements
+                    if len(args) >= 2:
+                        brand_name, model_name = args[0], args[1]
+                        return {
+                            "type": "unmatchable_entry",
+                            "field": field,
+                            "expected_brand": brand_name,
+                            "expected_model": model_name,
+                            "pattern": test_text,
+                            "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
+                        }
+                    else:
+                        # Fallback if args doesn't have enough elements
+                        return {
+                            "type": "unmatchable_entry",
+                            "field": field,
+                            "expected_brand": None,
+                            "expected_model": None,
+                            "pattern": test_text,
+                            "message": f"Entry '{test_text}' cannot be matched by {field} matcher",
+                        }
 
             # Check if the matcher returned the expected brand/model
             if hasattr(result, "matched") and result.matched:
@@ -1003,7 +1015,7 @@ class ValidateCorrectMatches:
         return None
 
     def _brand_exists_in_catalog(
-        self, field: str, brand_name: str, format_name: str = None
+        self, field: str, brand_name: str, format_name: Optional[str] = None
     ) -> bool:
         """Optimized brand existence check using cached validation data."""
         import unicodedata
@@ -1028,7 +1040,7 @@ class ValidateCorrectMatches:
             return exists
 
     def _model_exists_in_catalog(
-        self, field: str, brand_name: str, model_name: str, format_name: str = None
+        self, field: str, brand_name: str, model_name: str, format_name: Optional[str] = None
     ) -> bool:
         """Optimized model existence check using cached validation data."""
         import unicodedata
@@ -1615,13 +1627,26 @@ class ValidateCorrectMatches:
 
             if field == "blade":
                 # For blades, we need a format - use a common one for testing
-                result = matcher.match_with_context(test_input, "DE")
+                # Check if matcher is BladeMatcher which has match_with_context method
+                if isinstance(matcher, BladeMatcher):
+                    result = matcher.match_with_context(test_input, "DE")
+                else:
+                    # Fallback to standard match
+                    result = matcher.match(test_input)
             elif field == "handle":
-                # Use the handle matcher component
-                result = matcher.handle_matcher.match(test_input)
+                # Use the handle matcher component (BrushMatcher specific)
+                if isinstance(matcher, BrushMatcher) and hasattr(matcher, "handle_matcher"):
+                    result = matcher.handle_matcher.match(test_input)
+                else:
+                    # Fallback to standard match
+                    result = matcher.match(test_input)
             elif field == "knot":
-                # Use the knot matcher component
-                result = matcher.knot_matcher.match(test_input)
+                # Use the knot matcher component (BrushMatcher specific)
+                if isinstance(matcher, BrushMatcher) and hasattr(matcher, "knot_matcher"):
+                    result = matcher.knot_matcher.match(test_input)
+                else:
+                    # Fallback to standard match
+                    result = matcher.match(test_input)
             else:
                 # For other fields (brush, razor, soap), use the standard match method
                 result = matcher.match(test_input)

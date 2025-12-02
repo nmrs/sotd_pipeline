@@ -245,6 +245,15 @@ class BrushMatcher:
 
     def _validate_catalog_paths(self):
         """Validate that all catalog paths exist and are readable. Fail fast if not."""
+        # Type guards: ensure paths are not None (they should be set by __init__)
+        if (
+            self.brushes_path is None
+            or self.handles_path is None
+            or self.knots_path is None
+            or self.correct_matches_path is None
+        ):
+            raise ValueError("Catalog paths must be set before validation")
+
         catalog_paths = [
             ("brushes", self.brushes_path),
             ("handles", self.handles_path),
@@ -253,6 +262,8 @@ class BrushMatcher:
 
         # Validate single file catalogs
         for name, path in catalog_paths:
+            if path is None:  # Type guard
+                continue
             if not path.exists():
                 raise FileNotFoundError(f"Catalog file '{name}' not found at: {path.absolute()}")
 
@@ -272,6 +283,8 @@ class BrushMatcher:
                 )
 
         # Validate correct_matches (can be directory or file)
+        if self.correct_matches_path is None:  # Type guard
+            raise ValueError("Correct matches path must be set")
         if not self.correct_matches_path.exists():
             raise FileNotFoundError(
                 f"Correct matches path not found at: {self.correct_matches_path.absolute()}"
@@ -326,6 +339,13 @@ class BrushMatcher:
             return _catalog_cache
 
         # Load catalogs and cache them using the stored paths
+        # Type guards: paths should be set by __init__, but check for safety
+        if (
+            self.brushes_path is None
+            or self.handles_path is None
+            or self.knots_path is None
+        ):
+            raise ValueError("Catalog paths must be set before loading")
         catalogs = {}
         catalogs["brushes"] = self._load_yaml_file(self.brushes_path)
         catalogs["handles"] = self._load_yaml_file(self.handles_path)

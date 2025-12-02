@@ -514,6 +514,8 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
         # Process all strategy results
         for strategy_result in strategies:
             # The new matcher now provides full MatchResult objects with complete data
+            # Initialize strategy_name early to avoid unbound variable in exception handler
+            strategy_name = "unknown"
             try:
                 # Extract data from the MatchResult object
                 strategy_name = strategy_result.strategy or "unknown"
@@ -565,7 +567,11 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                             modifier_value = modifier_function(
                                 request.brushString, strategy_result, strategy_name
                             )
-                            actual_modifier_score = modifier_value * modifier_weight
+                            # Ensure modifier_value is numeric for multiplication
+                            if isinstance(modifier_value, (int, float)):
+                                actual_modifier_score = modifier_value * modifier_weight
+                            else:
+                                actual_modifier_score = modifier_weight
                         else:
                             # If no modifier function exists, just use the weight directly
                             actual_modifier_score = modifier_weight

@@ -103,14 +103,11 @@ class CatalogValidator:
                                             "knot"
                                         )
                                     else:
-                                        # Object with attributes
-                                        has_handle = (
-                                            hasattr(result.matched, "handle")
-                                            and result.matched.handle
+                                        # Object with attributes - use getattr for safety
+                                        has_handle = bool(
+                                            getattr(result.matched, "handle", None)
                                         )
-                                        has_knot = (
-                                            hasattr(result.matched, "knot") and result.matched.knot
-                                        )
+                                        has_knot = bool(getattr(result.matched, "knot", None))
 
                                     # IMPORTANT: Only flag as composite brush if the matcher
                                     # didn't return a top-level brand/model
@@ -141,25 +138,27 @@ class CatalogValidator:
                                                 knot_data.get("model") if knot_data else None
                                             )
                                         else:
-                                            # Object with attributes
+                                            # Object with attributes - use getattr for safety
+                                            handle_obj = getattr(result.matched, "handle", None)
+                                            knot_obj = getattr(result.matched, "knot", None)
                                             matched_handle_brand = (
-                                                getattr(result.matched.handle, "brand", None)
-                                                if hasattr(result.matched, "handle")
+                                                getattr(handle_obj, "brand", None)
+                                                if handle_obj
                                                 else None
                                             )
                                             matched_handle_model = (
-                                                getattr(result.matched.handle, "model", None)
-                                                if hasattr(result.matched, "handle")
+                                                getattr(handle_obj, "model", None)
+                                                if handle_obj
                                                 else None
                                             )
                                             matched_knot_brand = (
-                                                getattr(result.matched.knot, "brand", None)
-                                                if hasattr(result.matched, "knot")
+                                                getattr(knot_obj, "brand", None)
+                                                if knot_obj
                                                 else None
                                             )
                                             matched_knot_model = (
-                                                getattr(result.matched.knot, "model", None)
-                                                if hasattr(result.matched, "knot")
+                                                getattr(knot_obj, "model", None)
+                                                if knot_obj
                                                 else None
                                             )
 
@@ -308,18 +307,28 @@ class CatalogValidator:
                                                     knot_data.get("model") if knot_data else None
                                                 )
                                             else:
-                                                # Object with attributes
-                                                matched_handle_brand = getattr(
-                                                    result.matched.handle, "brand", None
+                                                # Object with attributes - use getattr for safety
+                                                handle_obj = getattr(result.matched, "handle", None)
+                                                knot_obj = getattr(result.matched, "knot", None)
+                                                matched_handle_brand = (
+                                                    getattr(handle_obj, "brand", None)
+                                                    if handle_obj
+                                                    else None
                                                 )
-                                                matched_handle_model = getattr(
-                                                    result.matched.handle, "model", None
+                                                matched_handle_model = (
+                                                    getattr(handle_obj, "model", None)
+                                                    if handle_obj
+                                                    else None
                                                 )
-                                                matched_knot_brand = getattr(
-                                                    result.matched.knot, "brand", None
+                                                matched_knot_brand = (
+                                                    getattr(knot_obj, "brand", None)
+                                                    if knot_obj
+                                                    else None
                                                 )
-                                                matched_knot_model = getattr(
-                                                    result.matched.knot, "model", None
+                                                matched_knot_model = (
+                                                    getattr(knot_obj, "model", None)
+                                                    if knot_obj
+                                                    else None
                                                 )
 
                                             # Flag if composite brush is stored in
@@ -363,19 +372,37 @@ class CatalogValidator:
                                             (
                                                 hasattr(result.matched, "handle")
                                                 and (
-                                                    hasattr(result.matched, "get")
-                                                    and result.matched.get("handle", {}).get(
-                                                        "brand"
+                                                    (
+                                                        hasattr(result.matched, "get")
+                                                        and result.matched.get("handle", {}).get(
+                                                            "brand"
+                                                        )
                                                     )
-                                                    or getattr(result.matched.handle, "brand", None)
+                                                    or (
+                                                        getattr(
+                                                            getattr(result.matched, "handle", None),
+                                                            "brand",
+                                                            None,
+                                                        )
+                                                    )
                                                 )
                                             )
                                             or (
                                                 hasattr(result.matched, "knot")
                                                 and (
-                                                    hasattr(result.matched, "get")
-                                                    and result.matched.get("knot", {}).get("brand")
-                                                    or getattr(result.matched.knot, "brand", None)
+                                                    (
+                                                        hasattr(result.matched, "get")
+                                                        and result.matched.get("knot", {}).get(
+                                                            "brand"
+                                                        )
+                                                    )
+                                                    or (
+                                                        getattr(
+                                                            getattr(result.matched, "knot", None),
+                                                            "brand",
+                                                            None,
+                                                        )
+                                                    )
                                                 )
                                             )
                                         ):
@@ -395,15 +422,17 @@ class CatalogValidator:
                                                     knot_data.get("brand") if knot_data else None
                                                 )
                                             else:
-                                                # Object with attributes
+                                                # Object with attributes - use getattr for safety
+                                                handle_obj = getattr(result.matched, "handle", None)
+                                                knot_obj = getattr(result.matched, "knot", None)
                                                 matched_handle_brand = (
-                                                    getattr(result.matched.handle, "brand", None)
-                                                    if hasattr(result.matched, "handle")
+                                                    getattr(handle_obj, "brand", None)
+                                                    if handle_obj
                                                     else None
                                                 )
                                                 matched_knot_brand = (
-                                                    getattr(result.matched.knot, "brand", None)
-                                                    if hasattr(result.matched, "knot")
+                                                    getattr(knot_obj, "brand", None)
+                                                    if knot_obj
                                                     else None
                                                 )
 

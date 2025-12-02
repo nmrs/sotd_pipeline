@@ -895,9 +895,13 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     if request.use_enriched_data and data.get("matched_data_map"):
                         # Get the original matched data from the matched_data_map
                         matched_data_map = data["matched_data_map"]
-                        matched_record = matched_data_map.get(record_id, {})
-                        matched_field_data = matched_record.get(request.field, {})
-                        matched = matched_field_data.get("matched", {})
+                        # Type guard: ensure matched_data_map is a dict
+                        if isinstance(matched_data_map, dict):
+                            matched_record = matched_data_map.get(record_id, {})
+                            matched_field_data = matched_record.get(request.field, {})
+                            matched = matched_field_data.get("matched", {})
+                        else:
+                            matched = {}
                         enriched = field_data.get("enriched", {})
                     else:
                         # Using matched data directly
@@ -1040,6 +1044,8 @@ async def get_correct_matches(field: str):
         import yaml
 
         data = {}
+        # Initialize field_data early to avoid unbound variable errors
+        field_data: Dict[str, Any] = {}
 
         # For brush field, combine data from brush, handle, and knot sections
         if field == "brush":
@@ -1516,14 +1522,14 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                             "model": issue.actual_knot_model,
                         }
                         # Add fiber and knot size if available
-                        if hasattr(issue, "actual_knot_fiber") and issue.actual_knot_fiber:
-                            processed_issue["expected_knot_match"][
-                                "fiber"
-                            ] = issue.actual_knot_fiber
-                        if hasattr(issue, "actual_knot_size_mm") and issue.actual_knot_size_mm:
+                        actual_knot_fiber = getattr(issue, "actual_knot_fiber", None)
+                        if actual_knot_fiber:
+                            processed_issue["expected_knot_match"]["fiber"] = actual_knot_fiber
+                        actual_knot_size_mm = getattr(issue, "actual_knot_size_mm", None)
+                        if actual_knot_size_mm:
                             processed_issue["expected_knot_match"][
                                 "knot_size_mm"
-                            ] = issue.actual_knot_size_mm
+                            ] = actual_knot_size_mm
 
             processed_issues.append(processed_issue)
 
