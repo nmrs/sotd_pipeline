@@ -518,9 +518,9 @@ DE:
     Lab Blue:
       patterns:
         - (person+a)?.*lab *blue
-        - personn*a.*blue
-        - personn*a.*comf.*coat
-        - personn*a
+        - person+a.*blue
+        - person+a.*comf.*coat
+        - person+a
         - accuforge
     Med Prep:
       patterns:
@@ -538,8 +538,8 @@ DE:
         - ^(?!.*(comfort|lab|plat|crystal)).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super+ Platinum:
       patterns:
-        - person.*super.*plat
-        - person.*crystal
+        - person+a.*super.*plat
+        - person+a.*crystal
     TOMY:
       patterns:
         - \btomy\b
@@ -755,6 +755,7 @@ DE:
     Mild:
       patterns:
         - viking.*mild
+        - vikings blade
   Voskhod:
     Teflon Coated:
       patterns:
@@ -857,6 +858,10 @@ Hair Shaper:
     Hair Shaper:
       patterns:
         - durham
+  Feather:
+    Cut Special:
+      patterns:
+        - feather.*cut.*(?:special)?
   Fromm:
     Hair Shaper:
       patterns:

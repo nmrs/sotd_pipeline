@@ -23,6 +23,7 @@ AC:
     - feather artist club professional
     - feather artist club professional (se)
     - feather pro
+    - feather pro (ac)
     - feather pro ac
     - feather pro injector
     - feather professional
@@ -30,6 +31,7 @@ AC:
     Pro Super:
     - feather - super professional
     - feather professional super
+    - feather professional super (ac)
     - feather super
     - feather super (?)
     ProGuard:
@@ -83,6 +85,7 @@ DE:
     - 7 o'clock sharpedge - yellow
     - 7 o'clock sharpedge yellow
     - 7'o clock - yellow
+    - gilette - 7 o'clock sharpedge
     - gillette - 7 o'clock - sharpedge
     - gillette - 7 o'clock sharp edge
     - gillette - 7 o'clock sharpedge
@@ -122,12 +125,15 @@ DE:
     - gillette seven o'clock super platinum
     - gillette super platinum (black)
     Super Stainless (Green):
+    - 7 o'clock
     - 7 o'clock - super stainless (green)
     - gilette 7 o' clock super stainless (green)
     - gilette 7 o'clock - super stainless
     - gillette - 7 o'clock
     - gillette 7 o clock green
+    - gillette 7 o'clock
     - gillette 7 o'clock (g)
+    - gillette 7 o'clock - super stainless (green)
     - gillette 7 o'clock stainless
     - gillette 7 o'clock stainless (green)
     - gillette 7 o'clock stainless green
@@ -139,6 +145,9 @@ DE:
     - gillette green
     - gillette seven o'clock super stainless
     - gillette super stainless (green)
+  Aeterna:
+    Super Stainless:
+    - aeterna stainless steel
   AMC:
     De-Luxe Thin:
     - vintage amc thin
@@ -151,6 +160,7 @@ DE:
     - asco platinum orange
     Super Stainless:
     - asco orange (comes preloaded in razor, new) (seven cents/blade)
+    - asco super stainless
   Assured for Men:
     DE:
     - assured for men
@@ -159,14 +169,18 @@ DE:
     - astra
     - astra - green
     - astra - platinum
+    - astra - sp
     - astra - superior platinum
     - astra green
     - astra green - [ on both razors]
+    - astra green label
+    - astra green platinum
     - astra green sp
     - astra platinum
     - astra platinum (green)
     - astra platium (green)
     - astra sp
+    - astra sp (-2)
     - astra sp (?)
     - astra sp (green)
     - astra sp green
@@ -177,11 +191,15 @@ DE:
     - astra superior platinum (in)
     - astra superior platinum (unknown number of uses)
     - astra superior platinum, de
+    - astras
+    - gillette astra platinum
     - gillette astra platinum green
+    - gillette astra sp
     - rapira platinum lux~~ ~~tiger~~ astra sp
     Superior Stainless (Blue):
     - astra - blue
     - astra blue
+    - astra blue label
     - astra ss
     - astra stainless
     - astra stainless (blue russian)
@@ -208,6 +226,7 @@ DE:
     - bic - chrome platinum
     - bic chrome
     - bic chrome platinum
+    - bic chrome platinum (seems sharper than treets)
     - bic cp
     - bic platinum
     - bic platinum chrome
@@ -220,6 +239,7 @@ DE:
     - lord big ben - super stainless
   Bolzano:
     Superinox:
+    - bolazano - superinox
     - bolzano
     - bolzano - superinox
     - bolzano superinox
@@ -272,6 +292,8 @@ DE:
     Sharp Hi Chromium:
     - durablade sharp hi chromium
     - sharp hi chromium
+    Sharp Titanium:
+    - durablade sharp titanium
   Elios:
     Inoxidable:
     - elios
@@ -297,9 +319,12 @@ DE:
     - feather hi-stainless
     - feather hi-stainless double edged razor blade
     - feather hi-stainless steel platinum
+    - feather hi-steel platinum
+    - feather hs
     - feather new hi stainless
     - feather new hi-stainless
     - feather platinum
+    - feather ss
     - feather stainless
     - feather stainless steel
   Filoso:
@@ -345,6 +370,7 @@ DE:
     - gillette nacet
     - gillette nacet half blade
     - gillette nacet stainless
+    - gillette nancet
     - gillette- nacet
     - nacet
     - nacet by gillette
@@ -387,6 +413,8 @@ DE:
     - gsb
     - silver blue
     - silverblue
+    Sputnik:
+    - gillette sputnik
     Stainless:
     - gillette - 365 stainless
     - gillette - stainless
@@ -441,6 +469,7 @@ DE:
     - kc gillette (aka gillette platinum)
     - kc gillette (last one, hooray!)
     - kc gillette, aka gillette platinum
+    - king c gillette
     - king c. gillette
   Ladas:
     Super Stainless:
@@ -468,6 +497,7 @@ DE:
     Super Stainless:
     - lord - super stainless
     - lord - super stainless steel
+    - lord super stainless
     - lord super stainless steel
   Manscaped:
     The Plow 2.0:
@@ -491,6 +521,7 @@ DE:
   Parker:
     Premium Platinum:
     - parker
+    - parker - parker premium platinum de
     - parker stainless steel
   Personna:
     '74':
@@ -522,6 +553,7 @@ DE:
     - personna double edge comfrot coated super platinum
     - personna lab blue
     - personna lab blue super
+    - personna super (aka lab blue)
     - personna super comfort coated (aka lab blue)
     Med Prep:
     - accutec - med prep
@@ -534,6 +566,7 @@ DE:
     - personna - platinum (for both)
     - personna - platinum chrome
     - personna - platinum chrome israeli red
+    - personna israeli red
     - personna platinum
     - personna platinum chrome
     - personna platinum chrome/german red
@@ -549,11 +582,13 @@ DE:
     - personne super stainless
     Super+ Platinum:
     - personna (crystal) platinum
+    - personna blue crystal
     - personna crystal super
     - personna platinum (crystal)
   Polsilver:
     Super Iridium:
     - polsilver
+    - polsilver - super iridium
     - polsilver si
     - polsilver super iridium
     - wizamet - polsilver
@@ -608,6 +643,9 @@ DE:
   Sharp Star:
     Platinum:
     - sharp star
+  Shaving Revolution:
+    Platinum:
+    - shaving revolution platinum
   Silver Star:
     Super Stainless:
     - lord silver star - stainless
@@ -669,6 +707,7 @@ DE:
     - treet - classic carbon
     - treet classic
     - treet classic carbon steel
+    - treet classic de
     Dura Sharp:
     - treet durasharp
     Falcon:
@@ -694,6 +733,7 @@ DE:
     - v12 - super platinum
   Van Der Hagen:
     Stainless:
+    - van der hagen - stainless
     - van der hagen stainless
   Veesta:
     Ultra Platinum:
@@ -708,6 +748,10 @@ DE:
   Viking's Sword:
     Stainless:
     - viking
+    - vikings sword
+  Vikings Blade:
+    Mild:
+    - vikings blade
   Voskhod:
     Teflon Coated:
     - voshkod
@@ -778,6 +822,7 @@ GEM:
     - gem
     - gem accuforge
     - gem accutec pro gem
+    - gem blade given to me by u/visceralwatch
     - gem ptfe
     - gem ptfe (?)
     - gem ptfe (use 5 or so)
@@ -799,10 +844,18 @@ GEM:
     GEM Stainless:
     - gem - coated single edge stainless steel
     - gem ss
+    - gem stainless
 Hair Shaper:
   Annie:
     Hair Shaper:
+    - annie hair shaper
     - annie hair shaper blade
+  Diane:
+    Hair Shaper:
+    - diane
+  Feather:
+    Cut Special:
+    - feather cut blade
   Fromm:
     Hair Shaper:
     - fromm hair cut blade
@@ -858,6 +911,7 @@ Injector:
     - hills (personna) chrome injector
     - personna
     - personna injector
+    - personna injector blade
   Schick:
     Injector:
     - schick
@@ -886,6 +940,7 @@ Injector:
     - ted pella - injector
     - ted pella injector
     - ted pella ptfe
+    - ted pella single edge injector
 Other:
   Rolls Razor:
     Blade:
