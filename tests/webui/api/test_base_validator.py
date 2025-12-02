@@ -63,6 +63,7 @@ class TestBaseValidator:
         result = validator.load_data()
 
         assert result.success is False
+        assert result.error_message is not None
         assert "File not found" in result.error_message
         assert validator.is_loaded is False
 
@@ -77,6 +78,7 @@ class TestBaseValidator:
         result = validator.load_data()
 
         assert result.success is False
+        assert result.error_message is not None
         assert "Invalid YAML" in result.error_message
         assert validator.is_loaded is False
 
@@ -117,6 +119,7 @@ class TestBaseValidator:
         result = validator.validate_required_fields(required_fields)
 
         assert result.success is True
+        assert result.validation_errors is not None
         assert len(result.validation_errors) == 0
 
     def test_validate_required_fields_missing(self):
@@ -128,6 +131,7 @@ class TestBaseValidator:
         result = validator.validate_required_fields(required_fields)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("missing_field" in error for error in result.validation_errors)
 
@@ -140,6 +144,7 @@ class TestBaseValidator:
         result = validator.validate_data_structure(expected_structure)
 
         assert result.success is True
+        assert result.validation_errors is not None
         assert len(result.validation_errors) == 0
 
     def test_validate_data_structure_invalid(self):
@@ -151,6 +156,7 @@ class TestBaseValidator:
         result = validator.validate_data_structure(expected_structure)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("wrong_key" in error for error in result.validation_errors)
 
@@ -208,6 +214,7 @@ class TestBaseValidator:
         result = validator.add_item("Test Item 1", new_item)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "already exists" in result.error_message
 
     def test_update_item_success(self):
@@ -233,6 +240,7 @@ class TestBaseValidator:
         result = validator.update_item("Non Existent Item", updated_item)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "not found" in result.error_message
 
     def test_delete_item_success(self):
@@ -256,6 +264,7 @@ class TestBaseValidator:
         result = validator.delete_item("Non Existent Item")
 
         assert result.success is False
+        assert result.error_message is not None
         assert "not found" in result.error_message
 
     def test_validate_item_data_success(self):
@@ -268,6 +277,7 @@ class TestBaseValidator:
         result = validator.validate_item_data(item_data, required_fields)
 
         assert result.success is True
+        assert result.validation_errors is not None
         assert len(result.validation_errors) == 0
 
     def test_validate_item_data_missing_fields(self):
@@ -280,6 +290,7 @@ class TestBaseValidator:
         result = validator.validate_item_data(item_data, required_fields)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("field2" in error for error in result.validation_errors)
 
@@ -307,6 +318,7 @@ class TestBaseValidator:
         result = validator.backup_data(backup_path)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "Data not loaded" in result.error_message
 
     def test_restore_data_success(self):
@@ -332,4 +344,5 @@ class TestBaseValidator:
         result = validator.restore_data(non_existent_backup)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "Backup file not found" in result.error_message

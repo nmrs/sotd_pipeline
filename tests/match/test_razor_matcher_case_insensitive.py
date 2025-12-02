@@ -127,7 +127,9 @@ class TestRazorMatcherCaseInsensitive:
 
         # Test with exact case match (should be found first)
         result = matcher.match("gillette superspeed")
+        assert result is not None
         assert result.match_type == "exact"
+        assert result.matched is not None
         assert result.matched["brand"] == "Gillette"
         assert result.matched["model"] == "Super Speed"
 

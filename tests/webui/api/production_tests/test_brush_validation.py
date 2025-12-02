@@ -443,7 +443,8 @@ class TestBrushValidationAPI:
             saved_data.update(data)
             # Don't actually save to file during test
 
-        updater.save_correct_matches = mock_save
+        # Type ignore for test - we're mocking the method for testing
+        updater.save_correct_matches = mock_save  # type: ignore
 
         # Test the update method with our dual-component brush
         updater.add_or_update_entry(

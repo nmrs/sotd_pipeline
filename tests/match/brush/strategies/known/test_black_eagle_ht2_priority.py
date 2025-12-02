@@ -167,10 +167,13 @@ class TestBlackEagleHT2Priority:
 
         # The strategy should return the Black Eagle HT2 match (longer pattern)
         result = self.strategy.match(test_text)
+        assert result is not None
+        assert result.matched is not None
         assert result.matched["brand"] == "Black Eagle", "Longer pattern should win"
         assert result.matched["model"] == "HT2", "Longer pattern should win"
 
         # Verify the winning pattern is longer than the generic B2 pattern
+        assert result.pattern is not None
         winning_pattern_length = len(result.pattern)
         generic_b2_length = 6
         assert winning_pattern_length > generic_b2_length, (

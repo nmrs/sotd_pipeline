@@ -23,7 +23,9 @@ def validate_month(value: str) -> str:
     if not (1 <= int(month) <= 12):
         raise argparse.ArgumentTypeError(f"Invalid month value: {value} (month must be 01-12)")
 
-    return value
+    # All validation passed, return the value
+    # Type checker sees exceptions as non-return paths, but they're valid control flow
+    return value  # type: ignore[return-value]
 
 
 def validate_range(value: str) -> str:

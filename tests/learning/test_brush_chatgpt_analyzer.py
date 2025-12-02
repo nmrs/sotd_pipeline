@@ -172,7 +172,8 @@ class TestBrushChatGPTAnalyzer:
 
         with pytest.raises(AttributeError):
             # This method doesn't exist yet
-            analyzer.generate_comprehensive_analysis(strategy_report)
+            # Type ignore for test - we're testing that the method doesn't exist
+            analyzer.generate_comprehensive_analysis(strategy_report)  # type: ignore
 
     def test_chatgpt_call_with_system_identification(self):
         """Test that ChatGPT calls include proper system identification."""
@@ -374,4 +375,5 @@ class TestBrushChatGPTAnalyzerIntegration:
 
         with pytest.raises(AttributeError):
             # This method doesn't exist yet
-            analyzer.generate_configuration_update_suggestions({"strategy_performance": {}})
+            # Type ignore for test - we're testing that the method doesn't exist
+            analyzer.generate_configuration_update_suggestions({"strategy_performance": {}})  # type: ignore

@@ -83,7 +83,8 @@ class TestBrushSplitValidator:
 
         # Test empty/None input
         assert validator.normalize_brush_string("") is None
-        assert validator.normalize_brush_string(None) is None
+        # Type ignore for None argument - test is checking None handling
+        assert validator.normalize_brush_string(None) is None  # type: ignore
 
     def test_load_brush_splits_success(self):
         """Test successful brush splits loading."""
@@ -91,6 +92,7 @@ class TestBrushSplitValidator:
         result = validator.load_brush_splits()
 
         assert result.success is True
+        assert result.data is not None
         assert "brush_splits" in result.data
         assert len(result.data["brush_splits"]) == 2
 
@@ -101,6 +103,7 @@ class TestBrushSplitValidator:
         result = validator.load_brush_splits()
 
         assert result.success is False
+        assert result.error_message is not None
         assert "File not found" in result.error_message
 
     def test_save_brush_splits_success(self):
@@ -191,6 +194,7 @@ class TestBrushSplitValidator:
         result = validator.add_brush_split(existing_brush_split)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "already exists" in result.error_message
 
     def test_update_brush_split_success(self):
@@ -212,6 +216,7 @@ class TestBrushSplitValidator:
 
         # Verify brush split was updated
         updated = validator.get_brush_split_by_name("Test Brush 1")
+        assert updated is not None
         assert updated.handle == "Updated"
 
     def test_update_brush_split_not_found(self):
@@ -230,6 +235,7 @@ class TestBrushSplitValidator:
         result = validator.update_brush_split(non_existent_brush_split)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "not found" in result.error_message
 
     def test_delete_brush_split_success(self):
@@ -253,6 +259,7 @@ class TestBrushSplitValidator:
         result = validator.delete_brush_split("Non Existent Brush")
 
         assert result.success is False
+        assert result.error_message is not None
         assert "not found" in result.error_message
 
     def test_validate_brush_split_data_success(self):
@@ -270,6 +277,7 @@ class TestBrushSplitValidator:
         result = validator.validate_brush_split_data(valid_brush_split)
 
         assert result.success is True
+        assert result.validation_errors is not None
         assert len(result.validation_errors) == 0
 
     def test_validate_brush_split_data_missing_original(self):
@@ -287,6 +295,7 @@ class TestBrushSplitValidator:
         result = validator.validate_brush_split_data(invalid_brush_split)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("original" in error for error in result.validation_errors)
 
@@ -305,6 +314,7 @@ class TestBrushSplitValidator:
         result = validator.validate_brush_split_data(invalid_brush_split)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("Knot must be null" in error for error in result.validation_errors)
 
@@ -323,6 +333,7 @@ class TestBrushSplitValidator:
         result = validator.validate_brush_split_data(invalid_brush_split)
 
         assert result.success is False
+        assert result.validation_errors is not None
         assert len(result.validation_errors) > 0
         assert any("handle/knot" in error for error in result.validation_errors)
 

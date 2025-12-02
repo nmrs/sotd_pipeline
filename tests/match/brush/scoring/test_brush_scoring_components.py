@@ -30,6 +30,7 @@ class TestCorrectMatchesMatcher:
         result = matcher.match("simpson chubby 2")
 
         assert result is not None
+        assert result.matched is not None
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
 
@@ -48,6 +49,7 @@ class TestCorrectMatchesMatcher:
         result = matcher.match("SIMPSON CHUBBY 2")
 
         assert result is not None
+        assert result.matched is not None
         assert result.matched["brand"] == "Simpson"
 
     def test_match_empty_input(self):
@@ -86,7 +88,9 @@ class TestStrategyOrchestrator:
         results = orchestrator.run_all_strategies("test brush")
 
         assert len(results) == 2
+        assert results[0].matched is not None
         assert results[0].matched["brand"] == "Test1"
+        assert results[1].matched is not None
         assert results[1].matched["brand"] == "Test2"
 
         mock_strategy1.match.assert_called_once_with("test brush")
@@ -108,6 +112,7 @@ class TestStrategyOrchestrator:
         results = orchestrator.run_all_strategies("test brush")
 
         assert len(results) == 1
+        assert results[0].matched is not None
         assert results[0].matched["brand"] == "Test2"
 
     def test_run_all_strategies_empty_list(self):
@@ -157,7 +162,7 @@ class TestScoringEngine:
 
         assert len(scored_results) == 2
         assert all(hasattr(result, "score") for result in scored_results)
-        assert all(result.score > 0 for result in scored_results)
+        assert all(result.score is not None and result.score > 0 for result in scored_results)
 
     def test_get_best_result(self):
         """Test getting the best result."""
@@ -174,7 +179,8 @@ class TestScoringEngine:
         result3 = Mock()
         result3.score = 75.0
 
-        scored_results = [result1, result2, result3]
+        # Type ignore for Mock objects in test - they simulate real objects
+        scored_results: list = [result1, result2, result3]  # type: ignore
         best_result = engine.get_best_result(scored_results)
 
         assert best_result == result2  # Highest score
@@ -211,6 +217,7 @@ class TestScoringEngine:
         scored_results = engine.score_results([result], "test brush")
 
         assert len(scored_results) == 1
+        assert scored_results[0].score is not None
         assert scored_results[0].score >= 80.0  # Base score plus modifiers
 
     def test_modifier_handle_brand_without_knot_brand(self):

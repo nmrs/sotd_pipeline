@@ -17,14 +17,16 @@ class TestBaseBrushMatchingStrategy:
     def test_cannot_instantiate_abstract_class(self):
         """Test that BaseBrushMatchingStrategy cannot be instantiated."""
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            BaseBrushMatchingStrategy()
+            # Type ignore for test - we're testing that instantiation fails
+            BaseBrushMatchingStrategy()  # type: ignore
 
     def test_has_required_abstract_method(self):
         """Test that BaseBrushMatchingStrategy has the required abstract method."""
         assert hasattr(BaseBrushMatchingStrategy, "match")
         # Check that the method is abstract by trying to instantiate the class
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            BaseBrushMatchingStrategy()
+            # Type ignore for test - we're testing that instantiation fails
+            BaseBrushMatchingStrategy()  # type: ignore
 
     def test_concrete_implementation_works(self):
         """Test that a concrete implementation of BaseBrushMatchingStrategy works."""
@@ -56,7 +58,8 @@ class TestBaseMultiResultBrushMatchingStrategy:
     def test_cannot_instantiate_abstract_class(self):
         """Test that BaseMultiResultBrushMatchingStrategy cannot be instantiated."""
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            BaseMultiResultBrushMatchingStrategy()
+            # Type ignore for test - we're testing that instantiation fails
+            BaseMultiResultBrushMatchingStrategy()  # type: ignore
 
     def test_has_required_abstract_methods(self):
         """Test that BaseMultiResultBrushMatchingStrategy has the required abstract methods."""
@@ -64,7 +67,8 @@ class TestBaseMultiResultBrushMatchingStrategy:
         assert hasattr(BaseMultiResultBrushMatchingStrategy, "match_all")
         # Check that the methods are abstract by trying to instantiate the class
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            BaseMultiResultBrushMatchingStrategy()
+            # Type ignore for test - we're testing that instantiation fails
+            BaseMultiResultBrushMatchingStrategy()  # type: ignore
 
     def test_concrete_implementation_works(self):
         """Test that a concrete implementation of BaseMultiResultBrushMatchingStrategy works."""

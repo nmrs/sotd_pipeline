@@ -90,6 +90,7 @@ class TestExternalScoringConsistency:
         # Base score for automated_split is 50.0
         # Modifiers should be calculated externally by scoring engine
         base_score = 50.0
+        assert scored_result.score is not None
         assert (
             scored_result.score >= base_score
         ), f"Composite brush strategy should get at least base score {base_score}, got {scored_result.score}"
@@ -117,6 +118,7 @@ class TestExternalScoringConsistency:
 
         # Component strategies should get base score + modifiers
         # Base score for knot_matching should be defined in config
+        assert scored_result.score is not None
         assert (
             scored_result.score > 0
         ), f"Component strategy should get positive score, got {scored_result.score}"
@@ -148,9 +150,14 @@ class TestExternalScoringConsistency:
         )
 
         # Verify that the result doesn't have pre-calculated scores
+        assert result.matched is not None
+        assert "handle" in result.matched
+        assert isinstance(result.matched["handle"], dict)
         assert (
             "score" not in result.matched["handle"]
         ), "Handle component should not have pre-calculated score"
+        assert "knot" in result.matched
+        assert isinstance(result.matched["knot"], dict)
         assert (
             "score" not in result.matched["knot"]
         ), "Knot component should not have pre-calculated score"
@@ -160,6 +167,7 @@ class TestExternalScoringConsistency:
         scored_result = scored_results[0]
 
         # The scoring engine should calculate scores externally
+        assert scored_result.score is not None
         assert scored_result.score > 0, "Scoring engine should calculate score externally"
 
     def test_scoring_engine_handles_all_component_scoring(self):
@@ -194,6 +202,7 @@ class TestExternalScoringConsistency:
         # The scoring engine should apply modifiers for component scoring
         # This includes handle_weight, knot_weight, and other modifiers
         base_score = 50.0  # automated_split base score
+        assert scored_result.score is not None
         modifier_score = scored_result.score - base_score
 
         # With test config modifiers set to 0.0, modifier_score should be 0.0
@@ -240,14 +249,23 @@ class TestExternalScoringConsistency:
             assert hasattr(
                 result, "score"
             ), f"Result from strategy {result.strategy} should have score attribute"
+            assert result.score is not None
             assert (
                 result.score > 0
             ), f"Result from strategy {result.strategy} should have positive score, got {result.score}"
 
         # Verify that all strategies get positive scores
-        complete_score = next(r.score for r in scored_results if r.strategy == "known_brush")
-        composite_score = next(r.score for r in scored_results if r.strategy == "automated_split")
-        component_score = next(r.score for r in scored_results if r.strategy == "knot_matching")
+        complete_result = next(r for r in scored_results if r.strategy == "known_brush")
+        composite_result = next(r for r in scored_results if r.strategy == "automated_split")
+        component_result = next(r for r in scored_results if r.strategy == "knot_matching")
+        
+        assert complete_result.score is not None
+        assert composite_result.score is not None
+        assert component_result.score is not None
+        
+        complete_score = complete_result.score
+        composite_score = composite_result.score
+        component_score = component_result.score
 
         # All strategies should have positive scores
         assert (
@@ -306,6 +324,7 @@ class TestExternalScoringConsistency:
 
         # The final score should be reasonable and consistent
         # Base score (50.0) + modifiers should give a meaningful total
+        assert scored_result.score is not None
         assert (
             50.0 <= scored_result.score <= 200.0
         ), f"External scoring should produce reasonable score (50-200), got {scored_result.score}"

@@ -76,7 +76,9 @@ class UserAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from user data."""
-        return df["author"]
+        # Ensure we get a Series, not DataFrame
+        author_series: pd.Series = df["author"]  # type: ignore
+        return author_series
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

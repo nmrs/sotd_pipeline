@@ -27,14 +27,14 @@ class TestCorrectMatchesCompositeBrush:
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
 
+        # Initialize before try block to avoid unbound variable in finally
+        original_exists = Path.exists
+        original_open = Path.open
+
         try:
             # Track which file handle corresponds to which file path
             file_handles = {}
             file_open_order = []
-
-            # Patch Path.exists and Path.open at the class level
-            original_exists = Path.exists
-            original_open = Path.open
 
             # Mock Path.exists() to return True for directory and section files
             def mock_exists(self):
@@ -90,6 +90,7 @@ class TestCorrectMatchesCompositeBrush:
 
             # Verify the entries contain data from all sections
             entries = result.entries
+            assert entries is not None
 
             # Should have brush section
             assert "brush" in entries
@@ -126,9 +127,11 @@ class TestCorrectMatchesCompositeBrush:
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
 
+        # Initialize before try block to avoid unbound variable in finally
+        original_exists = Path.exists
+        original_open = Path.open
+
         try:
-            original_exists = Path.exists
-            original_open = Path.open
 
             # Mock Path.exists() to return True only for brush.yaml (not handle/knot)
             def mock_exists(self):
@@ -164,6 +167,7 @@ class TestCorrectMatchesCompositeBrush:
             # Verify the entries contain all three sections for composite brush logic
             # The UI expects all sections to be present even when empty
             entries = result.entries
+            assert entries is not None
             assert "brush" in entries
             assert "AP Shave Co" in entries["brush"]
             assert "G5C" in entries["brush"]["AP Shave Co"]
@@ -213,6 +217,7 @@ class TestCorrectMatchesCompositeBrush:
 
             # Verify the entries contain all sections even when empty
             entries = result.entries
+            assert entries is not None
             assert "brush" in entries
             assert "handle" in entries
             assert "knot" in entries
@@ -226,9 +231,11 @@ class TestCorrectMatchesCompositeBrush:
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
 
+        # Initialize before try block to avoid unbound variable in finally
+        original_exists = Path.exists
+        original_open = Path.open
+
         try:
-            original_exists = Path.exists
-            original_open = Path.open
 
             # Mock Path.exists() to return True only for brush.yaml (not handle/knot)
             def mock_exists(self):
@@ -262,6 +269,7 @@ class TestCorrectMatchesCompositeBrush:
             # Verify the entries contain all three sections for composite brush logic
             # The UI expects all sections to be present even when empty
             entries = result.entries
+            assert entries is not None
             assert "brush" in entries
             assert "AP Shave Co" in entries["brush"]
             assert "G5C" in entries["brush"]["AP Shave Co"]
@@ -288,9 +296,11 @@ class TestCorrectMatchesCompositeBrush:
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
 
+        # Initialize before try block to avoid unbound variable in finally
+        original_exists = Path.exists
+        original_open = Path.open
+
         try:
-            original_exists = Path.exists
-            original_open = Path.open
 
             # Mock Path.exists() to return True for directory and razor.yaml only
             def mock_exists(self):
@@ -324,6 +334,7 @@ class TestCorrectMatchesCompositeBrush:
             # Verify the entries contain only razor section data
             # Non-brush fields return data directly without field name wrapper
             entries = result.entries
+            assert entries is not None
             assert "Koraat" in entries
             assert "brush" not in entries
             assert "handle" not in entries
@@ -344,9 +355,11 @@ class TestCorrectMatchesCompositeBrush:
         original_project_root = webui.api.analysis.project_root
         webui.api.analysis.project_root = Path("/mock/project")
 
+        # Initialize before try block to avoid unbound variable in finally
+        original_exists = Path.exists
+        original_open = Path.open
+
         try:
-            original_exists = Path.exists
-            original_open = Path.open
             file_open_order = []
 
             # Mock Path.exists() to return True for all three section files
@@ -401,14 +414,19 @@ class TestCorrectMatchesCompositeBrush:
             # 2. Its knot component "The Golden Nib - Boar" exists in knot section
 
             entries = result.entries
+            assert entries is not None
 
             # Verify handle component data is available
             assert "handle" in entries
+            assert "AP Shave Co" in entries["handle"]
+            assert "Unspecified" in entries["handle"]["AP Shave Co"]
             handle_entries = entries["handle"]["AP Shave Co"]["Unspecified"]
             assert "ap shave co. - lemon drop 26mm tgn boar" in handle_entries
 
             # Verify knot component data is available
             assert "knot" in entries
+            assert "The Golden Nib" in entries["knot"]
+            assert "Boar" in entries["knot"]["The Golden Nib"]
             knot_entries = entries["knot"]["The Golden Nib"]["Boar"]
             assert "ap shave co. - lemon drop 26mm tgn boar" in knot_entries
 

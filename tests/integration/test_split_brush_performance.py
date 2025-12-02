@@ -175,7 +175,8 @@ class TestSplitBrushPerformance:
         # Skipping for now to focus on core functionality
         pass
 
-        print(f"✅ BrushMatcher performance: {processing_time:.2f}s for 100 lookups")
+        # Commented out - processing_time is not defined in this test
+        # print(f"✅ BrushMatcher performance: {processing_time:.2f}s for 100 lookups")
 
     def test_memory_usage(self, large_split_brush_dataset, temp_correct_matches_file):
         """Test memory usage with large datasets."""

@@ -178,7 +178,8 @@ class TestBrushLearningReportGenerator:
         # Should have a method to generate comprehensive report
         with pytest.raises(AttributeError):
             # This will fail initially - we need to implement it
-            report = generator.generate_comprehensive_report()
+            # Type ignore for test - we're testing that the method doesn't exist
+            report = generator.generate_comprehensive_report()  # type: ignore
 
     def test_system_identification_in_reports(self):
         """Test that system identification is included in all reports."""
@@ -213,7 +214,8 @@ class TestBrushLearningReportGenerator:
 
         with pytest.raises(AttributeError):
             # This method doesn't exist yet
-            generator.load_validation_data_from_file(
+            # Type ignore for test - we're testing that the method doesn't exist
+            generator.load_validation_data_from_file(  # type: ignore
                 Path("data/learning/brush_user_actions_2025-05.yaml")
             )
 
@@ -224,7 +226,8 @@ class TestBrushLearningReportGenerator:
 
         with pytest.raises(AttributeError):
             # This method doesn't exist yet
-            generator.save_report_to_file(report, Path("test_report.yaml"))
+            # Type ignore for test - we're testing that the method doesn't exist
+            generator.save_report_to_file(report, Path("test_report.yaml"))  # type: ignore
 
     def test_empty_validation_data_handling(self):
         """Test handling of empty validation data."""
@@ -278,7 +281,8 @@ class TestBrushLearningReportGeneratorIntegration:
 
         with pytest.raises(AttributeError):
             # This method doesn't exist yet
-            generator.load_comparison_data(comparison_file)
+            # Type ignore for test - we're testing that the method doesn't exist
+            generator.load_comparison_data(comparison_file)  # type: ignore
 
     def test_report_format_compatibility(self):
         """Test that reports are compatible with existing report patterns."""

@@ -19,6 +19,7 @@ class TestUnifiedMatchResultCreation:
         )
 
         assert simple_result.original == "Koraat Moarteen"
+        assert simple_result.matched is not None
         assert simple_result.matched["brand"] == "Koraat"
         assert simple_result.section is None
         assert simple_result.priority is None
@@ -54,6 +55,7 @@ class TestBackwardCompatibilityWithExistingProducers:
 
         assert isinstance(result, MatchResult)
         assert result.original == "Test Product"
+        assert result.matched is not None
         assert result.matched["brand"] == "Test"
         assert result.section is None  # Default for backward compatibility
         assert result.priority is None  # Default for backward compatibility
@@ -82,6 +84,7 @@ class TestBackwardCompatibilityWithExistingConsumers:
 
         # Test existing property access
         assert result.original == "Test Product"
+        assert result.matched is not None
         assert result.matched["brand"] == "Test"
         assert result.match_type == "regex"
         assert result.pattern == "test.*product"

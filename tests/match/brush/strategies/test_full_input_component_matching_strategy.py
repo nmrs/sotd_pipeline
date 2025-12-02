@@ -714,10 +714,11 @@ class TestFullInputComponentMatchingStrategy:
         )
 
         # Mock the exclusion methods to return alternatives
-        self.strategy._match_handle_with_exclusions = lambda text, excluded: (
+        # Type ignore for test - we're mocking private methods for testing
+        self.strategy._match_handle_with_exclusions = lambda text, excluded: (  # type: ignore
             alternative_handle_result if "declaration grooming" in excluded else None
         )
-        self.strategy._match_knot_with_exclusions = lambda text, excluded: (
+        self.strategy._match_knot_with_exclusions = lambda text, excluded: (  # type: ignore
             alternative_knot_result if "declaration grooming" in excluded else None
         )
 
@@ -755,8 +756,9 @@ class TestFullInputComponentMatchingStrategy:
         )
 
         # Mock the exclusion methods to return None (no alternatives)
-        self.strategy._match_handle_with_exclusions = lambda text, excluded: None
-        self.strategy._match_knot_with_exclusions = lambda text, excluded: None
+        # Type ignore for test - we're mocking private methods for testing
+        self.strategy._match_handle_with_exclusions = lambda text, excluded: None  # type: ignore
+        self.strategy._match_knot_with_exclusions = lambda text, excluded: None  # type: ignore
 
         results = []
         seen_combinations = set()

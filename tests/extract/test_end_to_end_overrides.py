@@ -386,6 +386,10 @@ class TestEndToEndOverrides:
             time_with_overrides = time.time() - start_time
 
             # Verify both extractions produced the same number of results
+            assert result_no_overrides is not None
+            assert result_with_overrides is not None
+            assert result_no_overrides.get("data") is not None
+            assert result_with_overrides.get("data") is not None
             assert len(result_no_overrides["data"]) == 100
             assert len(result_with_overrides["data"]) == 100
 
@@ -395,10 +399,19 @@ class TestEndToEndOverrides:
             assert performance_ratio < 1.5, f"Performance impact too high: {performance_ratio:.2f}x"
 
             # Verify overrides were applied correctly
-            comment0 = result_with_overrides["data"][0]
+            assert result_with_overrides is not None
+            data = result_with_overrides.get("data")
+            assert data is not None
+            comment0 = data[0]
+            assert isinstance(comment0, dict)
+            assert comment0.get("razor") is not None
+            assert isinstance(comment0["razor"], dict)
             assert comment0["razor"]["normalized"] == "Corrected Razor 0"
             assert comment0["razor"]["overridden"] == "Normalized"
 
-            comment50 = result_with_overrides["data"][50]
+            comment50 = data[50]
+            assert isinstance(comment50, dict)
+            assert comment50.get("blade") is not None
+            assert isinstance(comment50["blade"], dict)
             assert comment50["blade"]["normalized"] == "Corrected Blade 50"
             assert comment50["blade"]["overridden"] == "Normalized"

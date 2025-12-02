@@ -311,6 +311,7 @@ class TestBrushConfigurationUpdaterIntegration:
 
         # Create backup
         backup_path = updater.create_backup()
+        assert backup_path is not None
         assert backup_path.exists()
 
         # Make changes

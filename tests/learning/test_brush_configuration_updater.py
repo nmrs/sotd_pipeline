@@ -196,6 +196,7 @@ class TestBrushConfigurationUpdater:
         updater = BrushConfigurationUpdater(self.config_path)
 
         backup_path = updater.create_backup()
+        assert backup_path is not None
 
         assert backup_path.exists()
         assert backup_path.name.startswith("test_brush_scoring_config.yaml.backup")

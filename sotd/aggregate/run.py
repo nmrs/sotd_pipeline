@@ -33,6 +33,10 @@ def run(args) -> bool:
                 years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
             return False  # Annual aggregation handles missing files gracefully
+        else:
+            # No year or range specified for annual mode - this should be caught by argparse
+            # but handle gracefully
+            return True  # Error case
     else:
         # Handle monthly aggregation with parallel processing support
         # Get months to process

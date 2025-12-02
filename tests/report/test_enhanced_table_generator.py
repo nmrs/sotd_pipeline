@@ -120,7 +120,8 @@ class TestEnhancedTableGenerator:
         generator = EnhancedTableGenerator()
 
         with pytest.raises(ValueError, match="Data cannot be None"):
-            generator.generate_table("test_table", None, {"shaves": 5})
+            # Type ignore for test - we're testing None handling
+            generator.generate_table("test_table", None, {"shaves": 5})  # type: ignore
 
     def test_generate_table_complex_scenario(self):
         """Test complex scenario with multiple limits and ties."""

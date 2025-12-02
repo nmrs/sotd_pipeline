@@ -70,7 +70,8 @@ class TestStripSocialMediaHandles:
 
     def test_none_input(self):
         """Test None input handling."""
-        assert strip_social_media_handles(None) is None
+        # Type ignore for test - we're testing None handling
+        assert strip_social_media_handles(None) is None  # type: ignore
 
     def test_multiple_at_beginning(self):
         """Test multiple @ symbols at the beginning."""

@@ -46,6 +46,7 @@ def test_webui_api_bypass_issue(
     # The test should FAIL because the bypass isn't working
     assert result is not None, "Bypass should work with constructor parameter"
     assert result.matched is not None, "Should have matched data"
+    assert isinstance(result.matched, dict)
     assert result.matched.get("brand") == "AP Shave Co", "Should match AP Shave Co brand"
     assert result.matched.get("model") == "G5C", "Should match G5C model"
 
@@ -77,22 +78,23 @@ def test_correct_bypass_approach(
     # The test should PASS
     assert result is not None, "Bypass should work with method parameter"
     assert result.matched is not None, "Should have matched data"
+    assert isinstance(result.matched, dict)
     assert result.matched.get("brand") == "AP Shave Co", "Should match AP Shave Co brand"
     assert result.matched.get("model") == "G5C", "Should match G5C model"
 
 
 if __name__ == "__main__":
     # Run the failing test to see the issue
+    # Create test paths for standalone execution
+    test_data_dir = Path(__file__).parent / "test_data"
+    test_correct_matches_path = test_data_dir / "correct_matches.yaml"
+    test_brushes_path = test_data_dir / "brushes.yaml"
+    test_handles_path = test_data_dir / "handles.yaml"
+    test_knots_path = test_data_dir / "knots.yaml"
+    test_brush_scoring_config_path = test_data_dir / "brush_scoring_config.yaml"
+
     print("Testing OLD approach (should fail):")
     try:
-        # Create test paths for standalone execution
-        test_data_dir = Path(__file__).parent / "test_data"
-        test_correct_matches_path = test_data_dir / "correct_matches.yaml"
-        test_brushes_path = test_data_dir / "brushes.yaml"
-        test_handles_path = test_data_dir / "handles.yaml"
-        test_knots_path = test_data_dir / "knots.yaml"
-        test_brush_scoring_config_path = test_data_dir / "brush_scoring_config.yaml"
-
         test_webui_api_bypass_issue(
             test_correct_matches_path,
             test_brushes_path,

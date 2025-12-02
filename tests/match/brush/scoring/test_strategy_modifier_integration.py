@@ -638,24 +638,26 @@ class TestModifierIntegrationWithScoringEngine:
         )
 
         # Debug output
+        assert result.strategy is not None
+        strategy_name = result.strategy
         print(f"\n=== Debug Output ===")
-        print(f"Strategy: {result.strategy}")
-        print(f"Base score: {self.config.get_base_strategy_score(result.strategy)}")
+        print(f"Strategy: {strategy_name}")
+        print(f"Base score: {self.config.get_base_strategy_score(strategy_name)}")
         print(
-            f"Modifier score: {self.scoring_engine._calculate_modifiers(result, result.original, result.strategy)}"
+            f"Modifier score: {self.scoring_engine._calculate_modifiers(result, result.original, strategy_name)}"
         )
         print(f"Total score: {score}")
 
         # Check multiple_brands modifier specifically
         modifier_value = self.scoring_engine._modifier_multiple_brands(
-            result.original, result, result.strategy
+            result.original, result, strategy_name
         )
         print(f"Multiple brands modifier value: {modifier_value}")
         print(
-            f"Multiple brands weight: {self.config.get_strategy_modifier(result.strategy, 'multiple_brands')}"
+            f"Multiple brands weight: {self.config.get_strategy_modifier(strategy_name, 'multiple_brands')}"
         )
         print(
-            f"Expected modifier score: {modifier_value * self.config.get_strategy_modifier(result.strategy, 'multiple_brands')}"
+            f"Expected modifier score: {modifier_value * self.config.get_strategy_modifier(strategy_name, 'multiple_brands')}"
         )
         print(f"=== End Debug ===\n")
 

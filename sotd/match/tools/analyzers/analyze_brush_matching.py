@@ -576,7 +576,18 @@ def _show_modifier_details(strategy_name: str, input_text: str, result):
 
                 try:
                     modifier_value = modifier_function(input_text, result_obj, strategy_name)
-                    total_effect = modifier_value * modifier_weight
+                    # Ensure modifier_value is numeric for multiplication
+                    if isinstance(modifier_value, (int, float)):
+                        numeric_value: float = float(modifier_value)
+                    elif modifier_value is None:
+                        numeric_value = 0.0
+                    else:
+                        # Try to convert to float, default to 0.0 if conversion fails
+                        try:
+                            numeric_value = float(modifier_value)  # type: ignore
+                        except (ValueError, TypeError):
+                            numeric_value = 0.0
+                    total_effect = numeric_value * modifier_weight
 
                     # Show just the final modifier value (clean and simple)
                     if total_effect > 0:

@@ -15,7 +15,8 @@ class TestNormalizeSoapSuffixes:
     def test_empty_input(self):
         """Test handling of empty input."""
         assert normalize_soap_suffixes("") == ""
-        assert normalize_soap_suffixes(None) is None
+        # Type ignore for test - we're testing None handling
+        assert normalize_soap_suffixes(None) is None  # type: ignore
 
     def test_no_suffixes(self):
         """Test text with no suffixes to normalize."""

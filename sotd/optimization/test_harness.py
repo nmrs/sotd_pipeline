@@ -179,9 +179,9 @@ class BrushMatchingTestHarness:
 
         try:
             # Create brush matcher with this configuration
+            # Note: bypass_correct_matches is a method parameter, not constructor parameter
             brush_matcher = BrushMatcher(
-                config_path=temp_config_path,
-                bypass_correct_matches=True,  # Use synthetic test cases
+                brush_scoring_config_path=temp_config_path,
             )
 
             results = {

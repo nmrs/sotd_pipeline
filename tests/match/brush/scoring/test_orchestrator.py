@@ -81,6 +81,7 @@ class TestStrategyOrchestrator:
 
         assert len(results) == 1
         result = results[0]
+        assert result.matched is not None
         assert result.matched["brand"] == "TestBrand"
         assert result.matched["model"] == "TestModel"
         assert result.strategy == "mock_single_strategy"
@@ -97,12 +98,14 @@ class TestStrategyOrchestrator:
 
         # First result
         result1 = results[0]
+        assert result1.matched is not None
         assert result1.matched["handle_text"] == "handle1"
         assert result1.matched["knot_text"] == "knot1"
         assert result1.strategy == "mock_multi_strategy"
 
         # Second result
         result2 = results[1]
+        assert result2.matched is not None
         assert result2.matched["handle_text"] == "handle2"
         assert result2.matched["knot_text"] == "knot2"
         assert result2.strategy == "mock_multi_strategy"
@@ -136,6 +139,7 @@ class TestStrategyOrchestrator:
 
         assert len(results) == 1
         result = results[0]
+        assert result.matched is not None
         assert result.matched["brand"] == "CachedBrand"
         assert result.matched["model"] == "CachedModel"
 
@@ -181,6 +185,7 @@ class TestStrategyOrchestrator:
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, MatchResult)
+        assert result.matched is not None
         assert result.matched["brand"] == "DictBrand"
         assert result.matched["model"] == "DictModel"
         assert result.match_type == "dict_test"
@@ -244,6 +249,7 @@ class TestStrategyOrchestrator:
 
         assert len(results) == 1
         result = results[0]
+        assert result.matched is not None
         assert result.matched["brand"] == "NoCachedBrand"
         assert result.strategy == "no_cached_strategy"
 

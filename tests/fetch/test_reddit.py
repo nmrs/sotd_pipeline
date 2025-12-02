@@ -1401,7 +1401,8 @@ class TestParallelCommentFetching:
         assert "total_time" in metrics
         assert "worker_utilization" in metrics
         assert "rate_limit_hits" in metrics
-        assert metrics["rate_limit_hits"] >= 0
+        assert isinstance(metrics, dict)
+        assert metrics.get("rate_limit_hits", 0) >= 0
 
     def test_parallel_fetch_top_level_comments_configuration_options(self, monkeypatch):
         """Test parallel comment fetching with various configuration options."""
