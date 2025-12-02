@@ -196,6 +196,8 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 """
 
     cache_stats = performance["cache_performance"]
+    # Initialize cache_hit_rate to avoid unbound variable
+    cache_hit_rate = 0.0
     if cache_stats:
         cache_size = cache_stats.get("size", 0)
         cache_hits = cache_stats.get("hits", 0)

@@ -230,4 +230,8 @@ def main():
 
 
 if __name__ == "__main__":
-    best_matches, new_additions = main()
+    result = main()
+    if result is not None:
+        best_matches, new_additions = result
+    else:
+        best_matches, new_additions = {}, []

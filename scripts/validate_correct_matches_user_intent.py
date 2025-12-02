@@ -31,7 +31,8 @@ class CorrectMatchesValidator:
     def __init__(self):
         """Initialize the validator with brush matcher."""
         self.config = BrushMatcherConfig.create_default()
-        self.brush_matcher = BrushMatcher(config=self.config)
+        # BrushMatcher doesn't accept config parameter, use default initialization
+        self.brush_matcher = BrushMatcher()
         self.correct_matches_path = Path("data/correct_matches")
 
     def load_correct_matches(self) -> Dict[str, Any]:
@@ -160,7 +161,7 @@ class CorrectMatchesValidator:
 
     def enhance_correct_matches(
         self, correct_matches: Dict[str, Any], validation_results: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    ) -> tuple[Dict[str, Any], List[str]]:
         """
         Enhance correct_matches directory with user intent data for successful validations.
 
@@ -226,7 +227,8 @@ class CorrectMatchesValidator:
                                 else:
                                     if pattern == brush_string:
                                         # Convert string to dictionary without user_intent
-                                        patterns[i] = {pattern_string: {}}
+                                        # pattern is a string here, use it directly
+                                        patterns[i] = {brush_string: {}}
                                         enhanced_entries.append(
                                             f"{entry_type}: {brush_string} (removed user_intent)"
                                         )

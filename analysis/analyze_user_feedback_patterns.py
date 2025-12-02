@@ -24,9 +24,9 @@ def load_yaml_data(file_path: Path) -> Dict[str, Any]:
 def analyze_webui_validation_tools() -> Dict[str, Any]:
     """Analyze WebUI validation tools and interfaces."""
 
-    webui_analysis = {
-        "validation_components": {},
-        "api_endpoints": {},
+    webui_analysis: Dict[str, Any] = {
+        "validation_components": [],
+        "api_endpoints": [],
         "validation_workflows": {},
         "user_interaction_patterns": {},
         "quality_feedback_mechanisms": {},
