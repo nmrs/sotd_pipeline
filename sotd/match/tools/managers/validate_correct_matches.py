@@ -76,20 +76,37 @@ class ValidateCorrectMatches:
             self._clear_validation_cache()
 
     def _load_correct_matches(self) -> Dict[str, Any]:
-        """Load correct_matches.yaml file."""
+        """Load correct_matches from directory structure or legacy file."""
+        from sotd.match.loaders import CatalogLoader
+
         if not self.correct_matches_path.exists():
             return {}
 
         try:
-            import yaml
-
-            with open(self.correct_matches_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-                result = data if data else {}
+            # Use CatalogLoader which supports both directory structure and legacy file format
+            loader = CatalogLoader()
+            # Load all fields (no field_type specified) to get complete structure
+            data = loader.load_correct_matches(self.correct_matches_path)
+            
+            # If loading from legacy file, ensure all field types are included
+            if self.correct_matches_path.is_file():
+                # Legacy file format - CatalogLoader returns brush/handle/knot/split_brush
+                # but we also need blade, razor, soap for validation
+                import yaml
+                with open(self.correct_matches_path, "r", encoding="utf-8") as f:
+                    legacy_data = yaml.safe_load(f) or {}
+                # Merge legacy data with loader result
+                result = data.copy() if data else {}
+                # Add any missing fields from legacy file
+                for field in ["blade", "razor", "soap"]:
+                    if field in legacy_data and field not in result:
+                        result[field] = legacy_data[field]
                 return result
+            
+            return data if data else {}
         except Exception as e:
             print(f"🔍 LOAD_DEBUG: Error loading file: {e}")
-            logger.error(f"Error loading correct_matches.yaml: {e}")
+            logger.error(f"Error loading correct_matches: {e}")
             return {}
 
     def _clear_field_cache(self, field: str):
@@ -161,7 +178,7 @@ class ValidateCorrectMatches:
             # This fixes the issue where relative paths were resolving to
             # webui/data/ instead of project/data/
             brush_matcher_paths = {
-                "correct_matches_path": base_dir / "correct_matches.yaml",
+                "correct_matches_path": base_dir / "correct_matches",
                 "brushes_path": base_dir / "brushes.yaml",
                 "handles_path": base_dir / "handles.yaml",
                 "knots_path": base_dir / "knots.yaml",
@@ -177,7 +194,7 @@ class ValidateCorrectMatches:
             # This fixes the issue where relative paths were resolving to
             # webui/data/ instead of project/data/
             return BrushMatcher(
-                correct_matches_path=base_dir / "correct_matches.yaml",
+                correct_matches_path=base_dir / "correct_matches",
                 brushes_path=base_dir / "brushes.yaml",
                 handles_path=base_dir / "handles.yaml",
                 knots_path=base_dir / "knots.yaml",

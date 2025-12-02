@@ -37,13 +37,13 @@ def validate_list_of_dicts(data: Any, data_name: str = "data") -> List[Dict[str,
         all_dicts = bool(is_dict_mask.all())
         if not all_dicts:
             # Find first non-dict item for error reporting
-            any_dicts = bool(is_dict_mask.any())
-            if not any_dicts:
-                first_invalid_idx = is_dict_mask.idxmin()
+            # Find the first index where the value is False (not a dict)
+            false_indices = is_dict_mask[~is_dict_mask].index
+            if len(false_indices) > 0:
+                first_invalid_idx = false_indices[0]
             else:
-                # Get index of first False value
-                false_mask: pd.Series = ~is_dict_mask  # type: ignore
-                first_invalid_idx = false_mask.index[0]
+                # Fallback: should not happen, but handle edge case
+                first_invalid_idx = 0
             raise ValueError(f"{data_name} item {first_invalid_idx} must be a dictionary")
 
     return data
