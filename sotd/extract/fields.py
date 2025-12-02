@@ -81,13 +81,17 @@ def get_patterns(alias: str) -> list[str]:
         # Pattern 3: Emoji-prefixed: *alias:* value (0.50% usage)
         rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
         # Pattern 5: Emoji-prefixed: *alias:* value variant 2 (0.43% usage)
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value (variant 2)
+        # emoji-prefixed *alias:* value (variant 2)
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",
         # Pattern 6: Markdown bold: * **Field** Value no separator (0.20% usage)
         # No colon/dash, handles both **razor** and **razor ** (space before closing **)
-        # (e.g., * **Razor** Blackbird, * **Razor**Blackbird, * **razor ** value, - **Razor** Blackbird, **Razor** Blackbird)
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*\*\*\s*(.+)$",  # * **Field** Value (no separator, space optional before closing **)
+        # (e.g., * **Razor** Blackbird, * **Razor**Blackbird, * **razor ** value,
+        # - **Razor** Blackbird, **Razor** Blackbird)
+        # * **Field** Value (no separator, space optional before closing **)
+        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*\*\*\s*(.+)$",
         # Pattern 7: Emoji-prefixed: *alias:* value variant (0.16% usage)
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value (variant)
+        # emoji-prefixed *alias:* value (variant)
+        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",
         # Pattern 8: Markdown bold: * **alias - value** (0.07% usage)
         rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
         # Pattern 9: Underscore: __alias:__ value (0.04% usage)

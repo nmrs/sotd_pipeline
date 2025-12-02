@@ -3,12 +3,11 @@
 
 import json
 import logging
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +110,6 @@ def _check_compatibility(
     # Missing blade format is a warning
     if not blade_format:
         return False, "warning", f"Razor format '{razor_format}' but blade format is missing"
-
-    blade_format_lower = blade_format.lower()
 
     # DE razor compatibility
     if razor_format == "DE":
@@ -221,7 +218,8 @@ async def analyze_format_compatibility(
         )
 
     # Analyze compatibility
-    incompatibilities: Dict[str, FormatCompatibilityResult] = {}
+    # Use tuple keys for grouping, convert to string for dictionary key
+    incompatibilities: Dict[Tuple[str, ...], FormatCompatibilityResult] = {}
 
     for record in all_records:
         razor_data = record.get("razor")
@@ -241,17 +239,18 @@ async def analyze_format_compatibility(
             razor_matched = razor_data.get("matched", {})
             blade_matched = blade_data.get("matched", {}) if blade_data else {}
 
-            key = (
-                razor_data.get("original", ""),
-                razor_matched.get("brand", ""),
-                razor_matched.get("model", ""),
-                razor_format or "",
-                blade_data.get("original", "") if blade_data else "",
-                blade_matched.get("brand", ""),
-                blade_matched.get("model", ""),
-                blade_format or "",
-                issue_severity,
-                issue_type,
+            # Create tuple key for grouping identical incompatibilities
+            key: Tuple[str, ...] = (
+                str(razor_data.get("original", "")),
+                str(razor_matched.get("brand", "")),
+                str(razor_matched.get("model", "")),
+                str(razor_format or ""),
+                str(blade_data.get("original", "") if blade_data else ""),
+                str(blade_matched.get("brand", "")),
+                str(blade_matched.get("model", "")),
+                str(blade_format or ""),
+                str(issue_severity),
+                str(issue_type),
             )
 
             if key not in incompatibilities:

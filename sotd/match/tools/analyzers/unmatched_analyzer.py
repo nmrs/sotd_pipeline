@@ -174,7 +174,6 @@ class UnmatchedAnalyzer(AnalysisTool):
 
                 # Use 'brand' instead of 'maker' to match the actual data structure
                 brand = matched.get("brand")
-                scent = matched.get("scent")
 
                 # If no brand at all, it's truly unmatched
                 if not brand:
