@@ -23,6 +23,7 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests (require external services)",
+    "production: marks tests as production catalog integration tests (run with 'make test-production')",
 ]
 
 [tool.coverage.run]
