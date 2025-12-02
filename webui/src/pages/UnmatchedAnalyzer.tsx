@@ -571,21 +571,21 @@ const UnmatchedAnalyzer: React.FC = () => {
               <h3 className='text-sm font-medium text-blue-900 mb-2'>🧼 Soap Analysis Insights</h3>
               <div className='text-xs text-blue-700 space-y-1'>
                 <p>
-                  <strong>Two-Phase Matching:</strong> Soap matching uses a two-phase approach:
+                  <strong>Unmatched Items Only:</strong> This analyzer shows only truly unmatched
+                  soaps (no brand match at all).
                 </p>
                 <ul className='list-disc list-inside ml-4 space-y-1'>
                   <li>
-                    <strong>Phase 1:</strong> Full soap matching (maker + scent) using exact
-                    patterns and regex
+                    <strong>Brand-only matches</strong> (brand matched, no scent) are partial
+                    matches that appear in <strong>Match Analyzer</strong>, not here
                   </li>
                   <li>
-                    <strong>Phase 2:</strong> Brand fallback matching (maker only) when scent
-                    patterns fail
+                    <strong>Complete matches</strong> (brand + scent) also appear in Match Analyzer
                   </li>
                 </ul>
                 <p className='mt-2'>
-                  <strong>Tip:</strong> Use "Soap Brand" field to analyze only brand-level matches
-                  and fallbacks.
+                  <strong>Tip:</strong> Use Match Analyzer to review brand-only partial matches and
+                  improve scent patterns.
                 </p>
               </div>
             </div>

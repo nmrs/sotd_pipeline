@@ -164,8 +164,9 @@ class UnmatchedAnalyzer(AnalysisTool):
 
             # Field-specific validation logic
             if field == "soap":
-                # For soap fields, show items that need brand-level attention
-                # This includes: truly unmatched (no maker) + brand-only fallbacks
+                # For soap fields, only show truly unmatched items (no brand at all)
+                # Brand-only matches (brand matched, no scent) are partial matches that should
+                # appear in MatchAnalyzer, not UnmatchedAnalyzer
                 if not isinstance(matched, dict):
                     normalized = extract_text(field_val, field)
                     all_unmatched[normalized].append(file_info)
@@ -174,28 +175,18 @@ class UnmatchedAnalyzer(AnalysisTool):
                 # Use 'brand' instead of 'maker' to match the actual data structure
                 brand = matched.get("brand")
                 scent = matched.get("scent")
-                match_type = field_val.get("match_type")
 
-                # If no brand at all, it's unmatched
+                # If no brand at all, it's truly unmatched
                 if not brand:
                     normalized = extract_text(field_val, field)
                     all_unmatched[normalized].append(file_info)
                     return
 
-                # If we have a brand but no scent, it's a brand-only fallback
-                if brand and not scent:
-                    normalized = extract_text(field_val, field)
-                    all_unmatched[normalized].append(
-                        {**file_info, "brand_only": True, "brand": brand, "match_type": match_type}
-                    )
-                    return
-
-                # If we have both brand and scent, it's a complete match regardless of match_type
-                # This includes both "regex" (scent patterns) and "brand"
-                # (brand patterns + remainder)
-                # These are properly matched soaps and should NOT be in the unmatched list
-                if brand and scent:
-                    # This is a complete match - don't add to unmatched list
+                # If we have a brand (even if no scent), it's a partial match
+                # These should appear in MatchAnalyzer, not UnmatchedAnalyzer
+                # So we don't add them to the unmatched list
+                if brand:
+                    # This is a partial or complete match - don't add to unmatched list
                     return
 
                 # If we have both maker and scent with match_type other than "brand", it's a
