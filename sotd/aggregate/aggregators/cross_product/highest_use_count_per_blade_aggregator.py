@@ -117,6 +117,7 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
 
     # Convert to list of dictionaries - no manual processing needed
     # Type conversion to ensure str keys
-    result = [{str(k): v for k, v in item.items()} for item in blade_max_usage.to_dict("records")]
+    # Type ignore for to_dict - pandas supports "records" parameter
+    result = [{str(k): v for k, v in item.items()} for item in blade_max_usage.to_dict("records")]  # type: ignore
 
     return result

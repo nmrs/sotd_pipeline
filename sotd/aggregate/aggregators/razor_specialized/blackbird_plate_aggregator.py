@@ -64,7 +64,9 @@ class BlackbirdPlateAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from plate data."""
-        return df["plate"]
+        # Ensure we get a Series, not DataFrame
+        plate_series: pd.Series = df["plate"]  # type: ignore
+        return plate_series
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

@@ -61,7 +61,9 @@ class StraightWidthAggregator(BaseAggregator):
             Series with width values
         """
         # Handle None values by converting to empty strings and concatenate properly
-        width = df["width"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        width_series: pd.Series = df["width"]  # type: ignore
+        width = width_series.fillna("")
         # Use pandas string conversion to avoid Series ambiguity
         return width.astype(str)
 

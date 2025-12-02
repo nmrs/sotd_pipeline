@@ -61,7 +61,9 @@ class BladeManufacturerAggregator(BaseAggregator):
             Series with brand names
         """
         # Handle None values by converting to empty strings
-        brand = df["brand"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        brand_series: pd.Series = df["brand"]  # type: ignore
+        brand = brand_series.fillna("")
         return brand
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:

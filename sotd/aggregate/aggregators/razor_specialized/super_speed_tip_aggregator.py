@@ -61,7 +61,9 @@ class SuperSpeedTipAggregator(BaseAggregator):
             Series with super_speed_tip values
         """
         # Handle None values by converting to empty strings and concatenate properly
-        tip = df["super_speed_tip"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        tip_series: pd.Series = df["super_speed_tip"]  # type: ignore
+        tip = tip_series.fillna("")
         # Use pandas string conversion to avoid Series ambiguity
         return tip.astype(str)
 

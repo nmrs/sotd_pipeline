@@ -61,7 +61,9 @@ class StraightGrindAggregator(BaseAggregator):
             Series with grind values
         """
         # Handle None values by converting to empty strings and concatenate properly
-        grind = df["grind"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        grind_series: pd.Series = df["grind"]  # type: ignore
+        grind = grind_series.fillna("")
         # Use pandas string conversion to avoid Series ambiguity
         return grind.astype(str)
 

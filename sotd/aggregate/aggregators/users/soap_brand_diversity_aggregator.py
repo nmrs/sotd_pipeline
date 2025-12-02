@@ -73,7 +73,9 @@ class SoapBrandDiversityAggregator(BaseAggregator, UserDiversityMixin):
             Series with brand names
         """
         # Handle None values by converting to empty strings
-        brand = df["brand"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        brand_series: pd.Series = df["brand"]  # type: ignore
+        brand = brand_series.fillna("")
         return brand
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:

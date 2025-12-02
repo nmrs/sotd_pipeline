@@ -71,7 +71,9 @@ class KnotMakerAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from brand data."""
-        return df["brand"]
+        # Ensure we get a Series, not DataFrame
+        brand_series: pd.Series = df["brand"]  # type: ignore
+        return brand_series
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

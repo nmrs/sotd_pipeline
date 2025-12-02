@@ -68,7 +68,9 @@ class HandleMakerAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from handle maker data."""
-        return df["handle_maker"]
+        # Ensure we get a Series, not DataFrame
+        maker_series: pd.Series = df["handle_maker"]  # type: ignore
+        return maker_series
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

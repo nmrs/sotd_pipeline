@@ -61,7 +61,9 @@ class StraightPointAggregator(BaseAggregator):
             Series with point values
         """
         # Handle None values by converting to empty strings and concatenate properly
-        point = df["point"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        point_series: pd.Series = df["point"]  # type: ignore
+        point = point_series.fillna("")
         # Use pandas string conversion to avoid Series ambiguity
         return point.astype(str)
 

@@ -61,7 +61,9 @@ class KnotSizeAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from knot size data."""
-        return df["knot_size_mm"].astype(str)
+        # Ensure we get a Series, not DataFrame
+        size_series: pd.Series = df["knot_size_mm"]  # type: ignore
+        return size_series.astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
@@ -71,7 +73,12 @@ class KnotSizeAggregator(BaseAggregator):
         """Validate and filter knot size data."""
         # Filter invalid sizes (15-50mm range)
         valid_mask = (df["knot_size_mm"] >= 15) & (df["knot_size_mm"] <= 50)
-        return df[valid_mask]
+        filtered_df = df[valid_mask]
+        # Ensure result is DataFrame, not Series
+        if isinstance(filtered_df, pd.DataFrame):
+            return filtered_df
+        else:
+            return df
 
     def aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Aggregate brush knot size data from enriched records.

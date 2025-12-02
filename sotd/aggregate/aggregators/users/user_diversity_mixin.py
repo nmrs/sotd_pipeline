@@ -63,13 +63,20 @@ class UserDiversityMixin:
                     rename_mapping[base_field] = output_field
 
         # Select columns and apply renaming
-        df = df[columns_to_keep]
+        selected_df = df[columns_to_keep]
+        # Ensure result is DataFrame
+        if isinstance(selected_df, pd.DataFrame):
+            df = selected_df
         if rename_mapping:
-            df = df.rename(columns=rename_mapping)
+            # Type ignore for rename - pandas supports columns parameter
+            renamed_df = df.rename(columns=rename_mapping)  # type: ignore
+            if isinstance(renamed_df, pd.DataFrame):
+                df = renamed_df
 
         # Convert back to list of dictionaries
         # Type conversion to ensure str keys
-        result = [{str(k): v for k, v in item.items()} for item in df.to_dict("records")]
+        # Type ignore for to_dict - pandas supports "records" parameter
+        result = [{str(k): v for k, v in item.items()} for item in df.to_dict("records")]  # type: ignore
 
         return result
 

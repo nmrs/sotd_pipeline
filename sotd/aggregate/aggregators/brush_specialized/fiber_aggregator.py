@@ -64,7 +64,9 @@ class FiberAggregator(BaseAggregator):
 
     def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
         """Create composite name from fiber data."""
-        return df["fiber"]
+        # Ensure we get a Series, not DataFrame
+        fiber_series: pd.Series = df["fiber"]  # type: ignore
+        return fiber_series
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""

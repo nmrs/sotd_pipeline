@@ -61,7 +61,9 @@ class GameChangerPlateAggregator(BaseAggregator):
             Series with gap values
         """
         # Handle None values by converting to empty strings and concatenate properly
-        gap = df["gap"].fillna("")
+        # Ensure we get a Series, not DataFrame
+        gap_series: pd.Series = df["gap"]  # type: ignore
+        gap = gap_series.fillna("")
         # Use pandas string conversion to avoid Series ambiguity
         return gap.astype(str)
 

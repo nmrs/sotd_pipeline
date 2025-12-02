@@ -192,7 +192,10 @@ class BaseAggregator(ABC):
         # FULLY OPTIMIZED: Use pandas operations to eliminate ALL Python loops
         # 1. Reorder columns to put rank first using pandas column operations
         cols = ["rank"] + [col for col in grouped.columns if col != "rank"]
-        grouped = grouped[cols]
+        reordered_df = grouped[cols]
+        # Ensure result is DataFrame, not Series
+        if isinstance(reordered_df, pd.DataFrame):
+            grouped = reordered_df
 
         # 2. Convert to list using pandas to_dict - no manual field ordering needed
         # Convert Hashable keys to strings for type compatibility
