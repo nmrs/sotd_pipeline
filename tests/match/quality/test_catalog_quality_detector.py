@@ -226,9 +226,9 @@ class TestCatalogQualityDetector:
                     assert "tier" in result
                     assert "quality_field_count" in result
                     assert "has_catalog_entry" in result
-        except FileNotFoundError:
-            # If real catalogs don't exist or fail to load, skip this test
-            pytest.skip("Real catalog files not available for integration test")
+        except FileNotFoundError as e:
+            # If real catalogs don't exist or fail to load, fail with clear message
+            pytest.fail(f"Test requires catalog files but they were not found: {e}. Create test catalog files or provide proper test fixtures to run this integration test.")
 
 
 class TestCatalogQualityDetectorPerformance:

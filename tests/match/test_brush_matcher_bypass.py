@@ -13,12 +13,12 @@ class TestBrushMatcherBypass:
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Create matcher (correct_matches.yaml is always loaded, but can be bypassed in match calls)
+        # Create matcher (correct_matches directory is always loaded, but can be bypassed in match calls)
         matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
             knots_path=data_dir / "knots.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         # Test the specific pattern that's failing with bypass enabled
@@ -65,12 +65,12 @@ class TestBrushMatcherBypass:
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Create matcher with default behavior (correct_matches.yaml is always loaded)
+        # Create matcher with default behavior (correct_matches directory is always loaded)
         matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
             knots_path=data_dir / "knots.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         # Test the same pattern with bypass disabled (default)
@@ -115,12 +115,12 @@ class TestBrushMatcherBypass:
         project_root = Path(__file__).parent.parent.parent
         data_dir = project_root / "data"
 
-        # Create matcher (correct_matches.yaml is always loaded)
+        # Create matcher (correct_matches directory is always loaded)
         matcher = BrushMatcher(
             brushes_path=data_dir / "brushes.yaml",
             handles_path=data_dir / "handles.yaml",
             knots_path=data_dir / "knots.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         # Test that bypass_correct_matches parameter works in match method

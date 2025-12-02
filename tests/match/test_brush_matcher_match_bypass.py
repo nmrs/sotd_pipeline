@@ -16,7 +16,7 @@ class TestBrushMatcherMatchBypass:
         # Create matcher WITHOUT bypass setting
         matcher = BrushMatcher(
             brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         test_pattern = "a.p. shave co amber smoke g5c fan"
@@ -63,7 +63,7 @@ class TestBrushMatcherMatchBypass:
         # with bypass_correct_matches=True
         bypass_matcher = BrushMatcher(
             brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         test_pattern = "a.p. shave co amber smoke g5c fan"
@@ -96,7 +96,7 @@ class TestBrushMatcherMatchBypass:
         # Create single matcher instance
         matcher = BrushMatcher(
             brush_scoring_config_path=data_dir / "brush_scoring_config.yaml",
-            correct_matches_path=data_dir / "correct_matches.yaml",
+            correct_matches_path=data_dir / "correct_matches",
         )
 
         test_pattern = "a.p. shave co amber smoke g5c fan"

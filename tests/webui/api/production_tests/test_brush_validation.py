@@ -225,29 +225,76 @@ class TestBrushValidationAPI:
             assert response.status_code == 200
             mock_cli.sort_entries.assert_called_once()
 
-    @pytest.mark.skip(reason="API uses counting service directly, CLI mocking doesn't work")
     def test_pagination_support(self):
         """Test pagination support for large datasets."""
-        entries = [{"input_text": f"Entry {i}", "system_used": "legacy"} for i in range(50)]
+        # Mock the counting service (which the API actually uses)
+        with patch(
+            "sotd.match.brush.validation.counting.BrushValidationCountingService"
+        ) as mock_service_class:
+            mock_service = Mock()
+            mock_service_class.return_value = mock_service
 
-        with patch("webui.api.brush_validation.BrushValidationCLI") as mock_cli_class:
-            mock_cli = Mock()
-            mock_cli_class.return_value = mock_cli
-            mock_cli.load_month_data.return_value = entries
-            mock_cli.sort_entries.return_value = entries
+            # Mock statistics with 50 total entries
+            mock_service.get_validation_statistics.return_value = {
+                "total_entries": 50,
+                "correct_entries": 0,
+                "user_processed": 0,
+                "overridden_count": 0,
+                "total_processed": 0,
+                "unprocessed_count": 50,
+                "processing_rate": 0.0,
+                "validated_count": 0,
+                "user_validations": 0,
+                "unvalidated_count": 50,
+                "validation_rate": 0.0,
+                "total_actions": 0,
+            }
 
-            response = self.client.get(
-                "/api/brushes/validation/data/2025-08/scoring?page=1&page_size=20"
-            )
+            # Mock matched data with 50 entries
+            mock_entries = [
+                {
+                    "id": f"comment_{i}",
+                    "brush": {
+                        "normalized": f"Test Brush {i}",
+                        "matched": {"brand": "Test Brand", "model": f"Model {i}"},
+                        "all_strategies": [{"strategy": "known_brush", "score": 95, "result": {}}],
+                    },
+                }
+                for i in range(50)
+            ]
+            mock_service._load_matched_data.return_value = {"data": mock_entries}
 
-            assert response.status_code == 200
-            data = response.json()
-            assert len(data["entries"]) == 20
-            assert "pagination" in data
-            assert data["pagination"]["page"] == 1
-            assert data["pagination"]["page_size"] == 20
-            assert data["pagination"]["total"] == 50
-            assert data["pagination"]["pages"] == 3
+            # Mock the CLI's sort_entries method (used for sorting)
+            with patch("webui.api.brush_validation.BrushValidationCLI") as mock_cli_class:
+                mock_cli = Mock()
+                mock_cli_class.return_value = mock_cli
+                # Return entries in sorted order (simulating sort)
+                mock_cli.sort_entries.return_value = [
+                    {
+                        "input_text": f"Test Brush {i}",
+                        "normalized_text": f"Test Brush {i}",
+                        "system_used": "scoring",
+                        "matched": {"brand": "Test Brand", "model": f"Model {i}"},
+                        "all_strategies": [{"strategy": "known_brush", "score": 95, "result": {}}],
+                        "comment_ids": [f"comment_{i}"],
+                    }
+                    for i in range(50)
+                ]
+
+                # Test pagination: page 1, page_size 20
+                response = self.client.get(
+                    "/api/brushes/validation/data/2025-08/scoring?page=1&page_size=20"
+                )
+
+                assert response.status_code == 200
+                data = response.json()
+                assert "entries" in data
+                assert "pagination" in data
+                assert len(data["entries"]) == 20  # Should return 20 entries
+                assert data["pagination"]["page"] == 1
+                assert data["pagination"]["page_size"] == 20
+                assert data["pagination"]["total"] == 50
+                assert data["pagination"]["pages"] == 3  # 50 entries / 20 per page = 3 pages
 
     def test_error_handling_invalid_action_data(self):
         """Test error handling for invalid action data."""
@@ -372,15 +419,6 @@ class TestBrushValidationAPI:
 
             # This test now verifies that the backend handles all the business logic
             # and the frontend only sends minimal data
-
-    @pytest.mark.skip(
-        reason="Complex dual-component brush test requires investigation of current API structure"
-    )
-    def test_dual_component_brush_field_type_determination_bug(self):
-        """Test that exposes the bug in field type determination for dual-component brushes."""
-        # This test requires investigation of current API structure
-        # Skipping for now to focus on core API functionality
-        pass
 
     def test_dual_component_brush_stored_in_correct_sections(self):
         """Test that dual-component brushes are stored in handle and knot sections, not split_brush."""

@@ -90,23 +90,27 @@ class TestDataStructureValidation:
         assert issue.correct_match == "ap shaveco 24mm luxury mixed knot"
 
     def test_validate_data_structure_duplicate_strings_multiple_sections(self):
-        """Test duplicate strings across multiple sections."""
+        """Test duplicate strings across multiple sections.
+        
+        Note: The validation only checks for cross-section conflicts between
+        related sections (brush/handle/knot), not between unrelated sections
+        like brush/razor. This test verifies that brush/razor duplicates
+        are not flagged since they are different product types.
+        """
         correct_matches = {
             "brush": {"AP Shave Co": {"Mixed Badger/Boar": ["ap shaveco 24mm luxury mixed knot"]}},
             "razor": {
                 "Different Brand": {
-                    "Different Model": ["ap shaveco 24mm luxury mixed knot"]  # Duplicate
+                    "Different Model": ["ap shaveco 24mm luxury mixed knot"]  # Same string in different section
                 }
             },
         }
 
         issues = self.validator._validate_data_structure(correct_matches)
 
-        assert len(issues) == 1
-        issue = issues[0]
-        assert issue.issue_type == "duplicate_string"
-        assert issue.severity == "low"
-        assert issue.correct_match == "ap shaveco 24mm luxury mixed knot"
+        # Should not flag this as an issue since brush and razor are unrelated sections
+        # Cross-section conflict detection only applies to brush/handle/knot combinations
+        assert len(issues) == 0
 
     def test_validate_data_structure_cross_section_conflict_brush_and_handle(self):
         """Test cross-section conflict between brush and handle sections."""

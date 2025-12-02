@@ -129,11 +129,3 @@ class TestMismatchItemModel:
         assert not hasattr(item, "knot_component")
 
 
-# Keep the existing test classes for when we can run them properly
-class TestAnalysisEndpoints:
-    """Test analysis endpoints."""
-
-    @pytest.mark.skip(reason="Requires FastAPI app setup")
-    def test_placeholder(self):
-        """Placeholder test to prevent pytest from failing."""
-        pass

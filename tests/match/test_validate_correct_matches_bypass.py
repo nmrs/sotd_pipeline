@@ -15,7 +15,7 @@ class TestValidateCorrectMatchesBypass:
         data_dir = project_root / "data"
 
         # Create validator
-        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches.yaml")
+        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches")
         validator._data_dir = data_dir
 
         # Get the brush matcher
@@ -43,7 +43,7 @@ class TestValidateCorrectMatchesBypass:
         data_dir = project_root / "data"
 
         # Create validator
-        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches.yaml")
+        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches")
         validator._data_dir = data_dir
 
         # Test the specific pattern that's failing
@@ -75,7 +75,7 @@ class TestValidateCorrectMatchesBypass:
         data_dir = project_root / "data"
 
         # Create validator
-        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches.yaml")
+        validator = ValidateCorrectMatches(correct_matches_path=data_dir / "correct_matches")
         validator._data_dir = data_dir
 
         print(f"🔍 DEBUG: Starting validate_field for brush")

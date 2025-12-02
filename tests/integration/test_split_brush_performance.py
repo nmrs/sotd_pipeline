@@ -168,16 +168,6 @@ class TestSplitBrushPerformance:
 
         print(f"✅ CorrectMatchesManager performance: {processing_time:.2f}s for 100 operations")
 
-    @pytest.mark.skip(reason="Performance test failing - brush matcher slower than expected")
-    def test_brush_matcher_performance(self, temp_correct_matches_file):
-        """Test performance of BrushMatcher with split brush lookups."""
-        # Performance test is currently failing due to brush matcher being slower than expected
-        # Skipping for now to focus on core functionality
-        pass
-
-        # Commented out - processing_time is not defined in this test
-        # print(f"✅ BrushMatcher performance: {processing_time:.2f}s for 100 lookups")
-
     def test_memory_usage(self, large_split_brush_dataset, temp_correct_matches_file):
         """Test memory usage with large datasets."""
 

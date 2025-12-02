@@ -157,28 +157,6 @@ class TestAnalysisAPISplitBrushRemoval:
             assert "handle_component" not in first_item
             assert "knot_component" not in first_item
 
-    @pytest.mark.skip(
-        reason="API endpoint function is defined inline, cannot be mocked as expected"
-    )
-    def test_error_handling_without_split_brush(self, mock_analyze_mismatch):
-        """Test error handling without split_brush functionality"""
-
-        mock_analyze_mismatch.side_effect = Exception("Test error")
-
-        response = client.post(
-            "/api/analysis/mismatch",
-            json={
-                "field": "brush",
-                "months": ["2025-01"],
-                "threshold": 3,
-                "use_enriched_data": False,
-            },
-        )
-
-        assert response.status_code == 500
-        data = response.json()
-        assert "error" in data
-
     def test_comment_detail_endpoint_structure(self):
         """Test that comment detail endpoint has the correct structure without split_brush fields"""
 
@@ -250,24 +228,25 @@ class TestAnalysisAPISplitBrushRemoval:
             assert data["success"] is True
             assert "Removed" in data["message"] and "matches from correct" in data["message"]
 
-    @pytest.mark.skip(reason="update_filtered_entries endpoint does not exist in current API")
-    def test_update_filtered_entries_without_split_brush(self):
-        """Test that update_filtered_entries endpoint works without split_brush processing"""
-
-        with patch("webui.api.analysis.update_filtered_entries") as mock_update:
-            mock_update.return_value = {"success": True, "message": "Filtered entries updated"}
+    def test_error_handling_without_split_brush(self):
+        """Test error handling in mismatch endpoint without split_brush functionality"""
+        # Mock MismatchAnalyzer to raise an exception to test error handling
+        with patch("webui.api.analysis.MismatchAnalyzer") as mock_analyzer_class:
+            # Make the analyzer raise an exception when instantiated
+            mock_analyzer_class.side_effect = Exception("Test error: Analyzer initialization failed")
 
             response = client.post(
-                "/update-filtered-entries",
+                "/api/analysis/mismatch",
                 json={
                     "field": "brush",
-                    "month": "2025-01",
-                    "comment_ids": ["1", "2"],
-                    "reason": "Test reason",
+                    "months": ["2025-01"],
+                    "threshold": 3,
+                    "use_enriched_data": False,
                 },
             )
 
-            assert response.status_code == 200
+            # Should return 500 error with proper error message
+            assert response.status_code == 500
             data = response.json()
-            assert data["success"] is True
-            assert data["message"] == "Filtered entries updated"
+            assert "detail" in data
+            assert "error" in data["detail"].lower() or "failed" in data["detail"].lower()

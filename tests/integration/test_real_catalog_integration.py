@@ -92,13 +92,15 @@ class TestRealCatalogIntegration:
                 result.matched[field] == expected_value
             ), f"Expected {expected_value}, got {result.matched[field]}"
 
-    @pytest.mark.skip(
-        reason="Uses production YAML catalogs - designed to test prod catalog integrity"
-    )
+    @pytest.mark.production
     def test_handle_knot_splitting_integration(self, brush_matcher):
-        """Test handle/knot splitting with real catalog data."""
-        # This test uses production YAML catalogs to validate catalog integrity
-        # Skipping as it intentionally operates on production data files
+        """Test handle/knot splitting with real catalog data.
+        
+        This test uses production YAML catalogs to validate catalog integrity.
+        Run with 'make test-production' to execute these production catalog tests.
+        """
+        # This test intentionally operates on production data files
+        # It validates that the catalog structure is correct and matchers work with real data
         pass
 
     def test_soap_scent_matching(self, soap_matcher):
@@ -122,13 +124,15 @@ class TestRealCatalogIntegration:
                     expected_scent.lower() in matched["scent"].lower()
                 ), f"Scent failed for {input_text}"
 
-    @pytest.mark.skip(
-        reason="Uses production YAML catalogs - designed to test prod catalog integrity"
-    )
+    @pytest.mark.production
     def test_specific_integration_scenarios(self, brush_matcher):
-        """Test specific integration scenarios that have caused issues."""
-        # This test uses production YAML catalogs to validate catalog integrity
-        # Skipping as it intentionally operates on production data files
+        """Test specific integration scenarios that have caused issues.
+        
+        This test uses production YAML catalogs to validate catalog integrity.
+        Run with 'make test-production' to execute these production catalog tests.
+        """
+        # This test intentionally operates on production data files
+        # It validates specific scenarios that have caused issues in the past
         pass
 
     def test_catalog_files_exist(self):

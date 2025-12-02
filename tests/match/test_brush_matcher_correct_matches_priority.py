@@ -75,7 +75,7 @@ class TestBrushMatcherCorrectMatchesPriority:
         # Find a brush entry in correct_matches that has a specific pattern
         brush_entries = self.correct_matches.get("brush", {})
         if not brush_entries:
-            pytest.skip("No brush entries in correct_matches.yaml")
+            pytest.fail("Test setup failed: No brush entries found in correct_matches test data. Test requires brush entries to validate correct matches priority.")
 
         # Look for an entry with specific patterns (not just brand names)
         test_input = None
@@ -92,7 +92,7 @@ class TestBrushMatcherCorrectMatchesPriority:
                 break
 
         if not test_input:
-            pytest.skip("No brush patterns found in correct_matches.yaml")
+            pytest.fail("Test setup failed: No brush patterns found in correct_matches test data. Test requires at least one pattern to validate correct matches priority.")
 
         # Test that correct matches returns immediately
         result = self.brush_matcher.match(test_input)
@@ -135,7 +135,7 @@ class TestBrushMatcherCorrectMatchesPriority:
         # Find a brush entry that could potentially match via other strategies too
         brush_entries = self.correct_matches.get("brush", {})
         if not brush_entries:
-            pytest.skip("No brush entries in correct_matches.yaml")
+            pytest.fail("Test setup failed: No brush entries found in correct_matches test data. Test requires brush entries to validate correct matches priority over other strategies.")
 
         # Look for a simple brand name that might match via other strategies
         test_input = None
