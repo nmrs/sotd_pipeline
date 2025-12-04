@@ -81,8 +81,8 @@ AC:
     - shick proline
 Cartridge/Disposable:
   Cartridge/Disposable:
-    Personna Twin Pivot Plus:
-    - personna twin pivot plus
+    ? ''
+    : - personna twin pivot plus
 DE:
   7 O'Clock:
     Sharpedge (Yellow):
@@ -280,19 +280,12 @@ DE:
     - crown super stainless (green), de
     - crown super stainless, de
     - lord crown stainless
-  Crystal:
-    Super:
-    - crystal
-    - crystal - super+ platinum
-    - crystal super+ platinum
   Derby:
     Extra:
     - derby
     - derby - extra
     - derby extra
     - derby extra - green
-    - derby extra - super stainless
-    - derby extra ss
     - derby usta
     Platinum:
     - derby platinum
@@ -300,6 +293,8 @@ DE:
     - derby - premium de
     - derby premium
     Super Stainless:
+    - derby extra - super stainless
+    - derby extra ss
     - derby ss
   Dorco:
     Prime Platinum:
@@ -462,7 +457,6 @@ DE:
     Sputnik:
     - gillette sputnik
     Stainless:
-    - gillette - 365 stainless
     - gillette - stainless
     Super Silver:
     - english gillette super silver 1980
@@ -609,7 +603,6 @@ DE:
     - personna cc
     - personna comfort coat
     - personna comfort coated
-    - personna double edge comfrot coated super platinum
     - personna lab blue
     - personna lab blue super
     - personna super (aka lab blue)

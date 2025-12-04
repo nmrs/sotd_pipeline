@@ -1,4 +1,4 @@
-oA77:
+A77:
   Cloud:
     A77:
       patterns:
@@ -79,7 +79,7 @@ AC:
     Proline (AC):
       patterns:
         - (schick.*)?proline
-        - (schick.*)?(proline.*)?p[ -]+[23]0
+        - (schick.*)?(proline.*)?p[ -]*[23]0
         - schick.*\bac\b
 Cartridge/Disposable:
   Cartridge/Disposable:
