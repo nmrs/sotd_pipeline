@@ -546,6 +546,8 @@ Carbon:
   - carbon shaving co. cx-316l/web ++ plate
   - carbon shaving cx-316l
   - carbon shaving cx-cu (copper) ++
+  - cx-316l @carbonshavingco polsilver ss blade
+  - cx-316l ti handle carbonshavingco
 Carl Rader:
   Straight:
   - carl rader 6/8" french point straight razor
@@ -931,43 +933,45 @@ Facón:
 Fatip:
   Grande:
   - fatip - grande classic originale nickel open comb
+  - fatip - testina gentile
   - fatip classic grande
+  - fatip classic testina gentile
+  - fatip classic testina gentile - chrome
   - fatip cromato nero grande (black)
+  - fatip gentile
   - fatip grande classic original nickel open comb
   - fatip grande classic original open comb nickel
   - fatip grande open comb
-  Lo Storto:
+  - fatip oc olive wood handle
+  - fatip oc olivewood handle
+  - fatip olivewood handle oc
+  - fatip testina gentile
+  Lo Storto (Slant):
+  - fatip - il piccolo storto originale
+  - fatip il piccolo sorto
+  - fatip il piccolo storto
+  - fatip il piccolo storto gold original
   - fatip - lo storto gentile
   - fatip - lo storto gentile (closed comb, chrome)
   - fatip - lo storto originale
   - fatip - lo storto originale - de slant, open comb
   - fatip lo storto
   - fatip lo storto originale
-  Olive Wood:
-  - fatip oc olive wood handle
-  - fatip oc olivewood handle
-  - fatip olivewood handle oc
   Piccolo:
-  - fatip - il piccolo storto originale
+  - fatip - piccolo - pre-2017
   - fatip - piccolo black & gold
   - fatip - piccolo black & gold (open comb)
-  - fatip il piccolo sorto
-  - fatip il piccolo storto
-  - fatip il piccolo storto gold original
+  - fatip - piccolo special edition
+  - fatip il piccolo
   - fatip piccolo
   - fatip piccolo closed comb slant
   - fatip piccolo oc
   - fatip piccolo open comb
+  - fatip piccolo se - solid bar
   - fatip piccolo slant
   - fatip piccolo slant open comb gold
   - fatip piccolo slant, closed comb
   - fatip piccolo special edition
-  Testina Gentile:
-  - fatip - testina gentile
-  - fatip classic testina gentile
-  - fatip classic testina gentile - chrome
-  - fatip gentile
-  - fatip testina gentile
 Feather:
   AS-D2:
   - feather - as-d2
@@ -1216,8 +1220,10 @@ Gillette:
   - 1961 gillette 195/fatboy on 8
   - 1961 gillette 195/fatboy on 9
   - 1961 gillette 195/fatboy set on 9
+  - 1961 gillette fatboy
   - 1961 gillette fatboy/195
   - f2 gillette fatboy
+  - f2 gillette fatboy (9 wtg, 7 xtg, 5 atg)
   - fatboy
   - fatboy w/ nacet
   - gilette - 1959 (e4) fat boy
@@ -1346,11 +1352,14 @@ Gillette:
   - 1961 gillette slim adjustable
   - 1962 gillette slim
   - 1962 gillette slim adjustable
+  - 1962 gillette slim adjustable (on 7)
   - 1962 gillette slim adjustable on 5
   - 1962 gillette slim adjustable on 6
   - 1962 gillette slim adjustable on 7
   - 1962 gillette slim adjustable on 8
+  - 1963 gillette i-2 slim adjustable razor (set to 3)
   - 1963 gillette slim adjustable
+  - 1963 gillette slim adjustable (set to 4)
   - 1964 j2 gillette slim
   - 1965 gillette slim adjustable
   - 1966 gillette slim adjustable
@@ -1575,16 +1584,19 @@ Gillette:
   - 1938-1945 fat handle gillette tech
   - 1938-1945 gillette fat handle tech
   - 1938-1945 gillette tech
+  - 1949-50 gillette tech ball end, gold
   - 1950s gillette tech
   - 1951ish gillette featherweight ball end tech
   - 1952 gillette ball end tech and rockwell 6s (plate 3)
   - 1952 gillette tech bakelite
   - 1953 gillette tech
+  - 1964 gillette solid handle tech razor
   - 1964 gillette travel tech head w
   - 1964 gillette travel tech head w/a maggard ss handle
   - 1964 travel tech head w/stainless steel handle
   - 1967 gillette travel tech (m3)
   - 1980 gillette tech ball end
+  - 1980's gillette british armed forces falkland war spiral tech
   - british aluminum handle gillette tech a1
   - british aluminum handle tech minus the base plate
   - brittish alluminum handle gillette tech
@@ -1600,7 +1612,9 @@ Gillette:
   - gillette - tech (pre-war)
   - gillette - tech - maggard ss handle
   - gillette - tech 1964 solid handle
+  - gillette - tech bakelite
   - gillette - tech ball-end 1955 (a1) gold
+  - gillette - tech post-war, random
   - gillette - tech with chisel and hound x briar works handle
   - gillette - travel tech
   - gillette 1947-51 fat handle tech
@@ -1612,6 +1626,7 @@ Gillette:
   - gillette ball end gold plated tech
   - gillette ball end tech
   - gillette ball end tech (a)
+  - gillette ball end tech - no code
   - gillette ball end tech early 50s made in england
   - gillette ball tech
   - gillette ball-end tech
@@ -1639,6 +1654,7 @@ Gillette:
   - gillette gold tech (ball end)
   - gillette gold tech ball end (open comb)
   - gillette hybrid tech
+  - gillette hybrid tech (1939)
   - gillette pre war tech
   - gillette rfb tech
   - gillette sportsman (tech)
@@ -2517,7 +2533,8 @@ Other Kamisori:
     - wood handle black kamisori
 Other Shavette:
   ? ''
-  : - ae gold ibc clone shavette
+  : - 1963 gillette slim adjustable (kamisori shavette, cutthroat shavette)
+    - ae gold ibc clone shavette
     - ae gold kamisori shavette
     - ae kai clone kamisori shavette
     - ae wood handle kamisori shavette
@@ -2607,6 +2624,7 @@ Other Straight Razor:
     - reliable razor - manganese steel
     - respec cutlery co. - 5/8" hollow ground square tip
     - respec cutlery co. - 5/8" square point hollow ground
+    - rr gc 84 straight bar
     - sheffield cutlery - red stripe scales
     - solingen best silver steel 6/8
     - straight colonial tool steel co 5/8
@@ -2829,6 +2847,8 @@ RazoRock:
   - game changer .84-p
   - game changer 0.84
   - gamechanger .68
+  - gamechanger 0.68
+  - gamechanger 0.84
   - gamechanger 84p
   - gamechanger. 84
   - gc .68p
@@ -2869,12 +2889,14 @@ RazoRock:
   - razorock game changer 76-p (sb)
   - razorock game changer jaws .84 (face) + leaf (2 blades for the dome)
   - razorock gamechanger . 84
+  - razorock gamechanger .68
   - razorock gamechanger .76-b (cc)
   - razorock gamechanger .84
   - 'razorock gamechanger .84 blade: treet platinum'
   - razorock gamechanger .84 oc
   - razorock gamechanger .84 w/ titanium halo
   - razorock gamechanger 0.68
+  - razorock gamechanger 0.84p
   - razorock gamechanger 1.05
   - razorock gamechanger 1.05p
   - razorock gamechanger 84
@@ -2888,6 +2910,7 @@ RazoRock:
   - razorock ss game changer 76
   - razorock ss game changer 76 with bulldog handle
   - razorrock game changer .68
+  - rr gamechanger 0.84p
   - rr gc .68-r
   - rr gc .84
   - rr gc .84-r
@@ -2967,6 +2990,7 @@ RazoRock:
   - razorock ss lupo 72
   - razorock ss lupo 72 with super knurl handle
   - razorock ss lupo 72 with titanium halo handle
+  - rr gc .68 ; rr lupo
   - rr lupo 58
   - rr lupo 72
   - rr lupo 95
@@ -3081,10 +3105,14 @@ Rockwell:
   - rockwell 6c (r6)
   - rockwell 6c - gunmetal
   - rockwell 6c 4/4/2 plate
+  - rockwell 6c gunmetal (level 4)
+  - rockwell 6c on a 5 plate
   - rockwell 6c plate 1 (newbie working on technique)
   - rockwell 6c plate 2
   - rockwell 6c plate 4
   - rockwell 6c plate)
+  - rockwell 6c r2 plate
+  - rockwell 6c r4
   - rockwell 6c r4 plate
   - rockwell 6c, plate 2
   - rockwell 6c, plate 3
@@ -3096,22 +3124,30 @@ Rockwell:
   - rockwell 6s $six
   - rockwell 6s (3 plate)
   - rockwell 6s (4 plate)
+  - rockwell 6s (4/2 plate)
+  - rockwell 6s (6, 2)
   - rockwell 6s (6, 3)
   - 'rockwell 6s (plate #2)'
   - 'rockwell 6s (plate #4)'
   - rockwell 6s (plate 3)
   - rockwell 6s (plate 4)
+  - rockwell 6s (plate 5)
   - rockwell 6s (r2)
   - rockwell 6s (r3 plate)
   - rockwell 6s (r3)
   - rockwell 6s (r4)
+  - rockwell 6s (r6 plate)
+  - rockwell 6s - r6
+  - rockwell 6s 4 plate
   - rockwell 6s @ r4 & r2
   - rockwell 6s plate 6
+  - rockwell 6s r3
   - rockwell 6s, 6
   - rockwell 6s, r3 plate
   - 'rockwell 6s: 6'
   - rockwell 6s:6
   T2:
+  - rockwell model t
   - rockwell t2 (face) + leaf (2 blade for the dome and 1 pass )
   - rockwell t2 (face) + leaf (2 blade for the dome and 2pass )
   - rockwell t2 (face) + leaf (2 blade for the dome)

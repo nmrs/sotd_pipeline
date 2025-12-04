@@ -418,7 +418,7 @@ Cartridge/Disposable:
       - penny shaver
       - person.*(single blade|face razor)
       - twinblade
-      - ^(?!.*tip).*gil.*blue
+      - ^(?!.*(tip|silver blue|lady)).*gil.*blue
 Charcoal Goods:
   Everyday:
     patterns:
@@ -751,30 +751,23 @@ Fasan:
     patterns:
       - fasan.*slant
 Fatip:
-  Testina Gentile:
-    patterns:
-      - fat+ip.*gentile
-      - test.*genti.*
   Grande:
     patterns:
+      - fat+ip.*gentile
       - fat+ip.*grande
       - fat+ip.*classic
-  Lo Storto:
+      - fat+ip.*olive
+  Lo Storto (Slant):
     patterns:
-      - fatt?ip.*stor[tn]o
-      - fatt?ip.*strobo
-      - fatt?ip.*slant
+      - fat+ip.*st?or[tnb]o
+      - fat+ip.*slant
       - lo.*storto
-  Olive Wood:
-    patterns:
-      - fatt?ip.*(olive|ulivo|wood)
   Piccolo:
     patterns:
-      - fatt?ip.*picc*oll*o
-      - fatip
+      - fat+ip.*pic+ol+o
   Retro:
     patterns:
-      - fatt?ip.*retro
+      - fat+ip.*retro
 Feather:
   800-1B:
     patterns:
@@ -1810,7 +1803,7 @@ Other Kamisori:
   "":
     format: Straight
     patterns:
-      - ^(?!.*\b(ice ?pick|chopstick|shavette|dairi|feather|henkotsu|facón|cjb|kai|yurii|raido|ac)\b).*kami
+      - ^(?!.*\b(ice ?pick|chopstick|shavette|dairi|feather|henkotsu|facón|cjb|nobel|kai|yurii|raido|ac)\b).*kami
 Other Straight Razor:
   "":
     format: Straight
