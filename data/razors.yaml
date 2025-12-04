@@ -699,8 +699,8 @@ Ever-Ready:
       - (ever|er).*1924
       - 1924.*(ever|er)
       - 'shovel\s*head'
-      - gem.*1924
       - "1924"
+      - gem.*1924
   E-Bar:
     format: GEM
     patterns:
@@ -1705,6 +1705,7 @@ Mühle:
   Rocca:
     patterns:
       - '\brocca\b'
+      - m[uü]hle.*r96
   Unspecified:
     patterns:
       - m[uü]hle
@@ -1802,6 +1803,7 @@ Other Shavette (AC):
       - (shavette|kami).*\bac\b
       - \bac\b.*(shavette|kami)
       - feather clone.*scales
+      - bbr-?s.*(shavette|scales)
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
@@ -2369,18 +2371,10 @@ Schick:
     patterns:
       - sc?hick.*adjustable
       - sc?hick.*\bm(1|2|3)\b
-  BBR-1J Kamisori Shavette:
-    format: Shavette
-    patterns:
-      - schick.*kami
   Dermaplaner:
     format: Shavette (Disposable)
     patterns:
       - schick.*dermaplaner
-  Eversharp:
-    format: Injector
-    patterns:
-      - 'ever\s*sharp'
   Golden 500:
     format: Injector
     patterns:
@@ -2403,10 +2397,6 @@ Schick:
   Krona:
     patterns:
       - (?:schick)?.*kry?ona
-  Proline BBR-S:
-    format: Shavette (AC)
-    patterns:
-      - schick.*bbr.*s
   Repeating Razor:
     format: Other
     patterns:
