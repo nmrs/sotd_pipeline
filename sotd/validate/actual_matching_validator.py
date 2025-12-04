@@ -45,6 +45,8 @@ class ValidationIssue:
         suggested_action: str = "",
         line_numbers: Optional[Dict[str, List[int]]] = None,
         matched_pattern: Optional[str] = None,
+        format: Optional[str] = None,
+        catalog_format: Optional[str] = None,
     ):
         self.issue_type = issue_type
         self.severity = severity
@@ -67,6 +69,8 @@ class ValidationIssue:
         self.suggested_action = suggested_action
         self.line_numbers = line_numbers or {}  # Dict mapping section/file to list of line numbers
         self.matched_pattern = matched_pattern
+        self.format = format  # Expected format (from correct_matches structure)
+        self.catalog_format = catalog_format  # Actual format (from matcher result)
 
 
 class ValidationResult:
@@ -133,14 +137,18 @@ class ActualMatchingValidator:
     def _get_matcher(self, field: str):
         """Get or create matcher for the specified field."""
         if field not in self._matchers:
+            # Create matchers with bypass_correct_matches=True to test actual matching logic
+            # rather than using the correct_matches cheat sheet
+            # Note: BrushMatcher doesn't support bypass_correct_matches in __init__,
+            # but it supports it in the match() method
             if field == "brush":
                 self._matchers[field] = BrushMatcher()
             elif field == "razor":
-                self._matchers[field] = RazorMatcher()
+                self._matchers[field] = RazorMatcher(bypass_correct_matches=True)
             elif field == "blade":
-                self._matchers[field] = BladeMatcher()
+                self._matchers[field] = BladeMatcher(bypass_correct_matches=True)
             elif field == "soap":
-                self._matchers[field] = SoapMatcher()
+                self._matchers[field] = SoapMatcher(bypass_correct_matches=True)
             else:
                 raise ValueError(f"Unsupported field type: {field}")
         return self._matchers[field]
@@ -741,7 +749,7 @@ class ActualMatchingValidator:
         return issues
 
     def _validate_simple_entry(
-        self, field: str, entry_string: str, expected_brand: str, expected_model: str
+        self, field: str, entry_string: str, expected_brand: str, expected_model: str, expected_format: Optional[str] = None
     ) -> List[ValidationIssue]:
         """Validate a simple entry (razor, blade, soap) using actual matching."""
         issues = []
@@ -749,8 +757,23 @@ class ActualMatchingValidator:
         try:
             matcher = self._get_matcher(field)
 
-            # Run actual matching with bypass_correct_matches=True
-            result = matcher.match(entry_string, bypass_correct_matches=True)
+            # For blades, use match_with_context() with the format from correct_matches section
+            # This aligns with actual pipeline behavior where blades are matched with razor format context
+            # The format sections represent usage context (which razor format the blade was used with)
+            if field == "blade" and expected_format is not None:
+                # Use match_with_context() to validate entry matches correctly in format context
+                # Note: match_with_context doesn't have bypass_correct_matches parameter,
+                # but since we're validating, we want to test the actual matching logic
+                # The matcher was created with bypass_correct_matches=True, so correct_matches
+                # won't be used in the matching process
+                if hasattr(matcher, "match_with_context"):
+                    result = matcher.match_with_context(entry_string, expected_format)
+                else:
+                    # Fallback if matcher doesn't support match_with_context
+                    result = matcher.match(entry_string, bypass_correct_matches=True)
+            else:
+                # For other fields (razor, soap), use regular match()
+                result = matcher.match(entry_string, bypass_correct_matches=True)
 
             if not result or not result.matched:
                 # No match found
@@ -759,9 +782,11 @@ class ActualMatchingValidator:
                         issue_type="no_match",
                         severity="high",
                         correct_match=entry_string,
+                        format=expected_format if field == "blade" else None,
                         details=(
                             f"{field.title()} string '{entry_string}' no "
                             f"longer matches any strategy"
+                            + (f" in {expected_format} format context" if field == "blade" and expected_format else "")
                         ),
                         suggested_action=(
                             f"Remove '{entry_string}' from correct_matches "
@@ -775,6 +800,9 @@ class ActualMatchingValidator:
             actual_brand = matched_data.get("brand")
             actual_model = matched_data.get("model")
 
+            # Check brand/model mismatch
+            # For blades, this validates that the entry matches the expected brand/model
+            # when used with the razor format from its section
             if expected_brand != actual_brand or expected_model != actual_model:
                 issues.append(
                     ValidationIssue(
@@ -785,10 +813,12 @@ class ActualMatchingValidator:
                         expected_model=expected_model,
                         actual_brand=actual_brand,
                         actual_model=actual_model,
+                        format=expected_format if field == "blade" else None,
                         details=(
                             f"Brand/model mismatch: expected "
                             f"'{expected_brand} {expected_model}', got "
                             f"'{actual_brand} {actual_model}'"
+                            + (f" in {expected_format} format context" if field == "blade" and expected_format else "")
                         ),
                         suggested_action=(
                             f"Update correct_matches directory to reflect "
@@ -1012,16 +1042,64 @@ class ActualMatchingValidator:
 
             else:
                 # Validate simple entries (razor, blade, soap)
-                field_section = correct_matches.get(field, {})
-                for brand, brand_data in field_section.items():
-                    if isinstance(brand_data, dict):
-                        for model, strings in brand_data.items():
-                            if isinstance(strings, list):
-                                for entry_string in strings:
-                                    entry_issues = self._validate_simple_entry(
-                                        field, entry_string, brand, model
-                                    )
-                                    issues.extend(entry_issues)
+                if field == "blade":
+                    # Blades are organized by format first (DE, Half DE, AC, etc.)
+                    blade_data = correct_matches.get(field, {})
+                    # Check if structure is format-based (top-level values are dicts with brand data)
+                    # Format-based structure: {format: {brand: {model: [strings]}}}
+                    # Flat structure: {brand: {model: [strings]}}
+                    # Check if at least one top-level value is a dict containing brand data
+                    is_format_based = (
+                        blade_data
+                        and isinstance(blade_data, dict)
+                        and any(
+                            isinstance(v, dict)
+                            and any(
+                                isinstance(brand_data, dict)
+                                and any(isinstance(model_data, list) for model_data in brand_data.values())
+                                for brand_data in v.values()
+                            )
+                            for v in blade_data.values()
+                        )
+                    )
+                    
+                    if is_format_based:
+                        # Iterate through format sections
+                        for format_name, format_data in blade_data.items():
+                            if not isinstance(format_data, dict):
+                                continue
+                            for brand, brand_data in format_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, strings in brand_data.items():
+                                        if isinstance(strings, list):
+                                            for entry_string in strings:
+                                                entry_issues = self._validate_simple_entry(
+                                                    field, entry_string, brand, model, expected_format=format_name
+                                                )
+                                                issues.extend(entry_issues)
+                    else:
+                        # Fallback to flat structure if format-based structure not detected
+                        for brand, brand_data in blade_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, strings in brand_data.items():
+                                    if isinstance(strings, list):
+                                        for entry_string in strings:
+                                            entry_issues = self._validate_simple_entry(
+                                                field, entry_string, brand, model
+                                            )
+                                            issues.extend(entry_issues)
+                else:
+                    # Other fields (razor, soap) use flat structure
+                    field_section = correct_matches.get(field, {})
+                    for brand, brand_data in field_section.items():
+                        if isinstance(brand_data, dict):
+                            for model, strings in brand_data.items():
+                                if isinstance(strings, list):
+                                    for entry_string in strings:
+                                        entry_issues = self._validate_simple_entry(
+                                            field, entry_string, brand, model
+                                        )
+                                        issues.extend(entry_issues)
 
             # Calculate total entries
             total_entries = 0
@@ -1029,6 +1107,41 @@ class ActualMatchingValidator:
                 for section_name in ["brush", "handle", "knot"]:
                     section_data = correct_matches.get(section_name, {})
                     for brand_data in section_data.values():
+                        if isinstance(brand_data, dict):
+                            for strings in brand_data.values():
+                                if isinstance(strings, list):
+                                    total_entries += len(strings)
+            elif field == "blade":
+                # Blades are organized by format first (DE, Half DE, AC, etc.)
+                blade_data = correct_matches.get(field, {})
+                # Check if structure is format-based (top-level values are dicts with brand data)
+                # Check if at least one top-level value is a dict containing brand data
+                is_format_based = (
+                    blade_data
+                    and isinstance(blade_data, dict)
+                    and any(
+                        isinstance(v, dict)
+                        and any(
+                            isinstance(brand_data, dict)
+                            and any(isinstance(model_data, list) for model_data in brand_data.values())
+                            for brand_data in v.values()
+                        )
+                        for v in blade_data.values()
+                    )
+                )
+                
+                if is_format_based:
+                    # Iterate through format sections
+                    for format_data in blade_data.values():
+                        if isinstance(format_data, dict):
+                            for brand_data in format_data.values():
+                                if isinstance(brand_data, dict):
+                                    for strings in brand_data.values():
+                                        if isinstance(strings, list):
+                                            total_entries += len(strings)
+                else:
+                    # Fallback to flat structure
+                    for brand_data in blade_data.values():
                         if isinstance(brand_data, dict):
                             for strings in brand_data.values():
                                 if isinstance(strings, list):

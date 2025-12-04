@@ -223,6 +223,40 @@ class TestActualMatchingValidator:
         assert issues[0].expected_model == "Moarteen"
         assert issues[0].actual_model == "Different Model"
 
+    @patch("sotd.validate.actual_matching_validator.BladeMatcher")
+    def test_validate_simple_entry_blade_with_format_context(self, mock_blade_matcher_class):
+        """Test blade entry validation with format context using match_with_context."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Derby",
+            "model": "USTA",  # Different from expected Extra
+            "format": "DE",  # Matches expected format (DE razor context)
+        }
+        mock_result.pattern = "derb.*usta"
+        # mock_with_context should be called for blades with format
+        mock_matcher.match_with_context.return_value = mock_result
+        mock_blade_matcher_class.return_value = mock_matcher
+
+        # Entry is in DE format section, validate it matches correctly in DE format context
+        # Expected: Derby/Extra, but matcher returns Derby/USTA
+        issues = self.validator._validate_simple_entry(
+            "blade", "derby usta", "Derby", "Extra", expected_format="DE"
+        )
+
+        assert len(issues) == 1
+        assert issues[0].issue_type == "data_mismatch"
+        assert issues[0].severity == "high"
+        assert issues[0].correct_match == "derby usta"
+        assert issues[0].expected_brand == "Derby"
+        assert issues[0].expected_model == "Extra"
+        assert issues[0].actual_brand == "Derby"
+        assert issues[0].actual_model == "USTA"
+        assert "DE format context" in issues[0].details
+        assert issues[0].matched_pattern == "derb.*usta"
+        # Verify match_with_context was called with format
+        mock_matcher.match_with_context.assert_called_once_with("derby usta", "DE")
+
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.glob")
     @patch("builtins.open")
@@ -450,6 +484,82 @@ class TestActualMatchingValidator:
             f"Found both structural_change and data_mismatch for: {overlap}. "
             f"data_mismatch should be suppressed."
         )
+
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.glob")
+    @patch("builtins.open")
+    @patch("yaml.safe_load")
+    @patch("sotd.validate.actual_matching_validator.BladeMatcher")
+    def test_validate_blade_field_format_based_structure(
+        self, mock_blade_matcher_class, mock_yaml_load, mock_open, mock_glob, mock_exists
+    ):
+        """Test validation for blade field with format-based structure."""
+        # Mock directory exists
+        mock_exists.return_value = True
+
+        # Mock directory structure: correct_matches/blade.yaml
+        mock_blade_file = Mock()
+        mock_blade_file.stem = "blade"
+        mock_blade_file.name = "blade.yaml"
+        mock_glob.return_value = [mock_blade_file]
+
+        # Mock file reading - Path.open() returns a context manager
+        mock_file_handle = Mock()
+        mock_file_context = Mock()
+        mock_file_context.__enter__ = Mock(return_value=mock_file_handle)
+        mock_file_context.__exit__ = Mock(return_value=None)
+        mock_blade_file.open.return_value = mock_file_context
+
+        # Mock format-based structure (DE, Half DE, etc.)
+        mock_yaml_load.return_value = {
+            "DE": {
+                "Derby": {
+                    "Extra": ["derby extra", "derby usta"],  # derby usta is in wrong format section
+                }
+            },
+            "Half DE": {
+                "Derby": {
+                    "USTA": ["derby usta 1/2 de"],
+                }
+            },
+        }
+
+        mock_matcher = Mock()
+        # match_with_context should be called for blades with format context
+        def match_with_context_side_effect(value, format_name, **kwargs):
+            mock_result = Mock()
+            if "derby extra" in value.lower() and format_name == "DE":
+                mock_result.matched = {"brand": "Derby", "model": "Extra", "format": "DE"}
+            elif "derby usta" in value.lower() and format_name == "DE":
+                # In DE format context, it matches to USTA (different model than expected Extra)
+                mock_result.matched = {"brand": "Derby", "model": "USTA", "format": "DE"}
+            elif "derby usta 1/2 de" in value.lower() and format_name == "Half DE":
+                mock_result.matched = {"brand": "Derby", "model": "USTA", "format": "Half DE"}
+            else:
+                mock_result.matched = None
+            mock_result.pattern = "test pattern"
+            return mock_result
+
+        mock_matcher.match_with_context.side_effect = match_with_context_side_effect
+        mock_blade_matcher_class.return_value = mock_matcher
+
+        result = self.validator.validate("blade")
+
+        assert isinstance(result, ValidationResult)
+        assert result.field == "blade"
+        assert result.validation_mode == "actual_matching"
+        assert result.total_entries == 3  # "derby extra", "derby usta" (DE), "derby usta 1/2 de" (Half DE)
+
+        # Should have 1 data_mismatch issue for "derby usta" in DE section
+        # (expected Derby/Extra, got Derby/USTA in DE format context)
+        data_mismatch_issues = [
+            i for i in result.issues if i.issue_type == "data_mismatch"
+        ]
+        derby_usta_issues = [i for i in data_mismatch_issues if "derby usta" in i.correct_match.lower()]
+        assert len(derby_usta_issues) == 1
+        assert derby_usta_issues[0].expected_model == "Extra"
+        assert derby_usta_issues[0].actual_model == "USTA"
+        assert "DE format context" in derby_usta_issues[0].details
 
 
 class TestValidationIssue:

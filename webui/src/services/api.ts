@@ -815,6 +815,7 @@ export const removeCatalogValidationEntries = async (request: {
     expected_brand: string;
     expected_model: string;
     issue_type?: string;
+    format?: string; // Format section for blades (AC, DE, Half DE, etc.)
   }>;
 }): Promise<{
   success: boolean;

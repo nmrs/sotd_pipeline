@@ -1482,7 +1482,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             processed_issue = {
                 "issue_type": mapped_issue_type,
                 "field": request.field,
-                "format": None,  # Format not available in actual matching validation
+                "format": getattr(issue, "format", None),  # Format section for blades (AC, DE, etc.)
                 "correct_match": issue.correct_match,
                 "expected_brand": issue.expected_brand,
                 "expected_model": issue.expected_model,
@@ -1493,7 +1493,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "severity": issue.severity,
                 "suggested_action": issue.suggested_action,
                 "details": issue.details,
-                "catalog_format": None,  # Format not available in actual matching validation
+                "catalog_format": getattr(issue, "catalog_format", None),  # Actual format from matcher
                 "matched_pattern": getattr(issue, "matched_pattern", None),  # Regex pattern that matched
                 "line_numbers": getattr(
                     issue, "line_numbers", None
@@ -1613,6 +1613,7 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                 correct_match = entry.get("correct_match", "")
                 actual_section = entry.get("actual_section", request.field)
                 issue_type = entry.get("issue_type", "")
+                expected_format = entry.get("format")  # Format section for blades (AC, DE, etc.)
 
                 if not correct_match:
                     errors.append(f"Invalid entry data: {entry}")
@@ -1636,31 +1637,108 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                     if section in yaml_data:
                         section_data = yaml_data[section]
 
-                        # Search through all brands and models in the section
-                        for brand, brand_data in section_data.items():
-                            if isinstance(brand_data, dict):
-                                for model, patterns in brand_data.items():
-                                    if isinstance(patterns, list):
-                                        # Look for the exact match (case-insensitive) and
-                                        # remove ALL occurrences
-                                        i = 0
-                                        while i < len(patterns):
-                                            pattern = patterns[i]
-                                            if (
-                                                isinstance(pattern, str)
-                                                and pattern.lower() == correct_match.lower()
-                                            ):
-                                                # Found the match, remove it
-                                                patterns.pop(i)
-                                                removed = True
-                                                removed_count += 1
-                                                # Don't increment i since we removed an element
-                                            else:
-                                                i += 1
+                        # For blades, handle format-based structure
+                        if request.field == "blade" and section_data:
+                            # Check if structure is format-based (top-level keys are format names)
+                            is_format_based = (
+                                isinstance(section_data, dict)
+                                and any(
+                                    isinstance(v, dict)
+                                    and any(
+                                        isinstance(brand_data, dict)
+                                        and any(isinstance(model_data, list) for model_data in brand_data.values())
+                                        for brand_data in v.values()
+                                    )
+                                    for v in section_data.values()
+                                )
+                            )
+
+                            if is_format_based:
+                                # Iterate through format sections first, then brands, then models
+                                # If expected_format is provided, only search in that format section
+                                # Otherwise, search all format sections (for backward compatibility)
+                                format_sections_to_search = (
+                                    [expected_format] if expected_format else list(section_data.keys())
+                                )
+                                
+                                for format_name in format_sections_to_search:
+                                    if format_name not in section_data:
+                                        continue
+                                    format_data = section_data[format_name]
+                                    if not isinstance(format_data, dict):
+                                        continue
+                                    for brand, brand_data in format_data.items():
+                                        if isinstance(brand_data, dict):
+                                            for model, patterns in brand_data.items():
+                                                if isinstance(patterns, list):
+                                                    # Look for the exact match (case-insensitive) and
+                                                    # remove ALL occurrences
+                                                    i = 0
+                                                    while i < len(patterns):
+                                                        pattern = patterns[i]
+                                                        if (
+                                                            isinstance(pattern, str)
+                                                            and pattern.lower() == correct_match.lower()
+                                                        ):
+                                                            # Found the match, remove it
+                                                            patterns.pop(i)
+                                                            removed = True
+                                                            removed_count += 1
+                                                            # Don't increment i since we removed an element
+                                                        else:
+                                                            i += 1
+                            else:
+                                # Fallback to flat structure
+                                for brand, brand_data in section_data.items():
+                                    if isinstance(brand_data, dict):
+                                        for model, patterns in brand_data.items():
+                                            if isinstance(patterns, list):
+                                                # Look for the exact match (case-insensitive) and
+                                                # remove ALL occurrences
+                                                i = 0
+                                                while i < len(patterns):
+                                                    pattern = patterns[i]
+                                                    if (
+                                                        isinstance(pattern, str)
+                                                        and pattern.lower() == correct_match.lower()
+                                                    ):
+                                                        # Found the match, remove it
+                                                        patterns.pop(i)
+                                                        removed = True
+                                                        removed_count += 1
+                                                        # Don't increment i since we removed an element
+                                                    else:
+                                                        i += 1
+                        else:
+                            # For other fields (razor, soap, brush), use flat structure
+                            # Search through all brands and models in the section
+                            for brand, brand_data in section_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, patterns in brand_data.items():
+                                        if isinstance(patterns, list):
+                                            # Look for the exact match (case-insensitive) and
+                                            # remove ALL occurrences
+                                            i = 0
+                                            while i < len(patterns):
+                                                pattern = patterns[i]
+                                                if (
+                                                    isinstance(pattern, str)
+                                                    and pattern.lower() == correct_match.lower()
+                                                ):
+                                                    # Found the match, remove it
+                                                    patterns.pop(i)
+                                                    removed = True
+                                                    removed_count += 1
+                                                    # Don't increment i since we removed an element
+                                                else:
+                                                    i += 1
 
                 if not removed:
                     sections_str = ", ".join(sections_to_search)
-                    errors.append(f"Entry not found in {sections_str} sections: {correct_match}")
+                    if request.field == "blade":
+                        errors.append(f"Entry not found in blade format sections: {correct_match}")
+                    else:
+                        errors.append(f"Entry not found in {sections_str} sections: {correct_match}")
 
             except Exception as e:
                 errors.append(f"Error removing entry {entry}: {e}")

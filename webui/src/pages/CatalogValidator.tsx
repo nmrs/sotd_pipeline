@@ -101,6 +101,8 @@ const CatalogValidator: React.FC = () => {
           expected_brand: issue.expected_brand,
           expected_model: issue.expected_model,
           issue_type: issue.issue_type,
+          // Include format information for blades to target specific format sections
+          format: issue.format,
         };
       });
 
