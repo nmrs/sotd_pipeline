@@ -978,7 +978,7 @@ Gillette:
       - 'super\s*blue'
   Diplomat:
     patterns:
-      - Diplomat
+      - gil.*diplomat
   Fatboy:
     patterns:
       - 'fat\s*boy'
@@ -1804,6 +1804,7 @@ Other Shavette (AC):
       - \bac\b.*(shavette|kami)
       - feather clone.*scales
       - bbr-?s.*(shavette|scales)
+      - kai.*[ck]lon(?:e[nm])?isori
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
@@ -2544,31 +2545,21 @@ Superior Cuts:
     patterns:
       - 'superior\s*cuts'
 Supply:
-  SE Pro:
-    format: Injector
-    patterns:
-      - supply.*se.*pro(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - supply.*adjustable
-      - supply.*pro
-  SE (Easy Loading):
-    format: Injector
-    patterns:
-      - supply.*se.*easy
-      - supply.*easy.*load
-  SE 2.0:
-    format: Injector
-    patterns:
-      - supply.*se.*2
-      - supply.*v2
-      - sup.*ly.*2
   SE:
     format: Injector
     patterns:
-      - ^(?!.*sentry).*supply.*se
-      - sup.*ly.*inject
-      - supply.*sing.*edge
-      - supply razor
+      - supply.*se.*pro
+      - supply.*se.*easy
+      - supply.*easy.*load
+      - supply.*se.*2\.0
+      - supply.*se\b
       - ^supply$
+  Single Edge (V1/V2):
+    format: Injector
+    patterns:
+      - supply.*single
+      - supply.*v1
+      - supply.*v2(?!\.0)
 T. Noonan & Sons:
   Straight:
     format: Straight
