@@ -419,6 +419,11 @@ Cartridge/Disposable:
       - person.*(single blade|face razor)
       - twinblade
       - ^(?!.*(tip|silver blue|lady)).*gil.*blue
+Charlex:
+  Straight:
+    format: Straight
+    patterns:
+      - charlex(?:.*\d{1,2}/(8|16))?
 Charcoal Goods:
   Everyday:
     patterns:
@@ -2398,14 +2403,14 @@ Schick:
   Krona:
     patterns:
       - (?:schick)?.*kry?ona
-  Magazine Repeating Razor:
-    format: Other
-    patterns:
-      - magazine.*repeating.*razor
   Proline BBR-S:
     format: Shavette (AC)
     patterns:
       - schick.*bbr.*s
+  Repeating Razor:
+    format: Other
+    patterns:
+      - repeating.*razor
   Stick:
     format: Injector
     patterns:
