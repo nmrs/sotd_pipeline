@@ -44,6 +44,7 @@ class ValidationIssue:
         details: str = "",
         suggested_action: str = "",
         line_numbers: Optional[Dict[str, List[int]]] = None,
+        matched_pattern: Optional[str] = None,
     ):
         self.issue_type = issue_type
         self.severity = severity
@@ -65,6 +66,7 @@ class ValidationIssue:
         self.details = details
         self.suggested_action = suggested_action
         self.line_numbers = line_numbers or {}  # Dict mapping section/file to list of line numbers
+        self.matched_pattern = matched_pattern
 
 
 class ValidationResult:
@@ -460,6 +462,7 @@ class ActualMatchingValidator:
                             f"Fix matching logic to respect should_not_split "
                             f"flag for '{brush_string}'"
                         ),
+                        matched_pattern=result.pattern if result else None,
                     )
                 )
                 # Return early since this is a critical issue
@@ -492,6 +495,7 @@ class ActualMatchingValidator:
                                 "KnownSplitWrapperStrategy for explicit splits "
                                 "from brush_splits.yaml"
                             ),
+                            matched_pattern=result.pattern if result else None,
                         )
                     )
                 else:
@@ -534,6 +538,7 @@ class ActualMatchingValidator:
                                         "KnownSplitWrapperStrategy to use "
                                         "correct handle text"
                                     ),
+                                    matched_pattern=result.pattern if result else None,
                                 )
                             )
 
@@ -560,6 +565,7 @@ class ActualMatchingValidator:
                                         "KnownSplitWrapperStrategy to use "
                                         "correct knot text"
                                     ),
+                                    matched_pattern=result.pattern if result else None,
                                 )
                             )
 
@@ -617,6 +623,7 @@ class ActualMatchingValidator:
                             f"Move '{brush_string}' from {expected_section} "
                             f"section to {actual_section} section"
                         ),
+                        matched_pattern=result.pattern if result else None,
                     )
                 )
 
@@ -648,6 +655,7 @@ class ActualMatchingValidator:
                                 f"new brand/model: '{actual_brand} "
                                 f"{actual_model}'"
                             ),
+                            matched_pattern=result.pattern if result else None,
                         )
                     )
 
@@ -685,6 +693,7 @@ class ActualMatchingValidator:
                                     f"new brand/model: '{actual_handle_brand} "
                                     f"{actual_handle_model}'"
                                 ),
+                                matched_pattern=result.pattern if result else None,
                             )
                         )
 
@@ -720,6 +729,7 @@ class ActualMatchingValidator:
                                     f"'{actual_knot_brand} "
                                     f"{actual_knot_model}'"
                                 ),
+                                matched_pattern=result.pattern if result else None,
                             )
                         )
 
@@ -785,6 +795,7 @@ class ActualMatchingValidator:
                             f"new brand/model: '{actual_brand} "
                             f"{actual_model}'"
                         ),
+                        matched_pattern=result.pattern if result else None,
                     )
                 )
 

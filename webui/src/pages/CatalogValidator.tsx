@@ -596,6 +596,16 @@ const CatalogValidator: React.FC = () => {
                                 <p className='text-xs text-gray-500 mt-1'>
                                   (based on current matching system)
                                 </p>
+                                {issue.matched_pattern && (
+                                  <div className='mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md'>
+                                    <p className='text-xs font-medium text-blue-800 mb-1'>
+                                      Matched Regex Pattern:
+                                    </p>
+                                    <code className='text-xs text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded break-all'>
+                                      {issue.matched_pattern}
+                                    </code>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : issue.issue_type === 'structural_change' ? (
@@ -802,17 +812,6 @@ const CatalogValidator: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Show matched pattern for mismatched results */}
-                          {issue.matched_pattern && (
-                            <div className='mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md'>
-                              <p className='text-sm font-medium text-yellow-800 mb-1'>
-                                Matched Pattern:
-                              </p>
-                              <code className='text-sm text-yellow-700 bg-yellow-100 px-2 py-1 rounded'>
-                                {issue.matched_pattern}
-                              </code>
-                            </div>
-                          )}
                         </div>
 
                         {/* Show conflicting pattern information */}

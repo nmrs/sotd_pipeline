@@ -1494,7 +1494,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "suggested_action": issue.suggested_action,
                 "details": issue.details,
                 "catalog_format": None,  # Format not available in actual matching validation
-                "matched_pattern": None,  # Pattern not available in actual matching validation
+                "matched_pattern": getattr(issue, "matched_pattern", None),  # Regex pattern that matched
                 "line_numbers": getattr(
                     issue, "line_numbers", None
                 ),  # Line numbers for duplicate/conflict issues
