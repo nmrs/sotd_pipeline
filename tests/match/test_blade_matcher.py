@@ -173,6 +173,51 @@ def test_format_context_matching(
     assert result.original == input_text
 
 
+def test_specific_pattern_priority_over_generic(tmp_path):
+    """
+    Test that more specific patterns (like AC Proline) match before generic patterns (like DE Schick).
+    
+    This test reproduces the issue where "Schick - P-30 Proline Artist Club Style" was matching
+    to DE format instead of AC format, even though the AC pattern is more specific.
+    """
+    # Create a test catalog with both DE and AC Schick patterns
+    yaml_content = """
+DE:
+  Schick:
+    Stainless (DE):
+      patterns:
+        - sc?hick
+AC:
+  Schick:
+    Proline (AC):
+      patterns:
+        - (schick.*)?proline
+        - (schick.*)?(proline.*)?p[ -]+[23]0
+        - schick.*\\bac\\b
+"""
+    catalog_file = tmp_path / "test_blades.yaml"
+    catalog_file.write_text(yaml_content)
+    
+    matcher = BladeMatcher(catalog_path=catalog_file)
+    
+    # This should match the AC Proline pattern, not the generic DE Schick pattern
+    blade_text = "Schick - P-30 Proline Artist Club Style"
+    result = matcher.match(blade_text)
+    
+    assert result.matched is not None
+    # Should match AC format, not DE format
+    assert result.matched["format"] == "AC", f"Expected AC format, got {result.matched['format']}"
+    assert result.matched["brand"] == "Schick"
+    assert result.matched["model"] == "Proline (AC)"
+    # The pattern should be the AC pattern, not the generic DE pattern
+    assert result.pattern is not None
+    # The AC pattern should be longer/more specific than the DE pattern
+    assert len(result.pattern) > 7, "AC pattern should be longer than generic 'sc?hick' pattern"
+    # Verify it's one of the AC patterns
+    assert "proline" in result.pattern.lower() or "p[ -]+[23]0" in result.pattern, \
+        f"Pattern should be AC pattern, got: {result.pattern}"
+
+
 def test_regex_sorting_order(matcher):
     """Test that patterns are properly sorted by format priority and specificity."""
     # Retrieve the compiled patterns directly

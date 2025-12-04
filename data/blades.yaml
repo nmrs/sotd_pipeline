@@ -79,7 +79,7 @@ AC:
     Proline (AC):
       patterns:
         - (schick.*)?proline
-        - (schick.*)?(proline.*)?p[ -]?[23]0
+        - (schick.*)?(proline.*)?p[ -]+[23]0
         - schick.*\bac\b
 Cartridge/Disposable:
   Cartridge/Disposable:
@@ -234,12 +234,6 @@ DE:
       patterns:
         - crown.*stainless
   Derby:
-    Blue Bird:
-      patterns:
-        - blue.*bird
-    Concord:
-      patterns:
-        - concord
     Extra:
       patterns:
         - derb.*extra
@@ -247,9 +241,15 @@ DE:
     Extra Blue:
       patterns:
         - derb.*blue
+    Platinum:
+      patterns:
+        - derb.*plat
     Premium:
       patterns:
         - derb.*prem
+    Super Stainless:
+      patterns:
+        - derb.*(ss|stain)
   Dorco:
     Prime Platinum:
       patterns:
@@ -444,6 +444,9 @@ DE:
       patterns:
         - \bloi\b
   Lord:
+    Blue Bird:
+      patterns:
+        - blue.*bird
     Blue Sword Platinum:
       patterns:
         - blue.*sword
@@ -686,6 +689,9 @@ DE:
     Classic:
       patterns:
         - tre(e|a)t.*classic
+    Concord:
+      patterns:
+        - concord
     Dura Sharp:
       patterns:
         - treet.*dura.*shar
@@ -895,6 +901,9 @@ Half DE:
     Premium:
       patterns:
         - derb.*prem
+    USTA:
+      patterns:
+        - derb.*usta
   Dorco:
     HST-300:
       patterns:
