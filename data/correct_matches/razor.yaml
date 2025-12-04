@@ -1051,6 +1051,8 @@ Flying Eagle:
   Tech Clone:
   - flying eagle - tech clone
 Focus:
+  R21:
+  - focus r21
   Slim AL:
   - focus slim al
 FrankenRazor:
@@ -1078,6 +1080,8 @@ GEM:
   - 1912s gem single edge
   - gem 1912
   - gem squat head 1912
+  '1914':
+  - gem 1914
   Clog Pruf:
   - gem - clog pruf -
   - gem - clog-pruf
@@ -1096,6 +1100,10 @@ GEM:
   - gem micromatic gen 2 "peerless" clog pruf
   - gem- micromatic clog pruf
   - micromatic clog-pruf
+  Contour:
+  - gem contour
+  Contour II:
+  - gem contour ii
   Damaskeene:
   - '''screwy'' (gem damaskeene)'
   - gem - damaskeene
@@ -1105,8 +1113,10 @@ GEM:
   - gem damaskeene ('screwy')
   - gem damaskeene ('screwy') $machienage
   - gem damaskeene ('skrewy')
+  - gem damaskeene (sb)
   - gem damaskeene sb
   - gem damaskeene, aka 'screwy'
+  - gem damaskene
   Damaskeene OC:
   - gem - damaskeene open comb
   - gem damaskeene (oc)
@@ -1127,6 +1137,7 @@ GEM:
   - gem - flying wing
   - gem - flying wing - bullet tip
   - gem - micromatic flying wing
+  - gem bullet tip
   - gem flying wing
   - gem flying wing / bullet tip
   - gem micromatic bullet tip
@@ -1141,6 +1152,8 @@ GEM:
   - gem g bar
   - gem g--bar
   - gem g-bar
+  - gem heavy flat top
+  - gem heavy flat top a.k.a. the g-bar
   Junior:
   - gem - junior
   - gem 1912 junior
@@ -2370,6 +2383,7 @@ Maggard:
   Slant:
   - gillette handles and maggard slant head
   - maggard - slant head
+  - maggard adjustable - slant plate (/s)
   - maggard mr11 with slant head
   - maggard razors - slant + mrt travel handle
   - maggard razors - slant + rr ufo handle
@@ -2385,9 +2399,14 @@ Maggard:
   V2:
   - maggard v2
   V3:
+  - frankenstein--razorock halo handle with maggard v3a head
   - maggard - v3a head / mr8 handle
+  - maggard mr-18 with v3 head
   - maggard mr1 v3a
+  - maggard mr1 with v3a head
+  - maggard mr11
   - maggard mr18 v3
+  - maggard mr7/v3a
   - maggard razors de safety razor mr5
   - maggard razors v3
   - maggard razors v3 head
@@ -2395,9 +2414,13 @@ Maggard:
   - maggard razors v3a
   - maggard v3
   - maggard v3 (i know, it's not in the photo; deal with it)
+  - maggard v3 head on a merkur handle
+  - maggard v3 on a merkur handle
+  - maggard v3 with mr6 handle
   - maggard v3a
   - maggard v3a/muhle handle
   - maggard v3m/mr5
+  - razorock halo handle and maggard v3a head
   - windrose g3 ss with maggard v3m
 Maher & Grosh:
   Straight:
@@ -2628,6 +2651,8 @@ Other Shavette (AC):
     - ae feather clone black scales
     - ae orange scale ac shavette
     - chinese black scales clone ac shavette
+    - feather ac - cosmo clonisori
+    - feather ac ssteaknife klonisori
     - gold head chinese clone ac kamisori
     - kai captain kamisori cap-sdjbk (ac)
     - kai captian standard klonisori

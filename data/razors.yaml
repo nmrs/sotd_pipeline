@@ -312,7 +312,7 @@ Blackland:
   Vector:
     format: AC
     patterns:
-      - (?:black(land|bird))?.*vector(?! handle)
+      - (?:black(land|bird))?.*vector(?! handle)(?:pad for priority length xxxxxxxxxxxx)?
 Blutt Rasur:
   BR-1:
     patterns:
@@ -788,9 +788,9 @@ Feather:
   Shavette:
     format: Shavette (AC)
     patterns:
-      - Feather.*(dx|ss|sr)
-      - feather.*artist.*clu
-      - feather.*\bac\b(?:.*(shavette|kami))?
+      - (?!.*(copy|[ck]loni)).*feather.*(dx|ss|sr)
+      - (?!.*(copy|[ck]loni)).feather.*artist.*clu
+      - (?!.*(copy|[ck]loni)).*feather.*\bac\b(?:.*(shavette|kami))?
 Filarmonica:
   "12":
     format: Straight
@@ -891,16 +891,28 @@ GEM:
     format: GEM
     patterns:
       - 1901.*lather.*catcher
-  "1912":
+  '1912':
     format: GEM
     patterns:
       - gem.*1912
       - 1912.*gem
+  '1914':
+    format: GEM
+    patterns:
+      - gem.*1914
   Clog Pruf:
     format: GEM
     patterns:
       - gem.*clog(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - .*clog.*pruf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  Contour:
+    format: GEM
+    patterns:
+      - gem.*contour
+  Contour II:
+    format: GEM
+    patterns:
+      - gem.*contour.*ii
   Damaskeene:
     format: GEM
     patterns:
@@ -925,6 +937,7 @@ GEM:
     format: GEM
     patterns:
       - gem.*g.*bar
+      - gem.*heavy flat
   Junior:
     format: GEM
     patterns:
@@ -1804,7 +1817,8 @@ Other Shavette (AC):
       - \bac\b.*(shavette|kami)
       - feather clone.*scales
       - bbr-?s.*(shavette|scales)
-      - kai.*[ck]lon(?:e[nm])?isori
+      - (kai|feather).*[ck]lon(?:e[nm])?isori
+      - '[ck]lon(?:e[nm])?isori.*(kai|feather)'
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
