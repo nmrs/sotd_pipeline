@@ -96,34 +96,6 @@ Cartridge/Disposable:
         - twin.*pivot(.*plus)?
         - xtreme2
 DE:
-  7 O'Clock:
-    Permasharp:
-      patterns:
-        - clock.*perm
-        - permasharp
-    Sharpedge (Yellow):
-      patterns:
-        - gill.*sharp.*edg
-        - clock.*sharp.*edg
-        - clock.*yellow
-        - gill.*yellow
-    Super Platinum (Black):
-      patterns:
-        - clock.*pla
-        - clock.*black
-        - gill.*black
-        - 7OC.*pla
-        - \b7 ?sp\b
-        - \b7'o.*black
-    Super Stainless (Green):
-      patterns:
-        - clock.*sta
-        - clock.*green
-        - clock
-        - gil.*et.*green
-        - clock.*super.*stain
-        - gil.*super.*stain.*green
-        - 7.*oc.*ss
   ABEST:
     Hi Platinum:
       patterns:
@@ -320,6 +292,33 @@ DE:
     "365":
       patterns:
         - (?:gillette)?.*\b365\b
+    7 O'Clock Permasharp:
+      patterns:
+        - clock.*perm
+        - permasharp
+    7 O'Clock Sharpedge (Yellow):
+      patterns:
+        - gill.*sharp.*edg
+        - clock.*sharp.*edg
+        - clock.*yellow
+        - gill.*yellow
+    7 O'Clock Super Platinum (Black):
+      patterns:
+        - clock.*pla
+        - clock.*black
+        - gill.*black
+        - 7OC.*pla
+        - \b7 ?sp\b
+        - \b7'o.*black
+    7 O'Clock Super Stainless (Green):
+      patterns:
+        - clock.*sta
+        - clock.*green
+        - clock
+        - gil.*et.*green
+        - clock.*super.*stain
+        - gil.*super.*stain.*green
+        - 7.*oc.*ss
     Blue:
       patterns:
         - gil.*blu
