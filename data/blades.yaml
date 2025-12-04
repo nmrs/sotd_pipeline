@@ -233,10 +233,6 @@ DE:
     Super Stainless:
       patterns:
         - crown.*stainless
-  Crystal:
-    Super:
-      patterns:
-        - crystal
   Derby:
     Blue Bird:
       patterns:
@@ -540,6 +536,7 @@ DE:
       patterns:
         - person+a.*super.*plat
         - person+a.*crystal
+        - crystal.*person+a
     TOMY:
       patterns:
         - \btomy\b

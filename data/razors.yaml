@@ -2198,6 +2198,9 @@ RazoRock:
   Mission:
     patterns:
       - mission
+  Old Type:
+    patterns:
+      - (razorock|\brr\b).*old.*type
   SLOC:
     patterns:
       - sloc
@@ -2386,6 +2389,7 @@ Schick:
     patterns:
       - sc?hick.*adjustable
       - sc?hick.*\bm(1|2|3)\b
+      - sc?hick.*dial
   Dermaplaner:
     format: Shavette (Disposable)
     patterns:
@@ -2664,19 +2668,19 @@ Union Cutlery:
     format: Straight
     patterns:
       - union.*(?:(razor|cutlery))?.*(?:\d{1,2}/(8|16))?
-Utica Knife & Razor:
+Utica Knife & Razor Co.:
   Red Point 917:
     format: Straight
     grind: Hollow
     point: Square
     width: 5/8
     patterns:
-      - utica.*red.?point.*917
-      - red.?point.*917(?:.*\d{1,2}/(8|16))?
+      - utica.*red.?(point|dot).*917
+      - red.?(point|dot).*917(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - utica.*straight(?:.*\d{1,2}/(8|16))?
+      - utica.*(?:.*\d{1,2}/(8|16))?
       - utica
 Utopia:
   Shavette:
@@ -2920,6 +2924,7 @@ Yaqi:
     patterns:
       - yaqi.*doc\b
   Excalibur:
+    format: AC
     patterns:
       - yaqi.*excal
   Flipside:
@@ -2953,8 +2958,8 @@ Yaqi:
   SE:
     format: Half DE
     patterns:
-      - yaqi \bse\b
-      - yaqi.*single\s*edge
+      - ^(?!.*excal).*yaqi \bse\b
+      - ^(?!.*excal).*yaqi.*single\s*edge
   Slant:
     patterns:
       - yaqi.*slant

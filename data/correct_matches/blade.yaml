@@ -18,6 +18,8 @@ AC:
   Feather:
     Pro:
     - feather - professional
+    - feather - professional ac
+    - feather ac - soft guard
     - feather artist club
     - feather artist club pro
     - feather artist club professional
@@ -28,8 +30,10 @@ AC:
     - feather pro injector
     - feather professional
     - feather professional artist club
+    - feather professional blades
     Pro Super:
     - feather - super professional
+    - feather pro super
     - feather professional super
     - feather professional super (ac)
     - feather super
@@ -39,9 +43,11 @@ AC:
     - feather - proguard
     - feather artist club pro-guard (se)
     - feather artist club proguard
+    - feather pro guard
     - feather proguard
   Kai:
     Captain Blade:
+    - kai captain standard
     - kai red hair cut blade
     Captain ProGuard:
     - kai proguard mg
@@ -86,6 +92,7 @@ DE:
     - 7 o'clock sharpedge yellow
     - 7'o clock - yellow
     - gilette - 7 o'clock sharpedge
+    - gilette 7 o'clock yellow sharpedge
     - gillette - 7 o'clock - sharpedge
     - gillette - 7 o'clock sharp edge
     - gillette - 7 o'clock sharpedge
@@ -97,8 +104,12 @@ DE:
     - gillette 7 o'clock sharpedge
     - gillette 7 o'clock sharpedge (yellow)
     - gillette 7 o'clock sharpedge yellow
+    - gillette 7 o'clock sharpedge, yellow
     - gillette 7 o'clock yellow
     - gillette 7 o'clock yellowddd
+    - gillette 7 o'clock yellows
+    - gillette 7 oclock yellow
+    - gillette 7' oclock yellow
     - gillette sharpedge
     - gillette yellow
     Super Platinum (Black):
@@ -124,6 +135,7 @@ DE:
     - gillette 7sp ss
     - gillette seven o'clock super platinum
     - gillette super platinum (black)
+    - gillette tech super platinum (black)
     Super Stainless (Green):
     - 7 o'clock
     - 7 o'clock - super stainless (green)
@@ -131,9 +143,11 @@ DE:
     - gilette 7 o'clock - super stainless
     - gillette - 7 o'clock
     - gillette 7 o clock green
+    - gillette 7 o clock super stainless steel
     - gillette 7 o'clock
     - gillette 7 o'clock (g)
     - gillette 7 o'clock - super stainless (green)
+    - gillette 7 o'clock sharp
     - gillette 7 o'clock stainless
     - gillette 7 o'clock stainless (green)
     - gillette 7 o'clock stainless green
@@ -192,9 +206,12 @@ DE:
     - astra superior platinum (unknown number of uses)
     - astra superior platinum, de
     - astras
+    - gillette astra
     - gillette astra platinum
     - gillette astra platinum green
+    - gillette astra platinum/green
     - gillette astra sp
+    - gillette astra superior platinum
     - rapira platinum lux~~ ~~tiger~~ astra sp
     Superior Stainless (Blue):
     - astra - blue
@@ -269,16 +286,21 @@ DE:
     - crystal super+ platinum
   Derby:
     Extra:
+    - derby
     - derby - extra
     - derby extra
     - derby extra - green
+    - derby extra - super stainless
+    - derby extra ss
     - derby usta
     Premium:
+    - derby - premium de
     - derby premium
   Dorco:
     Prime Platinum:
     - dorco prime
     - dorco prime platinum
+    - dorco stp301
     ST-300:
     - dorco
     - dorco platinum
@@ -286,6 +308,7 @@ DE:
     - dorco st-300 platinum
     - dorco st300
     - dorco stainless
+    - dorco stainless steel
     Titan:
     - dorco titan
   Durablade:
@@ -305,6 +328,7 @@ DE:
     - feather
     - feather (3rs use)
     - feather (always super sharp)
+    - feather (day 5)
     - feather (de)
     - feather - hi stainless
     - feather - hi stainless, de
@@ -316,6 +340,8 @@ DE:
     - feather - new-hi
     - feather - new-hi stianless
     - feather de
+    - feather hi stainless
+    - feather hi-platinum
     - feather hi-stainless
     - feather hi-stainless double edged razor blade
     - feather hi-stainless steel platinum
@@ -344,15 +370,19 @@ DE:
     - gillette 365
     - gillette 365 (chinese origin)
     - gillette 365 (chinese)
+    - gillette 365(chinese made)
     Blue:
     - gillette blue
+    - gillette silver blur
     - gillette super blue
+    - gillette super blue (3 or 4 ?)
     Goal:
     - gillette goal
     Minora:
     - gillette - minora
     - gillette - minora stainless
     - gillette minora
+    - gillette minora - stainless
     - gillette minora og
     - gillette minora platinum
     - gillette minora stainless
@@ -367,9 +397,11 @@ DE:
     - 'gillette - nacet (use #8 i think?)'
     - 'gillette - nacet (use #9 i think?)'
     - gillette - nacet stainless
+    - gillette -nacet
     - gillette nacet
     - gillette nacet half blade
     - gillette nacet stainless
+    - gillette nacete
     - gillette nancet
     - gillette- nacet
     - nacet
@@ -394,25 +426,34 @@ DE:
     - perma-sharp gillette
     - perma-sharp stainless
     - perma-sharp super
+    - permasharp (no idea, like 4)
     - permasharp super stainless
     Platinum:
     - gillette - platinum
     - gillette - platinum (half in kamisori new, whole in overlander new)
     - gillette platinum
+    - gillette platinum (20+)
+    - gillette platinum (going on week 2!)
+    - gillette platium
     - gillette swede
     Rubie:
     - gillette rubie
+    - gillette rubies
     Silver Blue:
     - gillete silver blue
     - gillete silver blue (1rst use)
     - gillette - silver blue
+    - gillette - silverblue
     - gillette -silver blue
     - gillette silve blue
     - gillette silver blue
+    - gillette silver blues
     - gillette silverblue
     - gsb
     - silver blue
     - silverblue
+    Spoiler:
+    - gillette vintage spoiler
     Sputnik:
     - gillette sputnik
     Stainless:
@@ -422,11 +463,13 @@ DE:
     - english gillette super silver 1980
     - gillette super silver
     Super Stainless:
+    - gilette - 'the spoiler' super stainless
     - gillette - 'the spoiler' super stainless
     - gillette super stainless
     - gillette super stainless vintage
     Super Thin Mejorada:
     - gillette - super thin
+    - gillette super thin mejorada
     Super Thin Platinum:
     - gillet super thin platinum
     - gillette - super thin platinum
@@ -461,18 +504,24 @@ DE:
     DE:
     - kai
     - kai - stainless
+    - kai stainless
+    - kai stainless steel de
   King C Gillette:
     DE:
     - gillette - king c gillette blades
+    - gillette king c blade
     - gillette king, platinum, closed-comb 3 piece
     - kc gillette
     - kc gillette (aka gillette platinum)
     - kc gillette (last one, hooray!)
     - kc gillette, aka gillette platinum
     - king c gillette
+    - king c gillette safety blade
+    - king c gillette safety blades
     - king c. gillette
   Ladas:
     Super Stainless:
+    - lada
     - ladas
   Laser:
     Ultra:
@@ -489,6 +538,8 @@ DE:
   Lord:
     Blue Sword Platinum:
     - blue sword platinum
+    Cool:
+    - lord cool
     Platinum:
     - lord new lord platinum
     - lord platinum
@@ -504,6 +555,7 @@ DE:
     - manscaped - the plow 2 de premium stainless blade
   Merkur:
     Super Platinum:
+    - merkur
     - merkur super platinum
   Mühle:
     Traditional:
@@ -522,6 +574,7 @@ DE:
     Premium Platinum:
     - parker
     - parker - parker premium platinum de
+    - parker platinum
     - parker stainless steel
   Personna:
     '74':
@@ -540,6 +593,7 @@ DE:
     - persona - lab blue
     - persona blue
     - persona comfort coat
+    - persona lab blue
     - personna - comfort coated (lab blue)
     - personna - lab blue
     - 'personna - lab blue (use #11ish)'
@@ -561,6 +615,7 @@ DE:
     - personna med prep
     Platinum:
     - persona platinum
+    - persona red
     - personna "israeli red"
     - personna - platinum
     - personna - platinum (for both)
@@ -576,13 +631,16 @@ DE:
     - personna (stainless)
     - personna (stainless), %th shave on that blade
     - personna - super
+    - personna red ss
     - personna super
     - personna super blue
     - personna super stainless
     - personne super stainless
     Super+ Platinum:
+    - crystal stainless (israeli personna)
     - personna (crystal) platinum
     - personna blue crystal
+    - personna crystal blue
     - personna crystal super
     - personna platinum (crystal)
   Polsilver:
@@ -604,9 +662,15 @@ DE:
     Super Stainless:
     - rapira super stainless
     Swedish:
+    - rapira - swedish steel
     - rapira swedish super steel
     - rapira swedish supersteel
     - rapira sweedish super steel
+  Rex:
+    Platinum:
+    - rex supply co. - platinum
+    - rex supply co. platinum
+    - rex supply platinum
   RK:
     Stainless:
     - rk chromium
@@ -615,6 +679,7 @@ DE:
   Rockwell:
     Swedish Stainless:
     - pair of brand new rovkwell blades
+    - rockwell double edge
     - rockwell stainless steel
     - rockwell swedish stainless steel
     - rockwell swedish steel
@@ -661,6 +726,7 @@ DE:
     - statum
   Super-Max:
     Platinum:
+    - super max platinum
     - supermax platinum plus
     Stainless (Red):
     - super- super-max super stainless
@@ -760,6 +826,7 @@ DE:
     - voskhod - teflon coated
     - voskhod super stainless
     - voskhod teflon coated
+    - voskhod, teflon coated
   Walgreens:
     2 Edge:
     - walgreens 2 edge
@@ -782,6 +849,7 @@ DE:
     Super Iridium:
     - wizamet
     - wizamet (?)
+    - wizamet - iridium super
     - wizamet - iridium super extra stainless
     - wizamet - super iridium
     - wizamet half
@@ -831,6 +899,7 @@ GEM:
     - gem ss ptfe
     - gem ss ptfe-coated
     - gem stainless ptfe
+    - persona gem ptfe
     - personna - gem ptfe
     - personna - gem ptfe coated
     - personna gem
@@ -840,11 +909,15 @@ GEM:
     - personna gem stainless ptfe
     - personna ptfe
     - personna ptfe stainless steel gem
+    - personne - gem ptfe
     - ptfe
+    - ptfe (?)
     GEM Stainless:
     - gem - coated single edge stainless steel
+    - gem single edge stainless
     - gem ss
     - gem stainless
+    - personna gem stainless
 Hair Shaper:
   Annie:
     Hair Shaper:
@@ -858,6 +931,7 @@ Hair Shaper:
     - feather cut blade
   Fromm:
     Hair Shaper:
+    - fromm
     - fromm hair cut blade
     - fromm hair shaper
     - fromm hair shaper blade
@@ -870,11 +944,14 @@ Hair Shaper:
     - kismet hai shaper
     - kismet hair shaper
     - kismet hair shaper blade
+    - kismet hairshaper
     - kismet rostfrei
     - kismet rostfrei, polymer beschichtet
+    - kismet stainless (se)
   Personna:
     Hair Shaper:
     - personna hair shaper
+    - personna hairshaper
     - personna specimen prep blade
 Half DE:
   American Razor Blades:
@@ -914,6 +991,7 @@ Injector:
     - personna injector blade
   Schick:
     Injector:
+    - injector blade
     - schick
     - schick injector
     - schick injector blade
@@ -932,6 +1010,7 @@ Injector:
     Black Label:
     - supply black injector blade
     - supply injector platinum
+    - supply single edge
   Taconic:
     Injector:
     - parker parker taconic
@@ -942,6 +1021,9 @@ Injector:
     - ted pella ptfe
     - ted pella single edge injector
 Other:
+  Kampfe:
+    Wedge:
+    - kampfe bros saturday
   Rolls Razor:
     Blade:
     - rolls blade e 45
