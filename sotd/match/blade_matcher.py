@@ -981,8 +981,9 @@ class BladeMatcher(BaseMatcher):
 
         blade_text = normalized_text
 
-        # Patterns are already sorted by specificity (longer patterns first, DE deprioritized)
-        # Return the first match immediately to respect pattern specificity
+        # Collect all regex matches
+        all_matches = []
+        best_pattern = None
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(blade_text):
                 match_data = {
@@ -996,12 +997,30 @@ class BladeMatcher(BaseMatcher):
                     if key not in ["patterns", "format"]:
                         match_data[key] = value
 
+                all_matches.append(match_data)
+                # Keep track of the pattern for the best match
+                if not best_pattern:
+                    best_pattern = raw_pattern
+
+        # If we have matches, prioritize by format compatibility
+        if all_matches:
+            # Prioritize DE over Half DE when no specific context is provided
+            de_matches = [m for m in all_matches if m["format"].upper() == "DE"]
+            if de_matches:
                 return create_match_result(
                     original=original_text,
-                    matched=match_data,
+                    matched=de_matches[0],
                     match_type=MatchType.REGEX,
-                    pattern=raw_pattern,
+                    pattern=best_pattern,
                 )
+
+            # If no DE matches, return the first match
+            return create_match_result(
+                original=original_text,
+                matched=all_matches[0],
+                match_type=MatchType.REGEX,
+                pattern=best_pattern,
+            )
 
         # No matches found
         return create_match_result(
