@@ -1162,7 +1162,11 @@ Gutche:
   A77 Shavette:
     format: Shavette (A77)
     patterns:
-      - gutche.*(?:shavette)?
+      - gutche.*a77.*(?:shavette)?
+  Hair Shaper:
+    format: Shavette (Hair Shaper)
+    patterns:
+      - gutche.*shaper
 H&S Co.:
   NO75:
     patterns:
@@ -1177,6 +1181,11 @@ Hadoson (Matsukura):
     format: Straight
     patterns:
       - (hadoson|matsukura)(?:.*\d{1,2}/(8|16))?
+Haircut and Shave Company:
+  NO75:
+    patterns:
+      - haircut.*75
+      - 75.*haircut
 Handlebar:
   Shaving Company Dali:
     patterns:
