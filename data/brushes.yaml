@@ -411,6 +411,7 @@ known_brushes:
       fiber: Boar
       knot_size_mm: 26
       patterns:
+        - 10049(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - omeg\w.*(pro)?.*49
         - omeg\w.*pro.*26mm
     Proraso Professional:
@@ -1956,10 +1957,10 @@ other_brushes:
     default: Badger
     patterns:
       - mountain.*hare
-  MRed:
-    default: badger
+  Mühle:
+    default: Synthetic
     patterns:
-      - \bmred\b
+      - m[uü]hle
   Muninn Woodworks:
     default: badger
     patterns:
@@ -1968,6 +1969,14 @@ other_brushes:
     default: Synthetic
     patterns:
       - m[uü]hle
+  Mutiny:
+    default: Synthetic
+    patterns:
+      - mutiny
+  MRed:
+    default: badger
+    patterns:
+      - \bmred\b
   Omega:
     default: Boar
     patterns:
@@ -2115,6 +2124,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - vikings blade
+  Vintage Blades:
+    default: Badger
+    patterns:
+      - vintage.*blades
   Voigt & Cop:
     default: Badger
     patterns:

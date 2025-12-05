@@ -649,10 +649,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - "\\bm[uü]hle\\b"
-  Mutiny:
-    Unspecified:
-      patterns:
-        - mutiny
   NY Shave Co:
     Unspecified:
       patterns:
@@ -817,10 +813,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - viking
-  Vintage Blades:
-    Unspecified:
-      patterns:
-        - vintage.*blades
   West Coast Shaving:
     Unspecified:
       patterns:

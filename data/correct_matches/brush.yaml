@@ -100,6 +100,7 @@ AP Shave Co:
   Synbad:
   - a p shaveco 22mm synbad
   - a p shaveco synbad synthetic
+  - ap shave co 24mm synbad
   - ap shave co gold flake 26mm synbad
   - ap shave co lemondrop 28mm synbad
   - ap shave co ruby red synbad
@@ -188,12 +189,9 @@ Boti:
   - my own black handle and black boti synthetic knot
   - my own boti brush
   - my own brush handle ,boti synthetic knot
-  - my own brush with black boti synthetic knot
-  - my own brush with boti synthetic knot
   - my own handle & boti synthetic 22mm
   - my own handle and boti synthetic knot
   - my own handle boti motherload 18mm synthetic knot
-  - my own handle with boti synthetic knot
 Brad Sears:
   Badger:
   - brad sears arley 26mm super badger
@@ -211,6 +209,8 @@ Böker:
   Synthetic:
   - böker synthetic
 CaYuen:
+  Badger:
+  - the ca yuen workshop (etsy) blue meany
   Synthetic:
   - cayuen abalone w/ 28mm timberwolf synthetic
   - cayuen copper ore w/ 30mm timberwolf synthetic
@@ -512,6 +512,8 @@ Dogwood:
   - dogwood handcrafts 26mm quartermoon synthetic
   - dogwood handcrafts matte orange/black motherload 26mm
   - dogwood independent t2 26mm
+  Timberwolf:
+  - dogwood handcrafts milkglass timberwolf
 Dovo:
   Synthetic:
   - dovo - synthetic olivewood
@@ -649,6 +651,7 @@ Maggard:
   - maggard 24mm purple handle two band badger fan knot
   - maggard razor aluminum handle 2-band badger 22 mm
   - maggard razors 24mm silvertip badger
+  - maggards 28mm badger shd fan
   - maggards purple 2 band badger with fine resin handle
   - olivewood maggard shd badger
   Boar:
@@ -695,6 +698,9 @@ MRed:
 Muninn Woodworks:
   Boar:
   - muninn woodworks "red amboyna burl" 26mm boar
+Mutiny:
+  Synthetic:
+  - mutiny shaving brush
 Mühle:
   Badger:
   - mühle silvertip badger
@@ -832,6 +838,7 @@ Omega:
   - omega 20248
   - omega pro48
   Pro 49:
+  - 10049 omega pure bristle shaving brush - professional
   - omega - 10049
   - omega 10049
   - omega 10049 boar
@@ -874,6 +881,7 @@ Oumo:
   - olivewood oumo rorschach badger
   ST-2:
   - oumo metal new chubby with 27mm st2 synthetic bulb knot
+  - oumo st-2 24mm
   - oumo synthetic st-2
 PAA:
   Green Ray:
@@ -916,6 +924,8 @@ Prometheus Handcrafts:
   - prometheus handcrafts "liquid rainbow" 28mm prometheus p2
   - prometheus handcrafts 28mm prometheus p2
   - prometheus handcrafts liquid rainbow 26mm manchurian
+  Synthetic:
+  - prometheus handcrafts dyed maple 26mm tuxedo
 Rad Dinosaur Creations:
   Badger:
   - 'rad dino creations #1 ""bogues"" w/26mm high mountain rex silvertip badger fan
@@ -957,6 +967,7 @@ RazoRock:
   Bruce:
   - razorock bruce
   Synthetic:
+  - razorock 24 mm plissoft
   - razorock faux horn plissoft disruptor synthetic shaving brush 22mm
   - razorock plissoft
 Rex:
@@ -1280,6 +1291,9 @@ Viking Revolution:
 Vikings Blade:
   Synthetic:
   - vikings blade white knight synthetic
+Vintage Blades:
+  Badger:
+  - vintage blades 24mm finest badger
 Voigt & Cop:
   Badger:
   - mammoth x voigt & cop smash 28mm vc01 super badger
@@ -1341,10 +1355,14 @@ Wolf Whiskers:
 Yaqi:
   Badger:
   - yaqi "mysterious space" - 2-band 24mm badger
+  - yaqi "mysterious space" 24mm silver tip badger
   - yaqi - moka express 2 band badger
+  - yaqi - mysterious space 2-band badger
+  - yaqi - mysterious space 24mm 2-band badger
   - yaqi black marble 24mm silvertip
   - yaqi caramel two-band badger
   - yaqi moka express 2 band badger
+  - yaqi mysterious space 24mm two band badger
   - yaqi panda 24mm two band badger
   - yaqi panda two band badger 24mm
   Boar:
@@ -1359,9 +1377,15 @@ Yaqi:
   - yaqi sagrada familia
   - yaqi sagrada familia 24mm tuxedo
   - yaqi sagrada familia tuxedo 24 mm
+  - yaqi sarada
   - yaqi sarada 24mm
   - yaqu sarada
   Synthetic:
+  - (26mm) yaqi mysterious space
+  - (26mm) yaqi mysterious space brush tuxedo synthetic
+  - (26mm) yaqi mysterious space synthetic
+  - (26mm) yaqi mysterious space synthetic tuxedo
+  - (26mm) yaqi myteripus space tuxedo synthetic
   - synthetic yaqi mysterious space
   - yaqi
   - yaqi "defect," 25mm synth
@@ -1383,13 +1407,14 @@ Yaqi:
   - yaqi defect, 25mm synth
   - yaqi ever hopeful synth
   - yaqi mysterious space
+  - yaqi mysterious space (26mm)
   - yaqi mysterious space 26mm
   - yaqi mysterious space tuxedo synthetic
   - yaqi naicha
   - yaqi ocean
   - yaqi panda tuxedo knot 24mm
+  - yaqi pro 24mm synth
   - yaqi rainbow
-  - yaqi sarada
   - yaqi synthetic 23mm
   - yaqi timber wolf, 26mm synth
   - yaqi top cap
@@ -1500,6 +1525,7 @@ Zenith:
   - zenith - b03-a26 (b2) 26mm boar
   - zenith pro aluminum
   - zenith pro aluminum boar
+  - zenith pro boar
   r/wetshaving MOAR BOAR:
   - moar
   - moar boar

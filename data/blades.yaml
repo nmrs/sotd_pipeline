@@ -499,14 +499,11 @@ DE:
         - p(?:ersonn*a)?.*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - pseventy-four
         - p74
-    Comfort Coated Super Platinum Chrome:
-      patterns:
-        - comf.*coat.*super.*plat
     Lab Blue:
       patterns:
         - (person+a)?.*lab *blue
         - person+a.*blue
-        - person+a.*comf.*coat
+        - person+a.*comf.*coat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - person+a
         - accuforge
     Med Prep:
@@ -643,7 +640,9 @@ DE:
     Blue Diamond:
       patterns:
         - super[\s-]*max.*(?:blu)*.*dia
-        - diamond(.*edge)?.*super.*plat
+    Diamond Edge:
+      patterns:
+      - diamond ?edge
     Platinum:
       patterns:
         - super[\s-]*max.*plat

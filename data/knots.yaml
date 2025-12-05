@@ -1016,10 +1016,6 @@ other_knots:
     default: Badger
     patterns:
       - mun+in
-  Mutiny:
-    default: Synthetic
-    patterns:
-      - mutiny
   NY Shave Co:
     default: Badger
     patterns:
@@ -1219,10 +1215,6 @@ other_knots:
     default: Badger
     patterns:
       - viking
-  Vintage Blades:
-    default: Badger
-    patterns:
-      - vintage.*blades
   Virginia Cheng:
     default: Badger
     patterns:
