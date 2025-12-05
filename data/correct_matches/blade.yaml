@@ -311,12 +311,6 @@ DE:
     - dorco stainless steel
     Titan:
     - dorco titan
-  Durablade:
-    Sharp Hi Chromium:
-    - durablade sharp hi chromium
-    - sharp hi chromium
-    Sharp Titanium:
-    - durablade sharp titanium
   Elios:
     Inoxidable:
     - elios
@@ -682,6 +676,8 @@ DE:
     - rockwell swedish stainless steel
     - rockwell swedish steel
   Schick:
+    Krona-Chrome:
+    - schick krona
     Stainless (DE):
     - schick (?)
     - schick de
@@ -703,6 +699,12 @@ DE:
     - shark ss
     - shark stainless
     - shark super stainless
+  Sharp:
+    Hi Chromium:
+    - durablade sharp hi chromium
+    - sharp hi chromium
+    Titanium:
+    - durablade sharp titanium
   Sharp Star:
     Platinum:
     - sharp star
@@ -725,11 +727,13 @@ DE:
   Super-Max:
     Platinum:
     - super max platinum
+    - super-max platinum
     - supermax platinum plus
     Stainless (Red):
     - super- super-max super stainless
     - super-max super stainless
     - supermax
+    - supermax super stainless
   Tatara:
     DE:
     - tatara - platinum
@@ -797,6 +801,7 @@ DE:
     - v12 - super platinum
   Van Der Hagen:
     Stainless:
+    - van der hagen
     - van der hagen - stainless
     - van der hagen stainless
   Veesta:
@@ -815,9 +820,11 @@ DE:
     - vikings sword
   Vikings Blade:
     Mild:
+    - viking blade mild
     - vikings blade
   Voskhod:
     Teflon Coated:
+    - vokshod
     - voshkod
     - voskhod
     - voskhod (sourced before russia-ukraine war)
@@ -853,6 +860,7 @@ DE:
     - wizamet half
     - wizamet i think
     - wizamet iridium
+    - wizamet si
     - wizamet super iridium
   Zorrik:
     Super Platinum:
@@ -871,27 +879,15 @@ GEM:
     Blue Star:
     - blue star gem
     - gem blue star
-  PAL:
-    Blue Blade:
-    - pal - single edge carbon steel blue
-  Personna:
-    GEM PTFE:
-    - accuforge - gem microcoat
+    PTFE:
     - accuforge gem microcoat
-    - accutec - gem stainless
-    - accutec - pro single edge
     - accutec pro
     - accutec pro premium
-    - accutec pro premium (gem)
-    - accutec pro single edge
-    - accutek pro gem blades
     - gem
-    - gem accuforge
     - gem accutec pro gem
     - gem blade given to me by u/visceralwatch
     - gem ptfe
     - gem ptfe (?)
-    - gem ptfe (use 5 or so)
     - gem ptfe coated
     - gem ptfe stainless
     - gem ss ptfe
@@ -910,12 +906,14 @@ GEM:
     - personne - gem ptfe
     - ptfe
     - ptfe (?)
-    GEM Stainless:
-    - gem - coated single edge stainless steel
+    Stainless:
     - gem single edge stainless
     - gem ss
     - gem stainless
     - personna gem stainless
+  PAL:
+    Blue Blade:
+    - pal - single edge carbon steel blue
 Hair Shaper:
   Annie:
     Hair Shaper:
@@ -998,8 +996,6 @@ Injector:
     - schick proline b-series injector
     - schick stainless steel injector
     - shick injector
-    Krona:
-    - schick krona
     Proline (Injector):
     - schick b-20
     - schick proline b-20

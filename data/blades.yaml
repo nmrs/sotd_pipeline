@@ -225,6 +225,10 @@ DE:
     Super Stainless:
       patterns:
         - cloud(.*super)?
+  Concord:
+    Stainless:
+      patterns:
+        - concord
   Croma:
     Diamant:
       patterns:
@@ -270,19 +274,6 @@ DE:
     Super Platinum:
       patterns:
         - dovo.*plat
-  Durablade:
-    Sharp 7AM Super Platinum:
-      patterns:
-        - (?:durablade)?.*sharp.*7am.*plus
-        - (?:durablade)?.*sharp(?! star).*plat
-    Sharp Titanium:
-      patterns:
-        - (?:durablade)?.*sharp.*\bti
-        - durablade
-    Sharp Hi Chromium:
-      patterns:
-        - (?:durablade)?.*sharp.*hi.*chromium
-        - durablade.*chrom
   Eddison:
     Stainless:
       patterns:
@@ -585,6 +576,9 @@ DE:
     Stainless (DE):
       patterns:
         - sc?hick
+    Krona-Chrome:
+      patterns:
+        - (?:schick)?.*krona
   Shark:
     Chrome:
       patterns:
@@ -597,6 +591,19 @@ DE:
       patterns:
         - shark
         - lord.*shark.*stain
+  Sharp:
+    7AM Super Platinum:
+      patterns:
+        - (?:durablade)?.*sharp.*7am.*plus
+        - (?:durablade)?.*sharp(?! star).*plat
+    Titanium:
+      patterns:
+        - (?:durablade)?.*sharp.*\bti
+        - durablade
+    Hi Chromium:
+      patterns:
+        - (?:durablade)?.*sharp.*hi.*chromium
+        - durablade.*chrom
   Sharp Star:
     Platinum:
       patterns:
@@ -690,9 +697,6 @@ DE:
     Classic:
       patterns:
         - tre(e|a)t.*classic
-    Concord:
-      patterns:
-        - concord
     Dura Sharp:
       patterns:
         - treet.*dura.*shar
@@ -818,12 +822,7 @@ GEM:
     Blue Star:
       patterns:
         - blue.*star
-  PAL:
-    Blue Blade:
-      patterns:
-        - \bpal\b.*blue
-  Personna:
-    GEM PTFE:
+    PTFE:
       patterns:
         - (person|gem).*p[tf]{2}e(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - gem by personna
@@ -834,15 +833,16 @@ GEM:
         - gem
         - acc?utec
         - accu.*(gem|coated|p[ft]{2}e)
-    GEM Stainless:
+        - pella.*ptfe
+    Stainless:
       patterns:
         - (personna)*gem.*stainless
         - gem.*ss
         - person.*gem.*uncoated
-  Ted Pella:
-    PTFE:
+  PAL:
+    Blue Blade:
       patterns:
-        - pella.*ptfe
+        - \bpal\b.*blue
 Hair Shaper:
   Annie:
     Hair Shaper:
@@ -952,9 +952,6 @@ Injector:
         - s?c?hick
         - inject
         - schick.*inject(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    Krona:
-      patterns:
-        - (?:schick)?.*krona
     Proline (Injector):
       patterns:
         - (schick.*)?(proline.*)?b[ -]?20
