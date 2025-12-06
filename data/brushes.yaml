@@ -1229,11 +1229,35 @@ known_knot_based_brushes:
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
+    v3:
+      patterns:
+        - chis.*[fh]ou.*v3
+        - \bc(?:\&|and|\+)h\b.*v3
+        - \bch\b.*v3
+        - darn ?rob.*v\.?3
+    v4:
+      patterns:
+        - chis.*[fh]ou.*v4
+        - \bc(?:\&|and|\+)h\b.*v4
+        - \bch\b.*v4
+        - darn ?rob.*v\.?4
     v5:
       patterns:
         - chis.*[fh]ou.*v5
         - \bc(?:\&|and|\+)h\b.*v5
         - \bch\b.*v5
+        - darn ?rob.*v\.?5
+    v6:
+      patterns:
+        - chis.*[fh]ou.*v6
+        - \bc(?:\&|and|\+)h\b.*v6
+        - \bch\b.*v6
+        - darn ?rob.*v\.?6
+    v7:
+      patterns:
+        - chis.*[fh]ou.*v7
+        - \bc(?:\&|and|\+)h\b.*v7
+        - \bch\b.*v7
     v8:
       patterns:
         - chis.*[fh]ou.*v8
@@ -1251,7 +1275,7 @@ known_knot_based_brushes:
         - \bch\b.*v10
     v11:
       patterns:
-        - chis.*[fh]ou.*v11
+        - chis.*[fh]ou.*v ?11
         - \bc(?:\&|and|\+)h\b.*v11
         - \bch\b.*v11
     v12:
