@@ -698,7 +698,7 @@ known_knots:
 
 other_knots:
   AKA Brushworx:
-    defaul t: Synthetic
+    default: Synthetic
     patterns:
       - aka.*brush
   AMACK:
