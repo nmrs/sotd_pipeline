@@ -51,6 +51,9 @@ class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
                         "compiled": compiled_pattern,
                     }
                 )
+        # Sort ALL patterns across ALL brands by length (longest first)
+        # This ensures more specific patterns are checked before less specific ones
+        compiled_patterns.sort(key=lambda x: len(x["pattern"]), reverse=True)
         return compiled_patterns
 
     def match(self, value: str | dict) -> MatchResult:

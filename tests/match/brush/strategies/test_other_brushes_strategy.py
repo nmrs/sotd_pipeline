@@ -222,3 +222,29 @@ def test_enhanced_regex_error_reporting():
     assert "Brand: Test Brand" in error_message
     assert "Strategy: OtherBrushMatchingStrategy" in error_message
     assert "unterminated character set" in error_message  # The actual regex error
+
+
+def test_pattern_priority_longer_patterns_first():
+    """Test that longer patterns are checked before shorter ones across all brands."""
+    # Create a catalog where a shorter pattern (dubl.*duck) would match first
+    # if patterns weren't sorted by length across brands
+    catalog = {
+        "Dubl Duck": {
+            "default": "Boar",
+            "patterns": ["dubl.*duck"],  # 11 chars - shorter pattern
+        },
+        "Heritage Collection": {
+            "default": "Badger",
+            "patterns": ["heritage", "heritage collection"],  # 18 chars - longer pattern
+        },
+    }
+    strategy = OtherBrushMatchingStrategy(catalog)
+
+    # Input that contains both patterns - longer pattern should win
+    result = strategy.match("heritage collection dubl duck")
+
+    assert result.matched is not None
+    # Should match "Heritage Collection" (longer pattern) not "Dubl Duck" (shorter pattern)
+    assert result.matched["brand"] == "Heritage Collection"
+    assert result.matched["_pattern_used"] == "heritage collection"
+    assert result.match_type == "brand_default"
