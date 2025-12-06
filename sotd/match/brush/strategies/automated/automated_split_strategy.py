@@ -150,7 +150,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         # Use case-insensitive matching per @match-phase.mdc rules
         for delimiter in high_reliability_delimiters:
             if delimiter.lower() in value.lower():
-                handle, knot = self._split_by_delimiter_positional(value, delimiter)
+                handle, knot = self._split_by_delimiter_smart(value, delimiter)
                 if handle and knot:
                     return self._create_split_result(handle, knot, value, "high")
 
@@ -376,6 +376,8 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         # Strong knot indicators (negative score)
         if any(word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon"]):
             score -= 8
+        if "knot" in text_lower:
+            score -= 10  # Strong knot indicator
         if re.search(r"\d+\s*mm", text_lower):
             score -= 6
         if re.search(r"[vV]\d+|[bB]\d+", text_lower):
@@ -407,6 +409,8 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
             word in text_lower for word in ["badger", "boar", "synthetic", "syn", "nylon", "shoat"]
         ):
             score += 8
+        if "knot" in text_lower:
+            score += 10  # Strong knot indicator
         if re.search(r"\d+\s*mm", text_lower):
             score += 6
         if re.search(r"[vV]\d+|[bB]\d+", text_lower):
