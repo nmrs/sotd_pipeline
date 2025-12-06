@@ -51,10 +51,6 @@ artisan_handles:
       patterns:
         - huck
         - bristle.*brush(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-  Brochas El Druida:
-    Unspecified:
-      patterns:
-        - brochas.*el.*druida
   Brushcraft:
     Unspecified:
       patterns:

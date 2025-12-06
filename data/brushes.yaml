@@ -1849,6 +1849,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - barrister.*and.*mann
+  Black Anvil:
+    default: Badger
+    patterns:
+      - black.*anv
   Black Eagle:
     default: Badger
     patterns:
@@ -1926,6 +1930,10 @@ other_brushes:
     patterns:
       - edwin.*jagger
       - ej
+  El Druida:
+    default: Badger
+    patterns:
+      - druidi*a
   Elite:
     default: Badger
     patterns:
@@ -2086,6 +2094,10 @@ other_brushes:
     default: Badger
     patterns:
       - rich.*man
+  Rick Montalvo:
+    default: Synthetic
+    patterns:
+      - montalv
   Runeman Nordic Shave Design:
     default: Badger
     patterns:
