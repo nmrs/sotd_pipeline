@@ -25,6 +25,23 @@ const CatalogValidator: React.FC = () => {
   const [selectedIssues, setSelectedIssues] = useState<Set<number>>(new Set());
   const [removing, setRemoving] = useState(false);
 
+  // Helper function to format section names for display
+  const formatSectionName = (section: string | undefined): string => {
+    if (!section) return 'Unknown';
+    switch (section) {
+      case 'brush':
+        return 'Brush';
+      case 'handle_knot':
+        return 'Handle + Knot';
+      case 'handle':
+        return 'Handle';
+      case 'knot':
+        return 'Knot';
+      default:
+        return section.charAt(0).toUpperCase() + section.slice(1);
+    }
+  };
+
   const handleValidate = async () => {
     if (!selectedField) {
       setError('Please select a field to validate');
@@ -613,8 +630,10 @@ const CatalogValidator: React.FC = () => {
                           ) : issue.issue_type === 'structural_change' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
                               <div className='p-3 bg-gray-50 rounded border border-gray-200'>
-                                <p className='font-medium text-gray-700 mb-2'>Currently Matched As (Brush):</p>
-                                {issue.current_match_details ? (
+                                <p className='font-medium text-gray-700 mb-2'>
+                                  Currently Stored As ({formatSectionName(issue.expected_section)}):
+                                </p>
+                                {issue.expected_section === 'brush' && issue.current_match_details ? (
                                   <div className='space-y-1'>
                                     <p className='text-gray-600'>
                                       <span className='font-medium'>Brand:</span> {issue.current_match_details.brand || 'Unknown'}
@@ -633,42 +652,79 @@ const CatalogValidator: React.FC = () => {
                                       </p>
                                     )}
                                   </div>
+                                ) : issue.expected_section === 'brush' ? (
+                                  <p className='text-gray-600'>
+                                    {issue.expected_brand || 'Unknown'} {issue.expected_model || ''}
+                                  </p>
+                                ) : issue.expected_section === 'handle_knot' ? (
+                                  <p className='text-gray-600'>
+                                    Stored as handle/knot combination in correct_matches.yaml
+                                  </p>
                                 ) : (
-                                  <p className='text-gray-600'>{issue.expected_brand} {issue.expected_model}</p>
+                                  <p className='text-gray-600'>
+                                    {issue.expected_brand} {issue.expected_model}
+                                  </p>
                                 )}
                                 <p className='text-xs text-gray-500 mt-2'>(in correct_matches.yaml)</p>
                               </div>
                               
                               <div className='p-3 bg-blue-50 rounded border border-blue-200'>
-                                <p className='font-medium text-blue-800 mb-2'>Should Match As (Handle + Knot):</p>
-                                <div className='space-y-2'>
-                                  {issue.expected_handle_match && (
-                                    <div className='bg-white p-2 rounded border border-blue-100'>
-                                      <p className='text-xs font-semibold text-blue-700 mb-1'>HANDLE:</p>
-                                      <p className='text-sm text-gray-700'>
-                                        {issue.expected_handle_match.brand} {issue.expected_handle_match.model}
+                                <p className='font-medium text-blue-800 mb-2'>
+                                  Should Be Stored As ({formatSectionName(issue.actual_section)}):
+                                </p>
+                                {issue.actual_section === 'brush' ? (
+                                  <div className='space-y-1'>
+                                    {issue.actual_brand && (
+                                      <p className='text-gray-700'>
+                                        <span className='font-medium'>Brand:</span> {issue.actual_brand}
                                       </p>
-                                    </div>
-                                  )}
-                                  {issue.expected_knot_match && (
-                                    <div className='bg-white p-2 rounded border border-blue-100'>
-                                      <p className='text-xs font-semibold text-blue-700 mb-1'>KNOT:</p>
-                                      <p className='text-sm text-gray-700'>
-                                        {issue.expected_knot_match.brand} {issue.expected_knot_match.model}
+                                    )}
+                                    {issue.actual_model && (
+                                      <p className='text-gray-700'>
+                                        <span className='font-medium'>Model:</span> {issue.actual_model}
                                       </p>
-                                      {issue.expected_knot_match.fiber && (
-                                        <p className='text-xs text-gray-600 mt-1'>
-                                          Fiber: {issue.expected_knot_match.fiber}
+                                    )}
+                                    {!issue.actual_brand && !issue.actual_model && (
+                                      <p className='text-gray-700'>Brush match from current matching system</p>
+                                    )}
+                                  </div>
+                                ) : issue.actual_section === 'handle_knot' ? (
+                                  <div className='space-y-2'>
+                                    {issue.expected_handle_match && (
+                                      <div className='bg-white p-2 rounded border border-blue-100'>
+                                        <p className='text-xs font-semibold text-blue-700 mb-1'>HANDLE:</p>
+                                        <p className='text-sm text-gray-700'>
+                                          {issue.expected_handle_match.brand} {issue.expected_handle_match.model}
                                         </p>
-                                      )}
-                                      {issue.expected_knot_match.knot_size_mm && (
-                                        <p className='text-xs text-gray-600'>
-                                          Size: {issue.expected_knot_match.knot_size_mm}mm
+                                      </div>
+                                    )}
+                                    {issue.expected_knot_match && (
+                                      <div className='bg-white p-2 rounded border border-blue-100'>
+                                        <p className='text-xs font-semibold text-blue-700 mb-1'>KNOT:</p>
+                                        <p className='text-sm text-gray-700'>
+                                          {issue.expected_knot_match.brand} {issue.expected_knot_match.model}
                                         </p>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
+                                        {issue.expected_knot_match.fiber && (
+                                          <p className='text-xs text-gray-600 mt-1'>
+                                            Fiber: {issue.expected_knot_match.fiber}
+                                          </p>
+                                        )}
+                                        {issue.expected_knot_match.knot_size_mm && (
+                                          <p className='text-xs text-gray-600'>
+                                            Size: {issue.expected_knot_match.knot_size_mm}mm
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+                                    {!issue.expected_handle_match && !issue.expected_knot_match && (
+                                      <p className='text-gray-700'>Handle/knot combination from current matching system</p>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p className='text-gray-700'>
+                                    {issue.actual_brand} {issue.actual_model}
+                                  </p>
+                                )}
                                 <p className='text-xs text-blue-600 mt-2'>(based on current matching system)</p>
                               </div>
                             </div>
