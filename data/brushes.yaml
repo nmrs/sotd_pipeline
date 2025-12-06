@@ -152,6 +152,15 @@ known_brushes:
       fiber: Boar
       patterns:
         - dreadnought.*avenger
+  Edwin Jagger:
+    STF:
+      knot:
+        brand: Edwin Jagger
+        fiber: Synthetic
+        model: STF
+      patterns:
+        - edwin.*jagger.*stf
+        - ej.*stf
   EldrormR Industries/Muninn Woodworks:
     BFM:
       # knot_size_mm: 50
@@ -1790,6 +1799,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - alpha
+  AMACK:
+    default: Synthetic
+    patterns:
+      - amack
   AP Shave Co:
     default: Synthetic
     patterns:
@@ -1884,6 +1897,11 @@ other_brushes:
     default: Boar
     patterns:
       - economy.*supply
+  Edwin Jagger:
+    default: Synthetic
+    patterns:
+      - edwin.*jagger
+      - ej
   Elite:
     default: Badger
     patterns:
@@ -2081,6 +2099,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - spokar
+  Stirling:
+    default: Synthetic
+    patterns:
+      - stirling
   Summer Break Soaps:
     default: Badger
     patterns:
@@ -2104,6 +2126,11 @@ other_brushes:
     patterns:
       - razor.*co
       - trc
+  Turn-N-Shave:
+    default: Badger
+    patterns:
+      - turn.{1,5}shave
+      - tns
   Van der Hagen:
     default: Boar
     patterns:

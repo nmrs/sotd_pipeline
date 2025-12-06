@@ -433,7 +433,7 @@ known_knots:
     STF:
       patterns:
         - m[uü]hle.*stf
-        - stf
+        - ^(?!.*(ej|jagger)).*stf
     STF XL:
       knot_size_mm: 25
       patterns:

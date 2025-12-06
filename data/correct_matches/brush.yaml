@@ -17,6 +17,9 @@ Alpha:
   - alpha bulldog ti
   - alpha shave big red 30mm
   - alpha shaving big red
+AMACK:
+  Synthetic:
+  - amack4shaving 24mm sunrise synth
 AP Shave Co:
   2Bed:
   - ap shave co. 26mm 2bed knot in the zen handle
@@ -247,6 +250,7 @@ Chisel & Hound:
   - chisel & hound season of the witch 26mm synthetic
   Rob's Finest Boar:
   - chisel & hound "rob's finest" 25mm boar
+  - chisel & hound "rob's finest" boar
   - chisel & hound 'rob's finest' boaar
   - chisel & hound 'rob's finest' boar
   - chisel & hound - "rob's finest" boar 25mm
@@ -259,6 +263,7 @@ Chisel & Hound:
   - chisel & hound - rob's finest - 25mm synthetic
   - chisel & hound rob's finest synth
   Synthetic:
+  - chisel & hound "rainbow" 26mm timberwolf
   - chisel & hound - ivory mortar 30mm mother lode
   - chisel & hound - ivory mortar w/ mother lode
   - chisel & hound - ivory mortar w/ mother lode knot
@@ -289,6 +294,7 @@ Chisel & Hound:
   v16:
   - chisel & hound fougère 26mm v16 fanchurian badger knot
   v17:
+  - c&h frag w/ v17
   - chisel and hound frag handle with a v17 knot
   v18:
   - chisel and hound - brasilia v18 26mm badger
@@ -346,6 +352,8 @@ Chisel & Hound:
   - chiseled hound - strawberry fields w. v24 fanchurian badger
   - that darn rob green & ivory w/v24 fanchurian badger
   v25:
+  - c&h v25
+  - chisel & hound "nice" w/ v25 fanchurian 26mm
   - chisel & hound - cherry w/ v25 fanchurian
   - chisel & hound - cherry w/ v25 fanchurian badger
   - chisel & hound - peridot - v25
@@ -537,6 +545,14 @@ DS Cosmetics:
 Economy Supply Co.:
   Boar:
   - economy supply co 44/20 vintage
+Edwin Jagger:
+  Badger:
+  - edwin jagger badger 24mm
+  STF:
+  - edwin jagger 25mm stf synth
+  Synthetic:
+  - edwin jagger synthetic 25mm
+  - edwin jagger synthetic silvertip fibre 21 mm
 EldrormR Industries/Muninn Woodworks:
   BFM:
   - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
@@ -646,6 +662,7 @@ Long Shaving:
   - long shaving storm w/ reserve iii
 Maggard:
   Badger:
+  - 26mm maggards shd
   - maggard 2 band
   - maggard 2 band badger 24mm
   - maggard 24mm purple handle two band badger fan knot
@@ -799,6 +816,7 @@ Omega:
   - omega 146206, hi-brush, 25mm synth
   - omega hi-brush 146206
   - omega hi-brush 146206, 25mm synth
+  - omega hi-brush 46206
   - omega hi-brush, 146206, 25mm synth
   - 'omega hi-brush: 146206, 25mm synth'
   '50014':
@@ -856,6 +874,7 @@ Omega:
   - proraso boar shaving brush
   - proraso omega boar
   - proraso pro
+  - proraso pro omega boar
   - proraso professional
   - proraso professional by omega
   - proraso professional shaving brush 28mm
@@ -1226,6 +1245,7 @@ Stirling:
   - stirling synthetic 24mm
   - stirling synthetic 24x51mm
   - stirling synthetic 26mm
+  - stirling tuxedo
 Summer Break Soaps:
   Badger:
   - summer break 28mm knight knot
@@ -1253,6 +1273,7 @@ Tatara:
 Taylor of Old Bond Street:
   Badger:
   - taylor of old bond street super badger p2236
+  - tobs pure badger 19mm
 The Razor Company:
   Synthetic:
   - the razor company blue and white
@@ -1266,10 +1287,17 @@ Trotter:
   - trotter handcrafts nocturnal classic 26mm t1 manchurian badger
   - trotter handcrafts souls 26mm manchurian t1 badger knot
 Turn-N-Shave:
+  Badger:
+  - 24mm turn n shave
+  - turn n shave chess brush
+  Low Density Badger (L*):
+  - turn-n-shave coke glass sorby 28mm l3
   Medium Density Badger (M*):
   - turn n shave m8 fan
   - turn n shave skarbide breeze 28mm m8
   - turn n shave skarbide breeze 28mm m8 fan
+  Synthetic:
+  - 26mm timberwolf in turn-n-shave handle
   Tuxedo:
   - turn n shave custom w/ a tuxedo synth
 Van der Hagen:
@@ -1406,6 +1434,7 @@ Yaqi:
   - yaqi defect 25mm synth
   - yaqi defect, 25mm synth
   - yaqi ever hopeful synth
+  - yaqi moka express 24mm synthetic
   - yaqi mysterious space
   - yaqi mysterious space (26mm)
   - yaqi mysterious space 26mm
