@@ -2351,7 +2351,7 @@ other_brushes:
   Stirling:
     default: Synthetic
     patterns:
-      - stirling
+      - ^(?!.*zenith).*stirling
   Strike Gold Shave:
     default: Synthetic
     patterns:
@@ -2368,7 +2368,6 @@ other_brushes:
   TanZ:
     default: Badger
     patterns:
-      - tobs
       - tanz
   Teton Shaves:
     default: Badger
@@ -2397,10 +2396,6 @@ other_brushes:
     patterns:
       - razor.*co
       - trc
-  The Varlet:
-    default: Badger
-    patterns:
-      - varlet
   Tony Forsyth:
     default: Badger
     patterns:
@@ -2455,7 +2450,6 @@ other_brushes:
     default: Badger
     patterns:
       - wald
-      - west.*coast
   Wallygator Manufacturing Co.:
     default: Synthetic
     knot_size_mm: 26

@@ -383,10 +383,6 @@ artisan_handles:
       patterns:
         - tgn
         - golden.*nib
-  The Varlet:
-    Unspecified:
-      patterns:
-        - varlet
   Tony Forsyth:
     Unspecified:
       patterns:
@@ -400,6 +396,10 @@ artisan_handles:
       patterns:
         - ^(?!.*chis)turn.{1,5}shave
         - ^(?!.*chis)\btns\b
+  Varlet:
+    Unspecified:
+      patterns:
+        - varlet
   Virginia Cheng:
     Unspecified:
       patterns:

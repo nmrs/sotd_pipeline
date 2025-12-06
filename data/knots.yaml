@@ -1187,7 +1187,6 @@ other_knots:
   TanZ:
     default: Badger
     patterns:
-      - tobs
       - tanz
   Teton Shaves:
     default: Badger
@@ -1215,10 +1214,6 @@ other_knots:
     patterns:
       - razor.*co
       - trc
-  The Varlet:
-    default: Badger
-    patterns:
-      - varlet
   Tony Forsyth:
     default: Badger
     patterns:
@@ -1236,6 +1231,10 @@ other_knots:
     default: Boar
     patterns:
       - van.*hag.*
+  Varlet:
+    default: Badger
+    patterns:
+      - varlet
   Vie Long:
     default: Horse
     patterns:
@@ -1266,7 +1265,6 @@ other_knots:
     default: Badger
     patterns:
       - wald
-      - west.*coast
   Wallygator Manufacturing Co.:
     default: Synthetic
     knot_size_mm:: 26
