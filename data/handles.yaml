@@ -63,6 +63,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - c-mon
+  C&R Industry:
+    Unspecified:
+      patterns:
+        - c&r industry
   Carnavis & Richardson:
     Unspecified:
       patterns:

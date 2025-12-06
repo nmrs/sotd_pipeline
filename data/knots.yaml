@@ -875,10 +875,6 @@ other_knots:
     default: Badger
     patterns:
       - doug\s*korn
-  Dubl Duck:
-    default: Boar
-    patterns:
-      - dubl.*duck
   Edwin Jagger:
     default: Badger
     patterns:
@@ -947,6 +943,7 @@ other_knots:
     default: Badger
     patterns:
       - heritage
+      - heritage collection
   Holzleute:
     default: Badger
     patterns:

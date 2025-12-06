@@ -1866,7 +1866,8 @@ other_brushes:
   Barrister and Mann:
     default: Synthetic
     patterns:
-      - barrister.*and.*mann
+      - b\s*(&|a|\+)\s*m\b
+      - barrister
   Bass:
     default: Boar
     patterns:
@@ -2048,6 +2049,7 @@ other_brushes:
     default: Badger
     patterns:
       - frank.*sha
+      - \bfs\b
   Geo F. Trumper:
     default: Badger
     patterns:
@@ -2077,6 +2079,7 @@ other_brushes:
     default: Badger
     patterns:
       - heritage
+      - heritage collection
   HJM:
     default: Boar
     patterns:
