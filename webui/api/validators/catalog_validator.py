@@ -104,9 +104,7 @@ class CatalogValidator:
                                         )
                                     else:
                                         # Object with attributes - use getattr for safety
-                                        has_handle = bool(
-                                            getattr(result.matched, "handle", None)
-                                        )
+                                        has_handle = bool(getattr(result.matched, "handle", None))
                                         has_knot = bool(getattr(result.matched, "knot", None))
 
                                     # IMPORTANT: Only flag as composite brush if the matcher

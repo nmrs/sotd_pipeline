@@ -1482,7 +1482,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
             processed_issue = {
                 "issue_type": mapped_issue_type,
                 "field": request.field,
-                "format": getattr(issue, "format", None),  # Format section for blades (AC, DE, etc.)
+                "format": getattr(
+                    issue, "format", None
+                ),  # Format section for blades (AC, DE, etc.)
                 "correct_match": issue.correct_match,
                 "expected_brand": issue.expected_brand,
                 "expected_model": issue.expected_model,
@@ -1493,8 +1495,12 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "severity": issue.severity,
                 "suggested_action": issue.suggested_action,
                 "details": issue.details,
-                "catalog_format": getattr(issue, "catalog_format", None),  # Actual format from matcher
-                "matched_pattern": getattr(issue, "matched_pattern", None),  # Regex pattern that matched
+                "catalog_format": getattr(
+                    issue, "catalog_format", None
+                ),  # Actual format from matcher
+                "matched_pattern": getattr(
+                    issue, "matched_pattern", None
+                ),  # Regex pattern that matched
                 "line_numbers": getattr(
                     issue, "line_numbers", None
                 ),  # Line numbers for duplicate/conflict issues
@@ -1640,17 +1646,17 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                         # For blades, handle format-based structure
                         if request.field == "blade" and section_data:
                             # Check if structure is format-based (top-level keys are format names)
-                            is_format_based = (
-                                isinstance(section_data, dict)
+                            is_format_based = isinstance(section_data, dict) and any(
+                                isinstance(v, dict)
                                 and any(
-                                    isinstance(v, dict)
+                                    isinstance(brand_data, dict)
                                     and any(
-                                        isinstance(brand_data, dict)
-                                        and any(isinstance(model_data, list) for model_data in brand_data.values())
-                                        for brand_data in v.values()
+                                        isinstance(model_data, list)
+                                        for model_data in brand_data.values()
                                     )
-                                    for v in section_data.values()
+                                    for brand_data in v.values()
                                 )
+                                for v in section_data.values()
                             )
 
                             if is_format_based:
@@ -1658,9 +1664,11 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                                 # If expected_format is provided, only search in that format section
                                 # Otherwise, search all format sections (for backward compatibility)
                                 format_sections_to_search = (
-                                    [expected_format] if expected_format else list(section_data.keys())
+                                    [expected_format]
+                                    if expected_format
+                                    else list(section_data.keys())
                                 )
-                                
+
                                 for format_name in format_sections_to_search:
                                     if format_name not in section_data:
                                         continue
@@ -1678,7 +1686,8 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                                                         pattern = patterns[i]
                                                         if (
                                                             isinstance(pattern, str)
-                                                            and pattern.lower() == correct_match.lower()
+                                                            and pattern.lower()
+                                                            == correct_match.lower()
                                                         ):
                                                             # Found the match, remove it
                                                             patterns.pop(i)
@@ -1738,7 +1747,9 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
                     if request.field == "blade":
                         errors.append(f"Entry not found in blade format sections: {correct_match}")
                     else:
-                        errors.append(f"Entry not found in {sections_str} sections: {correct_match}")
+                        errors.append(
+                            f"Entry not found in {sections_str} sections: {correct_match}"
+                        )
 
             except Exception as e:
                 errors.append(f"Error removing entry {entry}: {e}")

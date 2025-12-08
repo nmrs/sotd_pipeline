@@ -175,9 +175,7 @@ async def analyze_format_compatibility(
 
     # Validate severity filter
     if severity not in ["error", "warning", "all"]:
-        raise HTTPException(
-            status_code=400, detail="severity must be 'error', 'warning', or 'all'"
-        )
+        raise HTTPException(status_code=400, detail="severity must be 'error', 'warning', or 'all'")
 
     # Load enriched data for all months
     all_records = []
@@ -298,4 +296,3 @@ async def analyze_format_compatibility(
         results=results,
         processing_time=processing_time,
     )
-
