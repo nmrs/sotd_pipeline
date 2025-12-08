@@ -525,6 +525,7 @@ class TestActualMatchingValidator:
         }
 
         mock_matcher = Mock()
+
         # match_with_context should be called for blades with format context
         def match_with_context_side_effect(value, format_name, **kwargs):
             mock_result = Mock()
@@ -548,14 +549,16 @@ class TestActualMatchingValidator:
         assert isinstance(result, ValidationResult)
         assert result.field == "blade"
         assert result.validation_mode == "actual_matching"
-        assert result.total_entries == 3  # "derby extra", "derby usta" (DE), "derby usta 1/2 de" (Half DE)
+        assert (
+            result.total_entries == 3
+        )  # "derby extra", "derby usta" (DE), "derby usta 1/2 de" (Half DE)
 
         # Should have 1 data_mismatch issue for "derby usta" in DE section
         # (expected Derby/Extra, got Derby/USTA in DE format context)
-        data_mismatch_issues = [
-            i for i in result.issues if i.issue_type == "data_mismatch"
+        data_mismatch_issues = [i for i in result.issues if i.issue_type == "data_mismatch"]
+        derby_usta_issues = [
+            i for i in data_mismatch_issues if "derby usta" in i.correct_match.lower()
         ]
-        derby_usta_issues = [i for i in data_mismatch_issues if "derby usta" in i.correct_match.lower()]
         assert len(derby_usta_issues) == 1
         assert derby_usta_issues[0].expected_model == "Extra"
         assert derby_usta_issues[0].actual_model == "USTA"

@@ -258,11 +258,11 @@ class TestExternalScoringConsistency:
         complete_result = next(r for r in scored_results if r.strategy == "known_brush")
         composite_result = next(r for r in scored_results if r.strategy == "automated_split")
         component_result = next(r for r in scored_results if r.strategy == "knot_matching")
-        
+
         assert complete_result.score is not None
         assert composite_result.score is not None
         assert component_result.score is not None
-        
+
         complete_score = complete_result.score
         composite_score = composite_result.score
         component_score = component_result.score

@@ -169,9 +169,7 @@ def test_format_compatibility_shavette_with_any_blade_compatible(mock_enriched_d
 
     # Shavette with AC should not appear in results (compatible)
     shavette_issues = [
-        r
-        for r in data["results"]
-        if "Shavette" in r["razor_matched"].get("format", "")
+        r for r in data["results"] if "Shavette" in r["razor_matched"].get("format", "")
     ]
     assert len(shavette_issues) == 0
 
@@ -208,8 +206,7 @@ def test_format_compatibility_cartridge_with_blade_warning(mock_enriched_data_fi
     cartridge_issues = [
         r
         for r in data["results"]
-        if r["razor_matched"].get("format") == "Cartridge/Disposable"
-        and r["severity"] == "warning"
+        if r["razor_matched"].get("format") == "Cartridge/Disposable" and r["severity"] == "warning"
     ]
     assert len(cartridge_issues) == 1
     assert "Cartridge/Disposable" in cartridge_issues[0]["issue_type"]
@@ -367,4 +364,3 @@ def test_format_compatibility_half_de_with_de_compatible(mock_enriched_data_file
         and r["blade_matched"].get("format") == "DE"
     ]
     assert len(half_de_issues) == 0
-

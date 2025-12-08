@@ -95,7 +95,7 @@ class TestRealCatalogIntegration:
     @pytest.mark.production
     def test_handle_knot_splitting_integration(self, brush_matcher):
         """Test handle/knot splitting with real catalog data.
-        
+
         This test uses production YAML catalogs to validate catalog integrity.
         Run with 'make test-production' to execute these production catalog tests.
         """
@@ -127,7 +127,7 @@ class TestRealCatalogIntegration:
     @pytest.mark.production
     def test_specific_integration_scenarios(self, brush_matcher):
         """Test specific integration scenarios that have caused issues.
-        
+
         This test uses production YAML catalogs to validate catalog integrity.
         Run with 'make test-production' to execute these production catalog tests.
         """

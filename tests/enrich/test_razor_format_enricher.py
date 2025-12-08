@@ -438,4 +438,3 @@ class TestRazorFormatEnricherFallback:
         assert result is not None
         assert result["format"] == "DE"
         assert result["_extraction_source"] == "default"
-

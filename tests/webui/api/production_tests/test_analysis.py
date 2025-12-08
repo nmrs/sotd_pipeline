@@ -127,5 +127,3 @@ class TestMismatchItemModel:
         assert not hasattr(item, "is_split_brush")
         assert not hasattr(item, "handle_component")
         assert not hasattr(item, "knot_component")
-
-

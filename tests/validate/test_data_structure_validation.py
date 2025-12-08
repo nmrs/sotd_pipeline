@@ -91,7 +91,7 @@ class TestDataStructureValidation:
 
     def test_validate_data_structure_duplicate_strings_multiple_sections(self):
         """Test duplicate strings across multiple sections.
-        
+
         Note: The validation only checks for cross-section conflicts between
         related sections (brush/handle/knot), not between unrelated sections
         like brush/razor. This test verifies that brush/razor duplicates
@@ -101,7 +101,9 @@ class TestDataStructureValidation:
             "brush": {"AP Shave Co": {"Mixed Badger/Boar": ["ap shaveco 24mm luxury mixed knot"]}},
             "razor": {
                 "Different Brand": {
-                    "Different Model": ["ap shaveco 24mm luxury mixed knot"]  # Same string in different section
+                    "Different Model": [
+                        "ap shaveco 24mm luxury mixed knot"
+                    ]  # Same string in different section
                 }
             },
         }

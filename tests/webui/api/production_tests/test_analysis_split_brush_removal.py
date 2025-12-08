@@ -233,7 +233,9 @@ class TestAnalysisAPISplitBrushRemoval:
         # Mock MismatchAnalyzer to raise an exception to test error handling
         with patch("webui.api.analysis.MismatchAnalyzer") as mock_analyzer_class:
             # Make the analyzer raise an exception when instantiated
-            mock_analyzer_class.side_effect = Exception("Test error: Analyzer initialization failed")
+            mock_analyzer_class.side_effect = Exception(
+                "Test error: Analyzer initialization failed"
+            )
 
             response = client.post(
                 "/api/analysis/mismatch",

@@ -26,14 +26,14 @@ class TestRazorFormatEnricherIntegration:
                 "matched": {
                     "brand": "Other Shavette",
                     "format": "Shavette",
-                }
+                },
             },
             "blade": {
                 "original": "Feather Soft Guard AC",
                 "matched": {
                     "brand": "Feather",
                     "format": "AC",
-                }
+                },
             },
         }
 
@@ -52,14 +52,14 @@ class TestRazorFormatEnricherIntegration:
                 "matched": {
                     "brand": "Gillette",
                     "format": "DE",
-                }
+                },
             },
             "blade": {
                 "original": "Feather",
                 "matched": {
                     "brand": "Feather",
                     "format": "DE",
-                }
+                },
             },
         }
 
@@ -172,4 +172,3 @@ class TestRazorFormatEnricherIntegration:
         assert enriched["_enriched_by"] == "RazorFormatEnricher"
         assert "_extraction_source" in enriched
         assert enriched["_extraction_source"] == "blade_format_inference"
-

@@ -176,7 +176,7 @@ def test_format_context_matching(
 def test_specific_pattern_priority_over_generic(tmp_path):
     """
     Test that more specific patterns (like AC Proline) match before generic patterns (like DE Schick).
-    
+
     This test reproduces the issue where "Schick - P-30 Proline Artist Club Style" was matching
     to DE format instead of AC format, even though the AC pattern is more specific.
     """
@@ -197,13 +197,13 @@ AC:
 """
     catalog_file = tmp_path / "test_blades.yaml"
     catalog_file.write_text(yaml_content)
-    
-    matcher = BladeMatcher(catalog_path=catalog_file)
-    
+
+    matcher = BladeMatcher(catalog_path=catalog_file, bypass_correct_matches=True)
+
     # This should match the AC Proline pattern, not the generic DE Schick pattern
     blade_text = "Schick - P-30 Proline Artist Club Style"
-    result = matcher.match(blade_text)
-    
+    result = matcher.match(blade_text, bypass_correct_matches=True)
+
     assert result.matched is not None
     # Should match AC format, not DE format
     assert result.matched["format"] == "AC", f"Expected AC format, got {result.matched['format']}"
@@ -214,8 +214,9 @@ AC:
     # The AC pattern should be longer/more specific than the DE pattern
     assert len(result.pattern) > 7, "AC pattern should be longer than generic 'sc?hick' pattern"
     # Verify it's one of the AC patterns
-    assert "proline" in result.pattern.lower() or "p[ -]+[23]0" in result.pattern, \
-        f"Pattern should be AC pattern, got: {result.pattern}"
+    assert (
+        "proline" in result.pattern.lower() or "p[ -]+[23]0" in result.pattern
+    ), f"Pattern should be AC pattern, got: {result.pattern}"
 
 
 def test_regex_sorting_order(matcher):
@@ -636,3 +637,53 @@ def test_enhanced_regex_error_reporting():
         assert "Brand: Test Brand" in error_message
         assert "Model: Test Model" in error_message
         assert "unterminated character set" in error_message  # The actual regex error
+
+
+def test_pattern_traceability_with_format_prioritization(tmp_path):
+    """
+    Test that returned pattern corresponds to selected match when format prioritization occurs.
+
+    This test verifies the fix for the bug where multiple patterns match the same text,
+    format prioritization selects a different match, but the pattern returned was from
+    the first match, not the selected match.
+
+    Example case: "Personna Twin Pivot Plus Refills, Atra"
+    - Pattern "(personna)?.*twin.*pivot(.*plus)?" (Cartridge/Disposable) matches first
+    - Pattern "person+a" (Personna Lab Blue, DE format) also matches
+    - Code should select DE format match (Lab Blue) and return the DE pattern, not Cartridge/Disposable pattern
+    """
+    # Create a test catalog with multiple patterns that match the same text
+    yaml_content = """
+Cartridge/Disposable:
+  Cartridge/Disposable:
+    "":
+      patterns:
+        - (personna)?.*twin.*pivot(.*plus)?
+DE:
+  Personna:
+    Lab Blue:
+      patterns:
+        - person+a
+"""
+    catalog_file = tmp_path / "test_blades.yaml"
+    catalog_file.write_text(yaml_content)
+
+    matcher = BladeMatcher(catalog_path=catalog_file)
+
+    # This text matches both patterns
+    blade_text = "Personna Twin Pivot Plus Refills, Atra"
+    result = matcher.match(blade_text)
+
+    # Should match DE format (format prioritization)
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"
+    assert result.matched["brand"] == "Personna"
+    assert result.matched["model"] == "Lab Blue"
+
+    # The pattern should correspond to the selected match (DE), not the first match (Cartridge/Disposable)
+    assert result.pattern is not None
+    assert result.pattern == "person+a", f"Expected DE pattern 'person+a', got: {result.pattern}"
+    # Verify it's NOT the Cartridge/Disposable pattern
+    assert (
+        "twin.*pivot" not in result.pattern
+    ), f"Pattern should be DE pattern, not Cartridge/Disposable pattern: {result.pattern}"

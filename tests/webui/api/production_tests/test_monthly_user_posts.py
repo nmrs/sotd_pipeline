@@ -42,7 +42,6 @@ class TestMonthlyUserPostsAPI:
         assert data["status"] == "healthy"
         assert data["service"] == "monthly-user-posts"
 
-
     @patch("webui.api.monthly_user_posts.Path.exists")
     def test_get_available_months_no_directory(self, mock_exists):
         """Test handling when enriched directory doesn't exist."""
@@ -52,7 +51,6 @@ class TestMonthlyUserPostsAPI:
         assert response.status_code == 200
         data = response.json()
         assert data == []
-
 
     @patch("webui.api.monthly_user_posts.Path.exists")
     @patch("webui.api.monthly_user_posts.json.load")
@@ -132,7 +130,9 @@ class TestMonthlyUserPostsAPI:
     @patch("webui.api.monthly_user_posts.Path.exists")
     @patch("webui.api.monthly_user_posts.json.load")
     @patch("webui.api.monthly_user_posts.aggregate_users")
-    def test_get_user_posting_analysis_user_not_found(self, mock_aggregate, mock_json_load, mock_exists):
+    def test_get_user_posting_analysis_user_not_found(
+        self, mock_aggregate, mock_json_load, mock_exists
+    ):
         """Test handling when user has no posts in month."""
         mock_exists.return_value = True
         mock_json_load.return_value = {

@@ -20,7 +20,9 @@ class TestBrushLearningReportGeneratorIntegration:
         comparison_file = Path("data/brush_system_comparison_2025-05.json")
 
         if not comparison_file.exists():
-            pytest.fail(f"Test requires comparison file {comparison_file} but it was not found. Create the comparison file or provide a test fixture to run this integration test.")
+            pytest.fail(
+                f"Test requires comparison file {comparison_file} but it was not found. Create the comparison file or provide a test fixture to run this integration test."
+            )
 
         # Load real comparison data
         with open(comparison_file, "r") as f:

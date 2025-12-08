@@ -35,13 +35,13 @@ class TestCatalogValidation:
         """Create a temporary correct_matches directory structure with test data."""
         correct_matches_dir = tmp_path / "correct_matches"
         correct_matches_dir.mkdir()
-        
+
         # Extract field-specific data and create separate files
         for field_name, field_data in data.items():
             field_file = correct_matches_dir / f"{field_name}.yaml"
             with field_file.open("w") as f:
                 yaml.dump(field_data, f)
-        
+
         return correct_matches_dir
 
     def _set_validator_data_dir(self, validator: ValidateCorrectMatches) -> None:
@@ -514,10 +514,11 @@ class TestCatalogValidation:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_brush_brand_model_validation(self, tmp_path):
@@ -559,10 +560,11 @@ class TestCatalogValidation:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_step3_composite_brush_validation(self, tmp_path):
@@ -657,10 +659,11 @@ class TestCatalogValidation:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_step4_single_component_brush_validation(self, tmp_path):
@@ -756,10 +759,11 @@ class TestCatalogValidation:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_step1_complete_brush_validation_dinos_mores(self, tmp_path):
@@ -927,9 +931,7 @@ class TestCatalogValidationIntegration:
                     assert "field" in issue, "Each issue should have a field"
                     assert "severity" in issue, "Each issue should have a severity"
             else:
-                pytest.fail(
-                    f"API returned status code {response.status_code}: {response.text}"
-                )
+                pytest.fail(f"API returned status code {response.status_code}: {response.text}")
 
         finally:
             # Clean up
@@ -964,9 +966,7 @@ class TestCatalogValidationIntegration:
                 assert "field" in issue, "Each issue should have a field"
                 assert "severity" in issue, "Each issue should have a severity"
         else:
-            pytest.fail(
-                f"API returned status code {response.status_code}: {response.text}"
-            )
+            pytest.fail(f"API returned status code {response.status_code}: {response.text}")
 
     def test_api_brush_validation_with_temp_data(self):
         """Test the actual API validation logic with temporary brush data.
@@ -1018,16 +1018,15 @@ class TestCatalogValidationIntegration:
                 # The actual validation logic will be tested in integration tests
 
             else:
-                pytest.fail(
-                    f"API returned status code {response.status_code}: {response.text}"
-                )
+                pytest.fail(f"API returned status code {response.status_code}: {response.text}")
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_brush_validation_logic_structure(self):
@@ -1072,10 +1071,11 @@ class TestCatalogValidationIntegration:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_shared_catalog_validator_brush_validation(self, tmp_path):
@@ -1205,10 +1205,11 @@ class TestCatalogValidationIntegration:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
 
     def test_api_issue_type_mapping(self, tmp_path):
@@ -1314,8 +1315,9 @@ class TestCatalogValidationIntegration:
 
         finally:
             # Clean up
-            if 'correct_matches_dir' in locals() and correct_matches_dir.exists():
+            if "correct_matches_dir" in locals() and correct_matches_dir.exists():
                 import shutil
+
                 shutil.rmtree(correct_matches_dir)
-            elif 'correct_matches_file' in locals() and correct_matches_file.exists():
+            elif "correct_matches_file" in locals() and correct_matches_file.exists():
                 correct_matches_file.unlink()
