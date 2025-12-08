@@ -981,9 +981,8 @@ class BladeMatcher(BaseMatcher):
 
         blade_text = normalized_text
 
-        # Collect all regex matches
+        # Collect all regex matches with their patterns
         all_matches = []
-        best_pattern = None
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(blade_text):
                 match_data = {
@@ -997,29 +996,29 @@ class BladeMatcher(BaseMatcher):
                     if key not in ["patterns", "format"]:
                         match_data[key] = value
 
-                all_matches.append(match_data)
-                # Keep track of the pattern for the best match
-                if not best_pattern:
-                    best_pattern = raw_pattern
+                # Store the pattern with the match data
+                all_matches.append({"match": match_data, "pattern": raw_pattern})
 
         # If we have matches, prioritize by format compatibility
         if all_matches:
             # Prioritize DE over Half DE when no specific context is provided
-            de_matches = [m for m in all_matches if m["format"].upper() == "DE"]
+            de_matches = [m for m in all_matches if m["match"]["format"].upper() == "DE"]
             if de_matches:
+                selected = de_matches[0]
                 return create_match_result(
                     original=original_text,
-                    matched=de_matches[0],
+                    matched=selected["match"],
                     match_type=MatchType.REGEX,
-                    pattern=best_pattern,
+                    pattern=selected["pattern"],
                 )
 
             # If no DE matches, return the first match
+            selected = all_matches[0]
             return create_match_result(
                 original=original_text,
-                matched=all_matches[0],
+                matched=selected["match"],
                 match_type=MatchType.REGEX,
-                pattern=best_pattern,
+                pattern=selected["pattern"],
             )
 
         # No matches found

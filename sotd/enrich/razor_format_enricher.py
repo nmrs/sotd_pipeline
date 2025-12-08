@@ -48,9 +48,7 @@ class RazorFormatEnricher(BaseEnricher):
         self._current_record = record
         return True
 
-    def enrich(
-        self, field_data: Dict[str, Any], original_comment: str
-    ) -> Optional[Dict[str, Any]]:
+    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Determine the final razor format using complete logic from aggregate phase.
 
         Args:
@@ -124,4 +122,3 @@ class RazorFormatEnricher(BaseEnricher):
 
         # Default to DE (from aggregate phase logic)
         return self._create_single_source_enriched_data({"format": DE}, "default")
-

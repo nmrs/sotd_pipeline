@@ -749,7 +749,12 @@ class ActualMatchingValidator:
         return issues
 
     def _validate_simple_entry(
-        self, field: str, entry_string: str, expected_brand: str, expected_model: str, expected_format: Optional[str] = None
+        self,
+        field: str,
+        entry_string: str,
+        expected_brand: str,
+        expected_model: str,
+        expected_format: Optional[str] = None,
     ) -> List[ValidationIssue]:
         """Validate a simple entry (razor, blade, soap) using actual matching."""
         issues = []
@@ -786,7 +791,11 @@ class ActualMatchingValidator:
                         details=(
                             f"{field.title()} string '{entry_string}' no "
                             f"longer matches any strategy"
-                            + (f" in {expected_format} format context" if field == "blade" and expected_format else "")
+                            + (
+                                f" in {expected_format} format context"
+                                if field == "blade" and expected_format
+                                else ""
+                            )
                         ),
                         suggested_action=(
                             f"Remove '{entry_string}' from correct_matches "
@@ -818,7 +827,11 @@ class ActualMatchingValidator:
                             f"Brand/model mismatch: expected "
                             f"'{expected_brand} {expected_model}', got "
                             f"'{actual_brand} {actual_model}'"
-                            + (f" in {expected_format} format context" if field == "blade" and expected_format else "")
+                            + (
+                                f" in {expected_format} format context"
+                                if field == "blade" and expected_format
+                                else ""
+                            )
                         ),
                         suggested_action=(
                             f"Update correct_matches directory to reflect "
@@ -1056,13 +1069,16 @@ class ActualMatchingValidator:
                             isinstance(v, dict)
                             and any(
                                 isinstance(brand_data, dict)
-                                and any(isinstance(model_data, list) for model_data in brand_data.values())
+                                and any(
+                                    isinstance(model_data, list)
+                                    for model_data in brand_data.values()
+                                )
                                 for brand_data in v.values()
                             )
                             for v in blade_data.values()
                         )
                     )
-                    
+
                     if is_format_based:
                         # Iterate through format sections
                         for format_name, format_data in blade_data.items():
@@ -1074,7 +1090,11 @@ class ActualMatchingValidator:
                                         if isinstance(strings, list):
                                             for entry_string in strings:
                                                 entry_issues = self._validate_simple_entry(
-                                                    field, entry_string, brand, model, expected_format=format_name
+                                                    field,
+                                                    entry_string,
+                                                    brand,
+                                                    model,
+                                                    expected_format=format_name,
                                                 )
                                                 issues.extend(entry_issues)
                     else:
@@ -1123,13 +1143,15 @@ class ActualMatchingValidator:
                         isinstance(v, dict)
                         and any(
                             isinstance(brand_data, dict)
-                            and any(isinstance(model_data, list) for model_data in brand_data.values())
+                            and any(
+                                isinstance(model_data, list) for model_data in brand_data.values()
+                            )
                             for brand_data in v.values()
                         )
                         for v in blade_data.values()
                     )
                 )
-                
+
                 if is_format_based:
                     # Iterate through format sections
                     for format_data in blade_data.values():

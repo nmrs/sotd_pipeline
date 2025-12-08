@@ -295,9 +295,7 @@ class BrushMatchingAnalyzer:
             # Store the original match method from correct_matches_matcher
             correct_matches_matcher = getattr(self.scoring_matcher, "correct_matches_matcher", None)
             if correct_matches_matcher is not None:
-                original_methods["correct_matches_matcher.match"] = (
-                    correct_matches_matcher.match
-                )
+                original_methods["correct_matches_matcher.match"] = correct_matches_matcher.match
 
                 # Create a dummy method that always returns None
                 def dummy_match(value):

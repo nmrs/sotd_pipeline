@@ -87,12 +87,13 @@ class ValidateCorrectMatches:
             loader = CatalogLoader()
             # Load all fields (no field_type specified) to get complete structure
             data = loader.load_correct_matches(self.correct_matches_path)
-            
+
             # If loading from legacy file, ensure all field types are included
             if self.correct_matches_path.is_file():
                 # Legacy file format - CatalogLoader returns brush/handle/knot/split_brush
                 # but we also need blade, razor, soap for validation
                 import yaml
+
                 with open(self.correct_matches_path, "r", encoding="utf-8") as f:
                     legacy_data = yaml.safe_load(f) or {}
                 # Merge legacy data with loader result
@@ -102,7 +103,7 @@ class ValidateCorrectMatches:
                     if field in legacy_data and field not in result:
                         result[field] = legacy_data[field]
                 return result
-            
+
             return data if data else {}
         except Exception as e:
             print(f"🔍 LOAD_DEBUG: Error loading file: {e}")

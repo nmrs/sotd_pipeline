@@ -60,11 +60,11 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
 def get_patterns(alias: str) -> list[str]:
     """
     Get extraction patterns for a field alias, ordered by frequency/priority.
-    
+
     Patterns are tried in order (0=highest priority, last=lowest priority).
     Patterns 0-13 have explicit markers (colon : or dash -).
     Pattern 14 is ambiguous (no explicit markers) and must remain last.
-    
+
     Order is based on actual usage frequency from 2020-2025 data analysis.
     See docs/extraction_pattern_priorities.md for priority details.
     """

@@ -340,11 +340,7 @@ class BrushMatcher:
 
         # Load catalogs and cache them using the stored paths
         # Type guards: paths should be set by __init__, but check for safety
-        if (
-            self.brushes_path is None
-            or self.handles_path is None
-            or self.knots_path is None
-        ):
+        if self.brushes_path is None or self.handles_path is None or self.knots_path is None:
             raise ValueError("Catalog paths must be set before loading")
         catalogs = {}
         catalogs["brushes"] = self._load_yaml_file(self.brushes_path)

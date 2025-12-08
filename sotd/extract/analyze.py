@@ -178,13 +178,13 @@ def analyze_common_prefixes(
 def analyze_pattern_usage(paths: Iterable[Path]) -> None:
     """
     Analyze which extraction patterns match razor fields in comment files.
-    
+
     Processes all provided comment files, tracks which pattern index (0-14)
     matched each razor field extraction, and prints a table of usage statistics.
     """
     pattern_counts = Counter()
     total_razors = 0
-    
+
     # Pattern descriptions based on get_patterns() comments (ordered by frequency)
     pattern_descriptions = {
         0: "Markdown bold: * **alias:** value",
@@ -202,14 +202,14 @@ def analyze_pattern_usage(paths: Iterable[Path]) -> None:
         12: "Simple explicit: Field - Value",
         13: "Ambiguous: Field Value (no markers)",
     }
-    
+
     # Get razor patterns for base "razor" alias (this gives us the 0-13 pattern indices)
     base_patterns = get_patterns("razor")
     patterns_per_alias = len(base_patterns)  # Should be 14 (0-13)
-    
+
     # Get all aliases for razor (to match actual extraction behavior)
     aliases = FIELD_ALIASES.get("razor", ["razor"])
-    
+
     # Process all comment files
     for path in paths:
         try:
@@ -218,7 +218,7 @@ def analyze_pattern_usage(paths: Iterable[Path]) -> None:
         except FileNotFoundError:
             print(f"Warning: Skipped missing file: {path}")
             continue
-        
+
         # Process all comments in the file
         for comment in data.get("data", []):
             # Preprocess body (same as parse_comment)
@@ -226,14 +226,14 @@ def analyze_pattern_usage(paths: Iterable[Path]) -> None:
                 body = preprocess_body(comment["body"])
             else:
                 body = None
-            
+
             if not body:
                 continue
-            
+
             lines = body.splitlines()
             # Remove markdown links (same as parse_comment)
             lines = [re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", line) for line in lines]
-            
+
             # Try patterns in order (pattern priority), then lines, matching actual extraction logic
             matched_pattern_index = None
             for alias in aliases:
@@ -249,33 +249,31 @@ def analyze_pattern_usage(paths: Iterable[Path]) -> None:
                         break
                 if matched_pattern_index is not None:
                     break
-            
+
             if matched_pattern_index is not None:
                 pattern_counts[matched_pattern_index] += 1
                 total_razors += 1
-    
+
     # Print results table
     print("\nPattern Usage Analysis for Razor Field:")
     print("=" * 80)
     print(f"{'Pattern':<8} | {'Description':<45} | {'Count':<10} | {'Percentage':<10}")
     print("-" * 80)
-    
+
     # Create list of all patterns with their counts (0 for unmatched)
     all_patterns = []
     for pattern_index in range(patterns_per_alias):
         count = pattern_counts.get(pattern_index, 0)
         all_patterns.append((pattern_index, count))
-    
+
     # Sort by count (descending), then by pattern index
     sorted_patterns = sorted(all_patterns, key=lambda x: (x[1], -x[0]), reverse=True)
-    
+
     for pattern_index, count in sorted_patterns:
         percentage = (count / total_razors * 100) if total_razors > 0 else 0
         description = pattern_descriptions.get(pattern_index, f"Pattern {pattern_index}")
-        print(
-            f"{pattern_index:<8} | {description:<45} | {count:<10,} | {percentage:>9.2f}%"
-        )
-    
+        print(f"{pattern_index:<8} | {description:<45} | {count:<10,} | {percentage:>9.2f}%")
+
     print("-" * 80)
     print(f"Total razor extractions: {total_razors:,}")
     print()
