@@ -2676,7 +2676,7 @@ Utica Knife & Razor Co.:
     width: 5/8
     patterns:
       - utica.*red.?(point|dot).*917
-      - red.?(point|dot).*917(?:.*\d{1,2}/(8|16))?
+      - utica.*red.?(point|dot).*917(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:

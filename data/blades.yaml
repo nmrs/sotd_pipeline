@@ -33,17 +33,17 @@ AC:
         - feather.*pro.*guard
     Soft Guard:
       patterns:
-        - feather.*soft
+        - feather.*soft.*guard
   Generic:
     Kai Clone:
       patterns:
         - kai.*clone
   Kai:
-    Captain Blade:
+    Captain:
       patterns:
-        - kai.*blade
         - kai captain\s*$
         - kai.*cap
+        - kai
     Captain Sharpblade:
       patterns:
         - kai.*sharp
@@ -55,13 +55,10 @@ AC:
         - kai.*cap.*mild
         - kai.*captain.*mild
         - kai.*titan.*mild
-    Captain ProGuard:
-      patterns:
-        - kai.*pro\s*guard
-        - proguard
+        - kai.*pink
     Captain ProTouch:
       patterns:
-        - kai.*pro\s*touch
+        - kai.*pro\s*(touch|guard)
         - kai.*mild.*pro\s*touch
         - protouch
     Salon Select Premium Guard:
@@ -93,7 +90,7 @@ Cartridge/Disposable:
         - mach ?(iii|3|three)
         - sensor ?(iii|3|three)
         - trac( |-)?(2|two|ii)
-        - twin.*pivot(.*plus)?
+        - (personna)?.*twin.*pivot(.*plus)?
         - xtreme2
 DE:
   7 O'Clock:
@@ -319,7 +316,7 @@ DE:
         - gil.*blu
     Goal:
       patterns:
-        - gil.*goal
+        - gil+.*goal
     London Bridge:
       patterns:
         - london\s*bridge
@@ -390,6 +387,7 @@ DE:
     Winner Platinum:
       patterns:
         - winner.*plat
+        - winner.*black
   Glätz:
     Super Platinum:
       patterns:
@@ -504,7 +502,7 @@ DE:
         - (person+a)?.*lab *blue
         - person+a.*blue
         - person+a.*comf.*coat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - person+a
+        - ^(?!.*twin.*pivot).*person+a
         - accuforge
     Med Prep:
       patterns:
@@ -513,8 +511,8 @@ DE:
         - accu-?thrive
     Platinum:
       patterns:
-        - person.*plat
-        - person.*red
+        - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super Stainless:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -561,6 +559,7 @@ DE:
     Platinum:
       patterns:
         - \brex\b.*plat
+        - rex supply
   Rockwell:
     Swedish Stainless:
       patterns:
@@ -831,13 +830,15 @@ GEM:
         - ptfs
         - gem
         - acc?utec
-        - accu.*(gem|coated|p[ft]{2}e)
+        - accu.*(coated|p[ft]{2}e)
         - pella.*ptfe
+        - accu.*gem
     Stainless:
       patterns:
         - (personna)*gem.*stainless
         - gem.*ss
         - person.*gem.*uncoated
+        - acc?utec.*(stain|\bss\b)
   PAL:
     Blue Blade:
       patterns:
@@ -864,15 +865,23 @@ Hair Shaper:
   Feather:
     Cut Special:
       patterns:
-        - feather.*cut.*(?:special)?
+        - ^(?!.*clone).*feather.*cut.*(?:special)?
   Fromm:
     Hair Shaper:
       patterns:
         - fromm
+  Generic:
+    Feather Clone:
+      patterns:
+        - clone.*feather
   Gutche:
     Hair Shaper:
       patterns:
         - gutche
+  Kai:
+    Hair Cut:
+      patterns:
+        - kai.*hair.*cut
   Kismet:
     Hair Shaper:
       patterns:

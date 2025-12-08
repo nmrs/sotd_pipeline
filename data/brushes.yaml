@@ -592,6 +592,12 @@ known_brushes:
       knot_size_mm: 21
       patterns:
         - semogue.*1438
+    "1460":
+      fiber: Boar
+      knot_size_mm: 21
+      knot_loft_mm: 48
+      patterns:
+        - semogue.*1460
     "1800":
       knot_size_mm: 22
       patterns:
@@ -878,6 +884,28 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - st[ie]rling.*syn
+    510SE:
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 28
+      handle:
+        brand: Zenith
+      patterns:
+        - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
+        - stirl.*less boar
+    510SE-XL:
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 31
+        model: B35
+      handle:
+        brand: Zenith
+      patterns:
+        - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
   Tatara:
     Masamune Finest Badger:
       fiber: Badger
@@ -1110,24 +1138,6 @@ known_brushes:
       patterns:
         - zen.*\bpro\b
         - b03-a26
-    Stirling 510SE:
-      knot:
-        brand: Zenith
-        fiber: Boar
-        knot_size_mm: 28
-      patterns:
-        - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
-        - stirl.*less boar
-    Stirling 510SE-XL:
-      knot:
-        brand: Zenith
-        fiber: Boar
-        knot_size_mm: 31
-        model: B35
-      patterns:
-        - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
     The Big One:
       fiber: Badger
       knot_size_mm: 31
@@ -2136,10 +2146,18 @@ other_brushes:
     default: Synthetic
     patterns:
       - lutin
+  Made Rite:
+    default: Boar
+    patterns:
+      - made.*rite
   Maggard:
     default: Synthetic
     patterns:
-      - maggard
+      - mag(g?ard)?s?
+  Marco Rinaldi:
+    default: Synthetic
+    patterns:
+      - marco.*rinaldi
   Marshall Made Woodshop:
     default: Synthetic
     patterns:
@@ -2326,6 +2344,10 @@ other_brushes:
     default: Boar
     patterns:
       - semogue
+  Simpson:
+    default: Badger
+    patterns:
+      - simpson
   Sir Hare:
     default: Synthetic
     patterns:
@@ -2490,6 +2512,7 @@ other_brushes:
     default: Synthetic
     patterns:
       - yaqi
+      - mew brown
   Zenith:
     default: Boar
     patterns:

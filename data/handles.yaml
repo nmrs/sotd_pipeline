@@ -165,7 +165,7 @@ artisan_handles:
         - (ever.*read|\ber\b).*100-?t
     Unspecified:
       patterns:
-        - ever.*read
+        - e?ver.*read
   Extrò Cosmesi:
     Italian Flag Synthetic:
       fiber: Synthetic
@@ -195,7 +195,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - heritage
-        - heritage collection
+        - heritage (collection|shaving)
   Jayaruh:
     Unspecified:
       patterns:

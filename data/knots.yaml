@@ -142,6 +142,10 @@ known_knots:
       fiber: Synthetic
       patterns:
         - boti.*n3c
+    SHD Silk HMW Silvertip Badger:
+      fiber: Badger
+      patterns:
+        - boti.*silk
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
