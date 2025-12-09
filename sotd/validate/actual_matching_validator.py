@@ -47,6 +47,7 @@ class ValidationIssue:
         matched_pattern: Optional[str] = None,
         format: Optional[str] = None,
         catalog_format: Optional[str] = None,
+        source_files: Optional[List[str]] = None,
     ):
         self.issue_type = issue_type
         self.severity = severity
@@ -71,6 +72,7 @@ class ValidationIssue:
         self.matched_pattern = matched_pattern
         self.format = format  # Expected format (from correct_matches structure)
         self.catalog_format = catalog_format  # Actual format (from matcher result)
+        self.source_files = source_files or []  # List of file names where the issue originates (e.g., ["handle.yaml", "knot.yaml"])
 
 
 class ValidationResult:
@@ -399,7 +401,7 @@ class ActualMatchingValidator:
         return issues
 
     def _validate_brush_entry(
-        self, brush_string: str, expected_data: Dict[str, Any], expected_section: str
+        self, brush_string: str, expected_data: Dict[str, Any], expected_section: str, source_files: Optional[List[str]] = None
     ) -> List[ValidationIssue]:
         """Validate a single brush entry using actual matching."""
         issues = []
@@ -632,6 +634,7 @@ class ActualMatchingValidator:
                             f"section to {actual_section} section"
                         ),
                         matched_pattern=result.pattern if result else None,
+                        source_files=source_files or [],
                     )
                 )
 
@@ -1047,9 +1050,12 @@ class ActualMatchingValidator:
                         brush_string, locations, expected_section
                     )
 
+                    # Extract source file names from locations
+                    source_files = [f"{loc['section']}.yaml" for loc in locations]
+
                     # Validate the brush string
                     entry_issues = self._validate_brush_entry(
-                        brush_string, expected_data, expected_section
+                        brush_string, expected_data, expected_section, source_files=source_files
                     )
                     issues.extend(entry_issues)
 
@@ -1178,16 +1184,52 @@ class ActualMatchingValidator:
 
             processing_time = time.time() - start_time
 
+            # Deduplicate structural_change issues - keep only first occurrence per unique string
+            # Use a more comprehensive key that includes issue characteristics to catch exact duplicates
+            seen_structural_changes = set()
+            deduplicated_issues = []
+            duplicate_count = 0
+            for issue in issues:
+                if issue.issue_type == "structural_change":
+                    # Create a comprehensive key for deduplication:
+                    # - correct_match (case-insensitive)
+                    # - expected_section
+                    # - actual_section
+                    # This ensures we catch exact duplicates even if they have slightly different attributes
+                    match_key = (
+                        issue.correct_match.lower(),
+                        issue.expected_section,
+                        issue.actual_section,
+                    )
+                    if match_key not in seen_structural_changes:
+                        seen_structural_changes.add(match_key)
+                        deduplicated_issues.append(issue)
+                    else:
+                        # Skip duplicate structural_change issues
+                        duplicate_count += 1
+                        logger.debug(
+                            f"Deduplicating structural_change issue for '{issue.correct_match}' "
+                            f"(expected_section={issue.expected_section}, "
+                            f"actual_section={issue.actual_section}, duplicate #{duplicate_count})"
+                        )
+                else:
+                    deduplicated_issues.append(issue)
+            
+            if duplicate_count > 0:
+                logger.info(
+                    f"Deduplicated {duplicate_count} duplicate structural_change issue(s)"
+                )
+
             # Suppress data_mismatch issues when structural_change exists for same entry
             structural_change_patterns = {
                 issue.correct_match.lower()
-                for issue in issues
+                for issue in deduplicated_issues
                 if issue.issue_type == "structural_change"
             }
 
             filtered_issues = [
                 issue
-                for issue in issues
+                for issue in deduplicated_issues
                 if not (
                     issue.issue_type == "data_mismatch"
                     and issue.correct_match.lower() in structural_change_patterns

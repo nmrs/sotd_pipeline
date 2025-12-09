@@ -400,6 +400,93 @@ class TestActualMatchingValidator:
         assert result.strategy_stats == {}
         assert result.performance_metrics == {}
 
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.glob")
+    @patch("yaml.safe_load")
+    @patch("sotd.validate.actual_matching_validator.BrushMatcher")
+    def test_deduplicate_structural_change_issues(
+        self, mock_brush_matcher_class, mock_yaml_load, mock_glob, mock_exists
+    ):
+        """Test that duplicate structural_change issues are deduplicated when same string appears in multiple files."""
+        # Mock directory exists
+        mock_exists.return_value = True
+
+        # Mock directory structure: correct_matches/handle.yaml and knot.yaml
+        mock_handle_file = Mock()
+        mock_handle_file.stem = "handle"
+        mock_handle_file.name = "handle.yaml"
+        mock_knot_file = Mock()
+        mock_knot_file.stem = "knot"
+        mock_knot_file.name = "knot.yaml"
+        mock_glob.return_value = [mock_handle_file, mock_knot_file]
+
+        # Mock file reading - Path.open() returns a context manager
+        mock_handle_file_handle = Mock()
+        mock_handle_file_context = Mock()
+        mock_handle_file_context.__enter__ = Mock(return_value=mock_handle_file_handle)
+        mock_handle_file_context.__exit__ = Mock(return_value=None)
+        mock_handle_file.open.return_value = mock_handle_file_context
+
+        mock_knot_file_handle = Mock()
+        mock_knot_file_context = Mock()
+        mock_knot_file_context.__enter__ = Mock(return_value=mock_knot_file_handle)
+        mock_knot_file_context.__exit__ = Mock(return_value=None)
+        mock_knot_file.open.return_value = mock_knot_file_context
+
+        # Mock YAML data - same string appears in both handle.yaml and knot.yaml
+        test_string = "grizzly bay - sophisticated kaos bar-bear w/ v25 fanchurian"
+
+        def yaml_load_side_effect(f):
+            if f == mock_handle_file_handle:
+                return {
+                    "Grizzly Bay": {
+                        "Unspecified": [test_string]
+                    }
+                }
+            elif f == mock_knot_file_handle:
+                return {
+                    "Chisel & Hound": {
+                        "v25": [test_string]
+                    }
+                }
+            return None
+
+        mock_yaml_load.side_effect = yaml_load_side_effect
+
+        # Mock brush matcher to return a complete brush match (structural change from handle_knot to brush)
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "Grizzly Bay",
+            "model": "Sophisticated Kaos Bar-Bear",
+        }
+        mock_result.pattern = "test pattern"
+        mock_matcher.match.return_value = mock_result
+        mock_brush_matcher_class.return_value = mock_matcher
+
+        # Mock splits loader to not have this string in brush_splits.yaml
+        with patch.object(
+            self.validator, "_get_splits_loader"
+        ) as mock_splits_loader:
+            mock_splits = Mock()
+            mock_splits.should_not_split.return_value = False
+            mock_splits.find_split.return_value = None
+            mock_splits_loader.return_value = mock_splits
+
+            result = self.validator.validate("brush")
+
+            # Should have only ONE structural_change issue, not two
+            structural_change_issues = [
+                i for i in result.issues if i.issue_type == "structural_change"
+            ]
+            assert len(structural_change_issues) == 1, (
+                f"Expected 1 structural_change issue, got {len(structural_change_issues)}. "
+                f"Issues: {[i.correct_match for i in structural_change_issues]}"
+            )
+            assert structural_change_issues[0].correct_match == test_string
+            assert structural_change_issues[0].expected_section == "handle_knot"
+            assert structural_change_issues[0].actual_section == "brush"
+
     def test_suppress_data_mismatch_when_structural_change_exists(self):
         """Test that data_mismatch issues are suppressed when structural_change exists."""
         # Create test issues that would normally cause duplicates
