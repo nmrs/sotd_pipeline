@@ -6,6 +6,8 @@
 # Composite Brush Strategies (automated_split, full_input_component_matching, known_split):
 # - multiple_brands: Awarded when the strategy detects multiple brands in handle/knot components
 # - handle_brand_without_knot_brand: Awarded when the strategy detects a handle brand without a knot brand
+# - knot_brand_without_handle_brand: Awarded when the strategy detects a knot brand without a handle brand
+# - same_brand: Penalty when the strategy detects the same brand for both handle and knot (penalizes split combos to boost non-split strategies)
 # - neither_brand: Awarded when the strategy detects neither a handle brand nor a knot brand
 # - handle_weight: Multiplier for handle matching score (base + priority) - SHOULD BE 0
 # - knot_weight: Multiplier for knot matching score (base + priority) - SHOULD BE 0
@@ -27,14 +29,14 @@ brush_scoring_weights:
   # - Modifiers provide additional points for specific achievements within each strategy
   base_strategies:
     #complete brushes
-    known_brush: 145.0 # Bumped up from 80.0 for highest priority
+    known_brush: 155.0 # Bumped up from 80.0 for highest priority
     known_knot_based_brush: 80.0 # New category for knot-based brushes (e.g., "DB B3 Chisel & Hound v23")
     other_brush: 70.0
     omega_semogue_brush: 75.0
     zenith_brush: 75.0
 
     #component brushes
-    automated_split: 45.0
+    automated_split: 55.0
     full_input_component_matching: 50.0
     known_split: 150.0
 
@@ -54,10 +56,12 @@ brush_scoring_weights:
 
     #composite brushes
     automated_split:
-      multiple_brands: 100.0
+      multiple_brands: 125.0
       handle_weight: 0.0
       knot_weight: 0.0
       handle_brand_without_knot_brand: -15.0
+      knot_brand_without_handle_brand: -15.0
+      same_brand: -20.0
       neither_brand: -20.0
       high_confidence: 20.0
 
@@ -66,6 +70,8 @@ brush_scoring_weights:
       handle_weight: 0.0
       knot_weight: 0.0
       handle_brand_without_knot_brand: -15.0
+      knot_brand_without_handle_brand: -15.0
+      same_brand: -20.0
       neither_brand: -20.0
       dual_component: 0.0
 
@@ -74,6 +80,8 @@ brush_scoring_weights:
       handle_weight: 0
       knot_weight: 0
       handle_brand_without_knot_brand: -15.0
+      knot_brand_without_handle_brand: -15.0
+      same_brand: -20.0
       neither_brand: -20.0
 
     #

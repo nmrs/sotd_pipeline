@@ -467,6 +467,126 @@ class TestScoringEngine:
             == 1.0
         )
 
+        # Test composite brush strategies as well
+        assert (
+            engine._modifier_knot_brand_without_handle_brand(
+                "test", result_with_knot_brand, "automated_split"
+            )
+            == 1.0
+        )
+        assert (
+            engine._modifier_knot_brand_without_handle_brand(
+                "test", result_with_knot_brand, "full_input_component_matching"
+            )
+            == 1.0
+        )
+        assert (
+            engine._modifier_knot_brand_without_handle_brand(
+                "test", result_with_knot_brand, "known_split"
+            )
+            == 1.0
+        )
+
+        # Test same_brand modifier
+        result_same_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Declaration Grooming", "model": "Custom"},
+                "knot": {"brand": "Declaration Grooming", "model": "B2"},
+            },
+            match_type="automated_split",
+            pattern=None,
+            strategy="automated_split",
+        )
+
+        # Should return 1.0 when both handle and knot have the same brand
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand, "automated_split"
+            )
+            == 1.0
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand, "full_input_component_matching"
+            )
+            == 1.0
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand, "known_split"
+            )
+            == 1.0
+        )
+
+        # Test case-insensitive matching
+        result_same_brand_case = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Declaration Grooming", "model": "Custom"},
+                "knot": {"brand": "declaration grooming", "model": "B2"},
+            },
+            match_type="automated_split",
+            pattern=None,
+            strategy="automated_split",
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand_case, "automated_split"
+            )
+            == 1.0
+        )
+
+        # Should return 0.0 when brands are different
+        result_different_brands = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
+                "knot": {"brand": "Declaration Grooming", "model": "B2"},
+            },
+            match_type="automated_split",
+            pattern=None,
+            strategy="automated_split",
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_different_brands, "automated_split"
+            )
+            == 0.0
+        )
+
+        # Should return 0.0 when one brand is missing
+        result_missing_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {"brand": "Declaration Grooming", "model": "Custom"},
+                "knot": {"brand": None, "model": "B2"},
+            },
+            match_type="automated_split",
+            pattern=None,
+            strategy="automated_split",
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_missing_brand, "automated_split"
+            )
+            == 0.0
+        )
+
+        # Should return 0.0 for non-composite strategies
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand, "handle_only"
+            )
+            == 0.0
+        )
+        assert (
+            engine._modifier_same_brand(
+                "test", result_same_brand, "knot_only"
+            )
+            == 0.0
+        )
+
     def test_brand_balance_modifier_math_scenarios(self):
         """Test comprehensive math scenarios for brand balance modifiers."""
         mock_config = Mock()

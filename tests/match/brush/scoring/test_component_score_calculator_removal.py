@@ -261,11 +261,12 @@ class TestComponentScoreCalculatorRemoval:
         scored_result = scored_results[0]
 
         # The final score should be reasonable (not inflated by double scoring)
-        # Base score (45.0 for automated_split) + reasonable modifiers should be in a reasonable range
-        # Allow scores from base score (45.0) up to 150.0
+        # Base score (55.0 for automated_split) + reasonable modifiers should be in a reasonable range
+        # Note: This test uses same brand for handle and knot, so same_brand penalty (-20.0) applies
+        # Allow scores from (base - penalty) = 35.0 up to 150.0
         assert scored_result.score is not None
-        assert 45.0 <= scored_result.score <= 150.0, (
-            f"Final score should be reasonable (45-150), got {scored_result.score}. "
+        assert 35.0 <= scored_result.score <= 150.0, (
+            f"Final score should be reasonable (35-150), got {scored_result.score}. "
             "If this is too high, there might be double scoring."
         )
 

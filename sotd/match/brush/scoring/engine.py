@@ -276,6 +276,65 @@ class ScoringEngine:
 
         return 1.0 if len(brands_found) > 1 else 0.0
 
+    def _modifier_same_brand(self, input_text: str, result, strategy_name: str) -> float:
+        """
+        Return score modifier for same brand detection (penalty).
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object or dict
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if same brand detected for handle and knot, 0.0 otherwise)
+        """
+        # Apply only to composite brush strategies
+        allowed_strategies = [
+            "automated_split",
+            "full_input_component_matching",
+            "known_split",
+        ]
+        if strategy_name not in allowed_strategies:
+            return 0.0
+
+        # Handle both MatchResult objects and dicts
+        if hasattr(result, "matched"):
+            matched = result.matched
+        else:
+            matched = result.get("matched", {}) if isinstance(result, dict) else {}
+
+        # Handle case where matched is None
+        if matched is None:
+            return 0.0
+
+        # For full_input_component_matching strategy, check handle and knot sections
+        if strategy_name == "full_input_component_matching":
+            handle = matched.get("handle", {})
+            knot = matched.get("knot", {})
+
+            handle_brand = handle.get("brand") if handle else None
+            knot_brand = knot.get("brand") if knot else None
+
+            # Return 1.0 if both brands exist and are the same (case-insensitive)
+            if handle_brand and knot_brand:
+                return 1.0 if handle_brand.lower() == knot_brand.lower() else 0.0
+            return 0.0
+
+        # For all other strategies, check nested handle and knot brand fields
+        handle_brand = None
+        knot_brand = None
+
+        if "handle" in matched and isinstance(matched["handle"], dict):
+            handle_brand = matched["handle"].get("brand")
+
+        if "knot" in matched and isinstance(matched["knot"], dict):
+            knot_brand = matched["knot"].get("brand")
+
+        # Return 1.0 if both brands exist and are the same (case-insensitive)
+        if handle_brand and knot_brand:
+            return 1.0 if handle_brand.lower() == knot_brand.lower() else 0.0
+        return 0.0
+
     def _detect_fiber_conflict(
         self, input_text: str, result: Any
     ) -> tuple[bool, str | None, str | None]:
@@ -745,7 +804,15 @@ class ScoringEngine:
         Returns:
             Modifier value (1.0 if knot brand detected but no handle brand, 0.0 otherwise)
         """
-        if strategy_name not in ["handle_only", "knot_only"]:
+        # Apply to composite brush strategies and individual component strategies
+        allowed_strategies = [
+            "automated_split",
+            "full_input_component_matching",
+            "known_split",
+            "handle_only",
+            "knot_only",
+        ]
+        if strategy_name not in allowed_strategies:
             return 0.0
 
         # Check the current result's handle and knot data
