@@ -128,6 +128,15 @@ def _get_modifier_description(modifier_name: str, modifier_value: float, brush_s
     elif modifier_name == "knot_brand_without_handle_brand":
         return "Knot brand detected without handle brand"
 
+    elif modifier_name == "same_brand":
+        if modifier_value > 0:
+            return "Handle and knot share the same brand (penalty)"
+        else:
+            return "Handle and knot have different brands"
+
+    elif modifier_name == "neither_brand":
+        return "Neither handle nor knot has a brand detected"
+
     else:
         return f"Modifier: {modifier_name}"
 
@@ -563,10 +572,13 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                     if modifier_weight:
                         # Calculate the actual modifier value using the scoring engine
                         modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+                        modifier_value = 0.0  # Default value
+                        
                         if modifier_function and callable(modifier_function):
                             modifier_value = modifier_function(
                                 request.brushString, strategy_result, strategy_name
                             )
+                            
                             # Ensure modifier_value is numeric for multiplication
                             if isinstance(modifier_value, (int, float)):
                                 actual_modifier_score = modifier_value * modifier_weight
@@ -576,13 +588,18 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                             # If no modifier function exists, just use the weight directly
                             actual_modifier_score = modifier_weight
 
-                        modifier_details.append(
-                            {
-                                "name": modifier_name,
-                                "weight": actual_modifier_score,  # Use calculated value
-                                "description": f"{modifier_name} bonus",
-                            }
-                        )
+                        # Only include modifiers with non-zero calculated score
+                        # This prevents showing 0.0 modifiers in the UI
+                        if actual_modifier_score != 0.0:
+                            modifier_details.append(
+                                {
+                                    "name": modifier_name,
+                                    "weight": actual_modifier_score,  # Use calculated value
+                                    "description": _get_modifier_description(
+                                        modifier_name, modifier_value, request.brushString
+                                    ),
+                                }
+                            )
 
                 # Create the formatted result
                 formatted_result = BrushMatchResult(

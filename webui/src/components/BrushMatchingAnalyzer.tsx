@@ -128,7 +128,7 @@ function ModifierDetailsDisplay({
       <h4 className='font-medium mb-2'>Modifier Details</h4>
       <div className='text-xs text-gray-600 mb-2 bg-gray-50 p-2 rounded'>
         <p className='font-medium'>About Modifiers:</p>
-        <p>Modifiers are bonus points awarded for:</p>
+        <p>Modifiers can be bonuses (positive) or penalties (negative):</p>
         <ul className='list-disc list-inside ml-2 mt-1 space-y-1'>
           <li>Fiber type matches (badger, boar, synthetic)</li>
           <li>Size specifications (knot diameter)</li>
@@ -136,19 +136,30 @@ function ModifierDetailsDisplay({
           <li>Brand/model confidence</li>
           <li>Pattern specificity</li>
           <li>Component matching success</li>
+          <li>Brand balance (same brand penalty, multiple brands bonus)</li>
         </ul>
       </div>
       {modifierDetails.length > 0 ? (
         <div className='space-y-1'>
-          {modifierDetails.map((detail, idx) => (
-            <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
-              <div className='flex justify-between items-center'>
-                <span className='font-medium'>{detail.name}</span>
-                <span className='text-green-600 font-semibold'>+{detail.weight.toFixed(2)}</span>
+          {modifierDetails.map((detail, idx) => {
+            const isPenalty = detail.weight < 0;
+            const displayValue = detail.weight.toFixed(2);
+            return (
+              <div key={idx} className='text-sm text-gray-700 bg-gray-50 p-2 rounded'>
+                <div className='flex justify-between items-center'>
+                  <span className='font-medium'>{detail.name}</span>
+                  <span
+                    className={`font-semibold ${
+                      isPenalty ? 'text-red-600' : 'text-green-600'
+                    }`}
+                  >
+                    {displayValue}
+                  </span>
+                </div>
+                <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
               </div>
-              <p className='text-xs text-gray-500 mt-1'>{detail.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className='text-sm text-gray-500 italic'>
