@@ -312,12 +312,23 @@ class ScoringEngine:
             handle = matched.get("handle", {})
             knot = matched.get("knot", {})
 
-            handle_brand = handle.get("brand") if handle else None
-            knot_brand = knot.get("brand") if knot else None
+            # Extract brands from nested structure
+            # Handle uses "brand" field (set from handle_maker in strategy)
+            # Knot uses "brand" field
+            handle_brand = handle.get("brand") if handle and isinstance(handle, dict) else None
+            knot_brand = knot.get("brand") if knot and isinstance(knot, dict) else None
 
-            # Return 1.0 if both brands exist and are the same (case-insensitive)
-            if handle_brand and knot_brand:
-                return 1.0 if handle_brand.lower() == knot_brand.lower() else 0.0
+            # Fail fast: If either brand is missing, return 0.0 (not same brand)
+            if not handle_brand or not knot_brand:
+                return 0.0
+
+            # Compare brands (case-insensitive, stripped)
+            handle_clean = str(handle_brand).strip().lower()
+            knot_clean = str(knot_brand).strip().lower()
+            
+            # Only return 1.0 if brands are non-empty and match
+            if handle_clean and knot_clean:
+                return 1.0 if handle_clean == knot_clean else 0.0
             return 0.0
 
         # For all other strategies, check nested handle and knot brand fields
@@ -331,8 +342,15 @@ class ScoringEngine:
             knot_brand = matched["knot"].get("brand")
 
         # Return 1.0 if both brands exist and are the same (case-insensitive)
+        # Only apply penalty if both brands are non-empty strings
         if handle_brand and knot_brand:
-            return 1.0 if handle_brand.lower() == knot_brand.lower() else 0.0
+            # Strip whitespace and compare case-insensitively
+            handle_clean = str(handle_brand).strip().lower()
+            knot_clean = str(knot_brand).strip().lower()
+            
+            # Only return 1.0 if brands are non-empty and match
+            if handle_clean and knot_clean:
+                return 1.0 if handle_clean == knot_clean else 0.0
         return 0.0
 
     def _detect_fiber_conflict(
