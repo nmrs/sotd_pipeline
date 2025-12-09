@@ -61,7 +61,7 @@ Grizzly Bay - v24 Fanchurian 26mm badger:
     - lz9spgi
 Grizzly Bay Sophisticated Kaos - BarBear V25 26mm:
   handle: null
-  knot: Grizzly Bay Sophisticated Kaos - BarBear V25 26mm
+  knot: null
   match_type: null
   corrected: false
   validated_at: null
@@ -96,6 +96,44 @@ Made Rite - 500 PB (Oumo - 26mm SHD):
   - file: 2025-09.json
     comment_ids:
     - nfexjs4
+Prometheus Red Boti Fan 28mm:
+  handle: Prometheus Red
+  knot: Boti Fan 28mm
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - mvw33up
+    - mw2rafv
+    - mw98znq
+    - mwf3ei1
+    - mwly998
+    - mws3wgp
+    - mwyp34n
+    - mx54jf2
+    - mx7jn6u
+    - mxgrbl7
+    - mxp0q13
+    - mxuq8tu
+    - my4lbva
+    - my4o1ho
+    - mycti6p
+    - myj6yhe
+    - myqjkmr
+    - myxvtwr
+    - mz3gzdu
+    - mz9wrna
+    - mzggyaz
+    - mzn12h7
+    - mzq4r4x
+    - n06rfls
+    - n06s256
+    - n0cz3se
+    - n0p42jo
+    - n0p5geu
 Unbranded - Marble w/ Maggard G5C Synthetic:
   handle: Unbranded - Marble
   knot: Maggard G5C Synthetic
@@ -111,6 +149,53 @@ Unbranded - Marble w/ Maggard G5C Synthetic:
     - nqm3gtb
     - nqskvd8
     - nr4zqp9
+Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n6ejo6g
+    - n6ie1qr
+    - n6q1129
+    - n6vaius
+    - n72qht4
+    - n797ceo
+    - n7g0rxn
+    - n7l7zgk
+    - n7sjc8e
+    - n7y1710
+    - n88au2r
+    - n89uzsq
+    - n8hzfu9
+    - n8s6oan
+    - n8ylebu
+    - n90mfjf
+    - n9aunhd
+    - n9da0bp
+    - n9iwnun
+    - n9uiihx
+    - na1sbsr
+    - na1uvsv
+    - nacjqdt
+    - najhr36
+    - nakj5vx
+    - narglox
+    - nb2q8dh
+    - nb9ccq1
+    - nbbqw5b
+    - nbhnq3t
+    - nbnnkto
+  - file: 2025-09.json
+    comment_ids:
+    - nd97acn
+  - file: 2025-10.json
+    comment_ids:
+    - nj9pnvd
 Zenith 510SE 28mm x 56mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
   handle: null
   knot: null

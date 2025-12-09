@@ -367,7 +367,7 @@ known_knots:
         - \bb14\b
     B15:
       patterns:
-        - ^(?!zen).*\bb15\b
+        - ^(?!.*zen).*\bb15\b
     B16:
       patterns:
         - \bb16\b
@@ -376,7 +376,7 @@ known_knots:
         - \bb17\b
     B18:
       patterns:
-        - \bb18\b
+        - ^(?!.*zen).*\bb18\b
   Griffith:
     High Mountain Badger HD:
       fiber: Badger
@@ -738,11 +738,6 @@ other_knots:
     default: Badger
     patterns:
       - romera
-  B&M:
-    default: Synthetic
-    patterns:
-      - b\s*(&|a|\+)\s*m\b
-      - barrister
   Badlands Shaving Co.:
     default: Badger
     patterns:
@@ -1116,13 +1111,6 @@ other_knots:
       - rad dino(saur)?
       - priusaurus
       - rdc
-  RazoRock:
-    default: Synthetic
-    patterns:
-      - Razorr*ock
-      - (^|\s)rr\s
-      - plissoft
-      - razor rock
   Rich Man Shaving:
     default: Synthetic
     patterns:

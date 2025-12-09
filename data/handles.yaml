@@ -130,7 +130,7 @@ artisan_handles:
         - dogwood.*(handcrafts+)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - dogc*l
         - ^voa
-        - \bdw\b
+        - \bd[wh]\b
   Doug Korn:
     Unspecified:
       patterns:
@@ -761,10 +761,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - stanhome
-  Stirling:
-    Unspecified:
-      patterns:
-        - ^(?!.*zeni).*st[ie]rl
   Supply:
     Unspecified:
       patterns:

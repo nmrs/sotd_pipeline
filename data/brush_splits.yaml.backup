@@ -42,7 +42,7 @@ Chisel & Hound v28 Fanchurian (Oumo Warhammer Frosted White):
     - n788u5j
 Grizzly Bay - v24 Fanchurian 26mm badger:
   handle: null
-  knot: Grizzly Bay - v24 Fanchurian 26mm badger
+  knot: null
   match_type: null
   corrected: false
   validated_at: null
@@ -59,6 +59,17 @@ Grizzly Bay - v24 Fanchurian 26mm badger:
     - lyoannq
     - lyxnj2c
     - lz9spgi
+Grizzly Bay Sophisticated Kaos - BarBear V25 26mm:
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2024-11.json
+    comment_ids:
+    - lynfr8b
 Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger:
   handle: null
   knot: null
@@ -100,6 +111,54 @@ Unbranded - Marble w/ Maggard G5C Synthetic:
     - nqm3gtb
     - nqskvd8
     - nr4zqp9
+Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
+  handle: null
+  knot: Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle
+    (aka Less Boar Stirling Edition)
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-08.json
+    comment_ids:
+    - n6ejo6g
+    - n6ie1qr
+    - n6q1129
+    - n6vaius
+    - n72qht4
+    - n797ceo
+    - n7g0rxn
+    - n7l7zgk
+    - n7sjc8e
+    - n7y1710
+    - n88au2r
+    - n89uzsq
+    - n8hzfu9
+    - n8s6oan
+    - n8ylebu
+    - n90mfjf
+    - n9aunhd
+    - n9da0bp
+    - n9iwnun
+    - n9uiihx
+    - na1sbsr
+    - na1uvsv
+    - nacjqdt
+    - najhr36
+    - nakj5vx
+    - narglox
+    - nb2q8dh
+    - nb9ccq1
+    - nbbqw5b
+    - nbhnq3t
+    - nbnnkto
+  - file: 2025-09.json
+    comment_ids:
+    - nd97acn
+  - file: 2025-10.json
+    comment_ids:
+    - nj9pnvd
 Zenith 510SE 28mm x 56mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
   handle: null
   knot: null

@@ -1991,6 +1991,7 @@ other_brushes:
     default: Badger
     patterns:
       - dogwood
+      - \bd[wh]\b
   Dovo:
     default: Synthetic
     patterns:
