@@ -1504,6 +1504,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 "line_numbers": getattr(
                     issue, "line_numbers", None
                 ),  # Line numbers for duplicate/conflict issues
+                "source_files": getattr(
+                    issue, "source_files", None
+                ),  # List of file names where the issue originates (e.g., ["handle.yaml", "knot.yaml"])
             }
 
             # For structural_change issues with brush data, add match details

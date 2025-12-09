@@ -787,6 +787,8 @@ export interface CatalogValidationIssue {
   };
   // Line numbers for duplicate/conflict issues
   line_numbers?: Record<string, number[]>; // Maps section/file name to list of line numbers
+  // Source files where the issue originates
+  source_files?: string[]; // List of file names (e.g., ["handle.yaml", "knot.yaml"])
 }
 
 export interface CatalogValidationResult {

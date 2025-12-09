@@ -42,6 +42,25 @@ const CatalogValidator: React.FC = () => {
     }
   };
 
+  // Helper function to get file names from section or source_files
+  const getSourceFileNames = (issue: CatalogValidationIssue): string[] => {
+    // If source_files is available, use it
+    if (issue.source_files && issue.source_files.length > 0) {
+      return issue.source_files;
+    }
+    // Otherwise, infer from expected_section
+    if (issue.expected_section === 'handle_knot') {
+      return ['handle.yaml', 'knot.yaml'];
+    } else if (issue.expected_section === 'handle') {
+      return ['handle.yaml'];
+    } else if (issue.expected_section === 'knot') {
+      return ['knot.yaml'];
+    } else if (issue.expected_section === 'brush') {
+      return ['brush.yaml'];
+    }
+    return [];
+  };
+
   const handleValidate = async () => {
     if (!selectedField) {
       setError('Please select a field to validate');
@@ -658,14 +677,29 @@ const CatalogValidator: React.FC = () => {
                                   </p>
                                 ) : issue.expected_section === 'handle_knot' ? (
                                   <p className='text-gray-600'>
-                                    Stored as handle/knot combination in correct_matches.yaml
+                                    Stored as handle/knot combination
+                                    {(() => {
+                                      const fileNames = getSourceFileNames(issue);
+                                      if (fileNames.length > 0) {
+                                        return <> in {fileNames.join(' and ')}</>;
+                                      }
+                                      return null;
+                                    })()}
                                   </p>
                                 ) : (
                                   <p className='text-gray-600'>
                                     {issue.expected_brand} {issue.expected_model}
                                   </p>
                                 )}
-                                <p className='text-xs text-gray-500 mt-2'>(in correct_matches.yaml)</p>
+                                <p className='text-xs text-gray-500 mt-2'>
+                                  {(() => {
+                                    const fileNames = getSourceFileNames(issue);
+                                    if (fileNames.length > 0) {
+                                      return `(in ${fileNames.join(' and ')})`;
+                                    }
+                                    return '(in correct_matches directory)';
+                                  })()}
+                                </p>
                               </div>
                               
                               <div className='p-3 bg-blue-50 rounded border border-blue-200'>
