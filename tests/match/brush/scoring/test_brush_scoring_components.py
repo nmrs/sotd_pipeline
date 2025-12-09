@@ -587,6 +587,120 @@ class TestScoringEngine:
             == 0.0
         )
 
+        # Test full_input_component_matching with different brands (should return 0.0)
+        # This is the actual bug case: Chisel & Hound handle + Cornfed Viking knot
+        result_different_brands_full_input = MatchResult(
+            original="chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            matched={
+                "handle": {
+                    "brand": "Chisel & Hound",
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "Cornfed Viking",
+                    "model": "Odin's Beard",
+                },
+            },
+            match_type="composite",
+            pattern="dual_component",
+            strategy="full_input_component_matching",
+        )
+        # Should return 0.0 when brands are different - this test exposes the bug
+        result_value = engine._modifier_same_brand(
+            "chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            result_different_brands_full_input,
+            "full_input_component_matching",
+        )
+        assert result_value == 0.0, (
+            f"Expected 0.0 for different brands (Chisel & Hound vs Cornfed Viking), "
+            f"but got {result_value}. Handle brand: {result_different_brands_full_input.matched.get('handle', {}).get('brand')}, "
+            f"Knot brand: {result_different_brands_full_input.matched.get('knot', {}).get('brand')}"
+        )
+
+        # Test case where handle brand might be None or missing - check for fallback bug
+        result_missing_handle_brand = MatchResult(
+            original="test",
+            matched={
+                "handle": {
+                    "brand": None,  # Handle brand missing
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "Cornfed Viking",
+                    "model": "Odin's Beard",
+                },
+                # Check if top-level brand is being used as fallback
+                "brand": "Cornfed Viking",  # Top-level brand
+            },
+            match_type="composite",
+            pattern="dual_component",
+            strategy="full_input_component_matching",
+        )
+        # Should return 0.0 when handle brand is None
+        assert (
+            engine._modifier_same_brand(
+                "test", result_missing_handle_brand, "full_input_component_matching"
+            )
+            == 0.0
+        )
+
+        # Test the actual bug scenario: Check if handle_maker field is being used incorrectly
+        # When handle_maker is None, handle["brand"] should be None, not fallback to knot brand
+        result_with_handle_maker_none = MatchResult(
+            original="chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            matched={
+                "handle_maker": None,  # Top-level handle_maker is None
+                "handle": {
+                    "brand": None,  # Handle brand is None (because handle_maker was None)
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "Cornfed Viking",
+                    "model": "Odin's Beard",
+                },
+            },
+            match_type="composite",
+            pattern="dual_component",
+            strategy="full_input_component_matching",
+        )
+        # Should return 0.0 when handle brand is None (even if knot brand exists)
+        assert (
+            engine._modifier_same_brand(
+                "chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+                result_with_handle_maker_none,
+                "full_input_component_matching",
+            )
+            == 0.0
+        )
+
+        # Test case where both brands are the same (should return 1.0)
+        result_both_brands_same = MatchResult(
+            original="test",
+            matched={
+                "handle": {
+                    "brand": "Cornfed Viking",
+                    "model": "Unspecified",
+                },
+                "knot": {
+                    "brand": "Cornfed Viking",
+                    "model": "Odin's Beard",
+                },
+            },
+            match_type="composite",
+            pattern="dual_component",
+            strategy="full_input_component_matching",
+        )
+        # Should return 1.0 when both brands are the same
+        result_value_same = engine._modifier_same_brand(
+            "test",
+            result_both_brands_same,
+            "full_input_component_matching",
+        )
+        assert result_value_same == 1.0, (
+            f"Test case with both brands same: expected 1.0, got {result_value_same}. "
+            f"This test verifies the modifier correctly detects when both brands are the same."
+        )
+
     def test_brand_balance_modifier_math_scenarios(self):
         """Test comprehensive math scenarios for brand balance modifiers."""
         mock_config = Mock()
