@@ -57,7 +57,7 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     continue
         return compiled
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Match using known split logic.
 

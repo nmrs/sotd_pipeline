@@ -325,7 +325,7 @@ known_knots:
         - \bb1\b
     B2:
       patterns:
-        - \bb2\b
+        - ^(?!.*zen).*\bb2\b
     B3:
       patterns:
         - \bb3\b
@@ -1201,7 +1201,7 @@ other_knots:
   The Razor Company:
     default: Synthetic
     patterns:
-      - razor.*co
+      - razor.*\bco
       - trc
   Tony Forsyth:
     default: Badger

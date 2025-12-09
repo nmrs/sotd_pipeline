@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 from .utils.fiber_utils import match_fiber
@@ -55,8 +57,13 @@ class OtherKnotMatchingStrategy:
         all_patterns.sort(key=lambda x: len(x["pattern"]), reverse=True)
         return all_patterns
 
-    def match(self, value: str):
-        """Match input against other knot patterns. Always returns a MatchResult."""
+    def match(self, value: str, full_string: Optional[str] = None):
+        """Match input against other knot patterns. Always returns a MatchResult.
+        
+        Args:
+            value: The text to match against (may be a split portion)
+            full_string: The full original string (unused by this strategy, but required for interface consistency)
+        """
         if not validate_string_input(value):
             return create_strategy_result(
                 original_value=value,

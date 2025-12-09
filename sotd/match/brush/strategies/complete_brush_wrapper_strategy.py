@@ -27,7 +27,7 @@ class CompleteBrushWrapperStrategy(BaseBrushMatchingStrategy):
         super().__init__()
         self.catalog_data = catalog_data or {}
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Match using complete brush logic.
 

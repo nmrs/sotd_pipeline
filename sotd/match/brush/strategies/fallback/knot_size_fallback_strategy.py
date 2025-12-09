@@ -25,12 +25,13 @@ class KnotSizeFallbackStrategy(BaseBrushMatchingStrategy):
     a MatchResult with brand="Unspecified" and model="{size}mm".
     """
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Attempt to match the given string by extracting size information.
 
         Args:
-            value: The knot text to match
+            value: The knot text to match (may be a split portion)
+            full_string: The full original string (unused by this strategy, but required for interface consistency)
 
         Returns:
             MatchResult if size is detected, None otherwise

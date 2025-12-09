@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sotd.match.types import MatchResult, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
@@ -56,7 +58,7 @@ class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
         compiled_patterns.sort(key=lambda x: len(x["pattern"]), reverse=True)
         return compiled_patterns
 
-    def match(self, value: str | dict) -> MatchResult:
+    def match(self, value: str | dict, full_string: Optional[str] = None) -> MatchResult:
         # Handle both string and field data object inputs
         if isinstance(value, dict):
             # Extract normalized text from field data object

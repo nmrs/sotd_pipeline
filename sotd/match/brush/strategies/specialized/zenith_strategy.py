@@ -10,7 +10,7 @@ from ..utils.pattern_utils import (
 
 
 class ZenithBrushMatchingStrategy:
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         # Use unified string validation
         normalized_text = validate_string_input(value)
         if normalized_text is None:

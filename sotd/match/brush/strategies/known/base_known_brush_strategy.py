@@ -1,6 +1,7 @@
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Optional
 
 from sotd.match.types import MatchResult, create_match_result
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
@@ -49,7 +50,7 @@ class BaseKnownBrushMatchingStrategy(BaseBrushMatchingStrategy, ABC):
             metadata_fields=["fiber", "knot_size_mm", "handle_maker"],
         )
 
-    def match(self, value: str) -> MatchResult:
+    def match(self, value: str, full_string: Optional[str] = None) -> MatchResult:
         """
         Common pattern matching logic for known brush strategies.
 

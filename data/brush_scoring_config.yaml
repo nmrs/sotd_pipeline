@@ -66,7 +66,7 @@ brush_scoring_weights:
       high_confidence: 20.0
 
     full_input_component_matching:
-      multiple_brands: 100.0
+      multiple_brands: 120.0
       handle_weight: 0.0
       knot_weight: 0.0
       handle_brand_without_knot_brand: -15.0

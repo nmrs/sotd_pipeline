@@ -47,7 +47,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         self.high_priority_delimiters = BrushDelimiterPatterns.get_high_priority_delimiters()
         self.medium_priority_delimiters = BrushDelimiterPatterns.get_medium_priority_delimiters()
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Try to match using unified automated split logic.
 
@@ -259,7 +259,7 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
         """Create a MatchResult for a split brush."""
         # Use the handle and knot matchers to match the split parts
         handle_result = self.handle_matcher.match(handle)
-        knot_result = self.knot_matcher.match(knot)
+        knot_result = self.knot_matcher.match(knot, full_string=original_value)
 
         # Create a basic match result structure
         result = MatchResult(

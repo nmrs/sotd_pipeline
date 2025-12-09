@@ -35,7 +35,7 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         self.knot_matcher = knot_matcher
         self.catalogs = catalogs
 
-    def match(self, value: str | dict) -> Optional[MatchResult]:
+    def match(self, value: str | dict, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Match a brush string using unified component matching logic.
         Returns the best single result for backward compatibility.

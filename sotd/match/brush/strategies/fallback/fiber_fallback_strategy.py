@@ -25,12 +25,13 @@ class FiberFallbackStrategy(BaseBrushMatchingStrategy):
     with brand=None and model=fiber_type.
     """
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Attempt to match the given string by detecting fiber types.
 
         Args:
-            value: The knot text to match
+            value: The knot text to match (may be a split portion)
+            full_string: The full original string (unused by this strategy, but required for interface consistency)
 
         Returns:
             MatchResult if fiber is detected, None otherwise

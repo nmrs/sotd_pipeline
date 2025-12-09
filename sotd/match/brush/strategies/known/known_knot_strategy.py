@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sotd.match.types import MatchResult
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
@@ -69,8 +71,14 @@ class KnownKnotMatchingStrategy:
         all_patterns.sort(key=lambda x: len(x["pattern"]), reverse=True)
         return all_patterns
 
-    def match(self, value: str) -> MatchResult:
-        """Match input against known knot patterns. Always returns a MatchResult."""
+    def match(self, value: str, full_string: Optional[str] = None) -> MatchResult:
+        """Match input against known knot patterns. Always returns a MatchResult.
+        
+        Args:
+            value: The text to match against (may be a split portion)
+            full_string: The full original string (for negative lookahead patterns).
+                        If None, uses value as full_string.
+        """
         if not validate_string_input(value):
             return create_strategy_result(
                 original_value=value,
@@ -79,8 +87,16 @@ class KnownKnotMatchingStrategy:
                 strategy_name="KnownKnotMatchingStrategy",
             )
 
+        # When full_string is None, use value as full_string (backward compatibility)
+        effective_full_string = full_string if full_string is not None else value
+
         for pattern_data in self.patterns:
-            if pattern_data["compiled"].search(value):
+            # Check pattern against both split text and full string
+            # Pattern matches if it matches the split text AND the full string
+            matches_split = pattern_data["compiled"].search(value)
+            matches_full = pattern_data["compiled"].search(effective_full_string)
+            
+            if matches_split and matches_full:
                 # Extract size from input text if available
                 extracted_size = parse_knot_size(value)
 

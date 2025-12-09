@@ -30,7 +30,7 @@ class HighPriorityAutomatedSplitStrategy(BaseBrushMatchingStrategy):
         self.scoring_config = scoring_config
         self.strategy_name = "high_priority_automated_split"
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Try to match using legacy high_priority_automated_split logic.
 

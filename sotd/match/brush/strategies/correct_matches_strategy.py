@@ -33,7 +33,7 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
         self.checker = CorrectMatchesChecker(correct_matches_data)
         self.catalogs = catalogs or {}
 
-    def match(self, value: str) -> Optional[MatchResult]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
         Match the input value against correct_matches.yaml.
 

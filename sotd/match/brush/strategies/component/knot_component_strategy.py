@@ -23,6 +23,7 @@ class KnotComponentStrategy(BaseBrushMatchingStrategy):
     def match(
         self,
         value: str,
+        full_string: Optional[str] = None,
         cached_results: Optional[dict] = None,
         unified_result: Optional[MatchResult] = None,
     ) -> Optional[MatchResult]:

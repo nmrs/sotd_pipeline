@@ -28,12 +28,14 @@ class KnotMatcher:
                 priorities[strategy] = ("unknown", i)
         return priorities
 
-    def match(self, value: str) -> Optional["MatchResult"]:
+    def match(self, value: str, full_string: Optional[str] = None) -> Optional["MatchResult"]:
         """
         Match knot patterns in the given text using all available strategies.
 
         Args:
-            value: Text to match against
+            value: Text to match against (may be a split portion)
+            full_string: The full original string (for negative lookahead patterns).
+                        If None, uses value as full_string for backward compatibility.
 
         Returns:
             MatchResult if a match is found, None otherwise
@@ -41,9 +43,12 @@ class KnotMatcher:
         if not value or not isinstance(value, str):
             return None
 
+        # When full_string is None, use value as full_string (backward compatibility)
+        effective_full_string = full_string if full_string is not None else value
+
         for strategy in self.strategies:
             try:
-                result = strategy.match(value)
+                result = strategy.match(value, effective_full_string)
                 if result and result.matched:
                     # Add section/priority information to the result
                     section, priority = self.section_priorities.get(strategy, ("unknown", 999))
@@ -107,7 +112,7 @@ class KnotMatcher:
             if strategy.__class__.__name__ == handle_result.get("_matched_by_strategy"):
                 continue
 
-            result = strategy.match(value)
+            result = strategy.match(value, value)  # For fallback, use same value for both
             if result.matched:
                 knot_match = result.matched.copy()
                 # If we found a different brand, prioritize it as the knot maker
@@ -129,7 +134,7 @@ class KnotMatcher:
     ) -> Optional["MatchResult"]:
         """Match brush with knot priority (when we have a clear handle/knot split)."""
         for strategy in self.strategies:
-            result = strategy.match(knot)
+            result = strategy.match(knot, value)  # Pass full value as full_string
             # All strategies now return MatchResult objects
             if result.matched:
                 m = extract_match_dict_func(result, strategy, "knot_part", handle, knot)
@@ -155,7 +160,7 @@ class KnotMatcher:
     ) -> Optional["MatchResult"]:
         """Match brush with handle priority (when we have a clear handle/knot split)."""
         for strategy in self.strategies:
-            result = strategy.match(handle)
+            result = strategy.match(handle, value)  # Pass full value as full_string
             # All strategies now return MatchResult objects
             if result.matched:
                 m = extract_match_dict_func(result, strategy, "handle_part", handle, knot)
