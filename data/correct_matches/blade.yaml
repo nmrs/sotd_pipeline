@@ -20,7 +20,6 @@ AC:
     Pro:
     - feather - professional
     - feather - professional ac
-    - feather ac - soft guard
     - feather ac pro
     - feather artist club
     - feather artist club pro
@@ -126,8 +125,6 @@ Cartridge/Disposable:
       - personna twin pivot plus (atra) cart
       - personna twin pivot plus refills, atra
       - schick cartridge
-      - schick xtreme 2 sensitive
-      - whatever schick stuffs into this thing
 DE:
   7 O'Clock:
     Sharpedge (Yellow):
@@ -571,7 +568,6 @@ DE:
     - gillette sputnik
     Stainless:
     - gillette - stainless
-    - gillette goal stainless
     Super Silver:
     - english gillette super silver 1980
     - gillette super silver
@@ -780,13 +776,6 @@ DE:
     - personna super blue
     - personna super stainless
     - personne super stainless
-    Super+ Platinum:
-    - crystal stainless (israeli personna)
-    - personna (crystal) platinum
-    - personna blue crystal
-    - personna crystal blue
-    - personna crystal super
-    - personna platinum (crystal)
   Polsilver:
     Super Iridium:
     - polisilver
@@ -1089,7 +1078,6 @@ GEM:
     PTFE:
     - accuforge - gem microcoat
     - accuforge coated
-    - accuforge gem coated stainless steel
     - accuforge gem microcoat
     - accuforge pro ptfe gem
     - accutec - pro premium coated

@@ -1763,6 +1763,12 @@ known_knot_based_brushes:
       knot_loft_mm: 64
       patterns:
         - zenith.*\bb18\b
+    B21:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 50
+      patterns:
+        - zenith.*\bb21\b
     B25:
       fiber: Boar
       knot_size_mm: 27.5

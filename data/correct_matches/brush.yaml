@@ -619,11 +619,19 @@ Dogwood:
   Badger:
   - dh shd
   - dh shd badger
+  - dogwood handcrafts "fly fishing" 26mm badger
+  - dogwood handcrafts - 26mm
+  - dogwood handcrafts - ziost - 26mm fan (silvertip badger)
   - dogwood handcrafts 24mm 2-band
   - dogwood handcrafts 24mm 2-band bulb
   - dogwood handcrafts 30mm silver tip
   - dogwood handcrafts fly fishing
+  - dogwood handcrafts fly fishing 28mm badger
   - dogwood handcrafts green white swirl 26mm shd2 band bulb badger
+  - dogwood handcrafts jurassic silvertip
+  - dogwood handcrafts reindeer 28mm
+  - dogwood handcrafts titan
+  - dogwood handcrafts titan 26mm badger
   - dogwood harambe silvertip 32mm
   Boar:
   - dogwood handcrafts - faux ivory - 26mm boar
@@ -631,8 +639,11 @@ Dogwood:
   - dogwood handcrafts - lava flow w/26mm mixed
   - dogwood handcrafts - starscape w/24m mixed
   - dogwood handcrafts - starscape w/24mm mixed
+  - dogwood handcrafts - starscape w/24mm mixed bulb
   SHD Badger:
   - dogwood 28mm green/white super high density badger
+  - dogwood handcrafts / shd
+  - dogwood handcrafts 28mm shd stormtrooper
   - dogwood handcrafts ebony 28mm shd badger fan
   - dogwood handcrafts kyle shd
   - dogwood handcrafts shd
@@ -642,11 +653,22 @@ Dogwood:
   - dogwood 30mm synthetic orange/white
   - dogwood handcrafts "mighty stag" 24mm cashmere
   - dogwood handcrafts 26mm quartermoon synthetic
+  - dogwood handcrafts hybrid synth
   - dogwood handcrafts matte orange/black motherload 26mm
+  - dogwood handcrafts mighty stag 24mm cashmere
+  - dogwood handcrafts seascape synthetic
   - dogwood independent t2 26mm
   Timberwolf:
+  - dogwood 3d 26mm timberwolf
+  - dogwood 3d timberwolf 26mm
+  - dogwood handcrafts - milkglass - 28mm timberwolf synthetic
+  - dogwood handcrafts 26 mm timberwolf
   - dogwood handcrafts arcane abyss timberwolf
   - dogwood handcrafts milkglass timberwolf
+  - dogwood handcrafts white timberwolf
+  - dogwood hybrid 26mm timberwolf
+  Tuxedo:
+  - dogwood hybrid 26mm tuxedo
 Dovo:
   Synthetic:
   - dovo - synthetic olivewood
@@ -1205,8 +1227,6 @@ RazoRock:
   - razorock plissoft big bruce
   Blondie:
   - boar razorock the blondie
-  - razorock boar (made by zenith)
-  - razorock/ zenith blondie boar in olive wood handle
   Bruce:
   - razorock bruce
   Synthetic:
