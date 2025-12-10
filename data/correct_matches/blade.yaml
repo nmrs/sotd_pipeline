@@ -53,6 +53,7 @@ AC:
     - feather proguard
     - feather proguard (ac)
     Soft Guard:
+    - feather ac - soft guard
     - feather soft guard ac
     - feather softguard
   Generic:
@@ -62,6 +63,7 @@ AC:
     Captain:
     - kai - captain original
     - kai ac
+    - kai captain standard
     Captain ProTouch:
     - kai - captain titan mild pro touch mg
     - kai - captain titan mild protouch mg
@@ -776,6 +778,12 @@ DE:
     - personna super blue
     - personna super stainless
     - personne super stainless
+    Super+ Platinum:
+    - crystal stainless (israeli personna)
+    - personna (crystal) platinum
+    - personna blue crystal
+    - personna crystal blue
+    - personna platinum (crystal)
   Polsilver:
     Super Iridium:
     - polisilver
