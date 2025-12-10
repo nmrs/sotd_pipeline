@@ -59,6 +59,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - bullseye
+  Butchwood:
+    Unspecified:
+      patterns:
+        - butchwood
   C-Mon:
     Unspecified:
       patterns:
@@ -71,6 +75,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - carn.*rich
+        - c&r industry
   Catalin:
     Unspecified:
       patterns:
@@ -150,7 +155,7 @@ artisan_handles:
   Elite:
     Unspecified:
       patterns:
-        - elite
+        - elite(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Envy Shave:
     Unspecified:
       patterns:
@@ -179,6 +184,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - fireh.*pott
+  Forgotten Art:
+    Unspecified:
+      patterns:
+        - forgotten.*\bart\b
   Frank Shaving:
     Unspecified:
       patterns:
@@ -687,7 +696,7 @@ manufacturer_handles:
   PAA:
     Unspecified:
       patterns:
-        - paa
+        - paa(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - phoenix.*art
   Paragon:
     Unspecified:
@@ -868,3 +877,7 @@ other_handles:
     Galvanized Nipple:
       patterns:
         - southland.*galvanized.*nipple
+  Twister Tern:
+    Unspecified:
+      patterns:
+        - twister.*tern

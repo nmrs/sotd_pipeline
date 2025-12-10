@@ -103,8 +103,8 @@ known_knots:
     Pure Bliss:
       fiber: Synthetic
       patterns:
-        - pure\s*bliss(?!.*shd)
-        - \bpb\b(?!.*shd)
+        - pure\s*bliss(?!.*(shd|badger))
+        - \bpb\b(?!.*(shd|badger))
     Pure Bliss SHD:
       fiber: Synthetic
       patterns:
@@ -352,7 +352,7 @@ known_knots:
         - \bb0?9b\+?\b
     B10:
       patterns:
-        - \bb10\b
+        - ^(?!.*zen).*\bb10\b
     B11:
       patterns:
         - \bb11\b
@@ -364,7 +364,7 @@ known_knots:
         - \bb13\b
     B14:
       patterns:
-        - \bb14\b
+        - ^(?!.*zen).*\bb14\b
     B15:
       patterns:
         - ^(?!.*zen).*\bb15\b
@@ -527,7 +527,7 @@ known_knots:
       fiber: Badger
       knot_size_mm: 26
       patterns:
-        - rich.*man.*shav.*s-?2.*innovator
+        - rich.*man.*s-?2.*(innovator)?
   Trotter Handcrafts:
     T1 Manchurian Badger:
       fiber: Badger
@@ -910,6 +910,7 @@ other_knots:
     default: Synthetic
     patterns:
       - frank.*sha
+      - \bfs\b
   Geo F. Trumper:
     default: Badger
     patterns:
@@ -1065,7 +1066,7 @@ other_knots:
   Oumo:
     default: Badger
     patterns:
-      - \bo(o|u)+mo\b
+      - \b[ou]+mo\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - rorschach
   Oz Shaving:
     default: Synthetic
@@ -1148,6 +1149,10 @@ other_knots:
     default: Synthetic
     patterns:
       - shavedandy
+  Shavemac:
+    default: Badger
+    patterns:
+      - shavemac
   Sawdust Creation Studios:
     default: Synthetic
     patterns:
@@ -1160,6 +1165,10 @@ other_knots:
     default: Badger
     patterns:
       - simpson
+  Shave Forge:
+    default: Badger
+    patterns:
+      - shave.*forge
   Strike Gold Shave:
     default: Synthetic
     patterns:
@@ -1293,5 +1302,5 @@ other_knots:
   Zenith:
     default: Boar
     patterns:
-      - zenith
+      - ^(?!.*razorock).*zenith
       - zenith.*\bb\d+

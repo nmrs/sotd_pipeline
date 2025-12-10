@@ -521,8 +521,8 @@ DE:
     Super+ Platinum:
       patterns:
         - person+a.*super.*plat
-        - person+a.*crystal
-        - crystal.*person+a
+        - person+a.*crystal(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - crystal.*person+a(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     TOMY:
       patterns:
         - \btomy\b
