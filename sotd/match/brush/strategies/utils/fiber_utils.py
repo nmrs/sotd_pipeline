@@ -18,7 +18,7 @@ _FIBER_PATTERNS = {
     # General fiber types (checked last)
     "Badger": (
         r"(hmw|high.*mo|(2|3|two|three)[\s-]*band|shd|badger|silvertip|super|"
-        r"fan|gelo|gelous|gelousy|finest|best|ultralux|[fm]anchurian|\blod\b)"
+        r"gelo|gelous|gelousy|finest|best|ultralux|[fm]anchurian|\blod\b)"
     ),
     "Boar": r"\b(boar|shoat)\b",
     "Horse": r"\bhorse(hair)?\b",
