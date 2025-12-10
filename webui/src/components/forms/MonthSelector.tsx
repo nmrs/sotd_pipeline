@@ -28,10 +28,19 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   const { availableMonths, loading, error } = useAvailableMonths();
   const [isOpen, setIsOpen] = useState(false);
   const [deltaMonthsEnabled, setDeltaMonthsEnabled] = useState(false);
+  const [primaryMonths, setPrimaryMonths] = useState<string[]>(selectedMonths);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Calculate delta months when enabled
-  const deltaCalculation = deltaMonthsEnabled ? calculateDeltaMonths(selectedMonths) : null;
+  // Sync primaryMonths when selectedMonths prop changes externally
+  useEffect(() => {
+    // Only update if delta is not enabled, or if the change doesn't match our internal state
+    if (!deltaMonthsEnabled) {
+      setPrimaryMonths(selectedMonths);
+    }
+  }, [selectedMonths, deltaMonthsEnabled]);
+
+  // Calculate delta months from primary months when enabled
+  const deltaCalculation = deltaMonthsEnabled ? calculateDeltaMonths(primaryMonths) : null;
   // Note: effectiveSelectedMonths is only used for display, not for filtering delta months
   const effectiveSelectedMonths =
     deltaMonthsEnabled && deltaCalculation ? deltaCalculation.allMonths : selectedMonths;
@@ -94,41 +103,127 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   }, [isOpen]);
 
   const handleMonthChange = (month: string, checked: boolean) => {
-    let newSelectedMonths: string[];
+    if (checked) {
+      // Adding a month
+      if (deltaMonthsEnabled && deltaCalculation) {
+        // Check if this is a delta month being manually re-checked
+        const isDelta = deltaCalculation.deltaMonths.includes(month);
+        if (isDelta) {
+          // It's a delta month, just add it back to selectedMonths
+          const newSelectedMonths = [...selectedMonths, month];
+          onMonthsChange(newSelectedMonths);
+          return;
+        }
+      }
 
-    if (multiple) {
-      if (checked) {
-        newSelectedMonths = [...selectedMonths, month];
+      // It's a primary month being added
+      let newPrimaryMonths: string[];
+      if (multiple) {
+        newPrimaryMonths = [...primaryMonths, month];
       } else {
-        newSelectedMonths = selectedMonths.filter(m => m !== month);
+        newPrimaryMonths = [month];
+      }
+
+      setPrimaryMonths(newPrimaryMonths);
+
+      // If delta is enabled, recalculate delta and merge
+      if (deltaMonthsEnabled) {
+        const newDeltaCalc = calculateDeltaMonths(newPrimaryMonths);
+        if (newDeltaCalc) {
+          const allMonths = [...new Set([...newPrimaryMonths, ...newDeltaCalc.deltaMonths])];
+          updateMonthsAndDelta(allMonths, newPrimaryMonths);
+        } else {
+          updateMonthsAndDelta(newPrimaryMonths, newPrimaryMonths);
+        }
+      } else {
+        // Delta not enabled, just update selectedMonths
+        const newSelectedMonths = multiple ? [...selectedMonths, month] : [month];
+        updateMonthsAndDelta(newSelectedMonths, newPrimaryMonths);
       }
     } else {
-      newSelectedMonths = checked ? [month] : [];
-    }
+      // Removing a month
+      if (deltaMonthsEnabled && deltaCalculation) {
+        // Check if this is a delta month
+        const isDelta = deltaCalculation.deltaMonths.includes(month);
+        if (isDelta) {
+          // Remove delta month and disable delta checkbox
+          const newSelectedMonths = selectedMonths.filter(m => m !== month);
+          setDeltaMonthsEnabled(false);
+          if (onDeltaMonthsChange) {
+            onDeltaMonthsChange([]);
+          }
+          onMonthsChange(newSelectedMonths);
+          return;
+        }
+      }
 
-    updateMonthsAndDelta(newSelectedMonths);
+      // It's a primary month being removed
+      let newPrimaryMonths = primaryMonths.filter(m => m !== month);
+      setPrimaryMonths(newPrimaryMonths);
+
+      if (deltaMonthsEnabled) {
+        // Recalculate delta months from updated primary months
+        const newDeltaCalc = calculateDeltaMonths(newPrimaryMonths);
+        if (newDeltaCalc) {
+          const allMonths = [...new Set([...newPrimaryMonths, ...newDeltaCalc.deltaMonths])];
+          updateMonthsAndDelta(allMonths, newPrimaryMonths);
+        } else {
+          updateMonthsAndDelta(newPrimaryMonths, newPrimaryMonths);
+        }
+      } else {
+        // Delta not enabled, just remove from selectedMonths
+        const newSelectedMonths = multiple
+          ? selectedMonths.filter(m => m !== month)
+          : [];
+        if (!multiple) {
+          newPrimaryMonths = [];
+        }
+        updateMonthsAndDelta(newSelectedMonths, newPrimaryMonths);
+      }
+    }
   };
 
   const handleDeltaMonthsToggle = (enabled: boolean) => {
-    setDeltaMonthsEnabled(enabled);
-
-    if (enabled && onDeltaMonthsChange) {
-      // Calculate delta months immediately with current selectedMonths
+    if (enabled) {
+      // Store current selectedMonths as primary months
+      setPrimaryMonths(selectedMonths);
+      // Calculate delta months from primary months
       const newDeltaCalculation = calculateDeltaMonths(selectedMonths);
       if (newDeltaCalculation) {
-        onDeltaMonthsChange(newDeltaCalculation.deltaMonths);
+        // Merge primary + delta months into selectedMonths
+        const allMonths = [...new Set([...selectedMonths, ...newDeltaCalculation.deltaMonths])];
+        onMonthsChange(allMonths);
+        if (onDeltaMonthsChange) {
+          onDeltaMonthsChange(newDeltaCalculation.deltaMonths);
+        }
       }
-    } else if (!enabled && onDeltaMonthsChange) {
-      onDeltaMonthsChange([]);
+      setDeltaMonthsEnabled(true);
+    } else {
+      // Filter out all delta months, keep only primary months
+      if (deltaCalculation) {
+        onMonthsChange(primaryMonths);
+      } else {
+        onMonthsChange(selectedMonths);
+      }
+      if (onDeltaMonthsChange) {
+        onDeltaMonthsChange([]);
+      }
+      setDeltaMonthsEnabled(false);
     }
   };
 
-  const updateMonthsAndDelta = (newMonths: string[]) => {
+  const updateMonthsAndDelta = (newMonths: string[], newPrimaryMonths?: string[]) => {
     onMonthsChange(newMonths);
+
+    // Update primary months if provided
+    if (newPrimaryMonths !== undefined) {
+      setPrimaryMonths(newPrimaryMonths);
+    }
 
     // Update delta months if enabled
     if (deltaMonthsEnabled && onDeltaMonthsChange) {
-      const newDeltaCalculation = calculateDeltaMonths(newMonths);
+      const primaryForDelta = newPrimaryMonths !== undefined ? newPrimaryMonths : primaryMonths;
+      const newDeltaCalculation = calculateDeltaMonths(primaryForDelta);
       if (newDeltaCalculation) {
         onDeltaMonthsChange(newDeltaCalculation.deltaMonths);
       }
@@ -136,24 +231,63 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   };
 
   const selectAll = () => {
-    updateMonthsAndDelta([...effectiveAvailableMonths]);
+    const allMonths = [...effectiveAvailableMonths];
+    setPrimaryMonths(allMonths);
+    if (deltaMonthsEnabled) {
+      const deltaCalc = calculateDeltaMonths(allMonths);
+      if (deltaCalc) {
+        const allWithDelta = [...new Set([...allMonths, ...deltaCalc.deltaMonths])];
+        updateMonthsAndDelta(allWithDelta, allMonths);
+      } else {
+        updateMonthsAndDelta(allMonths, allMonths);
+      }
+    } else {
+      updateMonthsAndDelta(allMonths, allMonths);
+    }
   };
 
   const clearAll = () => {
-    updateMonthsAndDelta([]);
+    setPrimaryMonths([]);
+    updateMonthsAndDelta([], []);
   };
 
   const selectYearToDate = () => {
     const ytdMonths = getYearToDateMonths();
     // Only select months that are available in the system
     const availableYtdMonths = ytdMonths.filter(month => effectiveAvailableMonths.includes(month));
-    updateMonthsAndDelta(availableYtdMonths);
+    setPrimaryMonths(availableYtdMonths);
+    if (deltaMonthsEnabled) {
+      const deltaCalc = calculateDeltaMonths(availableYtdMonths);
+      if (deltaCalc) {
+        const allWithDelta = [...new Set([...availableYtdMonths, ...deltaCalc.deltaMonths])];
+        updateMonthsAndDelta(allWithDelta, availableYtdMonths);
+      } else {
+        updateMonthsAndDelta(availableYtdMonths, availableYtdMonths);
+      }
+    } else {
+      updateMonthsAndDelta(availableYtdMonths, availableYtdMonths);
+    }
   };
 
   const selectLast12Months = () => {
     const last12Months = getLast12Months();
-    // Select full last 12 months range
-    updateMonthsAndDelta(last12Months);
+    setPrimaryMonths(last12Months);
+    if (deltaMonthsEnabled) {
+      const deltaCalc = calculateDeltaMonths(last12Months);
+      if (deltaCalc) {
+        const allWithDelta = [...new Set([...last12Months, ...deltaCalc.deltaMonths])];
+        updateMonthsAndDelta(allWithDelta, last12Months);
+      } else {
+        updateMonthsAndDelta(last12Months, last12Months);
+      }
+    } else {
+      updateMonthsAndDelta(last12Months, last12Months);
+    }
+  };
+
+  const isDeltaMonth = (month: string): boolean => {
+    if (!deltaMonthsEnabled || !deltaCalculation) return false;
+    return deltaCalculation.deltaMonths.includes(month);
   };
 
   const getDisplayText = () => {
@@ -267,18 +401,26 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
               <p className='text-gray-500 text-sm py-2'>No months available</p>
             ) : (
               <div className='space-y-1'>
-                {effectiveAvailableMonths.map(month => (
-                  <label
-                    key={month}
-                    className='flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer'
-                  >
-                    <Checkbox
-                      checked={selectedMonths.includes(month)}
-                      onCheckedChange={checked => handleMonthChange(month, checked as boolean)}
-                    />
-                    <span className='text-sm text-gray-700'>{month}</span>
-                  </label>
-                ))}
+                {effectiveAvailableMonths.map(month => {
+                  const isDelta = isDeltaMonth(month);
+                  return (
+                    <label
+                      key={month}
+                      className='flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer'
+                    >
+                      <Checkbox
+                        checked={selectedMonths.includes(month)}
+                        onCheckedChange={checked => handleMonthChange(month, checked as boolean)}
+                      />
+                      <span
+                        className={`text-sm ${isDelta ? 'text-gray-500 italic' : 'text-gray-700'}`}
+                      >
+                        {month}
+                        {isDelta && <span className='ml-1 text-xs'>(delta)</span>}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
             )}
           </div>
