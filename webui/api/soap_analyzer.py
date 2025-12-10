@@ -608,14 +608,42 @@ def analyze_soap_neighbor_similarity_web(
                 "scent": first_match["matched"].get("scent", ""),
             }
 
-        # Get next entry for display
+        # Recalculate entry from matched data for consistency
+        # This ensures the entry string matches the actual matched brand/scent,
+        # even if different records had slightly different formatting
+        entry = current["entry"]
+        if matched_data and mode == "brand_scent":
+            # Recalculate entry from matched data to ensure consistency
+            recalculated_entry = f"{matched_data['brand']} - {matched_data['scent']}"
+            entry = recalculated_entry
+        elif matched_data and mode == "brands":
+            entry = matched_data["brand"]
+        elif matched_data and mode == "scents":
+            entry = matched_data["scent"]
+
+        # Get next entry for display (recalculate it too for consistency)
         next_entry = None
         if i < len(entries_with_similarities) - 1:
-            next_entry = entries_with_similarities[i + 1]["entry"]
+            next_group = entries_with_similarities[i + 1]
+            next_first_match = next_group["original_matches"][0]
+            next_matched_data = None
+            if "matched" in next_first_match and next_first_match["matched"]:
+                next_matched_data = {
+                    "brand": next_first_match["matched"].get("brand", ""),
+                    "scent": next_first_match["matched"].get("scent", ""),
+                }
+            if next_matched_data and mode == "brand_scent":
+                next_entry = f"{next_matched_data['brand']} - {next_matched_data['scent']}"
+            elif next_matched_data and mode == "brands":
+                next_entry = next_matched_data["brand"]
+            elif next_matched_data and mode == "scents":
+                next_entry = next_matched_data["scent"]
+            else:
+                next_entry = next_group["entry"]
 
         results.append(
             {
-                "entry": current["entry"],
+                "entry": entry,
                 "similarity_to_above": similarity_to_above,
                 "similarity_to_next": similarity_to_below,
                 "next_entry": next_entry,
