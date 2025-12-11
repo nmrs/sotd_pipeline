@@ -2571,7 +2571,11 @@ Supply:
       - supply.*easy.*load
       - supply.*se.*2\.0
       - supply.*se\b
-      - ^supply$
+      - supply
+  Single Edge Max:
+    format: Injector
+    patterns:
+      - supply.*(adjus|max)
   Single Edge (V1/V2):
     format: Injector
     patterns:

@@ -101,6 +101,12 @@ blade:
     - file: 2025-06.json
       id: mw99op2
       source: user
+  synthetic 1-4-8-12k - translucent ark finish:
+    added_date: '2025-12-11'
+    comment_ids:
+    - file: 2025-10.json
+      id: nme0t3m
+      source: user
   the three that come on it:
     added_date: '2025-08-25'
     comment_ids:

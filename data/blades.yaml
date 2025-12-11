@@ -237,6 +237,10 @@ DE:
     Super Stainless:
       patterns:
         - crown.*stainless
+  Crystal:
+    Stainless:
+      patterns:
+        - crystal.*(stain|ss)
   Derby:
     Extra:
       patterns:
@@ -342,6 +346,7 @@ DE:
       patterns:
         - gil.*pla
         - gil.*\bswede\b
+        - plat
     Rubie:
       patterns:
         - rubie
@@ -523,6 +528,8 @@ DE:
         - person+a.*super.*plat
         - person+a.*crystal(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - crystal.*person+a(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - crystal.*plat
+        - crystal
     TOMY:
       patterns:
         - \btomy\b
@@ -642,6 +649,7 @@ DE:
     Diamond Edge:
       patterns:
       - diamond ?edge
+      - diamond.*platinum
     Platinum:
       patterns:
         - super[\s-]*max.*plat
