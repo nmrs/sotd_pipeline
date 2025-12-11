@@ -22,6 +22,7 @@ from .files import router as files_router
 from .filtered import router as filtered_router
 from .format_compatibility import router as format_compatibility_router
 from .monthly_user_posts import router as monthly_user_posts_router
+from .product_usage import router as product_usage_router
 from .soap_analyzer import router as soap_analyzer_router
 
 # Create logs directory if it doesn't exist
@@ -97,6 +98,7 @@ app.include_router(brush_validation_router)
 app.include_router(brush_matching_router)
 app.include_router(soap_analyzer_router)
 app.include_router(monthly_user_posts_router)
+app.include_router(product_usage_router)
 app.include_router(format_compatibility_router)
 
 # Add CORS middleware for local development

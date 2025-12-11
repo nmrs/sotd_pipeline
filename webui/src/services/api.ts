@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { BrushSplit } from '@/types/brushSplit';
+import { Product, ProductUsageAnalysis } from '@/types/productUsage';
 
 // Use different base URL for tests vs development
 const API_BASE_URL =
@@ -996,6 +997,50 @@ export const undoLastValidationAction = async (
     return response.data;
   } catch (error) {
     console.error('Error undoing last validation action:', error);
+    throw error;
+  }
+};
+
+// Product usage operations
+export const getProductsForMonth = async (
+  month: string,
+  productType: string,
+  search?: string
+): Promise<Product[]> => {
+  try {
+    const params = new URLSearchParams();
+    if (search) {
+      params.append('search', search);
+    }
+    const response = await api.get(
+      `/product-usage/products/${month}/${productType}?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch products for month ${month} and type ${productType}:`, error);
+    throw error;
+  }
+};
+
+export const getProductUsageAnalysis = async (
+  month: string,
+  productType: string,
+  brand: string,
+  model: string
+): Promise<ProductUsageAnalysis> => {
+  try {
+    // URL encode brand and model to handle special characters
+    const encodedBrand = encodeURIComponent(brand);
+    const encodedModel = encodeURIComponent(model);
+    const response = await api.get(
+      `/product-usage/analysis/${month}/${productType}/${encodedBrand}/${encodedModel}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to fetch product usage analysis for ${productType} '${brand} ${model}' in month ${month}:`,
+      error
+    );
     throw error;
   }
 };

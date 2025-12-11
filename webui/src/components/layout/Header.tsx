@@ -46,6 +46,7 @@ const Header: React.FC = () => {
         { path: '/mismatch', label: 'Match Analyzer', icon: '📊' },
         { path: '/soap-analyzer', label: 'Soap Analyzer', icon: '🧼' },
         { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },
+        { path: '/product-usage', label: 'Product Usage', icon: '📦' },
         { path: '/format-compatibility', label: 'Format Compatibility', icon: '⚠️' },
       ],
     },

@@ -119,6 +119,15 @@ The backend provides a standardized REST API with the following endpoint structu
 - `POST /api/brushes/validation/action` - Perform validation action
 - `POST /api/brushes/matching/analyze` - Analyze brush matching
 
+#### Product Usage Endpoints (`/api/product-usage/`)
+- `GET /api/product-usage/products/{month}/{product_type}` - Get list of available products for a month and product type
+  - Query parameters: `search` (optional) - Filter products by brand/model
+  - Product types: `razor`, `blade`, `brush`, `soap`
+  - Returns: List of products with `key`, `brand`, `model`, `usage_count`, `unique_users`
+- `GET /api/product-usage/analysis/{month}/{product_type}/{brand}/{model}` - Get product usage analysis
+  - Returns: Product usage analysis with users, usage counts, dates, and comment IDs
+- `GET /api/product-usage/health` - Health check endpoint
+
 #### Other Endpoints
 - `GET /api/catalogs/` - Get all catalogs
 - `GET /api/catalogs/{field}` - Get specific catalog

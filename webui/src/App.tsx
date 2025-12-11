@@ -13,6 +13,7 @@ import MatchAnalyzer from './pages/MatchAnalyzer';
 import CatalogValidator from './pages/CatalogValidator';
 import SoapAnalyzer from './pages/SoapAnalyzer';
 import MonthlyUserPosts from './pages/MonthlyUserPosts';
+import ProductUsage from './pages/ProductUsage';
 import { BrushMatchingAnalyzerPage } from './pages/BrushMatchingAnalyzerPage';
 import FormatCompatibilityAnalyzer from './pages/FormatCompatibilityAnalyzer';
 
@@ -34,6 +35,7 @@ function App() {
             <Route path='/catalog-validator' element={<CatalogValidator />} />
             <Route path='/soap-analyzer' element={<SoapAnalyzer />} />
             <Route path='/monthly-user-posts' element={<MonthlyUserPosts />} />
+            <Route path='/product-usage' element={<ProductUsage />} />
             <Route path='/brush-matching-analyzer' element={<BrushMatchingAnalyzerPage />} />
             <Route path='/format-compatibility' element={<FormatCompatibilityAnalyzer />} />
           </Routes>
