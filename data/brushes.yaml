@@ -195,6 +195,13 @@ known_brushes:
       knot_loft_mm: 55
       patterns:
         - fendrihan.*pure.*grey
+  Goodfellas Smile:
+    The Deep:
+      fiber: Synthetic
+      knot_size_mm: 24
+      knot_loft_mm: 50
+      patterns:
+        - (goodfellas|tgs).*deep
   Groomatorium:
     Synthetic:
       fiber: Synthetic
@@ -950,6 +957,7 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - stirl.*(?:2|two)(?:-|\s)+band
+        - stirl.*24.*synth
     Boar Brush:
       fiber: Boar
       knot_size_mm: 24
@@ -961,7 +969,7 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - stirling.*finest
-        - stirling.*24.*badger
+        - stirling.*24.*(badger|fan)
     Kong Synthetic:
       fiber: Synthetic
       knot_size_mm: 26

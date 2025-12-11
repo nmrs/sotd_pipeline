@@ -1083,7 +1083,8 @@ GEM:
     - gem - blue star uncoated blades
     - gem blue star
     - gem blue star (uncoated)
-    PTFE:
+  Personna:
+    GEM PTFE:
     - accuforge - gem microcoat
     - accuforge coated
     - accuforge gem microcoat
@@ -1124,7 +1125,7 @@ GEM:
     - personne - gem ptfe
     - ptfe
     - ptfe (?)
-    Stainless:
+    GEM Stainless:
     - accutec - gem stainless
     - gem - coated single edge stainless steel
     - gem single edge stainless
@@ -1133,7 +1134,7 @@ GEM:
     - gem stainless
     - personna gem stainless
   PAL:
-    Blue Blade:
+    Blue Blade (GEM):
     - pal - single edge carbon steel blue
     - pal | single edge carbon steel blue blades
 Hair Shaper:

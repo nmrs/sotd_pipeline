@@ -820,7 +820,8 @@ GEM:
     Blue Star:
       patterns:
         - blue.*star
-    PTFE:
+  Personna:
+    GEM PTFE:
       patterns:
         - (person|gem).*p[tf]{2}e(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - gem by personna
@@ -833,14 +834,14 @@ GEM:
         - accu.*(coated|p[ft]{2}e)
         - pella.*ptfe
         - accu.*gem
-    Stainless:
+    GEM Stainless:
       patterns:
         - (personna)*gem.*stainless
         - gem.*ss
         - person.*gem.*uncoated
         - acc?utec.*(stain|\bss\b)
   PAL:
-    Blue Blade:
+    Blue Blade (GEM):
       patterns:
         - \bpal\b.*blue
 Hair Shaper:

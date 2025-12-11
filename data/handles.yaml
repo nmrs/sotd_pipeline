@@ -164,7 +164,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - erskine
-  Ever Ready:
+  Ever-Ready:
     100T:
       patterns:
         - (ever.*read|\ber\b).*100-?t

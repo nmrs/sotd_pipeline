@@ -21,9 +21,9 @@
     Ol' Red:
       patterns:
         - "345.*ol'? red"
-    Rky Mon Tree Line:
+    RKY MNT Tree Line:
       patterns:
-        - "rky (?:mtn|mnt) tree line"
+        - "ro?c?ky m.*tree ?line"
 A A Shaving:
   patterns:
     - "a ?a shaving"
@@ -298,6 +298,9 @@ Ariana & Evans:
     Vanille Vendetta:
       patterns:
         - (ariana|a&e|club).*vanil
+    Wake The F' Up:
+      patterns:
+        - wake the f.*up
     Which One's Pink:
       patterns:
         - which one'?s pink
@@ -420,7 +423,7 @@ Barbus:
 Barrister and Mann:
   patterns:
     - '\bb ?(and|&|\+|a)? ?m\b'
-    - 'barrister ?(and|\+|&) ?man+'
+    - 'barri[st]+er ?(and|\+|&) ?man+'
   scents:
     "42":
       patterns:
@@ -445,6 +448,9 @@ Barrister and Mann:
     Behold the Whatsis!:
       patterns:
         - '\bwhatsis\b'
+    Big Leap:
+      patterns:
+        - big leap
     Braeburn:
       patterns:
         - braeburn
@@ -516,7 +522,7 @@ Barrister and Mann:
     Hallows:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*h[oa]l+ows'
-        - barris.*h[ao]l+ows
+        - (barris|bam).*h[ao]l+ows
     Kalyptos:
       patterns:
         - kalyp[st]os
@@ -538,6 +544,10 @@ Barrister and Mann:
     Leviathan:
       patterns:
         - leviathan
+    Lime:
+      patterns:
+        - '\bb ?(and|&|\+) ?m\b.*lime'
+        - (barris|bam).*lime
     Lyssa:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*lyssi?a'
@@ -834,7 +844,7 @@ Castle Forbes:
         - castle forbes.*lime
 Catie's Bubbles:
   patterns:
-    - 'catie.*bub\w*s|\bcb\b'
+    - 'cati.*bub\w*s|\bcb\b'
     - cbubs
   scents:
     "'95 Liquid Labels":
@@ -877,6 +887,9 @@ Catie's Bubbles:
       patterns:
         - catie.*bubbles.*dftr
         - '\bcb\b.*dftr'
+    Dranks:
+      patterns:
+        - dranks
     Dusk:
       patterns:
         - catie.*bubbles.*dusk
@@ -934,7 +947,7 @@ Catie's Bubbles:
         - inspirazione di parma
     Pine Barrens:
       patterns:
-        - catie.*pine barrens
+        - pine barrens
     Porch Drinks:
       patterns:
         - porch drinks
@@ -1312,6 +1325,9 @@ Declaration Grooming:
     Mayflower:
       patterns:
         - mayflower
+    Opulence:
+      patterns:
+        - opulence
     Original:
       patterns:
         - (declaration|dg).*original
