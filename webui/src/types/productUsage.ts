@@ -26,3 +26,20 @@ export interface ProductUsageAnalysis {
   comments_by_date: Record<string, string[]>;
 }
 
+export interface MonthlyProductSummary {
+  month: string;
+  shaves: number;
+  unique_users: number;
+  rank: number | null;
+  has_data: boolean;
+}
+
+export interface ProductYearlySummary {
+  product: {
+    type: string;
+    brand: string;
+    model: string;
+  };
+  months: MonthlyProductSummary[];
+}
+

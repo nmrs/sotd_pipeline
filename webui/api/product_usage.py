@@ -4,6 +4,7 @@
 import json
 import logging
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
@@ -52,6 +53,23 @@ class ProductUsageAnalysis(BaseModel):
     users: List[UserProductUsage]
     usage_by_date: Dict[str, List[str]]
     comments_by_date: Dict[str, List[str]]
+
+
+class MonthlyProductSummary(BaseModel):
+    """Monthly product usage summary."""
+
+    month: str
+    shaves: int
+    unique_users: int
+    rank: Optional[int]  # None if product not found in that month
+    has_data: bool
+
+
+class ProductYearlySummary(BaseModel):
+    """Yearly product usage summary."""
+
+    product: Dict[str, str]
+    months: List[MonthlyProductSummary]
 
 
 def _generate_product_key(product_type: str, matched: Dict[str, Any]) -> str:
@@ -364,6 +382,160 @@ async def get_product_usage_analysis(
     except Exception as e:
         logger.error(
             f"Error analyzing product {product_type} '{brand} {model}' for month {month}: {e}"
+        )
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+def _construct_product_name(product_type: str, brand: str, model: str) -> str:
+    """Construct product name for matching against aggregated data."""
+    if product_type == "soap":
+        # Soaps use "Brand - Scent" format
+        return f"{brand} - {model}"
+    else:
+        # Razors, blades, brushes use "Brand Model" format
+        return f"{brand} {model}"
+
+
+def _get_months_range(selected_month: str) -> List[str]:
+    """Get list of 12 months (selected month and previous 11 months)."""
+    try:
+        year, month = map(int, selected_month.split("-"))
+        months = []
+        for i in range(12):
+            # Calculate month and year going back i months
+            current_month = month - i
+            current_year = year
+            
+            # Handle month rollover
+            while current_month <= 0:
+                current_month += 12
+                current_year -= 1
+            
+            months.append(f"{current_year:04d}-{current_month:02d}")
+        months.reverse()  # Oldest to newest
+        return months
+    except (ValueError, AttributeError) as e:
+        logger.error(f"Invalid month format: {selected_month} - {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid month format: {selected_month}")
+
+
+@router.get("/yearly-summary/{month}/{product_type}/{brand}/{model}", response_model=ProductYearlySummary)
+async def get_product_yearly_summary(
+    month: str, product_type: str, brand: str, model: str
+) -> ProductYearlySummary:
+    """Get yearly summary for a specific product over the past 12 months."""
+    try:
+        # Decode URL-encoded brand and model
+        brand = unquote(brand)
+        model = unquote(model)
+
+        # Validate product type
+        if product_type not in ["razor", "blade", "brush", "soap"]:
+            raise HTTPException(status_code=400, detail=f"Invalid product type: {product_type}")
+
+        # Get list of months to query
+        months = _get_months_range(month)
+
+        # Construct product name for matching
+        product_name = _construct_product_name(product_type, brand, model)
+        product_name_lower = product_name.lower()
+
+        # Map product type to aggregated data category
+        category_map = {
+            "razor": "razors",
+            "blade": "blades",
+            "brush": "brushes",
+            "soap": "soaps",
+        }
+        category = category_map[product_type]
+
+        # Load aggregated data for each month
+        project_root = Path(__file__).parent.parent.parent
+        aggregated_dir = project_root / "data" / "aggregated"
+
+        monthly_summaries = []
+
+        for month_str in months:
+            aggregated_file = aggregated_dir / f"{month_str}.json"
+
+            if not aggregated_file.exists():
+                # Month has no aggregated data
+                monthly_summaries.append(
+                    {
+                        "month": month_str,
+                        "shaves": 0,
+                        "unique_users": 0,
+                        "rank": None,
+                        "has_data": False,
+                    }
+                )
+                continue
+
+            try:
+                with aggregated_file.open("r", encoding="utf-8") as f:
+                    aggregated_data = json.load(f)
+
+                # Find product in category array
+                category_data = aggregated_data.get("data", {}).get(category, [])
+                product_found = None
+
+                for item in category_data:
+                    item_name = item.get("name", "")
+                    if item_name.lower() == product_name_lower:
+                        product_found = item
+                        break
+
+                if product_found:
+                    monthly_summaries.append(
+                        {
+                            "month": month_str,
+                            "shaves": product_found.get("shaves", 0),
+                            "unique_users": product_found.get("unique_users", 0),
+                            "rank": product_found.get("rank"),
+                            "has_data": True,
+                        }
+                    )
+                else:
+                    # Product not found in this month
+                    monthly_summaries.append(
+                        {
+                            "month": month_str,
+                            "shaves": 0,
+                            "unique_users": 0,
+                            "rank": None,
+                            "has_data": False,
+                        }
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error loading aggregated data for {month_str}: {e}")
+                monthly_summaries.append(
+                    {
+                        "month": month_str,
+                        "shaves": 0,
+                        "unique_users": 0,
+                        "rank": None,
+                        "has_data": False,
+                    }
+                )
+
+        # Build response
+        summary = {
+            "product": {
+                "type": product_type,
+                "brand": brand,
+                "model": model,
+            },
+            "months": monthly_summaries,
+        }
+
+        return ProductYearlySummary(**summary)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Error getting yearly summary for {product_type} '{brand} {model}' starting from {month}: {e}"
         )
         raise HTTPException(status_code=500, detail="Internal server error")
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BrushSplit } from '@/types/brushSplit';
-import { Product, ProductUsageAnalysis } from '@/types/productUsage';
+import { Product, ProductUsageAnalysis, ProductYearlySummary } from '@/types/productUsage';
 
 // Use different base URL for tests vs development
 const API_BASE_URL =
@@ -1039,6 +1039,29 @@ export const getProductUsageAnalysis = async (
   } catch (error) {
     console.error(
       `Failed to fetch product usage analysis for ${productType} '${brand} ${model}' in month ${month}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+export const getProductYearlySummary = async (
+  month: string,
+  productType: string,
+  brand: string,
+  model: string
+): Promise<ProductYearlySummary> => {
+  try {
+    // URL encode brand and model to handle special characters
+    const encodedBrand = encodeURIComponent(brand);
+    const encodedModel = encodeURIComponent(model);
+    const response = await api.get(
+      `/product-usage/yearly-summary/${month}/${productType}/${encodedBrand}/${encodedModel}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to fetch product yearly summary for ${productType} '${brand} ${model}' starting from ${month}:`,
       error
     );
     throw error;

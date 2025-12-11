@@ -11,12 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar as CalendarIcon, List as ListIcon, Table as TableIcon, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, List as ListIcon, Table as TableIcon, BarChart3 as SummaryIcon, Loader2 } from 'lucide-react';
 import { CommentDisplay } from '@/components/domain/CommentDisplay';
 import CommentModal from '@/components/domain/CommentModal';
 import { getCommentDetail, CommentDetail } from '@/services/api';
-import { getProductsForMonth, getProductUsageAnalysis } from '@/services/api';
-import { Product, ProductUsageAnalysis } from '@/types/productUsage';
+import { getProductsForMonth, getProductUsageAnalysis, getProductYearlySummary } from '@/services/api';
+import { Product, ProductUsageAnalysis, ProductYearlySummary } from '@/types/productUsage';
 import MonthSelector from '@/components/forms/MonthSelector';
 
 const ProductUsage: React.FC = () => {
@@ -27,9 +27,11 @@ const ProductUsage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [productAnalysis, setProductAnalysis] = useState<ProductUsageAnalysis | null>(null);
+  const [yearlySummary, setYearlySummary] = useState<ProductYearlySummary | null>(null);
+  const [yearlySummaryLoading, setYearlySummaryLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'list'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'list' | 'summary'>('calendar');
 
   // Comment modal state
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
@@ -51,6 +53,7 @@ const ProductUsage: React.FC = () => {
       setFilteredProducts([]);
       setSelectedProduct(null);
       setProductAnalysis(null);
+      setYearlySummary(null);
     }
   }, [selectedMonth, selectedProductType]);
 
@@ -97,6 +100,20 @@ const ProductUsage: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchYearlySummary = async (month: string, productType: string, product: Product) => {
+    try {
+      setYearlySummaryLoading(true);
+      setError('');
+      const summary = await getProductYearlySummary(month, productType, product.brand, product.model);
+      setYearlySummary(summary);
+    } catch (err) {
+      setError('Failed to fetch yearly summary');
+      console.error(err);
+    } finally {
+      setYearlySummaryLoading(false);
     }
   };
 
@@ -168,6 +185,7 @@ const ProductUsage: React.FC = () => {
     setSelectedMonth(month);
     setSelectedProduct(null);
     setProductAnalysis(null);
+    setYearlySummary(null);
     setProductSearch('');
   };
 
@@ -175,6 +193,7 @@ const ProductUsage: React.FC = () => {
     setSelectedProductType(productType as 'razor' | 'blade' | 'brush' | 'soap' | '');
     setSelectedProduct(null);
     setProductAnalysis(null);
+    setYearlySummary(null);
     setProductSearch('');
   };
 
@@ -182,6 +201,7 @@ const ProductUsage: React.FC = () => {
     setSelectedProduct(product);
     if (selectedMonth && selectedProductType) {
       fetchProductAnalysis(selectedMonth, selectedProductType, product);
+      fetchYearlySummary(selectedMonth, selectedProductType, product);
     }
   };
 
@@ -454,6 +474,80 @@ const ProductUsage: React.FC = () => {
     );
   };
 
+  const renderSummaryView = () => {
+    if (!yearlySummary) {
+      return (
+        <div className='text-center p-8 text-muted-foreground'>
+          {yearlySummaryLoading ? (
+            <div className='flex items-center justify-center'>
+              <Loader2 className='h-8 w-8 animate-spin mr-2' />
+              <span>Loading yearly summary...</span>
+            </div>
+          ) : (
+            <span>No yearly summary data available</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className='space-y-4'>
+        <div className='text-center mb-4'>
+          <h3 className='text-lg font-semibold'>
+            Yearly Summary: {yearlySummary.product.brand} {yearlySummary.product.model}
+          </h3>
+          <p className='text-sm text-muted-foreground'>Past 12 Months</p>
+        </div>
+
+        <div className='overflow-x-auto'>
+          <table className='w-full border-collapse border border-border'>
+            <thead>
+              <tr className='bg-muted'>
+                <th className='border border-border p-2 text-left'>Month</th>
+                <th className='border border-border p-2 text-center'>Shaves</th>
+                <th className='border border-border p-2 text-center'>Unique Users</th>
+                <th className='border border-border p-2 text-center'>Rank</th>
+              </tr>
+            </thead>
+            <tbody>
+              {yearlySummary.months.map(monthData => {
+                // Format month for display (e.g., "Nov 2025")
+                const [year, month] = monthData.month.split('-');
+                const monthDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+                const monthDisplay = monthDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  year: 'numeric',
+                });
+
+                return (
+                  <tr
+                    key={monthData.month}
+                    className={`hover:bg-muted/50 ${
+                      monthData.month === selectedMonth ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <td className='border border-border p-2 font-medium'>{monthDisplay}</td>
+                    <td className='border border-border p-2 text-center'>
+                      {monthData.has_data ? monthData.shaves.toLocaleString() : '-'}
+                    </td>
+                    <td className='border border-border p-2 text-center'>
+                      {monthData.has_data ? monthData.unique_users.toLocaleString() : '-'}
+                    </td>
+                    <td className='border border-border p-2 text-center'>
+                      {monthData.has_data && monthData.rank !== null
+                        ? monthData.rank.toLocaleString()
+                        : '-'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className='container mx-auto p-6 space-y-6'>
       <div className='flex items-center justify-between'>
@@ -572,14 +666,6 @@ const ProductUsage: React.FC = () => {
               {/* View Toggle */}
               <div className='flex items-center space-x-2'>
                 <Button
-                  variant={viewMode === 'table' ? 'default' : 'outline'}
-                  size='sm'
-                  onClick={() => setViewMode('table')}
-                >
-                  <TableIcon className='h-4 w-4 mr-2' />
-                  Table
-                </Button>
-                <Button
                   variant={viewMode === 'calendar' ? 'default' : 'outline'}
                   size='sm'
                   onClick={() => setViewMode('calendar')}
@@ -588,12 +674,28 @@ const ProductUsage: React.FC = () => {
                   Calendar
                 </Button>
                 <Button
+                  variant={viewMode === 'table' ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setViewMode('table')}
+                >
+                  <TableIcon className='h-4 w-4 mr-2' />
+                  Table
+                </Button>
+                <Button
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size='sm'
                   onClick={() => setViewMode('list')}
                 >
                   <ListIcon className='h-4 w-4 mr-2' />
                   List
+                </Button>
+                <Button
+                  variant={viewMode === 'summary' ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setViewMode('summary')}
+                >
+                  <SummaryIcon className='h-4 w-4 mr-2' />
+                  Summary
                 </Button>
               </div>
             </div>
@@ -608,6 +710,15 @@ const ProductUsage: React.FC = () => {
                 {viewMode === 'table' && renderTableView()}
                 {viewMode === 'calendar' && renderCalendarView()}
                 {viewMode === 'list' && renderListView()}
+                {viewMode === 'summary' && (
+                  yearlySummaryLoading ? (
+                    <div className='flex items-center justify-center h-64'>
+                      <Loader2 className='h-8 w-8 animate-spin' />
+                    </div>
+                  ) : (
+                    renderSummaryView()
+                  )
+                )}
               </div>
             )}
           </CardContent>

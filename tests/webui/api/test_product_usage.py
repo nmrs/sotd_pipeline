@@ -308,3 +308,123 @@ class TestProductUsageAPI:
             assert data[0]["brand"] == "Semogue"
             assert data[0]["model"] == "610"
 
+    @patch("webui.api.product_usage.Path.exists")
+    @patch("webui.api.product_usage.Path.open")
+    def test_get_product_yearly_summary_success(self, mock_open, mock_exists):
+        """Test successful yearly summary retrieval."""
+        # Mock Path.exists to return True for all months
+        mock_exists.return_value = True
+        
+        # Mock aggregated data
+        aggregated_data = {
+            "data": {
+                "razors": [
+                    {"rank": 1, "name": "Gillette Tech", "shaves": 55, "unique_users": 6},
+                ]
+            }
+        }
+
+        mock_file = Mock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+
+        with patch("webui.api.product_usage.json.load", return_value=aggregated_data):
+            response = client.get("/api/product-usage/yearly-summary/2025-11/razor/Gillette/Tech")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["product"]["brand"] == "Gillette"
+            assert data["product"]["model"] == "Tech"
+            assert len(data["months"]) == 12
+            # Check that months are in chronological order
+            months = [m["month"] for m in data["months"]]
+            assert months == sorted(months)
+            # Check that at least one month has data
+            months_with_data = [m for m in data["months"] if m["has_data"]]
+            assert len(months_with_data) > 0
+
+    @patch("webui.api.product_usage.Path.exists")
+    def test_get_product_yearly_summary_missing_months(self, mock_exists):
+        """Test yearly summary with missing months."""
+        # Return False for all months (no aggregated files)
+        mock_exists.return_value = False
+
+        response = client.get("/api/product-usage/yearly-summary/2025-11/razor/Gillette/Tech")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["months"]) == 12
+        # All months should have has_data: false
+        for month_data in data["months"]:
+            assert month_data["has_data"] is False
+            assert month_data["shaves"] == 0
+            assert month_data["unique_users"] == 0
+            assert month_data["rank"] is None
+
+    @patch("webui.api.product_usage.Path.exists")
+    @patch("webui.api.product_usage.Path.open")
+    def test_get_product_yearly_summary_product_not_found(self, mock_open, mock_exists):
+        """Test yearly summary when product is not found in some months."""
+        mock_exists.return_value = True
+        mock_file = Mock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+
+        # Mock aggregated data without the product
+        aggregated_data = {
+            "data": {
+                "razors": [
+                    {"rank": 1, "name": "Other Razor", "shaves": 10, "unique_users": 5},
+                ]
+            }
+        }
+
+        with patch("webui.api.product_usage.json.load", return_value=aggregated_data):
+            response = client.get("/api/product-usage/yearly-summary/2025-11/razor/Gillette/Tech")
+            assert response.status_code == 200
+            data = response.json()
+            assert len(data["months"]) == 12
+            # All months should have has_data: false (product not found)
+            for month_data in data["months"]:
+                assert month_data["has_data"] is False
+                assert month_data["rank"] is None
+
+    def test_get_product_yearly_summary_invalid_month_format(self):
+        """Test yearly summary with invalid month format."""
+        response = client.get("/api/product-usage/yearly-summary/invalid/razor/Gillette/Tech")
+        assert response.status_code == 400
+        assert "Invalid month format" in response.json()["detail"]
+
+    @patch("webui.api.product_usage.Path.exists")
+    @patch("webui.api.product_usage.Path.open")
+    def test_get_product_yearly_summary_soap_format(self, mock_open, mock_exists):
+        """Test yearly summary for soap with correct name format."""
+        mock_exists.return_value = True
+        mock_file = Mock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+
+        aggregated_data = {
+            "data": {
+                "soaps": [
+                    {
+                        "rank": 1,
+                        "name": "Grooming Dept - After The Fire",
+                        "shaves": 10,
+                        "unique_users": 5,
+                    },
+                ]
+            }
+        }
+
+        with patch("webui.api.product_usage.json.load", return_value=aggregated_data):
+            response = client.get(
+                "/api/product-usage/yearly-summary/2025-11/soap/Grooming%20Dept/After%20The%20Fire"
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["product"]["type"] == "soap"
+            assert data["product"]["brand"] == "Grooming Dept"
+            assert data["product"]["model"] == "After The Fire"
+

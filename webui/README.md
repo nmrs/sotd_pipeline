@@ -126,6 +126,10 @@ The backend provides a standardized REST API with the following endpoint structu
   - Returns: List of products with `key`, `brand`, `model`, `usage_count`, `unique_users`
 - `GET /api/product-usage/analysis/{month}/{product_type}/{brand}/{model}` - Get product usage analysis
   - Returns: Product usage analysis with users, usage counts, dates, and comment IDs
+- `GET /api/product-usage/yearly-summary/{month}/{product_type}/{brand}/{model}` - Get yearly summary for a product
+  - Returns: Yearly summary with monthly statistics (shaves, unique users, rank) for the past 12 months
+  - Uses aggregated data files for performance
+  - Returns data for selected month and previous 11 months
 - `GET /api/product-usage/health` - Health check endpoint
 
 #### Other Endpoints
