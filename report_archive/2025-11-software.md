@@ -9,7 +9,7 @@ Welcome to your SOTD Lather Log for November 2025
 
 ## Observations
 
-* Cella is on the march. From September to November, Cellas usage went 2/2 (shaves/users, )
+* Cella is on the march!
 
 |Month|Shaves|Unique Users|Rank|
 |:----|:-----|:-----------|:---|
@@ -18,6 +18,14 @@ Welcome to your SOTD Lather Log for November 2025
 |Sep|12|4|24|
 |Oct|26|7|7|
 |Nov|55|6|1|
+
+* Fanzine took a step back from Rocktober dominance, but still puts up a respectable showing: 45 shaves from 19 users make this its third highest month ever and keep it in the top 10.
+
+* Hallows apparently isn't just for Halloween.  I thought maybe this was just bleed over into early November, but the 18 Hallows shaves are spread pretty evenly across the month.
+
+* u/snoo-ting won the soap diversity contest along with his top shavers win, but then again, he had 60 shaves fit 38 soaps into. Runner up u/gcgallant arguably did it the harder way, using 34 soaps in 34 shaves.
+
+* No real surprises in brand diversity: Stirling, Barrister and Mann, and Catie’s Bubbles are still duking it out at the top. Stirling just edged out B&M on unique soaps this month, with Catie’s about 10 soaps back. The top of the brand table looks very similar, though B&M managed to sneak past Stirling on total shaves.
 
 ## Notes & Caveats
 
