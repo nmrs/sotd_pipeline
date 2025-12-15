@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import MonthSelector from '@/components/forms/MonthSelector';
 import FormatCompatibilityTable from '@/components/data/FormatCompatibilityTable';
 import CommentModal from '@/components/domain/CommentModal';
+import DeltaMonthsInfoPanel from '@/components/domain/DeltaMonthsInfoPanel';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import ErrorDisplay from '@/components/feedback/ErrorDisplay';
 import {
@@ -49,8 +50,8 @@ const FormatCompatibilityAnalyzer: React.FC = () => {
       setError(null);
       setResults(null);
 
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
 
       const result = await analyzeFormatCompatibility({
         months: allMonths,
@@ -72,7 +73,8 @@ const FormatCompatibilityAnalyzer: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
@@ -109,7 +111,8 @@ const FormatCompatibilityAnalyzer: React.FC = () => {
         try {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
-          const allMonths = [...selectedMonths, ...deltaMonths];
+          // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+          const allMonths = selectedMonths;
           const nextComment = await getCommentDetail(nextCommentId, allMonths);
 
           setAllComments(prev => [...prev, nextComment]);
@@ -149,41 +152,7 @@ const FormatCompatibilityAnalyzer: React.FC = () => {
         </p>
 
         {/* Delta Months Info Panel */}
-        {deltaMonths.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">📊 Delta Months Analysis</h3>
-                <div className="mt-2 text-sm text-blue-700">
-                  <p className="mb-2">
-                    <strong>Historical Comparison:</strong> Including delta months for
-                    comprehensive analysis:
-                  </p>
-                  <ul className="list-disc list-inside ml-4 space-y-1">
-                    <li>
-                      <strong>Primary months:</strong> {selectedMonths.join(', ')}
-                    </li>
-                    <li>
-                      <strong>Delta months:</strong> {deltaMonths.join(', ')}
-                    </li>
-                    <li>
-                      <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
 
         {/* Controls Section */}
         <div className="space-y-4 mb-4">
@@ -260,11 +229,9 @@ const FormatCompatibilityAnalyzer: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900">Analysis Results</h3>
                 <div className="mt-2 text-sm text-gray-600 flex flex-wrap gap-4">
                   <span className="whitespace-nowrap">
-                    Month{(selectedMonths.length + deltaMonths.length) > 1 ? 's' : ''}:{' '}
+                    Month{selectedMonths.length > 1 ? 's' : ''}:{' '}
                     <span className="font-medium">
-                      {(selectedMonths.length + deltaMonths.length) > 1
-                        ? 'Multiple'
-                        : selectedMonths[0] || deltaMonths[0]}
+                      {selectedMonths.length > 1 ? 'Multiple' : selectedMonths[0] || ''}
                     </span>
                   </span>
                   <span className="whitespace-nowrap">

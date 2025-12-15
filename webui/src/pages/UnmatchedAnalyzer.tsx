@@ -13,6 +13,7 @@ import LoadingSpinner from '../components/layout/LoadingSpinner';
 import UnmatchedAnalyzerDataTable from '../components/data/UnmatchedAnalyzerDataTable';
 import PerformanceMonitor from '../components/domain/PerformanceMonitor';
 import CommentModal from '../components/domain/CommentModal';
+import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
 
 import { useViewState } from '../hooks/useViewState';
 import { useSearchSort } from '../hooks/useSearchSort';
@@ -122,8 +123,8 @@ const UnmatchedAnalyzer: React.FC = () => {
       setResults(null);
       setOperationCount(prev => prev + 1);
 
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
 
       // Analyze unmatched items
       const result = await analyzeUnmatched({
@@ -192,8 +193,8 @@ const UnmatchedAnalyzer: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      // Combine selected months with delta months if enabled (same as analysis)
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
@@ -230,8 +231,8 @@ const UnmatchedAnalyzer: React.FC = () => {
         try {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
-          // Combine selected months with delta months if enabled (same as analysis)
-          const allMonths = [...selectedMonths, ...deltaMonths];
+          // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+          const allMonths = selectedMonths;
           const nextComment = await getCommentDetail(nextCommentId, allMonths);
 
           setAllComments(prev => [...prev, nextComment]);
@@ -388,8 +389,8 @@ const UnmatchedAnalyzer: React.FC = () => {
       setMatchPhaseLoading(true);
       setMatchPhaseOutput(null); // Clear previous output before writing new content
 
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
 
       const request: MatchPhaseRequest = {
         months: allMonths,
@@ -546,7 +547,7 @@ const UnmatchedAnalyzer: React.FC = () => {
           {results && (
             <div className='flex items-center justify-between'>
               <div className='text-sm text-gray-600'>
-                {results.field} | {[...selectedMonths, ...deltaMonths].join(', ')} |{' '}
+                {results.field} | {selectedMonths.join(', ')} |{' '}
                 {results.total_unmatched || 0} items |{' '}
                 {results.processing_time?.toFixed(2) || '0.00'}s
               </div>
@@ -613,33 +614,7 @@ const UnmatchedAnalyzer: React.FC = () => {
           )}
 
           {/* Delta Months Info Panel */}
-          {deltaMonths.length > 0 && (
-            <div className='bg-blue-50 border border-blue-200 rounded-md p-4 mb-4'>
-              <h3 className='text-sm font-medium text-blue-900 mb-2'>📊 Delta Months Analysis</h3>
-              <div className='text-xs text-blue-700 space-y-1'>
-                <p>
-                  <strong>Historical Comparison:</strong> Including delta months for comprehensive
-                  analysis:
-                </p>
-                <ul className='list-disc list-inside ml-4 space-y-1'>
-                  <li>
-                    <strong>Primary months:</strong> {selectedMonths.join(', ')}
-                  </li>
-                  <li>
-                    <strong>Delta months:</strong> {deltaMonths.join(', ')}
-                  </li>
-                  <li>
-                    <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
-                  </li>
-                </ul>
-                <p className='mt-2'>
-                  <strong>Delta months include:</strong> month-1, month-1year, month-5years for each
-                  selected month. This provides the same comprehensive view as the CLI{' '}
-                  <code>--delta</code> flag.
-                </p>
-              </div>
-            </div>
-          )}
+          <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
         </div>
       </div>
 

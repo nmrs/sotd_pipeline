@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 
 import MonthSelector from '../components/forms/MonthSelector';
 import CommentModal from '../components/domain/CommentModal';
+import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
 import { CommentDisplay } from '../components/domain/CommentDisplay';
 import { getCommentDetail, CommentDetail } from '../services/api';
 import { calculateDeltaMonths, formatDeltaMonths } from '../utils/deltaMonths';
@@ -106,8 +107,8 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/api/soaps/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
 
@@ -152,8 +153,8 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/api/soaps/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
 
@@ -210,8 +211,8 @@ const SoapAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      // Combine selected months with delta months if enabled
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
       const url = `http://localhost:8000/api/soaps/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
 
@@ -267,8 +268,8 @@ const SoapAnalyzer: React.FC = () => {
 
     try {
       setCommentLoading(true);
-      // Combine selected months with delta months if enabled (same as analysis)
-      const allMonths = [...selectedMonths, ...deltaMonths];
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
       const comment = await getCommentDetail(commentId, allMonths);
       setSelectedComment(comment);
       setCommentModalOpen(true);
@@ -339,37 +340,11 @@ const SoapAnalyzer: React.FC = () => {
       </Card>
 
       {/* Delta Months Info Panel */}
-      {deltaMonths.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-blue-900'>📊 Delta Months Analysis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='text-sm text-blue-700 space-y-1'>
-              <p>
-                <strong>Historical Comparison:</strong> Including delta months for comprehensive
-                analysis:
-              </p>
-              <ul className='list-disc list-inside ml-4 space-y-1'>
-                <li>
-                  <strong>Primary months:</strong> {selectedMonths.join(', ')}
-                </li>
-                <li>
-                  <strong>Delta months:</strong> {deltaMonths.join(', ')}
-                </li>
-                <li>
-                  <strong>Total months:</strong> {selectedMonths.length + deltaMonths.length}
-                </li>
-              </ul>
-              <p className='mt-2'>
-                <strong>Delta months include:</strong> month-1, month-1year, month-5years for each
-                selected month. This provides the same comprehensive view as the CLI{' '}
-                <code>--delta</code> flag.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <DeltaMonthsInfoPanel
+        selectedMonths={selectedMonths}
+        deltaMonths={deltaMonths}
+        variant='card'
+      />
 
       {/* Analysis Controls */}
       <Card>
