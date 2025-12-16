@@ -932,7 +932,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentDisplay
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => { })}
+              onCommentClick={(commentId) => onCommentClick?.(commentId, commentIds)}
               commentLoading={commentLoading}
             />
           );
