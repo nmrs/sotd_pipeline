@@ -815,7 +815,7 @@ Captain's Choice:
   patterns:
   - captain.*choice
   scents:
-    45th Parallel (Cream):
+    45th Parallel:
       format: Cream
       patterns:
       - 45.*parallel
@@ -858,6 +858,7 @@ Catie's Bubbles:
     '''95 Liquid Labels':
       patterns:
       - 95 liquid labels
+      alias: 95 Liquid Labels
     '322':
       patterns:
       - '322'
@@ -875,7 +876,7 @@ Catie's Bubbles:
     Blugère:
       patterns:
       - blug(e|è)re
-    Cape Code Cranberry:
+    Cape Cod Cranberry:
       patterns:
       - cape cod cranberry
     Colonia:
@@ -1021,7 +1022,7 @@ Central Texas Soaps:
   patterns:
   - central texas soaps
   scents:
-    Mr Pepper:
+    Mr. Pepper:
       patterns:
       - central texas.*pepper
 Chicago Grooming Co.:
@@ -1168,6 +1169,7 @@ Cooper & French:
     White Tea & Ginger:
       patterns:
       - cooper.*tea.*ginger
+      alias: White Tea and Ginger
 Cremo:
   format: Cream
   patterns:
@@ -1249,10 +1251,11 @@ Declaration Grooming:
   - declaration
   - declaratiøn grøøming
   scents:
-    88 Chestnut St.:
+    88 Chestnut St:
       patterns:
       - 88 chestnut
       - declaration.*\b88\b
+      alias: 88 Chestnut Street
     Admiral:
       patterns:
       - (declaration|dg|cha.*lux).*admiral
@@ -1296,6 +1299,7 @@ Declaration Grooming:
     Delta-V:
       patterns:
       - delta(-|\s)?\bv\b
+      alias: Delta V
     Dirtyver:
       patterns:
       - dirtyver
@@ -1308,6 +1312,7 @@ Declaration Grooming:
     Fourth & Pine:
       patterns:
       - fourth (and|&) pine
+      alias: Fourth and Pine
     Gemütlichkeit:
       patterns:
       - gem[uü]tlichkeit
@@ -1339,7 +1344,7 @@ Declaration Grooming:
     Original:
       patterns:
       - (declaration|dg).*original
-    Peaches & Scream:
+    Peaches + Scream:
       patterns:
       - peaches.*scream
     Puzzle:
@@ -1499,7 +1504,7 @@ Eleven:
   patterns:
   - eleven(?:\Wshaving)?
   scents:
-    2019 DFS:
+    2019 DFS LE:
       patterns:
       - eleven.*2019
     '5':
@@ -1543,6 +1548,7 @@ Ethos:
     Lavender Suprême:
       patterns:
       - ethos.*laven.*supreme
+      alias: Lavender Supreme
     Ravello:
       patterns:
       - ethos.*ravello
@@ -1561,9 +1567,9 @@ Extro Cosmesi:
   - extr.*cosmesi
   - extr[oò]'?
   scents:
-    Caffe:
+    Caffè:
       patterns:
-      - extr.*cosmesi.*caf+e
+      - extr.*cosmesi.*caf+[eéè]
     Liquirizia & Magnolia:
       patterns:
       - liquiriz.*magnolia
@@ -1708,6 +1714,7 @@ Geo. F. Trumper:
       format: Cream
       patterns:
       - trumper.*coconut
+      alias: Coconut
     Eucris:
       format: Cream
       patterns:
@@ -1883,6 +1890,7 @@ Henri et Victoria:
     La Poire Française:
       patterns:
       - la poire.*fran
+      alias: La Poire Francaise
     Lime:
       patterns:
       - henri.*victoria.*lime
@@ -1998,6 +2006,7 @@ House of Mammoth:
       patterns:
       - mammoth.*indigo
       - \bhom\b.*indigo
+      alias: Mood Indigo
     Kryptonite:
       patterns:
       - kr?yp?tonite
@@ -2103,6 +2112,7 @@ Karve:
     Semois Valley:
       patterns:
       - karve.*semois valley
+      alias: Seniors Valley
 Kell's Original:
   patterns:
   - kell'?s original(.*soap)?
@@ -2195,7 +2205,7 @@ Le Père Lucien:
       patterns:
       - le p.re lucien.*bay rum
       - lpl.*bay rum
-    Cologne Fougère:
+    Cologne-Fougère:
       patterns:
       - le p.re lucien.*foug\w*re
       - lainess.*elixir
@@ -2373,6 +2383,7 @@ Martin de Candre:
       patterns:
       - martin.*foug.re
       - \bmdc\b.*foug.re
+      alias: Fougere
     Nature:
       patterns:
       - candre.*nature
@@ -2441,6 +2452,7 @@ Mickey Lee Soapworks:
     Lū'au:
       patterns:
       - l[ūu]'au
+      alias: Lu'au
     Pantie Dropper:
       patterns:
       - mickey.*pant.*dropper
@@ -2458,6 +2470,7 @@ Mike's Natural Soaps:
     Bergamot, Orange, Ylang-ylang:
       patterns:
       - mike.*bergamot.*ylang
+      alias: Bergamot Orange Ylang Ylang
     Honey & Grapefruit:
       patterns:
       - mike.*honey.*grapefruit
@@ -2480,6 +2493,7 @@ Mike's Natural Soaps:
     Rose, Patchouli, Cedarwood:
       patterns:
       - ^mike.*rose.*cedar
+      alias: Cedarwood, Patchouli, Rose
     Vetiver:
       patterns:
       - mike.*vetiver
@@ -2520,6 +2534,10 @@ Murphy and McNeil:
   - murphy.*n(ei|ie)l+
   - \bm&m\b
   scents:
+    Barbershop de Los Muertos:
+      patterns:
+      - barbershop de los muertos
+      - bdlm
     Barbershop de Los Muertos 2:
       patterns:
       - barbershop de los muertos 2
@@ -2635,6 +2653,7 @@ Noble Otter:
     Hamam:
       patterns:
       - \bhamami?\b
+      alias: Hamami
     Jack:
       patterns:
       - noble.*\bjack\b
@@ -2804,7 +2823,7 @@ PannaCrema:
   patterns:
   - panna ?crea?m+a
   scents:
-    Nuavia Nero:
+    Nuavia Nera:
       patterns:
       - panna ?crema.*ner(o|a)\b
 Pantarei:
@@ -2831,18 +2850,26 @@ Proraso:
   - prosado
   - prasso
   scents:
-    Blue (Cream):
+    Aloe and Vitamin E:
       format: Cream
       patterns:
       - proraso.*blue
       - proraso.*aloe
       - proraso.*protect
-    Cypress & Vetyver (Cream):
+    Cypress & Vetyver:
       format: Cream
       patterns:
       - proraso.*cypress
       - proraso.*vety
-    Green (Cream):
+      alias: Cypress & Vetiver
+    Green Tea & Oat:
+      format: Cream
+      patterns:
+      - proraso.*white
+      - proraso.*tea
+      - proraso.*sensitive
+      - proraso.*green tea.*oat
+    Menthol and Eucalyptus:
       format: Cream
       patterns:
       - proraso
@@ -2852,7 +2879,7 @@ Proraso:
       - ^(?!.*\btea\b)^pro[rs]aso.*refresh
       - porasso green
       - prosado
-    Red (Cream):
+    Sandalwood:
       format: Cream
       patterns:
       - proraso.*red
@@ -2860,14 +2887,7 @@ Proraso:
       - proraso.*sandal
       - proraso.*nourish
       - proraso.*course
-    White (Cream):
-      format: Cream
-      patterns:
-      - proraso.*white
-      - proraso.*tea
-      - proraso.*sensitive
-      - proraso.*green tea.*oat
-    Wood & Spice (Cream):
+    Wood and Spice:
       patterns:
       - proraso.*wood.*spice
 Pré de Provence:

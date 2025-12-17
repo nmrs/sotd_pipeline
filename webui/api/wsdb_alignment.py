@@ -232,19 +232,19 @@ async def fuzzy_match(request: FuzzyMatchRequest) -> dict[str, Any]:
         wsdb_data = await load_wsdb_soaps()
         pipeline_data = await load_pipeline_soaps()
 
-        # Normalize query
-        query_brand = request.brand.lower().strip()
-        query_scent = request.scent.lower().strip()
+        # Normalize and lowercase query (case-insensitive matching)
+        query_brand = normalize_string(request.brand.lower().strip())
+        query_scent = normalize_string(request.scent.lower().strip())
 
         matches = []
 
         if request.source_type == "pipeline":
             # Match against WSDB soaps
             for soap in wsdb_data["soaps"]:
-                wsdb_brand = soap.get("brand", "").lower().strip()
-                wsdb_name = soap.get("name", "").lower().strip()
+                wsdb_brand = normalize_string(soap.get("brand", "").lower().strip())
+                wsdb_name = normalize_string(soap.get("name", "").lower().strip())
 
-                # Calculate similarity scores
+                # Calculate similarity scores (case-insensitive due to lowercasing above)
                 brand_score = fuzz.ratio(query_brand, wsdb_brand)
                 scent_score = fuzz.token_sort_ratio(query_scent, wsdb_name)
 
@@ -278,12 +278,12 @@ async def fuzzy_match(request: FuzzyMatchRequest) -> dict[str, Any]:
         elif request.source_type == "wsdb":
             # Match against pipeline soaps
             for brand_entry in pipeline_data["soaps"]:
-                pipeline_brand = brand_entry["brand"].lower().strip()
+                pipeline_brand = normalize_string(brand_entry["brand"].lower().strip())
 
                 for scent in brand_entry["scents"]:
-                    pipeline_scent = scent["name"].lower().strip()
+                    pipeline_scent = normalize_string(scent["name"].lower().strip())
 
-                    # Calculate similarity scores
+                    # Calculate similarity scores (case-insensitive due to lowercasing above)
                     brand_score = fuzz.ratio(query_brand, pipeline_brand)
                     scent_score = fuzz.token_sort_ratio(query_scent, pipeline_scent)
 
