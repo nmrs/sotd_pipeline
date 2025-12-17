@@ -58,6 +58,25 @@ interface AlignmentResult {
   expanded?: boolean;
 }
 
+interface BrandNonMatch {
+  pipeline_brand: string;
+  wsdb_brand: string;
+  added_at: string;
+}
+
+interface ScentNonMatch {
+  pipeline_brand: string;
+  pipeline_scent: string;
+  wsdb_brand: string;
+  wsdb_scent: string;
+  added_at: string;
+}
+
+interface NonMatches {
+  brand_non_matches: BrandNonMatch[];
+  scent_non_matches: ScentNonMatch[];
+}
+
 const WSDBAlignmentAnalyzer: React.FC = () => {
   const [wsdbSoaps, setWsdbSoaps] = useState<WSDBSoap[]>([]);
   const [pipelineSoaps, setPipelineSoaps] = useState<PipelineSoap[]>([]);
@@ -76,10 +95,15 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   >('non_perfect');
   const [lastRefreshTime, setLastRefreshTime] = useState<string | null>(null);
   const [analysisMode, setAnalysisMode] = useState<'brands' | 'brand_scent'>('brands');
+  const [nonMatches, setNonMatches] = useState<NonMatches>({
+    brand_non_matches: [],
+    scent_non_matches: [],
+  });
 
   // Load data on mount
   React.useEffect(() => {
     loadData();
+    loadNonMatches();
   }, []);
 
   const loadData = async () => {
@@ -107,6 +131,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadNonMatches = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+      if (response.ok) {
+        const data = await response.json();
+        setNonMatches(data);
+      }
+    } catch (err) {
+      console.error('Failed to load non-matches:', err);
+      // Don't show error to user, non-matches are optional
     }
   };
 
@@ -172,6 +209,47 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Analysis failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNotAMatch = async (source: AlignmentResult, match: FuzzyMatch) => {
+    // Determine match type based on current mode
+    const matchType = analysisMode === 'brands' ? 'brand' : 'scent';
+
+    // Build request payload
+    const payload = {
+      match_type: matchType,
+      pipeline_brand: source.source_brand,
+      wsdb_brand: match.brand,
+      ...(matchType === 'scent' && {
+        pipeline_scent: source.source_scent,
+        wsdb_scent: match.name,
+      }),
+    };
+
+    try {
+      // Auto-save to backend
+      const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // Reload non-matches
+        await loadNonMatches();
+
+        // Re-run analysis to filter out the new non-match
+        await analyzeAlignment();
+
+        // Show success message
+        setSuccessMessage('Non-match saved successfully');
+      } else {
+        setError('Failed to save non-match');
+      }
+    } catch (err) {
+      console.error('Error saving non-match:', err);
+      setError(err instanceof Error ? err.message : 'Error saving non-match');
     }
   };
 
@@ -583,9 +661,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     </Badge>
                                   )}
                                 </div>
-                                <Badge className={getConfidenceColor(match.confidence)}>
-                                  {match.confidence.toFixed(1)}%
-                                </Badge>
+                                <div className='flex items-center gap-2'>
+                                  <Badge className={getConfidenceColor(match.confidence)}>
+                                    {match.confidence.toFixed(1)}%
+                                  </Badge>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    onClick={() => handleNotAMatch(result, match)}
+                                    className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                  >
+                                    ✕ Not a Match
+                                  </Button>
+                                </div>
                               </div>
                               <div className='text-sm text-gray-600 space-y-1'>
                                 <div>
@@ -723,9 +811,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     </Badge>
                                   )}
                                 </div>
-                                <Badge className={getConfidenceColor(match.confidence)}>
-                                  {match.confidence.toFixed(1)}%
-                                </Badge>
+                                <div className='flex items-center gap-2'>
+                                  <Badge className={getConfidenceColor(match.confidence)}>
+                                    {match.confidence.toFixed(1)}%
+                                  </Badge>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    onClick={() => handleNotAMatch(result, match)}
+                                    className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                  >
+                                    ✕ Not a Match
+                                  </Button>
+                                </div>
                               </div>
                               <div className='text-sm text-gray-600 space-y-1'>
                                 <div>
