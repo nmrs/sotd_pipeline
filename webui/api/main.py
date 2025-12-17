@@ -24,6 +24,7 @@ from .format_compatibility import router as format_compatibility_router
 from .monthly_user_posts import router as monthly_user_posts_router
 from .product_usage import router as product_usage_router
 from .soap_analyzer import router as soap_analyzer_router
+from .wsdb_alignment import router as wsdb_alignment_router
 
 # Create logs directory if it doesn't exist
 logs_dir = Path(__file__).parent.parent / "logs"
@@ -100,6 +101,7 @@ app.include_router(soap_analyzer_router)
 app.include_router(monthly_user_posts_router)
 app.include_router(product_usage_router)
 app.include_router(format_compatibility_router)
+app.include_router(wsdb_alignment_router)
 
 # Add CORS middleware for local development
 app.add_middleware(

@@ -17,6 +17,7 @@ htmlcov/
 # Ignore JSON files in data subdirectories
 analysis/*.txt
 analysis/*.json
+data/*.json
 data/comments/*.json
 data/enriched/*.json
 data/extracted/*.json

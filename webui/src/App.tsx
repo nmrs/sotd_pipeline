@@ -16,6 +16,7 @@ import MonthlyUserPosts from './pages/MonthlyUserPosts';
 import ProductUsage from './pages/ProductUsage';
 import { BrushMatchingAnalyzerPage } from './pages/BrushMatchingAnalyzerPage';
 import FormatCompatibilityAnalyzer from './pages/FormatCompatibilityAnalyzer';
+import WSDBAlignmentAnalyzer from './pages/WSDBAlignmentAnalyzer';
 
 function App() {
   const messaging = useMessaging();
@@ -38,6 +39,7 @@ function App() {
             <Route path='/product-usage' element={<ProductUsage />} />
             <Route path='/brush-matching-analyzer' element={<BrushMatchingAnalyzerPage />} />
             <Route path='/format-compatibility' element={<FormatCompatibilityAnalyzer />} />
+            <Route path='/wsdb-alignment' element={<WSDBAlignmentAnalyzer />} />
           </Routes>
         </main>
         <MessageDisplay messages={messaging.messages} onRemoveMessage={messaging.removeMessage} />

@@ -64,6 +64,7 @@ const Header: React.FC = () => {
       icon: '🛠️',
       items: [
         { path: '/brush-matching-analyzer', label: 'Brush Matching', icon: '🧹' },
+        { path: '/wsdb-alignment', label: 'WSDB Alignment', icon: '🗃️' },
         { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
       ],
     },
