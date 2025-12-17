@@ -1039,6 +1039,90 @@ def test_add_scent_alias_duplicate(mock_data_files):
         assert data["Barrister and Mann"]["scents"]["Seville"]["alias"] == "Seville Classic"
 
 
+def test_unicode_normalization_brand_scent_mode(mock_data_files):
+    """Test that Unicode normalization handles visually identical strings correctly."""
+    import unicodedata
+
+    # Create test data with composed vs decomposed Unicode
+    # "Mélange" can be encoded as:
+    # - Composed: U+004D U+00E9 U+006C U+0061 U+006E U+0067 U+0065 (é as single character)
+    # - Decomposed: U+004D U+0065 U+0301 U+006C U+0061 U+006E U+0067 U+0065 (e + combining accent)
+    
+    # Use composed form in pipeline
+    composed_melange = "Mélange"  # This should be NFC (composed)
+    
+    # Create decomposed form for WSDB (simulating different encoding)
+    decomposed_melange = unicodedata.normalize("NFD", composed_melange)  # Decomposed form
+    
+    # Verify they're different encodings but visually identical
+    assert composed_melange != decomposed_melange
+    assert len(composed_melange) == 7  # 7 characters
+    assert len(decomposed_melange) == 8  # 8 characters (e + combining accent)
+    
+    # Update mock data
+    soaps_file = mock_data_files / "soaps.yaml"
+    wsdb_file = mock_data_files / "wsdb" / "software.json"
+    
+    with soaps_file.open("r", encoding="utf-8") as f:
+        soaps_data = yaml.safe_load(f)
+    
+    # Add test brand with composed Unicode
+    soaps_data["Test Brand Unicode"] = {
+        "scents": {
+            composed_melange: {"patterns": []}
+        }
+    }
+    
+    with soaps_file.open("w", encoding="utf-8") as f:
+        yaml.dump(soaps_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+    
+    with wsdb_file.open("r", encoding="utf-8") as f:
+        wsdb_data = json.load(f)
+    
+    # Add WSDB entry with decomposed Unicode
+    # wsdb_data is a list, not a dict
+    wsdb_data.append({
+        "brand": "Test Brand Unicode",
+        "name": decomposed_melange,
+        "type": "Soap",
+        "slug": "test-brand-unicode-melange",
+        "scent_notes": [],
+        "collaborators": [],
+        "tags": [],
+        "category": "software"
+    })
+    
+    with wsdb_file.open("w", encoding="utf-8") as f:
+        json.dump(wsdb_data, f, ensure_ascii=False, indent=2)
+    
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        # Run batch analysis in brand_scent mode
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze",
+            params={"mode": "brand_scent", "threshold": 0.7, "brand_threshold": 0.8}
+        )
+        assert response.status_code == 200
+        
+        results = response.json()
+        pipeline_results = results["pipeline_results"]
+        
+        # Find our test brand result
+        test_result = None
+        for result in pipeline_results:
+            if result["source_brand"] == "Test Brand Unicode":
+                test_result = result
+                break
+        
+        assert test_result is not None, "Test brand not found in results"
+        assert len(test_result["matches"]) > 0, "No matches found for test brand"
+        
+        # The match should be 100% confidence because Unicode normalization makes them identical
+        match = test_result["matches"][0]
+        assert match["confidence"] == 100.0, f"Expected 100% confidence, got {match['confidence']}%"
+        assert match["brand"] == "Test Brand Unicode"
+        # The name might be in either form, but they should match at 100%
+
+
 def test_add_scent_alias_scent_not_found(mock_data_files):
     """Test error handling when scent is not found."""
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):

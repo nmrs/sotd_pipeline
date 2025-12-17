@@ -3,6 +3,7 @@
 
 import json
 import logging
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,6 +20,24 @@ router = APIRouter(prefix="/api/wsdb-alignment", tags=["wsdb-alignment"])
 
 # Project root directory
 PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+
+def normalize_string(text: str) -> str:
+    """
+    Normalize a string to Unicode NFC (Normalization Form Canonical Composed).
+    
+    This ensures that visually identical characters are treated the same regardless
+    of their Unicode encoding (e.g., composed "é" vs decomposed "e" + combining accent).
+    
+    Args:
+        text: The string to normalize
+        
+    Returns:
+        The normalized string in NFC form
+    """
+    if not text:
+        return text
+    return unicodedata.normalize("NFC", text)
 
 
 class WSDBSoap(BaseModel):
@@ -326,45 +345,45 @@ def is_non_match(
     """
     if mode == "brands":
         # Check brand-level non-matches
-        source_brand = source["source_brand"]
-        match_brand = match["brand"]
+        source_brand = normalize_string(source["source_brand"].lower())
+        match_brand = normalize_string(match["brand"].lower())
 
         # Check if source is pipeline and match is WSDB (forward direction)
-        if source_brand in brand_non_matches:
-            if any(nm.lower() == match_brand.lower() for nm in brand_non_matches[source_brand]):
+        if source["source_brand"] in brand_non_matches:
+            if any(normalize_string(nm.lower()) == match_brand for nm in brand_non_matches[source["source_brand"]]):
                 return True
 
         # Check if source is WSDB and match is pipeline (reverse direction)
         # Need to check all pipeline brands to see if source_brand is in their non-match list
         for pipeline_brand, wsdb_brands in brand_non_matches.items():
-            if any(nm.lower() == source_brand.lower() for nm in wsdb_brands):
-                if pipeline_brand.lower() == match_brand.lower():
+            if any(normalize_string(nm.lower()) == source_brand for nm in wsdb_brands):
+                if normalize_string(pipeline_brand.lower()) == match_brand:
                     return True
 
         return False
 
     else:  # brand_scent mode
         # Check scent-level non-matches
-        source_brand = source["source_brand"]
-        source_scent = source.get("source_scent", "")
-        match_brand = match["brand"]
-        match_scent = match.get("name", "")
+        source_brand = normalize_string(source["source_brand"].lower())
+        source_scent = normalize_string(source.get("source_scent", "").lower())
+        match_brand = normalize_string(match["brand"].lower())
+        match_scent = normalize_string(match.get("name", "").lower())
 
         # Check if source is pipeline and match is WSDB (forward direction)
-        if source_brand in scent_non_matches:
-            if source_scent in scent_non_matches[source_brand]:
-                if any(nm.lower() == match_scent.lower() for nm in scent_non_matches[source_brand][source_scent]):
+        if source["source_brand"] in scent_non_matches:
+            if source["source_scent"] in scent_non_matches[source["source_brand"]]:
+                if any(normalize_string(nm.lower()) == match_scent for nm in scent_non_matches[source["source_brand"]][source["source_scent"]]):
                     # Also verify the brand matches (same brand, different scent)
-                    if source_brand.lower() == match_brand.lower():
+                    if source_brand == match_brand:
                         return True
 
         # Check if source is WSDB and match is pipeline (reverse direction)
         # For scents: if pipeline brand has scent X with non-matches [Y],
         # then checking WSDB scent Y against pipeline scent X should also return True
-        if match_brand in scent_non_matches:
-            if match_scent in scent_non_matches[match_brand]:
-                if any(nm.lower() == source_scent.lower() for nm in scent_non_matches[match_brand][match_scent]):
-                    if match_brand.lower() == source_brand.lower():
+        if match["brand"] in scent_non_matches:
+            if match["name"] in scent_non_matches[match["brand"]]:
+                if any(normalize_string(nm.lower()) == source_scent for nm in scent_non_matches[match["brand"]][match["name"]]):
+                    if match_brand == source_brand:
                         return True
 
         return False
@@ -415,17 +434,17 @@ async def batch_analyze(
             # In brands mode, analyze once per brand; in brand_scent mode, once per scent
             if mode == "brands":
                 # Brands only: match brand against all WSDB brands
-                query_brand = pipeline_brand.lower().strip()
+                query_brand = normalize_string(pipeline_brand.lower().strip())
                 
                 # Get all names to try: canonical + aliases
                 names_to_try = [query_brand]
                 if brand_entry.get("aliases"):
-                    names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
+                    names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
                 
                 matches = []
 
                 for wsdb_soap in wsdb_soaps:
-                    wsdb_brand = wsdb_soap.get("brand", "").lower().strip()
+                    wsdb_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
                     
                     # Try matching with each name (canonical + aliases)
                     best_score = 0
@@ -481,24 +500,24 @@ async def batch_analyze(
             else:
                 # Brand + Scent mode: match each scent individually
                 for scent in brand_entry["scents"]:
-                    query_brand = pipeline_brand.lower().strip()
+                    query_brand = normalize_string(pipeline_brand.lower().strip())
                     
                     # Get all brand names to try: canonical + aliases
                     names_to_try = [query_brand]
                     if brand_entry.get("aliases"):
-                        names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
+                        names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
                     
                     # Get scent names to try: canonical + single alias
-                    query_scent = scent["name"].lower().strip()
+                    query_scent = normalize_string(scent["name"].lower().strip())
                     scent_alias = scent.get("alias")
                     if scent_alias:
-                        scent_alias = scent_alias.lower().strip()
+                        scent_alias = normalize_string(scent_alias.lower().strip())
                     
                     matches = []
 
                     for wsdb_soap in wsdb_soaps:
-                        wsdb_brand = wsdb_soap.get("brand", "").lower().strip()
-                        wsdb_name = wsdb_soap.get("name", "").lower().strip()
+                        wsdb_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
+                        wsdb_name = normalize_string(wsdb_soap.get("name", "").lower().strip())
 
                         # Try matching with each brand name (canonical + aliases)
                         best_brand_score = 0
@@ -589,16 +608,16 @@ async def batch_analyze(
             # In brands mode, analyze all brands (typically not too many)
             # Analyze once per brand
             for wsdb_brand, soaps in sorted_brands:
-                query_brand = wsdb_brand.lower().strip()
+                query_brand = normalize_string(wsdb_brand.lower().strip())
                 matches = []
 
                 for brand_entry in pipeline_soaps:
-                    pipeline_brand = brand_entry["brand"].lower().strip()
+                    pipeline_brand = normalize_string(brand_entry["brand"].lower().strip())
                     
                     # Get all names to try: canonical + aliases
                     names_to_try = [pipeline_brand]
                     if brand_entry.get("aliases"):
-                        names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
+                        names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
                     
                     # Try matching with each name
                     best_score = 0
@@ -654,24 +673,24 @@ async def batch_analyze(
             )
             
             for wsdb_soap in sorted_wsdb_soaps:
-                query_brand = wsdb_soap.get("brand", "").lower().strip()
-                query_scent = wsdb_soap.get("name", "").lower().strip()
+                query_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
+                query_scent = normalize_string(wsdb_soap.get("name", "").lower().strip())
                 matches = []
 
                 for brand_entry in pipeline_soaps:
-                    pipeline_brand = brand_entry["brand"].lower().strip()
+                    pipeline_brand = normalize_string(brand_entry["brand"].lower().strip())
                     
                     # Get all names to try: canonical + aliases
                     names_to_try = [pipeline_brand]
                     if brand_entry.get("aliases"):
-                        names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
+                        names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
 
                     for scent in brand_entry["scents"]:
                         # Get scent names to try: canonical + single alias
-                        pipeline_scent = scent["name"].lower().strip()
+                        pipeline_scent = normalize_string(scent["name"].lower().strip())
                         scent_alias = scent.get("alias")
                         if scent_alias:
-                            scent_alias = scent_alias.lower().strip()
+                            scent_alias = normalize_string(scent_alias.lower().strip())
 
                         # Try matching with each brand name (canonical + aliases)
                         best_brand_score = 0
