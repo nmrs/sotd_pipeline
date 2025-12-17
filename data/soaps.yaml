@@ -1186,7 +1186,7 @@ Cremo:
     Original:
       patterns:
       - \bcremo\b
-Crown & Crane:
+Crowne & Crane:
   patterns:
   - crown.*crane
 Cyril R. Salter:
@@ -1595,7 +1595,7 @@ Farmbody Skin Care:
     'The Crop Tender: Orange Ale':
       patterns:
       - farm ?body.*orange ale
-Fenomeno:
+Fenomeno Shave:
   patterns:
   - fenomeno( shave)?
 Fine Accoutrements:
@@ -1714,7 +1714,7 @@ Geo. F. Trumper:
       format: Cream
       patterns:
       - trumper.*rose
-Gillete:
+Gillette:
   default format: Foam
   patterns:
   - gil+et+e

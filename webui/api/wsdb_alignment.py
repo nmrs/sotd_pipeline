@@ -723,6 +723,7 @@ async def refresh_wsdb_data() -> WSDBRefreshResponse:
     Returns:
         WSDBRefreshResponse with success status and metadata
     """
+    data = None
     try:
         logger.info("🔄 Refreshing WSDB data from API")
         url = "https://wetshavingdatabase.com/api/software.json"
