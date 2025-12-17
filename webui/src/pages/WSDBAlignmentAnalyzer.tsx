@@ -811,11 +811,27 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     </div>
                                     {/* List of scents under this brand */}
                                     <div className='pl-4 space-y-1'>
-                                      {brandMatches.map((match, idx) => (
-                                        <div key={idx} className='text-sm text-gray-700'>
-                                          • {match.name || '(no scent name)'}
-                                        </div>
-                                      ))}
+                                      {brandMatches.map((match, idx) => {
+                                        const slug = match.details?.slug;
+                                        const scentName = match.name || '(no scent name)';
+                                        return (
+                                          <div key={idx} className='text-sm text-gray-700'>
+                                            •{' '}
+                                            {slug ? (
+                                              <a
+                                                href={`https://www.wetshavingdatabase.com/software/${slug}/`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                              >
+                                                {scentName}
+                                              </a>
+                                            ) : (
+                                              <span>{scentName}</span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                     {/* Brand metadata */}
                                     {brandMatches[0].details.collaborators &&
@@ -835,7 +851,23 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
                                       <span>
                                         {match.brand}
-                                        {match.name && ` - ${match.name}`}
+                                        {match.name && (
+                                          <>
+                                            {' - '}
+                                            {match.details?.slug ? (
+                                              <a
+                                                href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                              >
+                                                {match.name}
+                                              </a>
+                                            ) : (
+                                              match.name
+                                            )}
+                                          </>
+                                        )}
                                       </span>
                                       {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (
@@ -1055,11 +1087,27 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     </div>
                                     {/* List of scents under this brand */}
                                     <div className='pl-4 space-y-1'>
-                                      {brandMatches.map((match, idx) => (
-                                        <div key={idx} className='text-sm text-gray-700'>
-                                          • {match.name || '(no scent name)'}
-                                        </div>
-                                      ))}
+                                      {brandMatches.map((match, idx) => {
+                                        const slug = match.details?.slug;
+                                        const scentName = match.name || '(no scent name)';
+                                        return (
+                                          <div key={idx} className='text-sm text-gray-700'>
+                                            •{' '}
+                                            {slug ? (
+                                              <a
+                                                href={`https://www.wetshavingdatabase.com/software/${slug}/`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                              >
+                                                {scentName}
+                                              </a>
+                                            ) : (
+                                              <span>{scentName}</span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                     {/* Brand metadata */}
                                     {brandMatches[0].details.patterns &&
@@ -1079,7 +1127,23 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
                                       <span>
                                         {match.brand}
-                                        {match.name && ` - ${match.name}`}
+                                        {match.name && (
+                                          <>
+                                            {' - '}
+                                            {match.details?.slug ? (
+                                              <a
+                                                href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                              >
+                                                {match.name}
+                                              </a>
+                                            ) : (
+                                              match.name
+                                            )}
+                                          </>
+                                        )}
                                       </span>
                                       {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (

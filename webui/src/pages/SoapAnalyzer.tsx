@@ -30,6 +30,16 @@ interface SoapPatternSuggestion {
   examples: string[];
 }
 
+interface WSDBSoap {
+  brand: string;
+  name: string;
+  slug: string;
+  scent_notes?: string[];
+  collaborators?: string[];
+  tags?: string[];
+  category?: string;
+}
+
 interface SoapNeighborSimilarityResult {
   entry: string;
   similarity_to_next: number | null;
@@ -41,6 +51,7 @@ interface SoapNeighborSimilarityResult {
   matched?: {
     maker: string;
     scent: string;
+    brand?: string;
   };
 }
 
@@ -71,6 +82,7 @@ const SoapAnalyzer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('duplicates');
+  const [wsdbSoaps, setWsdbSoaps] = useState<WSDBSoap[]>([]);
 
   // Comment modal state
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
@@ -79,6 +91,44 @@ const SoapAnalyzer: React.FC = () => {
 
   // Filter state
   const [filterText, setFilterText] = useState<string>('');
+
+  // Load WSDB data on mount
+  React.useEffect(() => {
+    const loadWSDBData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+        if (response.ok) {
+          const data = await response.json();
+          setWsdbSoaps(data.soaps || []);
+        }
+      } catch (err) {
+        console.error('Failed to load WSDB data:', err);
+        // Don't show error to user, just fail silently - links will simply not work
+      }
+    };
+    loadWSDBData();
+  }, []);
+
+  // Lookup function to find WSDB slug by brand and scent
+  const getWsdbSlug = useCallback(
+    (brand: string, scent: string): string | null => {
+      if (!brand || !scent || wsdbSoaps.length === 0) {
+        return null;
+      }
+
+      const normalizedBrand = brand.toLowerCase().trim();
+      const normalizedScent = scent.toLowerCase().trim();
+
+      const match = wsdbSoaps.find(soap => {
+        const soapBrand = (soap.brand || '').toLowerCase().trim();
+        const soapName = (soap.name || '').toLowerCase().trim();
+        return soapBrand === normalizedBrand && soapName === normalizedScent;
+      });
+
+      return match?.slug || null;
+    },
+    [wsdbSoaps]
+  );
 
   // Callback for delta months
   const handleDeltaMonthsChange = useCallback((months: string[]) => {
@@ -967,15 +1017,29 @@ const SoapAnalyzer: React.FC = () => {
                       <tbody>
                         {filteredNeighborResults.map((result, index) => {
                           // Use the matched data from the API (brand and scent are already parsed)
-                          const brand = result.matched?.brand || '-';
+                          const brand = result.matched?.brand || result.matched?.maker || '-';
                           const scent = result.matched?.scent || result.entry;
+                          const slug = getWsdbSlug(brand, scent);
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
                               <td className='border border-gray-300 px-3 py-2 font-medium'>
                                 {brand}
                               </td>
-                              <td className='border border-gray-300 px-3 py-2'>{scent}</td>
+                              <td className='border border-gray-300 px-3 py-2'>
+                                {slug ? (
+                                  <a
+                                    href={`https://www.wetshavingdatabase.com/software/${slug}/`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                                  >
+                                    {scent}
+                                  </a>
+                                ) : (
+                                  <span>{scent}</span>
+                                )}
+                              </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {index > 0 ? (
                                   <Badge

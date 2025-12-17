@@ -408,8 +408,7 @@ async def batch_analyze(
         # Pipeline → WSDB matches
         logger.info(f"📊 Analyzing Pipeline → WSDB ({len(pipeline_soaps)} brands)")
         
-        # In brands mode, analyze all brands (result limit is applied by frontend filtering)
-        # In brand_scent mode, stop when we hit the result limit
+        # In both modes, analyze all items (result limit is applied by frontend filtering)
         for brand_entry in pipeline_soaps:
             pipeline_brand = brand_entry["brand"]
 
@@ -482,10 +481,6 @@ async def batch_analyze(
             else:
                 # Brand + Scent mode: match each scent individually
                 for scent in brand_entry["scents"]:
-                    # Check if we've reached the limit
-                    if len(pipeline_results) >= limit:
-                        break
-                    
                     query_brand = pipeline_brand.lower().strip()
                     
                     # Get all brand names to try: canonical + aliases
@@ -575,10 +570,6 @@ async def batch_analyze(
                             "expanded": False,
                         }
                     )
-            
-            # Check if we've reached the limit (for Brand + Scent mode)
-            if mode != "brands" and len(pipeline_results) >= limit:
-                break
 
         # WSDB → Pipeline matches
         logger.info(f"📊 Analyzing WSDB → Pipeline ({len(wsdb_soaps)} soaps)")
@@ -662,7 +653,7 @@ async def batch_analyze(
                 key=lambda x: (x.get("brand", "").lower(), x.get("name", "").lower())
             )
             
-            for wsdb_soap in sorted_wsdb_soaps[:limit]:
+            for wsdb_soap in sorted_wsdb_soaps:
                 query_brand = wsdb_soap.get("brand", "").lower().strip()
                 query_scent = wsdb_soap.get("name", "").lower().strip()
                 matches = []

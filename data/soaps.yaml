@@ -64,6 +64,7 @@ Abbate Y La Mantia:
     Matteo 9-11:
       patterns:
       - abbate.*matteo
+      alias: Matteo 9,11
     Verbena Toscana:
       patterns:
       - (?:abbate)?.*verbena t[ou]scana
@@ -188,7 +189,7 @@ Ariana & Evans:
     Boca Negra:
       patterns:
       - (ariana|a&e|club).*boca
-    Boo!!:
+    Boo:
       patterns:
       - (ariana|a&e|club).*boo
     Cafe au Lait:
@@ -212,7 +213,7 @@ Ariana & Evans:
     Dirty Ginger:
       patterns:
       - (ariana|a&e|club).*ginger
-    Forbidoden Fruit:
+    Forbidden Fruit:
       patterns:
       - (arian|a&e).*forb+id+en fruit
     Fruit de la Passion:
@@ -221,6 +222,7 @@ Ariana & Evans:
     Indo Ink:
       patterns:
       - (arian|a&e).*indo[ -]ink
+      alias: Indo-Ink
     Kaizen:
       patterns:
       - \bkaizen\b
@@ -241,7 +243,7 @@ Ariana & Evans:
     London Gin Club:
       patterns:
       - arian+a?.*london
-    Low Scent Skeleton:
+    Low-Scent Skeletor:
       patterns:
       - (ariana|a&e|club).*skele
     Lurch & Fester:
@@ -283,7 +285,7 @@ Ariana & Evans:
     Sylvan Fog:
       patterns:
       - sylvan fog
-    The Graveyand:
+    The Graveyard:
       patterns:
       - (ariana|a&e|club).*grave
     The Novelist:
@@ -305,7 +307,7 @@ Ariana & Evans:
     Wake The F' Up:
       patterns:
       - wake the f.*up
-    Which One's Pink:
+    Which One's Pink?:
       patterns:
       - which one'?s pink
 Arko:
