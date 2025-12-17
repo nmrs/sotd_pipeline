@@ -3378,9 +3378,11 @@ Stirling Soap Co.:
     Glacial Electric Sheep:
       patterns:
       - glacial electric sheep
+      alias: Glacial, Electric Sheep
     Glacial Lemon Chill:
       patterns:
       - glacial.*lemon chill
+      alias: Glacial, Lemon Chill
     Haverford:
       patterns:
       - stirl.*have\wford
@@ -3399,6 +3401,9 @@ Stirling Soap Co.:
     Lavender:
       patterns:
       - stirling.*lavender
+    Lavender Sage:
+      patterns:
+      - stirling.*lavender.*sage
     Light-ish Red:
       patterns:
       - light-?ish.*red
@@ -3429,6 +3434,7 @@ Stirling Soap Co.:
     Ramblin' Man:
       patterns:
       - ramblin.*man
+      alias: Ramblin Man
     Royal:
       patterns:
       - stirling.*royal
@@ -3609,7 +3615,7 @@ Talbot Shaving:
   patterns:
   - talbot(?:\w? Shaving(.*maol grooming)?)?
   scents:
-    Author's Ridge:
+    Authors Ridge:
       patterns:
       - author.*ridge
     Grace:
@@ -3649,7 +3655,7 @@ Talent Soap Factory:
     Lionheart:
       patterns:
       - lionhe?art
-    Razberri and Tomato Leaf:
+    Razberri & Tomato Leaf:
       patterns:
       - raz+ber.*tomato
     Red-Eye Gravi:
@@ -3811,12 +3817,12 @@ The Holy Black:
   - (the )?holy black( new york)?
   - \bthb\b
   scents:
-    Gunpower Spice:
+    Gunpowder Spice:
       patterns:
       - gunpowder spice
       - holy black.*artisan
       - holy black.*(shaving )?soap
-    The Galleon!:
+    The Galleon:
       patterns:
       - holy.*galleon
 The Los Angeles Shaving Soap Company:
@@ -3897,7 +3903,7 @@ Valobra:
   patterns:
   - valobra
   scents:
-    Fougère:
+    Fougere:
       patterns:
       - valobra.*foug
 Van Der Hagen:
@@ -4062,19 +4068,20 @@ Wholly Kaw:
     Entropy Man:
       patterns:
       - entropy mansoa
-    Fougere Bouquet:
+    Fougère Bouquet:
       patterns:
       - \bkaw\b.*foug.*bouq
-    Fougere Mania:
+    Fougère Mania:
       patterns:
       - \bkaw\b.*foug.*mania
+      alias: Fougere Mania
     Iced Tea:
       patterns:
       - kaw.*iced? tea
     King of Oud:
       patterns:
       - king of oud
-    La Fougere Parfaite:
+    La Fougère Parfaite:
       patterns:
       - la fougere parfaite
     Man from Mayfair:
@@ -4183,6 +4190,7 @@ Zingari Man:
     Mousse Illuminee:
       patterns:
       - (zingari|romani).*illum[iu]n
+      alias: Mousse Illuminée
     No. 1 (with Byron Parfums):
       patterns:
       - zingari.*no\.? ?1
