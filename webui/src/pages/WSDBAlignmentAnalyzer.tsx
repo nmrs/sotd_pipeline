@@ -311,6 +311,56 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
+  const handleAddScentAlias = async (source: AlignmentResult, match: FuzzyMatch) => {
+    // Determine which brand and scent to use based on match direction
+    // match.source indicates where the match came from ("wsdb" or "pipeline")
+    let pipelineBrand: string;
+    let pipelineScent: string;
+    let aliasToAdd: string;
+
+    if (match.source === 'wsdb') {
+      // Pipeline → WSDB: source is pipeline, match is WSDB
+      pipelineBrand = source.source_brand;
+      pipelineScent = source.source_scent;
+      aliasToAdd = match.name; // WSDB scent name
+    } else {
+      // WSDB → Pipeline: source is WSDB, match is pipeline
+      pipelineBrand = match.brand;
+      pipelineScent = match.name;
+      aliasToAdd = source.source_scent; // WSDB scent name
+    }
+
+    try {
+      // Send request to add scent alias
+      const response = await fetch('http://localhost:8000/api/wsdb-alignment/add-scent-alias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pipeline_brand: pipelineBrand,
+          pipeline_scent: pipelineScent,
+          alias: aliasToAdd,
+        }),
+      });
+
+      if (response.ok) {
+        // Reload pipeline data to get updated aliases
+        await loadData();
+
+        // Re-run analysis to see updated matches
+        await analyzeAlignment();
+
+        // Show success message
+        setSuccessMessage(`Added "${aliasToAdd}" as scent alias for "${pipelineBrand} - ${pipelineScent}"`);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Failed to add scent alias');
+      }
+    } catch (err) {
+      console.error('Error adding scent alias:', err);
+      setError(err instanceof Error ? err.message : 'Error adding scent alias');
+    }
+  };
+
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return 'bg-green-100 text-green-800 border-green-300';
     if (confidence >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
@@ -815,6 +865,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         size='sm'
                                         onClick={(e) => {
                                           e.stopPropagation();
+                                          handleAddScentAlias(result, match);
+                                        }}
+                                        className='text-green-600 hover:bg-green-50 hover:text-green-700'
+                                      >
+                                        + Add Alias
+                                      </Button>
+                                      <Button
+                                        variant='outline'
+                                        size='sm'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           handleNotAMatch(result, match);
                                         }}
                                         className='text-red-600 hover:bg-red-50 hover:text-red-700'
@@ -1043,6 +1104,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                       <Badge className={getConfidenceColor(match.confidence)}>
                                         {match.confidence.toFixed(1)}%
                                       </Badge>
+                                      <Button
+                                        variant='outline'
+                                        size='sm'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleAddScentAlias(result, match);
+                                        }}
+                                        className='text-green-600 hover:bg-green-50 hover:text-green-700'
+                                      >
+                                        + Add Alias
+                                      </Button>
                                       <Button
                                         variant='outline'
                                         size='sm'

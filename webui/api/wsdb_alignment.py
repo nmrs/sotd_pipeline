@@ -1057,6 +1057,14 @@ class AddAliasRequest(BaseModel):
     alias: str
 
 
+class AddScentAliasRequest(BaseModel):
+    """Request model for adding an alias to a pipeline scent."""
+
+    pipeline_brand: str
+    pipeline_scent: str
+    alias: str
+
+
 @router.post("/add-alias")
 async def add_alias(request: AddAliasRequest) -> dict[str, Any]:
     """
@@ -1122,4 +1130,87 @@ async def add_alias(request: AddAliasRequest) -> dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Failed to add alias: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to add alias: {str(e)}")
+
+
+@router.post("/add-scent-alias")
+async def add_scent_alias(request: AddScentAliasRequest) -> dict[str, Any]:
+    """
+    Add an alias to a pipeline scent in soaps.yaml.
+
+    Args:
+        request: AddScentAliasRequest with pipeline_brand, pipeline_scent, and alias
+
+    Returns:
+        Dict with success status and message
+    """
+    try:
+        logger.info(
+            f"➕ Adding scent alias '{request.alias}' to scent '{request.pipeline_scent}' in brand '{request.pipeline_brand}'"
+        )
+
+        soaps_file = PROJECT_ROOT / "data" / "soaps.yaml"
+
+        if not soaps_file.exists():
+            logger.error(f"❌ soaps.yaml not found at {soaps_file}")
+            raise HTTPException(status_code=404, detail="soaps.yaml file not found")
+
+        # Load existing soaps data
+        with soaps_file.open("r", encoding="utf-8") as f:
+            soaps_data = yaml.safe_load(f) or {}
+
+        # Check if brand exists
+        if request.pipeline_brand not in soaps_data:
+            logger.error(f"❌ Brand '{request.pipeline_brand}' not found in soaps.yaml")
+            raise HTTPException(status_code=404, detail=f"Brand '{request.pipeline_brand}' not found in pipeline")
+
+        brand_data = soaps_data[request.pipeline_brand]
+
+        # Check if scent exists
+        if "scents" not in brand_data or request.pipeline_scent not in brand_data["scents"]:
+            logger.error(
+                f"❌ Scent '{request.pipeline_scent}' not found in brand '{request.pipeline_brand}' in soaps.yaml"
+            )
+            raise HTTPException(
+                status_code=404, detail=f"Scent '{request.pipeline_scent}' not found in brand '{request.pipeline_brand}'"
+            )
+
+        scent_data = brand_data["scents"][request.pipeline_scent]
+
+        # Ensure scent_data is a dict
+        if not isinstance(scent_data, dict):
+            scent_data = {}
+            brand_data["scents"][request.pipeline_scent] = scent_data
+
+        # Check if alias already exists (case-insensitive)
+        existing_alias = scent_data.get("alias")
+        if existing_alias and existing_alias.lower() == request.alias.lower():
+            logger.info(
+                f"ℹ️ Scent alias '{request.alias}' already exists for '{request.pipeline_scent}' in '{request.pipeline_brand}'"
+            )
+            return {"success": True, "message": f"Scent alias '{request.alias}' already exists"}
+
+        # Set the alias (replacing any existing alias)
+        scent_data["alias"] = request.alias
+
+        # Save atomically
+        temp_file = soaps_file.with_suffix(".tmp")
+        with temp_file.open("w", encoding="utf-8") as f:
+            yaml.dump(soaps_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+        temp_file.replace(soaps_file)
+
+        logger.info(
+            f"✅ Scent alias '{request.alias}' added to '{request.pipeline_scent}' in '{request.pipeline_brand}' successfully"
+        )
+        return {
+            "success": True,
+            "message": f"Added scent alias '{request.alias}' to '{request.pipeline_scent}' in '{request.pipeline_brand}'",
+            "alias": request.alias,
+        }
+
+    except HTTPException:
+        raise  # Re-raise HTTPExceptions without wrapping
+    except Exception as e:
+        logger.error(f"❌ Failed to add scent alias: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add scent alias: {str(e)}")
 

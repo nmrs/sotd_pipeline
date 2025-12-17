@@ -992,3 +992,60 @@ def test_add_alias_case_insensitive_duplicate(mock_data_files):
             data = yaml.safe_load(f)
         assert len(data["Barrister and Mann"]["aliases"]) == 1
 
+
+def test_add_scent_alias_success(mock_data_files):
+    """Test successfully adding a scent alias to a brand."""
+    soaps_file = mock_data_files / "soaps.yaml"
+
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        # Add a scent alias
+        response = client.post(
+            "/api/wsdb-alignment/add-scent-alias",
+            json={"pipeline_brand": "Barrister and Mann", "pipeline_scent": "Seville", "alias": "Seville Classic"},
+        )
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+
+        # Verify it was written to file
+        with soaps_file.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        assert "alias" in data["Barrister and Mann"]["scents"]["Seville"]
+        assert data["Barrister and Mann"]["scents"]["Seville"]["alias"] == "Seville Classic"
+
+
+def test_add_scent_alias_duplicate(mock_data_files):
+    """Test that duplicate scent aliases are replaced (not added)."""
+    soaps_file = mock_data_files / "soaps.yaml"
+
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        # Add alias first time
+        response1 = client.post(
+            "/api/wsdb-alignment/add-scent-alias",
+            json={"pipeline_brand": "Barrister and Mann", "pipeline_scent": "Seville", "alias": "Seville Classic"},
+        )
+        assert response1.status_code == 200
+
+        # Try to add same alias again (should replace, not duplicate)
+        response2 = client.post(
+            "/api/wsdb-alignment/add-scent-alias",
+            json={"pipeline_brand": "Barrister and Mann", "pipeline_scent": "Seville", "alias": "Seville Classic"},
+        )
+        assert response2.status_code == 200
+        assert "already exists" in response2.json()["message"]
+
+        # Verify only one alias entry (not an array)
+        with soaps_file.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        assert data["Barrister and Mann"]["scents"]["Seville"]["alias"] == "Seville Classic"
+
+
+def test_add_scent_alias_scent_not_found(mock_data_files):
+    """Test error handling when scent is not found."""
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        response = client.post(
+            "/api/wsdb-alignment/add-scent-alias",
+            json={"pipeline_brand": "Barrister and Mann", "pipeline_scent": "NonExistent", "alias": "Some Alias"},
+        )
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower()
+
