@@ -253,6 +253,52 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
+  const handleAddAlias = async (source: AlignmentResult, match: FuzzyMatch) => {
+    // Determine which is the pipeline brand and which is the alias to add
+    // match.source indicates where the match came from ("wsdb" or "pipeline")
+    let pipelineBrand: string;
+    let aliasToAdd: string;
+
+    if (match.source === 'wsdb') {
+      // Pipeline → WSDB: source is pipeline, match is WSDB
+      pipelineBrand = source.source_brand;
+      aliasToAdd = match.brand;
+    } else {
+      // WSDB → Pipeline: source is WSDB, match is pipeline
+      pipelineBrand = match.brand;
+      aliasToAdd = source.source_brand;
+    }
+
+    try {
+      // Send request to add alias
+      const response = await fetch('http://localhost:8000/api/wsdb-alignment/add-alias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pipeline_brand: pipelineBrand,
+          alias: aliasToAdd,
+        }),
+      });
+
+      if (response.ok) {
+        // Reload pipeline data to get updated aliases
+        await loadData();
+
+        // Re-run analysis to see updated matches
+        await analyzeAlignment();
+
+        // Show success message
+        setSuccessMessage(`Added "${aliasToAdd}" as alias for "${pipelineBrand}"`);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Failed to add alias');
+      }
+    } catch (err) {
+      console.error('Error adding alias:', err);
+      setError(err instanceof Error ? err.message : 'Error adding alias');
+    }
+  };
+
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return 'bg-green-100 text-green-800 border-green-300';
     if (confidence >= 60) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
@@ -682,6 +728,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                           size='sm'
                                           onClick={(e) => {
                                             e.stopPropagation();
+                                            handleAddAlias(result, brandMatches[0]);
+                                          }}
+                                          className='text-green-600 hover:bg-green-50 hover:text-green-700'
+                                        >
+                                          + Add Alias
+                                        </Button>
+                                        <Button
+                                          variant='outline'
+                                          size='sm'
+                                          onClick={(e) => {
+                                            e.stopPropagation();
                                             handleNotAMatch(result, brandMatches[0]);
                                           }}
                                           className='text-red-600 hover:bg-red-50 hover:text-red-700'
@@ -890,6 +947,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         <Badge className={getConfidenceColor(brandMatches[0].confidence)}>
                                           {brandMatches[0].confidence.toFixed(1)}%
                                         </Badge>
+                                        <Button
+                                          variant='outline'
+                                          size='sm'
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAddAlias(result, brandMatches[0]);
+                                          }}
+                                          className='text-green-600 hover:bg-green-50 hover:text-green-700'
+                                        >
+                                          + Add Alias
+                                        </Button>
                                         <Button
                                           variant='outline'
                                           size='sm'

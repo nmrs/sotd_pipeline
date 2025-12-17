@@ -933,3 +933,77 @@ async def remove_non_match(request: NonMatchRequest) -> dict[str, Any]:
         logger.error(f"❌ Failed to remove non-match: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to remove non-match: {str(e)}")
 
+
+class AddAliasRequest(BaseModel):
+    """Request model for adding an alias to a pipeline brand."""
+
+    pipeline_brand: str
+    alias: str
+
+
+@router.post("/add-alias")
+async def add_alias(request: AddAliasRequest) -> dict[str, Any]:
+    """
+    Add an alias to a pipeline brand in soaps.yaml.
+
+    Args:
+        request: AddAliasRequest with pipeline_brand and alias
+
+    Returns:
+        Dict with success status and message
+    """
+    try:
+        logger.info(f"➕ Adding alias '{request.alias}' to brand '{request.pipeline_brand}'")
+
+        soaps_file = PROJECT_ROOT / "data" / "soaps.yaml"
+
+        if not soaps_file.exists():
+            logger.error(f"❌ soaps.yaml not found at {soaps_file}")
+            raise HTTPException(status_code=404, detail="soaps.yaml file not found")
+
+        # Load existing soaps data
+        with soaps_file.open("r", encoding="utf-8") as f:
+            soaps_data = yaml.safe_load(f) or {}
+
+        # Check if brand exists
+        if request.pipeline_brand not in soaps_data:
+            logger.error(f"❌ Brand '{request.pipeline_brand}' not found in soaps.yaml")
+            raise HTTPException(status_code=404, detail=f"Brand '{request.pipeline_brand}' not found in pipeline")
+
+        brand_data = soaps_data[request.pipeline_brand]
+
+        # Get existing aliases or create new list
+        aliases = brand_data.get("aliases", [])
+        if not isinstance(aliases, list):
+            aliases = []
+
+        # Check if alias already exists (case-insensitive)
+        alias_lower = request.alias.lower()
+        if any(a.lower() == alias_lower for a in aliases):
+            logger.info(f"ℹ️ Alias '{request.alias}' already exists for '{request.pipeline_brand}'")
+            return {"success": True, "message": f"Alias '{request.alias}' already exists"}
+
+        # Add the new alias
+        aliases.append(request.alias)
+        brand_data["aliases"] = aliases
+
+        # Save atomically
+        temp_file = soaps_file.with_suffix(".tmp")
+        with temp_file.open("w", encoding="utf-8") as f:
+            yaml.dump(soaps_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+        temp_file.replace(soaps_file)
+
+        logger.info(f"✅ Alias '{request.alias}' added to '{request.pipeline_brand}' successfully")
+        return {
+            "success": True,
+            "message": f"Added alias '{request.alias}' to '{request.pipeline_brand}'",
+            "aliases": aliases,
+        }
+
+    except HTTPException:
+        raise  # Re-raise HTTPExceptions without wrapping
+    except Exception as e:
+        logger.error(f"❌ Failed to add alias: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add alias: {str(e)}")
+
