@@ -176,6 +176,9 @@ async def load_pipeline_soaps() -> dict[str, Any]:
             "loaded_at": datetime.now().isoformat(),
         }
 
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is (e.g., 404 for missing file)
+        raise
     except yaml.YAMLError as e:
         logger.error(f"❌ Failed to parse soaps.yaml: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to parse soaps.yaml: {str(e)}")
@@ -301,7 +304,7 @@ async def fuzzy_match(request: FuzzyMatchRequest) -> dict[str, Any]:
 
 
 def is_non_match(
-    source: dict, match: dict, brand_non_matches: list, scent_non_matches: list, mode: str
+    source: dict, match: dict, brand_non_matches: dict, scent_non_matches: dict, mode: str
 ) -> bool:
     """
     Check if this match pair is in the non-matches list.
@@ -309,35 +312,57 @@ def is_non_match(
     Args:
         source: Source item with source_brand and source_scent
         match: Match item with brand and name
-        brand_non_matches: List of brand-level non-matches
-        scent_non_matches: List of scent-level non-matches
+        brand_non_matches: Dict of pipeline_brand -> [wsdb_brands]
+        scent_non_matches: Dict of pipeline_brand -> pipeline_scent -> [wsdb_scents]
         mode: "brands" or "brand_scent"
 
     Returns:
         True if this match should be filtered out
     """
     if mode == "brands":
-        # Check brand-level non-matches (bidirectional)
-        return any(
-            (source["source_brand"].lower() == nm.get("pipeline_brand", "").lower()
-             and match["brand"].lower() == nm.get("wsdb_brand", "").lower())
-            or (source["source_brand"].lower() == nm.get("wsdb_brand", "").lower()
-                and match["brand"].lower() == nm.get("pipeline_brand", "").lower())
-            for nm in brand_non_matches
-        )
+        # Check brand-level non-matches
+        source_brand = source["source_brand"]
+        match_brand = match["brand"]
+
+        # Check if source is pipeline and match is WSDB (forward direction)
+        if source_brand in brand_non_matches:
+            if any(nm.lower() == match_brand.lower() for nm in brand_non_matches[source_brand]):
+                return True
+
+        # Check if source is WSDB and match is pipeline (reverse direction)
+        # Need to check all pipeline brands to see if source_brand is in their non-match list
+        for pipeline_brand, wsdb_brands in brand_non_matches.items():
+            if any(nm.lower() == source_brand.lower() for nm in wsdb_brands):
+                if pipeline_brand.lower() == match_brand.lower():
+                    return True
+
+        return False
+
     else:  # brand_scent mode
-        # Check scent-level non-matches (bidirectional)
-        return any(
-            (source["source_brand"].lower() == nm.get("pipeline_brand", "").lower()
-             and source.get("source_scent", "").lower() == nm.get("pipeline_scent", "").lower()
-             and match["brand"].lower() == nm.get("wsdb_brand", "").lower()
-             and match.get("name", "").lower() == nm.get("wsdb_scent", "").lower())
-            or (source["source_brand"].lower() == nm.get("wsdb_brand", "").lower()
-                and source.get("source_scent", "").lower() == nm.get("wsdb_scent", "").lower()
-                and match["brand"].lower() == nm.get("pipeline_brand", "").lower()
-                and match.get("name", "").lower() == nm.get("pipeline_scent", "").lower())
-            for nm in scent_non_matches
-        )
+        # Check scent-level non-matches
+        source_brand = source["source_brand"]
+        source_scent = source.get("source_scent", "")
+        match_brand = match["brand"]
+        match_scent = match.get("name", "")
+
+        # Check if source is pipeline and match is WSDB (forward direction)
+        if source_brand in scent_non_matches:
+            if source_scent in scent_non_matches[source_brand]:
+                if any(nm.lower() == match_scent.lower() for nm in scent_non_matches[source_brand][source_scent]):
+                    # Also verify the brand matches (same brand, different scent)
+                    if source_brand.lower() == match_brand.lower():
+                        return True
+
+        # Check if source is WSDB and match is pipeline (reverse direction)
+        # For scents: if pipeline brand has scent X with non-matches [Y],
+        # then checking WSDB scent Y against pipeline scent X should also return True
+        if match_brand in scent_non_matches:
+            if match_scent in scent_non_matches[match_brand]:
+                if any(nm.lower() == source_scent.lower() for nm in scent_non_matches[match_brand][match_scent]):
+                    if match_brand.lower() == source_brand.lower():
+                        return True
+
+        return False
 
 
 @router.post("/batch-analyze")
@@ -744,28 +769,32 @@ async def refresh_wsdb_data() -> WSDBRefreshResponse:
 @router.get("/non-matches")
 async def load_non_matches() -> dict[str, Any]:
     """
-    Load known non-matches from YAML file.
+    Load known non-matches from brand and scent YAML files.
 
     Returns:
-        Dict containing brand_non_matches and scent_non_matches lists
+        Dict with brand_non_matches and scent_non_matches in hierarchical format
     """
     try:
         logger.info("📂 Loading known non-matches")
-        non_matches_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches.yaml"
+        brands_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_brands.yaml"
+        scents_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_scents.yaml"
 
-        if not non_matches_file.exists():
-            logger.warning("⚠️ non_matches.yaml not found, returning empty lists")
-            return {"brand_non_matches": [], "scent_non_matches": []}
+        # Load brand non-matches
+        brand_non_matches = {}
+        if brands_file.exists():
+            with brands_file.open("r", encoding="utf-8") as f:
+                brand_non_matches = yaml.safe_load(f) or {}
 
-        with non_matches_file.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
+        # Load scent non-matches
+        scent_non_matches = {}
+        if scents_file.exists():
+            with scents_file.open("r", encoding="utf-8") as f:
+                scent_non_matches = yaml.safe_load(f) or {}
 
-        brand_non_matches = data.get("brand_non_matches", [])
-        scent_non_matches = data.get("scent_non_matches", [])
+        brand_count = sum(len(v) for v in brand_non_matches.values())
+        scent_count = sum(len(scents) for brand_scents in scent_non_matches.values() for scents in brand_scents.values())
 
-        logger.info(
-            f"✅ Loaded {len(brand_non_matches)} brand non-matches, {len(scent_non_matches)} scent non-matches"
-        )
+        logger.info(f"✅ Loaded {brand_count} brand non-matches, {scent_count} scent non-matches")
 
         return {"brand_non_matches": brand_non_matches, "scent_non_matches": scent_non_matches}
 
@@ -778,6 +807,7 @@ async def load_non_matches() -> dict[str, Any]:
 async def add_non_match(request: NonMatchRequest) -> dict[str, Any]:
     """
     Add a new non-match entry (auto-saves to YAML).
+    Only saves if the pipeline brand/scent exists in soaps.yaml.
 
     Args:
         request: Non-match request with match type and brand/scent info
@@ -788,69 +818,89 @@ async def add_non_match(request: NonMatchRequest) -> dict[str, Any]:
     try:
         logger.info(f"➕ Adding non-match: {request.match_type} - {request.pipeline_brand} != {request.wsdb_brand}")
 
-        non_matches_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches.yaml"
+        # Load pipeline soaps to verify brand/scent exists
+        soaps_file = PROJECT_ROOT / "data" / "soaps.yaml"
+        with soaps_file.open("r", encoding="utf-8") as f:
+            soaps_data = yaml.safe_load(f) or {}
 
-        # Load existing non-matches
-        if non_matches_file.exists():
-            with non_matches_file.open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
-        else:
-            data = {}
-
-        brand_non_matches = data.get("brand_non_matches", [])
-        scent_non_matches = data.get("scent_non_matches", [])
-
-        # Create new entry
-        new_entry = {
-            "pipeline_brand": request.pipeline_brand,
-            "wsdb_brand": request.wsdb_brand,
-            "added_at": datetime.now().isoformat(),
-        }
+        # Check if pipeline brand exists
+        if request.pipeline_brand not in soaps_data:
+            logger.warning(f"⚠️ Pipeline brand '{request.pipeline_brand}' not found, skipping non-match")
+            return {"success": False, "message": f"Pipeline brand '{request.pipeline_brand}' not found"}
 
         if request.match_type == "scent":
-            new_entry["pipeline_scent"] = request.pipeline_scent
-            new_entry["wsdb_scent"] = request.wsdb_scent
+            # Check if pipeline scent exists within the brand
+            brand_data = soaps_data[request.pipeline_brand]
+            scents = brand_data.get("scents", {})
+            if request.pipeline_scent not in scents:
+                logger.warning(
+                    f"⚠️ Pipeline scent '{request.pipeline_scent}' not found in '{request.pipeline_brand}', skipping"
+                )
+                return {
+                    "success": False,
+                    "message": f"Pipeline scent '{request.pipeline_scent}' not found in '{request.pipeline_brand}'",
+                }
 
-            # Check for duplicates in scent non-matches
-            is_duplicate = any(
-                nm.get("pipeline_brand", "").lower() == request.pipeline_brand.lower()
-                and nm.get("pipeline_scent", "").lower() == (request.pipeline_scent or "").lower()
-                and nm.get("wsdb_brand", "").lower() == request.wsdb_brand.lower()
-                and nm.get("wsdb_scent", "").lower() == (request.wsdb_scent or "").lower()
-                for nm in scent_non_matches
-            )
+            # Load scent non-matches
+            scents_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_scents.yaml"
+            scent_non_matches = {}
+            if scents_file.exists():
+                with scents_file.open("r", encoding="utf-8") as f:
+                    scent_non_matches = yaml.safe_load(f) or {}
 
-            if is_duplicate:
+            # Add non-match (bidirectional)
+            # Format: brand -> scent -> [list of non-matching wsdb scents]
+            if request.pipeline_brand not in scent_non_matches:
+                scent_non_matches[request.pipeline_brand] = {}
+            if request.pipeline_scent not in scent_non_matches[request.pipeline_brand]:
+                scent_non_matches[request.pipeline_brand][request.pipeline_scent] = []
+
+            # Check for duplicate
+            if request.wsdb_scent in scent_non_matches[request.pipeline_brand][request.pipeline_scent]:
                 logger.info("ℹ️ Non-match already exists, skipping")
                 return {"success": True, "message": "Non-match already exists"}
 
-            scent_non_matches.append(new_entry)
+            # Add the non-match
+            scent_non_matches[request.pipeline_brand][request.pipeline_scent].append(request.wsdb_scent)
+
+            # Save atomically
+            temp_file = scents_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(scent_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(scents_file)
+
+            logger.info("✅ Scent non-match added and saved successfully")
+            return {"success": True, "message": "Scent non-match added successfully"}
+
         else:  # brand
-            # Check for duplicates in brand non-matches
-            is_duplicate = any(
-                nm.get("pipeline_brand", "").lower() == request.pipeline_brand.lower()
-                and nm.get("wsdb_brand", "").lower() == request.wsdb_brand.lower()
-                for nm in brand_non_matches
-            )
+            # Load brand non-matches
+            brands_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_brands.yaml"
+            brand_non_matches = {}
+            if brands_file.exists():
+                with brands_file.open("r", encoding="utf-8") as f:
+                    brand_non_matches = yaml.safe_load(f) or {}
 
-            if is_duplicate:
+            # Add non-match
+            # Format: pipeline_brand -> [list of non-matching wsdb brands]
+            if request.pipeline_brand not in brand_non_matches:
+                brand_non_matches[request.pipeline_brand] = []
+
+            # Check for duplicate
+            if request.wsdb_brand in brand_non_matches[request.pipeline_brand]:
                 logger.info("ℹ️ Non-match already exists, skipping")
                 return {"success": True, "message": "Non-match already exists"}
 
-            brand_non_matches.append(new_entry)
+            # Add the non-match
+            brand_non_matches[request.pipeline_brand].append(request.wsdb_brand)
 
-        # Save atomically
-        data["brand_non_matches"] = brand_non_matches
-        data["scent_non_matches"] = scent_non_matches
+            # Save atomically
+            temp_file = brands_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(brand_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(brands_file)
 
-        temp_file = non_matches_file.with_suffix(".tmp")
-        with temp_file.open("w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-
-        temp_file.replace(non_matches_file)
-
-        logger.info("✅ Non-match added and saved successfully")
-        return {"success": True, "message": "Non-match added successfully"}
+            logger.info("✅ Brand non-match added and saved successfully")
+            return {"success": True, "message": "Brand non-match added successfully"}
 
     except Exception as e:
         logger.error(f"❌ Failed to add non-match: {e}")
@@ -873,61 +923,79 @@ async def remove_non_match(request: NonMatchRequest) -> dict[str, Any]:
             f"➖ Removing non-match: {request.match_type} - {request.pipeline_brand} != {request.wsdb_brand}"
         )
 
-        non_matches_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches.yaml"
-
-        if not non_matches_file.exists():
-            logger.warning("⚠️ non_matches.yaml not found")
-            return {"success": True, "message": "Non-matches file not found, nothing to remove"}
-
-        # Load existing non-matches
-        with non_matches_file.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-
-        brand_non_matches = data.get("brand_non_matches", [])
-        scent_non_matches = data.get("scent_non_matches", [])
-
-        # Remove matching entry
         if request.match_type == "scent":
-            original_count = len(scent_non_matches)
-            scent_non_matches = [
-                nm
-                for nm in scent_non_matches
-                if not (
-                    nm.get("pipeline_brand", "").lower() == request.pipeline_brand.lower()
-                    and nm.get("pipeline_scent", "").lower() == (request.pipeline_scent or "").lower()
-                    and nm.get("wsdb_brand", "").lower() == request.wsdb_brand.lower()
-                    and nm.get("wsdb_scent", "").lower() == (request.wsdb_scent or "").lower()
-                )
-            ]
-            removed_count = original_count - len(scent_non_matches)
+            scents_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_scents.yaml"
+
+            if not scents_file.exists():
+                logger.warning("⚠️ non_matches_scents.yaml not found")
+                return {"success": True, "message": "Scent non-matches file not found, nothing to remove"}
+
+            # Load existing scent non-matches
+            with scents_file.open("r", encoding="utf-8") as f:
+                scent_non_matches = yaml.safe_load(f) or {}
+
+            # Try to remove the entry
+            removed = False
+            if request.pipeline_brand in scent_non_matches:
+                if request.pipeline_scent in scent_non_matches[request.pipeline_brand]:
+                    scent_list = scent_non_matches[request.pipeline_brand][request.pipeline_scent]
+                    if request.wsdb_scent in scent_list:
+                        scent_list.remove(request.wsdb_scent)
+                        removed = True
+
+                        # Clean up empty entries
+                        if not scent_list:
+                            del scent_non_matches[request.pipeline_brand][request.pipeline_scent]
+                        if not scent_non_matches[request.pipeline_brand]:
+                            del scent_non_matches[request.pipeline_brand]
+
+            if not removed:
+                logger.info("ℹ️ No matching scent non-match found to remove")
+                return {"success": True, "message": "No matching scent non-match found"}
+
+            # Save atomically
+            temp_file = scents_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(scent_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(scents_file)
+
+            logger.info("✅ Removed scent non-match successfully")
+            return {"success": True, "message": "Scent non-match removed"}
+
         else:  # brand
-            original_count = len(brand_non_matches)
-            brand_non_matches = [
-                nm
-                for nm in brand_non_matches
-                if not (
-                    nm.get("pipeline_brand", "").lower() == request.pipeline_brand.lower()
-                    and nm.get("wsdb_brand", "").lower() == request.wsdb_brand.lower()
-                )
-            ]
-            removed_count = original_count - len(brand_non_matches)
+            brands_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_brands.yaml"
 
-        if removed_count == 0:
-            logger.info("ℹ️ No matching non-match found to remove")
-            return {"success": True, "message": "No matching non-match found"}
+            if not brands_file.exists():
+                logger.warning("⚠️ non_matches_brands.yaml not found")
+                return {"success": True, "message": "Brand non-matches file not found, nothing to remove"}
 
-        # Save atomically
-        data["brand_non_matches"] = brand_non_matches
-        data["scent_non_matches"] = scent_non_matches
+            # Load existing brand non-matches
+            with brands_file.open("r", encoding="utf-8") as f:
+                brand_non_matches = yaml.safe_load(f) or {}
 
-        temp_file = non_matches_file.with_suffix(".tmp")
-        with temp_file.open("w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            # Try to remove the entry
+            removed = False
+            if request.pipeline_brand in brand_non_matches:
+                if request.wsdb_brand in brand_non_matches[request.pipeline_brand]:
+                    brand_non_matches[request.pipeline_brand].remove(request.wsdb_brand)
+                    removed = True
 
-        temp_file.replace(non_matches_file)
+                    # Clean up empty entry
+                    if not brand_non_matches[request.pipeline_brand]:
+                        del brand_non_matches[request.pipeline_brand]
 
-        logger.info(f"✅ Non-match removed successfully ({removed_count} entries)")
-        return {"success": True, "message": f"Non-match removed successfully ({removed_count} entries)"}
+            if not removed:
+                logger.info("ℹ️ No matching brand non-match found to remove")
+                return {"success": True, "message": "No matching brand non-match found"}
+
+            # Save atomically
+            temp_file = brands_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(brand_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(brands_file)
+
+            logger.info("✅ Removed brand non-match successfully")
+            return {"success": True, "message": "Brand non-match removed"}
 
     except Exception as e:
         logger.error(f"❌ Failed to remove non-match: {e}")

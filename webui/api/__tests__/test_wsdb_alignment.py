@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for WSDB alignment API endpoints."""
 
+import copy
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -62,6 +63,7 @@ MOCK_PIPELINE_DATA = {
         "scents": {
             "Seville": {"patterns": ["seville"]},
             "Leviathan": {"patterns": ["leviathan", "levi"]},
+            "Le Grand Chypre": {"patterns": ["le.*grand.*chypre"]},
         },
     },
     "Declaration Grooming": {
@@ -76,6 +78,12 @@ MOCK_PIPELINE_DATA = {
         "scents": {
             "Executive Man": {"patterns": ["executive.*man", "exec man"]},
             "Barbershop": {"patterns": ["barbershop"]},
+        },
+    },
+    "Black Mountain Shaving": {
+        "patterns": ["black.*mountain.*shaving", "bms"],
+        "scents": {
+            "Sandalwood": {"patterns": ["sandalwood"]},
         },
     },
 }
@@ -182,9 +190,9 @@ class TestLoadPipelineSoaps:
         assert "total_scents" in data
         assert "loaded_at" in data
 
-        assert data["total_brands"] == 3
-        assert data["total_scents"] == 6  # 2 scents per brand
-        assert len(data["soaps"]) == 3
+        assert data["total_brands"] == 4
+        assert data["total_scents"] == 8
+        assert len(data["soaps"]) == 4
 
         # Verify structure
         for soap in data["soaps"]:
@@ -490,7 +498,7 @@ class TestAliasFuzzyMatch:
     def test_alias_matching_brands_only(self, mock_root, mock_data_files):
         """Test that alias matching works in brands only mode."""
         # Add alias data to pipeline
-        pipeline_with_aliases = MOCK_PIPELINE_DATA.copy()
+        pipeline_with_aliases = copy.deepcopy(MOCK_PIPELINE_DATA)
         pipeline_with_aliases["Alexandria Grooming"] = {
             "aliases": ["Alexendria Fragrances"],  # Intentional typo to test alias matching
             "patterns": ["alexandria.*grooming"],
@@ -558,7 +566,7 @@ class TestAliasFuzzyMatch:
     def test_alias_matching_brand_scent_mode(self, mock_root, mock_data_files):
         """Test that alias matching works in brand + scent mode."""
         # Similar setup to brands only test
-        pipeline_with_aliases = MOCK_PIPELINE_DATA.copy()
+        pipeline_with_aliases = copy.deepcopy(MOCK_PIPELINE_DATA)
         pipeline_with_aliases["Alexandria Grooming"] = {
             "aliases": ["Alexendria Fragrances"],
             "patterns": ["alexandria.*grooming"],
@@ -625,7 +633,7 @@ class TestAliasFuzzyMatch:
     def test_canonical_name_preferred_when_better(self, mock_root, mock_data_files):
         """Test that canonical name is used when it scores higher than alias."""
         # Setup where canonical name matches perfectly
-        pipeline_with_aliases = MOCK_PIPELINE_DATA.copy()
+        pipeline_with_aliases = copy.deepcopy(MOCK_PIPELINE_DATA)
         pipeline_with_aliases["Barrister and Mann"]["aliases"] = ["B&M", "Barrister & Mann"]
         
         soaps_file = mock_data_files / "soaps.yaml"
@@ -663,50 +671,47 @@ class TestAliasFuzzyMatch:
 
 
 def test_load_non_matches(mock_data_files):
-    """Test loading non-matches from YAML file."""
-    # Create non-matches file (wsdb dir already exists from fixture)
+    """Test loading non-matches from new hierarchical YAML files."""
+    # Create non-matches files (wsdb dir already exists from fixture)
     wsdb_dir = mock_data_files / "wsdb"
-    non_matches_file = wsdb_dir / "non_matches.yaml"
     
-    test_data = {
-        "brand_non_matches": [
-            {
-                "pipeline_brand": "Black Mountain Shaving",
-                "wsdb_brand": "Mountain Hare Shaving",
-                "added_at": "2025-12-17T10:30:00Z",
-            }
-        ],
-        "scent_non_matches": [
-            {
-                "pipeline_brand": "Barrister and Mann",
-                "pipeline_scent": "Le Grand Chypre",
-                "wsdb_brand": "Barrister and Mann",
-                "wsdb_scent": "Le Petit Chypre",
-                "added_at": "2025-12-17T10:31:00Z",
-            }
-        ],
+    # Brand non-matches
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
+    brands_data = {
+        "Black Mountain Shaving": ["Mountain Hare Shaving"],
     }
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump(brands_data, f)
     
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump(test_data, f)
+    # Scent non-matches
+    scents_file = wsdb_dir / "non_matches_scents.yaml"
+    scents_data = {
+        "Barrister and Mann": {
+            "Le Grand Chypre": ["Le Petit Chypre"],
+        }
+    }
+    with scents_file.open("w", encoding="utf-8") as f:
+        yaml.dump(scents_data, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.get("/api/wsdb-alignment/non-matches")
         assert response.status_code == 200
         data = response.json()
-        assert len(data["brand_non_matches"]) == 1
-        assert len(data["scent_non_matches"]) == 1
-        assert data["brand_non_matches"][0]["pipeline_brand"] == "Black Mountain Shaving"
+        assert "Black Mountain Shaving" in data["brand_non_matches"]
+        assert "Mountain Hare Shaving" in data["brand_non_matches"]["Black Mountain Shaving"]
+        assert "Barrister and Mann" in data["scent_non_matches"]
+        assert "Le Grand Chypre" in data["scent_non_matches"]["Barrister and Mann"]
+        assert "Le Petit Chypre" in data["scent_non_matches"]["Barrister and Mann"]["Le Grand Chypre"]
 
 
 def test_add_brand_non_match(mock_data_files):
     """Test adding brand-level non-match."""
     wsdb_dir = mock_data_files / "wsdb"
-    non_matches_file = wsdb_dir / "non_matches.yaml"
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
     
     # Initialize empty file
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump({"brand_non_matches": [], "scent_non_matches": []}, f)
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump({}, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.post(
@@ -720,21 +725,21 @@ def test_add_brand_non_match(mock_data_files):
         assert response.status_code == 200
         assert response.json()["success"] is True
 
-        # Verify file was written
-        with non_matches_file.open("r", encoding="utf-8") as f:
+        # Verify file was written with hierarchical format
+        with brands_file.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        assert len(data["brand_non_matches"]) == 1
-        assert data["brand_non_matches"][0]["pipeline_brand"] == "Black Mountain Shaving"
+        assert "Black Mountain Shaving" in data
+        assert "Mountain Hare Shaving" in data["Black Mountain Shaving"]
 
 
 def test_add_scent_non_match(mock_data_files):
     """Test adding scent-level non-match."""
     wsdb_dir = mock_data_files / "wsdb"
-    non_matches_file = wsdb_dir / "non_matches.yaml"
+    scents_file = wsdb_dir / "non_matches_scents.yaml"
     
     # Initialize empty file
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump({"brand_non_matches": [], "scent_non_matches": []}, f)
+    with scents_file.open("w", encoding="utf-8") as f:
+        yaml.dump({}, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.post(
@@ -750,11 +755,12 @@ def test_add_scent_non_match(mock_data_files):
         assert response.status_code == 200
         assert response.json()["success"] is True
 
-        # Verify file was written
-        with non_matches_file.open("r", encoding="utf-8") as f:
+        # Verify file was written with hierarchical format
+        with scents_file.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        assert len(data["scent_non_matches"]) == 1
-        assert data["scent_non_matches"][0]["pipeline_brand"] == "Barrister and Mann"
+        assert "Barrister and Mann" in data
+        assert "Le Grand Chypre" in data["Barrister and Mann"]
+        assert "Le Petit Chypre" in data["Barrister and Mann"]["Le Grand Chypre"]
 
 
 def test_non_match_filtering_brands_mode(mock_data_files):
@@ -762,19 +768,12 @@ def test_non_match_filtering_brands_mode(mock_data_files):
     wsdb_dir = mock_data_files / "wsdb"
     
     # Create non-matches file (software.json already in correct location from fixture)
-    non_matches_file = wsdb_dir / "non_matches.yaml"
-    non_matches_data = {
-        "brand_non_matches": [
-            {
-                "pipeline_brand": "Barrister and Mann",
-                "wsdb_brand": "Stirling Soap Co.",
-                "added_at": "2025-12-17T10:30:00Z",
-            }
-        ],
-        "scent_non_matches": [],
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
+    brands_data = {
+        "Barrister and Mann": ["Stirling Soap Co."],
     }
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump(non_matches_data, f)
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump(brands_data, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.post("/api/wsdb-alignment/batch-analyze?threshold=0.1&limit=100&mode=brands")
@@ -794,22 +793,16 @@ def test_non_match_filtering_brand_scent_mode(mock_data_files):
     """Test that non-matches are filtered in brand+scent mode."""
     wsdb_dir = mock_data_files / "wsdb"
     
-    # Create non-matches file (software.json already in correct location from fixture)
-    non_matches_file = wsdb_dir / "non_matches.yaml"
-    non_matches_data = {
-        "brand_non_matches": [],
-        "scent_non_matches": [
-            {
-                "pipeline_brand": "Barrister and Mann",
-                "pipeline_scent": "Seville",
-                "wsdb_brand": "Stirling Soap Co.",
-                "wsdb_scent": "Executive Man",
-                "added_at": "2025-12-17T10:31:00Z",
-            }
-        ],
+    # Create scent non-matches file (software.json already in correct location from fixture)
+    # Format: Brand -> Scent -> [list of non-matching scents within same brand]
+    scents_file = wsdb_dir / "non_matches_scents.yaml"
+    scents_data = {
+        "Barrister and Mann": {
+            "Seville": ["Leviathan"],  # BaM Seville != BaM Leviathan
+        }
     }
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump(non_matches_data, f)
+    with scents_file.open("w", encoding="utf-8") as f:
+        yaml.dump(scents_data, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.post("/api/wsdb-alignment/batch-analyze?threshold=0.1&limit=100&mode=brand_scent")
@@ -827,11 +820,11 @@ def test_non_match_filtering_brand_scent_mode(mock_data_files):
         )
         assert bam_seville is not None
 
-        # Verify Stirling Executive Man is NOT in the matches
-        stirling_matches = [
-            m for m in bam_seville["matches"] if m["brand"] == "Stirling Soap Co." and m["name"] == "Executive Man"
+        # Verify BaM Leviathan is NOT in the matches
+        leviathan_matches = [
+            m for m in bam_seville["matches"] if m["brand"] == "Barrister and Mann" and m["name"] == "Leviathan"
         ]
-        assert len(stirling_matches) == 0
+        assert len(leviathan_matches) == 0
 
 
 def test_bidirectional_filtering(mock_data_files):
@@ -840,19 +833,12 @@ def test_bidirectional_filtering(mock_data_files):
     
     # Create non-matches file (Pipeline: BaM != WSDB: Stirling)
     # (software.json already in correct location from fixture)
-    non_matches_file = wsdb_dir / "non_matches.yaml"
-    non_matches_data = {
-        "brand_non_matches": [
-            {
-                "pipeline_brand": "Barrister and Mann",
-                "wsdb_brand": "Stirling Soap Co.",
-                "added_at": "2025-12-17T10:30:00Z",
-            }
-        ],
-        "scent_non_matches": [],
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
+    brands_data = {
+        "Barrister and Mann": ["Stirling Soap Co."],
     }
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump(non_matches_data, f)
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump(brands_data, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         response = client.post("/api/wsdb-alignment/batch-analyze?threshold=0.1&limit=100&mode=brands")
@@ -875,11 +861,11 @@ def test_bidirectional_filtering(mock_data_files):
 def test_duplicate_non_match_prevention(mock_data_files):
     """Test that duplicate non-matches are not added."""
     wsdb_dir = mock_data_files / "wsdb"
-    non_matches_file = wsdb_dir / "non_matches.yaml"
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
     
     # Initialize empty file
-    with non_matches_file.open("w", encoding="utf-8") as f:
-        yaml.dump({"brand_non_matches": [], "scent_non_matches": []}, f)
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump({}, f)
 
     with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
         # Add first time
@@ -907,10 +893,12 @@ def test_duplicate_non_match_prevention(mock_data_files):
         assert response2.json()["success"] is True
         assert "already exists" in response2.json()["message"]
 
-        # Verify only one entry in file
-        with non_matches_file.open("r", encoding="utf-8") as f:
+        # Verify only one entry in file (hierarchical format)
+        with brands_file.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        assert len(data["brand_non_matches"]) == 1
+        assert "Black Mountain Shaving" in data
+        assert len(data["Black Mountain Shaving"]) == 1
+        assert "Mountain Hare Shaving" in data["Black Mountain Shaving"]
 
 
 def test_add_alias_success(mock_data_files):
