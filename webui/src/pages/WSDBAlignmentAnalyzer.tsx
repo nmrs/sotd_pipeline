@@ -646,68 +646,145 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
 
                       {result.expanded && result.matches.length > 0 && (
                         <div className='mt-4 space-y-3 pl-8'>
-                          {result.matches.map((match, matchIndex) => (
-                            <div key={matchIndex} className='border-l-2 border-blue-200 pl-4'>
-                              <div className='flex items-center justify-between mb-2'>
-                                <div className='font-medium text-gray-900 flex items-center gap-2'>
-                                  <span>
-                                    {match.brand}
-                                    {match.name && ` - ${match.name}`}
-                                  </span>
-                                  {/* Highlight if matched via alias */}
-                                  {match.matched_via === 'alias' && (
-                                    <Badge variant='outline' className='text-xs bg-blue-50 text-blue-700 border-blue-200'>
-                                      via alias
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                  <Badge className={getConfidenceColor(match.confidence)}>
-                                    {match.confidence.toFixed(1)}%
-                                  </Badge>
-                                  <Button
-                                    variant='outline'
-                                    size='sm'
-                                    onClick={() => handleNotAMatch(result, match)}
-                                    className='text-red-600 hover:bg-red-50 hover:text-red-700'
-                                  >
-                                    ✕ Not a Match
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className='text-sm text-gray-600 space-y-1'>
-                                <div>
-                                  Brand Score: {match.brand_score.toFixed(1)}% | Scent Score:{' '}
-                                  {match.scent_score.toFixed(1)}%
-                                </div>
-                                {match.details.scent_notes && match.details.scent_notes.length > 0 && (
-                                  <div>
-                                    <span className='font-medium'>Scent Notes:</span>{' '}
-                                    {match.details.scent_notes.join(', ')}
-                                  </div>
-                                )}
-                                {match.details.collaborators &&
-                                  match.details.collaborators.length > 0 && (
-                                    <div>
-                                      <span className='font-medium'>Collaborators:</span>{' '}
-                                      {match.details.collaborators.join(', ')}
+                          {analysisMode === 'brands'
+                            ? // Group by brand in Brands Only mode
+                              (() => {
+                                const brandGroups = result.matches.reduce((acc, match) => {
+                                  if (!acc[match.brand]) {
+                                    acc[match.brand] = [];
+                                  }
+                                  acc[match.brand].push(match);
+                                  return acc;
+                                }, {} as Record<string, FuzzyMatch[]>);
+
+                                return Object.entries(brandGroups).map(([brand, brandMatches]) => (
+                                  <div key={brand} className='border-l-2 border-blue-200 pl-4 space-y-2'>
+                                    {/* Brand-level header with "Not a Match" button */}
+                                    <div className='flex items-center justify-between mb-2'>
+                                      <div className='font-semibold text-gray-900 flex items-center gap-2'>
+                                        <span>{brand}</span>
+                                        {/* Highlight if matched via alias */}
+                                        {brandMatches[0].matched_via === 'alias' && (
+                                          <Badge
+                                            variant='outline'
+                                            className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                          >
+                                            via alias
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className='flex items-center gap-2'>
+                                        <Badge className={getConfidenceColor(brandMatches[0].confidence)}>
+                                          {brandMatches[0].confidence.toFixed(1)}%
+                                        </Badge>
+                                        <Button
+                                          variant='outline'
+                                          size='sm'
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleNotAMatch(result, brandMatches[0]);
+                                          }}
+                                          className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                        >
+                                          ✕ Not a Match
+                                        </Button>
+                                      </div>
                                     </div>
-                                  )}
-                                {match.details.tags && match.details.tags.length > 0 && (
-                                  <div>
-                                    <span className='font-medium'>Tags:</span>{' '}
-                                    {match.details.tags.join(', ')}
+                                    {/* List of scents under this brand */}
+                                    <div className='pl-4 space-y-1'>
+                                      {brandMatches.map((match, idx) => (
+                                        <div key={idx} className='text-sm text-gray-700'>
+                                          • {match.name || '(no scent name)'}
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {/* Brand metadata */}
+                                    <div className='text-sm text-gray-600 pl-4 space-y-1'>
+                                      <div>Brand Score: {brandMatches[0].brand_score.toFixed(1)}%</div>
+                                      {brandMatches[0].details.collaborators &&
+                                        brandMatches[0].details.collaborators.length > 0 && (
+                                          <div>
+                                            <span className='font-medium'>Collaborators:</span>{' '}
+                                            {brandMatches[0].details.collaborators.join(', ')}
+                                          </div>
+                                        )}
+                                      {brandMatches[0].details.category && (
+                                        <div>
+                                          <span className='font-medium'>Category:</span>{' '}
+                                          {brandMatches[0].details.category}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                )}
-                                {match.details.category && (
-                                  <div>
-                                    <span className='font-medium'>Category:</span>{' '}
-                                    {match.details.category}
+                                ));
+                              })()
+                            : // Show individual scent matches in Brand + Scent mode
+                              result.matches.map((match, matchIndex) => (
+                                <div key={matchIndex} className='border-l-2 border-blue-200 pl-4'>
+                                  <div className='flex items-center justify-between mb-2'>
+                                    <div className='font-medium text-gray-900 flex items-center gap-2'>
+                                      <span>
+                                        {match.brand}
+                                        {match.name && ` - ${match.name}`}
+                                      </span>
+                                      {/* Highlight if matched via alias */}
+                                      {match.matched_via === 'alias' && (
+                                        <Badge
+                                          variant='outline'
+                                          className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                        >
+                                          via alias
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className='flex items-center gap-2'>
+                                      <Badge className={getConfidenceColor(match.confidence)}>
+                                        {match.confidence.toFixed(1)}%
+                                      </Badge>
+                                      <Button
+                                        variant='outline'
+                                        size='sm'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleNotAMatch(result, match);
+                                        }}
+                                        className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                      >
+                                        ✕ Not a Match
+                                      </Button>
+                                    </div>
                                   </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                                  <div className='text-sm text-gray-600 space-y-1'>
+                                    <div>
+                                      Brand Score: {match.brand_score.toFixed(1)}% | Scent Score:{' '}
+                                      {match.scent_score.toFixed(1)}%
+                                    </div>
+                                    {match.details.scent_notes && match.details.scent_notes.length > 0 && (
+                                      <div>
+                                        <span className='font-medium'>Scent Notes:</span>{' '}
+                                        {match.details.scent_notes.join(', ')}
+                                      </div>
+                                    )}
+                                    {match.details.collaborators && match.details.collaborators.length > 0 && (
+                                      <div>
+                                        <span className='font-medium'>Collaborators:</span>{' '}
+                                        {match.details.collaborators.join(', ')}
+                                      </div>
+                                    )}
+                                    {match.details.tags && match.details.tags.length > 0 && (
+                                      <div>
+                                        <span className='font-medium'>Tags:</span>{' '}
+                                        {match.details.tags.join(', ')}
+                                      </div>
+                                    )}
+                                    {match.details.category && (
+                                      <div>
+                                        <span className='font-medium'>Category:</span> {match.details.category}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                         </div>
                       )}
                     </div>
@@ -796,49 +873,122 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
 
                       {result.expanded && result.matches.length > 0 && (
                         <div className='mt-4 space-y-3 pl-8'>
-                          {result.matches.map((match, matchIndex) => (
-                            <div key={matchIndex} className='border-l-2 border-green-200 pl-4'>
-                              <div className='flex items-center justify-between mb-2'>
-                                <div className='font-medium text-gray-900 flex items-center gap-2'>
-                                  <span>
-                                    {match.brand}
-                                    {match.name && ` - ${match.name}`}
-                                  </span>
-                                  {/* Highlight if matched via alias */}
-                                  {match.matched_via === 'alias' && (
-                                    <Badge variant='outline' className='text-xs bg-blue-50 text-blue-700 border-blue-200'>
-                                      via alias
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                  <Badge className={getConfidenceColor(match.confidence)}>
-                                    {match.confidence.toFixed(1)}%
-                                  </Badge>
-                                  <Button
-                                    variant='outline'
-                                    size='sm'
-                                    onClick={() => handleNotAMatch(result, match)}
-                                    className='text-red-600 hover:bg-red-50 hover:text-red-700'
-                                  >
-                                    ✕ Not a Match
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className='text-sm text-gray-600 space-y-1'>
-                                <div>
-                                  Brand Score: {match.brand_score.toFixed(1)}% | Scent Score:{' '}
-                                  {match.scent_score.toFixed(1)}%
-                                </div>
-                                {match.details.patterns && match.details.patterns.length > 0 && (
-                                  <div>
-                                    <span className='font-medium'>Patterns:</span>{' '}
-                                    {match.details.patterns.join(', ')}
+                          {analysisMode === 'brands'
+                            ? // Group by brand in Brands Only mode
+                              (() => {
+                                const brandGroups = result.matches.reduce((acc, match) => {
+                                  if (!acc[match.brand]) {
+                                    acc[match.brand] = [];
+                                  }
+                                  acc[match.brand].push(match);
+                                  return acc;
+                                }, {} as Record<string, FuzzyMatch[]>);
+
+                                return Object.entries(brandGroups).map(([brand, brandMatches]) => (
+                                  <div key={brand} className='border-l-2 border-green-200 pl-4 space-y-2'>
+                                    {/* Brand-level header with "Not a Match" button */}
+                                    <div className='flex items-center justify-between mb-2'>
+                                      <div className='font-semibold text-gray-900 flex items-center gap-2'>
+                                        <span>{brand}</span>
+                                        {/* Highlight if matched via alias */}
+                                        {brandMatches[0].matched_via === 'alias' && (
+                                          <Badge
+                                            variant='outline'
+                                            className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                          >
+                                            via alias
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className='flex items-center gap-2'>
+                                        <Badge className={getConfidenceColor(brandMatches[0].confidence)}>
+                                          {brandMatches[0].confidence.toFixed(1)}%
+                                        </Badge>
+                                        <Button
+                                          variant='outline'
+                                          size='sm'
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleNotAMatch(result, brandMatches[0]);
+                                          }}
+                                          className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                        >
+                                          ✕ Not a Match
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    {/* List of scents under this brand */}
+                                    <div className='pl-4 space-y-1'>
+                                      {brandMatches.map((match, idx) => (
+                                        <div key={idx} className='text-sm text-gray-700'>
+                                          • {match.name || '(no scent name)'}
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {/* Brand metadata */}
+                                    <div className='text-sm text-gray-600 pl-4 space-y-1'>
+                                      <div>Brand Score: {brandMatches[0].brand_score.toFixed(1)}%</div>
+                                      {brandMatches[0].details.patterns &&
+                                        brandMatches[0].details.patterns.length > 0 && (
+                                          <div>
+                                            <span className='font-medium'>Patterns:</span>{' '}
+                                            {brandMatches[0].details.patterns.join(', ')}
+                                          </div>
+                                        )}
+                                    </div>
                                   </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                                ));
+                              })()
+                            : // Show individual scent matches in Brand + Scent mode
+                              result.matches.map((match, matchIndex) => (
+                                <div key={matchIndex} className='border-l-2 border-green-200 pl-4'>
+                                  <div className='flex items-center justify-between mb-2'>
+                                    <div className='font-medium text-gray-900 flex items-center gap-2'>
+                                      <span>
+                                        {match.brand}
+                                        {match.name && ` - ${match.name}`}
+                                      </span>
+                                      {/* Highlight if matched via alias */}
+                                      {match.matched_via === 'alias' && (
+                                        <Badge
+                                          variant='outline'
+                                          className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                        >
+                                          via alias
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className='flex items-center gap-2'>
+                                      <Badge className={getConfidenceColor(match.confidence)}>
+                                        {match.confidence.toFixed(1)}%
+                                      </Badge>
+                                      <Button
+                                        variant='outline'
+                                        size='sm'
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleNotAMatch(result, match);
+                                        }}
+                                        className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                                      >
+                                        ✕ Not a Match
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className='text-sm text-gray-600 space-y-1'>
+                                    <div>
+                                      Brand Score: {match.brand_score.toFixed(1)}% | Scent Score:{' '}
+                                      {match.scent_score.toFixed(1)}%
+                                    </div>
+                                    {match.details.patterns && match.details.patterns.length > 0 && (
+                                      <div>
+                                        <span className='font-medium'>Patterns:</span>{' '}
+                                        {match.details.patterns.join(', ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                         </div>
                       )}
                     </div>
