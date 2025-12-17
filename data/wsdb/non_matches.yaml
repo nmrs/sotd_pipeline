@@ -1,0 +1,9 @@
+# WSDB Known Non-Matches
+# This file tracks brand and scent combinations that should not be matched together
+# Format:
+#   brand_non_matches: List of brand-level non-matches
+#   scent_non_matches: List of scent-level non-matches (same brand, different scents)
+
+brand_non_matches: []
+scent_non_matches: []
+
