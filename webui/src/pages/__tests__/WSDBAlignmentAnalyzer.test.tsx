@@ -1041,5 +1041,286 @@ describe('WSDBAlignmentAnalyzer', () => {
       );
     });
   });
+
+  describe('Non-Matches Functionality', () => {
+    const mockNonMatches = {
+      brand_non_matches: [
+        {
+          pipeline_brand: 'Black Mountain Shaving',
+          wsdb_brand: 'Mountain Hare Shaving',
+          added_at: '2025-12-17T10:30:00Z',
+        },
+      ],
+      scent_non_matches: [
+        {
+          pipeline_brand: 'Barrister and Mann',
+          pipeline_scent: 'Le Grand Chypre',
+          wsdb_brand: 'Barrister and Mann',
+          wsdb_scent: 'Le Petit Chypre',
+          added_at: '2025-12-17T10:31:00Z',
+        },
+      ],
+    };
+
+    const mockBatchAnalysisResponse = {
+      pipeline_results: [
+        {
+          source_brand: 'Barrister and Mann',
+          source_scent: '',
+          matches: [
+            {
+              brand: 'Barrister and Mann',
+              name: 'Seville',
+              confidence: 95.5,
+              brand_score: 100,
+              scent_score: 89,
+              source: 'wsdb',
+              matched_via: 'canonical',
+              details: { slug: 'barrister-and-mann-seville' },
+            },
+          ],
+          expanded: false,
+        },
+      ],
+      wsdb_results: [],
+    };
+
+    test('displays "Not a Match" button in brands mode', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ soaps: mockWSDBSoaps, total_count: mockWSDBSoaps.length }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            soaps: mockPipelineSoaps,
+            total_brands: mockPipelineSoaps.length,
+            total_scents: 0,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockNonMatches,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockBatchAnalysisResponse,
+        });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
+      });
+
+      // Click analyze button
+      const analyzeButton = screen.getByText(/Analyze Alignment/i);
+      fireEvent.click(analyzeButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByText(/Analysis complete/i)).toBeInTheDocument();
+      });
+
+      // Expand the first result to see matches
+      const expandButton = screen.getAllByRole('button')[2]; // Third button should be expand
+      fireEvent.click(expandButton);
+
+      // Wait for "Not a Match" button to appear
+      await waitFor(() => {
+        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+      });
+    });
+
+    test('displays "Not a Match" button in brand+scent mode', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ soaps: mockWSDBSoaps, total_count: mockWSDBSoaps.length }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            soaps: mockPipelineSoaps,
+            total_brands: mockPipelineSoaps.length,
+            total_scents: 0,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockNonMatches,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            ...mockBatchAnalysisResponse,
+            pipeline_results: [
+              {
+                source_brand: 'Barrister and Mann',
+                source_scent: 'Seville',
+                matches: mockBatchAnalysisResponse.pipeline_results[0].matches,
+                expanded: false,
+              },
+            ],
+          }),
+        });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
+      });
+
+      // Switch to Brand + Scent mode
+      const brandScentButton = screen.getByText(/Brand \+ Scent/i);
+      fireEvent.click(brandScentButton);
+
+      // Click analyze button
+      const analyzeButton = screen.getByText(/Analyze Alignment/i);
+      fireEvent.click(analyzeButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByText(/Analysis complete/i)).toBeInTheDocument();
+      });
+
+      // Expand the first result to see matches
+      const expandButton = screen.getAllByRole('button')[3]; // Fourth button should be expand
+      fireEvent.click(expandButton);
+
+      // Wait for "Not a Match" button to appear
+      await waitFor(() => {
+        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+      });
+    });
+
+    test('clicking "Not a Match" saves and filters result', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ soaps: mockWSDBSoaps, total_count: mockWSDBSoaps.length }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            soaps: mockPipelineSoaps,
+            total_brands: mockPipelineSoaps.length,
+            total_scents: 0,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockNonMatches,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockBatchAnalysisResponse,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, message: 'Non-match added successfully' }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockNonMatches,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            ...mockBatchAnalysisResponse,
+            pipeline_results: [
+              {
+                source_brand: 'Barrister and Mann',
+                source_scent: '',
+                matches: [], // Empty after filtering
+                expanded: false,
+              },
+            ],
+          }),
+        });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
+      });
+
+      // Click analyze button
+      const analyzeButton = screen.getByText(/Analyze Alignment/i);
+      fireEvent.click(analyzeButton);
+
+      // Wait for results
+      await waitFor(() => {
+        expect(screen.getByText(/Analysis complete/i)).toBeInTheDocument();
+      });
+
+      // Expand the first result to see matches
+      const expandButton = screen.getAllByRole('button')[2];
+      fireEvent.click(expandButton);
+
+      // Wait for "Not a Match" button
+      await waitFor(() => {
+        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+      });
+
+      // Click "Not a Match" button
+      const notMatchButton = screen.getByText(/Not a Match/i);
+      fireEvent.click(notMatchButton);
+
+      // Verify POST request was made
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/wsdb-alignment/non-matches'),
+          expect.objectContaining({
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+        );
+      });
+
+      // Verify success message
+      await waitFor(() => {
+        expect(screen.getByText(/Non-match saved successfully/i)).toBeInTheDocument();
+      });
+    });
+
+    test('non-matches are loaded and applied on mount', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ soaps: mockWSDBSoaps, total_count: mockWSDBSoaps.length }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            soaps: mockPipelineSoaps,
+            total_brands: mockPipelineSoaps.length,
+            total_scents: 0,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockNonMatches,
+        });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      // Verify non-matches endpoint was called
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/wsdb-alignment/non-matches')
+        );
+      });
+
+      // Verify component loaded successfully
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
+      });
+    });
+  });
 });
 
