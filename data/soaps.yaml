@@ -1825,7 +1825,7 @@ Haslinger:
     Schafmilch:
       patterns:
       - schafmilch
-Hendrix Classics & Co.:
+Hendrix Classics & Co:
   patterns:
   - hendri(?:.*classic?)?(.*\bco.?)?
   - hc&?c
@@ -1916,7 +1916,7 @@ Heritage Hill:
 Hess Professional:
   patterns:
   - hess professional
-Highland Springs:
+Highland Springs Soap Co.:
   patterns:
   - highland ?springs?( ?soaps?)?( co.?)?
   - \bhssc\b
@@ -2101,9 +2101,9 @@ Karve:
     Semois Valley:
       patterns:
       - karve.*semois valley
-Kell's Original Soap:
+Kell's Original:
   patterns:
-  - kell'?s original
+  - kell'?s original(.*soap)?
 KEPKINH:
   patterns:
   - kepk[in]+h
@@ -2254,6 +2254,8 @@ Lucky Tiger:
 Meißner Tremonia:
   patterns:
   - mei\w+ner tremonia
+  aliases:
+  - Meissner Tremonia
 MER Shaving:
   patterns:
   - \bmer ?shaving
@@ -2264,7 +2266,7 @@ MORE FOR YOU:
     Shaving Stick:
       patterns:
       - ^\W*more for you
-MacDuff's Soap Co.:
+MacDuff's Soap Company:
   patterns:
   - ma?c\s*duff['’]?s?(?:\s+(?:soap\s+)?co\.?(?:mpany)?)?
   - \bmcd\b
@@ -2490,7 +2492,7 @@ Mitchell's:
       patterns:
       - mitch.*wool fat
       - ^\W*mwf\b
-Moon Soap:
+Moon Soaps:
   patterns:
   - ^moon(?:\s*soaps?)?(?:\s+co\.?(?:mpany)?)?
   scents:
@@ -2511,7 +2513,7 @@ Moss Hill:
     Blue:
       patterns:
       - moss hill.*blue
-Murphy & McNeil:
+Murphy and McNeil:
   patterns:
   - murphy.*n(ei|ie)l+
   - \bm&m\b
@@ -2708,6 +2710,8 @@ Nordic Shaving Company:
 Nuàvia:
   patterns:
   - nu[aà]via
+  aliases:
+  - Nuavia
 Oaken Lab:
   patterns:
   - oaken(\s*lab)?
@@ -3179,7 +3183,7 @@ Southern Witchcrafts:
     Valley of Ashes:
       patterns:
       - valley of ashes
-Spearhead Shaving Co.:
+Spearhead Shaving Company:
   patterns:
   - spearhead( ?shaving( co(\.|mpany)?)?)?
   - seaforth!
@@ -3491,16 +3495,6 @@ Suavecito:
 Subtle Art Soap Co.:
   patterns:
   - 'subtle arts?(?: soap)?(?: co.?)?'
-Sudsy Soapery:
-  patterns:
-  - sudsy soapery
-  scents:
-    Delor de Treget:
-      patterns:
-      - delor de treget
-    Lemon Rose Chypre:
-      patterns:
-      - lemon rose chypre
 Summer Break Soaps:
   patterns:
   - summer break( soaps)?
@@ -3579,9 +3573,9 @@ Summer Break Soaps:
       patterns:
       - summer break( soaps)?.*wood ?shop
       - ^\W*sbs\b.*wood ?shop
-Taconic:
+Taconic Shave:
   patterns:
-  - taconic
+  - taconic( shave)?
   scents:
     Lime:
       patterns:
@@ -3741,6 +3735,8 @@ Tcheon Fung Sing:
 The Artisan Soap Shoppe:
   patterns:
   - '(?:the )?artisan(?: (soap|shav\w+))? shoppe'
+  aliases:
+  - The Artisan Shave Shoppe
 The Black Stuff:
   patterns:
   - (the )?black stuff
@@ -3769,7 +3765,7 @@ The Gentlemen's Groom Room:
     Highland Bothy:
       patterns:
       - highland bothy
-The Goodfellas Smile:
+The Goodfellas' Smile:
   patterns:
   - (the )?goodfella('|’)?s('|’)? smile
   scents:
@@ -3818,6 +3814,16 @@ The Razor Company:
 The Shave Mercantile:
   patterns:
   - (the )?shave mercantile
+The Sudsy Soapery:
+  patterns:
+  - sudsy soapery
+  scents:
+    Delor de Treget:
+      patterns:
+      - delor de treget
+    Lemon Rose Chypre:
+      patterns:
+      - lemon rose chypre
 Thiers-Issard:
   patterns:
   - thiers-?issard
@@ -3828,7 +3834,9 @@ Through the Fire Fine Crafts:
   patterns:
   - through the fire( fine crafts?)?
   - ttffc
-Tiki Bar Soap:
+  aliases:
+  - Through the Fire Fine Craft
+Tiki Bar Soaps:
   patterns:
   - 'tiki bar(?: soap)?'
   scents:
@@ -3853,7 +3861,7 @@ Turtleship Shave Co.:
     Te Java:
       patterns:
       - te\s?java
-Uncle Jon's:
+Uncle Jon's Soap:
   patterns:
   - uncle jon'?s?( shave)?( soap)?
 Váli:

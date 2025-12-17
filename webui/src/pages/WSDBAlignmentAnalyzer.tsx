@@ -212,6 +212,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
+  // Handler for confidence filter changes - auto-triggers analysis if results exist
+  const handleConfidenceFilterChange = (
+    filter: 'all' | 'perfect' | 'non_perfect' | 'high' | 'medium' | 'low'
+  ) => {
+    setConfidenceFilter(filter);
+    // Auto-trigger analysis if we have results (user has analyzed before)
+    if (pipelineResults.length > 0 || wsdbResults.length > 0) {
+      analyzeAlignment();
+    }
+  };
+
   const handleNotAMatch = async (source: AlignmentResult, match: FuzzyMatch) => {
     // Determine match type based on current mode
     const matchType = analysisMode === 'brands' ? 'brand' : 'scent';
@@ -551,14 +562,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               <Button
                 variant={confidenceFilter === 'all' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('all')}
+                onClick={() => handleConfidenceFilterChange('all')}
               >
                 All
               </Button>
               <Button
                 variant={confidenceFilter === 'perfect' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('perfect')}
+                onClick={() => handleConfidenceFilterChange('perfect')}
                 className={confidenceFilter === 'perfect' ? 'bg-blue-600 hover:bg-blue-700' : ''}
               >
                 Perfect (100%)
@@ -566,7 +577,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               <Button
                 variant={confidenceFilter === 'non_perfect' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('non_perfect')}
+                onClick={() => handleConfidenceFilterChange('non_perfect')}
                 className={confidenceFilter === 'non_perfect' ? 'bg-purple-600 hover:bg-purple-700' : ''}
               >
                 Non-Perfect (&lt;100%)
@@ -574,7 +585,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               <Button
                 variant={confidenceFilter === 'high' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('high')}
+                onClick={() => handleConfidenceFilterChange('high')}
                 className={confidenceFilter === 'high' ? 'bg-green-600 hover:bg-green-700' : ''}
               >
                 High (80-99%)
@@ -582,7 +593,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               <Button
                 variant={confidenceFilter === 'medium' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('medium')}
+                onClick={() => handleConfidenceFilterChange('medium')}
                 className={confidenceFilter === 'medium' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
               >
                 Medium (60-79%)
@@ -590,7 +601,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               <Button
                 variant={confidenceFilter === 'low' ? 'default' : 'outline'}
                 size='sm'
-                onClick={() => setConfidenceFilter('low')}
+                onClick={() => handleConfidenceFilterChange('low')}
                 className={confidenceFilter === 'low' ? 'bg-red-600 hover:bg-red-700' : ''}
               >
                 Low (&lt;60%)
