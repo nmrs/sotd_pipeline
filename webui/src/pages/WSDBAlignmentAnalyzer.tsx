@@ -13,6 +13,8 @@ import {
   AlertCircle,
   CheckCircle,
 } from 'lucide-react';
+import MonthSelector from '../components/forms/MonthSelector';
+import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
 
 interface WSDBSoap {
   brand: string;
@@ -57,6 +59,10 @@ interface AlignmentResult {
   source_scent: string;
   matches: FuzzyMatch[];
   expanded?: boolean;
+  original_texts?: string[];
+  match_types?: string[];
+  count?: number;
+  comment_ids?: string[];
 }
 
 interface BrandNonMatch {
@@ -100,12 +106,37 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     brand_non_matches: [],
     scent_non_matches: [],
   });
+  // Data source and month selection for match files mode
+  const [dataSource, setDataSource] = useState<'catalog' | 'match_files'>('catalog');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
+  const [matchTypeFilter, setMatchTypeFilter] = useState<string>('brand');
 
-  // Load data on mount
-  React.useEffect(() => {
-    loadData();
-    loadNonMatches();
+  // Callback for delta months
+  const handleDeltaMonthsChange = useCallback((months: string[]) => {
+    setDeltaMonths(months);
   }, []);
+
+  // Load data on mount and when switching modes
+  React.useEffect(() => {
+    if (dataSource === 'catalog') {
+      loadData();
+      loadNonMatches();
+    } else {
+      // In match files mode, we still need pipeline soaps for alias lookup and Add Alias functionality
+      // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
+      reloadPipelineSoaps();
+      loadNonMatches();
+    }
+  }, [dataSource, reloadPipelineSoaps]);
+
+  // Clear results when switching data sources
+  React.useEffect(() => {
+    setPipelineResults([]);
+    setWsdbResults([]);
+    setError(null);
+    setSuccessMessage(null);
+  }, [dataSource]);
 
   const loadData = async () => {
     try {
@@ -134,6 +165,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Separate function to reload just pipeline soaps (for alias updates)
+  const reloadPipelineSoaps = useCallback(async () => {
+    try {
+      const pipelineResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+      if (!pipelineResponse.ok) throw new Error('Failed to load pipeline soaps');
+      const pipelineData = await pipelineResponse.json();
+      setPipelineSoaps(pipelineData.soaps);
+    } catch (err) {
+      console.error('Failed to reload pipeline soaps:', err);
+      // Don't show error to user, just log it
+    }
+  }, []);
 
   const loadNonMatches = async () => {
     try {
@@ -178,9 +222,17 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   };
 
   const analyzeAlignment = async () => {
-    if (pipelineSoaps.length === 0 || wsdbSoaps.length === 0) {
-      setError('Please load data first');
-      return;
+    if (dataSource === 'catalog') {
+      if (pipelineSoaps.length === 0 || wsdbSoaps.length === 0) {
+        setError('Please load data first');
+        return;
+      }
+    } else {
+      // Match files mode
+      if (selectedMonths.length === 0) {
+        setError('Please select at least one month');
+        return;
+      }
     }
 
     try {
@@ -188,13 +240,27 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       setError(null);
       setSuccessMessage(null);
 
-      // Use batch analysis endpoint for much better performance
-      const response = await fetch(
-        `http://localhost:8000/api/wsdb-alignment/batch-analyze?threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8`,
-        {
-          method: 'POST',
-        }
-      );
+      let response;
+      if (dataSource === 'catalog') {
+        // Use batch analysis endpoint for catalog mode
+        response = await fetch(
+          `http://localhost:8000/api/wsdb-alignment/batch-analyze?threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8`,
+          {
+            method: 'POST',
+          }
+        );
+      } else {
+        // Use match files endpoint
+        // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+        const allMonths = selectedMonths;
+        const monthsParam = allMonths.join(',');
+        response = await fetch(
+          `http://localhost:8000/api/wsdb-alignment/batch-analyze-match-files?months=${monthsParam}&threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8&match_type_filter=${matchTypeFilter}`,
+          {
+            method: 'POST',
+          }
+        );
+      }
 
       if (!response.ok) throw new Error('Failed to analyze alignment');
 
@@ -293,8 +359,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       });
 
       if (response.ok) {
-        // Reload pipeline data to get updated aliases
-        await loadData();
+        // Reload pipeline soaps to get updated aliases (works in both modes)
+        await reloadPipelineSoaps();
 
         // Re-run analysis to see updated matches
         await analyzeAlignment();
@@ -343,8 +409,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       });
 
       if (response.ok) {
-        // Reload pipeline data to get updated aliases
-        await loadData();
+        // Reload pipeline soaps to get updated aliases (works in both modes)
+        await reloadPipelineSoaps();
 
         // Re-run analysis to see updated matches
         await analyzeAlignment();
@@ -404,7 +470,13 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               m =>
                 m.brand.toLowerCase().includes(searchTerm) ||
                 m.name.toLowerCase().includes(searchTerm)
-            )
+            ) ||
+            // Include original_texts in search for match files mode
+            (result.original_texts &&
+              result.original_texts.some(original => original.toLowerCase().includes(searchTerm))) ||
+            // Include match_types in search for match files mode
+            (result.match_types &&
+              result.match_types.some(mt => mt.toLowerCase().includes(searchTerm)))
         );
       }
 
@@ -480,6 +552,86 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
+          {/* Data Source Selector */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>Data Source</label>
+            <div className='flex flex-wrap gap-2'>
+              <Button
+                onClick={() => setDataSource('catalog')}
+                disabled={loading}
+                variant={dataSource === 'catalog' ? 'default' : 'secondary'}
+                size='sm'
+              >
+                Catalog
+              </Button>
+              <Button
+                onClick={() => setDataSource('match_files')}
+                disabled={loading}
+                variant={dataSource === 'match_files' ? 'default' : 'secondary'}
+                size='sm'
+              >
+                Match Files
+              </Button>
+            </div>
+            <p className='text-xs text-gray-500 mt-1'>
+              {dataSource === 'catalog'
+                ? 'Analyze catalog definitions from soaps.yaml'
+                : 'Analyze actual match results from match files'}
+            </p>
+          </div>
+
+          {/* Month Selector (only shown for match files mode) */}
+          {dataSource === 'match_files' && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>Select Months</label>
+              <MonthSelector
+                selectedMonths={selectedMonths}
+                onMonthsChange={setSelectedMonths}
+                multiple={true}
+                label='Analysis Months'
+                enableDeltaMonths={true}
+                onDeltaMonthsChange={handleDeltaMonthsChange}
+              />
+            </div>
+          )}
+
+          {/* Delta Months Info Panel (only shown for match files mode) */}
+          {dataSource === 'match_files' && (
+            <DeltaMonthsInfoPanel
+              selectedMonths={selectedMonths}
+              deltaMonths={deltaMonths}
+              variant='card'
+            />
+          )}
+
+          {/* Match Type Filter (only shown for match files mode) */}
+          {dataSource === 'match_files' && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>Match Type Filter</label>
+              <div className='flex flex-wrap gap-2'>
+                <Button
+                  onClick={() => setMatchTypeFilter('brand')}
+                  disabled={loading}
+                  variant={matchTypeFilter === 'brand' ? 'default' : 'secondary'}
+                  size='sm'
+                >
+                  Brand
+                </Button>
+                <Button
+                  onClick={() => setMatchTypeFilter('all')}
+                  disabled={loading}
+                  variant={matchTypeFilter === 'all' ? 'default' : 'secondary'}
+                  size='sm'
+                >
+                  All Types
+                </Button>
+              </div>
+              <p className='text-xs text-gray-500 mt-1'>
+                Filter match file entries by match_type (default: brand matches only)
+              </p>
+            </div>
+          )}
+
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -524,7 +676,11 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
             <div className='flex items-end'>
               <Button
                 onClick={analyzeAlignment}
-                disabled={loading || pipelineSoaps.length === 0 || wsdbSoaps.length === 0}
+                disabled={
+                  loading ||
+                  (dataSource === 'catalog' && (pipelineSoaps.length === 0 || wsdbSoaps.length === 0)) ||
+                  (dataSource === 'match_files' && selectedMonths.length === 0)
+                }
                 className='w-full'
               >
                 {loading ? 'Analyzing...' : 'Analyze Alignment'}
@@ -731,16 +887,34 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                             <div className='font-medium text-gray-900'>
                               {result.source_brand}
                               {result.source_scent && ` - ${result.source_scent}`}
-                              {/* Show aliases if available */}
-                              {pipelineSoaps.find(s => s.brand === result.source_brand)?.aliases &&
+                              {/* Show aliases if available (catalog mode only) */}
+                              {dataSource === 'catalog' &&
+                                pipelineSoaps.find(s => s.brand === result.source_brand)?.aliases &&
                                 pipelineSoaps.find(s => s.brand === result.source_brand)!.aliases!.length > 0 && (
                                   <span className='text-xs text-gray-500 ml-2'>
                                     (aka {pipelineSoaps.find(s => s.brand === result.source_brand)!.aliases!.join(', ')})
                                   </span>
                                 )}
+                              {/* Show match file metadata (match files mode only) */}
+                              {dataSource === 'match_files' && result.count && result.count > 1 && (
+                                <Badge variant='outline' className='ml-2 text-xs'>
+                                  {result.count} occurrences
+                                </Badge>
+                              )}
+                              {dataSource === 'match_files' && result.match_types && result.match_types.length > 0 && (
+                                <Badge variant='outline' className='ml-2 text-xs'>
+                                  {result.match_types.join(', ')}
+                                </Badge>
+                              )}
                             </div>
                             <div className='text-sm text-gray-600'>
                               {result.matches.length} match{result.matches.length !== 1 ? 'es' : ''}
+                              {dataSource === 'match_files' && result.original_texts && result.original_texts.length > 0 && (
+                                <span className='ml-2 text-xs'>
+                                  • Original: {result.original_texts[0]}
+                                  {result.original_texts.length > 1 && ` (+${result.original_texts.length - 1} more)`}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1010,9 +1184,26 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                             <div className='font-medium text-gray-900'>
                               {result.source_brand}
                               {result.source_scent && ` - ${result.source_scent}`}
+                              {/* Show match file metadata (match files mode only) */}
+                              {dataSource === 'match_files' && result.count && result.count > 1 && (
+                                <Badge variant='outline' className='ml-2 text-xs'>
+                                  {result.count} occurrences
+                                </Badge>
+                              )}
+                              {dataSource === 'match_files' && result.match_types && result.match_types.length > 0 && (
+                                <Badge variant='outline' className='ml-2 text-xs'>
+                                  {result.match_types.join(', ')}
+                                </Badge>
+                              )}
                             </div>
                             <div className='text-sm text-gray-600'>
                               {result.matches.length} match{result.matches.length !== 1 ? 'es' : ''}
+                              {dataSource === 'match_files' && result.original_texts && result.original_texts.length > 0 && (
+                                <span className='ml-2 text-xs'>
+                                  • Original: {result.original_texts[0]}
+                                  {result.original_texts.length > 1 && ` (+${result.original_texts.length - 1} more)`}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

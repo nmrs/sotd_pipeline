@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 import yaml
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from rapidfuzz import fuzz
 
@@ -1223,4 +1223,521 @@ async def add_scent_alias(request: AddScentAliasRequest) -> dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Failed to add scent alias: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to add scent alias: {str(e)}")
+
+
+def is_valid_month(month: str) -> bool:
+    """Validate month format (YYYY-MM)."""
+    try:
+        year, month_num = month.split("-")
+        if len(year) != 4 or len(month_num) != 2:
+            return False
+        int(year)
+        month_int = int(month_num)
+        return 1 <= month_int <= 12
+    except ValueError:
+        return False
+
+
+@router.post("/batch-analyze-match-files")
+async def batch_analyze_match_files(
+    months: str = Query(..., description="Comma-separated months (e.g., '2025-05,2025-06')"),
+    threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum confidence threshold (0.0-1.0)"),
+    limit: int = Query(100, ge=1, description="Maximum results per view"),
+    mode: str = Query("brand_scent", description="Analysis mode: 'brands' or 'brand_scent'"),
+    brand_threshold: float = Query(0.8, ge=0.0, le=1.0, description="Minimum brand match threshold (0.0-1.0)"),
+    match_type_filter: str = Query("brand", description="Filter for match_type (default: 'brand', use 'all' for all types)"),
+) -> dict[str, Any]:
+    """
+    Perform batch analysis of match file data against WSDB soaps.
+    Loads soap matches from match files and matches them against WSDB.
+
+    Args:
+        months: Comma-separated list of months (e.g., "2025-05,2025-06")
+        threshold: Minimum confidence threshold (0.0-1.0)
+        limit: Maximum results per view
+        mode: "brands" or "brand_scent"
+        brand_threshold: Minimum brand match threshold for brand+scent mode (0.0-1.0, default 0.8)
+        match_type_filter: Filter for match_type (default: "brand", use "all" for all types)
+
+    Returns:
+        Dict with pipeline_results and wsdb_results
+    """
+    try:
+        # Parse and validate months
+        month_list = [m.strip() for m in months.split(",")]
+        for month in month_list:
+            if not is_valid_month(month):
+                raise HTTPException(status_code=400, detail=f"Invalid month format: {month}. Use YYYY-MM format.")
+
+        logger.info(
+            f"🔄 Starting batch analysis from match files (mode: {mode}, threshold: {threshold}, "
+            f"brand_threshold: {brand_threshold}, match_type_filter: {match_type_filter}, months: {month_list})"
+        )
+
+        # Load match files
+        data_dir = PROJECT_ROOT / "data" / "matched"
+        all_soap_matches = []
+
+        for month in month_list:
+            month_file = data_dir / f"{month}.json"
+            if not month_file.exists():
+                logger.warning(f"⚠️ No match data found for month: {month}")
+                continue
+
+            try:
+                with month_file.open("r", encoding="utf-8") as f:
+                    match_data = json.load(f)
+
+                # Extract soap data from the data array
+                if "data" in match_data and isinstance(match_data["data"], list):
+                    for record in match_data["data"]:
+                        if "soap" in record and record["soap"]:
+                            soap = record["soap"]
+                            # Filter by match_type if specified
+                            if match_type_filter != "all" and soap.get("match_type") != match_type_filter:
+                                continue
+                            # Only include entries with matched brand and scent
+                            matched = soap.get("matched", {})
+                            if matched.get("brand") and matched.get("scent"):
+                                # Add comment_id if available
+                                soap_entry = soap.copy()
+                                soap_entry["comment_id"] = record.get("id", record.get("comment_id", ""))
+                                all_soap_matches.append(soap_entry)
+
+            except Exception as e:
+                logger.error(f"❌ Error loading month {month}: {e}")
+                continue
+
+        if not all_soap_matches:
+            logger.warning("⚠️ No soap matches found in match files for the specified criteria")
+            return {
+                "pipeline_results": [],
+                "wsdb_results": [],
+                "mode": mode,
+                "threshold": threshold,
+                "analyzed_at": datetime.now().isoformat(),
+                "months_processed": month_list,
+                "total_entries": 0,
+            }
+
+        logger.info(f"📊 Loaded {len(all_soap_matches)} soap matches from match files")
+
+        # Group by unique brand+scent combinations and collect metadata
+        brand_scent_groups: dict[str, dict[str, Any]] = {}
+        for soap in all_soap_matches:
+            matched = soap.get("matched", {})
+            brand = matched.get("brand", "").strip()
+            scent = matched.get("scent", "").strip()
+            if not brand or not scent:
+                continue
+
+            # Use brand+scent as key (case-insensitive for grouping)
+            key = f"{brand} - {scent}".lower()
+
+            if key not in brand_scent_groups:
+                brand_scent_groups[key] = {
+                    "brand": brand,
+                    "scent": scent,
+                    "original_texts": [],
+                    "match_types": [],
+                    "comment_ids": [],
+                    "count": 0,
+                }
+
+            # Collect metadata
+            brand_scent_groups[key]["original_texts"].append(soap.get("original", ""))
+            brand_scent_groups[key]["match_types"].append(soap.get("match_type", "unknown"))
+            if soap.get("comment_id"):
+                brand_scent_groups[key]["comment_ids"].append(soap.get("comment_id"))
+            brand_scent_groups[key]["count"] += 1
+
+        logger.info(f"📊 Grouped into {len(brand_scent_groups)} unique brand+scent combinations")
+
+        # Load WSDB data
+        wsdb_data = await load_wsdb_soaps()
+        wsdb_soaps = wsdb_data["soaps"]
+
+        # Load pipeline soaps for alias lookup
+        pipeline_data = await load_pipeline_soaps()
+        pipeline_soaps = pipeline_data["soaps"]
+
+        # Create lookup map: brand_name -> brand_entry (for aliases)
+        brand_lookup = {entry["brand"]: entry for entry in pipeline_soaps}
+
+        # Load non-matches for filtering
+        non_matches_data = await load_non_matches()
+        brand_non_matches = non_matches_data.get("brand_non_matches", [])
+        scent_non_matches = non_matches_data.get("scent_non_matches", [])
+
+        pipeline_results = []
+        wsdb_results = []
+
+        # Match each brand+scent combination against WSDB
+        for key, group_data in brand_scent_groups.items():
+            pipeline_brand = group_data["brand"]
+            pipeline_scent = group_data["scent"]
+
+            # Look up brand in pipeline soaps to get aliases
+            brand_entry = brand_lookup.get(pipeline_brand, {"aliases": [], "scents": []})
+
+            if mode == "brands":
+                # Brands only: match brand against all WSDB brands
+                query_brand = normalize_string(pipeline_brand.lower().strip())
+                
+                # Get all names to try: canonical + aliases
+                names_to_try = [query_brand]
+                if brand_entry.get("aliases"):
+                    names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
+                
+                matches = []
+
+                for wsdb_soap in wsdb_soaps:
+                    wsdb_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
+                    
+                    # Try matching with each name (canonical + aliases)
+                    best_score = 0
+                    matched_via = "canonical"
+                    
+                    for idx, name in enumerate(names_to_try):
+                        score = fuzz.ratio(name, wsdb_brand)
+                        if score > best_score:
+                            best_score = score
+                            matched_via = "canonical" if idx == 0 else "alias"
+                    
+                    brand_score = best_score
+                    confidence = brand_score
+
+                    if confidence >= threshold * 100:
+                        matches.append(
+                            {
+                                "brand": wsdb_soap.get("brand"),
+                                "name": wsdb_soap.get("name"),
+                                "confidence": round(confidence, 2),
+                                "brand_score": round(brand_score, 2),
+                                "scent_score": 0.0,
+                                "source": "wsdb",
+                                "matched_via": matched_via,
+                                "details": {
+                                    "slug": wsdb_soap.get("slug"),
+                                    "scent_notes": wsdb_soap.get("scent_notes", []),
+                                    "collaborators": wsdb_soap.get("collaborators", []),
+                                    "tags": wsdb_soap.get("tags", []),
+                                    "category": wsdb_soap.get("category"),
+                                },
+                            }
+                        )
+
+                # Filter non-matches before sorting
+                source_item = {"source_brand": pipeline_brand, "source_scent": ""}
+                matches = [
+                    m for m in matches if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                ]
+
+                # Sort and limit
+                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                matches = matches[:5]
+
+                pipeline_results.append(
+                    {
+                        "source_brand": pipeline_brand,
+                        "source_scent": "",
+                        "matches": matches,
+                        "expanded": False,
+                        "original_texts": list(set(group_data["original_texts"]))[:5],  # Top 5 unique originals
+                        "match_types": list(set(group_data["match_types"])),
+                        "count": group_data["count"],
+                        "comment_ids": group_data["comment_ids"][:10],  # Limit comment IDs
+                    }
+                )
+            else:
+                # Brand + Scent mode: match each scent individually
+                query_brand = normalize_string(pipeline_brand.lower().strip())
+                
+                # Get all brand names to try: canonical + aliases
+                names_to_try = [query_brand]
+                if brand_entry.get("aliases"):
+                    names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
+                
+                # Get scent names to try: canonical + single alias
+                query_scent = normalize_string(pipeline_scent.lower().strip())
+                scent_alias = None
+                # Look up scent alias in brand_entry scents
+                for scent_info in brand_entry.get("scents", []):
+                    if scent_info.get("name") == pipeline_scent:
+                        scent_alias = scent_info.get("alias")
+                        break
+                if scent_alias:
+                    scent_alias = normalize_string(scent_alias.lower().strip())
+                
+                matches = []
+
+                for wsdb_soap in wsdb_soaps:
+                    wsdb_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
+                    wsdb_name = normalize_string(wsdb_soap.get("name", "").lower().strip())
+
+                    # Try matching with each brand name (canonical + aliases)
+                    best_brand_score = 0
+                    matched_via = "canonical"
+                    
+                    for idx, name in enumerate(names_to_try):
+                        score = fuzz.ratio(name, wsdb_brand)
+                        if score > best_brand_score:
+                            best_brand_score = score
+                            matched_via = "canonical" if idx == 0 else "alias"
+                    
+                    brand_score = best_brand_score
+
+                    # Only proceed if brand matches above threshold
+                    if brand_score >= brand_threshold * 100:
+                        # Try matching with canonical name first
+                        canonical_score = fuzz.token_sort_ratio(query_scent, wsdb_name)
+                        best_scent_score = canonical_score
+                        scent_matched_via = "canonical"
+                        
+                        # Try alias if it exists and might score better
+                        if scent_alias:
+                            alias_score = fuzz.token_sort_ratio(scent_alias, wsdb_name)
+                            if alias_score > best_scent_score:
+                                best_scent_score = alias_score
+                                scent_matched_via = "alias"
+                        
+                        scent_score = best_scent_score
+                        confidence = scent_score  # Use scent score directly
+
+                        if confidence >= threshold * 100:
+                            matches.append(
+                                {
+                                    "brand": wsdb_soap.get("brand"),
+                                    "name": wsdb_soap.get("name"),
+                                    "confidence": round(confidence, 2),
+                                    "brand_score": round(brand_score, 2),
+                                    "scent_score": round(scent_score, 2),
+                                    "source": "wsdb",
+                                    "matched_via": matched_via,
+                                    "scent_matched_via": scent_matched_via,
+                                    "details": {
+                                        "slug": wsdb_soap.get("slug"),
+                                        "scent_notes": wsdb_soap.get("scent_notes", []),
+                                        "collaborators": wsdb_soap.get("collaborators", []),
+                                        "tags": wsdb_soap.get("tags", []),
+                                        "category": wsdb_soap.get("category"),
+                                    },
+                                }
+                            )
+
+                # Filter non-matches before sorting
+                source_item = {"source_brand": pipeline_brand, "source_scent": pipeline_scent}
+                matches = [
+                    m
+                    for m in matches
+                    if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                ]
+
+                # Sort and limit
+                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                matches = matches[:5]
+
+                pipeline_results.append(
+                    {
+                        "source_brand": pipeline_brand,
+                        "source_scent": pipeline_scent,
+                        "matches": matches,
+                        "expanded": False,
+                        "original_texts": list(set(group_data["original_texts"]))[:5],  # Top 5 unique originals
+                        "match_types": list(set(group_data["match_types"])),
+                        "count": group_data["count"],
+                        "comment_ids": group_data["comment_ids"][:10],  # Limit comment IDs
+                    }
+                )
+
+        # WSDB → Pipeline matches (reverse direction)
+        # For match files mode, we primarily care about Pipeline → WSDB, but we can also do reverse
+        # This would match WSDB soaps against the match file data
+        logger.info(f"📊 Analyzing WSDB → Pipeline ({len(wsdb_soaps)} soaps)")
+
+        if mode == "brands":
+            # Group WSDB soaps by brand
+            wsdb_brands_map = {}
+            for wsdb_soap in wsdb_soaps:
+                brand = wsdb_soap.get("brand", "")
+                if brand not in wsdb_brands_map:
+                    wsdb_brands_map[brand] = []
+                wsdb_brands_map[brand].append(wsdb_soap)
+
+            sorted_brands = sorted(wsdb_brands_map.items(), key=lambda x: x[0].lower())
+
+            for wsdb_brand, soaps in sorted_brands:
+                query_brand = normalize_string(wsdb_brand.lower().strip())
+                matches = []
+
+                # Match against unique brands from match files
+                unique_brands = {group_data["brand"] for group_data in brand_scent_groups.values()}
+                for pipeline_brand in unique_brands:
+                    # Look up brand in pipeline soaps to get aliases
+                    brand_entry = brand_lookup.get(pipeline_brand, {"aliases": [], "scents": []})
+                    
+                    # Get all names to try: canonical + aliases
+                    names_to_try = [normalize_string(pipeline_brand.lower().strip())]
+                    if brand_entry.get("aliases"):
+                        names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
+                    
+                    # Try matching with each name
+                    best_score = 0
+                    matched_via = "canonical"
+                    
+                    for idx, name in enumerate(names_to_try):
+                        score = fuzz.ratio(query_brand, name)
+                        if score > best_score:
+                            best_score = score
+                            matched_via = "canonical" if idx == 0 else "alias"
+                    
+                    brand_score = best_score
+                    confidence = brand_score
+
+                    if confidence >= threshold * 100:
+                        matches.append(
+                            {
+                                "brand": pipeline_brand,
+                                "name": "",
+                                "confidence": round(confidence, 2),
+                                "brand_score": round(brand_score, 2),
+                                "scent_score": 0.0,
+                                "source": "pipeline",
+                                "matched_via": matched_via,
+                                "details": {"patterns": []},
+                            }
+                        )
+
+                # Filter non-matches
+                source_item = {"source_brand": wsdb_brand, "source_scent": ""}
+                matches = [
+                    m for m in matches if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                ]
+
+                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                matches = matches[:5]
+
+                wsdb_results.append(
+                    {
+                        "source_brand": wsdb_brand,
+                        "source_scent": "",
+                        "matches": matches,
+                        "expanded": False,
+                    }
+                )
+        else:
+            # Brand + Scent mode: match each WSDB soap against match file data
+            sorted_wsdb_soaps = sorted(
+                wsdb_soaps, key=lambda x: (x.get("brand", "").lower(), x.get("name", "").lower())
+            )
+
+            for wsdb_soap in sorted_wsdb_soaps:
+                query_brand = normalize_string(wsdb_soap.get("brand", "").lower().strip())
+                query_scent = normalize_string(wsdb_soap.get("name", "").lower().strip())
+                matches = []
+
+                for key, group_data in brand_scent_groups.items():
+                    pipeline_brand = group_data["brand"]
+                    pipeline_scent = group_data["scent"]
+
+                    # Look up brand in pipeline soaps to get aliases
+                    brand_entry = brand_lookup.get(pipeline_brand, {"aliases": [], "scents": []})
+                    
+                    # Get all brand names to try: canonical + aliases
+                    names_to_try = [normalize_string(pipeline_brand.lower().strip())]
+                    if brand_entry.get("aliases"):
+                        names_to_try.extend([normalize_string(alias.lower().strip()) for alias in brand_entry["aliases"]])
+                    
+                    # Get scent names to try: canonical + single alias
+                    pipeline_scent_norm = normalize_string(pipeline_scent.lower().strip())
+                    scent_alias = None
+                    # Look up scent alias in brand_entry scents
+                    for scent_info in brand_entry.get("scents", []):
+                        if scent_info.get("name") == pipeline_scent:
+                            scent_alias = scent_info.get("alias")
+                            break
+                    if scent_alias:
+                        scent_alias = normalize_string(scent_alias.lower().strip())
+
+                    # Try matching with each brand name (canonical + aliases)
+                    best_brand_score = 0
+                    matched_via = "canonical"
+                    
+                    for idx, name in enumerate(names_to_try):
+                        score = fuzz.ratio(query_brand, name)
+                        if score > best_brand_score:
+                            best_brand_score = score
+                            matched_via = "canonical" if idx == 0 else "alias"
+                    
+                    brand_score = best_brand_score
+
+                    if brand_score >= brand_threshold * 100:
+                        # Try matching with canonical name first
+                        canonical_score = fuzz.token_sort_ratio(query_scent, pipeline_scent_norm)
+                        best_scent_score = canonical_score
+                        scent_matched_via = "canonical"
+                        
+                        # Try alias if it exists and might score better
+                        if scent_alias:
+                            alias_score = fuzz.token_sort_ratio(query_scent, scent_alias)
+                            if alias_score > best_scent_score:
+                                best_scent_score = alias_score
+                                scent_matched_via = "alias"
+                        
+                        scent_score = best_scent_score
+                        confidence = scent_score
+
+                        if confidence >= threshold * 100:
+                            matches.append(
+                                {
+                                    "brand": pipeline_brand,
+                                    "name": pipeline_scent,
+                                    "confidence": round(confidence, 2),
+                                    "brand_score": round(brand_score, 2),
+                                    "scent_score": round(scent_score, 2),
+                                    "source": "pipeline",
+                                    "matched_via": matched_via,
+                                    "scent_matched_via": scent_matched_via,
+                                    "details": {"patterns": []},
+                                }
+                            )
+
+                # Filter non-matches
+                source_item = {"source_brand": wsdb_soap.get("brand"), "source_scent": wsdb_soap.get("name")}
+                matches = [
+                    m for m in matches if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                ]
+
+                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                matches = matches[:5]
+
+                wsdb_results.append(
+                    {
+                        "source_brand": wsdb_soap.get("brand"),
+                        "source_scent": wsdb_soap.get("name"),
+                        "matches": matches,
+                        "expanded": False,
+                    }
+                )
+
+        logger.info(
+            f"✅ Batch analysis from match files complete: {len(pipeline_results)} pipeline results, "
+            f"{len(wsdb_results)} WSDB results"
+        )
+
+        return {
+            "pipeline_results": pipeline_results,
+            "wsdb_results": wsdb_results,
+            "mode": mode,
+            "threshold": threshold,
+            "analyzed_at": datetime.now().isoformat(),
+            "months_processed": month_list,
+            "total_entries": len(all_soap_matches),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Batch analysis from match files failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Batch analysis from match files failed: {str(e)}")
 
