@@ -2960,11 +2960,12 @@ Red House Farm:
     Nine Days Up Nort':
       patterns:
       - red house.*days up
+      alias: 9 Days up Nort'
     No Scrub:
       patterns:
       - red house.*no.*scrub
       - \bno ?scrub\b
-    Prarie Dog:
+    Prairie Dog:
       patterns:
       - red house.*prair.*dog
     Sandalwood & Bourbon:
@@ -3045,6 +3046,7 @@ Saponificio Varesino:
     Opuntia:
       patterns:
       - op+[iu]ntia
+      alias: Opuntia Beta
     Tundra Artica:
       patterns:
       - tundra arc?tica?
@@ -3087,9 +3089,9 @@ Shannon's Soaps:
     Oh... To Fou!:
       patterns:
       - shannon.*\b(to)?fou\b
-    Ohio Wet Shavers Meetup Test:
+    2022 Ohio Wet Shavers Meetup:
       patterns:
-      - shannon.*ohio.*meetup test
+      - shannon.*ohio.*meetup
     Pina Colada:
       patterns:
       - shannon.*colada
@@ -3174,6 +3176,7 @@ Southern Witchcrafts:
     Fougère Nemeta:
       patterns:
       - fo?ug.*nem(a|e)t+a
+      alias: Fougere Nemeta
     Gravefruit (with APR):
       patterns:
       - southern w.*.*grave ?fr?uit
@@ -3264,7 +3267,7 @@ Speick:
       format: Cream
       patterns:
       - speick.*active
-    Shaving Cream:
+    Shave Cream:
       format: Cream
       patterns:
       - speick

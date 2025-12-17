@@ -849,26 +849,22 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                 <div key={matchIndex} className='border-l-2 border-blue-200 pl-4'>
                                   <div className='flex items-center justify-between mb-2'>
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
-                                      <span>
-                                        {match.brand}
-                                        {match.name && (
-                                          <>
-                                            {' - '}
-                                            {match.details?.slug ? (
-                                              <a
-                                                href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-800 hover:underline"
-                                              >
-                                                {match.name}
-                                              </a>
-                                            ) : (
-                                              match.name
-                                            )}
-                                          </>
-                                        )}
-                                      </span>
+                                      {match.details?.slug ? (
+                                        <a
+                                          href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                          {match.brand}
+                                          {match.name && ` - ${match.name}`}
+                                        </a>
+                                      ) : (
+                                        <span>
+                                          {match.brand}
+                                          {match.name && ` - ${match.name}`}
+                                        </span>
+                                      )}
                                       {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (
                                         <Badge
@@ -1125,26 +1121,22 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                 <div key={matchIndex} className='border-l-2 border-green-200 pl-4'>
                                   <div className='flex items-center justify-between mb-2'>
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
-                                      <span>
-                                        {match.brand}
-                                        {match.name && (
-                                          <>
-                                            {' - '}
-                                            {match.details?.slug ? (
-                                              <a
-                                                href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-800 hover:underline"
-                                              >
-                                                {match.name}
-                                              </a>
-                                            ) : (
-                                              match.name
-                                            )}
-                                          </>
-                                        )}
-                                      </span>
+                                      {match.details?.slug ? (
+                                        <a
+                                          href={`https://www.wetshavingdatabase.com/software/${match.details.slug}/`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                                        >
+                                          {match.brand}
+                                          {match.name && ` - ${match.name}`}
+                                        </a>
+                                      ) : (
+                                        <span>
+                                          {match.brand}
+                                          {match.name && ` - ${match.name}`}
+                                        </span>
+                                      )}
                                       {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (
                                         <Badge
