@@ -189,7 +189,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
 
       // Use batch analysis endpoint for much better performance
       const response = await fetch(
-        `http://localhost:8000/api/wsdb-alignment/batch-analyze?threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}`,
+        `http://localhost:8000/api/wsdb-alignment/batch-analyze?threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8`,
         {
           method: 'POST',
         }

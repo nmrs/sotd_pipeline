@@ -543,8 +543,7 @@ class TestAliasFuzzyMatch:
         
         # Test Pipeline → WSDB with alias match
         response = client.post(
-            "/api/wsdb-alignment/batch-analyze",
-            json={"mode": "brands", "threshold": 0.5, "limit": 100},
+            "/api/wsdb-alignment/batch-analyze?mode=brands&threshold=0.5&limit=100",
         )
         
         assert response.status_code == 200
@@ -611,8 +610,7 @@ class TestAliasFuzzyMatch:
         
         # Test Pipeline → WSDB with alias match in brand_scent mode
         response = client.post(
-            "/api/wsdb-alignment/batch-analyze",
-            json={"mode": "brand_scent", "threshold": 0.5, "limit": 100},
+            "/api/wsdb-alignment/batch-analyze?mode=brand_scent&threshold=0.5&limit=100",
         )
         
         assert response.status_code == 200
@@ -656,8 +654,7 @@ class TestAliasFuzzyMatch:
         
         # Test with WSDB entry that matches canonical name perfectly
         response = client.post(
-            "/api/wsdb-alignment/batch-analyze",
-            json={"mode": "brands", "threshold": 0.5, "limit": 100},
+            "/api/wsdb-alignment/batch-analyze?mode=brands&threshold=0.5&limit=100",
         )
         
         assert response.status_code == 200

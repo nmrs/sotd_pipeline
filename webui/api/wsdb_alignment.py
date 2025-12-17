@@ -367,7 +367,7 @@ def is_non_match(
 
 @router.post("/batch-analyze")
 async def batch_analyze(
-    threshold: float = 0.7, limit: int = 100, mode: str = "brand_scent"
+    threshold: float = 0.7, limit: int = 100, mode: str = "brand_scent", brand_threshold: float = 0.8
 ) -> dict[str, Any]:
     """
     Perform batch analysis of all pipeline and WSDB soaps.
@@ -377,12 +377,13 @@ async def batch_analyze(
         threshold: Minimum confidence threshold (0.0-1.0)
         limit: Maximum results per view
         mode: "brands" or "brand_scent"
+        brand_threshold: Minimum brand match threshold for brand+scent mode (0.0-1.0, default 0.8)
 
     Returns:
         Dict with pipeline_results and wsdb_results
     """
     try:
-        logger.info(f"🔄 Starting batch analysis (mode: {mode}, threshold: {threshold})")
+        logger.info(f"🔄 Starting batch analysis (mode: {mode}, threshold: {threshold}, brand_threshold: {brand_threshold})")
 
         # Load both datasets
         wsdb_data = await load_wsdb_soaps()
@@ -505,28 +506,32 @@ async def batch_analyze(
                                 matched_via = "canonical" if idx == 0 else "alias"
                         
                         brand_score = best_brand_score
-                        scent_score = fuzz.token_sort_ratio(query_scent, wsdb_name)
-                        confidence = (brand_score * 0.6) + (scent_score * 0.4)
-
-                        if confidence >= threshold * 100:
-                            matches.append(
-                                {
-                                    "brand": wsdb_soap.get("brand"),
-                                    "name": wsdb_soap.get("name"),
-                                    "confidence": round(confidence, 2),
-                                    "brand_score": round(brand_score, 2),
-                                    "scent_score": round(scent_score, 2),
-                                    "source": "wsdb",
-                                    "matched_via": matched_via,
-                                    "details": {
-                                        "slug": wsdb_soap.get("slug"),
-                                        "scent_notes": wsdb_soap.get("scent_notes", []),
-                                        "collaborators": wsdb_soap.get("collaborators", []),
-                                        "tags": wsdb_soap.get("tags", []),
-                                        "category": wsdb_soap.get("category"),
-                                    },
-                                }
-                            )
+                        
+                        # Only proceed if brand matches above threshold (convert to percentage)
+                        if brand_score >= brand_threshold * 100:
+                            # Score only the scent portion
+                            scent_score = fuzz.token_sort_ratio(query_scent, wsdb_name)
+                            confidence = scent_score  # Use scent score directly
+                            
+                            if confidence >= threshold * 100:
+                                matches.append(
+                                    {
+                                        "brand": wsdb_soap.get("brand"),
+                                        "name": wsdb_soap.get("name"),
+                                        "confidence": round(confidence, 2),
+                                        "brand_score": round(brand_score, 2),
+                                        "scent_score": round(scent_score, 2),
+                                        "source": "wsdb",
+                                        "matched_via": matched_via,
+                                        "details": {
+                                            "slug": wsdb_soap.get("slug"),
+                                            "scent_notes": wsdb_soap.get("scent_notes", []),
+                                            "collaborators": wsdb_soap.get("collaborators", []),
+                                            "tags": wsdb_soap.get("tags", []),
+                                            "category": wsdb_soap.get("category"),
+                                        },
+                                    }
+                                )
 
                     # Filter non-matches before sorting
                     source_item = {"source_brand": pipeline_brand, "source_scent": scent["name"]}
@@ -662,22 +667,26 @@ async def batch_analyze(
                                 matched_via = "canonical" if idx == 0 else "alias"
                         
                         brand_score = best_brand_score
-                        scent_score = fuzz.token_sort_ratio(query_scent, pipeline_scent)
-                        confidence = (brand_score * 0.6) + (scent_score * 0.4)
-
-                        if confidence >= threshold * 100:
-                            matches.append(
-                                {
-                                    "brand": brand_entry["brand"],
-                                    "name": scent["name"],
-                                    "confidence": round(confidence, 2),
-                                    "brand_score": round(brand_score, 2),
-                                    "scent_score": round(scent_score, 2),
-                                    "source": "pipeline",
-                                    "matched_via": matched_via,
-                                    "details": {"patterns": scent.get("patterns", [])},
-                                }
-                            )
+                        
+                        # Only proceed if brand matches above threshold (convert to percentage)
+                        if brand_score >= brand_threshold * 100:
+                            # Score only the scent portion
+                            scent_score = fuzz.token_sort_ratio(query_scent, pipeline_scent)
+                            confidence = scent_score  # Use scent score directly
+                            
+                            if confidence >= threshold * 100:
+                                matches.append(
+                                    {
+                                        "brand": brand_entry["brand"],
+                                        "name": scent["name"],
+                                        "confidence": round(confidence, 2),
+                                        "brand_score": round(brand_score, 2),
+                                        "scent_score": round(scent_score, 2),
+                                        "source": "pipeline",
+                                        "matched_via": matched_via,
+                                        "details": {"patterns": scent.get("patterns", [])},
+                                    }
+                                )
 
                 # Filter non-matches before sorting
                 source_item = {"source_brand": wsdb_soap.get("brand"), "source_scent": wsdb_soap.get("name")}
