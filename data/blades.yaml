@@ -91,7 +91,7 @@ Cartridge/Disposable:
         - sensor ?(iii|3|three)
         - trac( |-)?(2|two|ii)
         - (personna)?.*twin.*pivot(.*plus)?
-        - xtreme2
+        - xtreme ?2
 DE:
   7 O'Clock:
     Permasharp:
@@ -101,8 +101,8 @@ DE:
       patterns:
         - gill.*sharp.*edg
         - clock.*sharp.*edg
-        - clock.*yellow
-        - gill.*yellow
+        - clock.*yellow(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - gill.*yellow(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super Platinum (Black):
       patterns:
         - clock.*pla
@@ -346,10 +346,11 @@ DE:
       patterns:
         - gil.*pla
         - gil.*\bswede\b
-        - plat
+        - plati
     Rubie:
       patterns:
         - rubie
+        - gil.*rub(ie|y)
     Silver Blue:
       patterns:
         - gsb
@@ -459,8 +460,6 @@ DE:
     Super Stainless:
       patterns:
         - lord.*sup
-    Unspecified:
-      patterns:
         - lord
   Manscaped:
     The Plow 2.0:
@@ -502,22 +501,27 @@ DE:
         - p(?:ersonn*a)?.*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - pseventy-four
         - p74
+    GEM Platinum Diamond Glide:
+      patterns:
+        - person+a.*gem
+        - gem.*diamond.*glide
     Lab Blue:
       patterns:
         - (person+a)?.*lab *blue
         - person+a.*blue
         - person+a.*comf.*coat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - ^(?!.*twin.*pivot).*person+a
+        - person+a
         - accuforge
     Med Prep:
       patterns:
         - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - med.*prep
         - accu-?thrive
+        - person+a.*prep
     Platinum:
       patterns:
-        - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*plat
+        - person.*red
     Super Stainless:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -530,6 +534,8 @@ DE:
         - crystal.*person+a(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - crystal.*plat
         - crystal
+        - israel.*person+a
+        - platinum.*israel
     TOMY:
       patterns:
         - \btomy\b
@@ -676,11 +682,12 @@ DE:
         - tatra.*carb
     Platinum:
       patterns:
+        - tatra.*plat
         - tatra
   Tiger:
     Platinum:
       patterns:
-        - tiger
+        - tiger(.*plat)?
   Timor:
     Stainless Steel:
       patterns:
@@ -783,6 +790,9 @@ DE:
       patterns:
         - wilk.*swor
         - wilkinson
+    Light Brigade:
+      patterns:
+        - light.*brigade
   Willy's:
     Premium:
       patterns:
@@ -963,6 +973,9 @@ Injector:
     Injector:
       patterns:
         - person+a(?:.*inject)?
+    Mini Hair Shaper:
+      patterns:
+        - person+a.*mini.*hair.*shaper
   Schick:
     Injector:
       patterns:

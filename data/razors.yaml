@@ -108,6 +108,11 @@ Alshabab:
   Razor:
     patterns:
       - al ?shabab
+Annie:
+  Hair Shaper:
+    format: Shavette (Hair Shaper)
+    patterns:
+      - annie.*(hair|shavette)
 Anton Wingen Jr.:
   Red Point:
     format: Straight
@@ -356,7 +361,7 @@ Bulimica:
       - bulimica
 Burmax:
   Aristocrat Shavette:
-    format: Shavette
+    format: Shavette (Hair Shaper)
     patterns:
       - burmax.*aristocrat(?! PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 C-Mon:
@@ -522,6 +527,11 @@ Dairi:
     format: Straight
     patterns:
       - dairi.*kami
+Dark Stag:
+  Kamisori:
+    format: Shavette (Half DE)
+    patterns:
+      - dark.*stag.*kami
 Daune:
   Double Edge Shavette:
     format: Shavette (DE)
@@ -673,6 +683,11 @@ Enders:
     format: Other
     patterns:
       - enders.*(?:speed)
+Equinox:
+  Shavette:
+    format: Shavette (Half DE)
+    patterns:
+      - equinox.*shavette
 ERN:
   Ator:
     patterns:
@@ -756,20 +771,30 @@ Fasan:
     patterns:
       - fasan.*slant
 Fatip:
-  Grande:
+  Open Comb (Originale):
+    patterns:
+      - fat+ip.*open.*comb
+      - fat+ip.*\boc\b
+      - fat+ip.*originale
+      - fat+ip.*classic
+      - fat+ip
+  Testina Gentile (Closed Comb):
     patterns:
       - fat+ip.*gentile
-      - fat+ip.*grande
-      - fat+ip.*classic
-      - fat+ip.*olive
+      - testina.*gentile
+      - fat+ip.*solid ?bar
   Lo Storto (Slant):
     patterns:
       - fat+ip.*st?or[tnb]o
       - fat+ip.*slant
       - lo.*storto
-  Piccolo:
+  L'Ibrido (Hybrid OC/CC):
+    format: DE
     patterns:
-      - fat+ip.*pic+ol+o
+      - fat+ip.*l.?ibrido
+      - fat+ip.*ibrido
+      - fat+ip.*hybrid
+      - fat+ip.*oc.*cc
   Retro:
     patterns:
       - fat+ip.*retro
@@ -788,7 +813,7 @@ Feather:
   Shavette:
     format: Shavette (AC)
     patterns:
-      - (?!.*(copy|[ck]loni)).*feather.*(dx|ss|sr)
+      - (?!.*(copy|[ck]loni)).*feather.*(dx|ss|sr|kami)
       - (?!.*(copy|[ck]loni)).feather.*artist.*clu
       - (?!.*(copy|[ck]loni)).*feather.*\bac\b(?:.*(shavette|kami))?
 Filarmonica:
@@ -814,10 +839,11 @@ Filarmonica:
     width: 15/16
     patterns:
       - filarm[oó]nica.*\b14\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - fil.*dou?ble.*temp.*14
   Straight:
     format: Straight
     patterns:
-      - 'Filar*m\wnica(\s+straight)*'
+      - filar*m\wnica
       - monserrat(?:.*\d{1,2}/(8|16))?
 Fine Accoutrements:
   DE5:
@@ -953,12 +979,14 @@ GEM:
       - mmoc
       - ocmm
       - gem.*open.*comb
-      - gem
       - micromatic\s*open\s*comb
   Pushbutton:
     format: GEM
     patterns:
       - gem.*push
+  Unspecified:
+    patterns:
+      - gem
 Geneva Cutlery Co.:
   Straight:
     format: Straight
@@ -1045,6 +1073,7 @@ Gillette:
       - big.*fellow
       - gil.*et.*bulldog
       - gil.*et.*brownie
+      - gil.*et.*khaki
   President:
     patterns:
       - president
@@ -1392,15 +1421,15 @@ Kafurt:
       - kafurt(?:.*\d{1,2}/(8|16))?
 Kai:
   Captain Folding:
-    format: Shavette
+    format: Shavette (AC)
     patterns:
       - kai.*captain.*fold
   Captain Kamisori:
-    format: Shavette
+    format: Shavette (AC)
     patterns:
       - kai.*captain.*kami
   Excelia Kamisori:
-    format: Shavette
+    format: Shavette (AC)
     patterns:
       - kai.*excelia
 Kampfe:
@@ -1427,6 +1456,10 @@ Karve:
     patterns:
       - (over|out)lander
 Kikuboshi:
+  Kamisori:
+    format: Straight
+    patterns:
+      - kikuboshi.*kami
   Straight:
     format: Straight
     patterns:
@@ -1435,6 +1468,11 @@ Kingever:
   Refillable Razor:
     patterns:
       - kingever
+Kismet:
+  Hair Shaper:
+    format: Shavette (Hair Shaper)
+    patterns:
+      - kismet(.*hair|.*shavette)
 Knockout:
   Razor:
     patterns:
@@ -1588,6 +1626,11 @@ Manscaped:
   The Plow 2.0:
     patterns:
       - manscaped?.*plow
+Marianna:
+  Hair Shaper:
+    format: Shavette (Hair Shaper)
+    patterns:
+      - marianna
 Master Barber:
   Magic Razor:
     format: Shavette (Half DE)
@@ -1674,6 +1717,10 @@ Mongoose:
     format: AC
     patterns:
       - goose.*(2|two|ii)
+  MinGoose:
+    format: Injector
+    patterns:
+      - mini?goose
   Original:
     format: AC
     patterns:
@@ -1685,7 +1732,7 @@ Mossei:
       - mossei.*mono
 Muninn Woodworks:
   Sextoblade:
-    format: Shavette
+    format: Shavette (Hair Shaper)
     patterns:
       - mun+in.*sexto
 Mutiny:
@@ -1746,6 +1793,7 @@ Occams Razor:
 OliWorks:
   M3teorite:
     patterns:
+      - m3teorite
       - oliworks.*m[e3]t\w+rite
       - oliworks
   OliBlade:
@@ -1795,10 +1843,8 @@ Other Shavette:
     patterns:
       - shavette
       - hess.*ezy
-      - hair.*sha
       - kamisori.*shavette
       - marianna
-      - burmax.*shavette
       - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
       - chopstick kamisori
       - ice ?pick kamisori
@@ -1813,11 +1859,11 @@ Other Shavette (AC):
   "":
     format: Shavette (AC)
     patterns:
-      - (shavette|kami).*\bac\b
-      - \bac\b.*(shavette|kami)
+      - (shavette|kami).*(\bac\b|\bartist\b\s*club\b)
+      - (\bac\b|\bartist\b\s*club\b).*(shavette|kami)
       - feather clone.*scales
       - bbr-?s.*(shavette|scales)
-      - (kai|feather).*[ck]lon(?:e[nm])?isori
+      - (kai|feather).*[ck]lon(?:e[nm])?.*isori
       - '[ck]lon(?:e[nm])?isori.*(kai|feather)'
 Other Shavette (Disposable):
   "":
@@ -1830,11 +1876,19 @@ Other Shavette (Half DE):
     format: Shavette (Half DE)
     patterns:
       - magic straight
+Other Shavette (Hair Shaper):
+  "":
+    format: Shavette (Hair Shaper)
+    patterns:
+      - hair.*sha
 Other Kamisori:
   "":
     format: Straight
     patterns:
-      - ^(?!.*\b(ice ?pick|chopstick|shavette|dairi|feather|henkotsu|facón|cjb|nobel|kai|yurii|raido|ac)\b).*kami
+      # - ^(?!.*\b(ice ?pick|chopstick|shavette|dairi|feather|henkotsu|facón|cjb|nobel|kai|yurii|raido|ac)\b).*kami
+      - kami
+      - kami.*\d{1,2}/(8|16)
+      - \d{1,2}/(8|16).*kami
 Other Straight Razor:
   "":
     format: Straight
@@ -1854,6 +1908,9 @@ Other Straight Razor:
       - reliable.*manganese
       - perfection.*germany
       - scales
+      - winner barber razor
+      - imperial razor
+      - tonsorial.*gem
 PAA:
   Alpha Ecliptic:
     patterns:
@@ -1892,7 +1949,7 @@ PAL:
   Injectomatic:
     format: Injector
     patterns:
-      - pal.*injectomatic
+      - pal.*injectomatic  
 Paradigm:
   17-4:
     patterns:
@@ -1941,7 +1998,7 @@ Parker:
       - 60R
   65R:
     patterns:
-      - 65\s?R
+      - (parker.*)?65[\s-]?R
   66R:
     patterns:
       - 66R
@@ -1990,10 +2047,11 @@ Parker:
     format: Shavette (Half DE)
     patterns:
       - parker.*srb.*shavette
-  SRW:
+  SRW Shavette:
+    format: Shavette (Half DE)
     patterns:
       - parker.*srw
-  SRX:
+  SRX Shavette:
     format: Shavette (Half DE)
     patterns:
       - parker.*srx
@@ -2371,7 +2429,7 @@ Saiver:
       - sa[iy]ver
 Sanguine:
   Coolcut 9:
-    format: Shavette (AC)
+    format: Shavette (Injector)
     patterns:
       - sanguine.*coolcut.*9
 Saponificio Varesino:
@@ -2579,7 +2637,7 @@ Supply:
   Single Edge (V1/V2):
     format: Injector
     patterns:
-      - supply.*single
+      - supply.*sing
       - supply.*v1
       - supply.*v2(?!\.0)
 T. Noonan & Sons:
@@ -2841,6 +2899,11 @@ Well Kept:
   Safety Razor:
     patterns:
       - well kept.*safety razor
+Weller:
+  Shavette:
+    format: Shavette (Hair Shaper)
+    patterns:
+      - weller.*(shavette|hair)
 Werner Breidenbach:
   Monte Rosa 14:
     format: Straight

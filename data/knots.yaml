@@ -377,6 +377,11 @@ known_knots:
     B18:
       patterns:
         - ^(?!.*zen).*\bb18\b
+  Frank Shaving:
+    Pur-Tech:
+      fiber: Synthetic
+      patterns:
+        - frank.*pur.*tec
   Griffith:
     High Mountain Badger HD:
       fiber: Badger
@@ -496,6 +501,7 @@ known_knots:
       fiber: Badger
       patterns:
         - (oumo.*)?rorschach
+        - rorasch
     ST-1:
       fiber: Synthetic
       patterns:

@@ -572,6 +572,7 @@ known_brushes:
       patterns:
         - razo.*blondie
         - razorock.*zenith
+        - \brr\b.*boar
       knot:
         brand: Zenith
         fiber: Boar
@@ -708,8 +709,8 @@ known_brushes:
     SOC Boar:
       knot_size_mm: 24
       patterns:
-        - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
-        - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*)
+        - (semogue\s*owner.*club|\bs\.?\s*o\.?\s*c\.?\b).*boar
+        - (semogue\s*owner.*club|\bs\.?\s*o\.?\s*c\.?\b)
         - owner.*club
         - sem\w+g.*taj
         - semogue.*oc
@@ -742,7 +743,7 @@ known_brushes:
     r/wetshaving Brushbutt Boar:
       knot_size_mm: 22
       patterns:
-        - brushbutt
+        - (wetshaving)?.*brushbutt
         - 2017 ws
         - semogue.*\bws\b
   Shave Boutique:
@@ -1619,6 +1620,11 @@ known_knot_based_brushes:
         brand: Maggard
         fiber: Synthetic
         model: Tuxedo
+  Frank Shaving:
+    Pur-Tech:
+      fiber: Synthetic
+      patterns:
+        - frank.*pur.*tec
   Grizzly Bay:
     fiber: Badger
     knot_size_mm: 26
@@ -1705,6 +1711,10 @@ known_knot_based_brushes:
       fiber: Badger
       patterns:
         - (oumo.*)?rorschach
+    ST-1:
+      fiber: Synthetic
+      patterns:
+        - \bst-?1\b
     ST-2:
       fiber: Synthetic
       patterns:
@@ -1979,6 +1989,7 @@ other_brushes:
     default: Synthetic
     patterns:
       - aka.*brush
+      - \baka\b
   Alpha:
     default: Synthetic
     patterns:
