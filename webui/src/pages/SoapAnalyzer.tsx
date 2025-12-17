@@ -862,13 +862,27 @@ const SoapAnalyzer: React.FC = () => {
                           const parts = result.entry.split(' - ');
                           const maker = parts[0] || '';
                           const scent = parts.slice(1).join(' - ') || '';
+                          const slug = getWsdbSlug(maker, scent);
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
                               <td className='border border-gray-300 px-3 py-2 font-medium'>
                                 {maker}
                               </td>
-                              <td className='border border-gray-300 px-3 py-2'>{scent}</td>
+                              <td className='border border-gray-300 px-3 py-2'>
+                                {slug ? (
+                                  <a
+                                    href={`https://www.wetshavingdatabase.com/software/${slug}/`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                                  >
+                                    {scent}
+                                  </a>
+                                ) : (
+                                  <span>{scent}</span>
+                                )}
+                              </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {index > 0 ? (
                                   <Badge
