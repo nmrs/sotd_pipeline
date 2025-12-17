@@ -1,8 +1,14 @@
 """Universal table generator for report templates."""
 
+import json
+import logging
+import unicodedata
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class TableGenerator:
@@ -33,8 +39,97 @@ class TableGenerator:
         self.comparison_data = comparison_data or {}
         self.current_month = current_month
         self.debug = debug
+        self._wsdb_soaps: List[Dict[str, Any]] | None = None
 
         # No more hardcoded mappings - we'll convert kebab-case to snake_case dynamically
+
+    def _load_wsdb_data(self) -> List[Dict[str, Any]]:
+        """Lazily load WSDB soap data from software.json.
+
+        Returns:
+            List of WSDB soap entries (filtered for type="Soap")
+        """
+        if self._wsdb_soaps is not None:
+            return self._wsdb_soaps
+
+        # Try to find the project root (go up from this file to find data/wsdb)
+        current_file = Path(__file__)
+        # This file is at: sotd/report/table_generators/table_generator.py
+        # Project root is 3 levels up
+        project_root = current_file.parent.parent.parent.parent
+        wsdb_file = project_root / "data" / "wsdb" / "software.json"
+
+        if not wsdb_file.exists():
+            if self.debug:
+                logger.debug(f"WSDB file not found at {wsdb_file}, skipping link generation")
+            self._wsdb_soaps = []
+            return []
+
+        try:
+            with wsdb_file.open("r", encoding="utf-8") as f:
+                all_software = json.load(f)
+
+            # Filter for soaps only
+            soaps = [item for item in all_software if item.get("type") == "Soap"]
+            self._wsdb_soaps = soaps
+
+            if self.debug:
+                logger.debug(f"Loaded {len(soaps)} soaps from WSDB")
+
+            return soaps
+        except Exception as e:
+            if self.debug:
+                logger.debug(f"Failed to load WSDB data: {e}, skipping link generation")
+            self._wsdb_soaps = []
+            return []
+
+    def _normalize_string(self, text: str) -> str:
+        """Normalize a string to Unicode NFC (Normalization Form Canonical Composed).
+
+        This ensures that visually identical characters are treated the same regardless
+        of their Unicode encoding.
+
+        Args:
+            text: The string to normalize
+
+        Returns:
+            The normalized string in NFC form
+        """
+        if not text:
+            return text
+        return unicodedata.normalize("NFC", text)
+
+    def _get_wsdb_slug(self, brand: str, scent: str) -> str | None:
+        """Lookup WSDB slug for a given brand and scent.
+
+        Uses case-insensitive matching with Unicode normalization for consistency.
+
+        Args:
+            brand: Brand name to match
+            scent: Scent name to match
+
+        Returns:
+            WSDB slug if found, None otherwise
+        """
+        if not brand or not scent:
+            return None
+
+        wsdb_soaps = self._load_wsdb_data()
+        if not wsdb_soaps:
+            return None
+
+        # Normalize and lowercase for comparison
+        normalized_brand = self._normalize_string(brand.lower().strip())
+        normalized_scent = self._normalize_string(scent.lower().strip())
+
+        for soap in wsdb_soaps:
+            wsdb_brand = self._normalize_string((soap.get("brand") or "").lower().strip())
+            wsdb_name = self._normalize_string((soap.get("name") or "").lower().strip())
+
+            if wsdb_brand == normalized_brand and wsdb_name == normalized_scent:
+                return soap.get("slug")
+
+        return None
 
     def _preserve_acronyms(self, text: str) -> str:
         """Preserve acronyms while converting text to title case.
@@ -143,6 +238,46 @@ class TableGenerator:
                     ~formatted_df[col].astype(str).str.startswith("u/")
                 )
                 formatted_df.loc[mask, col] = "u/" + formatted_df.loc[mask, col].astype(str)
+
+        return formatted_df
+
+    def _format_soap_links(self, df: pd.DataFrame, table_name: str) -> pd.DataFrame:
+        """Format soap names with WSDB links when slug is found.
+
+        Only applies to "soaps" table. Wraps soap names in markdown links
+        when a matching WSDB slug is found.
+
+        Args:
+            df: DataFrame to format
+            table_name: Name of the table being generated
+
+        Returns:
+            DataFrame with formatted soap names (with links when available)
+        """
+        # Only apply to soaps table
+        if table_name != "soaps":
+            return df
+
+        # Check if required columns exist
+        if "name" not in df.columns or "brand" not in df.columns or "scent" not in df.columns:
+            return df
+
+        formatted_df = df.copy()
+
+        # Apply vectorized operations to add links
+        def add_link(row: pd.Series) -> str:
+            """Add markdown link to soap name if slug is found."""
+            name = str(row.get("name", ""))
+            brand = str(row.get("brand", ""))
+            scent = str(row.get("scent", ""))
+
+            slug = self._get_wsdb_slug(brand, scent)
+            if slug:
+                return f"[{name}](https://www.wetshavingdatabase.com/software/{slug}/)"
+            return name
+
+        # Apply link formatting to name column
+        formatted_df["name"] = formatted_df.apply(add_link, axis=1)
 
         return formatted_df
 
@@ -685,6 +820,10 @@ class TableGenerator:
             column_df = self._apply_column_operations(df, columns)
             if isinstance(column_df, pd.DataFrame):
                 df = column_df
+
+        # Format soap names with WSDB links (only for soaps table)
+        # Do this BEFORE column name formatting so we can access columns by their original names
+        df = self._format_soap_links(df, table_name)
 
         # Format column names to Title Case with acronym preservation BEFORE converting to markdown
         # This ensures clean column names in the final output

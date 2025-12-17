@@ -1,5 +1,8 @@
 """Tests for the TableGenerator."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from sotd.report.table_generators.table_generator import TableGenerator
@@ -836,3 +839,258 @@ class TestTableGenerator:
             ValueError, match="Invalid threshold value 'abc' for column 'shaves' - must be numeric"
         ):
             generator.generate_table("soap-makers", shaves="abc")
+
+    def test_wsdb_slug_lookup_found(self, tmp_path, monkeypatch):
+        """Test WSDB slug lookup when match is found."""
+        # Create directory structure: tmp_path/sotd/report/table_generators/
+        # so that Path(__file__).parent.parent.parent.parent points to tmp_path
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Seville",
+                "slug": "barrister-and-mann-seville",
+                "type": "Soap",
+            },
+            {
+                "brand": "Stirling Soap Co.",
+                "name": "Executive Man",
+                "slug": "stirling-soap-co-executive-man",
+                "type": "Soap",
+            },
+            {"brand": "Other Brand", "name": "Other Scent", "slug": "other", "type": "Blade"},  # Not a soap
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f)
+
+        # Patch __file__ to point to our test directory structure
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        data = {"soaps": [{"rank": 1, "shaves": 100, "unique_users": 50}]}
+        generator = TableGenerator(data)
+
+        # Test slug lookup
+        slug = generator._get_wsdb_slug("Barrister and Mann", "Seville")
+        assert slug == "barrister-and-mann-seville"
+
+        slug2 = generator._get_wsdb_slug("Stirling Soap Co.", "Executive Man")
+        assert slug2 == "stirling-soap-co-executive-man"
+
+        # Test case-insensitive matching
+        slug3 = generator._get_wsdb_slug("barrister and mann", "seville")
+        assert slug3 == "barrister-and-mann-seville"
+
+        # Test non-existent soap
+        slug4 = generator._get_wsdb_slug("Non Existent", "Scent")
+        assert slug4 is None
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_wsdb_slug_lookup_missing_file(self, tmp_path, monkeypatch):
+        """Test WSDB slug lookup when file doesn't exist."""
+        # Create directory structure but don't create the WSDB file
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        data = {"soaps": [{"rank": 1, "shaves": 100, "unique_users": 50}]}
+        generator = TableGenerator(data)
+
+        # Should return None when file doesn't exist
+        slug = generator._get_wsdb_slug("Barrister and Mann", "Seville")
+        assert slug is None
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_wsdb_link_formatting_in_soaps_table(self, tmp_path, monkeypatch):
+        """Test that soap names are formatted with links in soaps table."""
+        # Create directory structure
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Seville",
+                "slug": "barrister-and-mann-seville",
+                "type": "Soap",
+            },
+            {
+                "brand": "Stirling Soap Co.",
+                "name": "Executive Man",
+                "slug": "stirling-soap-co-executive-man",
+                "type": "Soap",
+            },
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        data = {
+            "soaps": [
+                {
+                    "rank": 1,
+                    "shaves": 100,
+                    "unique_users": 50,
+                    "brand": "Barrister and Mann",
+                    "scent": "Seville",
+                    "name": "Barrister and Mann - Seville",
+                },
+                {
+                    "rank": 2,
+                    "shaves": 80,
+                    "unique_users": 40,
+                    "brand": "Stirling Soap Co.",
+                    "scent": "Executive Man",
+                    "name": "Stirling Soap Co. - Executive Man",
+                },
+                {
+                    "rank": 3,
+                    "shaves": 60,
+                    "unique_users": 30,
+                    "brand": "Unknown Brand",
+                    "scent": "Unknown Scent",
+                    "name": "Unknown Brand - Unknown Scent",
+                },
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table("soaps")
+
+        # Should contain links for matched soaps
+        assert "[Barrister and Mann - Seville](https://www.wetshavingdatabase.com/software/barrister-and-mann-seville/)" in result
+        assert "[Stirling Soap Co. - Executive Man](https://www.wetshavingdatabase.com/software/stirling-soap-co-executive-man/)" in result
+
+        # Should not contain link for unmatched soap (just the name)
+        assert "Unknown Brand - Unknown Scent" in result
+        assert "[Unknown Brand - Unknown Scent](" not in result
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_wsdb_link_formatting_not_applied_to_other_tables(self, tmp_path, monkeypatch):
+        """Test that link formatting is not applied to non-soap tables."""
+        # Create directory structure
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Seville",
+                "slug": "barrister-and-mann-seville",
+                "type": "Soap",
+            },
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        data = {
+            "soap_makers": [
+                {
+                    "rank": 1,
+                    "shaves": 100,
+                    "unique_users": 50,
+                    "brand": "Barrister and Mann",
+                    "name": "Barrister and Mann",
+                },
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table("soap-makers")
+
+        # Should not contain links (soap-makers table doesn't get link formatting)
+        assert "Barrister and Mann" in result
+        assert "[Barrister and Mann](" not in result
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_wsdb_unicode_normalization(self, tmp_path, monkeypatch):
+        """Test that Unicode normalization works in slug lookup."""
+        import unicodedata
+
+        # Create directory structure
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data with composed Unicode
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        # Use composed form (NFC)
+        composed_melange = "Mélange"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": composed_melange,
+                "slug": "barrister-and-mann-melange",
+                "type": "Soap",
+            },
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f, ensure_ascii=False)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        data = {"soaps": [{"rank": 1, "shaves": 100, "unique_users": 50}]}
+        generator = TableGenerator(data)
+
+        # Test with decomposed form (NFD) - should still match
+        decomposed_melange = unicodedata.normalize("NFD", composed_melange)
+        slug = generator._get_wsdb_slug("Barrister and Mann", decomposed_melange)
+        assert slug == "barrister-and-mann-melange"
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
