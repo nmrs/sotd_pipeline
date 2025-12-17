@@ -699,16 +699,13 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                       ))}
                                     </div>
                                     {/* Brand metadata */}
-                                    <div className='text-sm text-gray-600 pl-4 space-y-1'>
-                                      <div>Brand Score: {brandMatches[0].brand_score.toFixed(1)}%</div>
-                                      {brandMatches[0].details.collaborators &&
-                                        brandMatches[0].details.collaborators.length > 0 && (
-                                          <div>
-                                            <span className='font-medium'>Collaborators:</span>{' '}
-                                            {brandMatches[0].details.collaborators.join(', ')}
-                                          </div>
-                                        )}
-                                    </div>
+                                    {brandMatches[0].details.collaborators &&
+                                      brandMatches[0].details.collaborators.length > 0 && (
+                                        <div className='text-sm text-gray-600 pl-4'>
+                                          <span className='font-medium'>Collaborators:</span>{' '}
+                                          {brandMatches[0].details.collaborators.join(', ')}
+                                        </div>
+                                      )}
                                   </div>
                                 ));
                               })()
@@ -915,16 +912,13 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                       ))}
                                     </div>
                                     {/* Brand metadata */}
-                                    <div className='text-sm text-gray-600 pl-4 space-y-1'>
-                                      <div>Brand Score: {brandMatches[0].brand_score.toFixed(1)}%</div>
-                                      {brandMatches[0].details.patterns &&
-                                        brandMatches[0].details.patterns.length > 0 && (
-                                          <div>
-                                            <span className='font-medium'>Patterns:</span>{' '}
-                                            {brandMatches[0].details.patterns.join(', ')}
-                                          </div>
-                                        )}
-                                    </div>
+                                    {brandMatches[0].details.patterns &&
+                                      brandMatches[0].details.patterns.length > 0 && (
+                                        <div className='text-sm text-gray-600 pl-4'>
+                                          <span className='font-medium'>Patterns:</span>{' '}
+                                          {brandMatches[0].details.patterns.join(', ')}
+                                        </div>
+                                      )}
                                   </div>
                                 ));
                               })()
