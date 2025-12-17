@@ -41,6 +41,7 @@ interface FuzzyMatch {
   scent_score: number;
   source: string;
   matched_via?: 'canonical' | 'alias';
+  scent_matched_via?: 'canonical' | 'alias';
   details: {
     slug?: string;
     scent_notes?: string[];
@@ -786,13 +787,22 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         {match.brand}
                                         {match.name && ` - ${match.name}`}
                                       </span>
-                                      {/* Highlight if matched via alias */}
+                                      {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (
                                         <Badge
                                           variant='outline'
                                           className='text-xs bg-blue-50 text-blue-700 border-blue-200'
                                         >
                                           via alias
+                                        </Badge>
+                                      )}
+                                      {/* Highlight if matched via alias (scent) */}
+                                      {match.scent_matched_via === 'alias' && (
+                                        <Badge
+                                          variant='outline'
+                                          className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                        >
+                                          scent via alias
                                         </Badge>
                                       )}
                                     </div>
@@ -1010,13 +1020,22 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         {match.brand}
                                         {match.name && ` - ${match.name}`}
                                       </span>
-                                      {/* Highlight if matched via alias */}
+                                      {/* Highlight if matched via alias (brand) */}
                                       {match.matched_via === 'alias' && (
                                         <Badge
                                           variant='outline'
                                           className='text-xs bg-blue-50 text-blue-700 border-blue-200'
                                         >
                                           via alias
+                                        </Badge>
+                                      )}
+                                      {/* Highlight if matched via alias (scent) */}
+                                      {match.scent_matched_via === 'alias' && (
+                                        <Badge
+                                          variant='outline'
+                                          className='text-xs bg-blue-50 text-blue-700 border-blue-200'
+                                        >
+                                          scent via alias
                                         </Badge>
                                       )}
                                     </div>

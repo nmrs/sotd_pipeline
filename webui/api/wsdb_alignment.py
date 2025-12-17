@@ -158,8 +158,13 @@ async def load_pipeline_soaps() -> dict[str, Any]:
                 # Extract scents
                 if "scents" in brand_data:
                     for scent_name, scent_data in brand_data["scents"].items():
+                        scent_aliases = []
+                        if isinstance(scent_data, dict) and "aliases" in scent_data:
+                            scent_aliases = scent_data["aliases"] if isinstance(scent_data["aliases"], list) else []
+                        
                         scent_info = {
                             "name": scent_name,
+                            "aliases": scent_aliases,
                             "patterns": scent_data.get("patterns", []) if isinstance(scent_data, dict) else [],
                         }
                         scents.append(scent_info)
@@ -482,12 +487,16 @@ async def batch_analyze(
                         break
                     
                     query_brand = pipeline_brand.lower().strip()
-                    query_scent = scent["name"].lower().strip()
                     
-                    # Get all names to try: canonical + aliases
+                    # Get all brand names to try: canonical + aliases
                     names_to_try = [query_brand]
                     if brand_entry.get("aliases"):
                         names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
+                    
+                    # Get all scent names to try: canonical + aliases
+                    scent_names_to_try = [scent["name"].lower().strip()]
+                    if scent.get("aliases"):
+                        scent_names_to_try.extend([alias.lower().strip() for alias in scent["aliases"]])
                     
                     matches = []
 
@@ -509,8 +518,17 @@ async def batch_analyze(
                         
                         # Only proceed if brand matches above threshold (convert to percentage)
                         if brand_score >= brand_threshold * 100:
-                            # Score only the scent portion
-                            scent_score = fuzz.token_sort_ratio(query_scent, wsdb_name)
+                            # Try matching with each scent name (canonical + aliases)
+                            best_scent_score = 0
+                            scent_matched_via = "canonical"
+                            
+                            for idx, scent_name in enumerate(scent_names_to_try):
+                                score = fuzz.token_sort_ratio(scent_name, wsdb_name)
+                                if score > best_scent_score:
+                                    best_scent_score = score
+                                    scent_matched_via = "canonical" if idx == 0 else "alias"
+                            
+                            scent_score = best_scent_score
                             confidence = scent_score  # Use scent score directly
                             
                             if confidence >= threshold * 100:
@@ -523,6 +541,7 @@ async def batch_analyze(
                                         "scent_score": round(scent_score, 2),
                                         "source": "wsdb",
                                         "matched_via": matched_via,
+                                        "scent_matched_via": scent_matched_via,
                                         "details": {
                                             "slug": wsdb_soap.get("slug"),
                                             "scent_notes": wsdb_soap.get("scent_notes", []),
@@ -654,7 +673,10 @@ async def batch_analyze(
                         names_to_try.extend([alias.lower().strip() for alias in brand_entry["aliases"]])
 
                     for scent in brand_entry["scents"]:
-                        pipeline_scent = scent["name"].lower().strip()
+                        # Get all scent names to try: canonical + aliases
+                        scent_names_to_try = [scent["name"].lower().strip()]
+                        if scent.get("aliases"):
+                            scent_names_to_try.extend([alias.lower().strip() for alias in scent["aliases"]])
 
                         # Try matching with each brand name (canonical + aliases)
                         best_brand_score = 0
@@ -670,8 +692,17 @@ async def batch_analyze(
                         
                         # Only proceed if brand matches above threshold (convert to percentage)
                         if brand_score >= brand_threshold * 100:
-                            # Score only the scent portion
-                            scent_score = fuzz.token_sort_ratio(query_scent, pipeline_scent)
+                            # Try matching with each scent name (canonical + aliases)
+                            best_scent_score = 0
+                            scent_matched_via = "canonical"
+                            
+                            for idx, scent_name in enumerate(scent_names_to_try):
+                                score = fuzz.token_sort_ratio(query_scent, scent_name)
+                                if score > best_scent_score:
+                                    best_scent_score = score
+                                    scent_matched_via = "canonical" if idx == 0 else "alias"
+                            
+                            scent_score = best_scent_score
                             confidence = scent_score  # Use scent score directly
                             
                             if confidence >= threshold * 100:
@@ -684,6 +715,7 @@ async def batch_analyze(
                                         "scent_score": round(scent_score, 2),
                                         "source": "pipeline",
                                         "matched_via": matched_via,
+                                        "scent_matched_via": scent_matched_via,
                                         "details": {"patterns": scent.get("patterns", [])},
                                     }
                                 )
