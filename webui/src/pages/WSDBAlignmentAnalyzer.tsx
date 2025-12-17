@@ -708,12 +708,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                             {brandMatches[0].details.collaborators.join(', ')}
                                           </div>
                                         )}
-                                      {brandMatches[0].details.category && (
-                                        <div>
-                                          <span className='font-medium'>Category:</span>{' '}
-                                          {brandMatches[0].details.category}
-                                        </div>
-                                      )}
                                     </div>
                                   </div>
                                 ));
@@ -775,11 +769,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                       <div>
                                         <span className='font-medium'>Tags:</span>{' '}
                                         {match.details.tags.join(', ')}
-                                      </div>
-                                    )}
-                                    {match.details.category && (
-                                      <div>
-                                        <span className='font-medium'>Category:</span> {match.details.category}
                                       </div>
                                     )}
                                   </div>
