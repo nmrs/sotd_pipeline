@@ -7,6 +7,9 @@ from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
+# Import non-matches loading function
+from webui.api.wsdb_alignment import load_non_matches, normalize_for_matching
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/soaps", tags=["soaps"])
@@ -252,9 +255,19 @@ async def get_soap_neighbor_similarity(
 
         logger.info(f"Processing {len(all_matches)} total soap matches for neighbor similarity")
 
+        # Load non-matches data for filtering
+        try:
+            non_matches_data = await load_non_matches()
+            brand_non_matches = non_matches_data.get("brand_non_matches", {})
+            scent_non_matches = non_matches_data.get("scent_non_matches", {})
+        except Exception as e:
+            logger.warning(f"Failed to load non-matches, continuing without filtering: {e}")
+            brand_non_matches = {}
+            scent_non_matches = {}
+
         # Analyze neighbor similarity
         results = analyze_soap_neighbor_similarity_web(
-            all_matches, mode, similarity_threshold, limit
+            all_matches, mode, similarity_threshold, limit, brand_non_matches, scent_non_matches
         )
 
         return {
@@ -443,13 +456,127 @@ def symmetric_similarity(text1: str, text2: str) -> float:
     return max(score_1_to_2, score_2_to_1)
 
 
+def are_entries_non_matches(
+    entry1: dict, entry2: dict, mode: str, brand_non_matches: dict, scent_non_matches: dict
+) -> bool:
+    """
+    Check if two neighbor entries are known non-matches.
+
+    Args:
+        entry1: First entry dict with original_matches list
+        entry2: Second entry dict with original_matches list
+        mode: Analysis mode ("brands", "brand_scent", or "scents")
+        brand_non_matches: Dict of brand -> [non_match_brands]
+        scent_non_matches: Dict of brand -> scent -> [non_match_scents]
+
+    Returns:
+        True if the two entries are known non-matches
+    """
+    # Extract brand and scent from first occurrence of each entry
+    def extract_brand_scent(entry_dict):
+        """Extract brand and scent from entry's first original match."""
+        if not entry_dict.get("original_matches"):
+            return None, None
+
+        first_match = entry_dict["original_matches"][0]
+        if "matched" in first_match and first_match["matched"]:
+            brand = first_match["matched"].get("brand", "")
+            scent = first_match["matched"].get("scent", "")
+        else:
+            brand = first_match.get("brand", "")
+            scent = first_match.get("scent", "")
+        return brand, scent
+
+    brand1, scent1 = extract_brand_scent(entry1)
+    brand2, scent2 = extract_brand_scent(entry2)
+
+    if not brand1 or not brand2:
+        return False
+
+    # Normalize brands for comparison
+    brand1_norm = normalize_for_matching(brand1)
+    brand2_norm = normalize_for_matching(brand2)
+
+    if mode == "brands":
+        # Check if brands are in non-matches (bidirectional check)
+        # Check brand1 -> brand2
+        if brand1 in brand_non_matches:
+            if any(normalize_for_matching(nm) == brand2_norm for nm in brand_non_matches[brand1]):
+                return True
+        # Check brand2 -> brand1
+        if brand2 in brand_non_matches:
+            if any(normalize_for_matching(nm) == brand1_norm for nm in brand_non_matches[brand2]):
+                return True
+        return False
+
+    elif mode == "brand_scent":
+        # For brand_scent mode, check if same brand but different scents are non-matches
+        if brand1_norm != brand2_norm:
+            return False  # Different brands, not a scent non-match
+
+        if not scent1 or not scent2:
+            return False
+
+        scent1_norm = normalize_for_matching(scent1)
+        scent2_norm = normalize_for_matching(scent2)
+
+        # Check if scent1 -> scent2 is a non-match
+        if brand1 in scent_non_matches:
+            if scent1 in scent_non_matches[brand1]:
+                if any(normalize_for_matching(nm) == scent2_norm for nm in scent_non_matches[brand1][scent1]):
+                    return True
+        # Check if scent2 -> scent1 is a non-match
+        if brand2 in scent_non_matches:
+            if scent2 in scent_non_matches[brand2]:
+                if any(normalize_for_matching(nm) == scent1_norm for nm in scent_non_matches[brand2][scent2]):
+                    return True
+        return False
+
+    elif mode == "scents":
+        # For scents mode, we need brand context to check non-matches
+        # Both entries should have the same brand for this to be meaningful
+        if brand1_norm != brand2_norm:
+            return False  # Different brands, can't determine scent non-match
+
+        if not scent1 or not scent2:
+            return False
+
+        scent1_norm = normalize_for_matching(scent1)
+        scent2_norm = normalize_for_matching(scent2)
+
+        # Check if scent1 -> scent2 is a non-match
+        if brand1 in scent_non_matches:
+            if scent1 in scent_non_matches[brand1]:
+                if any(normalize_for_matching(nm) == scent2_norm for nm in scent_non_matches[brand1][scent1]):
+                    return True
+        # Check if scent2 -> scent1 is a non-match
+        if brand2 in scent_non_matches:
+            if scent2 in scent_non_matches[brand2]:
+                if any(normalize_for_matching(nm) == scent1_norm for nm in scent_non_matches[brand2][scent2]):
+                    return True
+        return False
+
+    return False
+
+
 def analyze_soap_neighbor_similarity_web(
-    matches: list[dict], mode: str, similarity_threshold: float = 0.5, limit: Optional[int] = None
+    matches: list[dict],
+    mode: str,
+    similarity_threshold: float = 0.5,
+    limit: Optional[int] = None,
+    brand_non_matches: dict = None,
+    scent_non_matches: dict = None,
 ) -> list[dict]:
     """Analyze soap matches for neighbor similarity (web-optimized version)"""
     import logging
 
     logger = logging.getLogger(__name__)
+
+    # Default to empty dicts if not provided
+    if brand_non_matches is None:
+        brand_non_matches = {}
+    if scent_non_matches is None:
+        scent_non_matches = {}
 
     # Memory optimization: Process in chunks for very large datasets
     if len(matches) > 10000:  # If more than 10k matches, log memory usage
@@ -543,17 +670,25 @@ def analyze_soap_neighbor_similarity_web(
         similarity_to_above = None
         if i > 0:
             above = unique_entries[i - 1]
-            above_normalized = above["normalized_string"]
-            current_normalized = current["normalized_string"]
-            similarity_to_above = symmetric_similarity(current_normalized, above_normalized)
+            # Check if entries are known non-matches first
+            if are_entries_non_matches(current, above, mode, brand_non_matches, scent_non_matches):
+                similarity_to_above = 0.0
+            else:
+                above_normalized = above["normalized_string"]
+                current_normalized = current["normalized_string"]
+                similarity_to_above = symmetric_similarity(current_normalized, above_normalized)
 
         # Calculate similarity to entry below (if exists)
         similarity_to_below = None
         if i < len(unique_entries) - 1:
             below = unique_entries[i + 1]
-            below_normalized = below["normalized_string"]
-            current_normalized = current["normalized_string"]
-            similarity_to_below = symmetric_similarity(current_normalized, below_normalized)
+            # Check if entries are known non-matches first
+            if are_entries_non_matches(current, below, mode, brand_non_matches, scent_non_matches):
+                similarity_to_below = 0.0
+            else:
+                below_normalized = below["normalized_string"]
+                current_normalized = current["normalized_string"]
+                similarity_to_below = symmetric_similarity(current_normalized, below_normalized)
 
         # Check if this entry meets the similarity threshold with either neighbor
         meets_threshold = (
@@ -582,17 +717,25 @@ def analyze_soap_neighbor_similarity_web(
         similarity_to_above = None
         if i > 0:
             above = entries_with_similarities[i - 1]
-            above_normalized = above["normalized_string"]
-            current_normalized = current["normalized_string"]
-            similarity_to_above = symmetric_similarity(current_normalized, above_normalized)
+            # Check if entries are known non-matches first
+            if are_entries_non_matches(current, above, mode, brand_non_matches, scent_non_matches):
+                similarity_to_above = 0.0
+            else:
+                above_normalized = above["normalized_string"]
+                current_normalized = current["normalized_string"]
+                similarity_to_above = symmetric_similarity(current_normalized, above_normalized)
 
         # Calculate similarity to entry below (if exists) in the filtered dataset
         similarity_to_below = None
         if i < len(entries_with_similarities) - 1:
             below = entries_with_similarities[i + 1]
-            below_normalized = below["normalized_string"]
-            current_normalized = current["normalized_string"]
-            similarity_to_below = symmetric_similarity(current_normalized, below_normalized)
+            # Check if entries are known non-matches first
+            if are_entries_non_matches(current, below, mode, brand_non_matches, scent_non_matches):
+                similarity_to_below = 0.0
+            else:
+                below_normalized = below["normalized_string"]
+                current_normalized = current["normalized_string"]
+                similarity_to_below = symmetric_similarity(current_normalized, below_normalized)
 
         # Determine pattern and normalized string from the first occurrence
         first_match = current["original_matches"][0]

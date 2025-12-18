@@ -64,6 +64,25 @@ interface NeighborSimilarityApiResponse {
   months_processed: string[];
 }
 
+interface NonMatches {
+  brand_non_matches: BrandNonMatch[];
+  scent_non_matches: ScentNonMatch[];
+}
+
+interface BrandNonMatch {
+  pipeline_brand: string;
+  wsdb_brand: string;
+  added_at: string;
+}
+
+interface ScentNonMatch {
+  pipeline_brand: string;
+  pipeline_scent: string;
+  wsdb_brand: string;
+  wsdb_scent: string;
+  added_at: string;
+}
+
 interface ApiResponse {
   message: string;
   results: SoapDuplicateResult[] | SoapPatternSuggestion[];
@@ -94,7 +113,13 @@ const SoapAnalyzer: React.FC = () => {
   // Filter state
   const [filterText, setFilterText] = useState<string>('');
 
-  // Load WSDB data and pipeline soaps on mount
+  // Non-matches state (for consistency with WSDBAlignmentAnalyzer)
+  const [nonMatches, setNonMatches] = useState<NonMatches>({
+    brand_non_matches: [],
+    scent_non_matches: [],
+  });
+
+  // Load WSDB data, pipeline soaps, and non-matches on mount
   React.useEffect(() => {
     const loadWSDBData = async () => {
       try {
@@ -122,8 +147,22 @@ const SoapAnalyzer: React.FC = () => {
       }
     };
 
+    const loadNonMatches = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+        if (response.ok) {
+          const data = await response.json();
+          setNonMatches(data);
+        }
+      } catch (err) {
+        console.error('Failed to load non-matches:', err);
+        // Don't show error to user, non-matches are optional - filtering happens server-side
+      }
+    };
+
     loadWSDBData();
     loadPipelineSoaps();
+    loadNonMatches();
   }, []);
 
   // Lookup function to find WSDB slug by brand and scent (using shared utility with alias support)
