@@ -615,9 +615,15 @@ def are_entries_non_matches(
     if mode == "brands":
         # Build canonical pair and check (relationships stored under alphabetically first key)
         canonical_key, other_brand = _canonicalize_brand_pair(brand1, brand2)
-        if canonical_key in brand_non_matches:
-            if any(normalize_for_matching(nm) == normalize_for_matching(other_brand) for nm in brand_non_matches[canonical_key]):
-                return True
+        
+        # Case-insensitive brand lookup (normalize brand for comparison)
+        canonical_key_norm = normalize_for_matching(canonical_key)
+        for stored_brand in brand_non_matches.keys():
+            if normalize_for_matching(stored_brand) == canonical_key_norm:
+                if any(normalize_for_matching(nm) == normalize_for_matching(other_brand) for nm in brand_non_matches[stored_brand]):
+                    return True
+                break
+        
         return False
 
     elif mode == "brand_scent":
@@ -633,13 +639,19 @@ def are_entries_non_matches(
 
         # Build canonical pair and check (relationships stored under alphabetically first scent)
         canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
-        if brand1 in scent_non_matches:
-            if canonical_key in scent_non_matches[brand1]:
-                if any(
-                    normalize_for_matching(nm) == normalize_for_matching(other_scent)
-                    for nm in scent_non_matches[brand1][canonical_key]
-                ):
-                    return True
+        
+        # Case-insensitive brand lookup (normalize brand for comparison)
+        # (brand1_norm already calculated above)
+        for stored_brand in scent_non_matches.keys():
+            if normalize_for_matching(stored_brand) == brand1_norm:
+                if canonical_key in scent_non_matches[stored_brand]:
+                    if any(
+                        normalize_for_matching(nm) == normalize_for_matching(other_scent)
+                        for nm in scent_non_matches[stored_brand][canonical_key]
+                    ):
+                        return True
+                break
+        
         return False
 
     elif mode == "scents":
@@ -653,13 +665,18 @@ def are_entries_non_matches(
         if brand1_norm == brand2_norm:
             # Build canonical pair and check (relationships stored under alphabetically first scent)
             canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
-            if brand1 in scent_non_matches:
-                if canonical_key in scent_non_matches[brand1]:
-                    if any(
-                        normalize_for_matching(nm) == normalize_for_matching(other_scent)
-                        for nm in scent_non_matches[brand1][canonical_key]
-                    ):
-                        return True
+            
+            # Case-insensitive brand lookup (normalize brand for comparison)
+            # (brand1_norm already calculated above)
+            for stored_brand in scent_non_matches.keys():
+                if normalize_for_matching(stored_brand) == brand1_norm:
+                    if canonical_key in scent_non_matches[stored_brand]:
+                        if any(
+                            normalize_for_matching(nm) == normalize_for_matching(other_scent)
+                            for nm in scent_non_matches[stored_brand][canonical_key]
+                        ):
+                            return True
+                    break
         else:
             # Different brands: check cross-brand scent non-matches
             # Get canonical scent key (alphabetically first)
