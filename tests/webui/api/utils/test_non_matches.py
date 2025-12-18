@@ -294,3 +294,118 @@ class TestSaveCrossBrandScentNonMatch:
             assert not temp_file.exists()
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
+
+
+class TestSymmetryEnforcement:
+    """Test symmetry enforcement for non-matches."""
+
+    def test_save_brand_non_match_symmetrical(self, tmp_path):
+        """Test that brand non-matches are saved symmetrically."""
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+        try:
+            overrides_dir = tmp_path / "data" / "overrides"
+            overrides_dir.mkdir(parents=True)
+
+            # Save A != B
+            result = save_brand_non_match("Brand A", "Brand B")
+            assert result["success"] is True
+
+            # Verify both A -> B and B -> A exist
+            brands_file = overrides_dir / "non_matches_brands.yaml"
+            with brands_file.open("r") as f:
+                data = yaml.safe_load(f)
+
+            assert "Brand A" in data
+            assert "Brand B" in data
+            assert "Brand B" in data["Brand A"]
+            assert "Brand A" in data["Brand B"]
+        finally:
+            os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_save_scent_non_match_symmetrical(self, tmp_path):
+        """Test that scent non-matches are saved symmetrically."""
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+        try:
+            overrides_dir = tmp_path / "data" / "overrides"
+            overrides_dir.mkdir(parents=True)
+
+            # Save A != B
+            result = save_scent_non_match("Brand A", "Scent A", "Scent B")
+            assert result["success"] is True
+
+            # Verify both A -> B and B -> A exist
+            scents_file = overrides_dir / "non_matches_scents.yaml"
+            with scents_file.open("r") as f:
+                data = yaml.safe_load(f)
+
+            assert "Brand A" in data
+            assert "Scent A" in data["Brand A"]
+            assert "Scent B" in data["Brand A"]
+            assert "Scent B" in data["Brand A"]["Scent A"]
+            assert "Scent A" in data["Brand A"]["Scent B"]
+        finally:
+            os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_load_enforces_symmetry(self, tmp_path):
+        """Test that loading fixes asymmetric entries."""
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+        try:
+            overrides_dir = tmp_path / "data" / "overrides"
+            overrides_dir.mkdir(parents=True)
+
+            # Manually create asymmetric YAML (only A -> B)
+            brands_file = overrides_dir / "non_matches_brands.yaml"
+            with brands_file.open("w") as f:
+                yaml.dump({"Brand A": ["Brand B"]}, f)
+
+            # Load and verify B -> A is added
+            result = load_non_matches()
+
+            # Verify symmetry is enforced in memory
+            assert "Brand A" in result["brand_non_matches"]
+            assert "Brand B" in result["brand_non_matches"]
+            assert "Brand B" in result["brand_non_matches"]["Brand A"]
+            assert "Brand A" in result["brand_non_matches"]["Brand B"]
+
+            # Verify file is updated
+            with brands_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Brand A" in saved_data
+                assert "Brand B" in saved_data
+                assert "Brand B" in saved_data["Brand A"]
+                assert "Brand A" in saved_data["Brand B"]
+        finally:
+            os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_symmetry_enforcement_on_existing_data(self, tmp_path):
+        """Test that existing asymmetric data is fixed."""
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+        try:
+            overrides_dir = tmp_path / "data" / "overrides"
+            overrides_dir.mkdir(parents=True)
+
+            # Create asymmetric scent data (only A -> B)
+            scents_file = overrides_dir / "non_matches_scents.yaml"
+            with scents_file.open("w") as f:
+                yaml.dump({"Brand A": {"Scent A": ["Scent B"]}}, f)
+
+            # Load existing asymmetric data
+            result = load_non_matches()
+
+            # Verify symmetry is enforced
+            assert "Brand A" in result["scent_non_matches"]
+            assert "Scent A" in result["scent_non_matches"]["Brand A"]
+            assert "Scent B" in result["scent_non_matches"]["Brand A"]
+            assert "Scent B" in result["scent_non_matches"]["Brand A"]["Scent A"]
+            assert "Scent A" in result["scent_non_matches"]["Brand A"]["Scent B"]
+
+            # Verify file is updated with symmetric entries
+            with scents_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Brand A" in saved_data
+                assert "Scent A" in saved_data["Brand A"]
+                assert "Scent B" in saved_data["Brand A"]
+                assert "Scent B" in saved_data["Brand A"]["Scent A"]
+                assert "Scent A" in saved_data["Brand A"]["Scent B"]
+        finally:
+            os.environ.pop("SOTD_DATA_DIR", None)
