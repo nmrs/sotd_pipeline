@@ -436,3 +436,30 @@ def test_parse_comment_soap_multiple_explicit_same_priority():
     # Should extract whichever appears first in the comment (first match wins within same priority)
     assert result["soap"]["original"] == "Soap A"
     assert result["soap"]["normalized"] == "Soap A"
+
+
+def test_parse_comment_soap_list_item_preferred_over_narrative():
+    """Test that list items (with * prefix) are preferred over narrative text at same priority."""
+    # This tests the case where both "* **Lather:** ..." and "**Soap:** ..." match pattern 0,
+    # but the list item should win even though "soap" comes before "lather" in alias order
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** Wilkinson Sword Classic",
+                "* **Razor:** Wilkinson Sword Classic $PLASTIC",
+                "* **Blade:** Treet Silver (3)",
+                "* **Lather:** Palmolive - Classic - Cream",
+                "* **Post Shave:** Thayer's - Witch Hazel Toner - Aftershave",
+                "",
+                "Some narrative text here.",
+                "",
+                "**Soap:** Purchased at the outrageous price of 3 Canadian dollars ($2.20usd) for a 100ml tube from a pharmacy near my parents; considering this usually sells for under 2€ I guess it's a small premium to find it locally.",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    # Should extract the list item "* **Lather:** ..." not the narrative "**Soap:** ..."
+    assert result["soap"]["original"] == "Palmolive - Classic - Cream"
+    assert result["soap"]["normalized"] == "Palmolive - Classic - Cream"

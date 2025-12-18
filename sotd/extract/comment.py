@@ -49,18 +49,39 @@ def parse_comment(
                 patterns_by_priority[pattern_num].append((alias, pattern))
 
         # Try each priority level across all aliases and all lines
+        # Collect all matches at each priority level, then choose the best one
         for priority_level, patterns_at_level in enumerate(patterns_by_priority):
+            matches_at_level = []
             for alias, pattern in patterns_at_level:
                 for line in lines:
                     value = extract_field_with_pattern(line, field, pattern)
                     if value:
-                        # Found a match with this priority level - use it
-                        normalized_value = normalize_for_matching(value, field=field)
-                        result[field] = {"original": value, "normalized": normalized_value}
-                        break  # Found match, move to next field
-                if field in result:
-                    break  # Found match for this field, try next field
-            if field in result:
+                        # Check if this is a list item (preferred over narrative text)
+                        is_list_item = bool(re.match(r"^[-*]\s+", line.strip()))
+                        matches_at_level.append({
+                            "value": value,
+                            "line": line,
+                            "is_list_item": is_list_item,
+                            "length": len(value),
+                        })
+            
+            # If we found matches at this priority level, choose the best one
+            if matches_at_level:
+                # Prefer list items over narrative text
+                # If multiple list items, prefer shorter matches (more specific)
+                # If no list items, prefer shorter matches (less narrative text)
+                best_match = min(
+                    matches_at_level,
+                    key=lambda m: (
+                        not m["is_list_item"],  # List items first (False < True)
+                        m["length"],  # Then by length (shorter is better)
+                    ),
+                )
+                normalized_value = normalize_for_matching(best_match["value"], field=field)
+                result[field] = {
+                    "original": best_match["value"],
+                    "normalized": normalized_value,
+                }
                 break  # Found match for this field, try next field
 
     # Apply overrides if override manager is provided
