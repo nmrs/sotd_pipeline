@@ -433,17 +433,19 @@ const SoapAnalyzer: React.FC = () => {
         return;
       }
 
+      const requestBody = {
+        mode: mode,
+        entry1_brand: entry1Data.brand,
+        entry1_scent: entry1Data.scent || null,
+        entry2_brand: entry2Data.brand,
+        entry2_scent: entry2Data.scent || null,
+      };
+
       // Call API to save non-match
       const response = await fetch('http://localhost:8000/api/soaps/non-matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: mode,
-          entry1_brand: entry1Data.brand,
-          entry1_scent: entry1Data.scent || null,
-          entry2_brand: entry2Data.brand,
-          entry2_scent: entry2Data.scent || null,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

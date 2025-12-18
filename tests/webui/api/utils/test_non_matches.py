@@ -296,116 +296,159 @@ class TestSaveCrossBrandScentNonMatch:
             os.environ.pop("SOTD_DATA_DIR", None)
 
 
-class TestSymmetryEnforcement:
-    """Test symmetry enforcement for non-matches."""
+class TestCanonicalStorage:
+    """Test canonical storage (no duplication) for non-matches."""
 
-    def test_save_brand_non_match_symmetrical(self, tmp_path):
-        """Test that brand non-matches are saved symmetrically."""
+    def test_save_brand_non_match_canonical(self, tmp_path):
+        """Test that brand non-matches are saved with canonical key (alphabetically first)."""
         os.environ["SOTD_DATA_DIR"] = str(tmp_path)
         try:
             overrides_dir = tmp_path / "data" / "overrides"
             overrides_dir.mkdir(parents=True)
 
-            # Save A != B
+            # Save A != B (A is alphabetically first)
             result = save_brand_non_match("Brand A", "Brand B")
             assert result["success"] is True
 
-            # Verify both A -> B and B -> A exist
+            # Verify only A -> B exists (canonical storage)
             brands_file = overrides_dir / "non_matches_brands.yaml"
             with brands_file.open("r") as f:
                 data = yaml.safe_load(f)
 
             assert "Brand A" in data
-            assert "Brand B" in data
             assert "Brand B" in data["Brand A"]
-            assert "Brand A" in data["Brand B"]
+            # B -> A should NOT exist (canonical storage)
+            assert "Brand B" not in data or "Brand A" not in data.get("Brand B", [])
+
+            # Test reverse: save B != A (should still use A as key)
+            result2 = save_brand_non_match("Brand B", "Brand A")
+            assert result2["success"] is True
+
+            # Verify still only A -> B (no duplication)
+            with brands_file.open("r") as f:
+                data2 = yaml.safe_load(f)
+            assert "Brand A" in data2
+            assert "Brand B" in data2["Brand A"]
+            assert data2["Brand A"].count("Brand B") == 1  # No duplicates
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
 
-    def test_save_scent_non_match_symmetrical(self, tmp_path):
-        """Test that scent non-matches are saved symmetrically."""
+    def test_save_scent_non_match_canonical(self, tmp_path):
+        """Test that scent non-matches are saved with canonical key (alphabetically first)."""
         os.environ["SOTD_DATA_DIR"] = str(tmp_path)
         try:
             overrides_dir = tmp_path / "data" / "overrides"
             overrides_dir.mkdir(parents=True)
 
-            # Save A != B
+            # Save A != B (A is alphabetically first)
             result = save_scent_non_match("Brand A", "Scent A", "Scent B")
             assert result["success"] is True
 
-            # Verify both A -> B and B -> A exist
+            # Verify only A -> B exists (canonical storage)
             scents_file = overrides_dir / "non_matches_scents.yaml"
             with scents_file.open("r") as f:
                 data = yaml.safe_load(f)
 
             assert "Brand A" in data
             assert "Scent A" in data["Brand A"]
-            assert "Scent B" in data["Brand A"]
             assert "Scent B" in data["Brand A"]["Scent A"]
-            assert "Scent A" in data["Brand A"]["Scent B"]
+            # B -> A should NOT exist (canonical storage)
+            assert "Scent B" not in data["Brand A"] or "Scent A" not in data["Brand A"].get("Scent B", [])
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
 
-    def test_load_enforces_symmetry(self, tmp_path):
-        """Test that loading fixes asymmetric entries."""
+    def test_save_cross_brand_scent_non_match_canonical(self, tmp_path):
+        """Test that cross-brand scent non-matches use canonical key (alphabetically first)."""
         os.environ["SOTD_DATA_DIR"] = str(tmp_path)
         try:
             overrides_dir = tmp_path / "data" / "overrides"
             overrides_dir.mkdir(parents=True)
 
-            # Manually create asymmetric YAML (only A -> B)
+            # Save Leather != Heather (Heather is alphabetically first)
+            result = save_cross_brand_scent_non_match(
+                "Noble Otter", "Leather", "Barrister & Mann", "Heather"
+            )
+            assert result["success"] is True
+
+            # Verify only Heather key exists (canonical storage)
+            cross_brand_file = overrides_dir / "non_matches_scents_cross_brand.yaml"
+            with cross_brand_file.open("r") as f:
+                data = yaml.safe_load(f)
+
+            assert "Heather" in data
+            assert "Leather" not in data  # Should not have separate key
+            # Verify both pairs are under Heather
+            brands_in_group = [pair.get("brand") for pair in data["Heather"]]
+            scents_in_group = [pair.get("scent") for pair in data["Heather"]]
+            assert "Noble Otter" in brands_in_group
+            assert "Barrister & Mann" in brands_in_group
+            assert "Leather" in scents_in_group
+            assert "Heather" in scents_in_group
+        finally:
+            os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_load_canonicalizes_and_dedupes(self, tmp_path):
+        """Test that loading canonicalizes and dedupes entries."""
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+        try:
+            overrides_dir = tmp_path / "data" / "overrides"
+            overrides_dir.mkdir(parents=True)
+
+            # Manually create duplicate/non-canonical YAML (B -> A and A -> B)
             brands_file = overrides_dir / "non_matches_brands.yaml"
             with brands_file.open("w") as f:
-                yaml.dump({"Brand A": ["Brand B"]}, f)
+                yaml.dump({"Brand A": ["Brand B"], "Brand B": ["Brand A"]}, f)
 
-            # Load and verify B -> A is added
+            # Load and verify canonicalization (only A -> B should remain)
             result = load_non_matches()
 
-            # Verify symmetry is enforced in memory
+            # Verify canonicalization in memory
             assert "Brand A" in result["brand_non_matches"]
-            assert "Brand B" in result["brand_non_matches"]
             assert "Brand B" in result["brand_non_matches"]["Brand A"]
-            assert "Brand A" in result["brand_non_matches"]["Brand B"]
+            # B -> A should be removed (canonical storage)
+            assert "Brand B" not in result["brand_non_matches"] or "Brand A" not in result["brand_non_matches"].get("Brand B", [])
 
             # Verify file is updated
             with brands_file.open("r") as f:
                 saved_data = yaml.safe_load(f)
                 assert "Brand A" in saved_data
-                assert "Brand B" in saved_data
                 assert "Brand B" in saved_data["Brand A"]
-                assert "Brand A" in saved_data["Brand B"]
+                # B -> A should be removed
+                assert "Brand B" not in saved_data or "Brand A" not in saved_data.get("Brand B", [])
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
 
-    def test_symmetry_enforcement_on_existing_data(self, tmp_path):
-        """Test that existing asymmetric data is fixed."""
+    def test_canonicalization_on_existing_data(self, tmp_path):
+        """Test that existing duplicate/non-canonical data is fixed."""
         os.environ["SOTD_DATA_DIR"] = str(tmp_path)
         try:
             overrides_dir = tmp_path / "data" / "overrides"
             overrides_dir.mkdir(parents=True)
 
-            # Create asymmetric scent data (only A -> B)
+            # Create duplicate scent data (both A -> B and B -> A)
             scents_file = overrides_dir / "non_matches_scents.yaml"
             with scents_file.open("w") as f:
-                yaml.dump({"Brand A": {"Scent A": ["Scent B"]}}, f)
+                yaml.dump(
+                    {"Brand A": {"Scent A": ["Scent B"], "Scent B": ["Scent A"]}}, f
+                )
 
-            # Load existing asymmetric data
+            # Load existing duplicate data
             result = load_non_matches()
 
-            # Verify symmetry is enforced
+            # Verify canonicalization (only A -> B should remain, A is alphabetically first)
             assert "Brand A" in result["scent_non_matches"]
             assert "Scent A" in result["scent_non_matches"]["Brand A"]
-            assert "Scent B" in result["scent_non_matches"]["Brand A"]
             assert "Scent B" in result["scent_non_matches"]["Brand A"]["Scent A"]
-            assert "Scent A" in result["scent_non_matches"]["Brand A"]["Scent B"]
+            # B -> A should be removed
+            assert "Scent B" not in result["scent_non_matches"]["Brand A"] or "Scent A" not in result["scent_non_matches"]["Brand A"].get("Scent B", [])
 
-            # Verify file is updated with symmetric entries
+            # Verify file is updated with canonical entries
             with scents_file.open("r") as f:
                 saved_data = yaml.safe_load(f)
                 assert "Brand A" in saved_data
                 assert "Scent A" in saved_data["Brand A"]
-                assert "Scent B" in saved_data["Brand A"]
                 assert "Scent B" in saved_data["Brand A"]["Scent A"]
-                assert "Scent A" in saved_data["Brand A"]["Scent B"]
+                # B -> A should be removed
+                assert "Scent B" not in saved_data["Brand A"] or "Scent A" not in saved_data["Brand A"].get("Scent B", [])
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)

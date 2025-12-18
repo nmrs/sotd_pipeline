@@ -496,7 +496,7 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Leather": ["Seaforth! Heather"],
+                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -525,7 +525,7 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Leather": ["Seaforth! Heather"],
+                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -554,7 +554,7 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Leather": ["Seaforth! Heather"],
+                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -583,7 +583,7 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Leather": ["Seaforth! Heather"],
+                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -709,7 +709,7 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Leather": ["Seaforth! Heather"],
+                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
             }
         }
         scent_cross_brand_non_matches = {}
@@ -927,10 +927,11 @@ class TestSoapNonMatchEndpoint:
             with scents_file.open("r") as f:
                 saved_data = yaml.safe_load(f)
                 assert "Spearhead Shaving Company" in saved_data
-                assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
+                # Canonical storage: Heather < Leather alphabetically, so Heather is the key
+                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]
                 assert (
-                    "Seaforth! Heather"
-                    in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                    "Seaforth! Leather"
+                    in saved_data["Spearhead Shaving Company"]["Seaforth! Heather"]
                 )
 
         finally:
@@ -1032,10 +1033,11 @@ class TestSoapNonMatchEndpoint:
             with scents_file.open("r") as f:
                 saved_data = yaml.safe_load(f)
                 assert "Spearhead Shaving Company" in saved_data
-                assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
+                # Canonical storage: Heather < Leather alphabetically, so Heather is the key
+                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]
                 assert (
-                    "Seaforth! Heather"
-                    in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                    "Seaforth! Leather"
+                    in saved_data["Spearhead Shaving Company"]["Seaforth! Heather"]
                 )
 
         finally:

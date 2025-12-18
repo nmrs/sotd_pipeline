@@ -19,7 +19,9 @@ from webui.api.wsdb_alignment import normalize_for_matching
 logger = logging.getLogger(__name__)
 
 # Project root directory
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# __file__ is webui/api/utils/non_matches.py
+# Go up: utils -> api -> webui -> project_root
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 
 
 def get_non_matches_dir() -> Path:
@@ -110,65 +112,168 @@ def _sort_non_matches_data(data: dict, file_type: str) -> dict:
         return data
 
 
-def _enforce_brand_symmetry(brand_non_matches: dict[str, list[str]]) -> dict[str, list[str]]:
-    """Ensure all brand non-matches are stored symmetrically.
+def _canonicalize_brand_pair(brand1: str, brand2: str) -> tuple[str, str]:
+    """Return canonical pair (alphabetically first, alphabetically second).
 
-    If A has B in its list, ensure B also has A in its list.
+    Args:
+        brand1: First brand name
+        brand2: Second brand name
+
+    Returns:
+        Tuple of (canonical_key, other_brand) where canonical_key is alphabetically first
+    """
+    if brand1.lower() < brand2.lower():
+        return (brand1, brand2)
+    return (brand2, brand1)
+
+
+def _canonicalize_scent_pair(scent1: str, scent2: str) -> tuple[str, str]:
+    """Return canonical pair (alphabetically first, alphabetically second).
+
+    Args:
+        scent1: First scent name
+        scent2: Second scent name
+
+    Returns:
+        Tuple of (canonical_key, other_scent) where canonical_key is alphabetically first
+    """
+    if scent1.lower() < scent2.lower():
+        return (scent1, scent2)
+    return (scent2, scent1)
+
+
+def _canonicalize_cross_brand_scent_key(entry1_scent: str, entry2_scent: str) -> str:
+    """Return canonical scent key (alphabetically first).
+
+    Args:
+        entry1_scent: First scent name
+        entry2_scent: Second scent name
+
+    Returns:
+        Alphabetically first scent name
+    """
+    if entry1_scent.lower() < entry2_scent.lower():
+        return entry1_scent
+    return entry2_scent
+
+
+def _dedupe_brand_non_matches(brand_non_matches: dict[str, list[str]]) -> dict[str, list[str]]:
+    """Remove duplicates and canonicalize brand non-matches.
 
     Args:
         brand_non_matches: Dict mapping brand -> list of non-match brands
 
     Returns:
-        Symmetrized dict with all relationships stored both ways
+        Canonicalized dict with no duplicates, using alphabetically first key
     """
-    # Create a copy to avoid modifying during iteration
-    result = {brand: list(non_matches) for brand, non_matches in brand_non_matches.items()}
+    canonical = {}
+    seen_pairs = set()
 
-    # For each brand and its non-matches, ensure reverse relationships exist
     for brand, non_matches in brand_non_matches.items():
         for non_match in non_matches:
-            # Ensure reverse relationship exists
-            if non_match not in result:
-                result[non_match] = []
-            if brand not in result[non_match]:
-                result[non_match].append(brand)
+            # Skip self-matches
+            if normalize_for_matching(brand) == normalize_for_matching(non_match):
+                continue
 
-    return result
+            # Get canonical pair
+            key, other = _canonicalize_brand_pair(brand, non_match)
+            pair_key = (normalize_for_matching(key), normalize_for_matching(other))
+
+            # Skip if already seen
+            if pair_key in seen_pairs:
+                continue
+            seen_pairs.add(pair_key)
+
+            # Add to canonical dict
+            if key not in canonical:
+                canonical[key] = []
+            if other not in canonical[key]:
+                canonical[key].append(other)
+
+    return canonical
 
 
-def _enforce_scent_symmetry(
+def _dedupe_scent_non_matches(
     scent_non_matches: dict[str, dict[str, list[str]]],
 ) -> dict[str, dict[str, list[str]]]:
-    """Ensure all scent non-matches are stored symmetrically.
-
-    If brand X has scent A with B in its list, ensure scent B also has A in its list.
+    """Remove duplicates and canonicalize scent non-matches.
 
     Args:
         scent_non_matches: Dict mapping brand -> scent -> list of non-match scents
 
     Returns:
-        Symmetrized dict with all relationships stored both ways
+        Canonicalized dict with no duplicates, using alphabetically first scent as key
     """
-    # Create a copy to avoid modifying during iteration
-    result = {}
-    for brand in scent_non_matches:
-        result[brand] = {
-            scent: list(non_matches) for scent, non_matches in scent_non_matches[brand].items()
-        }
+    canonical = {}
 
-    # For each brand-scent combination and its non-matches, ensure reverse relationships exist
     for brand, scents in scent_non_matches.items():
+        canonical[brand] = {}
+        seen_pairs = set()
+
         for scent, non_matches in scents.items():
             for non_match in non_matches:
-                # Ensure reverse relationship exists
-                if brand not in result:
-                    result[brand] = {}
-                if non_match not in result[brand]:
-                    result[brand][non_match] = []
-                if scent not in result[brand][non_match]:
-                    result[brand][non_match].append(scent)
+                # Skip self-matches
+                if normalize_for_matching(scent) == normalize_for_matching(non_match):
+                    continue
 
-    return result
+                # Get canonical pair
+                key, other = _canonicalize_scent_pair(scent, non_match)
+                pair_key = (normalize_for_matching(key), normalize_for_matching(other))
+
+                # Skip if already seen
+                if pair_key in seen_pairs:
+                    continue
+                seen_pairs.add(pair_key)
+
+                # Add to canonical dict
+                if key not in canonical[brand]:
+                    canonical[brand][key] = []
+                if other not in canonical[brand][key]:
+                    canonical[brand][key].append(other)
+
+    return canonical
+
+
+def _dedupe_cross_brand_scent_non_matches(
+    scent_cross_brand_non_matches: dict[str, list[dict[str, str]]],
+) -> dict[str, list[dict[str, str]]]:
+    """Remove duplicates and canonicalize cross-brand scent non-matches.
+
+    Args:
+        scent_cross_brand_non_matches: Dict mapping scent_name -> list of {brand, scent} dicts
+
+    Returns:
+        Canonicalized dict with no duplicates, using alphabetically first scent as key
+    """
+    canonical = {}
+    seen_pairs = set()  # Track seen brand-scent pairs
+
+    # First pass: collect all unique pairs and determine canonical keys
+    all_pairs = []
+    for scent_name, pairs in scent_cross_brand_non_matches.items():
+        for pair in pairs:
+            pair_scent = pair.get("scent", "")
+            # Determine canonical key for this pair group
+            canonical_key = _canonicalize_cross_brand_scent_key(scent_name, pair_scent)
+            all_pairs.append((canonical_key, pair))
+
+    # Second pass: group pairs by canonical key and dedupe
+    for canonical_key, pair in all_pairs:
+        if canonical_key not in canonical:
+            canonical[canonical_key] = []
+
+        # Check if pair already exists (normalized comparison)
+        pair_key = (
+            normalize_for_matching(pair.get("brand", "")),
+            normalize_for_matching(pair.get("scent", "")),
+        )
+        if pair_key in seen_pairs:
+            continue
+        seen_pairs.add(pair_key)
+
+        canonical[canonical_key].append(pair)
+
+    return canonical
 
 
 def _atomic_write_yaml(file_path: Path, data: dict, file_type: str) -> None:
@@ -233,20 +338,25 @@ def load_non_matches() -> dict[str, Any]:
         # Store original data to detect changes
         original_brand_non_matches = copy.deepcopy(brand_non_matches)
         original_scent_non_matches = copy.deepcopy(scent_non_matches)
+        original_scent_cross_brand_non_matches = copy.deepcopy(scent_cross_brand_non_matches)
 
-        # Enforce symmetry on loaded data (fixes any manually edited asymmetric entries)
-        brand_non_matches = _enforce_brand_symmetry(brand_non_matches)
-        scent_non_matches = _enforce_scent_symmetry(scent_non_matches)
+        # Canonicalize and dedupe loaded data
+        brand_non_matches = _dedupe_brand_non_matches(brand_non_matches)
+        scent_non_matches = _dedupe_scent_non_matches(scent_non_matches)
+        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(scent_cross_brand_non_matches)
 
-        # If symmetry enforcement added entries, save the fixed data back
-        # (This ensures manual edits are automatically fixed on next load)
+        # If canonicalization changed data, save the fixed data back
         if brand_non_matches != original_brand_non_matches:
             _atomic_write_yaml(brands_file, brand_non_matches, "brands")
-            logger.info("🔧 Fixed asymmetric brand non-matches and saved")
+            logger.info("🔧 Canonicalized and deduped brand non-matches and saved")
 
         if scent_non_matches != original_scent_non_matches:
             _atomic_write_yaml(scents_file, scent_non_matches, "scents")
-            logger.info("🔧 Fixed asymmetric scent non-matches and saved")
+            logger.info("🔧 Canonicalized and deduped scent non-matches and saved")
+
+        if scent_cross_brand_non_matches != original_scent_cross_brand_non_matches:
+            _atomic_write_yaml(scents_cross_brand_file, scent_cross_brand_non_matches, "scents_cross_brand")
+            logger.info("🔧 Canonicalized and deduped cross-brand scent non-matches and saved")
 
         brand_count = sum(len(v) for v in brand_non_matches.values())
         scent_count = sum(
@@ -294,24 +404,24 @@ def save_brand_non_match(pipeline_brand: str, wsdb_brand: str) -> dict[str, Any]
             with brands_file.open("r", encoding="utf-8") as f:
                 brand_non_matches = yaml.safe_load(f) or {}
 
-        # Add non-match in both directions
-        if pipeline_brand not in brand_non_matches:
-            brand_non_matches[pipeline_brand] = []
-        if wsdb_brand not in brand_non_matches:
-            brand_non_matches[wsdb_brand] = []
+        # Get canonical pair
+        canonical_key, other_brand = _canonicalize_brand_pair(pipeline_brand, wsdb_brand)
+
+        # Initialize if needed
+        if canonical_key not in brand_non_matches:
+            brand_non_matches[canonical_key] = []
 
         # Check for duplicate
-        if wsdb_brand in brand_non_matches[pipeline_brand]:
+        other_norm = normalize_for_matching(other_brand)
+        if any(normalize_for_matching(nm) == other_norm for nm in brand_non_matches[canonical_key]):
             logger.info("ℹ️ Non-match already exists, skipping")
             return {"success": True, "message": "Non-match already exists"}
 
-        # Add both directions
-        brand_non_matches[pipeline_brand].append(wsdb_brand)
-        if pipeline_brand not in brand_non_matches[wsdb_brand]:
-            brand_non_matches[wsdb_brand].append(pipeline_brand)
+        # Add the non-match
+        brand_non_matches[canonical_key].append(other_brand)
 
-        # Enforce symmetry (handles any edge cases)
-        brand_non_matches = _enforce_brand_symmetry(brand_non_matches)
+        # Dedupe and canonicalize (removes any duplicates that crept in)
+        brand_non_matches = _dedupe_brand_non_matches(brand_non_matches)
 
         # Save atomically with sorting
         _atomic_write_yaml(brands_file, brand_non_matches, "brands")
@@ -352,26 +462,26 @@ def save_scent_non_match(
             with scents_file.open("r", encoding="utf-8") as f:
                 scent_non_matches = yaml.safe_load(f) or {}
 
-        # Add non-match in both directions
+        # Get canonical pair
+        canonical_key, other_scent = _canonicalize_scent_pair(pipeline_scent, wsdb_scent)
+
+        # Initialize if needed
         if pipeline_brand not in scent_non_matches:
             scent_non_matches[pipeline_brand] = {}
-        if pipeline_scent not in scent_non_matches[pipeline_brand]:
-            scent_non_matches[pipeline_brand][pipeline_scent] = []
-        if wsdb_scent not in scent_non_matches[pipeline_brand]:
-            scent_non_matches[pipeline_brand][wsdb_scent] = []
+        if canonical_key not in scent_non_matches[pipeline_brand]:
+            scent_non_matches[pipeline_brand][canonical_key] = []
 
         # Check for duplicate
-        if wsdb_scent in scent_non_matches[pipeline_brand][pipeline_scent]:
+        other_norm = normalize_for_matching(other_scent)
+        if any(normalize_for_matching(nm) == other_norm for nm in scent_non_matches[pipeline_brand][canonical_key]):
             logger.info("ℹ️ Non-match already exists, skipping")
             return {"success": True, "message": "Non-match already exists"}
 
-        # Add both directions
-        scent_non_matches[pipeline_brand][pipeline_scent].append(wsdb_scent)
-        if pipeline_scent not in scent_non_matches[pipeline_brand][wsdb_scent]:
-            scent_non_matches[pipeline_brand][wsdb_scent].append(pipeline_scent)
+        # Add the non-match
+        scent_non_matches[pipeline_brand][canonical_key].append(other_scent)
 
-        # Enforce symmetry (handles any edge cases)
-        scent_non_matches = _enforce_scent_symmetry(scent_non_matches)
+        # Dedupe and canonicalize
+        scent_non_matches = _dedupe_scent_non_matches(scent_non_matches)
 
         # Save atomically with sorting
         _atomic_write_yaml(scents_file, scent_non_matches, "scents")
@@ -419,12 +529,12 @@ def save_cross_brand_scent_non_match(
             with scents_cross_brand_file.open("r", encoding="utf-8") as f:
                 scent_cross_brand_non_matches = yaml.safe_load(f) or {}
 
-        # Use the normalized scent name as the key (use entry1_scent as the canonical name)
-        scent_key = entry1_scent
+        # Get canonical scent key (alphabetically first)
+        canonical_key = _canonicalize_cross_brand_scent_key(entry1_scent, entry2_scent)
 
         # Initialize if needed
-        if scent_key not in scent_cross_brand_non_matches:
-            scent_cross_brand_non_matches[scent_key] = []
+        if canonical_key not in scent_cross_brand_non_matches:
+            scent_cross_brand_non_matches[canonical_key] = []
 
         # Create brand-scent pairs for both entries
         entry1_pair = {"brand": entry1_brand, "scent": entry1_scent}
@@ -434,14 +544,14 @@ def save_cross_brand_scent_non_match(
         entry1_exists = any(
             normalize_for_matching(pair.get("brand", "")) == brand1_norm
             and normalize_for_matching(pair.get("scent", "")) == scent1_norm
-            for pair in scent_cross_brand_non_matches[scent_key]
+            for pair in scent_cross_brand_non_matches[canonical_key]
         )
 
         # Check if entry2 is already in the group
         entry2_exists = any(
             normalize_for_matching(pair.get("brand", "")) == brand2_norm
             and normalize_for_matching(pair.get("scent", "")) == scent2_norm
-            for pair in scent_cross_brand_non_matches[scent_key]
+            for pair in scent_cross_brand_non_matches[canonical_key]
         )
 
         # If both exist, they're already marked as non-matches
@@ -451,9 +561,12 @@ def save_cross_brand_scent_non_match(
 
         # Add entries if they don't exist
         if not entry1_exists:
-            scent_cross_brand_non_matches[scent_key].append(entry1_pair)
+            scent_cross_brand_non_matches[canonical_key].append(entry1_pair)
         if not entry2_exists:
-            scent_cross_brand_non_matches[scent_key].append(entry2_pair)
+            scent_cross_brand_non_matches[canonical_key].append(entry2_pair)
+
+        # Dedupe and canonicalize
+        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(scent_cross_brand_non_matches)
 
         # Save atomically with sorting
         _atomic_write_yaml(

@@ -11,6 +11,9 @@ from pydantic import BaseModel
 
 # Import non-matches loading function and normalization
 from webui.api.utils.non_matches import (
+    _canonicalize_brand_pair,
+    _canonicalize_cross_brand_scent_key,
+    _canonicalize_scent_pair,
     load_non_matches,
     save_brand_non_match,
     save_scent_non_match,
@@ -610,14 +613,10 @@ def are_entries_non_matches(
     brand2_norm = normalize_for_matching(brand2)
 
     if mode == "brands":
-        # Check if brands are in non-matches (bidirectional check)
-        # Check brand1 -> brand2
-        if brand1 in brand_non_matches:
-            if any(normalize_for_matching(nm) == brand2_norm for nm in brand_non_matches[brand1]):
-                return True
-        # Check brand2 -> brand1
-        if brand2 in brand_non_matches:
-            if any(normalize_for_matching(nm) == brand1_norm for nm in brand_non_matches[brand2]):
+        # Build canonical pair and check (relationships stored under alphabetically first key)
+        canonical_key, other_brand = _canonicalize_brand_pair(brand1, brand2)
+        if canonical_key in brand_non_matches:
+            if any(normalize_for_matching(nm) == normalize_for_matching(other_brand) for nm in brand_non_matches[canonical_key]):
                 return True
         return False
 
@@ -632,20 +631,13 @@ def are_entries_non_matches(
         scent1_norm = normalize_for_matching(scent1)
         scent2_norm = normalize_for_matching(scent2)
 
-        # Check if scent1 -> scent2 is a non-match
+        # Build canonical pair and check (relationships stored under alphabetically first scent)
+        canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
         if brand1 in scent_non_matches:
-            if scent1 in scent_non_matches[brand1]:
+            if canonical_key in scent_non_matches[brand1]:
                 if any(
-                    normalize_for_matching(nm) == scent2_norm
-                    for nm in scent_non_matches[brand1][scent1]
-                ):
-                    return True
-        # Check if scent2 -> scent1 is a non-match
-        if brand2 in scent_non_matches:
-            if scent2 in scent_non_matches[brand2]:
-                if any(
-                    normalize_for_matching(nm) == scent1_norm
-                    for nm in scent_non_matches[brand2][scent2]
+                    normalize_for_matching(nm) == normalize_for_matching(other_scent)
+                    for nm in scent_non_matches[brand1][canonical_key]
                 ):
                     return True
         return False
@@ -659,45 +651,37 @@ def are_entries_non_matches(
 
         # If brands match, check same-brand scent non-matches
         if brand1_norm == brand2_norm:
-            # Check if scent1 -> scent2 is a non-match
+            # Build canonical pair and check (relationships stored under alphabetically first scent)
+            canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
             if brand1 in scent_non_matches:
-                if scent1 in scent_non_matches[brand1]:
+                if canonical_key in scent_non_matches[brand1]:
                     if any(
-                        normalize_for_matching(nm) == scent2_norm
-                        for nm in scent_non_matches[brand1][scent1]
-                    ):
-                        return True
-            # Check if scent2 -> scent1 is a non-match
-            if brand2 in scent_non_matches:
-                if scent2 in scent_non_matches[brand2]:
-                    if any(
-                        normalize_for_matching(nm) == scent1_norm
-                        for nm in scent_non_matches[brand2][scent2]
+                        normalize_for_matching(nm) == normalize_for_matching(other_scent)
+                        for nm in scent_non_matches[brand1][canonical_key]
                     ):
                         return True
         else:
             # Different brands: check cross-brand scent non-matches
-            # Check if both entries are in the same cross-brand non-match group
-            # Format: scent_name -> [list of {brand, scent} dicts]
-            for scent_name, brand_scent_pairs in scent_cross_brand_non_matches.items():
-                scent_name_norm = normalize_for_matching(scent_name)
-                # Check if both entries match this scent name
-                if scent_name_norm == scent1_norm or scent_name_norm == scent2_norm:
-                    # Check if entry1 is in this group
-                    entry1_in_group = any(
-                        normalize_for_matching(pair.get("brand", "")) == brand1_norm
-                        and normalize_for_matching(pair.get("scent", "")) == scent1_norm
-                        for pair in brand_scent_pairs
-                    )
-                    # Check if entry2 is in this group
-                    entry2_in_group = any(
-                        normalize_for_matching(pair.get("brand", "")) == brand2_norm
-                        and normalize_for_matching(pair.get("scent", "")) == scent2_norm
-                        for pair in brand_scent_pairs
-                    )
-                    # If both are in the same group, they're non-matches
-                    if entry1_in_group and entry2_in_group:
-                        return True
+            # Get canonical scent key (alphabetically first)
+            canonical_key = _canonicalize_cross_brand_scent_key(scent1, scent2)
+
+            if canonical_key in scent_cross_brand_non_matches:
+                brand_scent_pairs = scent_cross_brand_non_matches[canonical_key]
+                # Check if entry1 is in this group
+                entry1_in_group = any(
+                    normalize_for_matching(pair.get("brand", "")) == brand1_norm
+                    and normalize_for_matching(pair.get("scent", "")) == scent1_norm
+                    for pair in brand_scent_pairs
+                )
+                # Check if entry2 is in this group
+                entry2_in_group = any(
+                    normalize_for_matching(pair.get("brand", "")) == brand2_norm
+                    and normalize_for_matching(pair.get("scent", "")) == scent2_norm
+                    for pair in brand_scent_pairs
+                )
+                # If both are in the same group, they're non-matches
+                if entry1_in_group and entry2_in_group:
+                    return True
         return False
 
     return False
@@ -921,8 +905,11 @@ def analyze_soap_neighbor_similarity_web(
         first_match = current["original_matches"][0]
         matched_data = None
         if "matched" in first_match and first_match["matched"]:
+            # Get brand (prefer "brand" field, fallback to "maker" for compatibility)
+            brand = first_match["matched"].get("brand", "") or first_match["matched"].get("maker", "")
             matched_data = {
-                "brand": first_match["matched"].get("brand", ""),  # Use "brand" consistently
+                "brand": brand,  # Use "brand" consistently
+                "maker": brand,  # Also include "maker" for frontend compatibility
                 "scent": first_match["matched"].get("scent", ""),
             }
 
@@ -946,8 +933,11 @@ def analyze_soap_neighbor_similarity_web(
             next_first_match = next_group["original_matches"][0]
             next_matched_data = None
             if "matched" in next_first_match and next_first_match["matched"]:
+                # Get brand (prefer "brand" field, fallback to "maker" for compatibility)
+                next_brand = next_first_match["matched"].get("brand", "") or next_first_match["matched"].get("maker", "")
                 next_matched_data = {
-                    "brand": next_first_match["matched"].get("brand", ""),
+                    "brand": next_brand,
+                    "maker": next_brand,  # Also include "maker" for frontend compatibility
                     "scent": next_first_match["matched"].get("scent", ""),
                 }
             if next_matched_data and mode == "brand_scent":
