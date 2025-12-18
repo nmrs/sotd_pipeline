@@ -620,6 +620,10 @@ Barrister and Mann:
       - barrister.*roam.*(2|II|two)?
       - roma two
       - roam two
+    Samhain:
+      patterns:
+      - \bb ?(and|&|\+) ?m\b.*samhain
+      - (barris|bam).*samhain
     Sandalwood:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*sandalwood
@@ -1034,6 +1038,9 @@ Chicago Grooming Co.:
       patterns:
       - '1889'
       - ag ?1(8|9){3}
+    Animal Crackers:
+      patterns:
+      - chicago.*animal crackers
     Armonía:
       patterns:
       - armon\wa
@@ -1053,6 +1060,9 @@ Chicago Grooming Co.:
     No. 11:
       patterns:
       - chicago.*11
+    Rougére:
+      patterns:
+      - chicago.*roug[eé]re
     Shiloh:
       patterns:
       - chicago.*shiloh
@@ -1285,7 +1295,7 @@ Declaration Grooming:
       - champs de lavande
     Chaotic Neutral:
       patterns:
-      - chaotic.*n(e|u){2}tral
+      - ch?aotic.*n(e|u){2}tral
     Colonia Balsamica:
       patterns:
       - colonia balsamica
@@ -1559,6 +1569,9 @@ Eufros:
   patterns:
   - eufros
   scents:
+    Rosa-Oud:
+      patterns:
+      - eufros.*ros.*oud
     Vetiver de Haití:
       patterns:
       - eufros.*vetiver.*hait
@@ -1584,7 +1597,7 @@ Faena:
   - faena
 Fanzine Saponifications:
   patterns:
-  - fanzine( saponifications?)?
+  - fr?anzine( saponifications?)?
   scents:
     Caravaggio:
       patterns:
@@ -1986,7 +1999,7 @@ House of Mammoth:
       - dammusi
     DinoS'mores:
       patterns:
-      - dino.*s'mores
+      - dino.*s'?m'?ores
     Embrace:
       patterns:
       - (m\w+mmoth|\bhom\b).*embrace
@@ -2118,7 +2131,7 @@ Kell's Original:
   - kell'?s original(.*soap)?
 KEPKINH:
   patterns:
-  - kepk[in]+h
+  - ke[pr]k[in]+h
   scents:
     Barbersoap:
       patterns:
@@ -2240,6 +2253,9 @@ Long Rifle Soap Co.:
   patterns:
   - long ?rifle ?(?:(soap|shaving)? ?co(\.|mpany)?)?
   scents:
+    Hivernant:
+      patterns:
+      - long rifle.*hivernant
     Tabac No. 1:
       patterns:
       - long rifle.*tabac.*1
@@ -2374,7 +2390,7 @@ Martin de Candre:
   scents:
     Absinthe:
       patterns:
-      - martin.*ab[sc]+inthe?
+      - martin.*ab[sc]+[iy]nthe?
     Agrumes:
       patterns:
       - agrumes
@@ -2476,7 +2492,7 @@ Mike's Natural Soaps:
       - mike.*honey.*grapefruit
     Hungarian Lavender:
       patterns:
-      - mike.*hungarian.*lavend
+      - mike.*(hungarian)?.*lavender
     Lavandin & Eucalyptus:
       patterns:
       - mike.*lavandin.*eucalyptus
@@ -2508,6 +2524,9 @@ Mitchell's:
       patterns:
       - mitch.*wool fat
       - ^\W*mwf\b
+Mondial 1908:
+  patterns:
+  - mondial( 1908)?
 Moon Soaps:
   patterns:
   - ^moon(?:\s*soaps?)?(?:\s+co\.?(?:mpany)?)?
@@ -2728,11 +2747,6 @@ Nõberu of Sweden:
 Nordic Shaving Company:
   patterns:
   - 'nordic(?: shav(e|ing))? co(?:(\.|mpany))?'
-Nuàvia:
-  patterns:
-  - nu[aà]via
-  aliases:
-  - Nuavia
 Oaken Lab:
   patterns:
   - oaken(\s*lab)?
@@ -2743,6 +2757,9 @@ Oaken Lab:
 Oatcake:
   patterns:
   - oatcake
+Obsessive Soap Perfectionist:
+  patterns:
+  - obsessive.*(soap)?.*perfection
 Ogallala:
   patterns:
   - og+(?:al+)?al+a
@@ -2819,11 +2836,15 @@ Palmolive:
       format: Cream
       patterns:
       - palmolive.*sensitive
-PannaCrema:
+Pannacrema:
   patterns:
   - panna ?crea?m+a
   scents:
-    Nuavia Nera:
+    'Nuàvia Blu:':
+      patterns:
+      - (pan|a|u[aà]wvia).*blu
+      alias: Nuavia Blu
+    Nuàvia Nera:
       patterns:
       - panna ?crema.*ner(o|a)\b
 Pantarei:
@@ -2897,7 +2918,7 @@ Pré de Provence:
   scents:
     No. 63:
       patterns:
-      - prov\wnce.*63
+      - (prov\wnce|pdp).*63
 Purely Skinful:
   patterns:
   - purely skinful
@@ -3697,9 +3718,12 @@ Tallow + Steel:
     Morning Coffee in the Canadian Wilderness:
       patterns:
       - morning.*coffee.*candadian
+    Rainforest:
+      patterns:
+      - tallow.*rainforest
     Rainforest Two:
       patterns:
-      - rainforest two
+      - (tallow)?.*rainforest two
     Sarsaparilla:
       patterns:
       - tallow.*s\w+p\w+illa
@@ -3786,6 +3810,10 @@ The Butterfly Garden:
 The Cajun Blade:
   patterns:
   - (?:the )?cajun blade
+  scents:
+    Bon Temps Barbershop:
+      patterns:
+      - cajun blade.*bon temp.*barber
 The Gentlemen's Groom Room:
   patterns:
   - gentle.*groom room
@@ -3855,13 +3883,17 @@ The Sudsy Soapery:
     Lemon Rose Chypre:
       patterns:
       - lemon rose chypre
+    White Sage and Lime:
+      patterns:
+      - white sage.*lime
+      alias: White Sage & Lime
 Thiers-Issard:
   patterns:
   - thiers-?issard
 Thor's Hammer:
   patterns:
   - thor''?s hammer
-Through the Fire Fine Crafts:
+Through the Fire Fine Craft:
   patterns:
   - through the fire( fine crafts?)?
   - ttffc
@@ -4065,6 +4097,9 @@ Wholly Kaw:
     Club Yanka:
       patterns:
       - club yu?anka
+    Double Agent:
+      patterns:
+      - \bkaw\b.*double agent
     Entropy Man:
       patterns:
       - entropy mansoa
@@ -4090,6 +4125,9 @@ Wholly Kaw:
     Merchant of Tobacco:
       patterns:
       - \bkaw\b.*merchant
+    Monaco Royale:
+      patterns:
+      - \bkaw\b.*monaco.*royale
     Nightcap:
       patterns:
       - wholly.*nightcap
