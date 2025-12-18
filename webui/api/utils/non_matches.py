@@ -5,6 +5,7 @@ This module provides functions for loading and saving non-matches data
 with support for recursive alphabetical sorting and atomic file writes.
 """
 
+import copy
 import logging
 import os
 from pathlib import Path
@@ -109,6 +110,67 @@ def _sort_non_matches_data(data: dict, file_type: str) -> dict:
         return data
 
 
+def _enforce_brand_symmetry(brand_non_matches: dict[str, list[str]]) -> dict[str, list[str]]:
+    """Ensure all brand non-matches are stored symmetrically.
+
+    If A has B in its list, ensure B also has A in its list.
+
+    Args:
+        brand_non_matches: Dict mapping brand -> list of non-match brands
+
+    Returns:
+        Symmetrized dict with all relationships stored both ways
+    """
+    # Create a copy to avoid modifying during iteration
+    result = {brand: list(non_matches) for brand, non_matches in brand_non_matches.items()}
+
+    # For each brand and its non-matches, ensure reverse relationships exist
+    for brand, non_matches in brand_non_matches.items():
+        for non_match in non_matches:
+            # Ensure reverse relationship exists
+            if non_match not in result:
+                result[non_match] = []
+            if brand not in result[non_match]:
+                result[non_match].append(brand)
+
+    return result
+
+
+def _enforce_scent_symmetry(
+    scent_non_matches: dict[str, dict[str, list[str]]],
+) -> dict[str, dict[str, list[str]]]:
+    """Ensure all scent non-matches are stored symmetrically.
+
+    If brand X has scent A with B in its list, ensure scent B also has A in its list.
+
+    Args:
+        scent_non_matches: Dict mapping brand -> scent -> list of non-match scents
+
+    Returns:
+        Symmetrized dict with all relationships stored both ways
+    """
+    # Create a copy to avoid modifying during iteration
+    result = {}
+    for brand in scent_non_matches:
+        result[brand] = {
+            scent: list(non_matches) for scent, non_matches in scent_non_matches[brand].items()
+        }
+
+    # For each brand-scent combination and its non-matches, ensure reverse relationships exist
+    for brand, scents in scent_non_matches.items():
+        for scent, non_matches in scents.items():
+            for non_match in non_matches:
+                # Ensure reverse relationship exists
+                if brand not in result:
+                    result[brand] = {}
+                if non_match not in result[brand]:
+                    result[brand][non_match] = []
+                if scent not in result[brand][non_match]:
+                    result[brand][non_match].append(scent)
+
+    return result
+
+
 def _atomic_write_yaml(file_path: Path, data: dict, file_type: str) -> None:
     """Write YAML file atomically with recursive alphabetical sorting.
 
@@ -168,6 +230,24 @@ def load_non_matches() -> dict[str, Any]:
             with scents_cross_brand_file.open("r", encoding="utf-8") as f:
                 scent_cross_brand_non_matches = yaml.safe_load(f) or {}
 
+        # Store original data to detect changes
+        original_brand_non_matches = copy.deepcopy(brand_non_matches)
+        original_scent_non_matches = copy.deepcopy(scent_non_matches)
+
+        # Enforce symmetry on loaded data (fixes any manually edited asymmetric entries)
+        brand_non_matches = _enforce_brand_symmetry(brand_non_matches)
+        scent_non_matches = _enforce_scent_symmetry(scent_non_matches)
+
+        # If symmetry enforcement added entries, save the fixed data back
+        # (This ensures manual edits are automatically fixed on next load)
+        if brand_non_matches != original_brand_non_matches:
+            _atomic_write_yaml(brands_file, brand_non_matches, "brands")
+            logger.info("🔧 Fixed asymmetric brand non-matches and saved")
+
+        if scent_non_matches != original_scent_non_matches:
+            _atomic_write_yaml(scents_file, scent_non_matches, "scents")
+            logger.info("🔧 Fixed asymmetric scent non-matches and saved")
+
         brand_count = sum(len(v) for v in brand_non_matches.values())
         scent_count = sum(
             len(scents)
@@ -214,17 +294,24 @@ def save_brand_non_match(pipeline_brand: str, wsdb_brand: str) -> dict[str, Any]
             with brands_file.open("r", encoding="utf-8") as f:
                 brand_non_matches = yaml.safe_load(f) or {}
 
-        # Add non-match (bidirectional)
+        # Add non-match in both directions
         if pipeline_brand not in brand_non_matches:
             brand_non_matches[pipeline_brand] = []
+        if wsdb_brand not in brand_non_matches:
+            brand_non_matches[wsdb_brand] = []
 
         # Check for duplicate
         if wsdb_brand in brand_non_matches[pipeline_brand]:
             logger.info("ℹ️ Non-match already exists, skipping")
             return {"success": True, "message": "Non-match already exists"}
 
-        # Add the non-match
+        # Add both directions
         brand_non_matches[pipeline_brand].append(wsdb_brand)
+        if pipeline_brand not in brand_non_matches[wsdb_brand]:
+            brand_non_matches[wsdb_brand].append(pipeline_brand)
+
+        # Enforce symmetry (handles any edge cases)
+        brand_non_matches = _enforce_brand_symmetry(brand_non_matches)
 
         # Save atomically with sorting
         _atomic_write_yaml(brands_file, brand_non_matches, "brands")
@@ -265,19 +352,26 @@ def save_scent_non_match(
             with scents_file.open("r", encoding="utf-8") as f:
                 scent_non_matches = yaml.safe_load(f) or {}
 
-        # Add non-match (bidirectional)
+        # Add non-match in both directions
         if pipeline_brand not in scent_non_matches:
             scent_non_matches[pipeline_brand] = {}
         if pipeline_scent not in scent_non_matches[pipeline_brand]:
             scent_non_matches[pipeline_brand][pipeline_scent] = []
+        if wsdb_scent not in scent_non_matches[pipeline_brand]:
+            scent_non_matches[pipeline_brand][wsdb_scent] = []
 
         # Check for duplicate
         if wsdb_scent in scent_non_matches[pipeline_brand][pipeline_scent]:
             logger.info("ℹ️ Non-match already exists, skipping")
             return {"success": True, "message": "Non-match already exists"}
 
-        # Add the non-match
+        # Add both directions
         scent_non_matches[pipeline_brand][pipeline_scent].append(wsdb_scent)
+        if pipeline_scent not in scent_non_matches[pipeline_brand][wsdb_scent]:
+            scent_non_matches[pipeline_brand][wsdb_scent].append(pipeline_scent)
+
+        # Enforce symmetry (handles any edge cases)
+        scent_non_matches = _enforce_scent_symmetry(scent_non_matches)
 
         # Save atomically with sorting
         _atomic_write_yaml(scents_file, scent_non_matches, "scents")
