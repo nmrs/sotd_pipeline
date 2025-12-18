@@ -168,6 +168,9 @@ const SoapAnalyzer: React.FC = () => {
   // Lookup function to find WSDB slug by brand and scent (using shared utility with alias support)
   const getWsdbSlugForDisplay = useCallback(
     (brand: string, scent: string): string | null => {
+      if (!brand || !scent || wsdbSoaps.length === 0) {
+        return null;
+      }
       return getWsdbSlug(brand, scent, wsdbSoaps, pipelineSoaps);
     },
     [wsdbSoaps, pipelineSoaps]
