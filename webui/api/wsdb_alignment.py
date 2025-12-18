@@ -1131,12 +1131,13 @@ async def load_non_matches() -> dict[str, Any]:
     Load known non-matches from brand and scent YAML files.
 
     Returns:
-        Dict with brand_non_matches and scent_non_matches in hierarchical format
+        Dict with brand_non_matches, scent_non_matches, and scent_cross_brand_non_matches
     """
     try:
         logger.info("📂 Loading known non-matches")
         brands_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_brands.yaml"
         scents_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_scents.yaml"
+        scents_cross_brand_file = PROJECT_ROOT / "data" / "wsdb" / "non_matches_scents_cross_brand.yaml"
 
         # Load brand non-matches
         brand_non_matches = {}
@@ -1144,18 +1145,29 @@ async def load_non_matches() -> dict[str, Any]:
             with brands_file.open("r", encoding="utf-8") as f:
                 brand_non_matches = yaml.safe_load(f) or {}
 
-        # Load scent non-matches
+        # Load scent non-matches (same-brand)
         scent_non_matches = {}
         if scents_file.exists():
             with scents_file.open("r", encoding="utf-8") as f:
                 scent_non_matches = yaml.safe_load(f) or {}
 
+        # Load cross-brand scent non-matches
+        scent_cross_brand_non_matches = {}
+        if scents_cross_brand_file.exists():
+            with scents_cross_brand_file.open("r", encoding="utf-8") as f:
+                scent_cross_brand_non_matches = yaml.safe_load(f) or {}
+
         brand_count = sum(len(v) for v in brand_non_matches.values())
         scent_count = sum(len(scents) for brand_scents in scent_non_matches.values() for scents in brand_scents.values())
+        cross_brand_count = sum(len(pairs) for pairs in scent_cross_brand_non_matches.values())
 
-        logger.info(f"✅ Loaded {brand_count} brand non-matches, {scent_count} scent non-matches")
+        logger.info(f"✅ Loaded {brand_count} brand non-matches, {scent_count} scent non-matches, {cross_brand_count} cross-brand scent non-matches")
 
-        return {"brand_non_matches": brand_non_matches, "scent_non_matches": scent_non_matches}
+        return {
+            "brand_non_matches": brand_non_matches,
+            "scent_non_matches": scent_non_matches,
+            "scent_cross_brand_non_matches": scent_cross_brand_non_matches,
+        }
 
     except Exception as e:
         logger.error(f"❌ Failed to load non-matches: {e}")

@@ -3,16 +3,28 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
+import yaml
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
 # Import non-matches loading function
-from webui.api.wsdb_alignment import load_non_matches, normalize_for_matching
+from webui.api.wsdb_alignment import load_non_matches, normalize_for_matching, PROJECT_ROOT
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/soaps", tags=["soaps"])
+
+# Request model for SoapAnalyzer non-matches
+class SoapNonMatchRequest(BaseModel):
+    """Request model for SoapAnalyzer non-match operations."""
+
+    mode: str  # "brands", "brand_scent", or "scents"
+    entry1_brand: str
+    entry1_scent: Optional[str] = None
+    entry2_brand: str
+    entry2_scent: Optional[str] = None
 
 
 # Pydantic models for response
@@ -260,14 +272,22 @@ async def get_soap_neighbor_similarity(
             non_matches_data = await load_non_matches()
             brand_non_matches = non_matches_data.get("brand_non_matches", {})
             scent_non_matches = non_matches_data.get("scent_non_matches", {})
+            scent_cross_brand_non_matches = non_matches_data.get("scent_cross_brand_non_matches", {})
         except Exception as e:
             logger.warning(f"Failed to load non-matches, continuing without filtering: {e}")
             brand_non_matches = {}
             scent_non_matches = {}
+            scent_cross_brand_non_matches = {}
 
         # Analyze neighbor similarity
         results = analyze_soap_neighbor_similarity_web(
-            all_matches, mode, similarity_threshold, limit, brand_non_matches, scent_non_matches
+            all_matches,
+            mode,
+            similarity_threshold,
+            limit,
+            brand_non_matches,
+            scent_non_matches,
+            scent_cross_brand_non_matches,
         )
 
         return {
@@ -284,6 +304,211 @@ async def get_soap_neighbor_similarity(
     except Exception as e:
         logger.error(f"Error in soap neighbor similarity analysis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/non-matches")
+async def add_soap_non_match(request: SoapNonMatchRequest) -> dict[str, Any]:
+    """
+    Add a new non-match entry from SoapAnalyzer neighbor similarity analysis.
+
+    Args:
+        request: Non-match request with mode and entry data
+
+    Returns:
+        Dict with success status and message
+    """
+    try:
+        logger.info(
+            f"➕ Adding soap non-match: {request.mode} - {request.entry1_brand}/{request.entry1_scent} != {request.entry2_brand}/{request.entry2_scent}"
+        )
+
+        # Validate mode
+        valid_modes = ["brands", "brand_scent", "scents"]
+        if request.mode not in valid_modes:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid mode: {request.mode}. Must be one of: {', '.join(valid_modes)}"
+            )
+
+        # Normalize brands for comparison
+        brand1_norm = normalize_for_matching(request.entry1_brand)
+        brand2_norm = normalize_for_matching(request.entry2_brand)
+
+        # Allow override of data directory via environment variable for testing
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir) / "data" / "wsdb"
+        else:
+            data_dir = PROJECT_ROOT / "data" / "wsdb"
+
+        if request.mode == "brands":
+            # Save to brand non-matches file
+            brands_file = data_dir / "non_matches_brands.yaml"
+            brand_non_matches = {}
+            if brands_file.exists():
+                with brands_file.open("r", encoding="utf-8") as f:
+                    brand_non_matches = yaml.safe_load(f) or {}
+
+            # Add non-match (bidirectional)
+            if request.entry1_brand not in brand_non_matches:
+                brand_non_matches[request.entry1_brand] = []
+
+            # Check for duplicate
+            if request.entry2_brand in brand_non_matches[request.entry1_brand]:
+                logger.info("ℹ️ Non-match already exists, skipping")
+                return {"success": True, "message": "Non-match already exists"}
+
+            # Add the non-match
+            brand_non_matches[request.entry1_brand].append(request.entry2_brand)
+
+            # Save atomically
+            temp_file = brands_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(brand_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(brands_file)
+
+            logger.info("✅ Brand non-match added and saved successfully")
+            return {"success": True, "message": "Brand non-match added successfully"}
+
+        elif request.mode == "brand_scent":
+            # Validate same brand for brand_scent mode
+            if brand1_norm != brand2_norm:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"brand_scent mode requires same brand, got {request.entry1_brand} and {request.entry2_brand}",
+                )
+
+            if not request.entry1_scent or not request.entry2_scent:
+                raise HTTPException(status_code=400, detail="brand_scent mode requires both scents")
+
+            # Save to scent non-matches file (same-brand)
+            scents_file = data_dir / "non_matches_scents.yaml"
+            scent_non_matches = {}
+            if scents_file.exists():
+                with scents_file.open("r", encoding="utf-8") as f:
+                    scent_non_matches = yaml.safe_load(f) or {}
+
+            # Add non-match (bidirectional)
+            if request.entry1_brand not in scent_non_matches:
+                scent_non_matches[request.entry1_brand] = {}
+            if request.entry1_scent not in scent_non_matches[request.entry1_brand]:
+                scent_non_matches[request.entry1_brand][request.entry1_scent] = []
+
+            # Check for duplicate
+            if request.entry2_scent in scent_non_matches[request.entry1_brand][request.entry1_scent]:
+                logger.info("ℹ️ Non-match already exists, skipping")
+                return {"success": True, "message": "Non-match already exists"}
+
+            # Add the non-match
+            scent_non_matches[request.entry1_brand][request.entry1_scent].append(request.entry2_scent)
+
+            # Save atomically
+            temp_file = scents_file.with_suffix(".tmp")
+            with temp_file.open("w", encoding="utf-8") as f:
+                yaml.dump(scent_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            temp_file.replace(scents_file)
+
+            logger.info("✅ Scent non-match added and saved successfully")
+            return {"success": True, "message": "Scent non-match added successfully"}
+
+        elif request.mode == "scents":
+            if not request.entry1_scent or not request.entry2_scent:
+                raise HTTPException(status_code=400, detail="scents mode requires both scents")
+
+            # Normalize scents for comparison
+            scent1_norm = normalize_for_matching(request.entry1_scent)
+            scent2_norm = normalize_for_matching(request.entry2_scent)
+
+            # Determine which file to use based on brand match
+            if brand1_norm == brand2_norm:
+                # Same brand: save to scent non-matches file
+                scents_file = data_dir / "non_matches_scents.yaml"
+                scent_non_matches = {}
+                if scents_file.exists():
+                    with scents_file.open("r", encoding="utf-8") as f:
+                        scent_non_matches = yaml.safe_load(f) or {}
+
+                # Add non-match (bidirectional)
+                if request.entry1_brand not in scent_non_matches:
+                    scent_non_matches[request.entry1_brand] = {}
+                if request.entry1_scent not in scent_non_matches[request.entry1_brand]:
+                    scent_non_matches[request.entry1_brand][request.entry1_scent] = []
+
+                # Check for duplicate
+                if request.entry2_scent in scent_non_matches[request.entry1_brand][request.entry1_scent]:
+                    logger.info("ℹ️ Non-match already exists, skipping")
+                    return {"success": True, "message": "Non-match already exists"}
+
+                # Add the non-match
+                scent_non_matches[request.entry1_brand][request.entry1_scent].append(request.entry2_scent)
+
+                # Save atomically
+                temp_file = scents_file.with_suffix(".tmp")
+                with temp_file.open("w", encoding="utf-8") as f:
+                    yaml.dump(scent_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+                temp_file.replace(scents_file)
+
+                logger.info("✅ Scent non-match (same brand) added and saved successfully")
+                return {"success": True, "message": "Scent non-match added successfully"}
+            else:
+                # Different brands: save to cross-brand scent non-matches file
+                scents_cross_brand_file = data_dir / "non_matches_scents_cross_brand.yaml"
+                scent_cross_brand_non_matches = {}
+                if scents_cross_brand_file.exists():
+                    with scents_cross_brand_file.open("r", encoding="utf-8") as f:
+                        scent_cross_brand_non_matches = yaml.safe_load(f) or {}
+
+                # Use the normalized scent name as the key (use entry1_scent as the canonical name)
+                scent_key = request.entry1_scent
+
+                # Initialize if needed
+                if scent_key not in scent_cross_brand_non_matches:
+                    scent_cross_brand_non_matches[scent_key] = []
+
+                # Create brand-scent pairs for both entries
+                entry1_pair = {"brand": request.entry1_brand, "scent": request.entry1_scent}
+                entry2_pair = {"brand": request.entry2_brand, "scent": request.entry2_scent}
+
+                # Check if entry1 is already in the group
+                entry1_exists = any(
+                    normalize_for_matching(pair.get("brand", "")) == brand1_norm
+                    and normalize_for_matching(pair.get("scent", "")) == scent1_norm
+                    for pair in scent_cross_brand_non_matches[scent_key]
+                )
+
+                # Check if entry2 is already in the group
+                entry2_exists = any(
+                    normalize_for_matching(pair.get("brand", "")) == brand2_norm
+                    and normalize_for_matching(pair.get("scent", "")) == scent2_norm
+                    for pair in scent_cross_brand_non_matches[scent_key]
+                )
+
+                # If both exist, they're already marked as non-matches
+                if entry1_exists and entry2_exists:
+                    logger.info("ℹ️ Non-match already exists, skipping")
+                    return {"success": True, "message": "Non-match already exists"}
+
+                # Add entries if they don't exist
+                if not entry1_exists:
+                    scent_cross_brand_non_matches[scent_key].append(entry1_pair)
+                if not entry2_exists:
+                    scent_cross_brand_non_matches[scent_key].append(entry2_pair)
+
+                # Save atomically
+                temp_file = scents_cross_brand_file.with_suffix(".tmp")
+                with temp_file.open("w", encoding="utf-8") as f:
+                    yaml.dump(
+                        scent_cross_brand_non_matches, f, default_flow_style=False, allow_unicode=True, sort_keys=False
+                    )
+                temp_file.replace(scents_cross_brand_file)
+
+                logger.info("✅ Cross-brand scent non-match added and saved successfully")
+                return {"success": True, "message": "Cross-brand scent non-match added successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to add soap non-match: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add non-match: {str(e)}")
 
 
 def analyze_soap_duplicates_web(
@@ -457,7 +682,12 @@ def symmetric_similarity(text1: str, text2: str) -> float:
 
 
 def are_entries_non_matches(
-    entry1: dict, entry2: dict, mode: str, brand_non_matches: dict, scent_non_matches: dict
+    entry1: dict,
+    entry2: dict,
+    mode: str,
+    brand_non_matches: dict,
+    scent_non_matches: dict,
+    scent_cross_brand_non_matches: dict = None,
 ) -> bool:
     """
     Check if two neighbor entries are known non-matches.
@@ -467,11 +697,14 @@ def are_entries_non_matches(
         entry2: Second entry dict with original_matches list
         mode: Analysis mode ("brands", "brand_scent", or "scents")
         brand_non_matches: Dict of brand -> [non_match_brands]
-        scent_non_matches: Dict of brand -> scent -> [non_match_scents]
+        scent_non_matches: Dict of brand -> scent -> [non_match_scents] (same-brand)
+        scent_cross_brand_non_matches: Dict of scent_name -> [list of {brand, scent} dicts] (cross-brand)
 
     Returns:
         True if the two entries are known non-matches
     """
+    if scent_cross_brand_non_matches is None:
+        scent_cross_brand_non_matches = {}
     # Extract brand and scent from first occurrence of each entry
     def extract_brand_scent(entry_dict):
         """Extract brand and scent from entry's first original match."""
@@ -533,27 +766,47 @@ def are_entries_non_matches(
         return False
 
     elif mode == "scents":
-        # For scents mode, we need brand context to check non-matches
-        # Both entries should have the same brand for this to be meaningful
-        if brand1_norm != brand2_norm:
-            return False  # Different brands, can't determine scent non-match
-
         if not scent1 or not scent2:
             return False
 
         scent1_norm = normalize_for_matching(scent1)
         scent2_norm = normalize_for_matching(scent2)
 
-        # Check if scent1 -> scent2 is a non-match
-        if brand1 in scent_non_matches:
-            if scent1 in scent_non_matches[brand1]:
-                if any(normalize_for_matching(nm) == scent2_norm for nm in scent_non_matches[brand1][scent1]):
-                    return True
-        # Check if scent2 -> scent1 is a non-match
-        if brand2 in scent_non_matches:
-            if scent2 in scent_non_matches[brand2]:
-                if any(normalize_for_matching(nm) == scent1_norm for nm in scent_non_matches[brand2][scent2]):
-                    return True
+        # If brands match, check same-brand scent non-matches
+        if brand1_norm == brand2_norm:
+            # Check if scent1 -> scent2 is a non-match
+            if brand1 in scent_non_matches:
+                if scent1 in scent_non_matches[brand1]:
+                    if any(normalize_for_matching(nm) == scent2_norm for nm in scent_non_matches[brand1][scent1]):
+                        return True
+            # Check if scent2 -> scent1 is a non-match
+            if brand2 in scent_non_matches:
+                if scent2 in scent_non_matches[brand2]:
+                    if any(normalize_for_matching(nm) == scent1_norm for nm in scent_non_matches[brand2][scent2]):
+                        return True
+        else:
+            # Different brands: check cross-brand scent non-matches
+            # Check if both entries are in the same cross-brand non-match group
+            # Format: scent_name -> [list of {brand, scent} dicts]
+            for scent_name, brand_scent_pairs in scent_cross_brand_non_matches.items():
+                scent_name_norm = normalize_for_matching(scent_name)
+                # Check if both entries match this scent name
+                if scent_name_norm == scent1_norm or scent_name_norm == scent2_norm:
+                    # Check if entry1 is in this group
+                    entry1_in_group = any(
+                        normalize_for_matching(pair.get("brand", "")) == brand1_norm
+                        and normalize_for_matching(pair.get("scent", "")) == scent1_norm
+                        for pair in brand_scent_pairs
+                    )
+                    # Check if entry2 is in this group
+                    entry2_in_group = any(
+                        normalize_for_matching(pair.get("brand", "")) == brand2_norm
+                        and normalize_for_matching(pair.get("scent", "")) == scent2_norm
+                        for pair in brand_scent_pairs
+                    )
+                    # If both are in the same group, they're non-matches
+                    if entry1_in_group and entry2_in_group:
+                        return True
         return False
 
     return False
@@ -566,6 +819,7 @@ def analyze_soap_neighbor_similarity_web(
     limit: Optional[int] = None,
     brand_non_matches: dict = None,
     scent_non_matches: dict = None,
+    scent_cross_brand_non_matches: dict = None,
 ) -> list[dict]:
     """Analyze soap matches for neighbor similarity (web-optimized version)"""
     import logging
@@ -577,6 +831,8 @@ def analyze_soap_neighbor_similarity_web(
         brand_non_matches = {}
     if scent_non_matches is None:
         scent_non_matches = {}
+    if scent_cross_brand_non_matches is None:
+        scent_cross_brand_non_matches = {}
 
     # Memory optimization: Process in chunks for very large datasets
     if len(matches) > 10000:  # If more than 10k matches, log memory usage
@@ -671,7 +927,9 @@ def analyze_soap_neighbor_similarity_web(
         if i > 0:
             above = unique_entries[i - 1]
             # Check if entries are known non-matches first
-            if are_entries_non_matches(current, above, mode, brand_non_matches, scent_non_matches):
+            if are_entries_non_matches(
+                current, above, mode, brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            ):
                 similarity_to_above = 0.0
             else:
                 above_normalized = above["normalized_string"]
@@ -683,7 +941,9 @@ def analyze_soap_neighbor_similarity_web(
         if i < len(unique_entries) - 1:
             below = unique_entries[i + 1]
             # Check if entries are known non-matches first
-            if are_entries_non_matches(current, below, mode, brand_non_matches, scent_non_matches):
+            if are_entries_non_matches(
+                current, below, mode, brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            ):
                 similarity_to_below = 0.0
             else:
                 below_normalized = below["normalized_string"]
@@ -718,7 +978,9 @@ def analyze_soap_neighbor_similarity_web(
         if i > 0:
             above = entries_with_similarities[i - 1]
             # Check if entries are known non-matches first
-            if are_entries_non_matches(current, above, mode, brand_non_matches, scent_non_matches):
+            if are_entries_non_matches(
+                current, above, mode, brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            ):
                 similarity_to_above = 0.0
             else:
                 above_normalized = above["normalized_string"]
@@ -730,7 +992,9 @@ def analyze_soap_neighbor_similarity_web(
         if i < len(entries_with_similarities) - 1:
             below = entries_with_similarities[i + 1]
             # Check if entries are known non-matches first
-            if are_entries_non_matches(current, below, mode, brand_non_matches, scent_non_matches):
+            if are_entries_non_matches(
+                current, below, mode, brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            ):
                 similarity_to_below = 0.0
             else:
                 below_normalized = below["normalized_string"]
