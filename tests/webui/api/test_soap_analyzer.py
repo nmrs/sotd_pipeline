@@ -5,9 +5,11 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+import yaml
 from fastapi.testclient import TestClient
 
 from webui.api.main import app
+from webui.api.soap_analyzer import are_entries_non_matches
 
 client = TestClient(app)
 
@@ -429,3 +431,292 @@ class TestSoapAnalyzerAPI:
             # Clean up temporary files
             Path(temp_file_path_1).unlink(missing_ok=True)
             Path(temp_file_path_2).unlink(missing_ok=True)
+
+
+class TestAreEntriesNonMatches:
+    """Test are_entries_non_matches helper function."""
+
+    def test_brands_mode_non_match(self):
+        """Test brands mode with known non-matches."""
+        brand_non_matches = {
+            "Black Mountain Shaving": ["Mountain Hare Shaving"],
+            "Bombay Shaving Company": ["Spearhead Shaving Company"],
+        }
+        scent_non_matches = {}
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Black Mountain Shaving", "scent": "Test Scent"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Mountain Hare Shaving", "scent": "Test Scent"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+        )
+        assert result is True
+
+    def test_brands_mode_not_non_match(self):
+        """Test brands mode with entries that are not non-matches."""
+        brand_non_matches = {
+            "Black Mountain Shaving": ["Mountain Hare Shaving"],
+        }
+        scent_non_matches = {}
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Test Scent"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Test Scent"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+        )
+        assert result is False
+
+    def test_brand_scent_mode_non_match(self):
+        """Test brand_scent mode with known scent non-matches."""
+        brand_non_matches = {}
+        scent_non_matches = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Leather"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Heather"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches
+        )
+        assert result is True
+
+    def test_brand_scent_mode_different_brands(self):
+        """Test brand_scent mode with different brands (should not be non-match)."""
+        brand_non_matches = {}
+        scent_non_matches = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Seaforth! Leather"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seaforth! Heather"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches
+        )
+        assert result is False
+
+    def test_scents_mode_non_match(self):
+        """Test scents mode with known scent non-matches."""
+        brand_non_matches = {}
+        scent_non_matches = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Leather"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Heather"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches
+        )
+        assert result is True
+
+    def test_scents_mode_different_brands(self):
+        """Test scents mode with different brands (should not be non-match)."""
+        brand_non_matches = {}
+        scent_non_matches = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Seaforth! Leather"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seaforth! Heather"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches
+        )
+        assert result is False
+
+    def test_missing_brand_or_scent(self):
+        """Test with missing brand or scent data."""
+        brand_non_matches = {}
+        scent_non_matches = {}
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "", "scent": "Test Scent"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Test Scent"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+        )
+        assert result is False
+
+
+class TestNeighborSimilarityWithNonMatches:
+    """Test neighbor similarity analysis with non-matches filtering."""
+
+    def test_neighbor_similarity_with_scent_non_matches(self, tmp_path):
+        """Test that known scent non-matches don't appear as similar neighbors."""
+        # Create isolated test data in temporary directory
+        matched_dir = tmp_path / "data" / "matched"
+        matched_dir.mkdir(parents=True)
+
+        # Create WSDB directory and non-matches file
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+
+        # Create test data with Seaforth! Leather and Seaforth! Heather (known non-matches)
+        test_data = {
+            "data": [
+                {
+                    "id": "abc123",
+                    "soap": {
+                        "original": "Spearhead Shaving Company - Seaforth! Leather",
+                        "matched": {
+                            "brand": "Spearhead Shaving Company",
+                            "scent": "Seaforth! Leather",
+                        },
+                    },
+                },
+                {
+                    "id": "def456",
+                    "soap": {
+                        "original": "Spearhead Shaving Company - Seaforth! Heather",
+                        "matched": {
+                            "brand": "Spearhead Shaving Company",
+                            "scent": "Seaforth! Heather",
+                        },
+                    },
+                },
+            ]
+        }
+
+        test_file = matched_dir / "2025-01.json"
+        with test_file.open("w") as f:
+            json.dump(test_data, f)
+
+        # Create non-matches file
+        non_matches_scents = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        with scents_file.open("w") as f:
+            yaml.dump(non_matches_scents, f)
+
+        # Create empty brands file
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        with brands_file.open("w") as f:
+            yaml.dump({}, f)
+
+        # Use environment variable to override data directory
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.get(
+                "/api/soaps/neighbor-similarity"
+                "?months=2025-01&mode=brand_scent&similarity_threshold=0.5"
+            )
+        finally:
+            # Restore original environment
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "results" in data
+        # Since these are known non-matches, they should not appear as similar neighbors
+        # Check that if they appear, their similarity is 0.0
+        for result in data["results"]:
+            if "Seaforth! Leather" in result.get("entry", "") and result.get("similarity_to_next") is not None:
+                # If Seaforth! Leather is next to Seaforth! Heather, similarity should be 0.0
+                if "Seaforth! Heather" in result.get("next_entry", ""):
+                    assert result["similarity_to_next"] == 0.0
