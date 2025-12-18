@@ -659,7 +659,12 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            entry1,
+            entry2,
+            "scents",
+            brand_non_matches,
+            scent_non_matches,
+            scent_cross_brand_non_matches,
         )
         assert result is True
 
@@ -690,7 +695,12 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            entry1,
+            entry2,
+            "scents",
+            brand_non_matches,
+            scent_non_matches,
+            scent_cross_brand_non_matches,
         )
         assert result is False
 
@@ -720,7 +730,12 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+            entry1,
+            entry2,
+            "scents",
+            brand_non_matches,
+            scent_non_matches,
+            scent_cross_brand_non_matches,
         )
         assert result is True
 
@@ -734,9 +749,9 @@ class TestNeighborSimilarityWithNonMatches:
         matched_dir = tmp_path / "data" / "matched"
         matched_dir.mkdir(parents=True)
 
-        # Create WSDB directory and non-matches file
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
+        # Create overrides directory and non-matches file
+        overrides_dir = tmp_path / "data" / "overrides"
+        overrides_dir.mkdir(parents=True)
 
         # Create test data with Seaforth! Leather and Seaforth! Heather (known non-matches)
         test_data = {
@@ -774,12 +789,12 @@ class TestNeighborSimilarityWithNonMatches:
                 "Seaforth! Leather": ["Seaforth! Heather"],
             }
         }
-        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_file = overrides_dir / "non_matches_scents.yaml"
         with scents_file.open("w") as f:
             yaml.dump(non_matches_scents, f)
 
         # Create empty brands file
-        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_file = overrides_dir / "non_matches_brands.yaml"
         with brands_file.open("w") as f:
             yaml.dump({}, f)
 
@@ -808,7 +823,10 @@ class TestNeighborSimilarityWithNonMatches:
         # Since these are known non-matches, they should not appear as similar neighbors
         # Check that if they appear, their similarity is 0.0
         for result in data["results"]:
-            if "Seaforth! Leather" in result.get("entry", "") and result.get("similarity_to_next") is not None:
+            if (
+                "Seaforth! Leather" in result.get("entry", "")
+                and result.get("similarity_to_next") is not None
+            ):
                 # If Seaforth! Leather is next to Seaforth! Heather, similarity should be 0.0
                 if "Seaforth! Heather" in result.get("next_entry", ""):
                     assert result["similarity_to_next"] == 0.0
@@ -819,19 +837,19 @@ class TestSoapNonMatchEndpoint:
 
     def test_add_brand_non_match(self, tmp_path):
         """Test adding a brand non-match."""
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
+        overrides_dir = tmp_path / "data" / "overrides"
+        overrides_dir.mkdir(parents=True)
 
         # Create empty brand non-matches file
-        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_file = overrides_dir / "non_matches_brands.yaml"
         with brands_file.open("w") as f:
             yaml.dump({}, f)
 
         # Create empty scent files
-        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_file = overrides_dir / "non_matches_scents.yaml"
         with scents_file.open("w") as f:
             yaml.dump({}, f)
-        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        scents_cross_brand_file = overrides_dir / "non_matches_scents_cross_brand.yaml"
         with scents_cross_brand_file.open("w") as f:
             yaml.dump({}, f)
 
@@ -870,17 +888,17 @@ class TestSoapNonMatchEndpoint:
 
     def test_add_scent_non_match_same_brand(self, tmp_path):
         """Test adding a scent non-match with same brand."""
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
+        overrides_dir = tmp_path / "data" / "overrides"
+        overrides_dir.mkdir(parents=True)
 
         # Create empty files
-        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_file = overrides_dir / "non_matches_brands.yaml"
         with brands_file.open("w") as f:
             yaml.dump({}, f)
-        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_file = overrides_dir / "non_matches_scents.yaml"
         with scents_file.open("w") as f:
             yaml.dump({}, f)
-        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        scents_cross_brand_file = overrides_dir / "non_matches_scents_cross_brand.yaml"
         with scents_cross_brand_file.open("w") as f:
             yaml.dump({}, f)
 
@@ -910,7 +928,10 @@ class TestSoapNonMatchEndpoint:
                 saved_data = yaml.safe_load(f)
                 assert "Spearhead Shaving Company" in saved_data
                 assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
-                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                assert (
+                    "Seaforth! Heather"
+                    in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                )
 
         finally:
             if original_data_dir:
@@ -920,17 +941,17 @@ class TestSoapNonMatchEndpoint:
 
     def test_add_scent_non_match_different_brands(self, tmp_path):
         """Test adding a scent non-match with different brands (cross-brand)."""
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
+        overrides_dir = tmp_path / "data" / "overrides"
+        overrides_dir.mkdir(parents=True)
 
         # Create empty files
-        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_file = overrides_dir / "non_matches_brands.yaml"
         with brands_file.open("w") as f:
             yaml.dump({}, f)
-        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_file = overrides_dir / "non_matches_scents.yaml"
         with scents_file.open("w") as f:
             yaml.dump({}, f)
-        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        scents_cross_brand_file = overrides_dir / "non_matches_scents_cross_brand.yaml"
         with scents_cross_brand_file.open("w") as f:
             yaml.dump({}, f)
 
@@ -972,17 +993,17 @@ class TestSoapNonMatchEndpoint:
 
     def test_add_brand_scent_non_match(self, tmp_path):
         """Test adding a brand_scent non-match."""
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
+        overrides_dir = tmp_path / "data" / "overrides"
+        overrides_dir.mkdir(parents=True)
 
         # Create empty files
-        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_file = overrides_dir / "non_matches_brands.yaml"
         with brands_file.open("w") as f:
             yaml.dump({}, f)
-        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_file = overrides_dir / "non_matches_scents.yaml"
         with scents_file.open("w") as f:
             yaml.dump({}, f)
-        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        scents_cross_brand_file = overrides_dir / "non_matches_scents_cross_brand.yaml"
         with scents_cross_brand_file.open("w") as f:
             yaml.dump({}, f)
 
@@ -1012,7 +1033,10 @@ class TestSoapNonMatchEndpoint:
                 saved_data = yaml.safe_load(f)
                 assert "Spearhead Shaving Company" in saved_data
                 assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
-                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                assert (
+                    "Seaforth! Heather"
+                    in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+                )
 
         finally:
             if original_data_dir:
