@@ -62,17 +62,24 @@ def get_patterns(alias: str) -> list[str]:
     Get extraction patterns for a field alias, ordered by frequency/priority.
 
     Patterns are tried in order (0=highest priority, last=lowest priority).
-    Patterns 0-13 have explicit markers (colon : or dash -).
-    Pattern 14 is ambiguous (no explicit markers) and must remain last.
+    Patterns 0-14 have explicit markers (colon : or dash -).
+    Pattern 15 is ambiguous (no explicit markers) and must remain last.
+
+    Pattern 0 requires list item prefix (* or -) and is preferred over pattern 0b
+    which matches narrative text without the prefix.
 
     Order is based on actual usage frequency from 2020-2025 data analysis.
     See docs/extraction_pattern_priorities.md for priority details.
     """
     return [
-        # Pattern 0: Markdown bold: * **alias:** value (73.17% usage - most common)
+        # Pattern 0: Markdown bold with list prefix: * **alias:** value (highest priority)
+        # Requires * or - prefix (list items) - preferred over narrative text
         # Colon/dash BEFORE second ** (e.g., * **Razor:** Blackbird)
-        # BUG FIX: Require colon/dash (changed from optional [-:]? to required [-:])
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # * **alias:** value
+        rf"^[-*]\s+\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # * **alias:** value (list item)
+        # Pattern 0b: Markdown bold without list prefix: **alias:** value (lower priority)
+        # No * or - prefix (narrative text) - lower priority than list items
+        # Colon/dash BEFORE second ** (e.g., **Razor:** Blackbird in narrative)
+        rf"^\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # **alias:** value (narrative)
         # Pattern 1: Simple explicit: Field: Value (20.66% usage - second most common)
         rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s*[-:]\s*(.+)$",  # * alias: value (word boundary)
         # Pattern 2: Markdown bold: * **alias**: value (2.67% usage)
@@ -104,7 +111,7 @@ def get_patterns(alias: str) -> list[str]:
         rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
         # Pattern 13: Simple explicit: Field - Value (0.00% usage)
         rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
-        # Pattern 14: Ambiguous format (0.08% usage - MUST REMAIN LAST)
+        # Pattern 15: Ambiguous format (0.08% usage - MUST REMAIN LAST)
         # This pattern is tried last and only matches if no explicit markers found
         rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product (no colon/dash)
     ]
