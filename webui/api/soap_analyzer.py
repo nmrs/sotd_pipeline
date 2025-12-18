@@ -639,17 +639,22 @@ def are_entries_non_matches(
 
         # Build canonical pair and check (relationships stored under alphabetically first scent)
         canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
+        canonical_key_norm = normalize_for_matching(canonical_key)
+        other_scent_norm = normalize_for_matching(other_scent)
         
-        # Case-insensitive brand lookup (normalize brand for comparison)
+        # Case-insensitive brand and scent lookup (normalize for comparison)
         # (brand1_norm already calculated above)
         for stored_brand in scent_non_matches.keys():
             if normalize_for_matching(stored_brand) == brand1_norm:
-                if canonical_key in scent_non_matches[stored_brand]:
-                    if any(
-                        normalize_for_matching(nm) == normalize_for_matching(other_scent)
-                        for nm in scent_non_matches[stored_brand][canonical_key]
-                    ):
-                        return True
+                # Case-insensitive scent key lookup
+                for stored_scent_key in scent_non_matches[stored_brand].keys():
+                    if normalize_for_matching(stored_scent_key) == canonical_key_norm:
+                        if any(
+                            normalize_for_matching(nm) == other_scent_norm
+                            for nm in scent_non_matches[stored_brand][stored_scent_key]
+                        ):
+                            return True
+                        break
                 break
         
         return False
@@ -665,40 +670,49 @@ def are_entries_non_matches(
         if brand1_norm == brand2_norm:
             # Build canonical pair and check (relationships stored under alphabetically first scent)
             canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
+            canonical_key_norm = normalize_for_matching(canonical_key)
+            other_scent_norm = normalize_for_matching(other_scent)
             
-            # Case-insensitive brand lookup (normalize brand for comparison)
+            # Case-insensitive brand and scent lookup (normalize for comparison)
             # (brand1_norm already calculated above)
             for stored_brand in scent_non_matches.keys():
                 if normalize_for_matching(stored_brand) == brand1_norm:
-                    if canonical_key in scent_non_matches[stored_brand]:
-                        if any(
-                            normalize_for_matching(nm) == normalize_for_matching(other_scent)
-                            for nm in scent_non_matches[stored_brand][canonical_key]
-                        ):
-                            return True
+                    # Case-insensitive scent key lookup
+                    for stored_scent_key in scent_non_matches[stored_brand].keys():
+                        if normalize_for_matching(stored_scent_key) == canonical_key_norm:
+                            if any(
+                                normalize_for_matching(nm) == other_scent_norm
+                                for nm in scent_non_matches[stored_brand][stored_scent_key]
+                            ):
+                                return True
+                            break
                     break
         else:
             # Different brands: check cross-brand scent non-matches
             # Get canonical scent key (alphabetically first)
             canonical_key = _canonicalize_cross_brand_scent_key(scent1, scent2)
+            canonical_key_norm = normalize_for_matching(canonical_key)
 
-            if canonical_key in scent_cross_brand_non_matches:
-                brand_scent_pairs = scent_cross_brand_non_matches[canonical_key]
-                # Check if entry1 is in this group
-                entry1_in_group = any(
-                    normalize_for_matching(pair.get("brand", "")) == brand1_norm
-                    and normalize_for_matching(pair.get("scent", "")) == scent1_norm
-                    for pair in brand_scent_pairs
-                )
-                # Check if entry2 is in this group
-                entry2_in_group = any(
-                    normalize_for_matching(pair.get("brand", "")) == brand2_norm
-                    and normalize_for_matching(pair.get("scent", "")) == scent2_norm
-                    for pair in brand_scent_pairs
-                )
-                # If both are in the same group, they're non-matches
-                if entry1_in_group and entry2_in_group:
-                    return True
+            # Case-insensitive scent key lookup
+            for stored_scent_key in scent_cross_brand_non_matches.keys():
+                if normalize_for_matching(stored_scent_key) == canonical_key_norm:
+                    brand_scent_pairs = scent_cross_brand_non_matches[stored_scent_key]
+                    # Check if entry1 is in this group
+                    entry1_in_group = any(
+                        normalize_for_matching(pair.get("brand", "")) == brand1_norm
+                        and normalize_for_matching(pair.get("scent", "")) == scent1_norm
+                        for pair in brand_scent_pairs
+                    )
+                    # Check if entry2 is in this group
+                    entry2_in_group = any(
+                        normalize_for_matching(pair.get("brand", "")) == brand2_norm
+                        and normalize_for_matching(pair.get("scent", "")) == scent2_norm
+                        for pair in brand_scent_pairs
+                    )
+                    # If both are in the same group, they're non-matches
+                    if entry1_in_group and entry2_in_group:
+                        return True
+                    break
         return False
 
     return False
