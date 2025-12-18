@@ -460,7 +460,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches, {}
         )
         assert result is True
 
@@ -487,7 +487,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches, {}
         )
         assert result is False
 
@@ -516,7 +516,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches
+            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches, {}
         )
         assert result is True
 
@@ -545,7 +545,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches
+            entry1, entry2, "brand_scent", brand_non_matches, scent_non_matches, {}
         )
         assert result is False
 
@@ -574,7 +574,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "scents", brand_non_matches, scent_non_matches
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches, {}
         )
         assert result is True
 
@@ -603,7 +603,7 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "scents", brand_non_matches, scent_non_matches
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches, {}
         )
         assert result is False
 
@@ -628,9 +628,101 @@ class TestAreEntriesNonMatches:
         }
 
         result = are_entries_non_matches(
-            entry1, entry2, "brands", brand_non_matches, scent_non_matches
+            entry1, entry2, "brands", brand_non_matches, scent_non_matches, {}
         )
         assert result is False
+
+    def test_scents_mode_cross_brand_non_match(self):
+        """Test scents mode with cross-brand scent non-matches."""
+        brand_non_matches = {}
+        scent_non_matches = {}
+        scent_cross_brand_non_matches = {
+            "Lavender": [
+                {"brand": "Noble Otter", "scent": "Lavender"},
+                {"brand": "Barrister & Mann", "scent": "Lavender"},
+            ]
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Lavender"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Lavender"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+        )
+        assert result is True
+
+    def test_scents_mode_cross_brand_not_non_match(self):
+        """Test scents mode with different brands that are not non-matches."""
+        brand_non_matches = {}
+        scent_non_matches = {}
+        scent_cross_brand_non_matches = {
+            "Lavender": [
+                {"brand": "Noble Otter", "scent": "Lavender"},
+                {"brand": "Barrister & Mann", "scent": "Lavender"},
+            ]
+        }
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Noble Otter", "scent": "Seville"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+        )
+        assert result is False
+
+    def test_scents_mode_same_brand_still_uses_scent_non_matches(self):
+        """Test that scents mode with same brand still uses scent_non_matches file."""
+        brand_non_matches = {}
+        scent_non_matches = {
+            "Spearhead Shaving Company": {
+                "Seaforth! Leather": ["Seaforth! Heather"],
+            }
+        }
+        scent_cross_brand_non_matches = {}
+
+        entry1 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Leather"},
+                }
+            ]
+        }
+        entry2 = {
+            "original_matches": [
+                {
+                    "matched": {"brand": "Spearhead Shaving Company", "scent": "Seaforth! Heather"},
+                }
+            ]
+        }
+
+        result = are_entries_non_matches(
+            entry1, entry2, "scents", brand_non_matches, scent_non_matches, scent_cross_brand_non_matches
+        )
+        assert result is True
 
 
 class TestNeighborSimilarityWithNonMatches:
@@ -720,3 +812,266 @@ class TestNeighborSimilarityWithNonMatches:
                 # If Seaforth! Leather is next to Seaforth! Heather, similarity should be 0.0
                 if "Seaforth! Heather" in result.get("next_entry", ""):
                     assert result["similarity_to_next"] == 0.0
+
+
+class TestSoapNonMatchEndpoint:
+    """Test POST /api/soaps/non-matches endpoint."""
+
+    def test_add_brand_non_match(self, tmp_path):
+        """Test adding a brand non-match."""
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+
+        # Create empty brand non-matches file
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        with brands_file.open("w") as f:
+            yaml.dump({}, f)
+
+        # Create empty scent files
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        with scents_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        with scents_cross_brand_file.open("w") as f:
+            yaml.dump({}, f)
+
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "brands",
+                    "entry1_brand": "Black Mountain Shaving",
+                    "entry1_scent": None,
+                    "entry2_brand": "Mountain Hare Shaving",
+                    "entry2_scent": None,
+                },
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+
+            # Verify file was updated
+            with brands_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Black Mountain Shaving" in saved_data
+                assert "Mountain Hare Shaving" in saved_data["Black Mountain Shaving"]
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_add_scent_non_match_same_brand(self, tmp_path):
+        """Test adding a scent non-match with same brand."""
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+
+        # Create empty files
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        with brands_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        with scents_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        with scents_cross_brand_file.open("w") as f:
+            yaml.dump({}, f)
+
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "scents",
+                    "entry1_brand": "Spearhead Shaving Company",
+                    "entry1_scent": "Seaforth! Leather",
+                    "entry2_brand": "Spearhead Shaving Company",
+                    "entry2_scent": "Seaforth! Heather",
+                },
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+
+            # Verify file was updated (should go to scent_non_matches, not cross-brand)
+            with scents_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Spearhead Shaving Company" in saved_data
+                assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
+                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_add_scent_non_match_different_brands(self, tmp_path):
+        """Test adding a scent non-match with different brands (cross-brand)."""
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+
+        # Create empty files
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        with brands_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        with scents_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        with scents_cross_brand_file.open("w") as f:
+            yaml.dump({}, f)
+
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "scents",
+                    "entry1_brand": "Noble Otter",
+                    "entry1_scent": "Lavender",
+                    "entry2_brand": "Barrister & Mann",
+                    "entry2_scent": "Lavender",
+                },
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+
+            # Verify file was updated (should go to cross-brand file)
+            with scents_cross_brand_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Lavender" in saved_data
+                # Check that both entries are in the list
+                brands_in_list = [pair.get("brand") for pair in saved_data["Lavender"]]
+                assert "Noble Otter" in brands_in_list
+                assert "Barrister & Mann" in brands_in_list
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_add_brand_scent_non_match(self, tmp_path):
+        """Test adding a brand_scent non-match."""
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+
+        # Create empty files
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        with brands_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        with scents_file.open("w") as f:
+            yaml.dump({}, f)
+        scents_cross_brand_file = wsdb_dir / "non_matches_scents_cross_brand.yaml"
+        with scents_cross_brand_file.open("w") as f:
+            yaml.dump({}, f)
+
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "brand_scent",
+                    "entry1_brand": "Spearhead Shaving Company",
+                    "entry1_scent": "Seaforth! Leather",
+                    "entry2_brand": "Spearhead Shaving Company",
+                    "entry2_scent": "Seaforth! Heather",
+                },
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+
+            # Verify file was updated
+            with scents_file.open("r") as f:
+                saved_data = yaml.safe_load(f)
+                assert "Spearhead Shaving Company" in saved_data
+                assert "Seaforth! Leather" in saved_data["Spearhead Shaving Company"]
+                assert "Seaforth! Heather" in saved_data["Spearhead Shaving Company"]["Seaforth! Leather"]
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_add_non_match_invalid_mode(self, tmp_path):
+        """Test adding a non-match with invalid mode."""
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "invalid",
+                    "entry1_brand": "Test Brand",
+                    "entry1_scent": None,
+                    "entry2_brand": "Test Brand 2",
+                    "entry2_scent": None,
+                },
+            )
+
+            assert response.status_code == 400
+            assert "Invalid mode" in response.json()["detail"]
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
+
+    def test_add_brand_scent_non_match_different_brands_error(self, tmp_path):
+        """Test that brand_scent mode requires same brand."""
+        import os
+
+        original_data_dir = os.environ.get("SOTD_DATA_DIR")
+        os.environ["SOTD_DATA_DIR"] = str(tmp_path)
+
+        try:
+            response = client.post(
+                "/api/soaps/non-matches",
+                json={
+                    "mode": "brand_scent",
+                    "entry1_brand": "Noble Otter",
+                    "entry1_scent": "Lavender",
+                    "entry2_brand": "Barrister & Mann",
+                    "entry2_scent": "Lavender",
+                },
+            )
+
+            assert response.status_code == 400
+            assert "same brand" in response.json()["detail"]
+
+        finally:
+            if original_data_dir:
+                os.environ["SOTD_DATA_DIR"] = original_data_dir
+            else:
+                os.environ.pop("SOTD_DATA_DIR", None)
