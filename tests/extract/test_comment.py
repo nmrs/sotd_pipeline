@@ -362,3 +362,77 @@ def test_parse_comment_pattern_priority_narrative_vs_explicit():
     # Should extract the explicit marker line, not the narrative text
     assert result["razor"]["original"] == "WECK Hair Shaper - Pink Scales"
     assert result["razor"]["normalized"] == "WECK Hair Shaper - Pink Scales"
+
+
+def test_parse_comment_soap_explicit_lather_wins_over_ambiguous_soap():
+    """Test that explicit 'Lather:' pattern wins over ambiguous 'Soap' pattern."""
+    # This tests the specific case from comment id ntmpg39 where
+    # "* **Lather:** Mickey Lee Soapworks - The Kraken - Soap" should win over "Soap kill."
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** Yaqi - 24mm Boar",
+                "* **Razor:** Schick - Type I2 (Hydro-Magic)",
+                "* **Blade:** Personna - 74 - Injector (70)",
+                "* **Lather:** Mickey Lee Soapworks - The Kraken - Soap",
+                "* **Post Shave:** House of Mammoth - Sonder - Aftershave",
+                "* **Fragrance:** House of Mammoth - Sandalorian - Eau de Parfum",
+                "",
+                "This will be my final Kraken Friday. It was fun while it lasted.",
+                "",
+                "Soap kill.",
+                "",
+                "Splash kill.",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    # Should extract the explicit Lather: line, not the ambiguous "Soap kill." line
+    assert result["soap"]["original"] == "Mickey Lee Soapworks - The Kraken - Soap"
+    # Normalization strips trailing "Soap" product type indicator
+    assert result["soap"]["normalized"] == "Mickey Lee Soapworks - The Kraken"
+
+
+def test_parse_comment_soap_explicit_soap_wins_over_ambiguous_lather():
+    """Test that explicit 'Soap:' pattern wins over ambiguous 'Lather' pattern."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** Omega",
+                "* **Razor:** Game Changer",
+                "* **Blade:** Feather",
+                "* **Soap:** Some Soap Co. - Test Soap",
+                "",
+                "Lather was great today, really enjoyed it.",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    # Should extract the explicit Soap: line, not the ambiguous "Lather was great" line
+    assert result["soap"]["original"] == "Some Soap Co. - Test Soap"
+    assert result["soap"]["normalized"] == "Some Soap Co. - Test Soap"
+
+
+def test_parse_comment_soap_multiple_explicit_same_priority():
+    """Test that when multiple explicit patterns match, first match wins."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** Omega",
+                "* **Razor:** Game Changer",
+                "* **Blade:** Feather",
+                "* **Soap:** Soap A",
+                "* **Lather:** Soap B",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    # Should extract whichever appears first in the comment (first match wins within same priority)
+    assert result["soap"]["original"] == "Soap A"
+    assert result["soap"]["normalized"] == "Soap A"

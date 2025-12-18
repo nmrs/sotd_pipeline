@@ -65,3 +65,21 @@ The extraction logic now processes patterns in priority order:
 - For each field, try pattern 0 on all lines, then pattern 1 on all lines, etc.
 - This ensures explicit markers (patterns 0-13) are always preferred over ambiguous patterns (pattern 14), regardless of line order
 
+### Cross-Alias Priority Enforcement
+
+**IMPORTANT**: Pattern priority is enforced **across all aliases**, not per alias. This means:
+- All pattern 0s (highest priority) for all aliases are tried before any pattern 1s
+- All pattern 1s are tried before pattern 2s, etc.
+- Pattern 13 (ambiguous, lowest priority) is only tried after all explicit patterns (0-12) have been tried for all aliases
+
+**Example**: For the soap field with aliases "soap" and "lather":
+- Pattern 0 for "soap" is tried
+- Pattern 0 for "lather" is tried
+- Pattern 1 for "soap" is tried
+- Pattern 1 for "lather" is tried
+- ... (continues through all priority levels)
+- Pattern 13 for "soap" is tried (only after all explicit patterns fail)
+- Pattern 13 for "lather" is tried
+
+This ensures that an explicit "Lather:" pattern (pattern 0) will always win over an ambiguous "Soap" pattern (pattern 13), even if the ambiguous pattern appears earlier in the comment or earlier in the alias list.
+

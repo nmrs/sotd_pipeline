@@ -30,25 +30,36 @@ def parse_comment(
     # Process fields with pattern priority: try each pattern across all lines
     # This ensures high-priority patterns (explicit markers) are checked before
     # low-priority patterns (ambiguous), regardless of line order
+    # Pattern priority is enforced across all aliases, not per alias
     for field in ("razor", "blade", "brush", "soap"):
         if field in result:
             continue  # Already found this field
 
-        # Get all patterns for this field (ordered by priority, 0=highest, 57=lowest)
+        # Get all aliases for this field
         aliases = FIELD_ALIASES.get(field, [field])
-        patterns = []
-        for alias in aliases:
-            patterns.extend(get_patterns(alias))
 
-        # Try each pattern across all lines (pattern priority order)
-        for pattern in patterns:
-            for line in lines:
-                value = extract_field_with_pattern(line, field, pattern)
-                if value:
-                    # Found a match with this priority level - use it
-                    normalized_value = normalize_for_matching(value, field=field)
-                    result[field] = {"original": value, "normalized": normalized_value}
-                    break  # Found match, move to next field
+        # Get patterns grouped by priority level (pattern number)
+        # This ensures pattern 0 for all aliases is tried before pattern 1 for any alias
+        max_patterns = len(get_patterns(aliases[0])) if aliases else 0
+        patterns_by_priority = [[] for _ in range(max_patterns)]
+
+        for alias in aliases:
+            alias_patterns = get_patterns(alias)
+            for pattern_num, pattern in enumerate(alias_patterns):
+                patterns_by_priority[pattern_num].append((alias, pattern))
+
+        # Try each priority level across all aliases and all lines
+        for priority_level, patterns_at_level in enumerate(patterns_by_priority):
+            for alias, pattern in patterns_at_level:
+                for line in lines:
+                    value = extract_field_with_pattern(line, field, pattern)
+                    if value:
+                        # Found a match with this priority level - use it
+                        normalized_value = normalize_for_matching(value, field=field)
+                        result[field] = {"original": value, "normalized": normalized_value}
+                        break  # Found match, move to next field
+                if field in result:
+                    break  # Found match for this field, try next field
             if field in result:
                 break  # Found match for this field, try next field
 
