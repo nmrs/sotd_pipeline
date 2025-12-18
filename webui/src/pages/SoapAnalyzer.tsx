@@ -379,6 +379,112 @@ const SoapAnalyzer: React.FC = () => {
     setSelectedComment(null);
   };
 
+  const handleNotAMatch = async (
+    entry1: SoapNeighborSimilarityResult,
+    entry2: SoapNeighborSimilarityResult,
+    mode: 'brands' | 'brand_scent' | 'scents'
+  ) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Extract brand and scent from entries based on mode
+      const getBrandScent = (entry: SoapNeighborSimilarityResult) => {
+        // Prefer matched data if available (most reliable)
+        if (entry.matched) {
+          const brand = entry.matched.brand || entry.matched.maker || '';
+          const scent = entry.matched.scent || '';
+          
+          if (mode === 'brands') {
+            return { brand, scent: '' };
+          } else if (mode === 'brand_scent') {
+            return { brand, scent };
+          } else {
+            // scents mode
+            return { brand, scent };
+          }
+        }
+        
+        // Fallback: parse from entry string
+        if (mode === 'brands') {
+          return { brand: entry.entry, scent: '' };
+        } else if (mode === 'brand_scent') {
+          const parts = entry.entry.split(' - ');
+          return { brand: parts[0] || '', scent: parts.slice(1).join(' - ') || '' };
+        } else {
+          // scents mode - entry.entry is the scent, need brand from matched data
+          // In scents mode, matched data should always be available, but if not, we can't extract brand
+          // The validation below will catch this case
+          return { brand: '', scent: entry.entry };
+        }
+      };
+
+      const entry1Data = getBrandScent(entry1);
+      const entry2Data = getBrandScent(entry2);
+
+      // Validate required fields
+      if (!entry1Data.brand || !entry2Data.brand) {
+        setError('Missing brand information for one or both entries');
+        return;
+      }
+
+      if ((mode === 'brand_scent' || mode === 'scents') && (!entry1Data.scent || !entry2Data.scent)) {
+        setError('Missing scent information for one or both entries');
+        return;
+      }
+
+      // Call API to save non-match
+      const response = await fetch('http://localhost:8000/api/soaps/non-matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: mode,
+          entry1_brand: entry1Data.brand,
+          entry1_scent: entry1Data.scent || null,
+          entry2_brand: entry2Data.brand,
+          entry2_scent: entry2Data.scent || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.detail || errorData.message || 'Failed to save non-match');
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success === false) {
+        setError(data.message || 'Failed to save non-match');
+        return;
+      }
+
+      // Reload non-matches
+      try {
+        const nonMatchesResponse = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+        if (nonMatchesResponse.ok) {
+          const nonMatchesData = await nonMatchesResponse.json();
+          setNonMatches(nonMatchesData);
+        }
+      } catch (err) {
+        console.error('Failed to reload non-matches:', err);
+      }
+
+      // Re-run analysis to see updated results
+      if (neighborSimilarityResult) {
+        const currentMode = neighborSimilarityResult.mode as 'brands' | 'brand_scent' | 'scents';
+        await analyzeNeighborSimilarity(currentMode);
+      }
+
+      // Show success message (optional, could use a toast notification)
+      console.log('Non-match saved successfully');
+    } catch (err) {
+      console.error('Error saving non-match:', err);
+      setError(err instanceof Error ? err.message : 'Error saving non-match');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filtered results for neighbor similarity (text search only - similarity filtering is now server-side)
   const filteredNeighborResults = useMemo(() => {
     if (!neighborSimilarityResult?.results) {
@@ -759,24 +865,54 @@ const SoapAnalyzer: React.FC = () => {
                             </td>
                             <td className='border border-gray-300 px-3 py-2'>
                               {index > 0 ? (
-                                <Badge
-                                  className={getNeighborSimilarityColor(
-                                    result.similarity_to_above || 0
-                                  )}
-                                >
-                                  {(result.similarity_to_above || 0).toFixed(3)}
-                                </Badge>
+                                <div className='flex items-center gap-2'>
+                                  <Badge
+                                    className={getNeighborSimilarityColor(
+                                      result.similarity_to_above || 0
+                                    )}
+                                  >
+                                    {(result.similarity_to_above || 0).toFixed(3)}
+                                  </Badge>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const aboveEntry = filteredNeighborResults[index - 1];
+                                      handleNotAMatch(result, aboveEntry, 'brands');
+                                    }}
+                                    className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                    disabled={loading}
+                                  >
+                                    ✕
+                                  </Button>
+                                </div>
                               ) : (
                                 <span className='text-gray-400'>-</span>
                               )}
                             </td>
                             <td className='border border-gray-300 px-3 py-2'>
                               {result.similarity_to_next !== null ? (
-                                <Badge
-                                  className={getNeighborSimilarityColor(result.similarity_to_next)}
-                                >
-                                  {result.similarity_to_next.toFixed(3)}
-                                </Badge>
+                                <div className='flex items-center gap-2'>
+                                  <Badge
+                                    className={getNeighborSimilarityColor(result.similarity_to_next)}
+                                  >
+                                    {result.similarity_to_next.toFixed(3)}
+                                  </Badge>
+                                  <Button
+                                    variant='outline'
+                                    size='sm'
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const belowEntry = filteredNeighborResults[index + 1];
+                                      handleNotAMatch(result, belowEntry, 'brands');
+                                    }}
+                                    className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                    disabled={loading}
+                                  >
+                                    ✕
+                                  </Button>
+                                </div>
                               ) : (
                                 <span className='text-gray-400'>-</span>
                               )}
@@ -928,26 +1064,56 @@ const SoapAnalyzer: React.FC = () => {
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {index > 0 ? (
-                                  <Badge
-                                    className={getNeighborSimilarityColor(
-                                      result.similarity_to_above || 0
-                                    )}
-                                  >
-                                    {(result.similarity_to_above || 0).toFixed(3)}
-                                  </Badge>
+                                  <div className='flex items-center gap-2'>
+                                    <Badge
+                                      className={getNeighborSimilarityColor(
+                                        result.similarity_to_above || 0
+                                      )}
+                                    >
+                                      {(result.similarity_to_above || 0).toFixed(3)}
+                                    </Badge>
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const aboveEntry = filteredNeighborResults[index - 1];
+                                        handleNotAMatch(result, aboveEntry, 'brand_scent');
+                                      }}
+                                      className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                      disabled={loading}
+                                    >
+                                      ✕
+                                    </Button>
+                                  </div>
                                 ) : (
                                   <span className='text-gray-400'>-</span>
                                 )}
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {result.similarity_to_next !== null ? (
-                                  <Badge
-                                    className={getNeighborSimilarityColor(
-                                      result.similarity_to_next
-                                    )}
-                                  >
-                                    {result.similarity_to_next.toFixed(3)}
-                                  </Badge>
+                                  <div className='flex items-center gap-2'>
+                                    <Badge
+                                      className={getNeighborSimilarityColor(
+                                        result.similarity_to_next
+                                      )}
+                                    >
+                                      {result.similarity_to_next.toFixed(3)}
+                                    </Badge>
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const belowEntry = filteredNeighborResults[index + 1];
+                                        handleNotAMatch(result, belowEntry, 'brand_scent');
+                                      }}
+                                      className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                      disabled={loading}
+                                    >
+                                      ✕
+                                    </Button>
+                                  </div>
                                 ) : (
                                   <span className='text-gray-400'>-</span>
                                 )}
@@ -958,7 +1124,7 @@ const SoapAnalyzer: React.FC = () => {
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 {result.pattern || '-'}
                               </td>
-                              <td className='border border-gray-300 px-3 py-2 text-sm text-sm text-gray-600'>
+                              <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 <CommentDisplay
                                   commentIds={result.comment_ids}
                                   onCommentClick={handleCommentClick}
@@ -1099,26 +1265,56 @@ const SoapAnalyzer: React.FC = () => {
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {index > 0 ? (
-                                  <Badge
-                                    className={getNeighborSimilarityColor(
-                                      result.similarity_to_above || 0
-                                    )}
-                                  >
-                                    {(result.similarity_to_above || 0).toFixed(3)}
-                                  </Badge>
+                                  <div className='flex items-center gap-2'>
+                                    <Badge
+                                      className={getNeighborSimilarityColor(
+                                        result.similarity_to_above || 0
+                                      )}
+                                    >
+                                      {(result.similarity_to_above || 0).toFixed(3)}
+                                    </Badge>
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const aboveEntry = filteredNeighborResults[index - 1];
+                                        handleNotAMatch(result, aboveEntry, 'scents');
+                                      }}
+                                      className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                      disabled={loading}
+                                    >
+                                      ✕
+                                    </Button>
+                                  </div>
                                 ) : (
                                   <span className='text-gray-400'>-</span>
                                 )}
                               </td>
                               <td className='border border-gray-300 px-3 py-2'>
                                 {result.similarity_to_next !== null ? (
-                                  <Badge
-                                    className={getNeighborSimilarityColor(
-                                      result.similarity_to_next
-                                    )}
-                                  >
-                                    {result.similarity_to_next.toFixed(3)}
-                                  </Badge>
+                                  <div className='flex items-center gap-2'>
+                                    <Badge
+                                      className={getNeighborSimilarityColor(
+                                        result.similarity_to_next
+                                      )}
+                                    >
+                                      {result.similarity_to_next.toFixed(3)}
+                                    </Badge>
+                                    <Button
+                                      variant='outline'
+                                      size='sm'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const belowEntry = filteredNeighborResults[index + 1];
+                                        handleNotAMatch(result, belowEntry, 'scents');
+                                      }}
+                                      className='text-red-600 hover:bg-red-50 hover:text-red-700 text-xs px-2 py-1 h-6'
+                                      disabled={loading}
+                                    >
+                                      ✕
+                                    </Button>
+                                  </div>
                                 ) : (
                                   <span className='text-gray-400'>-</span>
                                 )}
