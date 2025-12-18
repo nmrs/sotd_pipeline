@@ -279,7 +279,7 @@ async def get_soap_neighbor_similarity(
 
         # Load non-matches data for filtering
         try:
-            non_matches_data = await load_non_matches()
+            non_matches_data = load_non_matches()
             brand_non_matches = non_matches_data.get("brand_non_matches", {})
             scent_non_matches = non_matches_data.get("scent_non_matches", {})
             scent_cross_brand_non_matches = non_matches_data.get(
@@ -292,15 +292,19 @@ async def get_soap_neighbor_similarity(
             scent_cross_brand_non_matches = {}
 
         # Analyze neighbor similarity
-        results = analyze_soap_neighbor_similarity_web(
-            all_matches,
-            mode,
-            similarity_threshold,
-            limit,
-            brand_non_matches,
-            scent_non_matches,
-            scent_cross_brand_non_matches,
-        )
+        try:
+            results = analyze_soap_neighbor_similarity_web(
+                all_matches,
+                mode,
+                similarity_threshold,
+                limit,
+                brand_non_matches,
+                scent_non_matches,
+                scent_cross_brand_non_matches,
+            )
+        except Exception as e:
+            logger.error(f"Error in analyze_soap_neighbor_similarity_web: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Error analyzing neighbor similarity: {str(e)}")
 
         return {
             "message": f"Neighbor similarity analysis completed for {mode} mode",
