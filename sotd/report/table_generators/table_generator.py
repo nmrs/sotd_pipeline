@@ -8,6 +8,8 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
+from sotd.utils.wsdb_lookup import WSDBLookup
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,6 +42,7 @@ class TableGenerator:
         self.current_month = current_month
         self.debug = debug
         self._wsdb_soaps: List[Dict[str, Any]] | None = None
+        self._wsdb_lookup: WSDBLookup | None = None
 
         # No more hardcoded mappings - we'll convert kebab-case to snake_case dynamically
 
@@ -99,10 +102,24 @@ class TableGenerator:
             return text
         return unicodedata.normalize("NFC", text)
 
+    def _get_wsdb_lookup(self) -> WSDBLookup:
+        """Get or create WSDB lookup utility instance.
+
+        Returns:
+            WSDBLookup instance
+        """
+        if self._wsdb_lookup is None:
+            # Find project root (same logic as _load_wsdb_data)
+            current_file = Path(__file__)
+            project_root = current_file.parent.parent.parent.parent
+            self._wsdb_lookup = WSDBLookup(project_root=project_root)
+        return self._wsdb_lookup
+
     def _get_wsdb_slug(self, brand: str, scent: str) -> str | None:
-        """Lookup WSDB slug for a given brand and scent.
+        """Lookup WSDB slug for a given brand and scent, respecting aliases.
 
         Uses case-insensitive matching with Unicode normalization for consistency.
+        Checks aliases from soaps.yaml for both brand and scent.
 
         Args:
             brand: Brand name to match
@@ -111,25 +128,8 @@ class TableGenerator:
         Returns:
             WSDB slug if found, None otherwise
         """
-        if not brand or not scent:
-            return None
-
-        wsdb_soaps = self._load_wsdb_data()
-        if not wsdb_soaps:
-            return None
-
-        # Normalize and lowercase for comparison
-        normalized_brand = self._normalize_string(brand.lower().strip())
-        normalized_scent = self._normalize_string(scent.lower().strip())
-
-        for soap in wsdb_soaps:
-            wsdb_brand = self._normalize_string((soap.get("brand") or "").lower().strip())
-            wsdb_name = self._normalize_string((soap.get("name") or "").lower().strip())
-
-            if wsdb_brand == normalized_brand and wsdb_name == normalized_scent:
-                return soap.get("slug")
-
-        return None
+        lookup = self._get_wsdb_lookup()
+        return lookup.get_wsdb_slug(brand, scent)
 
     def _preserve_acronyms(self, text: str) -> str:
         """Preserve acronyms while converting text to title case.

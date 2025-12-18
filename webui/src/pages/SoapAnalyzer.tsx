@@ -12,6 +12,7 @@ import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
 import { CommentDisplay } from '../components/domain/CommentDisplay';
 import { getCommentDetail, CommentDetail } from '../services/api';
 import { calculateDeltaMonths, formatDeltaMonths } from '../utils/deltaMonths';
+import { getWsdbSlug, PipelineSoap } from '../utils/wsdbLookup';
 
 interface SoapDuplicateResult {
   text1: string;
@@ -83,6 +84,7 @@ const SoapAnalyzer: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('duplicates');
   const [wsdbSoaps, setWsdbSoaps] = useState<WSDBSoap[]>([]);
+  const [pipelineSoaps, setPipelineSoaps] = useState<PipelineSoap[]>([]);
 
   // Comment modal state
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
@@ -92,7 +94,7 @@ const SoapAnalyzer: React.FC = () => {
   // Filter state
   const [filterText, setFilterText] = useState<string>('');
 
-  // Load WSDB data on mount
+  // Load WSDB data and pipeline soaps on mount
   React.useEffect(() => {
     const loadWSDBData = async () => {
       try {
@@ -106,28 +108,30 @@ const SoapAnalyzer: React.FC = () => {
         // Don't show error to user, just fail silently - links will simply not work
       }
     };
+
+    const loadPipelineSoaps = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+        if (response.ok) {
+          const data = await response.json();
+          setPipelineSoaps(data.soaps || []);
+        }
+      } catch (err) {
+        console.error('Failed to load pipeline soaps:', err);
+        // Don't show error to user, just fail silently - alias lookup will be disabled
+      }
+    };
+
     loadWSDBData();
+    loadPipelineSoaps();
   }, []);
 
-  // Lookup function to find WSDB slug by brand and scent
-  const getWsdbSlug = useCallback(
+  // Lookup function to find WSDB slug by brand and scent (using shared utility with alias support)
+  const getWsdbSlugForDisplay = useCallback(
     (brand: string, scent: string): string | null => {
-      if (!brand || !scent || wsdbSoaps.length === 0) {
-        return null;
-      }
-
-      const normalizedBrand = brand.toLowerCase().trim();
-      const normalizedScent = scent.toLowerCase().trim();
-
-      const match = wsdbSoaps.find(soap => {
-        const soapBrand = (soap.brand || '').toLowerCase().trim();
-        const soapName = (soap.name || '').toLowerCase().trim();
-        return soapBrand === normalizedBrand && soapName === normalizedScent;
-      });
-
-      return match?.slug || null;
+      return getWsdbSlug(brand, scent, wsdbSoaps, pipelineSoaps);
     },
-    [wsdbSoaps]
+    [wsdbSoaps, pipelineSoaps]
   );
 
   // Callback for delta months
@@ -862,7 +866,7 @@ const SoapAnalyzer: React.FC = () => {
                           const parts = result.entry.split(' - ');
                           const maker = parts[0] || '';
                           const scent = parts.slice(1).join(' - ') || '';
-                          const slug = getWsdbSlug(maker, scent);
+                          const slug = getWsdbSlugForDisplay(maker, scent);
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
@@ -1033,7 +1037,7 @@ const SoapAnalyzer: React.FC = () => {
                           // Use the matched data from the API (brand and scent are already parsed)
                           const brand = result.matched?.brand || result.matched?.maker || '-';
                           const scent = result.matched?.scent || result.entry;
-                          const slug = getWsdbSlug(brand, scent);
+                          const slug = getWsdbSlugForDisplay(brand, scent);
 
                           return (
                             <tr key={index} className='hover:bg-gray-50'>
