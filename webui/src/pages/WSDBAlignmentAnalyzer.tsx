@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import MonthSelector from '../components/forms/MonthSelector';
 import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
+import CommentModal from '../components/domain/CommentModal';
+import { CommentDisplay } from '../components/domain/CommentDisplay';
+import { getCommentDetail, CommentDetail } from '../services/api';
 
 interface WSDBSoap {
   brand: string;
@@ -111,32 +114,32 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
   const [matchTypeFilter, setMatchTypeFilter] = useState<string>('brand');
+  // Comment modal state
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
+  const [allComments, setAllComments] = useState<CommentDetail[]>([]);
+  const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
+  const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
+  const [commentLoading, setCommentLoading] = useState(false);
 
   // Callback for delta months
   const handleDeltaMonthsChange = useCallback((months: string[]) => {
     setDeltaMonths(months);
   }, []);
 
-  // Load data on mount and when switching modes
-  React.useEffect(() => {
-    if (dataSource === 'catalog') {
-      loadData();
-      loadNonMatches();
-    } else {
-      // In match files mode, we still need pipeline soaps for alias lookup and Add Alias functionality
-      // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
-      reloadPipelineSoaps();
-      loadNonMatches();
+  // Separate function to reload just pipeline soaps (for alias updates)
+  // Defined before useEffect to avoid "Cannot access before initialization" error
+  const reloadPipelineSoaps = useCallback(async () => {
+    try {
+      const pipelineResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+      if (!pipelineResponse.ok) throw new Error('Failed to load pipeline soaps');
+      const pipelineData = await pipelineResponse.json();
+      setPipelineSoaps(pipelineData.soaps);
+    } catch (err) {
+      console.error('Failed to reload pipeline soaps:', err);
+      // Don't show error to user, just log it
     }
-  }, [dataSource, reloadPipelineSoaps]);
-
-  // Clear results when switching data sources
-  React.useEffect(() => {
-    setPipelineResults([]);
-    setWsdbResults([]);
-    setError(null);
-    setSuccessMessage(null);
-  }, [dataSource]);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -166,18 +169,26 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
-  // Separate function to reload just pipeline soaps (for alias updates)
-  const reloadPipelineSoaps = useCallback(async () => {
-    try {
-      const pipelineResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
-      if (!pipelineResponse.ok) throw new Error('Failed to load pipeline soaps');
-      const pipelineData = await pipelineResponse.json();
-      setPipelineSoaps(pipelineData.soaps);
-    } catch (err) {
-      console.error('Failed to reload pipeline soaps:', err);
-      // Don't show error to user, just log it
+  // Load data on mount and when switching modes
+  React.useEffect(() => {
+    if (dataSource === 'catalog') {
+      loadData();
+      loadNonMatches();
+    } else {
+      // In match files mode, we still need pipeline soaps for alias lookup and Add Alias functionality
+      // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
+      reloadPipelineSoaps();
+      loadNonMatches();
     }
-  }, []);
+  }, [dataSource, reloadPipelineSoaps]);
+
+  // Clear results when switching data sources
+  React.useEffect(() => {
+    setPipelineResults([]);
+    setWsdbResults([]);
+    setError(null);
+    setSuccessMessage(null);
+  }, [dataSource]);
 
   const loadNonMatches = async () => {
     try {
@@ -262,9 +273,18 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         );
       }
 
-      if (!response.ok) throw new Error('Failed to analyze alignment');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Backend error response:', errorText);
+        throw new Error(`Failed to analyze alignment: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
+      console.log('Analysis response received:', {
+        pipeline_count: data.pipeline_results?.length || 0,
+        wsdb_count: data.wsdb_results?.length || 0,
+        mode: data.mode,
+      });
       setPipelineResults(data.pipeline_results || []);
       setWsdbResults(data.wsdb_results || []);
 
@@ -314,6 +334,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        
+        // Check if the backend returned success: false
+        if (data.success === false) {
+          setError(data.message || 'Failed to save non-match');
+          return;
+        }
+
         // Reload non-matches
         await loadNonMatches();
 
@@ -321,9 +349,10 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         await analyzeAlignment();
 
         // Show success message
-        setSuccessMessage('Non-match saved successfully');
+        setSuccessMessage(data.message || 'Non-match saved successfully');
       } else {
-        setError('Failed to save non-match');
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.detail || errorData.message || 'Failed to save non-match');
       }
     } catch (err) {
       console.error('Error saving non-match:', err);
@@ -425,6 +454,83 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       console.error('Error adding scent alias:', err);
       setError(err instanceof Error ? err.message : 'Error adding scent alias');
     }
+  };
+
+  const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
+    if (!commentId) return;
+
+    try {
+      setCommentLoading(true);
+
+      // Always load just the clicked comment initially for fast response
+      // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+      const allMonths = selectedMonths;
+      const comment = await getCommentDetail(commentId, allMonths);
+      setSelectedComment(comment);
+      setCurrentCommentIndex(0);
+      setCommentModalOpen(true);
+
+      // Store the comment IDs for potential future loading
+      if (allCommentIds && allCommentIds.length > 1) {
+        setAllComments([comment]); // Start with just the first comment
+        // Store the remaining IDs for lazy loading
+        setRemainingCommentIds(allCommentIds.filter(id => id !== commentId));
+      } else {
+        setAllComments([comment]);
+        setRemainingCommentIds([]);
+      }
+    } catch (err) {
+      console.error('Error loading comment:', err);
+      setError(err instanceof Error ? err.message : 'Error loading comment');
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+    if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
+
+    let newIndex = currentCommentIndex;
+    if (direction === 'prev') {
+      newIndex = Math.max(0, currentCommentIndex - 1);
+      setCurrentCommentIndex(newIndex);
+      setSelectedComment(allComments[newIndex]);
+    } else {
+      // Next - check if we need to load more comments
+      if (currentCommentIndex === allComments.length - 1 && remainingCommentIds.length > 0) {
+        // Load the next comment
+        try {
+          setCommentLoading(true);
+          const nextCommentId = remainingCommentIds[0];
+          // When delta months are enabled, selectedMonths already contains all months (primary + delta)
+          const allMonths = selectedMonths;
+          const nextComment = await getCommentDetail(nextCommentId, allMonths);
+
+          setAllComments(prev => [...prev, nextComment]);
+          setRemainingCommentIds(prev => prev.slice(1));
+          setCurrentCommentIndex(allComments.length);
+          setSelectedComment(nextComment);
+        } catch (err) {
+          console.error('Error loading next comment:', err);
+          setError(err instanceof Error ? err.message : 'Error loading next comment');
+        } finally {
+          setCommentLoading(false);
+        }
+      } else {
+        // Navigate to existing comment
+        newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+        setCurrentCommentIndex(newIndex);
+        setSelectedComment(allComments[newIndex]);
+      }
+    }
+  };
+
+  const handleCloseCommentModal = () => {
+    setCommentModalOpen(false);
+    setSelectedComment(null);
+    setAllComments([]);
+    setCurrentCommentIndex(0);
+    setRemainingCommentIds([]);
   };
 
   const getConfidenceColor = (confidence: number) => {
@@ -1112,6 +1218,21 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                   </div>
                                 </div>
                               ))}
+                          {/* Comment Display (match files mode only) */}
+                          {dataSource === 'match_files' && result.comment_ids && result.comment_ids.length > 0 && (
+                            <div className='mt-4 pt-4 border-t'>
+                              <div className='text-sm font-medium text-gray-700 mb-2'>
+                                Comment References ({result.comment_ids.length})
+                              </div>
+                              <CommentDisplay
+                                commentIds={result.comment_ids}
+                                onCommentClick={(commentId) => handleCommentClick(commentId, result.comment_ids)}
+                                commentLoading={commentLoading}
+                                maxDisplay={5}
+                                className='flex flex-wrap gap-2'
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1389,6 +1510,21 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                   </div>
                                 </div>
                               ))}
+                          {/* Comment Display (match files mode only) */}
+                          {dataSource === 'match_files' && result.comment_ids && result.comment_ids.length > 0 && (
+                            <div className='mt-4 pt-4 border-t'>
+                              <div className='text-sm font-medium text-gray-700 mb-2'>
+                                Comment References ({result.comment_ids.length})
+                              </div>
+                              <CommentDisplay
+                                commentIds={result.comment_ids}
+                                onCommentClick={(commentId) => handleCommentClick(commentId, result.comment_ids)}
+                                commentLoading={commentLoading}
+                                maxDisplay={5}
+                                className='flex flex-wrap gap-2'
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1405,6 +1541,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Comment Modal */}
+      {selectedComment && (
+        <CommentModal
+          comment={selectedComment}
+          isOpen={commentModalOpen}
+          onClose={handleCloseCommentModal}
+          comments={allComments}
+          currentIndex={currentCommentIndex}
+          onNavigate={handleCommentNavigation}
+          remainingCommentIds={remainingCommentIds}
+        />
+      )}
     </div>
   );
 };
