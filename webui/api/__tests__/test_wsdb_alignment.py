@@ -866,6 +866,49 @@ def test_bidirectional_filtering(mock_data_files):
             assert len(bam_matches) == 0
 
 
+def test_add_brand_non_match_brand_not_in_catalog(mock_data_files):
+    """Test that non-matches can be saved even when brand doesn't exist in soaps.yaml (match files mode)."""
+    wsdb_dir = mock_data_files / "wsdb"
+    brands_file = wsdb_dir / "non_matches_brands.yaml"
+    
+    # Initialize empty file
+    with brands_file.open("w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+
+    # Create soaps.yaml without the brand we're testing (simulating match files mode)
+    soaps_file = mock_data_files / "soaps.yaml"
+    soaps_data = {
+        "Some Other Brand": {
+            "patterns": ["some.*other"],
+            "scents": {"Scent1": {"patterns": ["scent1"]}},
+        }
+    }
+    with soaps_file.open("w", encoding="utf-8") as f:
+        yaml.dump(soaps_data, f)
+
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        # Try to add non-match for a brand that doesn't exist in soaps.yaml
+        response = client.post(
+            "/api/wsdb-alignment/non-matches",
+            json={
+                "match_type": "brand",
+                "pipeline_brand": "Third Pass Shaving Co",  # Not in soaps.yaml
+                "wsdb_brand": "Wild West Shaving Co.",
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        # Should succeed even though brand doesn't exist in catalog (for match files mode)
+        assert data["success"] is True
+
+        # Verify it was saved
+        with brands_file.open("r", encoding="utf-8") as f:
+            saved_data = yaml.safe_load(f) or {}
+        assert "Third Pass Shaving Co" in saved_data
+        assert "Wild West Shaving Co." in saved_data["Third Pass Shaving Co"]
+
+
 def test_duplicate_non_match_prevention(mock_data_files):
     """Test that duplicate non-matches are not added."""
     wsdb_dir = mock_data_files / "wsdb"
@@ -1314,12 +1357,12 @@ class TestBatchAnalyzeMatchFiles:
         mock_root_path = mock_data_files.parent
         mock_root.__truediv__ = lambda self, other: mock_root_path / other
 
-        # Test with non-existent month
+        # Test with non-existent month (use valid format but file doesn't exist)
         response = client.post(
-            "/api/wsdb-alignment/batch-analyze-match-files?months=2025-99&threshold=0.5&mode=brand_scent&match_type_filter=brand"
+            "/api/wsdb-alignment/batch-analyze-match-files?months=2025-01&threshold=0.5&mode=brand_scent&match_type_filter=brand"
         )
 
-        # Should return empty results, not an error
+        # Should return empty results, not an error (file doesn't exist but format is valid)
         assert response.status_code == 200
         data = response.json()
         assert data["total_entries"] == 0
@@ -1464,4 +1507,160 @@ class TestBatchAnalyzeMatchFiles:
         # Matches should have matched_via set to "canonical" (not alias)
         if len(bm_result["matches"]) > 0:
             assert bm_result["matches"][0]["matched_via"] == "canonical"
+
+    @patch("api.wsdb_alignment.PROJECT_ROOT")
+    def test_batch_analyze_match_files_non_matches_brands_mode(self, mock_root, mock_data_files):
+        """Test that non-matches are filtered in match files mode (brands only)."""
+        # Create match files directory
+        matched_dir = mock_data_files / "matched"
+        matched_dir.mkdir(exist_ok=True)
+
+        # Create a test match file
+        match_file = matched_dir / "2025-05.json"
+        match_data = {
+            "meta": {"month": "2025-05"},
+            "data": [
+                {
+                    "id": "comment1",
+                    "soap": {
+                        "original": "Barrister and Mann - Seville",
+                        "matched": {"brand": "Barrister and Mann", "scent": "Seville"},
+                        "match_type": "brand",
+                    },
+                },
+            ],
+        }
+        with match_file.open("w", encoding="utf-8") as f:
+            json.dump(match_data, f)
+
+        # Set up pipeline data
+        soaps_file = mock_data_files / "soaps.yaml"
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(MOCK_PIPELINE_DATA, f)
+
+        # Set up WSDB data
+        wsdb_dir = mock_data_files / "wsdb"
+        wsdb_dir.mkdir(exist_ok=True)
+        software_file = wsdb_dir / "software.json"
+        with software_file.open("w", encoding="utf-8") as f:
+            json.dump(MOCK_WSDB_DATA, f)
+
+        # Create non-matches file - Barrister and Mann should NOT match Stirling Soap Co.
+        brands_file = wsdb_dir / "non_matches_brands.yaml"
+        brands_data = {
+            "Barrister and Mann": ["Stirling Soap Co."],
+        }
+        with brands_file.open("w", encoding="utf-8") as f:
+            yaml.dump(brands_data, f)
+
+        mock_root_path = mock_data_files.parent
+        mock_root.__truediv__ = lambda self, other: mock_root_path / other
+
+        # Test the endpoint
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze-match-files?months=2025-05&threshold=0.1&mode=brands&match_type_filter=brand"
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Find Barrister and Mann result
+        bam_result = next(
+            (r for r in data["pipeline_results"] if r["source_brand"] == "Barrister and Mann"), None
+        )
+        assert bam_result is not None
+
+        # Verify Stirling Soap Co. is NOT in the matches (should be filtered out)
+        stirling_matches = [m for m in bam_result["matches"] if m["brand"] == "Stirling Soap Co."]
+        assert len(stirling_matches) == 0
+
+    @patch("api.wsdb_alignment.PROJECT_ROOT")
+    def test_batch_analyze_match_files_non_matches_brand_scent_mode(self, mock_root, mock_data_files):
+        """Test that non-matches are filtered in match files mode (brand+scent)."""
+        # Create match files directory
+        matched_dir = mock_data_files / "matched"
+        matched_dir.mkdir(exist_ok=True)
+
+        # Create a test match file
+        match_file = matched_dir / "2025-05.json"
+        match_data = {
+            "meta": {"month": "2025-05"},
+            "data": [
+                {
+                    "id": "comment1",
+                    "soap": {
+                        "original": "Barrister and Mann - Seville",
+                        "matched": {"brand": "Barrister and Mann", "scent": "Seville"},
+                        "match_type": "brand",
+                    },
+                },
+            ],
+        }
+        with match_file.open("w", encoding="utf-8") as f:
+            json.dump(match_data, f)
+
+        # Set up pipeline data
+        soaps_file = mock_data_files / "soaps.yaml"
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(MOCK_PIPELINE_DATA, f)
+
+        # Set up WSDB data - add Leviathan to test scent non-match
+        wsdb_with_leviathan = MOCK_WSDB_DATA.copy()
+        wsdb_with_leviathan.append(
+            {
+                "brand": "Barrister and Mann",
+                "name": "Leviathan",
+                "type": "Soap",
+                "slug": "barrister-and-mann-leviathan",
+                "scent_notes": ["coffee", "leather"],
+                "collaborators": [],
+                "tags": [],
+                "category": "Traditional",
+            }
+        )
+        wsdb_dir = mock_data_files / "wsdb"
+        wsdb_dir.mkdir(exist_ok=True)
+        software_file = wsdb_dir / "software.json"
+        with software_file.open("w", encoding="utf-8") as f:
+            json.dump(wsdb_with_leviathan, f)
+
+        # Create scent non-matches file - BaM Seville != BaM Leviathan
+        scents_file = wsdb_dir / "non_matches_scents.yaml"
+        scents_data = {
+            "Barrister and Mann": {
+                "Seville": ["Leviathan"],
+            }
+        }
+        with scents_file.open("w", encoding="utf-8") as f:
+            yaml.dump(scents_data, f)
+
+        mock_root_path = mock_data_files.parent
+        mock_root.__truediv__ = lambda self, other: mock_root_path / other
+
+        # Test the endpoint
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze-match-files?months=2025-05&threshold=0.1&mode=brand_scent&match_type_filter=brand"
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Find Barrister and Mann - Seville result
+        bam_seville = next(
+            (
+                r
+                for r in data["pipeline_results"]
+                if r["source_brand"] == "Barrister and Mann" and r["source_scent"] == "Seville"
+            ),
+            None,
+        )
+        assert bam_seville is not None
+
+        # Verify Leviathan is NOT in the matches (should be filtered out)
+        leviathan_matches = [m for m in bam_seville["matches"] if m["name"] == "Leviathan"]
+        assert len(leviathan_matches) == 0
+
+        # But Seville itself should still be in matches (same brand, same scent)
+        seville_matches = [m for m in bam_seville["matches"] if m["name"] == "Seville"]
+        assert len(seville_matches) > 0
 
