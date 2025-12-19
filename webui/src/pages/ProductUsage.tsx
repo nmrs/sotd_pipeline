@@ -11,22 +11,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar as CalendarIcon, List as ListIcon, Table as TableIcon, BarChart3 as SummaryIcon, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, List as ListIcon, Table as TableIcon, BarChart3 as SummaryIcon, Loader2, Copy, Check } from 'lucide-react';
 import { CommentDisplay } from '@/components/domain/CommentDisplay';
 import CommentModal from '@/components/domain/CommentModal';
 import { getCommentDetail, CommentDetail } from '@/services/api';
 import { getProductsForMonth, getProductUsageAnalysis, getProductYearlySummary } from '@/services/api';
 import { Product, ProductUsageAnalysis, ProductYearlySummary } from '@/types/productUsage';
 import MonthSelector from '@/components/forms/MonthSelector';
+import axios from 'axios';
 
 const ProductUsage: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedProductType, setSelectedProductType] = useState<'razor' | 'blade' | 'brush' | 'soap' | ''>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productSearch, setProductSearch] = useState<string>('');
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [productAnalysis, setProductAnalysis] = useState<ProductUsageAnalysis | null>(null);
+  const [productAnalyses, setProductAnalyses] = useState<Array<{ month: string; analysis: ProductUsageAnalysis }>>([]);
+  const [aggregatedAnalysis, setAggregatedAnalysis] = useState<ProductUsageAnalysis | null>(null);
   const [yearlySummary, setYearlySummary] = useState<ProductYearlySummary | null>(null);
   const [yearlySummaryLoading, setYearlySummaryLoading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,18 +46,25 @@ const ProductUsage: React.FC = () => {
   // Track expanded state for each user to synchronize comment IDs and usage dates
   const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({});
 
-  // Fetch products when month and product type change
+  // Copy to markdown state
+  const [copyLoading, setCopyLoading] = useState<Record<string, boolean>>({});
+  const [copySuccess, setCopySuccess] = useState<Record<string, boolean>>({});
+  const [commentUrls, setCommentUrls] = useState<Record<string, string>>({});
+
+  // Fetch products when months and product type change
   useEffect(() => {
-    if (selectedMonth && selectedProductType) {
-      fetchProductsForMonth(selectedMonth, selectedProductType);
+    if (selectedMonths.length > 0 && selectedProductType) {
+      fetchProductsForMonths(selectedMonths, selectedProductType);
     } else {
       setProducts([]);
       setFilteredProducts([]);
       setSelectedProduct(null);
-      setProductAnalysis(null);
+      setAggregatedAnalysis(null);
+      setProductAnalyses([]);
       setYearlySummary(null);
+      setCommentUrls({});
     }
-  }, [selectedMonth, selectedProductType]);
+  }, [selectedMonths, selectedProductType]);
 
   // Filter products when search changes
   useEffect(() => {
@@ -72,32 +81,215 @@ const ProductUsage: React.FC = () => {
     }
   }, [productSearch, products]);
 
-  const fetchProductsForMonth = async (month: string, productType: string) => {
+  const fetchProductsForMonths = async (months: string[], productType: string) => {
     try {
       setLoading(true);
       setError('');
-      const productsData = await getProductsForMonth(month, productType);
-      setProducts(productsData);
-      setFilteredProducts(productsData);
+      const responses = await Promise.all(
+        months.map(month => getProductsForMonth(month, productType))
+      );
+
+      // Merge products across all months
+      const productMap = new Map<string, Product>();
+      responses.forEach(productsData => {
+        productsData.forEach(product => {
+          const existing = productMap.get(product.key);
+          if (existing) {
+            existing.usage_count += product.usage_count;
+            // For unique_users, we need to track unique users across months
+            // Since we can't merge user sets from the API, we'll use the max value
+            existing.unique_users = Math.max(existing.unique_users, product.unique_users);
+          } else {
+            productMap.set(product.key, { ...product });
+          }
+        });
+      });
+
+      const mergedProducts = Array.from(productMap.values()).sort((a, b) => b.usage_count - a.usage_count);
+      setProducts(mergedProducts);
+      setFilteredProducts(mergedProducts);
       setSelectedProduct(null);
-      setProductAnalysis(null);
+      setAggregatedAnalysis(null);
+      setProductAnalyses([]);
     } catch (err) {
-      setError('Failed to fetch products for month');
+      setError('Failed to fetch products for months');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchProductAnalysis = async (month: string, productType: string, product: Product) => {
+  // Helper function to batch API calls to avoid overwhelming the server
+  const batchProcess = async <T, R>(
+    items: T[],
+    batchSize: number,
+    processor: (item: T) => Promise<R>
+  ): Promise<R[]> => {
+    const results: R[] = [];
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+      const batchResults = await Promise.all(batch.map(processor));
+      results.push(...batchResults);
+    }
+    return results;
+  };
+
+  const aggregateProductAnalyses = (analyses: ProductUsageAnalysis[]): ProductUsageAnalysis => {
+    if (analyses.length === 0) {
+      throw new Error('Cannot aggregate empty analyses array');
+    }
+
+    // Merge users across months
+    const userMap = new Map<string, any>();
+    analyses.forEach(analysis => {
+      analysis.users.forEach(user => {
+        const existing = userMap.get(user.username);
+        if (existing) {
+          existing.usage_count += user.usage_count;
+          // Merge usage_dates (unique)
+          const dateSet = new Set([...existing.usage_dates, ...user.usage_dates]);
+          existing.usage_dates = Array.from(dateSet).sort();
+          // Merge comment_ids (unique)
+          const commentIdSet = new Set([...existing.comment_ids, ...user.comment_ids]);
+          existing.comment_ids = Array.from(commentIdSet);
+        } else {
+          userMap.set(user.username, {
+            username: user.username,
+            usage_count: user.usage_count,
+            usage_dates: [...user.usage_dates].sort(),
+            comment_ids: [...user.comment_ids],
+          });
+        }
+      });
+    });
+
+    // Convert to array and sort by usage count
+    const mergedUsers = Array.from(userMap.values()).sort((a, b) => b.usage_count - a.usage_count);
+
+    // Merge comments_by_date across months
+    const mergedCommentsByDate: Record<string, string[]> = {};
+    analyses.forEach(analysis => {
+      Object.entries(analysis.comments_by_date).forEach(([date, ids]) => {
+        if (!mergedCommentsByDate[date]) {
+          mergedCommentsByDate[date] = [];
+        }
+        mergedCommentsByDate[date].push(...ids);
+        // Remove duplicates
+        mergedCommentsByDate[date] = [...new Set(mergedCommentsByDate[date])];
+      });
+    });
+
+    // Sum total_usage and calculate unique_users
+    const totalUsage = analyses.reduce((sum, a) => sum + a.total_usage, 0);
+    const uniqueUsers = mergedUsers.length;
+
+    return {
+      product: analyses[0].product, // Keep product info from first analysis
+      total_usage: totalUsage,
+      unique_users: uniqueUsers,
+      users: mergedUsers,
+      usage_by_date: { ...mergedCommentsByDate },
+      comments_by_date: mergedCommentsByDate,
+    };
+  };
+
+  const fetchProductAnalyses = async (months: string[], productType: string, product: Product) => {
     try {
       setLoading(true);
       setError('');
-      const analysis = await getProductUsageAnalysis(month, productType, product.brand, product.model);
-      setProductAnalysis(analysis);
+
+      // Process months in batches of 6 to avoid overwhelming the server
+      const batchSize = 6;
+      const responses = await batchProcess(months, batchSize, async month => {
+        try {
+          const analysis = await getProductUsageAnalysis(month, productType, product.brand, product.model);
+          return { month, analysis, error: null };
+        } catch (err: any) {
+          // Handle case where product doesn't exist in a month
+          if (err.response?.status === 404) {
+            return { month, analysis: null, error: null };
+          }
+          // For other errors, return error info but don't throw
+          return { month, analysis: null, error: err };
+        }
+      });
+
+      // Check if any requests failed with non-404 errors
+      const errors = responses.filter(r => r.error !== null);
+      if (errors.length > 0) {
+        const firstError = errors[0].error;
+        const errorMessage =
+          firstError instanceof Error && 'response' in firstError && (firstError as any).response?.status === 500
+            ? 'Server error: Failed to fetch product analysis. Please try again later.'
+            : firstError instanceof Error
+            ? `Failed to fetch product analysis: ${firstError.message}`
+            : 'Failed to fetch product analysis';
+        setError(errorMessage);
+        setAggregatedAnalysis(null);
+        setProductAnalyses([]);
+        return;
+      }
+
+      const validAnalysesWithMonths = responses
+        .filter(r => r.analysis !== null)
+        .map(r => ({
+          month: r.month,
+          analysis: r.analysis!,
+        }));
+
+      if (validAnalysesWithMonths.length === 0) {
+        setError(`Product ${product.brand} ${product.model} not found in any selected month`);
+        setAggregatedAnalysis(null);
+        setProductAnalyses([]);
+        return;
+      }
+
+      // Aggregate analyses
+      const validAnalyses = validAnalysesWithMonths.map(item => item.analysis);
+      const aggregated = aggregateProductAnalyses(validAnalyses);
+      setAggregatedAnalysis(aggregated);
+      setProductAnalyses(validAnalysesWithMonths);
+
+      // Fetch URLs for all comment IDs in the background
+      const allCommentIds = new Set<string>();
+      validAnalyses.forEach(analysis => {
+        analysis.users.forEach(user => {
+          user.comment_ids.forEach(id => allCommentIds.add(id));
+        });
+      });
+
+      if (allCommentIds.size > 0) {
+        // Fetch URLs in batches to avoid overwhelming the server
+        const urlMap: Record<string, string> = {};
+        await batchProcess(Array.from(allCommentIds), 10, async commentId => {
+          try {
+            const comment = await getCommentDetail(commentId, months);
+            return { commentId, url: comment.url };
+          } catch (err) {
+            console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
+            return { commentId, url: '' };
+          }
+        }).then(results => {
+          results.forEach(({ commentId, url }) => {
+            urlMap[commentId] = url;
+          });
+          setCommentUrls(urlMap);
+        });
+      } else {
+        setCommentUrls({});
+      }
     } catch (err) {
-      setError('Failed to fetch product usage analysis');
-      console.error(err);
+      const errorMessage =
+        err instanceof Error && 'response' in err && (err as any).response?.status === 500
+          ? 'Server error: Failed to fetch product analysis. Please try again later.'
+          : err instanceof Error
+          ? `Failed to fetch product analysis: ${err.message}`
+          : 'Failed to fetch product analysis';
+      setError(errorMessage);
+      setAggregatedAnalysis(null);
+      setProductAnalyses([]);
+      setCommentUrls({});
+      console.error('[ProductUsage] Error fetching product analysis:', err);
     } finally {
       setLoading(false);
     }
@@ -117,13 +309,35 @@ const ProductUsage: React.FC = () => {
     }
   };
 
+  // Helper function to get comment URLs from cache (no longer fetches)
+  const getCommentUrls = (commentIds: string[]): Record<string, string> => {
+    const urlMap: Record<string, string> = {};
+    commentIds.forEach(commentId => {
+      if (commentUrls[commentId]) {
+        urlMap[commentId] = commentUrls[commentId];
+      }
+    });
+    return urlMap;
+  };
+
+  // Helper function to copy text to clipboard
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      return false;
+    }
+  };
+
   // Comment modal handlers
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     try {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const comment = await getCommentDetail(commentId, [selectedMonth]);
+      const comment = await getCommentDetail(commentId, selectedMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
       setCommentModalOpen(true);
@@ -158,7 +372,7 @@ const ProductUsage: React.FC = () => {
         const nextCommentId = remainingCommentIds[0];
         try {
           setCommentLoading(true);
-          const nextComment = await getCommentDetail(nextCommentId, [selectedMonth]);
+          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
           setAllComments([...allComments, nextComment]);
           setRemainingCommentIds(remainingCommentIds.slice(1));
           setCurrentCommentIndex(allComments.length);
@@ -181,27 +395,34 @@ const ProductUsage: React.FC = () => {
     setRemainingCommentIds([]);
   };
 
-  const handleMonthChange = (month: string) => {
-    setSelectedMonth(month);
+  const handleMonthChange = (months: string[]) => {
+    setSelectedMonths(months);
     setSelectedProduct(null);
-    setProductAnalysis(null);
+    setAggregatedAnalysis(null);
+    setProductAnalyses([]);
     setYearlySummary(null);
     setProductSearch('');
+    setCommentUrls({});
   };
 
   const handleProductTypeChange = (productType: string) => {
     setSelectedProductType(productType as 'razor' | 'blade' | 'brush' | 'soap' | '');
     setSelectedProduct(null);
-    setProductAnalysis(null);
+    setAggregatedAnalysis(null);
+    setProductAnalyses([]);
     setYearlySummary(null);
     setProductSearch('');
+    setCommentUrls({});
   };
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
-    if (selectedMonth && selectedProductType) {
-      fetchProductAnalysis(selectedMonth, selectedProductType, product);
-      fetchYearlySummary(selectedMonth, selectedProductType, product);
+    if (selectedMonths.length > 0 && selectedProductType) {
+      fetchProductAnalyses(selectedMonths, selectedProductType, product);
+      // For yearly summary, use the first selected month
+      if (selectedMonths.length > 0) {
+        fetchYearlySummary(selectedMonths[0], selectedProductType, product);
+      }
     }
   };
 
@@ -212,8 +433,309 @@ const ProductUsage: React.FC = () => {
     }));
   };
 
+  // Helper function to get dates with URLs for a user (uses cached URLs)
+  const getUserUsageDatesWithUrls = (
+    commentIds: string[],
+    aggregatedAnalysis: ProductUsageAnalysis,
+    includeUrls: boolean = true
+  ): Array<{ date: string; url: string }> => {
+    if (!aggregatedAnalysis || !commentIds || commentIds.length === 0) {
+      return [];
+    }
+
+    // Map comment IDs to dates
+    const commentIdToDate: Record<string, string> = {};
+    const commentsByDate = aggregatedAnalysis.comments_by_date;
+
+    commentIds.forEach(commentId => {
+      for (const [date, dateCommentIds] of Object.entries(commentsByDate)) {
+        if (dateCommentIds.includes(commentId)) {
+          commentIdToDate[commentId] = date;
+          break;
+        }
+      }
+    });
+
+    // Get URLs from cache if including URLs
+    const commentUrlsMap = includeUrls ? getCommentUrls(commentIds) : {};
+
+    // Group by date and get first URL for each date
+    const dateToUrl: Record<string, string> = {};
+    commentIds.forEach(commentId => {
+      const date = commentIdToDate[commentId];
+      if (date && !dateToUrl[date]) {
+        dateToUrl[date] = includeUrls ? (commentUrlsMap[commentId] || '') : '';
+      }
+    });
+
+    // Create array of date-url pairs, sorted by date
+    const datesWithUrls = Object.keys(dateToUrl)
+      .sort()
+      .map(date => ({
+        date,
+        url: dateToUrl[date],
+      }));
+
+    return datesWithUrls;
+  };
+
+  // Generate markdown for calendar view
+  const generateCalendarMarkdown = (
+    month: string,
+    monthAnalysis: ProductUsageAnalysis,
+    year: number,
+    monthNum: number,
+    includeUrls: boolean = true
+  ): string => {
+    const startDate = new Date(year, monthNum - 1, 1);
+    const endDate = new Date(year, monthNum, 0);
+    const daysInMonth = endDate.getDate();
+    const firstDayOfWeek = startDate.getDay();
+
+    // Collect all unique comment IDs for this month
+    const allCommentIds = new Set<string>();
+    Object.values(monthAnalysis.comments_by_date).forEach(ids => {
+      ids.forEach(id => allCommentIds.add(id));
+    });
+
+    // Get URLs from cache if including URLs
+    const commentUrlsMap = includeUrls ? getCommentUrls(Array.from(allCommentIds)) : {};
+
+    // Build calendar grid
+    const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    let markdown = `## ${monthName}\n\n`;
+    markdown += '| Sun | Mon | Tue | Wed | Thu | Fri | Sat |\n';
+    markdown += '|-----|-----|-----|-----|-----|-----|-----|\n';
+
+    // Empty cells for days before month starts
+    const emptyCells = Array(firstDayOfWeek).fill('|     ');
+    let currentRow = emptyCells.join('');
+
+    // Generate calendar days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];
+      const isUsed = dayCommentIds.length > 0;
+
+      if (isUsed && dayCommentIds.length > 0 && includeUrls) {
+        // Use the first comment URL for the day link
+        const firstCommentId = dayCommentIds[0];
+        const url = commentUrlsMap[firstCommentId] || '';
+        if (url) {
+          currentRow += `| [${day}](${url}) `;
+        } else {
+          currentRow += `| ${day} `;
+        }
+      } else {
+        currentRow += `| ${day} `;
+      }
+
+      // Start new row on Saturday
+      if ((firstDayOfWeek + day) % 7 === 0) {
+        markdown += currentRow + '|\n';
+        currentRow = '';
+      }
+    }
+
+    // Add remaining cells for the last row
+    if (currentRow) {
+      const remainingCells = 7 - (currentRow.match(/\|/g) || []).length;
+      for (let i = 0; i < remainingCells; i++) {
+        currentRow += '|     ';
+      }
+      markdown += currentRow + '|\n';
+    }
+
+    return markdown;
+  };
+
+  // Generate markdown for list view
+  const generateListViewMarkdown = (
+    selectedMonths: string[],
+    productAnalyses: Array<{ month: string; analysis: ProductUsageAnalysis }>,
+    aggregatedAnalysis: ProductUsageAnalysis,
+    singleMonth?: string
+  ): string => {
+    let markdown = '';
+
+    // If singleMonth is specified, only generate for that month
+    const monthsToProcess = singleMonth ? [singleMonth] : selectedMonths;
+
+    if (selectedMonths.length > 1 && aggregatedAnalysis && !singleMonth) {
+      markdown += `## ${selectedMonths.length} months selected\n\n`;
+      markdown += `Total Usage: ${aggregatedAnalysis.total_usage} times by ${aggregatedAnalysis.unique_users} users\n\n`;
+    }
+
+    // Generate table for each month
+    monthsToProcess.forEach(month => {
+      const monthData = productAnalyses.find(a => a.month === month);
+      const monthAnalysis = monthData?.analysis;
+
+      if (!monthAnalysis) return;
+
+      const [year, monthNum] = month.split('-').map(Number);
+      const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+      });
+
+      markdown += `## ${monthName} - Daily Usage\n\n`;
+      markdown += '| Date | Status | Uses | Users |\n';
+      markdown += '|------|--------|------|-------|\n';
+
+      const endDate = new Date(year, monthNum, 0);
+      const daysInMonth = endDate.getDate();
+
+      // Get users who used the product on each date
+      const dateUserMap: Record<string, string[]> = {};
+      monthAnalysis.users.forEach(user => {
+        user.usage_dates.forEach(date => {
+          if (!dateUserMap[date]) {
+            dateUserMap[date] = [];
+          }
+          if (!dateUserMap[date].includes(user.username)) {
+            dateUserMap[date].push(user.username);
+          }
+        });
+      });
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isUsed = monthAnalysis.comments_by_date[dateStr]?.length > 0;
+        const status = isUsed ? 'Used' : 'Not Used';
+        const uses = monthAnalysis.comments_by_date[dateStr]?.length || 0;
+        const users = dateUserMap[dateStr]?.length || 0;
+
+        markdown += `| ${dateStr} | ${status} | ${uses} | ${users} |\n`;
+      }
+
+      markdown += '\n';
+    });
+
+    return markdown;
+  };
+
+  // Generate markdown for user table
+  const generateUserTableMarkdown = (
+    aggregatedAnalysis: ProductUsageAnalysis,
+    includeUrls: boolean = true
+  ): string => {
+    let markdown = '## Users\n\n';
+    markdown += '| # | Username | Usage Count | Dates |\n';
+    markdown += '|---|----------|-------------|-------|\n';
+
+    for (const [index, user] of aggregatedAnalysis.users.entries()) {
+      const datesWithUrls = getUserUsageDatesWithUrls(
+        user.comment_ids,
+        aggregatedAnalysis,
+        includeUrls
+      );
+      const datesStr =
+        datesWithUrls.length > 0
+          ? datesWithUrls
+              .map(({ date, url }) => (includeUrls && url ? `[${date}](${url})` : date))
+              .join(', ')
+          : '-';
+
+      markdown += `| ${index + 1} | ${user.username} | ${user.usage_count} | ${datesStr} |\n`;
+    }
+
+    return markdown;
+  };
+
+  // Handler for copying calendar markdown
+  const handleCopyCalendarMarkdown = async (month: string, includeUrls: boolean = true) => {
+    const monthData = productAnalyses.find(a => a.month === month);
+    const monthAnalysis = monthData?.analysis;
+
+    if (!monthAnalysis) return;
+
+    const [year, monthNum] = month.split('-').map(Number);
+    const key = `calendar-${month}-${includeUrls ? 'with-urls' : 'no-urls'}`;
+
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = generateCalendarMarkdown(month, monthAnalysis, year, monthNum, includeUrls);
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to generate calendar markdown:', err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Handler for copying list view markdown
+  const handleCopyListViewMarkdown = async (singleMonth?: string, includeUrls: boolean = true) => {
+    if (!aggregatedAnalysis) return;
+
+    const key = singleMonth
+      ? `list-view-${singleMonth}-${includeUrls ? 'with-urls' : 'no-urls'}`
+      : `list-view-${includeUrls ? 'with-urls' : 'no-urls'}`;
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = generateListViewMarkdown(
+        selectedMonths,
+        productAnalyses,
+        aggregatedAnalysis,
+        singleMonth
+      );
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to generate list view markdown:', err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Handler for copying user table markdown
+  const handleCopyUserTableMarkdown = async (includeUrls: boolean = true) => {
+    if (!aggregatedAnalysis) return;
+
+    const key = `user-table-${includeUrls ? 'with-urls' : 'no-urls'}`;
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = generateUserTableMarkdown(aggregatedAnalysis, includeUrls);
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to generate user table markdown:', err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
   const renderTableView = () => {
-    if (!productAnalysis) {
+    if (!aggregatedAnalysis) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
           Select a product to see usage analysis
@@ -222,51 +744,87 @@ const ProductUsage: React.FC = () => {
     }
 
     return (
-      <div className='overflow-x-auto'>
-        <table className='w-full border-collapse border border-border'>
-          <thead>
-            <tr className='bg-muted'>
-              <th className='border border-border p-2 text-center'>#</th>
-              <th className='border border-border p-2 text-left'>Username</th>
-              <th className='border border-border p-2 text-center'>Usage Count</th>
-              <th className='border border-border p-2 text-left'>Usage Dates</th>
-              <th className='border border-border p-2 text-left'>Comment IDs</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productAnalysis.users.map((user, index) => (
-              <tr key={user.username} className='hover:bg-muted/50'>
-                <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
-                <td className='border border-border p-2'>{user.username}</td>
-                <td className='border border-border p-2 text-center'>{user.usage_count}</td>
-                <td className='border border-border p-2'>
-                  <CommentDisplay
-                    commentIds={user.comment_ids}
-                    onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                    displayMode='dates'
-                    dates={user.usage_dates}
-                    expanded={expandedUsers[user.username]}
-                    onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                  />
-                </td>
-                <td className='border border-border p-2'>
-                  <CommentDisplay
-                    commentIds={user.comment_ids}
-                    onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                    expanded={expandedUsers[user.username]}
-                    onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                  />
-                </td>
+      <div className='space-y-4'>
+        <div className='flex justify-end gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handleCopyUserTableMarkdown(true)}
+            disabled={copyLoading['user-table-with-urls']}
+            className='flex items-center gap-2'
+          >
+            {copyLoading['user-table-with-urls'] ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : copySuccess['user-table-with-urls'] ? (
+              <Check className='h-4 w-4' />
+            ) : (
+              <Copy className='h-4 w-4' />
+            )}
+            {copySuccess['user-table-with-urls'] ? 'Copied!' : 'Copy (with URLs)'}
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handleCopyUserTableMarkdown(false)}
+            disabled={copyLoading['user-table-no-urls']}
+            className='flex items-center gap-2'
+          >
+            {copyLoading['user-table-no-urls'] ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : copySuccess['user-table-no-urls'] ? (
+              <Check className='h-4 w-4' />
+            ) : (
+              <Copy className='h-4 w-4' />
+            )}
+            {copySuccess['user-table-no-urls'] ? 'Copied!' : 'Copy (no URLs)'}
+          </Button>
+        </div>
+        <div className='overflow-x-auto'>
+          <table className='w-full border-collapse border border-border'>
+            <thead>
+              <tr className='bg-muted'>
+                <th className='border border-border p-2 text-center'>#</th>
+                <th className='border border-border p-2 text-left'>Username</th>
+                <th className='border border-border p-2 text-center'>Usage Count</th>
+                <th className='border border-border p-2 text-left'>Usage Dates</th>
+                <th className='border border-border p-2 text-left'>Comment IDs</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {aggregatedAnalysis.users.map((user, index) => (
+                <tr key={user.username} className='hover:bg-muted/50'>
+                  <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
+                  <td className='border border-border p-2'>{user.username}</td>
+                  <td className='border border-border p-2 text-center'>{user.usage_count}</td>
+                  <td className='border border-border p-2'>
+                    <CommentDisplay
+                      commentIds={user.comment_ids}
+                      onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                      displayMode='dates'
+                      dates={user.usage_dates}
+                      expanded={expandedUsers[user.username]}
+                      onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                    />
+                  </td>
+                  <td className='border border-border p-2'>
+                    <CommentDisplay
+                      commentIds={user.comment_ids}
+                      onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                      expanded={expandedUsers[user.username]}
+                      onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
 
   const renderCalendarView = () => {
-    if (!productAnalysis) {
+    if (!aggregatedAnalysis || selectedMonths.length === 0) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
           Select a product to see usage analysis
@@ -274,108 +832,164 @@ const ProductUsage: React.FC = () => {
       );
     }
 
-    // Parse the month to get year and month number
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-    const daysInMonth = endDate.getDate();
-
-    // Create array of dates for the month
-    const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-    // Convert usage dates to day numbers for easy lookup
-    const usageDays = new Set(
-      Object.keys(productAnalysis.comments_by_date).map(dateStr => {
-        const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
-        return date.getDate();
-      })
-    );
-
-    // Get users who used the product on each date for distinct user count
-    const dateUserMap: Record<string, string[]> = {};
-    productAnalysis.users.forEach(user => {
-      user.usage_dates.forEach(date => {
-        if (!dateUserMap[date]) {
-          dateUserMap[date] = [];
-        }
-        if (!dateUserMap[date].includes(user.username)) {
-          dateUserMap[date].push(user.username);
-        }
-      });
-    });
-
     return (
-      <div className='space-y-4'>
-        <div className='text-center'>
-          <h3 className='text-lg font-semibold'>
-            {new Date(year, month - 1).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </h3>
-          <p className='text-sm text-muted-foreground'>
-            Total Usage: {productAnalysis.total_usage} times by {productAnalysis.unique_users} users
-          </p>
-        </div>
+      <div className='space-y-8'>
+        {/* Aggregated summary when multiple months */}
+        {selectedMonths.length > 1 && aggregatedAnalysis && (
+          <div className='text-center mb-4'>
+            <h3 className='text-lg font-semibold'>{selectedMonths.length} months selected</h3>
+            <p className='text-sm text-muted-foreground'>
+              Total Usage: {aggregatedAnalysis.total_usage} times by {aggregatedAnalysis.unique_users} users
+            </p>
+          </div>
+        )}
 
-        <div className='grid grid-cols-7 gap-1'>
-          {/* Day headers */}
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className='p-2 text-center text-sm font-medium text-muted-foreground'>
-              {day}
-            </div>
-          ))}
+        {/* Separate calendar section for each month */}
+        {selectedMonths.map(month => {
+          const monthData = productAnalyses.find(a => a.month === month);
+          const monthAnalysis = monthData?.analysis || null;
 
-          {/* Empty cells for days before month starts */}
-          {Array.from({ length: startDate.getDay() }, (_, i) => (
-            <div key={`empty-${i}`} className='p-2' />
-          ))}
+          if (!monthAnalysis) return null;
 
-          {/* Month days */}
-          {dates.map(day => {
-            const isUsed = usageDays.has(day);
-            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayCommentIds = productAnalysis.comments_by_date[dateStr] || [];
-            const dayUsers = dateUserMap[dateStr] || [];
-            const dailyUses = dayCommentIds.length;
-            const distinctUsers = dayUsers.length;
+          // Parse the month to get year and month number
+          const [year, monthNum] = month.split('-').map(Number);
+          const startDate = new Date(year, monthNum - 1, 1);
+          const endDate = new Date(year, monthNum, 0);
+          const daysInMonth = endDate.getDate();
 
-            return (
-              <div
-                key={day}
-                className={`p-2 text-center border rounded-md min-h-[80px] flex flex-col items-center justify-center ${
-                  isUsed
-                    ? 'bg-green-100 border-green-300 text-green-800'
-                    : 'bg-gray-100 border-gray-300 text-gray-400'
-                }`}
-              >
-                <span className='text-sm font-medium'>{day}</span>
-                {isUsed && dailyUses > 0 && (
-                  <div className='mt-1 space-y-0.5'>
-                    <div className='text-xs'>
-                      {dailyUses} {dailyUses === 1 ? 'use' : 'uses'}
-                    </div>
-                    <div className='text-xs'>
-                      {distinctUsers} {distinctUsers === 1 ? 'user' : 'users'}
-                    </div>
-                    <div className='mt-1'>
-                      <CommentDisplay
-                        commentIds={dayCommentIds}
-                        onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
-                      />
-                    </div>
-                  </div>
-                )}
+          // Create array of dates for the month
+          const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+          // Convert usage dates to day numbers for easy lookup
+          const usageDays = new Set(
+            Object.keys(monthAnalysis.comments_by_date).map(dateStr => {
+              const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
+              return date.getDate();
+            })
+          );
+
+          // Get users who used the product on each date for distinct user count
+          const dateUserMap: Record<string, string[]> = {};
+          monthAnalysis.users.forEach(user => {
+            user.usage_dates.forEach(date => {
+              if (!dateUserMap[date]) {
+                dateUserMap[date] = [];
+              }
+              if (!dateUserMap[date].includes(user.username)) {
+                dateUserMap[date].push(user.username);
+              }
+            });
+          });
+
+          return (
+            <div key={month} className='space-y-4'>
+              <div className='text-center relative'>
+                <div className='absolute top-0 right-0 flex items-center gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyCalendarMarkdown(month, true)}
+                    disabled={copyLoading[`calendar-${month}-with-urls`]}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`calendar-${month}-with-urls`] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`calendar-${month}-with-urls`] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`calendar-${month}-with-urls`] ? 'Copied!' : 'Copy (with URLs)'}
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyCalendarMarkdown(month, false)}
+                    disabled={copyLoading[`calendar-${month}-no-urls`]}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`calendar-${month}-no-urls`] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`calendar-${month}-no-urls`] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`calendar-${month}-no-urls`] ? 'Copied!' : 'Copy (no URLs)'}
+                  </Button>
+                </div>
+                <h3 className='text-lg font-semibold'>
+                  {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p className='text-sm text-muted-foreground'>
+                  Total Usage: {monthAnalysis.total_usage} times by {monthAnalysis.unique_users} users
+                </p>
               </div>
-            );
-          })}
-        </div>
+
+              <div className='grid grid-cols-7 gap-1'>
+                {/* Day headers */}
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className='p-2 text-center text-sm font-medium text-muted-foreground'>
+                    {day}
+                  </div>
+                ))}
+
+                {/* Empty cells for days before month starts */}
+                {Array.from({ length: startDate.getDay() }, (_, i) => (
+                  <div key={`empty-${i}`} className='p-2' />
+                ))}
+
+                {/* Month days */}
+                {dates.map(day => {
+                  const isUsed = usageDays.has(day);
+                  const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];
+                  const dayUsers = dateUserMap[dateStr] || [];
+                  const dailyUses = dayCommentIds.length;
+                  const distinctUsers = dayUsers.length;
+
+                  return (
+                    <div
+                      key={day}
+                      className={`p-2 text-center border rounded-md min-h-[80px] flex flex-col items-center justify-center ${
+                        isUsed
+                          ? 'bg-green-100 border-green-300 text-green-800'
+                          : 'bg-gray-100 border-gray-300 text-gray-400'
+                      }`}
+                    >
+                      <span className='text-sm font-medium'>{day}</span>
+                      {isUsed && dailyUses > 0 && (
+                        <div className='mt-1 space-y-0.5'>
+                          <div className='text-xs'>
+                            {dailyUses} {dailyUses === 1 ? 'use' : 'uses'}
+                          </div>
+                          <div className='text-xs'>
+                            {distinctUsers} {distinctUsers === 1 ? 'user' : 'users'}
+                          </div>
+                          <div className='mt-1'>
+                            <CommentDisplay
+                              commentIds={dayCommentIds}
+                              onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
   const renderListView = () => {
-    if (!productAnalysis) {
+    if (!aggregatedAnalysis || selectedMonths.length === 0) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
           Select a product to see usage analysis
@@ -383,93 +997,221 @@ const ProductUsage: React.FC = () => {
       );
     }
 
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const usageDays = new Set(
-      Object.keys(productAnalysis.comments_by_date).map(dateStr => {
-        const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
-        return date.getDate();
-      })
-    );
-
-    // Get users who used the product on each date
-    const dateUserMap: Record<string, string[]> = {};
-    productAnalysis.users.forEach(user => {
-      user.usage_dates.forEach(date => {
-        if (!dateUserMap[date]) {
-          dateUserMap[date] = [];
-        }
-        if (!dateUserMap[date].includes(user.username)) {
-          dateUserMap[date].push(user.username);
-        }
-      });
-    });
-
     return (
-      <div className='space-y-4'>
-        <div className='text-center mb-4'>
-          <h3 className='text-lg font-semibold'>
-            {new Date(year, month - 1).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </h3>
-          <p className='text-sm text-muted-foreground'>
-            Total Usage: {productAnalysis.total_usage} times by {productAnalysis.unique_users} users
-          </p>
-        </div>
-
-        <div className='space-y-2'>
-          {Array.from({ length: daysInMonth }, (_, i) => {
-            const day = i + 1;
-            const isUsed = usageDays.has(day);
-            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayCommentIds = productAnalysis.comments_by_date[dateStr] || [];
-            const dayUsers = dateUserMap[dateStr] || [];
-
-            const dailyUses = dayCommentIds.length;
-            const distinctUsers = dayUsers.length;
-
-            return (
-              <div
-                key={day}
-                className={`flex items-center justify-between p-3 border rounded-lg ${
-                  isUsed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
-                }`}
+      <div className='space-y-8'>
+        {/* Aggregated summary when multiple months */}
+        {selectedMonths.length > 1 && aggregatedAnalysis && (
+          <div className='text-center mb-4 relative'>
+            <div className='absolute top-0 right-0 flex items-center gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handleCopyListViewMarkdown(undefined, true)}
+                disabled={copyLoading['list-view-with-urls']}
+                className='flex items-center gap-2'
               >
-                <div className='flex items-center space-x-3'>
-                  <span className='font-medium'>Day {day}</span>
-                  <Badge variant={isUsed ? 'default' : 'outline'} className={isUsed ? 'bg-green-600' : ''}>
-                    {isUsed ? 'Used' : 'Not Used'}
-                  </Badge>
-                  {isUsed && (
-                    <div className='flex items-center space-x-2 text-sm'>
-                      <Badge variant='outline' className='bg-blue-50'>
-                        {dailyUses} {dailyUses === 1 ? 'use' : 'uses'}
-                      </Badge>
-                      <Badge variant='outline' className='bg-purple-50'>
-                        {distinctUsers} {distinctUsers === 1 ? 'user' : 'users'}
-                      </Badge>
-                      {dayUsers.length > 0 && (
-                        <span className='text-muted-foreground'>
-                          ({dayUsers.join(', ')})
-                        </span>
+                {copyLoading['list-view-with-urls'] ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : copySuccess['list-view-with-urls'] ? (
+                  <Check className='h-4 w-4' />
+                ) : (
+                  <Copy className='h-4 w-4' />
+                )}
+                {copySuccess['list-view-with-urls'] ? 'Copied!' : 'Copy (with URLs)'}
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => handleCopyListViewMarkdown(undefined, false)}
+                disabled={copyLoading['list-view-no-urls']}
+                className='flex items-center gap-2'
+              >
+                {copyLoading['list-view-no-urls'] ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : copySuccess['list-view-no-urls'] ? (
+                  <Check className='h-4 w-4' />
+                ) : (
+                  <Copy className='h-4 w-4' />
+                )}
+                {copySuccess['list-view-no-urls'] ? 'Copied!' : 'Copy (no URLs)'}
+              </Button>
+            </div>
+            <h3 className='text-lg font-semibold'>{selectedMonths.length} months selected</h3>
+            <p className='text-sm text-muted-foreground'>
+              Total Usage: {aggregatedAnalysis.total_usage} times by {aggregatedAnalysis.unique_users} users
+            </p>
+          </div>
+        )}
+
+        {/* Copy button for single month list view */}
+        {selectedMonths.length === 1 && (
+          <div className='flex justify-end mb-4 gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => handleCopyListViewMarkdown(undefined, true)}
+              disabled={copyLoading['list-view-with-urls']}
+              className='flex items-center gap-2'
+            >
+              {copyLoading['list-view-with-urls'] ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : copySuccess['list-view-with-urls'] ? (
+                <Check className='h-4 w-4' />
+              ) : (
+                <Copy className='h-4 w-4' />
+              )}
+              {copySuccess['list-view-with-urls'] ? 'Copied!' : 'Copy (with URLs)'}
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => handleCopyListViewMarkdown(undefined, false)}
+              disabled={copyLoading['list-view-no-urls']}
+              className='flex items-center gap-2'
+            >
+              {copyLoading['list-view-no-urls'] ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : copySuccess['list-view-no-urls'] ? (
+                <Check className='h-4 w-4' />
+              ) : (
+                <Copy className='h-4 w-4' />
+              )}
+              {copySuccess['list-view-no-urls'] ? 'Copied!' : 'Copy (no URLs)'}
+            </Button>
+          </div>
+        )}
+
+        {/* Separate section for each month */}
+        {selectedMonths.map(month => {
+          const monthData = productAnalyses.find(a => a.month === month);
+          const monthAnalysis = monthData?.analysis || null;
+
+          if (!monthAnalysis) return null;
+
+          const [year, monthNum] = month.split('-').map(Number);
+          const daysInMonth = new Date(year, monthNum, 0).getDate();
+          const usageDays = new Set(
+            Object.keys(monthAnalysis.comments_by_date).map(dateStr => {
+              const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
+              return date.getDate();
+            })
+          );
+
+          // Get users who used the product on each date
+          const dateUserMap: Record<string, string[]> = {};
+          monthAnalysis.users.forEach(user => {
+            user.usage_dates.forEach(date => {
+              if (!dateUserMap[date]) {
+                dateUserMap[date] = [];
+              }
+              if (!dateUserMap[date].includes(user.username)) {
+                dateUserMap[date].push(user.username);
+              }
+            });
+          });
+
+          return (
+            <div key={month} className='space-y-4'>
+              <div className='text-center mb-4 relative'>
+                <div className='absolute top-0 right-0 flex items-center gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyListViewMarkdown(month, true)}
+                    disabled={copyLoading[`list-view-${month}-with-urls`]}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`list-view-${month}-with-urls`] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`list-view-${month}-with-urls`] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`list-view-${month}-with-urls`] ? 'Copied!' : 'Copy (with URLs)'}
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyListViewMarkdown(month, false)}
+                    disabled={copyLoading[`list-view-${month}-no-urls`]}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`list-view-${month}-no-urls`] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`list-view-${month}-no-urls`] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`list-view-${month}-no-urls`] ? 'Copied!' : 'Copy (no URLs)'}
+                  </Button>
+                </div>
+                <h3 className='text-lg font-semibold'>
+                  {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p className='text-sm text-muted-foreground'>
+                  Total Usage: {monthAnalysis.total_usage} times by {monthAnalysis.unique_users} users
+                </p>
+              </div>
+
+              <div className='space-y-2'>
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1;
+                  const isUsed = usageDays.has(day);
+                  const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];
+                  const dayUsers = dateUserMap[dateStr] || [];
+
+                  const dailyUses = dayCommentIds.length;
+                  const distinctUsers = dayUsers.length;
+
+                  return (
+                    <div
+                      key={day}
+                      className={`flex items-center justify-between p-3 border rounded-lg ${
+                        isUsed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className='flex items-center space-x-3'>
+                        <span className='font-medium'>Day {day}</span>
+                        <Badge variant={isUsed ? 'default' : 'outline'} className={isUsed ? 'bg-green-600' : ''}>
+                          {isUsed ? 'Used' : 'Not Used'}
+                        </Badge>
+                        {isUsed && (
+                          <div className='flex items-center space-x-2 text-sm'>
+                            <Badge variant='outline' className='bg-blue-50'>
+                              {dailyUses} {dailyUses === 1 ? 'use' : 'uses'}
+                            </Badge>
+                            <Badge variant='outline' className='bg-purple-50'>
+                              {distinctUsers} {distinctUsers === 1 ? 'user' : 'users'}
+                            </Badge>
+                            {dayUsers.length > 0 && (
+                              <span className='text-muted-foreground'>
+                                ({dayUsers.join(', ')})
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {isUsed && dayCommentIds.length > 0 && (
+                        <div className='text-sm text-muted-foreground'>
+                          <CommentDisplay
+                            commentIds={dayCommentIds}
+                            onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
+                          />
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-                {isUsed && dayCommentIds.length > 0 && (
-                  <div className='text-sm text-muted-foreground'>
-                    <CommentDisplay
-                      commentIds={dayCommentIds}
-                      onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
-                    />
-                  </div>
-                )}
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -523,7 +1265,7 @@ const ProductUsage: React.FC = () => {
                   <tr
                     key={monthData.month}
                     className={`hover:bg-muted/50 ${
-                      monthData.month === selectedMonth ? 'bg-blue-50' : ''
+                      selectedMonths.includes(monthData.month) ? 'bg-blue-50' : ''
                     }`}
                   >
                     <td className='border border-border p-2 font-medium'>{monthDisplay}</td>
@@ -567,15 +1309,15 @@ const ProductUsage: React.FC = () => {
           <div className='space-y-2'>
             <Label htmlFor='month'>Month</Label>
             <MonthSelector
-              selectedMonths={selectedMonth ? [selectedMonth] : []}
-              onMonthsChange={months => handleMonthChange(months[0] || '')}
-              multiple={false}
+              selectedMonths={selectedMonths}
+              onMonthsChange={handleMonthChange}
+              multiple={true}
               label=''
             />
           </div>
 
           {/* Product Type Selection */}
-          {selectedMonth && (
+          {selectedMonths.length > 0 && (
             <div className='space-y-2'>
               <Label htmlFor='product-type'>Product Type</Label>
               <Select value={selectedProductType} onValueChange={handleProductTypeChange}>
@@ -593,7 +1335,7 @@ const ProductUsage: React.FC = () => {
           )}
 
           {/* Product Selection */}
-          {selectedMonth && selectedProductType && (
+          {selectedMonths.length > 0 && selectedProductType && (
             <div className='space-y-2'>
               <Label htmlFor='product'>Product</Label>
               <div className='flex space-x-2'>
@@ -654,13 +1396,15 @@ const ProductUsage: React.FC = () => {
       )}
 
       {/* Analysis Results */}
-      {productAnalysis && (
+      {aggregatedAnalysis && (
         <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
               <CardTitle>
-                Usage Analysis for {productAnalysis.product.brand} {productAnalysis.product.model} -{' '}
-                {selectedMonth}
+                Usage Analysis for {aggregatedAnalysis.product.brand} {aggregatedAnalysis.product.model} -{' '}
+                {selectedMonths.length === 1
+                  ? selectedMonths[0]
+                  : `${selectedMonths.length} months`}
               </CardTitle>
 
               {/* View Toggle */}
