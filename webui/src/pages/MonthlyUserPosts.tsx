@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, List as ListIcon, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, List as ListIcon, Loader2, Copy, Check } from 'lucide-react';
 import { CommentDisplay } from '@/components/domain/CommentDisplay';
 import CommentModal from '@/components/domain/CommentModal';
 import { getCommentDetail, CommentDetail } from '@/services/api';
@@ -77,6 +77,10 @@ const MonthlyUserPosts: React.FC = () => {
 
   // Track expanded state for each product to synchronize comment IDs and usage dates
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
+
+  // Copy to markdown state
+  const [copyLoading, setCopyLoading] = useState<Record<string, boolean>>({});
+  const [copySuccess, setCopySuccess] = useState<Record<string, boolean>>({});
 
   // Fetch users when selected months change
   useEffect(() => {
@@ -277,6 +281,300 @@ const MonthlyUserPosts: React.FC = () => {
     }));
   };
 
+  // Helper function to fetch comment URLs
+  const getCommentUrls = async (
+    commentIds: string[],
+    months: string[]
+  ): Promise<Record<string, string>> => {
+    const urlMap: Record<string, string> = {};
+    const uniqueIds = [...new Set(commentIds)];
+
+    // Fetch URLs in parallel
+    const promises = uniqueIds.map(async commentId => {
+      try {
+        const comment = await getCommentDetail(commentId, months);
+        return { commentId, url: comment.url };
+      } catch (err) {
+        console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
+        return { commentId, url: '' };
+      }
+    });
+
+    const results = await Promise.all(promises);
+    results.forEach(({ commentId, url }) => {
+      urlMap[commentId] = url;
+    });
+
+    return urlMap;
+  };
+
+  // Helper function to copy text to clipboard
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      return false;
+    }
+  };
+
+  // Generate markdown for calendar view
+  const generateCalendarMarkdown = async (
+    month: string,
+    monthAnalysis: UserPostingAnalysis,
+    year: number,
+    monthNum: number,
+    selectedMonths: string[]
+  ): Promise<string> => {
+    const startDate = new Date(year, monthNum - 1, 1);
+    const endDate = new Date(year, monthNum, 0);
+    const daysInMonth = endDate.getDate();
+    const firstDayOfWeek = startDate.getDay();
+
+    // Collect all unique comment IDs for this month
+    const allCommentIds = new Set<string>();
+    Object.values(monthAnalysis.comments_by_date).forEach(ids => {
+      ids.forEach(id => allCommentIds.add(id));
+    });
+
+    // Fetch URLs for all comment IDs
+    const commentUrls = await getCommentUrls(Array.from(allCommentIds), selectedMonths);
+
+    // Build calendar grid
+    const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    let markdown = `## ${monthName}\n\n`;
+    markdown += '| Sun | Mon | Tue | Wed | Thu | Fri | Sat |\n';
+    markdown += '|-----|-----|-----|-----|-----|-----|-----|\n';
+
+    // Empty cells for days before month starts
+    const emptyCells = Array(firstDayOfWeek).fill('|     ');
+    let currentRow = emptyCells.join('');
+
+    // Generate calendar days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];
+      const isPosted = dayCommentIds.length > 0;
+
+      if (isPosted && dayCommentIds.length > 0) {
+        // Use the first comment URL for the day link
+        const firstCommentId = dayCommentIds[0];
+        const url = commentUrls[firstCommentId] || '';
+        if (url) {
+          currentRow += `| [${day}](${url}) `;
+        } else {
+          currentRow += `| ${day} `;
+        }
+      } else {
+        currentRow += `| ${day} `;
+      }
+
+      // Start new row on Saturday
+      if ((firstDayOfWeek + day) % 7 === 0) {
+        markdown += currentRow + '|\n';
+        currentRow = '';
+      }
+    }
+
+    // Add remaining cells for the last row
+    if (currentRow) {
+      const remainingCells = 7 - (currentRow.match(/\|/g) || []).length;
+      for (let i = 0; i < remainingCells; i++) {
+        currentRow += '|     ';
+      }
+      markdown += currentRow + '|\n';
+    }
+
+    return markdown;
+  };
+
+  // Generate markdown for list view
+  const generateListViewMarkdown = (
+    selectedMonths: string[],
+    userAnalyses: Array<{ month: string; analysis: UserPostingAnalysis }>,
+    aggregatedAnalysis: UserPostingAnalysis,
+    singleMonth?: string
+  ): string => {
+    let markdown = '';
+
+    // If singleMonth is specified, only generate for that month
+    const monthsToProcess = singleMonth ? [singleMonth] : selectedMonths;
+
+    if (selectedMonths.length > 1 && aggregatedAnalysis && !singleMonth) {
+      markdown += `## ${selectedMonths.length} months selected\n\n`;
+      markdown += `Posted: ${aggregatedAnalysis.posted_days} days, Missed: ${aggregatedAnalysis.missed_days} days\n\n`;
+    }
+
+    // Generate table for each month
+    monthsToProcess.forEach(month => {
+      const monthData = userAnalyses.find(a => a.month === month);
+      const monthAnalysis = monthData?.analysis;
+
+      if (!monthAnalysis) return;
+
+      const [year, monthNum] = month.split('-').map(Number);
+      const monthName = new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+      });
+
+      markdown += `## ${monthName} - Daily Posting\n\n`;
+      markdown += '| Date | Status |\n';
+      markdown += '|------|--------|\n';
+
+      const endDate = new Date(year, monthNum, 0);
+      const daysInMonth = endDate.getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isPosted = monthAnalysis.posted_dates.includes(dateStr);
+        const status = isPosted ? 'Posted' : 'Missed';
+
+        markdown += `| ${dateStr} | ${status} |\n`;
+      }
+
+      markdown += '\n';
+    });
+
+    return markdown;
+  };
+
+  // Helper function to get dates with URLs for a product
+  const getProductUsageDatesWithUrls = async (
+    commentIds: string[],
+    aggregatedAnalysis: UserPostingAnalysis,
+    selectedMonths: string[]
+  ): Promise<Array<{ date: string; url: string }>> => {
+    if (!aggregatedAnalysis || !commentIds || commentIds.length === 0) {
+      return [];
+    }
+
+    // Map comment IDs to dates
+    const commentIdToDate: Record<string, string> = {};
+    const commentsByDate = aggregatedAnalysis.comments_by_date;
+
+    commentIds.forEach(commentId => {
+      for (const [date, dateCommentIds] of Object.entries(commentsByDate)) {
+        if (dateCommentIds.includes(commentId)) {
+          commentIdToDate[commentId] = date;
+          break;
+        }
+      }
+    });
+
+    // Fetch URLs for all comment IDs
+    const commentUrls = await getCommentUrls(commentIds, selectedMonths);
+
+    // Group by date and get first URL for each date
+    const dateToUrl: Record<string, string> = {};
+    commentIds.forEach(commentId => {
+      const date = commentIdToDate[commentId];
+      if (date && !dateToUrl[date]) {
+        dateToUrl[date] = commentUrls[commentId] || '';
+      }
+    });
+
+    // Create array of date-url pairs, sorted by date
+    const datesWithUrls = Object.keys(dateToUrl)
+      .sort()
+      .map(date => ({
+        date,
+        url: dateToUrl[date],
+      }));
+
+    return datesWithUrls;
+  };
+
+  // Generate markdown for product aggregation tables
+  const generateProductTableMarkdown = async (
+    products: Array<{
+      brand: string;
+      model: string;
+      count: number;
+      comment_ids: string[];
+      handle_brand?: string;
+      knot_brand?: string;
+      knot_model?: string;
+    }>,
+    productType: string,
+    aggregatedAnalysis: UserPostingAnalysis,
+    selectedMonths: string[]
+  ): Promise<string> => {
+    const productTypeName = productType.charAt(0).toUpperCase() + productType.slice(1);
+    let markdown = `## ${productTypeName}s Used\n\n`;
+    
+    // For brushes, include handle and knot information
+    if (productType === 'brush') {
+      markdown += '| # | Brand | Model | Handle Brand | Knot Brand | Knot Model | Count | Dates |\n';
+      markdown += '|---|-------|-------|-------------|------------|------------|-------|-------|\n';
+
+      for (const [index, product] of products.entries()) {
+        const datesWithUrls = await getProductUsageDatesWithUrls(
+          product.comment_ids,
+          aggregatedAnalysis,
+          selectedMonths
+        );
+        const datesStr =
+          datesWithUrls.length > 0
+            ? datesWithUrls
+                .map(({ date, url }) => (url ? `[${date}](${url})` : date))
+                .join(', ')
+            : '-';
+        const handleBrand = product.handle_brand || '-';
+        const knotBrand = product.knot_brand || '-';
+        const knotModel = product.knot_model || '-';
+
+        markdown += `| ${index + 1} | ${product.brand} | ${product.model} | ${handleBrand} | ${knotBrand} | ${knotModel} | ${product.count} | ${datesStr} |\n`;
+      }
+    } else if (productType === 'soap') {
+      // For soaps, use "Scent" instead of "Model" to match the React view
+      markdown += '| # | Brand | Scent | Count | Dates |\n';
+      markdown += '|---|-------|-------|-------|-------|\n';
+
+      for (const [index, product] of products.entries()) {
+        const datesWithUrls = await getProductUsageDatesWithUrls(
+          product.comment_ids,
+          aggregatedAnalysis,
+          selectedMonths
+        );
+        const datesStr =
+          datesWithUrls.length > 0
+            ? datesWithUrls
+                .map(({ date, url }) => (url ? `[${date}](${url})` : date))
+                .join(', ')
+            : '-';
+
+        markdown += `| ${index + 1} | ${product.brand} | ${product.model} | ${product.count} | ${datesStr} |\n`;
+      }
+    } else {
+      markdown += '| # | Brand | Model | Count | Dates |\n';
+      markdown += '|---|-------|-------|-------|-------|\n';
+
+      for (const [index, product] of products.entries()) {
+        const datesWithUrls = await getProductUsageDatesWithUrls(
+          product.comment_ids,
+          aggregatedAnalysis,
+          selectedMonths
+        );
+        const datesStr =
+          datesWithUrls.length > 0
+            ? datesWithUrls
+                .map(({ date, url }) => (url ? `[${date}](${url})` : date))
+                .join(', ')
+            : '-';
+
+        markdown += `| ${index + 1} | ${product.brand} | ${product.model} | ${product.count} | ${datesStr} |\n`;
+      }
+    }
+
+    return markdown;
+  };
+
   const handleCommentNavigation = async (direction: 'prev' | 'next') => {
     if (direction === 'prev' && currentCommentIndex > 0) {
       setCurrentCommentIndex(currentCommentIndex - 1);
@@ -311,6 +609,113 @@ const MonthlyUserPosts: React.FC = () => {
     setAllComments([]);
     setCurrentCommentIndex(0);
     setRemainingCommentIds([]);
+  };
+
+  // Handler for copying calendar markdown
+  const handleCopyCalendarMarkdown = async (month: string) => {
+    const monthData = userAnalyses.find(a => a.month === month);
+    const monthAnalysis = monthData?.analysis;
+
+    if (!monthAnalysis) return;
+
+    const [year, monthNum] = month.split('-').map(Number);
+    const key = `calendar-${month}`;
+
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = await generateCalendarMarkdown(
+        month,
+        monthAnalysis,
+        year,
+        monthNum,
+        selectedMonths
+      );
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to generate calendar markdown:', err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Handler for copying list view markdown
+  const handleCopyListViewMarkdown = async (singleMonth?: string) => {
+    if (!aggregatedAnalysis) return;
+
+    const key = singleMonth ? `list-view-${singleMonth}` : 'list-view';
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = generateListViewMarkdown(
+        selectedMonths,
+        userAnalyses,
+        aggregatedAnalysis,
+        singleMonth
+      );
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to generate list view markdown:', err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Handler for copying product table markdown
+  const handleCopyProductTableMarkdown = async (
+    products: Array<{
+      brand: string;
+      model: string;
+      count: number;
+      comment_ids: string[];
+      handle_brand?: string;
+      knot_brand?: string;
+      knot_model?: string;
+    }>,
+    productType: string
+  ) => {
+    if (!aggregatedAnalysis) return;
+
+    const key = `product-${productType}`;
+    setCopyLoading(prev => ({ ...prev, [key]: true }));
+    setCopySuccess(prev => ({ ...prev, [key]: false }));
+
+    try {
+      const markdown = await generateProductTableMarkdown(
+        products,
+        productType,
+        aggregatedAnalysis,
+        selectedMonths
+      );
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        setCopySuccess(prev => ({ ...prev, [key]: true }));
+        setTimeout(() => {
+          setCopySuccess(prev => ({ ...prev, [key]: false }));
+        }, 2000);
+      }
+    } catch (err) {
+      console.error(`Failed to generate ${productType} table markdown:`, err);
+    } finally {
+      setCopyLoading(prev => ({ ...prev, [key]: false }));
+    }
   };
 
   const handleMonthChange = (months: string[]) => {
@@ -394,7 +799,25 @@ const MonthlyUserPosts: React.FC = () => {
 
           return (
             <div key={month} className='space-y-4'>
-              <div className='text-center'>
+              <div className='text-center relative'>
+                <div className='absolute top-0 right-0'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyCalendarMarkdown(month)}
+                    disabled={copyLoading[`calendar-${month}`]}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`calendar-${month}`] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`calendar-${month}`] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`calendar-${month}`] ? 'Copied!' : 'Copy to markdown'}
+                  </Button>
+                </div>
                 <h3 className='text-lg font-semibold'>
                   {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
                     month: 'long',
@@ -470,12 +893,52 @@ const MonthlyUserPosts: React.FC = () => {
       <div className='space-y-8'>
         {/* Aggregated summary when multiple months */}
         {selectedMonths.length > 1 && aggregatedAnalysis && (
-          <div className='text-center mb-4'>
+          <div className='text-center mb-4 relative'>
+            <div className='absolute top-0 right-0'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleCopyListViewMarkdown}
+                disabled={copyLoading['list-view']}
+                className='flex items-center gap-2'
+              >
+                {copyLoading['list-view'] ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : copySuccess['list-view'] ? (
+                  <Check className='h-4 w-4' />
+                ) : (
+                  <Copy className='h-4 w-4' />
+                )}
+                {copySuccess['list-view'] ? 'Copied!' : 'Copy to markdown'}
+              </Button>
+            </div>
             <h3 className='text-lg font-semibold'>{selectedMonths.length} months selected</h3>
             <p className='text-sm text-muted-foreground'>
               Posted: {aggregatedAnalysis.posted_days} days, Missed: {aggregatedAnalysis.missed_days}{' '}
               days
             </p>
+          </div>
+        )}
+
+        {/* Copy button for single month list view */}
+        {selectedMonths.length === 1 && (
+          <div className='flex justify-end mb-4'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleCopyListViewMarkdown}
+              disabled={copyLoading['list-view']}
+              className='flex items-center gap-2'
+            >
+              {copyLoading['list-view'] ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : copySuccess['list-view'] ? (
+                <Check className='h-4 w-4' />
+              ) : (
+                <Copy className='h-4 w-4' />
+              )}
+              {copySuccess['list-view'] ? 'Copied!' : 'Copy to markdown'}
+            </Button>
           </div>
         )}
 
@@ -497,7 +960,27 @@ const MonthlyUserPosts: React.FC = () => {
 
           return (
             <div key={month} className='space-y-4'>
-              <div className='text-center mb-4'>
+              <div className='text-center mb-4 relative'>
+                <div className='absolute top-0 right-0'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyListViewMarkdown(month)}
+                    disabled={copyLoading[`list-view-${month}`] || copyLoading['list-view']}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading[`list-view-${month}`] || copyLoading['list-view'] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess[`list-view-${month}`] || copySuccess['list-view'] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess[`list-view-${month}`] || copySuccess['list-view']
+                      ? 'Copied!'
+                      : 'Copy to markdown'}
+                  </Button>
+                </div>
                 <h3 className='text-lg font-semibold'>
                   {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
                     month: 'long',
@@ -695,7 +1178,25 @@ const MonthlyUserPosts: React.FC = () => {
           {aggregatedAnalysis && aggregatedAnalysis.razors.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Razors Used</CardTitle>
+                <div className='flex items-center justify-between'>
+                  <CardTitle>Razors Used</CardTitle>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyProductTableMarkdown(aggregatedAnalysis.razors, 'razor')}
+                    disabled={copyLoading['product-razor']}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading['product-razor'] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess['product-razor'] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess['product-razor'] ? 'Copied!' : 'Copy to markdown'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className='overflow-x-auto'>
@@ -758,7 +1259,25 @@ const MonthlyUserPosts: React.FC = () => {
           {aggregatedAnalysis && aggregatedAnalysis.blades.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Blades Used</CardTitle>
+                <div className='flex items-center justify-between'>
+                  <CardTitle>Blades Used</CardTitle>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyProductTableMarkdown(aggregatedAnalysis.blades, 'blade')}
+                    disabled={copyLoading['product-blade']}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading['product-blade'] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess['product-blade'] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess['product-blade'] ? 'Copied!' : 'Copy to markdown'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className='overflow-x-auto'>
@@ -821,7 +1340,25 @@ const MonthlyUserPosts: React.FC = () => {
           {aggregatedAnalysis && aggregatedAnalysis.brushes.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Brushes Used</CardTitle>
+                <div className='flex items-center justify-between'>
+                  <CardTitle>Brushes Used</CardTitle>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyProductTableMarkdown(aggregatedAnalysis.brushes, 'brush')}
+                    disabled={copyLoading['product-brush']}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading['product-brush'] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess['product-brush'] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess['product-brush'] ? 'Copied!' : 'Copy to markdown'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className='overflow-x-auto'>
@@ -890,7 +1427,25 @@ const MonthlyUserPosts: React.FC = () => {
           {aggregatedAnalysis && aggregatedAnalysis.soaps.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Soaps Used</CardTitle>
+                <div className='flex items-center justify-between'>
+                  <CardTitle>Soaps Used</CardTitle>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => handleCopyProductTableMarkdown(aggregatedAnalysis.soaps, 'soap')}
+                    disabled={copyLoading['product-soap']}
+                    className='flex items-center gap-2'
+                  >
+                    {copyLoading['product-soap'] ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : copySuccess['product-soap'] ? (
+                      <Check className='h-4 w-4' />
+                    ) : (
+                      <Copy className='h-4 w-4' />
+                    )}
+                    {copySuccess['product-soap'] ? 'Copied!' : 'Copy to markdown'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className='overflow-x-auto'>
