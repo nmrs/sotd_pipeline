@@ -292,9 +292,9 @@ def print_results(results: Dict, limit_examples: int = 5):
     print("SOAP FORMAT INDICATOR ANALYSIS")
     print("=" * 80)
     print()
-    print(
-        f"Analyzed {results['total_entries']:,} soap entries from {results['months_processed']} months"
-    )
+    total_entries = results['total_entries']
+    months_processed = results['months_processed']
+    print(f"Analyzed {total_entries:,} soap entries from {months_processed} months")
     print()
 
     format_stats = results["format_stats"]
@@ -362,9 +362,9 @@ def print_final_words_results(results: Dict, limit_examples: int = 5):
     print("SOAP FINAL WORD ANALYSIS")
     print("=" * 80)
     print()
-    print(
-        f"Analyzed {results['total_entries']:,} soap entries from {results['months_processed']} months"
-    )
+    total_entries = results['total_entries']
+    months_processed = results['months_processed']
+    print(f"Analyzed {total_entries:,} soap entries from {months_processed} months")
     print()
 
     final_word_stats = results["final_word_stats"]
