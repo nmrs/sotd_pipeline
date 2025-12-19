@@ -58,10 +58,11 @@ interface UserPostingAnalysis {
 }
 
 const MonthlyUserPosts: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [users, setUsers] = useState<UserData[]>([]);
-  const [userAnalysis, setUserAnalysis] = useState<UserPostingAnalysis | null>(null);
+  const [userAnalyses, setUserAnalyses] = useState<Array<{ month: string; analysis: UserPostingAnalysis }>>([]);
+  const [aggregatedAnalysis, setAggregatedAnalysis] = useState<UserPostingAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
@@ -77,34 +78,126 @@ const MonthlyUserPosts: React.FC = () => {
   // Track expanded state for each product to synchronize comment IDs and usage dates
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
 
-  // Fetch users when selected month changes
+  // Fetch users when selected months change
   useEffect(() => {
-    if (selectedMonth) {
-      fetchUsersForMonth(selectedMonth);
+    if (selectedMonths.length > 0) {
+      fetchUsersForMonths(selectedMonths);
     }
-  }, [selectedMonth]);
+  }, [selectedMonths]);
 
-  const fetchUsersForMonth = async (month: string) => {
+  const fetchUsersForMonths = async (months: string[]) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/monthly-user-posts/users/${month}`);
-      setUsers(response.data);
+      const responses = await Promise.all(
+        months.map(month => axios.get(`/api/monthly-user-posts/users/${month}`))
+      );
+
+      // Merge users across all months
+      const userMap = new Map<string, number>();
+      responses.forEach(response => {
+        response.data.forEach((user: UserData) => {
+          const current = userMap.get(user.username) || 0;
+          userMap.set(user.username, current + user.post_count);
+        });
+      });
+
+      const mergedUsers = Array.from(userMap.entries()).map(([username, post_count]) => ({
+        username,
+        post_count,
+      }));
+
+      setUsers(mergedUsers.sort((a, b) => b.post_count - a.post_count));
     } catch (err) {
-      setError('Failed to fetch users for month');
+      setError('Failed to fetch users for months');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUserAnalysis = async (month: string, username: string) => {
+  const aggregateUserAnalyses = (analyses: UserPostingAnalysis[]): UserPostingAnalysis => {
+    // Combine posted dates
+    const allPostedDates = new Set<string>();
+    analyses.forEach(a => a.posted_dates.forEach(d => allPostedDates.add(d)));
+
+    // Merge comments_by_date
+    const mergedCommentsByDate: Record<string, string[]> = {};
+    analyses.forEach(a => {
+      Object.entries(a.comments_by_date).forEach(([date, ids]) => {
+        if (!mergedCommentsByDate[date]) {
+          mergedCommentsByDate[date] = [];
+        }
+        mergedCommentsByDate[date].push(...ids);
+      });
+    });
+
+    // Aggregate products
+    const aggregateProducts = (productArrays: Array<Array<any>>) => {
+      const productMap = new Map<string, any>();
+      productArrays.forEach(products => {
+        products.forEach(product => {
+          const existing = productMap.get(product.key);
+          if (existing) {
+            existing.count += product.count;
+            existing.comment_ids = [...new Set([...existing.comment_ids, ...product.comment_ids])];
+          } else {
+            productMap.set(product.key, {
+              ...product,
+              comment_ids: [...product.comment_ids],
+            });
+          }
+        });
+      });
+      return Array.from(productMap.values()).sort((a, b) => b.count - a.count);
+    };
+
+    return {
+      user: analyses[0].user,
+      posted_days: analyses.reduce((sum, a) => sum + a.posted_days, 0),
+      missed_days: analyses.reduce((sum, a) => sum + a.missed_days, 0),
+      posted_dates: Array.from(allPostedDates).sort(),
+      comment_ids: [...new Set(analyses.flatMap(a => a.comment_ids))],
+      comments_by_date: mergedCommentsByDate,
+      razors: aggregateProducts(analyses.map(a => a.razors)),
+      blades: aggregateProducts(analyses.map(a => a.blades)),
+      brushes: aggregateProducts(analyses.map(a => a.brushes)),
+      soaps: aggregateProducts(analyses.map(a => a.soaps)),
+    };
+  };
+
+  const fetchUserAnalyses = async (months: string[], username: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/monthly-user-posts/analysis/${month}/${username}`);
-      setUserAnalysis(response.data);
-    } catch (err) {
-      setError('Failed to fetch user analysis');
-      console.error(err);
+      const responses = await Promise.all(
+        months.map(month =>
+          axios
+            .get(`/api/monthly-user-posts/analysis/${month}/${username}`)
+            .catch(err => {
+              // Handle case where user doesn't exist in a month
+              if (err.response?.status === 404) return null;
+              throw err;
+            })
+        )
+      );      const validAnalysesWithMonths = responses
+        .map((r, index) => (r !== null ? { month: months[index], analysis: r.data } : null))
+        .filter((r): r is { month: string; analysis: UserPostingAnalysis } => r !== null);      if (validAnalysesWithMonths.length === 0) {
+        setError(`User ${username} not found in any selected month`);
+        setAggregatedAnalysis(null);
+        setUserAnalyses([]);
+        return;
+      }
+
+      // Aggregate analyses
+      const validAnalyses = validAnalysesWithMonths.map(item => item.analysis);      const aggregated = aggregateUserAnalyses(validAnalyses);      setAggregatedAnalysis(aggregated);
+      setUserAnalyses(validAnalysesWithMonths);    } catch (err) {      const errorMessage = err instanceof Error && 'response' in err && (err as any).response?.status === 500
+        ? 'Server error: Failed to fetch user analysis. Please try again later.'
+        : err instanceof Error
+        ? `Failed to fetch user analysis: ${err.message}`
+        : 'Failed to fetch user analysis';
+      setError(errorMessage);
+      setAggregatedAnalysis(null);
+      setUserAnalyses([]);
+      console.error('[MonthlyUserPosts] Error fetching user analysis:', err);
     } finally {
       setLoading(false);
     }
@@ -116,7 +209,7 @@ const MonthlyUserPosts: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const comment = await getCommentDetail(commentId, [selectedMonth]);
+      const comment = await getCommentDetail(commentId, selectedMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
       setCommentModalOpen(true);
@@ -140,12 +233,12 @@ const MonthlyUserPosts: React.FC = () => {
 
   // Helper function to extract usage dates for a product
   const getProductUsageDates = (commentIds: string[]): string[] => {
-    if (!userAnalysis || !commentIds || commentIds.length === 0) {
+    if (!aggregatedAnalysis || !commentIds || commentIds.length === 0) {
       return [];
     }
 
     const usageDates: string[] = [];
-    const commentsByDate = userAnalysis.comments_by_date;
+    const commentsByDate = aggregatedAnalysis.comments_by_date;
 
     // For each comment ID, find which date it corresponds to
     commentIds.forEach(commentId => {
@@ -197,7 +290,7 @@ const MonthlyUserPosts: React.FC = () => {
         const nextCommentId = remainingCommentIds[0];
         try {
           setCommentLoading(true);
-          const nextComment = await getCommentDetail(nextCommentId, [selectedMonth]);
+          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
           setAllComments([...allComments, nextComment]);
           setRemainingCommentIds(remainingCommentIds.slice(1));
           setCurrentCommentIndex(allComments.length);
@@ -220,25 +313,34 @@ const MonthlyUserPosts: React.FC = () => {
     setRemainingCommentIds([]);
   };
 
-  const handleMonthChange = (month: string) => {
-    setSelectedMonth(month);
+  const handleMonthChange = (months: string[]) => {
+    setSelectedMonths(months);
     setSelectedUser('');
-    setUserAnalysis(null);
-    if (month) {
-      fetchUsersForMonth(month);
+    setAggregatedAnalysis(null);
+    setUserAnalyses([]);
+    if (months.length > 0) {
+      fetchUsersForMonths(months);
     }
   };
 
   const handleUserSelect = (username: string) => {
-    setSelectedUser(username);
-    if (selectedMonth && username) {
-      fetchUserAnalysis(selectedMonth, username);
+    try {
+      setSelectedUser(username);
+      setAggregatedAnalysis(null);
+      setUserAnalyses([]);
+      if (selectedMonths.length > 0 && username) {
+        fetchUserAnalyses(selectedMonths, username);
+      }
+    } catch (error) {
+      console.error('[MonthlyUserPosts] Error in handleUserSelect', error);
     }
   };
 
   const handleUserSearch = (searchTerm: string) => {
     if (searchTerm.trim() === '') {
-      fetchUsersForMonth(selectedMonth);
+      if (selectedMonths.length > 0) {
+        fetchUsersForMonths(selectedMonths);
+      }
     } else {
       // Filter users locally for better performance
       const filteredUsers = users.filter(user =>
@@ -248,8 +350,7 @@ const MonthlyUserPosts: React.FC = () => {
     }
   };
 
-  const renderCalendarView = () => {
-    if (!userAnalysis) {
+  const renderCalendarView = () => {    if (!aggregatedAnalysis || selectedMonths.length === 0) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
           Select a user to see their posting pattern
@@ -257,84 +358,107 @@ const MonthlyUserPosts: React.FC = () => {
       );
     }
 
-    // Parse the month to get year and month number
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-    const daysInMonth = endDate.getDate();
-
-    // Create array of dates for the month
-    const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-    // Convert posted dates to day numbers for easy lookup
-    const postedDays = new Set(
-      userAnalysis.posted_dates.map(dateStr => {
-        const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
-        return date.getDate();
-      })
-    );
-
     return (
-      <div className='space-y-4'>
-        <div className='text-center'>
-          <h3 className='text-lg font-semibold'>
-            {new Date(year, month - 1).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </h3>
-          <p className='text-sm text-muted-foreground'>
-            Posted: {userAnalysis.posted_days} days, Missed: {userAnalysis.missed_days} days
-          </p>
-        </div>
+      <div className='space-y-8'>
+        {/* Aggregated summary when multiple months */}
+        {selectedMonths.length > 1 && aggregatedAnalysis && (
+          <div className='text-center mb-4'>
+            <h3 className='text-lg font-semibold'>{selectedMonths.length} months selected</h3>
+            <p className='text-sm text-muted-foreground'>
+              Posted: {aggregatedAnalysis.posted_days} days, Missed: {aggregatedAnalysis.missed_days}{' '}
+              days
+            </p>
+          </div>
+        )}
 
-        <div className='grid grid-cols-7 gap-1'>
-          {/* Day headers */}
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className='p-2 text-center text-sm font-medium text-muted-foreground'>
-              {day}
+        {/* Separate calendar section for each month */}
+        {selectedMonths.map(month => {
+          const monthData = userAnalyses.find(a => a.month === month);
+          const monthAnalysis = monthData?.analysis || null;          if (!monthAnalysis) return null;
+
+          // Parse the month to get year and month number
+          const [year, monthNum] = month.split('-').map(Number);          const startDate = new Date(year, monthNum - 1, 1);
+          const endDate = new Date(year, monthNum, 0);
+          const daysInMonth = endDate.getDate();
+
+          // Create array of dates for the month
+          const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+          // Convert posted dates to day numbers for easy lookup
+          const postedDays = new Set(
+            monthAnalysis.posted_dates.map(dateStr => {
+              const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
+              return date.getDate();
+            })
+          );
+
+          return (
+            <div key={month} className='space-y-4'>
+              <div className='text-center'>
+                <h3 className='text-lg font-semibold'>
+                  {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p className='text-sm text-muted-foreground'>
+                  Posted: {monthAnalysis.posted_days} days, Missed: {monthAnalysis.missed_days} days
+                </p>
+              </div>
+
+              <div className='grid grid-cols-7 gap-1'>
+                {/* Day headers */}
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className='p-2 text-center text-sm font-medium text-muted-foreground'>
+                    {day}
+                  </div>
+                ))}
+
+                {/* Empty cells for days before month starts */}
+                {Array.from({ length: startDate.getDay() }, (_, i) => (
+                  <div key={`empty-${i}`} className='p-2' />
+                ))}
+
+                {/* Month days */}
+                {dates.map(day => {
+                  const isPosted = postedDays.has(day);
+                  const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;                  const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];                  return (
+                    <div
+                      key={day}
+                      className={`p-2 text-center border rounded-md min-h-[60px] flex flex-col items-center justify-center ${
+                        isPosted
+                          ? 'bg-green-100 border-green-300 text-green-800'
+                          : 'bg-red-100 border-red-300 text-red-800'
+                      }`}
+                    >
+                      <span className='text-sm font-medium'>{day}</span>
+                      {isPosted && dayCommentIds.length > 0 && (
+                        <div className='mt-1'>
+                          {(() => {
+                            try {
+                              return (
+                                <CommentDisplay
+                                  commentIds={dayCommentIds}
+                                  onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
+                                />
+                              );
+                            } catch (error) {                              return <span className='text-xs text-red-500'>Error</span>;
+                            }
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ))}
-
-          {/* Empty cells for days before month starts */}
-          {Array.from({ length: startDate.getDay() }, (_, i) => (
-            <div key={`empty-${i}`} className='p-2' />
-          ))}
-
-          {/* Month days */}
-          {dates.map(day => {
-            const isPosted = postedDays.has(day);
-            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
-
-            return (
-              <div
-                key={day}
-                className={`p-2 text-center border rounded-md min-h-[60px] flex flex-col items-center justify-center ${
-                  isPosted
-                    ? 'bg-green-100 border-green-300 text-green-800'
-                    : 'bg-red-100 border-red-300 text-red-800'
-                }`}
-              >
-                <span className='text-sm font-medium'>{day}</span>
-                {isPosted && dayCommentIds.length > 0 && (
-                  <div className='mt-1'>
-                    <CommentDisplay
-                      commentIds={dayCommentIds}
-                      onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          );
+        })}
       </div>
     );
   };
 
-  const renderListView = () => {
-    if (!userAnalysis) {
+  const renderListView = () => {    if (!aggregatedAnalysis || selectedMonths.length === 0) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
           Select a user to see their posting pattern
@@ -342,69 +466,93 @@ const MonthlyUserPosts: React.FC = () => {
       );
     }
 
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const postedDays = new Set(
-      userAnalysis.posted_dates.map(dateStr => {
-        const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
-        return date.getDate();
-      })
-    );
-
     return (
-      <div className='space-y-4'>
-        <div className='text-center mb-4'>
-          <h3 className='text-lg font-semibold'>
-            {new Date(year, month - 1).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </h3>
-          <p className='text-sm text-muted-foreground'>
-            Posted: {userAnalysis.posted_days} days, Missed: {userAnalysis.missed_days} days
-          </p>
-        </div>
+      <div className='space-y-8'>
+        {/* Aggregated summary when multiple months */}
+        {selectedMonths.length > 1 && aggregatedAnalysis && (
+          <div className='text-center mb-4'>
+            <h3 className='text-lg font-semibold'>{selectedMonths.length} months selected</h3>
+            <p className='text-sm text-muted-foreground'>
+              Posted: {aggregatedAnalysis.posted_days} days, Missed: {aggregatedAnalysis.missed_days}{' '}
+              days
+            </p>
+          </div>
+        )}
 
-        <div className='space-y-2'>
-          {Array.from({ length: daysInMonth }, (_, i) => {
-            const day = i + 1;
-            const isPosted = postedDays.has(day);
-            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayCommentIds = userAnalysis.comments_by_date[dateStr] || [];
+        {/* Separate section for each month */}
+        {selectedMonths.map(month => {
+          const monthData = userAnalyses.find(a => a.month === month);
+          const monthAnalysis = monthData?.analysis || null;
 
-            return (
-              <div
-                key={day}
-                className={`flex items-center justify-between p-3 border rounded-lg ${
-                  isPosted ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                }`}
-              >
-                <div className='flex items-center space-x-3'>
-                  <span className='font-medium'>Day {day}</span>
-                  <Badge
-                    variant={isPosted ? 'default' : 'destructive'}
-                    className={isPosted ? 'bg-green-600' : ''}
-                  >
-                    {isPosted ? 'Posted' : 'Missed'}
-                  </Badge>
-                </div>
-                {isPosted && dayCommentIds.length > 0 && (
-                  <div className='text-sm text-muted-foreground'>
-                    <CommentDisplay
-                      commentIds={dayCommentIds}
-                      onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
-                    />
-                  </div>
-                )}
+          if (!monthAnalysis) return null;
+
+          const [year, monthNum] = month.split('-').map(Number);
+          const daysInMonth = new Date(year, monthNum, 0).getDate();
+          const postedDays = new Set(
+            monthAnalysis.posted_dates.map(dateStr => {
+              const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
+              return date.getDate();
+            })
+          );
+
+          return (
+            <div key={month} className='space-y-4'>
+              <div className='text-center mb-4'>
+                <h3 className='text-lg font-semibold'>
+                  {new Date(year, monthNum - 1).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </h3>
+                <p className='text-sm text-muted-foreground'>
+                  Posted: {monthAnalysis.posted_days} days, Missed: {monthAnalysis.missed_days} days
+                </p>
               </div>
-            );
-          })}
-        </div>
+
+              <div className='space-y-2'>
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1;
+                  const isPosted = postedDays.has(day);
+                  const dateStr = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const dayCommentIds = monthAnalysis.comments_by_date[dateStr] || [];
+
+                  return (
+                    <div
+                      key={day}
+                      className={`flex items-center justify-between p-3 border rounded-lg ${
+                        isPosted ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      }`}
+                    >
+                      <div className='flex items-center space-x-3'>
+                        <span className='font-medium'>Day {day}</span>
+                        <Badge
+                          variant={isPosted ? 'default' : 'destructive'}
+                          className={isPosted ? 'bg-green-600' : ''}
+                        >
+                          {isPosted ? 'Posted' : 'Missed'}
+                        </Badge>
+                      </div>
+                      {isPosted && dayCommentIds.length > 0 && (
+                        <div className='text-sm text-muted-foreground'>
+                          <CommentDisplay
+                            commentIds={dayCommentIds}
+                            onCommentClick={commentId => handleCommentClick(commentId, dayCommentIds)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  return (
+  try {
+    return (
     <div className='container mx-auto p-6 space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
@@ -423,15 +571,15 @@ const MonthlyUserPosts: React.FC = () => {
           <div className='space-y-2'>
             <Label htmlFor='month'>Month</Label>
             <MonthSelector
-              selectedMonths={selectedMonth ? [selectedMonth] : []}
-              onMonthsChange={months => handleMonthChange(months[0] || '')}
-              multiple={false}
+              selectedMonths={selectedMonths}
+              onMonthsChange={handleMonthChange}
+              multiple={true}
               label=''
             />
           </div>
 
           {/* User Selection */}
-          {selectedMonth && (
+          {selectedMonths.length > 0 && (
             <div className='space-y-2'>
               <Label htmlFor='user'>User</Label>
               <div className='flex space-x-2'>
@@ -481,17 +629,23 @@ const MonthlyUserPosts: React.FC = () => {
         <Card className='border-destructive'>
           <CardContent className='pt-6'>
             <div className='text-destructive text-center'>{error}</div>
+            <div className='mt-2 text-sm text-muted-foreground text-center'>
+              Please check that the selected months have data available and try again.
+            </div>
           </CardContent>
         </Card>
       )}
 
       {/* Analysis Results */}
-      {userAnalysis && (
+      {aggregatedAnalysis && (
         <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
               <CardTitle>
-                Analysis for {userAnalysis.user} - {selectedMonth}
+                Analysis for {aggregatedAnalysis.user} -{' '}
+                {selectedMonths.length === 1
+                  ? selectedMonths[0]
+                  : `${selectedMonths.length} months`}
               </CardTitle>
 
               {/* View Toggle */}
@@ -521,17 +675,24 @@ const MonthlyUserPosts: React.FC = () => {
                 <Loader2 className='h-8 w-8 animate-spin' />
               </div>
             ) : (
-              <div>{viewMode === 'calendar' ? renderCalendarView() : renderListView()}</div>
+              <div>
+                {(() => {
+                  try {
+                    return viewMode === 'calendar' ? renderCalendarView() : renderListView();
+                  } catch (error) {                    return <div className='text-red-500'>Error rendering view: {error instanceof Error ? error.message : String(error)}</div>;
+                  }
+                })()}
+              </div>
             )}
           </CardContent>
         </Card>
       )}
 
       {/* Product Usage Tables */}
-      {userAnalysis && (
+      {aggregatedAnalysis && (
         <div className='space-y-6'>
           {/* Razors Table */}
-          {userAnalysis.razors.length > 0 && (
+          {aggregatedAnalysis && aggregatedAnalysis.razors.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Razors Used</CardTitle>
@@ -550,7 +711,7 @@ const MonthlyUserPosts: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {userAnalysis.razors.map((razor, index) => (
+                      {aggregatedAnalysis.razors.map((razor, index) => (
                         <tr key={razor.key} className='hover:bg-muted/50'>
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
@@ -594,7 +755,7 @@ const MonthlyUserPosts: React.FC = () => {
           )}
 
           {/* Blades Table */}
-          {userAnalysis.blades.length > 0 && (
+          {aggregatedAnalysis && aggregatedAnalysis.blades.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Blades Used</CardTitle>
@@ -613,7 +774,7 @@ const MonthlyUserPosts: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {userAnalysis.blades.map((blade, index) => (
+                      {aggregatedAnalysis.blades.map((blade, index) => (
                         <tr key={blade.key} className='hover:bg-muted/50'>
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
@@ -657,7 +818,7 @@ const MonthlyUserPosts: React.FC = () => {
           )}
 
           {/* Brushes Table */}
-          {userAnalysis.brushes.length > 0 && (
+          {aggregatedAnalysis && aggregatedAnalysis.brushes.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Brushes Used</CardTitle>
@@ -679,7 +840,7 @@ const MonthlyUserPosts: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {userAnalysis.brushes.map((brush, index) => (
+                      {aggregatedAnalysis.brushes.map((brush, index) => (
                         <tr key={brush.key} className='hover:bg-muted/50'>
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
@@ -726,7 +887,7 @@ const MonthlyUserPosts: React.FC = () => {
           )}
 
           {/* Soaps Table */}
-          {userAnalysis.soaps.length > 0 && (
+          {aggregatedAnalysis && aggregatedAnalysis.soaps.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Soaps Used</CardTitle>
@@ -745,7 +906,7 @@ const MonthlyUserPosts: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {userAnalysis.soaps.map((soap, index) => (
+                      {aggregatedAnalysis.soaps.map((soap, index) => (
                         <tr key={soap.key} className='hover:bg-muted/50'>
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
@@ -789,10 +950,11 @@ const MonthlyUserPosts: React.FC = () => {
           )}
 
           {/* No Products Message */}
-          {userAnalysis.razors.length === 0 &&
-            userAnalysis.blades.length === 0 &&
-            userAnalysis.brushes.length === 0 &&
-            userAnalysis.soaps.length === 0 && (
+          {aggregatedAnalysis &&
+            aggregatedAnalysis.razors.length === 0 &&
+            aggregatedAnalysis.blades.length === 0 &&
+            aggregatedAnalysis.brushes.length === 0 &&
+            aggregatedAnalysis.soaps.length === 0 && (
               <Card>
                 <CardContent className='pt-6'>
                   <div className='text-center text-muted-foreground'>
@@ -815,7 +977,20 @@ const MonthlyUserPosts: React.FC = () => {
         remainingCommentIds={remainingCommentIds}
       />
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('[MonthlyUserPosts] ====== ERROR DURING RENDER ======', error);
+    console.error('[MonthlyUserPosts] Error details:', error instanceof Error ? error.stack : String(error));
+    return (
+      <div className='container mx-auto p-6'>
+        <div className='text-red-500'>
+          <h1>Error rendering MonthlyUserPosts</h1>
+          <p>{error instanceof Error ? error.message : String(error)}</p>
+          <pre>{error instanceof Error ? error.stack : String(error)}</pre>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default MonthlyUserPosts;
