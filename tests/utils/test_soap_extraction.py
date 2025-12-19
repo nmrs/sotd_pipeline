@@ -56,6 +56,11 @@ class TestNormalizeSoapSuffixes:
             normalize_soap_suffixes("summer break soaps - steady - croap")
             == "summer break soaps - steady"
         )
+        # croap without dash (should also be stripped, like puck)
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady croap")
+            == "summer break soaps - steady"
+        )
 
         # - shaving soap suffix
         assert (

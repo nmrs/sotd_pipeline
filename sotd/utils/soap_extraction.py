@@ -259,6 +259,10 @@ def normalize_soap_suffixes(text: str) -> str:
             r"\s*-\s*croap\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "- croap" at end (with optional punctuation)
+        (
+            r"\s+croap\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "croap" at end (without dash, with optional punctuation)
         # Removed: standalone "soap" at end - too aggressive, breaks brand
         # names like "Soap Commander"
         # Only strip "soap" when preceded by delimiters (handled by line 244)
