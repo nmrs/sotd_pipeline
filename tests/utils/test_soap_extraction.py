@@ -81,12 +81,87 @@ class TestNormalizeSoapSuffixes:
             == "summer break soaps steady soap"
         )
 
-        # standalone cream - NOT removed (conservative approach)
-        # Only "- cream" (with dash) is removed
+        # cream without dash (should be stripped, like puck and croap)
         assert (
-            normalize_soap_suffixes("summer break soaps steady cream")
-            == "summer break soaps steady cream"
+            normalize_soap_suffixes("summer break soaps - steady cream")
+            == "summer break soaps - steady"
         )
+
+        # gel with and without dash
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - gel")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady gel")
+            == "summer break soaps - steady"
+        )
+
+        # foam with and without dash
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - foam")
+            == "summer break soaps - steady"
+        )
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady foam")
+            == "summer break soaps - steady"
+        )
+
+    def test_all_specified_formats_stripped(self):
+        """Test that all specified formats are stripped with dash."""
+        test_cases = [
+            ("some brand - some scent - cream", "some brand - some scent"),
+            ("some brand - some scent (vegan)", "some brand - some scent"),
+            ("some brand - some scent - shaving soap", "some brand - some scent"),
+            ("some brand - some scent - puck", "some brand - some scent"),
+            ("some brand - some scent - stick", "some brand - some scent"),
+            ("some brand - some scent - croap", "some brand - some scent"),
+            ("some brand - some scent - shave soap", "some brand - some scent"),
+            ("some brand - some scent - gel", "some brand - some scent"),
+            ("some brand - some scent - foam", "some brand - some scent"),
+        ]
+        for inp, expected in test_cases:
+            result = normalize_soap_suffixes(inp)
+            assert result == expected, f"Failed for '{inp}': got '{result}', expected '{expected}'"
+
+    def test_formats_stripped_without_dash(self):
+        """Test that formats (except soap) are stripped without dash."""
+        test_cases = [
+            ("some brand - some scent cream", "some brand - some scent"),
+            ("some brand - some scent gel", "some brand - some scent"),
+            ("some brand - some scent foam", "some brand - some scent"),
+            ("some brand - some scent puck", "some brand - some scent"),
+            ("some brand - some scent stick", "some brand - some scent"),
+            ("some brand - some scent croap", "some brand - some scent"),
+            # Soap should NOT be stripped without dash
+            ("some brand - some scent soap", "some brand - some scent soap"),
+            ("Try This Soap", "Try This Soap"),
+        ]
+        for inp, expected in test_cases:
+            result = normalize_soap_suffixes(inp)
+            assert result == expected, f"Failed for '{inp}': got '{result}', expected '{expected}'"
+
+    def test_shave_shaving_patterns_all_formats(self):
+        """Test shave/shaving patterns for all formats."""
+        formats = ["cream", "gel", "foam", "puck", "stick", "croap", "soap"]
+        for fmt in formats:
+            # With dash
+            inp = f"some brand - some scent - shave {fmt}"
+            result = normalize_soap_suffixes(inp)
+            assert result == "some brand - some scent", f"Failed for '{inp}': got '{result}'"
+
+            inp = f"some brand - some scent - shaving {fmt}"
+            result = normalize_soap_suffixes(inp)
+            assert result == "some brand - some scent", f"Failed for '{inp}': got '{result}'"
+
+            # Without dash
+            inp = f"some brand - some scent shave {fmt}"
+            result = normalize_soap_suffixes(inp)
+            assert result == "some brand - some scent", f"Failed for '{inp}': got '{result}'"
+
+            inp = f"some brand - some scent shaving {fmt}"
+            result = normalize_soap_suffixes(inp)
+            assert result == "some brand - some scent", f"Failed for '{inp}': got '{result}'"
 
     def test_container_type_suffixes(self):
         """Test removal of container type suffixes."""

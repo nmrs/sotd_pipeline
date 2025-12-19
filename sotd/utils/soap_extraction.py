@@ -170,6 +170,10 @@ def normalize_soap_suffixes(text: str) -> str:
     # Work with original case to preserve it
     current_text = text
 
+    # Define format indicators that support shave/shaving prefixes
+    # All formats except soap (soap is special - only stripped with dash)
+    formats_with_shave_support = ["cream", "gel", "foam", "puck", "stick", "croap", "soap"]
+
     # Define all normalization patterns in order of priority
     # Higher priority patterns are applied first
     # Use case-insensitive matching with re.IGNORECASE flag
@@ -201,15 +205,38 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s+sample\s*$", re.IGNORECASE),  # "sample" at end (without dash)
         (r"\s+tester\s*$", re.IGNORECASE),  # "tester" at end (without dash)
         (r"\s+samp\s*$", re.IGNORECASE),  # "samp" at end (without dash)
-        # Container type suffixes
-        (
-            r"\s*-\s*shave\s+stick\s*[.!?]*\s*$",
-            re.IGNORECASE,
-        ),  # "- shave stick" at end (with optional punctuation)
-        (
-            r"\s+shave\s+stick\s*[.!?]*\s*$",
-            re.IGNORECASE,
-        ),  # "shave stick" at end (without dash, with optional punctuation)
+        # Shave/Shaving prefix patterns for all formats (MUST come before standalone formats)
+        # Generate patterns for " - shaving [format]" and " - shave [format]" for each format
+        # Longer patterns (shaving) come before shorter (shave) to avoid partial matches
+        *[
+            (
+                rf"\s*-\s*shaving\s+{fmt}\s*[.!?]*\s*$",
+                re.IGNORECASE,
+            )  # f"- shaving {fmt}" at end
+            for fmt in formats_with_shave_support
+        ],
+        *[
+            (
+                rf"\s+shaving\s+{fmt}\s*[.!?]*\s*$",
+                re.IGNORECASE,
+            )  # f"shaving {fmt}" at end (without dash)
+            for fmt in formats_with_shave_support
+        ],
+        *[
+            (
+                rf"\s*-\s*shave\s+{fmt}\s*[.!?]*\s*$",
+                re.IGNORECASE,
+            )  # f"- shave {fmt}" at end
+            for fmt in formats_with_shave_support
+        ],
+        *[
+            (
+                rf"\s+shave\s+{fmt}\s*[.!?]*\s*$",
+                re.IGNORECASE,
+            )  # f"shave {fmt}" at end (without dash)
+            for fmt in formats_with_shave_support
+        ],
+        # Container type suffixes (standalone formats, after shave/shaving patterns)
         (
             r"\s*-\s*stick\s*[.!?]*\s*$",
             re.IGNORECASE,
@@ -230,14 +257,6 @@ def normalize_soap_suffixes(text: str) -> str:
         ),  # "hard" at end (without dash, with optional punctuation)
         # Product type suffixes
         (
-            r"\s*-\s*shaving\s+soap\s*[.!?]*\s*$",
-            re.IGNORECASE,
-        ),  # "- shaving soap" at end (with optional punctuation)
-        (
-            r"\s*-\s*shave\s+soap\s*[.!?]*\s*$",
-            re.IGNORECASE,
-        ),  # "- shave soap" at end (with optional punctuation)
-        (
             r"\s*-\s*crema\s+da\s+barba\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "- crema da barba" at end (with optional punctuation)
@@ -245,11 +264,34 @@ def normalize_soap_suffixes(text: str) -> str:
             r"\s+crema\s+da\s+barba\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "crema da barba" at end (without dash, with optional punctuation)
+        # Base format patterns (standalone formats, after shave/shaving patterns)
+        # Soap is special - only stripped with dash
         (r"\s*-\s*soap\s*[.!?]*\s*$", re.IGNORECASE),  # "- soap" at end (with optional punctuation)
+        # Other formats: stripped with or without dash
         (
             r"\s*-\s*cream\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "- cream" at end (with optional punctuation)
+        (
+            r"\s+cream\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "cream" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*gel\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- gel" at end (with optional punctuation)
+        (
+            r"\s+gel\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "gel" at end (without dash, with optional punctuation)
+        (
+            r"\s*-\s*foam\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- foam" at end (with optional punctuation)
+        (
+            r"\s+foam\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "foam" at end (without dash, with optional punctuation)
         (r"\s*-\s*puck\s*[.!?]*\s*$", re.IGNORECASE),  # "- puck" at end (with optional punctuation)
         (
             r"\s+puck\s*[.!?]*\s*$",
