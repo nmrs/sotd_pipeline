@@ -234,6 +234,10 @@ def normalize_soap_suffixes(text: str) -> str:
             re.IGNORECASE,
         ),  # "- shaving soap" at end (with optional punctuation)
         (
+            r"\s*-\s*shave\s+soap\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- shave soap" at end (with optional punctuation)
+        (
             r"\s*-\s*crema\s+da\s+barba\s*[.!?]*\s*$",
             re.IGNORECASE,
         ),  # "- crema da barba" at end (with optional punctuation)
@@ -242,6 +246,10 @@ def normalize_soap_suffixes(text: str) -> str:
             re.IGNORECASE,
         ),  # "crema da barba" at end (without dash, with optional punctuation)
         (r"\s*-\s*soap\s*[.!?]*\s*$", re.IGNORECASE),  # "- soap" at end (with optional punctuation)
+        (
+            r"\s*-\s*cream\s*[.!?]*\s*$",
+            re.IGNORECASE,
+        ),  # "- cream" at end (with optional punctuation)
         (r"\s*-\s*puck\s*[.!?]*\s*$", re.IGNORECASE),  # "- puck" at end (with optional punctuation)
         (
             r"\s+puck\s*[.!?]*\s*$",
