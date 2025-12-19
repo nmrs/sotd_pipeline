@@ -243,9 +243,9 @@ class ParallelMonthProcessor:
             phase_name: Name of the phase
         """
         if phase_name == "extract":
-            total_shaves = sum(r.get("shave_count", 0) for r in completed_results)
-            total_missing = sum(r.get("missing_count", 0) for r in completed_results)
-            total_skipped = sum(r.get("skipped_count", 0) for r in completed_results)
+            total_shaves = sum(r.get("meta", {}).get("shave_count", 0) for r in completed_results)
+            total_missing = sum(r.get("meta", {}).get("missing_count", 0) for r in completed_results)
+            total_skipped = sum(r.get("meta", {}).get("skipped_count", 0) for r in completed_results)
 
             print("\nExtraction Summary:")
             print(f"  Total Shaves: {total_shaves:,}")
