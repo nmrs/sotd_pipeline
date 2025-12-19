@@ -251,11 +251,10 @@ const ProductUsage: React.FC = () => {
       setProductAnalyses(validAnalysesWithMonths);
 
       // Fetch URLs for all comment IDs in the background
+      // Extract unique comment IDs from aggregated comments_by_date (much more efficient)
       const allCommentIds = new Set<string>();
-      validAnalyses.forEach(analysis => {
-        analysis.users.forEach(user => {
-          user.comment_ids.forEach(id => allCommentIds.add(id));
-        });
+      Object.values(aggregated.comments_by_date).forEach(ids => {
+        ids.forEach(id => allCommentIds.add(id));
       });
 
       if (allCommentIds.size > 0) {
