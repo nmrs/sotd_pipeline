@@ -5,6 +5,12 @@ Analyze extracted soap data to identify format indicators.
 This script analyzes all extracted soap entries and identifies format indicators
 (e.g., "croap", "cream", "soap", "puck", etc.) that appear with " - " prefixes,
 providing data-driven insights for deciding which formats should be stripped.
+
+Modes:
+- Default: Analyze format indicators with/without dash prefixes
+- --final-words: Analyze final word tokens in soap strings
+- --bracket-tokens: Analyze tokens in brackets (parentheses, square brackets,
+  or curly braces) at end of soap strings, aggregated by normalized content
 """
 
 import argparse
@@ -127,6 +133,42 @@ def extract_format_without_dash(text: str) -> Tuple[str | None, str]:
         if format_indicator in known_formats:
             remaining = text[: match.start()].strip()
             return format_indicator, remaining
+    return None, text
+
+
+def extract_bracket_token(text: str) -> Tuple[str | None, str]:
+    """
+    Extract token from brackets at end of text (supports (), [], {}).
+
+    All three bracket types are treated as equivalent - same token content
+    aggregates together regardless of bracket type.
+
+    Args:
+        text: Input text to analyze
+
+    Returns:
+        Tuple of (normalized_token, remaining_text) or (None, original_text) if no match
+    """
+    if not text or not text.strip():
+        return None, text
+
+    # Try each bracket type: parentheses, square brackets, curly braces
+    # Match at end, after optional whitespace/punctuation
+    patterns = [
+        (r"\(([^)]+)\)\s*[.!?]*\s*$", "("),  # parentheses
+        (r"\[([^\]]+)\]\s*[.!?]*\s*$", "["),  # square brackets
+        (r"\{([^}]+)\}\s*[.!?]*\s*$", "{"),  # curly braces
+    ]
+
+    for pattern, bracket_type in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            token_content = match.group(1).strip()
+            # Normalize token content (lowercase, strip) for aggregation
+            normalized_token = token_content.lower().strip()
+            remaining = text[: match.start()].strip()
+            return normalized_token, remaining
+
     return None, text
 
 
@@ -286,14 +328,87 @@ def analyze_final_words(data_dir: Path) -> Dict[str, Dict]:
     }
 
 
+def analyze_bracket_tokens(data_dir: Path) -> Dict[str, Dict]:
+    """
+    Analyze all extracted JSON files for bracket tokens ((), [], {}).
+
+    Tokens are aggregated by normalized content regardless of bracket type.
+    For example, (croap), [croap], and {croap} all count toward the same "croap" token.
+
+    Args:
+        data_dir: Directory containing extracted JSON files
+
+    Returns:
+        Dictionary with bracket token statistics and examples
+    """
+    bracket_token_stats: Dict[str, Dict] = defaultdict(
+        lambda: {
+            "count": 0,
+            "examples_original": [],
+            "examples_normalized": [],
+        }
+    )
+
+    total_entries = 0
+    months_processed = set()
+
+    # Get all valid month files
+    json_files = sorted([f for f in data_dir.glob("*.json") if is_valid_month_file(f)])
+
+    for json_file in json_files:
+        try:
+            with open(json_file, encoding="utf-8") as f:
+                data = json.load(f)
+
+            month = json_file.stem
+            months_processed.add(month)
+
+            entries = data.get("data", [])
+            for entry in entries:
+                if "soap" not in entry:
+                    continue
+
+                total_entries += 1
+                soap_data = entry["soap"]
+
+                # Analyze original field
+                original = soap_data.get("original", "")
+                if original:
+                    normalized_token, remaining = extract_bracket_token(original)
+                    if normalized_token:
+                        stats = bracket_token_stats[normalized_token]
+                        stats["count"] += 1
+                        if len(stats["examples_original"]) < 10:
+                            stats["examples_original"].append(original)
+
+                # Analyze normalized field
+                normalized = soap_data.get("normalized", "")
+                if normalized:
+                    normalized_token, remaining = extract_bracket_token(normalized)
+                    if normalized_token:
+                        stats = bracket_token_stats[normalized_token]
+                        if len(stats["examples_normalized"]) < 10:
+                            stats["examples_normalized"].append(normalized)
+
+        except (json.JSONDecodeError, KeyError) as e:
+            print(f"Warning: Error processing {json_file}: {e}")
+            continue
+
+    return {
+        "total_entries": total_entries,
+        "months_processed": len(months_processed),
+        "bracket_token_stats": dict(bracket_token_stats),
+    }
+
+
 def print_results(results: Dict, limit_examples: int = 5):
     """Print formatted analysis results to console."""
     print("=" * 80)
     print("SOAP FORMAT INDICATOR ANALYSIS")
     print("=" * 80)
     print()
-    total_entries = results['total_entries']
-    months_processed = results['months_processed']
+    total_entries = results["total_entries"]
+    months_processed = results["months_processed"]
     print(f"Analyzed {total_entries:,} soap entries from {months_processed} months")
     print()
 
@@ -362,8 +477,8 @@ def print_final_words_results(results: Dict, limit_examples: int = 5):
     print("SOAP FINAL WORD ANALYSIS")
     print("=" * 80)
     print()
-    total_entries = results['total_entries']
-    months_processed = results['months_processed']
+    total_entries = results["total_entries"]
+    months_processed = results["months_processed"]
     print(f"Analyzed {total_entries:,} soap entries from {months_processed} months")
     print()
 
@@ -410,6 +525,60 @@ def print_final_words_results(results: Dict, limit_examples: int = 5):
         print()
 
 
+def print_bracket_tokens_results(results: Dict, limit_examples: int = 5):
+    """Print formatted bracket token analysis results to console."""
+    print("=" * 80)
+    print("SOAP BRACKET TOKEN ANALYSIS")
+    print("=" * 80)
+    print()
+    total_entries = results["total_entries"]
+    months_processed = results["months_processed"]
+    print(f"Analyzed {total_entries:,} soap entries from {months_processed} months")
+    print()
+
+    bracket_token_stats = results["bracket_token_stats"]
+    if not bracket_token_stats:
+        print("No bracket tokens found.")
+        return
+
+    # Sort tokens by frequency (descending)
+    sorted_tokens = sorted(
+        bracket_token_stats.items(),
+        key=lambda x: x[1]["count"],
+        reverse=True,
+    )
+
+    print("BRACKET TOKEN SUMMARY")
+    print("-" * 80)
+    print(f"{'Token':<30} {'Count':<15}")
+    print("-" * 80)
+
+    for token, stats in sorted_tokens:
+        count = stats["count"]
+        print(f"{token:<30} {count:<15,}")
+
+    print()
+    print("=" * 80)
+    print("DETAILED EXAMPLES")
+    print("=" * 80)
+    print()
+
+    for token, stats in sorted_tokens:
+        count = stats["count"]
+        if count == 0:
+            continue
+
+        print(f"Token: {token.upper()}")
+        print("-" * 80)
+        print(f"  Count: {count:,} occurrences (aggregated across all bracket types)")
+        examples = stats["examples_original"][:limit_examples]
+        if examples:
+            print("  Examples:")
+            for example in examples:
+                print(f"    - {example}")
+        print()
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -437,6 +606,11 @@ def main():
         action="store_true",
         help="Analyze final words instead of format indicators",
     )
+    parser.add_argument(
+        "--bracket-tokens",
+        action="store_true",
+        help="Analyze tokens in brackets (parentheses, square brackets, or curly braces) at end of soap strings",
+    )
 
     args = parser.parse_args()
 
@@ -458,6 +632,24 @@ def main():
                     "unique_final_words": len(results["final_word_stats"]),
                 },
                 "final_word_stats": results["final_word_stats"],
+            }
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(output_data, f, indent=2)
+            print(f"\nDetailed results saved to: {args.output}")
+    elif args.bracket_tokens:
+        print("Analyzing bracket tokens in extracted soap data...")
+        results = analyze_bracket_tokens(args.data_dir)
+        print_bracket_tokens_results(results, limit_examples=args.limit_examples)
+
+        if args.output:
+            # Save detailed results to JSON
+            output_data = {
+                "summary": {
+                    "total_entries": results["total_entries"],
+                    "months_processed": results["months_processed"],
+                    "unique_bracket_tokens": len(results["bracket_token_stats"]),
+                },
+                "bracket_token_stats": results["bracket_token_stats"],
             }
             with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(output_data, f, indent=2)
