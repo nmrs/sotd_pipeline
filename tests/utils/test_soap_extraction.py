@@ -342,6 +342,39 @@ class TestNormalizeSoapSuffixes:
             == "summer break soaps - steady"
         )
 
+    def test_sample_indicators(self):
+        """Test removal of sample indicators."""
+        # (sample) in parentheses
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady (sample)")
+            == "summer break soaps - steady"
+        )
+        # (smush) in parentheses
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady (smush)")
+            == "summer break soaps - steady"
+        )
+        # - sample at end
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - sample")
+            == "summer break soaps - steady"
+        )
+        # - smush at end
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady - smush")
+            == "summer break soaps - steady"
+        )
+        # sample at end (without dash)
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady sample")
+            == "summer break soaps - steady"
+        )
+        # smush at end (without dash)
+        assert (
+            normalize_soap_suffixes("summer break soaps - steady smush")
+            == "summer break soaps - steady"
+        )
+
     def test_real_world_examples(self):
         """Test with real examples from soap.yaml."""
         # Summer Break Soaps examples
@@ -427,6 +460,12 @@ class TestExtractSoapSampleViaNormalization:
         )
         assert result == ("sample", None, None, "(samp)")
 
+        # (smush) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(smush)")
+
     def test_numbered_sample_patterns(self):
         """Test numbered sample pattern extraction."""
         # (sample #23)
@@ -447,6 +486,24 @@ class TestExtractSoapSampleViaNormalization:
         )
         assert result == ("sample", 3, 15, "(sample 3/15)")
 
+        # (smush #23) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush #23)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 23, None, "(smush #23)")
+
+        # (smush 5 of 10) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush 5 of 10)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 5, 10, "(smush 5 of 10)")
+
+        # (smush 3/15) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush 3/15)", "summer break soaps - steady"
+        )
+        assert result == ("sample", 3, 15, "(smush 3/15)")
+
     def test_trailing_sample_patterns(self):
         """Test trailing sample pattern extraction."""
         # - sample at end
@@ -460,6 +517,18 @@ class TestExtractSoapSampleViaNormalization:
             "summer break soaps - steady - tester", "summer break soaps - steady"
         )
         assert result == ("tester", None, None, "- tester")
+
+        # - smush at end - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady - smush", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "- smush")
+
+        # smush at end (without dash) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady smush", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "smush")
 
     def test_loose_sample_patterns(self):
         """Test loose sample pattern extraction with whitespace variations."""
@@ -475,6 +544,12 @@ class TestExtractSoapSampleViaNormalization:
         )
         assert result == ("tester", None, None, "( tester )")
 
+        # ( smush ) with spaces - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady ( smush )", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "( smush )")
+
     def test_gratitude_sample_patterns(self):
         """Test sample patterns with gratitude expressions."""
         # (sample -- thanks!!)
@@ -482,6 +557,12 @@ class TestExtractSoapSampleViaNormalization:
             "summer break soaps - steady (sample -- thanks!!)", "summer break soaps - steady"
         )
         assert result == ("sample", None, None, "(sample -- thanks!!)")
+
+        # (smush -- thanks!!) - should normalize to sample
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush -- thanks!!)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(smush -- thanks!!)")
 
     def test_case_insensitive(self):
         """Test that sample extraction is case insensitive."""
@@ -496,6 +577,18 @@ class TestExtractSoapSampleViaNormalization:
             "summer break soaps - steady (Sample)", "summer break soaps - steady"
         )
         assert result == ("sample", None, None, "(Sample)")
+
+        # SMUSH
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (SMUSH)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(SMUSH)")
+
+        # Smush
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (Smush)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(Smush)")
 
     def test_real_world_examples(self):
         """Test with real examples from soap.yaml."""
@@ -514,6 +607,12 @@ class TestExtractSoapSampleViaNormalization:
             "summer break soaps - steady - sample", "summer break soaps - steady"
         )
         assert result == ("sample", None, None, "- sample")
+
+        # smush example
+        result = extract_soap_sample_via_normalization(
+            "summer break soaps - steady (smush)", "summer break soaps - steady"
+        )
+        assert result == ("sample", None, None, "(smush)")
 
     def test_normalized_text_not_found(self):
         """Test when normalized text is not found in original."""

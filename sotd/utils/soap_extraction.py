@@ -76,18 +76,18 @@ def _extract_sample_patterns(remainder: str) -> Tuple[Optional[str], Optional[in
     # Convert to lowercase for case-insensitive matching
     remainder_lower = remainder.lower()
 
-    # Pattern 1: (sample), (tester)
+    # Pattern 1: (sample), (tester), (smush)
     basic_sample_match = re.search(r"\((\w+)\)", remainder_lower)
     if basic_sample_match:
         sample_type = basic_sample_match.group(1)
-        if sample_type in ["sample", "samp", "tester"]:
-            # Normalize samp to sample
-            if sample_type == "samp":
+        if sample_type in ["sample", "samp", "tester", "smush"]:
+            # Normalize samp and smush to sample
+            if sample_type in ["samp", "smush"]:
                 sample_type = "sample"
             return sample_type, None, None
 
-    # Pattern 2: (sample #23), (sample #5)
-    numbered_sample_match = re.search(r"\(sample\s+#(\d+)\)", remainder_lower)
+    # Pattern 2: (sample #23), (sample #5), (smush #23)
+    numbered_sample_match = re.search(r"\((?:sample|smush)\s+#(\d+)\)", remainder_lower)
     if numbered_sample_match:
         try:
             sample_number = int(numbered_sample_match.group(1))
@@ -95,8 +95,8 @@ def _extract_sample_patterns(remainder: str) -> Tuple[Optional[str], Optional[in
         except ValueError:
             pass
 
-    # Pattern 3: (sample 5 of 10), (sample 3 of 15)
-    range_sample_match = re.search(r"\(sample\s+(\d+)\s+of\s+(\d+)\)", remainder_lower)
+    # Pattern 3: (sample 5 of 10), (sample 3 of 15), (smush 5 of 10)
+    range_sample_match = re.search(r"\((?:sample|smush)\s+(\d+)\s+of\s+(\d+)\)", remainder_lower)
     if range_sample_match:
         try:
             sample_number = int(range_sample_match.group(1))
@@ -105,8 +105,8 @@ def _extract_sample_patterns(remainder: str) -> Tuple[Optional[str], Optional[in
         except ValueError:
             pass
 
-    # Pattern 4: (sample 5/10), (sample 3/15)
-    fraction_sample_match = re.search(r"\(sample\s+(\d+)/(\d+)\)", remainder_lower)
+    # Pattern 4: (sample 5/10), (sample 3/15), (smush 5/10)
+    fraction_sample_match = re.search(r"\((?:sample|smush)\s+(\d+)/(\d+)\)", remainder_lower)
     if fraction_sample_match:
         try:
             sample_number = int(fraction_sample_match.group(1))
@@ -115,34 +115,34 @@ def _extract_sample_patterns(remainder: str) -> Tuple[Optional[str], Optional[in
         except ValueError:
             pass
 
-    # Pattern 5: trailing "sample" or "tester" (e.g., "Brand - Scent - sample")
-    trailing_sample_match = re.search(r"\b(sample|samp|tester)\b$", remainder_lower)
+    # Pattern 5: trailing "sample", "tester", or "smush" (e.g., "Brand - Scent - sample")
+    trailing_sample_match = re.search(r"\b(sample|samp|tester|smush)\b$", remainder_lower)
     if trailing_sample_match:
         sample_type = trailing_sample_match.group(1)
-        if sample_type == "samp":
+        if sample_type in ["samp", "smush"]:
             sample_type = "sample"
         return sample_type, None, None
 
     # Pattern 6: (sample) with any whitespace variations
-    loose_sample_match = re.search(r"\(\s*(sample|samp|tester)\s*\)", remainder_lower)
+    loose_sample_match = re.search(r"\(\s*(sample|samp|tester|smush)\s*\)", remainder_lower)
     if loose_sample_match:
         sample_type = loose_sample_match.group(1)
-        if sample_type == "samp":
+        if sample_type in ["samp", "smush"]:
             sample_type = "sample"
         return sample_type, None, None
 
-    # Pattern 7: (sample -- thanks!!) or similar gratitude patterns
-    gratitude_sample_match = re.search(r"\(sample[^)]*thanks[^)]*\)", remainder_lower)
+    # Pattern 7: (sample -- thanks!!) or similar gratitude patterns, (smush -- thanks!!)
+    gratitude_sample_match = re.search(r"\((?:sample|smush)[^)]*thanks[^)]*\)", remainder_lower)
     if gratitude_sample_match:
         return "sample", None, None
 
-    # Pattern 8: (sample) with trailing punctuation
-    trailing_punct_match = re.search(r"\(sample\)[^\w]", remainder_lower)
+    # Pattern 8: (sample) or (smush) with trailing punctuation
+    trailing_punct_match = re.search(r"\((?:sample|smush)\)[^\w]", remainder_lower)
     if trailing_punct_match:
         return "sample", None, None
 
-    # Pattern 9: (sample) with emojis or special characters
-    emoji_sample_match = re.search(r"\(sample[^)]*[^\w\s][^)]*\)", remainder_lower)
+    # Pattern 9: (sample) or (smush) with emojis or special characters
+    emoji_sample_match = re.search(r"\((?:sample|smush)[^)]*[^\w\s][^)]*\)", remainder_lower)
     if emoji_sample_match:
         return "sample", None, None
 
@@ -182,6 +182,7 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s*\(sample[^)]*\)\s*", re.IGNORECASE),  # (sample), (sample -- thanks!!), etc.
         (r"\s*\(tester[^)]*\)\s*", re.IGNORECASE),  # (tester), etc.
         (r"\s*\(samp[^)]*\)\s*", re.IGNORECASE),  # (samp), etc.
+        (r"\s*\(smush[^)]*\)\s*", re.IGNORECASE),  # (smush), etc.
         # Size indicators in parentheses
         (r"\s*\(\d+oz\)\s*", re.IGNORECASE),  # (2oz), (4oz), etc.
         (r"\s*\(big\s+ass\s+og\s+\d+oz[^)]*\)\s*", re.IGNORECASE),  # (big ass og 4oz), etc.
@@ -202,9 +203,11 @@ def normalize_soap_suffixes(text: str) -> str:
         (r"\s*-\s*sample\s*$", re.IGNORECASE),  # "- sample" at end
         (r"\s*-\s*tester\s*$", re.IGNORECASE),  # "- tester" at end
         (r"\s*-\s*samp\s*$", re.IGNORECASE),  # "- samp" at end
+        (r"\s*-\s*smush\s*$", re.IGNORECASE),  # "- smush" at end
         (r"\s+sample\s*$", re.IGNORECASE),  # "sample" at end (without dash)
         (r"\s+tester\s*$", re.IGNORECASE),  # "tester" at end (without dash)
         (r"\s+samp\s*$", re.IGNORECASE),  # "samp" at end (without dash)
+        (r"\s+smush\s*$", re.IGNORECASE),  # "smush" at end (without dash)
         # Shave/Shaving prefix patterns for all formats (MUST come before standalone formats)
         # Generate patterns for " - shaving [format]" and " - shave [format]" for each format
         # Longer patterns (shaving) come before shorter (shave) to avoid partial matches

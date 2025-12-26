@@ -196,11 +196,11 @@ def strip_soap_patterns(value: str) -> str:
     cleaned = re.sub(other_product_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # OPTIMIZED: Combine soap-related indicators in parentheses
-    soap_pattern = r"\s*\((?:sample|tester|travel\s+size|mini|small)\)"
+    soap_pattern = r"\s*\((?:sample|tester|smush|travel\s+size|mini|small)\)"
     cleaned = re.sub(soap_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # OPTIMIZED: Combine standalone sample patterns into a single regex
-    standalone_sample_pattern = r"\s+(?:sample|tester)\s*[.!?]*\s*$"
+    standalone_sample_pattern = r"\s+(?:sample|tester|smush)\s*[.!?]*\s*$"
     cleaned = re.sub(standalone_sample_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up any leading/trailing delimiters and punctuation that the matcher needs

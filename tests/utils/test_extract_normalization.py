@@ -317,6 +317,8 @@ class TestStripSoapPatterns:
         test_cases = [
             ("B&M Seville (sample)", "B&M Seville"),  # "(sample)" is stripped
             ("Stirling Bay Rum (SAMPLE)", "Stirling Bay Rum"),  # "(SAMPLE)" is stripped
+            ("B&M Seville (smush)", "B&M Seville"),  # "(smush)" is stripped
+            ("Stirling Bay Rum (SMUSH)", "Stirling Bay Rum"),  # "(SMUSH)" is stripped
             (
                 "Declaration Grooming ( Sample )",
                 "Declaration Grooming ( Sample )",
@@ -333,10 +335,17 @@ class TestStripSoapPatterns:
         test_cases = [
             ("Stirling Bay Rum sample", "Stirling Bay Rum"),  # "sample" at end is stripped
             ("Declaration Grooming tester", "Declaration Grooming"),  # "tester" at end is stripped
+            ("B&M Seville smush", "B&M Seville"),  # "smush" at end is stripped
             ("B&M Seville SAMPLE", "B&M Seville"),  # "SAMPLE" at end is stripped (case insensitive)
+            (
+                "Stirling Bay Rum SMUSH",
+                "Stirling Bay Rum",
+            ),  # "SMUSH" at end is stripped (case insensitive)
             ("Stirling Bay Rum sample ", "Stirling Bay Rum"),  # trailing space stripped
             ("Declaration Grooming sample.", "Declaration Grooming"),  # "sample." stripped
             ("B&M Seville sample!", "B&M Seville"),  # "sample!" stripped
+            ("Declaration Grooming smush.", "Declaration Grooming"),  # "smush." stripped
+            ("B&M Seville smush!", "B&M Seville"),  # "smush!" stripped
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)

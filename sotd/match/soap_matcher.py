@@ -92,7 +92,7 @@ class SoapMatcher(BaseMatcher):
 
     def _is_sample(self, text: str) -> bool:
         """Check if text contains sample indicators."""
-        return bool(re.search(r"\b(sample|samp)\b", text.lower()))
+        return bool(re.search(r"\b(sample|samp|smush)\b", text.lower()))
 
     def _strip_surrounding_punctuation(self, text: str) -> str:
         """Strip surrounding punctuation from text."""
@@ -101,7 +101,7 @@ class SoapMatcher(BaseMatcher):
     def _normalize_common_text(self, text: str) -> str:
         """Normalize common text patterns."""
         # Remove sample markers (case-insensitive)
-        text = re.sub(r"\b(sample|samp)\b", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\b(sample|samp|smush)\b", "", text, flags=re.IGNORECASE)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
         # Strip trailing periods

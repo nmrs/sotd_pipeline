@@ -92,6 +92,20 @@ class TestSoapSampleEnricher:
             "extraction_remainder": "(tester)",
         }
 
+    def test_enrich_basic_smush(self):
+        """Test enrich with basic smush indicator - should normalize to sample."""
+        field_data = {
+            "original": "summer break soaps - steady (smush)",
+            "normalized": "summer break soaps - steady",
+        }
+        result = self.enricher.enrich(field_data, "")
+        assert result == {
+            "sample_type": "sample",
+            "sample_number": None,
+            "total_samples": None,
+            "extraction_remainder": "(smush)",
+        }
+
     def test_enrich_numbered_sample(self):
         """Test enrich with numbered sample."""
         field_data = {
@@ -106,6 +120,20 @@ class TestSoapSampleEnricher:
             "extraction_remainder": "(sample #23)",
         }
 
+    def test_enrich_numbered_smush(self):
+        """Test enrich with numbered smush - should normalize to sample."""
+        field_data = {
+            "original": "summer break soaps - steady (smush #23)",
+            "normalized": "summer break soaps - steady",
+        }
+        result = self.enricher.enrich(field_data, "")
+        assert result == {
+            "sample_type": "sample",
+            "sample_number": 23,
+            "total_samples": None,
+            "extraction_remainder": "(smush #23)",
+        }
+
     def test_enrich_range_sample(self):
         """Test enrich with range sample."""
         field_data = {
@@ -118,6 +146,34 @@ class TestSoapSampleEnricher:
             "sample_number": 5,
             "total_samples": 10,
             "extraction_remainder": "(sample 5 of 10)",
+        }
+
+    def test_enrich_range_smush(self):
+        """Test enrich with range smush - should normalize to sample."""
+        field_data = {
+            "original": "summer break soaps - steady (smush 5 of 10)",
+            "normalized": "summer break soaps - steady",
+        }
+        result = self.enricher.enrich(field_data, "")
+        assert result == {
+            "sample_type": "sample",
+            "sample_number": 5,
+            "total_samples": 10,
+            "extraction_remainder": "(smush 5 of 10)",
+        }
+
+    def test_enrich_fraction_smush(self):
+        """Test enrich with fraction smush - should normalize to sample."""
+        field_data = {
+            "original": "summer break soaps - steady (smush 3/15)",
+            "normalized": "summer break soaps - steady",
+        }
+        result = self.enricher.enrich(field_data, "")
+        assert result == {
+            "sample_type": "sample",
+            "sample_number": 3,
+            "total_samples": 15,
+            "extraction_remainder": "(smush 3/15)",
         }
 
     def test_enrich_trailing_sample(self):
@@ -174,4 +230,18 @@ class TestSoapSampleEnricher:
             "sample_number": None,
             "total_samples": None,
             "extraction_remainder": "(SAMPLE)",
+        }
+
+    def test_enrich_case_insensitive_smush(self):
+        """Test enrich with case insensitive smush input - should normalize to sample."""
+        field_data = {
+            "original": "SUMMER BREAK SOAPS - STEADY (SMUSH)",
+            "normalized": "summer break soaps - steady",
+        }
+        result = self.enricher.enrich(field_data, "")
+        assert result == {
+            "sample_type": "sample",
+            "sample_number": None,
+            "total_samples": None,
+            "extraction_remainder": "(SMUSH)",
         }
