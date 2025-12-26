@@ -161,7 +161,7 @@ Asylum:
   Rx:
     format: AC
     patterns:
-      - asylum.*rx
+      - as?ylum.*rx
 Atelier Durdan:
   Horizon:
     format: AC

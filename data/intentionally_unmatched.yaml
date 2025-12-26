@@ -365,9 +365,75 @@ razor:
       id: kpay05o
       source: user
 soap:
+  '[unknown]':
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-04.json
+      id: mmt38m5
+      source: user
+  cocoapuff's monster:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-07.json
+      id: n3fsh20
+      source: user
+  Coco Nutty - Cocoapuff's Monster:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-07.json
+      id: n38rerg
+      source: user
+  Coco Nutty - Cocopuff's Monster:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: n089098
+      source: user
+  Coco Nutty Soaps - Lavender Julius:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: my8pcmf
+      source: user
+  Coco's Nutty (soaps) - Lavender Julius:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx6qrk7
+      source: user
+  dawn platinum plus powerwash pumpkin spice:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-02.json
+      id: mb3sm2d
+      source: user
+  hot wheels body wash:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx9fi8c
+      source: user
+  megababe blade bar:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: mykchyc
+      source: user
+  misfits:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: n08mrew
+      source: user
   sample mash-up:
     added_date: '2025-09-19'
     comment_ids:
     - file: 2025-09.json
       id: ndmhcn6
+      source: user
+  this:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx0f6ht
       source: user

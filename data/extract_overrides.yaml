@@ -11,6 +11,14 @@
 # Comment IDs are Reddit comment IDs from the source data
 # Values should be the corrected, normalized product names
 
+2020-09:
+  g764hh5:
+    soap: "Catie's Bubbles - Pine Barrens"
+
+2020-11:
+  gdgvsde:
+    soap: "Catie's Bubbles - Pine Barrens"
+
 2025-01:
   # Example: "Ko" was extracted but user confirmed it's "Koraat"
   m99b8f9:
@@ -21,7 +29,12 @@
 2025-04:
   mkum44v:
     razor: "chiseled face legacy"
+  mo6ngrg:
+    soap: "Taylor's of Old Bond St Grapefruit"
 
+2025-05:
+  n6h5c3e:
+    razor: "Blackie Blade"
 2025-06:
   mvmlmio:
     razor: "Merkur slant"
