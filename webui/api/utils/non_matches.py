@@ -343,7 +343,9 @@ def load_non_matches() -> dict[str, Any]:
         # Canonicalize and dedupe loaded data
         brand_non_matches = _dedupe_brand_non_matches(brand_non_matches)
         scent_non_matches = _dedupe_scent_non_matches(scent_non_matches)
-        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(scent_cross_brand_non_matches)
+        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(
+            scent_cross_brand_non_matches
+        )
 
         # If canonicalization changed data, save the fixed data back
         if brand_non_matches != original_brand_non_matches:
@@ -355,7 +357,9 @@ def load_non_matches() -> dict[str, Any]:
             logger.info("🔧 Canonicalized and deduped scent non-matches and saved")
 
         if scent_cross_brand_non_matches != original_scent_cross_brand_non_matches:
-            _atomic_write_yaml(scents_cross_brand_file, scent_cross_brand_non_matches, "scents_cross_brand")
+            _atomic_write_yaml(
+                scents_cross_brand_file, scent_cross_brand_non_matches, "scents_cross_brand"
+            )
             logger.info("🔧 Canonicalized and deduped cross-brand scent non-matches and saved")
 
         brand_count = sum(len(v) for v in brand_non_matches.values())
@@ -473,7 +477,10 @@ def save_scent_non_match(
 
         # Check for duplicate
         other_norm = normalize_for_matching(other_scent)
-        if any(normalize_for_matching(nm) == other_norm for nm in scent_non_matches[pipeline_brand][canonical_key]):
+        if any(
+            normalize_for_matching(nm) == other_norm
+            for nm in scent_non_matches[pipeline_brand][canonical_key]
+        ):
             logger.info("ℹ️ Non-match already exists, skipping")
             return {"success": True, "message": "Non-match already exists"}
 
@@ -566,7 +573,9 @@ def save_cross_brand_scent_non_match(
             scent_cross_brand_non_matches[canonical_key].append(entry2_pair)
 
         # Dedupe and canonicalize
-        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(scent_cross_brand_non_matches)
+        scent_cross_brand_non_matches = _dedupe_cross_brand_scent_non_matches(
+            scent_cross_brand_non_matches
+        )
 
         # Save atomically with sorting
         _atomic_write_yaml(

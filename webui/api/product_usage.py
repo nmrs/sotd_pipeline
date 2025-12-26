@@ -99,7 +99,9 @@ def _generate_product_key(product_type: str, matched: Dict[str, Any]) -> str:
         return ""
 
 
-def _extract_product_info(product_type: str, product_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _extract_product_info(
+    product_type: str, product_data: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
     """Extract product information from product data."""
     if not product_data:
         return None
@@ -347,7 +349,9 @@ async def get_product_usage_analysis(
                         users_dict[author]["usage_dates"].append(date_str)
 
                 except Exception as e:
-                    logger.warning(f"Could not extract date from thread title: {thread_title} - {e}")
+                    logger.warning(
+                        f"Could not extract date from thread title: {thread_title} - {e}"
+                    )
                     continue
 
         # Convert users dict to list and sort by usage count
@@ -405,12 +409,12 @@ def _get_months_range(selected_month: str) -> List[str]:
             # Calculate month and year going back i months
             current_month = month - i
             current_year = year
-            
+
             # Handle month rollover
             while current_month <= 0:
                 current_month += 12
                 current_year -= 1
-            
+
             months.append(f"{current_year:04d}-{current_month:02d}")
         months.reverse()  # Oldest to newest
         return months
@@ -419,7 +423,9 @@ def _get_months_range(selected_month: str) -> List[str]:
         raise HTTPException(status_code=400, detail=f"Invalid month format: {selected_month}")
 
 
-@router.get("/yearly-summary/{month}/{product_type}/{brand}/{model}", response_model=ProductYearlySummary)
+@router.get(
+    "/yearly-summary/{month}/{product_type}/{brand}/{model}", response_model=ProductYearlySummary
+)
 async def get_product_yearly_summary(
     month: str, product_type: str, brand: str, model: str
 ) -> ProductYearlySummary:
@@ -544,4 +550,3 @@ async def get_product_yearly_summary(
 async def health_check() -> Dict[str, str]:
     """Health check endpoint."""
     return {"status": "healthy", "service": "product-usage"}
-

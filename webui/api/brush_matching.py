@@ -573,12 +573,12 @@ async def analyze_brush(request: BrushAnalysisRequest) -> BrushAnalysisResponse:
                         # Calculate the actual modifier value using the scoring engine
                         modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
                         modifier_value = 0.0  # Default value
-                        
+
                         if modifier_function and callable(modifier_function):
                             modifier_value = modifier_function(
                                 request.brushString, strategy_result, strategy_name
                             )
-                            
+
                             # Ensure modifier_value is numeric for multiplication
                             if isinstance(modifier_value, (int, float)):
                                 actual_modifier_score = modifier_value * modifier_weight

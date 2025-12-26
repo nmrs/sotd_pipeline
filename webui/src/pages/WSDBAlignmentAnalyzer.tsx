@@ -607,7 +607,15 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   );
 
   const filteredPipelineResults = useMemo(
-    () => filterResults(pipelineResults),
+    () => {
+      const filtered = filterResults(pipelineResults);
+      // Sort by brand, then by scent
+      return [...filtered].sort((a, b) => {
+        const brandCompare = (a.source_brand || '').localeCompare(b.source_brand || '', undefined, { sensitivity: 'base' });
+        if (brandCompare !== 0) return brandCompare;
+        return (a.source_scent || '').localeCompare(b.source_scent || '', undefined, { sensitivity: 'base' });
+      });
+    },
     [pipelineResults, filterResults]
   );
 

@@ -304,7 +304,9 @@ async def get_soap_neighbor_similarity(
             )
         except Exception as e:
             logger.error(f"Error in analyze_soap_neighbor_similarity_web: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Error analyzing neighbor similarity: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error analyzing neighbor similarity: {str(e)}"
+            )
 
         return {
             "message": f"Neighbor similarity analysis completed for {mode} mode",
@@ -619,15 +621,18 @@ def are_entries_non_matches(
     if mode == "brands":
         # Build canonical pair and check (relationships stored under alphabetically first key)
         canonical_key, other_brand = _canonicalize_brand_pair(brand1, brand2)
-        
+
         # Case-insensitive brand lookup (normalize brand for comparison)
         canonical_key_norm = normalize_for_matching(canonical_key)
         for stored_brand in brand_non_matches.keys():
             if normalize_for_matching(stored_brand) == canonical_key_norm:
-                if any(normalize_for_matching(nm) == normalize_for_matching(other_brand) for nm in brand_non_matches[stored_brand]):
+                if any(
+                    normalize_for_matching(nm) == normalize_for_matching(other_brand)
+                    for nm in brand_non_matches[stored_brand]
+                ):
                     return True
                 break
-        
+
         return False
 
     elif mode == "brand_scent":
@@ -645,7 +650,7 @@ def are_entries_non_matches(
         canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
         canonical_key_norm = normalize_for_matching(canonical_key)
         other_scent_norm = normalize_for_matching(other_scent)
-        
+
         # Case-insensitive brand and scent lookup (normalize for comparison)
         # (brand1_norm already calculated above)
         for stored_brand in scent_non_matches.keys():
@@ -660,7 +665,7 @@ def are_entries_non_matches(
                             return True
                         break
                 break
-        
+
         return False
 
     elif mode == "scents":
@@ -676,7 +681,7 @@ def are_entries_non_matches(
             canonical_key, other_scent = _canonicalize_scent_pair(scent1, scent2)
             canonical_key_norm = normalize_for_matching(canonical_key)
             other_scent_norm = normalize_for_matching(other_scent)
-            
+
             # Case-insensitive brand and scent lookup (normalize for comparison)
             # (brand1_norm already calculated above)
             for stored_brand in scent_non_matches.keys():
@@ -941,7 +946,9 @@ def analyze_soap_neighbor_similarity_web(
         matched_data = None
         if "matched" in first_match and first_match["matched"]:
             # Get brand (prefer "brand" field, fallback to "maker" for compatibility)
-            brand = first_match["matched"].get("brand", "") or first_match["matched"].get("maker", "")
+            brand = first_match["matched"].get("brand", "") or first_match["matched"].get(
+                "maker", ""
+            )
             matched_data = {
                 "brand": brand,  # Use "brand" consistently
                 "maker": brand,  # Also include "maker" for frontend compatibility
@@ -969,7 +976,9 @@ def analyze_soap_neighbor_similarity_web(
             next_matched_data = None
             if "matched" in next_first_match and next_first_match["matched"]:
                 # Get brand (prefer "brand" field, fallback to "maker" for compatibility)
-                next_brand = next_first_match["matched"].get("brand", "") or next_first_match["matched"].get("maker", "")
+                next_brand = next_first_match["matched"].get("brand", "") or next_first_match[
+                    "matched"
+                ].get("maker", "")
                 next_matched_data = {
                     "brand": next_brand,
                     "maker": next_brand,  # Also include "maker" for frontend compatibility
