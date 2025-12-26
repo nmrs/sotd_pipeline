@@ -496,7 +496,9 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
+                "Seaforth! Heather": [
+                    "Seaforth! Leather"
+                ],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -525,7 +527,9 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
+                "Seaforth! Heather": [
+                    "Seaforth! Leather"
+                ],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -554,7 +558,9 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
+                "Seaforth! Heather": [
+                    "Seaforth! Leather"
+                ],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -583,7 +589,9 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
+                "Seaforth! Heather": [
+                    "Seaforth! Leather"
+                ],  # Canonical: Heather < Leather alphabetically
             }
         }
 
@@ -709,7 +717,9 @@ class TestAreEntriesNonMatches:
         brand_non_matches = {}
         scent_non_matches = {
             "Spearhead Shaving Company": {
-                "Seaforth! Heather": ["Seaforth! Leather"],  # Canonical: Heather < Leather alphabetically
+                "Seaforth! Heather": [
+                    "Seaforth! Leather"
+                ],  # Canonical: Heather < Leather alphabetically
             }
         }
         scent_cross_brand_non_matches = {}

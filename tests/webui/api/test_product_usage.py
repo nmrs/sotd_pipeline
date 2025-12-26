@@ -205,9 +205,7 @@ class TestProductUsageAPI:
         }
 
         with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            with patch(
-                "webui.api.product_usage._extract_date_from_thread_title"
-            ) as mock_extract:
+            with patch("webui.api.product_usage._extract_date_from_thread_title") as mock_extract:
                 # Mock date extraction
                 from datetime import datetime
 
@@ -220,9 +218,7 @@ class TestProductUsageAPI:
 
                 mock_extract.side_effect = extract_date
 
-                response = client.get(
-                    "/api/product-usage/analysis/2025-06/razor/Gillette/Tech"
-                )
+                response = client.get("/api/product-usage/analysis/2025-06/razor/Gillette/Tech")
                 assert response.status_code == 200
                 data = response.json()
                 assert data["product"]["brand"] == "Gillette"
@@ -266,9 +262,7 @@ class TestProductUsageAPI:
         }
 
         with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            response = client.get(
-                "/api/product-usage/analysis/2025-06/razor/Gillette/Tech"
-            )
+            response = client.get("/api/product-usage/analysis/2025-06/razor/Gillette/Tech")
             assert response.status_code == 404
             assert "not found" in response.json()["detail"].lower()
 
@@ -314,7 +308,7 @@ class TestProductUsageAPI:
         """Test successful yearly summary retrieval."""
         # Mock Path.exists to return True for all months
         mock_exists.return_value = True
-        
+
         # Mock aggregated data
         aggregated_data = {
             "data": {
@@ -427,4 +421,3 @@ class TestProductUsageAPI:
             assert data["product"]["type"] == "soap"
             assert data["product"]["brand"] == "Grooming Dept"
             assert data["product"]["model"] == "After The Fire"
-

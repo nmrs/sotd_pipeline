@@ -353,7 +353,9 @@ class TestCanonicalStorage:
             assert "Scent A" in data["Brand A"]
             assert "Scent B" in data["Brand A"]["Scent A"]
             # B -> A should NOT exist (canonical storage)
-            assert "Scent B" not in data["Brand A"] or "Scent A" not in data["Brand A"].get("Scent B", [])
+            assert "Scent B" not in data["Brand A"] or "Scent A" not in data["Brand A"].get(
+                "Scent B", []
+            )
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
 
@@ -406,7 +408,9 @@ class TestCanonicalStorage:
             assert "Brand A" in result["brand_non_matches"]
             assert "Brand B" in result["brand_non_matches"]["Brand A"]
             # B -> A should be removed (canonical storage)
-            assert "Brand B" not in result["brand_non_matches"] or "Brand A" not in result["brand_non_matches"].get("Brand B", [])
+            assert "Brand B" not in result["brand_non_matches"] or "Brand A" not in result[
+                "brand_non_matches"
+            ].get("Brand B", [])
 
             # Verify file is updated
             with brands_file.open("r") as f:
@@ -428,9 +432,7 @@ class TestCanonicalStorage:
             # Create duplicate scent data (both A -> B and B -> A)
             scents_file = overrides_dir / "non_matches_scents.yaml"
             with scents_file.open("w") as f:
-                yaml.dump(
-                    {"Brand A": {"Scent A": ["Scent B"], "Scent B": ["Scent A"]}}, f
-                )
+                yaml.dump({"Brand A": {"Scent A": ["Scent B"], "Scent B": ["Scent A"]}}, f)
 
             # Load existing duplicate data
             result = load_non_matches()
@@ -440,7 +442,9 @@ class TestCanonicalStorage:
             assert "Scent A" in result["scent_non_matches"]["Brand A"]
             assert "Scent B" in result["scent_non_matches"]["Brand A"]["Scent A"]
             # B -> A should be removed
-            assert "Scent B" not in result["scent_non_matches"]["Brand A"] or "Scent A" not in result["scent_non_matches"]["Brand A"].get("Scent B", [])
+            assert "Scent B" not in result["scent_non_matches"][
+                "Brand A"
+            ] or "Scent A" not in result["scent_non_matches"]["Brand A"].get("Scent B", [])
 
             # Verify file is updated with canonical entries
             with scents_file.open("r") as f:
@@ -449,6 +453,8 @@ class TestCanonicalStorage:
                 assert "Scent A" in saved_data["Brand A"]
                 assert "Scent B" in saved_data["Brand A"]["Scent A"]
                 # B -> A should be removed
-                assert "Scent B" not in saved_data["Brand A"] or "Scent A" not in saved_data["Brand A"].get("Scent B", [])
+                assert "Scent B" not in saved_data["Brand A"] or "Scent A" not in saved_data[
+                    "Brand A"
+                ].get("Scent B", [])
         finally:
             os.environ.pop("SOTD_DATA_DIR", None)
