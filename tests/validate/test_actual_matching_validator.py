@@ -438,17 +438,9 @@ class TestActualMatchingValidator:
 
         def yaml_load_side_effect(f):
             if f == mock_handle_file_handle:
-                return {
-                    "Grizzly Bay": {
-                        "Unspecified": [test_string]
-                    }
-                }
+                return {"Grizzly Bay": {"Unspecified": [test_string]}}
             elif f == mock_knot_file_handle:
-                return {
-                    "Chisel & Hound": {
-                        "v25": [test_string]
-                    }
-                }
+                return {"Chisel & Hound": {"v25": [test_string]}}
             return None
 
         mock_yaml_load.side_effect = yaml_load_side_effect
@@ -465,9 +457,7 @@ class TestActualMatchingValidator:
         mock_brush_matcher_class.return_value = mock_matcher
 
         # Mock splits loader to not have this string in brush_splits.yaml
-        with patch.object(
-            self.validator, "_get_splits_loader"
-        ) as mock_splits_loader:
+        with patch.object(self.validator, "_get_splits_loader") as mock_splits_loader:
             mock_splits = Mock()
             mock_splits.should_not_split.return_value = False
             mock_splits.find_split.return_value = None

@@ -126,7 +126,11 @@ def test_scent_alias_match(temp_project_root, mock_wsdb_data, mock_pipeline_soap
         wsdb_data = json.load(f)
 
     # Remove canonical "Executive Man" entry
-    wsdb_data = [item for item in wsdb_data if not (item.get("brand") == "Stirling Soap Co." and item.get("name") == "Executive Man")]
+    wsdb_data = [
+        item
+        for item in wsdb_data
+        if not (item.get("brand") == "Stirling Soap Co." and item.get("name") == "Executive Man")
+    ]
 
     # Add entry with alias name only
     wsdb_data.append(
@@ -159,7 +163,13 @@ def test_brand_alias_and_scent_alias_match(temp_project_root, mock_wsdb_data, mo
         wsdb_data = json.load(f)
 
     # Remove canonical "Crisp Vetiver" entry
-    wsdb_data = [item for item in wsdb_data if not (item.get("brand") == "The Artisan Shave Shoppe" and item.get("name") == "Crisp Vetiver")]
+    wsdb_data = [
+        item
+        for item in wsdb_data
+        if not (
+            item.get("brand") == "The Artisan Shave Shoppe" and item.get("name") == "Crisp Vetiver"
+        )
+    ]
 
     # Add WSDB entry that matches both aliases
     wsdb_data.append(
@@ -179,7 +189,9 @@ def test_brand_alias_and_scent_alias_match(temp_project_root, mock_wsdb_data, mo
     with soaps_file.open("r", encoding="utf-8") as f:
         soaps_data = yaml.safe_load(f)
 
-    soaps_data["The Artisan Soap Shoppe"]["scents"]["Crisp Vetiver"]["alias"] = "Crisp Vetiver Alias"
+    soaps_data["The Artisan Soap Shoppe"]["scents"]["Crisp Vetiver"][
+        "alias"
+    ] = "Crisp Vetiver Alias"
 
     with soaps_file.open("w", encoding="utf-8") as f:
         yaml.dump(soaps_data, f)
@@ -388,7 +400,9 @@ def test_virtual_alias_case_insensitive(temp_project_root, mock_wsdb_data, mock_
     assert lookup.get_wsdb_slug("Test Brand", "Test Scent SOAP") == "test-brand-test-scent"
 
 
-def test_virtual_alias_wsdb_side_stripped_soap(temp_project_root, mock_wsdb_data, mock_pipeline_soaps):
+def test_virtual_alias_wsdb_side_stripped_soap(
+    temp_project_root, mock_wsdb_data, mock_pipeline_soaps
+):
     """Test virtual alias: WSDB entry with 'Soap' should match pipeline without 'Soap'."""
     lookup = WSDBLookup(project_root=temp_project_root)
 
@@ -414,7 +428,9 @@ def test_virtual_alias_wsdb_side_stripped_soap(temp_project_root, mock_wsdb_data
     assert slug == "test-brand-soap-test-scent"
 
 
-def test_virtual_alias_no_stripping_when_not_at_end(temp_project_root, mock_wsdb_data, mock_pipeline_soaps):
+def test_virtual_alias_no_stripping_when_not_at_end(
+    temp_project_root, mock_wsdb_data, mock_pipeline_soaps
+):
     """Test that 'soap' is only stripped when at the end, not in the middle."""
     lookup = WSDBLookup(project_root=temp_project_root)
 
@@ -445,7 +461,9 @@ def test_virtual_alias_no_stripping_when_not_at_end(temp_project_root, mock_wsdb
     assert slug == "soap-company-test-scent"
 
 
-def test_virtual_pattern_accent_normalization(temp_project_root, mock_wsdb_data, mock_pipeline_soaps):
+def test_virtual_pattern_accent_normalization(
+    temp_project_root, mock_wsdb_data, mock_pipeline_soaps
+):
     """Test virtual pattern: accented characters should match non-accented."""
     lookup = WSDBLookup(project_root=temp_project_root)
 
@@ -487,7 +505,9 @@ def test_virtual_pattern_accent_normalization(temp_project_root, mock_wsdb_data,
     assert slug == "cafe-resume"
 
 
-def test_virtual_pattern_and_ampersand_normalization(temp_project_root, mock_wsdb_data, mock_pipeline_soaps):
+def test_virtual_pattern_and_ampersand_normalization(
+    temp_project_root, mock_wsdb_data, mock_pipeline_soaps
+):
     """Test virtual pattern: 'and' and '&' should be treated as the same."""
     lookup = WSDBLookup(project_root=temp_project_root)
 
@@ -529,7 +549,9 @@ def test_virtual_pattern_and_ampersand_normalization(temp_project_root, mock_wsd
     assert slug == "test-and-company-scent"
 
 
-def test_virtual_pattern_combined_variations(temp_project_root, mock_wsdb_data, mock_pipeline_soaps):
+def test_virtual_pattern_combined_variations(
+    temp_project_root, mock_wsdb_data, mock_pipeline_soaps
+):
     """Test virtual patterns: combinations of all variations."""
     lookup = WSDBLookup(project_root=temp_project_root)
 
@@ -569,4 +591,3 @@ def test_virtual_pattern_combined_variations(temp_project_root, mock_wsdb_data, 
 
     slug = lookup.get_wsdb_slug("Barrister & Mann Soap", "Seville")
     assert slug == "barrister-and-mann-seville"
-

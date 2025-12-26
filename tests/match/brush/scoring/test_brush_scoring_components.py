@@ -500,24 +500,12 @@ class TestScoringEngine:
         )
 
         # Should return 1.0 when both handle and knot have the same brand
+        assert engine._modifier_same_brand("test", result_same_brand, "automated_split") == 1.0
         assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand, "automated_split"
-            )
+            engine._modifier_same_brand("test", result_same_brand, "full_input_component_matching")
             == 1.0
         )
-        assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand, "full_input_component_matching"
-            )
-            == 1.0
-        )
-        assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand, "known_split"
-            )
-            == 1.0
-        )
+        assert engine._modifier_same_brand("test", result_same_brand, "known_split") == 1.0
 
         # Test case-insensitive matching
         result_same_brand_case = MatchResult(
@@ -530,12 +518,7 @@ class TestScoringEngine:
             pattern=None,
             strategy="automated_split",
         )
-        assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand_case, "automated_split"
-            )
-            == 1.0
-        )
+        assert engine._modifier_same_brand("test", result_same_brand_case, "automated_split") == 1.0
 
         # Should return 0.0 when brands are different
         result_different_brands = MatchResult(
@@ -549,10 +532,7 @@ class TestScoringEngine:
             strategy="automated_split",
         )
         assert (
-            engine._modifier_same_brand(
-                "test", result_different_brands, "automated_split"
-            )
-            == 0.0
+            engine._modifier_same_brand("test", result_different_brands, "automated_split") == 0.0
         )
 
         # Should return 0.0 when one brand is missing
@@ -566,31 +546,16 @@ class TestScoringEngine:
             pattern=None,
             strategy="automated_split",
         )
-        assert (
-            engine._modifier_same_brand(
-                "test", result_missing_brand, "automated_split"
-            )
-            == 0.0
-        )
+        assert engine._modifier_same_brand("test", result_missing_brand, "automated_split") == 0.0
 
         # Should return 0.0 for non-composite strategies
-        assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand, "handle_only"
-            )
-            == 0.0
-        )
-        assert (
-            engine._modifier_same_brand(
-                "test", result_same_brand, "knot_only"
-            )
-            == 0.0
-        )
+        assert engine._modifier_same_brand("test", result_same_brand, "handle_only") == 0.0
+        assert engine._modifier_same_brand("test", result_same_brand, "knot_only") == 0.0
 
         # Test full_input_component_matching with different brands (should return 0.0)
         # This is the actual bug case: Chisel & Hound handle + Cornfed Viking knot
         result_different_brands_full_input = MatchResult(
-            original="chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            original='chisel & hound 26mm "bombshell" odin\'s beard v.6 fan',
             matched={
                 "handle": {
                     "brand": "Chisel & Hound",
@@ -607,7 +572,7 @@ class TestScoringEngine:
         )
         # Should return 0.0 when brands are different - this test exposes the bug
         result_value = engine._modifier_same_brand(
-            "chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            'chisel & hound 26mm "bombshell" odin\'s beard v.6 fan',
             result_different_brands_full_input,
             "full_input_component_matching",
         )
@@ -647,7 +612,7 @@ class TestScoringEngine:
         # Test the actual bug scenario: Check if handle_maker field is being used incorrectly
         # When handle_maker is None, handle["brand"] should be None, not fallback to knot brand
         result_with_handle_maker_none = MatchResult(
-            original="chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+            original='chisel & hound 26mm "bombshell" odin\'s beard v.6 fan',
             matched={
                 "handle_maker": None,  # Top-level handle_maker is None
                 "handle": {
@@ -666,7 +631,7 @@ class TestScoringEngine:
         # Should return 0.0 when handle brand is None (even if knot brand exists)
         assert (
             engine._modifier_same_brand(
-                "chisel & hound 26mm \"bombshell\" odin's beard v.6 fan",
+                'chisel & hound 26mm "bombshell" odin\'s beard v.6 fan',
                 result_with_handle_maker_none,
                 "full_input_component_matching",
             )

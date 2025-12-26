@@ -865,7 +865,12 @@ class TestTableGenerator:
                 "slug": "stirling-soap-co-executive-man",
                 "type": "Soap",
             },
-            {"brand": "Other Brand", "name": "Other Scent", "slug": "other", "type": "Blade"},  # Not a soap
+            {
+                "brand": "Other Brand",
+                "name": "Other Scent",
+                "slug": "other",
+                "type": "Blade",
+            },  # Not a soap
         ]
 
         with wsdb_file.open("w", encoding="utf-8") as f:
@@ -989,8 +994,14 @@ class TestTableGenerator:
         result = generator.generate_table("soaps")
 
         # Should contain links for matched soaps
-        assert "[Barrister and Mann - Seville](https://www.wetshavingdatabase.com/software/barrister-and-mann-seville/)" in result
-        assert "[Stirling Soap Co. - Executive Man](https://www.wetshavingdatabase.com/software/stirling-soap-co-executive-man/)" in result
+        assert (
+            "[Barrister and Mann - Seville](https://www.wetshavingdatabase.com/software/barrister-and-mann-seville/)"
+            in result
+        )
+        assert (
+            "[Stirling Soap Co. - Executive Man](https://www.wetshavingdatabase.com/software/stirling-soap-co-executive-man/)"
+            in result
+        )
 
         # Should not contain link for unmatched soap (just the name)
         assert "Unknown Brand - Unknown Scent" in result
