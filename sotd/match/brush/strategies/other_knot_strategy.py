@@ -59,7 +59,7 @@ class OtherKnotMatchingStrategy:
 
     def match(self, value: str, full_string: Optional[str] = None):
         """Match input against other knot patterns. Always returns a MatchResult.
-        
+
         Args:
             value: The text to match against (may be a split portion)
             full_string: The full original string (unused by this strategy, but required for interface consistency)

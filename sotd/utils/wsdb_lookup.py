@@ -53,12 +53,12 @@ class WSDBLookup:
 
     def _normalize_accents(self, text: str) -> str:
         """Remove accents from characters (e.g., 'Café' → 'Cafe').
-        
+
         Uses Unicode decomposition to separate base characters from combining marks.
-        
+
         Args:
             text: The string to normalize
-            
+
         Returns:
             String with accents removed
         """
@@ -66,41 +66,42 @@ class WSDBLookup:
             return text
         # Decompose to NFD (base + combining marks), then remove combining marks
         nfd = unicodedata.normalize("NFD", text)
-        return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
+        return "".join(c for c in nfd if unicodedata.category(c) != "Mn")
 
     def _normalize_and_ampersand(self, text: str) -> str:
         """Normalize 'and' and '&' to a consistent form.
-        
+
         Converts both 'and' and '&' (with or without spaces) to 'and'.
-        
+
         Args:
             text: The string to normalize
-            
+
         Returns:
             String with 'and' and '&' normalized to 'and'
         """
         if not text:
             return text
         import re
+
         # Replace '&' (with optional spaces) with 'and'
-        text = re.sub(r'\s*&\s*', ' and ', text)
+        text = re.sub(r"\s*&\s*", " and ", text)
         # Normalize multiple spaces
-        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r"\s+", " ", text)
         return text.strip()
 
     def _normalize_for_matching(self, text: str) -> str:
         """Apply all virtual pattern normalizations for matching.
-        
+
         This is the main normalization function that should be used for all
         WSDB matching operations. It applies:
         - Lowercase and trim
         - Unicode NFC normalization
         - Accent removal
         - "and"/"&" normalization
-        
+
         Args:
             text: The string to normalize
-            
+
         Returns:
             Fully normalized string for matching
         """
@@ -115,20 +116,20 @@ class WSDBLookup:
 
     def _strip_trailing_soap(self, text: str) -> str | None:
         """Strip trailing 'soap' (case-insensitive) from text.
-        
+
         This is a virtual alias helper that computes a stripped version on-the-fly.
         The result is NOT saved to soaps.yaml.
-        
+
         Args:
             text: The string to process
-            
+
         Returns:
             Stripped version if 'soap' found at end, None otherwise
         """
         if not text:
             return None
         text_lower = text.lower().rstrip()
-        if text_lower.endswith('soap'):
+        if text_lower.endswith("soap"):
             stripped = text[:-4].rstrip()  # Remove 'soap' and trailing whitespace
             return stripped if stripped else None
         return None
@@ -194,14 +195,20 @@ class WSDBLookup:
                 if isinstance(brand_data, dict):
                     # Extract aliases if present
                     if "aliases" in brand_data:
-                        aliases = brand_data["aliases"] if isinstance(brand_data["aliases"], list) else []
+                        aliases = (
+                            brand_data["aliases"] if isinstance(brand_data["aliases"], list) else []
+                        )
 
                     # Extract scents with aliases
                     if "scents" in brand_data:
                         for scent_name, scent_data in brand_data["scents"].items():
                             scent_alias = None
                             if isinstance(scent_data, dict) and "alias" in scent_data:
-                                scent_alias = scent_data["alias"] if isinstance(scent_data["alias"], str) else None
+                                scent_alias = (
+                                    scent_data["alias"]
+                                    if isinstance(scent_data["alias"], str)
+                                    else None
+                                )
 
                             scents[scent_name] = {"alias": scent_alias}
 
@@ -278,7 +285,7 @@ class WSDBLookup:
                     # Normalize WSDB entries using full normalization
                     wsdb_brand = self._normalize_for_matching(soap.get("brand") or "")
                     wsdb_name = self._normalize_for_matching(soap.get("name") or "")
-                    
+
                     # Also try matching against WSDB entries with stripped "soap" (virtual alias)
                     wsdb_brand_virtual = self._strip_trailing_soap(wsdb_brand)
                     if wsdb_brand_virtual:
@@ -288,13 +295,14 @@ class WSDBLookup:
                         wsdb_name_virtual = self._normalize_for_matching(wsdb_name_virtual)
 
                     # Match against original or virtual alias versions
-                    brand_matches = (wsdb_brand == brand_name or 
-                                   (wsdb_brand_virtual and wsdb_brand_virtual == brand_name))
-                    name_matches = (wsdb_name == scent_name or 
-                                  (wsdb_name_virtual and wsdb_name_virtual == scent_name))
+                    brand_matches = wsdb_brand == brand_name or (
+                        wsdb_brand_virtual and wsdb_brand_virtual == brand_name
+                    )
+                    name_matches = wsdb_name == scent_name or (
+                        wsdb_name_virtual and wsdb_name_virtual == scent_name
+                    )
 
                     if brand_matches and name_matches:
                         return soap.get("slug")
 
         return None
-

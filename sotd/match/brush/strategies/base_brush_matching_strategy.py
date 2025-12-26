@@ -13,7 +13,7 @@ class BaseBrushMatchingStrategy(ABC):
 
         Args:
             value: The text to match against (may be a split portion)
-            full_string: The full original string (for negative lookahead patterns). 
+            full_string: The full original string (for negative lookahead patterns).
                         If None, uses value as full_string.
 
         Returns:

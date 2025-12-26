@@ -325,7 +325,7 @@ class ScoringEngine:
             # Compare brands (case-insensitive, stripped)
             handle_clean = str(handle_brand).strip().lower()
             knot_clean = str(knot_brand).strip().lower()
-            
+
             # Only return 1.0 if brands are non-empty and match
             if handle_clean and knot_clean:
                 return 1.0 if handle_clean == knot_clean else 0.0
@@ -347,7 +347,7 @@ class ScoringEngine:
             # Strip whitespace and compare case-insensitively
             handle_clean = str(handle_brand).strip().lower()
             knot_clean = str(knot_brand).strip().lower()
-            
+
             # Only return 1.0 if brands are non-empty and match
             if handle_clean and knot_clean:
                 return 1.0 if handle_clean == knot_clean else 0.0

@@ -72,7 +72,9 @@ class ValidationIssue:
         self.matched_pattern = matched_pattern
         self.format = format  # Expected format (from correct_matches structure)
         self.catalog_format = catalog_format  # Actual format (from matcher result)
-        self.source_files = source_files or []  # List of file names where the issue originates (e.g., ["handle.yaml", "knot.yaml"])
+        self.source_files = (
+            source_files or []
+        )  # List of file names where the issue originates (e.g., ["handle.yaml", "knot.yaml"])
 
 
 class ValidationResult:
@@ -401,7 +403,11 @@ class ActualMatchingValidator:
         return issues
 
     def _validate_brush_entry(
-        self, brush_string: str, expected_data: Dict[str, Any], expected_section: str, source_files: Optional[List[str]] = None
+        self,
+        brush_string: str,
+        expected_data: Dict[str, Any],
+        expected_section: str,
+        source_files: Optional[List[str]] = None,
     ) -> List[ValidationIssue]:
         """Validate a single brush entry using actual matching."""
         issues = []
@@ -1214,11 +1220,9 @@ class ActualMatchingValidator:
                         )
                 else:
                     deduplicated_issues.append(issue)
-            
+
             if duplicate_count > 0:
-                logger.info(
-                    f"Deduplicated {duplicate_count} duplicate structural_change issue(s)"
-                )
+                logger.info(f"Deduplicated {duplicate_count} duplicate structural_change issue(s)")
 
             # Suppress data_mismatch issues when structural_change exists for same entry
             structural_change_patterns = {

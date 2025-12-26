@@ -20,7 +20,9 @@ class HandleComponentStrategy(BaseBrushMatchingStrategy):
     def __init__(self, handle_matcher: HandleMatcher):
         self.handle_matcher = handle_matcher
 
-    def match(self, value: str, full_string: Optional[str] = None, cached_results: Optional[dict] = None) -> Optional[MatchResult]:
+    def match(
+        self, value: str, full_string: Optional[str] = None, cached_results: Optional[dict] = None
+    ) -> Optional[MatchResult]:
         """
         Attempt to match the input as a handle-only component.
 

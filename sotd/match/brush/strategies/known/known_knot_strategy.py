@@ -73,7 +73,7 @@ class KnownKnotMatchingStrategy:
 
     def match(self, value: str, full_string: Optional[str] = None) -> MatchResult:
         """Match input against known knot patterns. Always returns a MatchResult.
-        
+
         Args:
             value: The text to match against (may be a split portion)
             full_string: The full original string (for negative lookahead patterns).
@@ -95,7 +95,7 @@ class KnownKnotMatchingStrategy:
             # Pattern matches if it matches the split text AND the full string
             matches_split = pattern_data["compiled"].search(value)
             matches_full = pattern_data["compiled"].search(effective_full_string)
-            
+
             if matches_split and matches_full:
                 # Extract size from input text if available
                 extracted_size = parse_knot_size(value)
