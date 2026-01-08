@@ -52,11 +52,9 @@ known_knots:
     G4:
       patterns:
         - alpha.*g4
-        - \bg4\b
     G5:
       patterns:
         - alpha.*g5
-        - \bg5\b
   AP Shave Co:
     APLuxury:
       fiber: Mixed Badger/Boar
@@ -451,7 +449,7 @@ known_knots:
     Reserve:
       fiber: Badger
       patterns:
-        - reserve vi*
+        - reserve (v|vi*|i*)
   Maggard:
     2-Band Badger:
       fiber: Badger
@@ -493,6 +491,14 @@ known_knots:
         - hi-?brush
         - omega.*syn
   Oumo:
+    Kirin:
+      fiber: Badger
+      patterns:
+        - oumo.*kirin
+    Meri-2:
+      fiber: Badger
+      patterns:
+        - oumo.*meri[- ]?2
     Pigsy:
       fiber: Boar
       patterns:
@@ -509,7 +515,7 @@ known_knots:
     ST-2:
       fiber: Synthetic
       patterns:
-        - \bst-?2\b
+        - \bs[tr]-?2\b
   Rad Dinosaur Creations:
     knot_size_mm: 26
     DinoBoar:
@@ -534,6 +540,20 @@ known_knots:
       knot_size_mm: 26
       patterns:
         - rich.*man.*s-?2.*(innovator)?
+  Semogue:
+    SOC:
+      fiber: Boar
+      knot_size_mm: 24
+      patterns:
+        - (semogue\s*owner.*club|\bs\.?\s*o\.?\s*c\.?\b).*boar
+        - (semogue\s*owner.*club|\bs\.?\s*o\.?\s*c\.?\b)
+        - owner.*club
+        - semogue.*oc
+  Shavemac:
+    D01:
+      fiber: Badger
+      patterns:
+        - shavemac.*d01
   Trotter Handcrafts:
     T1 Manchurian Badger:
       fiber: Badger
@@ -586,11 +606,13 @@ known_knots:
       patterns:
         - turn.{1,5}shave.*l\d
         - t[&n]s.*l\d
+        - \bl\d\b
     Medium Density Badger (M*):
       fiber: Badger
       patterns:
         - turn.{1,5}shave.*m\d
         - t[&n]s.*m\d
+        - ^(?!simpson).*\bm\d\b
     Plissoft:
       fiber: Synthetic
       knot_size_mm: 24
@@ -614,6 +636,7 @@ known_knots:
         - turn.{1,5}shave.*(tip|v[1-9])
         - t[&n]s.*(tip|v[1-9])
         - \btip\b v[1-9]
+        - v[1-9] \btip\b
     Tuxedo:
       fiber: Synthetic
       patterns:
@@ -718,7 +741,7 @@ other_knots:
   AP Shave Co:
     default: Synthetic
     patterns:
-      - A\.? ?P\.? ?\s*shave\s*(co)?
+      - a\.? ?p\.? ?\s*shave\s*(co)?
       - \bap\b
       - \bapsc\b
   Alpha:
@@ -891,7 +914,7 @@ other_knots:
   Elite:
     default: Badger
     patterns:
-      - elite
+      - (?<!omega )\b(elite)\b
   Envy Shave:
     default: Badger
     patterns:
@@ -925,17 +948,14 @@ other_knots:
     default: Synthetic
     patterns:
       - goodfella.*smile
+  Griffith:
+    default: Badger
+    patterns:
+      - griffith
   Grizzly Bay:
     default: Badger
     patterns:
       - griz.*bay
-  Groomatorium:
-    default: Synthetic
-    knot_size_mm: 24
-    patterns:
-      - groomatorium
-      - chiseled face
-      - \bcf\b
   Haircut & Shave Co:
     default: Badger
     patterns:
@@ -1074,6 +1094,7 @@ other_knots:
     patterns:
       - \b[ou]+mo\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - rorschach
+      - oumo
   Oz Shaving:
     default: Synthetic
     patterns:
@@ -1151,6 +1172,10 @@ other_knots:
     default: Badger
     patterns:
       - runeman
+  Self-Tied:
+    default: Badger
+    patterns:
+      - tied myself
   SHAVEDANDY:
     default: Synthetic
     patterns:
@@ -1171,6 +1196,10 @@ other_knots:
     default: Badger
     patterns:
       - simpson
+  Shavemac:
+    default: Badger
+    patterns:
+      - shavemac
   Shave Forge:
     default: Badger
     patterns:
@@ -1229,8 +1258,8 @@ other_knots:
   Turn-N-Shave:
     default: Badger
     patterns:
-      - turn.{1,5}shave
-      - tns
+      - turn.{1,5}shave(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - tns(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Van der Hagen:
     default: Boar
     patterns:

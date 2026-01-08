@@ -55,6 +55,7 @@ AC:
     - feather artist club proguard
     - feather pro guard
     - feather pro guard (?)
+    - feather pro-guard
     - feather proguard
     - feather proguard (ac)
     Soft Guard:
@@ -125,6 +126,7 @@ Cartridge/Disposable:
     ? ''
     : - astra sp + personna twin pivot plus
       - bic disposable's own blade
+      - bic single blade disposable
       - cartridge
       - dorco - pace 6 blade cartridge
       - gillette - joy
@@ -170,6 +172,7 @@ DE:
     - gillette 7 o'clock sharpedge
     - gillette 7 o'clock sharpedge (yellow)
     - gillette 7 o'clock sharpedge yellow
+    - gillette 7 o'clock sharpedge yellow\
     - gillette 7 o'clock sharpedge, yellow
     - gillette 7 o'clock yellow
     - gillette 7 o'clock yellowddd
@@ -178,6 +181,7 @@ DE:
     - gillette 7 oclock yellow
     - gillette 7' oclock yellow
     - gillette 7:00 yellow
+    - gillette 7o'clock sharp (yellow)
     - gillette 7oclock yellow
     - gillette sharpedge
     - gillette yellow
@@ -266,6 +270,9 @@ DE:
   American Razor Blades:
     DE:
     - american
+  Apollo:
+    No. 15:
+    - apollo no15 . 08mm 10 pfg hauchdonn. (1950s perhaps)
   Asco:
     Platinum:
     - asco orange platinum
@@ -404,6 +411,7 @@ DE:
     - crown - platinum
     Super Stainless:
     - crown - super stainless
+    - crown 1/2 de
     - crown super stainless (green), de
     - crown super stainless 1/2 de
     - crown super stainless, de
@@ -495,6 +503,7 @@ DE:
     - feather ss
     - feather stainless
     - feather stainless steel
+    - feather super platinum
     - return of the feather
     - super- feather the stainless
   Filoso:
@@ -607,7 +616,7 @@ DE:
     - gillette platinum - new
     - gillette platinum ⭐️
     - gillette platium
-    - gillette ruby platinum
+    - gillette premium
     - gillette super platinum
     - gillette swede
     - platinum
@@ -622,6 +631,7 @@ DE:
     - gillette - silver blue
     - gillette - silverblue
     - gillette -silver blue
+    - gillette -silver blue 1
     - gillette blue silver
     - gillette silve blue
     - gillette silver blue
@@ -662,6 +672,7 @@ DE:
     - gillette - wilkinson sword
     - gillette wilkinson sword
     - gillette wilkinson sword (saloon pack)
+    - gillette wilkinson sword - saloon pack stainless
     - gillette wilkinson sword india
     - gillette wilkinson sword salon pack ss
     - gillette x wilkinson sword
@@ -693,6 +704,9 @@ DE:
   Inglish:
     Super Stainless:
     - inglish stainless
+  Jianyu:
+    DE:
+    - jianyu
   Kai:
     DE:
     - kai
@@ -853,7 +867,6 @@ DE:
     - personna - platinum
     - personna - platinum (for both)
     - personna - platinum chrome
-    - personna - platinum chrome israeli red
     - personna israeli red
     - personna platimum
     - personna platinum
@@ -882,6 +895,7 @@ DE:
     - crystal super+ platinum
     - israeli personna
     - personna (crystal) platinum
+    - personna - platinum chrome israeli red
     - personna blue crystal
     - personna crystal blue
     - personna crystal super
@@ -890,6 +904,7 @@ DE:
   Polsilver:
     Super Iridium:
     - gillette - polsilver super iridium
+    - iridium - super
     - polisilver
     - polsilver
     - polsilver - super iridium
@@ -1146,6 +1161,7 @@ DE:
   Wilkinson Sword:
     Classic:
     - chinese gillette wilkinson
+    - tbd (wilkinson sword)
     - wilkenson sword
     - wilkerson sword
     - wilkinson
@@ -1187,6 +1203,7 @@ DE:
   Zorrik:
     Super Platinum:
     - zorrik - super platinum
+    - zorrik sp
     - zorrik super platinum
 FHS:
   Feather:
@@ -1345,6 +1362,7 @@ Half DE:
     - permasharp
     - permasharp (brand new blade)
     - permasharp 1/2 de
+    - permasharp 1/2-de
   Leaf:
     SE:
     - leaf single-edge blades
@@ -1379,6 +1397,7 @@ Injector:
   Schick:
     Injector:
     - chick
+    - chinese schick
     - injector
     - injector blade
     - schick

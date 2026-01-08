@@ -424,6 +424,10 @@ Cartridge/Disposable:
       - person.*(single blade|face razor)
       - twinblade
       - ^(?!.*(tip|silver blue|lady)).*gil.*blue
+Caveem:
+  Safety Razor:
+    patterns:
+      - caveem
 Charlex:
   Straight:
     format: Straight
@@ -708,6 +712,7 @@ Ever-Ready:
       - (?:ever|er).*1914
       - 1914.*(?:ever|er)
       - ever.*lather
+      - ever.*24/14
   "1924":
     format: GEM
     patterns:
@@ -816,6 +821,11 @@ Feather:
       - (?!.*(copy|[ck]loni)).*feather.*(dx|ss|sr|kami)
       - (?!.*(copy|[ck]loni)).feather.*artist.*clu
       - (?!.*(copy|[ck]loni)).*feather.*\bac\b(?:.*(shavette|kami))?
+Fendrihan:
+  Dixon:
+    patterns:
+      - fendrihan.*dixon
+      - fendrihan.*open
 Filarmonica:
   "12":
     format: Straight
@@ -884,6 +894,11 @@ Focus:
   Tritok Slant:
     patterns:
       - focus.*slant
+Frank Buster:
+  Straight:
+    format: Straight
+    patterns:
+      - frank.*buster(?:.*\d{1,2}/(8|16))?
 Frederick Reynolds:
   Straight:
     format: Straight
@@ -931,6 +946,7 @@ GEM:
     patterns:
       - gem.*clog(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - .*clog.*pruf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - mmcc
   Contour:
     format: GEM
     patterns:
@@ -985,6 +1001,7 @@ GEM:
     patterns:
       - gem.*push
   Unspecified:
+    format: GEM
     patterns:
       - gem
 Geneva Cutlery Co.:
@@ -1205,6 +1222,11 @@ Griffon:
     format: Straight
     patterns:
       - griffon(?:.*\d{1,2}/(8|16))?
+Gustave Lalune:
+  Straight:
+    format: Straight
+    patterns:
+      - gustave.*lalune(?:.*\d{1,2}/(8|16))?
 Gutche:
   A77 Shavette:
     format: Shavette (A77)
@@ -1374,9 +1396,9 @@ J.R. Torrey Razor Co.:
   Straight:
     format: Straight
     patterns:
-      - j\.?r\.?\s*torrey
-      - torrey
-      - torrey.*razor
+      - j\.?r\.?\s*torrey(.*\d{1,2}/(8|16))?
+      - torrey(.*\d{1,2}/(8|16))?
+      - torrey.*razor(.*\d{1,2}/(8|16))?
 Jenes Razors:
   Straight:
     patterns:
@@ -1530,6 +1552,7 @@ Lambda:
   Athena:
     patterns:
       - lambda.*athena
+      - tithena
 Leaf:
   Razor:
     format: Half DE (multi-blade)
@@ -1632,6 +1655,9 @@ Marianna:
     patterns:
       - marianna
 Master Barber:
+  Classic Safety Razor:
+    patterns:
+      - master barber
   Magic Razor:
     format: Shavette (Half DE)
     patterns:
@@ -1911,6 +1937,7 @@ Other Straight Razor:
       - winner barber razor
       - imperial razor
       - tonsorial.*gem
+      - cutlery
 PAA:
   Alpha Ecliptic:
     patterns:
@@ -1946,6 +1973,7 @@ PAL:
     format: Injector
     patterns:
       - pal.*injector
+      - pal.*adjustable
   Injectomatic:
     format: Injector
     patterns:
@@ -2542,6 +2570,7 @@ Simmons Hardware Co.:
     format: Straight
     patterns:
       - simmons.*hardware
+      - simmons.*pet
 Smart-Helix:
   Apollo:
     patterns:
@@ -2616,6 +2645,11 @@ Stirling:
       - st[ei]rling.*stain
       - st[ei]rling.*(ss|hyper|ha|stai)
       - st[ei]rling
+Sun Moon:
+  Straight:
+    format: Straight
+    patterns:
+      - sun.*moon(?:.*\d{1,2}/(8|16))?
 Superior Cuts:
   "":
     patterns:
@@ -2694,6 +2728,11 @@ Tedalus:
   Velocity-ONE:
     patterns:
       - tedal.*velo(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+Tennis:
+  Straight:
+    format: Straight
+    patterns:
+      - tennis(?:.*\d{1,2}/(8|16))?
 The Holy Black:
   Shavette:
     format: Shavette (Half DE)
@@ -2925,8 +2964,8 @@ Whityle:
 Wilkinson Sword:
   Butterfly:
     patterns:
-      - wilk.*sword
-      - wilk.*butter
+      - wil\w+son.*sword
+      - wil\w+son.*butter
   Classic:
     patterns:
       - wilk.*classic

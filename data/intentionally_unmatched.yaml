@@ -294,6 +294,12 @@ brush:
     - file: 2025-06.json
       id: mw9kte2
       source: user
+  rosie palm and her 5 sisters fingermagic brush:
+    added_date: '2026-01-07'
+    comment_ids:
+    - file: 2025-02.json
+      id: myf7jya
+      source: user
   see below:
     added_date: '2025-07-28'
     comment_ids:
@@ -305,6 +311,12 @@ brush:
     comment_ids:
     - file: 2025-06.json
       id: mxz7bbg
+      source: user
+  the tsar - hands:
+    added_date: '2026-01-05'
+    comment_ids:
+    - file: 2025-05.json
+      id: mx6nufz
       source: user
   u/jwoods23's hands:
     added_date: '2025-08-10'
@@ -365,18 +377,6 @@ razor:
       id: kpay05o
       source: user
 soap:
-  '[unknown]':
-    added_date: '2025-12-18'
-    comment_ids:
-    - file: 2025-04.json
-      id: mmt38m5
-      source: user
-  cocoapuff's monster:
-    added_date: '2025-12-18'
-    comment_ids:
-    - file: 2025-07.json
-      id: n3fsh20
-      source: user
   Coco Nutty - Cocoapuff's Monster:
     added_date: '2025-12-18'
     comment_ids:
@@ -400,6 +400,18 @@ soap:
     comment_ids:
     - file: 2025-06.json
       id: mx6qrk7
+      source: user
+  '[unknown]':
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-04.json
+      id: mmt38m5
+      source: user
+  cocoapuff's monster:
+    added_date: '2025-12-18'
+    comment_ids:
+    - file: 2025-07.json
+      id: n3fsh20
       source: user
   dawn platinum plus powerwash pumpkin spice:
     added_date: '2025-12-18'

@@ -59,6 +59,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - bullseye
+  Burma-Shave:
+    Unspecified:
+      patterns:
+        - burma.*shave
   Butchwood:
     Unspecified:
       patterns:
@@ -128,6 +132,7 @@ artisan_handles:
       patterns:
         - declaration
         - \bdg\b
+        - l&l grooming
   Dogwood:
     Unspecified:
       patterns:
@@ -155,7 +160,7 @@ artisan_handles:
   Elite:
     Unspecified:
       patterns:
-        - elite(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*omega elite).*elite
   Envy Shave:
     Unspecified:
       patterns:
@@ -171,6 +176,7 @@ artisan_handles:
     Unspecified:
       patterns:
         - e?ver.*read
+        - \ber\b
   Extrò Cosmesi:
     Italian Flag Synthetic:
       fiber: Synthetic
@@ -196,6 +202,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - fuller
+  GL Customs:
+    Unspecified:
+      patterns:
+        - gl customs
+        - gl customs.*\b3d\b.*(?:printed)?
   Grizzly Bay:
     Unspecified:
       patterns:
@@ -205,6 +216,10 @@ artisan_handles:
       patterns:
         - heritage
         - heritage (collection|shaving)
+  Hoosier Latheworks:
+    Unspecified:
+      patterns:
+        - hoosier.*lathe ?works
   Jayaruh:
     Unspecified:
       patterns:
@@ -308,11 +323,21 @@ artisan_handles:
     Unspecified:
       patterns:
         - montalv
+  Riva:
+    Unspecified:
+      patterns:
+        - \briva\b 
   Rooney:
     Unspecified:
       patterns:
         - rooney
   Rubberset:
+    "203":
+      patterns:
+        - rubberset.*203
+    "400":
+      patterns:
+        - rubberset.*400
     Unspecified:
       patterns:
         - rubberset
@@ -458,7 +483,7 @@ manufacturer_handles:
         - aka.*stanley
     Unspecified:
       patterns:
-        - aka.*brush
+        - aka.*brush(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - aka
   AMACK:
     Unspecified:
@@ -471,7 +496,7 @@ manufacturer_handles:
   AP Shave Co:
     Unspecified:
       patterns:
-        - ^A.? ?P.? ?\s*shave
+        - a.? ?p.? ?\s*shave
         - ^\bap\b
   Arno:
     Unspecified:
@@ -520,8 +545,7 @@ manufacturer_handles:
   Boti:
     Unspecified:
       patterns:
-        - boti
-        - boti.*brush
+        - ^(?!.*\bmob\b|my own).*boti
   Bundubeard:
     Unspecified:
       patterns:
@@ -581,6 +605,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - goodfellas'? smile
+  Griffith:
+    Unspecified:
+    patterns:
+      - griffith
   Haircut & Shave Co:
     Unspecified:
       patterns:
@@ -593,7 +621,7 @@ manufacturer_handles:
   Highlander Brushes:
     Unspecified:
       patterns:
-        - highlander brushes
+        - highlander(.*brushes)?
   Holzleute:
     Unspecified:
       patterns:
@@ -606,10 +634,6 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - jayaruh
-  L&L Grooming:
-    Unspecified:
-      patterns:
-        - l&l grooming
   L'Occitane en Provence:
     Unspecified:
       patterns:
@@ -633,7 +657,7 @@ manufacturer_handles:
   Maggard:
     Unspecified:
       patterns:
-        - maggard
+        - maggard(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Maritime Brush Co.:
     Unspecified:
       patterns:
@@ -669,7 +693,7 @@ manufacturer_handles:
   Noble Otter:
     Unspecified:
       patterns:
-        - noble
+        - noble(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - no\s*\d{2}mm
   Nom:
     Unspecified:
@@ -678,7 +702,7 @@ manufacturer_handles:
   Old Spice:
     Unspecified:
       patterns:
-        - old spice
+        - old spice(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Omega:
     Unspecified:
       patterns:
@@ -696,7 +720,7 @@ manufacturer_handles:
   PAA:
     Unspecified:
       patterns:
-        - paa(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - paa(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxxxxxxxxxx)
         - phoenix.*art
   Paragon:
     Unspecified:
@@ -791,7 +815,7 @@ manufacturer_handles:
   Timeless:
     Unspecified:
       patterns:
-        - timeless
+        - timeless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - \btrbr\b
   Truefitt & Hill:
     Unspecified:
@@ -860,11 +884,16 @@ other_handles:
       patterns:
         - homemade
         - my own
+        - \bmob\b
+        - my handle
+        - handcrafted
+        - custom(?! color)
   Unknown:
     Unspecified:
       patterns:
         - burl
         - unknown
+        - generic
   Marco Rinaldi:
     Unspecified:
       patterns:

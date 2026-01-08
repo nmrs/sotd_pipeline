@@ -142,6 +142,10 @@ DE:
       patterns:
         - american.*razor.*blades
         - american
+  Apollo:
+    No. 15:
+      patterns:
+        - apollo.*no.*15
   Asco:
     Platinum:
       patterns:
@@ -237,6 +241,7 @@ DE:
     Super Stainless:
       patterns:
         - crown.*stainless
+        - crown
   Crystal:
     Stainless:
       patterns:
@@ -347,6 +352,7 @@ DE:
         - gil.*pla
         - gil.*\bswede\b
         - plati
+        - gil.*prem
     Rubie:
       patterns:
         - rubie
@@ -412,6 +418,10 @@ DE:
     Super Stainless:
       patterns:
         - \binglish\b
+  Jianyu:
+    DE:
+      patterns:
+        - jianyu
   Kai:
     DE:
       patterns:
@@ -545,6 +555,7 @@ DE:
         - pol(i|-)*silver
         - polsiver
         - pol.*super.*iridium
+        - ^(?!.*wizamet).*iridium.*super
   QShave:
     Titanium:
       patterns:

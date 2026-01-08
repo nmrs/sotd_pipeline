@@ -76,7 +76,7 @@ brush_scoring_weights:
       dual_component: 0.0
 
     known_split:
-      multiple_brands: 35.0
+      multiple_brands: 135.0
       handle_weight: 0
       knot_weight: 0
       handle_brand_without_knot_brand: -15.0
