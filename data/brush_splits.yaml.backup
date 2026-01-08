@@ -1,3 +1,36 @@
+AP Shave Co Maggard Mixed $MISTURA:
+  handle: AP Shave Co
+  knot: Maggard Mixed $MISTURA
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - mww3zly
+Boar AP Shave Co Wooden 26 mm Maggards Boar knot:
+  handle: AP Shave Co Wooden
+  knot: 26 mm Maggards Boar knot
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-12.json
+    comment_ids:
+    - nv844f6
+Boar AP Shave Co Wooden 26mm Maggards boar:
+  handle: AP Shave Co Wooden
+  knot: 26mm Maggards boar
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-12.json
+    comment_ids:
+    - nwdowmq
 Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
   handle: Rudy Vey B&B Forum Brush
   knot: Boar RV Semogue Knot
@@ -13,6 +46,17 @@ Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
   system_knot: Rudy Vey B&B Forum Brush
   system_confidence: high
   system_reasoning: 'Fiber-hint split: knot contains fiber indicator'
+Boar Rudy Vey SOC knot 24mm:
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-12.json
+    comment_ids:
+    - ns4rnx1
 Chisel & Hound v27 Fanchurian (Oumo Warhammer Ivory White):
   handle: (Oumo Warhammer Ivory White)
   knot: Chisel & Hound v27 Fanchurian
@@ -96,6 +140,88 @@ Made Rite - 500 PB (Oumo - 26mm SHD):
   - file: 2025-09.json
     comment_ids:
     - nfexjs4
+Oumo X Twoface Brothers Maggard SHD 26mm Badger:
+  handle: Oumo X Twoface Brothers
+  knot: Maggard SHD 26mm Badger
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - mxffbiv
+Oumo X Twoface Brothers Shavemac D01:
+  handle: Oumo X Twoface Brothers
+  knot: Shavemac D01
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - mxgt3yp
+Prometheus Handcrafts "Red in White" 27.5mm Treated Oumo Manchurian:
+  handle: Prometheus Handcrafts "Red in White"
+  knot: 27.5mm Treated Oumo Manchurian
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-02.json
+    comment_ids:
+    - mcz2789
+Prometheus Red Boti Fan 28mm:
+  handle: Prometheus Red
+  knot: Boti Fan 28mm
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - mvw33up
+    - mw2rafv
+    - mw98znq
+    - mwf3ei1
+    - mwly998
+    - mws3wgp
+    - mwyp34n
+    - mx54jf2
+    - mx7jn6u
+    - mxgrbl7
+    - mxp0q13
+    - mxuq8tu
+    - my4lbva
+    - my4o1ho
+    - mycti6p
+    - myj6yhe
+    - myqjkmr
+    - myxvtwr
+    - mz3gzdu
+    - mz9wrna
+    - mzggyaz
+    - mzn12h7
+    - mzq4r4x
+    - n06rfls
+    - n06s256
+    - n0cz3se
+    - n0p42jo
+    - n0p5geu
+Rudy Vey B&B Forum Brush sOC knot:
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-12.json
+    comment_ids:
+    - nvtmv6r
 Unbranded - Marble w/ Maggard G5C Synthetic:
   handle: Unbranded - Marble
   knot: Maggard G5C Synthetic
@@ -113,8 +239,7 @@ Unbranded - Marble w/ Maggard G5C Synthetic:
     - nr4zqp9
 Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
   handle: null
-  knot: Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle
-    (aka Less Boar Stirling Edition)
+  knot: null
   match_type: null
   corrected: false
   validated_at: null
