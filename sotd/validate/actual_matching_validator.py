@@ -597,6 +597,8 @@ class ActualMatchingValidator:
                 actual_handle_model = None
                 actual_knot_brand = None
                 actual_knot_model = None
+                actual_brand = None
+                actual_model = None
 
                 if actual_section == "handle_knot":
                     # Extract handle and knot details from matched_data
@@ -614,6 +616,28 @@ class ActualMatchingValidator:
                     actual_handle_model = handle_data.get("model")
                     actual_knot_brand = knot_data.get("brand")
                     actual_knot_model = knot_data.get("model")
+                elif actual_section == "brush":
+                    # Extract brush brand and model from matched_data
+                    actual_brand = matched_data.get("brand")
+                    actual_model = matched_data.get("model")
+
+                # Extract expected handle/knot brand/model from expected_data
+                expected_handle_brand = None
+                expected_handle_model = None
+                expected_knot_brand = None
+                expected_knot_model = None
+
+                if expected_section == "handle_knot":
+                    expected_handle_brand = expected_data.get("handle_maker")
+                    expected_handle_model = expected_data.get("handle_model")
+                    expected_knot_brand = expected_data.get("knot_brand")
+                    expected_knot_model = expected_data.get("knot_model")
+                elif expected_section == "handle":
+                    expected_handle_brand = expected_data.get("handle_maker")
+                    expected_handle_model = expected_data.get("handle_model")
+                elif expected_section == "knot":
+                    expected_knot_brand = expected_data.get("knot_brand")
+                    expected_knot_model = expected_data.get("knot_model")
 
                 issues.append(
                     ValidationIssue(
@@ -630,6 +654,12 @@ class ActualMatchingValidator:
                         expected_model=(
                             expected_data.get("model") if expected_section == "brush" else None
                         ),
+                        actual_brand=actual_brand,
+                        actual_model=actual_model,
+                        expected_handle_brand=expected_handle_brand,
+                        expected_handle_model=expected_handle_model,
+                        expected_knot_brand=expected_knot_brand,
+                        expected_knot_model=expected_knot_model,
                         actual_handle_brand=actual_handle_brand,
                         actual_handle_model=actual_handle_model,
                         actual_knot_brand=actual_knot_brand,

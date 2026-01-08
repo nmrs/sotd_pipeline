@@ -776,6 +776,16 @@ export interface CatalogValidationIssue {
     fiber?: string;
     knot_size_mm?: number;
   };
+  current_handle_match?: {
+    brand?: string;
+    model?: string;
+  };
+  current_knot_match?: {
+    brand?: string;
+    model?: string;
+    fiber?: string;
+    knot_size_mm?: number;
+  };
   expected_handle_match?: {
     brand?: string;
     model?: string;

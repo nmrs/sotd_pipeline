@@ -248,6 +248,8 @@ class CatalogValidationIssue(BaseModel):
     matched_pattern: Optional[str] = None  # Pattern that caused the match for mismatched results
     # Brush-specific match details
     current_match_details: Optional[dict] = None  # Current brush match details
+    current_handle_match: Optional[dict] = None  # Current handle match details (from correct_matches)
+    current_knot_match: Optional[dict] = None  # Current knot match details (from correct_matches)
     expected_handle_match: Optional[dict] = None  # Expected handle match details
     expected_knot_match: Optional[dict] = None  # Expected knot match details
     line_numbers: Optional[Dict[str, List[int]]] = (
@@ -1517,6 +1519,42 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                         "brand": issue.expected_brand,
                         "model": issue.expected_model,
                     }
+
+                # Add current handle/knot match details (from correct_matches directory)
+                if issue.expected_section == "handle_knot":
+                    expected_handle_brand = getattr(issue, "expected_handle_brand", None)
+                    expected_handle_model = getattr(issue, "expected_handle_model", None)
+                    expected_knot_brand = getattr(issue, "expected_knot_brand", None)
+                    expected_knot_model = getattr(issue, "expected_knot_model", None)
+                    
+                    # Create handle match if we have handle data
+                    if expected_handle_brand is not None:
+                        processed_issue["current_handle_match"] = {
+                            "brand": expected_handle_brand or "",
+                            "model": expected_handle_model or "",
+                        }
+                    # Create knot match if we have knot data
+                    if expected_knot_brand is not None:
+                        processed_issue["current_knot_match"] = {
+                            "brand": expected_knot_brand or "",
+                            "model": expected_knot_model or "",
+                        }
+                elif issue.expected_section == "handle":
+                    expected_handle_brand = getattr(issue, "expected_handle_brand", None)
+                    expected_handle_model = getattr(issue, "expected_handle_model", None)
+                    if expected_handle_brand is not None:
+                        processed_issue["current_handle_match"] = {
+                            "brand": expected_handle_brand or "",
+                            "model": expected_handle_model or "",
+                        }
+                elif issue.expected_section == "knot":
+                    expected_knot_brand = getattr(issue, "expected_knot_brand", None)
+                    expected_knot_model = getattr(issue, "expected_knot_model", None)
+                    if expected_knot_brand is not None:
+                        processed_issue["current_knot_match"] = {
+                            "brand": expected_knot_brand or "",
+                            "model": expected_knot_model or "",
+                        }
 
                 # Add expected handle/knot match details (from current matcher)
                 if issue.actual_section == "handle_knot":

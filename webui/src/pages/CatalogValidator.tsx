@@ -676,16 +676,63 @@ const CatalogValidator: React.FC = () => {
                                     {issue.expected_brand || 'Unknown'} {issue.expected_model || ''}
                                   </p>
                                 ) : issue.expected_section === 'handle_knot' ? (
-                                  <p className='text-gray-600'>
-                                    Stored as handle/knot combination
-                                    {(() => {
-                                      const fileNames = getSourceFileNames(issue);
-                                      if (fileNames.length > 0) {
-                                        return <> in {fileNames.join(' and ')}</>;
-                                      }
-                                      return null;
-                                    })()}
-                                  </p>
+                                  issue.current_handle_match || issue.current_knot_match ? (
+                                    <div className='space-y-2'>
+                                      {issue.current_handle_match && (
+                                        <div className='bg-white p-2 rounded border border-gray-100'>
+                                          <p className='text-xs font-semibold text-gray-700 mb-1'>HANDLE:</p>
+                                          <p className='text-sm text-gray-600'>
+                                            {issue.current_handle_match.brand} {issue.current_handle_match.model}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {issue.current_knot_match && (
+                                        <div className='bg-white p-2 rounded border border-gray-100'>
+                                          <p className='text-xs font-semibold text-gray-700 mb-1'>KNOT:</p>
+                                          <p className='text-sm text-gray-600'>
+                                            {issue.current_knot_match.brand} {issue.current_knot_match.model}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className='text-gray-600'>
+                                      Stored as handle/knot combination
+                                      {(() => {
+                                        const fileNames = getSourceFileNames(issue);
+                                        if (fileNames.length > 0) {
+                                          return <> in {fileNames.join(' and ')}</>;
+                                        }
+                                        return null;
+                                      })()}
+                                    </p>
+                                  )
+                                ) : issue.expected_section === 'handle' ? (
+                                  issue.current_handle_match ? (
+                                    <div className='bg-white p-2 rounded border border-gray-100'>
+                                      <p className='text-xs font-semibold text-gray-700 mb-1'>HANDLE:</p>
+                                      <p className='text-sm text-gray-600'>
+                                        {issue.current_handle_match.brand} {issue.current_handle_match.model}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <p className='text-gray-600'>
+                                      {issue.expected_brand} {issue.expected_model}
+                                    </p>
+                                  )
+                                ) : issue.expected_section === 'knot' ? (
+                                  issue.current_knot_match ? (
+                                    <div className='bg-white p-2 rounded border border-gray-100'>
+                                      <p className='text-xs font-semibold text-gray-700 mb-1'>KNOT:</p>
+                                      <p className='text-sm text-gray-600'>
+                                        {issue.current_knot_match.brand} {issue.current_knot_match.model}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <p className='text-gray-600'>
+                                      {issue.expected_brand} {issue.expected_model}
+                                    </p>
+                                  )
                                 ) : (
                                   <p className='text-gray-600'>
                                     {issue.expected_brand} {issue.expected_model}
