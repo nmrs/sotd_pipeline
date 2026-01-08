@@ -3,6 +3,68 @@ from typing import Optional
 
 from sotd.utils.aliases import FIELD_ALIASES
 
+# Cache for next field stop pattern (built once, reused)
+_next_field_stop_pattern: Optional[str] = None
+
+
+def _build_next_field_stop_pattern() -> str:
+    """
+    Build a regex pattern that matches any next field marker on the same line.
+    
+    This pattern is used in lookahead assertions to stop field extraction
+    when another field marker is encountered (e.g., when multiple fields
+    appear on the same line separated by field markers).
+    
+    Returns:
+        Regex pattern string for use in positive lookahead
+    """
+    global _next_field_stop_pattern
+    
+    if _next_field_stop_pattern is not None:
+        return _next_field_stop_pattern
+    
+    # Collect all field aliases
+    all_aliases = []
+    for field_aliases in FIELD_ALIASES.values():
+        all_aliases.extend(field_aliases)
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_aliases = []
+    for alias in all_aliases:
+        if alias not in seen:
+            seen.add(alias)
+            unique_aliases.append(alias)
+    
+    # Build pattern alternatives for each alias
+    # Handle spaces in aliases (e.g., "straight razor", "shaving brush")
+    alias_patterns = []
+    for alias in unique_aliases:
+        # Escape special regex characters in alias
+        escaped_alias = re.escape(alias)
+        # Replace escaped spaces with \s+ to handle variable spacing
+        escaped_alias = escaped_alias.replace(r"\ ", r"\s+")
+        
+        # Pattern 1: .* **Field: (most common - the user's case)
+        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*[-:]")
+        # Pattern 2: .* **Field**: (colon after **)
+        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*\*\*\s*[-:]")
+        # Pattern 3: .* Field: (simple format)
+        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s*[-:]")
+        # Pattern 4: .* Field - (dash format)
+        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s+[-:]")
+        # Pattern 5: * **Field: (with bullet prefix)
+        alias_patterns.append(rf"[-*]\s+\*\*\s*\b{escaped_alias}\b\s*[-:]")
+        # Pattern 6: * Field: (with bullet prefix, simple)
+        alias_patterns.append(rf"[-*]\s+\b{escaped_alias}\b\s*[-:]")
+    
+    # Combine all patterns with alternation
+    combined_pattern = "|".join(alias_patterns)
+    
+    # Cache the result
+    _next_field_stop_pattern = combined_pattern
+    return _next_field_stop_pattern
+
 
 def extract_field(line: str, field: str) -> Optional[str]:
     return _extract_field_line(line, field)
@@ -21,14 +83,19 @@ def extract_field_with_pattern(line: str, field: str, pattern: str) -> Optional[
         Extracted value if pattern matches, None otherwise
     """
     # Check exclusions first
-    if field == "soap" and re.match(r"^lather\s+games", line, flags=re.IGNORECASE):
+    if field == "soap" and re.search(r"^lather\s+games", line, flags=re.IGNORECASE):
         return None
-    if field == "razor" and re.match(r"^razor\s+test", line, flags=re.IGNORECASE):
+    if field == "razor" and re.search(r"^razor\s+test", line, flags=re.IGNORECASE):
         return None
 
-    match = re.match(pattern, line, flags=re.IGNORECASE)
+    # Use search instead of match to handle fields that appear in the middle of a line
+    # (e.g., when multiple fields are on the same line)
+    match = re.search(pattern, line, flags=re.IGNORECASE)
     if match:
         value = match.group(1).strip()
+        # Filter out values that are just field markers (e.g., "**") or empty
+        if not value or value in ("**", "*"):
+            return None
         return value
     return None
 
@@ -49,9 +116,13 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
         patterns.extend(get_patterns(alias))
 
     for pattern in patterns:
-        match = re.match(pattern, line, flags=re.IGNORECASE)
+        # Use search instead of match to handle fields that appear in the middle of a line
+        match = re.search(pattern, line, flags=re.IGNORECASE)
         if match:
             value = match.group(1).strip()
+            # Filter out values that are just field markers (e.g., "**") or empty
+            if not value or value in ("**", "*"):
+                continue
             return value
 
     return None
@@ -70,48 +141,71 @@ def get_patterns(alias: str) -> list[str]:
 
     Order is based on actual usage frequency from 2020-2025 data analysis.
     See docs/extraction_pattern_priorities.md for priority details.
+    
+    All patterns use non-greedy matching with lookahead to stop at next field marker
+    when multiple fields appear on the same line.
     """
+    # Get the stop pattern for next field markers
+    next_field_pattern = _build_next_field_stop_pattern()
+    # Build lookahead that stops at next field marker or end of line
+    stop_lookahead = rf"(?={next_field_pattern}|$)"
+    
+    # Optional prefix to match field separator when fields appear on same line
+    # Matches either:
+    # - Start of line (^)
+    # - Field separator with period (.*  or .* **)
+    # - Field separator without period (*  or - ) - just the bullet/separator, not the field marker
+    field_separator_prefix = r"(?:^|\.\*\s+|[-*]\s+)"
+    
     return [
         # Pattern 0: Markdown bold with list prefix: * **alias:** value (highest priority)
         # Requires * or - prefix (list items) - preferred over narrative text
         # Colon/dash BEFORE second ** (e.g., * **Razor:** Blackbird)
-        rf"^[-*]\s+\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # * **alias:** value (list item)
+        # Also matches when field appears after another: .* **Razor:**
+        rf"{field_separator_prefix}[-*]\s+\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+?){stop_lookahead}",  # * **alias:** value (list item)
         # Pattern 0b: Markdown bold without list prefix: **alias:** value (lower priority)
         # No * or - prefix (narrative text) - lower priority than list items
         # Colon/dash BEFORE second ** (e.g., **Razor:** Blackbird in narrative)
-        rf"^\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+)$",  # **alias:** value (narrative)
+        # Also matches when field appears after another: .* **Razor:**
+        rf"{field_separator_prefix}\*\*\b{alias}\b\s*[-:]\s*\*\*\s*(.+?){stop_lookahead}",  # **alias:** value (narrative)
         # Pattern 1: Simple explicit: Field: Value (20.66% usage - second most common)
-        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s*[-:]\s*(.+)$",  # * alias: value (word boundary)
+        # Also matches when field appears after another: .* Field:
+        rf"{field_separator_prefix}(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s*[-:]\s*(.+?){stop_lookahead}",  # * alias: value (word boundary)
         # Pattern 2: Markdown bold: * **alias**: value (2.67% usage)
         # Colon/dash AFTER second ** (e.g., * **Razor**: Blackbird)
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\*\*\s*[-:]\s*(.+)$",  # * **alias**: value
+        # Also matches when field appears after another: .* **Razor**:
+        rf"{field_separator_prefix}(?:[-*]\s*)?\*\*\b{alias}\b\*\*\s*[-:]\s*(.+?){stop_lookahead}",  # * **alias**: value
         # Pattern 3: Emoji-prefixed: *alias:* value (0.50% usage)
-        rf"^[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
+        rf"{field_separator_prefix}[^\w\s]?\s*\*\b{alias}\b\*\s*[-:]\s*(.+?){stop_lookahead}",  # emoji-prefixed *alias:* value
         # Pattern 5: Emoji-prefixed: *alias:* value variant 2 (0.43% usage)
         # emoji-prefixed *alias:* value (variant 2)
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*)$",
+        rf"{field_separator_prefix}[^\w\s]\s*\*+\s*\b{alias}\b\s*\*+[-:]\s*(.*?){stop_lookahead}",
         # Pattern 6: Markdown bold: * **Field** Value no separator (0.20% usage)
         # No colon/dash, handles both **razor** and **razor ** (space before closing **)
         # (e.g., * **Razor** Blackbird, * **Razor**Blackbird, * **razor ** value,
         # - **Razor** Blackbird, **Razor** Blackbird)
         # * **Field** Value (no separator, space optional before closing **)
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*\*\*\s*(.+)$",
+        rf"{field_separator_prefix}(?:[-*]\s*)?\*\*\b{alias}\b\s*\*\*\s*(.+?){stop_lookahead}",
         # Pattern 7: Emoji-prefixed: *alias:* value variant (0.16% usage)
         # emoji-prefixed *alias:* value (variant)
-        rf"^[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*)$",
+        rf"{field_separator_prefix}[^\w\s]\s*\*+\s*\b{alias}\b[-:]\s*\*+\s*(.*?){stop_lookahead}",
         # Pattern 8: Markdown bold: * **alias - value** (0.07% usage)
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
+        # Note: This pattern has value inside **, so we need to stop before closing **
+        # but also check for next field marker
+        rf"{field_separator_prefix}(?:[-*]\s*)?\*\*\b{alias}\b\s*[-:]\s*(.+?)(?:\*\*|{stop_lookahead})",  # * **alias - value**
         # Pattern 9: Underscore: __alias:__ value (0.04% usage)
-        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value
+        rf"{field_separator_prefix}(?:[-*]\s*)?__{alias}:\__\s*(.+?){stop_lookahead}",  # __alias:__ value
         # Pattern 10: Forward slash: **alias //** value (0.02% usage)
-        rf"^(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+)$",  # **alias //** value
+        rf"{field_separator_prefix}(?:[-*]\s*)?\*\*\b{alias}\b\s*//\*\*\s*(.+?){stop_lookahead}",  # **alias //** value
         # Pattern 11: Checkmark: ✓Field: Value (0.00% usage)
-        rf"^✓\s*\b{alias}\b\s*[-:]\s*(.+)$",  # ✓Field: Value or ✓ Field: Value
+        rf"{field_separator_prefix}✓\s*\b{alias}\b\s*[-:]\s*(.+?){stop_lookahead}",  # ✓Field: Value or ✓ Field: Value
         # Pattern 12: Double hash: ##alias## - value (0.00% usage)
-        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
+        rf"{field_separator_prefix}(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+?){stop_lookahead}",  # ##alias## - value
         # Pattern 13: Simple explicit: Field - Value (0.00% usage)
-        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+)$",  # * alias - value (word boundary)
+        rf"{field_separator_prefix}(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+?){stop_lookahead}",  # * alias - value (word boundary)
         # Pattern 15: Ambiguous format (0.08% usage - MUST REMAIN LAST)
         # This pattern is tried last and only matches if no explicit markers found
-        rf"^\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+)$",  # Field product (no colon/dash)
+        # Note: This pattern already has negative lookahead for : and -, so we add
+        # the next field stop pattern as an additional constraint
+        rf"{field_separator_prefix}\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+?){stop_lookahead}",  # Field product (no colon/dash)
     ]
