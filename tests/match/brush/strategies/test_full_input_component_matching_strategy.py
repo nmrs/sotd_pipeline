@@ -770,3 +770,138 @@ class TestFullInputComponentMatchingStrategy:
 
         # Should not have created any new combinations
         assert len(results) == 0
+
+    def test_should_not_split_returns_empty_list_in_match_all(self):
+        """Test that match_all() returns empty list when should_not_split is True."""
+        # Mock splits_loader to return True for should_not_split
+        self.strategy.splits_loader.should_not_split = lambda text: True
+
+        # Mock handle and knot matches (should be ignored)
+        handle_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"handle_maker": "Rudy Vey", "handle_model": "Unspecified"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        knot_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"brand": "Semogue", "model": "SOC", "fiber": "Boar"},
+            match_type="exact",
+            pattern="semogue.*soc",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Should return empty list even though both components match
+        results = self.strategy.match_all("Boar Rudy Vey SOC knot 24mm")
+        assert results == []
+
+    def test_should_not_split_returns_none_in_match(self):
+        """Test that match() returns None when should_not_split is True."""
+        # Mock splits_loader to return True for should_not_split
+        self.strategy.splits_loader.should_not_split = lambda text: True
+
+        # Mock handle and knot matches (should be ignored)
+        handle_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"handle_maker": "Rudy Vey", "handle_model": "Unspecified"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        knot_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"brand": "Semogue", "model": "SOC", "fiber": "Boar"},
+            match_type="exact",
+            pattern="semogue.*soc",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Should return None even though both components match
+        result = self.strategy.match("Boar Rudy Vey SOC knot 24mm")
+        assert result is None
+
+    def test_should_not_split_prevents_dual_component_matching(self):
+        """Test that should_not_split prevents dual component matching."""
+        # Mock splits_loader to return True for should_not_split
+        self.strategy.splits_loader.should_not_split = lambda text: (
+            text == "Boar Rudy Vey SOC knot 24mm"
+        )
+
+        # Mock handle and knot matches
+        handle_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"handle_maker": "Rudy Vey", "handle_model": "Unspecified"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        knot_result = MatchResult(
+            original="Boar Rudy Vey SOC knot 24mm",
+            matched={"brand": "Semogue", "model": "SOC", "fiber": "Boar"},
+            match_type="exact",
+            pattern="semogue.*soc",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Should return None for should_not_split brush
+        result = self.strategy.match("Boar Rudy Vey SOC knot 24mm")
+        assert result is None
+
+        # Should work normally for other brushes
+        result = self.strategy.match("Declaration Grooming Washington B2")
+        assert result is not None
+
+    def test_should_not_split_prevents_single_component_matching(self):
+        """Test that should_not_split prevents single component matching."""
+        # Mock splits_loader to return True for should_not_split
+        self.strategy.splits_loader.should_not_split = lambda text: (text == "Test Brush String")
+
+        # Mock handle match only
+        handle_result = MatchResult(
+            original="Test Brush String",
+            matched={"handle_maker": "Test Maker", "handle_model": "Test Model"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+        self.knot_matcher.match.return_value = None
+
+        # Should return None even though handle matches
+        result = self.strategy.match("Test Brush String")
+        assert result is None
+
+    def test_normal_behavior_when_should_not_split_false(self):
+        """Test that normal behavior works when should_not_split is False."""
+        # Mock splits_loader to return False for should_not_split
+        self.strategy.splits_loader.should_not_split = lambda text: False
+
+        # Mock handle and knot matches
+        handle_result = MatchResult(
+            original="Declaration Grooming Washington",
+            matched={"handle_maker": "Declaration Grooming", "handle_model": "Washington"},
+            match_type="handle_match",
+            strategy="HandleMatcher",
+        )
+        self.handle_matcher.match_handle_maker.return_value = handle_result
+
+        knot_result = MatchResult(
+            original="Declaration Grooming B2",
+            matched={"brand": "Declaration Grooming", "model": "B2", "fiber": "Badger"},
+            match_type="exact",
+            pattern="declaration.*b2",
+            strategy="KnotMatcher",
+        )
+        self.knot_matcher.match.return_value = knot_result
+
+        # Should work normally
+        result = self.strategy.match("Declaration Grooming Washington B2")
+        assert result is not None
+        assert result.strategy == "full_input_component_matching"
+        assert result.match_type == "composite"
