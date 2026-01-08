@@ -46,17 +46,17 @@ def _build_next_field_stop_pattern() -> str:
         escaped_alias = escaped_alias.replace(r"\ ", r"\s+")
         
         # Pattern 1: .* **Field: (most common - the user's case)
-        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*[-:]")
+        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*[-:=]")
         # Pattern 2: .* **Field**: (colon after **)
-        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*\*\*\s*[-:]")
+        alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*\*\*\s*[-:=]")
         # Pattern 3: .* Field: (simple format)
-        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s*[-:]")
+        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s*[-:=]")
         # Pattern 4: .* Field - (dash format)
-        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s+[-:]")
+        alias_patterns.append(rf"\.\*\s+\b{escaped_alias}\b\s+[-:=]")
         # Pattern 5: * **Field: (with bullet prefix)
-        alias_patterns.append(rf"[-*]\s+\*\*\s*\b{escaped_alias}\b\s*[-:]")
+        alias_patterns.append(rf"[-*]\s+\*\*\s*\b{escaped_alias}\b\s*[-:=]")
         # Pattern 6: * Field: (with bullet prefix, simple)
-        alias_patterns.append(rf"[-*]\s+\b{escaped_alias}\b\s*[-:]")
+        alias_patterns.append(rf"[-*]\s+\b{escaped_alias}\b\s*[-:=]")
     
     # Combine all patterns with alternation
     combined_pattern = "|".join(alias_patterns)
@@ -133,7 +133,8 @@ def get_patterns(alias: str) -> list[str]:
     Get extraction patterns for a field alias, ordered by frequency/priority.
 
     Patterns are tried in order (0=highest priority, last=lowest priority).
-    Patterns 0-14 have explicit markers (colon : or dash -).
+    Patterns 0-14 have explicit markers (colon : or dash -) - highest priority.
+    Patterns 14a-14b have explicit markers with equals sign (=) - medium priority.
     Pattern 15 is ambiguous (no explicit markers) and must remain last.
 
     Pattern 0 requires list item prefix (* or -) and is preferred over pattern 0b
@@ -203,9 +204,15 @@ def get_patterns(alias: str) -> list[str]:
         rf"{field_separator_prefix}(?:[-*•‣⁃▪‧·~+]\s*)?\#\#\b{alias}\b\#\#\s*[-:]\s*(.+?){stop_lookahead}",  # ##alias## - value
         # Pattern 13: Simple explicit: Field - Value (0.00% usage)
         rf"{field_separator_prefix}(?:[-*•‣⁃▪‧·~+]*\s*)?\b{alias}\b\s+[-:]\s*(.+?){stop_lookahead}",  # * alias - value (word boundary)
+        # Pattern 14a: Simple explicit with equals: * Field = Value (medium priority, after : and -)
+        # List item format with equals sign delimiter
+        rf"{field_separator_prefix}[-*]\s+\b{alias}\b\s*=\s*(.+?){stop_lookahead}",  # * alias = value (list item)
+        # Pattern 14b: Simple explicit with equals: Field = Value (medium priority, after : and -)
+        # Narrative format with equals sign delimiter
+        rf"{field_separator_prefix}\b{alias}\b\s*=\s*(.+?){stop_lookahead}",  # alias = value (narrative)
         # Pattern 15: Ambiguous format (0.08% usage - MUST REMAIN LAST)
         # This pattern is tried last and only matches if no explicit markers found
-        # Note: This pattern already has negative lookahead for : and -, so we add
+        # Note: This pattern already has negative lookahead for :, -, and =, so we add
         # the next field stop pattern as an additional constraint
-        rf"{field_separator_prefix}\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(.+?){stop_lookahead}",  # Field product (no colon/dash)
+        rf"{field_separator_prefix}\b{alias}\b\s+(?![^:]*:)(?![^\-]*\-)(?![^=]*=)(.+?){stop_lookahead}",  # Field product (no colon/dash/equals)
     ]

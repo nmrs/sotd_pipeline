@@ -12,6 +12,8 @@ def test_extract_field_lines():
             ("Razor: Game Changer", "Game Changer"),
             ("* ##Razor## - Henson AL-13+", "Henson AL-13+"),
             ("* Razor - Henson Al13+", "Henson Al13+"),
+            ("* Razor = Henson AL-13+", "Henson AL-13+"),
+            ("Razor = Henson AL-13+", "Henson AL-13+"),
             ("* **Blade:** Astra", None),
             ("- **Razor:** Blackland Vector", "Blackland Vector"),
             ("* **Razor** : Pearl L-55", "Pearl L-55"),
@@ -37,6 +39,8 @@ def test_extract_field_lines():
             ("Blade: GSB", "GSB"),
             ("* ##Blade## - VOLSHOD", "VOLSHOD"),
             ("* Blade - Shark Super Chrome", "Shark Super Chrome"),
+            ("* Blade = Feather", "Feather"),
+            ("Blade = Feather", "Feather"),
             ("* **Soap:** Tabac", None),
             ("- **Blade:** Schick Proline", "Schick Proline"),
             ("* **Blade** : Gillette Winner", "Gillette Winner"),
@@ -53,6 +57,8 @@ def test_extract_field_lines():
             ("Brush: Boti White Boar", "Boti White Boar"),
             ("* ##Brush## - Yaqi Sagrada Familia", "Yaqi Sagrada Familia"),
             ("* Brush - Rocky Mountain - Badger", "Rocky Mountain - Badger"),
+            ("* Brush = Omega synthetic", "Omega synthetic"),
+            ("Brush = Omega synthetic", "Omega synthetic"),
             ("* **Blade:** Nacet", None),
             ("- **Brush:** C&H Odin's Beard", "C&H Odin's Beard"),
             ("* **Brush** : Zenith Boar", "Zenith Boar"),
@@ -71,6 +77,10 @@ def test_extract_field_lines():
             ("- **Soap:** MWF", "MWF"),
             ("* **Soap** : Arko", "Arko"),
             ("* Soap - Arko Stick", "Arko Stick"),
+            ("* Lather = DR Harris Lavender", "DR Harris Lavender"),
+            ("Lather = DR Harris Lavender", "DR Harris Lavender"),
+            ("* Soap = DR Harris Lavender", "DR Harris Lavender"),
+            ("Soap = DR Harris Lavender", "DR Harris Lavender"),
             # Lather variations
             ("* **Lather:** B&M Seville", "B&M Seville"),
             ("* **Lather**: B&M Seville", "B&M Seville"),
@@ -173,3 +183,22 @@ def test_extract_field_multi_field_same_line():
     assert extract_field(no_period_separator, "brush") == "Yaqi - Moka Express 2 Band Badger"
     assert extract_field(no_period_separator, "razor") == "Henson - AL 13 Mild"
     assert extract_field(no_period_separator, "blade") == "Personna Platinum"
+
+
+def test_extract_field_equals_delimiter_priority():
+    """Test that equals sign delimiter has lower priority than colon and dash."""
+    # Colon should match before equals
+    assert extract_field("* Razor: Henson AL-13+", "razor") == "Henson AL-13+"
+    assert extract_field("* Razor = Henson AL-13+", "razor") == "Henson AL-13+"
+    
+    # Dash should match before equals
+    assert extract_field("* Razor - Henson AL-13+", "razor") == "Henson AL-13+"
+    assert extract_field("* Razor = Henson AL-13+", "razor") == "Henson AL-13+"
+    
+    # Equals should work when colon/dash not present
+    assert extract_field("* Brush = Omega synthetic", "brush") == "Omega synthetic"
+    assert extract_field("Brush = Omega synthetic", "brush") == "Omega synthetic"
+    
+    # Test that equals delimiter extracts value correctly (not including the =)
+    assert extract_field("* Lather = DR Harris Lavender", "soap") == "DR Harris Lavender"
+    assert extract_field("Lather = DR Harris Lavender", "soap") == "DR Harris Lavender"
