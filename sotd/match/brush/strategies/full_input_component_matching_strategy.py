@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Unified component matching strategy that handles both dual and single component matches."""
 
+from pathlib import Path
 from typing import List, Optional
 
 # ComponentScoreCalculator no longer needed - scoring is handled externally
 from sotd.match.types import MatchResult
 
+from ..comparison.splits_loader import BrushSplitsLoader
 from .base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
@@ -34,6 +36,9 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         self.handle_matcher = handle_matcher
         self.knot_matcher = knot_matcher
         self.catalogs = catalogs
+
+        # Initialize BrushSplitsLoader to check should_not_split flag
+        self.splits_loader = BrushSplitsLoader(Path("data/brush_splits.yaml"))
 
     def match(self, value: str | dict, full_string: Optional[str] = None) -> Optional[MatchResult]:
         """
@@ -68,6 +73,11 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             text = value
 
         if not text or not isinstance(text, str):
+            return []
+
+        # Check if this brush should not be split (from brush_splits.yaml)
+        if self.splits_loader.should_not_split(text):
+            # Skip all split strategies if should_not_split is True
             return []
 
         results = []

@@ -8,8 +8,9 @@ match what's stored. This provides more comprehensive validation than pattern-on
 
 import logging
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
@@ -402,22 +403,35 @@ class ActualMatchingValidator:
 
         return issues
 
-    def _validate_brush_entry(
+    def _validate_single_brush_entry(
         self,
+        matcher: BrushMatcher,
+        splits_loader: Any,
         brush_string: str,
         expected_data: Dict[str, Any],
         expected_section: str,
         source_files: Optional[List[str]] = None,
     ) -> List[ValidationIssue]:
-        """Validate a single brush entry using actual matching."""
+        """Validate a single brush entry using provided matcher and splits_loader.
+
+        This is a helper function that can be used in both sequential and parallel processing.
+
+        Args:
+            matcher: BrushMatcher instance to use for matching
+            splits_loader: BrushSplitsLoader instance to check split rules
+            brush_string: The brush string to validate
+            expected_data: Expected data structure from correct_matches
+            expected_section: Expected section (brush, handle, knot, handle_knot)
+            source_files: Optional list of source file names
+
+        Returns:
+            List of ValidationIssue objects
+        """
         issues = []
 
         try:
             # Check if this brush should not be split (from brush_splits.yaml)
-            splits_loader = self._get_splits_loader()
             should_not_split = splits_loader.should_not_split(brush_string)
-
-            matcher = self._get_matcher("brush")
 
             # Run actual matching with bypass_correct_matches=True
             result = matcher.match(brush_string, bypass_correct_matches=True)
@@ -787,6 +801,98 @@ class ActualMatchingValidator:
 
         return issues
 
+    def _validate_brush_entry(
+        self,
+        brush_string: str,
+        expected_data: Dict[str, Any],
+        expected_section: str,
+        source_files: Optional[List[str]] = None,
+    ) -> List[ValidationIssue]:
+        """Validate a single brush entry using actual matching.
+
+        This is a wrapper that uses instance matcher and splits_loader.
+        For parallel processing, use _validate_single_brush_entry directly.
+        """
+        splits_loader = self._get_splits_loader()
+        matcher = self._get_matcher("brush")
+        return self._validate_single_brush_entry(
+            matcher, splits_loader, brush_string, expected_data, expected_section, source_files
+        )
+
+    def _validate_brush_entries_parallel(
+        self,
+        brush_string_locations: Dict[str, List[Dict[str, Any]]],
+        max_workers: int = 8,
+    ) -> List[ValidationIssue]:
+        """Validate brush entries in parallel using ProcessPoolExecutor.
+
+        Args:
+            brush_string_locations: Dictionary mapping brush strings to their locations
+            max_workers: Maximum number of parallel workers (default 8)
+
+        Returns:
+            List of all ValidationIssue objects from all workers
+        """
+        if not brush_string_locations:
+            return []
+
+        # Prepare batches for parallel processing
+        # Each batch contains: (brush_string, locations, expected_data, expected_section, source_files)
+        batches = []
+        for brush_string, locations in brush_string_locations.items():
+            expected_section = self._determine_expected_section(locations)
+            expected_data = self._build_expected_data(brush_string, locations, expected_section)
+            source_files = [f"{loc['section']}.yaml" for loc in locations]
+            batches.append((brush_string, locations, expected_data, expected_section, source_files))
+
+        # Split into worker batches (approximately equal distribution)
+        batch_size = max(1, len(batches) // max_workers)
+        worker_batches = []
+        for i in range(0, len(batches), batch_size):
+            worker_batches.append(batches[i : i + batch_size])
+
+        # If we have fewer batches than workers, adjust
+        if len(worker_batches) < max_workers:
+            max_workers = len(worker_batches)
+
+        if max_workers <= 1 or len(worker_batches) == 1:
+            # Fall back to sequential processing for small datasets
+            issues = []
+            for batch in batches:
+                brush_string, _, expected_data, expected_section, source_files = batch
+                entry_issues = self._validate_brush_entry(
+                    brush_string, expected_data, expected_section, source_files=source_files
+                )
+                issues.extend(entry_issues)
+            return issues
+
+        # Process batches in parallel
+        all_issues = []
+        data_path_str = str(self.data_path)
+
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all batches
+            future_to_batch = {
+                executor.submit(_validate_brush_entry_worker, batch, data_path_str): batch
+                for batch in worker_batches
+            }
+
+            # Collect results as they complete
+            for future in as_completed(future_to_batch):
+                batch = future_to_batch[future]
+                try:
+                    batch_issues = future.result()
+                    all_issues.extend(batch_issues)
+                except Exception as e:
+                    logger.error(f"Error processing batch: {e}")
+                    # Continue processing other batches even if one fails
+                    # Log which entries were in the failed batch
+                    brush_strings = [entry[0] for entry in batch]
+                    logger.error(f"Failed batch contained {len(brush_strings)} entries")
+                    raise
+
+        return all_issues
+
     def _validate_simple_entry(
         self,
         field: str,
@@ -1074,26 +1180,65 @@ class ActualMatchingValidator:
             issues.extend(structure_issues)
 
             # Validate field-specific entries
+            # Track performance metrics for parallel processing
+            performance_metrics = {}
+
             if field == "brush":
                 # First, collect all brush strings and their locations
                 brush_string_locations = self._collect_brush_string_locations(correct_matches)
 
-                # Validate each unique brush string
-                for brush_string, locations in brush_string_locations.items():
-                    # Determine expected structure based on locations
-                    expected_section = self._determine_expected_section(locations)
-                    expected_data = self._build_expected_data(
-                        brush_string, locations, expected_section
+                # Use parallel processing for large datasets
+                # Threshold: use parallel for >100 entries to amortize overhead
+                if len(brush_string_locations) > 100:
+                    logger.info(
+                        f"Using parallel processing for {len(brush_string_locations)} brush entries"
                     )
-
-                    # Extract source file names from locations
-                    source_files = [f"{loc['section']}.yaml" for loc in locations]
-
-                    # Validate the brush string
-                    entry_issues = self._validate_brush_entry(
-                        brush_string, expected_data, expected_section, source_files=source_files
+                    parallel_start = time.time()
+                    max_workers = 8
+                    brush_issues = self._validate_brush_entries_parallel(
+                        brush_string_locations, max_workers=max_workers
                     )
-                    issues.extend(entry_issues)
+                    parallel_time = time.time() - parallel_start
+                    issues.extend(brush_issues)
+
+                    # Calculate performance metrics
+                    entries_per_worker = len(brush_string_locations) / max_workers
+                    performance_metrics = {
+                        "parallel_workers": max_workers,
+                        "parallel_processing_time": parallel_time,
+                        "entries_per_worker": entries_per_worker,
+                        "total_entries": len(brush_string_locations),
+                        "processing_mode": "parallel",
+                    }
+                    logger.info(f"Parallel validation completed in {parallel_time:.2f}s")
+                else:
+                    # Sequential processing for small datasets
+                    logger.debug(
+                        f"Using sequential processing for {len(brush_string_locations)} brush entries"
+                    )
+                    sequential_start = time.time()
+                    for brush_string, locations in brush_string_locations.items():
+                        # Determine expected structure based on locations
+                        expected_section = self._determine_expected_section(locations)
+                        expected_data = self._build_expected_data(
+                            brush_string, locations, expected_section
+                        )
+
+                        # Extract source file names from locations
+                        source_files = [f"{loc['section']}.yaml" for loc in locations]
+
+                        # Validate the brush string
+                        entry_issues = self._validate_brush_entry(
+                            brush_string, expected_data, expected_section, source_files=source_files
+                        )
+                        issues.extend(entry_issues)
+                    sequential_time = time.time() - sequential_start
+                    performance_metrics = {
+                        "parallel_workers": 1,
+                        "sequential_processing_time": sequential_time,
+                        "total_entries": len(brush_string_locations),
+                        "processing_mode": "sequential",
+                    }
 
             else:
                 # Validate simple entries (razor, blade, soap)
@@ -1271,12 +1416,16 @@ class ActualMatchingValidator:
             ]
 
             # Update performance metrics
-            self._performance_metrics[field] = {
+            field_metrics = {
                 "processing_time": processing_time,
                 "total_entries": total_entries,
                 "issues_found": len(filtered_issues),
                 "validation_mode": "actual_matching",
             }
+            # Merge in parallel processing metrics if available
+            if performance_metrics:
+                field_metrics.update(performance_metrics)
+            self._performance_metrics[field] = field_metrics
 
             return ValidationResult(
                 field=field,
@@ -1292,3 +1441,48 @@ class ActualMatchingValidator:
             # Fail fast on internal errors
             logger.error("Error during %s validation: %s", field, e)
             raise ValueError(f"Validation failed for {field}: {e}") from e
+
+
+def _validate_brush_entry_worker(
+    batch: List[Tuple[str, List[Dict[str, Any]], Dict[str, Any], str, List[str]]],
+    data_path_str: str,
+) -> List[Any]:
+    """Worker function to validate a batch of brush entries in parallel.
+
+    This is a module-level function that can be pickled for ProcessPoolExecutor.
+    Each worker initializes its own matcher and splits_loader, then calls
+    the helper method from ActualMatchingValidator.
+
+    Args:
+        batch: List of tuples containing (brush_string, locations, expected_data, expected_section, source_files)
+        data_path_str: String path to data directory
+
+    Returns:
+        List of ValidationIssue objects
+    """
+    from pathlib import Path
+
+    # Import here to avoid circular imports at module level
+    from sotd.match.brush_matcher import BrushMatcher
+    from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader
+
+    # Initialize matcher and splits_loader in worker process
+    data_path = Path(data_path_str)
+    matcher = BrushMatcher()
+    splits_loader = BrushSplitsLoader(data_path / "brush_splits.yaml")
+
+    # Create a temporary validator instance to use helper methods
+    # Import here to avoid circular import (class is now defined above)
+    from sotd.validate.actual_matching_validator import ActualMatchingValidator
+
+    temp_validator = ActualMatchingValidator(data_path=data_path)
+
+    issues = []
+    for brush_string, locations, expected_data, expected_section, source_files in batch:
+        # Use the helper method to validate each entry
+        entry_issues = temp_validator._validate_single_brush_entry(
+            matcher, splits_loader, brush_string, expected_data, expected_section, source_files
+        )
+        issues.extend(entry_issues)
+
+    return issues

@@ -13,17 +13,19 @@ from typing import Any, Callable, Dict, List
 
 # Module-level cache (per process)
 # Use object identity as primary key for fast lookup, fallback to content hash
-_pattern_cache_by_id: Dict[tuple, List[Dict[str, Any]]] = {}  # (id(catalog), pattern_type) -> patterns
+_pattern_cache_by_id: Dict[tuple, List[Dict[str, Any]]] = (
+    {}
+)  # (id(catalog), pattern_type) -> patterns
 _pattern_cache_by_hash: Dict[str, List[Dict[str, Any]]] = {}  # hash_key -> patterns
 
 
 def _generate_cache_key(catalog_data: Dict[str, Any], pattern_type: str) -> str:
     """Generate a cache key from catalog data and pattern type.
-    
+
     Args:
         catalog_data: The catalog data dictionary
         pattern_type: Type of pattern (e.g., "known_brush", "other_brush", "handle")
-        
+
     Returns:
         Cache key string
     """
@@ -31,7 +33,7 @@ def _generate_cache_key(catalog_data: Dict[str, Any], pattern_type: str) -> str:
     # Sort keys to ensure consistent hashing regardless of dict iteration order
     catalog_str = json.dumps(catalog_data, sort_keys=True, default=str)
     catalog_hash = hashlib.md5(catalog_str.encode()).hexdigest()
-    
+
     return f"{pattern_type}_{catalog_hash}"
 
 
@@ -41,15 +43,15 @@ def get_compiled_patterns(
     compile_func: Callable[[Dict[str, Any]], List[Dict[str, Any]]],
 ) -> List[Dict[str, Any]]:
     """Get compiled patterns from cache or compile and cache.
-    
+
     Optimized to use object identity for fast cache lookup, avoiding expensive
     hash generation on cache hits.
-    
+
     Args:
         catalog_data: The catalog data to compile patterns from
         pattern_type: Type of pattern (e.g., "known_brush", "other_brush", "handle")
         compile_func: Function that compiles patterns from catalog data
-        
+
     Returns:
         List of compiled patterns with metadata
     """
@@ -57,7 +59,7 @@ def get_compiled_patterns(
     id_key = (id(catalog_data), pattern_type)
     if id_key in _pattern_cache_by_id:
         return _pattern_cache_by_id[id_key]
-    
+
     # Slow path: Generate hash key and check content-based cache
     # (needed when same catalog data is passed as different dict objects)
     cache_key = _generate_cache_key(catalog_data, pattern_type)
@@ -65,7 +67,7 @@ def get_compiled_patterns(
         # Also cache by ID for future fast lookups
         _pattern_cache_by_id[id_key] = _pattern_cache_by_hash[cache_key]
         return _pattern_cache_by_hash[cache_key]
-    
+
     # Cache miss: Compile patterns and cache them
     compiled = compile_func(catalog_data)
     _pattern_cache_by_hash[cache_key] = compiled
@@ -82,7 +84,7 @@ def clear_pattern_cache() -> None:
 
 def get_cache_stats() -> Dict[str, Any]:
     """Get cache statistics for debugging.
-    
+
     Returns:
         Dictionary with cache statistics
     """
