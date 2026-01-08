@@ -10,6 +10,7 @@ import {
   CatalogValidationIssue,
   handleApiError,
   removeCatalogValidationEntries,
+  moveCatalogValidationEntries,
 } from '../services/api';
 
 const CatalogValidator: React.FC = () => {
@@ -24,6 +25,7 @@ const CatalogValidator: React.FC = () => {
   // New state for multi-select functionality
   const [selectedIssues, setSelectedIssues] = useState<Set<number>>(new Set());
   const [removing, setRemoving] = useState(false);
+  const [fixing, setFixing] = useState(false);
 
   // Helper function to format section names for display
   const formatSectionName = (section: string | undefined): string => {
@@ -198,6 +200,102 @@ const CatalogValidator: React.FC = () => {
   };
 
   const isAnyIssueSelected = selectedIssues.size > 0;
+
+  // Helper function to check if an issue can be auto-fixed
+  const canAutoFixIssue = (issue: CatalogValidationIssue): boolean => {
+    // For cross_section_conflict, only allow auto-fix if we know where it should go
+    if (issue.issue_type === 'cross_section_conflict') {
+      return !!issue.actual_section && !!issue.actual_brand;
+    }
+    return (
+      issue.issue_type === 'structural_change' ||
+      issue.issue_type === 'data_mismatch' ||
+      issue.issue_type === 'catalog_pattern_mismatch'
+    );
+  };
+
+  // Get count of fixable issues in selection
+  const fixableIssuesCount = useMemo(() => {
+    return Array.from(selectedIssues).filter(index => {
+      const issue = filteredIssues[index];
+      return issue && canAutoFixIssue(issue);
+    }).length;
+  }, [selectedIssues, filteredIssues]);
+
+  const hasFixableIssues = fixableIssuesCount > 0;
+
+  // Auto-fix selected issues
+  const handleAutoFixSelected = async () => {
+    if (!results || selectedIssues.size === 0 || !hasFixableIssues) return;
+
+    try {
+      setFixing(true);
+      setError(null);
+
+      // Get the selected issues data that can be auto-fixed
+      const rawSelectedIssues = Array.from(selectedIssues).map(index => filteredIssues[index]);
+
+      const selectedIssuesData = rawSelectedIssues
+        .filter(issue => issue && canAutoFixIssue(issue))
+        .map(issue => {
+          // For data_mismatch and catalog_pattern_mismatch, default actual_section to selectedField
+          // if it's null/undefined, since these are mismatches within the same section
+          const actualSection = issue.actual_section || 
+            (issue.issue_type === 'data_mismatch' || issue.issue_type === 'catalog_pattern_mismatch'
+              ? selectedField
+              : issue.actual_section);
+          
+          return {
+            correct_match: issue.correct_match,
+            expected_brand: issue.expected_brand || '',
+            expected_model: issue.expected_model || '',
+            actual_brand: issue.actual_brand || '',
+            actual_model: issue.actual_model || '',
+            issue_type: issue.issue_type,
+            actual_section: actualSection,
+            expected_section: issue.expected_section || selectedField,
+            format: issue.format,
+            expected_handle_match: issue.expected_handle_match,
+            expected_knot_match: issue.expected_knot_match,
+          };
+        });
+
+      if (selectedIssuesData.length === 0) {
+        setError('No fixable issues selected');
+        return;
+      }
+
+      // Call the API to move entries
+      const response = await moveCatalogValidationEntries({
+        field: selectedField,
+        entries: selectedIssuesData,
+      });
+
+      if (response.success) {
+        // Clear selection after successful move
+        setSelectedIssues(new Set());
+
+        // Re-validate catalog to refresh results
+        await handleValidate();
+
+        // Show success message
+        console.log(
+          `Successfully moved ${response.moved_count} entries (removed ${response.removed_count}, added ${response.added_count})`
+        );
+      } else {
+        // Show error message
+        setError(`Failed to move entries: ${response.message}`);
+        if (response.errors.length > 0) {
+          console.error('Move errors:', response.errors);
+        }
+      }
+    } catch (err: unknown) {
+      setError(handleApiError(err));
+      // Keep items selected if move fails
+    } finally {
+      setFixing(false);
+    }
+  };
 
   const getDisplayModeCounts = () => {
     if (!results) {
@@ -514,7 +612,7 @@ const CatalogValidator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Select All and Remove Selected Buttons */}
+              {/* Select All, Remove Selected, and Auto-Fix Selected Buttons */}
               <div className='flex items-center gap-2'>
                 {filteredIssues.length > 0 && (
                   <Button
@@ -529,10 +627,22 @@ const CatalogValidator: React.FC = () => {
                   <Button
                     variant='destructive'
                     onClick={handleRemoveSelected}
-                    disabled={removing}
+                    disabled={removing || fixing}
                     className='flex items-center gap-2'
                   >
                     {removing ? 'Removing...' : `Remove Selected (${selectedIssues.size})`}
+                  </Button>
+                )}
+                {hasFixableIssues && (
+                  <Button
+                    variant='default'
+                    onClick={handleAutoFixSelected}
+                    disabled={fixing || removing}
+                    className='flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white'
+                  >
+                    {fixing
+                      ? 'Fixing...'
+                      : `Auto-Fix Selected (${fixableIssuesCount})`}
                   </Button>
                 )}
               </div>

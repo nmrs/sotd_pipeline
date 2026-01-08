@@ -222,6 +222,27 @@ class CorrectMatchesResponse(BaseModel):
     entries: Dict[str, Any]
 
 
+class MoveCatalogEntriesRequest(BaseModel):
+    """Request model for moving catalog validation entries."""
+
+    field: str = Field(..., description="Field type (razor, blade, brush, soap)")
+    matches: List[Dict[str, Any]] = Field(
+        ...,
+        description="List of entries to move with correct_match, expected/actual brand/model, issue_type, etc.",
+    )
+
+
+class MoveCatalogEntriesResponse(BaseModel):
+    """Response model for moving catalog validation entries."""
+
+    success: bool
+    message: str
+    moved_count: int
+    removed_count: int
+    added_count: int
+    errors: List[str] = []
+
+
 class CatalogValidationRequest(BaseModel):
     """Request model for catalog validation."""
 
@@ -248,7 +269,9 @@ class CatalogValidationIssue(BaseModel):
     matched_pattern: Optional[str] = None  # Pattern that caused the match for mismatched results
     # Brush-specific match details
     current_match_details: Optional[dict] = None  # Current brush match details
-    current_handle_match: Optional[dict] = None  # Current handle match details (from correct_matches)
+    current_handle_match: Optional[dict] = (
+        None  # Current handle match details (from correct_matches)
+    )
     current_knot_match: Optional[dict] = None  # Current knot match details (from correct_matches)
     expected_handle_match: Optional[dict] = None  # Expected handle match details
     expected_knot_match: Optional[dict] = None  # Expected knot match details
@@ -1526,7 +1549,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     expected_handle_model = getattr(issue, "expected_handle_model", None)
                     expected_knot_brand = getattr(issue, "expected_knot_brand", None)
                     expected_knot_model = getattr(issue, "expected_knot_model", None)
-                    
+
                     # Create handle match if we have handle data
                     if expected_handle_brand is not None:
                         processed_issue["current_handle_match"] = {
@@ -1825,4 +1848,390 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
         logger.error(f"Error removing catalog validation entries: {e}")
         raise HTTPException(
             status_code=500, detail=f"Error removing catalog validation entries: {str(e)}"
+        )
+
+
+@router.post("/move-catalog-entries", response_model=MoveCatalogEntriesResponse)
+async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
+    """Move entries from incorrect locations to correct locations in correct_matches directory."""
+    try:
+        validate_field(request.field)
+
+        if not request.matches:
+            return MoveCatalogEntriesResponse(
+                success=False,
+                message="No entries provided",
+                moved_count=0,
+                removed_count=0,
+                added_count=0,
+            )
+
+        # Import required modules
+        try:
+            import yaml
+            from rich.console import Console
+
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import required modules: {e}"
+            )
+
+        # Load and manipulate YAML from directory structure
+        correct_matches_dir = project_root / "data" / "correct_matches"
+
+        if not correct_matches_dir.exists():
+            return MoveCatalogEntriesResponse(
+                success=False,
+                message="Correct matches directory not found",
+                moved_count=0,
+                removed_count=0,
+                added_count=0,
+            )
+
+        # Initialize CorrectMatchesManager for adding entries
+        console = Console()
+        manager = CorrectMatchesManager(console, correct_matches_dir)
+        manager.load_correct_matches()
+
+        # Load YAML files from directory structure for removal
+        yaml_data = {}
+
+        # Determine which sections to load based on entries
+        sections_to_load = set()
+        for entry in request.matches:
+            issue_type = entry.get("issue_type", "")
+            expected_section = entry.get("expected_section", request.field)
+            actual_section = entry.get("actual_section", request.field)
+
+            # Add both source and target sections
+            if expected_section:
+                sections_to_load.add(expected_section)
+            if actual_section:
+                sections_to_load.add(actual_section)
+
+            # For brush field, always load brush, handle, and knot
+            if request.field == "brush" or issue_type == "structural_change":
+                sections_to_load.update(["brush", "handle", "knot"])
+
+        # Convert to list and load files
+        for section in sections_to_load:
+            section_file = correct_matches_dir / f"{section}.yaml"
+            if section_file.exists():
+                try:
+                    with section_file.open("r", encoding="utf-8") as f:
+                        section_data = yaml.safe_load(f) or {}
+                        if section_data:
+                            yaml_data[section] = section_data
+                except Exception as e:
+                    logger.warning(f"Error loading {section_file}: {e}")
+
+        removed_count = 0
+        added_count = 0
+        errors = []
+
+        for entry in request.matches:
+            try:
+                correct_match = entry.get("correct_match", "")
+                issue_type = entry.get("issue_type", "")
+                expected_section = entry.get("expected_section", request.field)
+                actual_section = entry.get("actual_section", request.field)
+                actual_brand = entry.get("actual_brand", "")
+                actual_model = entry.get("actual_model", "")
+                expected_format = entry.get("format")  # Format section for blades
+                expected_handle_match = entry.get("expected_handle_match")
+                expected_knot_match = entry.get("expected_knot_match")
+
+                if not correct_match:
+                    errors.append(f"Invalid entry data: missing correct_match: {entry}")
+                    continue
+
+                # Validate required fields for adding
+                # For structural changes to handle_knot, we need handle/knot match data instead of actual_brand
+                if issue_type == "structural_change" and actual_section in ["handle_knot", "handle", "knot"]:
+                    # For brush → handle_knot, we need expected_handle_match and expected_knot_match
+                    if not expected_handle_match or not expected_knot_match:
+                        errors.append(
+                            f"Invalid entry data: missing expected_handle_match or expected_knot_match for structural change: {entry}"
+                        )
+                        continue
+                elif not actual_brand or not actual_section:
+                    # For other cases, we need actual_brand and actual_section
+                    errors.append(
+                        f"Invalid entry data: missing actual_brand or actual_section: {entry}"
+                    )
+                    continue
+
+                # Step 1: Remove from ALL locations where it might exist
+                # For brush-related entries, always search all brush sections to handle conflicts
+                removed = False
+                sections_to_search = []
+
+                # Always search all brush-related sections for brush field or structural changes
+                # This ensures we remove from all conflicting locations
+                if (
+                    issue_type == "cross_section_conflict"
+                    or request.field == "brush"
+                    or expected_section in ["brush", "handle", "knot", "handle_knot"]
+                    or actual_section in ["brush", "handle", "knot", "handle_knot"]
+                    or issue_type == "structural_change"
+                ):
+                    sections_to_search = ["brush", "knot", "handle"]
+                else:
+                    sections_to_search = [expected_section] if expected_section else [request.field]
+
+                for section in sections_to_search:
+                    if section not in yaml_data:
+                        continue
+                    section_data = yaml_data[section]
+
+                    # For blades, handle format-based structure
+                    if request.field == "blade" and section_data:
+                        is_format_based = isinstance(section_data, dict) and any(
+                            isinstance(v, dict)
+                            and any(
+                                isinstance(brand_data, dict)
+                                and any(
+                                    isinstance(model_data, list)
+                                    for model_data in brand_data.values()
+                                )
+                                for brand_data in v.values()
+                            )
+                            for v in section_data.values()
+                        )
+
+                        if is_format_based:
+                            format_sections_to_search = (
+                                [expected_format] if expected_format else list(section_data.keys())
+                            )
+
+                            for format_name in format_sections_to_search:
+                                if format_name not in section_data:
+                                    continue
+                                format_data = section_data[format_name]
+                                if not isinstance(format_data, dict):
+                                    continue
+                                for brand, brand_data in format_data.items():
+                                    if isinstance(brand_data, dict):
+                                        for model, patterns in brand_data.items():
+                                            if isinstance(patterns, list):
+                                                i = 0
+                                                while i < len(patterns):
+                                                    pattern = patterns[i]
+                                                    if (
+                                                        isinstance(pattern, str)
+                                                        and pattern.lower()
+                                                        == correct_match.lower()
+                                                    ):
+                                                        patterns.pop(i)
+                                                        removed = True
+                                                        removed_count += 1
+                                                    else:
+                                                        i += 1
+                        else:
+                            # Fallback to flat structure
+                            for brand, brand_data in section_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, patterns in brand_data.items():
+                                        if isinstance(patterns, list):
+                                            i = 0
+                                            while i < len(patterns):
+                                                pattern = patterns[i]
+                                                if (
+                                                    isinstance(pattern, str)
+                                                    and pattern.lower() == correct_match.lower()
+                                                ):
+                                                    patterns.pop(i)
+                                                    removed = True
+                                                    removed_count += 1
+                                                else:
+                                                    i += 1
+                    else:
+                        # For other fields, use flat structure
+                        for brand, brand_data in section_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, patterns in brand_data.items():
+                                    if isinstance(patterns, list):
+                                        i = 0
+                                        while i < len(patterns):
+                                            pattern = patterns[i]
+                                            if (
+                                                isinstance(pattern, str)
+                                                and pattern.lower() == correct_match.lower()
+                                            ):
+                                                patterns.pop(i)
+                                                removed = True
+                                                removed_count += 1
+                                            else:
+                                                i += 1
+
+                # Step 2: Add to correct location
+                if issue_type == "structural_change":
+                    # Handle structural changes (moving between sections)
+                    if actual_section == "brush" and expected_section in ["handle_knot", "handle", "knot"]:
+                        # Moving from handle/knot to brush
+                        matched = {
+                            "brand": actual_brand,
+                            "model": actual_model if actual_model else None,
+                        }
+                        if expected_knot_match:
+                            if expected_knot_match.get("fiber"):
+                                matched["fiber"] = expected_knot_match["fiber"]
+                            if expected_knot_match.get("knot_size_mm"):
+                                matched["knot_size_mm"] = expected_knot_match["knot_size_mm"]
+
+                        match_data_to_save = {
+                            "original": correct_match,
+                            "matched": matched,
+                            "field": "brush",
+                        }
+                        match_key = manager.create_match_key("brush", correct_match, matched)
+                        manager.mark_match_as_correct(match_key, match_data_to_save)
+                        added_count += 1
+
+                    elif actual_section in ["handle_knot", "handle", "knot"] and expected_section == "brush":
+                        # Moving from brush to handle/knot
+                        # Add handle entry
+                        if expected_handle_match:
+                            handle_matched = {
+                                "brand": expected_handle_match.get("brand"),
+                                "model": expected_handle_match.get("model"),
+                            }
+                            handle_match_data = {
+                                "original": correct_match,
+                                "matched": handle_matched,
+                                "field": "handle",
+                            }
+                            handle_match_key = manager.create_match_key(
+                                "handle", correct_match, handle_matched
+                            )
+                            manager.mark_match_as_correct(handle_match_key, handle_match_data)
+                            added_count += 1
+
+                        # Add knot entry
+                        if expected_knot_match:
+                            knot_matched = {
+                                "brand": expected_knot_match.get("brand"),
+                                "model": expected_knot_match.get("model"),
+                            }
+                            if expected_knot_match.get("fiber"):
+                                knot_matched["fiber"] = expected_knot_match["fiber"]
+                            if expected_knot_match.get("knot_size_mm"):
+                                knot_matched["knot_size_mm"] = expected_knot_match["knot_size_mm"]
+
+                            knot_match_data = {
+                                "original": correct_match,
+                                "matched": knot_matched,
+                                "field": "knot",
+                            }
+                            knot_match_key = manager.create_match_key("knot", correct_match, knot_matched)
+                            manager.mark_match_as_correct(knot_match_key, knot_match_data)
+                            added_count += 1
+
+                elif issue_type in ["data_mismatch", "catalog_pattern_mismatch"]:
+                    # Update brand/model in same section
+                    matched = {"brand": actual_brand, "model": actual_model if actual_model else None}
+
+                    # For blades, preserve format
+                    if request.field == "blade" and expected_format:
+                        matched["format"] = expected_format
+
+                    match_data_to_save = {
+                        "original": correct_match,
+                        "matched": matched,
+                        "field": actual_section if actual_section != "handle_knot" else request.field,
+                    }
+                    match_key = manager.create_match_key(
+                        actual_section if actual_section != "handle_knot" else request.field,
+                        correct_match,
+                        matched,
+                    )
+                    manager.mark_match_as_correct(match_key, match_data_to_save)
+                    added_count += 1
+                
+                elif issue_type == "cross_section_conflict":
+                    # For cross-section conflicts, we need to determine where it should go
+                    # by running the actual matcher. If actual_brand/actual_section are provided,
+                    # use those. Otherwise, we can't auto-fix (should be filtered out in frontend)
+                    if actual_brand and actual_section:
+                        matched = {"brand": actual_brand, "model": actual_model if actual_model else None}
+                        
+                        # For blades, preserve format
+                        if request.field == "blade" and expected_format:
+                            matched["format"] = expected_format
+                        
+                        # Determine target section (default to brush for brush field conflicts)
+                        target_section = actual_section
+                        if request.field == "brush" and (not target_section or target_section == "handle_knot"):
+                            target_section = "brush"
+                        
+                        match_data_to_save = {
+                            "original": correct_match,
+                            "matched": matched,
+                            "field": target_section,
+                        }
+                        match_key = manager.create_match_key(
+                            target_section,
+                            correct_match,
+                            matched,
+                        )
+                        manager.mark_match_as_correct(match_key, match_data_to_save)
+                        added_count += 1
+                    else:
+                        # Can't auto-fix without knowing where it should go
+                        errors.append(
+                            f"Cannot auto-fix cross-section conflict for '{correct_match}': "
+                            f"missing actual_brand or actual_section"
+                        )
+
+                if not removed:
+                    logger.warning(
+                        f"Entry not found in source location for removal: {correct_match}"
+                    )
+
+            except Exception as e:
+                errors.append(f"Error moving entry {entry}: {e}")
+                logger.error(f"Error moving entry: {e}", exc_info=True)
+
+        # Save updated YAML files (for removals)
+        if removed_count > 0:
+            try:
+                for section, section_data in yaml_data.items():
+                    if section_data:
+                        section_file = correct_matches_dir / f"{section}.yaml"
+                        with section_file.open("w", encoding="utf-8") as f:
+                            yaml.dump(
+                                section_data,
+                                f,
+                                default_flow_style=False,
+                                allow_unicode=True,
+                                sort_keys=False,
+                            )
+            except Exception as e:
+                errors.append(f"Error saving YAML files after removal: {e}")
+                logger.error(f"Error saving YAML files: {e}")
+
+        # Save correct matches (for additions)
+        if added_count > 0:
+            try:
+                manager.save_correct_matches()
+            except Exception as e:
+                errors.append(f"Error saving correct matches after addition: {e}")
+                logger.error(f"Error saving correct matches: {e}")
+
+        moved_count = min(removed_count, added_count)  # Count of successfully moved entries
+
+        return MoveCatalogEntriesResponse(
+            success=moved_count > 0 or (removed_count > 0 and added_count > 0),
+            message=f"Moved {moved_count} entries (removed {removed_count}, added {added_count})",
+            moved_count=moved_count,
+            removed_count=removed_count,
+            added_count=added_count,
+            errors=errors,
+        )
+
+    except Exception as e:
+        logger.error(f"Error moving catalog validation entries: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error moving catalog validation entries: {str(e)}"
         )

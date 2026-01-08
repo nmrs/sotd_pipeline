@@ -848,6 +848,46 @@ export const removeCatalogValidationEntries = async (request: {
   }
 };
 
+export const moveCatalogValidationEntries = async (request: {
+  field: string;
+  entries: Array<{
+    correct_match: string;
+    expected_brand: string;
+    expected_model: string;
+    actual_brand: string;
+    actual_model: string;
+    issue_type: string;
+    actual_section?: string;
+    expected_section?: string;
+    format?: string;
+    expected_handle_match?: { brand?: string; model?: string };
+    expected_knot_match?: {
+      brand?: string;
+      model?: string;
+      fiber?: string;
+      knot_size_mm?: number;
+    };
+  }>;
+}): Promise<{
+  success: boolean;
+  message: string;
+  moved_count: number;
+  removed_count: number;
+  added_count: number;
+  errors: string[];
+}> => {
+  try {
+    const response = await api.post('/analysis/move-catalog-entries', {
+      field: request.field,
+      matches: request.entries,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to move catalog validation entries:', error);
+    throw error;
+  }
+};
+
 // Brush validation interfaces
 export interface BrushValidationEntry {
   input_text: string;
