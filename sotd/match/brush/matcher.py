@@ -108,8 +108,11 @@ class BrushMatcher:
             self.correct_matches_path = Path("data/correct_matches")
 
         # FAIL FAST: Validate that all catalog files exist and are readable
-        # Only validate if all paths are set (not None)
-        if all([self.brushes_path, self.handles_path, self.knots_path, self.correct_matches_path]):
+        # Only validate in debug mode to avoid expensive validation overhead in parallel workers
+        # In production, loading will fail fast if catalogs are missing/corrupted
+        if self.debug and all(
+            [self.brushes_path, self.handles_path, self.knots_path, self.correct_matches_path]
+        ):
             self._validate_catalog_paths()
 
         # Initialize configuration with provided path or default
@@ -137,11 +140,12 @@ class BrushMatcher:
         self.handle_matcher = HandleMatcher(self.handles_path)
 
         # Initialize KnotMatcher with knot-specific strategies
-        # Load catalogs directly without legacy config dependencies
-        catalogs = self._load_catalogs_directly()
+        # Load catalogs once and cache at instance level to avoid repeated calls
+        # Cache catalogs at instance level to avoid repeated _load_catalogs_directly() calls
+        self._catalogs = self._load_catalogs_directly()
 
         # Create knot strategies using factory for better separation of concerns
-        knot_strategies = KnotMatcherFactory.create_knot_strategies(catalogs)
+        knot_strategies = KnotMatcherFactory.create_knot_strategies(self._catalogs)
         self.knot_matcher = KnotMatcher(knot_strategies)
 
         # Initialize components
@@ -331,10 +335,18 @@ class BrushMatcher:
             print(f"   correct_matches: {self.correct_matches_path.absolute()}")
 
     def _load_catalogs_directly(self) -> dict:
-        """Load catalogs directly without legacy config dependencies."""
+        """Load catalogs directly without legacy config dependencies.
+
+        Uses instance-level cache if available, otherwise falls back to module-level cache.
+        """
+        # Return instance-level cached catalogs if available (fastest path)
+        # This should be the common case after initialization
+        if hasattr(self, "_catalogs") and self._catalogs is not None:
+            return self._catalogs
+
         global _catalog_cache
 
-        # Return cached catalogs if available
+        # Return module-level cached catalogs if available
         if _catalog_cache is not None:
             return _catalog_cache
 
@@ -379,8 +391,8 @@ class BrushMatcher:
         Returns:
             List of strategy objects
         """
-        # Use shared utilities instead of duplicating logic
-        catalogs = self._load_catalogs_directly()  # Use our direct loading method
+        # Use instance-level cached catalogs to avoid repeated loading
+        catalogs = self._catalogs
 
         # Create brush-level strategies (not knot strategies)
         strategies = []
@@ -469,8 +481,8 @@ class BrushMatcher:
         Returns:
             List of strategy objects (without unified component strategy)
         """
-        # Use shared utilities instead of duplicating logic
-        catalogs = self._load_catalogs_directly()  # Use our direct loading method
+        # Use instance-level cached catalogs to avoid repeated loading
+        catalogs = self._catalogs
 
         # Create strategies using factory for better separation of concerns
         strategies = KnotMatcherFactory.create_knot_strategies(catalogs)
@@ -744,8 +756,8 @@ class BrushMatcher:
                 FullInputComponentMatchingStrategy,
             )
 
-            # Create catalog loader for unified strategy
-            catalogs = self._load_catalogs_directly()  # Use our direct loading method
+            # Use instance-level cached catalogs to avoid repeated loading
+            catalogs = self._catalogs
 
             unified_strategy = FullInputComponentMatchingStrategy(
                 self.handle_matcher, self.knot_matcher, catalogs
@@ -777,7 +789,7 @@ class BrushMatcher:
         # Reuse the same instance to avoid rebuilding the O(1) lookup dictionary
         if not hasattr(self, "_correct_matches_strategy"):
             self._correct_matches_strategy = CorrectMatchesStrategy(
-                self.correct_matches_data, self._load_catalogs_directly()
+                self.correct_matches_data, self._catalogs
             )
         correct_strategy = self._correct_matches_strategy
 
@@ -821,17 +833,20 @@ class BrushMatcher:
         self.performance_monitor.start_timing()
 
         try:
-            # Pre-compute HandleMatcher and KnotMatcher results for optimization
-            cached_results = self._precompute_handle_knot_results(value)
-
             # PHASE 1: Check correct matches strategies first (highest priority) if not bypassed
+            # Check BEFORE pre-computing handle/knot results to avoid unnecessary work
             if not should_bypass:
-                correct_match_result = self._try_correct_matches_strategies(value, cached_results)
+                # Pass empty dict since correct matches strategy doesn't use cached_results
+                correct_match_result = self._try_correct_matches_strategies(value, {})
                 if correct_match_result:
                     # Correct match found - return immediately, don't run other strategies
                     if original is not None:
                         correct_match_result.original = original
                     return correct_match_result
+
+            # Pre-compute HandleMatcher and KnotMatcher results for optimization
+            # Only do this if we didn't find a correct match (performance optimization)
+            cached_results = self._precompute_handle_knot_results(value)
 
             # PHASE 2: Run all other strategies (excluding correct matches if bypassed)
             strategy_results = self.strategy_orchestrator.run_all_strategies(value, cached_results)
