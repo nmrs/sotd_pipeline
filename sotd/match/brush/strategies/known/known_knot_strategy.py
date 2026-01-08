@@ -4,6 +4,7 @@ from sotd.match.types import MatchResult
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 from ..utils.knot_size_utils import parse_knot_size
+from ..utils.pattern_cache import get_compiled_patterns
 from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
@@ -18,10 +19,18 @@ class KnownKnotMatchingStrategy:
         self.patterns = self._compile_known_knot_patterns()
 
     def _compile_known_knot_patterns(self) -> list[dict]:
-        """Compile patterns from the nested catalog structure."""
+        """Compile patterns from the nested catalog structure with caching."""
+        return get_compiled_patterns(
+            self.catalog,
+            "known_knot",
+            self._compile_known_knot_patterns_impl,
+        )
+
+    def _compile_known_knot_patterns_impl(self, catalog: dict) -> list[dict]:
+        """Implementation of known knot pattern compilation (extracted for caching)."""
         all_patterns = []
 
-        for brand, models in self.catalog.items():
+        for brand, models in catalog.items():
             if not isinstance(models, dict):
                 continue
 

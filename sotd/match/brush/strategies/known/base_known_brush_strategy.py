@@ -11,6 +11,7 @@ from ..base_brush_matching_strategy import (
 )
 from ..utils.fiber_utils import match_fiber
 from ..utils.knot_size_utils import parse_knot_size
+from ..utils.pattern_cache import get_compiled_patterns
 from ..utils.pattern_utils import (
     compile_catalog_patterns,
 )
@@ -43,11 +44,15 @@ class BaseKnownBrushMatchingStrategy(BaseBrushMatchingStrategy, ABC):
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self) -> list[dict]:
-        """Compile patterns using the unified pattern utilities."""
-        return compile_catalog_patterns(
+        """Compile patterns using the unified pattern utilities with caching."""
+        return get_compiled_patterns(
             self.catalog,
-            pattern_field="patterns",
-            metadata_fields=["fiber", "knot_size_mm", "handle_maker"],
+            "known_brush",
+            lambda cat: compile_catalog_patterns(
+                cat,
+                pattern_field="patterns",
+                metadata_fields=["fiber", "knot_size_mm", "handle_maker"],
+            ),
         )
 
     def match(self, value: str, full_string: Optional[str] = None) -> MatchResult:

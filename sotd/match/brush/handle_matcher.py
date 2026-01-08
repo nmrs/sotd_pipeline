@@ -7,6 +7,8 @@ import yaml
 from sotd.match.types import MatchResult
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
+from .strategies.utils.pattern_cache import get_compiled_patterns
+
 
 class HandleMatcher:
     """Handle matching functionality extracted from BrushMatcher."""
@@ -25,7 +27,15 @@ class HandleMatcher:
             return {}
 
     def _compile_handle_patterns(self) -> list[dict]:
-        """Compile handle patterns from the handles catalog in priority order."""
+        """Compile handle patterns from the handles catalog in priority order with caching."""
+        return get_compiled_patterns(
+            self.handles_data,
+            "handle",
+            self._compile_handle_patterns_impl,
+        )
+
+    def _compile_handle_patterns_impl(self, handles_data: dict) -> list[dict]:
+        """Implementation of handle pattern compilation (extracted for caching)."""
         patterns = []
 
         def _process_section(section_data: dict, section_name: str, priority: int):
@@ -57,11 +67,9 @@ class HandleMatcher:
                             )
 
         # Process all sections
-        _process_section(self.handles_data.get("artisan_handles", {}), "artisan_handles", 1)
-        _process_section(
-            self.handles_data.get("manufacturer_handles", {}), "manufacturer_handles", 2
-        )
-        _process_section(self.handles_data.get("other_handles", {}), "other_handles", 3)
+        _process_section(handles_data.get("artisan_handles", {}), "artisan_handles", 1)
+        _process_section(handles_data.get("manufacturer_handles", {}), "manufacturer_handles", 2)
+        _process_section(handles_data.get("other_handles", {}), "other_handles", 3)
 
         # Sort by priority (lower = higher), then by pattern length (longer = more specific)
         patterns.sort(key=lambda x: (x["priority"], -len(x["pattern"])))

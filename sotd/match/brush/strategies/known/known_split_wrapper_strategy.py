@@ -14,6 +14,7 @@ from sotd.match.types import MatchResult
 from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from ..utils.pattern_cache import get_compiled_patterns
 
 
 class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
@@ -35,10 +36,18 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
         self.compiled_patterns = self._compile_patterns()
 
     def _compile_patterns(self) -> list:
-        """Compile patterns for known splits from brush_splits.yaml structure."""
+        """Compile patterns for known splits from brush_splits.yaml structure with caching."""
+        return get_compiled_patterns(
+            self.known_splits_data,
+            "known_split",
+            self._compile_patterns_impl,
+        )
+
+    def _compile_patterns_impl(self, known_splits_data: dict) -> list:
+        """Implementation of known split pattern compilation (extracted for caching)."""
         compiled = []
         # brush_splits.yaml has brush names as top-level keys
-        for brush_name, split_data in self.known_splits_data.items():
+        for brush_name, split_data in known_splits_data.items():
             if isinstance(split_data, dict):
                 # Create a simple pattern that matches the exact brush name
                 # Use word boundaries only at the start/end, not around the entire pattern

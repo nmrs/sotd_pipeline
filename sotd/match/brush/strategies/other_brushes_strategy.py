@@ -8,6 +8,7 @@ from .base_brush_matching_strategy import (
 )
 from .utils.fiber_utils import match_fiber
 from .utils.knot_size_utils import parse_knot_size
+from .utils.pattern_cache import get_compiled_patterns
 from .utils.pattern_utils import (
     validate_catalog_structure,
 )
@@ -32,9 +33,17 @@ class OtherBrushMatchingStrategy(BaseBrushMatchingStrategy):
         )
 
     def _compile_patterns(self) -> list[dict]:
-        """Pre-compile patterns for performance optimization."""
+        """Pre-compile patterns for performance optimization with caching."""
+        return get_compiled_patterns(
+            self.catalog,
+            "other_brush",
+            self._compile_patterns_impl,
+        )
+
+    def _compile_patterns_impl(self, catalog: dict) -> list[dict]:
+        """Implementation of pattern compilation (extracted for caching)."""
         compiled_patterns = []
-        for brand, metadata in self.catalog.items():
+        for brand, metadata in catalog.items():
             patterns = sorted(metadata["patterns"], key=len, reverse=True)
             for pattern in patterns:
                 context = create_context_dict(

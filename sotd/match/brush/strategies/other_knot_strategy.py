@@ -3,6 +3,7 @@ from typing import Optional
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 from .utils.fiber_utils import match_fiber
+from .utils.pattern_cache import get_compiled_patterns
 from .utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
@@ -17,10 +18,18 @@ class OtherKnotMatchingStrategy:
         self.patterns = self._compile_other_knot_patterns()
 
     def _compile_other_knot_patterns(self) -> list[dict]:
-        """Compile patterns from the flat catalog structure."""
+        """Compile patterns from the flat catalog structure with caching."""
+        return get_compiled_patterns(
+            self.catalog,
+            "other_knot",
+            self._compile_other_knot_patterns_impl,
+        )
+
+    def _compile_other_knot_patterns_impl(self, catalog: dict) -> list[dict]:
+        """Implementation of other knot pattern compilation (extracted for caching)."""
         all_patterns = []
 
-        for brand, metadata in self.catalog.items():
+        for brand, metadata in catalog.items():
             if not isinstance(metadata, dict):
                 continue
 
