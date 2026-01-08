@@ -504,6 +504,15 @@ class BrushEnricher(BaseEnricher):
         catalog_knot_size = (
             knot_section.get("knot_size_mm") if knot_section else matched_data.get("knot_size_mm")
         )
+        # Fail fast if catalog_knot_size is a string (catalog data should be numeric)
+        if catalog_knot_size is not None and isinstance(catalog_knot_size, str):
+            knot_brand = knot_section.get("brand") if knot_section else matched_data.get("brand")
+            knot_model = knot_section.get("model") if knot_section else matched_data.get("model")
+            raise ValueError(
+                f"Invalid catalog data: knot_size_mm must be numeric, not string. "
+                f"Found string value '{catalog_knot_size}' for knot brand='{knot_brand}', model='{knot_model}'. "
+                f"Please fix the catalog data (knots.yaml or brushes.yaml) to use a numeric value (e.g., 26 instead of '26mm')."
+            )
         catalog_fiber = knot_section.get("fiber") if knot_section else matched_data.get("fiber")
 
         # Prepare user data dictionary
@@ -525,6 +534,16 @@ class BrushEnricher(BaseEnricher):
         handle_maker_brand = None
         if user_knot_size is None and catalog_knot_size is None:
             handle_maker_knot_size = self._infer_knot_size_from_handle_maker(matched_data)
+            # Fail fast if handle_maker_knot_size is a string (catalog data should be numeric)
+            if handle_maker_knot_size is not None and isinstance(handle_maker_knot_size, str):
+                handle_section = matched_data.get("handle", {})
+                handle_brand = handle_section.get("brand") if isinstance(handle_section, dict) else None
+                handle_model = handle_section.get("model") if isinstance(handle_section, dict) else None
+                raise ValueError(
+                    f"Invalid catalog data: knot_size_mm in handle maker defaults must be numeric, not string. "
+                    f"Found string value '{handle_maker_knot_size}' for handle brand='{handle_brand}', model='{handle_model}'. "
+                    f"Please fix the catalog data (handles.yaml) to use a numeric value (e.g., 26 instead of '26mm')."
+                )
             if handle_maker_knot_size is not None:
                 # Get handle brand for metadata
                 handle_section = matched_data.get("handle", {})
