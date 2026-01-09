@@ -983,26 +983,92 @@ const MatchAnalyzer: React.FC = () => {
     return item.is_confirmed || false;
   }, []);
 
+  // Helper function to determine if a pattern matches the display mode criteria
+  const isPatternMatchType = useCallback(
+    (pattern: { match_type: string }, mode: string): boolean => {
+      switch (mode) {
+        case 'all':
+          return true;
+        case 'mismatches':
+          // Show non-exact patterns (regex, brand, dash_split)
+          return pattern.match_type !== 'exact';
+        case 'unconfirmed':
+          // Show non-exact patterns (regex, brand, dash_split)
+          return pattern.match_type !== 'exact';
+        case 'regex':
+          // Show only regex patterns
+          return pattern.match_type === 'regex';
+        case 'matches':
+          // Show only exact patterns
+          return pattern.match_type === 'exact';
+        case 'intentionally_unmatched':
+          // Not applicable for grouped view (no mismatch_type info)
+          return false;
+        case 'complete_brushes':
+          // Not applicable for soap field
+          return false;
+        default:
+          return true;
+      }
+    },
+    []
+  );
+
+  // Helper function to determine if a group has patterns matching the display mode
+  const groupHasMatchingPatterns = useCallback(
+    (group: GroupedDataItem, mode: string): boolean => {
+      return group.all_patterns.some(pattern => isPatternMatchType(pattern, mode));
+    },
+    [isPatternMatchType]
+  );
+
   // Memoized filtered results for performance
   const filteredResults = useMemo((): AnalyzerDataItem[] => {
     // Handle grouped data (soap field with groupByMatched enabled)
     // Only return grouped data if groupByMatched is true AND we have grouped results
     if (groupByMatched && selectedField === 'soap' && groupedResults?.groups) {
-      // For grouped data, we show all groups (no filtering by display mode)
-      return groupedResults.groups.map(group => ({
-        matched_string: group.matched_string,
-        brand: group.brand,
-        scent: group.scent,
-        total_count: group.total_count,
-        top_patterns: group.top_patterns,
-        remaining_count: group.remaining_count,
-        all_patterns: group.all_patterns,
-        pattern_count: group.pattern_count,
-        match_type: group.match_type,
-        match_type_breakdown: group.match_type_breakdown,
-        // Add a flag to indicate this is grouped data
-        is_grouped: true,
-      } as GroupedDataItem));
+      // Filter groups first based on display mode
+      let filteredGroups = groupedResults.groups;
+      if (displayMode !== 'all') {
+        filteredGroups = filteredGroups.filter(group =>
+          groupHasMatchingPatterns(group, displayMode)
+        );
+      }
+
+      // Filter patterns within groups and recalculate counts
+      return filteredGroups
+        .map(group => {
+          const filteredTopPatterns = group.top_patterns.filter(pattern =>
+            isPatternMatchType(pattern, displayMode)
+          );
+          const filteredAllPatterns = group.all_patterns.filter(pattern =>
+            isPatternMatchType(pattern, displayMode)
+          );
+
+          // If all patterns are filtered out, exclude the group entirely
+          if (filteredAllPatterns.length === 0) {
+            return null;
+          }
+
+          // Recalculate remaining_count based on filtered patterns
+          // remaining_count = total patterns - top 3 patterns shown
+          const remainingCount = Math.max(0, filteredAllPatterns.length - 3);
+
+          return {
+            matched_string: group.matched_string,
+            brand: group.brand,
+            scent: group.scent,
+            total_count: group.total_count, // Keep original total for context
+            top_patterns: filteredTopPatterns.slice(0, 3), // Show top 3 filtered patterns
+            remaining_count: remainingCount,
+            all_patterns: filteredAllPatterns,
+            pattern_count: filteredAllPatterns.length, // Updated count
+            match_type: group.match_type,
+            match_type_breakdown: group.match_type_breakdown,
+            is_grouped: true,
+          } as GroupedDataItem;
+        })
+        .filter((group): group is GroupedDataItem => group !== null);
     }
 
     // Handle regular data (existing logic)
@@ -1053,7 +1119,16 @@ const MatchAnalyzer: React.FC = () => {
       default:
         return results.mismatch_items;
     }
-  }, [results?.mismatch_items, groupedResults?.groups, displayMode, isItemConfirmed]);
+  }, [
+    results?.mismatch_items,
+    groupedResults?.groups,
+    displayMode,
+    isItemConfirmed,
+    groupByMatched,
+    selectedField,
+    groupHasMatchingPatterns,
+    isPatternMatchType,
+  ]);
 
   // Keyboard navigation handlers
 
@@ -1103,7 +1178,10 @@ const MatchAnalyzer: React.FC = () => {
           event.preventDefault();
           if (activeRowIndex >= 0 && activeRowIndex < visibleRows.length) {
             const item = visibleRows[activeRowIndex];
-            const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+            // Use the same key logic as visibleItemKeys to handle both grouped and regular data
+            const itemKey = isGroupedDataItem(item)
+              ? `${selectedField}:${item.matched_string?.toLowerCase() || 'unknown'}`
+              : `${selectedField}:${item.original?.toLowerCase() || 'unknown'}`;
             const isCurrentlySelected = selectedItems.has(itemKey);
             handleItemSelection(itemKey, !isCurrentlySelected);
           }
@@ -1133,14 +1211,30 @@ const MatchAnalyzer: React.FC = () => {
 
   // Enable keyboard navigation when results are available
   useEffect(() => {
-    if (results && filteredResults.length > 0) {
+    // Check both regular results and grouped results
+    if ((results || groupedResults) && filteredResults.length > 0) {
       setKeyboardNavigationEnabled(true);
     } else {
       setKeyboardNavigationEnabled(false);
     }
-  }, [results, filteredResults.length]);
+  }, [results, groupedResults, filteredResults.length]);
 
   const getDisplayModeCounts = () => {
+    // Handle grouped data (soap field with groupByMatched enabled)
+    if (groupByMatched && selectedField === 'soap' && groupedResults?.groups) {
+      const groups = groupedResults.groups;
+      return {
+        mismatches: groups.filter(g => groupHasMatchingPatterns(g, 'mismatches')).length,
+        all: groups.length,
+        unconfirmed: groups.filter(g => groupHasMatchingPatterns(g, 'unconfirmed')).length,
+        regex: groups.filter(g => groupHasMatchingPatterns(g, 'regex')).length,
+        intentionally_unmatched: 0, // Not applicable for grouped view
+        matches: groups.filter(g => groupHasMatchingPatterns(g, 'matches')).length,
+        complete_brushes: 0, // Not applicable for soap field
+      };
+    }
+
+    // Handle regular data
     if (!results)
       return {
         mismatches: 0,

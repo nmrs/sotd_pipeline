@@ -47,14 +47,22 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
             className="rounded border-gray-300"
           />
         ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.getIsSelected()}
-            onChange={e => row.toggleSelected(!!e.target.checked)}
-            className="rounded border-gray-300"
-          />
-        ),
+        cell: ({ row }) => {
+          const item = row.original;
+          // Generate key using same logic as MatchAnalyzer
+          const itemKey = `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`;
+          const isSelected = selectedItems.has(itemKey);
+          return (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={e => {
+                onItemSelection?.(itemKey, e.target.checked);
+              }}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          );
+        },
         enableSorting: false,
         enableHiding: false,
       },
@@ -138,7 +146,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
     ];
 
     return baseColumns;
-  }, [field]);
+  }, [field, selectedItems, onItemSelection]);
 
   // Convert GroupedDataItem[] to AnalyzerDataItem[] for compatibility
   const compatibleData = useMemo(() => {
