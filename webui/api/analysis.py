@@ -869,12 +869,30 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         continue
                 elif request.display_mode == "mismatches":
                     # For mismatches mode, exclude confirmed matches
-                    if mismatch_type in ["exact_matches", "good_matches"]:
+                    # But always include dash_split records (they're fallback guesses that need review)
+                    if mismatch_type == "exact_matches":
                         continue
+                    elif mismatch_type == "good_matches":
+                        # Filter to only include dash_split records from good_matches
+                        items = [
+                            item
+                            for item in items
+                            if item.get("field_data", {}).get("match_type") == "dash_split"
+                        ]
+                        if not items:
+                            continue
                 elif request.display_mode == "unconfirmed":
                     # For unconfirmed mode, only show unconfirmed items
-                    if mismatch_type in ["exact_matches", "good_matches"]:
+                    # But always include dash_split records (they're fallback guesses that need review)
+                    if mismatch_type == "exact_matches":
                         continue
+                    elif mismatch_type == "good_matches":
+                        # Filter to only include dash_split records from good_matches
+                        items = [
+                            item
+                            for item in items
+                            if item.get("field_data", {}).get("match_type") == "dash_split"
+                        ]
                     items = [item for item in items if not item.get("is_confirmed", False)]
                     if not items:
                         continue
