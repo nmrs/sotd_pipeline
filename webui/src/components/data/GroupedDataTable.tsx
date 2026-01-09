@@ -72,7 +72,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
           const item = row.original;
           return (
             <div className="font-medium text-gray-900">
-              {item.matched_string}
+              {item.matched_string || 'N/A'}
             </div>
           );
         },
@@ -91,7 +91,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
           const item = row.original;
           return (
             <div className="text-center font-medium text-gray-900">
-              {item.total_count}
+              {item.total_count ?? 0}
             </div>
           );
         },
@@ -110,7 +110,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
           const item = row.original;
           return (
             <div className="text-center text-gray-600">
-              {item.pattern_count}
+              {item.pattern_count ?? 0}
             </div>
           );
         },
@@ -121,14 +121,17 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
         header: 'Top Patterns',
         cell: ({ row }: { row: Row<GroupedDataItem> }) => {
           const item = row.original;
-          return (
-            <ExpandablePatterns
-              patterns={item.top_patterns}
-              allPatterns={item.all_patterns}
-              remainingCount={item.remaining_count}
-              field={field}
-            />
-          );
+          try {
+            return (
+              <ExpandablePatterns
+                topPatterns={item.top_patterns || []}
+                allPatterns={item.all_patterns || []}
+                remainingCount={item.remaining_count || 0}
+              />
+            );
+          } catch (error) {
+            return <div className="text-red-500">Error rendering patterns</div>;
+          }
         },
         enableSorting: false,
       },

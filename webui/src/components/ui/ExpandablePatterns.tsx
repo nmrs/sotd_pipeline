@@ -26,7 +26,7 @@ const ExpandablePatterns: React.FC<ExpandablePatternsProps> = ({
         setIsExpanded(!isExpanded);
     };
 
-    const displayPatterns = isExpanded ? allPatterns : topPatterns;
+    const displayPatterns = isExpanded ? (allPatterns || []) : (topPatterns || []);
 
     const getMatchTypeColor = (matchType: string) => {
         switch (matchType) {

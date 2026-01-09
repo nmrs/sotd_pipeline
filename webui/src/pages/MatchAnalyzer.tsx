@@ -137,7 +137,7 @@ const MatchAnalyzer: React.FC = () => {
     loadYamlBrushSplitsData();
   }, [loadYamlBrushSplitsData]);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (overrideGroupByMatched?: boolean) => {
     if (selectedMonths.length === 0) {
       setError('Please select at least one month to analyze');
       return;
@@ -154,13 +154,21 @@ const MatchAnalyzer: React.FC = () => {
       // So we use selectedMonths directly to avoid double-counting
       const allMonths = selectedMonths;
 
+      // Use override value if provided, otherwise use current state
+      // Ensure we have a proper boolean value
+      const shouldGroupByMatched = overrideGroupByMatched !== undefined 
+        ? Boolean(overrideGroupByMatched) 
+        : Boolean(groupByMatched);
+
       // Check if we should use grouped data (soap field with groupByMatched enabled)
-      if (selectedField === 'soap' && groupByMatched) {
+      if (selectedField === 'soap' && shouldGroupByMatched) {
         const groupedResult = await getSoapGroupByMatched({
           months: allMonths.join(','),
           group_by_matched: true,
         });
         setGroupedResults(groupedResult);
+        // Clear regular results when using grouped data
+        setResults(null);
       } else {
         const result = await analyzeMismatch({
           field: selectedField,
@@ -183,6 +191,8 @@ const MatchAnalyzer: React.FC = () => {
         // });
 
         setResults(result);
+        // Clear grouped results when using regular data
+        setGroupedResults(null);
       }
     } catch (err: unknown) {
       setError(handleApiError(err));
@@ -976,7 +986,8 @@ const MatchAnalyzer: React.FC = () => {
   // Memoized filtered results for performance
   const filteredResults = useMemo((): AnalyzerDataItem[] => {
     // Handle grouped data (soap field with groupByMatched enabled)
-    if (groupedResults?.groups) {
+    // Only return grouped data if groupByMatched is true AND we have grouped results
+    if (groupByMatched && selectedField === 'soap' && groupedResults?.groups) {
       // For grouped data, we show all groups (no filtering by display mode)
       return groupedResults.groups.map(group => ({
         matched_string: group.matched_string,
@@ -995,7 +1006,9 @@ const MatchAnalyzer: React.FC = () => {
     }
 
     // Handle regular data (existing logic)
-    if (!results?.mismatch_items) return [];
+    if (!results?.mismatch_items) {
+      return [];
+    }
 
     switch (displayMode) {
       case 'mismatches':
@@ -1447,7 +1460,7 @@ const MatchAnalyzer: React.FC = () => {
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
               <button
-                onClick={handleAnalyze}
+                onClick={() => handleAnalyze()}
                 disabled={loading || selectedMonths.length === 0}
                 className='w-full sm:w-auto bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed h-10'
               >
@@ -1614,7 +1627,29 @@ const MatchAnalyzer: React.FC = () => {
                   type='checkbox'
                   id='groupByMatched'
                   checked={groupByMatched}
-                  onChange={e => setGroupByMatched(e.target.checked)}
+                  onChange={e => {
+                    const newValue = e.target.checked;
+                    setGroupByMatched(newValue);
+                    // If enabling groupByMatched and we have months selected, automatically trigger analysis
+                    // Pass the new value directly to avoid React state update timing issues
+                    if (newValue && selectedMonths.length > 0 && selectedField === 'soap') {
+                      // Clear existing results to avoid showing wrong data
+                      setResults(null);
+                      setGroupedResults(null);
+                      // Trigger analysis automatically with the new value
+                      setTimeout(() => {
+                        handleAnalyze(newValue);
+                      }, 0);
+                    } else if (!newValue) {
+                      // When unchecking, clear grouped results and trigger regular analysis
+                      setGroupedResults(null);
+                      if (selectedMonths.length > 0 && selectedField === 'soap') {
+                        setTimeout(() => {
+                          handleAnalyze(false);
+                        }, 0);
+                      }
+                    }
+                  }}
                   className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
                   aria-label='Group results by matched string (brand + scent) instead of original string'
                 />
@@ -1685,7 +1720,7 @@ const MatchAnalyzer: React.FC = () => {
                     Month{selectedMonths.length > 1 ? 's' : ''}:{' '}
                     <span className='font-medium'>{selectedMonths.length > 1 ? 'Multiple' : selectedMonths[0] || ''}</span>
                   </span>
-                  {groupedResults ? (
+                  {groupByMatched && selectedField === 'soap' && groupedResults ? (
                     <>
                       <span className='whitespace-nowrap'>
                         Total Groups:{' '}
@@ -1799,22 +1834,28 @@ const MatchAnalyzer: React.FC = () => {
           <div className='p-6'>
             {filteredResults.length > 0 ? (
               // Use GroupedDataTable for grouped view, MismatchAnalyzerDataTable for normal view
-              groupByMatched && selectedField === 'soap' ? (
-                <GroupedDataTable
-                  key={`grouped-${displayMode}-${filteredResults.length}`}
-                  data={filteredResults as GroupedDataItem[]}
-                  field={selectedField}
-                  onCommentClick={handleCommentClick}
-                  commentLoading={commentLoading}
-                  selectedItems={selectedItems}
-                  onItemSelection={handleItemSelection}
-                  isItemConfirmed={isItemConfirmed}
-                  onVisibleRowsChange={handleVisibleRowsChange}
-                  onBrushSplitClick={handleBrushSplitClick}
-                  activeRowIndex={activeRowIndex}
-                  keyboardNavigationEnabled={keyboardNavigationEnabled}
-                />
-              ) : (
+              // Only use GroupedDataTable if we actually have grouped data (groupedResults?.groups exists)
+              (() => {
+                // Check if we have actual grouped data before using GroupedDataTable
+                const hasGroupedData = groupedResults?.groups && groupedResults.groups.length > 0;
+                const shouldUseGrouped = groupByMatched && selectedField === 'soap' && hasGroupedData;
+                
+                return shouldUseGrouped ? (
+                  <GroupedDataTable
+                    key={`grouped-${displayMode}-${filteredResults.length}`}
+                    data={filteredResults as GroupedDataItem[]}
+                    field={selectedField}
+                    onCommentClick={handleCommentClick}
+                    commentLoading={commentLoading}
+                    selectedItems={selectedItems}
+                    onItemSelection={handleItemSelection}
+                    isItemConfirmed={isItemConfirmed}
+                    onVisibleRowsChange={handleVisibleRowsChange}
+                    onBrushSplitClick={handleBrushSplitClick}
+                    activeRowIndex={activeRowIndex}
+                    keyboardNavigationEnabled={keyboardNavigationEnabled}
+                  />
+                ) : (
                 <MismatchAnalyzerDataTable
                   key={`match-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
                   data={filteredResults}
@@ -1830,7 +1871,8 @@ const MatchAnalyzer: React.FC = () => {
                   activeRowIndex={activeRowIndex}
                   keyboardNavigationEnabled={keyboardNavigationEnabled}
                 />
-              )
+                );
+              })()
             ) : (
               <div className='text-center py-8'>
                 <div className='text-green-600 text-4xl mb-2'>✅</div>
