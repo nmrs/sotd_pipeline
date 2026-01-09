@@ -511,7 +511,7 @@ DE:
         - p(?:ersonn*a)?.*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - pseventy-four
         - p74
-    GEM Platinum Diamond Glide:
+    GEM Platinum Diamond Glide (DE):
       patterns:
         - person+a.*gem
         - gem.*diamond.*glide

@@ -214,7 +214,7 @@ artisan_handles:
   Grizzly Bay:
     Unspecified:
       patterns:
-        - grizzly.*bay
+        - grizzly.*bay(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Heritage Collection:
     Unspecified:
       patterns:
@@ -449,6 +449,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - trotter.*(?:handcraft)*
+  True Til Death Shaveware:
+    Unspecified:
+      patterns:
+        - true.*til.*death
   Turn-N-Shave:
     Unspecified:
       patterns:
@@ -775,7 +779,6 @@ manufacturer_handles:
       patterns:
         - Razorr*ock
         - (^|\s)rr\s
-        - plissoft
         - razor rock
   Rex Supply Co.:
     Unspecified:

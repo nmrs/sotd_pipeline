@@ -1317,37 +1317,6 @@ known_brushes:
       knot_size_mm: 21
       patterns:
         - vie.*long.*spanish.*barber.*pro
-  Wald:
-    A1:
-      fiber: Synthetic
-      knot_size_mm: 29
-      patterns:
-        - wald.*a1
-    Calyx:
-      fiber: Synthetic
-      knot_size_mm: 27
-      patterns:
-        - (?:wald.*)?calyx
-    J1:
-      fiber: Badger
-      knot_size_mm: 27
-      patterns:
-        - wald.*j1
-    J2:
-      fiber: Badger
-      knot_size_mm: 27
-      patterns:
-        - wald.*j2
-    J3:
-      fiber: Badger
-      knot_size_mm: 27
-      patterns:
-        - wald.*j3
-    J4:
-      fiber: Badger
-      knot_size_mm: 27
-      patterns:
-        - wald.*j4
   Walfront:
     Travel Brush:
       fiber: Synthetic
@@ -1408,6 +1377,12 @@ known_brushes:
       knot_size_mm: 27
       patterns:
         - 505NK
+    505B SE:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 51
+      patterns:
+        - zen.*505c?b
     506 MB:
       fiber: Badger
       knot_size_mm: 27
@@ -1421,8 +1396,10 @@ known_brushes:
     506U N:
       fiber: Horse
       knot_size_mm: 27
+      knot_loft_mm: 54
       patterns:
         - 506u.*n\b
+        - zen.*506.*horse
     506N XS:
       fiber: Horse
       knot_size_mm: 27
@@ -1449,6 +1426,12 @@ known_brushes:
         - 507N
         - 570N
         - zen.*ub1
+    509B XSE:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 57
+      patterns:
+        - zen.*509b
     80N XSE:
       fiber: Boar
       knot_size_mm: 27
@@ -1569,6 +1552,10 @@ known_brushes:
       knot_loft_mm: 57
       patterns:
         - zen.*ub3
+    Z Feidu:
+      fiber: Mixed Boar/Horse
+      patterns:
+        - z.*feidu
 
 known_knot_based_brushes:
   AP Shave Co:
@@ -2137,6 +2124,43 @@ known_knot_based_brushes:
       patterns:
         - turn.{1,5}shave.*tuxedo
         - t[&n]s.*tuxedo
+  Wald:
+    A1:
+      fiber: Synthetic
+      knot_size_mm: 29
+      patterns:
+        - wald.*a1
+    Calyx:
+      fiber: Synthetic
+      knot_size_mm: 27
+      patterns:
+        - (?:wald.*)?calyx
+    J1:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+        - wald.*j1
+    J2:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+        - wald.*j2
+    J3:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+        - wald.*j3
+    J4:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+        - wald.*j4
+    S1:
+      fiber: Badger
+      knot_size_mm: 27
+      knot_loft_mm: 55.5
+      patterns:
+        - wald.*s1
   Yaqi:
     Timberwolf:
       fiber: Synthetic
@@ -2198,6 +2222,12 @@ known_knot_based_brushes:
       patterns:
         - zenith.*\bb15\b
         - b506.*olive
+    B16:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 57
+      patterns:
+        - zenith.*\bb16\b
     B17:
       fiber: Boar
       knot_size_mm: 24
@@ -2267,7 +2297,7 @@ known_knot_based_brushes:
       knot_size_mm: 31
       knot_loft_mm: 57
       patterns:
-        - ^(?!.*moar).*zenith.*\bb35\b
+        - ^(?!.*moar).*zenith.*\bb-?35\b
         - 508a
     B37:
       fiber: Boar
@@ -2282,6 +2312,12 @@ known_knot_based_brushes:
       knot_loft_mm: 57
       patterns:
         - zenith.*\bb44\b
+    M23:
+      fiber: Badger
+      knot_size_mm: 27.5
+      knot_loft_mm: 51
+      patterns:
+        - zenith.*\bm23\b
 
 other_brushes:
   Acqua di Parma:
@@ -2569,7 +2605,7 @@ other_brushes:
   Frank Shaving:
     default: Badger
     patterns:
-      - frank.*(shav)?
+      - \bfrank\b.*(shav)?
       - \bfs\b
   Freddy Beuty:
     default: Boar

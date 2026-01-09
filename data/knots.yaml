@@ -345,7 +345,7 @@ known_knots:
         - \bb7\b
     B8:
       patterns:
-        - \bb8\b
+        - ^(?!.*zen).*\bb8\b
     B9A:
       patterns:
         - \bb0?9a\+?\b
@@ -372,7 +372,7 @@ known_knots:
         - ^(?!.*zen).*\bb15\b
     B16:
       patterns:
-        - \bb16\b
+        - ^(?!.*zen).*\bb16\b
     B17:
       patterns:
         - \bb17\b

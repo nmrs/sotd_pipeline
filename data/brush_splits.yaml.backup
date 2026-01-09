@@ -129,6 +129,17 @@ Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger:
   system_knot: null
   system_confidence: high
   system_reasoning: Single component brush
+Heritage Shave Collection EverReady Badger:
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - n0nbwpu
 Made Rite - 500 PB (Oumo - 26mm SHD):
   handle: Made Rite - 500 PB
   knot: Oumo - 26mm SHD
@@ -237,6 +248,17 @@ Unbranded - Marble w/ Maggard G5C Synthetic:
     - nqm3gtb
     - nqskvd8
     - nr4zqp9
+Unbranded Vintage Marble w/ Maggard SHD badger:
+  handle: Unbranded Vintage Marble
+  knot: Maggard SHD badger
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-02.json
+    comment_ids:
+    - madxop1
 Zenith 510SE 28mm x 46mm Bleached Boar knot set in Stirling green resin handle (aka Less Boar Stirling Edition):
   handle: null
   knot: null
