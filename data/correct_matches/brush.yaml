@@ -287,6 +287,7 @@ Art of Shaving:
   - my son's abandoned art of shaving badger
   Pure Badger:
   - art of shaving pure badger
+  - the art of shaving pure badger travel brush
   Synthetic:
   - art of shaving - travel size synthetic
   - art of shaving pos starter kit brush
@@ -468,6 +469,7 @@ CaYuen:
   - cayuen workshop 24mm hd high mountain white
   - cayuen workshop uhd 24mm high mountain white
   - the ca yuen workshop (etsy) blue meany
+  - the cayuen workshop diablo 26mm 2 band bulb badger
   Synthetic:
   - cayuen abalone w/ 28mm timberwolf synthetic
   - cayuen copper ore w/ 30mm timberwolf synthetic
@@ -487,7 +489,6 @@ Chisel & Hound:
   - c&h x briar brushworks
   - chisel & hound - abominable chalice
   - chisel & hound - cherry
-  - chisel & hound - diablo w/ knight knot
   - chisel & hound commodore 26mm badger knot
   - chisel & hound hive 28mm hmw fan badger
   - chisel & hound tropical hive 26mm hmw badger
@@ -548,6 +549,8 @@ Chisel & Hound:
   - chisel & hound quartermoon
   - chisel & hound root beer float 26mm black cashmere synth
   - chisel and hound peppermint flare w/ 26mm cashmere
+  v1:
+  - tdr old cahaba 26mm v1 fanchurian
   v10:
   - c&h magma (2664rc) 26mm v10 fanchurian
   - chisel & hound bermuda fanchurian v10 badger
@@ -614,6 +617,8 @@ Chisel & Hound:
   - chisel and hound "drake" w/ 26mm v19
   - chisel and hound hom dammusi 26mm v19
   - chisel and hound x hom dammusi 26mm v19 fanchurian
+  v2:
+  - tdr sotw 26mm v2 fanchurian
   v20:
   - chisel & hound "sawdusted" w/ 26mm v20
   - chisel & hound - 4355rc scholar - 26mm v20 fanchurian
@@ -1275,6 +1280,9 @@ Freddy Beuty:
   Boar:
   - freddy - beauty green boar bristle shave brush
   - freddy - beauty green boar bristle shave brush (walmart)
+Frugal Shave:
+  Synthetic:
+  - frugal shave barrel 30mm
 Gentleman's Groom Room:
   Seillean Badger:
   - groom room seillean badger
@@ -1359,6 +1367,7 @@ Haryali:
 Hendrix Classics & Co.:
   Dickel:
   - the dickel from hendrix classics
+  - the dickel, hc&c
   Synthetic:
   - hc&c w/ xtc knot
 Heritage Collection:
@@ -1425,6 +1434,9 @@ House of Mammoth/Chisel & Hound:
 House of Mammoth/Grizzly Bay:
   Shire 2:
   - grizzly bay shire 26mm v18 fanchurian
+House of Mammoth/Summer Break Soaps:
+  Alive:
+  - sbs x mammoth alive 26mm shd
 Imperial:
   Travel Shave Brush:
   - imperial travel shave brush 20mm
@@ -1475,6 +1487,9 @@ Long Shaving:
   Reserve:
   - long shaving storm w/ reserve iii
   - long storm w/ reserve iii
+Lowborn Supply:
+  Synthetic:
+  - lowborn supply montrose beach 26mm synthentic knot
 Lutin Brushworks:
   Badger:
   - lutin brushworks - williams lightning - 25mm fan (finest badger)
@@ -1488,6 +1503,7 @@ Made Rite:
   - made-rite no. 82 pure badger
   - made-rite no. 82 vintage badger
   - made-rite no. 82 vintage pure badger
+  - vintage made-rite no.82 pure badger
   Boar:
   - made-rite 200t vintage boar
   Mixed Badger/Boar:
@@ -1817,6 +1833,7 @@ Omega:
   - omega hi-brush 46206 synth
   - omega hi-brush, 146206, 25mm synth
   - 'omega hi-brush: 146206, 25mm synth'
+  - tbd (omega hi-brush 146206)
   '50014':
   - omega 50014 travel boar
   - omega 50014 travel boar shaving brush, 21mm
@@ -2016,6 +2033,7 @@ PAA:
   Starcraft:
   - paa the starcraft
   - paa the starcraft 24mm roswell hybrid synth brush
+  - synthetic paa starcraft
   Synthetic:
   - paa - star-craft 24mm synth
   - paa aerolite amber synthetic brush
@@ -2078,6 +2096,9 @@ Pearl:
   Synthetic:
   - pearl
   - pearl synthetic brush
+Peerless:
+  Boar:
+  - vintage peerless boar - black/green handle
 Peneuf:
   Badger:
   - peneuf - blue falcon badger brush
@@ -2124,6 +2145,9 @@ Prometheus Handcrafts:
   - prometheus handcrafts chubby tux synthetic
   - prometheus handcrafts dyed maple 26mm tuxedo
   - prometheus handcrafts w/ 26mm motherlode
+QED:
+  Badger:
+  - qed select- manchurian silvertip badger
 QSHAVE:
   Badger:
   - qshave
@@ -2257,26 +2281,45 @@ Riva:
 Rockwell:
   Synthetic:
   - rockwell razors - synthetic travel brush
-Rocky Mountain Barber:
-  Badger:
-  - rocky mountain
-  - rocky mountain badger
-  - rocky mountain badger brush
-  - rocky mountain, badger
 Rubab Men:
   Synthetic:
   - rubab men bomber
 Rubberset:
+  3IONT:
+  - rubberset - "plastiset" 3iont nylon
   '400':
+  - rubberset 400-unnumbered w/ original knot
+  400-3:
+  - rubberset 400-3 boar
+  - rubberset 400-3 w/ original knot
+  400-4:
   - rubberset 400-4 w/ original knot
   - rubberset 400-4 with original knot
-  - rubberset 400-unnumbered w/ original knot
+  43-R:
+  - rubberset 43-r
+  Boar:
+  - rubberset 49-5 - original boar
+  - rubberset 49.5 - original boar
+  - rubberset 49.5 - original boar 24mm
+  Travel Brush:
+  - rubberset - travel brush
 Rudy Vey:
   Badger:
   - rudy vey amboyna burl/24mm white manchurian knot
 Runeman Nordic Shave Design:
   Badger:
   - runeman nordic shave design
+Rx:
+  Synthetic:
+  - rx shaving synthetic
+Saponificio Varesino:
+  Badger:
+  - saponificio varesino - faux ivory - 28mm bulb (manchurian badger)
+  - saponificio varesino - faux ivory with natural pewter manchurian white badger
+  - saponificio varesino - louro faya - 26mm bulb (manchurian badger)
+  - 'saponificio varesino - paragon arlecchino #1/28 le - ash, maple, bubinga, wengé,
+    paduk, cherry, amaranth, beech, zebrano & american walnut - 30mm bulb (manchurian
+    badger)'
 Sawdust Creation Studios:
   Badger:
   - sawdust creation studios 26mm high mountain white
@@ -2300,9 +2343,12 @@ Semogue:
   '1250':
   - semogue - 1250
   - semogue 1250
+  - semogue 1250 (22x55mm boar)
+  - semogue 1250 (22x55mm boar)~~ yaqi rainbow
   - semogue 1250 22mm boar
   '1305':
   - boar semogue 1305
+  - semogue - 1305 boar
   - semogue 1305
   - semogue 1305 (boar)
   '1460':
@@ -2314,10 +2360,13 @@ Semogue:
   '1800':
   - semogue - 1800 boar
   - semogue 1800
+  - semogue 1800 boar
   '2000':
   - semogue - 2000
   - semogue 2000
   - semogue 2000 (boar)
+  '2015':
+  - semogue 2015 hd (22x55mm badger)
   '2020':
   - semogue 2020 best badger
   '610':
@@ -2328,6 +2377,7 @@ Semogue:
   - semogue 610 red edition
   '620':
   - semogue 620
+  - semogue 620 (21x50mm boar)
   - semogue 620 22mm boar
   - semogue 620 boar
   - semogue 620 boar brush
@@ -2346,6 +2396,7 @@ Semogue:
   - semogue 830 premium boar bristle
   Boar:
   - semogue - barbear classico cerda boar 22mm
+  - semogue boar brush
   - semogue spanish shavers le boar 24mm
   c3:
   - semogue c3 pure black horse hair
@@ -2357,14 +2408,31 @@ Semogue:
   Galahad C3:
   - semogue - galahad c3 premium boar (ib) bristle
   - semogue c3 galahad
+  - semogue galahad - c3
   - semogue galahad c3 premium boar
+  Mixed Badger/Boar:
+  - semogue butterscotch mistura $mistura
+  - semogue mistura
+  - semogue mistura $mistura
+  Pegasus C7 Mistura:
+  - semogue - pegasus c7 finest mistura shaving brush, tortoiseshell handle, 26mm
+    $mistura
+  - semogue pegasus c7 mistura $mistura
+  - semogue pegasus finest mistura badger/boar
+  - semogue pegasus mistura
+  - semogue pegasus mistura 26mm
+  - semogue pegasus mitsura
   Pharos C3 Horse:
   - semogue - pharos c3 horse
   - semogue - pharos c3 pure black horse
   - semogue - pharos-c3, black horse hair 21mm, ocean green beechwood
+  - semogue - pharos-c3, black horse hair 21mm, ocean green beechwood $horsesass
   - semogue pharos c3 horse
   - semogue pharos c3 horse hair
   - semogue pharos c3 pure black horse hair
+  - semogue pharos-c3 $horsesass
+  - semogue pharos-c3 ocean green - horse
+  - semogue pharos-c3 ocean green - horse $horsesass
   r/wetshaving Brushbutt Boar:
   - r/wetshaving exclusive brushbutt boar
   - semogue 2017 ws exclusive
@@ -2376,7 +2444,6 @@ Semogue:
   - semogue - owner's club - butterscotch resin handle - 24mm boar
   - semogue - owner's club 24mm boar
   - semogue - owner's club butterscotch handle - 24mm boar
-  - semogue - owner's club c5 24mm badger/boar
   - semogue - owner's club c5 24mm boar
   - semogue - owner's club taj
   - semogue - owners club - butterscotch handle - 24mm boar
@@ -2389,18 +2456,30 @@ Semogue:
   - semogue - soc 24mm c2 boar
   - semogue - soc boar
   - semogue owner club cherry wood
+  - semogue owner's club
   - semogue owner's club "taj" 24mm boar
   - semogue owner's club (cherry wood and boar)
+  - semogue owner's club - boar
+  - semogue owner's club 24mm c5 boar
   - semogue owner's club boar
   - semogue owner's club boar, cherry wood handle
+  - semogue owner's club c5 boar
   - semogue owners club
+  - semogue owners club - boar
+  - semogue owners club - cherry wood boar - 24mm
   - semogue owners club - cherry wood boar 24mm
   - semogue owners club boar
+  - semogue owners club boar 24mm
+  - semogue owners club boar shaving brush ivory handle, 24mm
   - semogue owners club board
+  - semogue owners club c5 boar
+  - semogue pharos-c3 ocean green
   - semogue soc
+  - semogue soc 24mm boar
   - semogue soc boar
   - semogue soc boar 24 mm
   - semogue soc butterscotch
+  - semogue soc c5 boar
   - semogue soc-c5 (taj) - 24mm premium boar
   - semogue soc-c5csp taj 1056 (taj) - 24mm special grade 90% tops boar
   - semogue taj
@@ -2414,20 +2493,32 @@ Semogue:
   - semogue - owner's club - taj handle - 24mm mistura
   - semogue - owner's club - taj handle - 24mm mistura (badger/boar mix)
   - semogue - owner's club - taj handle - 24mm mistura (badger/boar)
+  - semogue - owner's club c5 24mm badger/boar
   - semogue - soc 24mm c2 mistura
+  - semogue oc butterscotch mistura
   - semogue owner's club - 24mm mistura - taj handle
+  - semogue owner's club c5 mistura
+  - semogue owner's club c5 mistura $mistura
+  - semogue owner's club cherry wood mixed badger/boar 24 mm $mistura
   - semogue owner's club mistura badger & boar ash wood
   - semogue owner's club mistura badger & boar ash wood $wood $mistura
   - semogue owners club c5 mistura
   - semogue owners club mistura boar
   - semogue owners club mistura boar mix
+  - semogue soc c5 mistura
+  - semogue soc c5 mistura - taj
+  - semogue soc c5 mistura taj
   - semogue soc mistura
+  - semogue soc mistura (orange handle)
   - semogue soc-c5mf cer 1063 (cherry) - 24mm 50% special grade 90% tops boar / 50%
     two band badger
   Torga C5:
   - semogue - torga c5 - boar
   - semogue - torga premium boar
   - semogue c5 torga
+  - semogue c5 torga premium boar
+  - semogue torga
+  - semogue torga boar
   - semogue torga c-5 onyx
   - semogue torga c5
   - semogue torga c5 boar
@@ -2435,14 +2526,28 @@ Semogue:
   - semogue torga c5 onyx knot
   - semogue torga c5 premium
   - semogue torga c5 premium boar
+  Torga C5 Mistura:
+  - semogue torga mitsura
   Torga C5 Synth:
   - semogue torga c5 onyx synthetic
 Shave Boutique:
   Ivory Satin Fiber:
   - shave boutique ivory satin fibre brush
+Shave Envy:
+  Synthetic:
+  - shave envy - copper synthetic dfs edition
 Shave Factory:
   Boar:
   - shaving factory xs
+Shave Forge:
+  Horse:
+  - shave forge horsehair 20mm $horsesass
+SHAVEDANDY:
+  Badger:
+  - shave⭐dandy bocote alto (23x53mm silvertip badger)
+  Synthetic:
+  - shave⭐dandy cs baritone (26x55mm synth)
+  - shave⭐dandy st vincent (26x55mm synth)
 Shavemac:
   Badger:
   - shavemac 23mm 2-band silvertip
@@ -2455,15 +2560,18 @@ Shore Shave:
   - shore shave 26mm motherload
   - shore shave 26mm motherlode
   - shore shave motherlode
+  - shore shave pestle 24mm motherlode synthentic knot
 Simpson:
   '57':
   - simpsons 57
-  Badger:
-  - simpson special pure badger best badger hair badger
   Berkeley 46:
   - simpson berkeley 46 best
   - simpson berkeley 46pb
   - simpsons berkeley 46
+  Chubby 1:
+  - simpsons - chubby 1 best badger
+  - simpsons chubby 1 best
+  - simpsons chubby 1 best badger
   Chubby 2:
   - simpson - 'chubby 2' silvertip
   - simpson ch2 super badger
@@ -2471,10 +2579,13 @@ Simpson:
   - simpson chubby 2 best badger
   - simpson chubby 2 italian marble
   - simpson chubby 2 manchurian
+  - simpson chubby 2 super badger
+  - simpson's chubby 2 best badger
   - simpson's chubby two best badger best badger badger
   - simpson's chubby two ebony manchurian badger
   - simpsons chbby 2 italian marble
   - simpsons chubby 2 jade 27mm hmw
+  - simpsons chubby 2 manchurian badger
   Chubby 2 Synthetic:
   - simpson chubby 2 synthetic
   - simpson chubby 2 synthetic fibre shaving brush, 27mm
@@ -2482,15 +2593,22 @@ Simpson:
   - simpsons chubby 2 synthetic
   Chubby 3:
   - simpson butterscotch ch3 manchurian badger
+  - simpson butterscotch ch3 manchurian badger manchurian badger
+  - simpson candy stripe chubby 3 manchurian
+  - simpson chubby 3 best
+  Classic 1:
+  - simpson classic 1 sovereign fibre 21 mm
   Classic 1 Synthetic:
   - simpson 1 classic synthetic
   - 'simpson classic # 1 synthetic bristle'
+  - 'simpson classic # 1 synthetic bristle travel set'
   Colonel X2L:
   - simpson - 'colonel' best
   Commodore X1:
   - simpsons commodore x1 best badger
   Commodore X2:
   - simpson commodore x2
+  - simpson commodore x2 best badger
   - simpsons commodore x2 best badger
   Duke 2:
   - simpson duke 2 "classic" best badger
@@ -2501,12 +2619,20 @@ Simpson:
   - simpsons emperor 1 super badger
   Farringdon:
   - simpson farringdon
+  M6 TSN LE (2014):
+  - 'simpson m6 manchurian tsn le #146/200 2014'
   M7:
   - simpson - 'm7' manchurian
   Special S1:
   - simpson s1 pure badger
+  - simpson s1 special pure badger
+  - simpson special 1 - pure badger
+  - simpson special pure badger
+  - simpson special pure badger best badger hair badger
+  - simpsons special pure badger
   Trafalgar (Unspecified):
   - simpson trafalgar
+  - simpson trafalgar 2 synthetic
   Trafalgar T1:
   - simpson trafalgar t1
   - simpsons trafalgar t1 synthetic
@@ -2517,14 +2643,19 @@ Simpson:
   - simpson - trafalgar t2 synthetic
   - simpson simpson trafalgar fibre synthetic t2 (24 mm)
   - simpson t2
+  - simpson t2 cyclone
+  - simpson t2 trafalgar
   - simpson trafalgar t2
   - simpson trafalgar t2 24mm
   - simpson trafalgar t2 24mm synth
   - simpson trafalgar t2 24mm synthetic
   - simpson trafalgar t2 synthetic
+  - simpson trafalger t2 faux ivory handle w/ 24mm x 44mm sovereign synthetic knot
+  - simpsons - trafalgar t2 24mm synthetic
   - simpsons trafalgar t2
   - simpsons trafalgar t2 - 24mm synthetic
   - simpsons trafalgar t2 24mm synthetic
+  - simpsons trafalgar t2 royal pearl - synthetic
   Trafalgar T3:
   - alexander simpson trafalger t3 black
   - simpson - trafalgar (t3) - synthetic
@@ -2539,6 +2670,7 @@ Simpson:
   - simpson - 'wee scot' best
   - simpson - wee scott
   - simpson wee scot
+  - simpson wee scot badger
   - simpsons wee scot
   - simpsons wee scot 13mm best badger
 Sir Hare:
@@ -2549,11 +2681,15 @@ SmilezforMilez:
   - smilez for milez grape handle badger
   - smilez for milez grape handle manchurian
   - smilez for milez grape manchurian
+  - smilez for milez grape manchurian badger
   - smilezformilez - laser
 Some Making Required:
   Badger:
   - 'some making required #112 26mm shd badger'
   - some making required black & gold
+Spiffo:
+  Badger:
+  - spiffo - lemondrop
 Spokar:
   Badger:
   - spokar badger
@@ -2658,9 +2794,12 @@ Stirling:
   - stirling soap company - li'l brudder, synthetic 22mm
   - stirling synthetic li'l brudder
   Synthetic:
+  - stirling - synthetic 24mm
+  - stirling 24mm
   - stirling 24mm tuxedo
   - stirling 26mm synthetic
   - stirling pro 30mm synthetic
+  - stirling pro handle synthetic
   - stirling pro synthetic
   - stirling soap co. - 26mm synthetic
   - stirling synthetic
@@ -2671,15 +2810,30 @@ Stirling:
   - stirling tuxedo
 Summer Break Soaps:
   Badger:
-  - summer break 28mm knight knot
+  - summer break
+  - summer break soaps
   - summer break soaps "archie" with 26mm big cypress silvertip badger bulb
   - summer break soaps "tommy" 28mm v8 badger badger
+  - summer break soaps - nemaha 28mm sdh
+  - summer break soaps - nemaha custom resin handle
+  - summer break soaps blue 26mm badger
+  - summer break soaps blue 26mm shd badger
   - summer break soaps elkhorn
+  - summer break soaps naper shd badger
   - summer break soaps otoe 26mm shd badger
+  - summer break soaps otoe badger
+  - summer break soaps red
+  Boar:
+  - summer break soaps 28mm boar
+  - summer break soaps elk horn 28mm boar
   Mixed Badger/Boar:
   - summer break soaps cowles boar/badger
+  - summer break soaps red boar/badger mix
   Synthetic:
+  - summer break soaps "burton" / 26mm g5 fan
+  - summer break soaps "burton" / 26mm g5 fan synthetic
   - summer break soaps kimball synthetic
+  - summer break soaps red synthetic
 Supply:
   Silvertip Synthetic:
   - supply silvertip synthetic gold
@@ -2689,10 +2843,14 @@ Surrey:
   Boar:
   - blue surrey boar
   - blue surrey boar brush
+  - surrey - 22mm boar
   - surrey blue handle boar
   - surrey blue handle vintage boar
   - surrey boar
   - surrey boar (nos, red handle)
+TanZ:
+  Badger:
+  - turning by tanz - badger
 Tatara:
   Masamune Boar:
   - tatara semogue boar
@@ -2703,14 +2861,22 @@ Taylor of Old Bond Street:
   - taylor of old bond street pure badger
   - taylor of old bond street super badger
   - taylor of old bond street super badger p2236
+  - taylor of old bond street traditional super badger shaving brush, 13cm
   - tobs pure badger 19mm
   - tobs starter best badger brush
+TechichiShave:
+  Synthetic:
+  - techichi shave hive w/26mm synthetic tuxedo knot
+Tedalus:
+  Helios Synthetic:
+  - tedalus - helios synthetic
 Teton Shaves:
   Badger:
   - teton shaves - petoskey stone
   Synthetic:
   - teton shaves - freestone - 26mm synthetic silvertip
   - teton shaves darth maul w/ 28mm synthetic badger
+  - teton shaves w/ 26mm motherlode
 The Golden Nib:
   Badger:
   - catwood handcrafts golden nib master badger silvertip 18mm
@@ -2721,6 +2887,9 @@ The Razor Company:
   Synthetic:
   - razorock tricolor
   - the razor company blue and white
+  - trc - ice blue 24mm
+  - trc - ice blue synthetic 24mm
+  - trc - synthetic 24mm
   - trc cream soda 28mm
 Thäter:
   4125/4:
@@ -2736,12 +2905,19 @@ Tony Forsyth:
   - tf custom rhodium 27mm
 Trotter:
   T1 Manchurian Badger:
-  - trotter handcrafts lavender sno
+  - trotter 26mm t1 on loan from u/brokenjaw622
+  - trotter handcrafts daliesque 26mm manchurian t1 badger knot
+  - trotter handcrafts gothic 26mm manchurian t1 badger knot
   - trotter handcrafts lotus portal 26mm t1 manchurian badger
   - trotter handcrafts mahogany brush with 26mm t1 badger knot
   - trotter handcrafts mahogany handle with 26mm t1 badger knot
   - trotter handcrafts nocturnal classic 26mm t1 manchurian badger
   - trotter handcrafts souls 26mm manchurian t1 badger knot
+  - trotter handcrafts t1 manchurian
+  - trotter portal 26mm t1 on loan from u/brokenjaw622
+Trotter Handcrafts:
+  Badger:
+  - trotter handcrafts lavender sno
 Truefitt & Hill:
   Wellington:
   - truefitt & hill wellington 24mm silvertip
@@ -2758,12 +2934,21 @@ Turn-N-Shave:
   Low Density Badger (L*):
   - turn-n-shave coke glass sorby 28mm l3
   Medium Density Badger (M*):
+  - tns galaxy m7 hybrid
   - 'tns inception m1 galaxy #8 28mm'
+  - tns orchard inception m3 fan
+  - turn n shave - m8 - lg prize
+  - turn n shave - m8 lg2024 prize
+  - turn n shave m3
+  - turn n shave m8 - 2024 lg prize
   - turn n shave m8 28mm
   - turn n shave m8 fan
   - turn n shave skarbide breeze 28mm m8
   - turn n shave skarbide breeze 28mm m8 fan
   - turn n shave skarbide breeze m8 28mm fan
+  - turn-n-shave endure carverine m8
+  Mixed Badger/Boar:
+  - turn n shave - ancient bog oak handle, badger/boar knot $mistura
   Synthetic:
   - 26mm timberwolf in turn-n-shave handle
   Tip (Badger):
@@ -2773,32 +2958,49 @@ Turn-N-Shave:
   - turnnshave custom | 26mm fantip v5
   Tuxedo:
   - turn n shave custom w/ a tuxedo synth
+Tweezerman:
+  Shaving Brush:
+  - tweezerman 20mm badger
 Van der Hagen:
   Boar:
   - van der hagen - boar brush
+  - van der hagen - boar, 24mm
+  - van der hagen boar brish
+  - van der hagen boar brush
   - vdh boar brush
 Varlet:
   Badger:
+  - the varlet gaslamp 29mm hd
   - the varlet ranger sagarmatha ivory 29mm xd low-light
   - varlet orion 27xd
+  - varlet orion 27xd alpine knot
+  - varlet ranger two band hd badger
 Vie-Long:
   Horse:
   - vie long 24mm horse hair
   - vie long american style horse
   - vie long black horse hair
   - vie long cachurro
+  - 'vie-long #12705b'
+  - 'vie-long #14033'
   - vie-long - butterscotch handle - 26mm horsehair
   - vie-long - butterscotch resin handle 26mm brown horsehair
   - vie-long 13710c
   - vie-long alfil
+  - vie-long alfil $horsesass
   - vie-long black horse hair
+  - vie-long spain butterscotch resin handle 26mm horsehair
   - vielong 24mm horse hair
   - vielong black horse hair
   - vielong black horse hair 24mm
+  - vielong horse (61mm) $horsesass
+  - vielong horse (61mm) $horsesass $rubberstamp
+  - vielong vintage alter 24mm horse $horsesass
   Spanish Barber Pro:
   - vie-long spanish barber professional
 Viking Revolution:
   Badger:
+  - viking revolution - badger
   - viking revolution badger (one of the things i need to upgrade
 Vikings Blade:
   Synthetic:
@@ -2809,6 +3011,7 @@ Vintage Blades:
 Voigt & Cop:
   Badger:
   - mammoth x voigt & cop smash 28mm vc01 super badger
+  - v&c x mammoth smash 28mm vc01
   - voigt and cop vc03
 Vulfix:
   Badger:
@@ -2870,12 +3073,16 @@ Whipped Dog:
 Wild West Brushworks:
   Badger:
   - wild west brush works nebula badger 26mm
+  - wild west brushworks
+  - wild west brushworks "creamsicle" 26mm sweet spot
   - wild west brushworks - copper king - 26mm badger bulb
+  - wild west brushworks deep pearl 26mm sweet spot badger
   - wild west brushworks milky way with fanchurian v8
   - wild west brushworks stealth blue with fanchurian v8
   - wildwest blemish dewey silvertip badger
+  - wildwest brushworks
+  - wildwest brushworks snowdrift
   Synthetic:
-  - wild west brushworks
   - wild west brushworks "bob" w/ 24mm cashmere
   - wild west brushworks "bob"" w/ 24mm cashmere
   - wild west brushworks "dulce" handle with 26mm synthetic horse hair knot
@@ -2883,12 +3090,12 @@ Wild West Brushworks:
   - wild west brushworks - copper shadow with timberwolf knot
   - wild west brushworks - shock - 26mm timberwolf
   - wild west brushworks amethyst water tuxedo
+  - wild west brushworks blue & black 26mm boss synthentic knot
   - wild west brushworks blue space 26mm cashmere
   - wild west brushworks monsoon 24mm timberwolf
   - wild west brushworks synthetic
   - wild west brushworks w/ 24mm cashmere
-  - wildwest brushworks
-  - wildwest brushworks snowdrift
+  - wild west brushworks with black synth knot
   - wwb timberwolf
 Wolf Whiskers:
   Badger:

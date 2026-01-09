@@ -282,6 +282,12 @@ brush:
     - file: 2025-06.json
       id: myg6dwu
       source: user
+  palm 190mm:
+    added_date: '2026-01-08'
+    comment_ids:
+    - file: 2025-02.json
+      id: mar8lry
+      source: user
   plastic spatula:
     added_date: '2025-07-28'
     comment_ids:

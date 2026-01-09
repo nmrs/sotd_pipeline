@@ -198,6 +198,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - frank.*sha
+  Frugal Shave:
+    Unspecified:
+      patterns:
+        - frugal.*shave
   Fuller:
     Unspecified:
       patterns:
@@ -338,6 +342,18 @@ artisan_handles:
     "400":
       patterns:
         - rubberset.*400
+    400-1:
+      patterns:
+        - rubberset.*400-1
+    400-2:
+      patterns:
+        - rubberset.*400-2
+    400-3:
+      patterns:
+        - rubberset.*400-3
+    400-4:
+      patterns:
+        - rubberset.*400-4
     Unspecified:
       patterns:
         - rubberset
@@ -386,6 +402,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - smile.*mile
+  Spot Prints 3D:
+    Unspecified:
+      patterns:
+        - spot ?prints ?3d(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Strike Gold Shave:
     Unspecified:
       patterns:

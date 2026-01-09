@@ -136,6 +136,10 @@ known_knots:
         - black.*eag.*ht2
         - (?:black.*eag)?.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Boti:
+    Knight:
+      fiber: Synthetic
+      patterns:
+        - ^(?!.*viking).*knight
     N3C:
       fiber: Synthetic
       patterns:
