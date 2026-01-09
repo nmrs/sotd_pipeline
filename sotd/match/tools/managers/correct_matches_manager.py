@@ -278,8 +278,11 @@ class CorrectMatchesManager:
 
     def save_correct_matches(self) -> None:
         """Save correct matches to file."""
+        import time
         try:
+            total_start = time.time()
             # Group by field
+            group_start = time.time()
             field_data = {}
             for match_key, match_data in self._correct_matches_data.items():
                 field, original = match_key.split(":", 1)
@@ -326,14 +329,6 @@ class CorrectMatchesManager:
                         field_data[field][brand][scent].append(normalized_original)
                 elif field == "brush":
                     # Check if this is a split brush (composite brush with handle/knot components)
-                    self.console.print(
-                        f"[cyan]DEBUG: Processing brush match - original: {original}[/cyan]"
-                    )
-                    self.console.print(
-                        f"[cyan]DEBUG: Matched data keys: "
-                        f"{list(match_data['matched'].keys())}[/cyan]"
-                    )
-
                     # IMPORTANT: Check for complete brush (top-level brand AND
                     # model) FIRST
                     # Complete brushes can have nested handle/knot structures
@@ -350,32 +345,14 @@ class CorrectMatchesManager:
                     has_top_level_brand = brand and brand != "" and brand is not None
                     has_top_level_model = model and model != "" and model is not None
 
-                    self.console.print(
-                        f"[cyan]DEBUG: Top-level - brand: {brand}, model: {model}[/cyan]"
-                    )
-                    self.console.print(
-                        f"[cyan]DEBUG: Has top-level brand: "
-                        f"{has_top_level_brand}, Has top-level model: "
-                        f"{has_top_level_model}[/cyan]"
-                    )
-                    self.console.print(
-                        f"[cyan]DEBUG: Has handle: {bool(handle)}, Has knot: {bool(knot)}[/cyan]"
-                    )
-
                     # If this is a complete brush (has top-level brand AND model),
                     # save as brush
                     # Even if it has nested handle/knot structures, complete
                     # brushes go to brush section
                     if has_top_level_brand and has_top_level_model:
-                        self.console.print(
-                            "[cyan]DEBUG: Complete brush detected - saving to brush section[/cyan]"
-                        )
                         # Use "_no_model" placeholder when model is None or empty
                         if not model:
                             model = "_no_model"
-                            self.console.print(
-                                "[cyan]DEBUG: Model was None/empty, using '_no_model'[/cyan]"
-                            )
 
                         # Initialize brand and model dictionaries if they don't exist
                         if brand not in field_data[field]:
@@ -385,24 +362,11 @@ class CorrectMatchesManager:
 
                         # Normalize the original string before storing to prevent bloat
                         normalized_original = self._normalize_for_matching(original, field)
-                        self.console.print(
-                            f"[cyan]DEBUG: Normalized original: '{normalized_original}'[/cyan]"
-                        )
-                        self.console.print(f"[cyan]DEBUG: Saving to brush/{brand}/{model}[/cyan]")
                         if (
                             normalized_original
                             and normalized_original not in field_data[field][brand][model]
                         ):
                             field_data[field][brand][model].append(normalized_original)
-                            self.console.print(
-                                f"[green]DEBUG: Added '{normalized_original}' to "
-                                f"brush/{brand}/{model}[/green]"
-                            )
-                        else:
-                            self.console.print(
-                                "[yellow]DEBUG: Normalized original is empty "
-                                "or already exists[/yellow]"
-                            )
                     elif handle or knot:
                         # This is a split brush - save to handle and knot sections
                         if handle:
@@ -471,11 +435,7 @@ class CorrectMatchesManager:
                         # This is a split brush without top-level brand/model
                         # - save to handle/knot sections
                         # This case should be rare - usually brushes have at least brand
-                        self.console.print(
-                            "[yellow]DEBUG: Split brush without top-level "
-                            "brand/model - saving to handle/knot "
-                            "sections[/yellow]"
-                        )
+                        pass
                 elif field == "handle":
                     # Handle handle field - support both old and new structures
                     if (
@@ -517,8 +477,12 @@ class CorrectMatchesManager:
                     ):
                         field_data[field][brand][model].append(normalized_original)
 
+            group_end = time.time()
+            print(f"PERF: Grouping data took {group_end - group_start:.3f}s")
+            
             # Alphabetize entries within each field/brand/model (or field/format/brand/model)
             # First, sort the top-level field structure
+            sort_start = time.time()
             field_data = dict(sorted(field_data.items(), key=lambda x: self._sort_key(x[0])))
 
             for field_name, field_section in field_data.items():
@@ -593,7 +557,11 @@ class CorrectMatchesManager:
 
                                         entries.sort(key=sort_key)
 
+            sort_end = time.time()
+            print(f"PERF: Sorting data took {sort_end - sort_start:.3f}s")
+            
             # Save to directory structure: save each field to its own file
+            write_start = time.time()
             self._correct_matches_file.mkdir(parents=True, exist_ok=True)
             for field_name, field_section in field_data.items():
                 field_file = self._correct_matches_file / f"{field_name}.yaml"
@@ -605,7 +573,10 @@ class CorrectMatchesManager:
                         sort_keys=False,
                         allow_unicode=True,
                     )
-                self.console.print(f"[green]Correct matches saved to {field_file}[/green]")
+            write_end = time.time()
+            print(f"PERF: Writing YAML files took {write_end - write_start:.3f}s")
+            total_end = time.time()
+            print(f"PERF: Total save_correct_matches took {total_end - total_start:.3f}s")
         except Exception as e:
             self.console.print(f"[red]Error saving correct matches: {e}[/red]")
 

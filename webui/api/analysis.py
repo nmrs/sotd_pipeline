@@ -1249,7 +1249,11 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
         manager = CorrectMatchesManager(console, correct_matches_path)
 
         # Load existing correct matches
+        import time
+        load_start = time.time()
         manager.load_correct_matches()
+        load_end = time.time()
+        logger.info(f"PERF: load_correct_matches took {load_end - load_start:.3f}s")
 
         marked_count = 0
         errors = []
@@ -1263,20 +1267,8 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                     errors.append(f"Invalid match data: {match}")
                     continue
 
-                # Debug logging
-                logger.info(f"Processing match - original: {original}, matched: {matched}")
-                logger.info(
-                    f"DEBUG: Match data structure - field: {request.field}, original: {original}"
-                )
-                logger.info(
-                    f"DEBUG: Matched data keys: {list(matched.keys()) if matched else 'None'}"
-                )
-                logger.info(f"DEBUG: Matched data content: {matched}")
-
                 # For blade field, ensure format is preserved for correct section placement
                 if request.field == "blade" and "format" in matched:
-                    logger.info(f"Blade format detected: {matched['format']}")
-                    # Ensure the format field is preserved in the match data
                     match_data_to_save = {
                         "original": original,
                         "matched": matched,
@@ -1292,10 +1284,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
                 # Use the proper method to mark as correct
                 match_key = manager.create_match_key(request.field, original, matched)
-                logger.info(f"DEBUG: Created match_key: {match_key}")
-                logger.info(f"DEBUG: Match data to save: {match_data_to_save}")
                 manager.mark_match_as_correct(match_key, match_data_to_save)
-                logger.info("DEBUG: Marked match as correct, key stored in manager")
                 marked_count += 1
 
             except Exception as e:
@@ -1303,21 +1292,11 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
         # Save to file
         if marked_count > 0:
-            logger.info(f"DEBUG: Saving {marked_count} matches to correct_matches directory")
+            save_start = time.time()
             manager.save_correct_matches()
-            logger.info("DEBUG: Saved correct matches to file")
-            # Reload to verify it was saved
-            manager.load_correct_matches()
-            logger.info("DEBUG: Reloaded correct matches, verifying saved keys...")
-            for match in request.matches:
-                original = match.get("original", "")
-                matched = match.get("matched", {})
-                if original and matched:
-                    verify_key = manager.create_match_key(request.field, original, matched)
-                    is_found = verify_key in manager._correct_matches
-                    logger.info(f"DEBUG: Verification - key: {verify_key}, found: {is_found}")
-                    if not is_found:
-                        logger.warning(f"DEBUG: WARNING - Key {verify_key} not found after save!")
+            save_end = time.time()
+            logger.info(f"PERF: save_correct_matches took {save_end - save_start:.3f}s")
+            # Removed unnecessary reload and verification - this was the main bottleneck!
 
         return MarkCorrectResponse(
             success=marked_count > 0,
