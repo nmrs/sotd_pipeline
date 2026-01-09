@@ -158,6 +158,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
       onSortingChange={setSorting}
       keyboardNavigationEnabled={keyboardNavigationEnabled}
       activeRowIndex={activeRowIndex}
+      showPagination={true}
     />
   );
 };

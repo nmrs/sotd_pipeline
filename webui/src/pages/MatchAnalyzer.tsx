@@ -1885,7 +1885,7 @@ const MatchAnalyzer: React.FC = () => {
       )}
 
       {/* Ready State */}
-      {!loading && !results && !error && (
+      {!loading && !results && !groupedResults && !error && (
         <div className='bg-white rounded-lg shadow p-6'>
           <div className='text-center py-8'>
             <div className='text-gray-400 text-6xl mb-4'>🔍</div>
