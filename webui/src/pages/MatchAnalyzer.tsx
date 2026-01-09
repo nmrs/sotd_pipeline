@@ -1014,6 +1014,37 @@ const MatchAnalyzer: React.FC = () => {
     []
   );
 
+  // Helper function to check if a pattern is confirmed (in correct_matches)
+  const isPatternConfirmed = useCallback(
+    (pattern: { original: string }, brand: string, scent: string): boolean => {
+      if (!correctMatches?.entries) {
+        return false;
+      }
+      
+      // correctMatches.entries structure for soap: {brand: {scent: [normalized_originals]}}
+      // Patterns in grouped data are already normalized, so we just lowercase and trim
+      const normalizedOriginal = pattern.original.toLowerCase().trim();
+      
+      // Check if brand exists in entries
+      const brandEntry = correctMatches.entries[brand];
+      if (!brandEntry || typeof brandEntry !== 'object') {
+        return false;
+      }
+      
+      // Check if scent exists under brand
+      const scentEntry = brandEntry[scent];
+      if (!scentEntry || !Array.isArray(scentEntry)) {
+        return false;
+      }
+      
+      // Check if normalized pattern is in the scent's array
+      return scentEntry.some((entry: string) => 
+        entry.toLowerCase().trim() === normalizedOriginal
+      );
+    },
+    [correctMatches]
+  );
+
   // Helper function to determine if a group has patterns matching the display mode
   const groupHasMatchingPatterns = useCallback(
     (group: GroupedDataItem, mode: string): boolean => {
@@ -1038,12 +1069,29 @@ const MatchAnalyzer: React.FC = () => {
       // Filter patterns within groups and recalculate counts
       return filteredGroups
         .map(group => {
-          const filteredTopPatterns = group.top_patterns.filter(pattern =>
+          // First filter by display mode
+          let displayModeFilteredPatterns = group.all_patterns.filter(pattern =>
             isPatternMatchType(pattern, displayMode)
           );
-          const filteredAllPatterns = group.all_patterns.filter(pattern =>
-            isPatternMatchType(pattern, displayMode)
-          );
+          
+          // Then filter out confirmed patterns (unless displayMode is 'matches' or 'all')
+          let finalPatterns = displayModeFilteredPatterns;
+          if (displayMode !== 'all' && displayMode !== 'matches' && correctMatches?.entries) {
+            finalPatterns = displayModeFilteredPatterns.filter(pattern =>
+              !isPatternConfirmed(pattern, group.brand, group.scent)
+            );
+          }
+          
+          // For 'matches' mode, only show confirmed patterns
+          if (displayMode === 'matches' && correctMatches?.entries) {
+            finalPatterns = displayModeFilteredPatterns.filter(pattern =>
+              isPatternConfirmed(pattern, group.brand, group.scent)
+            );
+          }
+
+          // Get top patterns from final filtered list
+          const filteredTopPatterns = finalPatterns.slice(0, 3);
+          const filteredAllPatterns = finalPatterns;
 
           // If all patterns are filtered out, exclude the group entirely
           if (filteredAllPatterns.length === 0) {
@@ -1128,6 +1176,8 @@ const MatchAnalyzer: React.FC = () => {
     selectedField,
     groupHasMatchingPatterns,
     isPatternMatchType,
+    isPatternConfirmed,
+    correctMatches,
   ]);
 
   // Keyboard navigation handlers
