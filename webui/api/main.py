@@ -142,6 +142,39 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+# Global queue manager instance
+_queue_manager = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Startup event handler - initialize background queue worker."""
+    global _queue_manager
+    try:
+        from webui.api.queue_manager import QueueManager
+
+        # Project root directory (webui/api/main.py -> webui/api -> webui -> project_root)
+        project_root = Path(__file__).parent.parent.parent
+        correct_matches_path = project_root / "data" / "correct_matches"
+        _queue_manager = QueueManager(correct_matches_path)
+        _queue_manager.start_background_worker()
+        logger.info("✅ Background queue worker started")
+    except Exception as e:
+        logger.error(f"❌ Failed to start background queue worker: {e}", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Shutdown event handler - stop background queue worker."""
+    global _queue_manager
+    if _queue_manager:
+        try:
+            _queue_manager.stop_background_worker()
+            logger.info("✅ Background queue worker stopped")
+        except Exception as e:
+            logger.error(f"❌ Error stopping background queue worker: {e}")
+
+
 @app.get("/")
 async def root() -> Dict[str, str]:
     """Root endpoint."""

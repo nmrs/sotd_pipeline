@@ -22,6 +22,8 @@ import {
   AnalyzerDataItem,
   isGroupedDataItem,
 } from '@/services/api';
+import { useOperationStatus } from '@/hooks/useOperationStatus';
+import { OperationProgress } from '@/components/domain/OperationProgress';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import ErrorDisplay from '@/components/feedback/ErrorDisplay';
@@ -67,6 +69,10 @@ const MatchAnalyzer: React.FC = () => {
   const [markingCorrect, setMarkingCorrect] = useState(false);
   const [removingCorrect, setRemovingCorrect] = useState(false);
   const [visibleRows, setVisibleRows] = useState<AnalyzerDataItem[]>([]);
+  
+  // Async operation state
+  const [currentOperationId, setCurrentOperationId] = useState<string | null>(null);
+  const { status: operationStatus, error: operationError, isPolling } = useOperationStatus(currentOperationId);
 
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
@@ -137,7 +143,7 @@ const MatchAnalyzer: React.FC = () => {
     loadYamlBrushSplitsData();
   }, [loadYamlBrushSplitsData]);
 
-  const handleAnalyze = async (overrideGroupByMatched?: boolean) => {
+  const handleAnalyze = useCallback(async (overrideGroupByMatched?: boolean) => {
     if (selectedMonths.length === 0) {
       setError('Please select at least one month to analyze');
       return;
@@ -199,7 +205,34 @@ const MatchAnalyzer: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched]);
+
+  // Handle operation completion - MUST be after loadCorrectMatches and handleAnalyze are defined
+  useEffect(() => {
+    if (operationStatus?.status === 'completed') {
+      // Operation completed - reload data
+      loadCorrectMatches();
+      
+      // For grouped view, we don't need to re-analyze - filtering will handle it
+      // For regular view, re-run analysis to get updated mismatch data
+      if (selectedMonths.length > 0 && !(groupByMatched && selectedField === 'soap')) {
+        handleAnalyze();
+      }
+      
+      // Clear operation ID after a delay to allow user to see completion status
+      setTimeout(() => {
+        setCurrentOperationId(null);
+        setMarkingCorrect(false);
+        setRemovingCorrect(false);
+      }, 2000);
+    } else if (operationStatus?.status === 'failed') {
+      // Operation failed - show error
+      setError(operationStatus.result?.error || 'Operation failed');
+      setCurrentOperationId(null);
+      setMarkingCorrect(false);
+      setRemovingCorrect(false);
+    }
+  }, [operationStatus?.status, selectedMonths, groupByMatched, selectedField, loadCorrectMatches, handleAnalyze]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
@@ -610,23 +643,17 @@ const MatchAnalyzer: React.FC = () => {
         force: true,
       });
 
-      if (response.success) {
-        // Reload correct matches and re-analyze to get fresh data
-        await loadCorrectMatches();
+      if (response.success && response.operation_id) {
+        // Operation queued successfully - start polling for status
+        setCurrentOperationId(response.operation_id);
         setSelectedItems(new Set());
         setError(null);
-
-        // For grouped view, we don't need to re-analyze - filtering will handle it
-        // For regular view, re-run analysis to get updated mismatch data
-        if (selectedMonths.length > 0 && !(groupByMatched && selectedField === 'soap')) {
-          await handleAnalyze();
-        }
       } else {
-        setError(`Failed to mark items as correct: ${response.message}`);
+        setError(`Failed to queue operation: ${response.message}`);
+        setMarkingCorrect(false);
       }
     } catch (err: unknown) {
       setError(handleApiError(err));
-    } finally {
       setMarkingCorrect(false);
     }
   };
@@ -765,22 +792,17 @@ const MatchAnalyzer: React.FC = () => {
         force: true,
       });
 
-      if (response.success) {
-        // Reload correct matches and re-analyze to get fresh data
-        await loadCorrectMatches();
+      if (response.success && response.operation_id) {
+        // Operation queued successfully - start polling for status
+        setCurrentOperationId(response.operation_id);
         setSelectedItems(new Set());
         setError(null);
-
-        // Re-run analysis to get updated mismatch data
-        if (selectedMonths.length > 0) {
-          await handleAnalyze();
-        }
       } else {
-        setError(`Failed to remove items from correct matches: ${response.message}`);
+        setError(`Failed to queue operation: ${response.message}`);
+        setRemovingCorrect(false);
       }
     } catch (err: unknown) {
       setError(handleApiError(err));
-    } finally {
       setRemovingCorrect(false);
     }
   };
@@ -1447,7 +1469,7 @@ const MatchAnalyzer: React.FC = () => {
   }, [selectedItems, results?.mismatch_items]);
 
   return (
-    <div ref={containerRef} className='w-full p-4 max-w-full overflow-x-hidden'>
+      <div ref={containerRef} className='w-full p-4 max-w-full overflow-x-hidden'>
       {/* Controls and Header */}
       <div className='mb-4'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Match Analyzer</h1>
@@ -1859,6 +1881,14 @@ const MatchAnalyzer: React.FC = () => {
         <div className='mb-4'>
           <LoadingSpinner message='Analyzing mismatches...' />
         </div>
+      )}
+
+      {currentOperationId && (
+        <OperationProgress
+          status={operationStatus}
+          error={operationError}
+          isPolling={isPolling}
+        />
       )}
 
       {/* Results Table */}

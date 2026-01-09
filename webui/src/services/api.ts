@@ -641,6 +641,8 @@ export interface MarkCorrectResponse {
   message: string;
   marked_count: number;
   errors: string[];
+  operation_id?: string;
+  status_url?: string;
 }
 
 export interface CorrectMatchesResponse {
@@ -663,24 +665,10 @@ export const markMatchesAsCorrect = async (
   request: MarkCorrectRequest
 ): Promise<MarkCorrectResponse> => {
   try {
-    console.log('🔍 DEBUG: markMatchesAsCorrect called with:', request);
-    console.log('🔍 DEBUG: Full request structure:', JSON.stringify(request, null, 2));
-    if (request.matches && request.matches.length > 0) {
-      console.log('🔍 DEBUG: First match details:', {
-        original: request.matches[0].original,
-        matched: request.matches[0].matched,
-        matchedKeys: Object.keys(request.matches[0].matched || {}),
-        matchedStringified: JSON.stringify(request.matches[0].matched, null, 2),
-      });
-    }
-
     const response = await api.post('/analysis/mark-correct', request);
-
-    console.log('🔍 DEBUG: markMatchesAsCorrect response:', response.data);
-
     return response.data;
   } catch (error) {
-    console.error('🔍 DEBUG: markMatchesAsCorrect error:', error);
+    console.error('Failed to mark matches as correct:', error);
     throw error;
   }
 };
@@ -711,6 +699,8 @@ export interface RemoveCorrectResponse {
   message: string;
   removed_count: number;
   errors: string[];
+  operation_id?: string;
+  status_url?: string;
 }
 
 export const removeMatchesFromCorrect = async (
@@ -731,6 +721,32 @@ export const clearAllCorrectMatches = async (): Promise<{ success: boolean; mess
     return response.data;
   } catch (error) {
     console.error('Failed to clear all correct matches:', error);
+    throw error;
+  }
+};
+
+// Operation status for async queue operations
+export interface OperationStatus {
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  message: string;
+  started_at?: number;
+  updated_at: number;
+  completed_at?: number;
+  result?: {
+    marked_count?: number;
+    removed_count?: number;
+    errors: string[];
+    error?: string;
+  };
+}
+
+export const getOperationStatus = async (operationId: string): Promise<OperationStatus> => {
+  try {
+    const response = await api.get(`/analysis/operation-status/${operationId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to get operation status for ${operationId}:`, error);
     throw error;
   }
 };

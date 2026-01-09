@@ -191,8 +191,10 @@ class MarkCorrectResponse(BaseModel):
 
     success: bool
     message: str
-    marked_count: int
-    errors: List[str] = []
+    marked_count: int = 0
+    errors: List[str] = Field(default_factory=list)
+    operation_id: Optional[str] = None
+    status_url: Optional[str] = None
 
 
 class RemoveCorrectRequest(BaseModel):
@@ -210,7 +212,10 @@ class RemoveCorrectResponse(BaseModel):
 
     success: bool
     message: str
-    removed_count: int
+    removed_count: int = 0
+    errors: List[str] = Field(default_factory=list)
+    operation_id: Optional[str] = None
+    status_url: Optional[str] = None
     errors: List[str] = []
 
 
@@ -1225,85 +1230,45 @@ async def get_correct_matches(field: str):
 
 @router.post("/mark-correct", response_model=MarkCorrectResponse)
 async def mark_matches_as_correct(request: MarkCorrectRequest):
-    """Mark matches as correct and save to correct_matches directory."""
+    """Mark matches as correct and save to correct_matches directory (async queue)."""
     try:
         validate_field(request.field)
 
         if not request.matches:
-            return MarkCorrectResponse(success=False, message="No matches provided", marked_count=0)
-
-        # Import the correct matches manager
-        try:
-            from rich.console import Console
-
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
-        except ImportError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            return MarkCorrectResponse(
+                success=False, message="No matches provided", marked_count=0
             )
 
-        # Create manager instance with correct file path
-        # Use directory structure for field-specific files
-        console = Console()
+        # Import queue manager
+        try:
+            from webui.api.queue_manager import QueueManager
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import QueueManager: {e}"
+            )
+
+        # Create queue manager instance
         correct_matches_path = project_root / "data" / "correct_matches"
-        manager = CorrectMatchesManager(console, correct_matches_path)
+        queue_manager = QueueManager(correct_matches_path)
 
-        # Load existing correct matches
-        import time
-        load_start = time.time()
-        manager.load_correct_matches()
-        load_end = time.time()
-        logger.info(f"PERF: load_correct_matches took {load_end - load_start:.3f}s")
+        # Add operation to queue
+        try:
+            operation_id = queue_manager.add_operation("mark_correct", request.field, request.matches)
+            status_url = f"/api/analysis/operation-status/{operation_id}"
 
-        marked_count = 0
-        errors = []
-
-        for match in request.matches:
-            try:
-                original = match.get("original", "")
-                matched = match.get("matched", {})
-
-                if not original or not matched:
-                    errors.append(f"Invalid match data: {match}")
-                    continue
-
-                # For blade field, ensure format is preserved for correct section placement
-                if request.field == "blade" and "format" in matched:
-                    match_data_to_save = {
-                        "original": original,
-                        "matched": matched,
-                        "field": request.field,
-                    }
-                else:
-                    # For non-blade fields or blade fields without format, use standard structure
-                    match_data_to_save = {
-                        "original": original,
-                        "matched": matched,
-                        "field": request.field,
-                    }
-
-                # Use the proper method to mark as correct
-                match_key = manager.create_match_key(request.field, original, matched)
-                manager.mark_match_as_correct(match_key, match_data_to_save)
-                marked_count += 1
-
-            except Exception as e:
-                errors.append(f"Error marking match {match}: {e}")
-
-        # Save to file
-        if marked_count > 0:
-            save_start = time.time()
-            manager.save_correct_matches()
-            save_end = time.time()
-            logger.info(f"PERF: save_correct_matches took {save_end - save_start:.3f}s")
-            # Removed unnecessary reload and verification - this was the main bottleneck!
-
-        return MarkCorrectResponse(
-            success=marked_count > 0,
-            message=f"Marked {marked_count} matches as correct",
-            marked_count=marked_count,
-            errors=errors,
-        )
+            return MarkCorrectResponse(
+                success=True,
+                message="Operation queued for processing",
+                marked_count=0,  # Will be updated when operation completes
+                errors=[],
+                operation_id=operation_id,
+                status_url=status_url,
+            )
+        except Exception as e:
+            logger.error(f"Failed to queue operation: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to queue operation: {str(e)}"
+            )
 
     except Exception as e:
         logger.error(f"Error marking matches as correct: {e}")
@@ -1312,7 +1277,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
 @router.post("/remove-correct", response_model=RemoveCorrectResponse)
 async def remove_matches_from_correct(request: RemoveCorrectRequest):
-    """Remove matches from correct matches and save to correct_matches directory."""
+    """Remove matches from correct matches and save to correct_matches directory (async queue)."""
     try:
         validate_field(request.field)
 
@@ -1321,61 +1286,65 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
                 success=False, message="No matches provided", removed_count=0
             )
 
-        # Import the correct matches manager
+        # Import queue manager
         try:
-            from rich.console import Console
-
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            from webui.api.queue_manager import QueueManager
         except ImportError as e:
             raise HTTPException(
-                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+                status_code=500, detail=f"Could not import QueueManager: {e}"
             )
 
-        # Create manager instance with correct file path
-        # Use directory structure for field-specific files
-        console = Console()
+        # Create queue manager instance
         correct_matches_path = project_root / "data" / "correct_matches"
-        manager = CorrectMatchesManager(console, correct_matches_path)
+        queue_manager = QueueManager(correct_matches_path)
 
-        # Load existing correct matches
-        manager.load_correct_matches()
+        # Add operation to queue
+        try:
+            operation_id = queue_manager.add_operation("remove_correct", request.field, request.matches)
+            status_url = f"/api/analysis/operation-status/{operation_id}"
 
-        removed_count = 0
-        errors = []
-
-        for match in request.matches:
-            try:
-                original = match.get("original", "")
-                matched = match.get("matched", {})
-
-                if not original or not matched:
-                    errors.append(f"Invalid match data: {match}")
-                    continue
-
-                # Use the manager's remove_match method
-                if manager.remove_match(request.field, original, matched):
-                    removed_count += 1
-                else:
-                    errors.append(f"Match not found in correct matches: {original}")
-
-            except Exception as e:
-                errors.append(f"Error removing match {match}: {e}")
-
-        # Save to file
-        if removed_count > 0:
-            manager.save_correct_matches()
-
-        return RemoveCorrectResponse(
-            success=removed_count > 0,
-            message=f"Removed {removed_count} matches from correct matches",
-            removed_count=removed_count,
-            errors=errors,
-        )
+            return RemoveCorrectResponse(
+                success=True,
+                message="Operation queued for processing",
+                removed_count=0,  # Will be updated when operation completes
+                errors=[],
+                operation_id=operation_id,
+                status_url=status_url,
+            )
+        except Exception as e:
+            logger.error(f"Failed to queue operation: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to queue operation: {str(e)}"
+            )
 
     except Exception as e:
         logger.error(f"Error removing matches from correct matches: {e}")
         raise HTTPException(
             status_code=500, detail=f"Error removing matches from correct matches: {str(e)}"
+        )
+
+
+@router.get("/operation-status/{operation_id}")
+async def get_operation_status(operation_id: str):
+    """Get status of an async operation."""
+    try:
+        from webui.api.queue_manager import QueueManager
+
+        correct_matches_path = project_root / "data" / "correct_matches"
+        queue_manager = QueueManager(correct_matches_path)
+
+        status = queue_manager.get_operation_status(operation_id)
+
+        if status is None:
+            raise HTTPException(status_code=404, detail=f"Operation {operation_id} not found")
+
+        return status
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting operation status: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error getting operation status: {str(e)}"
         )
 
 
