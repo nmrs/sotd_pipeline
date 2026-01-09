@@ -67,7 +67,7 @@ Abbate Y La Mantia:
     Ishtar:
       patterns:
       - abbate.*ishtar
-    Koke:
+    Koké:
       patterns:
       - abbate.*kok[eé]
     Krokos:
@@ -163,6 +163,13 @@ Adopted Acres:
     Royal Bloom:
       patterns:
       - adopted acres.*royal bloom
+Antica Barbieria Colla:
+  patterns:
+  - antica barbieria colla
+  scents:
+    Sandalo Rosso:
+      patterns:
+      - antica.*colla.*sandal
 Apothecary 87:
   patterns:
   - apothecary ?87
@@ -204,7 +211,7 @@ Ariana & Evans:
     Barbiere Sofisticato:
       patterns:
       - (ariana|a&e).*barbiere sofisticato
-    BL∀CK:
+    BLⱯCK:
       patterns:
       - (arian|a&e).*bl[a∀Ɐ]ck$
       - bl[∀Ɐ]ck
@@ -441,19 +448,27 @@ Barbasol:
   patterns:
   - barbasol
   scents:
-    Original:
+    1919 (Cream):
+      format: Cream
+      patterns:
+      - barbasol.*1919
+    Extra Moisturizing (Purple):
+      format: Cream
+      patterns:
+      - barbasol.*(moist|purple)
+    Original (Red):
       format: Foam
       patterns:
-      - barbasol.*original
+      - barbasol.*(original|red)
       - barbasol
-    Sensitive Skin:
+    Sensitive Skin (Orange):
       format: Foam
       patterns:
-      - barbasol.*sensitive
-    Soothing Aloe:
+      - barbasol.*(sensitive|orange)
+    Soothing Aloe (Green):
       format: Foam
       patterns:
-      - barbasol.*aloe
+      - barbasol.*(aloe|green)
 Barberia Toscana:
   patterns:
   - barberia toscana
@@ -1315,27 +1330,49 @@ Crabtree & Evelyn:
   scents:
     Sandalwood:
       patterns:
-      - sandalwood
+      - crabtree.*sandalwood
 Cremo:
   format: Cream
   patterns:
   - \bcremo\b
   scents:
+    Bergamot Black:
+      patterns:
+      - cremo.*(bergamot|black)
     Bourbon Vanilla:
       patterns:
       - cremo.*bourbon
-    Classic Citrus:
+    Classic Citrus (Original):
       patterns:
       - crea?mo.*citrus
+      - \bcremo\b
     Coconut Mango Shave Cream:
       patterns:
       - cremo.*mango
     Cooling:
       patterns:
       - cremo.*cooling
-    Original:
+    Palo Santo:
       patterns:
-      - \bcremo\b
+      - cremo.*palo santo
+    Refresing Mint:
+      patterns:
+      - cremo.*refreshing mint
+    Sage & Citrus:
+      patterns:
+      - cremo.*sage.*citrus
+    Sandalwood:
+      patterns:
+      - cremo.*sandalwood
+    Sensitive:
+      patterns:
+      - cremo.*sensitive
+    Silver Water & Birch:
+      patterns:
+      - cremo.*birch    
+    Spiced Amber:
+      patterns:
+      - cremo.*(508|red|amber)
 Crowne & Crane:
   patterns:
   - crown.*crane
@@ -1785,6 +1822,13 @@ Farmbody Skin Care:
     'The Crop Tender: Orange Ale':
       patterns:
       - farm ?body.*orange ale
+Fendrihan:
+  patterns:
+  - fendrihan
+  scents:
+    Coconut Vanilla:
+      patterns:
+      - fendrihan.*coconut.*vanilla
 Fenomeno Shave:
   patterns:
   - fenomeno( shave)?
@@ -1849,6 +1893,13 @@ Floris London:
 Fresh Thyme Farmacy:
   patterns:
   - fresh thyme farmacy
+Funky Gallo Toiletries:
+  patterns:
+  - funky gallo( toiletries)?
+  scents:
+    Damasco:
+      patterns:
+      - funky gallo.*damasco
 Fuzzyface Soaps:
   patterns:
   - 'fuzzy ?face(?: ?soaps?)?'
@@ -1932,6 +1983,9 @@ Ginger's Garden:
   patterns:
   - ginger'?s garden
   scents:
+    Old Spice Type:
+      patterns:
+      - ginger.*old spice
     Vizier:
       patterns:
       - ginger.*vizier
@@ -2982,6 +3036,13 @@ Nõberu of Sweden:
       - n[õo]beru.*sandalwood
       - sweden.*sandalwood
       - n[õo]beru( of sweden)?
+Nomad Theory:
+  patterns:
+  - nomad theory
+  scents:
+    Sorrento:
+      patterns:
+      - nomad.*sorrento
 Nordic Shaving Company:
   patterns:
   - 'nordic(?: shav(e|ing))? co(?:(\.|mpany))?'
@@ -2998,6 +3059,14 @@ Oatcake:
 Obsessive Soap Perfectionist:
   patterns:
   - obsessive.*(soap)?.*perfection
+Officina Artigiana:
+  patterns:
+  - officina artigiana( milano)?
+  scents:
+    Oli del benessere:
+      patterns:
+      - artigiana.*benes+ere
+      - artigiana.*wellness
 Ogallala:
   patterns:
   - og+(?:al+)?al+a
@@ -3126,7 +3195,7 @@ Proraso:
   - prosado
   - prasso
   scents:
-    Aloe and Vitamin E:
+    Aloe and Vitamin E (Blue):
       format: Cream
       patterns:
       - proraso.*blue
@@ -3138,14 +3207,14 @@ Proraso:
       - proraso.*cypress
       - proraso.*vety
       alias: Cypress & Vetiver
-    Green Tea & Oat:
+    Green Tea & Oat (White):
       format: Cream
       patterns:
       - proraso.*white
       - proraso.*tea
       - proraso.*sensitive
       - proraso.*green tea.*oat
-    Menthol and Eucalyptus:
+    Menthol and Eucalyptus (Green):
       format: Cream
       patterns:
       - proraso
@@ -3155,7 +3224,7 @@ Proraso:
       - ^(?!.*\btea\b)^pro[rs]aso.*refresh
       - porasso green
       - prosado
-    Sandalwood:
+    Sandalwood (Red):
       format: Cream
       patterns:
       - proraso.*red
@@ -3339,16 +3408,16 @@ Saponificio Varesino:
 Savonnerie du Bon Berger:
   patterns:
   - (?:savonnerie du )?bon berger
-Savonniere du Moulin:
+Savonnière du Moulin:
   patterns:
   - savonniere du moulin
-Savonu Du Barba:
+Savonnerie du Nebbiu:
   patterns:
-  - savonu du barba
+  - (la )?savon+erie du neb+iu
   scents:
-    La Savonnerie du Nebbiu Savon a Barbe:
+    Savon à Barbe:
       patterns:
-      - la savon.*nebbiu
+      - (la )?savon+erie du neb+iu
 Schmiere:
   patterns:
   - schmiere
@@ -3438,16 +3507,6 @@ Sir Hare:
 Sir Henry's:
   patterns:
   - sir henry('?s)?
-Smitten Soapery:
-  patterns:
-  - smitten soapery
-  scents:
-    Hipster:
-      patterns:
-      - smitten.*hipster
-    Stud Muffin:
-      patterns:
-      - smitten.*stud muffi?n
 Soap Commander:
   patterns:
   - soap commander
@@ -3545,7 +3604,7 @@ Spearhead Shaving Company:
       patterns:
       - spearhead.*heather
       - seaforth.*heather
-    Seaforth! Leather:
+    Seaforth! Leather (r/wetshaving exclusive):
       patterns:
       - spearhead.*leather
       - seaforth.*leather
@@ -3697,7 +3756,7 @@ Stirling Soap Co.:
     Hot Apple Cider:
       patterns:
       - stirling.*hot apple cider
-    I, Rich Moose:
+    I, Rich Moose (r/wetshaving exclusive):
       patterns:
       - (stirling.*)?rich moose
     Iced Coffee:
@@ -4268,8 +4327,12 @@ The Shave Mercantile:
   - (the )?shave mercantile
 The Sudsy Soapery:
   patterns:
-  - (the)?.*sudsy soapery
+  - (the)?.*sudsy soap[ea]ry
   scents:
+    Bay & Citrus:
+      patterns:
+      - sudsy.*citrus.*bay
+      - sudsy.*bay.*citrus
     Delor de Treget:
       patterns:
       - delor de treget
@@ -4648,6 +4711,7 @@ Zaharoff:
 Zingari Man:
   patterns:
   - zina?gari?( man)?
+  - smitten soapery
   scents:
     Barrel Proof:
       patterns:
@@ -4659,6 +4723,9 @@ Zingari Man:
     El Cantinero:
       patterns:
       - zingari.*can?tinero
+    Hipster:
+      patterns:
+      - (smitten|zingari).*hipster
     Il Signore:
       patterns:
       - il signore
@@ -4672,6 +4739,9 @@ Zingari Man:
     Nocturne (with B&M):
       patterns:
       - zingari.*nocturn
+    Stud Muffin:
+      patterns:
+      - (smitten|zingari).*stud muffi?n
     The Amir:
       patterns:
       - zingari.*amir
