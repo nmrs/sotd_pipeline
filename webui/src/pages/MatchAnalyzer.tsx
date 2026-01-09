@@ -616,8 +616,9 @@ const MatchAnalyzer: React.FC = () => {
         setSelectedItems(new Set());
         setError(null);
 
-        // Re-run analysis to get updated mismatch data
-        if (selectedMonths.length > 0) {
+        // For grouped view, we don't need to re-analyze - filtering will handle it
+        // For regular view, re-run analysis to get updated mismatch data
+        if (selectedMonths.length > 0 && !(groupByMatched && selectedField === 'soap')) {
           await handleAnalyze();
         }
       } else {
@@ -1014,35 +1015,45 @@ const MatchAnalyzer: React.FC = () => {
     []
   );
 
+  // Memoized Set for O(1) pattern confirmation lookups
+  const confirmedPatternsSet = useMemo(() => {
+    if (!correctMatches?.entries) {
+      return new Set<string>();
+    }
+    
+    // Build a Set of confirmed patterns for O(1) lookups
+    // Key format: "brand|scent|normalized_original"
+    const set = new Set<string>();
+    for (const [brand, brandData] of Object.entries(correctMatches.entries)) {
+      if (typeof brandData === 'object' && brandData !== null) {
+        for (const [scent, scentData] of Object.entries(brandData)) {
+          if (Array.isArray(scentData)) {
+            for (const normalizedOriginal of scentData) {
+              const key = `${brand}|${scent}|${normalizedOriginal.toLowerCase().trim()}`;
+              set.add(key);
+            }
+          }
+        }
+      }
+    }
+    return set;
+  }, [correctMatches]);
+
   // Helper function to check if a pattern is confirmed (in correct_matches)
   const isPatternConfirmed = useCallback(
     (pattern: { original: string }, brand: string, scent: string): boolean => {
-      if (!correctMatches?.entries) {
+      if (!correctMatches?.entries || confirmedPatternsSet.size === 0) {
         return false;
       }
       
-      // correctMatches.entries structure for soap: {brand: {scent: [normalized_originals]}}
       // Patterns in grouped data are already normalized, so we just lowercase and trim
       const normalizedOriginal = pattern.original.toLowerCase().trim();
       
-      // Check if brand exists in entries
-      const brandEntry = correctMatches.entries[brand];
-      if (!brandEntry || typeof brandEntry !== 'object') {
-        return false;
-      }
-      
-      // Check if scent exists under brand
-      const scentEntry = brandEntry[scent];
-      if (!scentEntry || !Array.isArray(scentEntry)) {
-        return false;
-      }
-      
-      // Check if normalized pattern is in the scent's array
-      return scentEntry.some((entry: string) => 
-        entry.toLowerCase().trim() === normalizedOriginal
-      );
+      // Use O(1) Set lookup instead of O(n) Array.some()
+      const key = `${brand}|${scent}|${normalizedOriginal}`;
+      return confirmedPatternsSet.has(key);
     },
-    [correctMatches]
+    [correctMatches, confirmedPatternsSet]
   );
 
   // Helper function to determine if a group has patterns matching the display mode
@@ -1067,7 +1078,7 @@ const MatchAnalyzer: React.FC = () => {
       }
 
       // Filter patterns within groups and recalculate counts
-      return filteredGroups
+      const result = filteredGroups
         .map(group => {
           // First filter by display mode
           let displayModeFilteredPatterns = group.all_patterns.filter(pattern =>
@@ -1117,6 +1128,7 @@ const MatchAnalyzer: React.FC = () => {
           } as GroupedDataItem;
         })
         .filter((group): group is GroupedDataItem => group !== null);
+      return result;
     }
 
     // Handle regular data (existing logic)
