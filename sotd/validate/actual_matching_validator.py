@@ -952,40 +952,77 @@ class ActualMatchingValidator:
 
             matched_data = result.matched
             actual_brand = matched_data.get("brand")
-            actual_model = matched_data.get("model")
 
-            # Check brand/model mismatch
-            # For blades, this validates that the entry matches the expected brand/model
-            # when used with the razor format from its section
-            if expected_brand != actual_brand or expected_model != actual_model:
-                issues.append(
-                    ValidationIssue(
-                        issue_type="data_mismatch",
-                        severity="high",
-                        correct_match=entry_string,
-                        expected_brand=expected_brand,
-                        expected_model=expected_model,
-                        actual_brand=actual_brand,
-                        actual_model=actual_model,
-                        format=expected_format if field == "blade" else None,
-                        details=(
-                            f"Brand/model mismatch: expected "
-                            f"'{expected_brand} {expected_model}', got "
-                            f"'{actual_brand} {actual_model}'"
-                            + (
-                                f" in {expected_format} format context"
-                                if field == "blade" and expected_format
-                                else ""
-                            )
-                        ),
-                        suggested_action=(
-                            f"Update correct_matches directory to reflect "
-                            f"new brand/model: '{actual_brand} "
-                            f"{actual_model}'"
-                        ),
-                        matched_pattern=result.pattern if result else None,
+            # Soap uses 'scent' instead of 'model'
+            if field == "soap":
+                actual_scent = matched_data.get("scent")
+                # For soap, expected_model is actually the scent name from YAML
+                # Use case-insensitive comparison since matching is case-insensitive
+                if (expected_brand or "").lower() != (actual_brand or "").lower() or (expected_model or "").lower() != (actual_scent or "").lower():
+                    issues.append(
+                        ValidationIssue(
+                            issue_type="data_mismatch",
+                            severity="high",
+                            correct_match=entry_string,
+                            expected_brand=expected_brand,
+                            expected_model=expected_model,  # This is actually scent name
+                            actual_brand=actual_brand,
+                            actual_model=actual_scent,  # Store scent in actual_model for consistency
+                            format=expected_format if field == "blade" else None,
+                            details=(
+                                f"Brand/scent mismatch: expected "
+                                f"'{expected_brand} {expected_model}', got "
+                                f"'{actual_brand} {actual_scent or 'None'}'"
+                                + (
+                                    f" in {expected_format} format context"
+                                    if field == "blade" and expected_format
+                                    else ""
+                                )
+                            ),
+                            suggested_action=(
+                                f"Update correct_matches directory to reflect "
+                                f"new brand/scent: '{actual_brand} "
+                                f"{actual_scent or 'None'}'"
+                            ),
+                            matched_pattern=result.pattern if result else None,
+                        )
                     )
-                )
+            else:
+                # Existing logic for razor, blade (use model)
+                actual_model = matched_data.get("model")
+
+                # Check brand/model mismatch
+                # For blades, this validates that the entry matches the expected brand/model
+                # when used with the razor format from its section
+                if expected_brand != actual_brand or expected_model != actual_model:
+                    issues.append(
+                        ValidationIssue(
+                            issue_type="data_mismatch",
+                            severity="high",
+                            correct_match=entry_string,
+                            expected_brand=expected_brand,
+                            expected_model=expected_model,
+                            actual_brand=actual_brand,
+                            actual_model=actual_model,
+                            format=expected_format if field == "blade" else None,
+                            details=(
+                                f"Brand/model mismatch: expected "
+                                f"'{expected_brand} {expected_model}', got "
+                                f"'{actual_brand} {actual_model}'"
+                                + (
+                                    f" in {expected_format} format context"
+                                    if field == "blade" and expected_format
+                                    else ""
+                                )
+                            ),
+                            suggested_action=(
+                                f"Update correct_matches directory to reflect "
+                                f"new brand/model: '{actual_brand} "
+                                f"{actual_model}'"
+                            ),
+                            matched_pattern=result.pattern if result else None,
+                        )
+                    )
 
         except Exception as e:
             # Fail fast on internal errors

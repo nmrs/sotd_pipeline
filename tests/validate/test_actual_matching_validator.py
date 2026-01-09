@@ -223,6 +223,112 @@ class TestActualMatchingValidator:
         assert issues[0].expected_model == "Moarteen"
         assert issues[0].actual_model == "Different Model"
 
+    @patch("sotd.validate.actual_matching_validator.SoapMatcher")
+    def test_validate_simple_entry_soap_no_match(self, mock_soap_matcher_class):
+        """Test soap entry validation when no match is found."""
+        mock_matcher = Mock()
+        mock_matcher.match.return_value = None
+        mock_soap_matcher_class.return_value = mock_matcher
+
+        issues = self.validator._validate_simple_entry(
+            "soap", "345 co. - cairn", "345 Soap Co.", "Cairn"
+        )
+
+        assert len(issues) == 1
+        assert issues[0].issue_type == "no_match"
+        assert issues[0].severity == "high"
+        assert "345 co. - cairn" in issues[0].correct_match
+
+    @patch("sotd.validate.actual_matching_validator.SoapMatcher")
+    def test_validate_simple_entry_soap_data_mismatch(self, mock_soap_matcher_class):
+        """Test soap entry validation when scent doesn't match."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "345 Soap Co.",
+            "scent": "Different Scent",  # Different from expected Cairn
+        }
+        mock_result.pattern = "345.*different"
+        mock_matcher.match.return_value = mock_result
+        mock_soap_matcher_class.return_value = mock_matcher
+
+        issues = self.validator._validate_simple_entry(
+            "soap", "345 co. - cairn", "345 Soap Co.", "Cairn"
+        )
+
+        assert len(issues) == 1
+        assert issues[0].issue_type == "data_mismatch"
+        assert issues[0].severity == "high"
+        assert issues[0].expected_brand == "345 Soap Co."
+        assert issues[0].expected_model == "Cairn"  # This is the scent name from YAML
+        assert issues[0].actual_brand == "345 Soap Co."
+        assert issues[0].actual_model == "Different Scent"  # Stored in actual_model for consistency
+        assert "Brand/scent mismatch" in issues[0].details
+        assert "brand/scent" in issues[0].suggested_action.lower()
+        assert issues[0].matched_pattern == "345.*different"
+
+    @patch("sotd.validate.actual_matching_validator.SoapMatcher")
+    def test_validate_simple_entry_soap_correct_match(self, mock_soap_matcher_class):
+        """Test soap entry validation when scent matches correctly."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "brand": "345 Soap Co.",
+            "scent": "Cairn",  # Matches expected
+        }
+        mock_result.pattern = "345.*cairn"
+        mock_matcher.match.return_value = mock_result
+        mock_soap_matcher_class.return_value = mock_matcher
+
+        issues = self.validator._validate_simple_entry(
+            "soap", "345 co. - cairn", "345 Soap Co.", "Cairn"
+        )
+
+        # Should have no issues when scent matches
+        assert len(issues) == 0
+
+    @patch("sotd.validate.actual_matching_validator.SoapMatcher")
+    def test_validate_simple_entry_soap_case_insensitive_match(self, mock_soap_matcher_class):
+        """Test soap entry validation when scent matches but with different casing."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        # Matcher returns lowercase scent, but YAML has proper casing
+        mock_result.matched = {
+            "brand": "Abbate Y La Mantia",
+            "scent": "marduk",  # Lowercase, but YAML has "Marduk"
+        }
+        mock_result.pattern = "abbate.*marduk"
+        mock_matcher.match.return_value = mock_result
+        mock_soap_matcher_class.return_value = mock_matcher
+
+        issues = self.validator._validate_simple_entry(
+            "soap", "abbate y la mantia - marduk", "Abbate Y La Mantia", "Marduk"
+        )
+
+        # Should have no issues when scent matches (case-insensitive)
+        assert len(issues) == 0
+
+    @patch("sotd.validate.actual_matching_validator.SoapMatcher")
+    def test_validate_simple_entry_soap_case_insensitive_brand(self, mock_soap_matcher_class):
+        """Test soap entry validation when brand matches but with different casing."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        # Matcher returns different brand casing
+        mock_result.matched = {
+            "brand": "ariana & evans",  # Lowercase, but YAML has "Ariana & Evans"
+            "scent": "Aqua de Boracay",  # Matches expected
+        }
+        mock_result.pattern = "ariana.*boracay"
+        mock_matcher.match.return_value = mock_result
+        mock_soap_matcher_class.return_value = mock_matcher
+
+        issues = self.validator._validate_simple_entry(
+            "soap", "ariana & evans - aqua de boracay", "Ariana & Evans", "Aqua de Boracay"
+        )
+
+        # Should have no issues when brand matches (case-insensitive)
+        assert len(issues) == 0
+
     @patch("sotd.validate.actual_matching_validator.BladeMatcher")
     def test_validate_simple_entry_blade_with_format_context(self, mock_blade_matcher_class):
         """Test blade entry validation with format context using match_with_context."""
