@@ -50,7 +50,7 @@ const mockData: MismatchItem[] = [
     original: 'Test Razor 2',
     matched: { brand: 'Test Brand', model: 'Model 2' },
     mismatch_type: 'multiple_patterns',
-    match_type: 'alias',
+    match_type: 'dash_split',
     pattern: 'test_pattern_2',
     confidence: 0.6,
     count: 3,

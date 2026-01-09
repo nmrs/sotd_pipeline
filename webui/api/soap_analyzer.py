@@ -1140,8 +1140,8 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         match_type = match.get("match_type", "unknown")
 
         if not brand or not scent:
-            if match_type == "alias":
-                print(f"🔍 DEBUG: Skipping alias match due to missing brand/scent: {match}")
+            if match_type == "dash_split":
+                print(f"🔍 DEBUG: Skipping dash_split match due to missing brand/scent: {match}")
             continue
 
         # Create matched string key (case-insensitive for grouping)
@@ -1239,22 +1239,22 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         for pattern in patterns:
             match_type_counts[pattern["match_type"]] += pattern["count"]
 
-        # Determine primary match type with priority: regex > brand > alias > exact
+        # Determine primary match type with priority: regex > brand > dash_split > exact
         # If a soap has regex matches, it should be categorized as regex regardless of other counts
         if "regex" in match_type_counts:
             primary_match_type = "regex"
         elif "brand" in match_type_counts:
             primary_match_type = "brand"
-        elif "alias" in match_type_counts:
-            primary_match_type = "alias"
+        elif "dash_split" in match_type_counts:
+            primary_match_type = "dash_split"
         else:
             # If only exact matches, use exact as primary
             primary_match_type = "exact"
 
-        # Debug: Log match type counts for groups with alias matches
-        if "alias" in match_type_counts:
+        # Debug: Log match type counts for groups with dash_split matches
+        if "dash_split" in match_type_counts:
             print(
-                f"🔍 DEBUG: Group '{matched_string}' has alias matches: "
+                f"🔍 DEBUG: Group '{matched_string}' has dash_split matches: "
                 f"{dict(match_type_counts)} -> primary: {primary_match_type}"
             )
 

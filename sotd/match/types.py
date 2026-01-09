@@ -231,7 +231,7 @@ class MatchType:
 
     EXACT = "exact"  # From correct_matches.yaml (manually verified)
     REGEX = "regex"  # From regex patterns in YAML catalogs
-    ALIAS = "alias"  # Brand/model aliases
+    DASH_SPLIT = "dash_split"  # Dash-split fallback (splits on dash, guesses brand and scent)
     BRAND = "brand"  # Brand-only fallback
     UNMATCHED = "unmatched"  # No match found
 

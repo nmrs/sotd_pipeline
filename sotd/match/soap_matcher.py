@@ -214,7 +214,7 @@ class SoapMatcher(BaseMatcher):
 
         result = self._match_dash_split(original, normalized)
         if result:
-            result["match_type"] = "alias"
+            result["match_type"] = "dash_split"
             match_result = create_match_result(
                 original=result["original"],
                 matched=result["matched"],
@@ -280,7 +280,7 @@ class SoapMatcher(BaseMatcher):
                     "original": original,
                     "matched": {"brand": brand_guess, "scent": scent_guess},
                     "pattern": None,
-                    "match_type": MatchType.ALIAS,  # Will be overridden by caller
+                    "match_type": MatchType.DASH_SPLIT,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
                 }
         return None
@@ -381,7 +381,7 @@ class SoapMatcher(BaseMatcher):
                         result.matched["scent"] = None
                 return result
 
-        # Fall back to regex/brand/alias matching
+        # Fall back to regex/brand/dash_split matching
         result = self._match_with_regex(normalized_text, original_text)
         if result and result.matched:
             if "brand" not in result.matched:

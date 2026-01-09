@@ -36,7 +36,7 @@ const ExpandablePatterns: React.FC<ExpandablePatternsProps> = ({
                 return 'bg-blue-100 text-blue-800';
             case 'brand':
                 return 'bg-orange-100 text-orange-800';
-            case 'alias':
+            case 'dash_split':
                 return 'bg-purple-100 text-purple-800';
             default:
                 return 'bg-gray-100 text-gray-800';

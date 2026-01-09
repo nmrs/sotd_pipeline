@@ -361,7 +361,7 @@ export interface GroupedDataItem {
   match_type: string;
   match_type_breakdown: {
     exact: number;
-    [key: string]: number; // regex, brand, or alias
+    [key: string]: number; // regex, brand, or dash_split
   };
   // Add a flag to indicate this is grouped data
   is_grouped: true;

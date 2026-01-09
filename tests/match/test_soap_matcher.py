@@ -216,7 +216,7 @@ def test_match_returns_correct_match_type(soap_matcher_with_mock):
         ("Barrister and Mann - Seville", "exact"),  # Found in correct matches
         ("House of Mammoth - Alive", "exact"),  # Found in correct matches
         ("House of Mammoth - Aliive", "brand"),  # Matches brand pattern, scent from remainder
-        ("UnknownBrand - SomeNewScent", "alias"),  # Dash-split fallback
+        ("UnknownBrand - SomeNewScent", "dash_split"),  # Dash-split fallback
     ]
     for input_text, expected_type in test_cases:
         # Pass just the normalized string to matchers
