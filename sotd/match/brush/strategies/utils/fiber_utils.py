@@ -9,11 +9,13 @@ _FIBER_PATTERNS = {
     ),
     "Mixed Badger/Synthetic": r"(natural fiber.*synthetic|badger/synth|synth/badger)",
     # Specific fiber types with detailed patterns
+    "Mixed Boar/Horse": r"(boar/horse|horse/boar)",
+    # Specific fiber types with detailed patterns
     "Synthetic": (
-        r"(acrylic|timber|tux|mew|silk|synt|synbad|2bed|captain|cashmere|"
+        r"(acrylic|timber|tux|mew|silk(?!.*badger)|synt|synbad|2bed|captain|cashmere|"
         r"faux (horse|boar|badger)|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
         r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
-        r"\bmig\b|synthetic badger|mother ?(lode|load)|\bg\d\b)"
+        r"\bmig\b|synthetic badger|mother ?(lode|load)|\bg\d\b|\bt4\b)"
     ),
     # General fiber types (checked last)
     "Badger": (
