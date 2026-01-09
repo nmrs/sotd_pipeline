@@ -7,8 +7,12 @@ Individual phases can be run separately or as part of a complete pipeline workfl
 
 import argparse
 import datetime
+import io
+import re
 import sys
-from typing import List, Optional
+import time
+from contextlib import redirect_stdout
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def validate_month(value: str) -> str:
@@ -175,7 +179,238 @@ def calculate_delta_months(args) -> list[str]:
     return sorted(list(delta_months))
 
 
-def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
+def calculate_months_from_args(args: List[str]) -> List[str]:
+    """
+    Calculate months from date arguments in args list.
+
+    Args:
+        args: List of command line arguments
+
+    Returns:
+        List of months in YYYY-MM format
+    """
+    # Parse args into a simple namespace-like structure
+    class Args:
+        month: Optional[str] = None
+        year: Optional[int] = None
+        start: Optional[str] = None
+        end: Optional[str] = None
+        range: Optional[str] = None
+        delta_months: Optional[str] = None
+        ytd: bool = False
+
+    parsed_args = Args()
+
+    # Parse arguments from list
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--month" and i + 1 < len(args):
+            parsed_args.month = args[i + 1]
+            i += 2
+        elif arg == "--year" and i + 1 < len(args):
+            try:
+                parsed_args.year = int(args[i + 1])
+            except ValueError:
+                pass
+            i += 2
+        elif arg == "--start" and i + 1 < len(args):
+            parsed_args.start = args[i + 1]
+            i += 2
+        elif arg == "--end" and i + 1 < len(args):
+            parsed_args.end = args[i + 1]
+            i += 2
+        elif arg == "--range" and i + 1 < len(args):
+            parsed_args.range = args[i + 1]
+            i += 2
+        elif arg == "--delta-months" and i + 1 < len(args):
+            parsed_args.delta_months = args[i + 1]
+            i += 2
+        elif arg == "--ytd":
+            parsed_args.ytd = True
+            i += 1
+        else:
+            i += 1
+
+    # Use similar logic to month_span() from date_span.py
+    if parsed_args.delta_months:
+        # Handle delta months (comma-separated list)
+        months = []
+        for month_str in parsed_args.delta_months.split(","):
+            month_str = month_str.strip()
+            if month_str:
+                months.append(month_str)
+        return months
+
+    if parsed_args.month:
+        return [parsed_args.month]
+
+    if parsed_args.year:
+        return [f"{parsed_args.year}-{m:02d}" for m in range(1, 13)]
+
+    if parsed_args.range:
+        try:
+            start_str, end_str = parsed_args.range.split(":")
+            start_year, start_month = map(int, start_str.split("-"))
+            end_year, end_month = map(int, end_str.split("-"))
+
+            months = []
+            current_year, current_month = start_year, start_month
+            while (current_year, current_month) <= (end_year, end_month):
+                months.append(f"{current_year:04d}-{current_month:02d}")
+                current_month += 1
+                if current_month > 12:
+                    current_month = 1
+                    current_year += 1
+            return months
+        except (ValueError, AttributeError):
+            pass
+
+    if parsed_args.start and parsed_args.end:
+        try:
+            start_year, start_month = map(int, parsed_args.start.split("-"))
+            end_year, end_month = map(int, parsed_args.end.split("-"))
+
+            months = []
+            current_year, current_month = start_year, start_month
+            while (current_year, current_month) <= (end_year, end_month):
+                months.append(f"{current_year:04d}-{current_month:02d}")
+                current_month += 1
+                if current_month > 12:
+                    current_month = 1
+                    current_year += 1
+            return months
+        except (ValueError, AttributeError):
+            pass
+
+    if parsed_args.ytd:
+        now = datetime.datetime.now()
+        current_year = now.year
+        current_month = now.month
+        return [f"{current_year}-{m:02d}" for m in range(1, current_month + 1)]
+
+    # Default to previous month if no date arguments
+    return [get_default_month()]
+
+
+def parse_record_count_from_output(output: str, phase: str) -> Optional[int]:
+    """
+    Parse record count from phase output.
+
+    Args:
+        output: Captured stdout output from phase execution
+        phase: Phase name for context-specific parsing
+
+    Returns:
+        Record count if found, None otherwise
+    """
+    if not output:
+        return None
+
+    # Patterns to match different output formats
+    patterns = [
+        # Match: "Total Records: 70,306" (from parallel processor summary)
+        r"Total Records:\s*([\d,]+)",
+        # Enrich: "Total Records: 70,306" (from parallel processor summary)
+        # Aggregate: "70306 records processed" (from engine output)
+        r"(\d[\d,]*)\s+records processed",
+        # Alternative format: "records processed: 70,306"
+        r"records processed[:\s]+([\d,]+)",
+        # Alternative format: "Total records: 70,306"
+        r"Total records[:\s]+([\d,]+)",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, output, re.IGNORECASE)
+        if match:
+            # Extract number and remove commas
+            number_str = match.group(1).replace(",", "")
+            try:
+                return int(number_str)
+            except ValueError:
+                continue
+
+    return None
+
+
+def print_pipeline_summary(
+    phase_results: List[Dict[str, Any]],
+    total_time: float,
+    args: List[str],
+    phases_failed: bool = False,
+) -> None:
+    """
+    Print comprehensive pipeline summary with timing and statistics.
+
+    Args:
+        phase_results: List of phase execution results with name, duration, exit_code,
+                       records_processed, and records_per_second
+        total_time: Total wall clock time for the pipeline
+        args: Command line arguments used
+        phases_failed: Whether the pipeline failed partway through
+    """
+    # Calculate months processed
+    months = calculate_months_from_args(args)
+    months_count = len(months)
+    months_per_second = months_count / total_time if total_time > 0 else 0.0
+
+    # Get record counts from phases (they may differ as records drop out)
+    # Track first and last phase counts
+    first_phase_records = None
+    last_phase_records = None
+    
+    for result in phase_results:
+        records = result.get("records_processed")
+        if records is not None:
+            if first_phase_records is None:
+                first_phase_records = records
+            last_phase_records = records
+
+    print(f"\n{'=' * 60}")
+    print("PIPELINE SUMMARY")
+    print(f"{'=' * 60}")
+    print(f"Total Wall Time: {total_time:.2f}s")
+    print(f"Months Processed: {months_count}")
+    print(f"Throughput: {months_per_second:.2f} months/s")
+    if first_phase_records is not None:
+        print(f"Records In: {first_phase_records:,}")
+    if last_phase_records is not None and last_phase_records != first_phase_records:
+        print(f"Records Out: {last_phase_records:,}")
+    elif last_phase_records is not None:
+        # If they're the same, just show one
+        print(f"Records: {last_phase_records:,}")
+
+    if phase_results:
+        print("\nPhase Breakdown:")
+        for i, result in enumerate(phase_results, 1):
+            phase_name = result["name"]
+            phase_duration = result["duration"]
+            phase_status = "✓" if result["exit_code"] == 0 else "✗"
+            records = result.get("records_processed")
+            records_per_sec = result.get("records_per_second")
+            
+            # Calculate months/s for this phase (only if multiple months)
+            months_per_sec_phase = None
+            if months_count > 1 and phase_duration > 0:
+                months_per_sec_phase = months_count / phase_duration
+
+            # Build phase line
+            phase_line = f"  Phase {i} ({phase_name}): {phase_duration:6.2f}s {phase_status}"
+            if records is not None:
+                phase_line += f" | {records:,} records"
+            if records_per_sec is not None:
+                phase_line += f" | {records_per_sec:,.0f} records/s"
+            if months_per_sec_phase is not None:
+                phase_line += f" | {months_per_sec_phase:.2f} months/s"
+            print(phase_line)
+
+    if phases_failed:
+        print("\nNote: Pipeline failed partway through. Summary shows completed phases only.")
+
+    print(f"{'=' * 60}\n")
+
+
+def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, str]:
     """
     Run a specific pipeline phase.
 
@@ -185,7 +420,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
         debug: Whether debug mode is enabled
 
     Returns:
-        Exit code (0 for success, non-zero for failure)
+        Tuple of (exit_code, captured_output)
     """
     phase_modules = {
         "fetch": "sotd.fetch.run",
@@ -261,16 +496,27 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
         if debug:
             print(f"[DEBUG] {phase} phase args: {phase_args}")
 
-        # Run the phase with filtered arguments and capture exit code
-        exit_code = module.main(phase_args)
-        return exit_code if exit_code is not None else 0
+        # Capture stdout during phase execution
+        output_buffer = io.StringIO()
+        try:
+            with redirect_stdout(output_buffer):
+                # Run the phase with filtered arguments and capture exit code
+                exit_code = module.main(phase_args)
+                exit_code = exit_code if exit_code is not None else 0
+        finally:
+            # Always restore stdout and get captured output
+            captured_output = output_buffer.getvalue()
+            # Print captured output to maintain normal behavior
+            print(captured_output, end="")
+
+        return (exit_code, captured_output)
 
     except ImportError as e:
         print(f"[ERROR] Failed to import {phase} phase: {e}")
-        return 1
+        return (1, "")
     except Exception as e:
         print(f"[ERROR] Failed to run {phase} phase: {e}")
-        return 1
+        return (1, "")
 
 
 def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int:
@@ -289,6 +535,10 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         print(f"[DEBUG] Running pipeline phases: {', '.join(phases)}")
         print(f"[DEBUG] Base arguments: {args}")
 
+    # Track pipeline timing and results
+    pipeline_start_time = time.time()
+    phase_results: List[Dict[str, Any]] = []
+
     # Add visual separation for multi-phase runs
     if len(phases) > 1:
         print(f"\n{'=' * 60}")
@@ -305,7 +555,26 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         elif debug:
             print(f"\n[DEBUG] Running phase {i + 1}/{len(phases)}: {phase}")
 
-        exit_code = run_phase(phase, args, debug=debug)
+        # Track phase timing
+        phase_start_time = time.time()
+        exit_code, captured_output = run_phase(phase, args, debug=debug)
+        phase_duration = time.time() - phase_start_time
+
+        # Parse record count from output
+        records_processed = parse_record_count_from_output(captured_output, phase)
+        records_per_second = (
+            records_processed / phase_duration if records_processed and phase_duration > 0 else None
+        )
+
+        # Record phase result
+        phase_results.append({
+            "name": phase,
+            "duration": phase_duration,
+            "exit_code": exit_code,
+            "records_processed": records_processed,
+            "records_per_second": records_per_second,
+        })
+
         if exit_code != 0:
             print(f"\n{'=' * 60}")
             print(f"PIPELINE FAILED: Phase {phase} failed with exit code {exit_code}")
@@ -313,16 +582,25 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
             print(f"Failed phase: {phase}")
             print(f"Remaining phases: {', '.join(phases[i + 1 :])}")
             print(f"{'=' * 60}\n")
+            # Show summary up to failure point
+            if len(phases) > 1:
+                total_time = time.time() - pipeline_start_time
+                print_pipeline_summary(phase_results, total_time, args, phases_failed=True)
             return exit_code
 
         if debug:
             print(f"[DEBUG] Phase {phase} completed successfully")
+
+    # Calculate total pipeline time
+    total_time = time.time() - pipeline_start_time
 
     # Add completion summary for multi-phase runs
     if len(phases) > 1:
         print(f"\n{'=' * 60}")
         print(f"PIPELINE COMPLETE: {len(phases)} phases finished successfully")
         print(f"{'=' * 60}\n")
+        # Print comprehensive summary
+        print_pipeline_summary(phase_results, total_time, args)
 
     return 0
 
