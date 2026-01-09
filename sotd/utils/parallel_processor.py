@@ -100,7 +100,7 @@ class ParallelMonthProcessor:
             # Process results as they complete
             results = []
             for future in tqdm(
-                as_completed(future_to_month), total=len(future_to_month), desc=desc
+                as_completed(future_to_month), total=len(future_to_month), desc=desc, unit="month"
             ):
                 month = future_to_month[future]
                 try:
