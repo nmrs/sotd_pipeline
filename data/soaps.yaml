@@ -134,6 +134,9 @@ Anbbas:
   patterns:
   - anbbas
   - annabas
+Angora Soaps:
+  patterns:
+  - angora soaps?
 Apex Alchemy Shaving:
   aliases:
   - Apex Alchemy Soaps
@@ -626,6 +629,10 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*lime
       - (barris|bam).*lime
+    Lime, Lavender & Cedarwood:
+      patterns:
+      - \bb ?(and|&|\+) ?m\b.*lime.*lav.*cedar
+      - (barris|bam).*lime.*lav.*cedar
     Lyssa:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*lyssi?a
@@ -689,12 +696,11 @@ Barrister and Mann:
       - (barris|ba?m).*rhapsody
     Roam (I):
       patterns:
-      - \bb ?(and|&|\+) ?m\b.*roam.*\b(?:1|i|one|2014)\b
-      - \bb ?(and|&|\+) ?m\b.*roam.*\b(?:1|i|one|2014)\b
-      - barrister.*roam.*(?:og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - \bb ?(and|&|\+) ?m\b.*roam.*(?:og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - \bb ?(and|&|\+) ?m\b.*(?:og|orig).*roam(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      # - barrister.*(?:og|orig).*(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bb ?(and|&|\+) ?m\b.*roam.*\b(1|i|one|2014)\b
+      - \bb ?(and|&|\+) ?m\b.*roam.*\b(1|i|one|2014)\b
+      - barrister.*roam.*(og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bb ?(and|&|\+) ?m\b.*roam.*(og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bb ?(and|&|\+) ?m\b.*(og|orig).*roam(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - roam.*(glissant|excelsior)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Roam Two:
       patterns:
@@ -789,7 +795,7 @@ BBS:
   - '\bbbs\b(?: shops?)?'
 Beak & Snout:
   patterns:
-  - beak.*snout( apothecary)?
+  - br?eak.*snout( apothecary)?
   scents:
     Bard's Barbershop:
       patterns:
@@ -921,6 +927,9 @@ Captain Nemo's:
     Absolute Zero:
       patterns:
       - absolute zero
+    Elaichi:
+      patterns:
+      - elaichi
     Pirate Potion:
       patterns:
       - pirate potion
@@ -1059,16 +1068,20 @@ Catie's Bubbles:
       - literal lilac
     Maggards MeetUp 2019:
       patterns:
-      - cat.*bubb.*(mag.*2019|2019.*mag)
+      - cat.*bubb.*(mag.*19|19.*mag)
     Maggards MeetUp 2023:
       patterns:
-      - cat.*bubb.*(mag.*2023|2023.*mag)
+      - cat.*bubb.*(mag.*23|23.*mag)
     Maggards MeetUp 2024:
       patterns:
-      - cat.*bubb.*(mag.*2024|2024.*mag)
+      - cat.*bubb.*(mag.*24|24.*mag)
     Maggards MeetUp 2025:
       patterns:
-      - cat.*bubb.*(mag.*2025|2025.*mag)
+      - cat.*bubb.*(mag.*25|25.*mag)
+    Maggards MeetUp (Year Unspecified):
+      patterns:
+        - cat.*bubb.*ma.*meet
+        - mag.*meet.*.*cat.*bubb
     Massepain:
       patterns:
       - (catie|cb).*mass(e|é)pain
@@ -1258,6 +1271,9 @@ Chiseled Face:
     Summer Storm:
       patterns:
       - (cf|chisel).*summer storm
+    Topanga Fougere:
+      patterns:
+      - (chis|cf).*topanga foug
     Trade Winds:
       patterns:
       - chisel.*trade ?winds
@@ -1757,11 +1773,14 @@ eos:
   - eos
 Ethos:
   patterns:
-  - ethos
+  - ethos( grooming)?( essentials)?
   scents:
+    Greenfresh:
+      patterns:
+      - ethos.*green ?fresh
     Lavender Suprême:
       patterns:
-      - ethos.*laven.*supreme
+      - ethos.*laven.*supr[eê]me
       alias: Lavender Supreme
     Ravello:
       patterns:
@@ -1904,9 +1923,9 @@ Funky Gallo Toiletries:
 Fuzzyface Soaps:
   patterns:
   - 'fuzzy ?face(?: ?soaps?)?'
-GZD:
+GBS:
   patterns:
-  - \bgzd\b
+  - \bg\.? ?b\.? ?s\.?\b
 Gentlemans Face Care Club:
   patterns:
   - gentlemans face care club
@@ -2053,6 +2072,9 @@ Grooming Dept:
     Wonderland:
       patterns:
       - grooming.*wonderland
+GZD:
+  patterns:
+  - \bgzd\b
 HAGS:
   patterns:
   - hags
@@ -2642,7 +2664,7 @@ Maggard Razors:
       - mag.*tobacco.*leather
 Mama Bear's Soaps:
   patterns:
-  - mama bear('s)?( soaps)?
+  - mam+a bear('s)?( soaps)?
   scents:
     Aged Spice:
       patterns:
@@ -2805,6 +2827,9 @@ Mitchell's:
       patterns:
       - mitch.*wool fat
       - ^\W*mwf\b
+MMGP:
+  patterns:
+  - \bmmgp\b
 Mondial 1908:
   patterns:
   - mondial( 1908)?
@@ -4196,7 +4221,7 @@ Taylor of Old Bond Street:
       - (taylor|tob'?s).*lavend\wr
     Lime Zest:
       patterns:
-      - (taylor|tobs).*lime zest
+      - (taylor|tobs).*lime( zest)?
     Oud:
       patterns:
       - (taylor|tobs).*oud
@@ -4323,8 +4348,8 @@ The Holy Black:
       - holy.*galleon
 The Los Angeles Shaving Soap Company:
   patterns:
-  - ^(the )?los angeles( shaving soap (company|co.?)?)?
-  - 'l.?a.?(?: shaving soap)? co.?'
+  - ^(the )?los angeles( shaving soap (co\.?(mpany)?)?)?
+  - l.? ?a.?( shaving)? (soap)? co\.?(mpany)?
   - lassco
   scents:
     Blackfern:
@@ -4333,7 +4358,7 @@ The Los Angeles Shaving Soap Company:
       - l.?a.?.*black ?fern
     Topanga Fougère:
       patterns:
-      - topanga foug
+      - ^(?!.*(chis|cf)).*topanga foug
 The Razor Company:
   patterns:
   - the razor company

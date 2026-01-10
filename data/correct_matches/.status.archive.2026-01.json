@@ -31,5 +31,82 @@
       "marked_count": 14,
       "errors": []
     }
+  },
+  "op_1768012812211_vm0av3ml": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 9 matches processed",
+    "updated_at": 1768012814.070369,
+    "completed_at": 1768012814.07037,
+    "result": {
+      "marked_count": 9,
+      "errors": []
+    }
+  },
+  "op_1768013297970_ws7oyv8r": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 11 matches processed",
+    "updated_at": 1768013299.769828,
+    "completed_at": 1768013299.769829,
+    "result": {
+      "marked_count": 11,
+      "errors": []
+    }
+  },
+  "op_1768013558584_v4gzd3nc": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 3 matches processed",
+    "updated_at": 1768013560.207627,
+    "completed_at": 1768013560.207627,
+    "result": {
+      "marked_count": 3,
+      "errors": []
+    }
+  },
+  "op_1768013595220_0ijg3z5r": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 27 matches processed",
+    "updated_at": 1768013597.924918,
+    "completed_at": 1768013597.9249191,
+    "result": {
+      "marked_count": 27,
+      "errors": []
+    }
+  },
+  "op_1768013643824_vgsd81k9": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 14 matches processed",
+    "updated_at": 1768013646.174099,
+    "completed_at": 1768013646.174099,
+    "result": {
+      "marked_count": 14,
+      "errors": []
+    }
+  },
+  "op_1768013687001_nr6i89yc": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 7 matches processed",
+    "updated_at": 1768013689.903289,
+    "completed_at": 1768013689.903289,
+    "result": {
+      "marked_count": 7,
+      "errors": []
+    }
+  },
+  "op_1768015104763_hybzps3n": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 4 matches processed",
+    "updated_at": 1768015107.115189,
+    "completed_at": 1768015107.115189,
+    "result": {
+      "marked_count": 4,
+      "errors": []
+    }
   }
 }
