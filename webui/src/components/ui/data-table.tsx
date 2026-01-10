@@ -113,6 +113,8 @@ export function DataTable<TData, TValue>({
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [isResizing, setIsResizing] = useState(false);
   const [resizeColumn, setResizeColumn] = useState<string | null>(null);
+  const [useRegexMode, setUseRegexMode] = useState<boolean>(false);
+  const [regexError, setRegexError] = useState<string | null>(null);
   const tableRef = React.useRef<HTMLDivElement>(null);
 
   // Use external row selection if provided, otherwise use internal
@@ -156,15 +158,54 @@ export function DataTable<TData, TValue>({
     enableSortingRemoval: true,
     enableGlobalFilter: true,
     globalFilterFn: (row, _columnId, filterValue) => {
-      const searchTerm = filterValue.toLowerCase();
+      const searchTerm = filterValue as string;
       const rowData = row.original as Record<string, unknown>;
 
-      // Simple search: just search in the most important string fields
+      // If search is empty, show all rows
+      if (!searchTerm || searchTerm.trim() === '') {
+        return true;
+      }
+
+      // Regex mode
+      if (useRegexMode) {
+        try {
+          // Make regex case-insensitive by default (add 'i' flag) to match user expectations
+          const regex = new RegExp(searchTerm, 'i');
+          
+          // Search in the most important string fields
+          const searchableFields = ['original', 'matched_string', 'brand', 'model', 'match_type', 'mismatch_type'];
+          
+          for (const field of searchableFields) {
+            const value = rowData[field];
+            if (value && typeof value === 'string' && regex.test(value)) {
+              return true;
+            }
+          }
+
+          // Search in matched object if it exists
+          if (rowData.matched && typeof rowData.matched === 'object') {
+            const matched = rowData.matched as Record<string, unknown>;
+            for (const [key, value] of Object.entries(matched)) {
+              if (value && typeof value === 'string' && regex.test(value)) {
+                return true;
+              }
+            }
+          }
+
+          return false;
+        } catch (error) {
+          // Invalid regex - return false to show no matches
+          return false;
+        }
+      }
+
+      // Normal text search (case-insensitive substring matching)
+      const searchTermLower = searchTerm.toLowerCase();
       const searchableFields = ['original', 'matched_string', 'brand', 'model', 'match_type', 'mismatch_type'];
       
       for (const field of searchableFields) {
         const value = rowData[field];
-        if (value && typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
+        if (value && typeof value === 'string' && value.toLowerCase().includes(searchTermLower)) {
           return true;
         }
       }
@@ -173,7 +214,7 @@ export function DataTable<TData, TValue>({
       if (rowData.matched && typeof rowData.matched === 'object') {
         const matched = rowData.matched as Record<string, unknown>;
         for (const [key, value] of Object.entries(matched)) {
-          if (value && typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
+          if (value && typeof value === 'string' && value.toLowerCase().includes(searchTermLower)) {
             return true;
           }
         }
@@ -379,15 +420,75 @@ export function DataTable<TData, TValue>({
     URL.revokeObjectURL(url);
   };
 
+  // Validate regex pattern and update error state
+  const validateRegex = (pattern: string): boolean => {
+    if (!useRegexMode || !pattern || pattern.trim() === '') {
+      setRegexError(null);
+      return true;
+    }
+
+    try {
+      new RegExp(pattern);
+      setRegexError(null);
+      return true;
+    } catch (error) {
+      setRegexError('Invalid regex pattern');
+      return false;
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (value: string) => {
+    table.setGlobalFilter(value);
+    if (useRegexMode) {
+      validateRegex(value);
+    } else {
+      setRegexError(null);
+    }
+  };
+
+  // Handle regex mode toggle
+  const handleRegexModeToggle = (checked: boolean) => {
+    setUseRegexMode(checked);
+    const currentFilter = (table.getState().globalFilter as string) ?? '';
+    if (checked) {
+      validateRegex(currentFilter);
+    } else {
+      setRegexError(null);
+    }
+  };
+
   return (
     <div className='w-full space-y-4'>
-      <div className='flex items-center py-4'>
-        <Input
-          placeholder='Search all columns...'
-          value={(table.getState().globalFilter as string) ?? ''}
-          onChange={event => table.setGlobalFilter(event.target.value)}
-          className='max-w-sm'
-        />
+      <div className='flex items-center py-4 gap-2'>
+        <div className='flex items-center gap-2 flex-1'>
+          <Input
+            placeholder={useRegexMode ? 'Enter regex pattern...' : 'Search all columns...'}
+            value={(table.getState().globalFilter as string) ?? ''}
+            onChange={event => handleSearchChange(event.target.value)}
+            className={`max-w-sm ${regexError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+          />
+          <div className='flex items-center gap-2'>
+            <Checkbox
+              id='regex-mode'
+              checked={useRegexMode}
+              onCheckedChange={handleRegexModeToggle}
+              className='h-4 w-4'
+            />
+            <label
+              htmlFor='regex-mode'
+              className='text-sm text-gray-700 cursor-pointer'
+              title='Enable regex pattern matching'
+            >
+              Regex
+            </label>
+          </div>
+          {regexError && (
+            <span className='text-sm text-red-600' title={regexError}>
+              Invalid regex
+            </span>
+          )}
+        </div>
 
 
         {customControls}
