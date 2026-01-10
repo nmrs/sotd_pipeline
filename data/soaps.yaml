@@ -79,7 +79,7 @@ Abbate Y La Mantia:
     Matteo 9-11:
       patterns:
       - abbate.*matteo
-      alias: Matteo 9,11
+      wsdb_slug: abbate-y-la-mantia-matteo-911-soap
     Verbena Toscana:
       patterns:
       - (?:abbate)?.*verbena t[ou]scana
@@ -121,8 +121,6 @@ Alexandria Grooming:
     Fructus Virginis:
       patterns:
       - fructus virginis
-  aliases:
-  - Alexandria Fragrances
 Alvarez Gomez:
   patterns:
   - alvarez gomez
@@ -138,8 +136,6 @@ Angora Soaps:
   patterns:
   - angora soaps?
 Apex Alchemy Shaving:
-  aliases:
-  - Apex Alchemy Soaps
   patterns:
   - apex alchemy.*(shaving|soaps?)?
 Acqua Di Parma:
@@ -218,7 +214,7 @@ Ariana & Evans:
       patterns:
       - (arian|a&e).*bl[a∀Ɐ]ck$
       - bl[∀Ɐ]ck
-      alias: Black
+      wsdb_slug: ariana-and-evans-black-soap
     Black Birch Stout:
       patterns:
       - black birt?ch stout
@@ -264,7 +260,7 @@ Ariana & Evans:
     Indo Ink:
       patterns:
       - (arian|a&e).*indo[ -]ink
-      alias: Indo-Ink
+      wsdb_slug: ariana-and-evans-indo-ink-soap
     Kaizen:
       patterns:
       - \bkaizen\b
@@ -374,6 +370,7 @@ Arko:
     Shaving Soap:
       patterns:
       - \barko+\b
+      wsdb_slug: arko-arko-soap
 Arsenal Grooming:
   patterns:
   - arsenal grooming
@@ -400,9 +397,9 @@ Australian Private Reserve:
       patterns:
       - general ledger
     La Violetta:
-      alias: Lavioletta
       patterns:
       - la ?violetta
+      wsdb_slug: australian-private-reserve-lavioletta-soap
     Mycroft:
       patterns:
       - (aus|apr).*mycroft
@@ -415,7 +412,7 @@ Australian Private Reserve:
 Aveeno:
   patterns:
   - aveeno
-  scents: 
+  scents:
     Therapeutic Shave Gel:
       patterns:
       - aveeno.*therapeutic
@@ -543,6 +540,7 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*classic
       - barrister.*classic
+      wsdb_slug: barrister-and-mann-reserve-classic-soap
     Clusterfig:
       patterns:
       - cluster ?fig
@@ -574,6 +572,7 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*fern
       - barris.*fern
+      wsdb_slug: barrister-and-mann-reserve-fern-soap
     Figarose:
       patterns:
       - figarose
@@ -614,6 +613,7 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*lavender
       - barris.*lavender
+      wsdb_slug: barrister-and-mann-lavender-black-label-soap
     Le Grand Chypre:
       patterns:
       - gran.*che?y?p
@@ -736,6 +736,7 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*spice
       - barris.*spice
+      wsdb_slug: barrister-and-mann-reserve-spice-soap
     Sunny Lane:
       patterns:
       - sunny lane
@@ -779,6 +780,7 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*wave
       - barris.*wave
+      wsdb_slug: barrister-and-mann-reserve-waves-soap
 Bartigan & Stark:
   patterns:
   - bartigan (and|&) stark
@@ -958,8 +960,6 @@ Captain Fawcett:
       format: Cream
       patterns:
       - fawcett.*scapic+h?io
-  aliases:
-  - Captain Fawcett Limited
 Carnavis & Richardson:
   patterns:
   - carnavis.*richardson
@@ -983,10 +983,10 @@ Catie's Bubbles:
   - cati.*bub\w*s|\bcb\b
   - cbubs
   scents:
-    "'95 Liquid Labels":
+    '''95 Liquid Labels':
       patterns:
       - 95 liquid labels
-      alias: 95 Liquid Labels
+      wsdb_slug: caties-bubbles-95-liquid-labels-soap
     '322':
       patterns:
       - '322'
@@ -1080,8 +1080,8 @@ Catie's Bubbles:
       - cat.*bubb.*(mag.*25|25.*mag)
     Maggards MeetUp (Year Unspecified):
       patterns:
-        - cat.*bubb.*ma.*meet
-        - mag.*meet.*.*cat.*bubb
+      - cat.*bubb.*ma.*meet
+      - mag.*meet.*.*cat.*bubb
     Massepain:
       patterns:
       - (catie|cb).*mass(e|é)pain
@@ -1153,6 +1153,7 @@ Cella:
       patterns:
       - \bcella\b
       - ^cell[oa]$
+      wsdb_slug: cella-milano-crema-da-barba-soap
     All'Olio Di Mandorla:
       format: Cream
       patterns:
@@ -1340,7 +1341,7 @@ Cooper & French:
     White Tea & Ginger:
       patterns:
       - cooper.*tea.*ginger
-      alias: White Tea and Ginger
+      wsdb_slug: cooper-and-french-white-tea-and-ginger-soap
 Crabtree & Evelyn:
   patterns:
   - crabtree & evelyn
@@ -1386,7 +1387,7 @@ Cremo:
       - cremo.*sensitive
     Silver Water & Birch:
       patterns:
-      - cremo.*birch    
+      - cremo.*birch
     Spiced Amber:
       patterns:
       - cremo.*(508|red|amber)
@@ -1461,7 +1462,7 @@ Declaration Grooming:
       patterns:
       - 88 chestnut
       - declaration.*\b88\b
-      alias: 88 Chestnut Street
+      wsdb_slug: declaration-grooming-88-chestnut-street-soap
     Admiral:
       patterns:
       - (declaration|dg|cha.*lux).*admiral
@@ -1508,7 +1509,7 @@ Declaration Grooming:
     Delta-V:
       patterns:
       - delta(-|\s)?\bv\b
-      alias: Delta V
+      wsdb_slug: declaration-grooming-delta-v-soap
     Dirtyver:
       patterns:
       - dirtyver
@@ -1521,7 +1522,7 @@ Declaration Grooming:
     Fourth & Pine:
       patterns:
       - fourth (and|&) pine
-      alias: Fourth and Pine
+      wsdb_slug: declaration-grooming-fourth-and-pine-soap
     Gemütlichkeit:
       patterns:
       - gem[uü]tlichkeit
@@ -1781,7 +1782,7 @@ Ethos:
     Lavender Suprême:
       patterns:
       - ethos.*laven.*supr[eê]me
-      alias: Lavender Supreme
+      wsdb_slug: ethos-lavender-supreme-soap
     Ravello:
       patterns:
       - ethos.*ravello
@@ -1815,6 +1816,9 @@ Extro Cosmesi:
     Tabacco:
       patterns:
       - extr.*cosmesi.*t[ao]bac
+    The End:
+      patterns:
+      - extro.*the end
 FSC:
   patterns:
   - ^fsc\b
@@ -1882,6 +1886,9 @@ First Line Shave:
   patterns:
   - 'first line(?: shaves?)?'
   scents:
+    Dapper Man:
+      patterns:
+      - first line.*dapper man
     Fallout:
       patterns:
       - first line.*fallout
@@ -1973,7 +1980,7 @@ Geo. F. Trumper:
       format: Cream
       patterns:
       - trumper.*coconut
-      alias: Coconut
+      wsdb_slug: geo-f-trumper-coconut-soap
     Eucris:
       format: Cream
       patterns:
@@ -2168,6 +2175,10 @@ Henri et Victoria:
     Amande:
       patterns:
       - \bamande\b
+    Coeur de Vetiver:
+      patterns:
+      - c[oeu]+r de v[eé]tiver
+      wsdb_slug: henri-et-victoria-couer-de-vetiver-soap
     Cognac and Cuban Cigars:
       patterns:
       - cognac.*cuban
@@ -2177,7 +2188,7 @@ Henri et Victoria:
     La Poire Française:
       patterns:
       - la poire.*fran
-      alias: La Poire Francaise
+      wsdb_slug: henri-et-victoria-la-poire-francaise-soap
     Lime:
       patterns:
       - henri.*victoria.*lime
@@ -2299,7 +2310,7 @@ House of Mammoth:
       patterns:
       - mammoth.*indigo
       - \bhom\b.*indigo
-      alias: Mood Indigo
+      wsdb_slug: house-of-mammoth-mood-indigo-soap
     Kryptonite:
       patterns:
       - kr?yp?tonite
@@ -2326,7 +2337,7 @@ House of Mammoth:
       - (hous.*mammoth|\bhom\b).*sonder
     Stones:
       patterns:
-        - (hom|mammoth).*stones
+      - (hom|mammoth).*stones
     Tobacconist:
       patterns:
       - tobac+on+ist
@@ -2415,7 +2426,7 @@ Karve:
     Semois Valley:
       patterns:
       - karve.*semois valley
-      alias: Seniors Valley
+      wsdb_slug: karve-seniors-valley-soap
 Kell's Original:
   patterns:
   - kell'?s original(.*soap)?
@@ -2551,6 +2562,7 @@ Long Rifle Soap Co.:
     Hivernant:
       patterns:
       - long rifle.*hivernant
+      wsdb_slug: long-rifle-soap-company-hivernant-soap
     Tabac No. 1:
       patterns:
       - long rifle.*tabac.*1
@@ -2577,11 +2589,14 @@ Lotus Eater:
 Lucky Tiger:
   patterns:
   - lucky tiger
+  scents:
+    Shave Cream:
+      patterns:
+      - lucky tiger
+      wsdb_slug: lucky-tiger-lucky-tiger-cream
 Meißner Tremonia:
   patterns:
   - mei\w+ner tremonia
-  aliases:
-  - Meissner Tremonia
 MER Shaving:
   patterns:
   - \bmer ?shaving
@@ -2696,7 +2711,7 @@ Martin de Candre:
       patterns:
       - martin.*foug.re
       - \bmdc\b.*foug.re
-      alias: Fougere
+      wsdb_slug: martin-de-candre-fougere-soap
     Nature:
       patterns:
       - candre.*nature
@@ -2771,7 +2786,7 @@ Mickey Lee Soapworks:
     Lū'au:
       patterns:
       - l[ūu]'au
-      alias: Lu'au
+      wsdb_slug: mickey-lee-soapworks-luau-soap
     Pantie Dropper:
       patterns:
       - mickey.*pant.*dropper
@@ -2789,7 +2804,7 @@ Mike's Natural Soaps:
     Bergamot, Orange, Ylang-ylang:
       patterns:
       - mike.*bergamot.*ylang
-      alias: Bergamot Orange Ylang Ylang
+      wsdb_slug: mikes-natural-soaps-bergamot-orange-ylang-ylang-soap
     Honey & Grapefruit:
       patterns:
       - mike.*honey.*grapefruit
@@ -2812,7 +2827,7 @@ Mike's Natural Soaps:
     Rose, Patchouli, Cedarwood:
       patterns:
       - ^mike.*rose.*cedar
-      alias: Cedarwood, Patchouli, Rose
+      wsdb_slug: mikes-natural-soaps-cedarwood-patchouli-rose-soap
     Vetiver:
       patterns:
       - mike.*vetiver
@@ -2925,6 +2940,10 @@ Musgo Real:
 Mystic Water:
   patterns:
   - mystic water
+  scents:
+    Brown Windsor:
+      patterns:
+      - mystic.*brown.*windsor
 Mühle:
   patterns:
   - \bm[üu]hle\b( shave care)?
@@ -2972,9 +2991,10 @@ Noble Otter:
   - nob.*otter
   - ^\W*no\b
   scents:
-    "'Tis the Season":
+    '''Tis the Season':
       patterns:
       - tis+ the season
+      wsdb_slug: noble-otter-tis-the-season-soap
     Bare:
       patterns:
       - noble.*\bbare\b
@@ -2993,7 +3013,7 @@ Noble Otter:
     Hamam:
       patterns:
       - \bhamami?\b
-      alias: Hamami
+      wsdb_slug: noble-otter-hamami-soap
     Italian Summer:
       patterns:
       - (noble|no).*italian.*summer
@@ -3099,7 +3119,7 @@ Oatcake:
   - oatcake
 Obsessive Soap Perfectionist:
   patterns:
-  - obsessive.*(soap)?.*perfection
+  - obsessive.*(soap)?.*perfection(ist)?
 Officina Artigiana:
   patterns:
   - officina artigiana( milano)?
@@ -3205,7 +3225,7 @@ Pannacrema:
     'Nuàvia Blu:':
       patterns:
       - (pan|n\w+via).*blu
-      alias: Nuavia Blu
+      wsdb_slug: pannacrema-nuavia-blu-soap
     Nuàvia Nera:
       patterns:
       - (pan|n\w+via).*ner[oa]
@@ -3242,12 +3262,13 @@ Proraso:
       - proraso.*blue
       - proraso.*aloe
       - proraso.*protect
+      wsdb_slug: proraso-aloe-and-vitamin-e-soap
     Cypress & Vetyver:
       format: Cream
       patterns:
       - proraso.*cypress
       - proraso.*vety
-      alias: Cypress & Vetiver
+      wsdb_slug: proraso-cypress-and-vetiver-soap
     Green Tea & Oat (White):
       format: Cream
       patterns:
@@ -3255,6 +3276,7 @@ Proraso:
       - proraso.*tea
       - proraso.*sensitive
       - proraso.*green tea.*oat
+      wsdb_slug: proraso-green-tea-and-oat-soap
     Menthol and Eucalyptus (Green):
       format: Cream
       patterns:
@@ -3265,6 +3287,7 @@ Proraso:
       - ^(?!.*\btea\b)^pro[rs]aso.*refresh
       - porasso green
       - prosado
+      wsdb_slug: proraso-menthol-and-eucalyptus-soap
     Sandalwood (Red):
       format: Cream
       patterns:
@@ -3273,6 +3296,7 @@ Proraso:
       - proraso.*sandal
       - proraso.*nourish
       - proraso.*course
+      wsdb_slug: proraso-sandalwood-soap
     Wood and Spice:
       patterns:
       - proraso.*wood.*spice
@@ -3349,7 +3373,7 @@ Red House Farm:
     Nine Days Up Nort':
       patterns:
       - red house.*days up
-      alias: 9 Days up Nort'
+      wsdb_slug: red-house-farm-9-days-up-nort-soap
     No Scrub:
       patterns:
       - red house.*no.*scrub
@@ -3431,7 +3455,7 @@ Saponificio Varesino:
   scents:
     70th Anniversary:
       patterns:
-      - varesino.*(70th|settantesimo)
+      - varesino.*(70|settantesimo).*an+iv
     Desert Vetiver:
       patterns:
       - sapon.*sino desert vetiver
@@ -3442,7 +3466,7 @@ Saponificio Varesino:
     Opuntia:
       patterns:
       - op+[iu]ntia
-      alias: Opuntia Beta
+      wsdb_slug: saponificio-varesino-opuntia-beta-soap
     Tundra Artica:
       patterns:
       - tundra arc?tica?
@@ -3581,7 +3605,7 @@ Southern Witchcrafts:
     Fougère Nemeta:
       patterns:
       - fo?ug.*nem(a|e)t+a
-      alias: Fougere Nemeta
+      wsdb_slug: southern-witchcrafts-fougere-nemeta-soap
     Gravefruit (with APR):
       patterns:
       - southern w.*.*grave ?fr?uit
@@ -3786,11 +3810,11 @@ Stirling Soap Co.:
     Glacial Electric Sheep:
       patterns:
       - glacial electric sheep
-      alias: Glacial, Electric Sheep
+      wsdb_slug: stirling-soap-co-glacial-electric-sheep-soap
     Glacial Lemon Chill:
       patterns:
       - glacial.*lemon chill
-      alias: Glacial, Lemon Chill
+      wsdb_slug: stirling-soap-co-glacial-lemon-chill-soap
     Haverford:
       patterns:
       - stirl.*have\wford
@@ -3848,7 +3872,7 @@ Stirling Soap Co.:
     Ramblin' Man:
       patterns:
       - ramblin.*man
-      alias: Ramblin Man
+      wsdb_slug: stirling-soap-co-ramblin-man-soap
     Royal:
       patterns:
       - stirling.*royal
@@ -3882,6 +3906,9 @@ Stirling Soap Co.:
     Stirling Blu:
       patterns:
       - st[ie]rling.*blue?\b
+    Stirling Gentleman:
+      patterns:
+      - stirling.*gentlem[ae]n
     Stirling Green:
       patterns:
       - stirling.*green
@@ -4277,8 +4304,6 @@ The Art of Shaving:
 The Artisan Soap Shoppe:
   patterns:
   - '(?:the )?artisan(?: (soap|shav\w+))? shoppe'
-  aliases:
-  - The Artisan Shave Shoppe
 The Black Stuff:
   patterns:
   - (the )?black stuff
@@ -4335,7 +4360,7 @@ The Goodfellas' Smile:
       - goodfella.*tallow
 The Holy Black:
   patterns:
-  - (the )?holy black( trading co.?(mpany)?)?( new york)?
+  - (the )?holy black( trading co\.?(mpany)?)?( new york)?
   - \bthb\b
   scents:
     Gunpowder Spice:
@@ -4343,6 +4368,9 @@ The Holy Black:
       - gunpowder spice
       - holy black.*artisan
       - holy black.*(shaving )?soap
+    Mountain Man:
+      patterns:
+      - holy black.*mountain m[ae]n
     The Galleon:
       patterns:
       - holy.*galleon
@@ -4382,11 +4410,11 @@ The Sudsy Soapery:
       - sudsy.*fresh
     Lemon Rose Chypre:
       patterns:
-      - lemon rose chypre
+      - lemon.*rose.*chypre
     White Sage and Lime:
       patterns:
       - white sage.*lime
-      alias: White Sage & Lime
+      wsdb_slug: the-sudsy-soapery-white-sage-and-lime-soap
 Thiers-Issard:
   patterns:
   - thiers-?issard
@@ -4397,8 +4425,6 @@ Through the Fire Fine Craft:
   patterns:
   - through the fire( fine crafts?)?
   - ttffc
-  aliases:
-  - Through the Fire Fine Craft
 Tiki Bar Soaps:
   patterns:
   - 'tiki bar(?: soap)?'
@@ -4644,7 +4670,7 @@ Wholly Kaw:
     Fougère Mania:
       patterns:
       - \bkaw\b.*foug.*mania
-      alias: Fougere Mania
+      wsdb_slug: wholly-kaw-fougere-mania-soap
     Iced Tea:
       patterns:
       - kaw.*iced? tea
@@ -4678,7 +4704,7 @@ Wholly Kaw:
       - \bwk\b \byrp\b
 Wickham Soap Co.:
   patterns:
-  - 'wickham(( soap)? co(?:\.|mpany))?.*(1912)?'
+  - wickham(( soap)? co(?:\.|mpany))?.*(1912)?
   scents:
     Club Cola:
       patterns:
@@ -4773,7 +4799,7 @@ Zingari Man:
     Mousse Illuminee:
       patterns:
       - (zingari|romani).*illum[iu]n
-      alias: Mousse Illuminée
+      wsdb_slug: zingari-man-mousse-illuminee-soap
     No. 1 (with Byron Parfums):
       patterns:
       - zingari.*no\.? ?1
