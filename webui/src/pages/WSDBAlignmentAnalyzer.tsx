@@ -182,7 +182,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       loadData();
       loadNonMatches();
     } else {
-      // In match files mode, we still need pipeline soaps for alias lookup and Add Alias functionality
+      // In match files mode, we still need pipeline soaps for slug lookup
       // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
       reloadPipelineSoaps();
       loadNonMatches();
@@ -369,92 +369,53 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
-  const handleAddAlias = async (source: AlignmentResult, match: FuzzyMatch) => {
-    // Determine which is the pipeline brand and which is the alias to add
-    // match.source indicates where the match came from ("wsdb" or "pipeline")
-    let pipelineBrand: string;
-    let aliasToAdd: string;
-
-    if (match.source === 'wsdb') {
-      // Pipeline → WSDB: source is pipeline, match is WSDB
-      pipelineBrand = source.source_brand;
-      aliasToAdd = match.brand;
-    } else {
-      // WSDB → Pipeline: source is WSDB, match is pipeline
-      pipelineBrand = match.brand;
-      aliasToAdd = source.source_brand;
-    }
-
-    try {
-      // Send request to add alias
-      const response = await fetch('http://localhost:8000/api/wsdb-alignment/add-alias', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pipeline_brand: pipelineBrand,
-          alias: aliasToAdd,
-        }),
-      });
-
-      if (response.ok) {
-        // Reload pipeline soaps to get updated aliases (works in both modes)
-        await reloadPipelineSoaps();
-
-        // Re-run analysis to see updated matches
-        await analyzeAlignment();
-
-        // Show success message
-        setSuccessMessage(`Added "${aliasToAdd}" as alias for "${pipelineBrand}"`);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || 'Failed to add alias');
-      }
-    } catch (err) {
-      console.error('Error adding alias:', err);
-      setError(err instanceof Error ? err.message : 'Error adding alias');
-    }
-  };
-
   const handleAddScentAlias = async (source: AlignmentResult, match: FuzzyMatch) => {
     // Determine which brand and scent to use based on match direction
     // match.source indicates where the match came from ("wsdb" or "pipeline")
     let pipelineBrand: string;
     let pipelineScent: string;
-    let aliasToAdd: string;
+    let wsdbSlug: string | undefined;
 
     if (match.source === 'wsdb') {
       // Pipeline → WSDB: source is pipeline, match is WSDB
       pipelineBrand = source.source_brand;
       pipelineScent = source.source_scent;
-      aliasToAdd = match.name; // WSDB scent name
+      wsdbSlug = match.details?.slug; // WSDB slug
     } else {
       // WSDB → Pipeline: source is WSDB, match is pipeline
       pipelineBrand = match.brand;
       pipelineScent = match.name;
-      aliasToAdd = source.source_scent; // WSDB scent name
+      // For WSDB → Pipeline, we need the slug from the source (WSDB entry)
+      // The source should have the slug in its details
+      wsdbSlug = source.matches?.[0]?.details?.slug;
+    }
+
+    if (!wsdbSlug) {
+      addErrorMessage('No WSDB slug found in match. Cannot add slug to catalog.');
+      return;
     }
 
     try {
-      // Send request to add scent alias
+      // Send request to add WSDB slug
       const response = await fetch('http://localhost:8000/api/wsdb-alignment/add-scent-alias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pipeline_brand: pipelineBrand,
           pipeline_scent: pipelineScent,
-          alias: aliasToAdd,
+          wsdb_slug: wsdbSlug,
         }),
       });
 
       if (response.ok) {
-        // Reload pipeline soaps to get updated aliases (works in both modes)
+        // Reload pipeline soaps to get updated slugs (works in both modes)
         await reloadPipelineSoaps();
 
         // Re-run analysis to see updated matches
         await analyzeAlignment();
 
         // Show success message as toast
-        addSuccessMessage(`Added "${aliasToAdd}" as scent alias for "${pipelineBrand} - ${pipelineScent}"`);
+        addSuccessMessage(`Added WSDB slug "${wsdbSlug}" for "${pipelineBrand} - ${pipelineScent}"`);
       } else {
         // Handle error response gracefully (may not be JSON)
         const errorData = await response.json().catch(() => ({}));
@@ -472,15 +433,15 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
             errorMessage = errorMessage || `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
           }
         } else {
-          errorMessage = errorMessage || 'Failed to add scent alias';
+          errorMessage = errorMessage || 'Failed to add WSDB slug';
         }
         
         // Show error message as toast
         addErrorMessage(errorMessage);
       }
     } catch (err) {
-      console.error('Error adding scent alias:', err);
-      addErrorMessage(err instanceof Error ? err.message : 'Error adding scent alias');
+      console.error('Error adding WSDB slug:', err);
+      addErrorMessage(err instanceof Error ? err.message : 'Error adding WSDB slug');
     }
   };
 
@@ -1135,17 +1096,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                           size='sm'
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            handleAddAlias(result, brandMatches[0]);
-                                          }}
-                                          className='text-green-600 hover:bg-green-50 hover:text-green-700'
-                                        >
-                                          + Add Alias
-                                        </Button>
-                                        <Button
-                                          variant='outline'
-                                          size='sm'
-                                          onClick={(e) => {
-                                            e.stopPropagation();
                                             handleNotAMatch(result, brandMatches[0]);
                                           }}
                                           className='text-red-600 hover:bg-red-50 hover:text-red-700'
@@ -1242,7 +1192,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         }}
                                         className='text-green-600 hover:bg-green-50 hover:text-green-700'
                                       >
-                                        + Add Alias
+                                        + Add Slug
                                       </Button>
                                       <Button
                                         variant='outline'
@@ -1439,17 +1389,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                           size='sm'
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            handleAddAlias(result, brandMatches[0]);
-                                          }}
-                                          className='text-green-600 hover:bg-green-50 hover:text-green-700'
-                                        >
-                                          + Add Alias
-                                        </Button>
-                                        <Button
-                                          variant='outline'
-                                          size='sm'
-                                          onClick={(e) => {
-                                            e.stopPropagation();
                                             handleNotAMatch(result, brandMatches[0]);
                                           }}
                                           className='text-red-600 hover:bg-red-50 hover:text-red-700'
@@ -1546,7 +1485,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                         }}
                                         className='text-green-600 hover:bg-green-50 hover:text-green-700'
                                       >
-                                        + Add Alias
+                                        + Add Slug
                                       </Button>
                                       <Button
                                         variant='outline'

@@ -15,6 +15,8 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from rapidfuzz import fuzz
 
+from sotd.utils.wsdb_lookup import WSDBLookup
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/wsdb-alignment", tags=["wsdb-alignment"])
@@ -668,6 +670,9 @@ async def batch_analyze(
         brand_non_matches = non_matches_data.get("brand_non_matches", [])
         scent_non_matches = non_matches_data.get("scent_non_matches", [])
 
+        # Initialize WSDB lookup to check for existing slugs
+        wsdb_lookup = WSDBLookup(project_root=PROJECT_ROOT)
+
         pipeline_results = []
         wsdb_results = []
 
@@ -776,6 +781,14 @@ async def batch_analyze(
             else:
                 # Brand + Scent mode: match each scent individually
                 for scent in brand_entry["scents"]:
+                    # Skip if this brand+scent already has a wsdb_slug in the catalog
+                    existing_slug = wsdb_lookup.get_wsdb_slug(brand_entry["brand"], scent["name"])
+                    if existing_slug:
+                        logger.debug(
+                            f"⏭️ Skipping {brand_entry['brand']} - {scent['name']}: already has slug '{existing_slug}'"
+                        )
+                        continue
+
                     # Use pre-normalized brand data
                     names_to_try = pipeline_brand_norm["names_to_try"]
                     brand_virtual_alias = pipeline_brand_norm["brand_virtual_norm"]
@@ -1385,104 +1398,28 @@ async def remove_non_match(request: NonMatchRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Failed to remove non-match: {str(e)}")
 
 
-class AddAliasRequest(BaseModel):
-    """Request model for adding an alias to a pipeline brand."""
-
-    pipeline_brand: str
-    alias: str
-
-
 class AddScentAliasRequest(BaseModel):
-    """Request model for adding an alias to a pipeline scent."""
+    """Request model for adding a WSDB slug to a pipeline scent."""
 
     pipeline_brand: str
     pipeline_scent: str
-    alias: str
-
-
-@router.post("/add-alias")
-async def add_alias(request: AddAliasRequest) -> dict[str, Any]:
-    """
-    Add an alias to a pipeline brand in soaps.yaml.
-
-    Args:
-        request: AddAliasRequest with pipeline_brand and alias
-
-    Returns:
-        Dict with success status and message
-    """
-    try:
-        logger.info(f"➕ Adding alias '{request.alias}' to brand '{request.pipeline_brand}'")
-
-        soaps_file = PROJECT_ROOT / "data" / "soaps.yaml"
-
-        if not soaps_file.exists():
-            logger.error(f"❌ soaps.yaml not found at {soaps_file}")
-            raise HTTPException(status_code=404, detail="soaps.yaml file not found")
-
-        # Load existing soaps data
-        with soaps_file.open("r", encoding="utf-8") as f:
-            soaps_data = yaml.safe_load(f) or {}
-
-        # Check if brand exists
-        if request.pipeline_brand not in soaps_data:
-            logger.error(f"❌ Brand '{request.pipeline_brand}' not found in soaps.yaml")
-            raise HTTPException(
-                status_code=404, detail=f"Brand '{request.pipeline_brand}' not found in pipeline"
-            )
-
-        brand_data = soaps_data[request.pipeline_brand]
-
-        # Get existing aliases or create new list
-        aliases = brand_data.get("aliases", [])
-        if not isinstance(aliases, list):
-            aliases = []
-
-        # Check if alias already exists (case-insensitive)
-        alias_lower = request.alias.lower()
-        if any(a.lower() == alias_lower for a in aliases):
-            logger.info(f"ℹ️ Alias '{request.alias}' already exists for '{request.pipeline_brand}'")
-            return {"success": True, "message": f"Alias '{request.alias}' already exists"}
-
-        # Add the new alias
-        aliases.append(request.alias)
-        brand_data["aliases"] = aliases
-
-        # Save atomically
-        temp_file = soaps_file.with_suffix(".tmp")
-        with temp_file.open("w", encoding="utf-8") as f:
-            yaml.dump(soaps_data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-
-        temp_file.replace(soaps_file)
-
-        logger.info(f"✅ Alias '{request.alias}' added to '{request.pipeline_brand}' successfully")
-        return {
-            "success": True,
-            "message": f"Added alias '{request.alias}' to '{request.pipeline_brand}'",
-            "aliases": aliases,
-        }
-
-    except HTTPException:
-        raise  # Re-raise HTTPExceptions without wrapping
-    except Exception as e:
-        logger.error(f"❌ Failed to add alias: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to add alias: {str(e)}")
+    wsdb_slug: str
 
 
 @router.post("/add-scent-alias")
 async def add_scent_alias(request: AddScentAliasRequest) -> dict[str, Any]:
     """
-    Add an alias to a pipeline scent in soaps.yaml.
+    Add a WSDB slug to a pipeline scent in soaps.yaml.
 
     Args:
-        request: AddScentAliasRequest with pipeline_brand, pipeline_scent, and alias
+        request: AddScentAliasRequest with pipeline_brand, pipeline_scent, and wsdb_slug
 
     Returns:
         Dict with success status and message
     """
     try:
         logger.info(
-            f"➕ Adding scent alias '{request.alias}' to scent '{request.pipeline_scent}' in brand '{request.pipeline_brand}'"
+            f"➕ Adding WSDB slug '{request.wsdb_slug}' to scent '{request.pipeline_scent}' in brand '{request.pipeline_brand}'"
         )
 
         soaps_file = PROJECT_ROOT / "data" / "soaps.yaml"
@@ -1521,16 +1458,16 @@ async def add_scent_alias(request: AddScentAliasRequest) -> dict[str, Any]:
             scent_data = {}
             brand_data["scents"][request.pipeline_scent] = scent_data
 
-        # Check if alias already exists (case-insensitive)
-        existing_alias = scent_data.get("alias")
-        if existing_alias and existing_alias.lower() == request.alias.lower():
+        # Check if slug already exists
+        existing_slug = scent_data.get("wsdb_slug")
+        if existing_slug and existing_slug == request.wsdb_slug:
             logger.info(
-                f"ℹ️ Scent alias '{request.alias}' already exists for '{request.pipeline_scent}' in '{request.pipeline_brand}'"
+                f"ℹ️ WSDB slug '{request.wsdb_slug}' already exists for '{request.pipeline_scent}' in '{request.pipeline_brand}'"
             )
-            return {"success": True, "message": f"Scent alias '{request.alias}' already exists"}
+            return {"success": True, "message": f"WSDB slug '{request.wsdb_slug}' already exists"}
 
-        # Set the alias (replacing any existing alias)
-        scent_data["alias"] = request.alias
+        # Set the slug (replacing any existing slug)
+        scent_data["wsdb_slug"] = request.wsdb_slug
 
         # Save atomically
         temp_file = soaps_file.with_suffix(".tmp")
@@ -1540,19 +1477,19 @@ async def add_scent_alias(request: AddScentAliasRequest) -> dict[str, Any]:
         temp_file.replace(soaps_file)
 
         logger.info(
-            f"✅ Scent alias '{request.alias}' added to '{request.pipeline_scent}' in '{request.pipeline_brand}' successfully"
+            f"✅ WSDB slug '{request.wsdb_slug}' added to '{request.pipeline_scent}' in '{request.pipeline_brand}' successfully"
         )
         return {
             "success": True,
-            "message": f"Added scent alias '{request.alias}' to '{request.pipeline_scent}' in '{request.pipeline_brand}'",
-            "alias": request.alias,
+            "message": f"Added WSDB slug '{request.wsdb_slug}' to '{request.pipeline_scent}' in '{request.pipeline_brand}'",
+            "wsdb_slug": request.wsdb_slug,
         }
 
     except HTTPException:
         raise  # Re-raise HTTPExceptions without wrapping
     except Exception as e:
-        logger.error(f"❌ Failed to add scent alias: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to add scent alias: {str(e)}")
+        logger.error(f"❌ Failed to add WSDB slug: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to add WSDB slug: {str(e)}")
 
 
 def is_valid_month(month: str) -> bool:
@@ -1728,6 +1665,9 @@ async def batch_analyze_match_files(
         brand_non_matches = non_matches_data.get("brand_non_matches", {})
         scent_non_matches = non_matches_data.get("scent_non_matches", {})
 
+        # Initialize WSDB lookup to check for existing slugs
+        wsdb_lookup = WSDBLookup(project_root=PROJECT_ROOT)
+
         pipeline_results = []
         wsdb_results = []
 
@@ -1735,6 +1675,14 @@ async def batch_analyze_match_files(
         for key, group_data in brand_scent_groups.items():
             pipeline_brand = group_data["brand"]
             pipeline_scent = group_data["scent"]
+
+            # Skip if this brand+scent already has a wsdb_slug in the catalog
+            existing_slug = wsdb_lookup.get_wsdb_slug(pipeline_brand, pipeline_scent)
+            if existing_slug:
+                logger.debug(
+                    f"⏭️ Skipping {pipeline_brand} - {pipeline_scent}: already has slug '{existing_slug}'"
+                )
+                continue
 
             # Look up brand in pipeline soaps to get aliases
             brand_entry = brand_lookup.get(
