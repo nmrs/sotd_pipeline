@@ -7,6 +7,7 @@ import random
 import string
 import time
 import threading
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -84,22 +85,70 @@ class QueueManager:
         """
         Get status for an operation.
 
+        Checks live status file first, then archive files if not found.
+        This handles cases where operations have been cleaned up from live status
+        but the frontend is still polling.
+
         Args:
-            operation_id: Operation ID to check
+            operation_id: Operation ID to check (format: op_TIMESTAMP_RANDOM)
 
         Returns:
             Status dictionary or None if not found
         """
-        if not self.status_file.exists():
-            return None
+        # Check live status file first
+        if self.status_file.exists():
+            try:
+                with self.status_file.open("r", encoding="utf-8") as f:
+                    status_data = json.load(f)
+                if operation_id in status_data:
+                    return status_data[operation_id]
+            except Exception as e:
+                logger.error(f"Failed to read status file: {e}")
 
+        # If not found in live status, check archive files
+        # Extract timestamp from operation_id to determine which archive to check
         try:
-            with self.status_file.open("r", encoding="utf-8") as f:
-                status_data = json.load(f)
-            return status_data.get(operation_id)
-        except Exception as e:
-            logger.error(f"Failed to read status file: {e}")
-            return None
+            # operation_id format: op_1768002684007_2bo3k1wh
+            # Extract timestamp (milliseconds)
+            parts = operation_id.split("_")
+            if len(parts) >= 2 and parts[0] == "op":
+                timestamp_ms = int(parts[1])
+                timestamp = timestamp_ms / 1000.0  # Convert to seconds
+                operation_date = datetime.fromtimestamp(timestamp)
+
+                # Check archive file for this month
+                archive_file = self._get_archive_file_path(operation_date)
+                if archive_file.exists():
+                    try:
+                        with archive_file.open("r", encoding="utf-8") as f:
+                            archive_data = json.load(f)
+                        return archive_data.get(operation_id)
+                    except Exception as e:
+                        logger.error(f"Failed to read archive file {archive_file.name}: {e}")
+        except (ValueError, IndexError) as e:
+            logger.warning(f"Could not parse timestamp from operation_id {operation_id}: {e}")
+            # Fallback: check recent archive files (current month and previous month)
+            # This handles edge cases where timestamp parsing fails
+            for months_back in range(2):
+                check_date = datetime.now().replace(day=1)
+                for _ in range(months_back):
+                    # Go back one month
+                    if check_date.month == 1:
+                        check_date = check_date.replace(year=check_date.year - 1, month=12)
+                    else:
+                        check_date = check_date.replace(month=check_date.month - 1)
+
+                archive_file = self._get_archive_file_path(check_date)
+                if archive_file.exists():
+                    try:
+                        with archive_file.open("r", encoding="utf-8") as f:
+                            archive_data = json.load(f)
+                        if operation_id in archive_data:
+                            return archive_data[operation_id]
+                    except Exception as e:
+                        logger.error(f"Failed to read archive file {archive_file.name}: {e}")
+
+        return None
 
     def _update_status(
         self,
@@ -143,9 +192,20 @@ class QueueManager:
             if result:
                 status_entry["result"] = result
 
-        status_data[operation_id] = status_entry
+        # If operation is completed or failed, archive it but keep in live status briefly
+        # This allows the frontend to get the final status before we remove it
+        if status in ("completed", "failed"):
+            # Archive the completed operation immediately
+            self._archive_completed_operation(operation_id, status_entry)
+            # Keep in live status for a grace period to allow frontend to get final status
+            # The frontend stops polling once it sees completed/failed, but we keep it
+            # briefly to avoid 404 errors during the transition
+            status_data[operation_id] = status_entry
+        else:
+            # Update live status for pending/processing operations
+            status_data[operation_id] = status_entry
 
-        # Save status file atomically
+        # Save status file atomically (only pending/processing operations)
         temp_file = self.status_file.with_suffix(".tmp")
         try:
             with temp_file.open("w", encoding="utf-8") as f:
@@ -153,6 +213,65 @@ class QueueManager:
             temp_file.replace(self.status_file)
         except Exception as e:
             logger.error(f"Failed to update status file: {e}")
+            if temp_file.exists():
+                temp_file.unlink()
+
+    def _get_archive_file_path(self, date: datetime) -> Path:
+        """
+        Get archive file path for a given date (monthly archives).
+
+        Args:
+            date: Date to get archive file for
+
+        Returns:
+            Path to archive file (e.g., .status.archive.2025-01.json)
+        """
+        date_str = date.strftime("%Y-%m")
+        return self.correct_matches_path / f".status.archive.{date_str}.json"
+
+    def _archive_completed_operation(self, operation_id: str, status_entry: Dict[str, Any]) -> None:
+        """
+        Archive a completed operation to monthly archive file.
+
+        Uses the completion date to determine which monthly archive file to use.
+
+        Args:
+            operation_id: Operation ID
+            status_entry: Status entry dictionary
+        """
+        # Get completion date from status entry
+        completed_at = status_entry.get("completed_at")
+        if not completed_at:
+            # Fallback to updated_at if completed_at not available
+            completed_at = status_entry.get("updated_at", time.time())
+
+        # Convert timestamp to datetime
+        completion_date = datetime.fromtimestamp(completed_at)
+
+        # Get archive file path for this month
+        archive_file = self._get_archive_file_path(completion_date)
+
+        # Load existing archive
+        archive_data = {}
+        if archive_file.exists():
+            try:
+                with archive_file.open("r", encoding="utf-8") as f:
+                    archive_data = json.load(f)
+            except Exception:
+                archive_data = {}
+
+        # Add operation to archive
+        archive_data[operation_id] = status_entry
+
+        # Save archive file atomically
+        temp_file = archive_file.with_suffix(".tmp")
+        try:
+            with temp_file.open("w", encoding="utf-8") as f:
+                json.dump(archive_data, f, indent=2)
+            temp_file.replace(archive_file)
+            logger.debug(f"Archived operation {operation_id} to {archive_file.name}")
+        except Exception as e:
+            logger.error(f"Failed to archive operation {operation_id}: {e}")
             if temp_file.exists():
                 temp_file.unlink()
 
@@ -370,6 +489,54 @@ class QueueManager:
             # Don't remove from queue on failure - allow retry
             return False
 
+    def _cleanup_old_completed_operations(self) -> None:
+        """
+        Remove completed/failed operations from live status that are older than grace period.
+        
+        This runs periodically to clean up operations that have been completed for a while,
+        giving the frontend time to poll and get the final status.
+        """
+        GRACE_PERIOD_SECONDS = 10  # Keep completed operations for 10 seconds after completion
+        
+        if not self.status_file.exists():
+            return
+        
+        try:
+            with self.status_file.open("r", encoding="utf-8") as f:
+                status_data = json.load(f)
+        except Exception:
+            return
+        
+        current_time = time.time()
+        removed_count = 0
+        
+        # Find completed/failed operations older than grace period
+        operations_to_remove = []
+        for operation_id, status_entry in status_data.items():
+            if status_entry.get("status") in ("completed", "failed"):
+                completed_at = status_entry.get("completed_at")
+                if completed_at and (current_time - completed_at) > GRACE_PERIOD_SECONDS:
+                    operations_to_remove.append(operation_id)
+        
+        # Remove old completed operations
+        if operations_to_remove:
+            for operation_id in operations_to_remove:
+                del status_data[operation_id]
+                removed_count += 1
+            
+            # Save updated status file
+            temp_file = self.status_file.with_suffix(".tmp")
+            try:
+                with temp_file.open("w", encoding="utf-8") as f:
+                    json.dump(status_data, f, indent=2)
+                temp_file.replace(self.status_file)
+                if removed_count > 0:
+                    logger.debug(f"Cleaned up {removed_count} old completed operations from live status")
+            except Exception as e:
+                logger.error(f"Failed to cleanup old operations: {e}")
+                if temp_file.exists():
+                    temp_file.unlink()
+
     def process_queue(self) -> None:
         """Process all pending operations in queue."""
         if self._processing:
@@ -382,6 +549,9 @@ class QueueManager:
 
         self._processing = True
         try:
+            # Cleanup old completed operations before processing new ones
+            self._cleanup_old_completed_operations()
+            
             operations = self._read_queue()
             if not operations:
                 return
