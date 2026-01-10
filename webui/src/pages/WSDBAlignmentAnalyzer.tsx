@@ -18,6 +18,8 @@ import DeltaMonthsInfoPanel from '../components/domain/DeltaMonthsInfoPanel';
 import CommentModal from '../components/domain/CommentModal';
 import { CommentDisplay } from '../components/domain/CommentDisplay';
 import { getCommentDetail, CommentDetail } from '../services/api';
+import { useMessaging } from '../hooks/useMessaging';
+import MessageDisplay from '../components/feedback/MessageDisplay';
 
 interface WSDBSoap {
   brand: string;
@@ -123,6 +125,9 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
   const [commentLoading, setCommentLoading] = useState(false);
+
+  // Initialize messaging hook for toast notifications
+  const { messages, addErrorMessage, addSuccessMessage, removeMessage } = useMessaging();
 
   // Callback for delta months
   const handleDeltaMonthsChange = useCallback((months: string[]) => {
@@ -270,7 +275,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         const allMonths = selectedMonths;
         const monthsParam = allMonths.join(',');
         response = await fetch(
-          `http://localhost:8000/api/wsdb-alignment/batch-analyze-match-files?months=${monthsParam}&threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8&match_type_filter=${matchTypeFilter}`,
+          `http://localhost:8000/api/wsdb-alignment/batch-analyze-match-files?months=${monthsParam}&threshold=${similarityThreshold}&limit=${resultLimit}&mode=${analysisMode}&brand_threshold=0.8&match_type_filter=all`,
           {
             method: 'POST',
           }
@@ -448,15 +453,34 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         // Re-run analysis to see updated matches
         await analyzeAlignment();
 
-        // Show success message
-        setSuccessMessage(`Added "${aliasToAdd}" as scent alias for "${pipelineBrand} - ${pipelineScent}"`);
+        // Show success message as toast
+        addSuccessMessage(`Added "${aliasToAdd}" as scent alias for "${pipelineBrand} - ${pipelineScent}"`);
       } else {
-        const errorData = await response.json();
-        setError(errorData.detail || 'Failed to add scent alias');
+        // Handle error response gracefully (may not be JSON)
+        const errorData = await response.json().catch(() => ({}));
+        
+        // Extract error message with context
+        let errorMessage = errorData.detail || errorData.message;
+        
+        // Provide user-friendly error messages for common cases
+        if (response.status === 404) {
+          if (errorMessage?.includes('Scent') && errorMessage?.includes('not found')) {
+            errorMessage = `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
+          } else if (errorMessage?.includes('Brand') && errorMessage?.includes('not found')) {
+            errorMessage = `Brand '${pipelineBrand}' not found in catalog. Please add the brand to the catalog first.`;
+          } else {
+            errorMessage = errorMessage || `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
+          }
+        } else {
+          errorMessage = errorMessage || 'Failed to add scent alias';
+        }
+        
+        // Show error message as toast
+        addErrorMessage(errorMessage);
       }
     } catch (err) {
       console.error('Error adding scent alias:', err);
-      setError(err instanceof Error ? err.message : 'Error adding scent alias');
+      addErrorMessage(err instanceof Error ? err.message : 'Error adding scent alias');
     }
   };
 
@@ -755,33 +779,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
             />
           )}
 
-          {/* Match Type Filter (only shown for match files mode) */}
-          {dataSource === 'match_files' && (
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>Match Type Filter</label>
-              <div className='flex flex-wrap gap-2'>
-                <Button
-                  onClick={() => setMatchTypeFilter('brand')}
-                  disabled={loading}
-                  variant={matchTypeFilter === 'brand' ? 'default' : 'secondary'}
-                  size='sm'
-                >
-                  Brand
-                </Button>
-                <Button
-                  onClick={() => setMatchTypeFilter('all')}
-                  disabled={loading}
-                  variant={matchTypeFilter === 'all' ? 'default' : 'secondary'}
-                  size='sm'
-                >
-                  All Types
-                </Button>
-              </div>
-              <p className='text-xs text-gray-500 mt-1'>
-                Filter match file entries by match_type (default: brand matches only)
-              </p>
-            </div>
-          )}
 
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div>
@@ -1622,6 +1619,9 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
           remainingCommentIds={remainingCommentIds}
         />
       )}
+
+      {/* Toast Notifications */}
+      <MessageDisplay messages={messages} onRemoveMessage={removeMessage} />
     </div>
   );
 };

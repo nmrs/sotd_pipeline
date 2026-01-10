@@ -315,13 +315,13 @@ class NonMatchRequest(BaseModel):
 @router.get("/load-wsdb")
 async def load_wsdb_soaps() -> dict[str, Any]:
     """
-    Load WSDB soaps from software.json, filtering for type="Soap" only.
+    Load WSDB soaps and creams from software.json, filtering for type="Soap" or type="Cream".
 
     Returns:
-        Dict containing list of WSDB soaps and metadata
+        Dict containing list of WSDB soaps/creams and metadata
     """
     try:
-        logger.info("📂 Loading WSDB soaps from software.json")
+        logger.info("📂 Loading WSDB soaps and creams from software.json")
         software_file = PROJECT_ROOT / "data" / "wsdb" / "software.json"
 
         if not software_file.exists():
@@ -331,11 +331,11 @@ async def load_wsdb_soaps() -> dict[str, Any]:
         with software_file.open("r", encoding="utf-8") as f:
             all_software = json.load(f)
 
-        # Filter for soaps only
-        soaps = [item for item in all_software if item.get("type") == "Soap"]
+        # Filter for soaps and creams
+        soaps = [item for item in all_software if item.get("type") in ("Soap", "Cream")]
 
         logger.info(
-            f"✅ Loaded {len(soaps)} soaps from WSDB (filtered from {len(all_software)} total items)"
+            f"✅ Loaded {len(soaps)} soaps/creams from WSDB (filtered from {len(all_software)} total items)"
         )
 
         return {
@@ -496,6 +496,7 @@ async def fuzzy_match(request: FuzzyMatchRequest) -> dict[str, Any]:
                                 "collaborators": soap.get("collaborators", []),
                                 "tags": soap.get("tags", []),
                                 "category": soap.get("category"),
+                                "type": soap.get("type"),
                             },
                         }
                     )
@@ -742,6 +743,7 @@ async def batch_analyze(
                                     "collaborators": wsdb_soap.get("collaborators", []),
                                     "tags": wsdb_soap.get("tags", []),
                                     "category": wsdb_soap.get("category"),
+                                    "type": wsdb_soap.get("type"),
                                 },
                             }
                         )
@@ -754,8 +756,13 @@ async def batch_analyze(
                     if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
                 ]
 
-                # Sort and limit
-                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                # Sort and limit: prefer Soap over Cream when scores are equal
+                matches.sort(
+                    key=lambda x: (
+                        -x["confidence"],  # Negative for descending
+                        0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                    )
+                )
                 matches = matches[:5]
 
                 pipeline_results.append(
@@ -856,6 +863,7 @@ async def batch_analyze(
                                             "collaborators": wsdb_soap.get("collaborators", []),
                                             "tags": wsdb_soap.get("tags", []),
                                             "category": wsdb_soap.get("category"),
+                                            "type": wsdb_soap.get("type"),
                                         },
                                     }
                                 )
@@ -873,8 +881,13 @@ async def batch_analyze(
                         )
                     ]
 
-                    # Sort and limit
-                    matches.sort(key=lambda x: x["confidence"], reverse=True)
+                    # Sort and limit: prefer Soap over Cream when scores are equal
+                    matches.sort(
+                        key=lambda x: (
+                            -x["confidence"],  # Negative for descending
+                            0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                        )
+                    )
                     matches = matches[:5]
 
                     pipeline_results.append(
@@ -1567,7 +1580,7 @@ async def batch_analyze_match_files(
         0.8, ge=0.0, le=1.0, description="Minimum brand match threshold (0.0-1.0)"
     ),
     match_type_filter: str = Query(
-        "brand", description="Filter for match_type (default: 'brand', use 'all' for all types)"
+        "all", description="Filter for match_type (deprecated: always includes all types for WSDB alignment)"
     ),
 ) -> dict[str, Any]:
     """
@@ -1588,6 +1601,7 @@ async def batch_analyze_match_files(
     import time
 
     start_time = time.time()
+
     try:
         logger.info(
             f"🔄 Starting batch_analyze_match_files: months={months}, mode={mode}, threshold={threshold}"
@@ -1632,12 +1646,8 @@ async def batch_analyze_match_files(
                                     f"⚠️ Skipping non-dict soap entry in {month}: {type(soap)}"
                                 )
                                 continue
-                            # Filter by match_type if specified
-                            if (
-                                match_type_filter != "all"
-                                and soap.get("match_type") != match_type_filter
-                            ):
-                                continue
+                            # Note: For WSDB alignment, we don't filter by match_type - all matched entries
+                            # should be analyzed for WSDB mapping regardless of how they were matched
                             # Only include entries with matched brand and scent
                             matched = soap.get("matched")
                             if not matched or not isinstance(matched, dict):
@@ -1785,6 +1795,7 @@ async def batch_analyze_match_files(
                                     "collaborators": wsdb_soap.get("collaborators", []),
                                     "tags": wsdb_soap.get("tags", []),
                                     "category": wsdb_soap.get("category"),
+                                    "type": wsdb_soap.get("type"),
                                 },
                             }
                         )
@@ -1797,8 +1808,13 @@ async def batch_analyze_match_files(
                     if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
                 ]
 
-                # Sort and limit
-                matches.sort(key=lambda x: x["confidence"], reverse=True)
+                # Sort and limit: prefer Soap over Cream when scores are equal
+                matches.sort(
+                    key=lambda x: (
+                        -x["confidence"],  # Negative for descending
+                        0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                    )
+                )
                 matches = matches[:5]
 
                 pipeline_results.append(
@@ -1866,6 +1882,7 @@ async def batch_analyze_match_files(
 
                     brand_score = best_brand_score
 
+
                     # Only proceed if brand matches above threshold
                     if brand_score >= brand_threshold * 100:
                         # Try matching with each scent name (canonical + alias + virtual alias)
@@ -1890,28 +1907,30 @@ async def batch_analyze_match_files(
                                     scent_matched_via = "alias"
 
                         scent_score = best_scent_score
-                        confidence = scent_score  # Use scent score directly
+                        # Brand + Scent: 60% brand + 40% scent
+                        confidence = (brand_score * 0.6) + (scent_score * 0.4)
+
 
                         if confidence >= threshold * 100:
-                            matches.append(
-                                {
-                                    "brand": wsdb_soap.get("brand"),
-                                    "name": wsdb_soap.get("name"),
-                                    "confidence": round(confidence, 2),
-                                    "brand_score": round(brand_score, 2),
-                                    "scent_score": round(scent_score, 2),
-                                    "source": "wsdb",
-                                    "matched_via": matched_via,
-                                    "scent_matched_via": scent_matched_via,
-                                    "details": {
-                                        "slug": wsdb_soap.get("slug"),
-                                        "scent_notes": wsdb_soap.get("scent_notes", []),
-                                        "collaborators": wsdb_soap.get("collaborators", []),
-                                        "tags": wsdb_soap.get("tags", []),
-                                        "category": wsdb_soap.get("category"),
-                                    },
-                                }
-                            )
+                            match_entry = {
+                                "brand": wsdb_soap.get("brand"),
+                                "name": wsdb_soap.get("name"),
+                                "confidence": round(confidence, 2),
+                                "brand_score": round(brand_score, 2),
+                                "scent_score": round(scent_score, 2),
+                                "source": "wsdb",
+                                "matched_via": matched_via,
+                                "scent_matched_via": scent_matched_via,
+                                "details": {
+                                    "slug": wsdb_soap.get("slug"),
+                                    "scent_notes": wsdb_soap.get("scent_notes", []),
+                                    "collaborators": wsdb_soap.get("collaborators", []),
+                                    "tags": wsdb_soap.get("tags", []),
+                                    "category": wsdb_soap.get("category"),
+                                    "type": wsdb_soap.get("type"),
+                                },
+                            }
+                            matches.append(match_entry)
 
                 # Filter non-matches before sorting
                 source_item = {"source_brand": pipeline_brand, "source_scent": pipeline_scent}
@@ -1921,24 +1940,29 @@ async def batch_analyze_match_files(
                     if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
                 ]
 
-                # Sort and limit
-                matches.sort(key=lambda x: x["confidence"], reverse=True)
+
+                # Sort and limit: prefer Soap over Cream when scores are equal
+                matches.sort(
+                    key=lambda x: (
+                        -x["confidence"],  # Negative for descending
+                        0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                    )
+                )
                 matches = matches[:5]
 
-                pipeline_results.append(
-                    {
-                        "source_brand": pipeline_brand,
-                        "source_scent": pipeline_scent,
-                        "matches": matches,
-                        "expanded": False,
-                        "original_texts": list(set(group_data["original_texts"]))[
-                            :5
-                        ],  # Top 5 unique originals
-                        "match_types": list(set(group_data["match_types"])),
-                        "count": group_data["count"],
-                        "comment_ids": group_data["comment_ids"][:10],  # Limit comment IDs
-                    }
-                )
+                result_entry = {
+                    "source_brand": pipeline_brand,
+                    "source_scent": pipeline_scent,
+                    "matches": matches,
+                    "expanded": False,
+                    "original_texts": list(set(group_data["original_texts"]))[
+                        :5
+                    ],  # Top 5 unique originals
+                    "match_types": list(set(group_data["match_types"])),
+                    "count": group_data["count"],
+                    "comment_ids": group_data["comment_ids"][:10],  # Limit comment IDs
+                }
+                pipeline_results.append(result_entry)
 
         # WSDB → Pipeline matches (reverse direction)
         # For match files mode, we primarily care about Pipeline → WSDB, but we can also do reverse
