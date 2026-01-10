@@ -1235,11 +1235,14 @@ const MatchAnalyzer: React.FC = () => {
           // remaining_count = total patterns - top 3 patterns shown
           const remainingCount = Math.max(0, filteredAllPatterns.length - 3);
 
+          // Recalculate total_count from filtered patterns (not original total)
+          const filteredTotalCount = filteredAllPatterns.reduce((sum, pattern) => sum + (pattern.count || 0), 0);
+
           return {
             matched_string: group.matched_string,
             brand: group.brand,
             scent: group.scent,
-            total_count: group.total_count, // Keep original total for context
+            total_count: filteredTotalCount, // Use recalculated total from filtered patterns
             top_patterns: filteredTopPatterns.slice(0, 3), // Show top 3 filtered patterns
             remaining_count: remainingCount,
             all_patterns: filteredAllPatterns,
