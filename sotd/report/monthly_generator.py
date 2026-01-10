@@ -220,10 +220,10 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
                     # Generate the table with parameters
                     # Extract numeric limits (any parameter that's not ranks, rows,
-                    # columns, or deltas)
+                    # columns, deltas, or wsdb)
                     numeric_limits = {}
                     for key, value in parameters.items():
-                        if key not in ["ranks", "rows", "columns", "deltas"]:
+                        if key not in ["ranks", "rows", "columns", "deltas", "wsdb"]:
                             numeric_limits[key] = value
 
                     table_content = table_generator.generate_table(
@@ -232,6 +232,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                         rows=parameters.get("rows"),
                         columns=parameters.get("columns"),
                         deltas=parameters.get("deltas") == "true",
+                        wsdb=parameters.get("wsdb") == "true",
                         **numeric_limits,
                     )
 

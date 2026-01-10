@@ -241,21 +241,24 @@ class TableGenerator:
 
         return formatted_df
 
-    def _format_soap_links(self, df: pd.DataFrame, table_name: str) -> pd.DataFrame:
+    def _format_soap_links(
+        self, df: pd.DataFrame, table_name: str, enable_wsdb: bool = False
+    ) -> pd.DataFrame:
         """Format soap names with WSDB links when slug is found.
 
-        Only applies to "soaps" table. Wraps soap names in markdown links
+        Only applies to "soaps" table when enable_wsdb=True. Wraps soap names in markdown links
         when a matching WSDB slug is found.
 
         Args:
             df: DataFrame to format
             table_name: Name of the table being generated
+            enable_wsdb: Whether to enable WSDB link formatting
 
         Returns:
             DataFrame with formatted soap names (with links when available)
         """
-        # Only apply to soaps table
-        if table_name != "soaps":
+        # Only apply to soaps table when wsdb is enabled
+        if table_name != "soaps" or not enable_wsdb:
             return df
 
         # Check if required columns exist
@@ -697,6 +700,7 @@ class TableGenerator:
         rows: Optional[int] = None,
         columns: Optional[str] = None,
         deltas: bool = False,
+        wsdb: bool = False,
         **numeric_limits,
     ) -> str:
         """Generate a markdown table by table name.
@@ -707,6 +711,7 @@ class TableGenerator:
             rows: Maximum number of rows to include
             columns: Optional column specification (e.g., "rank, name=soap, shaves")
             deltas: Whether to include delta calculations
+            wsdb: Whether to add WSDB links to soap names (only applies to soaps table)
             **numeric_limits: Single numeric column limit (e.g., shaves=50)
 
         Returns:
@@ -815,15 +820,15 @@ class TableGenerator:
                 if isinstance(formatted_df, pd.DataFrame):
                     df = formatted_df
 
-        # Apply column operations AFTER delta calculation (so rank column is available for deltas)
+        # Format soap names with WSDB links (only for soaps table when wsdb=True)
+        # Do this BEFORE column operations so we can access columns by their original names
+        df = self._format_soap_links(df, table_name, enable_wsdb=wsdb)
+
+        # Apply column operations AFTER WSDB formatting (so rank column is available for deltas)
         if columns:
             column_df = self._apply_column_operations(df, columns)
             if isinstance(column_df, pd.DataFrame):
                 df = column_df
-
-        # Format soap names with WSDB links (only for soaps table)
-        # Do this BEFORE column name formatting so we can access columns by their original names
-        df = self._format_soap_links(df, table_name)
 
         # Format column names to Title Case with acronym preservation BEFORE converting to markdown
         # This ensures clean column names in the final output

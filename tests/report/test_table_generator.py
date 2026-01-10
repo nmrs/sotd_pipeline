@@ -991,7 +991,7 @@ class TestTableGenerator:
         }
 
         generator = TableGenerator(data)
-        result = generator.generate_table("soaps")
+        result = generator.generate_table("soaps", wsdb=True)
 
         # Should contain links for matched soaps
         assert (

@@ -27,7 +27,7 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Soaps
 
-{{tables.soaps|shaves:5|columns:rank, name=soap, shaves, unique_users|deltas:true}}
+{{tables.soaps|shaves:5|columns:rank, name=soap, shaves, unique_users|deltas:true|wsdb:true}}
 
 ## Brand Diversity
 

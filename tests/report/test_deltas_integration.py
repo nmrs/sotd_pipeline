@@ -175,3 +175,188 @@ class TestDeltasIntegration:
 
         # Should contain n/a for deltas when no comparison data
         assert "n/a" in table_content
+
+
+class TestWSDBParameterIntegration:
+    """Test wsdb parameter integration through the full pipeline."""
+
+    def test_wsdb_parameter_end_to_end(self, tmp_path, monkeypatch):
+        """Test that wsdb:true parameter works end-to-end through template processing."""
+        import json
+
+        # Create directory structure
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Seville",
+                "slug": "barrister-and-mann-seville",
+                "type": "Soap",
+            },
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        # Create a test template with wsdb parameter
+        template_content = """# Test Software Report
+
+## Soaps with WSDB Links
+{{tables.soaps|wsdb:true}}
+
+## Soaps without WSDB Links
+{{tables.soaps}}
+"""
+        template_file = tmp_path / "software.md"
+        template_file.write_text(template_content)
+
+        # Create test data
+        metadata = {"month": "2025-06", "total_shaves": 1000}
+        data = {
+            "soaps": [
+                {
+                    "rank": 1,
+                    "shaves": 100,
+                    "unique_users": 50,
+                    "brand": "Barrister and Mann",
+                    "scent": "Seville",
+                    "name": "Barrister and Mann - Seville",
+                },
+            ]
+        }
+
+        # Create monthly generator and table generator
+        monthly_gen = MonthlyReportGenerator("software", metadata, data)
+        table_generator = TableGenerator(data)
+
+        # Process the template
+        result = monthly_gen._process_enhanced_table_syntax(template_content, table_generator)
+
+        # Verify that the enhanced table was processed
+        assert "{{tables.soaps|wsdb:true}}" in result
+
+        # Verify that WSDB links are present in the output
+        table_content = result["{{tables.soaps|wsdb:true}}"]
+        assert (
+            "[Barrister and Mann - Seville](https://www.wetshavingdatabase.com/software/barrister-and-mann-seville/)"
+            in table_content
+        )
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_wsdb_parameter_boolean_conversion(self):
+        """Test that wsdb:true gets converted to boolean True correctly."""
+
+        # Test the parameter parsing and conversion logic directly
+        from sotd.report.table_parameter_parser import TableParameterParser
+
+        parser = TableParameterParser()
+        table_name, parameters = parser.parse_placeholder("{{tables.soaps|wsdb:true}}")
+
+        assert table_name == "soaps"
+        assert parameters["wsdb"] == "true"
+
+        # Test boolean conversion
+        wsdb_bool = parameters.get("wsdb") == "true"
+        assert wsdb_bool is True
+
+        # Test false case
+        table_name, parameters = parser.parse_placeholder("{{tables.soaps|wsdb:false}}")
+        wsdb_bool = parameters.get("wsdb") == "true"
+        assert wsdb_bool is False
+
+    def test_wsdb_parameter_with_other_parameters(self, tmp_path, monkeypatch):
+        """Test that wsdb parameter works with other parameters like shaves and deltas."""
+        import json
+
+        # Create directory structure
+        table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
+        table_generators_dir.mkdir(parents=True)
+
+        # Create mock WSDB data
+        wsdb_dir = tmp_path / "data" / "wsdb"
+        wsdb_dir.mkdir(parents=True)
+        wsdb_file = wsdb_dir / "software.json"
+
+        mock_wsdb_data = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Seville",
+                "slug": "barrister-and-mann-seville",
+                "type": "Soap",
+            },
+        ]
+
+        with wsdb_file.open("w", encoding="utf-8") as f:
+            json.dump(mock_wsdb_data, f)
+
+        import sotd.report.table_generators.table_generator as tg_module
+
+        original_file = tg_module.__file__
+        test_file_path = str(table_generators_dir / "table_generator.py")
+        monkeypatch.setattr(tg_module, "__file__", test_file_path)
+
+        template_content = """# Test Report
+
+## Soaps with Multiple Parameters
+{{tables.soaps|shaves:5|wsdb:true|deltas:true}}
+"""
+        template_file = tmp_path / "software.md"
+        template_file.write_text(template_content)
+
+        metadata = {"month": "2025-06", "total_shaves": 1000}
+        data = {
+            "soaps": [
+                {
+                    "rank": 1,
+                    "shaves": 100,
+                    "unique_users": 50,
+                    "brand": "Barrister and Mann",
+                    "scent": "Seville",
+                    "name": "Barrister and Mann - Seville",
+                },
+                {
+                    "rank": 2,
+                    "shaves": 3,  # Below shaves:5 threshold
+                    "unique_users": 2,
+                    "brand": "Stirling Soap Co.",
+                    "scent": "Executive Man",
+                    "name": "Stirling Soap Co. - Executive Man",
+                },
+            ]
+        }
+
+        monthly_gen = MonthlyReportGenerator("software", metadata, data)
+        table_generator = TableGenerator(data)
+
+        # Process the template
+        result = monthly_gen._process_enhanced_table_syntax(template_content, table_generator)
+
+        # Verify that the enhanced table was processed
+        assert "{{tables.soaps|shaves:5|wsdb:true|deltas:true}}" in result
+
+        # Verify WSDB links are present and filtering worked
+        table_content = result["{{tables.soaps|shaves:5|wsdb:true|deltas:true}}"]
+        assert (
+            "[Barrister and Mann - Seville](https://www.wetshavingdatabase.com/software/barrister-and-mann-seville/)"
+            in table_content
+        )
+        # Should not include the soap below threshold
+        assert "Stirling Soap Co. - Executive Man" not in table_content
+
+        # Restore original file path
+        monkeypatch.setattr(tg_module, "__file__", original_file)
