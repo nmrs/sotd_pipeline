@@ -49,6 +49,7 @@ interface SoapNeighborSimilarityResult {
   pattern: string;
   comment_ids: string[];
   count: number;
+  match_types?: string[];
   matched?: {
     maker: string;
     scent: string;
@@ -358,6 +359,21 @@ const SoapAnalyzer: React.FC = () => {
     return 'bg-green-100 text-green-800'; // Different - good separation
   };
 
+  const getMatchTypeColor = (matchType: string) => {
+    switch (matchType) {
+      case 'exact':
+        return 'bg-green-100 text-green-800';
+      case 'regex':
+        return 'bg-blue-100 text-blue-800';
+      case 'brand':
+        return 'bg-orange-100 text-orange-800';
+      case 'dash_split':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   // Comment handling functions
   const handleCommentClick = async (commentId: string) => {
     if (!commentId) return;
@@ -509,6 +525,8 @@ const SoapAnalyzer: React.FC = () => {
           (result.normalized_string &&
             result.normalized_string.toLowerCase().includes(searchTerm)) ||
           (result.pattern && result.pattern.toLowerCase().includes(searchTerm)) ||
+          (result.match_types &&
+            result.match_types.some(mt => mt.toLowerCase().includes(searchTerm))) ||
           (result.comment_ids &&
             result.comment_ids.some(id => id.toLowerCase().includes(searchTerm)))
       );
@@ -858,6 +876,9 @@ const SoapAnalyzer: React.FC = () => {
                             Pattern
                           </th>
                           <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
+                            Match Type
+                          </th>
+                          <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
                             Comment IDs
                           </th>
                         </tr>
@@ -927,6 +948,18 @@ const SoapAnalyzer: React.FC = () => {
                             </td>
                             <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                               {result.pattern || '-'}
+                            </td>
+                            <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
+                              <div className='flex flex-wrap gap-1'>
+                                {(result.match_types || ['unknown']).map((matchType, idx) => (
+                                  <span
+                                    key={idx}
+                                    className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold rounded-full ${getMatchTypeColor(matchType)}`}
+                                  >
+                                    {matchType}
+                                  </span>
+                                ))}
+                              </div>
                             </td>
                             <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                               <CommentDisplay
@@ -1036,6 +1069,9 @@ const SoapAnalyzer: React.FC = () => {
                             Pattern
                           </th>
                           <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
+                            Match Type
+                          </th>
+                          <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
                             Comment IDs
                           </th>
                         </tr>
@@ -1128,6 +1164,18 @@ const SoapAnalyzer: React.FC = () => {
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 {result.pattern || '-'}
+                              </td>
+                              <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
+                                <div className='flex flex-wrap gap-1'>
+                                  {(result.match_types || ['unknown']).map((matchType, idx) => (
+                                    <span
+                                      key={idx}
+                                      className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold rounded-full ${getMatchTypeColor(matchType)}`}
+                                    >
+                                      {matchType}
+                                    </span>
+                                  ))}
+                                </div>
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 <CommentDisplay
@@ -1238,6 +1286,9 @@ const SoapAnalyzer: React.FC = () => {
                             Pattern
                           </th>
                           <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
+                            Match Type
+                          </th>
+                          <th className='border border-gray-300 px-3 py-2 text-left font-medium'>
                             Comment IDs
                           </th>
                         </tr>
@@ -1329,6 +1380,18 @@ const SoapAnalyzer: React.FC = () => {
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 {result.pattern || '-'}
+                              </td>
+                              <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
+                                <div className='flex flex-wrap gap-1'>
+                                  {(result.match_types || ['unknown']).map((matchType, idx) => (
+                                    <span
+                                      key={idx}
+                                      className={`inline-flex items-center px-1.5 py-0.5 text-xs font-semibold rounded-full ${getMatchTypeColor(matchType)}`}
+                                    >
+                                      {matchType}
+                                    </span>
+                                  ))}
+                                </div>
                               </td>
                               <td className='border border-gray-300 px-3 py-2 text-sm text-gray-600'>
                                 <CommentDisplay
