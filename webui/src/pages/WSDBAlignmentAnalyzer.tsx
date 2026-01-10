@@ -114,6 +114,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
   const [matchTypeFilter, setMatchTypeFilter] = useState<string>('brand');
+  // Sort mode state
+  const [sortMode, setSortMode] = useState<'count' | 'alphabetical'>('alphabetical');
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
@@ -182,12 +184,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   }, [dataSource, reloadPipelineSoaps]);
 
-  // Clear results when switching data sources
+  // Clear results when switching data sources and update sort mode
   React.useEffect(() => {
     setPipelineResults([]);
     setWsdbResults([]);
     setError(null);
     setSuccessMessage(null);
+    // Update sort mode based on data source
+    setSortMode(dataSource === 'match_files' ? 'count' : 'alphabetical');
   }, [dataSource]);
 
   const loadNonMatches = async () => {
@@ -609,17 +613,50 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const filteredPipelineResults = useMemo(
     () => {
       const filtered = filterResults(pipelineResults);
-      // Sort by brand, then by scent
+      // Sort based on sort mode
       return [...filtered].sort((a, b) => {
+        // Count-based sorting (match files mode)
+        if (dataSource === 'match_files' && sortMode === 'count') {
+          const countA = a.count || 0;
+          const countB = b.count || 0;
+          if (countB !== countA) return countB - countA; // Descending
+          // Always subsort alphabetically when counts are tied
+          const brandCompare = (a.source_brand || '').localeCompare(b.source_brand || '', undefined, { sensitivity: 'base' });
+          if (brandCompare !== 0) return brandCompare;
+          return (a.source_scent || '').localeCompare(b.source_scent || '', undefined, { sensitivity: 'base' });
+        }
+        // Alphabetical sorting (default)
         const brandCompare = (a.source_brand || '').localeCompare(b.source_brand || '', undefined, { sensitivity: 'base' });
         if (brandCompare !== 0) return brandCompare;
         return (a.source_scent || '').localeCompare(b.source_scent || '', undefined, { sensitivity: 'base' });
       });
     },
-    [pipelineResults, filterResults]
+    [pipelineResults, filterResults, dataSource, sortMode]
   );
 
-  const filteredWsdbResults = useMemo(() => filterResults(wsdbResults), [wsdbResults, filterResults]);
+  const filteredWsdbResults = useMemo(
+    () => {
+      const filtered = filterResults(wsdbResults);
+      // Sort based on sort mode
+      return [...filtered].sort((a, b) => {
+        // Count-based sorting (match files mode)
+        if (dataSource === 'match_files' && sortMode === 'count') {
+          const countA = a.count || 0;
+          const countB = b.count || 0;
+          if (countB !== countA) return countB - countA; // Descending
+          // Always subsort alphabetically when counts are tied
+          const brandCompare = (a.source_brand || '').localeCompare(b.source_brand || '', undefined, { sensitivity: 'base' });
+          if (brandCompare !== 0) return brandCompare;
+          return (a.source_scent || '').localeCompare(b.source_scent || '', undefined, { sensitivity: 'base' });
+        }
+        // Alphabetical sorting (default)
+        const brandCompare = (a.source_brand || '').localeCompare(b.source_brand || '', undefined, { sensitivity: 'base' });
+        if (brandCompare !== 0) return brandCompare;
+        return (a.source_scent || '').localeCompare(b.source_scent || '', undefined, { sensitivity: 'base' });
+      });
+    },
+    [wsdbResults, filterResults, dataSource, sortMode]
+  );
 
   // Calculate statistics
   const calculateStats = (results: AlignmentResult[]) => {
@@ -929,6 +966,29 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
               </Button>
             </div>
           </div>
+
+          {/* Sort Mode (only shown in match files mode) */}
+          {dataSource === 'match_files' && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>Sort By</label>
+              <div className='flex flex-wrap gap-2'>
+                <Button
+                  variant={sortMode === 'count' ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setSortMode('count')}
+                >
+                  Count (High to Low)
+                </Button>
+                <Button
+                  variant={sortMode === 'alphabetical' ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setSortMode('alphabetical')}
+                >
+                  Alphabetical
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -1009,8 +1069,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     (aka {pipelineSoaps.find(s => s.brand === result.source_brand)!.aliases!.join(', ')})
                                   </span>
                                 )}
-                              {/* Show match file metadata (match files mode only) */}
-                              {dataSource === 'match_files' && result.count && result.count > 1 && (
+                              {/* Show match count (both modes) */}
+                              {result.count && result.count > 1 && (
                                 <Badge variant='outline' className='ml-2 text-xs'>
                                   {result.count} occurrences
                                 </Badge>
@@ -1313,8 +1373,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                             <div className='font-medium text-gray-900'>
                               {result.source_brand}
                               {result.source_scent && ` - ${result.source_scent}`}
-                              {/* Show match file metadata (match files mode only) */}
-                              {dataSource === 'match_files' && result.count && result.count > 1 && (
+                              {/* Show match count (both modes) */}
+                              {result.count && result.count > 1 && (
                                 <Badge variant='outline' className='ml-2 text-xs'>
                                   {result.count} occurrences
                                 </Badge>
