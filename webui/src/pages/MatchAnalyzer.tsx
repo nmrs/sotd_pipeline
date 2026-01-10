@@ -73,6 +73,11 @@ const MatchAnalyzer: React.FC = () => {
   // Async operation state
   const [currentOperationId, setCurrentOperationId] = useState<string | null>(null);
   const { status: operationStatus, error: operationError, isPolling } = useOperationStatus(currentOperationId);
+  const [pendingOperationIds, setPendingOperationIds] = useState<string[]>([]); // Queue of operation IDs to poll
+  
+  // Pending items state - tracks items submitted but not yet processed
+  const [pendingItems, setPendingItems] = useState<Set<string>>(new Set());
+  const [operationItemsMap, setOperationItemsMap] = useState<Map<string, Set<string>>>(new Map());
 
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
@@ -209,6 +214,29 @@ const MatchAnalyzer: React.FC = () => {
 
   // Handle operation completion - MUST be after loadCorrectMatches and handleAnalyze are defined
   useEffect(() => {
+    if (operationStatus?.status === 'completed' || operationStatus?.status === 'failed') {
+      // Get the operation ID from currentOperationId
+      const operationId = currentOperationId;
+      if (operationId) {
+        // Find items associated with this operation
+        const operationItems = operationItemsMap.get(operationId);
+        if (operationItems) {
+          // Remove items from pending set
+          setPendingItems(prev => {
+            const newPending = new Set(prev);
+            operationItems.forEach(key => newPending.delete(key));
+            return newPending;
+          });
+          // Remove operation from map
+          setOperationItemsMap(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(operationId);
+            return newMap;
+          });
+        }
+      }
+    }
+    
     if (operationStatus?.status === 'completed') {
       // Operation completed - reload data
       loadCorrectMatches();
@@ -219,11 +247,21 @@ const MatchAnalyzer: React.FC = () => {
         handleAnalyze();
       }
       
-      // Clear operation ID after a delay to allow user to see completion status
+      // Clear operation ID and start polling next operation if any
       setTimeout(() => {
         setCurrentOperationId(null);
         setMarkingCorrect(false);
         setRemovingCorrect(false);
+        
+        // Start polling next operation in queue
+        setPendingOperationIds(prev => {
+          if (prev.length > 0) {
+            const [nextOperationId, ...remaining] = prev;
+            setCurrentOperationId(nextOperationId);
+            return remaining;
+          }
+          return prev;
+        });
       }, 2000);
     } else if (operationStatus?.status === 'failed') {
       // Operation failed - show error
@@ -231,8 +269,18 @@ const MatchAnalyzer: React.FC = () => {
       setCurrentOperationId(null);
       setMarkingCorrect(false);
       setRemovingCorrect(false);
+      
+      // Start polling next operation in queue
+      setPendingOperationIds(prev => {
+        if (prev.length > 0) {
+          const [nextOperationId, ...remaining] = prev;
+          setCurrentOperationId(nextOperationId);
+          return remaining;
+        }
+        return prev;
+      });
     }
-  }, [operationStatus?.status, selectedMonths, groupByMatched, selectedField, loadCorrectMatches, handleAnalyze]);
+  }, [operationStatus?.status, currentOperationId, operationItemsMap, selectedMonths, groupByMatched, selectedField, loadCorrectMatches, handleAnalyze]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
@@ -644,10 +692,32 @@ const MatchAnalyzer: React.FC = () => {
       });
 
       if (response.success && response.operation_id) {
-        // Operation queued successfully - start polling for status
-        setCurrentOperationId(response.operation_id);
+        // Capture selected item keys before clearing selection
+        const selectedItemKeys = new Set(selectedItems);
+        
+        // Add items to pending set and store operation mapping
+        setPendingItems(prev => {
+          const newPending = new Set(prev);
+          selectedItemKeys.forEach(key => newPending.add(key));
+          return newPending;
+        });
+        setOperationItemsMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(response.operation_id, selectedItemKeys);
+          return newMap;
+        });
+        
+        // Start polling this operation if no operation is currently being polled
+        if (!currentOperationId) {
+          setCurrentOperationId(response.operation_id);
+        } else {
+          // Queue this operation to be polled after current one completes
+          setPendingOperationIds(prev => [...prev, response.operation_id]);
+        }
+        
         setSelectedItems(new Set());
         setError(null);
+        setMarkingCorrect(false); // Re-enable button immediately after queuing
       } else {
         setError(`Failed to queue operation: ${response.message}`);
         setMarkingCorrect(false);
@@ -793,10 +863,32 @@ const MatchAnalyzer: React.FC = () => {
       });
 
       if (response.success && response.operation_id) {
-        // Operation queued successfully - start polling for status
-        setCurrentOperationId(response.operation_id);
+        // Capture selected item keys before clearing selection
+        const selectedItemKeys = new Set(selectedItems);
+        
+        // Add items to pending set and store operation mapping
+        setPendingItems(prev => {
+          const newPending = new Set(prev);
+          selectedItemKeys.forEach(key => newPending.add(key));
+          return newPending;
+        });
+        setOperationItemsMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(response.operation_id, selectedItemKeys);
+          return newMap;
+        });
+        
+        // Start polling this operation if no operation is currently being polled
+        if (!currentOperationId) {
+          setCurrentOperationId(response.operation_id);
+        } else {
+          // Queue this operation to be polled after current one completes
+          setPendingOperationIds(prev => [...prev, response.operation_id]);
+        }
+        
         setSelectedItems(new Set());
         setError(null);
+        setRemovingCorrect(false); // Re-enable button immediately after queuing
       } else {
         setError(`Failed to queue operation: ${response.message}`);
         setRemovingCorrect(false);
@@ -1150,7 +1242,12 @@ const MatchAnalyzer: React.FC = () => {
           } as GroupedDataItem;
         })
         .filter((group): group is GroupedDataItem => group !== null);
-      return result;
+      
+      // Filter out pending items from grouped results
+      return result.filter(group => {
+        const itemKey = `${selectedField}:${group.matched_string?.toLowerCase() || 'unknown'}`;
+        return !pendingItems.has(itemKey);
+      });
     }
 
     // Handle regular data (existing logic)
@@ -1158,10 +1255,11 @@ const MatchAnalyzer: React.FC = () => {
       return [];
     }
 
+    let filtered: AnalyzerDataItem[];
     switch (displayMode) {
       case 'mismatches':
         // Show only potential mismatches (default behavior)
-        return results.mismatch_items.filter(
+        filtered = results.mismatch_items.filter(
           item =>
             item.mismatch_type &&
             item.mismatch_type !== 'good_match' &&
@@ -1169,38 +1267,51 @@ const MatchAnalyzer: React.FC = () => {
             item.mismatch_type !== 'intentionally_unmatched' &&
             !isItemConfirmed(item)
         );
+        break;
 
       case 'all':
         // Show all matches (both good and problematic)
-        return results.mismatch_items;
+        filtered = results.mismatch_items;
+        break;
 
       case 'unconfirmed':
         // Show only unconfirmed matches (not exact or previously confirmed)
-        return results.mismatch_items.filter(item => !isItemConfirmed(item));
+        filtered = results.mismatch_items.filter(item => !isItemConfirmed(item));
+        break;
 
       case 'regex':
         // Show only regex matches that need confirmation
-        return results.mismatch_items.filter(
+        filtered = results.mismatch_items.filter(
           item => item.match_type === 'regex' && !isItemConfirmed(item)
         );
+        break;
 
       case 'intentionally_unmatched':
         // Show only intentionally unmatched items
-        return results.mismatch_items.filter(
+        filtered = results.mismatch_items.filter(
           item => item.mismatch_type === 'intentionally_unmatched'
         );
+        break;
 
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
-        return results.mismatch_items.filter(item => (item as any).is_complete_brush === true);
+        filtered = results.mismatch_items.filter(item => (item as any).is_complete_brush === true);
+        break;
 
       case 'matches':
         // Show only confirmed matches (exact and manually confirmed)
-        return results.mismatch_items.filter(item => isItemConfirmed(item));
+        filtered = results.mismatch_items.filter(item => isItemConfirmed(item));
+        break;
 
       default:
-        return results.mismatch_items;
+        filtered = results.mismatch_items;
     }
+    
+    // Filter out pending items from regular results
+    return filtered.filter(item => {
+      const itemKey = `${selectedField}:${item.original?.toLowerCase() || 'unknown'}`;
+      return !pendingItems.has(itemKey);
+    });
   }, [
     results?.mismatch_items,
     groupedResults?.groups,
@@ -1212,6 +1323,7 @@ const MatchAnalyzer: React.FC = () => {
     isPatternMatchType,
     isPatternConfirmed,
     correctMatches,
+    pendingItems,
   ]);
 
   // Keyboard navigation handlers
