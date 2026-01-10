@@ -691,10 +691,11 @@ Barrister and Mann:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*roam.*\b(?:1|i|one|2014)\b
       - \bb ?(and|&|\+) ?m\b.*roam.*\b(?:1|i|one|2014)\b
-      - barrister.*roam.*(?:og|orig)
-      - \bb ?(and|&|\+) ?m\b.*roam.*(?:og|orig)
-      - \bb ?(and|&|\+) ?m\b.*(?:og|orig).*roam
-      - barrister.*(?:og|orig).*roam
+      - barrister.*roam.*(?:og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bb ?(and|&|\+) ?m\b.*roam.*(?:og|orig)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bb ?(and|&|\+) ?m\b.*(?:og|orig).*roam(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      # - barrister.*(?:og|orig).*(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - roam.*(glissant|excelsior)(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Roam Two:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*roam.*(2|II|two)?
@@ -2049,6 +2050,9 @@ Grooming Dept:
     Sandalwood Nobile:
       patterns:
       - sandal.*nobile
+    Wonderland:
+      patterns:
+      - grooming.*wonderland
 HAGS:
   patterns:
   - hags
@@ -2277,6 +2281,9 @@ House of Mammoth:
     Kryptonite:
       patterns:
       - kr?yp?tonite
+    Mull:
+      patterns:
+      - (hom|mammoth).*mull
     Rumble:
       patterns:
       - hous.*mammoth.*rumble
@@ -2295,6 +2302,9 @@ House of Mammoth:
     Sonder:
       patterns:
       - (hous.*mammoth|\bhom\b).*sonder
+    Stones:
+      patterns:
+        - (hom|mammoth).*stones
     Tobacconist:
       patterns:
       - tobac+on+ist
@@ -2394,6 +2404,9 @@ KEPKINH:
     Barbersoap:
       patterns:
       - kepkinh.*barber
+    Erebus:
+      patterns:
+      - ke[pr]k[in]+h.*erebus
 Kent:
   patterns:
   - ^kent\b
@@ -3015,6 +3028,9 @@ Noble Otter:
     Texaus (with APR):
       patterns:
       - texaus
+    The Night Before:
+      patterns:
+      - (noble|no).*night before
     Thé Noir et Vanille:
       patterns:
       - nob.*otter.*noir.*vanil
@@ -3994,7 +4010,7 @@ Summer Break Soaps:
       - (summer|sbs).*shh
     Steady:
       patterns:
-      - summer ?break.*steady
+      - (summer ?break|sbs).*steady
     Teacher's Pet:
       patterns:
       - teacher.*pet

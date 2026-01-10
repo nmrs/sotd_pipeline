@@ -337,11 +337,22 @@ Barrister and Mann:
   - barrister and mann - promises
   Ravish:
   - barrister and mann - ravish
+  Roam (I):
+  - barrister and mann - roam (glissant base)
+  - barrister and mann - roam (glissant)
+  - barrister and mann roam (excelsior)
+  - barrister and mann roam (glissant)
   Roam Two:
+  - bam - roam two
+  - barrister & mann - roam 2
+  - barrister & mann - roam two
+  - barrister and mann - mf roam 2
   - barrister and mann - roam
   - barrister and mann - roam 2
   - barrister and mann - roam two
   - barrister and mann - roam two soap
+  - barrister and mann roam 2
+  - barrister and mann roam two
   Samhain:
   - b&m samhain
   - barrister & mann - samhain
@@ -359,8 +370,14 @@ Barrister and Mann:
   - bam - season of the witch
   - barrister and mann - season of the witch
   Seville:
+  - b&m - seville
   - b&m seville
+  - b&m seville, white label
   - barrister & mann - seville
+  - barrister & mann - seville (reserve)
+  - barrister & mann seville
+  - barrister &mann - seville
+  - barrister and man - seville
   - barrister and mann - seville
   - barrister and mann - seville in reserve
   - barrister and mann seville
@@ -470,6 +487,9 @@ Catie's Bubbles:
   Dranks:
   - catie's bubbles - dranks
   - catie's bubbles - dranks (prem)
+  - catie's bubbles - dranks prem
+  - catie's bubbles - prem dranks
+  - cb dranks prem
   Dusk:
   - catie's bubbles - dusk
   Florentine Fern:
@@ -543,6 +563,7 @@ Catie's Bubbles:
   - catie's bubbles tonsorium fougere
   Top of the World:
   - catie's bubbles - top of the world
+  - catie's bubbles - top of the world - premium
   Un Jour Gris:
   - catie's bubbles - un jour gris
   V:
@@ -550,6 +571,7 @@ Catie's Bubbles:
   Verdigris:
   - catie's bubbles - verdigris
   - catie's bubbles verdigris
+  - caties bubbles verdigris
   - cb verdigris
   Waterlyptus:
   - catie's bubbles - waterlyptus
@@ -569,6 +591,7 @@ Cella:
   - cella - crema de barba all olio di mandorla classical
   Almond Shaving Cream:
   - cella
+  - cella (original)
   - cella (red)
   - cella - almond
   - cella - almond cream soap
@@ -581,17 +604,20 @@ Cella:
   - cella - red - none
   - cella - riserva fresc
   - cella almond
+  - cella almond cherry
   - cella creme da barba
   - cella milano
   - cella milano - almond
   - cella milano - cella
   - cella milano - classic red - almond
   - cella milano - crema de barba
+  - cella milano -almond
   - cella milano. (ca. 1899 ce)
   - cella original
   - cella red
   - cella w/ jequil&corenveo synthetic
   - cella- almond
+  - cello
   Aloe Vera:
   - cella - all aloe vera
   - cella - bio
@@ -675,6 +701,8 @@ Chiseled Face:
   - chiseled face 23? tallow - midnight stag (2024a)
   - chiseled face groomatorium - midnight stag
   - chiseled face midnight stag
+  - chiseled face midnight stag. silk base
+  - chiseled face og base midnight stag
   - chiseled face og tallow - midnight stag
   - midnight stag
   Santa Monica Bay Rum:
@@ -921,15 +949,34 @@ Fanzine Saponifications:
   - fanzine saponifications - bubblegum rose
   Caravaggio:
   - fanzine caravaggio
+  - fanzine sapone - caravaggio
   - fanzine saponifications - caravaggio
   - fanzine saponifications - caravaggio soap
+  - fanzine saponifications - carvaggio
+  - fanzine soaponifications - caravaggio
+  - franzine saponifications - caravaggio
   Cool Bro Dude Man:
   - fanzine saponifications - cool bro dude man
   Testing... Testing:
   - fanzine saponifications - testing... testing
   This is not a Test:
+  - fanzine - this is not a test
+  - fanzine sapone - not a test
+  - fanzine sapone - this is not a test soap
   - fanzine saponifications - not a test
   - fanzine saponifications - this is not a test
+  - fanzine saponifications - this is not a test $rocktober
+  - 'fanzine saponifications - this is not a test - localizedstringkey(key: "puck",
+    hasformatting: false, arguments: )'
+  - 'fanzine saponifications - this is not a test issue #0'
+  - fanzine saponifications - this is not a test soap
+  - fanzine saponifications - tinat
+  - fanzine saponifications not a test
+  - fanzine saponifications this is not a test
+  - fanzine saponifocations - this is not a test
+  - fanzine saponifocations - this is not a test issue
+  - fanzine saponifocations - this is not a test issue 0
+  - fanzine saponifocations - this is not a test issue no. 0
   - fanzine soaponifications - this is not a test
   - fanzine this is not a test
   - fanzinesapone - this is not a test
@@ -982,6 +1029,8 @@ Grooming Dept:
   - grooming dept - le tabac
   Tobacco Oud:
   - grooming dept - tobacco oud
+  Wonderland:
+  - grooming dept - wonderland soap
 Haslinger:
   Sandelholz:
   - haslinger - sandalholz
@@ -1047,21 +1096,41 @@ House of Mammoth:
   - house of mammoth - fu dao
   - house of mammoth - fú dào
   Hygge:
+  - hom - hygge
   - hom hygee
   - hom hygge
   - house of mammoth - hygge
+  - 'house of mammoth - hygge - localizedstringkey(key: "croap", hasformatting: false,
+    arguments: )'
+  - house of mammoth - hygge - none
+  - house of mammoth - hygge v2
   - house of mammoth hygge
+  - house of mammoth 🦣 - hygge
+  - house of mammoth- hygge
+  - mammoth soaps - hygge
   Indigo:
   - house of mammoth - indigo
   - house of mammoth - mood indigo
   - house of mammoth indigo
   Kryptonite:
+  - house of mammoth - green kryptonite - none
   - house of mammoth - kryptonite
+  - house of mammoth - kryptonite (2005)
+  - house of mammoth - kryptonite 1
   - house of mammoth - kryptonite 2
+  - house of mammoth - kryptonite 2 - none
+  - house of mammoth - kryptonite 2 soap (green)
+  - house of mammoth - kryptonite v1
   - house of mammoth - kryptonite v2
   - house of mammoth - kryptonite v2 (green)
+  - house of mammoth - kryptonite v2 soap
+  - house of mammoth - krytonite v1
   - house of mammoth kryptonite
+  - house of mammoth- kryptonite soap
+  - mammoth - kryptonite
   - mammoth soaps - kryptonite
+  Mull:
+  - house of mammoth - mull
   Restore:
   - mammoth soaps restore
   Rumble:
@@ -1078,15 +1147,19 @@ House of Mammoth:
   Sonder:
   - hom sonder
   - house of mammoth - sonder
+  - house of mammoth - sonder (2025)
   - house of mammoth - sonder v2
   - house of mammoth sonder
   Stones:
+  - hom stones
+  - house of mammoth - stones
   - mammoth soaps - stones
   Tobacconist:
   - hom tobacconist
   - house of mammoth - tobacconist
   - house of mammoth - tobaconnist
   - house of mammoth tobacconist
+  - house of mammoth 🦣 - tobacconist
   - house of mammoth- tobacconist
   - mammoth soaps - the tobacconist
   Uitwaaien:
@@ -1109,6 +1182,10 @@ House of Mann:
 Jordan's:
   Blueberry Muffin:
   - jordan's - blueberry muffin
+KEPKINH:
+  Erebus:
+  - kepkinh - erebus
+  - kerkinh - erebus
 La Toja:
   Shaving Soap:
   - la toja
@@ -1195,11 +1272,42 @@ Martin de Candre:
   Rose:
   - martin de candre - rose
   Vetyver:
+  - martin de candre - vetiver
   - martin de candre - vetyver
+  - martin de candre - vétyver
   - martin de candre vetiver
   - martin de candre vetiver jar
+  - martin de candre vetyver
   - martin de candri - vetyver
+  - mdc vetiver
+  - mdc vetyver
   - mdc vetyver brain bowl
+  - mdc vetyver brain bowl (day 1)
+  - mdc vetyver brain bowl (day 10)
+  - mdc vetyver brain bowl (day 13)
+  - mdc vetyver brain bowl (day 14)
+  - mdc vetyver brain bowl (day 15)
+  - mdc vetyver brain bowl (day 16)
+  - mdc vetyver brain bowl (day 19)
+  - mdc vetyver brain bowl (day 20)
+  - mdc vetyver brain bowl (day 21)
+  - mdc vetyver brain bowl (day 23)
+  - mdc vetyver brain bowl (day 24)
+  - mdc vetyver brain bowl (day 25)
+  - mdc vetyver brain bowl (day 27)
+  - mdc vetyver brain bowl (day 29)
+  - mdc vetyver brain bowl (day 3)
+  - mdc vetyver brain bowl (day 30)
+  - mdc vetyver brain bowl (day 31)
+  - mdc vetyver brain bowl (day 32)
+  - mdc vetyver brain bowl (day 36)
+  - mdc vetyver brain bowl (day 39)
+  - mdc vetyver brain bowl (day 4)
+  - mdc vetyver brain bowl (day 5)
+  - mdc vetyver brain bowl (day 9)
+  - mdc vetyver brain bowl - (day 11)
+  - mdc vetyver brain bowl - day 12
+  - mdc vetyver brain bowl - day 2
 Master Soap Creations:
   Apricot Pie:
   - master creations - apricot pie
@@ -1233,14 +1341,22 @@ Mike's Natural Soaps:
   - mike's - orange, cedarwood, and black pepper
   - mike's - orange, cedarwood, black pepper
   - mike's natural soap - orange cedarwood black pepper
+  - mike's natural soap - orange, cedarwood, and black pepper
+  - mike's natural soap - orange, cedarwood, black pepper
   - mike's natural soap- orange cedarwood black pepper
+  - mike's natural soaps - orange cedarwood black pepper
+  - mike's natural soaps - orange, cedar & black pepper
   - mike's natural soaps - orange, cedarwood & black pepper
+  - mike's natural soaps - orange, cedarwood & blak pepper
   - mike's natural soaps - orange, cedarwood and black pepper
   - mike's natural soaps - orange, cedarwood, & black pepper
   - mike's natural soaps - orange, cedarwood, and black pepper
+  - mike's natural soaps - orange, cedarwood, black pepper
+  - mike's natural soaps orange, cedarwood, & black pepper
   - mike's orange, cedarwood, black papper
   - mike's orange, cedarwood, black pepper
   - mikes natural - orange cedar and black pepper
+  - mikes natural soaps - orange, cedarwood, black pepper
   Rose, Patchouli, Cedarwood:
   - mike's natural soaps - rose patchouli cedarwood
   - mike's natural soaps - rose, patchouli, cedarwood
@@ -1252,13 +1368,19 @@ Mike's Natural Soaps:
 Mitchell's:
   Wool Fat:
   - mitchel's wool fat
+  - mitchel's wool fat - original
   - mitchell's - wool fat
   - mitchell's - wool fat (non-tallow)
   - mitchell's wool fat
+  - mitchell's wool fat (old tallow formula)
+  - mitchell's wool fat - mitchell's wool fat
   - mitchell's wool fat - n/a
   - mitchell's wool fat - new formula
+  - mitchell's wool fat, tallow formula
   - mitchells - wool fat
   - mwf
+  - mwf - tallow formula
+  - mwf tallow version
   - mwf, tallow formula
 Moon Soaps:
   Bixby:
@@ -1308,9 +1430,11 @@ Mäurer & Wirtz:
   - mäurer & wirtz - tabac - tallow base
   - mäurer & wirtz - tabac original
   - mäurer & wirtz - tabac original (stick)
+  - mäurer & wirtz - tabac original (tallow, sample)
   - mäurer & wirtz - tabac original - (stick)
   - mäurer & wirtz - tabac original - vegan base
   - mäurer & wirtz - tabac original original
+  - mäurer & wirtz - tabac soap
   - mäurer & wirtz tabac
   - mäurer & wirtz tabac (tallow formula)
   - mäurer & wirtz tabac original
@@ -1328,15 +1452,21 @@ Mäurer & Wirtz:
   - tabac cream - vegan
   - tabac in tallow base
   - tabac og
+  - tabac og soap
   - tabac original
   - tabac original puck in old spice mug
+  - tabac original puck in old spice mug. tallow
   - tabac original tallow base
   - tabac original tallow formula
+  - tabac refill tallow
   - tabac ss
   - tabac tallow
+  - tabac tallow - hard soap
   - tabac tallow base
+  - tabac tallow refill
   - tabac tub
   - tabac vegan 2024
+  - tabac vegan 2024 - hard soap
 Noble Otter:
   '''Tis the Season':
   - noble otter - 'tis the season
@@ -1406,6 +1536,9 @@ Noble Otter:
   - noble otter rawr
   Texaus (with APR):
   - noble otter/australian private reserve - texaus
+  The Night Before:
+  - noble otter - the night before
+  - noble otter - the night before (og version)
   Thé Noir et Vanille:
   - noble otter - thé noir et vanille
   Toons & Spoons:
@@ -1457,6 +1590,7 @@ Proraso:
   - triple milled soap with (just a touch), proraso
   Sandalwood (Red):
   - proraso - red
+  - proraso - sandalwood
   - proraso red
   - proraso sandalwood
 Pré de Provence:
@@ -1565,6 +1699,7 @@ Southern Witchcrafts:
   Pomona:
   - southern witchcrafts - pomona
   Samhain:
+  - southern witchcraft - samhain
   - southern witchcrafts - samhain
   Tres Matres:
   - southern witchcrafts - tres matres
@@ -1598,18 +1733,35 @@ Spearhead Shaving Company:
   - spearhead shaving company - seaforth heather
   - spearhead shaving company - seaforth! heather
   Seaforth! Leather (r/wetshaving exclusive):
+  - seaforth leather
+  - seaforth! leather
+  - seaforth- leather
   - spearhead - leather
+  - spearhead - seaforth leather
   - spearhead - seaforth! leather
   - spearhead - seaforth! leather (special release for r/wetshaving)
+  - spearhead - seafoth! leather
+  - spearhead seaforth - leather
   - spearhead seaforth! - leather
   - spearhead seaforth! leather
+  - spearhead seaforth! leather w/ terrorade
+  - spearhead shaving - leather
   - spearhead shaving - seaforth! leather
+  - spearhead shaving - seaforth! leather soap
+  - spearhead shaving co - leather
   - spearhead shaving co - seaforth! leather
   - spearhead shaving co - seaforth! leather r/wetshaving exclusive
+  - spearhead shaving co- seaforth! leather
   - spearhead shaving co. - seaforth! leather
+  - spearhead shaving company - leather
+  - spearhead shaving company - r/wetshaving sub exclusive leather
+  - spearhead shaving company - seaforth leather
   - spearhead shaving company - seaforth! leather
+  - spearhead shaving company - seaftorth! leather
+  - spearhead shaving company - searforth! leather
   - spearhead shaving company seaforth! - leather
   - spearhead shaving seaforth! leather
+  - spearhead shaving- seaforth! leather
   Seaforth! Roman Spice:
   - seaforth! - roman spice
   - spearhead - roman spice
@@ -1625,13 +1777,23 @@ Spearhead Shaving Company:
   - spearhead shaving company - seaforth! sea ice lime
   Seaforth! Sea Spice Lime:
   - seaforth - sea spice lime
+  - seaforth sea lime spice
   - seaforth sea spice lime
+  - seaforth! - sea spice lime
+  - seaforth! - sea spice lime soap
+  - seaforth! - sea spiced lime
+  - seaforth! sea spice lime
   - spearhead - sea spice lime
   - spearhead - seaforth! sea spice lime
+  - spearhead seaforth - sea spice lime
+  - spearhead seaforth sea spice lime
   - spearhead seaforth! - sea spice lime
+  - spearhead shaving - sea spice lime
   - spearhead shaving - seaforth! sea spice lime
   - spearhead shaving co. - seaforth! sea spice lime
+  - spearhead shaving company - seaforth sea spice lime
   - spearhead shaving company - seaforth! sea spice lime
+  - spearhead shaving seaforth - sea spice lime
   Seaforth! Spiced:
   - spearhead - seaforth spiced
   - spearhead shaving - seaforth! spiced
@@ -1697,10 +1859,15 @@ Stirling Soap Co.:
   Electric Sheep:
   - stirling co. - electric sheep
   Executive Man:
+  - sterling executive man
+  - stirling - executive man
   - stirling co. - executive man
   - stirling executive man
+  - stirling soap - executive man
+  - stirling soap co - executive man
   - stirling soap co. - executive man
   - stirling soap co. - executive man soap
+  - tbd (stirling executive man)
   Frankincense & Myrrh:
   - stirling soap co. - frankincense & myrrh
   - stirling soap co. - frankinscense & myrrh
@@ -1708,6 +1875,7 @@ Stirling Soap Co.:
   - stirling - friends to the end
   Gatlinburg:
   - stirling co. - gatlinburg
+  - stirling soap co. - gatlinburg
   Gin & Tonic on the Rocks:
   - stirling co. - gin & tonic on the rocks
   - stirling gin & tonic on the rocks
@@ -1727,28 +1895,81 @@ Stirling Soap Co.:
   Hot Apple Cider:
   - stirling soap co. - hot apple cider
   I, Rich Moose (r/wetshaving exclusive):
+  - i rich moose
+  - ste~~ stirling - i, rich moose r/wetshaving exclusive
+  - stirling + r/wetshaving - i, rich moose le
   - stirling - i, rich moose
+  - stirling - i, rich moose (mutton base)
+  - stirling - i, rich moose (mutton tallow, r/wetshaving exclusive)
   - stirling - i, rich moose (mutton)
   - stirling - i, rich moose (r/wetshaving edition)
   - stirling - i, rich moose (r/wetshaving exclusive)
+  - 'stirling - i, rich moose (r/wetshaving exclusive) - localizedstringkey(key: "croap",
+    hasformatting: false, arguments: )'
+  - stirling - i, rich moose (r/wetshaving mutton exclusive)
+  - stirling - i, rich moose (r/wetshaving mutton tallow edition)
+  - stirling - i, rich moose (r/wetshaving mutton tallow version)
   - stirling - i, rich moose (r/wetshaving mutton tallow)
   - stirling - i, rich moose (reddit special)
+  - stirling - i, rich moose (sheep tallow)
+  - stirling - i, rich moose (standard base)
   - stirling - i, rich moose (sub exclusive)
   - stirling - i, rich moose mutton le
+  - stirling - i, rich moose sheep
+  - stirling - r/wetshaving exclusive i, rich moose
+  - stirling - r/wetshaving i, rich moose
   - stirling co. - i, rich moose
   - stirling co. - i, rich moose (mutton -r/wetshaving)
   - stirling co. - i, rich moose (r/wetshaving exclusive)
   - stirling co. - i, rich moose - 🐑 edition
   - stirling co. x r/wetshaving - i, rich moose (mutton)
   - stirling company - i, rich moose (/r/wetshaving edition)
+  - stirling i rich moose
   - stirling i, rich moose (reddit se)
+  - stirling i, rich moose (reddit se, sheep tallow)
+  - stirling i, rich moose, mutton formula
+  - stirling i, rich moose, reddit edition
+  - stirling mutton tallow - i rich moose
   - stirling soap co - i rich moose - mutton base
+  - stirling soap co - i rich moose sheep
   - stirling soap co - i, rich moose (mutton base)
+  - stirling soap co - i, rich moose (sheep)
+  - stirling soap co - i, rich moose - sheep base
+  - stirling soap co - i, rich moose -sheep
+  - stirling soap co - i, rich moose mutton le
+  - stirling soap co - i, rich moose r/wetshaving exclusive
+  - stirling soap co - i, rich moose/sheep
   - stirling soap co. - i, rich moose
+  - stirling soap co. - i, rich moose (/r/wetshaving edition)
+  - stirling soap co. - i, rich moose (beef)
+  - stirling soap co. - i, rich moose (mutton -r/wetshaving)
+  - stirling soap co. - i, rich moose (r/ wetshaving special edition)
+  - stirling soap co. - i, rich moose (r/wetshaving exclusive)
+  - stirling soap co. - i, rich moose (r/wetshaving mutton tallow)
   - stirling soap co. - i, rich moose (r/wetshaving special edition)
+  - stirling soap co. - i, rich moose (sheep)
+  - stirling soap co. - i, rich moose (sub exclusive mutton base)
   - stirling soap co. - i, rich moose (sub exclusive)
+  - stirling soap co. - i, rich moose (sub-edition)
+  - stirling soap co. - i, rich moose (ws exclusive mutton tallow)
+  - stirling soap co. - i, rich moose (ws mutton tallow)
+  - stirling soap co. - i, rich moose - sheep
+  - stirling soap co. - i, rich moose - soap (mutton tallow)
   - stirling soap co. - i, rich moose - 🐑 edition
+  - stirling soap co. - i, rich moose /r/wetshaving edition
+  - stirling soap co. - i, rich moose r/wetshaving exclusive
+  - stirling soap co. - i, rich moose sheep
+  - stirling soap co. - i, rich moose special release for r/wetshaving (mutton base)
+  - stirling soap co. - r/wetshaving i, rich moose
+  - 'stirling soap co. - r/wetshaving l, rich moose soap. post shave: stirling soap
+    co. - satsuma splash. post shave: stirling soap co. - satsuma balm'
+  - stirling soap co. i, rich moose (mutton base)
+  - stirling soap co. i, rich moose r/wetshaving exclusive
+  - stirling soap co. x r/wetshaving - i, rich moose (mutton)
   - stirling soap company - i, rich moose (/r/wetshaving edition)
+  - stirling soap company - i, rich moose (sub-exclusive sheep tallow)
+  - stirling soap company - r/wetshaving i, rich moose mutton le
+  - stirling soaps - i rich moose
   Intrepid Man:
   - stirling co. - intrepid man
   Island Man:
@@ -1782,8 +2003,10 @@ Stirling Soap Co.:
   - stirling - sandpiper
   - stirling co. - sandpiper
   - stirling sandpiper
+  - stirling soap co. - sandpiper
   Scarn:
   - stirling - scarn
+  - stirling scarn
   - stirling soap co. - scarn
   Scots Pine Sheep:
   - stirling - scots pine sheep
@@ -1981,7 +2204,9 @@ Taylor of Old Bond Street:
   - taylor of old bond street - sandalwood soap
   - taylors of old bond street - sandalwood soap
   - taylors of old bond street -sandalwood soap
+  - tobs - sandalwood
   - tobs sandalwood
+  - tobs sandalwood soap
   - tobs sandlewood
   Tobacco Leaf:
   - tobs tobacco leaf
