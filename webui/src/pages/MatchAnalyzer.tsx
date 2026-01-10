@@ -50,6 +50,8 @@ const MatchAnalyzer: React.FC = () => {
     | 'intentionally_unmatched'
     | 'complete_brushes'
     | 'matches'
+    | 'brand'
+    | 'dash_split'
   >('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1122,6 +1124,12 @@ const MatchAnalyzer: React.FC = () => {
         case 'complete_brushes':
           // Not applicable for soap field
           return false;
+        case 'brand':
+          // Show only brand match patterns
+          return pattern.match_type === 'brand';
+        case 'dash_split':
+          // Show only dash_split match patterns
+          return pattern.match_type === 'dash_split';
         default:
           return true;
       }
@@ -1303,6 +1311,16 @@ const MatchAnalyzer: React.FC = () => {
         filtered = results.mismatch_items.filter(item => isItemConfirmed(item));
         break;
 
+      case 'brand':
+        // Show only brand matches
+        filtered = results.mismatch_items.filter(item => item.match_type === 'brand');
+        break;
+
+      case 'dash_split':
+        // Show only dash_split matches
+        filtered = results.mismatch_items.filter(item => item.match_type === 'dash_split');
+        break;
+
       default:
         filtered = results.mismatch_items;
     }
@@ -1382,6 +1400,12 @@ const MatchAnalyzer: React.FC = () => {
             handleItemSelection(itemKey, !isCurrentlySelected);
           }
           break;
+        case 'Enter':
+          event.preventDefault();
+          if (selectedItems.size > 0 && !markingCorrect) {
+            handleMarkAsCorrect();
+          }
+          break;
         case 'Escape':
           setActiveRowIndex(-1);
           setKeyboardNavigationEnabled(false);
@@ -1398,6 +1422,8 @@ const MatchAnalyzer: React.FC = () => {
     selectedField,
     selectedItems,
     handleItemSelection,
+    markingCorrect,
+    handleMarkAsCorrect,
   ]);
 
   // Reset active row when data changes
@@ -1427,6 +1453,8 @@ const MatchAnalyzer: React.FC = () => {
         intentionally_unmatched: 0, // Not applicable for grouped view
         matches: groups.filter(g => groupHasMatchingPatterns(g, 'matches')).length,
         complete_brushes: 0, // Not applicable for soap field
+        brand: groups.filter(g => groupHasMatchingPatterns(g, 'brand')).length,
+        dash_split: groups.filter(g => groupHasMatchingPatterns(g, 'dash_split')).length,
       };
     }
 
@@ -1440,6 +1468,8 @@ const MatchAnalyzer: React.FC = () => {
         intentionally_unmatched: 0,
         matches: 0,
         complete_brushes: 0,
+        brand: 0,
+        dash_split: 0,
       };
 
     // We always have the full dataset now, so calculate from the returned items
@@ -1493,6 +1523,8 @@ const MatchAnalyzer: React.FC = () => {
     const completeBrushesCount = returnedItems.filter(
       item => (item as any).is_complete_brush === true
     ).length;
+    const brandCount = returnedItems.filter(item => item.match_type === 'brand').length;
+    const dashSplitCount = returnedItems.filter(item => item.match_type === 'dash_split').length;
 
     // Debug logging for count calculations
     // console.log('🔍 DEBUG: Display mode count calculations:', {
@@ -1526,6 +1558,8 @@ const MatchAnalyzer: React.FC = () => {
       intentionally_unmatched: intentionallyUnmatchedCount,
       matches: matchesCount,
       complete_brushes: completeBrushesCount,
+      brand: brandCount,
+      dash_split: dashSplitCount,
     };
   };
 
@@ -1880,6 +1914,46 @@ const MatchAnalyzer: React.FC = () => {
                   Show only confirmed matches (exact and manually confirmed)
                 </span>
               </Button>
+              {/* Brand button - only show if there are brand matches */}
+              {getDisplayModeCounts().brand > 0 && (
+                <Button
+                  variant='outline'
+                  onClick={() => setDisplayMode('brand')}
+                  className={`flex items-center gap-1 text-sm relative group ${displayMode === 'brand' ? 'bg-blue-600 text-white' : ''}`}
+                  title='Show only brand matches'
+                >
+                  <Filter className='h-4 w-4' />
+                  Brand
+                  <span
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'brand' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'}`}
+                  >
+                    {getDisplayModeCounts().brand}
+                  </span>
+                  <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                    Show only brand matches
+                  </span>
+                </Button>
+              )}
+              {/* Dash Split button - only show if there are dash_split matches */}
+              {getDisplayModeCounts().dash_split > 0 && (
+                <Button
+                  variant='outline'
+                  onClick={() => setDisplayMode('dash_split')}
+                  className={`flex items-center gap-1 text-sm relative group ${displayMode === 'dash_split' ? 'bg-blue-600 text-white' : ''}`}
+                  title='Show only dash_split matches'
+                >
+                  <Filter className='h-4 w-4' />
+                  Dash Split
+                  <span
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'dash_split' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'}`}
+                  >
+                    {getDisplayModeCounts().dash_split}
+                  </span>
+                  <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                    Show only dash_split matches
+                  </span>
+                </Button>
+              )}
               {/* Complete Brushes filter - only show when field is brush */}
               {selectedField === 'brush' && (
                 <Button
