@@ -1,8 +1,6 @@
 """Universal table generator for report templates."""
 
-import json
 import logging
-import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -41,66 +39,9 @@ class TableGenerator:
         self.comparison_data = comparison_data or {}
         self.current_month = current_month
         self.debug = debug
-        self._wsdb_soaps: List[Dict[str, Any]] | None = None
         self._wsdb_lookup: WSDBLookup | None = None
 
         # No more hardcoded mappings - we'll convert kebab-case to snake_case dynamically
-
-    def _load_wsdb_data(self) -> List[Dict[str, Any]]:
-        """Lazily load WSDB soap data from software.json.
-
-        Returns:
-            List of WSDB soap entries (filtered for type="Soap")
-        """
-        if self._wsdb_soaps is not None:
-            return self._wsdb_soaps
-
-        # Try to find the project root (go up from this file to find data/wsdb)
-        current_file = Path(__file__)
-        # This file is at: sotd/report/table_generators/table_generator.py
-        # Project root is 3 levels up
-        project_root = current_file.parent.parent.parent.parent
-        wsdb_file = project_root / "data" / "wsdb" / "software.json"
-
-        if not wsdb_file.exists():
-            if self.debug:
-                logger.debug(f"WSDB file not found at {wsdb_file}, skipping link generation")
-            self._wsdb_soaps = []
-            return []
-
-        try:
-            with wsdb_file.open("r", encoding="utf-8") as f:
-                all_software = json.load(f)
-
-            # Filter for soaps only
-            soaps = [item for item in all_software if item.get("type") == "Soap"]
-            self._wsdb_soaps = soaps
-
-            if self.debug:
-                logger.debug(f"Loaded {len(soaps)} soaps from WSDB")
-
-            return soaps
-        except Exception as e:
-            if self.debug:
-                logger.debug(f"Failed to load WSDB data: {e}, skipping link generation")
-            self._wsdb_soaps = []
-            return []
-
-    def _normalize_string(self, text: str) -> str:
-        """Normalize a string to Unicode NFC (Normalization Form Canonical Composed).
-
-        This ensures that visually identical characters are treated the same regardless
-        of their Unicode encoding.
-
-        Args:
-            text: The string to normalize
-
-        Returns:
-            The normalized string in NFC form
-        """
-        if not text:
-            return text
-        return unicodedata.normalize("NFC", text)
 
     def _get_wsdb_lookup(self) -> WSDBLookup:
         """Get or create WSDB lookup utility instance.
@@ -109,24 +50,23 @@ class TableGenerator:
             WSDBLookup instance
         """
         if self._wsdb_lookup is None:
-            # Find project root (same logic as _load_wsdb_data)
+            # Find project root
             current_file = Path(__file__)
             project_root = current_file.parent.parent.parent.parent
             self._wsdb_lookup = WSDBLookup(project_root=project_root)
         return self._wsdb_lookup
 
     def _get_wsdb_slug(self, brand: str, scent: str) -> str | None:
-        """Lookup WSDB slug for a given brand and scent, respecting aliases.
+        """Lookup WSDB slug for a given brand and scent from soaps.yaml.
 
-        Uses case-insensitive matching with Unicode normalization for consistency.
-        Checks aliases from soaps.yaml for both brand and scent.
+        Uses WSDBLookup to get the slug directly from the catalog.
 
         Args:
-            brand: Brand name to match
-            scent: Scent name to match
+            brand: Brand name to lookup
+            scent: Scent name to lookup
 
         Returns:
-            WSDB slug if found, None otherwise
+            WSDB slug if found in catalog, None otherwise
         """
         lookup = self._get_wsdb_lookup()
         return lookup.get_wsdb_slug(brand, scent)
