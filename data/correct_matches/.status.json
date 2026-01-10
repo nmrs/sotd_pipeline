@@ -196,5 +196,16 @@
       "marked_count": 8,
       "errors": []
     }
+  },
+  "op_1768003961574_bobobqsn": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 11 matches processed",
+    "updated_at": 1768003963.6119978,
+    "completed_at": 1768003963.6119978,
+    "result": {
+      "marked_count": 11,
+      "errors": []
+    }
   }
 }
