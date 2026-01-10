@@ -1,11 +1,11 @@
-# Software Report - March 2025
+# Lather Log - March 2025
 
-**Total Shaves:** 2,110
-**Unique Shavers:** 135
+**Total Shaves:** 2,067
+**Unique Shavers:** 132
 
 Welcome to your SOTD Lather Log for March 2025
 
-* 2,110 shave reports from 135 distinct shavers during the month of March 2025 were analyzed to produce this report. Collectively, these shavers used 617 distinct soaps from 118 distinct brands.
+* 2,067 shave reports from 132 distinct shavers during the month of March 2025 were analyzed to produce this report. Collectively, these shavers used 618 distinct soaps from 117 distinct brands. 0 of those shaves used samples of 0 unique soaps.
 
 ## Observations
 
@@ -21,152 +21,266 @@ Welcome to your SOTD Lather Log for March 2025
 
 * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
-## Soap Makers
+## Soap Brands
 
-*No data available for soap-makers*
+| Rank   | Brand                     |   Shaves |   Unique Users | Δ vs Feb 2025   | Δ vs Mar 2024   | Δ vs Mar 2020   |
+|:-------|:--------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
+| 1      | Catie's Bubbles           |      279 |             55 | ↑1              | ↑7              | ↑7              |
+| 2      | Barrister and Mann        |      276 |             73 | ↓1              | ↓1              | ↓1              |
+| 3      | Spearhead Shaving Company |      196 |             49 | ↑1              | ↑2              | ↑14             |
+| 4      | Talent Soap Factory       |      180 |             38 | ↑7              | ↑11             | n/a             |
+| 5      | House of Mammoth          |      167 |             45 | =               | ↓3              | ↑14             |
+| 6      | Stirling Soap Co.         |      167 |             43 | ↓3              | ↓3              | ↓3              |
+| 7      | Summer Break Soaps        |       72 |             30 | ↑12             | ↓1              | ↑6              |
+| 8      | Noble Otter               |       71 |             36 | ↓2              | ↓4              | ↓4              |
+| 9      | Chicago Grooming Co.      |       65 |             25 | ↑4              | ↑1              | ↑9              |
+| 10     | Southern Witchcrafts      |       50 |             27 | ↓1              | ↓1              | ↓3              |
+| 11     | Declaration Grooming      |       50 |             25 | ↓4              | ↓4              | ↓9              |
+| 12     | Zingari Man               |       38 |             16 | =               | ↑1              | ↓6              |
+| 13     | Tcheon Fung Sing          |       31 |              1 | ↑72             | ↑43             | ↑72             |
+| 14     | Chiseled Face             |       30 |             13 | ↓4              | ↓3              | ↓5              |
+| 15     | Ariana & Evans            |       28 |             13 | ↓7              | ↓3              | ↓5              |
+| 16     | Fanzine Saponifications   |       26 |             11 | ↑69             | n/a             | n/a             |
+| 17     | MacDuff's Soap Company    |       22 |             12 | ↑17             | ↑1              | n/a             |
+| 18     | Mäurer & Wirtz            |       21 |             16 | ↓2              | ↓2              | ↑21             |
+| 19     | Proraso                   |       16 |             11 | ↑3              | ↓2              | ↑4              |
+| 20     | Williams                  |       15 |              1 | ↑3              | ↑38             | ↑11             |
+| 21     | Wholly Kaw                |       14 |             11 | ↓6              | ↓7              | ↓16             |
+| 22     | Captain's Choice          |       14 |              1 | ↑63             | n/a             | n/a             |
+| 23     | Mike's Natural Soaps      |       10 |              8 | ↓6              | ↑44             | ↑1              |
+| 24     | Martin de Candre          |       10 |              7 | ↓3              | ↑10             | ↑2              |
+| 25     | Red House Farm            |        8 |              6 | ↑5              | ↑29             | n/a             |
+| 26     | Moon Soaps                |        8 |              4 | ↑5              | ↑6              | n/a             |
+| 27     | Back to Basics Log Cabin  |        7 |              1 | ↓3              | n/a             | n/a             |
+| 28     | Henri et Victoria         |        6 |              4 | ↑3              | ↑23             | ↑2              |
+| 29     | Grooming Dept             |        6 |              3 | ↑17             | ↑30             | ↓9              |
+| 30=    | Maggard Razors            |        6 |              2 | ↓12             | ↑29             | n/a             |
+| 30=    | Shavologist               |        6 |              2 | ↓2              | n/a             | n/a             |
+| 32     | Black Ship Grooming       |        5 |              3 | ↑6              | ↑16             | ↓3              |
+| 33     | RazoRock                  |        5 |              2 | ↓4              | ↑3              | ↓9              |
+| 34=    | Bartigan & Stark          |        5 |              1 | ↑9              | ↑33             | n/a             |
+| 34=    | Pré de Provence           |        5 |              1 | ↓14             | ↑17             | ↑31             |
+| 34=    | Shave Dandy               |        5 |              1 | ↑51             | ↑42             | n/a             |
+| 34=    | unreleased~~              |        5 |              1 | n/a             | n/a             | n/a             |
 
 ## Soaps
 
-| Soap                                                       | shaves   | unique users | avg shaves per user | Δ vs previous month | Δ vs previous year | Δ vs 5 years ago |
-| ---------------------------------------------------------- | -------: | -----------: | ------------------: | :-----------------: | :----------------: | :--------------: |
-| Spearhead Shaving Co. - Seaforth! Leather                  |       44 |           26 |                1.69 | =                   | n/a                | n/a              |
-| Talent Soap Factory - Fantasy Donut                        |       38 |            8 |                4.75 | ↑521                | n/a                | n/a              |
-| House of Mammoth - Alive                                   |       37 |            6 |                6.17 | ↑59                 | ↑5                 | n/a              |
-| Catie's Bubbles - Top of the World                         |       34 |            9 |                3.78 | ↑53                 | n/a                | n/a              |
-| Catie's Bubbles - Maggards MeetUp 2023                     |       32 |            2 |               16.00 | ↓3                  | ↑7                 | n/a              |
-| Tcheon Fung Sing - Crema Purissima Per Barba               |       31 |            1 |               31.00 | n/a                 | n/a                | n/a              |
-| Spearhead Shaving Co. - Seaforth! Sea Spice Lime           |       30 |           16 |                1.88 | ↑19                 | ↑13                | n/a              |
-| Spearhead Shaving Co. - Seaforth! Black Watch              |       29 |           14 |                2.07 | ↑11                 | ↑1                 | n/a              |
-| Barrister and Mann - Hallows                               |       26 |           17 |                1.53 | ↓5                  | ↓7                 | ↓8               |
-| Fanzine Saponifications - Testing... Testing               |       23 |           11 |                2.09 | n/a                 | n/a                | n/a              |
-| Spearhead Shaving Co. - Seaforth! Roman Spice              |       22 |           13 |                1.69 | ↑14                 | n/a                | n/a              |
-| Spearhead Shaving Co. - Seaforth! Heather                  |       21 |           10 |                2.10 | ↑31                 | ↑72                | n/a              |
-| House of Mammoth - Hygge                                   |       20 |            8 |                2.50 | ↓6                  | ↑35                | n/a              |
-| Stirling Soap Co. - Gin & Tonic on the Rocks               |       19 |            1 |               19.00 | ↑5                  | n/a                | n/a              |
-| Spearhead Shaving Co. - Seaforth! 3 Scots                  |       19 |           12 |                1.58 | ↑44                 | ↓10                | n/a              |
-| Barrister and Mann - Roam Two                              |       19 |           13 |                1.46 | ↑23                 | ↑78                | ↑82              |
-| House of Mammoth - Tobacconist                             |       17 |            6 |                2.83 | ↑3                  | ↓1                 | n/a              |
-| Stirling Soap Co. - Executive Man                          |       17 |            4 |                4.25 | ↑457                | ↑67                | ↑52              |
-| Talent Soap Factory - Switchback                           |       17 |            4 |                4.25 | ↑131                | n/a                | n/a              |
-| Barrister and Mann - Midnight Special                      |       17 |            2 |                8.50 | ↑15                 | ↑32                | n/a              |
-| House of Mammoth - Shire                                   |       16 |           10 |                1.60 | ↑20                 | ↓17                | ↑377             |
-| Barrister and Mann - Spice                                 |       16 |            6 |                2.67 | ↑9                  | ↑11                | ↑146             |
-| House of Mammoth - Indigo                                  |       15 |            7 |                2.14 | ↑9                  | ↓9                 | n/a              |
-| Talent Soap Factory - Trash Panda                          |       15 |            4 |                3.75 | ↑169                | n/a                | n/a              |
-| Williams - Mug Shaving Soap                                |       15 |            1 |               15.00 | ↓11                 | ↑183               | ↓8               |
-| Captain's Choice - Venture                                 |       14 |            1 |               14.00 | n/a                 | n/a                | n/a              |
-| Spearhead Shaving Co. - Seaforth! Fleur de France          |       13 |            7 |                1.86 | ↑27                 | ↓5                 | n/a              |
-| Catie's Bubbles - Tonsorium                                |       13 |            4 |                3.25 | ↑92                 | n/a                | ↑281             |
-| Catie's Bubbles - Azure                                    |       13 |            8 |                1.62 | ↑43                 | ↑95                | n/a              |
-| Catie's Bubbles - Blugere                                  |       13 |           12 |                1.08 | ↓3                  | ↑19                | n/a              |
-| Catie's Bubbles - 322                                      |       12 |            9 |                1.33 | ↑132                | n/a                | ↑273             |
-| Barrister and Mann - Ubrique                               |       12 |            8 |                1.50 | ↑19                 | n/a                | n/a              |
-| Barrister and Mann - Sandalwood                            |       12 |            5 |                2.40 | ↓20                 | ↑88                | n/a              |
-| Zingari Man - The Gent                                     |       12 |            2 |                6.00 | =                   | ↑127               | n/a              |
-| Mäurer & Wirtz - Sir Irisch Moos                           |       11 |           11 |                1.00 | ↑393                | ↑109               | ↑400             |
-| Spearhead Shaving Co. - Seaforth! Spiced                   |       11 |            8 |                1.38 | ↑96                 | ↓25                | n/a              |
-| Barrister and Mann - Lavender                              |       11 |            4 |                2.75 | ↑60                 | ↓3                 | ↓26              |
-| Chicago Grooming Co. - 40                                  |       11 |            1 |               11.00 | n/a                 | n/a                | n/a              |
-| Noble Otter - BarrBarr                                     |       10 |            6 |                1.67 | ↓31                 | ↓24                | ↓27              |
-| Catie's Bubbles - Dirty Prose                              |       10 |            2 |                5.00 | n/a                 | ↑178               | n/a              |
-| Barrister and Mann - Waves                                 |       10 |            1 |               10.00 | ↑237                | ↑78                | ↓32              |
-| Mäurer & Wirtz - Tabac                                     |       10 |            6 |                1.67 | ↓36                 | ↓35                | ↑26              |
-| Barrister and Mann - Seville                               |       10 |           10 |                1.00 | ↓29                 | ↓32                | ↓37              |
-| Summer Break Soaps - Woodshop                              |       10 |            7 |                1.43 | ↑477                | ↑35                | n/a              |
-| Summer Break Soaps - Daydream                              |        9 |            6 |                1.50 | ↑459                | ↓12                | n/a              |
-| House of Mammoth - Dammusi                                 |        9 |            4 |                2.25 | ↑56                 | ↓11                | n/a              |
-| Noble Otter - Thé Noir et Vanille                          |        9 |            5 |                1.80 | ↑17                 | ↓47                | ↓22              |
-| Stirling Soap Co. - Barbershop                             |        9 |            5 |                1.80 | ↓7                  | ↑17                | ↓1               |
-| Stirling Soap Co. - Deep Blue Sea                          |        9 |            6 |                1.50 | ↑182                | ↑17                | ↑185             |
-| Chicago Grooming Co. - AG 1889                             |        9 |            6 |                1.50 | ↓25                 | ↓46                | n/a              |
-| Barrister and Mann - Vespers                               |        9 |            6 |                1.50 | ↑234                | ↑318               | ↓14              |
-| Proraso - Green (Cream)                                    |        9 |            7 |                1.29 | ↓16                 | ↑62                | ↑80              |
-| Stirling Soap Co. - Burgundy                               |        8 |            1 |                8.00 | n/a                 | ↑493               | n/a              |
-| House of Mammoth - You & I (Will Die)                      |        8 |            3 |                2.67 | ↑60                 | n/a                | n/a              |
-| Barrister and Mann - Le Grand Chypre                       |        8 |            3 |                2.67 | ↓56                 | ↑46                | ↑100             |
-| Catie's Bubbles - Sunday Brunch                            |        8 |            5 |                1.60 | ↑241                | n/a                | n/a              |
-| Southern Witchcrafts - Labyrinth                           |        8 |            4 |                2.00 | ↓28                 | ↑82                | n/a              |
-| Talent Soap Factory - Slow Dancing in the Dark             |        8 |            5 |                1.60 | n/a                 | n/a                | n/a              |
-| Catie's Bubbles - Waterlyptus                              |        8 |            5 |                1.60 | ↑108                | n/a                | n/a              |
-| Stirling Soap Co. - Varen                                  |        8 |            7 |                1.14 | ↓38                 | ↓41                | ↑460             |
-| Catie's Bubbles - Retreat                                  |        8 |            5 |                1.60 | ↓30                 | ↑112               | n/a              |
-| Catie's Bubbles - A Midnight Dreary                        |        8 |            5 |                1.60 | ↑43                 | ↑162               | n/a              |
-| House of Mammoth - Smash                                   |        8 |            6 |                1.33 | ↓11                 | ↓44                | n/a              |
-| Chicago Grooming Co. - Armonía                             |        8 |            7 |                1.14 | ↑117                | ↑87                | n/a              |
-| Barrister and Mann - Diamond                               |        8 |            7 |                1.14 | ↑104                | ↑64                | ↑25              |
-| Summer Break Soaps - Valedictorian                         |        8 |            8 |                1.00 | ↑462                | ↑10                | n/a              |
-| Catie's Bubbles - Purple Grapefruit                        |        8 |            5 |                1.60 | ↑242                | n/a                | n/a              |
-| Barrister and Mann - First Snow                            |        7 |            4 |                1.75 | ↑87                 | n/a                | n/a              |
-| Back to Basics Log Cabin - Glycerin Shave Soap             |        7 |            1 |                7.00 | ↓58                 | n/a                | n/a              |
-| Noble Otter - Lonestar                                     |        7 |            5 |                1.40 | ↑38                 | ↓54                | ↑53              |
-| House of Mammoth - Everett                                 |        7 |            5 |                1.40 | ↑324                | ↑118               | n/a              |
-| Barrister and Mann - Marilyn                               |        7 |            6 |                1.17 | ↑10                 | ↑43                | n/a              |
-| Barrister and Mann - Paganini's Violin                     |        7 |            7 |                1.00 | ↑93                 | ↑18                | n/a              |
-| Stirling Soap Co. - Haverford                              |        6 |            4 |                1.50 | ↑395                | ↓57                | n/a              |
-| Declaration Grooming - Dirtyver                            |        6 |            1 |                6.00 | ↑243                | ↑83                | ↓87              |
-| Chicago Grooming Co. - Fomo                                |        6 |            1 |                6.00 | ↑218                | n/a                | n/a              |
-| Declaration Grooming - Persephone                          |        6 |            2 |                3.00 | ↑3                  | ↑40                | n/a              |
-| MacDuff's Soap Co. - Trail Tobacco                         |        6 |            3 |                2.00 | n/a                 | n/a                | n/a              |
-| Catie's Bubbles - Dusk                                     |        6 |            3 |                2.00 | ↑209                | n/a                | n/a              |
-| Barrister and Mann - Lavanille                             |        6 |            3 |                2.00 | ↓45                 | ↓43                | ↓47              |
-| Stirling Soap Co. - Oro Valley                             |        6 |            4 |                1.50 | ↑103                | ↑491               | n/a              |
-| Catie's Bubbles - Barnegat Bay                             |        6 |            3 |                2.00 | ↑16                 | ↑285               | n/a              |
-| Southern Witchcrafts - Samhain                             |        6 |            4 |                1.50 | ↓7                  | ↓11                | ↓33              |
-| Chiseled Face - Midnight Stag                              |        6 |            4 |                1.50 | ↑63                 | ↓42                | ↑246             |
-| Catie's Bubbles - Connecticut Shade                        |        6 |            4 |                1.50 | ↓41                 | ↑295               | n/a              |
-| Barrister and Mann - Noggin' On Heaven's Door              |        6 |            4 |                1.50 | ↑2                  | n/a                | n/a              |
-| Barrister and Mann - Bay Rum                               |        6 |            4 |                1.50 | ↑187                | ↑3                 | ↑85              |
-| Southern Witchcrafts - Boonana                             |        6 |            5 |                1.20 | ↑54                 | ↓2                 | n/a              |
-| Catie's Bubbles - V                                        |        6 |            5 |                1.20 | ↑229                | n/a                | n/a              |
-| Barrister and Mann - Nordost                               |        6 |            6 |                1.00 | ↓14                 | ↑97                | ↓60              |
-| Noble Otter - Rawr                                         |        6 |            4 |                1.50 | ↓53                 | ↓71                | n/a              |
-| Chiseled Face - Guy Noir                                   |        5 |            1 |                5.00 | ↑216                | n/a                | n/a              |
-| Barrister and Mann - Unscented                             |        5 |            1 |                5.00 | n/a                 | n/a                | n/a              |
-| Bartigan & Stark - Campione                                |        5 |            1 |                5.00 | ↓55                 | ↑175               | n/a              |
-| Talent Soap Factory - Hystrix Citrus                       |        5 |            1 |                5.00 | ↑417                | n/a                | n/a              |
-| Maggard Razors - Limes & Bergamot                          |        5 |            1 |                5.00 | ↓98                 | ↑138               | n/a              |
-| Pré de Provence - No. 63                                   |        5 |            1 |                5.00 | ↓95                 | ↑59                | ↑28              |
-| Shave Dandy - Coconut Cow                                  |        5 |            1 |                5.00 | ↑347                | n/a                | n/a              |
-| Noble Otter - Firefighter                                  |        5 |            2 |                2.50 | ↓37                 | ↓24                | n/a              |
-| Stirling Soap Co. - Spice                                  |        5 |            2 |                2.50 | n/a                 | n/a                | n/a              |
-| Catie's Bubbles - '95 Liquid Labels                        |        5 |            3 |                1.67 | n/a                 | ↑36                | n/a              |
-| Talent Soap Factory - Tonka Bean & Tobacco                 |        5 |            3 |                1.67 | n/a                 | ↑164               | n/a              |
-| Noble Otter - Jasmine Green Tea                            |        5 |            3 |                1.67 | ↑47                 | n/a                | n/a              |
-| Catie's Bubbles - Black Bergamot                           |        5 |            3 |                1.67 | n/a                 | n/a                | n/a              |
-| Summer Break Soaps - Rope Swing                            |        5 |            4 |                1.25 | n/a                 | ↑165               | n/a              |
-| Summer Break Soaps - Prom King                             |        5 |            4 |                1.25 | n/a                 | ↓64                | n/a              |
-| Noble Otter - Neon Sun                                     |        5 |            4 |                1.25 | ↑88                 | ↓32                | n/a              |
-| Catie's Bubbles - Irish Coffee                             |        5 |            4 |                1.25 | ↑109                | ↑129               | ↑108             |
-| House of Mammoth - Avocado (Cream)                         |        5 |            5 |                1.00 | ↑300                | n/a                | n/a              |
-| unreleased~~ - Sandalwood, Lavender, Oakmoss, Sweet Orange |        5 |            1 |                5.00 | n/a                 | n/a                | n/a              |
-
+| Rank   | Soap                                                                                                                         |   Shaves |   Unique Users | Δ vs Feb 2025   | Δ vs Mar 2024   | Δ vs Mar 2020   |
+|:-------|:-----------------------------------------------------------------------------------------------------------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
+| 1      | Spearhead Shaving Company - Seaforth! Leather (r/wetshaving exclusive)                                                       |       44 |             26 | =               | n/a             | n/a             |
+| 2      | Talent Soap Factory - Fantasy Donut                                                                                          |       39 |              9 | ↑244            | n/a             | n/a             |
+| 3      | House of Mammoth - Alive                                                                                                     |       37 |              6 | ↑57             | ↑1              | n/a             |
+| 4=     | Catie's Bubbles - Maggards MeetUp (Year Unspecified)                                                                         |       31 |              1 | ↑3              | n/a             | n/a             |
+| 4=     | Tcheon Fung Sing -                                                                                                           |       31 |              1 | n/a             | n/a             | n/a             |
+| 6      | Spearhead Shaving Company - Seaforth! Sea Spice Lime                                                                         |       29 |             15 | ↑20             | ↑14             | n/a             |
+| 7      | Spearhead Shaving Company - Seaforth! Black Watch                                                                            |       28 |             13 | ↑50             | ↑1              | n/a             |
+| 8      | Fanzine Saponifications - Testing... Testing                                                                                 |       23 |             11 | n/a             | n/a             | n/a             |
+| 9      | Spearhead Shaving Company - Seaforth! Roman Spice                                                                            |       21 |             12 | ↑15             | n/a             | n/a             |
+| 10     | Catie's Bubbles - Top of the World                                                                                           |       21 |              8 | ↑88             | n/a             | n/a             |
+| 11     | Barrister and Mann - Roam Two                                                                                                |       19 |             13 | ↑27             | ↑83             | ↑87             |
+| 12     | Spearhead Shaving Company - Seaforth! 3 Scots                                                                                |       19 |             12 | ↑45             | ↓6              | n/a             |
+| 13     | Spearhead Shaving Company - Seaforth! Heather                                                                                |       19 |              9 | ↑29             | ↑71             | n/a             |
+| 14     | Stirling Soap Co. - Gin & Tonic on the Rocks                                                                                 |       19 |              1 | ↑7              | n/a             | n/a             |
+| 15     | House of Mammoth - Hygge                                                                                                     |       18 |              7 | ↓1              | ↑32             | n/a             |
+| 16     | House of Mammoth - Tobacconist                                                                                               |       17 |              6 | ↑4              | ↓2              | n/a             |
+| 17=    | Stirling Soap Co. - Executive Man                                                                                            |       17 |              4 | ↑229            | ↑70             | ↑57             |
+| 17=    | Talent Soap Factory - Switchback                                                                                             |       17 |              4 | ↑123            | n/a             | n/a             |
+| 19     | Barrister and Mann - Midnight Special                                                                                        |       17 |              2 | ↑16             | ↑25             | n/a             |
+| 20     | [Barrister and Mann - Spice](https://www.wetshavingdatabase.com/software/barrister-and-mann-reserve-spice-soap/)             |       16 |              6 | ↑11             | ↑14             | ↑144            |
+| 21     | Talent Soap Factory - Trash Panda                                                                                            |       16 |              5 | ↑129            | ↑297            | n/a             |
+| 22     | House of Mammoth - Shire                                                                                                     |       15 |              9 | ↑19             | ↓19             | ↑233            |
+| 23     | [House of Mammoth - Indigo](https://www.wetshavingdatabase.com/software/house-of-mammoth-mood-indigo-soap/)                  |       15 |              7 | ↑9              | ↓11             | ↑184            |
+| 24     | Williams - Mug Shaving Soap                                                                                                  |       15 |              1 | ↓11             | ↑183            | ↑12             |
+| 25     | Captain's Choice - Venture                                                                                                   |       14 |              1 | n/a             | n/a             | n/a             |
+| 26     | Catie's Bubbles - Blugère                                                                                                    |       13 |             12 | ↓2              | ↑18             | n/a             |
+| 27     | Catie's Bubbles - Azure                                                                                                      |       13 |              8 | ↑43             | ↑99             | n/a             |
+| 28     | Spearhead Shaving Company - Seaforth! Fleur de France                                                                        |       13 |              7 | ↑23             | ↓5              | n/a             |
+| 29     | Barrister and Mann - Leviathan                                                                                               |       13 |              5 | ↓20             | ↑20             | ↓22             |
+| 30     | Catie's Bubbles - Tonsorium                                                                                                  |       13 |              4 | ↑92             | n/a             | ↑225            |
+| 31     | Catie's Bubbles - 322                                                                                                        |       12 |              9 | ↑119            | ↑186            | ↑19             |
+| 32     | Barrister and Mann - Ubrique                                                                                                 |       12 |              8 | ↑19             | n/a             | n/a             |
+| 33=    | [Barrister and Mann - Lavender](https://www.wetshavingdatabase.com/software/barrister-and-mann-lavender-black-label-soap/)   |       12 |              5 | ↑117            | ↓6              | ↓18             |
+| 33=    | Barrister and Mann - Sandalwood                                                                                              |       12 |              5 | ↓21             | ↑93             | n/a             |
+| 35     | Zingari Man - The Gent                                                                                                       |       12 |              2 | ↓3              | ↑123            | n/a             |
+| 36     | Mäurer & Wirtz - Sir Irisch Moos                                                                                             |       11 |             11 | ↑210            | ↑107            | ↑219            |
+| 37     | Spearhead Shaving Company - Seaforth! Spiced                                                                                 |       11 |              8 | ↑209            | ↓27             | n/a             |
+| 38     | Chicago Grooming Co. - 40                                                                                                    |       11 |              1 | n/a             | n/a             | n/a             |
+| 39     | Barrister and Mann - Seville                                                                                                 |       10 |             10 | ↓31             | ↓34             | ↓38             |
+| 40     | Summer Break Soaps - Woodshop                                                                                                |       10 |              7 | ↑206            | ↑33             | n/a             |
+| 41=    | Mäurer & Wirtz - Tabac                                                                                                       |       10 |              6 | ↓38             | ↓34             | ↑50             |
+| 41=    | Noble Otter - Barrbarr                                                                                                       |       10 |              6 | ↓32             | ↓23             | ↓25             |
+| 43     | Catie's Bubbles - Dirty Prose                                                                                                |       10 |              2 | n/a             | ↑174            | n/a             |
+| 44     | [Barrister and Mann - Waves](https://www.wetshavingdatabase.com/software/barrister-and-mann-reserve-waves-soap/)             |       10 |              1 | ↑202            | ↑82             | ↓31             |
+| 45     | [Proraso - Menthol and Eucalyptus (Green)](https://www.wetshavingdatabase.com/software/proraso-menthol-and-eucalyptus-soap/) |        9 |              7 | ↓16             | ↑68             | ↑78             |
+| 46=    | Barrister and Mann - Vespers                                                                                                 |        9 |              6 | n/a             | ↑272            | ↓8              |
+| 46=    | Chicago Grooming Co. - AG 1889                                                                                               |        9 |              6 | ↓24             | ↓45             | n/a             |
+| 46=    | Stirling Soap Co. - Deep Blue Sea                                                                                            |        9 |              6 | ↑157            | ↑19             | ↑161            |
+| 46=    | Summer Break Soaps - Daydream                                                                                                |        9 |              6 | ↑200            | ↓9              | n/a             |
+| 50     | Noble Otter - Thé Noir et Vanille                                                                                            |        9 |              5 | ↑15             | ↓48             | ↓19             |
+| 51     | Summer Break Soaps - Valedictorian                                                                                           |        8 |              8 | ↑195            | ↑12             | n/a             |
+| 52=    | Barrister and Mann - Diamond                                                                                                 |        8 |              7 | ↑98             | ↑74             | ↑32             |
+| 52=    | Chicago Grooming Co. - Armonía                                                                                               |        8 |              7 | ↑98             | ↑91             | n/a             |
+| 52=    | Stirling Soap Co. - Varen                                                                                                    |        8 |              7 | ↓33             | ↓39             | ↑203            |
+| 55     | House of Mammoth - Smash                                                                                                     |        8 |              6 | ↓10             | ↓44             | n/a             |
+| 56=    | Catie's Bubbles - Purple Grapefruit                                                                                          |        8 |              5 | ↑190            | n/a             | n/a             |
+| 56=    | Catie's Bubbles - Retreat                                                                                                    |        8 |              5 | ↓26             | ↑38             | n/a             |
+| 56=    | Catie's Bubbles - Sunday Brunch                                                                                              |        8 |              5 | ↑190            | n/a             | n/a             |
+| 56=    | Catie's Bubbles - Waterlyptus                                                                                                |        8 |              5 | ↑94             | n/a             | n/a             |
+| 56=    | Talent Soap Factory - Slow Dancing in the Dark                                                                               |        8 |              5 | n/a             | n/a             | n/a             |
+| 61=    | Southern Witchcrafts - Labyrinth                                                                                             |        8 |              4 | ↓26             | ↑82             | n/a             |
+| 61=    | Stirling Soap Co. - Barbershop                                                                                               |        8 |              4 | ↓17             | ↑7              | ↓31             |
+| 63=    | Barrister and Mann - Le Grand Chypre                                                                                         |        8 |              3 | ↓58             | ↑31             | ↑60             |
+| 63=    | House of Mammoth - You & I (Will Die)                                                                                        |        8 |              3 | ↑59             | n/a             | n/a             |
+| 65     | Stirling Soap Co. - Burgundy                                                                                                 |        8 |              1 | n/a             | ↑253            | n/a             |
+| 66     | Barrister and Mann - Paganini's Violin                                                                                       |        7 |              7 | ↑11             | ↑9              | n/a             |
+| 67     | Barrister and Mann - Marilyn                                                                                                 |        7 |              6 | ↑10             | ↑51             | n/a             |
+| 68     | Noble Otter - Lonestar                                                                                                       |        7 |              5 | ↑30             | ↓54             | ↑55             |
+| 69=    | Barrister and Mann - First Snow                                                                                              |        7 |              4 | ↑81             | n/a             | n/a             |
+| 69=    | Catie's Bubbles - A Midnight Dreary                                                                                          |        7 |              4 | ↑81             | ↑148            | n/a             |
+| 71     | Back to Basics Log Cabin - Glycerin Shave Soap                                                                               |        7 |              1 | ↓55             | n/a             | n/a             |
+| 72     | Barrister and Mann - Nordost                                                                                                 |        6 |              6 | ↓12             | ↑71             | ↓56             |
+| 73=    | Catie's Bubbles - V                                                                                                          |        6 |              5 | ↑173            | ↑245            | n/a             |
+| 73=    | Southern Witchcrafts - Boonana                                                                                               |        6 |              5 | ↑4              | ↓21             | n/a             |
+| 75=    | Barrister and Mann - Bay Rum                                                                                                 |        6 |              4 | ↑171            | ↑4              | ↑89             |
+| 75=    | Barrister and Mann - Noggin' On Heaven's Door                                                                                |        6 |              4 | ↑2              | n/a             | n/a             |
+| 75=    | Catie's Bubbles - Connecticut Shade                                                                                          |        6 |              4 | ↓36             | ↑243            | n/a             |
+| 75=    | Chiseled Face - Midnight Stag                                                                                                |        6 |              4 | ↑65             | ↓37             | ↑180            |
+| 75=    | House of Mammoth - Everett                                                                                                   |        6 |              4 | ↑171            | ↑116            | n/a             |
+| 75=    | Noble Otter - Rawr                                                                                                           |        6 |              4 | ↓48             | ↓66             | n/a             |
+| 75=    | Southern Witchcrafts - Samhain                                                                                               |        6 |              4 | ↓5              | ↓5              | ↓25             |
+| 75=    | Stirling Soap Co. - Haverford                                                                                                |        6 |              4 | ↑171            | ↓50             | n/a             |
+| 75=    | Stirling Soap Co. - Oro Valley                                                                                               |        6 |              4 | ↑75             | ↑243            | n/a             |
+| 84=    | Catie's Bubbles - Barnegat Bay                                                                                               |        6 |              3 | ↑14             | ↑234            | n/a             |
+| 84=    | Catie's Bubbles - Dusk                                                                                                       |        6 |              3 | ↑162            | ↑234            | ↑171            |
+| 84=    | MacDuff's Soap Company - Trail Tobacco                                                                                       |        6 |              3 | n/a             | n/a             | n/a             |
+| 87     | Declaration Grooming - Persephone                                                                                            |        6 |              2 | ↑6              | ↑23             | n/a             |
+| 88=    | Chicago Grooming Co. - Fomo                                                                                                  |        6 |              1 | ↑158            | n/a             | n/a             |
+| 88=    | Declaration Grooming - Dirtyver                                                                                              |        6 |              1 | ↑158            | ↑88             | ↓83             |
+| 90     | House of Mammoth - Avocado (Cream)                                                                                           |        5 |              5 | ↑156            | n/a             | n/a             |
+| 91=    | Catie's Bubbles - Irish Coffee                                                                                               |        5 |              4 | ↑112            | ↑126            | ↑116            |
+| 91=    | Noble Otter - Neon Sun                                                                                                       |        5 |              4 | ↑59             | ↓28             | n/a             |
+| 91=    | Stirling Soap Co. - Stirling Green                                                                                           |        5 |              4 | ↑59             | ↑77             | ↓25             |
+| 91=    | Summer Break Soaps - Prom King                                                                                               |        5 |              4 | n/a             | ↓59             | n/a             |
+| 91=    | Summer Break Soaps - Rope Swing                                                                                              |        5 |              4 | n/a             | ↑85             | n/a             |
+| 91=    | Talent Soap Factory - The Abyss                                                                                              |        5 |              4 | n/a             | ↑227            | n/a             |
+| 97=    | Barrister and Mann - Petrichor                                                                                               |        5 |              3 | n/a             | ↑16             | ↑158            |
+| 97=    | [Catie's Bubbles - '95 Liquid Labels](https://www.wetshavingdatabase.com/software/caties-bubbles-95-liquid-labels-soap/)     |        5 |              3 | n/a             | ↑41             | n/a             |
+| 97=    | Catie's Bubbles - Black Bergamot                                                                                             |        5 |              3 | n/a             | n/a             | n/a             |
+| 97=    | House of Mammoth - Dammusi                                                                                                   |        5 |              3 | ↑1              | ↓67             | n/a             |
+| 97=    | Noble Otter - Jasmine Green Tea                                                                                              |        5 |              3 | ↑43             | n/a             | n/a             |
+| 97=    | Talent Soap Factory - Tonka Bean & Tobacco                                                                                   |        5 |              3 | n/a             | ↑120            | n/a             |
+| 103    | Stirling Soap Co. - Spice                                                                                                    |        5 |              2 | n/a             | n/a             | n/a             |
+| 104=   | Barrister and Mann - Unscented                                                                                               |        5 |              1 | ↑142            | n/a             | n/a             |
+| 104=   | Bartigan & Stark - Campione                                                                                                  |        5 |              1 | ↓55             | ↑180            | n/a             |
+| 104=   | Chiseled Face - Guy Noir                                                                                                     |        5 |              1 | ↑142            | n/a             | n/a             |
+| 104=   | Maggard Razors - Limes & Bergamot                                                                                            |        5 |              1 | ↓100            | ↑113            | n/a             |
+| 104=   | Pré de Provence - No. 63                                                                                                     |        5 |              1 | ↓93             | ↑64             | ↑151            |
+| 104=   | Shave Dandy - Coconut Cow                                                                                                    |        5 |              1 | ↑142            | ↑214            | n/a             |
+| 104=   | Talent Soap Factory - Hystrix Citrus                                                                                         |        5 |              1 | ↑142            | n/a             | n/a             |
+| 104=   | unreleased~~ - Sandalwood, Lavender, Oakmoss, Sweet Orange                                                                   |        5 |              1 | n/a             | n/a             | n/a             |
 
 ## Brand Diversity
 
-*No data available for brand-diversity*
+| Rank   | Brand                     |   Unique Soaps | Δ vs Feb 2025   | Δ vs Mar 2024   | Δ vs Mar 2020   |
+|:-------|:--------------------------|---------------:|:----------------|:----------------|:----------------|
+| 1      | Barrister and Mann        |             66 | =               | ↑1              | =               |
+| 2      | Stirling Soap Co.         |             57 | =               | ↓1              | =               |
+| 3      | Catie's Bubbles           |             56 | =               | ↑1              | ↑4              |
+| 4      | Talent Soap Factory       |             52 | ↑1              | ↑2              | n/a             |
+| 5      | Declaration Grooming      |             30 | ↓1              | ↓2              | ↓2              |
+| 6      | House of Mammoth          |             24 | =               | ↑1              | ↑11             |
+| 7      | Noble Otter               |             21 | ↑1              | ↑1              | ↓1              |
+| 8      | Summer Break Soaps        |             20 | ↑2              | ↑1              | ↑4              |
+| 9=     | Ariana & Evans            |             18 | ↓1              | ↓5              | ↓4              |
+| 9=     | Southern Witchcrafts      |             18 | ↑2              | =               | ↓2              |
+| 9=     | Zingari Man               |             18 | ↑2              | ↑2              | =               |
+| 12=    | Chicago Grooming Co.      |             16 | ↓1              | ↑1              | ↓1              |
+| 12=    | Spearhead Shaving Company |             16 | ↑3              | ↑4              | =               |
+| 14     | Chiseled Face             |             15 | =               | ↓1              | ↓2              |
+| 15     | MacDuff's Soap Company    |             14 | ↑2              | =               | n/a             |
+| 16     | Wholly Kaw                |             12 | ↓9              | ↓5              | ↓12             |
+| 17=    | Mike's Natural Soaps      |              6 | =               | ↑36             | ↑5              |
+| 17=    | Moon Soaps                |              6 | ↑3              | ↑4              | n/a             |
+| 19=    | Martin de Candre          |              5 | ↑8              | ↑18             | ↑8              |
+| 19=    | Shavologist               |              5 | ↑8              | n/a             | n/a             |
+
+## Soap Diversity by User
+
+| Rank   | User                   |   Unique Soaps |   Shaves |   Avg Shaves per Soap | Δ vs Feb 2025   | Δ vs Mar 2024   | Δ vs Mar 2020   |
+|:-------|:-----------------------|---------------:|---------:|----------------------:|:----------------|:----------------|:----------------|
+| 1      | u/brokenjaw622         |             31 |       32 |                  1.03 | ↑2              | n/a             | n/a             |
+| 2      | u/Eructate             |             29 |       31 |                  1.07 | ↑12             | ↑3              | n/a             |
+| 3      | u/snoo-ting            |             28 |       32 |                  1.14 | ↑9              | n/a             | n/a             |
+| 4      | u/PhilosphicalZombie   |             28 |       28 |                  1    | ↑24             | ↑1              | n/a             |
+| 5      | u/35048467             |             27 |       31 |                  1.15 | ↑4              | ↑21             | ↑7              |
+| 6      | u/SamIAmShepard        |             26 |       31 |                  1.19 | ↑7              | ↑30             | n/a             |
+| 7=     | u/EldrormR             |             25 |       31 |                  1.24 | ↑12             | ↑10             | ↑19             |
+| 7=     | u/InfernalInternal     |             25 |       31 |                  1.24 | ↑13             | ↓2              | n/a             |
+| 7=     | u/rocketk455           |             25 |       31 |                  1.24 | ↑18             | ↑32             | ↑28             |
+| 10     | u/socialkittielynx     |             25 |       29 |                  1.16 | ↑43             | n/a             | n/a             |
+| 11     | u/gcgallant            |             25 |       27 |                  1.08 | ↑29             | ↓9              | n/a             |
+| 12=    | u/Environmental-Gap380 |             24 |       31 |                  1.29 | ↓5              | ↓1              | n/a             |
+| 12=    | u/djundjila            |             24 |       31 |                  1.29 | ↓10             | ↓2              | n/a             |
+| 14=    | u/loudmusicboy         |             23 |       31 |                  1.35 | ↑30             | ↑16             | n/a             |
+| 14=    | u/wallygator88         |             23 |       31 |                  1.35 | ↑4              | ↑19             | ↑48             |
+| 16     | u/RedMosquitoMM        |             23 |       27 |                  1.17 | ↓1              | ↓12             | n/a             |
+| 17     | u/Engineered_Shave     |             22 |       37 |                  1.68 | ↑6              | ↓8              | n/a             |
+| 18     | u/partyman97_3         |             22 |       31 |                  1.41 | ↓2              | ↑1              | n/a             |
+| 19=    | u/oswald_heist         |             21 |       31 |                  1.48 | ↓14             | ↓5              | n/a             |
+| 19=    | u/wyze0ne              |             21 |       31 |                  1.48 | ↑12             | ↑9              | ↑19             |
+| 21     | u/B_S80                |             21 |       30 |                  1.43 | ↓10             | ↑60             | ↑25             |
+| 22     | u/frankieIVfingers     |             20 |       24 |                  1.2  | ↓1              | ↑9              | n/a             |
+| 23     | u/Gaidin23             |             19 |       21 |                  1.11 | n/a             | n/a             | n/a             |
+| 24     | u/Crossan1983          |             18 |       31 |                  1.72 | ↓18             | ↑23             | n/a             |
+| 25     | u/sahenders            |             18 |       18 |                  1    | ↓24             | ↓23             | n/a             |
+| 26     | u/Impressive_Donut114  |             17 |       34 |                  2    | ↑28             | ↓11             | n/a             |
+| 27=    | u/Allisnotwellin       |             17 |       22 |                  1.29 | ↑66             | ↑32             | n/a             |
+| 27=    | u/expoqeteer           |             17 |       22 |                  1.29 | n/a             | n/a             | n/a             |
+| 29     | u/BossHoggins10        |             16 |       31 |                  1.94 | ↑8              | ↑42             | n/a             |
+| 30     | u/2SaintsDude          |             16 |       18 |                  1.12 | ↓13             | ↑5              | n/a             |
+| 31=    | u/AdWorried2804        |             15 |       31 |                  2.07 | ↓22             | ↓14             | n/a             |
+| 31=    | u/FireDragonMonkey     |             15 |       31 |                  2.07 | ↓7              | ↑23             | n/a             |
+| 33     | u/glink48              |             15 |       21 |                  1.4  | ↓6              | ↑54             | n/a             |
+| 34     | u/Priusaurus           |             15 |       18 |                  1.2  | ↓26             | ↓23             | n/a             |
+| 35     | u/Banedon38            |             15 |       15 |                  1    | n/a             | ↑85             | n/a             |
+| 36     | u/raymoonie            |             14 |       18 |                  1.29 | ↑9              | ↓11             | n/a             |
+| 37     | u/solongamerica        |             14 |       16 |                  1.14 | ↑14             | ↑53             | n/a             |
+| 38     | u/psychonaut7343       |             13 |       18 |                  1.38 | ↑1              | n/a             | n/a             |
+| 39     | u/JoboozeRum           |             13 |       17 |                  1.31 | n/a             | ↑31             | n/a             |
+| 40     | u/whosgotthepudding    |             13 |       15 |                  1.15 | ↑41             | ↓2              | n/a             |
 
 ## Top Shavers
 
-| User                  | shaves   | missed days | Δ vs previous month | Δ vs previous year | Δ vs 5 years ago |
-| --------------------- | -------: | ----------- | :-----------------: | :----------------: | :--------------: |
-| u/Engineered_Shave    |       37 | 0           | =                   | ↑2                 | n/a              |
-| u/Impressive_Donut114 |       34 | 0           | =                   | ↓1                 | n/a              |
-| u/putneycj            |       33 | 0           | ↑28                 | ↑62                | n/a              |
-| u/Breadheater9876     |       32 | 0           | ↑28                 | ↑4                 | n/a              |
-| u/brokenjaw622        |       32 | 0           | ↑11                 | n/a                | n/a              |
-| u/snoo-ting           |       32 | 1           | ↓1                  | n/a                | n/a              |
-| u/wyze0ne             |       31 | 0           | ↓3                  | ↑9                 | ↑24              |
-| u/wallygator88        |       31 | 0           | ↓3                  | ↑2                 | ↓13              |
-| u/SamIAmShepard       |       31 | 0           | ↓13                 | ↑30                | n/a              |
-| u/rocketk455          |       31 | 0           | ↑10                 | ↑16                | ↑9               |
-| u/partyman97_3        |       31 | 0           | ↓5                  | ↓1                 | n/a              |
-| u/oswald_heist        |       31 | 0           | ↓5                  | ↑13                | n/a              |
-| u/loudmusicboy        |       31 | 0           | ↓5                  | =                  | n/a              |
-| u/el_charminman       |       31 | 0           | ↓5                  | ↓3                 | ↓12              |
-| u/djundjila           |       31 | 0           | ↓18                 | ↓16                | n/a              |
-| u/anchovie7468        |       31 | 0           | ↓5                  | n/a                | n/a              |
-| u/scribe__            |       31 | 0           | ↓4                  | ↑1                 | n/a              |
-| u/Marquis90           |       31 | 0           | ↓3                  | ↑23                | n/a              |
-| u/Old_Hiker           |       31 | 0           | ↑10                 | ↓6                 | ↓12              |
-| u/InfernalInternal    |       31 | 0           | ↓3                  | ↓5                 | n/a              |
-
+| Rank   | User                   |   Shaves |   Missed Days | Δ vs Feb 2025   | Δ vs Mar 2024   | Δ vs Mar 2020   |
+|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
+| 1      | u/Engineered_Shave     |       37 |             0 | =               | ↑1              | n/a             |
+| 2      | u/Impressive_Donut114  |       34 |             0 | =               | ↓1              | n/a             |
+| 3=     | u/Breadheater9876      |       32 |             0 | ↑28             | ↑3              | n/a             |
+| 3=     | u/brokenjaw622         |       32 |             0 | ↑4              | n/a             | n/a             |
+| 5=     | u/35048467             |       31 |             0 | ↑2              | ↑1              | ↓4              |
+| 5=     | u/AdWorried2804        |       31 |             0 | ↑2              | ↑25             | n/a             |
+| 5=     | u/BossHoggins10        |       31 |             0 | ↑2              | ↑25             | n/a             |
+| 5=     | u/Crossan1983          |       31 |             0 | ↓1              | ↑52             | n/a             |
+| 5=     | u/EldrormR             |       31 |             0 | ↑26             | ↑25             | ↑19             |
+| 5=     | u/Environmental-Gap380 |       31 |             0 | ↑2              | ↑1              | n/a             |
+| 5=     | u/Eructate             |       31 |             0 | ↑22             | ↑1              | n/a             |
+| 5=     | u/FireDragonMonkey     |       31 |             0 | ↑2              | ↑33             | n/a             |
+| 5=     | u/Glass_Procedure7497  |       31 |             0 | ↑2              | ↑72             | n/a             |
+| 5=     | u/InfernalInternal     |       31 |             0 | ↑2              | ↑1              | n/a             |
+| 5=     | u/Marquis90            |       31 |             0 | ↑2              | ↑33             | n/a             |
+| 5=     | u/Old_Hiker            |       31 |             0 | ↑22             | ↑1              | ↓4              |
+| 5=     | u/SamIAmShepard        |       31 |             0 | ↑1              | ↑43             | n/a             |
+| 5=     | u/anchovie7468         |       31 |             0 | ↑2              | n/a             | n/a             |
+| 5=     | u/djundjila            |       31 |             0 | ↓2              | ↓1              | n/a             |
+| 5=     | u/el_charminman        |       31 |             0 | ↑2              | ↑1              | ↓4              |
+| 5=     | u/loudmusicboy         |       31 |             0 | ↑2              | ↑1              | n/a             |
+| 5=     | u/oswald_heist         |       31 |             0 | ↑2              | ↑25             | n/a             |
+| 5=     | u/partyman97_3         |       31 |             0 | ↑2              | ↑1              | n/a             |
+| 5=     | u/rocketk455           |       31 |             0 | ↑28             | ↑33             | ↑27             |
+| 5=     | u/scribe__             |       31 |             0 | ↑2              | ↑1              | n/a             |
+| 5=     | u/wallygator88         |       31 |             0 | ↑2              | ↑1              | ↓4              |
+| 5=     | u/wyze0ne              |       31 |             0 | ↑2              | ↑25             | ↑44             |
+| 28     | u/snoo-ting            |       32 |             1 | ↓24             | n/a             | n/a             |
+| 29=    | u/B_S80                |       30 |             1 | ↑4              | ↑63             | ↑25             |
+| 29=    | u/sandstorm99          |       30 |             1 | ↓2              | n/a             | n/a             |
+| 29=    | u/tsrblke              |       30 |             1 | ↓22             | ↓23             | n/a             |

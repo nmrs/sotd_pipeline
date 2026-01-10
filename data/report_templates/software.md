@@ -1,4 +1,4 @@
-# Lather Log {{month_year}}
+# Lather Log - {{month_year}}
 
 **Total Shaves:** {{total_shaves}}
 **Unique Shavers:** {{unique_shavers}}
