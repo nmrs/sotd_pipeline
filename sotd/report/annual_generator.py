@@ -63,6 +63,9 @@ class AnnualReportGenerator(BaseReportGenerator):
                 return val
             return 0
 
+        missing_months_count = _count(self.metadata.get("missing_months", []))
+        included_months_count = _count(self.metadata.get("included_months", []))
+
         variables = {
             "year": self.year,
             "total_shaves": f"{self.metadata.get('total_shaves', 0):,}",
@@ -73,22 +76,15 @@ class AnnualReportGenerator(BaseReportGenerator):
             "sample_percentage": f"{self.metadata.get('sample_percentage', 0):.1f}%",
             "sample_users": str(self.metadata.get("sample_users", 0)),
             "sample_brands": str(self.metadata.get("sample_brands", 0)),
-            "included_months": str(_count(self.metadata.get("included_months", []))),
-            "missing_months": str(_count(self.metadata.get("missing_months", []))),
+            "included_months": str(included_months_count),
+            "missing_months": str(missing_months_count),
+            "missing_months_note": (
+                f"* Note: {missing_months_count} month{'s' if missing_months_count != 1 else ''} "
+                f"{'were' if missing_months_count != 1 else 'was'} missing from the data set."
+                if missing_months_count > 0
+                else ""
+            ),
         }
-
-        # Create table generator for table placeholders
-        table_generator = TableGenerator(self.data, self.comparison_data, None, self.debug)
-
-        # Generate all tables for the template
-        tables = {}
-        for table_name in table_generator.get_available_table_names():
-            try:
-                tables[table_name] = table_generator.generate_table_by_name(table_name)
-            except Exception as e:
-                if self.debug:
-                    print(f"[DEBUG] AnnualReport: Error generating table {table_name}: {e}")
-                tables[table_name] = f"*Error generating table {table_name}: {e}*"
 
         # Create template processor with custom path if provided
         if self.template_path:
@@ -98,7 +94,126 @@ class AnnualReportGenerator(BaseReportGenerator):
 
         # Generate report using annual template
         annual_template_name = f"annual_{self.report_type}"
+        template_content = processor.get_template(annual_template_name)
+
+        # Create table generator for table placeholders
+        # For annual reports, use year-12 (December) as the "current month" for delta calculations
+        # This allows the delta calculator to work with year-based comparisons
+        current_month_for_deltas = f"{self.year}-12"
+        table_generator = TableGenerator(
+            self.data, self.comparison_data, current_month_for_deltas, self.debug
+        )
+
+        # Scan template for table placeholders (like monthly reports do)
+        # This ensures we use the exact placeholder names from the template (with hyphens)
+        import re
+
+        template_table_pattern = r"\{\{tables\.([^|}]+)(?:\|[^}]*)?\}\}"
+        template_table_names = re.findall(template_table_pattern, template_content)
+
+        # Generate tables for all template placeholders found
+        tables = {}
+        for table_name in template_table_names:
+            try:
+                # Generate table using the template name (with hyphens)
+                # TableGenerator.generate_table() handles hyphen-to-underscore conversion internally
+                table_content = table_generator.generate_table(table_name, deltas=True)
+                if table_content:
+                    # Use the full placeholder as the key to match template syntax
+                    placeholder = f"{{{{tables.{table_name}}}}}"
+                    tables[placeholder] = table_content
+                else:
+                    placeholder = f"{{{{tables.{table_name}}}}}"
+                    tables[placeholder] = "*No data available for this category*"
+            except Exception as e:
+                if self.debug:
+                    print(f"[DEBUG] AnnualReport: Error generating table '{table_name}': {e}")
+                placeholder = f"{{{{tables.{table_name}}}}}"
+                tables[placeholder] = f"*Error generating table {table_name}: {e}*"
+
+        # Process enhanced table syntax with parameters (like monthly reports)
+        enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
+        tables.update(enhanced_tables)
+
         return processor.process_template(annual_template_name, variables, tables)
+
+    def _process_enhanced_table_syntax(
+        self, template_content: str, table_generator: TableGenerator
+    ) -> Dict[str, str]:
+        """Process enhanced table syntax with parameters in the template.
+
+        Args:
+            template_content: The template content to scan for enhanced syntax
+            table_generator: The table generator instance
+
+        Returns:
+            Dictionary of enhanced table placeholders to their generated content
+        """
+        enhanced_tables = {}
+
+        # Pattern to match enhanced table syntax: {{tables.table_name|param:value|param:value}}
+        # This pattern specifically looks for the pipe character to identify enhanced syntax
+        # It must contain at least one pipe character to be considered enhanced
+        import re
+
+        # Find all unique full placeholders (not just table names) to handle multiple
+        # placeholders with the same table name but different parameters
+        full_placeholder_pattern = r"\{\{tables\.[^}]+\|[^}]+\}\}"
+        full_placeholders = re.findall(full_placeholder_pattern, template_content)
+
+        # Process each unique placeholder
+        for full_placeholder in set(full_placeholders):
+            try:
+                # Parse the placeholder to extract table name and parameters
+                from .table_parameter_parser import TableParameterParser
+
+                parser = TableParameterParser()
+                table_name, parameters = parser.parse_placeholder(full_placeholder)
+
+                if self.debug:
+                    print(
+                        f"[DEBUG] AnnualReport({self.report_type}): "
+                        f"Processing enhanced table: {table_name} "
+                        f"with parameters: {parameters}"
+                    )
+
+                # Generate the table with parameters
+                # Extract numeric limits (any parameter that's not ranks, rows,
+                # columns, deltas, or wsdb)
+                numeric_limits = {}
+                for key, value in parameters.items():
+                    if key not in ["ranks", "rows", "columns", "deltas", "wsdb"]:
+                        numeric_limits[key] = value
+
+                table_content = table_generator.generate_table(
+                    table_name,
+                    ranks=parameters.get("ranks"),
+                    rows=parameters.get("rows"),
+                    columns=parameters.get("columns"),
+                    deltas=parameters.get("deltas") == "true",
+                    wsdb=parameters.get("wsdb") == "true",
+                    **numeric_limits,
+                )
+
+                # Use the full placeholder as the key for replacement
+                enhanced_tables[full_placeholder] = table_content
+
+                if self.debug:
+                    print(
+                        f"[DEBUG] AnnualReport({self.report_type}): "
+                        f"Generated enhanced table for {table_name}"
+                    )
+
+            except Exception as e:
+                # Handle enhanced table syntax errors gracefully
+                if self.debug:
+                    print(
+                        f"[DEBUG] AnnualReport({self.report_type}): "
+                        f"Error processing enhanced table '{full_placeholder}': {e}"
+                    )
+                enhanced_tables[full_placeholder] = f"*Error processing enhanced table syntax: {e}*"
+
+        return enhanced_tables
 
     def generate_tables(self) -> list[str]:
         """Generate all tables for the annual report.
@@ -220,10 +335,48 @@ def generate_annual_report(
             logger.info(f"Total shaves: {metadata['total_shaves']}")
             logger.info(f"Unique shavers: {metadata['unique_shavers']}")
 
+        # Load comparison data for delta calculations (previous year, 5 years ago)
+        comparison_data = {}
+        try:
+            from .annual_comparison_loader import AnnualComparisonLoader
+
+            # Calculate comparison years: previous year and 5 years ago
+            year_int = int(year)
+            comparison_years = [str(year_int - 1), str(year_int - 5)]
+
+            loader = AnnualComparisonLoader(debug=debug)
+            annual_data_dir = data_dir / "aggregated" / "annual"
+            comparison_years_data = loader.load_comparison_years(comparison_years, annual_data_dir)
+
+            # Convert to format expected by TableGenerator: {YYYY-MM: (metadata, data)}
+            # Use December (12) as the representative month for each year
+            # Annual data structure: {metadata: {...}, razors: [...], blades: [...], ...}
+            # We need to extract metadata and put everything else in a "data" dict
+            for comp_year, comp_data in comparison_years_data.items():
+                # Extract metadata
+                comp_metadata = comp_data.get("metadata", {})
+                # Extract all non-metadata keys as the data section
+                comp_data_section = {k: v for k, v in comp_data.items() if k != "metadata"}
+                # Use YYYY-12 format to match monthly comparison data format
+                comparison_data[f"{comp_year}-12"] = (comp_metadata, comp_data_section)
+
+            if debug:
+                logger.info(
+                    f"Loaded comparison data for years: {list(comparison_years_data.keys())}"
+                )
+                print(
+                    f"[DEBUG] Loaded comparison data for years: {list(comparison_years_data.keys())}"
+                )
+        except Exception as e:
+            if debug:
+                logger.warning(f"Failed to load comparison data: {e}")
+                print(f"[DEBUG] Warning: Failed to load comparison data: {e}")
+            comparison_data = {}
+
         # Generate report content using unified patterns
         monitor.start_processing_timing()
         result = generate_annual_report_content(
-            report_type, year, metadata, data, {}, debug, template_path
+            report_type, year, metadata, data, comparison_data, debug, template_path
         )
         monitor.end_processing_timing()
 

@@ -421,7 +421,9 @@ class TableGenerator:
                 # Check if comparison DataFrame has all required sort columns
                 # If not, skip sorting for comparison data (it's from an old file format)
                 sort_columns = [col for col, _ in sort_info]
-                missing_in_comparison = [col for col in sort_columns if col not in comparison_df.columns]
+                missing_in_comparison = [
+                    col for col in sort_columns if col not in comparison_df.columns
+                ]
                 if missing_in_comparison:
                     # Comparison data doesn't have required columns (e.g., from old annual file)
                     # Skip sorting for comparison - it will still work for delta calculation

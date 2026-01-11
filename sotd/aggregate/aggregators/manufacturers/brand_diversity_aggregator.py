@@ -29,11 +29,14 @@ def aggregate_brand_diversity(
         return []
 
     # Extract brand names from soap_makers (which have full names like "Barrister and Mann")
+    # Handle both "brand" (monthly) and "name" (annual) field names
     brand_names = set()
     for maker_data in soap_makers:
-        brand = maker_data.get("brand", "").strip()
+        brand = maker_data.get("brand") or maker_data.get("name", "")
         if brand:
-            brand_names.add(brand)
+            brand = str(brand).strip()
+            if brand:
+                brand_names.add(brand)
 
     if not brand_names:
         return []
