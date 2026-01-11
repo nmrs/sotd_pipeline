@@ -6,9 +6,7 @@ Welcome to your Annual SOTD Lather Log for {{year}}
 
 * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
 * Data includes {{included_months}} months of the year.
-{% if missing_months > 0 %}
-* Note: {{missing_months}} months were missing from the data set.
-{% endif %}
+{{missing_months_note}}
 
 ## Notes & Caveats
 
@@ -20,18 +18,22 @@ Welcome to your Annual SOTD Lather Log for {{year}}
 
 * The change Δ vs columns show how an item has moved up or down the rankings since the previous year. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to the previous year. n/a means the item was not present in the previous year.
 
-## Soap Makers
+## Soap Brands
 
-{{tables.soap-makers}}
+{{tables.soap-makers|shaves:50|columns:rank, name=brand, shaves, unique_users|deltas:true|deltas:true}}
 
 ## Soaps
 
-{{tables.soaps}}
+{{tables.soaps|ranks:100|columns:rank, name=soap, shaves, unique_users|deltas:true|wsdb:true}}
 
 ## Brand Diversity
 
-{{tables.brand-diversity}}
+{{tables.brand-diversity|unique_soaps:10|deltas:true}}
 
-## Top Shavers
+## Soap Diversity by User
 
-{{tables.top-shavers}}
+{{tables.user-soap-brand-scent-diversity|ranks:20|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
+
+## Most Boring Shaver
+
+{{tables.user-soap-brand-scent-diversity|ranks:20|columns:rank, user, hhi=boring score desc, effective_soaps, unique_combinations=unique_soaps, shaves|deltas:true|shaves:50}}

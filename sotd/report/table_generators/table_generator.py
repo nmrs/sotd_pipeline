@@ -264,12 +264,27 @@ class TableGenerator:
 
         Returns:
             List of comparison periods: [previous_month, previous_year, five_years_ago]
+            For annual reports (when current_month ends in -12), returns only year-based periods
         """
         from datetime import datetime
 
         # Parse current month
         current_date = datetime.strptime(current_month, "%Y-%m")
 
+        # For annual reports (December), only return year-based comparisons
+        # Skip previous month comparison as it doesn't make sense for annual data
+        if current_date.month == 12:
+            # Previous year (December)
+            prev_year = current_date.replace(year=current_date.year - 1)
+            # Five years ago (December)
+            five_years_ago = current_date.replace(year=current_date.year - 5)
+            # Return only year-based periods
+            return [
+                prev_year.strftime("%Y-%m"),
+                five_years_ago.strftime("%Y-%m"),
+            ]
+
+        # For monthly reports, return all three periods
         # Previous month
         if current_date.month == 1:
             prev_month = current_date.replace(year=current_date.year - 1, month=12)
@@ -321,14 +336,21 @@ class TableGenerator:
         }
 
     def _calculate_deltas(
-        self, df: pd.DataFrame, table_name: str, current_month: str
+        self,
+        df: pd.DataFrame,
+        table_name: str,
+        current_month: str,
+        sort_info: Optional[list[tuple[str, bool]]] = None,
     ) -> pd.DataFrame:
         """Calculate delta columns for rank changes using vectorized operations.
 
         Args:
-            df: DataFrame with current data
+            df: DataFrame with current data (already sorted if sort_info was provided)
             table_name: Name of the table being processed
             current_month: Current month in YYYY-MM format
+            sort_info: Optional list of (column_name, ascending) tuples for sorting.
+                      If provided, comparison data will be sorted the same way before
+                      calculating deltas to ensure consistent rank comparisons.
 
         Returns:
             DataFrame with delta columns added
@@ -336,26 +358,43 @@ class TableGenerator:
         if not self.comparison_data:
             # No comparison data available
             df = df.copy()
-            df["Δ vs Previous Month"] = "n/a"
-            df["Δ vs Previous Year"] = "n/a"
-            df["Δ vs 5 Years Ago"] = "n/a"
+            # For annual reports (when current_month ends in -12), only create year-based columns
+            if current_month.endswith("-12"):
+                df["Δ vs Previous Year"] = "n/a"
+                df["Δ vs 5 Years Ago"] = "n/a"
+            else:
+                df["Δ vs Previous Month"] = "n/a"
+                df["Δ vs Previous Year"] = "n/a"
+                df["Δ vs 5 Years Ago"] = "n/a"
             return df
 
         comparison_periods = self._get_comparison_periods(current_month)
         df = df.copy()
 
         # Initialize delta columns with proper names
-        df["Δ vs Previous Month"] = "n/a"
-        df["Δ vs Previous Year"] = "n/a"
-        df["Δ vs 5 Years Ago"] = "n/a"
+        # For annual reports (when current_month ends in -12), only create year-based columns
+        if current_month.endswith("-12"):
+            df["Δ vs Previous Year"] = "n/a"
+            df["Δ vs 5 Years Ago"] = "n/a"
+        else:
+            df["Δ vs Previous Month"] = "n/a"
+            df["Δ vs Previous Year"] = "n/a"
+            df["Δ vs 5 Years Ago"] = "n/a"
 
         # Get identifier columns for matching
-        string_columns = self._get_string_columns(list(df.columns), table_name)
-        if not string_columns:
+        # Note: We need to get string columns before any renaming happens
+        # But we also need to handle the case where df gets renamed during the loop
+        original_string_columns = self._get_string_columns(list(df.columns), table_name)
+        if not original_string_columns:
             return df
 
         # Calculate deltas for each comparison period
         for i, period in enumerate(comparison_periods):
+            # Recalculate string_columns in case df was renamed in a previous iteration
+            string_columns = self._get_string_columns(list(df.columns), table_name)
+            if not string_columns:
+                # Fallback to original if current df doesn't have any string columns
+                string_columns = original_string_columns
             if period not in self.comparison_data:
                 continue
 
@@ -372,22 +411,68 @@ class TableGenerator:
 
             # Get comparison data for this table
             comparison_df = pd.DataFrame(period_data[table_name])
+
             if comparison_df.empty:
                 continue
 
+            # Apply the same sorting to comparison data if sort_info is provided
+            # This ensures delta calculations compare ranks from the same sorting scheme
+            if sort_info:
+                # Check if comparison DataFrame has all required sort columns
+                # If not, skip sorting for comparison data (it's from an old file format)
+                sort_columns = [col for col, _ in sort_info]
+                missing_in_comparison = [col for col in sort_columns if col not in comparison_df.columns]
+                if missing_in_comparison:
+                    # Comparison data doesn't have required columns (e.g., from old annual file)
+                    # Skip sorting for comparison - it will still work for delta calculation
+                    pass
+                else:
+                    comparison_df = self._apply_sorting(comparison_df, sort_info)
+
             # Use vectorized operations for matching
             # Find the best matching column between current and comparison data
+            # Handle case where current data uses "name" but comparison uses original field names
             matching_column = None
+
+            # First, try direct column matching
             for col in string_columns:
                 if col in df.columns and col in comparison_df.columns:
                     matching_column = col
                     break
 
+            # If no direct match and current data has "name", try to map to original identifier field
+            if not matching_column and "name" in df.columns:
+                # Map table names to their original identifier fields
+                table_to_identifier = {
+                    "brush_knot_makers": "brand",
+                    "brush_handle_makers": "handle_maker",
+                    "brush_fibers": "fiber",
+                    "brush_knot_sizes": "knot_size_mm",
+                }
+
+                original_field = table_to_identifier.get(table_name)
+
+                if original_field and original_field in comparison_df.columns:
+                    # Rename "name" to the original field name in current DataFrame for matching
+                    df_for_matching = df.rename(columns={"name": original_field})
+                    matching_column = original_field
+                    # Update df to use the renamed column for the rest of the matching logic
+                    df = df_for_matching
+                elif "name" in comparison_df.columns:
+                    # Comparison data also uses "name", use that
+                    matching_column = "name"
+
             if not matching_column:
                 continue
 
             # Create a mapping from identifier to rank for fast lookup
-            rank_mapping = comparison_df.set_index(matching_column)["rank"].to_dict()
+            # Handle both "rank" (new format) and "position" (old format) columns
+            rank_column = "rank" if "rank" in comparison_df.columns else "position"
+            if rank_column not in comparison_df.columns:
+                # No rank/position column available, skip this period
+                continue
+
+            rank_mapping = comparison_df.set_index(matching_column)[rank_column].to_dict()
 
             # Vectorized delta calculation
             def calculate_delta(identifier, current_rank):
@@ -408,12 +493,20 @@ class TableGenerator:
             )
 
             # Set delta values in appropriate column
-            if i == 0:  # Previous month
-                df["Δ vs Previous Month"] = deltas
-            elif i == 1:  # Previous year
-                df["Δ vs Previous Year"] = deltas
-            elif i == 2:  # 5 years ago
-                df["Δ vs 5 Years Ago"] = deltas
+            # For annual reports (when current_month ends in -12), only two periods: previous year and 5 years ago
+            if current_month.endswith("-12"):
+                if i == 0:  # Previous year (first period for annual reports)
+                    df["Δ vs Previous Year"] = deltas
+                elif i == 1:  # 5 years ago (second period for annual reports)
+                    df["Δ vs 5 Years Ago"] = deltas
+            else:
+                # For monthly reports, three periods: previous month, previous year, 5 years ago
+                if i == 0:  # Previous month
+                    df["Δ vs Previous Month"] = deltas
+                elif i == 1:  # Previous year
+                    df["Δ vs Previous Year"] = deltas
+                elif i == 2:  # 5 years ago
+                    df["Δ vs 5 Years Ago"] = deltas
 
         return df
 
@@ -491,14 +584,19 @@ class TableGenerator:
 
         return identifier_columns
 
-    def _parse_columns_parameter(self, columns_spec: str) -> tuple[list[str], dict[str, str]]:
+    def _parse_columns_parameter(
+        self, columns_spec: str
+    ) -> tuple[list[str], dict[str, str], list[tuple[str, bool]]]:
         """Parse the columns parameter specification.
 
         Args:
-            columns_spec: String like "rank, name=soap, shaves, unique_users"
+            columns_spec: String like "rank, name=soap, shaves desc, unique_users asc"
 
         Returns:
-            Tuple of (column_order, rename_mapping)
+            Tuple of (column_order, rename_mapping, sort_info)
+            - column_order: List of column names in order
+            - rename_mapping: Dictionary mapping original names to aliases
+            - sort_info: List of tuples (column_name, ascending) for columns with sort directions
 
         Raises:
             ValueError: If syntax is invalid
@@ -508,6 +606,7 @@ class TableGenerator:
 
         column_order = []
         rename_mapping = {}
+        sort_info = []
 
         # OPTIMIZED: Use pandas operations for vectorized parsing
         # Split and clean parts using pandas operations
@@ -516,27 +615,110 @@ class TableGenerator:
 
         # Process parts using vectorized operations where possible
         for part in parts:
+            # Check for sort direction (case-insensitive)
+            ascending = True  # Default to ascending
+            has_direction = False
+            original_part = part
+
+            # Check if part ends with " desc" or " asc" (case-insensitive)
+            part_lower = part.lower()
+            if part_lower.endswith(" desc"):
+                ascending = False
+                has_direction = True
+                part = part[: -len(" desc")].strip()
+            elif part_lower.endswith(" asc"):
+                ascending = True
+                has_direction = True
+                part = part[: -len(" asc")].strip()
+
             if "=" in part:
                 # Handle renaming: "name=soap"
                 if part.count("=") != 1:
-                    raise ValueError(f"Invalid rename syntax: {part}")
+                    raise ValueError(f"Invalid rename syntax: {original_part}")
                 original, alias = part.split("=", 1)
                 original = original.strip()
                 alias = alias.strip()
 
                 if not original or not alias:
-                    raise ValueError(f"Invalid rename syntax: {part}")
+                    raise ValueError(f"Invalid rename syntax: {original_part}")
 
                 column_order.append(original)
                 rename_mapping[original] = alias
+
+                # Store sort info if direction was specified
+                if has_direction:
+                    sort_info.append((original, ascending))
             else:
                 # Simple column name
-                column_order.append(part)
+                column_name = part.strip()
+                if not column_name:
+                    raise ValueError(f"Invalid column specification: {original_part}")
+
+                column_order.append(column_name)
+
+                # Store sort info if direction was specified
+                if has_direction:
+                    sort_info.append((column_name, ascending))
 
         if not column_order:
             raise ValueError("No valid columns specified")
 
-        return column_order, rename_mapping
+        return column_order, rename_mapping, sort_info
+
+    def _apply_sorting(self, df: pd.DataFrame, sort_info: list[tuple[str, bool]]) -> pd.DataFrame:
+        """Apply sorting to DataFrame and re-rank if rank column exists.
+
+        Args:
+            df: DataFrame to sort
+            sort_info: List of tuples (column_name, ascending) for sorting
+
+        Returns:
+            Sorted DataFrame with re-ranked rank column if applicable
+
+        Raises:
+            ValueError: If sort column doesn't exist in DataFrame
+        """
+        if not sort_info:
+            return df
+
+        # Validate all sort columns exist
+        sort_columns = [col for col, _ in sort_info]
+        missing_columns = [col for col in sort_columns if col not in df.columns]
+        if missing_columns:
+            raise ValueError(
+                f"Sort columns not found in data: {', '.join(missing_columns)}. "
+                f"Available columns: {', '.join(df.columns)}"
+            )
+
+        # Extract column names and ascending flags
+        columns_to_sort = [col for col, _ in sort_info]
+        ascending_flags = [asc for _, asc in sort_info]
+
+        # Sort the DataFrame
+        df = df.sort_values(columns_to_sort, ascending=ascending_flags).reset_index(drop=True)
+
+        # Re-rank if rank column exists
+        if "rank" in df.columns:
+            # Use competition ranking: same values get same rank, next rank is skipped
+            # Create temporary sequential rank based on sorted order
+            df["temp_rank"] = range(1, len(df) + 1)
+
+            # Group by sort column values to handle ties
+            # For multi-column sorts, group by all sort columns
+            group_by_cols = sort_columns
+
+            # Get minimum rank for each group (ties get same rank)
+            df["rank"] = df.groupby(group_by_cols, sort=False)["temp_rank"].transform("min")
+
+            # Drop temporary rank column
+            df = df.drop("temp_rank", axis=1)
+
+            # Sort by rank and then by sort columns for consistent ordering
+            df = df.sort_values(
+                ["rank"] + columns_to_sort, ascending=[True] + ascending_flags
+            ).reset_index(drop=True)
+
+        return df
 
     def _apply_column_operations(
         self, df: pd.DataFrame, columns_spec: Optional[str] = None
@@ -554,7 +736,7 @@ class TableGenerator:
             return df
 
         try:
-            column_order, rename_mapping = self._parse_columns_parameter(columns_spec)
+            column_order, rename_mapping, _ = self._parse_columns_parameter(columns_spec)
         except ValueError as e:
             raise ValueError(f"Invalid columns parameter: {e}")
 
@@ -691,6 +873,39 @@ class TableGenerator:
         if df.empty:
             return ""
 
+        # Extract sort information from columns parameter if provided
+        sort_info = []
+        if columns:
+            try:
+                _, _, sort_info = self._parse_columns_parameter(columns)
+            except ValueError:
+                # If parsing fails, we'll catch it later in _apply_column_operations
+                pass
+
+        # Apply numeric column limits BEFORE sorting if:
+        # 1. Custom sort is specified (sort_info is not empty)
+        # 2. AND the sort column is different from the numeric limit column
+        # This ensures we filter before ranking when sorting by a different column
+        numeric_limits_applied_early = False
+        if numeric_limits and sort_info:
+            # Get the sort column name (first sort column)
+            sort_column = sort_info[0][0] if sort_info else None
+
+            # Get the numeric limit column name
+            limit_column = next(iter(numeric_limits.keys())) if numeric_limits else None
+
+            # If sort column differs from limit column, apply limit before sorting
+            if sort_column and limit_column and sort_column != limit_column:
+                limited_df = self._apply_numeric_limits(df, numeric_limits)
+                if isinstance(limited_df, pd.DataFrame):
+                    df = limited_df
+                # Mark that we've applied the limit early
+                numeric_limits_applied_early = True
+
+        # Apply sorting early if sort directions are specified
+        if sort_info:
+            df = self._apply_sorting(df, sort_info)
+
         # Validate that rank column exists only when needed
         rank_required = ranks is not None or deltas or columns is not None
 
@@ -728,8 +943,8 @@ class TableGenerator:
         if not isinstance(df, pd.DataFrame):
             raise ValueError("Expected DataFrame but got other type")
 
-        # Apply numeric column limits if specified
-        if numeric_limits:
+        # Apply numeric column limits if specified (only if not already applied before sorting)
+        if numeric_limits and not numeric_limits_applied_early:
             limited_df = self._apply_numeric_limits(df, numeric_limits)
             if isinstance(limited_df, pd.DataFrame):
                 df = limited_df
@@ -743,14 +958,29 @@ class TableGenerator:
             # Use the data key (with underscore) for delta calculation,
             # not the table name (with hyphen)
             data_key = table_name.replace("-", "_")
-            delta_df = self._calculate_deltas(df, data_key, current_month)
+            delta_df = self._calculate_deltas(df, data_key, current_month, sort_info)
             if isinstance(delta_df, pd.DataFrame):
                 df = delta_df
 
             # Format delta column names
-            delta_name_mapping = self._format_delta_column_names(current_month)
+            # For annual reports (when current_month ends in -12), use year-based labels
+            if current_month.endswith("-12"):
+                year = current_month.split("-")[0]
+                year_int = int(year)
+                # Only map columns that actually exist in the DataFrame
+                delta_name_mapping = {}
+                if "Δ vs Previous Year" in df.columns:
+                    delta_name_mapping["Δ vs Previous Year"] = f"Δ vs {year_int - 1}"
+                if "Δ vs 5 Years Ago" in df.columns:
+                    delta_name_mapping["Δ vs 5 Years Ago"] = f"Δ vs {year_int - 5}"
+                # Remove "Δ vs Previous Month" column if it exists (shouldn't for annual reports)
+                if "Δ vs Previous Month" in df.columns:
+                    df = df.drop(columns=["Δ vs Previous Month"])
+            else:
+                delta_name_mapping = self._format_delta_column_names(current_month)
             # Type ignore for rename - pandas supports columns parameter
-            df = df.rename(columns=delta_name_mapping)  # type: ignore
+            if delta_name_mapping:
+                df = df.rename(columns=delta_name_mapping)  # type: ignore
 
         # Apply rank formatting AFTER delta calculation (so deltas use numeric ranks)
         if "rank" in df.columns:
