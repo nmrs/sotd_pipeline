@@ -10,24 +10,24 @@ _next_field_stop_pattern: Optional[str] = None
 def _build_next_field_stop_pattern() -> str:
     """
     Build a regex pattern that matches any next field marker on the same line.
-    
+
     This pattern is used in lookahead assertions to stop field extraction
     when another field marker is encountered (e.g., when multiple fields
     appear on the same line separated by field markers).
-    
+
     Returns:
         Regex pattern string for use in positive lookahead
     """
     global _next_field_stop_pattern
-    
+
     if _next_field_stop_pattern is not None:
         return _next_field_stop_pattern
-    
+
     # Collect all field aliases
     all_aliases = []
     for field_aliases in FIELD_ALIASES.values():
         all_aliases.extend(field_aliases)
-    
+
     # Remove duplicates while preserving order
     seen = set()
     unique_aliases = []
@@ -35,7 +35,7 @@ def _build_next_field_stop_pattern() -> str:
         if alias not in seen:
             seen.add(alias)
             unique_aliases.append(alias)
-    
+
     # Build pattern alternatives for each alias
     # Handle spaces in aliases (e.g., "straight razor", "shaving brush")
     alias_patterns = []
@@ -44,7 +44,7 @@ def _build_next_field_stop_pattern() -> str:
         escaped_alias = re.escape(alias)
         # Replace escaped spaces with \s+ to handle variable spacing
         escaped_alias = escaped_alias.replace(r"\ ", r"\s+")
-        
+
         # Pattern 1: .* **Field: (most common - the user's case)
         alias_patterns.append(rf"\.\*\s+\*\*\s*\b{escaped_alias}\b\s*[-:=]")
         # Pattern 2: .* **Field**: (colon after **)
@@ -57,10 +57,10 @@ def _build_next_field_stop_pattern() -> str:
         alias_patterns.append(rf"[-*]\s+\*\*\s*\b{escaped_alias}\b\s*[-:=]")
         # Pattern 6: * Field: (with bullet prefix, simple)
         alias_patterns.append(rf"[-*]\s+\b{escaped_alias}\b\s*[-:=]")
-    
+
     # Combine all patterns with alternation
     combined_pattern = "|".join(alias_patterns)
-    
+
     # Cache the result
     _next_field_stop_pattern = combined_pattern
     return _next_field_stop_pattern
@@ -142,7 +142,7 @@ def get_patterns(alias: str) -> list[str]:
 
     Order is based on actual usage frequency from 2020-2025 data analysis.
     See docs/extraction_pattern_priorities.md for priority details.
-    
+
     All patterns use non-greedy matching with lookahead to stop at next field marker
     when multiple fields appear on the same line.
     """
@@ -150,14 +150,14 @@ def get_patterns(alias: str) -> list[str]:
     next_field_pattern = _build_next_field_stop_pattern()
     # Build lookahead that stops at next field marker or end of line
     stop_lookahead = rf"(?={next_field_pattern}|$)"
-    
+
     # Optional prefix to match field separator when fields appear on same line
     # Matches either:
     # - Start of line (^)
     # - Field separator with period (.*  or .* **)
     # - Field separator without period (*  or - ) - just the bullet/separator, not the field marker
     field_separator_prefix = r"(?:^|\.\*\s+|[-*]\s+)"
-    
+
     return [
         # Pattern 0: Markdown bold with list prefix: * **alias:** value (highest priority)
         # Requires * or - prefix (list items) - preferred over narrative text

@@ -204,12 +204,13 @@ def save_annual_report(
         logger.info(f"Output directory: {out_dir}")
         print(f"[DEBUG] Output directory: {out_dir}")
 
-    # Create output directory if it doesn't exist
-    out_dir.mkdir(parents=True, exist_ok=True)
+    # Create reports subdirectory (consistent with monthly reports)
+    reports_dir = out_dir / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate output filename
     output_filename = f"{year}-{report_type}.md"
-    output_path = out_dir / output_filename
+    output_path = reports_dir / output_filename
 
     if debug:
         logger.info(f"Output file: {output_path}")

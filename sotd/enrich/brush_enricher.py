@@ -537,8 +537,12 @@ class BrushEnricher(BaseEnricher):
             # Fail fast if handle_maker_knot_size is a string (catalog data should be numeric)
             if handle_maker_knot_size is not None and isinstance(handle_maker_knot_size, str):
                 handle_section = matched_data.get("handle", {})
-                handle_brand = handle_section.get("brand") if isinstance(handle_section, dict) else None
-                handle_model = handle_section.get("model") if isinstance(handle_section, dict) else None
+                handle_brand = (
+                    handle_section.get("brand") if isinstance(handle_section, dict) else None
+                )
+                handle_model = (
+                    handle_section.get("model") if isinstance(handle_section, dict) else None
+                )
                 raise ValueError(
                     f"Invalid catalog data: knot_size_mm in handle maker defaults must be numeric, not string. "
                     f"Found string value '{handle_maker_knot_size}' for handle brand='{handle_brand}', model='{handle_model}'. "

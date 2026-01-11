@@ -958,7 +958,9 @@ class ActualMatchingValidator:
                 actual_scent = matched_data.get("scent")
                 # For soap, expected_model is actually the scent name from YAML
                 # Use case-insensitive comparison since matching is case-insensitive
-                if (expected_brand or "").lower() != (actual_brand or "").lower() or (expected_model or "").lower() != (actual_scent or "").lower():
+                if (expected_brand or "").lower() != (actual_brand or "").lower() or (
+                    expected_model or ""
+                ).lower() != (actual_scent or "").lower():
                     issues.append(
                         ValidationIssue(
                             issue_type="data_mismatch",

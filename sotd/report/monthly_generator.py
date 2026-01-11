@@ -193,73 +193,68 @@ class MonthlyReportGenerator(BaseReportGenerator):
         # It must contain at least one pipe character to be considered enhanced
         enhanced_pattern = r"\{\{tables\.([^|}]+)\|[^}]+\}\}"
 
-        # Find all enhanced table placeholders
-        matches = re.findall(enhanced_pattern, template_content)
+        # Find all unique full placeholders (not just table names) to handle multiple
+        # placeholders with the same table name but different parameters
+        full_placeholder_pattern = r"\{\{tables\.[^}]+\|[^}]+\}\}"
+        full_placeholders = re.findall(full_placeholder_pattern, template_content)
 
-        for match in matches:
-            # Extract the full placeholder to get parameters
-            full_placeholder_pattern = r"\{\{tables\." + re.escape(match) + r"\|[^}]+\}\}"
-            full_match = re.search(full_placeholder_pattern, template_content)
+        # Process each unique placeholder
+        for full_placeholder in set(full_placeholders):
+            try:
+                # Parse the placeholder to extract table name and parameters
+                from .table_parameter_parser import TableParameterParser
 
-            if full_match:
-                full_placeholder = full_match.group(0)
+                parser = TableParameterParser()
+                table_name, parameters = parser.parse_placeholder(full_placeholder)
 
-                try:
-                    # Parse the placeholder to extract table name and parameters
-                    from .table_parameter_parser import TableParameterParser
-
-                    parser = TableParameterParser()
-                    table_name, parameters = parser.parse_placeholder(full_placeholder)
-
-                    if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Processing enhanced table: {table_name} "
-                            f"with parameters: {parameters}"
-                        )
-
-                    # Generate the table with parameters
-                    # Extract numeric limits (any parameter that's not ranks, rows,
-                    # columns, deltas, or wsdb)
-                    numeric_limits = {}
-                    for key, value in parameters.items():
-                        if key not in ["ranks", "rows", "columns", "deltas", "wsdb"]:
-                            numeric_limits[key] = value
-
-                    table_content = table_generator.generate_table(
-                        table_name,
-                        ranks=parameters.get("ranks"),
-                        rows=parameters.get("rows"),
-                        columns=parameters.get("columns"),
-                        deltas=parameters.get("deltas") == "true",
-                        wsdb=parameters.get("wsdb") == "true",
-                        **numeric_limits,
+                if self.debug:
+                    print(
+                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                        f"Processing enhanced table: {table_name} "
+                        f"with parameters: {parameters}"
                     )
 
-                    # Use the full placeholder as the key for replacement
-                    enhanced_tables[full_placeholder] = table_content
+                # Generate the table with parameters
+                # Extract numeric limits (any parameter that's not ranks, rows,
+                # columns, deltas, or wsdb)
+                numeric_limits = {}
+                for key, value in parameters.items():
+                    if key not in ["ranks", "rows", "columns", "deltas", "wsdb"]:
+                        numeric_limits[key] = value
 
-                    if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Generated enhanced table for {table_name}"
-                        )
+                table_content = table_generator.generate_table(
+                    table_name,
+                    ranks=parameters.get("ranks"),
+                    rows=parameters.get("rows"),
+                    columns=parameters.get("columns"),
+                    deltas=parameters.get("deltas") == "true",
+                    wsdb=parameters.get("wsdb") == "true",
+                    **numeric_limits,
+                )
 
-                except Exception as e:
-                    # Handle enhanced table syntax errors gracefully by falling back to basic table
-                    # generation
-                    if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Enhanced table syntax error for "
-                            f"'{{tables.{match}}}' - {e}. "
-                            "Falling back to basic table generation."
-                        )
+                # Use the full placeholder as the key for replacement
+                enhanced_tables[full_placeholder] = table_content
 
-                    # Don't add this placeholder to enhanced_tables - let it be processed as basic
-                    # table
-                    # This allows the template processor to handle it normally
-                    continue
+                if self.debug:
+                    print(
+                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                        f"Generated enhanced table for {table_name}"
+                    )
+
+            except Exception as e:
+                # Handle enhanced table syntax errors gracefully
+                if self.debug:
+                    print(
+                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                        f"Enhanced table syntax error for "
+                        f"'{full_placeholder}' - {e}. "
+                        "Adding error message placeholder."
+                    )
+
+                # Add error message placeholder so the template processor can replace it
+                # This ensures the placeholder doesn't appear as raw text in the output
+                enhanced_tables[full_placeholder] = "*No data available for this category*"
+                continue
 
         return enhanced_tables
 

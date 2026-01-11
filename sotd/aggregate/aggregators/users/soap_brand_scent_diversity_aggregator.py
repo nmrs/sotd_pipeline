@@ -24,7 +24,13 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
     @property
     def METRIC_FIELDS(self) -> List[str]:
         """Calculated/metric fields."""
-        return ["unique_combinations", "shaves", "avg_shaves_per_combination"]
+        return [
+            "unique_combinations",
+            "shaves",
+            "avg_shaves_per_combination",
+            "hhi",
+            "effective_soaps",
+        ]
 
     @property
     def RANKING_FIELDS(self) -> List[str]:
@@ -123,6 +129,39 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
             grouped["shaves"] / grouped["unique_combinations"]
         ).round(2)
 
+        # Calculate HHI (Herfindahl-Hirschman Index) for each user
+        # HHI measures concentration: HHI = Σ p_i² where p_i = count_i / total_shaves
+        # For each user, count occurrences of each brand-scent combination
+        soap_counts = df.groupby(["author", "brand_scent_key"]).size().reset_index(name="count")  # type: ignore
+
+        # Merge with total shaves to calculate shares
+        soap_counts = soap_counts.merge(grouped[["author", "shaves"]], on="author")
+
+        # Calculate shares: p_i = count_i / total_shaves
+        soap_counts["share"] = soap_counts["count"] / soap_counts["shaves"]
+
+        # Calculate squared shares: p_i²
+        soap_counts["squared_share"] = soap_counts["share"] ** 2
+
+        # Calculate HHI per user: HHI = Σ p_i²
+        hhi_by_user = soap_counts.groupby("author")["squared_share"].sum().reset_index()
+        hhi_by_user.columns = ["author", "hhi"]
+        hhi_by_user["hhi"] = hhi_by_user["hhi"].round(4)
+
+        # Calculate effective_soaps = 1 / HHI
+        hhi_by_user["effective_soaps"] = (1.0 / hhi_by_user["hhi"]).round(2)
+        # Handle edge case where HHI is 0 (shouldn't happen, but be safe)
+        hhi_by_user.loc[hhi_by_user["hhi"] == 0, "effective_soaps"] = 0.0
+
+        # Merge HHI and effective_soaps back into grouped
+        grouped = grouped.merge(
+            hhi_by_user[["author", "hhi", "effective_soaps"]], on="author", how="left"
+        )
+
+        # Fill any missing values (shouldn't happen, but be safe)
+        grouped["hhi"] = grouped["hhi"].fillna(0.0)
+        grouped["effective_soaps"] = grouped["effective_soaps"].fillna(0.0)
+
         # Add unique_users field (always 1 for user aggregators)
         grouped["unique_users"] = 1
 
@@ -147,6 +186,8 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
                 "unique_combinations": "unique_combinations",
                 "shaves": "shaves",
                 "avg_shaves_per_combination": "avg_shaves_per_combination",
+                "hhi": "hhi",
+                "effective_soaps": "effective_soaps",
                 "unique_users": "unique_users",
             },
         )

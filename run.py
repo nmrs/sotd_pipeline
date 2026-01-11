@@ -189,6 +189,7 @@ def calculate_months_from_args(args: List[str]) -> List[str]:
     Returns:
         List of months in YYYY-MM format
     """
+
     # Parse args into a simple namespace-like structure
     class Args:
         month: Optional[str] = None
@@ -358,7 +359,7 @@ def print_pipeline_summary(
     # Track first and last phase counts
     first_phase_records = None
     last_phase_records = None
-    
+
     for result in phase_results:
         records = result.get("records_processed")
         if records is not None:
@@ -388,7 +389,7 @@ def print_pipeline_summary(
             phase_status = "✓" if result["exit_code"] == 0 else "✗"
             records = result.get("records_processed")
             records_per_sec = result.get("records_per_second")
-            
+
             # Calculate months/s for this phase (only if multiple months)
             months_per_sec_phase = None
             if months_count > 1 and phase_duration > 0:
@@ -469,11 +470,13 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                     if i + 1 < len(args):
                         phase_args.append(args[i + 1])
                         i += 1  # Skip the value in next iteration
-                # If phase doesn't support it, skip both flag and value
-                if i + 1 < len(args):
-                    i += 2  # Skip both flag and value
+                    i += 1  # Skip the flag
                 else:
-                    i += 1  # Skip just the flag if no value
+                    # If phase doesn't support it, skip both flag and value
+                    if i + 1 < len(args):
+                        i += 2  # Skip both flag and value
+                    else:
+                        i += 1  # Skip just the flag if no value
                 continue
 
             elif arg.startswith("--type"):
@@ -485,6 +488,14 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                         phase_args.append(args[i + 1])
                         i += 1  # Skip the value in next iteration
                 # If phase doesn't support it, skip both flag and value
+                i += 1
+                continue
+
+            elif arg.startswith("--annual"):
+                # Only pass annual to report phase
+                if phase == "report":
+                    phase_args.append(arg)
+                # If phase doesn't support it, skip it
                 i += 1
                 continue
 
@@ -567,13 +578,15 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         )
 
         # Record phase result
-        phase_results.append({
-            "name": phase,
-            "duration": phase_duration,
-            "exit_code": exit_code,
-            "records_processed": records_processed,
-            "records_per_second": records_per_second,
-        })
+        phase_results.append(
+            {
+                "name": phase,
+                "duration": phase_duration,
+                "exit_code": exit_code,
+                "records_processed": records_processed,
+                "records_per_second": records_per_second,
+            }
+        )
 
         if exit_code != 0:
             print(f"\n{'=' * 60}")
@@ -786,6 +799,11 @@ Examples:
         help="Report type: hardware, software, or all (only applies to report phase)",
     )
     parser.add_argument(
+        "--annual",
+        action="store_true",
+        help="Generate annual reports (only applies to report phase, requires --year or --range)",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Show INFO messages during pipeline execution",
@@ -918,6 +936,8 @@ Examples:
             common_args.extend(["--max-workers", str(args.max_workers)])
         if args.type:
             common_args.extend(["--type", args.type])
+        if args.annual:
+            common_args.append("--annual")
 
         return run_pipeline(phases, common_args, debug=args.debug)
 

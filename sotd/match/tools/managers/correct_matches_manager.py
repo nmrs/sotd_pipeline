@@ -279,6 +279,7 @@ class CorrectMatchesManager:
     def save_correct_matches(self) -> None:
         """Save correct matches to file."""
         import time
+
         try:
             total_start = time.time()
             # Group by field
@@ -479,7 +480,7 @@ class CorrectMatchesManager:
 
             group_end = time.time()
             print(f"PERF: Grouping data took {group_end - group_start:.3f}s")
-            
+
             # Alphabetize entries within each field/brand/model (or field/format/brand/model)
             # First, sort the top-level field structure
             sort_start = time.time()
@@ -559,7 +560,7 @@ class CorrectMatchesManager:
 
             sort_end = time.time()
             print(f"PERF: Sorting data took {sort_end - sort_start:.3f}s")
-            
+
             # Save to directory structure: save each field to its own file
             write_start = time.time()
             self._correct_matches_file.mkdir(parents=True, exist_ok=True)
