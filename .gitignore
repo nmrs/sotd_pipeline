@@ -27,6 +27,10 @@ data/threads/*.json
 data/aggregated/*.json
 data/aggregated/annual/*.json
 data/correct_matches.yaml.backup
+# Ignore correct_matches queue and status files
+data/correct_matches/.queue.jsonl
+data/correct_matches/.status.json
+data/correct_matches/.status.archive.*.json
 # Ignore generated report files
 data/reports/*.md
 # Ignore learning data files
