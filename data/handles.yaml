@@ -874,6 +874,7 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - wallygator
+        - wally manu
   Wilkinson Sword:
     Unspecified:
       patterns:

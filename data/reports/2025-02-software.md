@@ -202,58 +202,18 @@ Welcome to your SOTD Lather Log for February 2025
 | 18     | u/wallygator88         |             19 |       28 |                  1.47 | ↑3              | ↑7              | ↑28             |
 | 19     | u/EldrormR             |             19 |       26 |                  1.37 | ↑8              | ↓10             | ↑10             |
 | 20     | u/InfernalInternal     |             18 |       28 |                  1.56 | ↓15             | ↓17             | n/a             |
-| 21     | u/frankieIVfingers     |             18 |       18 |                  1    | ↑29             | ↓3              | n/a             |
-| 22     | u/OnionMiasma          |             16 |       18 |                  1.12 | ↑62             | ↑9              | n/a             |
-| 23     | u/Engineered_Shave     |             15 |       33 |                  2.2  | ↓19             | ↓16             | n/a             |
-| 24     | u/FireDragonMonkey     |             14 |       28 |                  2    | ↓1              | ↑9              | n/a             |
-| 25     | u/rocketk455           |             14 |       25 |                  1.79 | =               | ↑2              | ↑11             |
-| 26     | u/GroundbreakingRole45 |             14 |       21 |                  1.5  | ↑6              | ↑31             | n/a             |
-| 27     | u/glink48              |             14 |       18 |                  1.29 | ↑15             | ↓1              | n/a             |
-| 28     | u/PhilosphicalZombie   |             14 |       15 |                  1.07 | ↓14             | ↓27             | n/a             |
-| 29     | u/tsrblke              |             13 |       28 |                  2.15 | ↑2              | ↓15             | n/a             |
-| 30     | u/jwoods23             |             13 |       13 |                  1    | ↑20             | ↓15             | n/a             |
-| 31=    | u/scribe__             |             12 |       28 |                  2.33 | ↑9              | ↑31             | n/a             |
-| 31=    | u/wyze0ne              |             12 |       28 |                  2.33 | ↓14             | ↓13             | ↑10             |
-| 33     | u/drichlin             |             12 |       16 |                  1.33 | ↑33             | n/a             | n/a             |
-| 34=    | u/KerblimeySkal        |             11 |       16 |                  1.45 | ↑13             | ↑14             | n/a             |
-| 34=    | u/jimm262              |             11 |       16 |                  1.45 | ↑15             | ↑11             | n/a             |
-| 36     | u/hugbckt              |             11 |       11 |                  1    | ↑8              | ↑1              | n/a             |
-| 37     | u/BossHoggins10        |             10 |       27 |                  2.7  | ↓3              | ↑3              | n/a             |
-| 38     | u/[deleted]            |             10 |       20 |                  2    | ↓14             | ↓30             | ↓37             |
-| 39     | u/psychonaut7343       |             10 |       16 |                  1.6  | ↓2              | n/a             | n/a             |
-| 40     | u/gcgallant            |             10 |       12 |                  1.2  | ↓22             | ↓37             | n/a             |
 
-## Top Shavers
+## Most Boring Shaver
 
-| Rank   | User                   |   Shaves |   Missed Days | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
-|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
-| 1      | u/Engineered_Shave     |       33 |             0 | ↑21             | ↑2              | n/a             |
-| 2      | u/Impressive_Donut114  |       32 |             0 | ↑1              | ↓1              | n/a             |
-| 3      | u/djundjila            |       31 |             0 | =               | =               | n/a             |
-| 4=     | u/Crossan1983          |       30 |             0 | ↓1              | ↑71             | n/a             |
-| 4=     | u/snoo-ting            |       30 |             0 | ↓3              | n/a             | n/a             |
-| 6      | u/SamIAmShepard        |       29 |             0 | ↓3              | ↑31             | n/a             |
-| 7=     | u/35048467             |       28 |             0 | ↓4              | ↓4              | ↓5              |
-| 7=     | u/AdWorried2804        |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/BossHoggins10        |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/Environmental-Gap380 |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/FireDragonMonkey     |       28 |             0 | ↓4              | ↑25             | n/a             |
-| 7=     | u/Glass_Procedure7497  |       28 |             0 | ↓4              | ↑30             | n/a             |
-| 7=     | u/InfernalInternal     |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/Marquis90            |       28 |             0 | ↓4              | ↓5              | n/a             |
-| 7=     | u/anchovie7468         |       28 |             0 | ↓4              | n/a             | n/a             |
-| 7=     | u/brokenjaw622         |       28 |             0 | ↓4              | n/a             | n/a             |
-| 7=     | u/el_charminman        |       28 |             0 | ↓4              | ↓4              | ↓5              |
-| 7=     | u/loudmusicboy         |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/oswald_heist         |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/partyman97_3         |       28 |             0 | ↓5              | ↓4              | n/a             |
-| 7=     | u/pridetwo             |       28 |             0 | ↑87             | ↑41             | n/a             |
-| 7=     | u/sahenders            |       28 |             0 | ↑38             | ↑37             | n/a             |
-| 7=     | u/scribe__             |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/tsrblke              |       28 |             0 | ↓4              | ↑22             | n/a             |
-| 7=     | u/wallygator88         |       28 |             0 | ↑24             | ↓4              | ↑10             |
-| 7=     | u/wyze0ne              |       28 |             0 | ↑16             | ↑35             | ↑59             |
-| 27=    | u/Eructate             |       27 |             1 | ↑1              | ↓24             | n/a             |
-| 27=    | u/Old_Hiker            |       27 |             1 | ↓2              | ↓24             | ↓25             |
-| 27=    | u/Priusaurus           |       27 |             1 | ↑39             | ↑39             | n/a             |
-| 27=    | u/sandstorm99          |       27 |             1 | ↑4              | n/a             | n/a             |
+| Rank   | User                  |   Avg Shaves per Soap |   Unique Soaps |   Shaves | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
+|:-------|:----------------------|----------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1=     | u/el_charminman       |                 14    |              2 |       28 | =               | ↑3              | ↑1              |
+| 1=     | u/anchovie7468        |                 14    |              2 |       28 | ↑57             | n/a             | n/a             |
+| 3      | u/SirKravsALot        |                  8    |              1 |        8 | ↑2              | ↑49             | n/a             |
+| 4      | u/VisceralWatch       |                  6.5  |              2 |       13 | ↑11             | ↑19             | ↑2              |
+| 5      | u/Glass_Procedure7497 |                  5.6  |              5 |       28 | ↓1              | ↓2              | n/a             |
+| 6      | u/sandstorm99         |                  5.4  |              5 |       27 | ↓4              | n/a             | n/a             |
+| 7      | u/Impressive_Donut114 |                  5.33 |              6 |       32 | ↑55             | =               | n/a             |
+| 8      | u/Marquis90           |                  4    |              7 |       28 | ↑6              | ↑19             | n/a             |
+| 9      | u/Old_Hiker           |                  3.86 |              7 |       27 | ↑26             | ↑73             | ↑48             |
+| 10     | u/loudmusicboy        |                  3.5  |              8 |       28 | ↑9              | ↑5              | n/a             |

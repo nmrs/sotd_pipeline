@@ -77,7 +77,7 @@ Welcome to your SOTD Lather Log for May 2025
 | Rank   | Soap                                                                                                                                                |   Shaves |   Unique Users | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
 |:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Strike Gold Shave - Bee's Knees Soap                                                                                                                |       31 |              1 | n/a             | n/a             | n/a             |
-| 2      | Mitchell's - Wool Fat                                                                                                                               |       29 |              4 | ↑74             | ↑108            | ↑58             |
+| 2      | [Mitchell's - Wool Fat](https://www.wetshavingdatabase.com/software/mitchells-wool-fat-mitchells-wool-fat-soap/)                                    |       29 |              4 | ↑74             | ↑108            | ↑58             |
 | 3      | Noble Otter - Rawr                                                                                                                                  |       25 |              6 | ↑6              | ↑9              | n/a             |
 | 4      | Mäurer & Wirtz - Tabac                                                                                                                              |       24 |             12 | ↓2              | ↓3              | ↑137            |
 | 5      | Tallow + Steel - Shag                                                                                                                               |       23 |              1 | n/a             | n/a             | n/a             |
@@ -210,58 +210,18 @@ Welcome to your SOTD Lather Log for May 2025
 | 18     | u/loudmusicboy         |             19 |       31 |                  1.63 | ↑3              | ↑20             | n/a             |
 | 19     | u/InfernalInternal     |             18 |       31 |                  1.72 | ↑6              | ↓7              | n/a             |
 | 20     | u/Old_Hiker            |             17 |       31 |                  1.82 | ↓4              | ↓4              | ↑30             |
-| 21     | u/GroundbreakingRole45 |             16 |       23 |                  1.44 | ↑5              | ↑20             | n/a             |
-| 22     | u/gcgallant            |             16 |       20 |                  1.25 | ↑10             | ↓19             | n/a             |
-| 23     | u/FireDragonMonkey     |             15 |       31 |                  2.07 | ↓4              | ↑16             | n/a             |
-| 24     | u/EldrormR             |             15 |       26 |                  1.73 | ↓1              | =               | ↑10             |
-| 25     | u/Low_Key1782          |             15 |       19 |                  1.27 | ↑32             | n/a             | n/a             |
-| 26     | u/glink48              |             15 |       18 |                  1.2  | ↑1              | ↑56             | n/a             |
-| 27     | u/Urzas_Penguins       |             15 |       17 |                  1.13 | ↑27             | n/a             | n/a             |
-| 28     | u/2SaintsDude          |             15 |       16 |                  1.07 | ↑18             | ↓2              | n/a             |
-| 29     | u/frankieIVfingers     |             15 |       15 |                  1    | ↑23             | ↓1              | ↑64             |
-| 30     | u/psychonaut7343       |             14 |       19 |                  1.36 | ↑1              | n/a             | n/a             |
-| 31     | u/BossHoggins10        |             13 |       31 |                  2.38 | ↓10             | ↑5              | n/a             |
-| 32     | u/rocketk455           |             13 |       29 |                  2.23 | ↓30             | ↓18             | ↑37             |
-| 33     | u/B_S80                |             12 |       29 |                  2.42 | ↑16             | n/a             | ↓31             |
-| 34     | u/expoqeteer           |             12 |       23 |                  1.92 | ↓5              | n/a             | n/a             |
-| 35     | u/jwoods23             |             12 |       19 |                  1.58 | ↑6              | ↓3              | n/a             |
-| 36     | u/drichlin             |             12 |       15 |                  1.25 | ↑1              | n/a             | n/a             |
-| 37     | u/FredBikes9876        |             11 |       26 |                  2.36 | ↑6              | ↑71             | n/a             |
-| 38     | u/Gaidin23             |             11 |       11 |                  1    | ↓18             | n/a             | n/a             |
-| 39     | u/Breadheater9876      |             10 |       30 |                  3    | ↑12             | ↑11             | n/a             |
-| 40     | u/_walden_             |             10 |       14 |                  1.4  | ↑25             | ↑68             | n/a             |
 
-## Top Shavers
+## Most Boring Shaver
 
-| Rank   | User                   |   Shaves |   Missed Days | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
-|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
-| 1      | u/Engineered_Shave     |       36 |             0 | =               | ↑20             | n/a             |
-| 2      | u/djundjila            |       33 |             0 | ↑1              | ↑1              | n/a             |
-| 3      | u/Impressive_Donut114  |       32 |             0 | ↓1              | ↓2              | n/a             |
-| 4=     | u/35048467             |       31 |             0 | ↑3              | ↓1              | ↓2              |
-| 4=     | u/AdWorried2804        |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 4=     | u/BossHoggins10        |       31 |             0 | ↑3              | ↑19             | n/a             |
-| 4=     | u/Crossan1983          |       31 |             0 | ↑3              | ↑92             | n/a             |
-| 4=     | u/FireDragonMonkey     |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 4=     | u/InfernalInternal     |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 4=     | u/Old_Hiker            |       31 |             0 | ↑3              | ↓1              | ↓2              |
-| 4=     | u/RedMosquitoMM        |       31 |             0 | ↑30             | ↑27             | ↑148            |
-| 4=     | u/SamIAmShepard        |       31 |             0 | ↑3              | ↑35             | n/a             |
-| 4=     | u/anchovie7468         |       31 |             0 | ↑3              | n/a             | n/a             |
-| 4=     | u/brokenjaw622         |       31 |             0 | ↑3              | ↑34             | n/a             |
-| 4=     | u/el_charminman        |       31 |             0 | ↑3              | ↓1              | ↑15             |
-| 4=     | u/loudmusicboy         |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 4=     | u/oswald_heist         |       31 |             0 | ↑25             | ↓1              | n/a             |
-| 4=     | u/partyman97_3         |       31 |             0 | ↑3              | ↑76             | n/a             |
-| 4=     | u/scribe__             |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 4=     | u/wyze0ne              |       31 |             0 | ↑3              | ↑29             | ↑101            |
-| 21     | u/Environmental-Gap380 |       31 |             1 | ↓16             | ↓18             | n/a             |
-| 22=    | u/Breadheater9876      |       30 |             1 | ↓15             | ↓19             | n/a             |
-| 22=    | u/Glass_Procedure7497  |       30 |             1 | ↓15             | ↑8              | n/a             |
-| 22=    | u/josiguuh             |       30 |             1 | n/a             | n/a             | n/a             |
-| 22=    | u/tsrblke              |       30 |             1 | ↓15             | ↑1              | n/a             |
-| 26     | u/coco_for_cocoapuffs  |       30 |             2 | ↑70             | n/a             | n/a             |
-| 27=    | u/B_S80                |       29 |             2 | ↑7              | n/a             | ↓25             |
-| 27=    | u/rocketk455           |       29 |             2 | ↑2              | ↓24             | ↑16             |
-| 27=    | u/sandstorm99          |       29 |             2 | =               | n/a             | n/a             |
-| 27=    | u/snoo-ting            |       29 |             2 | ↓24             | n/a             | n/a             |
+| Rank   | User                  |   Avg Shaves per Soap |   Unique Soaps |   Shaves | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
+|:-------|:----------------------|----------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1      | u/scribe__            |                 31    |              1 |       31 | ↑18             | ↑2              | n/a             |
+| 2      | u/el_charminman       |                 15.5  |              2 |       31 | =               | ↑2              | ↑24             |
+| 3      | u/sandstorm99         |                  9.67 |              3 |       29 | ↑2              | n/a             | n/a             |
+| 4      | u/Crossan1983         |                  7.75 |              4 |       31 | ↑2              | ↑73             | n/a             |
+| 5      | u/Glass_Procedure7497 |                  7.5  |              4 |       30 | ↓1              | ↓3              | n/a             |
+| 6=     | u/tsrblke             |                  5    |              6 |       30 | ↑9              | ↑5              | n/a             |
+| 6=     | u/FrattySatty92       |                  5    |              1 |        5 | ↑21             | n/a             | n/a             |
+| 8      | u/VisceralWatch       |                  4.33 |              3 |       13 | ↑1              | ↑5              | ↑63             |
+| 9      | u/coco_for_cocoapuffs |                  3.75 |              8 |       30 | ↑72             | n/a             | n/a             |
+| 10     | u/blipsnchitz7        |                  3.67 |              3 |       11 | ↑17             | n/a             | n/a             |

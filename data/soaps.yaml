@@ -2842,6 +2842,7 @@ Mitchell's:
       patterns:
       - mitch.*wool fat
       - ^\W*mwf\b
+      wsdb_slug: mitchells-wool-fat-mitchells-wool-fat-soap
 MMGP:
   patterns:
   - \bmmgp\b

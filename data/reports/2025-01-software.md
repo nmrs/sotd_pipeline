@@ -219,58 +219,19 @@ Welcome to your SOTD Lather Log for January 2025
 | 18     | u/gcgallant            |             20 |       23 |                  1.15 | ↓14             | ↓16             | n/a             |
 | 19     | u/2SaintsDude          |             20 |       20 |                  1    | ↑10             | ↑1              | n/a             |
 | 20     | u/Old_Hiker            |             19 |       29 |                  1.53 | ↓13             | ↑44             | ↓15             |
-| 21     | u/wallygator88         |             19 |       24 |                  1.26 | ↓3              | ↓3              | ↑18             |
-| 22     | u/RedMosquitoMM        |             18 |       21 |                  1.17 | ↓2              | ↓7              | n/a             |
-| 23     | u/FireDragonMonkey     |             17 |       31 |                  1.82 | ↓7              | ↑30             | n/a             |
-| 24     | u/[deleted]            |             17 |       30 |                  1.76 | ↑41             | ↓9              | ↓23             |
-| 25     | u/rocketk455           |             17 |       29 |                  1.71 | ↑3              | =               | ↑2              |
-| 26     | u/loudmusicboy         |             16 |       31 |                  1.94 | ↓2              | ↑15             | n/a             |
-| 27     | u/EldrormR             |             15 |       27 |                  1.8  | ↓19             | ↓8              | ↑19             |
-| 28     | u/Marquis90            |             14 |       31 |                  2.21 | ↑2              | ↓16             | n/a             |
-| 29=    | u/curbside_champ       |             13 |       13 |                  1    | n/a             | ↑6              | n/a             |
-| 29=    | u/sahenders            |             13 |       13 |                  1    | ↓12             | ↑1              | n/a             |
-| 31     | u/tsrblke              |             12 |       31 |                  2.58 | ↑48             | ↓23             | n/a             |
-| 32     | u/GroundbreakingRole45 |             11 |       21 |                  1.91 | ↓1              | ↑11             | n/a             |
-| 33     | u/Gaidin23             |             11 |       11 |                  1    | ↓14             | n/a             | n/a             |
-| 34=    | u/BossHoggins10        |             10 |       31 |                  3.1  | ↑3              | ↑17             | n/a             |
-| 34=    | u/Crossan1983          |             10 |       31 |                  3.1  | ↑11             | ↑58             | n/a             |
-| 36     | u/el_guapo26           |             10 |       19 |                  1.9  | ↓4              | ↑2              | n/a             |
-| 37     | u/psychonaut7343       |             10 |       15 |                  1.5  | ↑45             | n/a             | n/a             |
-| 38     | u/solongamerica        |             10 |       13 |                  1.3  | ↑22             | n/a             | n/a             |
-| 39     | u/schontzm             |             10 |       10 |                  1    | ↑12             | ↓2              | n/a             |
-| 40     | u/scribe__             |              9 |       31 |                  3.44 | ↑22             | ↑28             | n/a             |
 
-## Top Shavers
+## Most Boring Shaver
 
-| Rank   | User                   |   Shaves |   Missed Days | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
-|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
-| 1      | u/snoo-ting            |       34 |             0 | ↑1              | n/a             | n/a             |
-| 2      | u/partyman97_3         |       32 |             0 | ↑4              | =               | n/a             |
-| 3=     | u/35048467             |       31 |             0 | ↑3              | ↓1              | ↓1              |
-| 3=     | u/AdWorried2804        |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 3=     | u/BossHoggins10        |       31 |             0 | ↑20             | ↑15             | n/a             |
-| 3=     | u/Crossan1983          |       31 |             0 | ↑3              | ↑90             | n/a             |
-| 3=     | u/Environmental-Gap380 |       31 |             0 | ↑3              | ↑15             | n/a             |
-| 3=     | u/FireDragonMonkey     |       31 |             0 | ↑3              | ↑68             | n/a             |
-| 3=     | u/Glass_Procedure7497  |       31 |             0 | ↑20             | ↑25             | n/a             |
-| 3=     | u/Impressive_Donut114  |       31 |             0 | ↓2              | ↓1              | n/a             |
-| 3=     | u/InfernalInternal     |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 3=     | u/Marquis90            |       31 |             0 | ↑20             | ↑15             | n/a             |
-| 3=     | u/SamIAmShepard        |       31 |             0 | ↑2              | ↓1              | n/a             |
-| 3=     | u/anchovie7468         |       31 |             0 | ↑3              | n/a             | n/a             |
-| 3=     | u/brokenjaw622         |       31 |             0 | ↑32             | n/a             | n/a             |
-| 3=     | u/djundjila            |       31 |             0 | =               | ↓2              | n/a             |
-| 3=     | u/el_charminman        |       31 |             0 | ↑3              | ↓1              | ↑9              |
-| 3=     | u/loudmusicboy         |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 3=     | u/oswald_heist         |       31 |             0 | ↑20             | ↓1              | n/a             |
-| 3=     | u/scribe__             |       31 |             0 | ↑3              | ↓1              | n/a             |
-| 3=     | u/tsrblke              |       31 |             0 | ↑3              | ↑19             | n/a             |
-| 22     | u/Engineered_Shave     |       35 |             1 | ↓18             | ↑5              | n/a             |
-| 23=    | u/Breadheater9876      |       30 |             1 | ↓17             | ↓1              | n/a             |
-| 23=    | u/wyze0ne              |       30 |             1 | ↑5              | ↑22             | ↑39             |
-| 25=    | u/Old_Hiker            |       29 |             2 | ↓19             | ↓3              | ↓2              |
-| 25=    | u/rocketk455           |       29 |             2 | ↑8              | ↓3              | =               |
-| 27     | u/socialkittielynx     |       28 |             3 | ↑25             | n/a             | n/a             |
-| 28=    | u/EldrormR             |       27 |             4 | ↓5              | ↓10             | ↓16             |
-| 28=    | u/Eructate             |       27 |             4 | ↓22             | ↓26             | n/a             |
-| 30     | u/B_S80                |       25 |             6 | ↑6              | n/a             | n/a             |
+| Rank   | User                  |   Avg Shaves per Soap |   Unique Soaps |   Shaves | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
+|:-------|:----------------------|----------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1      | u/el_charminman       |                 15.5  |              2 |       31 | ↑1              | ↑6              | ↑92             |
+| 2      | u/sandstorm99         |                 12    |              2 |       24 | ↑7              | n/a             | n/a             |
+| 3      | u/B_S80               |                  6.25 |              4 |       25 | ↑15             | n/a             | n/a             |
+| 4      | u/Glass_Procedure7497 |                  5.17 |              6 |       31 | =               | =               | n/a             |
+| 5      | u/SirKravsALot        |                  5    |              1 |        5 | ↑19             | ↑12             | n/a             |
+| 6      | u/FredBikes9876       |                  3.83 |              6 |       23 | ↑4              | n/a             | n/a             |
+| 7      | u/scribe__            |                  3.44 |              9 |       31 | ↓4              | ↓5              | n/a             |
+| 8      | u/Breadheater9876     |                  3.33 |              9 |       30 | ↑5              | ↓2              | n/a             |
+| 9      | u/raymoonie           |                  3.17 |              6 |       19 | ↑50             | ↑73             | n/a             |
+| 10=    | u/BossHoggins10       |                  3.1  |             10 |       31 | ↑5              | ↓1              | n/a             |
+| 10=    | u/Crossan1983         |                  3.1  |             10 |       31 | ↓3              | ↑72             | n/a             |

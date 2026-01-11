@@ -741,6 +741,18 @@ known_brushes:
         knot_size_mm: 28
       handle:
         brand: Rad Dinosaur Creations
+  Razor Emporium:
+    Best Badger:
+      fiber: Badger
+      knot_size_mm: 26
+      knot_loft_mm: 55
+      patterns:
+        - razor.*emporium.*badger
+    Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - razor.*emporium.*synth
   RazoRock:
     "400":
       fiber: Synthetic
@@ -758,6 +770,7 @@ known_brushes:
         - razo.*blondie
         - razorock.*zenith
         - \brr\b.*boar
+        - \brr\b.*blond
       knot:
         brand: Zenith
         fiber: Boar
@@ -1322,6 +1335,13 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - walfront.*travel
+  West Coast Shaving:
+    Honeycomb:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - wcs.*honeycomb
+        - honeycomb badger
   Yaqi:
     Cashmere:
       fiber: Synthetic
@@ -2459,6 +2479,10 @@ other_brushes:
       - butterfly.*vintage
       - vintage.*butterfly
       - butterfly blue handle
+  Cadman:
+    default: Badger
+    patterns:
+      - cadman
   CaYuen:
     default: Badger
     patterns:

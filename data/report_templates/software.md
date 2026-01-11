@@ -35,8 +35,8 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Soap Diversity by User
 
-{{tables.user-soap-brand-scent-diversity|ranks:40|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
+{{tables.user-soap-brand-scent-diversity|ranks:20|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
 
-## Top Shavers
+## Most Boring Shaver
 
-{{tables.users|ranks:30|columns:rank, user, shaves, missed_days|deltas:true}}
+{{tables.user-soap-brand-scent-diversity|ranks:10|columns:rank, user, hhi desc, effective_soaps, unique_combinations=unique_soaps, shaves|deltas:true}}

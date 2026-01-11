@@ -70,7 +70,7 @@ Welcome to your SOTD Lather Log for August 2025
 | 13     | Mike's Natural Soaps - Lime                                                                                                                               |       52 |              2 | ↑255            | n/a             | n/a             |
 | 14     | Mike's Natural Soaps - Bay Rum                                                                                                                            |       49 |              4 | ↑16             | n/a             | n/a             |
 | 15     | Stirling Soap Co. - Electric Sheep                                                                                                                        |       42 |              2 | ↑95             | ↑17             | n/a             |
-| 16     | Mitchell's - Wool Fat                                                                                                                                     |       39 |              2 | ↑10             | n/a             | ↓3              |
+| 16     | [Mitchell's - Wool Fat](https://www.wetshavingdatabase.com/software/mitchells-wool-fat-mitchells-wool-fat-soap/)                                          |       39 |              2 | ↑10             | n/a             | ↓3              |
 | 17     | Stirling Soap Co. - Sheep                                                                                                                                 |       35 |              2 | n/a             | ↓11             | n/a             |
 | 18     | [House of Mammoth - Indigo](https://www.wetshavingdatabase.com/software/house-of-mammoth-mood-indigo-soap/)                                               |       33 |              2 | ↑34             | ↓11             | n/a             |
 | 19=    | Gentleman's Nod - Jackie                                                                                                                                  |       32 |              1 | ↑91             | n/a             | n/a             |
@@ -150,112 +150,54 @@ Welcome to your SOTD Lather Log for August 2025
 | 17=    | u/schontzm             |              4 |        5 |                  1.25 | ↑63             | ↑73             | n/a             |
 | 19     | u/tcainerr             |              4 |        4 |                  1    | n/a             | n/a             | n/a             |
 | 20     | u/redwingzfandave      |              3 |        3 |                  1    | ↑70             | n/a             | n/a             |
-| 21=    | u/rocketk455           |              2 |       31 |                 15.5  | ↑9              | ↓15             | ↑23             |
-| 21=    | u/wallygator88         |              2 |       31 |                 15.5  | ↓15             | ↓15             | ↓17             |
-| 21=    | u/wyze0ne              |              2 |       31 |                 15.5  | ↓5              | ↓9              | n/a             |
-| 24     | u/B_S80                |              2 |       30 |                 15    | ↓6              | ↓22             | n/a             |
-| 25     | u/sandstorm99          |              2 |       28 |                 14    | ↑37             | ↑65             | n/a             |
-| 26     | u/OnionMiasma          |              2 |        6 |                  3    | ↑59             | ↑41             | n/a             |
-| 27=    | u/el_charminman        |              2 |        2 |                  1    | ↑48             | ↓15             | ↓23             |
-| 27=    | u/l1mer1ck             |              2 |        2 |                  1    | ↑63             | n/a             | n/a             |
-| 27=    | u/raymoonie            |              2 |        2 |                  1    | ↑52             | n/a             | n/a             |
-| 30=    | u/FireDragonMonkey     |              1 |       32 |                 32    | ↓11             | ↓29             | n/a             |
-| 30=    | u/OBeardWanKenobe      |              1 |       32 |                 32    | n/a             | ↓18             | ↑14             |
-| 30=    | u/RedMosquitoMM        |              1 |       32 |                 32    | ↓6              | ↑39             | n/a             |
-| 30=    | u/SamIAmShepard        |              1 |       32 |                 32    | ↓21             | ↑54             | n/a             |
-| 30=    | u/SuperLuck5116        |              1 |       32 |                 32    | ↑16             | n/a             | n/a             |
-| 30=    | u/brokenjaw622         |              1 |       32 |                 32    | ↓29             | ↓18             | n/a             |
-| 30=    | u/partyman97_3         |              1 |       32 |                 32    | ↓17             | n/a             | n/a             |
-| 37=    | u/2SaintsDude          |              1 |       31 |                 31    | ↑11             | ↓25             | n/a             |
-| 37=    | u/35048467             |              1 |       31 |                 31    | ↓26             | ↓25             | ↓33             |
-| 37=    | u/AdWorried2804        |              1 |       31 |                 31    | ↓35             | ↓25             | n/a             |
-| 37=    | u/BossHoggins10        |              1 |       31 |                 31    | ↓9              | ↓33             | n/a             |
-| 37=    | u/Breadheater9876      |              1 |       31 |                 31    | ↑14             | ↓25             | n/a             |
-| 37=    | u/Crisp_Mango          |              1 |       31 |                 31    | n/a             | ↓25             | ↓33             |
-| 37=    | u/Crossan1983          |              1 |       31 |                 31    | ↑33             | ↓25             | n/a             |
-| 37=    | u/EldrormR             |              1 |       31 |                 31    | ↓11             | ↓25             | n/a             |
-| 37=    | u/Environmental-Gap380 |              1 |       31 |                 31    | ↓24             | ↓25             | n/a             |
-| 37=    | u/Eructate             |              1 |       31 |                 31    | n/a             | ↓25             | n/a             |
-| 37=    | u/FredBikes9876        |              1 |       31 |                 31    | ↓10             | ↓25             | n/a             |
-| 37=    | u/Impressive_Donut114  |              1 |       31 |                 31    | ↓29             | ↓25             | n/a             |
-| 37=    | u/InfernalInternal     |              1 |       31 |                 31    | ↓3              | ↓25             | n/a             |
-| 37=    | u/KerblimeySkal        |              1 |       31 |                 31    | ↑41             | ↓25             | n/a             |
-| 37=    | u/Lob-Star             |              1 |       31 |                 31    | ↑29             | n/a             | n/a             |
-| 37=    | u/Marquis90            |              1 |       31 |                 31    | ↓15             | ↓31             | n/a             |
-| 37=    | u/Old_Hiker            |              1 |       31 |                 31    | ↓24             | ↓25             | ↓33             |
-| 37=    | u/Priusaurus           |              1 |       31 |                 31    | n/a             | ↓25             | n/a             |
-| 37=    | u/Ramjet615            |              1 |       31 |                 31    | ↑2              | ↑18             | n/a             |
-| 37=    | u/SexBobomb            |              1 |       31 |                 31    | ↑7              | n/a             | n/a             |
-| 37=    | u/SirKravsALot         |              1 |       31 |                 31    | n/a             | ↓25             | n/a             |
-| 37=    | u/Tetriside            |              1 |       31 |                 31    | ↑10             | ↑28             | ↓33             |
-| 37=    | u/anchovie7468         |              1 |       31 |                 31    | ↓32             | n/a             | n/a             |
-| 37=    | u/bmac92               |              1 |       31 |                 31    | ↑24             | ↓25             | n/a             |
-| 37=    | u/chronnoisseur42O     |              1 |       31 |                 31    | ↑34             | ↓25             | ↑16             |
-| 37=    | u/coco_for_cocoapuffs  |              1 |       31 |                 31    | ↑27             | n/a             | n/a             |
-| 37=    | u/djundjila            |              1 |       31 |                 31    | =               | ↓25             | n/a             |
-| 37=    | u/expoqeteer           |              1 |       31 |                 31    | ↓16             | n/a             | n/a             |
-| 37=    | u/ginopono             |              1 |       31 |                 31    | n/a             | ↑34             | n/a             |
-| 37=    | u/josiguuh             |              1 |       31 |                 31    | ↑1              | n/a             | n/a             |
-| 37=    | u/jwoods23             |              1 |       31 |                 31    | ↑11             | ↓25             | n/a             |
-| 37=    | u/lakes1964            |              1 |       31 |                 31    | ↑16             | n/a             | n/a             |
-| 37=    | u/loudmusicboy         |              1 |       31 |                 31    | ↓15             | ↓31             | n/a             |
-| 37=    | u/oswald_heist         |              1 |       31 |                 31    | ↓20             | ↓25             | n/a             |
-| 37=    | u/scribe__             |              1 |       31 |                 31    | ↑5              | ↑53             | ↓33             |
-| 37=    | u/sgrdddy              |              1 |       31 |                 31    | ↑43             | ↓25             | ↑15             |
-| 37=    | u/socialkittielynx     |              1 |       31 |                 31    | ↓27             | ↑21             | n/a             |
-| 37=    | u/solongamerica        |              1 |       31 |                 31    | ↑48             | ↑50             | n/a             |
-| 37=    | u/whosgotthepudding    |              1 |       31 |                 31    | ↑17             | ↑24             | n/a             |
 
-## Top Shavers
+## Most Boring Shaver
 
-| Rank   | User                   |   Shaves |   Missed Days | Δ vs Jul 2025   | Δ vs Aug 2024   | Δ vs Aug 2020   |
-|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
-| 1      | u/Engineered_Shave     |       38 |             0 | =               | ↑1              | n/a             |
-| 2=     | u/FireDragonMonkey     |       32 |             0 | ↑3              | =               | n/a             |
-| 2=     | u/OBeardWanKenobe      |       32 |             0 | n/a             | =               | ↑44             |
-| 2=     | u/RedMosquitoMM        |       32 |             0 | ↑42             | ↑66             | n/a             |
-| 2=     | u/SamIAmShepard        |       32 |             0 | ↑3              | ↑82             | n/a             |
-| 2=     | u/SuperLuck5116        |       32 |             0 | ↑30             | n/a             | n/a             |
-| 2=     | u/brokenjaw622         |       32 |             0 | ↑3              | =               | n/a             |
-| 2=     | u/partyman97_3         |       32 |             0 | ↑3              | n/a             | n/a             |
-| 9=     | u/2SaintsDude          |       31 |             0 | ↑52             | ↓7              | n/a             |
-| 9=     | u/35048467             |       31 |             0 | ↓4              | ↓7              | ↓7              |
-| 9=     | u/AdWorried2804        |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/BossHoggins10        |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/Breadheater9876      |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/Crisp_Mango          |       31 |             0 | n/a             | ↓7              | ↓7              |
-| 9=     | u/Crossan1983          |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/EldrormR             |       31 |             0 | ↑21             | ↓7              | n/a             |
-| 9=     | u/Environmental-Gap380 |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/Eructate             |       31 |             0 | n/a             | ↓7              | n/a             |
-| 9=     | u/FredBikes9876        |       31 |             0 | ↑24             | ↓7              | n/a             |
-| 9=     | u/Impressive_Donut114  |       31 |             0 | ↓7              | ↓7              | n/a             |
-| 9=     | u/InfernalInternal     |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/KerblimeySkal        |       31 |             0 | ↑60             | ↓7              | n/a             |
-| 9=     | u/Lob-Star             |       31 |             0 | ↑64             | n/a             | n/a             |
-| 9=     | u/Marquis90            |       31 |             0 | ↓4              | ↑38             | n/a             |
-| 9=     | u/Old_Hiker            |       31 |             0 | ↓4              | ↓7              | ↓7              |
-| 9=     | u/Priusaurus           |       31 |             0 | n/a             | ↓7              | n/a             |
-| 9=     | u/Ramjet615            |       31 |             0 | ↑33             | ↓7              | n/a             |
-| 9=     | u/SexBobomb            |       31 |             0 | ↑38             | ↑47             | n/a             |
-| 9=     | u/SirKravsALot         |       31 |             0 | n/a             | ↓7              | n/a             |
-| 9=     | u/anchovie7468         |       31 |             0 | ↑14             | n/a             | n/a             |
-| 9=     | u/bmac92               |       31 |             0 | ↑58             | ↓7              | n/a             |
-| 9=     | u/chronnoisseur42O     |       31 |             0 | ↑46             | ↓7              | ↑46             |
-| 9=     | u/coco_for_cocoapuffs  |       31 |             0 | ↑54             | n/a             | n/a             |
-| 9=     | u/djundjila            |       31 |             0 | ↓4              | ↓7              | n/a             |
-| 9=     | u/expoqeteer           |       31 |             0 | ↑26             | n/a             | n/a             |
-| 9=     | u/ginopono             |       31 |             0 | n/a             | ↑61             | n/a             |
-| 9=     | u/josiguuh             |       31 |             0 | ↑24             | n/a             | n/a             |
-| 9=     | u/jwoods23             |       31 |             0 | ↑52             | ↓7              | n/a             |
-| 9=     | u/lakes1964            |       31 |             0 | ↑38             | n/a             | n/a             |
-| 9=     | u/loudmusicboy         |       31 |             0 | ↓4              | ↑38             | n/a             |
-| 9=     | u/oswald_heist         |       31 |             0 | ↑14             | ↓7              | n/a             |
-| 9=     | u/rocketk455           |       31 |             0 | ↑18             | ↑38             | ↑37             |
-| 9=     | u/scribe__             |       31 |             0 | ↓6              | ↑82             | ↓7              |
-| 9=     | u/sgrdddy              |       31 |             0 | ↑78             | ↓7              | ↑45             |
-| 9=     | u/socialkittielynx     |       31 |             0 | ↑26             | ↑45             | n/a             |
-| 9=     | u/solongamerica        |       31 |             0 | ↑70             | ↑79             | n/a             |
-| 9=     | u/wallygator88         |       31 |             0 | ↑18             | ↑38             | ↓7              |
-| 9=     | u/whosgotthepudding    |       31 |             0 | ↑46             | ↑49             | n/a             |
-| 9=     | u/wyze0ne              |       31 |             0 | ↑28             | ↓7              | n/a             |
+| Rank   | User                   |   Avg Shaves per Soap |   Unique Soaps |   Shaves | Δ vs Jul 2025   | Δ vs Aug 2024   | Δ vs Aug 2020   |
+|:-------|:-----------------------|----------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1=     | u/OBeardWanKenobe      |                    32 |              1 |       32 | n/a             | ↑1              | ↑40             |
+| 1=     | u/partyman97_3         |                    32 |              1 |       32 | ↑50             | n/a             | n/a             |
+| 1=     | u/brokenjaw622         |                    32 |              1 |       32 | ↑73             | ↑1              | n/a             |
+| 1=     | u/SuperLuck5116        |                    32 |              1 |       32 | ↑10             | n/a             | n/a             |
+| 1=     | u/SamIAmShepard        |                    32 |              1 |       32 | ↑58             | ↑78             | n/a             |
+| 1=     | u/RedMosquitoMM        |                    32 |              1 |       32 | ↑73             | ↑58             | n/a             |
+| 1=     | u/FireDragonMonkey     |                    32 |              1 |       32 | ↑39             | ↑88             | n/a             |
+| 8=     | u/Impressive_Donut114  |                    31 |              1 |       31 | ↑42             | ↓6              | n/a             |
+| 8=     | u/Old_Hiker            |                    31 |              1 |       31 | ↑43             | ↓6              | ↓7              |
+| 8=     | u/Marquis90            |                    31 |              1 |       31 | ↑24             | ↑53             | n/a             |
+| 8=     | u/Lob-Star             |                    31 |              1 |       31 | ↑66             | n/a             | n/a             |
+| 8=     | u/KerblimeySkal        |                    31 |              1 |       31 | ↑5              | ↓6              | n/a             |
+| 8=     | u/InfernalInternal     |                    31 |              1 |       31 | ↑14             | ↓6              | n/a             |
+| 8=     | u/bmac92               |                    31 |              1 |       31 | ↑40             | ↓6              | n/a             |
+| 8=     | u/FredBikes9876        |                    31 |              1 |       31 | ↑28             | ↓6              | n/a             |
+| 8=     | u/Crisp_Mango          |                    31 |              1 |       31 | n/a             | ↓6              | ↓7              |
+| 8=     | u/Eructate             |                    31 |              1 |       31 | n/a             | ↓6              | n/a             |
+| 8=     | u/Environmental-Gap380 |                    31 |              1 |       31 | ↑43             | ↓6              | n/a             |
+| 8=     | u/EldrormR             |                    31 |              1 |       31 | ↑27             | ↓6              | n/a             |
+| 8=     | u/Priusaurus           |                    31 |              1 |       31 | n/a             | ↓6              | n/a             |
+| 8=     | u/SexBobomb            |                    31 |              1 |       31 | ↑35             | n/a             | n/a             |
+| 8=     | u/SirKravsALot         |                    31 |              1 |       31 | n/a             | ↓6              | n/a             |
+| 8=     | u/lakes1964            |                    31 |              1 |       31 | ↑16             | n/a             | n/a             |
+| 8=     | u/whosgotthepudding    |                    31 |              1 |       31 | ↑22             | ↑43             | n/a             |
+| 8=     | u/solongamerica        |                    31 |              1 |       31 | ↑5              | ↑76             | n/a             |
+| 8=     | u/socialkittielynx     |                    31 |              1 |       31 | ↑65             | ↑40             | n/a             |
+| 8=     | u/sgrdddy              |                    31 |              1 |       31 | ↑66             | ↓6              | ↑41             |
+| 8=     | u/scribe__             |                    31 |              1 |       31 | ↑2              | ↑81             | ↓7              |
+| 8=     | u/oswald_heist         |                    31 |              1 |       31 | ↑38             | ↓6              | n/a             |
+| 8=     | u/loudmusicboy         |                    31 |              1 |       31 | ↑24             | ↑53             | n/a             |
+| 8=     | u/jwoods23             |                    31 |              1 |       31 | ↑48             | ↓6              | n/a             |
+| 8=     | u/Tetriside            |                    31 |              1 |       31 | ↑41             | ↑47             | ↓7              |
+| 8=     | u/josiguuh             |                    31 |              1 |       31 | ↑15             | n/a             | n/a             |
+| 8=     | u/ginopono             |                    31 |              1 |       31 | n/a             | ↑57             | n/a             |
+| 8=     | u/expoqeteer           |                    31 |              1 |       31 | ↑37             | n/a             | n/a             |
+| 8=     | u/djundjila            |                    31 |              1 |       31 | ↑11             | ↓6              | n/a             |
+| 8=     | u/coco_for_cocoapuffs  |                    31 |              1 |       31 | ↑30             | n/a             | n/a             |
+| 8=     | u/chronnoisseur42O     |                    31 |              1 |       31 | ↓1              | ↓6              | ↑42             |
+| 8=     | u/anchovie7468         |                    31 |              1 |       31 | ↑59             | n/a             | n/a             |
+| 8=     | u/Crossan1983          |                    31 |              1 |       31 | ↓6              | ↓6              | n/a             |
+| 8=     | u/Ramjet615            |                    31 |              1 |       31 | ↑33             | ↑37             | n/a             |
+| 8=     | u/Breadheater9876      |                    31 |              1 |       31 | ↓2              | ↓6              | n/a             |
+| 8=     | u/BossHoggins10        |                    31 |              1 |       31 | ↑17             | ↑65             | n/a             |
+| 8=     | u/AdWorried2804        |                    31 |              1 |       31 | ↑63             | ↓6              | n/a             |
+| 8=     | u/35048467             |                    31 |              1 |       31 | ↑47             | ↓6              | ↓7              |
+| 8=     | u/2SaintsDude          |                    31 |              1 |       31 | ↑48             | ↓6              | n/a             |
