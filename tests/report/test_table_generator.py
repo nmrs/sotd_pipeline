@@ -1,7 +1,6 @@
 """Tests for the TableGenerator."""
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -794,7 +793,7 @@ class TestTableGenerator:
         assert "Brand E" not in result  # rank: 5, shaves: 20
 
     def test_numeric_column_limits_gap_detection(self):
-        """Test that numeric column filtering works correctly even if it creates gaps in the table."""
+        """Test numeric column filtering works correctly even if it creates gaps."""
         data = {
             "soap_makers": [
                 {"rank": 1, "shaves": 100, "unique_users": 50, "brand": "Brand A"},
@@ -1105,3 +1104,341 @@ class TestTableGenerator:
 
         # Restore original file path
         monkeypatch.setattr(tg_module, "__file__", original_file)
+
+    def test_parse_columns_parameter_with_sort_directions(self):
+        """Test parsing columns parameter with sort directions."""
+        data = {"soap_makers": [{"rank": 1, "shaves": 100, "unique_users": 50}]}
+        generator = TableGenerator(data)
+
+        # Test simple column with desc
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter("shaves desc")
+        assert column_order == ["shaves"]
+        assert rename_mapping == {}
+        assert sort_info == [("shaves", False)]
+
+        # Test simple column with asc
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter("shaves asc")
+        assert column_order == ["shaves"]
+        assert rename_mapping == {}
+        assert sort_info == [("shaves", True)]
+
+        # Test renamed column with desc
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter(
+            "unique_combinations=unique_soaps desc"
+        )
+        assert column_order == ["unique_combinations"]
+        assert rename_mapping == {"unique_combinations": "unique_soaps"}
+        assert sort_info == [("unique_combinations", False)]
+
+        # Test multiple columns with directions
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter(
+            "rank, user, unique_combinations desc, shaves desc"
+        )
+        assert column_order == ["rank", "user", "unique_combinations", "shaves"]
+        assert rename_mapping == {}
+        assert sort_info == [("unique_combinations", False), ("shaves", False)]
+
+        # Test mixed (some with directions, some without)
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter(
+            "rank, user, unique_combinations desc"
+        )
+        assert column_order == ["rank", "user", "unique_combinations"]
+        assert rename_mapping == {}
+        assert sort_info == [("unique_combinations", False)]
+
+        # Test case-insensitive directions
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter("shaves DESC")
+        assert sort_info == [("shaves", False)]
+
+        column_order, rename_mapping, sort_info = generator._parse_columns_parameter("shaves ASC")
+        assert sort_info == [("shaves", True)]
+
+    def test_sorting_single_column_ascending(self):
+        """Test sorting with single column ascending."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity", columns="rank, user, unique_combinations asc, shaves"
+        )
+
+        # Should be sorted by unique_combinations ascending (lowest first)
+        # user2 (5) should come before user1 (10) should come before user3 (15)
+        user2_index = result.find("user2")
+        user1_index = result.find("user1")
+        user3_index = result.find("user3")
+
+        assert user2_index < user1_index < user3_index
+
+    def test_sorting_single_column_descending(self):
+        """Test sorting with single column descending."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations desc, shaves",
+        )
+
+        # Should be sorted by unique_combinations descending (highest first)
+        # user3 (15) should come before user1 (10) should come before user2 (5)
+        user3_index = result.find("user3")
+        user1_index = result.find("user1")
+        user2_index = result.find("user2")
+
+        assert user3_index < user1_index < user2_index
+
+    def test_sorting_multiple_columns(self):
+        """Test sorting with multiple columns."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 10, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 10, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations asc, shaves desc",
+        )
+
+        # Should be sorted by unique_combinations asc, then shaves desc
+        # All have same unique_combinations (10), so sorted by shaves desc
+        # user1 (50) should come before user3 (40) should come before user2 (30)
+        user1_index = result.find("user1")
+        user3_index = result.find("user3")
+        user2_index = result.find("user2")
+
+        assert user1_index < user3_index < user2_index
+
+    def test_sorting_with_reranking(self):
+        """Test that sorting re-ranks the data correctly."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity", columns="rank, user, unique_combinations asc, shaves"
+        )
+
+        # After sorting by unique_combinations asc, ranks should be recalculated
+        # user2 (5) should be rank 1, user1 (10) should be rank 2, user3 (15) should be rank 3
+        # Check that ranks are present (formatted as "|      1 |" or "|      1=|")
+        assert "|      1 |" in result or "|      1=" in result  # Rank 1
+        assert "|      2 |" in result or "|      2=" in result  # Rank 2
+        assert "|      3 |" in result or "|      3=" in result  # Rank 3
+
+        # Verify user2 appears first (lowest unique_combinations)
+        user2_index = result.find("user2")
+        user1_index = result.find("user1")
+        assert user2_index < user1_index
+
+    def test_sorting_with_ranks_parameter(self):
+        """Test sorting combined with ranks parameter."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+                {"rank": 4, "user": "user4", "unique_combinations": 3, "shaves": 20},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            ranks=2,
+            columns="rank, user, unique_combinations asc, shaves",
+        )
+
+        # After sorting by unique_combinations asc, should show top 2 ranks
+        # user4 (3) should be rank 1, user2 (5) should be rank 2
+        assert "user4" in result
+        assert "user2" in result
+        assert "user1" not in result
+        assert "user3" not in result
+
+    def test_sorting_with_rows_parameter(self):
+        """Test sorting combined with rows parameter."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+                {"rank": 4, "user": "user4", "unique_combinations": 3, "shaves": 20},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            rows=2,
+            columns="rank, user, unique_combinations asc, shaves",
+        )
+
+        # After sorting by unique_combinations asc, should show first 2 rows
+        # user4 (3) should be first, user2 (5) should be second
+        assert "user4" in result
+        assert "user2" in result
+        assert "user1" not in result
+        assert "user3" not in result
+
+    def test_sorting_with_deltas(self):
+        """Test sorting combined with deltas parameter."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        comparison_data = {
+            "2025-05": {
+                "user_soap_brand_scent_diversity": [
+                    {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                    {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                    {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations asc, shaves",
+            deltas=True,
+        )
+
+        # Should have delta columns
+        assert "Δ vs" in result
+        # Should be sorted correctly
+        user2_index = result.find("user2")
+        user1_index = result.find("user1")
+        user3_index = result.find("user3")
+        assert user2_index < user1_index < user3_index
+
+    def test_sorting_invalid_column(self):
+        """Test error when sort column doesn't exist."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+            ]
+        }
+
+        generator = TableGenerator(data)
+
+        with pytest.raises(ValueError, match="Sort columns not found in data"):
+            generator.generate_table(
+                "user-soap-brand-scent-diversity",
+                columns="rank, user, nonexistent_column asc",
+            )
+
+    def test_sorting_with_column_renaming(self):
+        """Test that sorting works with column renaming."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations=unique_soaps asc, shaves",
+        )
+
+        # Should be sorted correctly and column renamed
+        assert "Unique Soaps" in result  # Renamed column
+        user2_index = result.find("user2")
+        user1_index = result.find("user1")
+        user3_index = result.find("user3")
+        assert user2_index < user1_index < user3_index
+
+    def test_sorting_with_ties(self):
+        """Test that sorting handles ties correctly with competition ranking."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 10, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 10, "shaves": 40},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations asc, shaves",
+        )
+
+        # All have same unique_combinations (10), so should all get same rank after re-ranking
+        # But since we're sorting by unique_combinations first, they should be grouped together
+        assert "user1" in result
+        assert "user2" in result
+        assert "user3" in result
+
+    def test_sorting_with_deltas_consistent_sorting(self):
+        """Test that deltas work correctly when using custom sorting - comparison data is sorted the same way."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                {"rank": 2, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                {"rank": 3, "user": "user3", "unique_combinations": 15, "shaves": 40},
+            ]
+        }
+
+        # Previous month data - sorted by default (descending by unique_combinations)
+        # user3: 15 (rank 1), user1: 10 (rank 2), user2: 5 (rank 3)
+        comparison_data = {
+            "2025-05": {
+                "user_soap_brand_scent_diversity": [
+                    {"rank": 1, "user": "user3", "unique_combinations": 15, "shaves": 40},
+                    {"rank": 2, "user": "user1", "unique_combinations": 10, "shaves": 50},
+                    {"rank": 3, "user": "user2", "unique_combinations": 5, "shaves": 30},
+                ]
+            }
+        }
+
+        generator = TableGenerator(data, comparison_data, current_month="2025-06")
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, unique_combinations asc, shaves",
+            deltas=True,
+        )
+
+        # After sorting current month by unique_combinations asc:
+        # user2: 5 (rank 1), user1: 10 (rank 2), user3: 15 (rank 3)
+        # After sorting previous month by unique_combinations asc:
+        # user2: 5 (rank 1), user1: 10 (rank 2), user3: 15 (rank 3)
+        # So deltas should all be "=" (no change)
+
+        # Should have delta columns
+        assert "Δ vs" in result
+        # All users should show "=" since they're in the same positions after consistent sorting
+        assert "=" in result
+        # Verify sorting is correct (ascending)
+        user2_index = result.find("user2")
+        user1_index = result.find("user1")
+        user3_index = result.find("user3")
+        assert user2_index < user1_index < user3_index

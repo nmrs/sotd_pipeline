@@ -481,24 +481,24 @@ def test_parse_comment_multi_field_same_line():
         "thread_title": "Thursday SOTD Thread - Jul 17, 2025",
         "url": "https://www.reddit.com/r/Wetshaving/comments/1m1zs53/thursday_sotd_thread_jul_17_2025/n3m6xst/",
     }
-    
+
     result = parse_comment(comment)
     assert result is not None
-    
+
     # Verify all fields extract correctly
     # Note: The period before the field separator is not included in the field value
     assert "brush" in result
     assert result["brush"]["original"] == "Stirling/Zenith - 510SE XL 31mm Boar"
     assert result["brush"]["normalized"] == "Stirling/Zenith - 510SE XL 31mm Boar"
-    
+
     assert "razor" in result
     assert result["razor"]["original"] == "Henson - AL 13 Mild"
     assert result["razor"]["normalized"] == "Henson - AL 13 Mild"
-    
+
     assert "blade" in result
     assert result["blade"]["original"] == "Wizamet - Super Iridium"
     assert result["blade"]["normalized"] == "Wizamet - Super Iridium"
-    
+
     assert "soap" in result
     # Note: "Post Shave" is not a recognized field, so extraction continues to end of line
     # This is expected behavior - we only stop at recognized field markers

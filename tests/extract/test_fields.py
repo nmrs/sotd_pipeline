@@ -150,34 +150,37 @@ def test_extract_field_multi_field_same_line():
         "* **Brush:** Stirling/Zenith - 510SE XL 31mm Boar.* **Razor:** Henson - AL 13 Mild.* "
         "**Blade:** Wizamet - Super Iridium.* **Lather:** Stirling Soap Co. - r/wetshaving l, Rich Moose soap."
     )
-    
+
     assert extract_field(multi_field_line, "brush") == "Stirling/Zenith - 510SE XL 31mm Boar"
     assert extract_field(multi_field_line, "razor") == "Henson - AL 13 Mild"
     assert extract_field(multi_field_line, "blade") == "Wizamet - Super Iridium"
-    assert extract_field(multi_field_line, "soap") == "Stirling Soap Co. - r/wetshaving l, Rich Moose soap."
-    
+    assert (
+        extract_field(multi_field_line, "soap")
+        == "Stirling Soap Co. - r/wetshaving l, Rich Moose soap."
+    )
+
     # Test other field combinations
     razor_blade_line = "* **Razor:** Game Changer.* **Blade:** Feather"
     assert extract_field(razor_blade_line, "razor") == "Game Changer"
     assert extract_field(razor_blade_line, "blade") == "Feather"
-    
+
     brush_soap_line = "* **Brush:** Omega.* **Soap:** Tabac"
     assert extract_field(brush_soap_line, "brush") == "Omega"
     assert extract_field(brush_soap_line, "soap") == "Tabac"
-    
+
     # Test backward compatibility: single field per line still works
     single_field_line = "* **Razor:** Blackbird"
     assert extract_field(single_field_line, "razor") == "Blackbird"
-    
+
     # Test field at end of line (no next field marker)
     end_of_line = "* **Brush:** Simpson T3"
     assert extract_field(end_of_line, "brush") == "Simpson T3"
-    
+
     # Test with different separator formats
     simple_separator = "Razor: Game Changer.* Blade: Feather"
     assert extract_field(simple_separator, "razor") == "Game Changer"
     assert extract_field(simple_separator, "blade") == "Feather"
-    
+
     # Test separator without period (just * between fields)
     no_period_separator = "* **Brush:** Yaqi - Moka Express 2 Band Badger* **Razor:** Henson - AL 13 Mild* **Blade:** Personna Platinum"
     assert extract_field(no_period_separator, "brush") == "Yaqi - Moka Express 2 Band Badger"
@@ -190,15 +193,15 @@ def test_extract_field_equals_delimiter_priority():
     # Colon should match before equals
     assert extract_field("* Razor: Henson AL-13+", "razor") == "Henson AL-13+"
     assert extract_field("* Razor = Henson AL-13+", "razor") == "Henson AL-13+"
-    
+
     # Dash should match before equals
     assert extract_field("* Razor - Henson AL-13+", "razor") == "Henson AL-13+"
     assert extract_field("* Razor = Henson AL-13+", "razor") == "Henson AL-13+"
-    
+
     # Equals should work when colon/dash not present
     assert extract_field("* Brush = Omega synthetic", "brush") == "Omega synthetic"
     assert extract_field("Brush = Omega synthetic", "brush") == "Omega synthetic"
-    
+
     # Test that equals delimiter extracts value correctly (not including the =)
     assert extract_field("* Lather = DR Harris Lavender", "soap") == "DR Harris Lavender"
     assert extract_field("Lather = DR Harris Lavender", "soap") == "DR Harris Lavender"

@@ -262,3 +262,125 @@ class TestSoapBrandScentDiversityAggregator:
         assert result[0]["unique_combinations"] == 3
         assert result[0]["shaves"] == 3
         assert result[0]["unique_users"] == 1
+
+    def test_hhi_calculation_single_soap(self):
+        """Test HHI calculation for user with single soap (maximum concentration)."""
+        # Example A: 32 shaves, 1 soap → HHI = 1.0, effective_soaps = 1.0
+        records = []
+        for _ in range(32):
+            records.append(
+                {
+                    "author": "user1",
+                    "soap": {
+                        "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    },
+                }
+            )
+
+        result = aggregate_soap_brand_scent_diversity(records)
+
+        assert len(result) == 1
+        assert result[0]["user"] == "user1"
+        assert result[0]["shaves"] == 32
+        assert result[0]["unique_combinations"] == 1
+        # Single soap: p = 1, HHI = 1² = 1.0
+        assert abs(result[0]["hhi"] - 1.0) < 0.0001
+        # Effective soaps = 1 / HHI = 1 / 1.0 = 1.0
+        assert abs(result[0]["effective_soaps"] - 1.0) < 0.01
+
+    def test_hhi_calculation_even_distribution(self):
+        """Test HHI calculation for user with even distribution across soaps."""
+        # Example B: 64 shaves, 4 soaps (16 each) → HHI = 0.25, effective_soaps = 4.0
+        records = []
+        soaps = [
+            {"brand": "Declaration Grooming", "scent": "B2"},
+            {"brand": "Barrister & Mann", "scent": "Seville"},
+            {"brand": "Noble Otter", "scent": "Lonestar"},
+            {"brand": "Stirling Soap Co.", "scent": "Executive Man"},
+        ]
+        for soap in soaps:
+            for _ in range(16):
+                records.append(
+                    {
+                        "author": "user1",
+                        "soap": {"matched": soap},
+                    }
+                )
+
+        result = aggregate_soap_brand_scent_diversity(records)
+
+        assert len(result) == 1
+        assert result[0]["user"] == "user1"
+        assert result[0]["shaves"] == 64
+        assert result[0]["unique_combinations"] == 4
+        # Even distribution: each p = 16/64 = 0.25, HHI = 4 * (0.25²) = 4 * 0.0625 = 0.25
+        assert abs(result[0]["hhi"] - 0.25) < 0.0001
+        # Effective soaps = 1 / HHI = 1 / 0.25 = 4.0
+        assert abs(result[0]["effective_soaps"] - 4.0) < 0.01
+
+    def test_hhi_calculation_concentrated(self):
+        """Test HHI calculation for user with concentrated distribution."""
+        # Example C: 64 shaves, 4 soaps (52/4/4/4) → HHI ≈ 0.6719, effective_soaps ≈ 1.49
+        records = []
+        # 52 shaves with first soap
+        for _ in range(52):
+            records.append(
+                {
+                    "author": "user1",
+                    "soap": {"matched": {"brand": "Declaration Grooming", "scent": "B2"}},
+                }
+            )
+        # 4 shaves each with other 3 soaps
+        other_soaps = [
+            {"brand": "Barrister & Mann", "scent": "Seville"},
+            {"brand": "Noble Otter", "scent": "Lonestar"},
+            {"brand": "Stirling Soap Co.", "scent": "Executive Man"},
+        ]
+        for soap in other_soaps:
+            for _ in range(4):
+                records.append(
+                    {
+                        "author": "user1",
+                        "soap": {"matched": soap},
+                    }
+                )
+
+        result = aggregate_soap_brand_scent_diversity(records)
+
+        assert len(result) == 1
+        assert result[0]["user"] == "user1"
+        assert result[0]["shaves"] == 64
+        assert result[0]["unique_combinations"] == 4
+        # Concentrated: p's are 52/64 = 0.8125 and 4/64 = 0.0625 (three times)
+        # HHI = 0.8125² + 3*(0.0625²) = 0.6602 + 3*0.0039 ≈ 0.6719
+        assert abs(result[0]["hhi"] - 0.6719) < 0.0001
+        # Effective soaps = 1 / HHI = 1 / 0.6719 ≈ 1.49
+        assert abs(result[0]["effective_soaps"] - 1.49) < 0.01
+
+    def test_hhi_in_aggregate_output(self):
+        """Test that hhi and effective_soaps are included in aggregation output."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                },
+            },
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                },
+            },
+        ]
+
+        result = aggregate_soap_brand_scent_diversity(records)
+
+        assert len(result) == 1
+        assert "hhi" in result[0]
+        assert "effective_soaps" in result[0]
+        assert isinstance(result[0]["hhi"], (int, float))
+        assert isinstance(result[0]["effective_soaps"], (int, float))
+        assert result[0]["hhi"] >= 0.0
+        assert result[0]["hhi"] <= 1.0
+        assert result[0]["effective_soaps"] >= 0.0

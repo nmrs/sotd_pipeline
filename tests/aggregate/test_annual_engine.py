@@ -345,6 +345,81 @@ class TestAnnualAggregationEngine:
         expected_missing = [f"2024-{month:02d}" for month in range(1, 13)]
         assert result["metadata"]["missing_months"] == expected_missing
 
+    def test_aggregate_user_diversity_with_hhi(self):
+        """Test annual aggregation of user diversity includes HHI and effective_soaps fields."""
+        engine = AnnualAggregationEngine("2024", Path("/data"))
+
+        monthly_data = {
+            "2024-01": {
+                "meta": {"total_shaves": 100, "unique_shavers": 50},
+                "data": {
+                    "user_soap_brand_scent_diversity": [
+                        {
+                            "user": "user1",
+                            "unique_combinations": 3,
+                            "shaves": 10,
+                            "avg_shaves_per_combination": 3.33,
+                            "hhi": 0.5,
+                            "effective_soaps": 2.0,
+                        },
+                        {
+                            "user": "user2",
+                            "unique_combinations": 2,
+                            "shaves": 5,
+                            "avg_shaves_per_combination": 2.5,
+                            "hhi": 0.6,
+                            "effective_soaps": 1.67,
+                        },
+                    ],
+                },
+            },
+            "2024-02": {
+                "meta": {"total_shaves": 80, "unique_shavers": 40},
+                "data": {
+                    "user_soap_brand_scent_diversity": [
+                        {
+                            "user": "user1",
+                            "unique_combinations": 2,
+                            "shaves": 8,
+                            "avg_shaves_per_combination": 4.0,
+                            "hhi": 0.4,
+                            "effective_soaps": 2.5,
+                        },
+                        {
+                            "user": "user2",
+                            "unique_combinations": 1,
+                            "shaves": 6,
+                            "avg_shaves_per_combination": 6.0,
+                            "hhi": 1.0,
+                            "effective_soaps": 1.0,
+                        },
+                    ],
+                },
+            },
+        }
+
+        result = engine._aggregate_user_diversity(monthly_data, "user_soap_brand_scent_diversity")
+
+        assert len(result) == 2
+        # user1 should be first (3+2=5 unique combinations, 10+8=18 shaves)
+        assert result[0]["user"] == "user1"
+        assert result[0]["unique_combinations"] == 5
+        assert result[0]["shaves"] == 18
+        assert result[0]["avg_shaves_per_combination"] == 3.6
+        # HHI and effective_soaps are set to 0.0 as placeholders
+        # (cannot be accurately recalculated from monthly summaries alone)
+        assert result[0]["hhi"] == 0.0
+        assert result[0]["effective_soaps"] == 0.0
+
+        # user2 should be second (2+1=3 unique combinations, 5+6=11 shaves)
+        assert result[1]["user"] == "user2"
+        assert result[1]["unique_combinations"] == 3
+        assert result[1]["shaves"] == 11
+        # Rounding: 11 / 3 = 3.666... rounds to 3.7 with round(1)
+        assert abs(result[1]["avg_shaves_per_combination"] - 3.7) < 0.01
+        assert result[1]["hhi"] == 0.0
+        assert result[1]["effective_soaps"] == 0.0
+
 
 class TestAggregateMonthlyData:
     """Test the aggregate_monthly_data function."""
