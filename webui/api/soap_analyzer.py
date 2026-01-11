@@ -940,7 +940,7 @@ def analyze_soap_neighbor_similarity_web(
         first_match = current["original_matches"][0]
         pattern = first_match.get("pattern", current["entry"])
         normalized_string = first_match.get("normalized", current["normalized_string"])
-        
+
         # Collect all unique match_types from all matches in this group
         match_types = set()
         for match in current["original_matches"]:

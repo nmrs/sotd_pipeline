@@ -1517,7 +1517,8 @@ async def batch_analyze_match_files(
         0.8, ge=0.0, le=1.0, description="Minimum brand match threshold (0.0-1.0)"
     ),
     match_type_filter: str = Query(
-        "all", description="Filter for match_type (deprecated: always includes all types for WSDB alignment)"
+        "all",
+        description="Filter for match_type (deprecated: always includes all types for WSDB alignment)",
     ),
 ) -> dict[str, Any]:
     """
@@ -1830,7 +1831,6 @@ async def batch_analyze_match_files(
 
                     brand_score = best_brand_score
 
-
                     # Only proceed if brand matches above threshold
                     if brand_score >= brand_threshold * 100:
                         # Try matching with each scent name (canonical + alias + virtual alias)
@@ -1857,7 +1857,6 @@ async def batch_analyze_match_files(
                         scent_score = best_scent_score
                         # Brand + Scent: 60% brand + 40% scent
                         confidence = (brand_score * 0.6) + (scent_score * 0.4)
-
 
                         if confidence >= threshold * 100:
                             match_entry = {
@@ -1887,7 +1886,6 @@ async def batch_analyze_match_files(
                     for m in matches
                     if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
                 ]
-
 
                 # Sort and limit: prefer Soap over Cream when scores are equal
                 matches.sort(

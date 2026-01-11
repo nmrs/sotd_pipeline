@@ -40,9 +40,7 @@ class QueueManager:
         random_suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
         return f"op_{timestamp}_{random_suffix}"
 
-    def add_operation(
-        self, operation_type: str, field: str, matches: List[Dict[str, Any]]
-    ) -> str:
+    def add_operation(self, operation_type: str, field: str, matches: List[Dict[str, Any]]) -> str:
         """
         Add operation to queue file.
 
@@ -388,7 +386,9 @@ class QueueManager:
 
         try:
             # Update status to processing
-            self._update_status(operation_id, "processing", 0.1, f"Processing {len(matches)} matches...")
+            self._update_status(
+                operation_id, "processing", 0.1, f"Processing {len(matches)} matches..."
+            )
 
             # Import here to avoid circular dependencies
             from rich.console import Console
@@ -456,9 +456,7 @@ class QueueManager:
 
             # Save to file
             if marked_count > 0:
-                self._update_status(
-                    operation_id, "processing", 0.9, "Saving changes to file..."
-                )
+                self._update_status(operation_id, "processing", 0.9, "Saving changes to file...")
                 manager.save_correct_matches()
 
             # Update status to completed
@@ -492,24 +490,24 @@ class QueueManager:
     def _cleanup_old_completed_operations(self) -> None:
         """
         Remove completed/failed operations from live status that are older than grace period.
-        
+
         This runs periodically to clean up operations that have been completed for a while,
         giving the frontend time to poll and get the final status.
         """
         GRACE_PERIOD_SECONDS = 10  # Keep completed operations for 10 seconds after completion
-        
+
         if not self.status_file.exists():
             return
-        
+
         try:
             with self.status_file.open("r", encoding="utf-8") as f:
                 status_data = json.load(f)
         except Exception:
             return
-        
+
         current_time = time.time()
         removed_count = 0
-        
+
         # Find completed/failed operations older than grace period
         operations_to_remove = []
         for operation_id, status_entry in status_data.items():
@@ -517,13 +515,13 @@ class QueueManager:
                 completed_at = status_entry.get("completed_at")
                 if completed_at and (current_time - completed_at) > GRACE_PERIOD_SECONDS:
                     operations_to_remove.append(operation_id)
-        
+
         # Remove old completed operations
         if operations_to_remove:
             for operation_id in operations_to_remove:
                 del status_data[operation_id]
                 removed_count += 1
-            
+
             # Save updated status file
             temp_file = self.status_file.with_suffix(".tmp")
             try:
@@ -531,7 +529,9 @@ class QueueManager:
                     json.dump(status_data, f, indent=2)
                 temp_file.replace(self.status_file)
                 if removed_count > 0:
-                    logger.debug(f"Cleaned up {removed_count} old completed operations from live status")
+                    logger.debug(
+                        f"Cleaned up {removed_count} old completed operations from live status"
+                    )
             except Exception as e:
                 logger.error(f"Failed to cleanup old operations: {e}")
                 if temp_file.exists():
@@ -551,7 +551,7 @@ class QueueManager:
         try:
             # Cleanup old completed operations before processing new ones
             self._cleanup_old_completed_operations()
-            
+
             operations = self._read_queue()
             if not operations:
                 return
@@ -571,6 +571,7 @@ class QueueManager:
 
     def start_background_worker(self) -> None:
         """Start background thread to continuously process queue."""
+
         def worker_loop():
             logger.info("Background queue worker started")
             while not self._stop_event.is_set():

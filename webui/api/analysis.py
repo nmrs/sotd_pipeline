@@ -1235,17 +1235,13 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
         validate_field(request.field)
 
         if not request.matches:
-            return MarkCorrectResponse(
-                success=False, message="No matches provided", marked_count=0
-            )
+            return MarkCorrectResponse(success=False, message="No matches provided", marked_count=0)
 
         # Import queue manager
         try:
             from webui.api.queue_manager import QueueManager
         except ImportError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Could not import QueueManager: {e}"
-            )
+            raise HTTPException(status_code=500, detail=f"Could not import QueueManager: {e}")
 
         # Create queue manager instance
         correct_matches_path = project_root / "data" / "correct_matches"
@@ -1253,7 +1249,9 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
         # Add operation to queue
         try:
-            operation_id = queue_manager.add_operation("mark_correct", request.field, request.matches)
+            operation_id = queue_manager.add_operation(
+                "mark_correct", request.field, request.matches
+            )
             status_url = f"/api/analysis/operation-status/{operation_id}"
 
             return MarkCorrectResponse(
@@ -1266,9 +1264,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
             )
         except Exception as e:
             logger.error(f"Failed to queue operation: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to queue operation: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Failed to queue operation: {str(e)}")
 
     except Exception as e:
         logger.error(f"Error marking matches as correct: {e}")
@@ -1290,9 +1286,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
         try:
             from webui.api.queue_manager import QueueManager
         except ImportError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Could not import QueueManager: {e}"
-            )
+            raise HTTPException(status_code=500, detail=f"Could not import QueueManager: {e}")
 
         # Create queue manager instance
         correct_matches_path = project_root / "data" / "correct_matches"
@@ -1300,7 +1294,9 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
 
         # Add operation to queue
         try:
-            operation_id = queue_manager.add_operation("remove_correct", request.field, request.matches)
+            operation_id = queue_manager.add_operation(
+                "remove_correct", request.field, request.matches
+            )
             status_url = f"/api/analysis/operation-status/{operation_id}"
 
             return RemoveCorrectResponse(
@@ -1313,9 +1309,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
             )
         except Exception as e:
             logger.error(f"Failed to queue operation: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to queue operation: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Failed to queue operation: {str(e)}")
 
     except Exception as e:
         logger.error(f"Error removing matches from correct matches: {e}")
@@ -1343,9 +1337,7 @@ async def get_operation_status(operation_id: str):
         raise
     except Exception as e:
         logger.error(f"Error getting operation status: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Error getting operation status: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error getting operation status: {str(e)}")
 
 
 @router.delete("/correct-matches/{field}")
@@ -1839,9 +1831,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
 
             from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Could not import required modules: {e}"
-            )
+            raise HTTPException(status_code=500, detail=f"Could not import required modules: {e}")
 
         # Load and manipulate YAML from directory structure
         correct_matches_dir = project_root / "data" / "correct_matches"
@@ -1914,7 +1904,11 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
 
                 # Validate required fields for adding
                 # For structural changes to handle_knot, we need handle/knot match data instead of actual_brand
-                if issue_type == "structural_change" and actual_section in ["handle_knot", "handle", "knot"]:
+                if issue_type == "structural_change" and actual_section in [
+                    "handle_knot",
+                    "handle",
+                    "knot",
+                ]:
                     # For brush → handle_knot, we need expected_handle_match and expected_knot_match
                     if not expected_handle_match or not expected_knot_match:
                         errors.append(
@@ -1986,8 +1980,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                     pattern = patterns[i]
                                                     if (
                                                         isinstance(pattern, str)
-                                                        and pattern.lower()
-                                                        == correct_match.lower()
+                                                        and pattern.lower() == correct_match.lower()
                                                     ):
                                                         patterns.pop(i)
                                                         removed = True
@@ -2034,7 +2027,11 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                 # Step 2: Add to correct location
                 if issue_type == "structural_change":
                     # Handle structural changes (moving between sections)
-                    if actual_section == "brush" and expected_section in ["handle_knot", "handle", "knot"]:
+                    if actual_section == "brush" and expected_section in [
+                        "handle_knot",
+                        "handle",
+                        "knot",
+                    ]:
                         # Moving from handle/knot to brush
                         matched = {
                             "brand": actual_brand,
@@ -2055,7 +2052,10 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         manager.mark_match_as_correct(match_key, match_data_to_save)
                         added_count += 1
 
-                    elif actual_section in ["handle_knot", "handle", "knot"] and expected_section == "brush":
+                    elif (
+                        actual_section in ["handle_knot", "handle", "knot"]
+                        and expected_section == "brush"
+                    ):
                         # Moving from brush to handle/knot
                         # Add handle entry
                         if expected_handle_match:
@@ -2090,13 +2090,18 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                 "matched": knot_matched,
                                 "field": "knot",
                             }
-                            knot_match_key = manager.create_match_key("knot", correct_match, knot_matched)
+                            knot_match_key = manager.create_match_key(
+                                "knot", correct_match, knot_matched
+                            )
                             manager.mark_match_as_correct(knot_match_key, knot_match_data)
                             added_count += 1
 
                 elif issue_type in ["data_mismatch", "catalog_pattern_mismatch"]:
                     # Update brand/model in same section
-                    matched = {"brand": actual_brand, "model": actual_model if actual_model else None}
+                    matched = {
+                        "brand": actual_brand,
+                        "model": actual_model if actual_model else None,
+                    }
 
                     # For blades, preserve format
                     if request.field == "blade" and expected_format:
@@ -2105,7 +2110,9 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     match_data_to_save = {
                         "original": correct_match,
                         "matched": matched,
-                        "field": actual_section if actual_section != "handle_knot" else request.field,
+                        "field": (
+                            actual_section if actual_section != "handle_knot" else request.field
+                        ),
                     }
                     match_key = manager.create_match_key(
                         actual_section if actual_section != "handle_knot" else request.field,
@@ -2114,23 +2121,28 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     )
                     manager.mark_match_as_correct(match_key, match_data_to_save)
                     added_count += 1
-                
+
                 elif issue_type == "cross_section_conflict":
                     # For cross-section conflicts, we need to determine where it should go
                     # by running the actual matcher. If actual_brand/actual_section are provided,
                     # use those. Otherwise, we can't auto-fix (should be filtered out in frontend)
                     if actual_brand and actual_section:
-                        matched = {"brand": actual_brand, "model": actual_model if actual_model else None}
-                        
+                        matched = {
+                            "brand": actual_brand,
+                            "model": actual_model if actual_model else None,
+                        }
+
                         # For blades, preserve format
                         if request.field == "blade" and expected_format:
                             matched["format"] = expected_format
-                        
+
                         # Determine target section (default to brush for brush field conflicts)
                         target_section = actual_section
-                        if request.field == "brush" and (not target_section or target_section == "handle_knot"):
+                        if request.field == "brush" and (
+                            not target_section or target_section == "handle_knot"
+                        ):
                             target_section = "brush"
-                        
+
                         match_data_to_save = {
                             "original": correct_match,
                             "matched": matched,
