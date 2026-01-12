@@ -3,14 +3,16 @@ from typing import Optional
 
 _FIBER_PATTERNS = {
     # Most specific patterns first
+    "Mixed Badger/Synthetic": r"(natural fiber.*synthetic|badger/synth|synth/badger)",
+    # Specific fiber types with detailed patterns
+    "Mixed Badger/Horse": r"(badger/horse|vie-?long.*mix.*badger)",
+    # Specific fiber types with detailed patterns
+    "Mixed Boar/Horse": r"(boar/horse|horse/boar)",
+    # Specific fiber types with detailed patterns
     "Mixed Badger/Boar": (
         r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|(?:badg|boar).*hybrid|hybrid.*(?:badg|boar)|fusion|"
         r"badger.*cased|tasso et setola)"
     ),
-    "Mixed Badger/Synthetic": r"(natural fiber.*synthetic|badger/synth|synth/badger)",
-    # Specific fiber types with detailed patterns
-    "Mixed Boar/Horse": r"(boar/horse|horse/boar)",
-    # Specific fiber types with detailed patterns
     "Synthetic": (
         r"(acrylic|timber|tux|mew|silk(?!.*badger)|synt|synbad|2bed|captain|cashmere|"
         r"faux (horse|boar|badger)|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
