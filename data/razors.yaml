@@ -369,6 +369,11 @@ C-Mon:
     format: Straight
     patterns:
       - c-?mon(?:.*\d{1,2}/(8|16))?
+C.F. Schwartz & Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - c\.?\s*f\.?\s*schwartz(?:.*\d{1,2}/(8|16))?
 C.V. Heljestrand:
   Lather Catcher:
     format: Other
@@ -559,9 +564,6 @@ Dorco:
   PL-602:
     patterns:
       - 'pl(?:-*\s*)602'
-  ST-301:
-    patterns:
-      - 'ST(?:-*\s*)301'
 Drew Dick:
   Straight:
     format: Straight
@@ -655,6 +657,11 @@ Efendi:
     format: Straight
     patterns:
       - efendi(?:.*\d{1,2}/(8|16))?
+Edlis:
+  Straight:
+    format: Straight
+    patterns:
+      - edlis(?:.*\d{1,2}/(8|16))?
 Edmond Roffler:
   Straight:
     format: Straight
@@ -1427,6 +1434,11 @@ Joseph Rodgers & Sons:
     format: Straight
     patterns:
       - joseph.*rod?gers(?:.*\d{1,2}/(8|16))?
+Joseph Smith & Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - joseph.*smith(?:.*\d{1,2}/(8|16))?
 Junjie:
   Safety Razor:
     patterns:
@@ -2760,6 +2772,10 @@ Treet:
   TTO:
     patterns:
       - treet
+Trident Shaving:
+  Varukh:
+    patterns:
+      - varukh
 TryCatch:
   PL13 (3D Printed Henson clone):
     patterns:
@@ -2799,10 +2815,6 @@ Van Der Hagen:
     patterns:
       - Van Der Haa*gen
       - '\bvdh\b'
-Varukh:
-  Slant:
-    patterns:
-      - varukh
 Vikings Blade:
   Chieftain:
     patterns:
@@ -2969,6 +2981,7 @@ Wilkinson Sword:
   Classic:
     patterns:
       - wilk.*classic
+      - wil\w+son.*sword.*classic
 Wizamet:
   Junior P-1:
     patterns:

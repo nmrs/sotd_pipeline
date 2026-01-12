@@ -268,11 +268,14 @@ DE:
       patterns:
         - dorco.*prime
         - doric prime
-        - dorco.*st.*301
     ST-300:
       patterns:
         - dorco
         - dorco.*st.*300
+    ST-301:
+      patterns:
+        - dorco.*red
+        - dorco.*st.*301
     Titan:
       patterns:
         - dorco.*titan
@@ -944,9 +947,14 @@ Half DE:
       patterns:
         - derb.*usta
   Dorco:
-    HST-300:
+    HST-300-1P:
       patterns:
         - dorco.*hst.*300
+    HST-300R-1P Prime:
+      patterns:
+        - dorco.*hst.*300r
+        - dorco.*red
+        - dorco.*prime
   Facón:
     SE:
       patterns:

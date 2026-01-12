@@ -218,5 +218,104 @@
       "marked_count": 1,
       "errors": []
     }
+  },
+  "op_1768246755541_glyn1kr2": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 19 matches processed",
+    "updated_at": 1768246758.5404422,
+    "completed_at": 1768246758.540443,
+    "result": {
+      "marked_count": 19,
+      "errors": []
+    }
+  },
+  "op_1768247156364_783raunt": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 7 matches processed",
+    "updated_at": 1768247159.170032,
+    "completed_at": 1768247159.170032,
+    "result": {
+      "marked_count": 7,
+      "errors": []
+    }
+  },
+  "op_1768247239807_jeklzzln": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 21 matches processed",
+    "updated_at": 1768247242.245922,
+    "completed_at": 1768247242.245923,
+    "result": {
+      "marked_count": 21,
+      "errors": []
+    }
+  },
+  "op_1768247645230_5h6gz1w6": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 1 matches processed",
+    "updated_at": 1768247647.799362,
+    "completed_at": 1768247647.799362,
+    "result": {
+      "marked_count": 1,
+      "errors": []
+    }
+  },
+  "op_1768248392745_vt4y787k": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 3 matches processed",
+    "updated_at": 1768248394.6456802,
+    "completed_at": 1768248394.645681,
+    "result": {
+      "marked_count": 3,
+      "errors": []
+    }
+  },
+  "op_1768249491800_gm3p87ll": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 14 matches processed",
+    "updated_at": 1768249494.02962,
+    "completed_at": 1768249494.029621,
+    "result": {
+      "marked_count": 14,
+      "errors": []
+    }
+  },
+  "op_1768249571350_l4vrh1vc": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 8 matches processed",
+    "updated_at": 1768249573.120624,
+    "completed_at": 1768249573.1206248,
+    "result": {
+      "marked_count": 8,
+      "errors": []
+    }
+  },
+  "op_1768249752610_nzd6jbyw": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 10 matches processed",
+    "updated_at": 1768249755.6854029,
+    "completed_at": 1768249755.6854038,
+    "result": {
+      "marked_count": 10,
+      "errors": []
+    }
+  },
+  "op_1768249899092_wss5lciv": {
+    "status": "completed",
+    "progress": 1.0,
+    "message": "Completed: 13 matches processed",
+    "updated_at": 1768249902.104919,
+    "completed_at": 1768249902.1049201,
+    "result": {
+      "marked_count": 13,
+      "errors": []
+    }
   }
 }

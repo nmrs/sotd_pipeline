@@ -213,7 +213,9 @@ DE:
     - gillette 7 o'clock super platinum
     - gillette 7 o'clock super platinum (black)
     - gillette 7 o'clock super platinum black
+    - gillette 7 o-clock super platinum
     - gillette 7'o clock black
+    - gillette 7'oclock black super platinum
     - gillette 7o'clock black
     - gillette 7o'clock super platinum
     - gillette 7oc super platinum
@@ -250,10 +252,12 @@ DE:
     - gillette 7 o'clock super stainless (green)
     - gillette 7 o'clock super stainless (green), de
     - gillette 7 o'clock super stainless (green), de - 1/2
+    - gillette 7 o'clock super stainless (green), de 1/2 blade
     - gillette 7 o'clock super stainless green
     - gillette 7 o'clock super stainless green box
     - gillette 7 o'clock super stainless green pack
     - gillette 7 o'clock super stainless/green
+    - gillette 7 o'clock superspeed
     - gillette 7'oc-ss
     - gillette 7o clock super stainless
     - gillette 7oclock green
@@ -363,6 +367,7 @@ DE:
     Chrome Platinum:
     - bic
     - bic - chrome platinum
+    - bic - chrome platinum - 1
     - bic - platinum
     - bic chrome
     - bic chrome platinum
@@ -438,11 +443,8 @@ DE:
     - derby ss
   Dorco:
     Prime Platinum:
-    - dorco - st-301 stainless
     - dorco prime
     - dorco prime platinum
-    - dorco st-301
-    - dorco stp301
     - doric prime
     ST-300:
     - dorco
@@ -455,6 +457,8 @@ DE:
     - dorco st300
     - dorco stainless
     - dorco stainless steel
+    ST-301:
+    - dorco red
     Titan:
     - dorco titan
   Eddison:
@@ -473,6 +477,7 @@ DE:
     DE:
     - feather
     - feather (3rs use)
+    - feather (9/1)
     - feather (always super sharp)
     - feather (day 5)
     - feather (de)
@@ -758,6 +763,7 @@ DE:
     - lord cool
     Platinum:
     - lord - platinum
+    - lord blue platinum
     - lord new lord platinum
     - lord platinum
     - lord platinum class
@@ -1015,6 +1021,7 @@ DE:
     Cryo Sputtered Platinum:
     - silvermax black
     - silvermax sp
+    - silvermax super platinum
   Starmaxx:
     Superior Platinum:
     - starmaxx - superior platinum
@@ -1083,6 +1090,7 @@ DE:
     Carbon:
     - trees carbon steel -
     - treet - carbon steel
+    - treet carbin steel
     - treet carbon steel
     - treet carbon steel -
     Classic:
@@ -1111,6 +1119,7 @@ DE:
     - treet stainless
     - treet, 1st shave
     - treet, 2nd shave
+    - treet- platinum super stainless
     Silver:
     - treet silver
   V12:
@@ -1252,6 +1261,7 @@ GEM:
     - gem ptfe (?)
     - gem ptfe (probably a few dozen shaves, i dunno)
     - gem ptfe (use 5 or so)
+    - gem ptfe / schick injector
     - gem ptfe coated
     - gem ptfe personna
     - gem ptfe stainless
@@ -1352,8 +1362,11 @@ Half DE:
     Premium:
     - derby premium 1/2 de
   Dorco:
-    HST-300:
+    HST-300-1P:
     - dorco hst-300-p1 1/2 de
+    - dorco hst300 1/2 de
+    HST-300R-1P Prime:
+    - dorco red 1/2 de
   Facón:
     SE:
     - facōn

@@ -308,6 +308,16 @@ known_brushes:
         knot_size_mm: 26
       patterns:
         - (chisel|c&h|mammoth|hom).*everett      
+    Kryptonite:
+      handle:
+        brand: Chisel & Hound
+      knot:
+        brand: Chisel & Hound
+        model: v27
+        fiber: Badger
+        knot_size_mm: 26
+      patterns:
+        - (chisel|c&h|mammoth|hom).*kryptonite
     Rumble:
       handle:
         brand: Chisel & Hound
@@ -520,6 +530,11 @@ known_brushes:
       knot_size_mm: 24
       patterns:
         - "11137"
+    "11573":
+      knot_size_mm: 27
+      knot_loft_mm: 47
+      patterns:
+        - omega.*11573
     "146818":
       fiber: Synthetic
       knot_size_mm: 25
@@ -1325,6 +1340,12 @@ known_brushes:
       patterns:
         - tweezerman
   Vie-Long:
+    Mixed Badger & Horse:
+      fiber: Mixed Badger/Horse
+      knot_size_mm: 21
+      knot_loft_mm: 52
+      patterns:
+        - vie.*long.*mixed.*badger(.*horse)?
     Spanish Barber Pro:
       fiber: Boar
       knot_size_mm: 21
