@@ -80,7 +80,7 @@ class EnricherRegistry:
             for enricher in enrichers:
                 try:
                     if enricher.applies_to(record):
-                        enrichment_result = enricher.enrich(field_data, extracted_value)
+                        enrichment_result = enricher.enrich(field_data, extracted_value, record)
                         if enrichment_result:
                             field_enriched_data.update(enrichment_result)
                             logger.debug(f"Applied {enricher.get_enricher_name()} to {field}")

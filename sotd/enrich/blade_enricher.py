@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sotd.utils.blade_extraction import extract_blade_use_count_via_normalization
 
@@ -37,7 +37,12 @@ class BladeCountEnricher(BaseEnricher):
         """Check if this enricher applies to the record."""
         return "blade" in record and record["blade"] is not None
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Dict[str, Any]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Enrich blade data with use count information using normalization approach."""
         original = field_data.get("original", "")
         normalized = field_data.get("normalized", "")

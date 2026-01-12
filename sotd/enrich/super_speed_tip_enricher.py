@@ -37,7 +37,12 @@ class SuperSpeedTipEnricher(BaseEnricher):
 
         return brand == "Gillette" and model == "Super Speed"
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Extract Super Speed tip type from the user-supplied razor_extracted field.
 
         Args:

@@ -24,7 +24,12 @@ class BlackbirdPlateEnricher(BaseEnricher):
         model = matched_data.get("model", "")
         return brand == "Blackland" and "Blackbird" in model
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         # Use the full comment text for plate extraction since plate info is in the comment
         # The original_comment parameter contains the full user comment text
         plate = self._extract_plate(original_comment)

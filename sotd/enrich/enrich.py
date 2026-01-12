@@ -1,10 +1,13 @@
 """Main enrich module that coordinates all enrichers."""
 
+from typing import Optional
+
 from .blackbird_plate_enricher import BlackbirdPlateEnricher
 from .blade_enricher import BladeCountEnricher
 from .brush_enricher import BrushEnricher
 from .christopher_bradley_enricher import ChristopherBradleyEnricher
 from .game_changer_enricher import GameChangerEnricher
+from .override_manager import EnrichmentOverrideManager
 from .razor_format_enricher import RazorFormatEnricher
 from .registry import enricher_registry
 from .soap_sample_enricher import SoapSampleEnricher
@@ -14,17 +17,37 @@ from .super_speed_tip_enricher import SuperSpeedTipEnricher
 # Track if enrichers have been set up to avoid repeated setup
 _enrichers_setup = False
 
+# Global override manager (updated per month)
+_current_override_manager: Optional[EnrichmentOverrideManager] = None
 
-def setup_enrichers():
-    """Set up all enrichers in the registry."""
-    global _enrichers_setup
+
+def setup_enrichers(override_manager: Optional[EnrichmentOverrideManager] = None):
+    """Set up all enrichers in the registry.
+
+    Args:
+        override_manager: Optional enrichment override manager for forcing catalog values
+    """
+    global _enrichers_setup, _current_override_manager
+
+    # Update current override manager (can change per month)
+    _current_override_manager = override_manager
+
     if _enrichers_setup:
-        return  # Already set up, skip
+        # Enrichers already registered, just update override manager in BrushEnricher
+        # Find BrushEnricher and update its override_manager
+        for enricher in enricher_registry.get_all_enrichers():
+            if isinstance(enricher, BrushEnricher):
+                enricher.override_manager = override_manager
+        return
 
-    # Register all enrichers
+    # Get data_path from first enricher if it exists (for consistency)
+    # For now, we'll use None and let enrichers use default paths
+    data_path = None
+
+    # Register all enrichers with override manager
     enricher_registry.register(BladeCountEnricher())
-    enricher_registry.register(BrushEnricher())
-    enricher_registry.register(StraightRazorEnricher())
+    enricher_registry.register(BrushEnricher(data_path=data_path, override_manager=override_manager))
+    enricher_registry.register(StraightRazorEnricher(override_manager=override_manager))
     enricher_registry.register(GameChangerEnricher())
     enricher_registry.register(ChristopherBradleyEnricher())
     enricher_registry.register(BlackbirdPlateEnricher())
@@ -44,9 +67,10 @@ def enrich_comments(comments: list[dict], original_comments: list[str]) -> list[
 
     Returns:
         List of enriched comment records
-    """
-    # Ensure enrichers are set up (will be skipped if already done)
-    setup_enrichers()
 
+    Note:
+        setup_enrichers() must be called before this function to register enrichers
+        and set up the override manager.
+    """
     # Enrich all comments
     return enricher_registry.enrich_records(comments, original_comments)

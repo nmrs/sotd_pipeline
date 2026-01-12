@@ -1,0 +1,40 @@
+# SOTD Pipeline Enrichment Phase Overrides
+# This file allows data analysts to force catalog values over user-extracted values
+# for specific records when the catalog is authoritative.
+#
+# Format:
+# YYYY-MM:
+#   comment_id:
+#     field:
+#       enrichment_key: value_or_override_spec
+#
+# Valid fields: razor, blade, brush, soap
+# Comment IDs are Reddit comment IDs from the source data
+#
+# Override Options:
+# 1. Explicit value: Specify the exact value to use
+#    Example: fiber: "Mixed Badger/Horse"
+# 2. Use catalog flag: Force use of catalog value, ignore user extraction
+#    Example:
+#      fiber:
+#        use_catalog: true
+#
+# Priority: Explicit value > use_catalog flag > default (user overrides catalog)
+#
+# Valid enrichment keys by field:
+# - brush: fiber (string), knot_size_mm (float)
+# - razor: grind, width, point, steel, gap, plate, plate_type, plate_level, super_speed_tip, format (all strings)
+# - blade: use_count (integer)
+# - soap: sample_brand, sample_scent (both strings)
+#
+# Example:
+# 2026-01:
+#   m99b8f9:
+#     brush:
+#       fiber:
+#         use_catalog: true
+#       knot_size_mm: 21.0
+#     razor:
+#       grind: "full_hollow"
+#     blade:
+#       use_count: 3

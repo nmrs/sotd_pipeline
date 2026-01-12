@@ -48,7 +48,12 @@ class RazorFormatEnricher(BaseEnricher):
         self._current_record = record
         return True
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Determine the final razor format using complete logic from aggregate phase.
 
         Args:

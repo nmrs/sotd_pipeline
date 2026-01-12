@@ -1,11 +1,15 @@
 import argparse
 import json
+import logging
 from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
+
+logger = logging.getLogger(__name__)
 from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
+from sotd.enrich.override_manager import EnrichmentOverrideManager
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
@@ -44,6 +48,17 @@ def _process_month(
         }
     monitor.end_file_io_timing()
 
+    # Initialize enrichment override manager
+    override_file_path = base_path / "enrichment_overrides.yaml"
+    override_manager = EnrichmentOverrideManager(override_file_path)
+    try:
+        override_manager.load_overrides()
+        if override_manager.has_overrides():
+            logger.info("Loaded enrichment overrides from: %s", override_file_path)
+    except Exception as e:
+        logger.warning("Failed to load enrichment overrides from %s: %s", override_file_path, e)
+        # Continue without overrides if file doesn't exist or has errors
+
     # Extract original comment texts for enrichment - optimized version
     original_comments = []
     for comment in comments:
@@ -57,6 +72,11 @@ def _process_month(
             or ""
         )
         original_comments.append(original_text)
+        # Add month to record metadata for override lookups
+        comment["_month"] = ym
+
+    # Setup enrichers with override manager
+    setup_enrichers(override_manager=override_manager)
 
     # Enrich the comments
     enriched_comments = enrich_comments(comments, original_comments)

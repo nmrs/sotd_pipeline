@@ -2,6 +2,7 @@ import re
 from typing import Any, Dict, Optional
 
 from .enricher import BaseEnricher
+from .override_manager import EnrichmentOverrideManager
 
 
 class StraightRazorEnricher(BaseEnricher):
@@ -12,6 +13,15 @@ class StraightRazorEnricher(BaseEnricher):
     - "wedge 7/8 square" -> grind: "wedge", width_eighths: 7, point: "square"
     - "half hollow 5/8" -> grind: "half_hollow", width_eighths: 5, point: null
     """
+
+    def __init__(self, override_manager: Optional[EnrichmentOverrideManager] = None):
+        """Initialize StraightRazorEnricher.
+
+        Args:
+            override_manager: Optional enrichment override manager for forcing catalog values
+        """
+        super().__init__()
+        self.override_manager = override_manager
 
     @property
     def target_field(self) -> str:
@@ -39,7 +49,12 @@ class StraightRazorEnricher(BaseEnricher):
             return matched_data.get("format") == "Straight"
         return False
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Extract straight razor specifications from the user-supplied razor_extracted field.
 
         Args:
@@ -62,6 +77,51 @@ class StraightRazorEnricher(BaseEnricher):
         catalog_width = field_data.get("width") if isinstance(field_data, dict) else None
         catalog_point = field_data.get("point") if isinstance(field_data, dict) else None
         catalog_steel = field_data.get("steel") if isinstance(field_data, dict) else None
+
+        # Check for enrichment overrides if override_manager and record are available
+        if self.override_manager and record:
+            month = record.get("_month")
+            comment_id = record.get("id")
+            if month and comment_id:
+                # Check for grind override
+                grind_override = self.override_manager.get_override(
+                    month, comment_id, "razor", "grind"
+                )
+                if grind_override == "use_catalog":
+                    user_grind = None
+                elif grind_override is not None and grind_override != "use_catalog":
+                    user_grind = grind_override
+                    catalog_grind = grind_override
+
+                # Check for width override
+                width_override = self.override_manager.get_override(
+                    month, comment_id, "razor", "width"
+                )
+                if width_override == "use_catalog":
+                    user_width = None
+                elif width_override is not None and width_override != "use_catalog":
+                    user_width = width_override
+                    catalog_width = width_override
+
+                # Check for point override
+                point_override = self.override_manager.get_override(
+                    month, comment_id, "razor", "point"
+                )
+                if point_override == "use_catalog":
+                    user_point = None
+                elif point_override is not None and point_override != "use_catalog":
+                    user_point = point_override
+                    catalog_point = point_override
+
+                # Check for steel override
+                steel_override = self.override_manager.get_override(
+                    month, comment_id, "razor", "steel"
+                )
+                if steel_override == "use_catalog":
+                    user_steel = None
+                elif steel_override is not None and steel_override != "use_catalog":
+                    user_steel = steel_override
+                    catalog_steel = steel_override
 
         # Merge specifications: user comment takes precedence over catalog data
         final_grind = user_grind or catalog_grind

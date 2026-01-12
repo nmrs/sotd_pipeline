@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sotd.utils.soap_extraction import extract_soap_sample_via_normalization
 
@@ -27,7 +27,12 @@ class SoapSampleEnricher(BaseEnricher):
         """Check if this enricher applies to the record."""
         return "soap" in record and record["soap"] is not None
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Dict[str, Any]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Enrich soap data with sample information using normalization approach."""
         original = field_data.get("original", "")
         normalized = field_data.get("normalized", "")

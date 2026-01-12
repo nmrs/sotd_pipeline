@@ -36,7 +36,12 @@ class ChristopherBradleyEnricher(BaseEnricher):
             return brand == "Karve" and model == "Christopher Bradley"
         return False
 
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Extract Christopher Bradley specifications from the user-supplied razor_extracted field.
 
         Args:

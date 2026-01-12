@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from sotd.enrich.enricher import BaseEnricher
+from sotd.enrich.override_manager import EnrichmentOverrideManager
 from sotd.enrich.utils.catalog_loader import CatalogLoader
 from sotd.match.brush.strategies.utils.fiber_utils import match_fiber
 from sotd.match.brush.strategies.utils.pattern_utils import extract_knot_size
@@ -12,15 +13,21 @@ from sotd.match.brush.strategies.utils.pattern_utils import extract_knot_size
 class BrushEnricher(BaseEnricher):
     """Enricher for brush specifications from user comments."""
 
-    def __init__(self, data_path: Optional[Path] = None):
+    def __init__(
+        self,
+        data_path: Optional[Path] = None,
+        override_manager: Optional[EnrichmentOverrideManager] = None,
+    ):
         """
         Initialize BrushEnricher.
 
         Args:
             data_path: Path to data directory containing catalogs
+            override_manager: Optional enrichment override manager for forcing catalog values
         """
         super().__init__()
         self.catalog_loader = CatalogLoader(data_path)
+        self.override_manager = override_manager
 
     @property
     def target_field(self) -> str:
@@ -477,7 +484,9 @@ class BrushEnricher(BaseEnricher):
             return True
         return False
 
-    def enrich(self, field_data: dict, original_comment: str) -> Optional[dict]:
+    def enrich(
+        self, field_data: dict, original_comment: str, record: Optional[dict] = None
+    ) -> Optional[dict]:
         """Extract brush specifications from the user-supplied brush_extracted field and merge
         with catalog data.
 
@@ -514,6 +523,35 @@ class BrushEnricher(BaseEnricher):
                 f"Please fix the catalog data (knots.yaml or brushes.yaml) to use a numeric value (e.g., 26 instead of '26mm')."
             )
         catalog_fiber = knot_section.get("fiber") if knot_section else matched_data.get("fiber")
+
+        # Check for enrichment overrides if override_manager and record are available
+        if self.override_manager and record:
+            month = record.get("_month")  # Month should be added to record metadata
+            comment_id = record.get("id")
+            if month and comment_id:
+                # Check for fiber override
+                fiber_override = self.override_manager.get_override(
+                    month, comment_id, "brush", "fiber"
+                )
+                if fiber_override == "use_catalog":
+                    # Skip user extraction, use catalog value only
+                    user_fiber = None
+                elif fiber_override is not None and fiber_override != "use_catalog":
+                    # Explicit value override
+                    user_fiber = fiber_override
+                    catalog_fiber = fiber_override  # Use override as both for consistency
+
+                # Check for knot_size_mm override
+                knot_size_override = self.override_manager.get_override(
+                    month, comment_id, "brush", "knot_size_mm"
+                )
+                if knot_size_override == "use_catalog":
+                    # Skip user extraction, use catalog value only
+                    user_knot_size = None
+                elif knot_size_override is not None and knot_size_override != "use_catalog":
+                    # Explicit value override
+                    user_knot_size = knot_size_override
+                    catalog_knot_size = knot_size_override  # Use override as both for consistency
 
         # Prepare user data dictionary
         user_data = {}

@@ -28,12 +28,18 @@ class BaseEnricher(ABC):
         pass
 
     @abstractmethod
-    def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    def enrich(
+        self,
+        field_data: Dict[str, Any],
+        original_comment: str,
+        record: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
         """Enrich the given field data with additional specifications.
 
         Args:
             field_data: The matched product data for the target field
             original_comment: The original user comment text for extraction
+            record: Optional full record containing metadata (id, month, etc.) for override lookups
 
         Returns:
             Dictionary with enriched data, or None if no enrichment possible.
