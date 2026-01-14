@@ -183,25 +183,20 @@ const MatchAnalyzer: React.FC = () => {
         // Clear regular results when using grouped data
         setResults(null);
       } else {
+        // Don't pass display_mode to API for modes that require frontend filtering
+        // The backend's filtering logic doesn't match the frontend's expectations
+        // (e.g., backend filters regex by mismatch_type, frontend filters by match_type)
+        // Instead, always fetch all data and let the frontend filter it
+        const apiDisplayMode = ['regex', 'brand', 'dash_split'].includes(displayMode) 
+          ? 'all' 
+          : displayMode;
         const result = await analyzeMismatch({
           field: selectedField,
           months: allMonths, // Pass combined months array
           threshold,
           use_enriched_data: useEnrichedData,
-          display_mode: displayMode,
+          display_mode: apiDisplayMode,
         });
-
-        // console.log('🔍 DEBUG: handleAnalyze returned result:', {
-        //   field: result.field,
-        //   totalItems: result.mismatch_items?.length || 0,
-        //   hasData: !!result.mismatch_items,
-        //   sampleItems: result.mismatch_items?.slice(0, 3).map(item => ({
-        //     original: item.original,
-        //     match_type: item.match_type,
-        //     mismatch_type: item.mismatch_type,
-        //     is_confirmed: item.is_confirmed,
-        //   })) || [],
-        // });
 
         setResults(result);
         // Clear grouped results when using regular data
