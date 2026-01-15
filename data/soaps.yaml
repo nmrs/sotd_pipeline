@@ -367,6 +367,9 @@ Arko:
   patterns:
   - \barko+\b
   scents:
+    Hydrate:
+      patterns:
+      - arko.*hydrate
     Shaving Soap:
       patterns:
       - \barko+\b
@@ -722,7 +725,7 @@ Barrister and Mann:
       - softheart sandalwood
     Season of the Witch:
       patterns:
-      - season of the witch
+      - s\w+\b of the witch
     Seville:
       patterns:
       - seville
@@ -805,6 +808,13 @@ Beak & Snout:
 Bedlingtom Supplies:
   patterns:
   - bedlington( supplies)?
+Benessere Naturale:
+  patterns:
+  - ben+es+ere.*naturale?
+  scents:
+    Ione:
+      patterns:
+      - ben+es+ere.*ione
 Biggis Seifenküche:
   patterns:
   - biggis seifenk[üu]e?che
@@ -2076,6 +2086,9 @@ Grooming Dept:
     Sandalwood Nobile:
       patterns:
       - sandal.*nobile
+    Unum:
+      patterns:
+      - grooming.*unum
     Wonderland:
       patterns:
       - grooming.*wonderland
@@ -2211,6 +2224,10 @@ Henry Cavendish:
 Henson:
   patterns:
   - henson
+  scents:
+    Protect:
+      patterns:
+      - henson.*protect
 Herc Soap Co:
   patterns:
   - herc( soap (co\.?)?)?
@@ -2321,9 +2338,12 @@ House of Mammoth:
       patterns:
       - hous.*mammoth.*rumble
       - \bhom\b.*rumble
+    Santal Noir (with APR):
+      patterns:
+      - (hom|mammoth).*santal.*noir
     Santa Noir:
       patterns:
-      - santa.*noir
+      - santa\b.*noir
     Shire:
       patterns:
       - (hous.*mammoth|\bhom\b).*sh\wre
@@ -2369,6 +2389,12 @@ Hwayeon Soap Co.:
     Shaving Soap:
       patterns:
       - hwayeon
+    Dr. Lion Elixir of Blooms:
+      patterns:
+      - lion.*elixir.*bloom
+    Terry's Soap:
+      patterns:
+      - hwayeon.*terry
 I Coloniali:
   patterns:
   - \bi\b colonia(?:li)?\b
@@ -2443,6 +2469,10 @@ KEPKINH:
 Kent:
   patterns:
   - ^kent\b
+  scents:
+    Luxury:
+      patterns:
+      - kent.*luxury
 Klar Seifen:
   patterns:
   - 'klar(?: seifen)?'
@@ -2600,11 +2630,11 @@ Meißner Tremonia:
 MER Shaving:
   patterns:
   - \bmer ?shaving
-MORE FOR YOU:
+More for You:
   patterns:
   - ^\W*more for you
   scents:
-    Shaving Stick:
+    Shaving Soap:
       patterns:
       - ^\W*more for you
 MacDuff's Soap Company:
@@ -2834,6 +2864,13 @@ Mike's Natural Soaps:
 Midnight & Two:
   patterns:
   - midnight.*two
+Miraculum:
+  patterns:
+    miraculum
+  scents:
+    Lider:
+      patterns:
+      - \blider\b
 Mitchell's:
   patterns:
   - mitchell?'s
@@ -3144,6 +3181,9 @@ Old Spice:
       patterns:
       - old spi?ce
       - ^all spice cream$
+    Fresh Lime:
+      patterns:
+      - old spice.*fresh lime
 Oliver Blossom Soap Co.:
   patterns:
   - 'oliver blossom(?: soap(?: co.?)?)?'
@@ -3215,6 +3255,10 @@ Palmolive:
       format: Cream
       patterns:
       - palmolive
+    Rinfrescante:
+      format: Cream
+      patterns:
+      - palmolive.*rinfrescante
     Sensitive:
       format: Cream
       patterns:
@@ -3504,6 +3548,9 @@ Shannon's Soaps:
     Copaiba Rose:
       patterns:
       - shannon.*copaiba
+    Haymarket Vetiver:
+      patterns:
+      - shannon.*soaps?.*vet\wver
     Lady Luck:
       patterns:
       - shannon.*lady luck
@@ -3519,9 +3566,6 @@ Shannon's Soaps:
     The Scarlet Zone:
       patterns:
       - shannon.*scarlet.*zone
-    Vetiver:
-      patterns:
-      - shannon.*soaps?.*vet\wver
     Woody's Victories:
       patterns:
       - shannon.*soaps?.*woody.*victories
@@ -4279,6 +4323,7 @@ Tcheon Fung Sing:
       patterns:
       - ^\W*tfs\b.*red
       - ciotola rossa
+      - tcheon
     Granducato Toscano:
       patterns:
       - granducato toscano
@@ -4498,7 +4543,7 @@ Van Yulay:
 Vi-John:
   default format: Foam
   patterns:
-  - vi-?john
+  - vi[ -]?john
 Via Barberia:
   patterns:
   - via barberia
@@ -4520,13 +4565,19 @@ Vitos:
   patterns:
   - \bvito['’]?s\b
   scents:
-    Extra Super:
+    Sapone Per Barba (Green):
       patterns:
-      - vito['’]?s.*extra super
-      - vito['’]?s.*super extra
+      - vito
+    Extra Super (Red):
+      patterns:
+      - vito.*extra super
+      - vito.*super extra
+    Extra Super Coco (Red):
+      patterns:
+      - vito.*(extra super|super extra)?.*coco
     Vegetale:
       patterns:
-      - vito['’]?s.*vegetale?
+      - vito*vegetale?
 Vitry:
   patterns:
   - vitry

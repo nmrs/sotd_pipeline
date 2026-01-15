@@ -12,18 +12,28 @@ def session_soap_catalog():
     """Session-scoped soap catalog for all tests."""
     return {
         "Barrister and Mann": {
-            "Seville": {"patterns": ["b&m.*seville", "barrister.*mann.*seville"]},
-            "Fougère Gothique": {"patterns": ["fougère.*gothique"]},
+            "scents": {
+                "Seville": {"patterns": ["b&m.*seville", "barrister.*mann.*seville"]},
+                "Fougère Gothique": {"patterns": ["fougère.*gothique"]},
+            }
         },
         "House of Mammoth": {
-            "Alive": {"patterns": ["hom.*alive", "house.*mammoth.*alive"]},
-            "Tusk": {"patterns": ["hom.*tusk", "house.*mammoth.*tusk"]},
-            "Hygge": {"patterns": ["hom.*hygge", "house.*mammoth.*hygge"]},
-            "Almond Leather": {"patterns": ["almond.*leather"]},
+            "scents": {
+                "Alive": {"patterns": ["hom.*alive", "house.*mammoth.*alive"]},
+                "Tusk": {"patterns": ["hom.*tusk", "house.*mammoth.*tusk"]},
+                "Hygge": {"patterns": ["hom.*hygge", "house.*mammoth.*hygge"]},
+                "Almond Leather": {"patterns": ["almond.*leather"]},
+            }
         },
-        "Noble Otter": {"'Tis the Season": {"patterns": ["'tis.*season"]}},
-        "Strike Gold Shave": {"Bee's Knees Soap": {"patterns": ["bee.*knees"]}},
-        "Southern Witchcrafts": {"Tres Matres": {"patterns": ["tres.*matres"]}},
+        "Noble Otter": {
+            "scents": {"'Tis the Season": {"patterns": ["'tis.*season"]}}
+        },
+        "Strike Gold Shave": {
+            "scents": {"Bee's Knees Soap": {"patterns": ["bee.*knees"]}}
+        },
+        "Southern Witchcrafts": {
+            "scents": {"Tres Matres": {"patterns": ["tres.*matres"]}}
+        },
     }
 
 
@@ -287,9 +297,10 @@ def test_correct_matches_priority_before_regex(tmp_path):
     # Create a test catalog with a regex pattern that would match
     catalog_content = """
 Barrister and Mann:
-  Seville:
-    patterns:
-      - "barrister.*mann.*seville"
+  scents:
+    Seville:
+      patterns:
+        - "barrister.*mann.*seville"
 """
     catalog_file = tmp_path / "soaps.yaml"
     catalog_file.write_text(catalog_content)
@@ -427,6 +438,31 @@ def test_enhanced_regex_error_reporting():
         assert "File: data/soaps.yaml" in error_message
         assert "Brand: Test Brand" in error_message
         assert "unterminated character set" in error_message  # The actual regex error
+
+
+def test_invalid_yaml_structure_validation():
+    """Test that invalid YAML structure (scent directly under brand) raises ValueError."""
+    # Invalid structure: scent directly under brand without 'scents:' wrapper
+    mock_catalog = {
+        "Test Brand": {
+            "Test Scent": {
+                "patterns": ["test.*pattern"]
+            }
+        }
+    }
+
+    # Mock the load_yaml_with_nfc function to return our mock catalog
+    with patch("sotd.match.soap_matcher.load_yaml_with_nfc", return_value=mock_catalog):
+        with pytest.raises(ValueError) as exc_info:
+            SoapMatcher()
+
+        error_message = str(exc_info.value)
+        assert "Invalid YAML structure" in error_message
+        assert "File: data/soaps.yaml" in error_message
+        assert "Brand: Test Brand" in error_message
+        assert "Test Scent" in error_message
+        assert "scents:" in error_message
+        assert "Expected structure:" in error_message
 
 
 def test_brand_match_with_by_connector():
