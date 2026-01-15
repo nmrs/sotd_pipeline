@@ -121,6 +121,11 @@ class CatalogLoader:
         try:
             with open(catalog_path, "r", encoding="utf-8") as f:
                 catalog_data = yaml.safe_load(f)
+            # Validate patterns format if catalog data exists
+            if catalog_data:
+                from sotd.utils.catalog_validator import validate_patterns_format
+
+                validate_patterns_format(catalog_data, catalog_path)
         except (yaml.YAMLError, OSError):
             return {}
 
@@ -232,6 +237,11 @@ class CatalogLoader:
         try:
             with open(catalog_path, "r", encoding="utf-8") as f:
                 catalog_data = yaml.safe_load(f)
+            # Validate patterns format if catalog data exists
+            if catalog_data:
+                from sotd.utils.catalog_validator import validate_patterns_format
+
+                validate_patterns_format(catalog_data, catalog_path)
         except (yaml.YAMLError, OSError):
             return []
 

@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional
 import yaml
 
 from sotd.match.exceptions import CatalogLoadError
+from sotd.utils.catalog_validator import validate_patterns_format
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 # Global cache for YAML catalog files to avoid repeated loads
@@ -74,6 +75,8 @@ class CatalogLoader:
                         "data_type": str(type(data)),
                     },
                 )
+            # Validate patterns format before caching
+            self.validate_catalog_structure(data, catalog_type, catalog_path=path)
             _yaml_catalog_cache[abs_path] = data
             self.load_stats["catalogs_loaded"] += 1  # type: ignore
             return data
@@ -256,13 +259,16 @@ class CatalogLoader:
 
         return stats
 
-    def validate_catalog_structure(self, data: Dict[str, Any], catalog_type: str) -> None:
+    def validate_catalog_structure(
+        self, data: Dict[str, Any], catalog_type: str, catalog_path: Optional[Path] = None
+    ) -> None:
         """
         Validate catalog data structure.
 
         Args:
             data: Catalog data to validate
             catalog_type: Type of catalog for validation rules
+            catalog_path: Path to the catalog file (for error messages)
 
         Raises:
             CatalogLoadError: If validation fails
@@ -272,6 +278,20 @@ class CatalogLoader:
                 f"Invalid {catalog_type} catalog: expected dict, got {type(data)}",
                 context={"catalog_type": catalog_type, "data_type": str(type(data))},
             )
+
+        # Validate patterns format (fail fast on formatting errors)
+        if catalog_path:
+            try:
+                validate_patterns_format(data, catalog_path)
+            except ValueError as e:
+                raise CatalogLoadError(
+                    str(e),
+                    context={
+                        "catalog_type": catalog_type,
+                        "path": str(catalog_path),
+                        "operation": "validate_patterns_format",
+                    },
+                ) from e
 
         # Add catalog-specific validation rules here if needed
         if catalog_type == "brushes":

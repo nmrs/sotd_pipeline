@@ -1061,6 +1061,13 @@ known_brushes:
       patterns:
         - simp.*chubby\s*3
         - simp.*ch3
+    Chubby 3 Platinum:
+      fiber: Synthetic
+      knot_size_mm: 28
+      knot_loft_mm: 62
+      patterns:
+        - simp.*chubby\s*3.*platinum
+        - simp.*ch3.*platinum
     Classic 1:
       fiber: Badger
       knot_size_mm: 21
@@ -1400,7 +1407,7 @@ known_brushes:
       fiber: Boar
       knot_size_mm: 26
       patterns:
-        - 502B
+        - zenith.*502B
     502NK SE:
       fiber: Boar
       knot_size_mm: 26
@@ -1423,6 +1430,8 @@ known_brushes:
       knot_size_mm: 28
       knot_loft_mm: 51
       patterns:
+        - zenith.*\bb34\b
+        - zenith.*chubby
         - zen.*505c?b
     506 MB:
       fiber: Badger
@@ -1511,17 +1520,6 @@ known_brushes:
         knot_size_mm: 28
         knot_loft_mm: 50
         model: B21
-    Butterscotch Chubby (B34):
-      patterns:
-        - zenith.*\bb34\b
-        - (zenith|505).*butter
-        - zenith.*chubby
-      knot:
-        brand: Zenith
-        fiber: Boar
-        knot_size_mm: 28
-        knot_loft_mm: 57
-        model: B34
     Copper Manchurian Badger:
       fiber: Badger
       knot_size_mm: 27.5
@@ -1559,7 +1557,7 @@ known_brushes:
         - zenith.*\bp10\b
     Short and Scrubby (B17):
       patterns:
-        - zenith.*short.*scrubby
+        - zenith.*(short|chubby).*scrubby
       knot:
         brand: Zenith
         fiber: Boar
@@ -2617,6 +2615,7 @@ other_brushes:
     patterns:
       - ever.*ready.*vintage
       - vintage.*ever.*ready
+      - ever.*ready.*grandfathers
   Executive Shaving:
     default: Synthetic
     patterns:
@@ -2676,6 +2675,10 @@ other_brushes:
     default: Badger
     patterns:
       - grizzly.*bay.*(?:v\d{1,2})?
+  Half Rotten Hardwoods:
+    default: Badger
+    patterns:
+      - half.*rotten.*hardwoods?
   Haircut & Shave Co:
     default: Badger
     patterns:

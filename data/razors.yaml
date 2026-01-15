@@ -76,7 +76,7 @@ Ale Razors:
   Straight:
     format: Straight
     patterns:
-      - \bale\b.*razors?(?:.*\d{1,2}/(8|16))?
+      - \bale\b.*(razors?)?(?:.*\d{1,2}/(8|16))?
 Alpha:
   Claymore:
     format: AC

@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 from rich.console import Console
 from rich.table import Table
 
+from sotd.utils.catalog_validator import validate_patterns_format
 from sotd.utils.extract_normalization import strip_trailing_periods
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
@@ -33,6 +34,8 @@ class SoapMatcher(BaseMatcher):
         # Override catalog and correct_matches from BaseMatcher with direct loading
         self.catalog_path = catalog_path
         self.catalog = load_yaml_with_nfc(catalog_path)
+        # Validate patterns format before proceeding
+        validate_patterns_format(self.catalog, catalog_path)
         # Use default path if not provided
         if correct_matches_path is None:
             correct_matches_path = Path("data/correct_matches")

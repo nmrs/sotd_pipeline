@@ -361,6 +361,13 @@ class BrushMatcher:
         catalogs["correct_matches"] = self._load_correct_matches_catalog()
         catalogs["brush_splits"] = self._load_yaml_file(Path("data/brush_splits.yaml"))
 
+        # Validate patterns format for all catalog files
+        from sotd.utils.catalog_validator import validate_patterns_format
+
+        validate_patterns_format(catalogs["brushes"], self.brushes_path)
+        validate_patterns_format(catalogs["handles"], self.handles_path)
+        validate_patterns_format(catalogs["knots"], self.knots_path)
+
         # Cache the catalogs for future use
         _catalog_cache = catalogs
         return catalogs

@@ -518,6 +518,7 @@ DE:
       patterns:
         - person+a.*gem
         - gem.*diamond.*glide
+        - personna.*diamond.*glide
     Lab Blue:
       patterns:
         - (person+a)?.*lab *blue

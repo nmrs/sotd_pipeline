@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sotd.utils.catalog_validator import validate_patterns_format
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 from .types import MatchResult, create_match_result
@@ -41,9 +42,12 @@ class BaseMatcher:
         global _catalog_cache
         cache_key = str(self.catalog_path.resolve())
         if cache_key not in _catalog_cache:
-            _catalog_cache[cache_key] = load_yaml_with_nfc(
+            catalog_data = load_yaml_with_nfc(
                 self.catalog_path, loader_cls=UniqueKeyLoader
             )
+            # Validate patterns format before caching
+            validate_patterns_format(catalog_data, self.catalog_path)
+            _catalog_cache[cache_key] = catalog_data
         return _catalog_cache[cache_key]
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:

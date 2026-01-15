@@ -15,7 +15,7 @@ _FIBER_PATTERNS = {
     ),
     "Synthetic": (
         r"(acrylic|timber|tux|mew|silk(?!.*badger)|synt|synbad|2bed|captain|cashmere|"
-        r"faux (horse|boar|badger)|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
+        r"faux (horse|boar|badger)|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|platinum"
         r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
         r"\bmig\b|synthetic badger|mother ?(lode|load)|\bg\d\b|\bt4\b)"
     ),

@@ -215,6 +215,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - grizzly.*bay(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  Half Rotten Hardwoods:
+    Unspecified:
+      patterns:
+        - half.*rotten.*hardwoods?
   Heritage Collection:
     Unspecified:
       patterns:

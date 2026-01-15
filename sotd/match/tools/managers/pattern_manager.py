@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 
 from rich.console import Console
 
+from sotd.utils.catalog_validator import validate_patterns_format
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 
@@ -118,6 +119,8 @@ class PatternManager:
 
         try:
             catalog_data = load_yaml_with_nfc(catalog_path)
+            # Validate patterns format before extracting
+            validate_patterns_format(catalog_data, catalog_path)
             patterns = self._extract_patterns_from_catalog(catalog_data, field)
 
             # Cache the patterns

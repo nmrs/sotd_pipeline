@@ -22,6 +22,7 @@ from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags  # noqa: E402
 from sotd.utils.extract_normalization import normalize_for_matching  # noqa: E402
+from sotd.utils.catalog_validator import validate_patterns_format  # noqa: E402
 from sotd.utils.yaml_loader import load_yaml_with_nfc  # noqa: E402
 
 
@@ -1095,6 +1096,8 @@ class MismatchAnalyzer(AnalysisTool):
 
         try:
             catalog_data = load_yaml_with_nfc(catalog_path)
+            # Validate patterns format before extracting
+            validate_patterns_format(catalog_data, catalog_path)
             patterns = self._extract_patterns_from_catalog(catalog_data, field)
             self._catalog_patterns[field] = patterns
 
