@@ -1073,6 +1073,9 @@ Catie's Bubbles:
     Honey Noir:
       patterns:
       - (catie|cb).*honey.*noir
+    Horizon:
+      patterns:
+      - (catie|cb).*horizon
     Inspirazione Di Parma:
       patterns:
       - inspirazione di parma
@@ -1307,9 +1310,9 @@ Chiseled Face:
     Cryogen:
       patterns:
       - cryogen
-    Darkfall:
+    Gemütlichkeit:
       patterns:
-      - darkfall
+      - gem[uü]tlichkeit
     Ghost Town Barber:
       patterns:
       - ghost ?town barber
@@ -1572,6 +1575,9 @@ Declaration Grooming:
       patterns:
       - declaration.*contemplation
       - dg.*contemplation
+    Darkfall:
+      patterns:
+      - darkfall
     Delta-V:
       patterns:
       - delta(-|\s)?\bv\b
@@ -1589,9 +1595,6 @@ Declaration Grooming:
       patterns:
       - fourth (and|&) pine
       wsdb_slug: declaration-grooming-fourth-and-pine-soap
-    Gemütlichkeit:
-      patterns:
-      - gem[uü]tlichkeit
     Gratiot League Square:
       patterns:
       - gratiot league
@@ -1870,7 +1873,11 @@ Ethos:
 Eufros:
   patterns:
   - eufros
+  - jabon ?man
   scents:
+    Brisa de Oriente:
+      patterns:
+      - brisa de oriente
     Rosa-Oud:
       patterns:
       - eufros.*ros.*oud
@@ -2515,13 +2522,6 @@ Itakha:
 J.M. Fraser's:
   patterns:
   - j\.?m\.? fraser'?s?
-JabonMan:
-  patterns:
-  - jabon ?man
-  scents:
-    Brisa de Oriente:
-      patterns:
-      - brisa de oriente
 Jack Black:
   default format: Cream
   patterns:
@@ -2628,7 +2628,7 @@ Lainess:
   scents:
     Cerise:
       patterns:
-      - lainess.*cerise
+      - (lainess|vioune).*cerise
 La Toja:
   patterns:
   - la toja
@@ -3005,7 +3005,7 @@ Mitchell's:
   scents:
     Wool Fat:
       patterns:
-      - mitch.*wool fat
+      - mitch.*wool ?fat
       - ^\W*mwf\b
       wsdb_slug: mitchells-wool-fat-mitchells-wool-fat-soap
 MMGP:
@@ -3025,6 +3025,12 @@ Moon Soaps:
     Bixby:
       patterns:
       - moon.*bixby
+    Koa Mahina:
+      patterns:
+      - koa mahina
+    Santa Cruz:
+      patterns:
+      - moon.*santa cruz
     Tobacco Flower:
       patterns:
       - moon.*tobacco flower
@@ -3114,6 +3120,9 @@ Mühle:
   patterns:
   - \bm[üu]hle\b( shave care)?
   scents:
+    Aloe Vera:
+      patterns:
+      - \bm[üu]hle\b.*aloe
     Sandalwood:
       patterns:
       - \bm[üu]hle\b( shave care)?.*sandalwood
@@ -3204,6 +3213,9 @@ Noble Otter:
     Lonestar:
       patterns:
       - noble.*lone ?star
+    Lorekeeper:
+      patterns:
+      - lorekeeper
     Marbles (with APR):
       patterns:
       - (noble|no).*marbles
@@ -3236,6 +3248,9 @@ Noble Otter:
     Rawr:
       patterns:
       - \brawr\b
+    Sanctum:
+      patterns:
+      - oaken.*sanctum
     Texaus (with APR):
       patterns:
       - texaus
@@ -3354,9 +3369,15 @@ PAA:
   - phoenix.*shaving
   - the soap brand which may upset you
   scents:
+    Blue Samhain:
+      patterns:
+      - blue samhain
     Clown Fruit:
       patterns:
       - clown fruit
+    Cucumber Fumbler:
+      patterns:
+      - cucumber fumbler
     Doppelgänger Grey Label:
       patterns:
       - dop+[el]{2}g[aä]nger.*gr[ae]y
@@ -3526,6 +3547,9 @@ RazoRock:
     Lime Burst:
       patterns:
       - razorock.*what.*lime
+    Sicily:
+      patterns:
+      - razorock.*sicily
     The Dead Sea:
       patterns:
       - (razorock|rr).*dead sea
@@ -3639,6 +3663,9 @@ Saponificio Varesino:
     Felce Aromatica:
       patterns:
       - felce aromatica
+    Mirto di Sardegna:
+      patterns:
+      - mirto.*sardegna
     Opuntia:
       patterns:
       - op+[iu]ntia
@@ -3666,13 +3693,25 @@ Sebum:
   patterns:
   - sebum
   scents:
+    Gold:
+      patterns:
+      - sebum.*gold
     Green:
       patterns:
       - sebum.*green
+    Latte:
+      patterns:
+      - sebum.*latte
+    Purple:
+      patterns:
+      - sebum.*purple
 Shannon's Soaps:
   patterns:
   - ^shannon'?s?( soaps?)?
   scents:
+    25th Street Lime:
+      patterns:
+      - shannon.*25.*lime
     A Saturday Afternoon in Columbus:
       patterns:
       - shannon.*columbus
@@ -3719,6 +3758,9 @@ Shavologist:
     Ruh Khus:
       patterns:
       - shavologist.*khus
+    The Skull:
+      patterns:
+      - shavologist.*skull
 Signature Soaps:
   patterns:
   - signature soaps
@@ -3772,6 +3814,9 @@ Southern Witchcrafts:
     Carpathia:
       patterns:
       - carpathia
+    Desairology:
+      patterns:
+      - desairology
     Druantia:
       patterns:
       - druantia
@@ -3933,6 +3978,9 @@ Stirling Soap Co.:
     Bay Laurel:
       patterns:
       - stirling.*bay laurel
+    Bay Rum:
+      patterns:
+      - st[ie]rling.*bay rum
     Bergamot Lavender:
       patterns:
       - stirling.*bergamot lavender
@@ -3954,21 +4002,31 @@ Stirling Soap Co.:
     Coconut Lime:
       patterns:
       - stirling.*c\w+nut lime
+    Coniferous:
+      patterns:
+      - st[ie]rling.*coniferous
     Cool Blue:
       patterns:
       - st[ie]rling.*cool.*blue
     Deep Blue Sea:
       patterns:
       - (?:stirling.*)?deep blue sea
+    Destination Unknown:
+      patterns:
+      - st[ie]rling.*destination unknown
     Deton-8:
       patterns:
       - deton[ -]?8
+    Executive Man:
+      patterns:
+      - stirling.*executive man
+      - executive man
+    Duchess:
+      patterns:
+      - st[ie]rling.*duchess
     Electric Sheep:
       patterns:
       - (?<!glacial\s)electric shr?eep
-    Executive Man:
-      patterns:
-      - executive man
     FOSSCO Musc:
       patterns:
       - fossco mu?sc
@@ -4151,6 +4209,9 @@ Strike Gold Shave:
     Bees Knees:
       patterns:
       - strike.*bee.*knee
+    Grant:
+      patterns:
+      - strike ?gold.*grant
     Jelly Rings:
       patterns:
       - strike.*jelly ring
@@ -4940,6 +5001,7 @@ Williams:
       patterns:
       - william'?s.*mug
       - williams shave soap
+      - ^williams$
     Tonsorial:
       patterns:
       - william'?s.*tonso
