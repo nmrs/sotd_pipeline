@@ -33,12 +33,23 @@ def validate_month(value: str) -> str:
 
 
 def validate_range(value: str) -> str:
-    """Validate range format (YYYY-MM:YYYY-MM) and ensure months are 01-12."""
+    """Validate range format (YYYY-MM:YYYY-MM or YYYY:YYYY for annual).
+
+    Supports both monthly range format (YYYY-MM:YYYY-MM) and annual range format (YYYY:YYYY).
+    """
     import re
 
+    # Check if this is an annual range (YYYY:YYYY format)
+    if ":" in value and len(value.split(":")) == 2:
+        start, end = value.split(":")
+        if len(start) == 4 and start.isdigit() and len(end) == 4 and end.isdigit():
+            # This is a valid annual range format
+            return value
+
+    # Validate monthly range format (YYYY-MM:YYYY-MM)
     if not re.match(r"^\d{4}-\d{2}:\d{4}-\d{2}$", value):
         raise argparse.ArgumentTypeError(
-            f"Invalid range format: {value} (expected YYYY-MM:YYYY-MM)"
+            f"Invalid range format: {value} (expected YYYY-MM:YYYY-MM or YYYY:YYYY for annual)"
         )
 
     # Validate month values in range
@@ -492,8 +503,8 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                 continue
 
             elif arg.startswith("--annual"):
-                # Only pass annual to report phase
-                if phase == "report":
+                # Pass annual to both aggregate and report phases
+                if phase in ["aggregate", "report"]:
                     phase_args.append(arg)
                 # If phase doesn't support it, skip it
                 i += 1
@@ -769,7 +780,11 @@ Examples:
         "--start", type=validate_month, help="Start month for range (YYYY-MM format)"
     )
     parser.add_argument("--end", type=validate_month, help="End month for range (YYYY-MM format)")
-    parser.add_argument("--range", type=validate_range, help="Month range (YYYY-MM:YYYY-MM format)")
+    parser.add_argument(
+        "--range",
+        type=validate_range,
+        help="Date range (YYYY-MM:YYYY-MM for monthly, YYYY:YYYY for annual)",
+    )
     parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
