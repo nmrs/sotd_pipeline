@@ -73,6 +73,19 @@ class AnnualReportGenerator(BaseReportGenerator):
         sample_users = self.metadata.get("sample_users", 0)
         sample_brands = self.metadata.get("sample_brands", 0)
 
+        # Calculate unique counts from aggregated data for software reports
+        unique_soaps = 0
+        unique_brands = 0
+
+        if self.report_type == "software":
+            # Calculate unique_soaps from aggregated soaps list
+            soaps = self.data.get("soaps", [])
+            unique_soaps = len(soaps) if soaps else 0
+
+            # Calculate unique_brands from aggregated soap_makers list
+            soap_makers = self.data.get("soap_makers", [])
+            unique_brands = len(soap_makers) if soap_makers else 0
+
         variables = {
             "year": self.year,
             "total_shaves": f"{total_shaves:,}",
@@ -92,6 +105,14 @@ class AnnualReportGenerator(BaseReportGenerator):
                 else ""
             ),
         }
+
+        # Add software-specific variables if this is a software report
+        if self.report_type == "software":
+            variables["unique_soaps"] = f"{unique_soaps:,}"
+            variables["unique_brands"] = f"{unique_brands:,}"
+            # Get unique_sample_soaps from metadata (calculated during annual aggregation)
+            unique_sample_soaps = self.metadata.get("unique_sample_soaps", 0)
+            variables["unique_sample_soaps"] = f"{unique_sample_soaps:,}"
 
         # Create template processor with custom path if provided
         if self.template_path:

@@ -1287,6 +1287,30 @@ class AnnualAggregationEngine:
         # Calculate median shaves per user by aggregating user data from monthly records
         median_shaves_per_user = self._calculate_median_shaves_per_user(monthly_data)
 
+        # Calculate sample-related metrics from enriched records
+        from sotd.aggregate.utils.metrics import (
+            calculate_total_samples,
+            calculate_sample_users,
+            calculate_sample_brands,
+            calculate_unique_sample_soaps,
+        )
+
+        total_samples = 0
+        sample_users = 0
+        sample_brands = 0
+        unique_sample_soaps = 0
+
+        if all_enriched_records:
+            total_samples = calculate_total_samples(all_enriched_records)
+            sample_users = calculate_sample_users(all_enriched_records)
+            sample_brands = calculate_sample_brands(all_enriched_records)
+            unique_sample_soaps = calculate_unique_sample_soaps(all_enriched_records)
+
+        # Calculate sample percentage
+        sample_percentage = 0.0
+        if total_shaves > 0:
+            sample_percentage = round((total_samples / total_shaves) * 100, 1)
+
         # Use provided lists or calculate from monthly_data keys
         if included_months is None:
             included_months = sorted(monthly_data.keys())
@@ -1309,6 +1333,11 @@ class AnnualAggregationEngine:
             "unique_shavers": total_unique_shavers,
             "avg_shaves_per_user": avg_shaves_per_user,
             "median_shaves_per_user": median_shaves_per_user,
+            "total_samples": total_samples,
+            "sample_users": sample_users,
+            "sample_brands": sample_brands,
+            "unique_sample_soaps": unique_sample_soaps,
+            "sample_percentage": sample_percentage,
             "included_months": sorted(included_months),
             "missing_months": sorted(missing_months),
         }
