@@ -76,7 +76,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_generator.return_value = mock_report_content
-            mock_saver.return_value = Path("data/reports/2024-hardware.md")
+            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -112,7 +112,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_generator.return_value = mock_report_content
-            mock_saver.return_value = Path("data/reports/2024-hardware.md")
+            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -208,7 +208,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_generator.return_value = mock_report_content
-            mock_saver.return_value = Path("data/reports/2024-software.md")
+            mock_saver.return_value = Path("data/reports/annual/2024-software.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -243,7 +243,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_generator.return_value = mock_report_content
-            mock_saver.return_value = Path("data/reports/2024-hardware.md")
+            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -274,7 +274,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_generator.return_value = mock_report_content
-            mock_saver.return_value = Path("data/reports/2024-hardware.md")
+            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
 
             # Create a proper mock monitor with the required attributes
             mock_monitor = Mock()
@@ -305,7 +305,7 @@ class TestAnnualReportIntegration:
             json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        output_path = Path("data/reports/2024-hardware.md")
+        output_path = Path("data/reports/annual/2024-hardware.md")
 
         with (
             patch("sotd.report.annual_run.generate_annual_report") as mock_generator,
@@ -439,16 +439,17 @@ class TestAnnualReportSaveIntegration:
     def test_save_annual_report_success(self, tmp_path):
         """Test successful annual report saving."""
         report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        out_dir = tmp_path / "reports"
-        out_dir.mkdir()
+        out_dir = tmp_path
 
         output_path = annual_run.save_annual_report(
             report_content, out_dir, "2024", "hardware", False, False
         )
 
-        # Verify file was created
+        # Verify file was created in annual subdirectory
         assert output_path.exists()
         assert output_path.name == "2024-hardware.md"
+        assert output_path.parent.name == "annual"
+        assert output_path.parent.parent.name == "reports"
 
         # Verify content was written correctly
         with open(output_path, "r") as f:
@@ -458,11 +459,12 @@ class TestAnnualReportSaveIntegration:
     def test_save_annual_report_with_force(self, tmp_path):
         """Test annual report saving with force flag."""
         report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        out_dir = tmp_path / "reports"
-        out_dir.mkdir()
+        out_dir = tmp_path
 
-        # Create existing file
-        existing_file = out_dir / "2024-hardware.md"
+        # Create existing file in annual subdirectory
+        annual_dir = out_dir / "reports" / "annual"
+        annual_dir.mkdir(parents=True)
+        existing_file = annual_dir / "2024-hardware.md"
         with open(existing_file, "w") as f:
             f.write("Old content")
 
@@ -479,11 +481,12 @@ class TestAnnualReportSaveIntegration:
     def test_save_annual_report_without_force(self, tmp_path):
         """Test annual report saving without force flag raises error."""
         report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        out_dir = tmp_path / "reports"
-        out_dir.mkdir()
+        out_dir = tmp_path
 
-        # Create existing file
-        existing_file = out_dir / "2024-hardware.md"
+        # Create existing file in annual subdirectory
+        annual_dir = out_dir / "reports" / "annual"
+        annual_dir.mkdir(parents=True)
+        existing_file = annual_dir / "2024-hardware.md"
         with open(existing_file, "w") as f:
             f.write("Old content")
 
@@ -494,29 +497,36 @@ class TestAnnualReportSaveIntegration:
     def test_save_annual_report_creates_directory(self, tmp_path):
         """Test that save_annual_report creates output directory if it doesn't exist."""
         report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        out_dir = tmp_path / "reports" / "annual"
+        out_dir = tmp_path
 
         # Directory doesn't exist yet
-        assert not out_dir.exists()
+        annual_dir = out_dir / "reports" / "annual"
+        assert not annual_dir.exists()
 
         output_path = annual_run.save_annual_report(
             report_content, out_dir, "2024", "hardware", False, False
         )
 
         # Verify directory was created and file was saved
-        assert out_dir.exists()
+        assert annual_dir.exists()
         assert output_path.exists()
         assert output_path.name == "2024-hardware.md"
+        assert output_path.parent == annual_dir
 
     def test_save_annual_report_software_type(self, tmp_path):
         """Test annual report saving for software type."""
         report_content = "# Annual Software Report 2024\n\nTest report content"
-        out_dir = tmp_path / "reports"
-        out_dir.mkdir()
+        out_dir = tmp_path
 
         output_path = annual_run.save_annual_report(
             report_content, out_dir, "2024", "software", False, False
         )
+
+        # Verify file was created in annual subdirectory
+        assert output_path.exists()
+        assert output_path.name == "2024-software.md"
+        assert output_path.parent.name == "annual"
+        assert output_path.parent.parent.name == "reports"
 
         # Verify correct filename
         assert output_path.name == "2024-software.md"

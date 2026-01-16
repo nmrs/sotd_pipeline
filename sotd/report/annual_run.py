@@ -204,8 +204,8 @@ def save_annual_report(
         logger.info(f"Output directory: {out_dir}")
         print(f"[DEBUG] Output directory: {out_dir}")
 
-    # Create reports subdirectory (consistent with monthly reports)
-    reports_dir = out_dir / "reports"
+    # Create annual reports subdirectory (consistent with annual aggregations)
+    reports_dir = out_dir / "reports" / "annual"
     reports_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate output filename

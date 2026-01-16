@@ -76,7 +76,7 @@ class TestAnnualRangeProcessing:
 
         # Mock the generate function to return test content
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2023-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2023-hardware.md")
 
         run_annual_report(args)
 
@@ -98,7 +98,7 @@ class TestAnnualRangeProcessing:
 
         # Mock the generate function to return test content
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2021-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2021-hardware.md")
 
         run_annual_report(args)
 
@@ -118,7 +118,7 @@ class TestAnnualRangeProcessing:
         )
 
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2022-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
 
         run_annual_report(args)
 
@@ -137,7 +137,7 @@ class TestAnnualRangeProcessing:
         )
 
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2022-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
 
         run_annual_report(args)
 
@@ -177,7 +177,7 @@ class TestAnnualRangeProcessing:
         def mock_save_side_effect(report_content, out_dir, year, report_type, force, debug):
             if year == "2022":
                 raise OSError("Save failed for 2022")
-            return Path(f"data/reports/{year}-{report_type}.md")
+            return Path(f"data/reports/annual/{year}-{report_type}.md")
 
         mock_save.side_effect = mock_save_side_effect
 
@@ -234,7 +234,7 @@ class TestAnnualRangePerformance:
         args = parser.parse_args(["--annual", "--range", "2015:2024", "--type", "hardware"])
 
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2015-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2015-hardware.md")
 
         # Should process all 10 years without performance issues
         run_annual_report(args)
@@ -253,7 +253,7 @@ class TestAnnualRangePerformance:
         args = parser.parse_args(["--annual", "--range", "2020:2024", "--type", "hardware"])
 
         mock_generate.return_value = "# Test Report Content"
-        mock_save.return_value = Path("data/reports/2020-hardware.md")
+        mock_save.return_value = Path("data/reports/annual/2020-hardware.md")
 
         # Process should complete without memory issues
         run_annual_report(args)
