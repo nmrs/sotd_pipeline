@@ -23,6 +23,7 @@ interface UserPostingAnalysis {
   posted_dates: string[];
   comment_ids: string[];
   comments_by_date: Record<string, string[]>;
+  comment_urls?: Record<string, string>; // Optional for backward compatibility
   // Product usage data
   razors: Array<{
     key: string;
@@ -136,6 +137,18 @@ const MonthlyUserPosts: React.FC = () => {
       });
     });
 
+    // Merge comment_urls from all analyses
+    const mergedCommentUrls: Record<string, string> = {};
+    analyses.forEach(a => {
+      if (a.comment_urls) {
+        Object.entries(a.comment_urls).forEach(([commentId, url]) => {
+          if (url) {
+            mergedCommentUrls[commentId] = url;
+          }
+        });
+      }
+    });
+
     // Aggregate products
     const aggregateProducts = (productArrays: Array<Array<any>>) => {
       const productMap = new Map<string, any>();
@@ -163,6 +176,7 @@ const MonthlyUserPosts: React.FC = () => {
       posted_dates: Array.from(allPostedDates).sort(),
       comment_ids: [...new Set(analyses.flatMap(a => a.comment_ids))],
       comments_by_date: mergedCommentsByDate,
+      comment_urls: Object.keys(mergedCommentUrls).length > 0 ? mergedCommentUrls : undefined,
       razors: aggregateProducts(analyses.map(a => a.razors)),
       blades: aggregateProducts(analyses.map(a => a.blades)),
       brushes: aggregateProducts(analyses.map(a => a.brushes)),
@@ -244,27 +258,33 @@ const MonthlyUserPosts: React.FC = () => {
       setAggregatedAnalysis(aggregated);
       setUserAnalyses(validAnalysesWithMonths);
 
-      // Fetch URLs for all comment IDs in the background
-      const allCommentIds = [...new Set(aggregated.comment_ids)];
-      if (allCommentIds.length > 0) {
-        // Fetch URLs in batches to avoid overwhelming the server
-        const urlMap: Record<string, string> = {};
-        await batchProcess(allCommentIds, 10, async commentId => {
-          try {
-            const comment = await getCommentDetail(commentId, months);
-            return { commentId, url: comment.url };
-          } catch (err) {
-            console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
-            return { commentId, url: '' };
-          }
-        }).then(results => {
-          results.forEach(({ commentId, url }) => {
-            urlMap[commentId] = url;
-          });
-          setCommentUrls(urlMap);
-        });
+      // Use pre-computed URLs if available, otherwise fetch them
+      if (aggregated.comment_urls && Object.keys(aggregated.comment_urls).length > 0) {
+        // Use pre-computed URLs from aggregation
+        setCommentUrls(aggregated.comment_urls);
       } else {
-        setCommentUrls({});
+        // Fallback: Fetch URLs for all comment IDs in the background
+        const allCommentIds = [...new Set(aggregated.comment_ids)];
+        if (allCommentIds.length > 0) {
+          // Fetch URLs in batches to avoid overwhelming the server
+          const urlMap: Record<string, string> = {};
+          await batchProcess(allCommentIds, 10, async commentId => {
+            try {
+              const comment = await getCommentDetail(commentId, months);
+              return { commentId, url: comment.url };
+            } catch (err) {
+              console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
+              return { commentId, url: '' };
+            }
+          }).then(results => {
+            results.forEach(({ commentId, url }) => {
+              urlMap[commentId] = url;
+            });
+            setCommentUrls(urlMap);
+          });
+        } else {
+          setCommentUrls({});
+        }
       }
     } catch (err) {
       const errorMessage =
@@ -357,11 +377,15 @@ const MonthlyUserPosts: React.FC = () => {
     }));
   };
 
-  // Helper function to get comment URLs from cache (no longer fetches)
+  // Helper function to get comment URLs from pre-computed or cache
   const getCommentUrls = (commentIds: string[]): Record<string, string> => {
     const urlMap: Record<string, string> = {};
     commentIds.forEach(commentId => {
-      if (commentUrls[commentId]) {
+      // First try pre-computed URLs from aggregated analysis
+      if (aggregatedAnalysis?.comment_urls?.[commentId]) {
+        urlMap[commentId] = aggregatedAnalysis.comment_urls[commentId];
+      } else if (commentUrls[commentId]) {
+        // Fallback to cached URLs
         urlMap[commentId] = commentUrls[commentId];
       }
     });
@@ -835,7 +859,7 @@ const MonthlyUserPosts: React.FC = () => {
         )}
 
         {/* Separate calendar section for each month */}
-        {selectedMonths.map(month => {
+        {[...selectedMonths].sort().map(month => {
           const monthData = userAnalyses.find(a => a.month === month);
           const monthAnalysis = monthData?.analysis || null;          if (!monthAnalysis) return null;
 
@@ -1049,7 +1073,7 @@ const MonthlyUserPosts: React.FC = () => {
         )}
 
         {/* Separate section for each month */}
-        {selectedMonths.map(month => {
+        {[...selectedMonths].sort().map(month => {
           const monthData = userAnalyses.find(a => a.month === month);
           const monthAnalysis = monthData?.analysis || null;
 

@@ -179,6 +179,18 @@ const ProductUsage: React.FC = () => {
       });
     });
 
+    // Merge comment_urls from all analyses
+    const mergedCommentUrls: Record<string, string> = {};
+    analyses.forEach(analysis => {
+      if (analysis.comment_urls) {
+        Object.entries(analysis.comment_urls).forEach(([commentId, url]) => {
+          if (url) {
+            mergedCommentUrls[commentId] = url;
+          }
+        });
+      }
+    });
+
     // Sum total_usage and calculate unique_users
     const totalUsage = analyses.reduce((sum, a) => sum + a.total_usage, 0);
     const uniqueUsers = mergedUsers.length;
@@ -190,6 +202,7 @@ const ProductUsage: React.FC = () => {
       users: mergedUsers,
       usage_by_date: { ...mergedCommentsByDate },
       comments_by_date: mergedCommentsByDate,
+      comment_urls: Object.keys(mergedCommentUrls).length > 0 ? mergedCommentUrls : undefined,
     };
   };
 
@@ -250,32 +263,38 @@ const ProductUsage: React.FC = () => {
       setAggregatedAnalysis(aggregated);
       setProductAnalyses(validAnalysesWithMonths);
 
-      // Fetch URLs for all comment IDs in the background
-      // Extract unique comment IDs from aggregated comments_by_date (much more efficient)
-      const allCommentIds = new Set<string>();
-      Object.values(aggregated.comments_by_date).forEach(ids => {
-        ids.forEach(id => allCommentIds.add(id));
-      });
-
-      if (allCommentIds.size > 0) {
-        // Fetch URLs in batches to avoid overwhelming the server
-        const urlMap: Record<string, string> = {};
-        await batchProcess(Array.from(allCommentIds), 10, async commentId => {
-          try {
-            const comment = await getCommentDetail(commentId, months);
-            return { commentId, url: comment.url };
-          } catch (err) {
-            console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
-            return { commentId, url: '' };
-          }
-        }).then(results => {
-          results.forEach(({ commentId, url }) => {
-            urlMap[commentId] = url;
-          });
-          setCommentUrls(urlMap);
-        });
+      // Use pre-computed URLs if available, otherwise fetch them
+      if (aggregated.comment_urls && Object.keys(aggregated.comment_urls).length > 0) {
+        // Use pre-computed URLs from aggregation
+        setCommentUrls(aggregated.comment_urls);
       } else {
-        setCommentUrls({});
+        // Fallback: Fetch URLs for all comment IDs in the background
+        // Extract unique comment IDs from aggregated comments_by_date (much more efficient)
+        const allCommentIds = new Set<string>();
+        Object.values(aggregated.comments_by_date).forEach(ids => {
+          ids.forEach(id => allCommentIds.add(id));
+        });
+
+        if (allCommentIds.size > 0) {
+          // Fetch URLs in batches to avoid overwhelming the server
+          const urlMap: Record<string, string> = {};
+          await batchProcess(Array.from(allCommentIds), 10, async commentId => {
+            try {
+              const comment = await getCommentDetail(commentId, months);
+              return { commentId, url: comment.url };
+            } catch (err) {
+              console.warn(`Failed to fetch URL for comment ${commentId}:`, err);
+              return { commentId, url: '' };
+            }
+          }).then(results => {
+            results.forEach(({ commentId, url }) => {
+              urlMap[commentId] = url;
+            });
+            setCommentUrls(urlMap);
+          });
+        } else {
+          setCommentUrls({});
+        }
       }
     } catch (err) {
       const errorMessage =
@@ -308,11 +327,15 @@ const ProductUsage: React.FC = () => {
     }
   };
 
-  // Helper function to get comment URLs from cache (no longer fetches)
+  // Helper function to get comment URLs from pre-computed or cache
   const getCommentUrls = (commentIds: string[]): Record<string, string> => {
     const urlMap: Record<string, string> = {};
     commentIds.forEach(commentId => {
-      if (commentUrls[commentId]) {
+      // First try pre-computed URLs from aggregated analysis
+      if (aggregatedAnalysis?.comment_urls?.[commentId]) {
+        urlMap[commentId] = aggregatedAnalysis.comment_urls[commentId];
+      } else if (commentUrls[commentId]) {
+        // Fallback to cached URLs
         urlMap[commentId] = commentUrls[commentId];
       }
     });
@@ -844,7 +867,7 @@ const ProductUsage: React.FC = () => {
         )}
 
         {/* Separate calendar section for each month */}
-        {selectedMonths.map(month => {
+        {[...selectedMonths].sort().map(month => {
           const monthData = productAnalyses.find(a => a.month === month);
           const monthAnalysis = monthData?.analysis || null;
 
@@ -1081,7 +1104,7 @@ const ProductUsage: React.FC = () => {
         )}
 
         {/* Separate section for each month */}
-        {selectedMonths.map(month => {
+        {[...selectedMonths].sort().map(month => {
           const monthData = productAnalyses.find(a => a.month === month);
           const monthAnalysis = monthData?.analysis || null;
 
@@ -1464,6 +1487,93 @@ const ProductUsage: React.FC = () => {
                 )}
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Users Table - Always Visible */}
+      {aggregatedAnalysis && aggregatedAnalysis.users.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className='flex items-center justify-between'>
+              <CardTitle>Users Who Used This Product</CardTitle>
+              <div className='flex items-center gap-2'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => handleCopyUserTableMarkdown(true)}
+                  disabled={copyLoading['user-table-with-urls']}
+                  className='flex items-center gap-2'
+                >
+                  {copyLoading['user-table-with-urls'] ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : copySuccess['user-table-with-urls'] ? (
+                    <Check className='h-4 w-4' />
+                  ) : (
+                    <Copy className='h-4 w-4' />
+                  )}
+                  {copySuccess['user-table-with-urls'] ? 'Copied!' : 'Copy (with URLs)'}
+                </Button>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => handleCopyUserTableMarkdown(false)}
+                  disabled={copyLoading['user-table-no-urls']}
+                  className='flex items-center gap-2'
+                >
+                  {copyLoading['user-table-no-urls'] ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : copySuccess['user-table-no-urls'] ? (
+                    <Check className='h-4 w-4' />
+                  ) : (
+                    <Copy className='h-4 w-4' />
+                  )}
+                  {copySuccess['user-table-no-urls'] ? 'Copied!' : 'Copy (no URLs)'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className='overflow-x-auto'>
+              <table className='w-full border-collapse border border-border'>
+                <thead>
+                  <tr className='bg-muted'>
+                    <th className='border border-border p-2 text-center'>#</th>
+                    <th className='border border-border p-2 text-left'>Username</th>
+                    <th className='border border-border p-2 text-center'>Usage Count</th>
+                    <th className='border border-border p-2 text-left'>Usage Dates</th>
+                    <th className='border border-border p-2 text-left'>Comment IDs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {aggregatedAnalysis.users.map((user, index) => (
+                    <tr key={user.username} className='hover:bg-muted/50'>
+                      <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
+                      <td className='border border-border p-2'>{user.username}</td>
+                      <td className='border border-border p-2 text-center'>{user.usage_count}</td>
+                      <td className='border border-border p-2'>
+                        <CommentDisplay
+                          commentIds={user.comment_ids}
+                          onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                          displayMode='dates'
+                          dates={user.usage_dates}
+                          expanded={expandedUsers[user.username]}
+                          onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                        />
+                      </td>
+                      <td className='border border-border p-2'>
+                        <CommentDisplay
+                          commentIds={user.comment_ids}
+                          onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                          expanded={expandedUsers[user.username]}
+                          onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       )}

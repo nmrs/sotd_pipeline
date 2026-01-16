@@ -24,6 +24,7 @@ export interface ProductUsageAnalysis {
   users: UserProductUsage[];
   usage_by_date: Record<string, string[]>;
   comments_by_date: Record<string, string[]>;
+  comment_urls?: Record<string, string>; // Optional for backward compatibility
 }
 
 export interface MonthlyProductSummary {
