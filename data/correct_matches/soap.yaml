@@ -39,6 +39,7 @@ Abbate Y La Mantia:
   - abbate y la mantia - garibaldi
   - abbate y la mantia - garribaldi
   Isacco:
+  - abbate y la mantia - isacco
   - abbate y la mantia - isacco soap
   Ishtar:
   - abbate y la mantia - ishtar
@@ -877,6 +878,8 @@ Catie's Bubbles:
   - catie's bubbles - greek fire
   Honey Noir:
   - catie's bubbles - honey noir
+  Horizon:
+  - catie's bubbles/talbot shaving - horizon
   Irish Coffee:
   - catie's bubbles - irish coffee
   - catie's bubbles irish coffee
@@ -1145,10 +1148,6 @@ Chiseled Face:
   - chiseled face cedar & spice
   Cryogen:
   - chiseled face - cryogen
-  Darkfall:
-  - declaration grooming - darkfall
-  - declaration grooming- darkfall
-  - dg darkfall
   Ghost Town Barber:
   - chiseled face - ghost town barber
   - chiseled face ghost town barber
@@ -1173,6 +1172,7 @@ Chiseled Face:
   - chiseled face - santa monica bay rum
   Sherlock:
   - chiseled face - sherlock
+  - chiseled face - sherlock - artisan shaving soap (silk tallow base)
   Summer Storm:
   - chiseled face - summer storm
   - chiseled face summer storm
@@ -1292,6 +1292,10 @@ Declaration Grooming:
   - declaration grooming - convergence
   Cuir et Épices:
   - declaration grooming - cuir et épices
+  Darkfall:
+  - declaration grooming - darkfall
+  - declaration grooming- darkfall
+  - dg darkfall
   Dayman:
   - declaration grooming - dayman
   Delta-V:
@@ -1512,6 +1516,8 @@ Ethos:
   Succès:
   - ethos grooming essentials - succès
 Eufros:
+  Brisa de Oriente:
+  - eufros - brisa de oriente
   Rosa-Oud:
   - eufros - rosa oud
   - jabonman eufros rosa oud
@@ -1878,9 +1884,6 @@ Hwayeon Soap Co.:
 Imaginary Authors:
   Telegrama:
   - imaginary authors - telegrama
-JabonMan:
-  Brisa de Oriente:
-  - eufros - brisa de oriente
 Jordan's:
   Blueberry Muffin:
   - jordan's - blueberry muffin
@@ -1904,6 +1907,9 @@ Kyna:
 La Toja:
   Shaving Soap:
   - la toja
+Lainess:
+  Cerise:
+  - asinerie de la vioune - cerise
 Lakewood Soap Company:
   Lard Lass Two Weeks With Pay:
   - lakewood soap co. - lard lass "two weeks with pay"
@@ -2179,6 +2185,7 @@ Mitchell's:
   - mitchell's wool fat - n/a
   - mitchell's wool fat - new formula
   - mitchell's wool fat, tallow formula
+  - mitchell's woolfat not beef tallow
   - mitchells - wool fat
   - mwf
   - mwf - tallow formula
@@ -2192,6 +2199,12 @@ Moon Soaps:
   - moon soaps - bixby
   Havana:
   - moon soaps - havana
+  Koa Mahina:
+  - moon soaps - koa mahina
+  Old School:
+  - moon soaps - old school
+  Santa Cruz:
+  - moon soaps - santa cruz
   Tobacco Flower:
   - moon soaps - tobacco flower
   - moonsoaps - tobacco flower
@@ -2294,6 +2307,9 @@ Mäurer & Wirtz:
   - tabac tub
   - tabac vegan 2024
   - tabac vegan 2024 - hard soap
+Mühle:
+  Aloe Vera:
+  - mühle - aloe vera
 Nawal's:
   Summer Bliss:
   - nawal's summer bliss
@@ -2347,6 +2363,8 @@ Noble Otter:
   Lonestar:
   - noble otter - lonestar
   - noble otter lonestar
+  Lorekeeper:
+  - noble otter - lorekeeper
   Marbles (with APR):
   - australian private reserve/noble otter - marbles
   - noble otter/australian private reserve - marbles
@@ -2379,6 +2397,8 @@ Noble Otter:
   - noble otter - rawr
   - noble otter rawr
   - noble otter soap co. - rawr
+  Sanctum:
+  - oaken lab - sanctum
   Texaus (with APR):
   - noble otter/australian private reserve - texaus
   The Night Before:
@@ -2430,9 +2450,13 @@ One Blessed Acre Farm:
   Sandalwood:
   - one blessed acre farm - goats milk shaving soap (sandalwood)
 PAA:
+  Blue Samhain:
+  - paa - blue samhain
   Clown Fruit:
   - paa clown fruit
   - paa clown fruit 2025
+  Cucumber Fumbler:
+  - phoenix artisan accoutrements - cucumber fumbler (2025 advent calendar, day 4)
   Doppelgänger Grey Label:
   - paa - doppelgänger grey
   - phoenix doppelgänger grey label
@@ -2498,6 +2522,8 @@ RazoRock:
   - razorock what the puck - lime
   Mudder Focker:
   - razorock - mudder focker
+  Sicily:
+  - razorock - sicily
   The Dead Sea:
   - razorock - the dead sea
   XXX:
@@ -2540,6 +2566,8 @@ Saponificio Varesino:
   - saponificio varesino - felce aromatica
   Manna di Sicilia:
   - saponificio varesino - manna di sicilia
+  Mirto di Sardegna:
+  - saponificio varesino - mirto di sardegna
   Opuntia:
   - saponificio varesino - opintia
   - saponificio varesino - opuntia
@@ -2552,7 +2580,11 @@ Savonnerie du Nebbiu:
 Sebum:
   Green:
   - sebum - green
+  Latte:
+  - sebum - latte
 Shannon's Soaps:
+  25th Street Lime:
+  - shannon's soaps - 25th street lime
   Haymarket Vetiver:
   - shannon's soap's - haymarket vetiver
   Lady Luck:
@@ -2573,6 +2605,8 @@ Shavologist:
   - shavologist invasion set
   Ruh Khus:
   - shavologist ruh khus (vetiver)
+  The Skull:
+  - shavologist - skull
 Signature Soaps:
   Novus Spice:
   - signature soaps - novus spice
@@ -2603,6 +2637,7 @@ Southern Witchcrafts:
   - southern witchcrafts carpathia
   - southern witchcrats - carpathia
   Desairology:
+  - southern witchcraft - desairology
   - southern witchcrafts - desairology
   Druantia:
   - southern witchcrafts - druantia
@@ -2816,6 +2851,7 @@ Stirling Soap Co.:
   - stirling soap co. - bay laurel
   Bay Rum:
   - stirling - bay rum
+  - stirling soap co. - bay rum
   Bergamot Lavender:
   - stirling soap co - bergamot lavender
   - stirling soap co. - bergamot lavender
@@ -2845,6 +2881,8 @@ Stirling Soap Co.:
   - stirling soap company - christmas eve
   Coconut Lime:
   - stirling coconut lime
+  Coniferous:
+  - stirling soap co. - coniferous
   Cool Blue:
   - stirling - cool blue
   - stirling co. - cool blue
@@ -2858,8 +2896,12 @@ Stirling Soap Co.:
   - stirling soap co. - deep blue sea
   Destination Unknown:
   - stirling - destination unknown
+  - stirling soap co. - destination unknown
   Deton-8:
   - stirling soap co. - deton-8
+  Duchess:
+  - sterling duchess
+  - stirling duchess
   Electric Sheep:
   - sterling - electric sheep
   - stirling - electric sheep
@@ -2879,6 +2921,8 @@ Stirling Soap Co.:
   - stirling soap co. - executive man
   - stirling soap co. - executive man soap
   - tbd (stirling executive man)
+  Falkor:
+  - stirling soap co. - falkor
   Frankincense & Myrrh:
   - stirling soap co. - frankincense & myrrh
   - stirling soap co. - frankinscense & myrrh
@@ -2895,6 +2939,8 @@ Stirling Soap Co.:
   - stirling co. - gin & tonic on the rocks
   - stirling gin & tonic on the rocks
   - stirling soap co. - gin and tonic on the rocks
+  Gingerbread Man:
+  - stirling soap co. - gingerbread man
   Glacial Electric Sheep:
   - stirling glacial electric sheep
   Glacial Iceberg Island:
@@ -2902,6 +2948,8 @@ Stirling Soap Co.:
   Glacial Lemon Chill:
   - stirling co. - glacial, lemon chill
   - stirling soap co. glacial lemon chill
+  Glastonbury:
+  - stirling - glastonbury
   Haverford:
   - stirling - haverford
   - stirling co. - haverford
@@ -3036,10 +3084,14 @@ Stirling Soap Co.:
   Port-au-Prince:
   - stirling co. - port-au-prince
   - stirling soap co. - port-au-prince
+  Queen of Hearts:
+  - sterling queen of hearts
   Ramblin' Man:
   - stirling - ramblin' man
   - stirling ramblin' man
   - stirling soap co. - ramblin' man
+  Sandalwood:
+  - stirling soap co. - sandalwood
   Sandpiper:
   - stirling - sandpiper
   - stirling co. - sandpiper
@@ -3128,6 +3180,8 @@ Stirling Soap Co.:
   West Indies Lime:
   - stirling - west indies lime
   - stirling soap co. - west indies lime
+  Witchy Woman:
+  - sterling witchy woman
 Stone Cottage Soapworks:
   Fougère:
   - stone cottage soapworks - fougère
@@ -3150,11 +3204,20 @@ Strike Gold Shave:
   - strike gold shave - bee's knees
   Bees Knees:
   - strike gold shave - bee's knees soap
+  Grant:
+  - strike gold shave grant. adventist & baccarat rouge blend dupe
+  Knockout:
+  - shave dad/ strikegoldshave knockout
   Nostalgia:
   - strike gold shave nostalgia
   TDS:
   - strike gold shave - tds
   - strike gold shaves - tds
+  Tippecanoe:
+  - strike gold shaves tippacanoe
+Subtle Art Soap Co.:
+  Orange & Patchouli:
+  - subtle art soap - orange & patchouli
 Summer Break Soaps:
   Back to School:
   - summer break soaps - back to school
@@ -3184,6 +3247,8 @@ Summer Break Soaps:
   Homecoming:
   - summer break soaps - homecoming
   - summer break soaps - homecoming soap
+  International Studies:
+  - summer break soaps - international studies
   Lather Games ROTY 2020:
   - summer break soaps lather games roty 2020
   Lather Games ROTY 2021:
@@ -3264,11 +3329,15 @@ Talbot Shaving:
   Grace:
   - talbot shaving grace mash up
   - talbot shaving grace soap mix
+  Valley of Fire:
+  - catie's bubbles/talbot shaving - valley of fire
   Winter's Refraction:
   - talbot shaving - winter's refraction
   - talbot shaving winter's refraction
   - talbot shaving winter's refraction mix
 Talent Soap Factory:
+  2 Deer:
+  - talent soap factory - 2 deer
   Banana:
   - talent soap factory - banana
   Cakehole:
@@ -3303,6 +3372,8 @@ Talent Soap Factory:
   Lionheart:
   - talent soap factory - lionhart
   - talent soap factory - lionheart
+  Love, Betty:
+  - talent soap factory - love betty soap
   Octopus Balls:
   - talent factory - octopus balls
   Peony & Violet:
@@ -3408,6 +3479,9 @@ Tcheon Fung Sing:
   - tfs granducato toscano mix
   Torino:
   - tcheon fung sing torino soap
+The American Gentleman:
+  Honey & Leather:
+  - 'the american gentleman soap co. - shave soap: honey and leather'
 The Art of Shaving:
   Bourbon:
   - art of shaving - bourbon
@@ -3458,12 +3532,21 @@ The Los Angeles Shaving Soap Company:
 The Sudsy Soapery:
   Bay & Citrus:
   - sudsy soapery - bay and citrus
+  Cola:
+  - sudsy soapery - cola
   Fresh:
   - the sudsy soapery - fresh
   Lemon Rose Chypre:
   - sudsy soapary - lemon, rose, chypre
   White Sage and Lime:
   - sudsy soapery white sage and lime
+Through the Fire Fine Craft:
+  Birch Forest:
+  - through the fire fine crafts - birch forest
+  Sunsite:
+  - through the fire fine craft - sunset
+  Up North:
+  - through the fire fine crafts - up north
 Truefitt & Hill:
   Sandalwood:
   - truefitt & hill - sandalwood
@@ -3472,6 +3555,9 @@ Van Der Hagen:
   - van der hagen - luxury scented
   - van der hagen - scented luxury
   - van der hagen luxury
+Vi-John:
+  Classic:
+  - vi john - original
 Vicco:
   Turmeric Sandalwood:
   - vicco sandalwood
@@ -3502,9 +3588,12 @@ West Coast Shaving:
   Pear-Brrr Shoppe:
   - west coast shaving - pear-brrr shoppe
 WestMan Shaving:
+  Gerês:
+  - westman - gerês
   MazaGran:
   - westman shaving mazagran
   Utopia:
+  - westman - utopia
   - westman shaving - utopia
 Wet Shaving Products:
   Gaelic Tweed:
@@ -3525,6 +3614,8 @@ Wholly Kaw:
   - wholly kaw - cedrati
   Club Yanka:
   - wholly kaw - club yanka
+  Dark Vetiver:
+  - wholly kaw - dark vetiver
   Double Agent:
   - wholly kaw - double agent
   - wholly kaw - double agent tallow
@@ -3542,6 +3633,8 @@ Wholly Kaw:
   - wholly kaw - hiatus
   Iced Tea:
   - wholly kaw - iced tea
+  Jupiter:
+  - wholly kaw - jupiter (crème fraiche)
   King of Bourbon:
   - wholly kaw - king of bourbon
   King of Oud:
@@ -3563,8 +3656,11 @@ Wholly Kaw:
   - wholly kaw - monaco royale - premium
   Nightcap:
   - wholly kaw - nightcap
+  Pompelmo:
+  - wholly kaw - pompelmo
   Rebelle:
   - wholly kaw - rebelle
+  - wholly kaw - rebelle soap
 Wickham Soap Co.:
   Club Cola:
   - wickham soap co. - club cola
@@ -3574,6 +3670,7 @@ Wild Stone:
 Williams:
   Mug Shaving Soap:
   - combe, inc. - williams mug
+  - williams
   - williams - mug
   - williams - mug soap
   - williams mug
@@ -3621,6 +3718,7 @@ Zingari Man:
   - zingari man - mousse illuminée
   No. 1 (with Byron Parfums):
   - zingari - no. 1
+  - 'zingari man - #1'
   - zingari man- no. 1
   Nocturne (with B&M):
   - zingari man - nocturne
@@ -3663,6 +3761,7 @@ Zingari Man:
   - zingari man - nomad
   - zingari man - the nomad
   The Rambler:
+  - zinagari man - the rambler
   - zingari - the rambler
   - zingari man - the rambler
   - zingari man the rambler

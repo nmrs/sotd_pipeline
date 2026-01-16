@@ -1332,6 +1332,9 @@ Chiseled Face:
     Santa Monica Bay Rum:
       patterns:
       - santa monica bay rum
+    Sherlock:
+      patterns:
+      - (chisel|cf).*sherlock
     Summer Storm:
       patterns:
       - (cf|chisel).*summer storm
@@ -3028,6 +3031,9 @@ Moon Soaps:
     Koa Mahina:
       patterns:
       - koa mahina
+    Old School:
+      patterns:
+      - moon.*old school
     Santa Cruz:
       patterns:
       - moon.*santa cruz
@@ -4017,16 +4023,19 @@ Stirling Soap Co.:
     Deton-8:
       patterns:
       - deton[ -]?8
-    Executive Man:
-      patterns:
-      - stirling.*executive man
-      - executive man
     Duchess:
       patterns:
       - st[ie]rling.*duchess
     Electric Sheep:
       patterns:
       - (?<!glacial\s)electric shr?eep
+    Executive Man:
+      patterns:
+      - stirling.*executive man
+      - executive man
+    Falkor:
+      patterns:
+      - \bfalkor\b
     FOSSCO Musc:
       patterns:
       - fossco mu?sc
@@ -4045,6 +4054,9 @@ Stirling Soap Co.:
     Gin & Tonic on the Rocks:
       patterns:
       - st(i|e)rling.*gin.*tonic.*rock
+    Gingerbread Man:
+      patterns:
+      - st[ie]rling.*gingerbread man
     Glacial Electric Sheep:
       patterns:
       - glacial electric sheep
@@ -4053,6 +4065,9 @@ Stirling Soap Co.:
       patterns:
       - glacial.*lemon chill
       wsdb_slug: stirling-soap-co-glacial-lemon-chill-soap
+    Glastonbury:
+      patterns:
+      - st[ie]rling.*glastonbury
     Haverford:
       patterns:
       - stirl.*have\wford
@@ -4107,6 +4122,9 @@ Stirling Soap Co.:
     Port-au-Prince:
       patterns:
       - stirling.*port.*prince
+    Queen of Hearts:
+      patterns:
+      - st[ie]rling.*queen.*hearts
     Ramblin' Man:
       patterns:
       - ramblin.*man
@@ -4117,6 +4135,9 @@ Stirling Soap Co.:
     Saguaro Blossom:
       patterns:
       - sagua?ro.*blossom
+    Sandalwood:
+      patterns:
+      - st[ie]rling.*sandalwood
     Sandpiper:
       patterns:
       - sand ?piper
@@ -4167,13 +4188,16 @@ Stirling Soap Co.:
       - stirling.*unscented
     Vanilla Sandalwood:
       patterns:
-      - vanilla sandalwood
+      - st[ie]rling.*vanilla.*sandalwood
     Varen:
       patterns:
       - \bvaren\b
     West Indies Lime:
       patterns:
       - stirl.*west indies
+    Witchy Woman:
+      patterns:
+      - st[ie]rling.*witchy woman
 Stone Cottage Soapworks:
   patterns:
   - stone cottage( soaps?( ?works( inc.?)?)?)?
@@ -4204,7 +4228,7 @@ Storybook Soapworks:
       - west egg
 Strike Gold Shave:
   patterns:
-  - strike ?gold( shave)?
+  - strike ?gold( shaves?)?
   scents:
     Bees Knees:
       patterns:
@@ -4215,12 +4239,18 @@ Strike Gold Shave:
     Jelly Rings:
       patterns:
       - strike.*jelly ring
+    Knockout:
+      patterns:
+      - strike ?gold.*knockout
     Nostalgia:
       patterns:
       - strike gold.*nostalgia
     TDS:
       patterns:
       - strike.*tds
+    Tippecanoe:
+      patterns:
+      - strike ?gold.*tipp[ea]canoe
 Strop Shoppe:
   patterns:
   - strop shoppe
@@ -4233,6 +4263,10 @@ Suavecito:
 Subtle Art Soap Co.:
   patterns:
   - 'subtle arts?(?: soap)?(?: co.?)?'
+  scents:
+    Orange & Patchouli:
+      patterns:
+      - subtle.*orange.*patchouli
 Summer Break Soaps:
   patterns:
   - su[nm]+er break( soaps)?
@@ -4265,6 +4299,9 @@ Summer Break Soaps:
     Homecoming:
       patterns:
       - (summer|sbs).*homecoming
+    International Studies:
+      patterns:
+      - (summer|sbs).*international studies
     Lather Games ROTY 2020:
       patterns:
       - summer.*lather.*2020
@@ -4362,12 +4399,18 @@ Talbot Shaving:
     Winter's Refraction:
       patterns:
       - winter.*refraction
+    Valley of Fire:
+      patterns:
+      - (talbot|cb|catie).*valley of fire
 Talent Soap Factory:
   patterns:
   - 'talent(?: soap)?(?: factory)?'
   - ^\W*tsf\b
   - \bt\.?s\.?f\.?
   scents:
+    2 Deer:
+      patterns:
+      - (talent|tsf).*2 deer
     Banana:
       patterns:
       - (talent|tsf).*banana
@@ -4405,6 +4448,9 @@ Talent Soap Factory:
     Lionheart:
       patterns:
       - lionhe?art
+    Love, Betty:
+      patterns:
+      - (talent|tsf).*love.*betty
     Peony & Violet:
       patterns:
       - (talent|tsf).*peony.*violet
@@ -4544,6 +4590,13 @@ Tcheon Fung Sing:
     Torino:
       patterns:
       - tcheon.*torino
+The American Gentleman:
+  patterns:
+    - (the )?american gentleman( soap( (co\.?(mpany)?)?)?)?
+  scents:
+    Honey & Leather:
+      patterns:
+      - american gentleman.*honey.*leather
 The Art of Shaving:
   patterns:
   - (?:the )?art of shaving
@@ -4670,6 +4723,9 @@ The Sudsy Soapery:
       patterns:
       - sudsy.*citrus.*bay
       - sudsy.*bay.*citrus
+    Cola:
+      patterns:
+      - sudsy.*cola
     Delor de Treget:
       patterns:
       - delor de treget
@@ -4693,6 +4749,16 @@ Through the Fire Fine Craft:
   patterns:
   - through the fire( fine crafts?)?
   - ttffc
+  scents:
+    Birch Forest:
+      patterns:
+      - (through.*fire|ttffc).*birch forest
+    Sunsite:
+      patterns:
+      - (through.*fire|ttffc).*sunset
+    Up North:
+      patterns:
+      - (through.*fire|ttffc).*up north
 Tiki Bar Soaps:
   patterns:
   - 'tiki bar(?: soap)?'
@@ -4766,6 +4832,10 @@ Vi-John:
   default format: Foam
   patterns:
   - vi[ -]?john
+  scents:
+    Classic:
+      patterns:
+      - vi[ -]?john.*(classic|original)
 Via Barberia:
   patterns:
   - via barberia
@@ -4857,6 +4927,9 @@ WestMan Shaving:
     (Desas)sossego:
       patterns:
       - desas.*sossego
+    Gerês:
+      patterns:
+      - westman.*ger[eê]s
     MazaGran:
       patterns:
       - maza ?gran
@@ -4929,6 +5002,9 @@ Wholly Kaw:
     Club Yanka:
       patterns:
       - club yu?anka
+    Dark Vetiver:
+      patterns:
+      - \bkaw\b.*dark vetiver
     Denarius:
       patterns:
       - \bkaw\b.*denario?us
@@ -4948,6 +5024,9 @@ Wholly Kaw:
     Iced Tea:
       patterns:
       - kaw.*iced? tea
+    Jupiter:
+      patterns:
+      - \bkaw\b.*jupiter
     King of Oud:
       patterns:
       - king of oud
@@ -4969,6 +5048,12 @@ Wholly Kaw:
     Noce di Cocco:
       patterns:
       - wholly.*\bnoc[ei]\b
+    Pompelmo:
+      patterns:
+      - \bkaw\b.*pompelmo
+    Rebelle:
+      patterns:
+      - \bkaw\b.*rebelle
     Valentynka:
       patterns:
       - valentynka
@@ -5077,7 +5162,7 @@ Zingari Man:
       wsdb_slug: zingari-man-mousse-illuminee-soap
     No. 1 (with Byron Parfums):
       patterns:
-      - zingari.*no\.? ?1
+      - zingari.*(no\.?|#) ?1
     Nocturne (with B&M):
       patterns:
       - zingari.*nocturn
@@ -5126,7 +5211,7 @@ Zingari Man:
       - zingari.*nomad
     The Rambler:
       patterns:
-      - zingari.*rambler
+      - zina?gari.*rambler
     The Royal:
       patterns:
       - zingari.*royal
