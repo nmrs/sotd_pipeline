@@ -44,13 +44,25 @@ def month_span(args) -> list[tuple[int, int]]:
         return [(y, m) for m in range(1, 13)]
 
     if args.range:
-        try:
-            start_str, end_str = args.range.split(":")
-            start = parse_ym(start_str)
-            end = parse_ym(end_str)
-        except ValueError as exc:
-            raise ValueError(f"Invalid range format: {args.range}") from exc
-        return list(iter_months(start, end))
+        start_str, end_str = args.range.split(":")
+        # Check if this is an annual range (YYYY:YYYY format)
+        if len(start_str) == 4 and start_str.isdigit() and len(end_str) == 4 and end_str.isdigit():
+            # Annual range: expand to all months for each year
+            start_year = int(start_str)
+            end_year = int(end_str)
+            months = []
+            for year in range(start_year, end_year + 1):
+                for month in range(1, 13):
+                    months.append((year, month))
+            return months
+        else:
+            # Monthly range (YYYY-MM:YYYY-MM format)
+            try:
+                start = parse_ym(start_str)
+                end = parse_ym(end_str)
+            except ValueError as exc:
+                raise ValueError(f"Invalid range format: {args.range}") from exc
+            return list(iter_months(start, end))
 
     if args.start and args.end:
         start = parse_ym(args.start)

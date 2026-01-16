@@ -104,17 +104,27 @@ def calculate_delta_months(args) -> list[str]:
     elif args.range:
         # For range format, expand the full range and add all months
         start, end = args.range.split(":")
-        start_year, start_month = map(int, start.split("-"))
-        end_year, end_month = map(int, end.split("-"))
+        # Check if this is an annual range (YYYY:YYYY format)
+        if len(start) == 4 and start.isdigit() and len(end) == 4 and end.isdigit():
+            # Annual range: expand to all months for each year
+            start_year = int(start)
+            end_year = int(end)
+            for year in range(start_year, end_year + 1):
+                for month in range(1, 13):
+                    delta_months.add(f"{year:04d}-{month:02d}")
+        else:
+            # Monthly range (YYYY-MM:YYYY-MM format)
+            start_year, start_month = map(int, start.split("-"))
+            end_year, end_month = map(int, end.split("-"))
 
-        # Expand the range to include all months
-        current_year, current_month = start_year, start_month
-        while (current_year, current_month) <= (end_year, end_month):
-            delta_months.add(f"{current_year:04d}-{current_month:02d}")
-            current_month += 1
-            if current_month > 12:
-                current_month = 1
-                current_year += 1
+            # Expand the range to include all months
+            current_year, current_month = start_year, start_month
+            while (current_year, current_month) <= (end_year, end_month):
+                delta_months.add(f"{current_year:04d}-{current_month:02d}")
+                current_month += 1
+                if current_month > 12:
+                    current_month = 1
+                    current_year += 1
     elif args.ytd:
         # For YTD, add all months from January to current month
         now = datetime.datetime.now()
@@ -263,18 +273,36 @@ def calculate_months_from_args(args: List[str]) -> List[str]:
     if parsed_args.range:
         try:
             start_str, end_str = parsed_args.range.split(":")
-            start_year, start_month = map(int, start_str.split("-"))
-            end_year, end_month = map(int, end_str.split("-"))
+            # Check if this is an annual range (YYYY:YYYY format)
+            is_annual_range = (
+                len(start_str) == 4
+                and start_str.isdigit()
+                and len(end_str) == 4
+                and end_str.isdigit()
+            )
+            if is_annual_range:
+                # Annual range: expand to all months for each year
+                start_year = int(start_str)
+                end_year = int(end_str)
+                months = []
+                for year in range(start_year, end_year + 1):
+                    for month in range(1, 13):
+                        months.append(f"{year:04d}-{month:02d}")
+                return months
+            else:
+                # Monthly range (YYYY-MM:YYYY-MM format)
+                start_year, start_month = map(int, start_str.split("-"))
+                end_year, end_month = map(int, end_str.split("-"))
 
-            months = []
-            current_year, current_month = start_year, start_month
-            while (current_year, current_month) <= (end_year, end_month):
-                months.append(f"{current_year:04d}-{current_month:02d}")
-                current_month += 1
-                if current_month > 12:
-                    current_month = 1
-                    current_year += 1
-            return months
+                months = []
+                current_year, current_month = start_year, start_month
+                while (current_year, current_month) <= (end_year, end_month):
+                    months.append(f"{current_year:04d}-{current_month:02d}")
+                    current_month += 1
+                    if current_month > 12:
+                        current_month = 1
+                        current_year += 1
+                return months
         except (ValueError, AttributeError):
             pass
 
