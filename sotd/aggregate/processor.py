@@ -36,6 +36,8 @@ from .aggregators.razor_specialized import (
     aggregate_straight_widths,
     aggregate_super_speed_tips,
 )
+from .aggregators.product_usage import aggregate_product_usage
+from .aggregators.user_analysis import aggregate_user_analysis
 from .aggregators.users import (
     aggregate_blade_diversity,
     aggregate_brush_diversity,
@@ -258,5 +260,10 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     aggregated_data["data"]["highest_use_count_per_blade"] = aggregate_highest_use_count_per_blade(
         records
     )
+
+    # Store specialized aggregations for API use (not in main aggregated data)
+    # These are saved separately for performance optimization
+    aggregated_data["_user_analysis"] = aggregate_user_analysis(records)
+    aggregated_data["_product_usage"] = aggregate_product_usage(records)
 
     return aggregated_data

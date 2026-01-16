@@ -9,7 +9,7 @@ from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 from .load import load_enriched_data
 from .processor import aggregate_all
-from .save import save_aggregated_data
+from .save import save_aggregated_data, save_product_usage_data, save_user_analysis_data
 
 
 def process_months(
@@ -44,7 +44,16 @@ def process_months(
             aggregated_data = aggregate_all(records, month, debug=debug)
 
             monitor.start_file_io_timing()
+            # Save main aggregated data (remove specialized aggregations first)
+            user_analysis = aggregated_data.pop("_user_analysis", {})
+            product_usage = aggregated_data.pop("_product_usage", {})
             save_aggregated_data(aggregated_data, month, data_dir)
+
+            # Save specialized aggregations to separate files
+            if user_analysis:
+                save_user_analysis_data(user_analysis, month, data_dir)
+            if product_usage:
+                save_product_usage_data(product_usage, month, data_dir)
             monitor.end_file_io_timing()
 
             monitor.end_total_timing()
@@ -201,7 +210,16 @@ def process_single_month(
         aggregated_data = aggregate_all(records, month, debug=debug)
 
         monitor.start_file_io_timing()
+        # Save main aggregated data (remove specialized aggregations first)
+        user_analysis = aggregated_data.pop("_user_analysis", {})
+        product_usage = aggregated_data.pop("_product_usage", {})
         save_aggregated_data(aggregated_data, month, data_dir)
+
+        # Save specialized aggregations to separate files
+        if user_analysis:
+            save_user_analysis_data(user_analysis, month, data_dir)
+        if product_usage:
+            save_product_usage_data(product_usage, month, data_dir)
         monitor.end_file_io_timing()
 
         monitor.end_total_timing()
