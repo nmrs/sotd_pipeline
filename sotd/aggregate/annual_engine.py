@@ -6,9 +6,13 @@ of aggregated data into yearly summaries.
 """
 
 import logging
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
+
+from tqdm import tqdm
 
 from ..utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
 from .aggregators.annual_aggregator import (
@@ -110,6 +114,7 @@ class AnnualAggregationEngine:
         self.year = year
         self.data_dir = data_dir
         self.monitor = AnnualPerformanceMonitor(year)
+        self._cached_enriched_records: Optional[List[Dict[str, Any]]] = None  # Cache for enriched records
 
     def aggregate_razors(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -637,9 +642,15 @@ class AnnualAggregationEngine:
     def _load_enriched_records(self) -> List[Dict[str, Any]]:
         """Load enriched records for all months in the year.
 
+        Uses cached records if available to avoid redundant file I/O.
+
         Returns:
             List of enriched records from all months
         """
+        # Return cached records if available
+        if self._cached_enriched_records is not None:
+            return self._cached_enriched_records
+
         from sotd.utils.file_io import load_json_data
 
         enriched_dir = self.data_dir / "enriched"
@@ -662,6 +673,8 @@ class AnnualAggregationEngine:
                     # Skip corrupted files
                     continue
 
+        # Cache the loaded records
+        self._cached_enriched_records = all_enriched_records
         return all_enriched_records
 
     def _calculate_medians_for_category(
@@ -1317,6 +1330,10 @@ class AnnualAggregationEngine:
         Returns:
             Dictionary with all aggregated data and metadata
         """
+        # Pre-load enriched records once to cache them for all category calculations
+        # This eliminates redundant file I/O when calculating medians and unique_users
+        _ = self._load_enriched_records()
+
         metadata = self.generate_metadata(monthly_data, included_months, missing_months)
 
         # Aggregate basic categories first
@@ -1518,6 +1535,105 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
             monitor.print_summary()
 
 
+def process_single_annual(
+    year: str, data_dir: Path, debug: bool = False, force: bool = False
+) -> dict | None:
+    """Process a single year for parallel processing.
+
+    Args:
+        year: Year to process (YYYY format)
+        data_dir: Data directory containing monthly aggregated files
+        debug: Enable debug logging
+        force: Force regeneration of existing files
+
+    Returns:
+        Dictionary with processing results or error information, or None if skipped
+    """
+    try:
+        process_annual(year, data_dir, debug=debug, force=force)
+        return {
+            "year": year,
+            "status": "completed",
+        }
+    except FileNotFoundError as e:
+        return {
+            "status": "error",
+            "year": year,
+            "error": f"{e}. Run monthly aggregation first.",
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "year": year,
+            "error": f"Failed to process {year}: {e}",
+        }
+
+
+def process_annual_range_parallel(
+    years: Sequence[str],
+    data_dir: Path,
+    debug: bool = False,
+    force: bool = False,
+    max_workers: int = 8,
+) -> bool:
+    """Process multiple years in parallel using ProcessPoolExecutor.
+
+    Args:
+        years: List of years to process (YYYY format)
+        data_dir: Data directory containing monthly aggregated files
+        debug: Enable debug logging
+        force: Force regeneration of existing files
+        max_workers: Maximum number of parallel workers
+
+    Returns:
+        True if there were errors, False otherwise
+    """
+    print(f"Processing {len(years)} years in parallel...")
+
+    wall_clock_start = time.time()
+
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        future_to_year = {
+            executor.submit(process_single_annual, year, data_dir, debug, force): year
+            for year in years
+        }
+
+        results = []
+        for future in tqdm(
+            as_completed(future_to_year), total=len(years), desc="Processing", unit="year"
+        ):
+            year = future_to_year[future]
+            try:
+                result = future.result()
+                if result:
+                    results.append(result)
+            except Exception as e:
+                print(f"[ERROR] Failed to process {year}: {e}")
+
+    # Filter results and check for errors
+    errors = [r for r in results if r and r.get("status") == "error"]
+    completed = [r for r in results if r and r.get("status") == "completed"]
+
+    # Display error details
+    if errors:
+        print("\n❌ Error Details:")
+        for error_result in errors:
+            year = error_result.get("year", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {year}: {error_msg}")
+
+    # Print summary
+    wall_clock_time = time.time() - wall_clock_start
+    if completed:
+        print(
+            f"[INFO] Annual aggregation complete for {years[0]}…{years[-1]}: "
+            f"{len(completed)} year(s) processed"
+        )
+    print(f"Parallel processing completed in {wall_clock_time:.2f}s")
+
+    return len(errors) > 0
+
+
 def process_annual_range(
     years: Sequence[str], data_dir: Path, debug: bool = False, force: bool = False
 ) -> None:
@@ -1530,8 +1646,6 @@ def process_annual_range(
         debug: Enable debug logging
         force: Force regeneration of existing files
     """
-    from tqdm import tqdm
-
     if debug:
         logger.info(f"Processing annual aggregation for years: {years}")
         logger.info(f"Data directory: {data_dir}")
