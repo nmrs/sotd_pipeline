@@ -92,9 +92,7 @@ class EnrichmentOverrideManager:
                 )
 
             if not isinstance(month_data, dict):
-                raise ValueError(
-                    f"Month '{month}' must contain a dictionary of comment overrides"
-                )
+                raise ValueError(f"Month '{month}' must contain a dictionary of comment overrides")
 
             month_overrides = {}
             for comment_id, field_data in month_data.items():
@@ -302,9 +300,7 @@ class EnrichmentOverrideManager:
 
         return None
 
-    def has_override(
-        self, month: str, comment_id: str, field: str, enrichment_key: str
-    ) -> bool:
+    def has_override(self, month: str, comment_id: str, field: str, enrichment_key: str) -> bool:
         """Check if override exists for specific enrichment field.
 
         Args:

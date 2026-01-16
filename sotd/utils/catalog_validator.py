@@ -98,16 +98,20 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
                 # Found the parent key, now look for "patterns:" in the following lines
                 # Check indentation - patterns should be indented more than the parent
                 parent_indent = len(line) - len(line.lstrip())
-                
+
                 for j in range(i + 1, min(len(lines), i + 20)):  # Check up to 20 lines ahead
                     check_line = lines[j]
                     check_stripped = check_line.strip()
                     check_indent = len(check_line) - len(check_line.lstrip())
-                    
+
                     # If we hit a line with same or less indentation, we've gone too far
-                    if check_stripped and check_indent <= parent_indent and not check_stripped.startswith("#"):
+                    if (
+                        check_stripped
+                        and check_indent <= parent_indent
+                        and not check_stripped.startswith("#")
+                    ):
                         break
-                    
+
                     # Look for "patterns:" that's indented more than parent
                     if check_stripped.startswith("patterns:") and check_indent > parent_indent:
                         # Found patterns line - check if it's followed by a non-list value
@@ -116,15 +120,23 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
                             next_line = lines[k]
                             next_stripped = next_line.strip()
                             next_indent = len(next_line) - len(next_line.lstrip())
-                            
+
                             # If we hit a line with same or less indentation, stop
-                            if next_stripped and next_indent <= check_indent and not next_stripped.startswith("#"):
+                            if (
+                                next_stripped
+                                and next_indent <= check_indent
+                                and not next_stripped.startswith("#")
+                            ):
                                 break
-                            
+
                             # If we find a non-list value (no "-" prefix), this is the error
-                            if next_stripped and not next_stripped.startswith("-") and not next_stripped.startswith("#"):
+                            if (
+                                next_stripped
+                                and not next_stripped.startswith("-")
+                                and not next_stripped.startswith("#")
+                            ):
                                 return k + 1  # 1-indexed
-                        
+
                         # If patterns: is found but we can't find the value line, return patterns line
                         return j + 1  # 1-indexed
 
@@ -166,7 +178,7 @@ def _build_patterns_error_message(
     location_str = f"'{location}'"
     if line_number:
         location_str += f" (line {line_number})"
-    
+
     error_msg = (
         f"Invalid patterns format in {catalog_path} at {location_str}:\n"
         f"  Expected: list (e.g., ['pattern1', 'pattern2'])\n"

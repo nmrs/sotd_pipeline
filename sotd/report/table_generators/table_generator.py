@@ -193,18 +193,18 @@ class TableGenerator:
         formatted_df = df.copy()
 
         # Get all numeric columns, excluding rank and delta columns
-        numeric_columns = formatted_df.select_dtypes(include=["int64", "float64", "int32", "float32"]).columns
+        numeric_columns = formatted_df.select_dtypes(
+            include=["int64", "float64", "int32", "float32"]
+        ).columns
         columns_to_format = [
-            col
-            for col in numeric_columns
-            if col != "rank" and not col.startswith("Δ")
+            col for col in numeric_columns if col != "rank" and not col.startswith("Δ")
         ]
 
         # Format each numeric column with commas
         for col in columns_to_format:
             # Convert column to object type first to avoid dtype warnings
             formatted_df[col] = formatted_df[col].astype(object)
-            
+
             # Format all values: integers get commas, floats with decimals stay as is
             def format_value(x):
                 if pd.isna(x):
@@ -218,7 +218,7 @@ class TableGenerator:
                 else:
                     # Float with decimals - keep as is (will be formatted by to_markdown)
                     return x
-            
+
             formatted_df[col] = formatted_df[col].apply(format_value)
 
         return formatted_df
@@ -598,6 +598,8 @@ class TableGenerator:
 
             # Exclude columns that are clearly not identifiers
             if col.startswith("avg_"):  # All average fields (avg_shaves_per_*)
+                return False
+            if col.startswith("median_"):  # All median fields (median_shaves_per_*)
                 return False
             if col.startswith("unique_"):  # All unique count fields (unique_*)
                 return False

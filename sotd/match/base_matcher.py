@@ -42,9 +42,7 @@ class BaseMatcher:
         global _catalog_cache
         cache_key = str(self.catalog_path.resolve())
         if cache_key not in _catalog_cache:
-            catalog_data = load_yaml_with_nfc(
-                self.catalog_path, loader_cls=UniqueKeyLoader
-            )
+            catalog_data = load_yaml_with_nfc(self.catalog_path, loader_cls=UniqueKeyLoader)
             # Validate patterns format before caching
             validate_patterns_format(catalog_data, self.catalog_path)
             _catalog_cache[cache_key] = catalog_data

@@ -46,7 +46,9 @@ def setup_enrichers(override_manager: Optional[EnrichmentOverrideManager] = None
 
     # Register all enrichers with override manager
     enricher_registry.register(BladeCountEnricher())
-    enricher_registry.register(BrushEnricher(data_path=data_path, override_manager=override_manager))
+    enricher_registry.register(
+        BrushEnricher(data_path=data_path, override_manager=override_manager)
+    )
     enricher_registry.register(StraightRazorEnricher(override_manager=override_manager))
     enricher_registry.register(GameChangerEnricher())
     enricher_registry.register(ChristopherBradleyEnricher())

@@ -125,26 +125,26 @@ class SoapMatcher(BaseMatcher):
     def _validate_catalog_structure(self):
         """
         Validate that the catalog structure follows the expected format.
-        
+
         Raises:
             ValueError: If the catalog structure is invalid with detailed context.
         """
         for brand, entry in self.catalog.items():
             if not isinstance(entry, dict):
                 continue
-            
+
             # Check for direct scent entries (without 'scents:' wrapper)
             # Valid keys at brand level: 'patterns', 'scents', 'wsdb_slug'
             valid_brand_keys = {"patterns", "scents", "wsdb_slug"}
             direct_scent_keys = []
-            
+
             for key, value in entry.items():
                 if key in valid_brand_keys:
                     continue
                 # If it's a dict with 'patterns' key, it's likely a scent entry
                 if isinstance(value, dict) and "patterns" in value:
                     direct_scent_keys.append(key)
-            
+
             if direct_scent_keys:
                 catalog_file = str(self.catalog_path)
                 context_str = f"File: {catalog_file}, Brand: {brand}"
@@ -163,7 +163,7 @@ class SoapMatcher(BaseMatcher):
     def _compile_patterns(self):
         # Validate structure before compiling patterns
         self._validate_catalog_structure()
-        
+
         scent_compiled = []
         brand_compiled = []
         for brand, entry in self.catalog.items():
