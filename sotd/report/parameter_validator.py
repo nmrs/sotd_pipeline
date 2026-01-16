@@ -22,16 +22,36 @@ class ParameterValidator:
     # These are the actual field names used in templates for filtering, not display names
     TABLE_SORTING_COLUMNS = {
         # Core product tables
-        "razors": ["shaves", "unique_users"],
-        "blades": ["shaves", "unique_users"],
-        "brushes": ["shaves", "unique_users"],
-        "soaps": ["shaves", "unique_users"],
+        "razors": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
+        "blades": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
+        "brushes": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
+        "soaps": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
         # Manufacturer tables
-        "razor-manufacturers": ["shaves", "unique_users"],
-        "blade-manufacturers": ["shaves", "unique_users"],
-        "brush-handle-makers": ["shaves", "unique_users"],
-        "brush-knot-makers": ["shaves", "unique_users"],
-        "soap-makers": ["shaves", "unique_users"],
+        "razor-manufacturers": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "blade-manufacturers": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "brush-handle-makers": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "brush-knot-makers": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "soap-makers": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
         # Diversity tables
         "brush-diversity": ["unique_brushes", "shaves"],
         "blade-diversity": ["unique_blades", "shaves"],
@@ -39,23 +59,68 @@ class ParameterValidator:
         "razor-diversity": ["unique_razors", "shaves"],
         "brand-diversity": ["unique_soaps", "shaves"],
         # Specialized tables
-        "blackbird-plates": ["shaves", "unique_users"],
-        "christopher-bradley-plates": ["shaves", "unique_users"],
-        "game-changer-plates": ["shaves", "unique_users"],
+        "blackbird-plates": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "christopher-bradley-plates": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "game-changer-plates": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
         "super-speed-tips": ["shaves", "unique_users"],
-        "straight-widths": ["shaves", "unique_users"],
-        "straight-grinds": ["shaves", "unique_users"],
-        "straight-points": ["shaves", "unique_users"],
+        "straight-widths": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "straight-grinds": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "straight-points": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
         # Cross-product tables
-        "razor-blade-combinations": ["shaves", "unique_users"],
+        "razor-blade-combinations": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
         "highest-use-count-per-blade": ["uses"],
         # User tables
         "users": ["shaves", "missed_days"],
         "top-shavers": ["shaves", "missed_days"],
         # Format and fiber tables
-        "razor-formats": ["shaves", "unique_users"],
-        "brush-fibers": ["shaves", "unique_users"],
-        "brush-knot-sizes": ["shaves", "unique_users"],
+        "razor-formats": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
+        "brush-fibers": ["shaves", "unique_users", "avg_shaves_per_user", "median_shaves_per_user"],
+        "brush-knot-sizes": [
+            "shaves",
+            "unique_users",
+            "avg_shaves_per_user",
+            "median_shaves_per_user",
+        ],
         "razor-format-users": ["format", "shaves"],
         "brush-fiber-users": ["fiber", "shaves"],
         # Software tables

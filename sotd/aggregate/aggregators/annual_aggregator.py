@@ -128,6 +128,14 @@ class AnnualAggregator(BaseAggregator):
         # For annual aggregation, we sum the shaves and unique_users across months
         grouped = df.groupby("name").agg({"shaves": "sum", "unique_users": "sum"}).reset_index()
 
+        # Calculate average shaves per user
+        if "unique_users" in grouped.columns:
+            grouped["avg_shaves_per_user"] = (
+                grouped["shaves"] / grouped["unique_users"].replace(0, 1)
+            ).round(1)
+            # Handle division by zero: if unique_users is 0, set avg to 0.0
+            grouped.loc[grouped["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+
         return grouped
 
 
