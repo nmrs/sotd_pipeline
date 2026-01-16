@@ -25,20 +25,20 @@ Welcome to your SOTD Hardware Report for February 2025
 
 ## Razor Formats
 
-|   Rank | Format                 |   Shaves |   Unique Users | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
-|-------:|:-----------------------|---------:|---------------:|:----------------|:----------------|:----------------|
-|      1 | DE                     |     1108 |            100 | =               | =               | =               |
-|      2 | Straight               |      114 |             15 | =               | ↑1              | =               |
-|      3 | GEM                    |      102 |             23 | =               | ↓1              | ↑2              |
-|      4 | Shavette (Hair Shaper) |       52 |              5 | ↑1              | ↑3              | ↑3              |
-|      5 | AC                     |       31 |              8 | ↓1              | ↓1              | ↓2              |
-|      6 | Cartridge/Disposable   |       20 |              2 | ↑3              | =               | ↑2              |
-|      7 | Injector               |       13 |              5 | ↓1              | ↓2              | ↓3              |
-|      8 | Shavette (AC)          |        6 |              3 | =               | ↑2              | ↓2              |
-|      9 | FHS                    |        4 |              1 | ↑4              | n/a             | =               |
-|     10 | Shavette (Injector)    |        3 |              1 | ↑1              | ↑1              | ↑1              |
-|     11 | Half DE                |        1 |              1 | ↑3              | ↓3              | n/a             |
-|     12 | Shavette (DE)          |        1 |              1 | ↓5              | ↓3              | n/a             |
+|   Rank | Format                 | Shaves   |   Unique Users |   Avg Shaves per User |   Median Shaves per User | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
+|-------:|:-----------------------|:---------|---------------:|----------------------:|-------------------------:|:----------------|:----------------|:----------------|
+|      1 | DE                     | 1,108    |            100 |                  11.1 |                      8   | =               | =               | =               |
+|      2 | Straight               | 114      |             15 |                   7.6 |                      5   | =               | ↑1              | =               |
+|      3 | GEM                    | 102      |             23 |                   4.4 |                      3   | =               | ↓1              | ↑2              |
+|      4 | Shavette (Hair Shaper) | 52       |              5 |                  10.4 |                      7   | ↑1              | ↑3              | ↑3              |
+|      5 | AC                     | 31       |              8 |                   3.9 |                      1.5 | ↓1              | ↓1              | ↓2              |
+|      6 | Cartridge/Disposable   | 20       |              2 |                  10   |                     10   | ↑3              | =               | ↑2              |
+|      7 | Injector               | 13       |              5 |                   2.6 |                      2   | ↓1              | ↓2              | ↓3              |
+|      8 | Shavette (AC)          | 6        |              3 |                   2   |                      1   | =               | ↑2              | ↓2              |
+|      9 | FHS                    | 4        |              1 |                   4   |                      4   | ↑4              | n/a             | =               |
+|     10 | Shavette (Injector)    | 3        |              1 |                   3   |                      3   | ↑1              | ↑1              | ↑1              |
+|     11 | Half DE                | 1        |              1 |                   1   |                      1   | ↑3              | ↓3              | n/a             |
+|     12 | Shavette (DE)          | 1        |              1 |                   1   |                      1   | ↓5              | ↓3              | n/a             |
 
 ## Razors
 
@@ -144,23 +144,23 @@ Welcome to your SOTD Hardware Report for February 2025
 | 6      | Voskhod Teflon Coated             |       66 |              8 | ↑3              | ↑3              | ↑2              |
 | 7      | Gillette Nacet                    |       57 |             14 | ↓3              | ↓3              | ↓4              |
 | 8      | Wizamet Super Iridium             |       55 |             13 | ↓2              | ↓3              | ↓1              |
-| 9      | Gillette Minora                   |       53 |              4 | ↑2              | ↑16             | ↑27             |
+| 9      | Gillette Minora                   |       53 |              4 | ↑2              | ↑17             | ↑27             |
 | 10     | 7 O'Clock Super Stainless (Green) |       39 |              6 | ↑9              | ↓3              | ↑1              |
 | 11     | Personna Platinum                 |       37 |              6 | ↑3              | ↑6              | ↑2              |
 | 12     | Shark Stainless                   |       32 |              3 | ↑6              | n/a             | ↑17             |
 | 13     | Treet Platinum                    |       27 |              2 | ↓3              | ↑42             | ↑25             |
 | 14     | Fromm Hair Shaper                 |       27 |              1 | ↑38             | ↑48             | n/a             |
 | 15     | Personna 74                       |       24 |              4 | ↑7              | ↑15             | ↑25             |
-| 16     | Gillette Perma-Sharp              |       23 |             10 | ↓4              | ↑12             | ↓10             |
+| 16     | Gillette Perma-Sharp              |       23 |             10 | ↓4              | ↑9              | ↓10             |
 | 17     | Personna Lab Blue                 |       22 |              5 | ↓12             | ↓3              | ↓8              |
 | 18     | Feather DE                        |       21 |             11 | ↓3              | ↓12             | ↓14             |
 | 19     | Kismet Hair Shaper                |       21 |              4 | ↑4              | ↑2              | n/a             |
-| 20     | 7 O'Clock Super Platinum (Black)  |       19 |              5 | ↓7              | ↑6              | ↓10             |
+| 20     | 7 O'Clock Super Platinum (Black)  |       19 |              5 | ↓7              | ↑7              | ↓10             |
 | 21     | Cartridge/Disposable              |       17 |              3 | ↑15             | ↓6              | ↑34             |
-| 22     | Dorco Prime Platinum              |       16 |              3 | ↑12             | ↑9              | ↑18             |
+| 22     | Dorco Prime Platinum              |       16 |              3 | ↑12             | ↑9              | n/a             |
 | 23     | Wilkinson Sword Classic           |       15 |              5 | ↑8              | ↓12             | ↓4              |
 | 24     | Personna Med Prep                 |       15 |              3 | ↓7              | =               | ↑16             |
-| 25     | Astra Superior Stainless (Blue)   |       14 |              2 | n/a             | ↑2              | ↑6              |
+| 25     | Astra Superior Stainless (Blue)   |       14 |              2 | n/a             | ↑3              | ↑6              |
 | 26     | Polsilver Super Iridium           |       12 |              2 | ↑14             | ↓13             | ↓21             |
 | 27     | Bic Chrome Platinum               |       12 |              1 | ↑5              | ↓7              | ↓7              |
 | 28     | Schick Injector                   |       11 |              4 | ↓7              | ↓12             | ↓13             |
@@ -179,7 +179,7 @@ Welcome to your SOTD Hardware Report for February 2025
 | 40=    | Shark Chrome                      |        6 |              2 | ↓4              | ↑31             | ↑12             |
 | 42=    | Statum Platinum                   |        6 |              1 | ↓2              | ↑29             | n/a             |
 | 42=    | Super-Max Stainless (Red)         |        6 |              1 | ↑10             | ↑9              | n/a             |
-| 44     | Bolzano Superinox                 |        5 |              2 | ↓19             | ↑1              | ↓22             |
+| 44     | Bolzano Superinox                 |        5 |              2 | ↓19             | ↑2              | ↓22             |
 | 45     | Personna Injector                 |        5 |              1 | ↓7              | ↓13             | ↑3              |
 | 46=    | Dorco ST-300                      |        4 |              1 | ↑17             | ↑2              | ↑2              |
 | 46=    | King C Gillette DE                |        4 |              1 | n/a             | ↑25             | n/a             |
@@ -194,8 +194,8 @@ Welcome to your SOTD Hardware Report for February 2025
 | Rank   | Brush                            |   Shaves |   Unique Users | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
 |:-------|:---------------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Zenith r/wetshaving MOAR BOAR    |       59 |             19 | ↑4              | =               | n/a             |
-| 2      | Yaqi Synthetic                   |       44 |             10 | ↑144            | ↑11             | ↑50             |
-| 3      | Stirling 2-Band Synthetic        |       44 |              7 | ↓1              | ↑32             | ↑114            |
+| 2      | Yaqi Synthetic                   |       44 |             10 | ↑143            | ↑11             | ↑50             |
+| 3      | Stirling 2-Band Synthetic        |       44 |              7 | ↓1              | ↑32             | ↑113            |
 | 4      | Rad Dinosaur Creations Raptor    |       37 |              3 | ↑109            | n/a             | n/a             |
 | 5      | AP Shave Co G5C                  |       36 |              8 | ↑1              | ↑15             | n/a             |
 | 6      | Maggard Synthetic                |       35 |              8 | ↓5              | ↑9              | ↓1              |
@@ -212,37 +212,37 @@ Welcome to your SOTD Hardware Report for February 2025
 | 17     | DS Cosmetics Synthetic           |       16 |              1 | ↑10             | ↑25             | ↓1              |
 | 18     | Rad Dinosaur Creations Synthetic |       15 |              2 | ↑95             | n/a             | n/a             |
 | 19=    | Chisel & Hound Synthetic         |       14 |              2 | ↑6              | ↑137            | n/a             |
-| 19=    | Simpson Chubby 2                 |       14 |              2 | ↓8              | ↑73             | ↑43             |
+| 19=    | Simpson Chubby 2                 |       14 |              2 | ↓8              | ↑74             | ↑43             |
 | 21     | Semogue 830                      |       13 |              5 | ↑2              | ↑16             | ↑120            |
 | 22     | Chisel & Hound v26               |       12 |              3 | ↑8              | n/a             | n/a             |
-| 23     | Leavitt & Pierce Badger          |       12 |              1 | ↑51             | ↑59             | n/a             |
+| 23     | Leavitt & Pierce Badger          |       12 |              1 | ↑51             | ↑60             | n/a             |
 | 24     | Dogwood SHD Badger               |       11 |              3 | ↓10             | ↑132            | ↓13             |
 | 25     | Semogue c7                       |       11 |              2 | ↑60             | n/a             | n/a             |
 | 26     | Omega Proraso Professional       |       10 |              5 | ↓7              | ↑41             | ↑45             |
 | 27     | Chisel & Hound v20               |       10 |              4 | ↑2              | ↑23             | n/a             |
-| 28     | Trotter T1 Manchurian Badger     |       10 |              3 | ↑34             | ↑71             | n/a             |
+| 28     | Trotter T1 Manchurian Badger     |       10 |              3 | ↑36             | ↑71             | n/a             |
 | 29=    | Stirling 510SE                   |       10 |              2 | ↑55             | ↓12             | n/a             |
-| 29=    | Yaqi Sagrada                     |       10 |              2 | ↑37             | ↑38             | ↑112            |
-| 31     | Omega Pro 49                     |        9 |              4 | ↑11             | ↓7              | ↓11             |
-| 32     | Semogue 2020                     |        9 |              1 | ↑4              | ↑16             | n/a             |
+| 29=    | Yaqi Sagrada                     |       10 |              2 | ↑39             | ↑38             | ↑112            |
+| 31     | Omega Pro 49                     |        9 |              4 | ↑11             | ↓7              | ↓12             |
+| 32     | Semogue 2020                     |        9 |              1 | ↑3              | ↑16             | n/a             |
 | 33     | Chisel & Hound v23               |        8 |              5 | ↓12             | ↑123            | n/a             |
 | 34     | Semogue Torga C5                 |        8 |              4 | ↓2              | ↑122            | n/a             |
-| 35     | Omega 20102                      |        8 |              3 | ↑24             | ↑64             | ↑47             |
+| 35     | Omega 20102                      |        8 |              3 | ↑26             | ↑64             | ↑47             |
 | 36=    | Semogue 610                      |        8 |              2 | ↓14             | n/a             | ↓13             |
-| 36=    | Yaqi Cashmere                    |        8 |              2 | ↑11             | ↑120            | ↑81             |
-| 38=    | Omega 46206 HI-BRUSH Synthetic   |        8 |              1 | ↓2              | n/a             | n/a             |
+| 36=    | Yaqi Cashmere                    |        8 |              2 | ↑11             | ↑120            | ↑80             |
+| 38=    | Omega 46206 HI-BRUSH Synthetic   |        8 |              1 | ↓3              | n/a             | n/a             |
 | 38=    | Yaqi Badger                      |        8 |              1 | ↓13             | ↑38             | ↑17             |
 | 40     | AP Shave Co Synbad               |        7 |              5 | ↓12             | ↓11             | ↑67             |
 | 41     | Wald A1                          |        7 |              4 | ↓9              | ↑18             | n/a             |
-| 42=    | AP Shave Co Synthetic            |        7 |              3 | ↑20             | ↑22             | ↑29             |
+| 42=    | AP Shave Co Synthetic            |        7 |              3 | ↑22             | ↑22             | ↑29             |
 | 42=    | Chisel & Hound v19               |        7 |              3 | ↑5              | ↑57             | n/a             |
 | 44=    | Chisel & Hound v11               |        7 |              1 | ↓4              | n/a             | n/a             |
 | 44=    | Parker Arctic Storm              |        7 |              1 | ↑44             | n/a             | n/a             |
-| 44=    | Zenith 506 MB                    |        7 |              1 | ↑8              | n/a             | n/a             |
+| 44=    | Zenith 506 MB                    |        7 |              1 | ↑9              | n/a             | n/a             |
 | 47=    | Chisel & Hound v24               |        6 |              4 | ↓31             | n/a             | n/a             |
-| 47=    | Dogwood Synthetic                |        6 |              4 | ↓15             | ↓29             | ↓9              |
-| 49     | Holzleute Badger                 |        6 |              1 | ↓13             | ↑107            | n/a             |
-| 50=    | AP Shave Co Cashmere             |        5 |              3 | ↓15             | ↑106            | n/a             |
+| 47=    | Dogwood Synthetic                |        6 |              4 | ↓8              | ↓29             | ↓9              |
+| 49     | Holzleute Badger                 |        6 |              1 | ↓14             | ↑107            | n/a             |
+| 50=    | AP Shave Co Cashmere             |        5 |              3 | ↓16             | ↑106            | n/a             |
 | 50=    | Declaration Grooming B3          |        5 |              3 | ↓1              | ↑106            | ↑91             |
 | 50=    | Omega Pro 48                     |        5 |              3 | ↓32             | ↓34             | ↑41             |
 
@@ -251,7 +251,7 @@ Welcome to your SOTD Hardware Report for February 2025
 | Rank   | Handle Maker           |   Shaves |   Unique Users | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
 |:-------|:-----------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Chisel & Hound         |      179 |             31 | =               | ↑2              | ↑12             |
-| 2      | Zenith                 |      127 |             33 | =               | ↓1              | ↑12             |
+| 2      | Zenith                 |      128 |             33 | =               | ↓1              | ↑12             |
 | 3      | Rad Dinosaur Creations |      125 |             12 | ↑6              | n/a             | n/a             |
 | 4      | Dogwood                |      104 |             23 | ↓1              | ↓2              | ↓3              |
 | 5      | Semogue                |       77 |             15 | =               | ↑4              | ↓1              |
@@ -286,7 +286,7 @@ Welcome to your SOTD Hardware Report for February 2025
 |   Rank | Knot Maker             |   Shaves |   Unique Users | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
 |-------:|:-----------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 |      1 | Chisel & Hound         |      165 |             31 | =               | ↑3              | ↑14             |
-|      2 | Zenith                 |      133 |             34 | ↑1              | ↓1              | ↑9              |
+|      2 | Zenith                 |      134 |             34 | ↑1              | ↓1              | ↑9              |
 |      3 | AP Shave Co            |      132 |             34 | ↓1              | ↓1              | ↑3              |
 |      4 | Declaration Grooming   |       89 |             25 | ↑1              | ↑1              | ↓3              |
 |      5 | Semogue                |       80 |             16 | ↑1              | ↑4              | ↓2              |
@@ -322,17 +322,17 @@ Welcome to your SOTD Hardware Report for February 2025
 |-------:|:------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 |      1 | Synthetic         |      636 |             83 | =               | =               | ↑1              |
 |      2 | Badger            |      350 |             42 | =               | =               | ↓1              |
-|      3 | Boar              |      203 |             47 | =               | =               | =               |
+|      3 | Boar              |      204 |             47 | =               | =               | =               |
 |      4 | Mixed Badger/Boar |       14 |              7 | =               | =               | =               |
 
 ## Knot Sizes
 
 |   Rank |   Knot Size MM |   Shaves |   Unique Users | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
 |-------:|---------------:|---------:|---------------:|:----------------|:----------------|:----------------|
-|      1 |           26   |      179 |             34 | =               | =               | ↑2              |
+|      1 |           26   |      184 |             34 | =               | =               | ↑2              |
 |      2 |           24   |      147 |             36 | =               | =               | =               |
 |      3 |           31   |       81 |             25 | ↑1              | =               | n/a             |
-|      4 |           28   |       78 |             31 | ↓1              | =               | ↓3              |
+|      4 |           28   |       74 |             30 | ↓1              | =               | ↓3              |
 |      5 |           22   |       31 |              7 | ↑1              | =               | ↓1              |
 |      6 |           27   |       29 |              5 | ↓1              | =               | ↑2              |
 |      7 |           25   |       21 |              9 | ↑1              | ↑4              | =               |
@@ -453,35 +453,35 @@ Welcome to your SOTD Hardware Report for February 2025
 
 ## Top Shavers
 
-| Rank   | User                   |   Shaves |   Missed Days | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
-|:-------|:-----------------------|---------:|--------------:|:----------------|:----------------|:----------------|
-| 1      | u/Engineered_Shave     |       33 |             0 | ↑21             | ↑2              | n/a             |
-| 2      | u/Impressive_Donut114  |       32 |             0 | ↑1              | ↓1              | n/a             |
-| 3      | u/djundjila            |       31 |             0 | =               | =               | n/a             |
-| 4=     | u/Crossan1983          |       30 |             0 | ↓1              | ↑71             | n/a             |
-| 4=     | u/snoo-ting            |       30 |             0 | ↓3              | n/a             | n/a             |
-| 6      | u/SamIAmShepard        |       29 |             0 | ↓3              | ↑31             | n/a             |
-| 7=     | u/35048467             |       28 |             0 | ↓4              | ↓4              | ↓5              |
-| 7=     | u/AdWorried2804        |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/BossHoggins10        |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/Environmental-Gap380 |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/FireDragonMonkey     |       28 |             0 | ↓4              | ↑25             | n/a             |
-| 7=     | u/Glass_Procedure7497  |       28 |             0 | ↓4              | ↑30             | n/a             |
-| 7=     | u/InfernalInternal     |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/Marquis90            |       28 |             0 | ↓4              | ↓5              | n/a             |
-| 7=     | u/anchovie7468         |       28 |             0 | ↓4              | n/a             | n/a             |
-| 7=     | u/brokenjaw622         |       28 |             0 | ↓4              | n/a             | n/a             |
-| 7=     | u/el_charminman        |       28 |             0 | ↓4              | ↓4              | ↓5              |
-| 7=     | u/loudmusicboy         |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/oswald_heist         |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/partyman97_3         |       28 |             0 | ↓5              | ↓4              | n/a             |
-| 7=     | u/pridetwo             |       28 |             0 | ↑87             | ↑41             | n/a             |
-| 7=     | u/sahenders            |       28 |             0 | ↑38             | ↑37             | n/a             |
-| 7=     | u/scribe__             |       28 |             0 | ↓4              | ↓4              | n/a             |
-| 7=     | u/tsrblke              |       28 |             0 | ↓4              | ↑22             | n/a             |
-| 7=     | u/wallygator88         |       28 |             0 | ↑24             | ↓4              | ↑10             |
-| 7=     | u/wyze0ne              |       28 |             0 | ↑16             | ↑35             | ↑59             |
-| 27=    | u/Eructate             |       27 |             1 | ↑1              | ↓24             | n/a             |
-| 27=    | u/Old_Hiker            |       27 |             1 | ↓2              | ↓24             | ↓25             |
-| 27=    | u/Priusaurus           |       27 |             1 | ↑39             | ↑39             | n/a             |
-| 27=    | u/sandstorm99          |       27 |             1 | ↑4              | n/a             | n/a             |
+| Rank   | User                   |   Missed Days |   Shaves | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
+|:-------|:-----------------------|--------------:|---------:|:----------------|:----------------|:----------------|
+| 1      | u/Engineered_Shave     |             0 |       33 | ↑21             | ↑2              | n/a             |
+| 2      | u/Impressive_Donut114  |             0 |       32 | ↑1              | ↓1              | n/a             |
+| 3      | u/djundjila            |             0 |       31 | =               | =               | n/a             |
+| 4=     | u/Crossan1983          |             0 |       30 | ↓1              | ↑71             | n/a             |
+| 4=     | u/snoo-ting            |             0 |       30 | ↓3              | n/a             | n/a             |
+| 6      | u/SamIAmShepard        |             0 |       29 | ↓3              | ↑31             | n/a             |
+| 7=     | u/35048467             |             0 |       28 | ↓4              | ↓4              | ↓5              |
+| 7=     | u/AdWorried2804        |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/BossHoggins10        |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/Environmental-Gap380 |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/FireDragonMonkey     |             0 |       28 | ↓4              | ↑25             | n/a             |
+| 7=     | u/Glass_Procedure7497  |             0 |       28 | ↓4              | ↑30             | n/a             |
+| 7=     | u/InfernalInternal     |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/Marquis90            |             0 |       28 | ↓4              | ↓5              | n/a             |
+| 7=     | u/anchovie7468         |             0 |       28 | ↓4              | n/a             | n/a             |
+| 7=     | u/brokenjaw622         |             0 |       28 | ↓4              | n/a             | n/a             |
+| 7=     | u/el_charminman        |             0 |       28 | ↓4              | ↓4              | ↓5              |
+| 7=     | u/loudmusicboy         |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/oswald_heist         |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/partyman97_3         |             0 |       28 | ↓5              | ↓4              | n/a             |
+| 7=     | u/pridetwo             |             0 |       28 | ↑87             | ↑41             | n/a             |
+| 7=     | u/sahenders            |             0 |       28 | ↑38             | ↑37             | n/a             |
+| 7=     | u/scribe__             |             0 |       28 | ↓4              | ↓4              | n/a             |
+| 7=     | u/tsrblke              |             0 |       28 | ↓4              | ↑22             | n/a             |
+| 7=     | u/wallygator88         |             0 |       28 | ↑24             | ↓4              | ↑10             |
+| 7=     | u/wyze0ne              |             0 |       28 | ↑16             | ↑35             | ↑59             |
+| 27=    | u/Eructate             |             1 |       27 | ↑1              | ↓24             | n/a             |
+| 27=    | u/Old_Hiker            |             1 |       27 | ↓2              | ↓24             | ↓25             |
+| 27=    | u/Priusaurus           |             1 |       27 | ↑39             | ↑39             | n/a             |
+| 27=    | u/sandstorm99          |             1 |       27 | ↑4              | n/a             | n/a             |
