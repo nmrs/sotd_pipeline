@@ -181,6 +181,48 @@ class TableGenerator:
 
         return formatted_df
 
+    def _format_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format numeric columns with comma separators for thousands.
+
+        Args:
+            df: DataFrame to format
+
+        Returns:
+            DataFrame with formatted numeric columns
+        """
+        formatted_df = df.copy()
+
+        # Get all numeric columns, excluding rank and delta columns
+        numeric_columns = formatted_df.select_dtypes(include=["int64", "float64", "int32", "float32"]).columns
+        columns_to_format = [
+            col
+            for col in numeric_columns
+            if col != "rank" and not col.startswith("Δ")
+        ]
+
+        # Format each numeric column with commas
+        for col in columns_to_format:
+            # Convert column to object type first to avoid dtype warnings
+            formatted_df[col] = formatted_df[col].astype(object)
+            
+            # Format all values: integers get commas, floats with decimals stay as is
+            def format_value(x):
+                if pd.isna(x):
+                    return x
+                if isinstance(x, (int, float)) and x == int(x):
+                    # Whole number - format with commas
+                    return f"{int(x):,}"
+                elif isinstance(x, int):
+                    # Integer - format with commas
+                    return f"{x:,}"
+                else:
+                    # Float with decimals - keep as is (will be formatted by to_markdown)
+                    return x
+            
+            formatted_df[col] = formatted_df[col].apply(format_value)
+
+        return formatted_df
+
     def _format_soap_links(
         self, df: pd.DataFrame, table_name: str, enable_wsdb: bool = False
     ) -> pd.DataFrame:
@@ -1010,6 +1052,9 @@ class TableGenerator:
 
         # Format usernames with "u/" prefix for Reddit display
         df = self._format_usernames(df)
+
+        # Format numeric columns with commas (excluding rank and delta columns)
+        df = self._format_numeric_columns(df)
 
         # Convert to markdown
         result = df.to_markdown(index=False)

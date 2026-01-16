@@ -66,20 +66,27 @@ class AnnualReportGenerator(BaseReportGenerator):
         missing_months_count = _count(self.metadata.get("missing_months", []))
         included_months_count = _count(self.metadata.get("included_months", []))
 
+        # Format all numeric values with commas
+        total_shaves = self.metadata.get("total_shaves", 0)
+        unique_shavers = self.metadata.get("unique_shavers", 0)
+        total_samples = self.metadata.get("total_samples", 0)
+        sample_users = self.metadata.get("sample_users", 0)
+        sample_brands = self.metadata.get("sample_brands", 0)
+
         variables = {
             "year": self.year,
-            "total_shaves": f"{self.metadata.get('total_shaves', 0):,}",
-            "unique_shavers": str(self.metadata.get("unique_shavers", 0)),
+            "total_shaves": f"{total_shaves:,}",
+            "unique_shavers": f"{unique_shavers:,}",
             "avg_shaves_per_user": f"{self.metadata.get('avg_shaves_per_user', 0):.1f}",
             "median_shaves_per_user": f"{self.metadata.get('median_shaves_per_user', 0):.1f}",
-            "total_samples": f"{self.metadata.get('total_samples', 0):,}",
+            "total_samples": f"{total_samples:,}",
             "sample_percentage": f"{self.metadata.get('sample_percentage', 0):.1f}%",
-            "sample_users": str(self.metadata.get("sample_users", 0)),
-            "sample_brands": str(self.metadata.get("sample_brands", 0)),
-            "included_months": str(included_months_count),
-            "missing_months": str(missing_months_count),
+            "sample_users": f"{sample_users:,}",
+            "sample_brands": f"{sample_brands:,}",
+            "included_months": f"{included_months_count:,}",
+            "missing_months": f"{missing_months_count:,}",
             "missing_months_note": (
-                f"* Note: {missing_months_count} month{'s' if missing_months_count != 1 else ''} "
+                f"* Note: {missing_months_count:,} month{'s' if missing_months_count != 1 else ''} "
                 f"{'were' if missing_months_count != 1 else 'was'} missing from the data set."
                 if missing_months_count > 0
                 else ""

@@ -100,20 +100,16 @@ class MonthlyReportGenerator(BaseReportGenerator):
             elif key == "avg_shaves_per_user" or key == "median_shaves_per_user":
                 # Format decimal numbers
                 variables[key] = f"{value:.1f}"
-            elif key in [
-                "total_shaves",
-                "unique_soaps",
-                "unique_brands",
-                "total_samples",
-                "unique_shavers",
-                "sample_users",
-                "sample_brands",
-            ]:
-                # Format large numbers with commas
-                variables[key] = f"{value:,}"
             elif key == "sample_percentage":
                 # Format percentage
                 variables[key] = f"{value:.1f}%"
+            elif isinstance(value, (int, float)):
+                # Format all numeric values with commas (integers) or as decimals (floats)
+                if isinstance(value, int) or (isinstance(value, float) and value.is_integer()):
+                    variables[key] = f"{int(value):,}"
+                else:
+                    # For non-integer floats, format with appropriate decimal places
+                    variables[key] = f"{value:.1f}"
             else:
                 # Convert everything else to string
                 variables[key] = str(value)
