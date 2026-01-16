@@ -16,6 +16,7 @@ from pydantic import BaseModel
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from sotd.aggregate.aggregators.product_usage import aggregate_product_usage  # noqa: E402
 from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
     _extract_date_from_thread_title,
 )
@@ -53,6 +54,7 @@ class ProductUsageAnalysis(BaseModel):
     users: List[UserProductUsage]
     usage_by_date: Dict[str, List[str]]
     comments_by_date: Dict[str, List[str]]
+    comment_urls: Optional[Dict[str, str]] = None  # Optional for backward compatibility
 
 
 class MonthlyProductSummary(BaseModel):
@@ -163,9 +165,55 @@ async def get_products_for_month(
         if product_type not in ["razor", "blade", "brush", "soap"]:
             raise HTTPException(status_code=400, detail=f"Invalid product type: {product_type}")
 
-        # Load enriched data
+        project_root = Path(__file__).parent.parent.parent
+
+        # Try to load from pre-computed product usage file
+        product_usage_file = (
+            project_root / "data" / "aggregated" / "product_usage" / f"{month}.json"
+        )
+
+        if product_usage_file.exists():
+            try:
+                with product_usage_file.open("r", encoding="utf-8") as f:
+                    product_usage_data = json.load(f)
+
+                # Extract products from the product type category
+                products_dict = product_usage_data.get(product_type + "s", {})
+                products = []
+                for product_key, analysis in products_dict.items():
+                    product_info = analysis.get("product", {})
+                    products.append(
+                        {
+                            "key": product_key,
+                            "brand": product_info.get("brand", ""),
+                            "model": product_info.get("model", ""),
+                            "usage_count": analysis.get("total_usage", 0),
+                            "unique_users": analysis.get("unique_users", 0),
+                        }
+                    )
+
+                # Sort by usage count (descending)
+                products.sort(key=lambda x: x["usage_count"], reverse=True)
+
+                # Apply search filter if provided
+                if search:
+                    search_lower = search.lower()
+                    products = [
+                        p
+                        for p in products
+                        if search_lower in p["brand"].lower() or search_lower in p["model"].lower()
+                    ]
+
+                # Limit to top 100 for performance
+                return products[:100]
+
+            except Exception as e:
+                logger.warning(
+                    f"Error loading product usage file for {month}: {e}, falling back to enriched data"
+                )
+
+        # Fallback: Load enriched data and process on-demand
         try:
-            project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
 
             if not enriched_file.exists():
@@ -174,65 +222,65 @@ async def get_products_for_month(
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
 
+            # Extract products from records
+            products_dict: Dict[str, Dict[str, Any]] = {}
+            records = enriched_data.get("data", [])
+
+            for record in records:
+                product_field = record.get(product_type)
+                if not product_field:
+                    continue
+
+                product_info = _extract_product_info(product_type, product_field)
+                if not product_info:
+                    continue
+
+                product_key = product_info["key"]
+                if product_key not in products_dict:
+                    products_dict[product_key] = {
+                        "key": product_key,
+                        "brand": product_info["brand"],
+                        "model": product_info["model"],
+                        "usage_count": 0,
+                        "unique_users": set(),
+                    }
+
+                products_dict[product_key]["usage_count"] += 1
+                author = record.get("author")
+                if author:
+                    products_dict[product_key]["unique_users"].add(author)
+
+            # Convert to list and format
+            products = []
+            for product_data in products_dict.values():
+                products.append(
+                    {
+                        "key": product_data["key"],
+                        "brand": product_data["brand"],
+                        "model": product_data["model"],
+                        "usage_count": product_data["usage_count"],
+                        "unique_users": len(product_data["unique_users"]),
+                    }
+                )
+
+            # Sort by usage count (descending)
+            products.sort(key=lambda x: x["usage_count"], reverse=True)
+
+            # Apply search filter if provided
+            if search:
+                search_lower = search.lower()
+                products = [
+                    p
+                    for p in products
+                    if search_lower in p["brand"].lower() or search_lower in p["model"].lower()
+                ]
+
+            # Limit to top 100 for performance
+            return products[:100]
+
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
             return []
-
-        # Extract products from records
-        products_dict: Dict[str, Dict[str, Any]] = {}
-        records = enriched_data.get("data", [])
-
-        for record in records:
-            product_field = record.get(product_type)
-            if not product_field:
-                continue
-
-            product_info = _extract_product_info(product_type, product_field)
-            if not product_info:
-                continue
-
-            product_key = product_info["key"]
-            if product_key not in products_dict:
-                products_dict[product_key] = {
-                    "key": product_key,
-                    "brand": product_info["brand"],
-                    "model": product_info["model"],
-                    "usage_count": 0,
-                    "unique_users": set(),
-                }
-
-            products_dict[product_key]["usage_count"] += 1
-            author = record.get("author")
-            if author:
-                products_dict[product_key]["unique_users"].add(author)
-
-        # Convert to list and format
-        products = []
-        for product_data in products_dict.values():
-            products.append(
-                {
-                    "key": product_data["key"],
-                    "brand": product_data["brand"],
-                    "model": product_data["model"],
-                    "usage_count": product_data["usage_count"],
-                    "unique_users": len(product_data["unique_users"]),
-                }
-            )
-
-        # Sort by usage count (descending)
-        products.sort(key=lambda x: x["usage_count"], reverse=True)
-
-        # Apply search filter if provided
-        if search:
-            search_lower = search.lower()
-            products = [
-                p
-                for p in products
-                if search_lower in p["brand"].lower() or search_lower in p["model"].lower()
-            ]
-
-        # Limit to top 100 for performance
-        return products[:100]
 
     except HTTPException:
         raise
@@ -255,9 +303,48 @@ async def get_product_usage_analysis(
         if product_type not in ["razor", "blade", "brush", "soap"]:
             raise HTTPException(status_code=400, detail=f"Invalid product type: {product_type}")
 
-        # Load enriched data
+        project_root = Path(__file__).parent.parent.parent
+
+        # Generate product key for lookup
+        if product_type == "soap":
+            product_key = f"{brand}|{model}"  # model is scent for soap
+        else:
+            product_key = f"{brand}|{model}"
+
+        # Try to load from pre-computed product usage file
+        product_usage_file = (
+            project_root / "data" / "aggregated" / "product_usage" / f"{month}.json"
+        )
+
+        if product_usage_file.exists():
+            try:
+                with product_usage_file.open("r", encoding="utf-8") as f:
+                    product_usage_data = json.load(f)
+
+                # Find product in the appropriate category
+                products_dict = product_usage_data.get(product_type + "s", {})
+                if product_key in products_dict:
+                    analysis = products_dict[product_key]
+                    # Ensure comment_urls is present (may be missing in older files)
+                    if "comment_urls" not in analysis:
+                        analysis["comment_urls"] = None
+                    # Convert to expected format (already in correct structure)
+                    return ProductUsageAnalysis(**analysis)
+                else:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Product {product_type} '{brand} {model}' not found in month {month}",
+                    )
+
+            except HTTPException:
+                raise
+            except Exception as e:
+                logger.warning(
+                    f"Error loading product usage file for {month}: {e}, falling back to enriched data"
+                )
+
+        # Fallback: Load enriched data and process on-demand
         try:
-            project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
 
             if not enriched_file.exists():
@@ -266,128 +353,38 @@ async def get_product_usage_analysis(
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
 
+            # Generate product usage analysis on-demand
+            product_analyses = aggregate_product_usage(enriched_data["data"])
+
+            # Find product in the appropriate category
+            products_dict = product_analyses.get(product_type + "s", {})
+            if product_key in products_dict:
+                analysis = products_dict[product_key]
+                # Ensure comment_urls is present (may be missing in older aggregations)
+                if "comment_urls" not in analysis:
+                    analysis["comment_urls"] = None
+                # Convert to expected format
+                return ProductUsageAnalysis(**analysis)
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Product {product_type} '{brand} {model}' not found in month {month}",
+                )
+
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Error loading enriched data for {month}: {e}")
-            raise HTTPException(status_code=500, detail="Error loading enriched data")
-
-        # Filter records by product match
-        matching_records = []
-        records = enriched_data.get("data", [])
-
-        for record in records:
-            product_field = record.get(product_type)
-            if not product_field:
-                continue
-
-            matched = product_field.get("matched", {})
-            if not matched:
-                continue
-
-            # Match based on product type
-            if product_type == "razor":
-                if matched.get("brand") == brand and matched.get("model") == model:
-                    matching_records.append(record)
-            elif product_type == "blade":
-                if matched.get("brand") == brand and matched.get("model") == model:
-                    matching_records.append(record)
-            elif product_type == "brush":
-                # For brushes, match on brand/model (handle/knot info is for display)
-                if matched.get("brand") == brand and matched.get("model") == model:
-                    matching_records.append(record)
-            elif product_type == "soap":
-                # For soap, brand is maker and model is scent
-                if matched.get("brand") == brand and matched.get("scent") == model:
-                    matching_records.append(record)
-
-        if not matching_records:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Product {product_type} '{brand} {model}' not found in month {month}",
-            )
-
-        # Group by user and extract dates
-        users_dict: Dict[str, Dict[str, Any]] = {}
-        comments_by_date: Dict[str, List[str]] = {}
-        total_usage = len(matching_records)
-
-        for record in matching_records:
-            author = record.get("author", "")
-            comment_id = record.get("id", "")
-            thread_title = record.get("thread_title", "")
-
-            if not author:
-                continue
-
-            # Initialize user if not exists
-            if author not in users_dict:
-                users_dict[author] = {
-                    "username": author,
-                    "usage_count": 0,
-                    "usage_dates": [],
-                    "comment_ids": [],
-                }
-
-            users_dict[author]["usage_count"] += 1
-            if comment_id:
-                users_dict[author]["comment_ids"].append(comment_id)
-
-            # Extract date from thread title
-            if thread_title and comment_id:
-                try:
-                    posted_date = _extract_date_from_thread_title(thread_title)
-                    date_str = posted_date.strftime("%Y-%m-%d")
-
-                    if date_str not in comments_by_date:
-                        comments_by_date[date_str] = []
-
-                    comments_by_date[date_str].append(comment_id)
-
-                    # Add date to user if not already present
-                    if date_str not in users_dict[author]["usage_dates"]:
-                        users_dict[author]["usage_dates"].append(date_str)
-
-                except Exception as e:
-                    logger.warning(
-                        f"Could not extract date from thread title: {thread_title} - {e}"
-                    )
-                    continue
-
-        # Convert users dict to list and sort by usage count
-        users_list = list(users_dict.values())
-        users_list.sort(key=lambda x: x["usage_count"], reverse=True)
-
-        # Sort usage dates for each user
-        for user in users_list:
-            user["usage_dates"].sort()
-
-        # Build usage_by_date (same as comments_by_date for consistency)
-        usage_by_date = comments_by_date.copy()
-
-        # Build response
-        analysis = {
-            "product": {
-                "type": product_type,
-                "brand": brand,
-                "model": model,
-            },
-            "total_usage": total_usage,
-            "unique_users": len(users_list),
-            "users": users_list,
-            "usage_by_date": usage_by_date,
-            "comments_by_date": comments_by_date,
-        }
-
-        return ProductUsageAnalysis(**analysis)
+            logger.error(f"Error loading enriched data for {month}: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Error loading enriched data: {str(e)}")
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(
-            f"Error analyzing product {product_type} '{brand} {model}' for month {month}: {e}"
+            f"Error analyzing product {product_type} '{brand} {model}' for month {month}: {e}",
+            exc_info=True,
         )
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 def _construct_product_name(product_type: str, brand: str, model: str) -> str:

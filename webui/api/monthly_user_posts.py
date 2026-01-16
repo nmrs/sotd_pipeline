@@ -14,8 +14,8 @@ from pydantic import BaseModel
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from sotd.aggregate.aggregators.user_analysis import aggregate_user_analysis  # noqa: E402
 from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
-    _extract_date_from_thread_title,
     aggregate_users,
 )
 
@@ -33,6 +33,7 @@ class UserPostingAnalysis(BaseModel):
     posted_dates: List[str]
     comment_ids: List[str]
     comments_by_date: Dict[str, List[str]]
+    comment_urls: Optional[Dict[str, str]] = None  # Optional for backward compatibility
     # Product usage data
     razors: List[Dict[str, Any]]
     blades: List[Dict[str, Any]]
@@ -97,10 +98,37 @@ async def get_users_for_month(
 ) -> List[Dict[str, Any]]:
     """Get list of users who posted in a specific month."""
     try:
-        # Load enriched data
+        project_root = Path(__file__).parent.parent.parent
+
+        # Try to load from pre-computed user analysis file
+        user_analysis_file = project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+
+        if user_analysis_file.exists():
+            try:
+                with user_analysis_file.open("r", encoding="utf-8") as f:
+                    user_analysis_data = json.load(f)
+
+                # Extract users from the analysis data
+                users_dict = user_analysis_data.get("users", {})
+                users = [
+                    {"username": username, "post_count": analysis.get("posted_days", 0)}
+                    for username, analysis in users_dict.items()
+                ]
+
+                # Apply search filter if provided
+                if search:
+                    search_lower = search.lower()
+                    users = [user for user in users if search_lower in user["username"].lower()]
+
+                # Sort by post_count descending
+                users.sort(key=lambda x: x["post_count"], reverse=True)
+                return users[:50]
+
+            except Exception as e:
+                logger.warning(f"Error loading user analysis file for {month}: {e}, falling back to enriched data")
+
+        # Fallback: Load enriched data and process on-demand
         try:
-            # Get project root directory (3 levels up from this file)
-            project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
 
             if not enriched_file.exists():
@@ -109,25 +137,25 @@ async def get_users_for_month(
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
 
+            # Use existing user aggregation logic
+            user_aggregations = aggregate_users(enriched_data["data"])
+
+            # Convert to our expected format
+            users = [
+                {"username": user["user"], "post_count": user["shaves"]} for user in user_aggregations
+            ]
+
+            # Apply search filter if provided
+            if search:
+                search_lower = search.lower()
+                users = [user for user in users if search_lower in user["username"].lower()]
+
+            # Return more users for better coverage (limit to top 50 instead of 20)
+            return users[:50]
+
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
             return []
-
-        # Use existing user aggregation logic
-        user_aggregations = aggregate_users(enriched_data["data"])
-
-        # Convert to our expected format
-        users = [
-            {"username": user["user"], "post_count": user["shaves"]} for user in user_aggregations
-        ]
-
-        # Apply search filter if provided
-        if search:
-            search_lower = search.lower()
-            users = [user for user in users if search_lower in user["username"].lower()]
-
-        # Return more users for better coverage (limit to top 50 instead of 20)
-        return users[:50]
 
     except Exception as e:
         logger.error(f"Error getting users for month {month}: {e}")
@@ -138,10 +166,37 @@ async def get_users_for_month(
 async def get_user_posting_analysis(month: str, username: str) -> UserPostingAnalysis:
     """Get posting analysis for a specific user in a specific month."""
     try:
-        # Load enriched data
+        project_root = Path(__file__).parent.parent.parent
+
+        # Try to load from pre-computed user analysis file
+        user_analysis_file = project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+
+        if user_analysis_file.exists():
+            try:
+                with user_analysis_file.open("r", encoding="utf-8") as f:
+                    user_analysis_data = json.load(f)
+
+                # Find the specific user
+                users_dict = user_analysis_data.get("users", {})
+                if username not in users_dict:
+                    raise HTTPException(
+                        status_code=404, detail=f"User {username} not found in month {month}"
+                    )
+
+                user_analysis = users_dict[username]
+
+                # Convert to expected format (already in correct structure)
+                return UserPostingAnalysis(**user_analysis)
+
+            except HTTPException:
+                raise
+            except Exception as e:
+                logger.warning(
+                    f"Error loading user analysis file for {month}: {e}, falling back to enriched data"
+                )
+
+        # Fallback: Load enriched data and process on-demand
         try:
-            # Get project root directory (3 levels up from this file)
-            project_root = Path(__file__).parent.parent.parent
             enriched_file = project_root / "data" / "enriched" / f"{month}.json"
 
             if not enriched_file.exists():
@@ -150,189 +205,24 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
             with enriched_file.open("r", encoding="utf-8") as f:
                 enriched_data = json.load(f)
 
+            # Generate user analysis on-demand
+            user_analyses = aggregate_user_analysis(enriched_data["data"])
+
+            if username not in user_analyses:
+                raise HTTPException(
+                    status_code=404, detail=f"User {username} not found in month {month}"
+                )
+
+            user_analysis = user_analyses[username]
+
+            # Convert to expected format
+            return UserPostingAnalysis(**user_analysis)
+
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
             raise HTTPException(status_code=500, detail="Error loading enriched data")
-
-        # Debug logging
-        logger.debug(f"Enriched data type: {type(enriched_data)}")
-        data_keys = list(enriched_data.keys()) if isinstance(enriched_data, dict) else "Not a dict"
-        logger.debug(f"Enriched data keys: {data_keys}")
-
-        # Use existing user aggregation logic
-        user_aggregations = aggregate_users(enriched_data["data"])
-
-        # Find the specific user
-        user_analysis = None
-        for user in user_aggregations:
-            if user["user"] == username:
-                user_analysis = user
-                break
-
-        if not user_analysis:
-            raise HTTPException(
-                status_code=404, detail=f"User {username} not found in month {month}"
-            )
-
-        # Calculate posted dates and comment IDs for the specific user
-        user_records = [
-            record for record in enriched_data.get("data", []) if record.get("author") == username
-        ]
-
-        # Extract posted dates and comment IDs
-        posted_dates = []
-        comment_ids = []
-        comments_by_date = {}
-
-        for record in user_records:
-            thread_title = record.get("thread_title", "")
-            comment_id = record.get("id", "")
-
-            if thread_title and comment_id:
-                try:
-                    posted_date = _extract_date_from_thread_title(thread_title)
-                    date_str = posted_date.strftime("%Y-%m-%d")
-
-                    if date_str not in comments_by_date:
-                        comments_by_date[date_str] = []
-                        posted_dates.append(date_str)
-
-                    comments_by_date[date_str].append(comment_id)
-                    comment_ids.append(comment_id)
-
-                except Exception as e:
-                    logger.warning(
-                        f"Could not extract date from thread title: {thread_title} - {e}"
-                    )
-                    continue
-
-        # Extract product usage data
-        razors = []
-        blades = []
-        brushes = []
-        soaps = []
-
-        for record in user_records:
-            comment_id = record.get("id", "")
-
-            # Extract razor data
-            if "razor" in record and record["razor"]:
-                razor = record["razor"]
-                matched = razor.get("matched", {})
-                if matched and matched.get("brand") and matched.get("model"):
-                    razor_key = f"{matched['brand']}|{matched['model']}"
-                    existing = next((r for r in razors if r["key"] == razor_key), None)
-                    if existing:
-                        existing["count"] += 1
-                        existing["comment_ids"].append(comment_id)
-                    else:
-                        razors.append(
-                            {
-                                "key": razor_key,
-                                "brand": matched["brand"],
-                                "model": matched["model"],
-                                "count": 1,
-                                "comment_ids": [comment_id],
-                            }
-                        )
-
-            # Extract blade data
-            if "blade" in record and record["blade"]:
-                blade = record["blade"]
-                matched = blade.get("matched", {})
-                if matched and matched.get("brand") and matched.get("model"):
-                    blade_key = f"{matched['brand']}|{matched['model']}"
-                    existing = next((b for b in blades if b["key"] == blade_key), None)
-                    if existing:
-                        existing["count"] += 1
-                        existing["comment_ids"].append(comment_id)
-                    else:
-                        blades.append(
-                            {
-                                "key": blade_key,
-                                "brand": matched["brand"],
-                                "model": matched["model"],
-                                "count": 1,
-                                "comment_ids": [comment_id],
-                            }
-                        )
-
-            # Extract brush data
-            if "brush" in record and record["brush"]:
-                brush = record["brush"]
-                matched = brush.get("matched", {})
-
-                # Extract brush information from various possible locations
-                brush_brand = matched.get("brand")
-                brush_model = matched.get("model")
-
-                # Get handle and knot info for display purposes
-                handle = matched.get("handle", {})
-                knot = matched.get("knot", {})
-                handle_brand = handle.get("brand", "") if handle else ""
-                knot_brand = knot.get("brand", "") if knot else ""
-                knot_model = knot.get("model", "") if knot else ""
-
-                # Process all brushes, even those without top-level brand/model
-                # Use actual top-level values, don't fill with fallbacks
-                brush_key = (
-                    f"{brush_brand or ''}|{brush_model or ''}|"
-                    f"{handle_brand}|{knot_brand}|{knot_model}"
-                )
-                existing = next((b for b in brushes if b["key"] == brush_key), None)
-                if existing:
-                    existing["count"] += 1
-                    existing["comment_ids"].append(comment_id)
-                else:
-                    brushes.append(
-                        {
-                            "key": brush_key,
-                            "brand": brush_brand or "",
-                            "model": brush_model or "",
-                            "handle_brand": handle_brand,
-                            "knot_brand": knot_brand,
-                            "knot_model": knot_model,
-                            "count": 1,
-                            "comment_ids": [comment_id],
-                        }
-                    )
-
-            # Extract soap data
-            if "soap" in record and record["soap"]:
-                soap = record["soap"]
-                matched = soap.get("matched", {})
-                if matched and matched.get("brand") and matched.get("scent"):
-                    soap_key = f"{matched['brand']}|{matched['scent']}"
-                    existing = next((s for s in soaps if s["key"] == soap_key), None)
-                    if existing:
-                        existing["count"] += 1
-                        existing["comment_ids"].append(comment_id)
-                    else:
-                        soaps.append(
-                            {
-                                "key": soap_key,
-                                "brand": matched["brand"],
-                                "model": matched["scent"],
-                                "count": 1,
-                                "comment_ids": [comment_id],
-                            }
-                        )
-
-        # Convert to our expected format
-        analysis = {
-            "user": user_analysis["user"],
-            "posted_days": user_analysis["shaves"],
-            "missed_days": user_analysis["missed_days"],
-            "posted_dates": sorted(posted_dates),
-            "comment_ids": comment_ids,
-            "comments_by_date": comments_by_date,
-            "razors": razors,
-            "blades": blades,
-            "brushes": brushes,
-            "soaps": soaps,
-        }
-
-        return UserPostingAnalysis(**analysis)
 
     except HTTPException:
         raise
