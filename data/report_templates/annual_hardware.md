@@ -6,6 +6,10 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report, for an average of {{avg_shaves_per_user}} (median {{median_shaves_per_user}}) shaves per user.
 
+## Observations
+
+* [Observations will be generated based on data analysis]
+
 ## Notes & Caveats
 
 * Most tables are row-limited to keep them readable and avoid max post length issues. If the final row is part of a tie, the entire tied group is included in the report.
@@ -24,68 +28,68 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 ## Razors
 
-{{tables.razors|ranks:50|columns:rank, name=razor, shaves, unique_users|deltas:true}}
+{{tables.razors|ranks:50|columns:rank, name=razor, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Razor Manufacturers
 
-{{tables.razor-manufacturers|ranks:30|deltas:true}}
+{{tables.razor-manufacturers|ranks:30|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Blades
 
-{{tables.blades|ranks:50|columns:rank, name=blade, shaves, unique_users|deltas:true}}
+{{tables.blades|ranks:50|columns:rank, name=blade, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Brushes
 
-{{tables.brushes|ranks:50|columns:rank, name=brush, shaves, unique_users|deltas:true}}
+{{tables.brushes|ranks:50|columns:rank, name=brush, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Brush Handle Makers
 
-{{tables.brush-handle-makers|ranks:30|columns:rank, name, shaves, unique_users|deltas:true}}
+{{tables.brush-handle-makers|ranks:30|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers|ranks:30|columns:rank, brand=Knot Maker, shaves, unique_users|deltas:true}}
+{{tables.brush-knot-makers|ranks:30|columns:rank, name=Knot Maker, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Knot Fibers
 
-{{tables.brush-fibers|deltas:true}}
+{{tables.brush-fibers|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Knot Sizes
 
-{{tables.brush-knot-sizes|deltas:true}}
+{{tables.brush-knot-sizes|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Blackbird Plates
 
-{{tables.blackbird-plates|deltas:true}}
+{{tables.blackbird-plates|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Christopher Bradley Plates
 
-{{tables.christopher-bradley-plates|deltas:true}}
+{{tables.christopher-bradley-plates|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Game Changer Plates
 
-{{tables.game-changer-plates|columns:rank, gap=plate, shaves, unique_users|deltas:true}}
+{{tables.game-changer-plates|columns:rank, name, gap=plate, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Straight Widths
 
-{{tables.straight-widths|deltas:true}}
+{{tables.straight-widths|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Straight Grinds
 
-{{tables.straight-grinds|deltas:true}}
+{{tables.straight-grinds|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Straight Points
 
-{{tables.straight-points|deltas:true}}
+{{tables.straight-points|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Most Used Blades in Most Used Razors
 
-{{tables.razor-blade-combinations|shaves:20}}
+{{tables.razor-blade-combinations|shaves:50|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user}}
 
 ## Highest Use Count per Blade
 
-{{tables.highest-use-count-per-blade|uses:20}}
+{{tables.highest-use-count-per-blade|uses:50}}
 
 ## Top Shavers
 
-{{tables.users|ranks:30|columns:rank, user, missed_days, shaves|deltas:true}}
+{{tables.users|ranks:100|columns:rank, user, missed_days, shaves|deltas:true}}
