@@ -25,15 +25,9 @@ def session_soap_catalog():
                 "Almond Leather": {"patterns": ["almond.*leather"]},
             }
         },
-        "Noble Otter": {
-            "scents": {"'Tis the Season": {"patterns": ["'tis.*season"]}}
-        },
-        "Strike Gold Shave": {
-            "scents": {"Bee's Knees Soap": {"patterns": ["bee.*knees"]}}
-        },
-        "Southern Witchcrafts": {
-            "scents": {"Tres Matres": {"patterns": ["tres.*matres"]}}
-        },
+        "Noble Otter": {"scents": {"'Tis the Season": {"patterns": ["'tis.*season"]}}},
+        "Strike Gold Shave": {"scents": {"Bee's Knees Soap": {"patterns": ["bee.*knees"]}}},
+        "Southern Witchcrafts": {"scents": {"Tres Matres": {"patterns": ["tres.*matres"]}}},
     }
 
 
@@ -443,13 +437,7 @@ def test_enhanced_regex_error_reporting():
 def test_invalid_yaml_structure_validation():
     """Test that invalid YAML structure (scent directly under brand) raises ValueError."""
     # Invalid structure: scent directly under brand without 'scents:' wrapper
-    mock_catalog = {
-        "Test Brand": {
-            "Test Scent": {
-                "patterns": ["test.*pattern"]
-            }
-        }
-    }
+    mock_catalog = {"Test Brand": {"Test Scent": {"patterns": ["test.*pattern"]}}}
 
     # Mock the load_yaml_with_nfc function to return our mock catalog
     with patch("sotd.match.soap_matcher.load_yaml_with_nfc", return_value=mock_catalog):

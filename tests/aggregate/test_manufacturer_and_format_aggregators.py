@@ -75,10 +75,14 @@ def test_aggregate_razor_formats_basic():
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
     assert result[0]["rank"] == 1
+    assert result[0]["avg_shaves_per_user"] == 1.0
+    assert result[0]["median_shaves_per_user"] == 1.0
     assert result[1]["format"] == "Straight"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
     assert result[1]["rank"] == 2
+    assert result[1]["avg_shaves_per_user"] == 1.0
+    assert result[1]["median_shaves_per_user"] == 1.0
 
 
 def test_aggregate_razor_formats_shavette_ac():
@@ -227,6 +231,92 @@ def test_aggregate_razor_formats_no_razor_match():
     ]
     result = aggregate_razor_formats(records)
     assert len(result) == 0  # Should skip records with no razor match
+
+
+def test_aggregate_razor_formats_avg_shaves_per_user():
+    """Test average shaves per user calculation."""
+    records = [
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user2", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user2", "razor": {"matched": {"format": "DE"}}},
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 1
+    assert result[0]["format"] == "DE"
+    assert result[0]["shaves"] == 5
+    assert result[0]["unique_users"] == 2
+    assert result[0]["avg_shaves_per_user"] == 2.5
+    assert result[0]["median_shaves_per_user"] == 2.5  # Median of [3, 2] = 2.5
+
+
+def test_aggregate_razor_formats_median_shaves_per_user():
+    """Test median shaves per user calculation with odd number of users."""
+    records = [
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user2", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user3", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user3", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user3", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user3", "razor": {"matched": {"format": "DE"}}},
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 1
+    assert result[0]["format"] == "DE"
+    assert result[0]["shaves"] == 8
+    assert result[0]["unique_users"] == 3
+    assert result[0]["avg_shaves_per_user"] == round(8 / 3, 1)
+    # Median of [3, 1, 4] = 3.0
+    assert result[0]["median_shaves_per_user"] == 3.0
+
+
+def test_aggregate_razor_formats_avg_shaves_per_user_single_user():
+    """Test average shaves per user with single user."""
+    records = [
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 1
+    assert result[0]["format"] == "DE"
+    assert result[0]["shaves"] == 3
+    assert result[0]["unique_users"] == 1
+    assert result[0]["avg_shaves_per_user"] == 3.0
+    assert result[0]["median_shaves_per_user"] == 3.0
+
+
+def test_aggregate_razor_formats_avg_shaves_per_user_multiple_formats():
+    """Test average and median calculations across multiple formats."""
+    records = [
+        # Format 1: DE - user1 has 3 shaves, user2 has 2 shaves
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user1", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user2", "razor": {"matched": {"format": "DE"}}},
+        {"author": "user2", "razor": {"matched": {"format": "DE"}}},
+        # Format 2: Straight - user3 has 1 shave
+        {"author": "user3", "razor": {"matched": {"format": "Straight"}}},
+    ]
+    result = aggregate_razor_formats(records)
+    assert len(result) == 2
+
+    # Check DE format
+    de_result = next(r for r in result if r["format"] == "DE")
+    assert de_result["shaves"] == 5
+    assert de_result["unique_users"] == 2
+    assert de_result["avg_shaves_per_user"] == 2.5
+    assert de_result["median_shaves_per_user"] == 2.5  # Median of [3, 2] = 2.5
+
+    # Check Straight format
+    straight_result = next(r for r in result if r["format"] == "Straight")
+    assert straight_result["shaves"] == 1
+    assert straight_result["unique_users"] == 1
+    assert straight_result["avg_shaves_per_user"] == 1.0
+    assert straight_result["median_shaves_per_user"] == 1.0
 
 
 def test_aggregate_razor_formats_complex_scenario():

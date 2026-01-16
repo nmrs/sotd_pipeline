@@ -444,7 +444,5 @@ class TestEnrichmentOverrideManager:
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate") == "A"
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate_type") == "B"
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate_level") == "1"
-        assert (
-            manager.get_override("2026-01", "m99b8f9", "razor", "super_speed_tip") == "Red"
-        )
+        assert manager.get_override("2026-01", "m99b8f9", "razor", "super_speed_tip") == "Red"
         assert manager.get_override("2026-01", "m99b8f9", "razor", "format") == "DE"
