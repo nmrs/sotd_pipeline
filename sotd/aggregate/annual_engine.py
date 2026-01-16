@@ -528,6 +528,56 @@ class AnnualAggregationEngine:
 
         return result
 
+    def _calculate_median_shaves_per_user(self, monthly_data: Dict[str, Dict]) -> float:
+        """
+        Calculate median shaves per user from monthly aggregated data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+
+        Returns:
+            Median shaves per user (rounded to 1 decimal place)
+        """
+        if not monthly_data:
+            return 0.0
+
+        # Collect all user records from all months
+        all_user_records = []
+        for month, data in monthly_data.items():
+            if "data" in data and "users" in data["data"]:
+                users_data = data["data"]["users"]
+                if isinstance(users_data, list):
+                    all_user_records.extend(users_data)
+
+        if not all_user_records:
+            return 0.0
+
+        import pandas as pd
+
+        # Convert to DataFrame
+        df = pd.DataFrame(all_user_records)
+
+        # Group by user and sum shaves across all months
+        user_shaves = df.groupby("user")["shaves"].sum().reset_index()
+
+        # Get list of shave counts
+        shave_counts = user_shaves["shaves"].tolist()
+        shave_counts.sort()
+
+        if not shave_counts:
+            return 0.0
+
+        # Calculate median
+        n = len(shave_counts)
+        if n % 2 == 0:
+            # Even number of users, average of two middle values
+            median = (shave_counts[n // 2 - 1] + shave_counts[n // 2]) / 2
+        else:
+            # Odd number of users, middle value
+            median = shave_counts[n // 2]
+
+        return round(median, 1)
+
     def _aggregate_user_diversity(
         self, monthly_data: Dict[str, Dict], category: str
     ) -> List[Dict[str, Any]]:
@@ -689,6 +739,14 @@ class AnnualAggregationEngine:
                 total_shaves += meta.get("total_shaves", 0)
                 total_unique_shavers += meta.get("unique_shavers", 0)
 
+        # Calculate average shaves per user
+        avg_shaves_per_user = 0.0
+        if total_unique_shavers > 0:
+            avg_shaves_per_user = round(total_shaves / total_unique_shavers, 1)
+
+        # Calculate median shaves per user by aggregating user data from monthly records
+        median_shaves_per_user = self._calculate_median_shaves_per_user(monthly_data)
+
         # Use provided lists or calculate from monthly_data keys
         if included_months is None:
             included_months = sorted(monthly_data.keys())
@@ -709,6 +767,8 @@ class AnnualAggregationEngine:
             "year": self.year,
             "total_shaves": total_shaves,
             "unique_shavers": total_unique_shavers,
+            "avg_shaves_per_user": avg_shaves_per_user,
+            "median_shaves_per_user": median_shaves_per_user,
             "included_months": sorted(included_months),
             "missing_months": sorted(missing_months),
         }

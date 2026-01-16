@@ -4,35 +4,19 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 ## Annual Summary
 
-* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
-* Data includes {{included_months}} months of the year.
-{{missing_months_note}}
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report, for an average of {{avg_shaves_per_user}} (median {{median_shaves_per_user}}) shaves per user.
 
 ## Notes & Caveats
 
-* I only show the top n results per category to keep the tables readable and avoid max post length issues.
-
-* Blade Format stats now differentiate between DE and half DE razors.
+* Most tables are row-limited to keep them readable and avoid max post length issues. If the final row is part of a tie, the entire tied group is included in the report.
 
 * "Other" in the Blade Format table includes vintage reusable blades (including Rolls, Valet Auto Strop, and old-style lather catchers with wedge blades) as well as other antique proprietary blade formats (e.g. Enders Speed Blade)
 
 * Blades recorded as just 'GEM' will be matched to 'Personna GEM PTFE' per guidance [here](https://www.reddit.com/r/Wetshaving/comments/19a43q7/comment/kil95r8/)
 
-* The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for this report. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
+* The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for the time being. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
 
-    * Personna GEM PTFE is now Accutec Pro Premium (GEM)
-  
-    * Personna Lab Blue is now Accuforge Super Stainless MicroCoat
-  
-    * Personna Med Prep is now Accuthrive Super Med Prep
-
-    * The German-made Personna Platinums (aka "Personna Reds") will continue to use the Personna brand
-
-* In the case of most brush makers (eg Maggard) - knots are split into synthetic / badger / boar and attributed to the maker - eg 'Maggard Synthetic', though for particularly popular brush models (e.g. specific models from Semogue and Omega) or knots (e.g. DG, Chisel & Hound, or AP Shave Co.) they are reported on indvidually.
-
-* The unique user column shows the number of different users who used a given razor / brush etc during the year. We can combine this with the total number of shaves to get the average number of times a user used a razor / brush etc
-
-* The change Δ vs columns show how an item has moved up or down the rankings since the previous year. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to the previous year. n/a means the item was not present in the previous year.
+* The Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
 ## Razor Formats
 
