@@ -7,7 +7,7 @@ from typing import Optional, Sequence
 from tqdm import tqdm
 
 from ..cli_utils.date_span import month_span
-from .annual_engine import process_annual, process_annual_range
+from .annual_engine import process_annual, process_annual_range, process_annual_range_parallel
 from .annual_loader import load_annual_data
 from .cli import get_parser
 from .engine import process_months, process_months_parallel
@@ -17,6 +17,7 @@ __all__ = [
     "main",
     "process_annual",
     "process_annual_range",
+    "process_annual_range_parallel",
 ]
 
 
@@ -25,6 +26,7 @@ def run(args) -> bool:
     if args.annual:
         # Handle annual aggregation (annual handles missing files gracefully)
         if args.year:
+            # Single year - use sequential processing
             process_annual(
                 year=args.year, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
@@ -33,10 +35,29 @@ def run(args) -> bool:
             # Parse year range for annual mode
             start_year, end_year = args.range.split(":")
             years = [str(year) for year in range(int(start_year), int(end_year) + 1)]
-            process_annual_range(
-                years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
+
+            # Check if we should use parallel processing
+            use_parallel = (
+                hasattr(args, "parallel") and args.parallel or (len(years) > 1 and not args.debug)
             )
-            return False  # Annual aggregation handles missing files gracefully
+
+            if use_parallel and len(years) > 1:
+                # Use parallel processing
+                max_workers = getattr(args, "max_workers", 8)
+                has_errors = process_annual_range_parallel(
+                    years=years,
+                    data_dir=args.out_dir,
+                    debug=args.debug,
+                    force=args.force,
+                    max_workers=max_workers,
+                )
+                return has_errors
+            else:
+                # Use sequential processing
+                process_annual_range(
+                    years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
+                )
+                return False  # Annual aggregation handles missing files gracefully
         else:
             # No year or range specified for annual mode - this should be caught by argparse
             # but handle gracefully
