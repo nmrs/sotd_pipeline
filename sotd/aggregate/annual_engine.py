@@ -121,7 +121,31 @@ class AnnualAggregationEngine:
         Returns:
             List of aggregated razor data sorted by shaves desc, unique_users desc
         """
-        return aggregate_annual_razors(monthly_data)
+        result = aggregate_annual_razors(monthly_data)
+        # Recalculate unique_users and median from enriched records for accuracy
+        if result:
+            import pandas as pd
+
+            df = pd.DataFrame(result)
+            # Recalculate unique_users from enriched records
+            unique_users_values = self._calculate_unique_users_for_category(
+                "razors", df, "name", "name"
+            )
+            df["unique_users"] = unique_users_values
+            # Recalculate avg_shaves_per_user with accurate unique_users
+            df["avg_shaves_per_user"] = (df["shaves"] / df["unique_users"].replace(0, 1)).round(1)
+            df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+            # Calculate median
+            median_values = self._calculate_medians_for_category("razors", df, "name", "name")
+            df["median_shaves_per_user"] = median_values
+            # Update result with recalculated values
+            for idx, row in df.iterrows():
+                idx_int = int(idx) if isinstance(idx, (int, float)) else 0
+                if idx_int < len(result):
+                    result[idx_int]["unique_users"] = int(row["unique_users"])
+                    result[idx_int]["avg_shaves_per_user"] = float(row["avg_shaves_per_user"])
+                    result[idx_int]["median_shaves_per_user"] = float(row["median_shaves_per_user"])
+        return result
 
     def aggregate_blades(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -133,7 +157,31 @@ class AnnualAggregationEngine:
         Returns:
             List of aggregated blade data sorted by shaves desc, unique_users desc
         """
-        return aggregate_annual_blades(monthly_data)
+        result = aggregate_annual_blades(monthly_data)
+        # Recalculate unique_users and median from enriched records for accuracy
+        if result:
+            import pandas as pd
+
+            df = pd.DataFrame(result)
+            # Recalculate unique_users from enriched records
+            unique_users_values = self._calculate_unique_users_for_category(
+                "blades", df, "name", "name"
+            )
+            df["unique_users"] = unique_users_values
+            # Recalculate avg_shaves_per_user with accurate unique_users
+            df["avg_shaves_per_user"] = (df["shaves"] / df["unique_users"].replace(0, 1)).round(1)
+            df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+            # Calculate median
+            median_values = self._calculate_medians_for_category("blades", df, "name", "name")
+            df["median_shaves_per_user"] = median_values
+            # Update result with recalculated values
+            for idx, row in df.iterrows():
+                idx_int = int(idx) if isinstance(idx, (int, float)) else 0
+                if idx_int < len(result):
+                    result[idx_int]["unique_users"] = int(row["unique_users"])
+                    result[idx_int]["avg_shaves_per_user"] = float(row["avg_shaves_per_user"])
+                    result[idx_int]["median_shaves_per_user"] = float(row["median_shaves_per_user"])
+        return result
 
     def aggregate_brushes(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -145,7 +193,31 @@ class AnnualAggregationEngine:
         Returns:
             List of aggregated brush data sorted by shaves desc, unique_users desc
         """
-        return aggregate_annual_brushes(monthly_data)
+        result = aggregate_annual_brushes(monthly_data)
+        # Recalculate unique_users and median from enriched records for accuracy
+        if result:
+            import pandas as pd
+
+            df = pd.DataFrame(result)
+            # Recalculate unique_users from enriched records
+            unique_users_values = self._calculate_unique_users_for_category(
+                "brushes", df, "name", "name"
+            )
+            df["unique_users"] = unique_users_values
+            # Recalculate avg_shaves_per_user with accurate unique_users
+            df["avg_shaves_per_user"] = (df["shaves"] / df["unique_users"].replace(0, 1)).round(1)
+            df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+            # Calculate median
+            median_values = self._calculate_medians_for_category("brushes", df, "name", "name")
+            df["median_shaves_per_user"] = median_values
+            # Update result with recalculated values
+            for idx, row in df.iterrows():
+                idx_int = int(idx) if isinstance(idx, (int, float)) else 0
+                if idx_int < len(result):
+                    result[idx_int]["unique_users"] = int(row["unique_users"])
+                    result[idx_int]["avg_shaves_per_user"] = float(row["avg_shaves_per_user"])
+                    result[idx_int]["median_shaves_per_user"] = float(row["median_shaves_per_user"])
+        return result
 
     def aggregate_soaps(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -157,7 +229,31 @@ class AnnualAggregationEngine:
         Returns:
             List of aggregated soap data sorted by shaves desc, unique_users desc
         """
-        return aggregate_annual_soaps(monthly_data)
+        result = aggregate_annual_soaps(monthly_data)
+        # Recalculate unique_users and median from enriched records for accuracy
+        if result:
+            import pandas as pd
+
+            df = pd.DataFrame(result)
+            # Recalculate unique_users from enriched records
+            unique_users_values = self._calculate_unique_users_for_category(
+                "soaps", df, "name", "name"
+            )
+            df["unique_users"] = unique_users_values
+            # Recalculate avg_shaves_per_user with accurate unique_users
+            df["avg_shaves_per_user"] = (df["shaves"] / df["unique_users"].replace(0, 1)).round(1)
+            df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+            # Calculate median
+            median_values = self._calculate_medians_for_category("soaps", df, "name", "name")
+            df["median_shaves_per_user"] = median_values
+            # Update result with recalculated values
+            for idx, row in df.iterrows():
+                idx_int = int(idx) if isinstance(idx, (int, float)) else 0
+                if idx_int < len(result):
+                    result[idx_int]["unique_users"] = int(row["unique_users"])
+                    result[idx_int]["avg_shaves_per_user"] = float(row["avg_shaves_per_user"])
+                    result[idx_int]["median_shaves_per_user"] = float(row["median_shaves_per_user"])
+        return result
 
     def aggregate_brush_fibers(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -211,7 +307,33 @@ class AnnualAggregationEngine:
         self, monthly_data: Dict[str, Dict]
     ) -> List[Dict[str, Any]]:
         """Aggregate annual razor-blade combinations from monthly data."""
-        return aggregate_annual_razor_blade_combinations(monthly_data)
+        result = aggregate_annual_razor_blade_combinations(monthly_data)
+        # Recalculate unique_users and median from enriched records for accuracy
+        if result:
+            import pandas as pd
+
+            df = pd.DataFrame(result)
+            # Recalculate unique_users from enriched records
+            unique_users_values = self._calculate_unique_users_for_category(
+                "razor_blade_combinations", df, "name", "name"
+            )
+            df["unique_users"] = unique_users_values
+            # Recalculate avg_shaves_per_user with accurate unique_users
+            df["avg_shaves_per_user"] = (df["shaves"] / df["unique_users"].replace(0, 1)).round(1)
+            df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+            # Calculate median
+            median_values = self._calculate_medians_for_category(
+                "razor_blade_combinations", df, "name", "name"
+            )
+            df["median_shaves_per_user"] = median_values
+            # Update result with recalculated values
+            for idx, row in df.iterrows():
+                idx_int = int(idx) if isinstance(idx, (int, float)) else 0
+                if idx_int < len(result):
+                    result[idx_int]["unique_users"] = int(row["unique_users"])
+                    result[idx_int]["avg_shaves_per_user"] = float(row["avg_shaves_per_user"])
+                    result[idx_int]["median_shaves_per_user"] = float(row["median_shaves_per_user"])
+        return result
 
     def aggregate_highest_use_count_per_blade(
         self, monthly_data: Dict[str, Dict]
@@ -320,39 +442,72 @@ class AnnualAggregationEngine:
             return []
 
         # Use the same simple aggregation pattern as _aggregate_specialized_category
-        # Group by identifier and sum metrics (shaves, unique_users)
+        # Group by identifier and sum shaves (unique_users will be recalculated from enriched records)
         import pandas as pd
 
         # Convert to DataFrame
         df = pd.DataFrame(all_records)
 
-        # Determine which metric fields are available
-        agg_dict = {"shaves": "sum"}
-        if "unique_users" in df.columns:
-            # For unique_users, we need to sum them (they're already aggregated per month)
-            # But we should use max or a set union approach - actually, since these are
-            # already aggregated monthly values, we can't just sum unique_users across months
-            # as that would double-count users who appear in multiple months.
-            # However, for annual aggregation, summing is acceptable as an approximation
-            # The correct approach would be to track unique users across all months,
-            # but that requires the raw data. For now, we'll sum as the monthly aggregator
-            # already handles this correctly.
-            agg_dict["unique_users"] = "sum"
-
-        # Group by identifier field and sum metrics
-        grouped = df.groupby(identifier_field).agg(agg_dict).reset_index()
+        # Group by identifier field and sum shaves (don't sum unique_users - recalculate from enriched records)
+        grouped = df.groupby(identifier_field).agg({"shaves": "sum"}).reset_index()
 
         # Rename identifier_field to "name" for consistency with other aggregators
         grouped = grouped.rename(columns={identifier_field: "name"})
 
-        # Sort by shaves desc, then by unique_users desc if available
-        sort_columns = ["shaves"]
-        if "unique_users" in grouped.columns:
-            sort_columns.append("unique_users")
-        grouped = grouped.sort_values(sort_columns, ascending=[False] * len(sort_columns))
+        # Recalculate unique_users from enriched records for accuracy
+        # Determine the identifier field name in extracted data based on category
+        identifier_field_map = {
+            "brush_fibers": "fiber",
+            "brush_knot_sizes": "knot_size_mm",
+            "brush_handle_makers": "handle_maker",
+            "brush_knot_makers": "brand",
+        }
+        identifier_in_extracted = identifier_field_map.get(category, "name")
+
+        # Calculate accurate unique_users from enriched records
+        unique_users_values = self._calculate_unique_users_for_category(
+            category, grouped, "name", identifier_in_extracted
+        )
+        grouped["unique_users"] = unique_users_values
+
+        # Sort by shaves desc, then by unique_users desc
+        grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
         # Add rank column using competition ranking
         grouped["rank"] = grouped["shaves"].rank(method="min", ascending=False).astype(int)
+
+        # Calculate avg_shaves_per_user using accurate unique_users
+        grouped["avg_shaves_per_user"] = (
+            grouped["shaves"] / grouped["unique_users"].replace(0, 1)
+        ).round(1)
+        # Handle division by zero: if unique_users is 0, set avg to 0.0
+        grouped.loc[grouped["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+
+        # Calculate median_shaves_per_user using accurate unique_users
+        median_values = self._calculate_medians_for_category(
+            category, grouped, "name", identifier_in_extracted
+        )
+        grouped["median_shaves_per_user"] = median_values
+
+        # Reorder columns: rank, identifier, then metrics
+        column_order = ["rank", "name"]
+        if "unique_users" in grouped.columns:
+            column_order.append("unique_users")
+        column_order.append("shaves")
+        if "avg_shaves_per_user" in grouped.columns:
+            column_order.append("avg_shaves_per_user")
+        if "median_shaves_per_user" in grouped.columns:
+            column_order.append("median_shaves_per_user")
+        grouped = grouped[column_order]
+
+        # Replace NaN with 0.0 for numeric columns before conversion
+        if "median_shaves_per_user" in grouped.columns:
+            # Ensure it's a Series before calling fillna
+            median_col = grouped["median_shaves_per_user"]
+            if isinstance(median_col, pd.Series):
+                grouped["median_shaves_per_user"] = median_col.fillna(0.0)
+            else:
+                grouped["median_shaves_per_user"] = pd.Series(median_col).fillna(0.0)
 
         # Convert back to list of dicts
         return grouped.to_dict("records")
@@ -389,19 +544,15 @@ class AnnualAggregationEngine:
         if not all_records:
             return []
 
-        # Use AnnualAggregator pattern: group by identifier and sum metrics
+        # Use AnnualAggregator pattern: group by identifier and sum shaves
+        # unique_users will be recalculated from enriched records for accuracy
         import pandas as pd
 
         # Convert to DataFrame
         df = pd.DataFrame(all_records)
 
-        # Determine which metric fields are available
-        agg_dict = {"shaves": "sum"}
-        if "unique_users" in df.columns:
-            agg_dict["unique_users"] = "sum"
-
-        # Group by identifier field and sum metrics
-        grouped = df.groupby(identifier_field).agg(agg_dict).reset_index()
+        # Group by identifier field and sum shaves (don't sum unique_users - recalculate from enriched records)
+        grouped = df.groupby(identifier_field).agg({"shaves": "sum"}).reset_index()
 
         # Rename identifier_field to "name" for consistency with other aggregators
         # Exception: keep "user" field name for users table
@@ -411,26 +562,368 @@ class AnnualAggregationEngine:
         else:
             final_identifier = "user"
 
-        # Sort by shaves desc, then by unique_users desc if available
-        sort_columns = ["shaves"]
-        if "unique_users" in grouped.columns:
-            sort_columns.append("unique_users")
-        grouped = grouped.sort_values(sort_columns, ascending=[False] * len(sort_columns))
+        # Recalculate unique_users from enriched records for accuracy
+        # Determine the identifier field name in extracted data based on category
+        identifier_field_map = {
+            "razor_formats": "format",
+            "razor_manufacturers": "brand",
+            "blade_manufacturers": "brand",
+            "soap_makers": "brand",
+            "blackbird_plates": "plate",
+            "christopher_bradley_plates": "plate",
+            "game_changer_plates": "gap",
+            "straight_widths": "width",
+            "straight_grinds": "grind",
+            "straight_points": "point",
+        }
+        identifier_in_extracted = identifier_field_map.get(category, identifier_field)
+
+        # Calculate accurate unique_users from enriched records
+        unique_users_values = self._calculate_unique_users_for_category(
+            category, grouped, final_identifier, identifier_in_extracted
+        )
+        grouped["unique_users"] = unique_users_values
+
+        # Sort by shaves desc, then by unique_users desc
+        grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
         # Add rank column (1-based, with ties getting the same rank)
         grouped["rank"] = grouped["shaves"].rank(method="min", ascending=False).astype(int)
+
+        # Calculate avg_shaves_per_user using accurate unique_users
+        grouped["avg_shaves_per_user"] = (
+            grouped["shaves"] / grouped["unique_users"].replace(0, 1)
+        ).round(1)
+        # Handle division by zero: if unique_users is 0, set avg to 0.0
+        grouped.loc[grouped["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
+
+        # Calculate median_shaves_per_user using accurate unique_users
+        median_values = self._calculate_medians_for_category(
+            category, grouped, final_identifier, identifier_in_extracted
+        )
+        grouped["median_shaves_per_user"] = median_values
 
         # Reorder columns: rank, identifier, then metrics
         column_order = ["rank", final_identifier]
         if "unique_users" in grouped.columns:
             column_order.append("unique_users")
         column_order.append("shaves")
+        if "avg_shaves_per_user" in grouped.columns:
+            column_order.append("avg_shaves_per_user")
+        if "median_shaves_per_user" in grouped.columns:
+            column_order.append("median_shaves_per_user")
         grouped = grouped[column_order]
+
+        # Replace NaN with 0.0 for numeric columns before conversion
+        if "median_shaves_per_user" in grouped.columns:
+            # Ensure it's a Series before calling fillna
+            median_col = grouped["median_shaves_per_user"]
+            if isinstance(median_col, pd.Series):
+                grouped["median_shaves_per_user"] = median_col.fillna(0.0)
+            else:
+                grouped["median_shaves_per_user"] = pd.Series(median_col).fillna(0.0)
+
+        # Fill NaN for unique_users and avg_shaves_per_user
+        if "unique_users" in grouped.columns:
+            grouped["unique_users"] = grouped["unique_users"].fillna(0).astype(int)
+        if "avg_shaves_per_user" in grouped.columns:
+            grouped["avg_shaves_per_user"] = grouped["avg_shaves_per_user"].fillna(0.0)
 
         # Convert back to list of dicts
         result = grouped.to_dict("records")
 
         return result
+
+    def _load_enriched_records(self) -> List[Dict[str, Any]]:
+        """Load enriched records for all months in the year.
+
+        Returns:
+            List of enriched records from all months
+        """
+        from sotd.utils.file_io import load_json_data
+
+        enriched_dir = self.data_dir / "enriched"
+        all_enriched_records = []
+
+        # Get all months in the year
+        for month in range(1, 13):
+            month_str = f"{self.year}-{month:02d}"
+            enriched_file = enriched_dir / f"{month_str}.json"
+            if enriched_file.exists():
+                try:
+                    enriched_data = load_json_data(enriched_file)
+                    # Handle both list and dict structures
+                    if isinstance(enriched_data, list):
+                        all_enriched_records.extend(enriched_data)
+                    elif isinstance(enriched_data, dict) and "data" in enriched_data:
+                        if isinstance(enriched_data["data"], list):
+                            all_enriched_records.extend(enriched_data["data"])
+                except Exception:
+                    # Skip corrupted files
+                    continue
+
+        return all_enriched_records
+
+    def _calculate_medians_for_category(
+        self,
+        category: str,
+        grouped: "pd.DataFrame",
+        identifier_col: str,
+        identifier_field_in_extracted: str = "name",
+    ) -> "pd.Series":
+        """
+        Calculate median shaves per user for a category by loading enriched records and calculating directly.
+
+        Args:
+            category: Category name (e.g., "razors", "blades", "razor_manufacturers")
+            grouped: DataFrame with name/identifier, shaves, unique_users already calculated
+            identifier_col: Column name in grouped DataFrame (usually "name")
+            identifier_field_in_extracted: Field name in extracted data (e.g., "name", "brand", "plate")
+
+        Returns:
+            Series with median_shaves_per_user values indexed by identifier
+        """
+        import pandas as pd
+
+        # Type hint for grouped parameter
+        if not isinstance(grouped, pd.DataFrame):
+            return pd.Series(0.0, index=[])
+
+        # Load enriched records
+        all_enriched_records = self._load_enriched_records()
+
+        if not all_enriched_records:
+            # If no enriched records, return zeros
+            return pd.Series(0.0, index=grouped[identifier_col])
+
+        # Get the appropriate aggregator class to extract data
+        aggregator_class = self._get_aggregator_class_for_category(category)
+        if not aggregator_class:
+            # If aggregator not found, return zeros
+            return pd.Series(0.0, index=grouped[identifier_col])
+
+        # Create aggregator instance and extract data
+        aggregator = aggregator_class()
+        extracted_data = aggregator._extract_data(all_enriched_records)
+
+        if not extracted_data:
+            return pd.Series(0.0, index=grouped[identifier_col])
+
+        # Convert to DataFrame
+        df = pd.DataFrame(extracted_data)
+
+        # Create composite identifier using the aggregator's logic
+        # This handles cases like brushes which group by name and fiber
+        df["composite_identifier"] = aggregator._create_composite_name(df)
+
+        # Group by composite identifier and author to get shaves per user per identifier
+        user_shaves_per_identifier = (
+            df.groupby(["composite_identifier", "author"]).size().reset_index()
+        )
+        user_shaves_per_identifier.columns = ["composite_identifier", "author", "user_shaves"]
+
+        # Calculate median shaves per user for each composite identifier
+        median_shaves = (
+            user_shaves_per_identifier.groupby("composite_identifier")["user_shaves"]
+            .median()
+            .reset_index()
+        )
+        median_shaves.columns = ["composite_identifier", "median_shaves_per_user"]
+        median_shaves["median_shaves_per_user"] = median_shaves["median_shaves_per_user"].round(1)
+
+        # Create mapping from composite identifier to median
+        identifier_to_median = dict(
+            zip(median_shaves["composite_identifier"], median_shaves["median_shaves_per_user"])
+        )
+
+        # Map medians to grouped dataframe
+        median_series = grouped[identifier_col].map(identifier_to_median).fillna(0.0)
+
+        return median_series
+
+    def _calculate_unique_users_for_category(
+        self,
+        category: str,
+        grouped: "pd.DataFrame",
+        identifier_col: str,
+        identifier_field_in_extracted: str = "name",
+    ) -> "pd.Series":
+        """
+        Calculate accurate unique_users for a category by loading enriched records and counting unique authors.
+
+        Args:
+            category: Category name (e.g., "razors", "blades", "razor_manufacturers")
+            grouped: DataFrame with name/identifier, shaves already calculated
+            identifier_col: Column name in grouped DataFrame (usually "name")
+            identifier_field_in_extracted: Field name in extracted data (e.g., "name", "brand", "plate")
+
+        Returns:
+            Series with unique_users values indexed by identifier
+        """
+        import pandas as pd
+
+        # Type hint for grouped parameter
+        if not isinstance(grouped, pd.DataFrame):
+            return pd.Series(0, index=[], dtype=int)
+
+        # Load enriched records
+        all_enriched_records = self._load_enriched_records()
+
+        if not all_enriched_records:
+            # If no enriched records, return zeros
+            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+
+        # Get the appropriate aggregator class to extract data
+        aggregator_class = self._get_aggregator_class_for_category(category)
+        if not aggregator_class:
+            # If aggregator not found, return zeros
+            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+
+        # Create aggregator instance and extract data
+        aggregator = aggregator_class()
+        extracted_data = aggregator._extract_data(all_enriched_records)
+
+        if not extracted_data:
+            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+
+        # Convert to DataFrame
+        df = pd.DataFrame(extracted_data)
+
+        # Create composite identifier using the aggregator's logic
+        # This handles cases like brushes which group by name and fiber
+        df["composite_identifier"] = aggregator._create_composite_name(df)
+
+        # Group by composite identifier and author, then count unique authors per identifier
+        unique_users_per_identifier = (
+            df.groupby("composite_identifier")["author"].nunique().reset_index()
+        )
+        unique_users_per_identifier.columns = ["composite_identifier", "unique_users"]
+
+        # Create mapping from composite identifier to unique_users count
+        identifier_to_unique_users = dict(
+            zip(
+                unique_users_per_identifier["composite_identifier"],
+                unique_users_per_identifier["unique_users"],
+            )
+        )
+
+        # Map unique_users to grouped dataframe
+        unique_users_series = (
+            grouped[identifier_col].map(identifier_to_unique_users).fillna(0).astype(int)
+        )
+
+        return unique_users_series
+
+    def _get_aggregator_class_for_category(self, category: str):
+        """Get the appropriate aggregator class for a category.
+
+        Args:
+            category: Category name
+
+        Returns:
+            Aggregator class or None if not found
+        """
+        # Map category names to their aggregator classes
+        aggregator_class_map = {
+            "razors": __import__(
+                "sotd.aggregate.aggregators.core.razor_aggregator", fromlist=["RazorAggregator"]
+            ).RazorAggregator,
+            "blades": __import__(
+                "sotd.aggregate.aggregators.core.blade_aggregator", fromlist=["BladeAggregator"]
+            ).BladeAggregator,
+            "brushes": __import__(
+                "sotd.aggregate.aggregators.core.brush_aggregator", fromlist=["BrushAggregator"]
+            ).BrushAggregator,
+            "soaps": __import__(
+                "sotd.aggregate.aggregators.core.soap_aggregator", fromlist=["SoapAggregator"]
+            ).SoapAggregator,
+            "razor_manufacturers": __import__(
+                "sotd.aggregate.aggregators.manufacturers.razor_manufacturer_aggregator",
+                fromlist=["RazorManufacturerAggregator"],
+            ).RazorManufacturerAggregator,
+            "blade_manufacturers": __import__(
+                "sotd.aggregate.aggregators.manufacturers.blade_manufacturer_aggregator",
+                fromlist=["BladeManufacturerAggregator"],
+            ).BladeManufacturerAggregator,
+            "soap_makers": __import__(
+                "sotd.aggregate.aggregators.manufacturers.soap_maker_aggregator",
+                fromlist=["SoapMakerAggregator"],
+            ).SoapMakerAggregator,
+            "brush_handle_makers": __import__(
+                "sotd.aggregate.aggregators.brush_specialized.handle_maker_aggregator",
+                fromlist=["HandleMakerAggregator"],
+            ).HandleMakerAggregator,
+            "brush_knot_makers": __import__(
+                "sotd.aggregate.aggregators.brush_specialized.knot_maker_aggregator",
+                fromlist=["KnotMakerAggregator"],
+            ).KnotMakerAggregator,
+            "brush_fibers": __import__(
+                "sotd.aggregate.aggregators.brush_specialized.fiber_aggregator",
+                fromlist=["FiberAggregator"],
+            ).FiberAggregator,
+            "brush_knot_sizes": __import__(
+                "sotd.aggregate.aggregators.brush_specialized.knot_size_aggregator",
+                fromlist=["KnotSizeAggregator"],
+            ).KnotSizeAggregator,
+            "blackbird_plates": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.blackbird_plate_aggregator",
+                fromlist=["BlackbirdPlateAggregator"],
+            ).BlackbirdPlateAggregator,
+            "christopher_bradley_plates": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.christopher_bradley_plate_aggregator",
+                fromlist=["ChristopherBradleyPlateAggregator"],
+            ).ChristopherBradleyPlateAggregator,
+            "game_changer_plates": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.game_changer_plate_aggregator",
+                fromlist=["GameChangerPlateAggregator"],
+            ).GameChangerPlateAggregator,
+            "straight_widths": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.straight_width_aggregator",
+                fromlist=["StraightWidthAggregator"],
+            ).StraightWidthAggregator,
+            "straight_grinds": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.straight_grind_aggregator",
+                fromlist=["StraightGrindAggregator"],
+            ).StraightGrindAggregator,
+            "straight_points": __import__(
+                "sotd.aggregate.aggregators.razor_specialized.straight_point_aggregator",
+                fromlist=["StraightPointAggregator"],
+            ).StraightPointAggregator,
+            "razor_blade_combinations": __import__(
+                "sotd.aggregate.aggregators.cross_product.razor_blade_combo_aggregator",
+                fromlist=["RazorBladeComboAggregator"],
+            ).RazorBladeComboAggregator,
+            "razor_formats": __import__(
+                "sotd.aggregate.aggregators.formats.razor_format_aggregator",
+                fromlist=["RazorFormatAggregator"],
+            ).RazorFormatAggregator,
+        }
+
+        return aggregator_class_map.get(category)
+
+    def _calculate_razor_format_medians(
+        self, grouped: "pd.DataFrame", identifier_col: str
+    ) -> "pd.Series":
+        """
+        Calculate median shaves per user for each razor format by loading enriched records.
+
+        Args:
+            grouped: DataFrame with format/name, shaves, unique_users already calculated
+            identifier_col: Column name for the format identifier ("name" or "format")
+
+        Returns:
+            Series with median_shaves_per_user values indexed by format
+        """
+        import pandas as pd
+
+        # Type hint for grouped parameter
+        if not isinstance(grouped, pd.DataFrame):
+            return pd.Series(0.0, index=[])
+
+        # Use the generic helper with format-specific mapping
+        return self._calculate_medians_for_category(
+            "razor_formats", grouped, identifier_col, identifier_field_in_extracted="format"
+        )
 
     def _aggregate_users(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -475,8 +968,11 @@ class AnnualAggregationEngine:
             lambda i: list(monthly_data.keys())[i // 1000] if i < len(all_records) else None
         )
         # Actually, we need to track which month each record came from
-        # Let's rebuild with month tracking
+        # Let's rebuild with month tracking, ensuring we account for ALL months
+        # even if a user doesn't appear in some months
         records_with_month = []
+        user_months_map = {}  # Track which months each user appears in
+
         for month, data in monthly_data.items():
             if "data" in data and "users" in data["data"]:
                 users_data = data["data"]["users"]
@@ -484,10 +980,16 @@ class AnnualAggregationEngine:
                     year, month_num = int(month[:4]), int(month[5:7])
                     days_in_month = monthrange(year, month_num)[1]
                     for user_record in users_data:
-                        user_record_copy = user_record.copy()
-                        user_record_copy["_month"] = month
-                        user_record_copy["_days_in_month"] = days_in_month
-                        records_with_month.append(user_record_copy)
+                        user = user_record.get("user")
+                        if user:
+                            if user not in user_months_map:
+                                user_months_map[user] = set()
+                            user_months_map[user].add(month)
+
+                            user_record_copy = user_record.copy()
+                            user_record_copy["_month"] = month
+                            user_record_copy["_days_in_month"] = days_in_month
+                            records_with_month.append(user_record_copy)
 
         df = pd.DataFrame(records_with_month)
 
@@ -499,7 +1001,23 @@ class AnnualAggregationEngine:
             df.groupby("user").agg({"shaves": "sum", "unique_days_in_month": "sum"}).reset_index()
         )
 
+        # For users who don't appear in all months, we need to add missed days for missing months
+        # Get all months in the year
+        all_months = set(monthly_data.keys())
+        for user in grouped["user"]:
+            user_months = user_months_map.get(user, set())
+            missing_months = all_months - user_months
+            # Add missed days for months where user didn't appear
+            for missing_month in missing_months:
+                year, month_num = int(missing_month[:4]), int(missing_month[5:7])
+                days_in_missing_month = monthrange(year, month_num)[1]
+                # User missed all days in this month
+                user_idx = grouped[grouped["user"] == user].index[0]
+                # unique_days_in_month is already summed, so we don't need to add anything
+                # (it's already 0 for missing months since user didn't appear)
+
         # Calculate annual missed_days: 365 - total_unique_days
+        # This correctly accounts for months where user didn't appear (unique_days = 0)
         grouped["missed_days"] = 365 - grouped["unique_days_in_month"]
 
         # Drop the helper column
@@ -730,14 +1248,23 @@ class AnnualAggregationEngine:
             Dictionary with annual metadata
         """
         total_shaves = 0
-        total_unique_shavers = 0
 
-        # Calculate totals from included months
+        # Calculate total shaves from included months
         for month, data in monthly_data.items():
             if "meta" in data and isinstance(data["meta"], dict):
                 meta = data["meta"]
                 total_shaves += meta.get("total_shaves", 0)
-                total_unique_shavers += meta.get("unique_shavers", 0)
+
+        # Calculate accurate unique_shavers from enriched records (not summing monthly counts)
+        all_enriched_records = self._load_enriched_records()
+        if all_enriched_records:
+            # Count unique authors across all enriched records
+            import pandas as pd
+
+            df = pd.DataFrame(all_enriched_records)
+            total_unique_shavers = int(df["author"].nunique()) if "author" in df.columns else 0
+        else:
+            total_unique_shavers = 0
 
         # Calculate average shaves per user
         avg_shaves_per_user = 0.0
@@ -1003,12 +1530,15 @@ def process_annual_range(
         debug: Enable debug logging
         force: Force regeneration of existing files
     """
+    from tqdm import tqdm
+
     if debug:
         logger.info(f"Processing annual aggregation for years: {years}")
         logger.info(f"Data directory: {data_dir}")
         logger.info(f"Force: {force}")
 
-    for year in years:
+    print(f"Processing annual aggregation for {len(years)} year(s)...")
+    for year in tqdm(years, desc="Annual aggregation", unit="year"):
         try:
             process_annual(year, data_dir, debug=debug, force=force)
         except Exception as e:

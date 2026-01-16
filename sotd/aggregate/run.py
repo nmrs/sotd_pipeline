@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Main entry point for the aggregate phase of the SOTD pipeline."""
 
+from pathlib import Path
 from typing import Optional, Sequence
+
+from tqdm import tqdm
 
 from ..cli_utils.date_span import month_span
 from .annual_engine import process_annual, process_annual_range
+from .annual_loader import load_annual_data
 from .cli import get_parser
 from .engine import process_months, process_months_parallel
 
@@ -64,7 +68,90 @@ def run(args) -> bool:
                 months=months, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
 
+        # After monthly aggregation, check if we should create annual files
+        # This happens when --year or --range is specified (not --month)
+        if (args.year or args.range) and not args.month:
+            _create_annual_files_if_complete(months, args.out_dir, args.debug, args.force)
+
         return has_errors
+
+
+def _create_annual_files_if_complete(
+    months: Sequence[str], data_dir: Path, debug: bool = False, force: bool = False
+) -> None:
+    """
+    Create annual aggregation files for years where all 12 months have been aggregated.
+
+    This function checks all years that appear in the months list, and for each year
+    where all 12 months exist in the aggregated directory, it creates the annual file.
+
+    Args:
+        months: List of months that were just aggregated (YYYY-MM format)
+        data_dir: Data directory containing aggregated files
+        debug: Enable debug logging
+        force: Force regeneration of existing annual files
+    """
+    from collections import defaultdict
+
+    # Group months by year and find all unique years
+    years = set(month.split("-")[0] for month in months)
+
+    # Check each year to see if all 12 months are present
+    monthly_data_dir = data_dir / "aggregated"
+
+    # Collect years that need annual files created
+    years_to_process = []
+    for year in sorted(years):
+        # Check if all 12 months exist in the aggregated directory
+        all_months_present = True
+        for month_num in range(1, 13):
+            month_str = f"{year}-{month_num:02d}"
+            month_file = monthly_data_dir / f"{month_str}.json"
+            if not month_file.exists():
+                all_months_present = False
+                if debug:
+                    print(
+                        f"[DEBUG] Month {month_str} missing, skipping annual file creation for {year}"
+                    )
+                break
+
+        # If all 12 months are present, add to processing list
+        if all_months_present:
+            # Check if annual file already exists and force is False
+            annual_file = monthly_data_dir / "annual" / f"{year}.json"
+            if annual_file.exists() and not force:
+                if debug:
+                    print(
+                        f"[DEBUG] Annual file for {year} already exists, skipping (use --force to regenerate)"
+                    )
+                continue
+            years_to_process.append(year)
+
+    # Process years with progress bar
+    if years_to_process:
+        print(f"Creating annual aggregation files for {len(years_to_process)} year(s)...")
+        for year in tqdm(years_to_process, desc="Annual aggregation", unit="year"):
+            try:
+                if debug:
+                    print(
+                        f"[DEBUG] All 12 months present for {year}, creating annual aggregation file"
+                    )
+
+                # Create the annual file
+                try:
+                    process_annual(year=year, data_dir=data_dir, debug=debug, force=force)
+                    if debug:
+                        print(f"[DEBUG] Created annual aggregation file for {year}")
+                except Exception as e:
+                    if debug:
+                        print(f"[DEBUG] Could not create annual file for {year}: {e}")
+                    # Continue with other years even if one fails
+                    continue
+            except Exception as e:
+                if debug:
+                    print(f"[DEBUG] Error checking/creating annual file for {year}: {e}")
+                # Continue with other years even if one fails
+                continue
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
