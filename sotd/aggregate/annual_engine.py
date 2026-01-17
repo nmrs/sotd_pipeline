@@ -1146,26 +1146,22 @@ class AnnualAggregationEngine:
         # Convert to DataFrame
         df = pd.DataFrame(all_records)
 
-        # Group by user and sum shaves and unique_combinations
-        # Note: unique_combinations should be summed (total unique combinations across all months)
+        # Group by user and sum shaves
+        # Note: unique_combinations cannot be summed - must be recalculated from enriched records
+        # to avoid double-counting soaps that appear in multiple months
         grouped = (
             df.groupby("user")
             .agg(
                 {
                     "shaves": "sum",
-                    "unique_combinations": "sum",  # Sum gives total across months
                 }
             )
             .reset_index()
         )
 
-        # Recalculate avg_shaves_per_combination
-        grouped["avg_shaves_per_combination"] = (
-            grouped["shaves"] / grouped["unique_combinations"]
-        ).round(1)
-
-        # Recalculate HHI and effective_soaps from enriched records for accurate annual values
-        # Load enriched records for all months and recalculate HHI from combined distribution
+        # Recalculate unique_combinations, HHI, and effective_soaps from enriched records
+        # for accurate annual values. Load enriched records for all months and recalculate
+        # from combined distribution to get true unique combinations across the year.
         try:
             from .load import load_enriched_data
             from .aggregators.users.soap_brand_scent_diversity_aggregator import (
@@ -1186,20 +1182,27 @@ class AnnualAggregationEngine:
                     continue
 
             if all_enriched_records:
-                # Recalculate HHI from combined enriched records
+                # Recalculate unique_combinations, HHI, and effective_soaps from combined enriched records
                 aggregator = SoapBrandScentDiversityAggregator()
                 hhi_results = aggregator.aggregate(all_enriched_records)
 
-                # Create mapping of user -> hhi, effective_soaps
+                # Create mapping of user -> unique_combinations, hhi, effective_soaps
                 hhi_map = {
                     result["user"]: {
+                        "unique_combinations": result.get("unique_combinations", 0),
                         "hhi": result.get("hhi", 0.0),
                         "effective_soaps": result.get("effective_soaps", 0.0),
                     }
                     for result in hhi_results
                 }
 
-                # Merge HHI values into grouped data
+                # Merge values into grouped data
+                grouped["unique_combinations"] = (
+                    grouped["user"]
+                    .map(lambda u: hhi_map.get(u, {}).get("unique_combinations", 0))
+                    .fillna(0)
+                    .astype(int)
+                )
                 grouped["hhi"] = (
                     grouped["user"].map(lambda u: hhi_map.get(u, {}).get("hhi", 0.0)).fillna(0.0)
                 )
@@ -1209,11 +1212,34 @@ class AnnualAggregationEngine:
                     .fillna(0.0)
                 )
             else:
-                # Fallback if no enriched records available
+                # Fallback if no enriched records available - use summed values (less accurate)
+                # This should rarely happen, but provides a fallback
+                unique_combinations_sum = (
+                    df.groupby("user")["unique_combinations"].sum().reset_index()
+                )
+                grouped = grouped.merge(
+                    unique_combinations_sum[["user", "unique_combinations"]], on="user", how="left"
+                )
+                grouped["unique_combinations"] = grouped["unique_combinations"].fillna(0).astype(int)
                 grouped["hhi"] = 0.0
                 grouped["effective_soaps"] = 0.0
+
+            # Recalculate avg_shaves_per_combination with accurate unique_combinations
+            grouped["avg_shaves_per_combination"] = (
+                grouped["shaves"] / grouped["unique_combinations"].replace(0, 1)
+            ).round(1)
+            grouped.loc[grouped["unique_combinations"] == 0, "avg_shaves_per_combination"] = 0.0
         except Exception:
-            # Fallback if HHI recalculation fails for any reason
+            # Fallback if recalculation fails for any reason - use summed values (less accurate)
+            unique_combinations_sum = df.groupby("user")["unique_combinations"].sum().reset_index()
+            grouped = grouped.merge(
+                unique_combinations_sum[["user", "unique_combinations"]], on="user", how="left"
+            )
+            grouped["unique_combinations"] = grouped["unique_combinations"].fillna(0).astype(int)
+            grouped["avg_shaves_per_combination"] = (
+                grouped["shaves"] / grouped["unique_combinations"].replace(0, 1)
+            ).round(1)
+            grouped.loc[grouped["unique_combinations"] == 0, "avg_shaves_per_combination"] = 0.0
             grouped["hhi"] = 0.0
             grouped["effective_soaps"] = 0.0
 
