@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,6 +60,8 @@ interface UserPostingAnalysis {
 }
 
 const MonthlyUserPosts: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [users, setUsers] = useState<UserData[]>([]);
@@ -84,12 +87,48 @@ const MonthlyUserPosts: React.FC = () => {
   const [copySuccess, setCopySuccess] = useState<Record<string, boolean>>({});
   const [commentUrls, setCommentUrls] = useState<Record<string, string>>({});
 
+  // Read URL parameters on mount and initialize state
+  useEffect(() => {
+    const userParam = searchParams.get('user');
+    const monthsParam = searchParams.get('months');
+
+    if (userParam) {
+      setSelectedUser(userParam);
+    }
+
+    if (monthsParam) {
+      // Parse comma-separated months
+      const months = monthsParam.split(',').map(m => m.trim()).filter(m => m.length > 0);
+      if (months.length > 0) {
+        setSelectedMonths(months);
+      }
+    }
+  }, [searchParams]);
+
   // Fetch users when selected months change
   useEffect(() => {
     if (selectedMonths.length > 0) {
       fetchUsersForMonths(selectedMonths);
     }
   }, [selectedMonths]);
+
+  // Auto-trigger user analysis if both user and months are provided from URL
+  useEffect(() => {
+    const userParam = searchParams.get('user');
+    const monthsParam = searchParams.get('months');
+
+    // Only auto-trigger if URL params exist and state matches
+    if (userParam && monthsParam && selectedMonths.length > 0 && selectedUser === userParam) {
+      // Only trigger if we haven't already loaded data for this user
+      // Check if aggregatedAnalysis exists and matches the user
+      const shouldFetch = !aggregatedAnalysis || aggregatedAnalysis.user !== userParam;
+      if (shouldFetch) {
+        fetchUserAnalyses(selectedMonths, userParam);
+      }
+    }
+    // Note: We intentionally don't include aggregatedAnalysis in deps to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMonths, selectedUser]);
 
   const fetchUsersForMonths = async (months: string[]) => {
     try {
@@ -837,6 +876,16 @@ const MonthlyUserPosts: React.FC = () => {
     }
   };
 
+  // Navigate to ProductUsage with product type, brand, model, and months
+  const handleProductClick = (productType: string, brand: string, model: string) => {
+    if (selectedMonths.length > 0) {
+      const monthsParam = selectedMonths.join(',');
+      navigate(
+        `/product-usage?months=${encodeURIComponent(monthsParam)}&productType=${encodeURIComponent(productType)}&brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}`
+      );
+    }
+  };
+
   const renderCalendarView = () => {    if (!aggregatedAnalysis || selectedMonths.length === 0) {
       return (
         <div className='flex items-center justify-center h-64 text-muted-foreground'>
@@ -1379,8 +1428,24 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
                           </td>
-                          <td className='border border-border p-2'>{razor.brand}</td>
-                          <td className='border border-border p-2'>{razor.model}</td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('razor', razor.brand, razor.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {razor.brand}
+                            </button>
+                          </td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('razor', razor.brand, razor.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {razor.model}
+                            </button>
+                          </td>
                           <td className='border border-border p-2 text-center'>{razor.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
@@ -1478,8 +1543,24 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
                           </td>
-                          <td className='border border-border p-2'>{blade.brand}</td>
-                          <td className='border border-border p-2'>{blade.model}</td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('blade', blade.brand, blade.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {blade.brand}
+                            </button>
+                          </td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('blade', blade.brand, blade.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {blade.model}
+                            </button>
+                          </td>
                           <td className='border border-border p-2 text-center'>{blade.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
@@ -1580,8 +1661,32 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
                           </td>
-                          <td className='border border-border p-2'>{brush.brand || '-'}</td>
-                          <td className='border border-border p-2'>{brush.model || '-'}</td>
+                          <td className='border border-border p-2'>
+                            {brush.brand ? (
+                              <button
+                                onClick={() => handleProductClick('brush', brush.brand || '', brush.model || '')}
+                                className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                                type='button'
+                              >
+                                {brush.brand}
+                              </button>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                          <td className='border border-border p-2'>
+                            {brush.model ? (
+                              <button
+                                onClick={() => handleProductClick('brush', brush.brand || '', brush.model || '')}
+                                className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                                type='button'
+                              >
+                                {brush.model}
+                              </button>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
                           <td className='border border-border p-2'>{brush.handle_brand || '-'}</td>
                           <td className='border border-border p-2'>{brush.knot_brand || '-'}</td>
                           <td className='border border-border p-2'>{brush.knot_model || '-'}</td>
@@ -1682,8 +1787,24 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center font-medium'>
                             {index + 1}
                           </td>
-                          <td className='border border-border p-2'>{soap.brand}</td>
-                          <td className='border border-border p-2'>{soap.model}</td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('soap', soap.brand, soap.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {soap.brand}
+                            </button>
+                          </td>
+                          <td className='border border-border p-2'>
+                            <button
+                              onClick={() => handleProductClick('soap', soap.brand, soap.model)}
+                              className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                              type='button'
+                            >
+                              {soap.model}
+                            </button>
+                          </td>
                           <td className='border border-border p-2 text-center'>{soap.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay

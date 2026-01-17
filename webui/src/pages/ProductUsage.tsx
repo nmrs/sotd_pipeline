@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,8 @@ import MonthSelector from '@/components/forms/MonthSelector';
 import axios from 'axios';
 
 const ProductUsage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedProductType, setSelectedProductType] = useState<'razor' | 'blade' | 'brush' | 'soap' | ''>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -50,6 +53,72 @@ const ProductUsage: React.FC = () => {
   const [copyLoading, setCopyLoading] = useState<Record<string, boolean>>({});
   const [copySuccess, setCopySuccess] = useState<Record<string, boolean>>({});
   const [commentUrls, setCommentUrls] = useState<Record<string, string>>({});
+
+  // Read URL parameters on mount and initialize state
+  useEffect(() => {
+    const monthsParam = searchParams.get('months');
+    const productTypeParam = searchParams.get('productType');
+    const brandParam = searchParams.get('brand');
+    const modelParam = searchParams.get('model');
+
+    if (monthsParam) {
+      // Parse comma-separated months
+      const months = monthsParam.split(',').map(m => m.trim()).filter(m => m.length > 0);
+      if (months.length > 0) {
+        setSelectedMonths(months);
+      }
+    }
+
+    if (productTypeParam && ['razor', 'blade', 'brush', 'soap'].includes(productTypeParam)) {
+      setSelectedProductType(productTypeParam as 'razor' | 'blade' | 'brush' | 'soap');
+    }
+  }, [searchParams]);
+
+  // Auto-select product when URL params are provided and products are loaded
+  useEffect(() => {
+    const brandParam = searchParams.get('brand');
+    const modelParam = searchParams.get('model');
+    const monthsParam = searchParams.get('months');
+    const productTypeParam = searchParams.get('productType');
+
+    // Only auto-select if all URL params exist, products are loaded, and we haven't already selected this product
+    if (
+      brandParam &&
+      modelParam &&
+      monthsParam &&
+      productTypeParam &&
+      products.length > 0 &&
+      selectedMonths.length > 0 &&
+      selectedProductType
+    ) {
+      // Check if we've already selected the matching product
+      const isAlreadySelected =
+        selectedProduct &&
+        selectedProduct.brand === brandParam &&
+        selectedProduct.model === modelParam;
+
+      if (!isAlreadySelected) {
+        // Find matching product by brand and model
+        const matchingProduct = products.find(
+          p => p.brand === brandParam && p.model === modelParam
+        );
+
+        if (matchingProduct) {
+          setSelectedProduct(matchingProduct);
+          // Trigger product analysis
+          fetchProductAnalyses(selectedMonths, selectedProductType, matchingProduct);
+          // For yearly summary, use the first selected month
+          if (selectedMonths.length > 0) {
+            fetchYearlySummary(selectedMonths[0], selectedProductType, matchingProduct);
+          }
+        } else {
+          // Product not found - might not exist in those months
+          setError(`Product ${brandParam} ${modelParam} not found in selected months`);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, searchParams, selectedMonths, selectedProductType, selectedProduct]);
 
   // Fetch products when months and product type change
   useEffect(() => {
@@ -453,6 +522,14 @@ const ProductUsage: React.FC = () => {
       ...prev,
       [username]: expanded,
     }));
+  };
+
+  // Navigate to MonthlyUserPosts with username and months
+  const handleUsernameClick = (username: string) => {
+    if (selectedMonths.length > 0) {
+      const monthsParam = selectedMonths.join(',');
+      navigate(`/monthly-user-posts?user=${encodeURIComponent(username)}&months=${encodeURIComponent(monthsParam)}`);
+    }
   };
 
   // Helper function to get dates with URLs for a user (uses cached URLs)
@@ -1549,7 +1626,15 @@ const ProductUsage: React.FC = () => {
                   {aggregatedAnalysis.users.map((user, index) => (
                     <tr key={user.username} className='hover:bg-muted/50'>
                       <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
-                      <td className='border border-border p-2'>{user.username}</td>
+                      <td className='border border-border p-2'>
+                        <button
+                          onClick={() => handleUsernameClick(user.username)}
+                          className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                          type='button'
+                        >
+                          {user.username}
+                        </button>
+                      </td>
                       <td className='border border-border p-2 text-center'>{user.usage_count}</td>
                       <td className='border border-border p-2'>
                         <CommentDisplay
