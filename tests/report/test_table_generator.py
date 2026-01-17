@@ -1442,3 +1442,34 @@ class TestTableGenerator:
         user1_index = result.find("user1")
         user3_index = result.find("user3")
         assert user2_index < user1_index < user3_index
+
+    def test_hhi_percentage_formatting(self):
+        """Test that hhi (Boring Score) is formatted as a percentage."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {"rank": 1, "user": "user1", "hhi": 0.933, "effective_soaps": 1.07, "unique_combinations": 6, "shaves": 116},
+                {"rank": 2, "user": "user2", "hhi": 0.5176, "effective_soaps": 1.93, "unique_combinations": 4, "shaves": 64},
+                {"rank": 3, "user": "user3", "hhi": 0.4681, "effective_soaps": 2.14, "unique_combinations": 9, "shaves": 56},
+            ]
+        }
+
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, hhi=boring score desc, effective_soaps, unique_combinations=unique_soaps, shaves"
+        )
+
+        # Check that hhi values are formatted as percentages with 1 decimal place
+        assert "93.3%" in result  # 0.933 * 100 = 93.3%
+        assert "51.8%" in result  # 0.5176 * 100 = 51.8%
+        assert "46.8%" in result  # 0.4681 * 100 = 46.8%
+        
+        # Check that effective_soaps values are formatted with 1 decimal place
+        assert "1.1" in result  # 1.07 formatted to 1.1
+        assert "1.9" in result  # 1.93 formatted to 1.9
+        assert "2.1" in result  # 2.14 formatted to 2.1
+        
+        # Verify the values are not shown as decimals
+        assert "0.933" not in result
+        assert "0.5176" not in result
+        assert "0.4681" not in result

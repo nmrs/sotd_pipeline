@@ -266,6 +266,52 @@ class TableGenerator:
 
         return formatted_df
 
+    def _format_hhi_percentage(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format hhi column as percentage before column renaming.
+        
+        Args:
+            df: DataFrame to format
+            
+        Returns:
+            DataFrame with hhi formatted as percentage
+        """
+        if "hhi" not in df.columns:
+            return df
+        
+        formatted_df = df.copy()
+        formatted_df["hhi"] = formatted_df["hhi"].astype(object)
+        
+        def format_hhi(x):
+            if pd.isna(x):
+                return x
+            return f"{(float(x) * 100):.1f}%"
+        
+        formatted_df["hhi"] = formatted_df["hhi"].apply(format_hhi)
+        return formatted_df
+
+    def _format_effective_soaps(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format effective_soaps column to 1 decimal place before column renaming.
+        
+        Args:
+            df: DataFrame to format
+            
+        Returns:
+            DataFrame with effective_soaps formatted to 1 decimal place
+        """
+        if "effective_soaps" not in df.columns:
+            return df
+        
+        formatted_df = df.copy()
+        formatted_df["effective_soaps"] = formatted_df["effective_soaps"].astype(object)
+        
+        def format_effective_soaps(x):
+            if pd.isna(x):
+                return x
+            return f"{float(x):.1f}"
+        
+        formatted_df["effective_soaps"] = formatted_df["effective_soaps"].apply(format_effective_soaps)
+        return formatted_df
+
     def _format_rank_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format rank column to show equal ranks as N=.
 
@@ -1039,6 +1085,14 @@ class TableGenerator:
         # Format soap names with WSDB links (only for soaps table when wsdb=True)
         # Do this BEFORE column operations so we can access columns by their original names
         df = self._format_soap_links(df, table_name, enable_wsdb=wsdb)
+
+        # Format hhi as percentage BEFORE column operations
+        # This ensures it works regardless of what the template renames it to
+        df = self._format_hhi_percentage(df)
+        
+        # Format effective_soaps to 1 decimal place BEFORE column operations
+        # This ensures it works regardless of what the template renames it to
+        df = self._format_effective_soaps(df)
 
         # Apply column operations AFTER WSDB formatting (so rank column is available for deltas)
         if columns:
