@@ -750,7 +750,17 @@ class AnnualAggregationEngine:
         )
 
         # Map medians to grouped dataframe
-        median_series = grouped[identifier_col].map(identifier_to_median).fillna(0.0)
+        # Convert identifier column to string to match composite_identifier (which is always string)
+        # For numeric identifiers (like knot sizes), normalize to float then string for consistent matching
+        # This handles cases where monthly data might have 24 (int) vs enriched data having 24.0 (float)
+        identifier_series = grouped[identifier_col]
+        # Try to convert to float first for numeric values, then to string for consistent formatting
+        try:
+            identifier_series = identifier_series.astype(float).astype(str)
+        except (ValueError, TypeError):
+            # If conversion fails, just convert to string (for non-numeric identifiers)
+            identifier_series = identifier_series.astype(str)
+        median_series = identifier_series.map(identifier_to_median).fillna(0.0)
 
         return median_series
 
@@ -821,8 +831,18 @@ class AnnualAggregationEngine:
         )
 
         # Map unique_users to grouped dataframe
+        # Convert identifier column to string to match composite_identifier (which is always string)
+        # For numeric identifiers (like knot sizes), normalize to float then string for consistent matching
+        # This handles cases where monthly data might have 24 (int) vs enriched data having 24.0 (float)
+        identifier_series = grouped[identifier_col]
+        # Try to convert to float first for numeric values, then to string for consistent formatting
+        try:
+            identifier_series = identifier_series.astype(float).astype(str)
+        except (ValueError, TypeError):
+            # If conversion fails, just convert to string (for non-numeric identifiers)
+            identifier_series = identifier_series.astype(str)
         unique_users_series = (
-            grouped[identifier_col].map(identifier_to_unique_users).fillna(0).astype(int)
+            identifier_series.map(identifier_to_unique_users).fillna(0).astype(int)
         )
 
         return unique_users_series

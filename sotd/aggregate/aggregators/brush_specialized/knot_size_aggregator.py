@@ -63,7 +63,9 @@ class KnotSizeAggregator(BaseAggregator):
         """Create composite name from knot size data."""
         # Ensure we get a Series, not DataFrame
         size_series: pd.Series = df["knot_size_mm"]  # type: ignore
-        return size_series.astype(str)
+        # Normalize to float first, then string for consistent matching
+        # This ensures "24" and 24.0 both become "24.0" for matching
+        return size_series.astype(float).astype(str)
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping."""
