@@ -153,9 +153,15 @@ async def startup_event():
     try:
         from webui.api.queue_manager import QueueManager
 
-        # Project root directory (webui/api/main.py -> webui/api -> webui -> project_root)
-        project_root = Path(__file__).parent.parent.parent
-        correct_matches_path = project_root / "data" / "correct_matches"
+        # Support SOTD_DATA_DIR environment variable for containerized deployments
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir)
+            correct_matches_path = data_dir / "correct_matches"
+        else:
+            # Fallback to relative path for development
+            project_root = Path(__file__).parent.parent.parent
+            correct_matches_path = project_root / "data" / "correct_matches"
         _queue_manager = QueueManager(correct_matches_path)
         _queue_manager.start_background_worker()
         logger.info("✅ Background queue worker started")

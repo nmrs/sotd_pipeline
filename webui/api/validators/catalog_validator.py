@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Shared catalog validation logic for CLI and API."""
 
+import os
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -15,7 +16,14 @@ class CatalogValidator:
     def __init__(self, project_root: Path):
         """Initialize the validator with project paths."""
         self.project_root = project_root
-        self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
+        # Support SOTD_DATA_DIR environment variable for containerized deployments
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir)
+            self.correct_matches_path = data_dir / "correct_matches.yaml"
+        else:
+            # Fallback to relative path for development
+            self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
 
         # Debug logging
         import os

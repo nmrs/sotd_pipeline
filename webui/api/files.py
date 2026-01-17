@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -13,9 +14,6 @@ logger = logging.getLogger(__name__)
 
 # Create router for file endpoints
 router = APIRouter(prefix="/api/files", tags=["files"])
-
-# Data directory path (relative to project root)
-DATA_DIR = Path("../../data/matched")
 
 
 class MonthData(BaseModel):
@@ -35,9 +33,14 @@ class AvailableMonths(BaseModel):
 
 def get_data_directory() -> Path:
     """Get the data directory path."""
-    # Get the current file's directory and navigate to project root
-    current_dir = Path(__file__).parent
-    data_dir = current_dir.parent.parent / "data" / "matched"
+    # Support SOTD_DATA_DIR environment variable for containerized deployments
+    sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+    if sotd_data_dir:
+        data_dir = Path(sotd_data_dir) / "matched"
+    else:
+        # Fallback to relative path for development
+        current_dir = Path(__file__).parent
+        data_dir = current_dir.parent.parent / "data" / "matched"
     return data_dir
 
 

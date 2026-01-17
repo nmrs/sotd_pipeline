@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: webui/api/Dockerfile
+    container_name: sotd-backend
+    environment:
+      - SOTD_DATA_DIR=/data
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    volumes:
+      - type: bind
+        source: /volume1/homes/sotd/sotd_pipeline/data
+        target: /data
+        bind:
+          create_host_path: false
+    ports:
+      - "8000:8000"
+    networks:
+      - sotd-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: webui/Dockerfile
+      args:
+        - VITE_API_URL=http://backend:8000
+    container_name: sotd-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    networks:
+      - sotd-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  sotd-network:
+    driver: bridge

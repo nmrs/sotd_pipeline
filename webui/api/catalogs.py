@@ -2,6 +2,7 @@
 """Catalog integration for SOTD pipeline analyzer API."""
 
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -23,7 +24,13 @@ CATALOG_FILES = {
     "knot": "knots.yaml",
 }
 
-CATALOG_DIR = Path(__file__).parent.parent.parent / "data"
+# Support SOTD_DATA_DIR environment variable for containerized deployments
+SOTD_DATA_DIR = os.environ.get("SOTD_DATA_DIR")
+if SOTD_DATA_DIR:
+    CATALOG_DIR = Path(SOTD_DATA_DIR)
+else:
+    # Fallback to relative path for development
+    CATALOG_DIR = Path(__file__).parent.parent.parent / "data"
 
 
 def get_catalog_path(field: str) -> Path:

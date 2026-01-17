@@ -22,6 +22,16 @@ if str(project_root) not in sys.path:
 # Get logger for this module
 logger = logging.getLogger(__name__)
 
+
+def get_data_directory() -> Path:
+    """Get the data directory path, respecting SOTD_DATA_DIR environment variable."""
+    sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+    if sotd_data_dir:
+        return Path(sotd_data_dir)
+    else:
+        # Fallback to relative path for development
+        return project_root / "data"
+
 # Import the existing FilteredEntriesManager instead of duplicating logic
 from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
 
@@ -318,7 +328,7 @@ def validate_months(months: List[str]) -> None:
 
 def get_filtered_entries_manager() -> FilteredEntriesManager:
     """Get FilteredEntriesManager instance for intentionally unmatched data."""
-    filtered_file = project_root / "data" / "intentionally_unmatched.yaml"
+    filtered_file = get_data_directory() / "intentionally_unmatched.yaml"
     manager = FilteredEntriesManager(filtered_file)
     manager.load()
     return manager
@@ -334,7 +344,7 @@ def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dic
 
     # First, try enriched files (which contain both matched and enriched data)
     for month in months:
-        enriched_path = project_root / "data" / "enriched" / f"{month}.json"
+        enriched_path = get_data_directory() / "enriched" / f"{month}.json"
         if enriched_path.exists():
             try:
                 with enriched_path.open("r", encoding="utf-8") as f:
@@ -349,7 +359,7 @@ def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dic
 
     # Fallback to matched files
     for month in months:
-        matched_path = project_root / "data" / "matched" / f"{month}.json"
+        matched_path = get_data_directory() / "matched" / f"{month}.json"
         if matched_path.exists():
             try:
                 with matched_path.open("r", encoding="utf-8") as f:
@@ -592,7 +602,7 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                     self.delta_months = None  # Add this to match month_span function
                     self.field = request.field
                     self.limit = request.limit
-                    self.out_dir = project_root / "data"
+                    self.out_dir = get_data_directory()
                     self.debug = False
 
             args = Args()
@@ -1085,7 +1095,7 @@ async def get_correct_matches(field: str):
         validate_field(field)
 
         # Load correct matches from directory structure
-        correct_matches_dir = project_root / "data" / "correct_matches"
+        correct_matches_dir = get_data_directory() / "correct_matches"
         if not correct_matches_dir.exists():
             return CorrectMatchesResponse(field=field, total_entries=0, entries={})
 
@@ -1244,7 +1254,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
             raise HTTPException(status_code=500, detail=f"Could not import QueueManager: {e}")
 
         # Create queue manager instance
-        correct_matches_path = project_root / "data" / "correct_matches"
+        correct_matches_path = get_data_directory() / "correct_matches"
         queue_manager = QueueManager(correct_matches_path)
 
         # Add operation to queue
@@ -1289,7 +1299,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
             raise HTTPException(status_code=500, detail=f"Could not import QueueManager: {e}")
 
         # Create queue manager instance
-        correct_matches_path = project_root / "data" / "correct_matches"
+        correct_matches_path = get_data_directory() / "correct_matches"
         queue_manager = QueueManager(correct_matches_path)
 
         # Add operation to queue
@@ -1324,7 +1334,7 @@ async def get_operation_status(operation_id: str):
     try:
         from webui.api.queue_manager import QueueManager
 
-        correct_matches_path = project_root / "data" / "correct_matches"
+        correct_matches_path = get_data_directory() / "correct_matches"
         queue_manager = QueueManager(correct_matches_path)
 
         status = queue_manager.get_operation_status(operation_id)
@@ -1358,7 +1368,7 @@ async def clear_correct_matches_by_field(field: str):
 
         # Create manager instance and clear field
         console = Console()
-        correct_matches_path = project_root / "data" / "correct_matches"
+        correct_matches_path = get_data_directory() / "correct_matches"
         manager = CorrectMatchesManager(console, correct_matches_path)
         manager.load_correct_matches()
         manager.clear_correct_matches_by_field(field)
@@ -1386,7 +1396,7 @@ async def clear_all_correct_matches():
 
         # Create manager instance and clear all
         console = Console()
-        correct_matches_path = project_root / "data" / "correct_matches"
+        correct_matches_path = get_data_directory() / "correct_matches"
         manager = CorrectMatchesManager(console, correct_matches_path)
         manager.clear_correct_matches()
 
@@ -1409,9 +1419,11 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         # Set up paths
         api_project_root = Path(__file__).parent.parent.parent
-        correct_matches_path = api_project_root / "data" / "correct_matches"
+        data_dir = get_data_directory()
+        correct_matches_path = data_dir / "correct_matches"
 
         logger.info(f"Project root: {api_project_root}")
+        logger.info(f"Data directory: {data_dir}")
         logger.info(f"Correct matches path: {correct_matches_path}")
         logger.info(f"Path exists: {correct_matches_path.exists()}")
 
@@ -1432,7 +1444,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
         logger.info("Cleared all catalog caches for fresh data")
 
         # Create the actual matching validator
-        validator = ActualMatchingValidator(data_path=api_project_root / "data")
+        validator = ActualMatchingValidator(data_path=data_dir)
         logger.info(f"Created ActualMatchingValidator: {type(validator)}")
 
         # Run validation
@@ -1598,7 +1610,7 @@ async def remove_catalog_validation_entries(request: RemoveCorrectRequest):
             raise HTTPException(status_code=500, detail=f"Could not import required modules: {e}")
 
         # Load and manipulate YAML from directory structure
-        correct_matches_dir = project_root / "data" / "correct_matches"
+        correct_matches_dir = get_data_directory() / "correct_matches"
 
         if not correct_matches_dir.exists():
             return RemoveCorrectResponse(
@@ -1834,7 +1846,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
             raise HTTPException(status_code=500, detail=f"Could not import required modules: {e}")
 
         # Load and manipulate YAML from directory structure
-        correct_matches_dir = project_root / "data" / "correct_matches"
+        correct_matches_dir = get_data_directory() / "correct_matches"
 
         if not correct_matches_dir.exists():
             return MoveCatalogEntriesResponse(
