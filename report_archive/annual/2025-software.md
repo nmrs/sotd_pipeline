@@ -40,7 +40,7 @@ Welcome to your 2025 Lather Log. 21,627 shave reports from 283 distinct shavers 
 
 * In other climbing news, Mike’s Natural jumps 32 spots to 7th among brands, powered by multiple soaps that absolutely rocket up the charts: Orange, Cedarwood & Black Pepper (+608 vs 2024), Vetiver (+184), Rose/Patchouli/Cedarwood (+457), Lime (+720), Bay Rum (+724), and Hungarian Lavender (+1206) all muscle their way into the top 100.
 
-* Fanzine Saponifications makes about as loud a debut as you can. It lands 13th in total shaves with 524 uses from 50 users, and puts three soaps into the top 60 scents (Caravaggio, This is not a Test, and Testing… Testing) in its first full year on the Lather Log.
+* Fanzine Saponifications makes about as loud a debut as you can. It lands 13th in total shaves with 524 uses from 50 users, and puts three soaps into the top 60 scents (Caravaggio, This is not a Test, and Testing… Testing) in its first year on the Lather Log.
 
 * Across the full year, Stirling stands alone atop the Brand Diversity table, with 33% more scents than runner-up Barrister and Mann. The race for third was much tighter: Catie’s Bubbles just edged out Talent Soap Factory, 80 to 79.
 
