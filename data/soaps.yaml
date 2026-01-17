@@ -225,6 +225,9 @@ Ariana & Evans:
       - (arian|a&e).*bl[a∀Ɐ]ck$
       - bl[∀Ɐ]ck
       wsdb_slug: ariana-and-evans-black-soap
+    Bhang:
+      patterns:
+      - (arian|a&e).*bhang
     Black Birch Stout:
       patterns:
       - black birt?ch stout
@@ -675,8 +678,8 @@ Barrister and Mann:
       - (barris|\bb ?(and|&|\+) ?m\b).*night music
     Nocturne:
       patterns:
-      - \bb ?(and|&|\+) ?m\b.*nocturne
-      - barris.*nocturne
+      - ^(?!.*zing).*\bb ?(and|&|\+) ?m\b.*nocturne
+      - ^(?!.*zing).*barris.*nocturne
     Noggin' On Heaven's Door:
       patterns:
       - noggin.*heaven
@@ -871,6 +874,9 @@ Black Ship Grooming:
     Cap'n Dark Side:
       patterns:
       - cap.*dark ?side
+    Captain Scurvy:
+      patterns:
+      - black ship.*captain scurvy
     Classic:
       patterns:
       - black ship.*classic
@@ -909,6 +915,10 @@ Brut:
 Brutalt Bra:
   patterns:
   - brutalt bra
+  scents:
+    Norwegian Wood:
+      patterns:
+      - brutalt bra.*norwegian wood
 Bufflehead Soap Co.:
   patterns:
   - bufflehead( soap co.?)?
@@ -917,6 +927,9 @@ Bundubeard:
   - bund\wbeard
   - boendoebaard
   scents:
+    Lemoentyd in die Leveld:
+      patterns:
+      - brutalt bra.*lemoentyd in die leveld
     Kletterkees:
       patterns:
       - kletter[bk]ees
@@ -2155,6 +2168,9 @@ Grooming Dept:
     Earl Grey Gelato:
       patterns:
       - early? grey gelato
+    Kulfi:
+      patterns:
+      - grooming.*kulfi
     Laundry II:
       patterns:
       - grooming.*laundry (2|ii)
@@ -3576,6 +3592,9 @@ Red House Farm:
   patterns:
   - red house farms?
   scents:
+    Lumos:
+      patterns:
+      - red house.*lumos
     Nine Days Up Nort':
       patterns:
       - red house.*days up
@@ -4404,19 +4423,40 @@ Talbot Shaving:
       - (talbot|cb|catie).*valley of fire
 Talent Soap Factory:
   patterns:
-  - 'talent(?: soap)?(?: factory)?'
+  - 'talent(?: soap)?(?: fact[io]ry)?'
   - ^\W*tsf\b
   - \bt\.?s\.?f\.?
   scents:
+    100 Grand:
+      patterns:
+      - (talent|tsf).*100 grand
     2 Deer:
       patterns:
       - (talent|tsf).*2 deer
+    2nd Wind:
+      patterns:
+      - (talent|tsf).*2nd wind
+    Absinthe Dream:
+      patterns:
+      - (talent|tsf).*absinthe dream
+    Amber:
+      patterns:
+      - (talent|tsf).*amber
     Banana:
       patterns:
       - (talent|tsf).*banana
     Banana Kush:
       patterns:
       - (talent|tsf).*banana kush
+    Barbershop+Lime:
+      patterns:
+      - (talent|tsf).*barbershop.*lime
+    Cantaloupe:
+      patterns:
+      - (talent|tsf).*cantaloupe
+    Cayman Express:
+      patterns:
+      - (talent|tsf).*cayman express
     Cola Freak:
       patterns:
       - (talent|tsf).*cola freak
@@ -4426,6 +4466,9 @@ Talent Soap Factory:
     Daddy Longlegs:
       patterns:
       - daddy long ?legs
+    Devilwood:
+      patterns:
+      - (talent|tsf).*devilwood
     Digital Dude:
       patterns:
       - digital dude
@@ -4436,6 +4479,9 @@ Talent Soap Factory:
       patterns:
       - talent soap factory.*fizz
       - ^\W*tsf\b.*fizz
+    Flying Dutchman:
+      patterns:
+      - (talent|tsf).*flying dutchman
     Galaxy Grape:
       patterns:
       - (talent|tsf).*galaxy grape
@@ -4468,13 +4514,16 @@ Talent Soap Factory:
       - save the earth
     Slow Dancing in the Dark:
       patterns:
-      - slow dancing.*dark
+      - (talent|tsf|slow).*dancing.*dark
     Switchback:
       patterns:
       - talent.*switch ?back
     Tea Shoppe:
       patterns:
       - (talent|tsf).*tea shoppe
+    The Abyss:
+      patterns:
+      - (talent|tsf).*abyss
     Tobacco & Vanilla:
       patterns:
       - (talent|tsf).*tobacco.*vanilla
@@ -4490,6 +4539,9 @@ Talent Soap Factory:
     Tumbleweed & Co.:
       patterns:
       - (talent|tsf).*tumbleweed
+    Turpesaurus Rex:
+      patterns:
+      - (talent|tsf).*turpesaurus rex
     Wallflower:
       patterns:
       - (talent|tsf).*wallflower
