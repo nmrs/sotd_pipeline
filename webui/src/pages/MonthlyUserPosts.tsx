@@ -60,7 +60,7 @@ interface UserPostingAnalysis {
 }
 
 const MonthlyUserPosts: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
@@ -847,6 +847,14 @@ const MonthlyUserPosts: React.FC = () => {
     if (months.length > 0) {
       fetchUsersForMonths(months);
     }
+
+    // Update URL parameters
+    if (months.length > 0) {
+      updateUrlParams({ months: months.join(',') });
+    } else {
+      // Clear all related parameters when months are cleared
+      updateUrlParams({ months: null, user: null });
+    }
   };
 
   const handleUserSelect = (username: string) => {
@@ -856,6 +864,13 @@ const MonthlyUserPosts: React.FC = () => {
       setUserAnalyses([]);
       if (selectedMonths.length > 0 && username) {
         fetchUserAnalyses(selectedMonths, username);
+      }
+
+      // Update URL parameters
+      if (username) {
+        updateUrlParams({ user: username });
+      } else {
+        updateUrlParams({ user: null });
       }
     } catch (error) {
       console.error('[MonthlyUserPosts] Error in handleUserSelect', error);
@@ -873,6 +888,33 @@ const MonthlyUserPosts: React.FC = () => {
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setUsers(filteredUsers);
+    }
+  };
+
+  // Helper function to update URL parameters
+  // Only updates if the values actually changed to prevent infinite loops
+  const updateUrlParams = (updates: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams);
+    let hasChanges = false;
+
+    Object.entries(updates).forEach(([key, value]) => {
+      const currentValue = searchParams.get(key);
+      if (value === null || value === '') {
+        if (currentValue !== null) {
+          newParams.delete(key);
+          hasChanges = true;
+        }
+      } else {
+        if (currentValue !== value) {
+          newParams.set(key, value);
+          hasChanges = true;
+        }
+      }
+    });
+
+    // Only update if there are actual changes
+    if (hasChanges) {
+      setSearchParams(newParams, { replace: true });
     }
   };
 

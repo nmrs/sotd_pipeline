@@ -31,11 +31,11 @@ Welcome to your SOTD Lather Log for February 2025
 | 4      | Spearhead Shaving Company            |       92 |             43 | ↑1              | ↑2              | n/a             |
 | 5      | House of Mammoth                     |       83 |             28 | ↓3              | ↓2              | ↑15             |
 | 6      | Noble Otter                          |       70 |             22 | ↑1              | ↓1              | ↓2              |
-| 7      | Declaration Grooming                 |       60 |             29 | ↓1              | ↓3              | ↓6              |
-| 8      | Ariana & Evans                       |       47 |             14 | =               | ↑1              | ↓1              |
+| 7      | Declaration Grooming                 |       59 |             29 | ↓1              | ↓3              | ↓6              |
+| 8      | Ariana & Evans                       |       47 |             14 | ↑1              | ↑1              | ↓1              |
 | 9      | Southern Witchcrafts                 |       41 |             20 | ↑1              | ↑7              | ↓3              |
-| 10     | Talent Soap Factory                  |       35 |             17 | ↑3              | ↑3              | n/a             |
-| 11     | Chiseled Face                        |       35 |             15 | ↓2              | ↓3              | ↑1              |
+| 10     | Chiseled Face                        |       36 |             15 | ↓2              | ↓2              | ↑2              |
+| 11     | Talent Soap Factory                  |       35 |             17 | ↑2              | ↑2              | n/a             |
 | 12     | Zingari Man                          |       34 |             19 | ↓1              | ↓2              | ↓3              |
 | 13     | Chicago Grooming Co.                 |       31 |             18 | ↑4              | ↑8              | =               |
 | 14     | Ginger's Garden                      |       27 |              1 | ↑76             | n/a             | n/a             |
@@ -154,7 +154,7 @@ Welcome to your SOTD Lather Log for February 2025
 | 1      | Barrister and Mann                   |             48 | =               | ↑1              | =               |
 | 2      | Stirling Soap Co.                    |             47 | ↑1              | ↓1              | ↑1              |
 | 3      | Catie's Bubbles                      |             39 | ↓1              | ↑3              | ↑5              |
-| 4      | Declaration Grooming                 |             25 | =               | ↓1              | ↓3              |
+| 4      | Declaration Grooming                 |             24 | =               | ↓1              | ↓3              |
 | 5      | Talent Soap Factory                  |             23 | ↑2              | =               | n/a             |
 | 6      | House of Mammoth                     |             22 | =               | ↑1              | ↑17             |
 | 7=     | Noble Otter                          |             21 | ↑3              | =               | ↓1              |
@@ -164,7 +164,7 @@ Welcome to your SOTD Lather Log for February 2025
 | 11=    | Chicago Grooming Co.                 |             14 | ↑3              | ↑5              | ↓2              |
 | 11=    | Southern Witchcrafts                 |             14 | ↓2              | ↑3              | ↓5              |
 | 11=    | Zingari Man                          |             14 | ↓4              | ↓2              | =               |
-| 14     | Chiseled Face                        |             12 | ↓1              | =               | ↑5              |
+| 14     | Chiseled Face                        |             13 | ↓2              | =               | ↑5              |
 | 15     | Spearhead Shaving Company            |              9 | =               | ↑2              | n/a             |
 | 16     | RazoRock                             |              8 | ↑2              | ↑8              | ↓1              |
 | 17=    | Los Jabones de Joserra               |              7 | ↑13             | n/a             | n/a             |
@@ -204,27 +204,30 @@ Welcome to your SOTD Lather Log for February 2025
 | 20     | u/InfernalInternal     |             18 |       28 |                  1.56 | ↓15             | ↓17             | n/a             |
 
 ## Most Boring Shaver
+Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occassional. 
 
-| Rank   | User                   |   Hhi |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
-|:-------|:-----------------------|------:|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
-| 1=     | u/sentientschoolbus    |     1 |                 1 |              1 |        1 | =               | n/a             | n/a             |
-| 1=     | u/SaintBandicoot       |     1 |                 1 |              1 |        1 | n/a             | ↑77             | n/a             |
-| 1=     | u/SirKravsALot         |     1 |                 1 |              1 |        8 | =               | ↑41             | n/a             |
-| 1=     | u/RiverRatAg14         |     1 |                 1 |              1 |        2 | n/a             | n/a             | n/a             |
-| 1=     | u/majorhawkicedagger   |     1 |                 1 |              1 |        2 | =               | =               | n/a             |
-| 1=     | u/Allisnotwellin       |     1 |                 1 |              1 |        1 | ↑26             | ↑32             | n/a             |
-| 1=     | u/BJoe5325             |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/CanadaEh97           |     1 |                 1 |              1 |        1 | ↑39             | n/a             | n/a             |
-| 1=     | u/HuginMuninGlaux      |     1 |                 1 |              1 |        1 | ↑26             | ↑66             | n/a             |
-| 1=     | u/J33pGuy13            |     1 |                 1 |              1 |        1 | n/a             | ↑57             | n/a             |
-| 1=     | u/Jrmicide             |     1 |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |
-| 1=     | u/ShavingInCT          |     1 |                 1 |              1 |        1 | =               | n/a             | n/a             |
-| 1=     | u/Specialist-Quiet-833 |     1 |                 1 |              1 |        1 | n/a             | ↑16             | n/a             |
-| 1=     | u/TheStallionPartThree |     1 |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |
-| 1=     | u/USS-SpongeBob        |     1 |                 1 |              1 |        1 | n/a             | n/a             | ↑158            |
-| 1=     | u/Wutroslaw            |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/derubempre           |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/georgejo314159       |     1 |                 1 |              1 |        1 | n/a             | ↑16             | n/a             |
-| 1=     | u/iamsms               |     1 |                 1 |              1 |        1 | n/a             | =               | ↑36             |
-| 1=     | u/igord                |     1 |                 1 |              1 |        1 | =               | ↑57             | n/a             |
-| 1=     | u/londonexpat          |     1 |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |
+For the mathematically inclined: Boring Score is a diversity/concentration index (HHI in economics, Simpson’s index in ecology). More detail at [Wikipedia: Diversity index](https://en.wikipedia.org/wiki/Diversity_index).
+
+| Rank   | User                   | Hhi     |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Jan 2025   | Δ vs Feb 2024   | Δ vs Feb 2020   |
+|:-------|:-----------------------|:--------|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1=     | u/sentientschoolbus    | 100.00% |                 1 |              1 |        1 | =               | n/a             | n/a             |
+| 1=     | u/SaintBandicoot       | 100.00% |                 1 |              1 |        1 | n/a             | ↑77             | n/a             |
+| 1=     | u/SirKravsALot         | 100.00% |                 1 |              1 |        8 | =               | ↑41             | n/a             |
+| 1=     | u/RiverRatAg14         | 100.00% |                 1 |              1 |        2 | n/a             | n/a             | n/a             |
+| 1=     | u/majorhawkicedagger   | 100.00% |                 1 |              1 |        2 | =               | =               | n/a             |
+| 1=     | u/Allisnotwellin       | 100.00% |                 1 |              1 |        1 | ↑26             | ↑32             | n/a             |
+| 1=     | u/BJoe5325             | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/CanadaEh97           | 100.00% |                 1 |              1 |        1 | ↑39             | n/a             | n/a             |
+| 1=     | u/HuginMuninGlaux      | 100.00% |                 1 |              1 |        1 | ↑26             | ↑66             | n/a             |
+| 1=     | u/J33pGuy13            | 100.00% |                 1 |              1 |        1 | n/a             | ↑57             | n/a             |
+| 1=     | u/Jrmicide             | 100.00% |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |
+| 1=     | u/ShavingInCT          | 100.00% |                 1 |              1 |        1 | =               | n/a             | n/a             |
+| 1=     | u/Specialist-Quiet-833 | 100.00% |                 1 |              1 |        1 | n/a             | ↑16             | n/a             |
+| 1=     | u/TheStallionPartThree | 100.00% |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |
+| 1=     | u/USS-SpongeBob        | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | ↑158            |
+| 1=     | u/Wutroslaw            | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/derubempre           | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/georgejo314159       | 100.00% |                 1 |              1 |        1 | n/a             | ↑16             | n/a             |
+| 1=     | u/iamsms               | 100.00% |                 1 |              1 |        1 | n/a             | =               | ↑36             |
+| 1=     | u/igord                | 100.00% |                 1 |              1 |        1 | =               | ↑57             | n/a             |
+| 1=     | u/londonexpat          | 100.00% |                 1 |              1 |        1 | ↑26             | n/a             | n/a             |

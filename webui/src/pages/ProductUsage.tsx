@@ -23,7 +23,7 @@ import axios from 'axios';
 
 const ProductUsage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedProductType, setSelectedProductType] = useState<'razor' | 'blade' | 'brush' | 'soap' | ''>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -486,6 +486,33 @@ const ProductUsage: React.FC = () => {
     setRemainingCommentIds([]);
   };
 
+  // Helper function to update URL parameters
+  // Only updates if the values actually changed to prevent infinite loops
+  const updateUrlParams = (updates: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams);
+    let hasChanges = false;
+
+    Object.entries(updates).forEach(([key, value]) => {
+      const currentValue = searchParams.get(key);
+      if (value === null || value === '') {
+        if (currentValue !== null) {
+          newParams.delete(key);
+          hasChanges = true;
+        }
+      } else {
+        if (currentValue !== value) {
+          newParams.set(key, value);
+          hasChanges = true;
+        }
+      }
+    });
+
+    // Only update if there are actual changes
+    if (hasChanges) {
+      setSearchParams(newParams, { replace: true });
+    }
+  };
+
   const handleMonthChange = (months: string[]) => {
     setSelectedMonths(months);
     setSelectedProduct(null);
@@ -494,6 +521,14 @@ const ProductUsage: React.FC = () => {
     setYearlySummary(null);
     setProductSearch('');
     setCommentUrls({});
+
+    // Update URL parameters
+    if (months.length > 0) {
+      updateUrlParams({ months: months.join(',') });
+    } else {
+      // Clear all related parameters when months are cleared
+      updateUrlParams({ months: null, productType: null, brand: null, model: null });
+    }
   };
 
   const handleProductTypeChange = (productType: string) => {
@@ -504,6 +539,14 @@ const ProductUsage: React.FC = () => {
     setYearlySummary(null);
     setProductSearch('');
     setCommentUrls({});
+
+    // Update URL parameters
+    if (productType) {
+      updateUrlParams({ productType, brand: null, model: null });
+    } else {
+      // Clear product-related parameters when product type is cleared
+      updateUrlParams({ productType: null, brand: null, model: null });
+    }
   };
 
   const handleProductSelect = (product: Product) => {
@@ -514,6 +557,11 @@ const ProductUsage: React.FC = () => {
       if (selectedMonths.length > 0) {
         fetchYearlySummary(selectedMonths[0], selectedProductType, product);
       }
+    }
+
+    // Update URL parameters with product brand and model
+    if (product) {
+      updateUrlParams({ brand: product.brand, model: product.model });
     }
   };
 

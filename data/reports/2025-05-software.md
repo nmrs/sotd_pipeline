@@ -26,8 +26,8 @@ Welcome to your SOTD Lather Log for May 2025
 | Rank   | Brand                      |   Shaves |   Unique Users | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
 |:-------|:---------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Stirling Soap Co.          |      198 |             54 | =               | ↑2              | ↑2              |
-| 2      | Catie's Bubbles            |      156 |             38 | ↑1              | ↑7              | ↑9              |
-| 3      | Barrister and Mann         |      134 |             46 | ↓1              | ↓2              | ↓2              |
+| 2      | Catie's Bubbles            |      156 |             38 | =               | ↑7              | ↑9              |
+| 3      | Barrister and Mann         |      134 |             46 | =               | ↓2              | ↓2              |
 | 4      | House of Mammoth           |       96 |             40 | =               | ↓2              | ↑17             |
 | 5      | Noble Otter                |       90 |             30 | ↑1              | ↓1              | ↓1              |
 | 6      | Spearhead Shaving Company  |       65 |             28 | ↑2              | ↓1              | ↑14             |
@@ -97,7 +97,7 @@ Welcome to your SOTD Lather Log for May 2025
 | 20     | House of Mammoth - Sonder                                                                                                                           |       11 |              9 | ↑7              | ↑49             | ↑192            |
 | 21     | Stirling Soap Co. - Varen                                                                                                                           |       11 |              8 | ↑3              | ↑5              | ↑133            |
 | 22     | Catie's Bubbles - Top of the World                                                                                                                  |       11 |              7 | ↓16             | n/a             | n/a             |
-| 23     | [Stirling Soap Co. - Ramblin' Man](https://www.wetshavingdatabase.com/software/stirling-soap-co-ramblin-man-soap/)                                  |       11 |              4 | ↑194            | ↑269            | ↑241            |
+| 23     | [Stirling Soap Co. - Ramblin' Man](https://www.wetshavingdatabase.com/software/stirling-soap-co-ramblin-man-soap/)                                  |       11 |              4 | ↑193            | ↑269            | ↑241            |
 | 24     | Noble Otter - Lonestar                                                                                                                              |       11 |              3 | ↑31             | ↑84             | ↑34             |
 | 25     | Catie's Bubbles - Mille Chypre                                                                                                                      |       11 |              2 | n/a             | n/a             | ↑294            |
 | 26     | Catie's Bubbles - Maggards MeetUp 2023                                                                                                              |       11 |              1 | ↑110            | n/a             | n/a             |
@@ -110,12 +110,12 @@ Welcome to your SOTD Lather Log for May 2025
 | 33     | Stirling Soap Co. - Stirling Spice                                                                                                                  |        9 |              2 | ↑9              | n/a             | ↑147            |
 | 34     | Barrister and Mann - Nordost                                                                                                                        |        8 |              6 | ↑34             | ↓12             | ↑16             |
 | 35     | Stirling Soap Co. - Margaritas in the Arctic                                                                                                        |        8 |              4 | ↑101            | ↑21             | ↓14             |
-| 36=    | Chiseled Face - Guy Noir                                                                                                                            |        8 |              3 | ↑247            | n/a             | n/a             |
+| 36=    | Chiseled Face - Guy Noir                                                                                                                            |        8 |              3 | ↑246            | n/a             | n/a             |
 | 36=    | Fanzine Saponifications - Testing... Testing                                                                                                        |        8 |              3 | ↓28             | n/a             | n/a             |
 | 38=    | Barrister and Mann - Le Grand Chypre                                                                                                                |        7 |              5 | ↑52             | ↑3              | ↓30             |
 | 38=    | Declaration Grooming - Yuzu/Rose/Patchouli                                                                                                          |        7 |              5 | ↑98             | ↑5              | ↓6              |
 | 38=    | Noble Otter - Barrbarr                                                                                                                              |        7 |              5 | ↓1              | ↓8              | ↓5              |
-| 41=    | Catie's Bubbles - Menage a Lavande                                                                                                                  |        7 |              4 | ↑242            | ↑251            | ↓23             |
+| 41=    | Catie's Bubbles - Menage a Lavande                                                                                                                  |        7 |              4 | ↑241            | ↑251            | ↓23             |
 | 41=    | [House of Mammoth - Indigo](https://www.wetshavingdatabase.com/software/house-of-mammoth-mood-indigo-soap/)                                         |        7 |              4 | ↓22             | ↓10             | n/a             |
 | 41=    | [Mike's Natural Soaps - Rose, Patchouli, Cedarwood](https://www.wetshavingdatabase.com/software/mikes-natural-soaps-cedarwood-patchouli-rose-soap/) |        7 |              4 | ↑27             | n/a             | n/a             |
 | 41=    | Stirling Soap Co. - Deep Blue Sea                                                                                                                   |        7 |              4 | ↓12             | ↑31             | ↑171            |
@@ -127,16 +127,16 @@ Welcome to your SOTD Lather Log for May 2025
 | 50     | Australian Private Reserve - Raconteur                                                                                                              |        6 |              6 | ↑86             | n/a             | ↑162            |
 | 51=    | Mike's Natural Soaps - Vetiver                                                                                                                      |        6 |              5 | ↓17             | ↑241            | ↑268            |
 | 51=    | Spearhead Shaving Company - Seaforth! Roman Spice                                                                                                   |        6 |              5 | ↑39             | ↓49             | n/a             |
-| 51=    | Stirling Soap Co. - Scarn                                                                                                                           |        6 |              5 | ↑232            | ↑38             | n/a             |
+| 51=    | Stirling Soap Co. - Scarn                                                                                                                           |        6 |              5 | ↑231            | ↑38             | n/a             |
 | 54=    | Ariana & Evans - Peach & Cognac                                                                                                                     |        6 |              4 | n/a             | ↑54             | n/a             |
 | 54=    | Catie's Bubbles - X                                                                                                                                 |        6 |              4 | ↑69             | ↑238            | n/a             |
 | 56=    | House of Mammoth - Hygge                                                                                                                            |        6 |              3 | ↓35             | ↓52             | n/a             |
-| 56=    | Zingari Man - El Cantinero                                                                                                                          |        6 |              3 | ↑161            | n/a             | n/a             |
-| 58=    | Chicago Grooming Co. - Caoba                                                                                                                        |        6 |              2 | ↑225            | n/a             | n/a             |
+| 56=    | Zingari Man - El Cantinero                                                                                                                          |        6 |              3 | ↑160            | n/a             | n/a             |
+| 58=    | Chicago Grooming Co. - Caoba                                                                                                                        |        6 |              2 | ↑224            | n/a             | n/a             |
 | 58=    | Talent Soap Factory - Cola Freak                                                                                                                    |        6 |              2 | ↓28             | n/a             | n/a             |
 | 60     | Black Ship Grooming - Thomas Tew                                                                                                                    |        6 |              1 | ↑57             | ↑232            | ↑62             |
 | 61=    | Barrister and Mann - Paganini's Violin                                                                                                              |        5 |              5 | ↑62             | ↓22             | n/a             |
-| 61=    | Catie's Bubbles - Waterlyptus                                                                                                                       |        5 |              5 | ↑222            | ↑13             | n/a             |
+| 61=    | Catie's Bubbles - Waterlyptus                                                                                                                       |        5 |              5 | ↑221            | ↑13             | n/a             |
 | 61=    | [Southern Witchcrafts - Fougère Nemeta](https://www.wetshavingdatabase.com/software/southern-witchcrafts-fougere-nemeta-soap/)                      |        5 |              5 | ↑62             | ↑96             | n/a             |
 | 61=    | Spearhead Shaving Company - Seaforth! 3 Scots                                                                                                       |        5 |              5 | ↑106            | ↓23             | n/a             |
 | 65=    | Catie's Bubbles - Tonsorial Parlour                                                                                                                 |        5 |              4 | ↑18             | ↑176            | ↑254            |
@@ -147,13 +147,13 @@ Welcome to your SOTD Lather Log for May 2025
 | 68=    | Summer Break Soaps - Woodshop                                                                                                                       |        5 |              3 | ↑36             | ↑89             | n/a             |
 | 71=    | Ariana & Evans - Legacy                                                                                                                             |        5 |              2 | ↓3              | n/a             | n/a             |
 | 71=    | Mike's Natural Soaps - Honey & Grapefruit                                                                                                           |        5 |              2 | ↑8              | n/a             | n/a             |
-| 71=    | Wholly Kaw - Entropy Man                                                                                                                            |        5 |              2 | ↑212            | n/a             | ↑248            |
+| 71=    | Wholly Kaw - Entropy Man                                                                                                                            |        5 |              2 | ↑211            | n/a             | ↑248            |
 | 74=    | Crowne & Crane - Green Tea                                                                                                                          |        5 |              1 | n/a             | ↓47             | n/a             |
-| 74=    | Henri et Victoria - Cognac and Cuban Cigars                                                                                                         |        5 |              1 | ↑209            | ↓28             | ↑190            |
-| 74=    | Homemade - Stearic Acid & Coconut Oil                                                                                                               |        5 |              1 | ↑209            | n/a             | n/a             |
+| 74=    | Henri et Victoria - Cognac and Cuban Cigars                                                                                                         |        5 |              1 | ↑208            | ↓28             | ↑190            |
+| 74=    | Homemade - Stearic Acid & Coconut Oil                                                                                                               |        5 |              1 | ↑208            | n/a             | n/a             |
 | 74=    | Shave Dandy - Coconut Cow                                                                                                                           |        5 |              1 | ↓31             | n/a             | n/a             |
 | 74=    | Stirling Soap Co. - Hipster                                                                                                                         |        5 |              1 | n/a             | ↑218            | n/a             |
-| 74=    | Tallow + Steel - 1Up                                                                                                                                |        5 |              1 | ↑209            | n/a             | n/a             |
+| 74=    | Tallow + Steel - 1Up                                                                                                                                |        5 |              1 | ↑208            | n/a             | n/a             |
 | 74=    | Zingari Man - Unscented                                                                                                                             |        5 |              1 | n/a             | ↑167            | n/a             |
 
 ## Brand Diversity
@@ -211,32 +211,35 @@ Welcome to your SOTD Lather Log for May 2025
 | 20     | u/Old_Hiker            |             17 |       31 |                  1.82 | ↓4              | ↓4              | ↑30             |
 
 ## Most Boring Shaver
+Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occassional. 
 
-| Rank   | User                   |   Hhi |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
-|:-------|:-----------------------|------:|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
-| 1=     | u/wonkynerddude        |     1 |                 1 |              1 |        1 | n/a             | n/a             | ↑83             |
-| 1=     | u/bloodcrab            |     1 |                 1 |              1 |        1 | n/a             | ↑55             | n/a             |
-| 1=     | u/scribe__             |     1 |                 1 |              1 |       31 | ↑52             | ↑53             | n/a             |
-| 1=     | u/FrattySatty92        |     1 |                 1 |              1 |        5 | ↑29             | n/a             | n/a             |
-| 1=     | u/TheStallionPartThree |     1 |                 1 |              1 |        2 | ↑19             | =               | n/a             |
-| 1=     | u/Admirable-Nobody-946 |     1 |                 1 |              1 |        1 | =               | ↑55             | n/a             |
-| 1=     | u/BourbonInExile       |     1 |                 1 |              1 |        1 | ↑61             | ↑76             | ↑46             |
-| 1=     | u/Eructate             |     1 |                 1 |              1 |        1 | ↑103            | ↑122            | n/a             |
-| 1=     | u/HuginMuninGlaux      |     1 |                 1 |              1 |        1 | =               | ↑90             | n/a             |
-| 1=     | u/JoboozeRum           |     1 |                 1 |              1 |        1 | ↑18             | =               | n/a             |
-| 1=     | u/MadDingersYo         |     1 |                 1 |              1 |        1 | ↑37             | ↑86             | ↑124            |
-| 1=     | u/Ok-Yak-3950          |     1 |                 1 |              1 |        1 | =               | n/a             | n/a             |
-| 1=     | u/SufficientKnee       |     1 |                 1 |              1 |        1 | ↑44             | ↑131            | n/a             |
-| 1=     | u/ciopobbi             |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/dgerasimov           |     1 |                 1 |              1 |        1 | n/a             | =               | n/a             |
-| 1=     | u/hangheel             |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/iamhonestlylying     |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/londonexpat          |     1 |                 1 |              1 |        1 | ↑17             | n/a             | n/a             |
-| 1=     | u/merikus              |     1 |                 1 |              1 |        1 | =               | n/a             | ↑51             |
-| 1=     | u/moonbiter1           |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/plathrop01           |     1 |                 1 |              1 |        1 | ↑50             | n/a             | n/a             |
-| 1=     | u/privremen            |     1 |                 1 |              1 |        1 | ↑57             | ↑86             | n/a             |
-| 1=     | u/sahenders            |     1 |                 1 |              1 |        1 | ↑90             | ↑129            | n/a             |
-| 1=     | u/scarpux              |     1 |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/sgrdddy              |     1 |                 1 |              1 |        1 | n/a             | ↑76             | ↑164            |
-| 1=     | u/teeraymcfly          |     1 |                 1 |              1 |        1 | ↑19             | n/a             | n/a             |
+For the mathematically inclined: Boring Score is a diversity/concentration index (HHI in economics, Simpson’s index in ecology). More detail at [Wikipedia: Diversity index](https://en.wikipedia.org/wiki/Diversity_index).
+
+| Rank   | User                   | Hhi     |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Apr 2025   | Δ vs May 2024   | Δ vs May 2020   |
+|:-------|:-----------------------|:--------|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1=     | u/wonkynerddude        | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | ↑83             |
+| 1=     | u/bloodcrab            | 100.00% |                 1 |              1 |        1 | n/a             | ↑55             | n/a             |
+| 1=     | u/scribe__             | 100.00% |                 1 |              1 |       31 | ↑52             | ↑53             | n/a             |
+| 1=     | u/FrattySatty92        | 100.00% |                 1 |              1 |        5 | ↑29             | n/a             | n/a             |
+| 1=     | u/TheStallionPartThree | 100.00% |                 1 |              1 |        2 | ↑19             | =               | n/a             |
+| 1=     | u/Admirable-Nobody-946 | 100.00% |                 1 |              1 |        1 | =               | ↑55             | n/a             |
+| 1=     | u/BourbonInExile       | 100.00% |                 1 |              1 |        1 | ↑61             | ↑76             | ↑46             |
+| 1=     | u/Eructate             | 100.00% |                 1 |              1 |        1 | ↑103            | ↑122            | n/a             |
+| 1=     | u/HuginMuninGlaux      | 100.00% |                 1 |              1 |        1 | =               | ↑90             | n/a             |
+| 1=     | u/JoboozeRum           | 100.00% |                 1 |              1 |        1 | ↑18             | =               | n/a             |
+| 1=     | u/MadDingersYo         | 100.00% |                 1 |              1 |        1 | ↑37             | ↑86             | ↑124            |
+| 1=     | u/Ok-Yak-3950          | 100.00% |                 1 |              1 |        1 | =               | n/a             | n/a             |
+| 1=     | u/SufficientKnee       | 100.00% |                 1 |              1 |        1 | ↑44             | ↑131            | n/a             |
+| 1=     | u/ciopobbi             | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/dgerasimov           | 100.00% |                 1 |              1 |        1 | n/a             | =               | n/a             |
+| 1=     | u/hangheel             | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/iamhonestlylying     | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/londonexpat          | 100.00% |                 1 |              1 |        1 | ↑17             | n/a             | n/a             |
+| 1=     | u/merikus              | 100.00% |                 1 |              1 |        1 | =               | n/a             | ↑51             |
+| 1=     | u/moonbiter1           | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/plathrop01           | 100.00% |                 1 |              1 |        1 | ↑50             | n/a             | n/a             |
+| 1=     | u/privremen            | 100.00% |                 1 |              1 |        1 | ↑57             | ↑86             | n/a             |
+| 1=     | u/sahenders            | 100.00% |                 1 |              1 |        1 | ↑90             | ↑129            | n/a             |
+| 1=     | u/scarpux              | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/sgrdddy              | 100.00% |                 1 |              1 |        1 | n/a             | ↑76             | ↑164            |
+| 1=     | u/teeraymcfly          | 100.00% |                 1 |              1 |        1 | ↑19             | n/a             | n/a             |
