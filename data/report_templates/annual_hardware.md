@@ -44,27 +44,27 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 ## Brush Handle Makers
 
-{{tables.brush-handle-makers|ranks:30|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.brush-handle-makers|ranks:30|columns:rank, name=handle maker, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Brush Knot Makers
 
-{{tables.brush-knot-makers|ranks:30|columns:rank, name=Knot Maker, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.brush-knot-makers|ranks:30|columns:rank, name=knot maker, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Knot Fibers
 
-{{tables.brush-fibers|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.brush-fibers|columns:rank, name=fiber, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Knot Sizes
 
-{{tables.brush-knot-sizes|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.brush-knot-sizes|columns:rank, name=knot size mm, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Blackbird Plates
 
-{{tables.blackbird-plates|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.blackbird-plates|columns:rank, name=plate, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Christopher Bradley Plates
 
-{{tables.christopher-bradley-plates|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.christopher-bradley-plates|columns:rank, name=plate, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Game Changer Plates
 
@@ -72,15 +72,15 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
 
 ## Straight Widths
 
-{{tables.straight-widths|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.straight-widths|columns:rank, name=width, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Straight Grinds
 
-{{tables.straight-grinds|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.straight-grinds|columns:rank, name=grind, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Straight Points
 
-{{tables.straight-points|columns:rank, name, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
+{{tables.straight-points|columns:rank, name=point, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
 
 ## Most Used Blades in Most Used Razors
 
