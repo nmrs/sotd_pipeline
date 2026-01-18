@@ -126,6 +126,10 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // Track matches that are being processed (optimistic UI)
+  const [pendingNonMatches, setPendingNonMatches] = useState<Set<string>>(new Set());
+  const [pendingSlugs, setPendingSlugs] = useState<Set<string>>(new Set());
+
   // Initialize messaging hook for toast notifications
   const { messages, addErrorMessage, addSuccessMessage, removeMessage } = useMessaging();
 
@@ -294,8 +298,26 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         wsdb_count: data.wsdb_results?.length || 0,
         mode: data.mode,
       });
-      setPipelineResults(data.pipeline_results || []);
-      setWsdbResults(data.wsdb_results || []);
+      
+      // Preserve expanded state when updating results
+      const preserveExpandedState = (oldResults: AlignmentResult[], newResults: AlignmentResult[]): AlignmentResult[] => {
+        const expandedMap = new Map<string, boolean>();
+        oldResults.forEach(result => {
+          const key = `${result.source_brand}|${result.source_scent || ''}`;
+          expandedMap.set(key, result.expanded || false);
+        });
+        
+        return (newResults || []).map(result => {
+          const key = `${result.source_brand}|${result.source_scent || ''}`;
+          return {
+            ...result,
+            expanded: expandedMap.get(key) || false,
+          };
+        });
+      };
+      
+      setPipelineResults(prev => preserveExpandedState(prev, data.pipeline_results || []));
+      setWsdbResults(prev => preserveExpandedState(prev, data.wsdb_results || []));
 
       setSuccessMessage(
         `Analysis complete: ${data.pipeline_results?.length || 0} pipeline results, ${data.wsdb_results?.length || 0} WSDB results`
@@ -319,7 +341,103 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   };
 
+  // Create unique key for identifying matches
+  const getMatchKey = (source: AlignmentResult, match: FuzzyMatch): string => {
+    // Create unique key: source_brand|source_scent|wsdb_brand|wsdb_scent
+    const sourceKey = `${source.source_brand}|${source.source_scent || ''}`;
+    const matchKey = `${match.brand}|${match.name || ''}`;
+    return `${sourceKey}|${matchKey}`;
+  };
+
+  // Check if a match is pending (being processed)
+  const isMatchPending = (source: AlignmentResult, match: FuzzyMatch): boolean => {
+    const matchKey = getMatchKey(source, match);
+    return pendingNonMatches.has(matchKey);
+  };
+
+  // Check if a match has a pending slug being added
+  const isSlugPending = (source: AlignmentResult, match: FuzzyMatch): boolean => {
+    const matchKey = getMatchKey(source, match);
+    return pendingSlugs.has(matchKey);
+  };
+
+  // Check if a match is a saved non-match (not just pending)
+  // Note: nonMatches.scent_non_matches is actually a nested dict: {brand: {scent_key: [list]}}
+  const isNonMatch = (source: AlignmentResult, match: FuzzyMatch): boolean => {
+    if (analysisMode === 'brands') {
+      // Brand non-matches structure: {brand_key: [list_of_non_matches]}
+      const brandNonMatches = nonMatches.brand_non_matches as any || {};
+      const sourceBrand = source.source_brand;
+      const matchBrand = match.brand;
+      
+      // Check both directions (canonical keys can be either brand)
+      const sourceInKeys = sourceBrand in brandNonMatches;
+      const matchInKeys = matchBrand in brandNonMatches;
+      
+      if (sourceInKeys) {
+        const list = brandNonMatches[sourceBrand] || [];
+        const matchFound = list.some((nm: string) => 
+          nm.toLowerCase().trim() === matchBrand.toLowerCase().trim()
+        );
+        if (matchFound) {
+          return true;
+        }
+      }
+      
+      if (matchInKeys) {
+        const list = brandNonMatches[matchBrand] || [];
+        const sourceFound = list.some((nm: string) => 
+          nm.toLowerCase().trim() === sourceBrand.toLowerCase().trim()
+        );
+        if (sourceFound) {
+          return true;
+        }
+      }
+      
+      return false;
+    } else {
+      // Scent non-matches structure: {brand: {scent_key: [list_of_non_matches]}}
+      const scentNonMatches = nonMatches.scent_non_matches as any || {};
+      const brandData = scentNonMatches[source.source_brand] || {};
+      const sourceScent = source.source_scent || '';
+      const matchName = match.name || '';
+      
+      // Check both directions (canonical keys can be either scent)
+      const sourceInKeys = sourceScent in brandData;
+      const matchInKeys = matchName in brandData;
+      
+      // Check if source_scent is a key and match_name is in its list
+      if (sourceInKeys) {
+        const list = brandData[sourceScent] || [];
+        const matchFound = list.some((nm: string) => 
+          nm.toLowerCase().trim() === matchName.toLowerCase().trim()
+        );
+        if (matchFound) {
+          return true;
+        }
+      }
+      
+      // Check if match_name is a key and source_scent is in its list
+      if (matchInKeys) {
+        const list = brandData[matchName] || [];
+        const sourceFound = list.some((nm: string) => 
+          nm.toLowerCase().trim() === sourceScent.toLowerCase().trim()
+        );
+        if (sourceFound) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+  };
+
   const handleNotAMatch = async (source: AlignmentResult, match: FuzzyMatch) => {
+    const matchKey = getMatchKey(source, match);
+    
+    // Optimistic update: immediately remove from UI
+    setPendingNonMatches(prev => new Set(prev).add(matchKey));
+    
     // Determine match type based on current mode
     const matchType = analysisMode === 'brands' ? 'brand' : 'scent';
 
@@ -334,39 +452,60 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       }),
     };
 
-    try {
-      // Auto-save to backend
-      const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Check if the backend returned success: false
-        if (data.success === false) {
-          setError(data.message || 'Failed to save non-match');
-          return;
+    // Process in background (fire-and-forget)
+    fetch('http://localhost:8000/api/wsdb-alignment/non-matches', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.success === false) {
+            // Error: remove from pending and show error
+            setPendingNonMatches(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(matchKey);
+              return newSet;
+            });
+            setError(data.message || 'Failed to save non-match');
+            return;
+          }
+          
+          // Success: reload non-matches and remove from pending set
+          // The match will be filtered out on next analysis
+          await loadNonMatches();
+          // Remove from pending set since it's now saved and will be filtered by backend
+          setPendingNonMatches(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchKey);
+            return newSet;
+          });
+          // Don't call analyzeAlignment() here - it causes UI jumping
+          // The optimistic update already removed the match from view
+          addSuccessMessage(data.message || 'Non-match saved successfully');
+        } else {
+          // Error: restore UI and show error
+          setPendingNonMatches(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchKey);
+            return newSet;
+          });
+          const errorData = await response.json().catch(() => ({}));
+          setError(errorData.detail || errorData.message || 'Failed to save non-match');
         }
-
-        // Reload non-matches
-        await loadNonMatches();
-
-        // Re-run analysis to filter out the new non-match
-        await analyzeAlignment();
-
-        // Show success message
-        setSuccessMessage(data.message || 'Non-match saved successfully');
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.detail || errorData.message || 'Failed to save non-match');
-      }
-    } catch (err) {
-      console.error('Error saving non-match:', err);
-      setError(err instanceof Error ? err.message : 'Error saving non-match');
-    }
+      })
+      .catch((err) => {
+        // Error: restore UI and show error
+        setPendingNonMatches(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(matchKey);
+          return newSet;
+        });
+        console.error('Error saving non-match:', err);
+        setError(err instanceof Error ? err.message : 'Error saving non-match');
+      });
   };
 
   const handleAddScentAlias = async (source: AlignmentResult, match: FuzzyMatch) => {
@@ -395,54 +534,86 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       return;
     }
 
-    try {
-      // Send request to add WSDB slug
-      const response = await fetch('http://localhost:8000/api/wsdb-alignment/add-scent-alias', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pipeline_brand: pipelineBrand,
-          pipeline_scent: pipelineScent,
-          wsdb_slug: wsdbSlug,
-        }),
-      });
+    const matchKey = getMatchKey(source, match);
+    
+    // Optimistic update: immediately remove from UI
+    setPendingSlugs(prev => new Set(prev).add(matchKey));
 
-      if (response.ok) {
-        // Reload pipeline soaps to get updated slugs (works in both modes)
-        await reloadPipelineSoaps();
-
-        // Re-run analysis to see updated matches
-        await analyzeAlignment();
-
-        // Show success message as toast
-        addSuccessMessage(`Added WSDB slug "${wsdbSlug}" for "${pipelineBrand} - ${pipelineScent}"`);
-      } else {
-        // Handle error response gracefully (may not be JSON)
-        const errorData = await response.json().catch(() => ({}));
-        
-        // Extract error message with context
-        let errorMessage = errorData.detail || errorData.message;
-        
-        // Provide user-friendly error messages for common cases
-        if (response.status === 404) {
-          if (errorMessage?.includes('Scent') && errorMessage?.includes('not found')) {
-            errorMessage = `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
-          } else if (errorMessage?.includes('Brand') && errorMessage?.includes('not found')) {
-            errorMessage = `Brand '${pipelineBrand}' not found in catalog. Please add the brand to the catalog first.`;
-          } else {
-            errorMessage = errorMessage || `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
+    // Process in background (fire-and-forget)
+    fetch('http://localhost:8000/api/wsdb-alignment/add-scent-alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pipeline_brand: pipelineBrand,
+        pipeline_scent: pipelineScent,
+        wsdb_slug: wsdbSlug,
+      }),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.success === false) {
+            // Error: remove from pending and show error
+            setPendingSlugs(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(matchKey);
+              return newSet;
+            });
+            addErrorMessage(data.message || 'Failed to add WSDB slug');
+            return;
           }
+          
+          // Success: reload pipeline soaps to get updated slug data, then remove from pending set
+          // The match will be filtered out on next analysis (since it now has a slug)
+          await reloadPipelineSoaps();
+          // Remove from pending set since it's now saved and will be filtered by backend
+          setPendingSlugs(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchKey);
+            return newSet;
+          });
+          // Don't call analyzeAlignment() here - it causes UI jumping
+          // The optimistic update already removed the match from view
+          addSuccessMessage(data.message || `Added WSDB slug "${wsdbSlug}" for "${pipelineBrand} - ${pipelineScent}"`);
         } else {
-          errorMessage = errorMessage || 'Failed to add WSDB slug';
+          // Error: restore UI and show error
+          setPendingSlugs(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchKey);
+            return newSet;
+          });
+          const errorData = await response.json().catch(() => ({}));
+          
+          // Extract error message with context
+          let errorMessage = errorData.detail || errorData.message;
+          
+          // Provide user-friendly error messages for common cases
+          if (response.status === 404) {
+            if (errorMessage?.includes('Scent') && errorMessage?.includes('not found')) {
+              errorMessage = `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
+            } else if (errorMessage?.includes('Brand') && errorMessage?.includes('not found')) {
+              errorMessage = `Brand '${pipelineBrand}' not found in catalog. Please add the brand to the catalog first.`;
+            } else {
+              errorMessage = errorMessage || `Scent '${pipelineScent}' not found in brand '${pipelineBrand}' in catalog. Please add the scent to the catalog first.`;
+            }
+          } else {
+            errorMessage = errorMessage || 'Failed to add WSDB slug';
+          }
+          
+          addErrorMessage(errorMessage);
         }
-        
-        // Show error message as toast
-        addErrorMessage(errorMessage);
-      }
-    } catch (err) {
-      console.error('Error adding WSDB slug:', err);
-      addErrorMessage(err instanceof Error ? err.message : 'Error adding WSDB slug');
-    }
+      })
+      .catch((err) => {
+        // Error: restore UI and show error
+        setPendingSlugs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(matchKey);
+          return newSet;
+        });
+        console.error('Error adding WSDB slug:', err);
+        addErrorMessage(err instanceof Error ? err.message : 'Error adding WSDB slug');
+      });
   };
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
@@ -1003,8 +1174,23 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
             <CardContent>
               {filteredPipelineResults.length > 0 ? (
                 <div className='space-y-2'>
-                  {filteredPipelineResults.map((result, index) => (
-                    <div key={index} className='border rounded-lg p-4'>
+                  {filteredPipelineResults.map((result, index) => {
+                    // Filter out pending matches, saved non-matches, and pending slugs for this result
+                    const nonPendingMatches = result.matches.filter(match => 
+                      !isMatchPending(result, match) && 
+                      !isNonMatch(result, match) &&
+                      !isSlugPending(result, match)
+                    );
+                    const hasNonPendingMatches = nonPendingMatches.length > 0;
+                    // Check if there are any pending operations for this result
+                    const hasPendingOperations = result.matches.some(match => 
+                      isMatchPending(result, match) || isSlugPending(result, match)
+                    );
+                    // Use stable key based on brand+scent to prevent re-rendering
+                    const resultKey = `${result.source_brand}|${result.source_scent || ''}`;
+                    
+                    return (
+                    <div key={resultKey} className='border rounded-lg p-4'>
                       <div
                         className='flex items-center justify-between cursor-pointer'
                         onClick={() => toggleExpanded(result, setPipelineResults)}
@@ -1040,7 +1226,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                               )}
                             </div>
                             <div className='text-sm text-gray-600'>
-                              {result.matches.length} match{result.matches.length !== 1 ? 'es' : ''}
+                              {nonPendingMatches.length} match{nonPendingMatches.length !== 1 ? 'es' : ''}
                               {dataSource === 'match_files' && result.original_texts && result.original_texts.length > 0 && (
                                 <span className='ml-2 text-xs'>
                                   • Original: {result.original_texts[0]}
@@ -1050,20 +1236,21 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        {result.matches.length > 0 && (
-                          <Badge className={getConfidenceColor(result.matches[0].confidence)}>
-                            {getConfidenceLabel(result.matches[0].confidence)} (
-                            {result.matches[0].confidence.toFixed(1)}%)
+                        {hasNonPendingMatches && (
+                          <Badge className={getConfidenceColor(nonPendingMatches[0].confidence)}>
+                            {getConfidenceLabel(nonPendingMatches[0].confidence)} (
+                            {nonPendingMatches[0].confidence.toFixed(1)}%)
                           </Badge>
                         )}
                       </div>
 
-                      {result.expanded && result.matches.length > 0 && (
+                      {result.expanded && (
                         <div className='mt-4 space-y-3 pl-8'>
-                          {analysisMode === 'brands'
+                          {hasNonPendingMatches ? (
+                          analysisMode === 'brands'
                             ? // Group by brand in Brands Only mode
                               (() => {
-                                const brandGroups = result.matches.reduce((acc, match) => {
+                                const brandGroups = nonPendingMatches.reduce((acc, match) => {
                                   if (!acc[match.brand]) {
                                     acc[match.brand] = [];
                                   }
@@ -1140,8 +1327,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                 ));
                               })()
                             : // Show individual scent matches in Brand + Scent mode
-                              result.matches.map((match, matchIndex) => (
-                                <div key={matchIndex} className='border-l-2 border-blue-200 pl-4'>
+                              nonPendingMatches.map((match, matchIndex) => (
+                                <div key={`${match.brand}-${match.name}-${matchIndex}`} className='border-l-2 border-blue-200 pl-4'>
                                   <div className='flex items-center justify-between mb-2'>
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
                                       {match.details?.slug ? (
@@ -1232,7 +1419,16 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     )}
                                   </div>
                                 </div>
-                              ))}
+                              ))
+                          ) : hasPendingOperations ? (
+                            <div className='text-sm text-gray-500 italic'>
+                              All matches are being processed...
+                            </div>
+                          ) : (
+                            <div className='text-sm text-gray-500 italic'>
+                              No matches found
+                            </div>
+                          )}
                           {/* Comment Display (match files mode only) */}
                           {dataSource === 'match_files' && result.comment_ids && result.comment_ids.length > 0 && (
                             <div className='mt-4 pt-4 border-t'>
@@ -1251,7 +1447,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                         </div>
                       )}
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className='text-center py-8 text-gray-500'>
@@ -1304,8 +1501,23 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
             <CardContent>
               {filteredWsdbResults.length > 0 ? (
                 <div className='space-y-2'>
-                  {filteredWsdbResults.map((result, index) => (
-                    <div key={index} className='border rounded-lg p-4'>
+                  {filteredWsdbResults.map((result, index) => {
+                    // Filter out pending matches, saved non-matches, and pending slugs for this result
+                    const nonPendingMatches = result.matches.filter(match => 
+                      !isMatchPending(result, match) && 
+                      !isNonMatch(result, match) &&
+                      !isSlugPending(result, match)
+                    );
+                    const hasNonPendingMatches = nonPendingMatches.length > 0;
+                    // Check if there are any pending operations for this result
+                    const hasPendingOperations = result.matches.some(match => 
+                      isMatchPending(result, match) || isSlugPending(result, match)
+                    );
+                    // Use stable key based on brand+scent to prevent re-rendering
+                    const resultKey = `${result.source_brand}|${result.source_scent || ''}`;
+                    
+                    return (
+                    <div key={resultKey} className='border rounded-lg p-4'>
                       <div
                         className='flex items-center justify-between cursor-pointer'
                         onClick={() => toggleExpanded(result, setWsdbResults)}
@@ -1333,7 +1545,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                               )}
                             </div>
                             <div className='text-sm text-gray-600'>
-                              {result.matches.length} match{result.matches.length !== 1 ? 'es' : ''}
+                              {nonPendingMatches.length} match{nonPendingMatches.length !== 1 ? 'es' : ''}
                               {dataSource === 'match_files' && result.original_texts && result.original_texts.length > 0 && (
                                 <span className='ml-2 text-xs'>
                                   • Original: {result.original_texts[0]}
@@ -1343,20 +1555,21 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        {result.matches.length > 0 && (
-                          <Badge className={getConfidenceColor(result.matches[0].confidence)}>
-                            {getConfidenceLabel(result.matches[0].confidence)} (
-                            {result.matches[0].confidence.toFixed(1)}%)
+                        {hasNonPendingMatches && (
+                          <Badge className={getConfidenceColor(nonPendingMatches[0].confidence)}>
+                            {getConfidenceLabel(nonPendingMatches[0].confidence)} (
+                            {nonPendingMatches[0].confidence.toFixed(1)}%)
                           </Badge>
                         )}
                       </div>
 
-                      {result.expanded && result.matches.length > 0 && (
+                      {result.expanded && (
                         <div className='mt-4 space-y-3 pl-8'>
-                          {analysisMode === 'brands'
+                          {hasNonPendingMatches ? (
+                          analysisMode === 'brands'
                             ? // Group by brand in Brands Only mode
                               (() => {
-                                const brandGroups = result.matches.reduce((acc, match) => {
+                                const brandGroups = nonPendingMatches.reduce((acc, match) => {
                                   if (!acc[match.brand]) {
                                     acc[match.brand] = [];
                                   }
@@ -1433,8 +1646,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                 ));
                               })()
                             : // Show individual scent matches in Brand + Scent mode
-                              result.matches.map((match, matchIndex) => (
-                                <div key={matchIndex} className='border-l-2 border-green-200 pl-4'>
+                              nonPendingMatches.map((match, matchIndex) => (
+                                <div key={`${match.brand}-${match.name}-${matchIndex}`} className='border-l-2 border-green-200 pl-4'>
                                   <div className='flex items-center justify-between mb-2'>
                                     <div className='font-medium text-gray-900 flex items-center gap-2'>
                                       {match.details?.slug ? (
@@ -1513,7 +1726,16 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                                     )}
                                   </div>
                                 </div>
-                              ))}
+                              ))
+                          ) : hasPendingOperations ? (
+                            <div className='text-sm text-gray-500 italic'>
+                              All matches are being processed...
+                            </div>
+                          ) : (
+                            <div className='text-sm text-gray-500 italic'>
+                              No matches found
+                            </div>
+                          )}
                           {/* Comment Display (match files mode only) */}
                           {dataSource === 'match_files' && result.comment_ids && result.comment_ids.length > 0 && (
                             <div className='mt-4 pt-4 border-t'>
@@ -1532,7 +1754,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                         </div>
                       )}
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className='text-center py-8 text-gray-500'>
