@@ -528,6 +528,9 @@ Barrister and Mann:
     Amazelnut:
       patterns:
       - amazelnut
+    Arctique:
+      patterns:
+      - arctique
     Atomic Holiday:
       patterns:
       - atomic holiday
@@ -548,6 +551,9 @@ Barrister and Mann:
     Braeburn:
       patterns:
       - braeburn
+    Brew Ha-Ha:
+      patterns:
+      - brew ha[- ]?ha
     Caledonia Rose:
       patterns:
       - (barris|bam).*caledonia rose
@@ -598,6 +604,9 @@ Barrister and Mann:
     Figarose:
       patterns:
       - figarose
+    Figgy Puddin':
+      patterns:
+      - barrister.*figgy puddin
     First Snow:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*first snow
@@ -611,7 +620,7 @@ Barrister and Mann:
       - foug.?re aromatique
     Fougère Classique:
       patterns:
-      - foug.?re classique
+      - fou?g\w+re classique
     Fougère Gothique:
       patterns:
       - foug.?re gothique
@@ -628,6 +637,9 @@ Barrister and Mann:
     Kalyptos:
       patterns:
       - kalyp[st]os
+    Latha (Original):
+      patterns:
+      - latha original
     Lavanille:
       patterns:
       - lavan[ie]l+e
@@ -730,6 +742,9 @@ Barrister and Mann:
       - barrister.*roam.*(2|II|two)?
       - roma two
       - roam two
+    Saeryan:
+      patterns:
+      - saeryan
     Saguesera:
       patterns:
       - sague?sera
@@ -748,12 +763,18 @@ Barrister and Mann:
     Seville:
       patterns:
       - seville
+    Sinfonia:
+      patterns:
+      - sinfonia
     Smoking Bishop:
       patterns:
       - smoking bishop
     Soapmakers of Awesometown:
       patterns:
       - awesometown
+    Solstice:
+      patterns:
+      - barrister.*solstice
     Spice:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*spice
@@ -788,12 +809,15 @@ Barrister and Mann:
       patterns:
       - full measure of man
       - full measure of a man
+    Tuesday:
+      patterns:
+      - barrister.*tuesday
     Ubrique:
       patterns:
       - ubrique
     Unscented:
       patterns:
-      - barris.*unscent
+      - (barris|\bbam\b|b&m|b\+m).*unscent
     Vespers:
       patterns:
       - \bb ?(and|&|\+) ?m\b.*vespers
@@ -3560,6 +3584,9 @@ RazoRock:
       patterns:
       - razorock.*american barber
       - rr.*american barber
+    Blue Barbershop:
+      patterns:
+      - razor+ock.*blue barb[ae]rshop
     Green Label:
       patterns:
       - razorock.*green label
@@ -3581,6 +3608,10 @@ RazoRock:
 Razor Emporium:
   patterns:
   - razor emporium
+  scents:
+    Element 47:
+      patterns:
+      - element 47
 Razor Master:
   patterns:
   - razor master
@@ -3973,18 +4004,27 @@ Stirling Soap Co.:
   scents:
     2025 Ohio Wet Shavers Meetup:
       patterns:
-      - ohio.*meetup.*(2025|5|five)
-      - 2025.*ohio.*meetup
+      - (2025|5|five).*ohio.*(wetshavers|meetup)
+      - ohio.*(wetshavers|meetup).*(2025|5|five)
     6ix 7even:
       patterns:
       - 6ix 7even
       - stirling.*six.*seven
+    Agar:
+      patterns:
+      - st[ie]rling.*agar
     Alighieri:
       patterns:
       - stirl.*alighieri
     Almond Creme:
       patterns:
       - stirl.*almond
+    Amyris:
+      patterns:
+      - stirling.*amyris
+    Arance Mandarini:
+      patterns:
+      - stirling.*arance.*mandarini
     Arkadia:
       patterns:
       - arkadia
@@ -4008,22 +4048,46 @@ Stirling Soap Co.:
       - st[ie]rling.*bay rum
     Bergamot Lavender:
       patterns:
-      - stirling.*bergamot lavender
+      - st[ie]rling.*bergamon?t.*lavender
     Black Cherry:
       patterns:
       - stirling.*black cherry
+    Black Ice:
+      patterns:
+      - st[ie]rling.*black ice
+    Black Pepper Lime:
+      patterns:
+      - st[ie]rling.*black pepper lime
     Boat Drinks:
       patterns:
       - stirl.*boat drinks
+    Bonafide:
+      patterns:
+      - st[ie]rling.*bonafide
+    Bonaparte:
+      patterns:
+      - st[ie]rling.*bonaparte
     British Leather:
       patterns:
       - stirling.*british leather
+    Burgundy:
+      patterns:
+      - st[ie]rling.*burgundy
+    Campania:
+      patterns:
+      - st[ie]rling.*campania.*(barbiere)?
     Candy Cane:
       patterns:
       - stirling.*candy cane
+    Carmichael:
+      patterns:
+      - st[ie]rling.*carmichael
     Christmas Eve:
       patterns:
       - stirling.*christmas eve
+    Clementine:
+      patterns:
+      - st[ie]rling.*clementine
     Coconut Lime:
       patterns:
       - stirling.*c\w+nut lime
@@ -4033,6 +4097,12 @@ Stirling Soap Co.:
     Cool Blue:
       patterns:
       - st[ie]rling.*cool.*blue
+    Cypress:
+      patterns:
+      - st[ie]rling.*cypress
+    D-503:
+      patterns:
+      - st[ie]rling.*d-?503
     Deep Blue Sea:
       patterns:
       - (?:stirling.*)?deep blue sea
@@ -4045,9 +4115,21 @@ Stirling Soap Co.:
     Duchess:
       patterns:
       - st[ie]rling.*duchess
+    Duke:
+      patterns:
+      - st[ie]rling.*duke
+    Dunshire:
+      patterns:
+      - st[ie]rling.*dunshire
     Electric Sheep:
       patterns:
       - (?<!glacial\s)electric shr?eep
+    Eucalyptus Mint:
+      patterns:
+      - st[ie]rling.*eucalyptus.*mint
+    Evie:
+      patterns:
+      - st[ie]rling.*evie
     Executive Man:
       patterns:
       - stirling.*executive man
@@ -4055,6 +4137,9 @@ Stirling Soap Co.:
     Falkor:
       patterns:
       - \bfalkor\b
+    First Light:
+      patterns:
+      - st[ie]rling.*first light
     FOSSCO Musc:
       patterns:
       - fossco mu?sc
@@ -4064,6 +4149,9 @@ Stirling Soap Co.:
     Friends to the End:
       patterns:
       - stirling.*friends to the end
+    Frozen Tundra:
+      patterns:
+      - st[ie]rling.*frozen tundra
     Gatlinburg:
       patterns:
       - stirling.*gatlinburg
@@ -4076,6 +4164,9 @@ Stirling Soap Co.:
     Gingerbread Man:
       patterns:
       - st[ie]rling.*gingerbread man
+    Glacial Citron:
+      patterns:
+      - st[ie]rling.*glacial.*citron
     Glacial Electric Sheep:
       patterns:
       - glacial electric sheep
@@ -4083,13 +4174,32 @@ Stirling Soap Co.:
     Glacial Lemon Chill:
       patterns:
       - glacial.*lemon chill
+      - lemon chill.*glacial
       wsdb_slug: stirling-soap-co-glacial-lemon-chill-soap
+    Glacial Mango Sunrise:
+      patterns:
+      - st[ie]rling.*glacial.*mango sunrise
+    Glacial Obsidian:
+      patterns:
+      - st[ie]rling.*glacial.*obsidian
+    Glacial Spearmint:
+      patterns:
+      - st[ie]rling.*glacial.*spearmint
+    Glacial Strawberry Lemonade:
+      patterns:
+      - st[ie]rling.*glacial.*strawberry lemonade
     Glastonbury:
       patterns:
       - st[ie]rling.*glastonbury
+    Grapefruit:
+      patterns:
+      - st[ie]rling.*grapefruit
     Haverford:
       patterns:
       - stirl.*have\wford
+    Hipster:
+      patterns:
+      - st[ie]rling.*hipster
     Hot Apple Cider:
       patterns:
       - stirling.*hot apple cider
@@ -4108,39 +4218,84 @@ Stirling Soap Co.:
     Island Man:
       patterns:
       - stirling.*island man
+    Juniper Breeze:
+      patterns:
+      - st[ie]rling.*juniper.*breeze
+    Lady in White:
+      patterns:
+      - st[ie]rling.*lady in white
+    Lampasas:
+      patterns:
+      - st[ie]rling.*lampasas
     Lavender:
       patterns:
       - stirling.*lavender
     Lavender Sage:
       patterns:
       - stirling.*lavender.*sage
+    Lemintense:
+      patterns:
+      - st[ie]rling.*lemintense
     Light-ish Red:
       patterns:
       - light-?ish.*red
+    Lime:
+      patterns:
+      - st[ie]rling.*lime
+    Maggard Meetup 2025:
+      patterns:
+      - st[ie]rling.*maggard.*meetup.*2025
     Margaritas in the Arctic:
       patterns:
       - marg.*arc?tic
+    Mediterranean Man:
+      patterns:
+      - st[ie]rling.*mediterranean man
+    Meghalaya:
+      patterns:
+      - st[ie]rling.*meghalay
     Mountain Man:
       patterns:
       - ^(?=.*st[ie]rling)(?=.*mountain man).*
+    Nag Champa:
+      patterns:
+      - st[ie]rling.*nag champa
     Naked & Smooth:
       patterns:
       - naked.*smooth
+    Noble Man:
+      patterns:
+      - st[ie]rling.*noble man
     Orange Chill:
       patterns:
       - stirling.*orange chill
     Oro Valley:
       patterns:
       - oro valley
+    Oud Sigma:
+      patterns:
+      - st[ie]rling.*oud sigma
+    Outdoor Man:
+      patterns:
+      - st[ie]rling.*outdoor man
     Ozark Mountain:
       patterns:
       - stir.*ozark( mount)?
+    Pharaoh's Dreamsicle:
+      patterns:
+      - st[ie]rling.*pharaoh.*dreamsicle
     Piacenza:
       patterns:
       - piacenza
+    Plumeria:
+      patterns:
+      - st[ie]rling.*plumeria
     Port-au-Prince:
       patterns:
       - stirling.*port.*prince
+    Pumpkin Spice:
+      patterns:
+      - stirling.*pumpkin.*spice
     Queen of Hearts:
       patterns:
       - st[ie]rling.*queen.*hearts
@@ -4148,6 +4303,9 @@ Stirling Soap Co.:
       patterns:
       - ramblin.*man
       wsdb_slug: stirling-soap-co-ramblin-man-soap
+    Red Eye:
+      patterns:
+      - st[ie]rling.*red eye
     Royal:
       patterns:
       - stirling.*royal
@@ -4178,6 +4336,9 @@ Stirling Soap Co.:
     Sheep:
       patterns:
       - ^(?!.*pine)^(?!.*electric)^(?!.*moose)^.*stirling.*sheep
+    Smoky Grapefruit:
+      patterns:
+      - st[ie]rling.*smoky.*grapefruit
     South Padre:
       patterns:
       - stirling.*south padre
@@ -4189,7 +4350,7 @@ Stirling Soap Co.:
       - st[ie]rling.*blue?\b
     Stirling Clubman:
       patterns:
-      - stirling.*clubman
+      - stirling.*clubman(.*dupe)?
     Stirling Gentleman:
       patterns:
       - stirling.*gentlem[ae]n
@@ -4199,9 +4360,27 @@ Stirling Soap Co.:
     Stirling Noir:
       patterns:
       - stirling noir
+    Stirling One:
+      patterns:
+      - st[ie]rling.*one
     Stirling Spice:
       patterns:
       - stirling.*spice
+    Stirling Sport:
+      patterns:
+      - stirling.*sport
+    Texas on Fire:
+      patterns:
+      - st[ie]rling.*texas on fire
+    The Fresher:
+      patterns:
+      - st[ie]rling.*fresher
+    Triumph:
+      patterns:
+      - st[ie]rling.*triumph
+    Tsuka:
+      patterns:
+      - st[ie]rling.*tsuka
     Unscented with Beeswax:
       patterns:
       - stirling.*unscented
@@ -4639,6 +4818,9 @@ Tcheon Fung Sing:
     Granducato Toscano:
       patterns:
       - granducato toscano
+    Rabarbaro Italiano:
+      patterns:
+      - rabarbaro italiano
     Torino:
       patterns:
       - tcheon.*torino
