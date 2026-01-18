@@ -1,14 +1,137 @@
 # 🧸 SOTD Pipeline
 
-A Python data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community.
+## Overview
+
+SOTD Pipeline is a Python data processing system for turning r/wetshaving “Shave of the Day” (SOTD)
+threads into structured datasets and readable monthly/annual reports.
+
+### What it does
+
+- **Collects**: Fetches Reddit threads + comments for one month, a range, or a whole year.
+- **Parses**: Extracts product mentions from free-form SOTD posts (razors, blades, brushes, soaps).
+- **Normalizes**: Matches messy user-entered text to canonical products via YAML catalogs + overrides.
+- **Enriches**: Derives additional metadata (e.g., blade-use counts, soap attributes) from extracted data.
+- **Summarizes**: Aggregates results into statistics (monthly + annual).
+- **Reports**: Produces human-readable markdown reports (hardware + software) suitable for sharing.
+
+### How it works (pipeline phases)
+
+The pipeline runs in six sequential phases:
+
+1. **Fetch**: Download thread/comment data from Reddit.
+2. **Extract**: Parse SOTD text into structured per-record product fields.
+3. **Match**: Resolve product fields against YAML catalogs (plus `correct_matches` overrides).
+4. **Enrich**: Add derived fields and metadata for analysis/reporting.
+5. **Aggregate**: Compute counts, rankings, and other statistics (monthly and annual).
+6. **Report**: Render markdown reports (hardware/software) from aggregated data.
+
+### Inputs and outputs
+
+- **Inputs**:
+  - Reddit data (threads/comments) fetched via the pipeline
+  - Product catalogs in `data/*.yaml` (and manual overrides under `data/`)
+- **Outputs**:
+  - Intermediate JSON artifacts per phase under `data/` (easy to inspect + rerun)
+  - Final markdown reports under `data/reports/` (monthly + annual)
+
+### Design goals
+
+- **Re-runnable and inspectable**: Every phase writes artifacts so you can debug and rerun selectively.
+- **Data quality first**: Catalog-backed normalization + explicit override mechanisms.
+- **Two interfaces**: CLI-first pipeline with an optional WebUI for interactive analysis.
 
 ## 🚀 Quick Start
 
+### Prerequisites
+- **Python 3.11** (required, enforced by pyrightconfig.json)
+- **Node.js and npm** (optional, for webui component)
+
 ### Setup
+
+1. **Create and activate virtual environment:**
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+2. **Install Python dependencies:**
+```bash
 pip install -r requirements-dev.txt
+```
+
+3. **Install WebUI dependencies (optional):**
+```bash
+cd webui
+npm install
+cd ..
+```
+
+The WebUI is optional and provides a web-based interface for analyzing pipeline data. The core pipeline can run without it.
+
+### Running the Pipeline
+
+**Important**: Always use the `--force` flag during development to ensure fresh data processing and avoid cached results.
+
+#### Individual Phases
+```bash
+# Run a single phase (defaults to previous month)
+python run.py fetch --force
+python run.py extract --force
+python run.py match --force
+python run.py enrich --force
+python run.py aggregate --force
+python run.py report --type hardware --force
+
+# Run with specific month
+python run.py fetch --month 2025-05 --force
+python run.py extract --month 2025-05 --force
+```
+
+#### Complete Pipeline
+```bash
+# Run all phases (defaults to previous month)
+python run.py --force
+
+# Run all phases with specific month
+python run.py --month 2025-05 --force
+```
+
+#### Phase Ranges
+```bash
+# Run phases from extract through enrich
+python run.py extract:enrich --month 2025-05 --force
+
+# Run from match to end
+python run.py match: --month 2025-05 --force
+
+# Run from start to aggregate
+python run.py :aggregate --month 2025-05 --force
+```
+
+#### Date Ranges
+```bash
+# Process specific month
+python run.py --month 2025-05 --force
+
+# Process entire year
+python run.py --year 2024 --force
+
+# Process date range
+python run.py --start 2024-01 --end 2024-06 --force
+python run.py --range 2024-01:2024-06 --force
+
+# Year-to-date (January 1st to current month)
+python run.py --ytd --force
+
+# Annual reports (requires --year or --range)
+python run.py aggregate --year 2024 --annual --force
+python run.py report --year 2024 --annual --type hardware --force
+```
+
+#### Debug Mode
+```bash
+# Enable debug logging
+python run.py --month 2025-05 --force --debug
 ```
 
 ### Development Workflow
@@ -19,28 +142,60 @@ make test-fast
 # Complete validation (run before commits)
 make format lint typecheck test
 
-# Run pipeline phases
-python run.py fetch --month 2025-05 --force
-python run.py extract --month 2025-05 --force
-python run.py match --month 2025-05 --force
-python run.py enrich --month 2025-05 --force
-python run.py aggregate --month 2025-05 --force
-python run.py report --month 2025-05 --force
-
-# Or run complete pipeline
-python run.py pipeline --month 2025-05 --force
+# Run WebUI development server (optional)
+cd webui && npm run dev
 ```
 
 ## 📊 Pipeline Overview
 
 The pipeline consists of 6 sequential phases:
 
-1. **Fetch** - Extract Reddit threads and comments
-2. **Extract** - Parse product mentions from comments
-3. **Match** - Normalize product names against catalogs
-4. **Enrich** - Extract additional metadata
-5. **Aggregate** - Generate statistical summaries
-6. **Report** - Create human-readable reports
+1. **Fetch** - Extract Reddit threads and comments from r/wetshaving
+2. **Extract** - Parse product mentions (razors, blades, brushes, soaps) from comments
+3. **Match** - Normalize product names against YAML catalogs
+4. **Enrich** - Extract additional metadata (blade counts, soap formats, etc.)
+5. **Aggregate** - Generate statistical summaries (monthly and annual)
+6. **Report** - Create human-readable reports (hardware and software)
+
+Each phase writes its output to phase-specific directories under `data/` (e.g., `data/extracted/`, `data/matched/`, `data/enriched/`, etc.) with files named `YYYY-MM.json`, allowing easy reruns of individual phases and inspection of intermediate results. The pipeline supports both monthly processing and annual aggregation for year-over-year analysis.
+
+## 🌐 WebUI (Optional)
+
+The project includes an optional web-based interface for analyzing pipeline data. The WebUI provides:
+
+- Interactive data analysis tools
+- Unmatched product analyzer
+- Mismatch analyzer
+- React-based frontend with TypeScript
+- FastAPI backend for data processing
+
+### WebUI Setup
+
+```bash
+# Install dependencies
+cd webui
+npm install
+
+# Start development server
+npm run dev
+# Frontend: http://localhost:3000
+# API: http://localhost:8000
+```
+
+### WebUI Development
+
+```bash
+# Run React tests
+cd webui && npm run test
+
+# Run E2E tests (requires servers running)
+make test-e2e
+
+# Build for production
+cd webui && npm run build
+```
+
+See [webui/README.md](webui/README.md) for detailed WebUI documentation.
 
 ## 🛠️ Development Features
 
@@ -62,17 +217,20 @@ Invalid regex pattern '[invalid' in File: data/handles.yaml, Brand: Test Maker, 
 
 This significantly improves debugging efficiency when working with regex patterns in catalog files.
 
-### Optimized Testing Strategy
-- **Fast Tests**: `make test-fast` (~4.6s, 57% faster than sequential)
-- **Complete Validation**: `make test` (~10.8s, full coverage)
-- **Performance Analysis**: `make test-slow` (identify bottlenecks)
-- **Test Count**: 1,255 optimized tests (5.8% reduction from baseline)
+### Testing Strategy
+- **Fast Tests**: `make test-fast` - Parallel test execution for quick feedback
+- **Complete Validation**: `make test` - Full test suite with coverage
+- **Performance Analysis**: `make test-slow` - Identify bottlenecks
+- **Integration Tests**: `make test-integration` - Test with real data
+- **WebUI Tests**: `make test-react` - React component tests
+- **E2E Tests**: `make test-e2e` - End-to-end browser tests
 
 ### Quality Assurance
 - **Code Formatting**: Black + Ruff
 - **Linting**: Ruff (E, F, I rules)
-- **Type Checking**: Pyright
+- **Type Checking**: Pyright (standard mode)
 - **Test Coverage**: pytest-cov
+- **Pre-commit Validation**: `make format lint typecheck test`
 
 ## 📚 Documentation
 
@@ -82,10 +240,21 @@ This significantly improves debugging efficiency when working with regex pattern
 
 ## 🔧 Configuration
 
-- **Python**: 3.11
+- **Python**: 3.11 (required, enforced by pyrightconfig.json)
 - **Environment**: Virtual environment with `.venv`
-- **Dependencies**: See `requirements.txt` and `requirements-dev.txt`
+- **Dependencies**: 
+  - Python: See `requirements.txt` (runtime) and `requirements-dev.txt` (development)
+  - WebUI: Node.js and npm (see `webui/package.json`)
 - **Configuration**: `pyproject.toml`, `pyrightconfig.json`
+
+### Key Features
+
+- **Monthly Processing**: Process individual months or date ranges
+- **Annual Aggregation**: Generate year-over-year statistics with `--annual` flag
+- **Year-to-Date (YTD)**: Process from January 1st to current month with `--ytd` flag
+- **Delta Mode**: Process current month(s) plus historical comparisons (1 month ago, 1 year ago, 5 years ago) with `--delta` flag
+- **Phase Ranges**: Run subsets of the pipeline using `phase1:phase2` syntax
+- **Parallel Processing**: Month-level parallelization for improved performance
 
 ## 📁 Project Structure
 
@@ -100,6 +269,19 @@ sotd_pipeline/
 │   └── report/             # Report generation
 ├── tests/                  # Comprehensive test suite
 ├── data/                   # Pipeline data storage
+│   ├── threads/            # Fetch phase output (Reddit threads)
+│   ├── comments/           # Fetch phase output (Reddit comments)
+│   ├── extracted/          # Extract phase output
+│   ├── matched/            # Match phase output
+│   ├── enriched/           # Enrich phase output
+│   ├── aggregated/         # Aggregate phase output
+│   ├── reports/            # Report phase output
+│   ├── *.yaml              # Product catalogs
+│   └── correct_matches/    # Manual match overrides
+├── webui/                  # Optional web interface
+│   ├── src/                # React frontend
+│   ├── api/                # FastAPI backend
+│   └── tests/              # WebUI tests
 ├── docs/                   # Detailed documentation
 ├── run.py                  # Pipeline orchestration
 └── Makefile               # Development commands
@@ -107,24 +289,25 @@ sotd_pipeline/
 
 ## 🤝 Contributing
 
-1. Follow the **Pipeline --force Rule**: Always use `--force` flag during development
+1. Follow the **Pipeline --force Rule**: Always use `--force` flag during development to ensure fresh data processing
 2. Use **Test-First Development**: Write tests before implementing features
 3. Run **Fast Tests** during development: `make test-fast`
 4. Run **Complete Validation** before commits: `make format lint typecheck test`
-5. Update documentation with code changes
+5. Update documentation with code changes (including this README)
+6. For WebUI changes: Run `make test-react` and `make test-e2e` as appropriate
 
 ## 📈 Performance
 
-- **Test Execution**: 57% improvement with parallel execution
-- **Test Coverage**: 71% with comprehensive edge case coverage
-- **Development Speed**: Fast feedback loop with optimized testing strategy
+- **Parallel Processing**: Month-level parallelization for improved throughput
+- **Test Execution**: Parallel test execution for faster feedback during development
+- **Comprehensive Coverage**: Extensive test suite covering edge cases and integration scenarios
 
 ## Product Matching Normalization (2024-07)
 
 All correct match lookups in the pipeline now use a single, canonical normalization function:
 
 ```
-from sotd.utils.match_filter_utils import normalize_for_matching
+from sotd.utils.extract_normalization import normalize_for_matching
 ```
 
 - This function is the only allowed normalization for correct match lookups.
