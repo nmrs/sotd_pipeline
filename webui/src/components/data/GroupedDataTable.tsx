@@ -16,6 +16,12 @@ interface GroupedDataTableProps {
   onBrushSplitClick?: (item: any) => void;
   activeRowIndex?: number;
   keyboardNavigationEnabled?: boolean;
+  sorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
+  globalFilter?: string;
+  onGlobalFilterChange?: (value: string) => void;
+  useRegexMode?: boolean;
+  onUseRegexModeChange?: (value: boolean) => void;
 }
 
 const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
@@ -30,9 +36,17 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
   onBrushSplitClick,
   activeRowIndex = -1,
   keyboardNavigationEnabled = false,
+  sorting: externalSorting,
+  onSortingChange,
+  globalFilter: externalGlobalFilter,
+  onGlobalFilterChange,
+  useRegexMode: externalUseRegexMode,
+  onUseRegexModeChange,
 }) => {
-  // Sorting state
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // Sorting state - use external if provided, otherwise internal
+  const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+  const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+  const setSorting = onSortingChange || setInternalSorting;
 
   const columns = useMemo(() => {
     const baseColumns: ColumnDef<GroupedDataItem>[] = [
@@ -167,6 +181,10 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
       keyboardNavigationEnabled={keyboardNavigationEnabled}
       activeRowIndex={activeRowIndex}
       showPagination={true}
+      globalFilter={externalGlobalFilter}
+      onGlobalFilterChange={onGlobalFilterChange}
+      useRegexMode={externalUseRegexMode}
+      onUseRegexModeChange={onUseRegexModeChange}
     />
   );
 };

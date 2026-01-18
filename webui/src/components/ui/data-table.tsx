@@ -71,6 +71,10 @@ interface DataTableProps<TData, TValue> {
   externalRowSelection?: Record<string, boolean>;
   field?: string; // For generating row keys
   totalCount?: number; // Total count from backend for external pagination
+  globalFilter?: string; // External search value
+  onGlobalFilterChange?: (value: string) => void; // Callback for search changes
+  useRegexMode?: boolean; // External regex mode state
+  onUseRegexModeChange?: (value: boolean) => void; // Callback for regex mode changes
 }
 
 export function DataTable<TData, TValue>({
@@ -96,6 +100,10 @@ export function DataTable<TData, TValue>({
   externalRowSelection,
   totalCount,
   field,
+  globalFilter: externalGlobalFilter,
+  onGlobalFilterChange,
+  useRegexMode: externalUseRegexMode,
+  onUseRegexModeChange,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
   // Simple search - no column selection needed
@@ -113,9 +121,13 @@ export function DataTable<TData, TValue>({
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [isResizing, setIsResizing] = useState(false);
   const [resizeColumn, setResizeColumn] = useState<string | null>(null);
-  const [useRegexMode, setUseRegexMode] = useState<boolean>(false);
+  const [internalUseRegexMode, setInternalUseRegexMode] = useState<boolean>(false);
   const [regexError, setRegexError] = useState<string | null>(null);
   const tableRef = React.useRef<HTMLDivElement>(null);
+
+  // Use external regex mode if provided, otherwise use internal
+  const useRegexMode = externalUseRegexMode !== undefined ? externalUseRegexMode : internalUseRegexMode;
+  const setUseRegexMode = onUseRegexModeChange || setInternalUseRegexMode;
 
   // Use external row selection if provided, otherwise use internal
   const effectiveRowSelection =
@@ -227,6 +239,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection: effectiveRowSelection,
+      globalFilter: externalGlobalFilter,
     },
     initialState: {
       pagination: {
@@ -439,7 +452,11 @@ export function DataTable<TData, TValue>({
 
   // Handle search input change
   const handleSearchChange = (value: string) => {
-    table.setGlobalFilter(value);
+    if (onGlobalFilterChange) {
+      onGlobalFilterChange(value);
+    } else {
+      table.setGlobalFilter(value);
+    }
     if (useRegexMode) {
       validateRegex(value);
     } else {
@@ -464,7 +481,7 @@ export function DataTable<TData, TValue>({
         <div className='flex items-center gap-2 flex-1'>
           <Input
             placeholder={useRegexMode ? 'Enter regex pattern...' : 'Search all columns...'}
-            value={(table.getState().globalFilter as string) ?? ''}
+            value={externalGlobalFilter !== undefined ? externalGlobalFilter : ((table.getState().globalFilter as string) ?? '')}
             onChange={event => handleSearchChange(event.target.value)}
             className={`max-w-sm ${regexError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
           />

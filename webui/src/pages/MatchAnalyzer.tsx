@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { SortingState } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Filter, Eye, EyeOff } from 'lucide-react';
 import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
@@ -99,6 +100,14 @@ const MatchAnalyzer: React.FC = () => {
   // Keyboard navigation state
   const [activeRowIndex, setActiveRowIndex] = useState<number>(-1);
   const [keyboardNavigationEnabled, setKeyboardNavigationEnabled] = useState<boolean>(false);
+
+  // Table UI state (preserved across analyze operations)
+  const [tableSorting, setTableSorting] = useState<SortingState>([]);
+  const [tableSearch, setTableSearch] = useState<string>('');
+  const [tableUseRegex, setTableUseRegex] = useState<boolean>(false);
+  const [matchTypeFilter, setMatchTypeFilter] = useState<Set<string>>(new Set());
+  const [brushTypeFilter, setBrushTypeFilter] = useState<Set<string>>(new Set());
+  const [strategyFilter, setStrategyFilter] = useState<Set<string>>(new Set());
 
   // Callback for delta months
   const handleDeltaMonthsChange = useCallback((months: string[]) => {
@@ -2212,7 +2221,7 @@ const MatchAnalyzer: React.FC = () => {
                 
                 return shouldUseGrouped ? (
                   <GroupedDataTable
-                    key={`grouped-${displayMode}-${filteredResults.length}`}
+                    key={`grouped-${displayMode}-${selectedField}`}
                     data={filteredResults as GroupedDataItem[]}
                     field={selectedField}
                     onCommentClick={handleCommentClick}
@@ -2224,10 +2233,16 @@ const MatchAnalyzer: React.FC = () => {
                     onBrushSplitClick={handleBrushSplitClick}
                     activeRowIndex={activeRowIndex}
                     keyboardNavigationEnabled={keyboardNavigationEnabled}
+                    sorting={tableSorting}
+                    onSortingChange={setTableSorting}
+                    globalFilter={tableSearch}
+                    onGlobalFilterChange={setTableSearch}
+                    useRegexMode={tableUseRegex}
+                    onUseRegexModeChange={setTableUseRegex}
                   />
                 ) : (
                 <MismatchAnalyzerDataTable
-                  key={`match-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
+                  key={`match-${displayMode}-${selectedField}`}
                   data={filteredResults}
                   field={selectedField}
                   onCommentClick={handleCommentClick}
@@ -2240,6 +2255,18 @@ const MatchAnalyzer: React.FC = () => {
                   onBrushSplitClick={handleBrushSplitClick}
                   activeRowIndex={activeRowIndex}
                   keyboardNavigationEnabled={keyboardNavigationEnabled}
+                  sorting={tableSorting}
+                  onSortingChange={setTableSorting}
+                  globalFilter={tableSearch}
+                  onGlobalFilterChange={setTableSearch}
+                  useRegexMode={tableUseRegex}
+                  onUseRegexModeChange={setTableUseRegex}
+                  matchTypeFilter={matchTypeFilter}
+                  onMatchTypeFilterChange={setMatchTypeFilter}
+                  brushTypeFilter={brushTypeFilter}
+                  onBrushTypeFilterChange={setBrushTypeFilter}
+                  strategyFilter={strategyFilter}
+                  onStrategyFilterChange={setStrategyFilter}
                 />
                 );
               })()

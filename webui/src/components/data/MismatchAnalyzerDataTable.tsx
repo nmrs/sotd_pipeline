@@ -104,6 +104,18 @@ interface MismatchAnalyzerDataTableProps {
   onBrushSplitClick?: (item: MismatchItem) => void;
   activeRowIndex?: number;
   keyboardNavigationEnabled?: boolean;
+  sorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
+  globalFilter?: string;
+  onGlobalFilterChange?: (value: string) => void;
+  useRegexMode?: boolean;
+  onUseRegexModeChange?: (value: boolean) => void;
+  matchTypeFilter?: Set<string>;
+  onMatchTypeFilterChange?: (filter: Set<string>) => void;
+  brushTypeFilter?: Set<string>;
+  onBrushTypeFilterChange?: (filter: Set<string>) => void;
+  strategyFilter?: Set<string>;
+  onStrategyFilterChange?: (filter: Set<string>) => void;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -119,6 +131,18 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onBrushSplitClick,
   activeRowIndex = -1,
   keyboardNavigationEnabled = false,
+  sorting: externalSorting,
+  onSortingChange,
+  globalFilter: externalGlobalFilter,
+  onGlobalFilterChange,
+  useRegexMode: externalUseRegexMode,
+  onUseRegexModeChange,
+  matchTypeFilter: externalMatchTypeFilter,
+  onMatchTypeFilterChange,
+  brushTypeFilter: externalBrushTypeFilter,
+  onBrushTypeFilterChange,
+  strategyFilter: externalStrategyFilter,
+  onStrategyFilterChange,
 }) => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -128,13 +152,22 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     originalText: string;
   } | null>(null);
 
-  // Header filter state
-  const [matchTypeFilter, setMatchTypeFilter] = useState<Set<string>>(new Set());
-  const [brushTypeFilter, setBrushTypeFilter] = useState<Set<string>>(new Set());
-  const [strategyFilter, setStrategyFilter] = useState<Set<string>>(new Set());
+  // Header filter state - use external if provided, otherwise internal
+  const [internalMatchTypeFilter, setInternalMatchTypeFilter] = useState<Set<string>>(new Set());
+  const [internalBrushTypeFilter, setInternalBrushTypeFilter] = useState<Set<string>>(new Set());
+  const [internalStrategyFilter, setInternalStrategyFilter] = useState<Set<string>>(new Set());
 
-  // Sorting state
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const matchTypeFilter = externalMatchTypeFilter !== undefined ? externalMatchTypeFilter : internalMatchTypeFilter;
+  const setMatchTypeFilter = onMatchTypeFilterChange || setInternalMatchTypeFilter;
+  const brushTypeFilter = externalBrushTypeFilter !== undefined ? externalBrushTypeFilter : internalBrushTypeFilter;
+  const setBrushTypeFilter = onBrushTypeFilterChange || setInternalBrushTypeFilter;
+  const strategyFilter = externalStrategyFilter !== undefined ? externalStrategyFilter : internalStrategyFilter;
+  const setStrategyFilter = onStrategyFilterChange || setInternalStrategyFilter;
+
+  // Sorting state - use external if provided, otherwise internal
+  const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+  const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+  const setSorting = onSortingChange || setInternalSorting;
 
   // Helper function to safely get strategy field
   const getStrategyField = (item: MismatchItem): string => {
@@ -1001,6 +1034,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         activeRowIndex={activeRowIndex}
         keyboardNavigationEnabled={keyboardNavigationEnabled}
         field={field}
+        globalFilter={externalGlobalFilter}
+        onGlobalFilterChange={onGlobalFilterChange}
+        useRegexMode={externalUseRegexMode}
+        onUseRegexModeChange={onUseRegexModeChange}
       />
 
       {/* Enrich Phase Modal */}
