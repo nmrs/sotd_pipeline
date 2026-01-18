@@ -261,6 +261,9 @@ Ariana & Evans:
     Dirty Ginger:
       patterns:
       - (ariana|a&e|club).*ginger
+    Emerald Moss:
+      patterns:
+      - emerald moss
     Forbidden Fruit:
       patterns:
       - (arian|a&e).*forb+id+en fruit
@@ -685,6 +688,7 @@ Barrister and Mann:
     Mûir(e) Wood:
       patterns:
       - m[uû]ir.*wood
+      - (barrister|\bb[&a\+]m\b).*wood$
     Night Music:
       patterns:
       - (barris|\bb ?(and|&|\+) ?m\b).*night music
@@ -4870,6 +4874,9 @@ The Cajun Blade:
   patterns:
   - (?:(the|a) )?cajun blade
   scents:
+    Atchafalaya:
+      patterns:
+      - cajun.*atchafalaya
     Bon Temps Barbershop:
       patterns:
       - cajun blade.*bon temp.*barber

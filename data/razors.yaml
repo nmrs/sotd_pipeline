@@ -1950,6 +1950,7 @@ Other Straight Razor:
       - imperial razor
       - tonsorial.*gem
       - cutlery
+      - ^perfection razor$
 PAA:
   Alpha Ecliptic:
     patterns:

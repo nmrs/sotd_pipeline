@@ -610,7 +610,7 @@ DE:
         - lord.*shark.*chr
     Platinum:
       patterns:
-        - shark.*pla
+        - shark.*plat
     Stainless:
       patterns:
         - shark
