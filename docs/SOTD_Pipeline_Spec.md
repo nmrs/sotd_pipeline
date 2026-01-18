@@ -23,20 +23,20 @@ python run.py aggregate --month 2025-05 --force
 python run.py report --month 2025-05 --force
 
 # Complete pipeline
-python run.py pipeline --month 2025-05 --force
+python run.py --month 2025-05 --force
 
 # Phase ranges
-python run.py pipeline --month 2025-05 --force extract:enrich  # Run extract through enrich
-python run.py pipeline --month 2025-05 --force match:          # Run from match to end
-python run.py pipeline --month 2025-05 --force :enrich         # Run from start to enrich
+python run.py extract:enrich --month 2025-05 --force  # Run extract through enrich
+python run.py match: --month 2025-05 --force          # Run from match to end
+python run.py :enrich --month 2025-05 --force         # Run from start to enrich
 
 # Date ranges
-python run.py pipeline --year 2024 --force                    # Process entire year
-python run.py pipeline --start-month 2024-01 --end-month 2024-06 --force  # Date range
-python run.py pipeline --range 2024-01:2024-06 --force        # Alternative range syntax
+python run.py --year 2024 --force                              # Process entire year
+python run.py --start 2024-01 --end 2024-06 --force            # Date range
+python run.py --range 2024-01:2024-06 --force                  # Alternative range syntax
 
 # Debug mode
-python run.py pipeline --month 2025-05 --force --debug
+python run.py --month 2025-05 --force --debug
 ```
 
 ### Key Features
@@ -110,14 +110,14 @@ Match extracted product names to known item catalogs to normalize naming:
 - `RR GC .84` → `RazoRock Game Changer 0.84`
 
 **Matching Priority Order:**
-1. **Correct Matches File**: If the original value is found in `data/correct_matches.yaml` (manually confirmed), it is matched directly, and `match_type` is set to `exact`. All catalog specifications (e.g., grind, width, point) are preserved in the match output.
+1. **Correct Matches Files**: If the original value is found in `data/correct_matches/*.yaml` (manually confirmed), it is matched directly, and `match_type` is set to `exact`. All catalog specifications (e.g., grind, width, point) are preserved in the match output.
 2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type` set to `regex`, and all catalog specifications are also preserved.
 3. **Brand/Alias Fallbacks**: If no regex match is found, fallback strategies may be used (e.g., brand-only, alias), with appropriate `match_type` values.
 
 **Field Structure:**
 - `original`: The original extracted value
 - `matched`: The canonical match result, including all catalog fields
-- `match_type`: One of `exact` (correct_matches.yaml), `regex` (pattern match), `alias`, `brand`, or `None` (unmatched)
+- `match_type`: One of `exact` (from `data/correct_matches/*.yaml`), `regex` (pattern match), `alias`, `brand`, or `None` (unmatched)
 - `pattern`: The regex pattern used (if any)
 
 **Example:**
@@ -133,7 +133,7 @@ Match extracted product names to known item catalogs to normalize naming:
             "point": "Square",
             "width": "15/16"
         },
-        "match_type": "exact",  # From correct_matches.yaml
+        "match_type": "exact",  # From data/correct_matches/*.yaml
         "pattern": None
     },
     "blade": {
@@ -197,8 +197,8 @@ Save aggregate summaries to:
 ## 6. **Report Generation**
 Generate human-readable summaries for publication on r/wetshaving. Include product rankings, trends, and commentary excerpts. Save reports to:
 
-- `reports/YYYY-MM.md`
-- `reports/YYYY-MM-assets/`
+- Monthly reports: `data/reports/YYYY-MM-{hardware|software}.md`
+- Annual reports: `data/reports/annual/YYYY-{hardware|software}.md`
 
 ---
 

@@ -5,7 +5,7 @@
 All correct match lookups in the SOTD Pipeline must use the canonical normalization function:
 
 ```python
-from sotd.utils.match_filter_utils import normalize_for_matching
+from sotd.utils.extract_normalization import normalize_for_matching
 ```
 
 This function is the **single source of truth** for normalizing strings for correct match lookups in matchers, analyzers, and any other consumers. All components must use this function to ensure consistent normalization.
