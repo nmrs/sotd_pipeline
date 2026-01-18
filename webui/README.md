@@ -1,27 +1,122 @@
 # SOTD Pipeline Analyzer Web UI
 
-React frontend for the SOTD pipeline analyzer, providing web-based interfaces for the unmatched_analyzer.py and mismatch_analyzer.py tools.
+## Overview
+
+The SOTD Pipeline Analyzer WebUI is an optional web-based interface for analyzing, validating, and improving the quality of data processed by the SOTD Pipeline. It provides interactive tools for operators to identify data quality issues, validate matching results, explore product usage patterns, and manage catalog entries.
+
+### What it does
+
+The WebUI provides a comprehensive suite of analysis and validation tools:
+
+- **Data Quality Analysis**: Identify unmatched products, mismatched entries, and catalog conflicts across multiple months
+- **Product Validation**: Validate and correct product matching results (brushes, razors, blades, soaps)
+- **Catalog Management**: Validate catalog entries, identify duplicates, and suggest pattern improvements
+- **Usage Analytics**: Explore product usage patterns, user behavior, and trends over time
+- **Data Alignment**: Compare pipeline data with external sources (e.g., Wet Shaving Database)
+- **Interactive Exploration**: View original Reddit comments, navigate between related entries, and make corrections directly
+
+### Available Tools
+
+1. **Unmatched Analyzer** - Identify products that failed to match against catalogs, helping discover potential catalog additions
+2. **Mismatch Analyzer** - Analyze mismatched items to find catalog conflicts, regex issues, and data inconsistencies
+3. **Soap Analyzer** - Detect duplicate soap entries, suggest pattern improvements, and analyze neighbor similarity
+4. **Brush Validation** - Validate brush matching results, compare legacy vs. scoring systems, and manage correct matches
+5. **Brush Split Validator** - Validate and manage brush split configurations (handle/knot combinations)
+6. **Catalog Validator** - Validate catalog entries, identify conflicts, and test regex patterns
+7. **Product Usage** - Explore product usage statistics, user patterns, and yearly summaries with calendar/list views
+8. **Monthly User Posts** - Analyze user posting patterns and activity across months
+9. **Brush Matching Analyzer** - Analyze brush matching strategies and scoring results
+10. **Format Compatibility Analyzer** - Analyze format compatibility issues (e.g., razor/blade mismatches)
+11. **WSDB Alignment Analyzer** - Compare pipeline soap data with Wet Shaving Database for alignment and validation
+
+### How it works
+
+The WebUI consists of two components:
+
+- **Frontend (React/TypeScript)**: Interactive web interface running on port 3000
+- **Backend (FastAPI)**: REST API server running on port 8000 that processes pipeline data and provides analysis endpoints
+
+The frontend communicates with the backend via REST API calls, and the backend reads from the same `data/` directory structure used by the CLI pipeline. This allows operators to analyze pipeline results, validate matches, and make corrections without leaving the browser.
+
+### Key Features
+
+- **Multi-month Analysis**: Select and compare data across multiple months or date ranges
+- **Delta Comparisons**: Automatically include historical comparison months (1 month ago, 1 year ago, 5 years ago)
+- **Interactive Comment Viewing**: View original Reddit comments for any matched/unmatched entry
+- **Correct Match Management**: Mark items as correct matches or remove incorrect entries directly from the UI
+- **Real-time Validation**: Validate catalog entries and regex patterns before committing changes
+- **Export Capabilities**: Export analysis results and corrected data for use in pipeline catalogs
 
 ## Setup
 
-1. Install dependencies:
+1. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. Start the development server:
+2. **Start the development servers:**
+
+The WebUI consists of two servers that must run together:
+- **Frontend** (Vite/React): http://localhost:3000
+- **Backend** (FastAPI): http://localhost:8000
+
+**Recommended approach** (starts both servers):
 ```bash
-npm run dev
+./scripts/manage-servers.sh start
 ```
 
-The app will be available at `http://localhost:3000`
+**Manual approach** (start servers separately):
+```bash
+# Terminal 1: Start frontend
+npm run dev
+
+# Terminal 2: Start backend (requires Python virtual environment)
+source ../.venv/bin/activate  # Activate venv from project root
+ENVIRONMENT=test DEBUG=true PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Note**: The backend requires the Python virtual environment from the project root (`.venv`). The `manage-servers.sh` script automatically activates it.
+
+## Server Management
+
+The recommended way to manage WebUI servers is using the `manage-servers.sh` script:
+
+```bash
+# Start both servers
+./scripts/manage-servers.sh start
+
+# Stop both servers
+./scripts/manage-servers.sh stop
+
+# Restart both servers
+./scripts/manage-servers.sh restart
+
+# Check server status
+./scripts/manage-servers.sh status
+
+# View logs
+./scripts/manage-servers.sh logs frontend   # Frontend server logs
+./scripts/manage-servers.sh logs backend   # Backend server logs
+./scripts/manage-servers.sh logs api-debug # API debug logs
+./scripts/manage-servers.sh logs api-errors # API error logs
+
+# Clean up PID files and logs
+./scripts/manage-servers.sh clean
+
+# Force start (kills external processes using ports)
+./scripts/manage-servers.sh start --force
+```
+
+See [`scripts/README.md`](scripts/README.md) for detailed server management documentation.
 
 ## Development
 
-- **Port**: 3000 (configured in vite.config.ts)
+- **Frontend Port**: 3000 (configured in vite.config.ts)
+- **Backend Port**: 8000 (FastAPI)
 - **API Proxy**: Requests to `/api/*` are proxied to `http://localhost:8000` (FastAPI backend)
 - **TypeScript**: Full TypeScript support with strict mode
 - **Routing**: React Router for navigation between analyzers
+- **Hot Reload**: Both frontend (Vite) and backend (uvicorn --reload) support hot reloading
 
 ## Project Structure
 
@@ -36,13 +131,31 @@ src/
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
+### Development
+- `npm run dev` - Start frontend development server (Vite on port 3000)
 - `npm run build` - Build for production
+- `npm run preview` - Preview production build
+
+### Code Quality
 - `npm run lint` - Run ESLint with error reporting
 - `npm run lint:fix` - Run ESLint with auto-fix
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting with Prettier
-- `npm run preview` - Preview production build
+
+### Testing
+- `npm run test` - Run Jest unit tests
+- `npm run test:watch` - Run Jest tests in watch mode
+- `npm run test:coverage` - Run Jest tests with coverage report
+- `npm run test:unit` - Run unit tests only (testPathPattern=src)
+
+### End-to-End Testing
+- `npm run test:e2e` - Run Playwright E2E tests (requires servers running)
+- `npm run test:e2e:safari` - Run E2E tests on Safari
+- `npm run test:e2e:ui` - Run E2E tests in UI mode (interactive)
+- `npm run test:e2e:headed` - Run E2E tests in headed mode (visible browser)
+- `npm run test:e2e:debug` - Run E2E tests in debug mode
+
+**Note**: E2E tests require both frontend and backend servers to be running. Use `make test-e2e` from the project root (manages servers automatically) or start servers manually before running E2E tests.
 
 ## Code Quality & Linting
 
@@ -84,6 +197,45 @@ npm run format:check
 ## Backend Integration
 
 The frontend is designed to work with the FastAPI backend running on port 8000. The Vite dev server is configured to proxy API requests to the backend.
+
+### Backend Architecture
+
+- **Location**: `webui/api/` directory
+- **Framework**: FastAPI
+- **Entry Point**: `webui/api/main.py`
+- **Port**: 8000
+- **Virtual Environment**: Requires Python virtual environment from project root (`.venv`)
+- **Auto-activation**: The `manage-servers.sh` script automatically activates the venv when starting the backend
+
+### Starting the Backend
+
+**Recommended**: Use `./scripts/manage-servers.sh start` (starts both servers)
+
+**Manual**:
+```bash
+# From webui directory
+source ../.venv/bin/activate
+ENVIRONMENT=test DEBUG=true PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Backend Logs
+
+Logs are written to `webui/logs/`:
+- `api_debug.log` - Detailed debug logs (DEBUG level)
+- `api_errors.log` - Error logs only (ERROR level)
+
+View logs using:
+```bash
+./scripts/manage-servers.sh logs backend    # Backend server stdout/stderr
+./scripts/manage-servers.sh logs api-debug # API debug log file
+./scripts/manage-servers.sh logs api-errors # API error log file
+```
+
+### API Documentation
+
+Once the backend is running, interactive API documentation is available at:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
 ### API Endpoints
 
@@ -141,9 +293,71 @@ The backend provides a standardized REST API with the following endpoint structu
 - `GET /api/users/months` - Get user months
 - `GET /api/users/users/{month}` - Get users for month
 
-## Next Steps
+## Development Workflow
 
-- Implement DateRangePicker component
-- Build AnalysisTable with React Table
-- Add ConfigurationPanel for analysis parameters
-- Integrate with backend API endpoints 
+### Typical Development Session
+
+1. **Start servers:**
+   ```bash
+   ./scripts/manage-servers.sh start
+   ```
+
+2. **Verify servers are running:**
+   ```bash
+   ./scripts/manage-servers.sh status
+   ```
+
+3. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API docs: http://localhost:8000/docs
+
+4. **Make changes:**
+   - Frontend changes: Hot reload via Vite (automatic)
+   - Backend changes: Hot reload via uvicorn --reload (automatic)
+
+5. **Run tests during development:**
+   ```bash
+   # Unit tests (fast feedback)
+   npm run test:watch
+   
+   # E2E tests (requires servers running)
+   make test-e2e  # From project root (manages servers)
+   # OR
+   npm run test:e2e  # If servers already running
+   ```
+
+6. **View logs for debugging:**
+   ```bash
+   ./scripts/manage-servers.sh logs frontend
+   ./scripts/manage-servers.sh logs backend
+   ./scripts/manage-servers.sh logs api-debug
+   ```
+
+7. **Stop servers when done:**
+   ```bash
+   ./scripts/manage-servers.sh stop
+   ```
+
+### Troubleshooting
+
+**Port already in use:**
+```bash
+# Check what's using the port
+lsof -i :3000  # Frontend
+lsof -i :8000  # Backend
+
+# Force start (kills external processes)
+./scripts/manage-servers.sh start --force
+```
+
+**Servers won't start:**
+```bash
+# Clean up and try again
+./scripts/manage-servers.sh clean
+./scripts/manage-servers.sh start
+```
+
+**Backend errors:**
+- Check `webui/logs/api_errors.log` for error details
+- Verify Python virtual environment is activated
+- Ensure all Python dependencies are installed: `pip install -r requirements-dev.txt` 
