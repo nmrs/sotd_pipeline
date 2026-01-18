@@ -10,7 +10,7 @@ threads into structured datasets and readable monthly/annual reports.
 - **Collects**: Fetches Reddit threads + comments for one month, a range, or a whole year.
 - **Parses**: Extracts product mentions from free-form SOTD posts (razors, blades, brushes, soaps).
 - **Normalizes**: Matches messy user-entered text to canonical products via YAML catalogs + overrides.
-- **Enriches**: Derives additional metadata (e.g., blade-use counts, soap attributes) from extracted data.
+- **Enriches**: Derives additional metadata (e.g., blade-use counts, straight razor attributes) from extracted data.
 - **Summarizes**: Aggregates results into statistics (monthly + annual).
 - **Reports**: Produces human-readable markdown reports (hardware + software) suitable for sharing.
 
@@ -20,7 +20,7 @@ The pipeline runs in six sequential phases:
 
 1. **Fetch**: Download thread/comment data from Reddit.
 2. **Extract**: Parse SOTD text into structured per-record product fields.
-3. **Match**: Resolve product fields against YAML catalogs (plus `correct_matches` overrides).
+3. **Match**: Resolve product fields against YAML catalogs and pre-validated matches in `data/correct_matches/*.yaml`.
 4. **Enrich**: Add derived fields and metadata for analysis/reporting.
 5. **Aggregate**: Compute counts, rankings, and other statistics (monthly and annual).
 6. **Report**: Render markdown reports (hardware/software) from aggregated data.
@@ -30,9 +30,35 @@ The pipeline runs in six sequential phases:
 - **Inputs**:
   - Reddit data (threads/comments) fetched via the pipeline
   - Product catalogs in `data/*.yaml` (and manual overrides under `data/`)
+  - `praw.ini` in the project root (required for the `fetch` phase)
 - **Outputs**:
-  - Intermediate JSON artifacts per phase under `data/` (easy to inspect + rerun)
+  - Intermediate JSON artifacts per phase under `--out-dir` (default: `data/`)
   - Final markdown reports under `data/reports/` (monthly + annual)
+
+#### Artifact layout (default `--out-dir data`)
+
+- **Fetch**:
+  - `data/threads/YYYY-MM.json`
+  - `data/comments/YYYY-MM.json`
+- **Extract**: `data/extracted/YYYY-MM.json`
+- **Match**: `data/matched/YYYY-MM.json`
+- **Enrich**: `data/enriched/YYYY-MM.json`
+- **Aggregate**:
+  - Monthly: `data/aggregated/YYYY-MM.json`
+  - Annual: `data/aggregated/annual/YYYY.json`
+- **Report**:
+  - Monthly: `data/reports/YYYY-MM-{hardware|software}.md`
+  - Annual: `data/reports/annual/YYYY-{hardware|software}.md`
+
+#### Common operator override files
+
+These are the most commonly edited “control” files (all under `data/`):
+
+- **Thread selection (fetch)**: `data/thread_overrides.yaml`
+- **Extraction fixes (extract)**: `data/extract_overrides.yaml` (default path for `--override-file`)
+- **Intentionally unmatched (match)**: `data/intentionally_unmatched.yaml`
+- **Enrichment fixes (enrich)**: `data/enrichment_overrides.yaml`
+- **Confirmed matches (match)**: `data/correct_matches/*.yaml`
 
 ### Design goals
 
@@ -45,6 +71,7 @@ The pipeline runs in six sequential phases:
 ### Prerequisites
 - **Python 3.11** (required, enforced by pyrightconfig.json)
 - **Node.js and npm** (optional, for webui component)
+- **Reddit API credentials** (required for `fetch`) via a `praw.ini` file
 
 ### Setup
 
@@ -67,6 +94,15 @@ cd ..
 ```
 
 The WebUI is optional and provides a web-based interface for analyzing pipeline data. The core pipeline can run without it.
+
+### Reddit credentials (required for `fetch`)
+
+The fetch phase uses PRAW and calls `praw.Reddit()` (i.e., it relies on a `praw.ini` file in the **project root**).
+
+- If you only run `extract`/`match`/`enrich`/`aggregate`/`report` against already-fetched data, you may not need Reddit credentials.
+- If you run `fetch` (directly or via the full pipeline), you must provide a working `praw.ini`.
+
+See PRAW docs for the exact `praw.ini` format (client id/secret, user agent, etc.).
 
 ### Running the Pipeline
 
@@ -153,7 +189,7 @@ The pipeline consists of 6 sequential phases:
 1. **Fetch** - Extract Reddit threads and comments from r/wetshaving
 2. **Extract** - Parse product mentions (razors, blades, brushes, soaps) from comments
 3. **Match** - Normalize product names against YAML catalogs
-4. **Enrich** - Extract additional metadata (blade counts, soap formats, etc.)
+4. **Enrich** - Extract additional metadata (blade counts, straight razor attributes, etc.)
 5. **Aggregate** - Generate statistical summaries (monthly and annual)
 6. **Report** - Create human-readable reports (hardware and software)
 
@@ -176,10 +212,13 @@ The project includes an optional web-based interface for analyzing pipeline data
 cd webui
 npm install
 
-# Start development server
-npm run dev
+# Start both servers (recommended)
+./scripts/manage-servers.sh start
 # Frontend: http://localhost:3000
 # API: http://localhost:8000
+
+# Stop both servers
+./scripts/manage-servers.sh stop
 ```
 
 ### WebUI Development
@@ -188,7 +227,7 @@ npm run dev
 # Run React tests
 cd webui && npm run test
 
-# Run E2E tests (requires servers running)
+# Run E2E tests (make target manages servers)
 make test-e2e
 
 # Build for production
@@ -314,7 +353,7 @@ from sotd.utils.extract_normalization import normalize_for_matching
 - The old `normalize_for_storage` function is deprecated and should not be used.
 - See [docs/product_matching_validation.md](docs/product_matching_validation.md) for details and examples.
 
-This change ensures that all entries in `correct_matches.yaml` are always found as exact matches, eliminating normalization inconsistencies and "confirmed but not exact" mismatches.
+This change ensures that all entries in `data/correct_matches/*.yaml` are always found as exact matches, eliminating normalization inconsistencies and "confirmed but not exact" mismatches.
 
 ---
 
@@ -322,21 +361,22 @@ For detailed information, see the [Pipeline Specification](docs/SOTD_Pipeline_Sp
 
 ## Brush Correct Matches Enhancement (2025-07)
 
-The brush matcher now supports advanced correct matching for combo brushes using separate `handle:` and `knot:` sections in `data/correct_matches.yaml`. For brushes like `DG B15 w/ C&H Zebra`, the matcher extracts and stores handle and knot details separately, and defers the decision of top-level brand/model to the reporting phase. Simple brushes continue to use the `brush:` section as before.
+The brush matcher supports advanced correct matching for combo brushes using the split correct-matches files under `data/correct_matches/` (e.g., `handle.yaml` and `knot.yaml`). For brushes like `DG B15 w/ C&H Zebra`, the matcher extracts and stores handle and knot details separately, and may defer the decision of top-level brand/model to reporting. Simple brushes continue to use complete-brush entries (in `data/correct_matches/brush.yaml`) as before.
 
 ### Example YAML
 ```yaml
-handle:
-  Chisel & Hound:
-    Zebra:
+# data/correct_matches/handle.yaml
+Chisel & Hound:
+  Zebra:
+    - "DG B15 w/ C&H Zebra"
+
+# data/correct_matches/knot.yaml
+Declaration Grooming:
+  B15:
+    strings:
       - "DG B15 w/ C&H Zebra"
-knot:
-  Declaration Grooming:
-    B15:
-      strings:
-        - "DG B15 w/ C&H Zebra"
-      fiber: "Badger"
-      knot_size_mm: 26.0
+    fiber: "Badger"
+    knot_size_mm: 26.0
 ```
 
 ### Example Match Output
@@ -362,7 +402,7 @@ knot:
 **Critical Bug Fix**: The system now preserves user intent information when processing correct matches, preventing data loss.
 
 ### Problem
-Previously, when brushes were added to `correct_matches.yaml`, the system would lose user intent information (whether the user considered the brush "handle-primary" or "knot-primary") that was previously captured through automated matching.
+Previously, when brushes were added to correct-matches overrides, the system would lose user intent information (whether the user considered the brush "handle-primary" or "knot-primary") that was previously captured through automated matching.
 
 ### Solution
 All correct match processing methods now include user intent detection:
@@ -377,7 +417,7 @@ The system detects user intent based on component order in the input string:
 - **"handle_primary"**: When handle component appears before knot component (e.g., "Rad Dinosaur G5C")
 
 ### Data Quality Enhancement
-Correct matches now enhance rather than degrade data quality by preserving all available information, including user intent. This ensures that adding brushes to `correct_matches.yaml` improves data quality without any information loss.
+Correct matches now enhance rather than degrade data quality by preserving all available information, including user intent. This ensures that adding brushes to `data/correct_matches/*.yaml` improves data quality without any information loss.
 
 ### Example
 ```python

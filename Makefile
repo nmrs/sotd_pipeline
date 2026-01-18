@@ -168,32 +168,32 @@ test-e2e-debug: start-servers
 # Playwright tests in background mode (non-blocking) - with server management
 test-e2e-background: start-servers
 	@echo "Running E2E tests in background mode..."
-	cd webui && npm run test:e2e:background
+	cd webui && ./scripts/auto-playwright.sh
 	@echo "Stopping servers after E2E tests..."
 	cd webui && ./scripts/manage-servers.sh stop
 
 # Quick E2E tests (Chromium only, basic tests) - with server management
 test-e2e-quick: start-servers
 	@echo "Running quick E2E tests..."
-	cd webui && npm run test:e2e:quick
+	cd webui && npx playwright test --project=chromium
 	@echo "Stopping servers after E2E tests..."
 	cd webui && ./scripts/manage-servers.sh stop
 
 # All E2E tests across all browsers - with server management
 test-e2e-all: start-servers
 	@echo "Running all E2E tests across browsers..."
-	cd webui && npm run test:e2e:all
+	cd webui && npx playwright test
 	@echo "Stopping servers after E2E tests..."
 	cd webui && ./scripts/manage-servers.sh stop
 
 # Monitor E2E test logs
 test-e2e-monitor:
-	cd webui && npm run test:e2e:monitor
+	cd webui && ./scripts/monitor-tests.sh
 
 # Watch E2E tests - with server management
 test-e2e-watch: start-servers
 	@echo "Running E2E tests in watch mode..."
-	cd webui && npm run test:e2e:watch
+	cd webui && npm run test:e2e:ui
 	@echo "Stopping servers after E2E tests..."
 	cd webui && ./scripts/manage-servers.sh stop
 
@@ -325,10 +325,10 @@ aggregate:
 
 # Pipeline targets (using unified run.py orchestration)
 pipeline:
-	python run.py pipeline --month 2025-05 --force
+	python run.py --month 2025-05 --force
 
 pipeline-debug:
-	python run.py pipeline --month 2025-05 --force --debug
+	python run.py --month 2025-05 --force --debug
 
 # Performance testing
 performance-test:
@@ -400,7 +400,7 @@ test-full: test-coverage
 	cd webui && ./scripts/manage-servers.sh stop
 	@echo "Running E2E tests..."
 	cd webui && ./scripts/manage-servers.sh start
-	cd webui && npm run test:e2e:all
+	cd webui && npx playwright test
 	cd webui && ./scripts/manage-servers.sh stop
 
 # CI test suite (comprehensive but fast) - with server management
@@ -411,7 +411,7 @@ test-ci: test-python
 	cd webui && ./scripts/manage-servers.sh stop
 	@echo "Running quick E2E tests..."
 	cd webui && ./scripts/manage-servers.sh start
-	cd webui && npm run test:e2e:quick
+	cd webui && npx playwright test --project=chromium
 	cd webui && ./scripts/manage-servers.sh stop
 
 # Development test suite (watch mode for active development) - with server management
