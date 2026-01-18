@@ -33,9 +33,9 @@ Welcome to your SOTD Lather Log for January 2025
 | 6      | Declaration Grooming       |       64 |             31 | =               | ↓2              | ↓5              |
 | 7      | Noble Otter                |       47 |             24 | ↓3              | ↓2              | ↓4              |
 | 8      | Chiseled Face              |       47 |             14 | ↑5              | ↓1              | ↑1              |
-| 9      | Ariana & Evans             |       44 |             16 | ↑5              | ↑1              | ↓1              |
+| 9      | Ariana & Evans             |       44 |             16 | ↑5              | ↑2              | ↓1              |
 | 10     | Southern Witchcrafts       |       42 |             14 | ↑7              | ↑3              | ↓3              |
-| 11     | Zingari Man                |       38 |             17 | ↑4              | =               | ↓5              |
+| 11     | Zingari Man                |       38 |             17 | ↑4              | ↓1              | ↓5              |
 | 12     | Grooming Dept              |       35 |              4 | ↑22             | ↑12             | ↑4              |
 | 13     | Talent Soap Factory        |       34 |             12 | ↓1              | ↑1              | n/a             |
 | 14     | Summer Break Soaps         |       30 |             14 | ↓6              | ↓6              | ↓4              |
@@ -84,7 +84,7 @@ Welcome to your SOTD Lather Log for January 2025
 | Rank   | Soap                                                                                                                               |   Shaves |   Unique Users | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
 |:-------|:-----------------------------------------------------------------------------------------------------------------------------------|---------:|---------------:|:----------------|:----------------|:----------------|
 | 1      | Stirling Soap Co. - Haverford                                                                                                      |       30 |             10 | ↑44             | ↑45             | ↑118            |
-| 2      | Mäurer & Wirtz - Tabac                                                                                                             |       24 |             13 | ↑2              | ↓1              | ↑145            |
+| 2      | Mäurer & Wirtz - Tabac                                                                                                             |       24 |             13 | ↑2              | ↓1              | ↑146            |
 | 3      | Chiseled Face - Ghost Town Barber                                                                                                  |       24 |              5 | ↑136            | ↑2              | ↑19             |
 | 4      | House of Mammoth - Hygge                                                                                                           |       23 |              9 | ↑9              | ↑16             | n/a             |
 | 5      | Grooming Dept - Laundry II                                                                                                         |       18 |              1 | n/a             | n/a             | n/a             |
@@ -143,7 +143,7 @@ Welcome to your SOTD Lather Log for January 2025
 | 57=    | Red House Farm - Tofino                                                                                                            |        6 |              1 | n/a             | n/a             | n/a             |
 | 57=    | Talent Soap Factory - Switchback                                                                                                   |        6 |              1 | ↑15             | n/a             | n/a             |
 | 60=    | Barrister and Mann - 42                                                                                                            |        5 |              5 | n/a             | ↓30             | ↑11             |
-| 60=    | Barrister and Mann - Bay Rum                                                                                                       |        5 |              5 | ↑175            | ↑23             | ↑87             |
+| 60=    | Barrister and Mann - Bay Rum                                                                                                       |        5 |              5 | ↑175            | ↑23             | ↑88             |
 | 60=    | [Noble Otter - 'Tis the Season](https://www.wetshavingdatabase.com/software/noble-otter-tis-the-season-soap/)                      |        5 |              5 | ↓55             | ↑56             | n/a             |
 | 60=    | [Proraso - Sandalwood (Red)](https://www.wetshavingdatabase.com/software/proraso-sandalwood-soap/)                                 |        5 |              5 | ↓29             | ↓14             | ↑38             |
 | 64=    | Noble Otter - Toons & Spoons                                                                                                       |        5 |              4 | ↑15             | n/a             | n/a             |
@@ -158,16 +158,16 @@ Welcome to your SOTD Lather Log for January 2025
 | 69=    | House of Mammoth - Smash                                                                                                           |        5 |              2 | ↓31             | ↑3              | n/a             |
 | 74=    | Black Ship Grooming - Thomas Tew                                                                                                   |        5 |              1 | ↑116            | ↑193            | n/a             |
 | 74=    | Crowne & Crane - Green Tea                                                                                                         |        5 |              1 | n/a             | n/a             | n/a             |
-| 74=    | Grooming Dept - Kulfi                                                                                                              |        5 |              1 | n/a             | n/a             | n/a             |
+| 74=    | Grooming Dept - Kulfi                                                                                                              |        5 |              1 | ↑51             | n/a             | n/a             |
 | 74=    | [The Sudsy Soapery - White Sage and Lime](https://www.wetshavingdatabase.com/software/the-sudsy-soapery-white-sage-and-lime-soap/) |        5 |              1 | ↑17             | n/a             | ↑228            |
 
 ## Brand Diversity
 
 | Rank   | Brand                      |   Unique Soaps | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
 |:-------|:---------------------------|---------------:|:----------------|:----------------|:----------------|
-| 1      | Barrister and Mann         |             47 | =               | =               | =               |
+| 1      | Barrister and Mann         |             47 | =               | ↑1              | =               |
 | 2      | Catie's Bubbles            |             41 | ↑1              | ↑2              | ↑11             |
-| 3      | Stirling Soap Co.          |             37 | ↓1              | ↓2              | ↓1              |
+| 3      | Stirling Soap Co.          |             37 | ↓1              | ↓2              | =               |
 | 4      | Declaration Grooming       |             31 | =               | ↓1              | ↓2              |
 | 5      | Ariana & Evans             |             27 | ↓1              | =               | =               |
 | 6      | House of Mammoth           |             24 | =               | ↑1              | ↑18             |
@@ -225,26 +225,26 @@ Boring Score is the chance that two shaves picked at random from a user used the
 
 For the mathematically inclined: Boring Score is a diversity/concentration index (HHI in economics, Simpson’s index in ecology). More detail at [Wikipedia: Diversity index](https://en.wikipedia.org/wiki/Diversity_index).
 
-| Rank   | User                   | Hhi     |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
-|:-------|:-----------------------|:--------|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
-| 1=     | u/teeraymcfly          | 100.00% |                 1 |              1 |        1 | ↑83             | n/a             | n/a             |
-| 1=     | u/User38514            | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/SirKravsALot         | 100.00% |                 1 |              1 |        5 | =               | ↑31             | n/a             |
-| 1=     | u/Crisp_Mango          | 100.00% |                 1 |              1 |        2 | =               | ↑59             | n/a             |
-| 1=     | u/Jill_Lett_Slim       | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/Jwisin               | 100.00% |                 1 |              1 |        1 | ↑39             | n/a             | n/a             |
-| 1=     | u/MadDingersYo         | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | ↑152            |
-| 1=     | u/No-Musician-1580     | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/ShaveDaStubble       | 100.00% |                 1 |              1 |        1 | ↑25             | n/a             | n/a             |
-| 1=     | u/ShavingInCT          | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/U_Tiago              | 100.00% |                 1 |              1 |        1 | ↑69             | n/a             | n/a             |
-| 1=     | u/BuccellatiExplainsIt | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/W5IEM                | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/solyomb              | 100.00% |                 1 |              1 |        1 | n/a             | =               | =               |
-| 1=     | u/chronnoisseur42O     | 100.00% |                 1 |              1 |        1 | =               | ↑93             | n/a             |
-| 1=     | u/igord                | 100.00% |                 1 |              1 |        1 | ↑77             | n/a             | n/a             |
-| 1=     | u/l1mer1ck             | 100.00% |                 1 |              1 |        1 | ↑24             | n/a             | n/a             |
-| 1=     | u/majorhawkicedagger   | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/pridetwo             | 100.00% |                 1 |              1 |        1 | n/a             | ↑87             | n/a             |
-| 1=     | u/abitofthis           | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
-| 1=     | u/sentientschoolbus    | 100.00% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| Rank   | User                   | Hhi    |   Effective Soaps |   Unique Soaps |   Shaves | Δ vs Dec 2024   | Δ vs Jan 2024   | Δ vs Jan 2020   |
+|:-------|:-----------------------|:-------|------------------:|---------------:|---------:|:----------------|:----------------|:----------------|
+| 1=     | u/teeraymcfly          | 100.0% |                 1 |              1 |        1 | ↑83             | n/a             | n/a             |
+| 1=     | u/User38514            | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/SirKravsALot         | 100.0% |                 1 |              1 |        5 | =               | ↑31             | n/a             |
+| 1=     | u/Crisp_Mango          | 100.0% |                 1 |              1 |        2 | =               | ↑59             | n/a             |
+| 1=     | u/Jill_Lett_Slim       | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/Jwisin               | 100.0% |                 1 |              1 |        1 | ↑39             | n/a             | n/a             |
+| 1=     | u/MadDingersYo         | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | ↑152            |
+| 1=     | u/No-Musician-1580     | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/ShaveDaStubble       | 100.0% |                 1 |              1 |        1 | ↑25             | n/a             | n/a             |
+| 1=     | u/ShavingInCT          | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/U_Tiago              | 100.0% |                 1 |              1 |        1 | ↑69             | n/a             | n/a             |
+| 1=     | u/BuccellatiExplainsIt | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/W5IEM                | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/solyomb              | 100.0% |                 1 |              1 |        1 | n/a             | =               | =               |
+| 1=     | u/chronnoisseur42O     | 100.0% |                 1 |              1 |        1 | =               | ↑93             | n/a             |
+| 1=     | u/igord                | 100.0% |                 1 |              1 |        1 | ↑77             | n/a             | n/a             |
+| 1=     | u/l1mer1ck             | 100.0% |                 1 |              1 |        1 | ↑24             | n/a             | n/a             |
+| 1=     | u/majorhawkicedagger   | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/pridetwo             | 100.0% |                 1 |              1 |        1 | n/a             | ↑87             | n/a             |
+| 1=     | u/abitofthis           | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |
+| 1=     | u/sentientschoolbus    | 100.0% |                 1 |              1 |        1 | n/a             | n/a             | n/a             |

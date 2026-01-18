@@ -11,7 +11,7 @@ Welcome to your 2025 Lather Log. 21,627 shave reports from 283 distinct shavers 
 |----------------------|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|
 | Barrister and Mann   |    1 |    1 |    1 |    1 |    1 |    1 |    1 |    2 |    2 |    2 |
 | Catie's Bubbles      |    6 |    7 |    9 |    8 |   12 |   13 |   11 |   11 |    8 |    3 |
-| Chiseled Face        |    3 |    5 |    4 |    4 |    5 |    7 |    6 |    6 |    5 |   10 |
+| Chiseled Face        |    3 |    5 |    4 |    4 |    5 |    7 |    5 |    6 |    5 |   10 |
 | Declaration Grooming |    7 |    4 |    2 |    2 |    2 |    2 |    4 |    5 |    7 |    8 |
 | House of Mammoth     |      |      |  119 |   17 |   11 |    4 |    2 |    3 |    1 |    4 |
 | Mickey Lee Soapworks |    2 |    3 |    7 |   14 |   20 |   20 |   44 |   81 |   56 |   48 |
@@ -26,15 +26,15 @@ Welcome to your 2025 Lather Log. 21,627 shave reports from 283 distinct shavers 
 |------------------------------------------------------------|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|:-----|
 | Barrister and Mann - Leviathan                             |    2 |    5 |    2 |    3 |    3 |    6 |   10 |   35 |   29 |   22 |
 | Barrister and Mann - Seville                               |    1 |    1 |    1 |    2 |    2 |    3 |    6 |    3 |    8 |    5 |
-| Chiseled Face - Ghost Town Barber                          |   15 |    3 |   16 |    4 |   18 |   29 |   84 |   38 |   27 |   45 |
+| Chiseled Face - Ghost Town Barber                          |   15 |    3 |   16 |    4 |   18 |   29 |   84 |   38 |   27 |   44 |
 | Chiseled Face - Midnight Stag                              |  104 |  117 |   12 |    1 |    1 |    2 |    1 |    2 |    1 |    3 |
-| House of Mammoth - Indigo                                  |      |      |  828 |  259 |  203 |    1 |    7 |    6 |   10 |   26 |
-| L'Occitane - Cade                                          |    3 |    2 |   15 |  102 |  168 |  213 | 1054 |      |      |      |
+| House of Mammoth - Indigo                                  |      |      |  828 |  259 |  202 |    1 |    7 |    6 |   10 |   26 |
+| L'Occitane - Cade                                          |    3 |    2 |   15 |  102 |  169 |  213 | 1051 |      |      |      |
 | Mäurer & Wirtz - Tabac                                     |    4 |    4 |    6 |   44 |   52 |   14 |    2 |    1 |    2 |    2 |
-| Noble Otter - Barrbarr                                     |      |  141 |    3 |   14 |   14 |   15 |   11 |   40 |   23 |   43 |
+| Noble Otter - Barrbarr                                     |      |  141 |    3 |   14 |   14 |   15 |   11 |   41 |   23 |   47 |
 | Spearhead Shaving Company - Seaforth! Sea Spice Lime       |      |      |      |      |      |    5 |    3 |   10 |   13 |   12 |
 | Stirling Soap Co. - I, Rich Moose (r/wetshaving exclusive) |      |      |      |      |      |      |      |      |      |    1 |
-| Stirling Soap Co. - Varen                                  |      |      |      |  317 |  277 |  148 |   86 |    8 |    3 |   28 |
+| Stirling Soap Co. - Varen                                  |      |      |      |  317 |  278 |  149 |   86 |    8 |    3 |   28 |
 
 * Stirling's Executive Man man surges 95 spots in the rankings to seize fourth.
 
@@ -42,7 +42,7 @@ Welcome to your 2025 Lather Log. 21,627 shave reports from 283 distinct shavers 
 
 * Fanzine Saponifications makes about as loud a debut as you can. It lands 13th in total shaves with 524 uses from 50 users, and puts three soaps into the top 60 scents (Caravaggio, This is not a Test, and Testing… Testing) in its first year on the Lather Log.
 
-* Across the full year, Stirling stands alone atop the Brand Diversity table, with 33% more scents than runner-up Barrister and Mann. The race for third was much tighter: Catie’s Bubbles just edged out Talent Soap Factory, 80 to 79.
+* Across the full year, Stirling stands alone atop the Brand Diversity table, with almost 40 more scents than runner-up Barrister and Mann (134 vs 96). The race for third was much tighter: Catie’s Bubbles just edged out Talent Soap Factory, 80 to 79.
 
 * It's a photo finish in the Soap Diversity By User contest, with u/RedMosquitoMM just clipping u/brokenjaw622 147 to 146.
 
