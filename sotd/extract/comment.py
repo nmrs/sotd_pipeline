@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def parse_comment(
-    comment: dict, override_manager: Optional[OverrideManager] = None
+    comment: dict,
+    override_manager: Optional[OverrideManager] = None,
+    processing_month: Optional[str] = None,
 ) -> Optional[dict]:
     if "body" in comment:
         comment["body"] = preprocess_body(comment["body"])
@@ -65,10 +67,19 @@ def parse_comment(
                 break  # Found match for this field, try next field
 
     # Apply overrides if override manager is provided
+    # Use processing_month if provided, otherwise fall back to extracting from created_utc
     if override_manager and comment.get("id"):
-        month = comment.get("created_utc", "").split("-")[:2]  # Extract YYYY-MM from timestamp
-        if len(month) == 2:
-            month_str = f"{month[0]}-{month[1]:0>2}"
+        if processing_month:
+            month_str = processing_month
+        else:
+            # Fallback: extract month from created_utc timestamp
+            month = comment.get("created_utc", "").split("-")[:2]
+            if len(month) != 2:
+                month_str = None
+            else:
+                month_str = f"{month[0]}-{month[1]:0>2}"
+
+        if month_str:
             comment_id = comment["id"]
 
             for field in ("razor", "blade", "brush", "soap"):
@@ -112,7 +123,7 @@ def run_extraction_for_month(
     skipped = []
 
     for comment in comments:
-        parsed = parse_comment(comment, override_manager)
+        parsed = parse_comment(comment, override_manager, processing_month=month)
         if parsed:
             extracted.append(parsed)
         else:

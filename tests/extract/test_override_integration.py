@@ -34,7 +34,7 @@ class TestOverrideIntegration:
             override_manager = OverrideManager(override_file)
             override_manager.load_overrides()
 
-            result = parse_comment(comment, override_manager)
+            result = parse_comment(comment, override_manager, processing_month="2025-01")
 
             assert result is not None
             assert isinstance(result, dict)
@@ -71,7 +71,7 @@ class TestOverrideIntegration:
             override_manager = OverrideManager(override_file)
             override_manager.load_overrides()
 
-            result = parse_comment(comment, override_manager)
+            result = parse_comment(comment, override_manager, processing_month="2025-01")
 
             assert result is not None
             assert "razor" in result
@@ -137,7 +137,7 @@ class TestOverrideIntegration:
             override_file.unlink()
 
     def test_parse_comment_with_override_invalid_timestamp(self):
-        """Test parsing comment with invalid timestamp format."""
+        """Test parsing comment with invalid timestamp format but valid processing_month."""
         comment = {
             "id": "m99b8f9",
             "body": "✓Razor: Ko\n✓Blade: Feather",
@@ -158,14 +158,84 @@ class TestOverrideIntegration:
             override_manager = OverrideManager(override_file)
             override_manager.load_overrides()
 
-            result = parse_comment(comment, override_manager)
+            # With processing_month provided, override should apply despite invalid timestamp
+            result = parse_comment(comment, override_manager, processing_month="2025-01")
 
-            # Should process normally without applying overrides
             assert result is not None
             assert "razor" in result
             assert result["razor"]["original"] == "Ko"
-            assert result["razor"]["normalized"] == "Ko"
+            assert result["razor"]["normalized"] == "Koraat"  # Override applied
+            assert result["razor"]["overridden"] == "Normalized"
+
+        finally:
+            override_file.unlink()
+
+    def test_parse_comment_with_override_no_processing_month_invalid_timestamp(self):
+        """Test parsing comment with invalid timestamp and no processing_month (fallback)."""
+        comment = {
+            "id": "m99b8f9",
+            "body": "✓Razor: Ko\n✓Blade: Feather",
+            "created_utc": "invalid-timestamp",  # Invalid format
+        }
+
+        # Create override manager
+        override_content = """
+2025-01:
+  m99b8f9:
+    razor: Koraat
+"""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            f.write(override_content)
+            override_file = Path(f.name)
+
+        try:
+            override_manager = OverrideManager(override_file)
+            override_manager.load_overrides()
+
+            # Without processing_month and invalid timestamp, override should not apply
+            result = parse_comment(comment, override_manager, processing_month=None)
+
+            assert result is not None
+            assert "razor" in result
+            assert result["razor"]["original"] == "Ko"
+            assert result["razor"]["normalized"] == "Ko"  # No override applied
             assert "overridden" not in result["razor"]
+
+        finally:
+            override_file.unlink()
+
+    def test_override_uses_processing_month_not_created_utc(self):
+        """Test that overrides use processing_month, not created_utc timestamp."""
+        # This tests the bug where created_utc is from a different month than
+        # the processing month (e.g., comment posted late in thread)
+        comment = {
+            "id": "n0y9seq",
+            "body": "* **Lather:** Stirlingster and Mann - Roam Again",
+            "created_utc": "2025-07-02T14:47:59Z",  # July timestamp
+        }
+
+        # Override is in 2025-06 section (processing month)
+        override_content = """
+2025-06:
+  n0y9seq:
+    soap: "100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas on Fire"
+"""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            f.write(override_content)
+            override_file = Path(f.name)
+
+        try:
+            override_manager = OverrideManager(override_file)
+            override_manager.load_overrides()
+
+            # Process as 2025-06 even though created_utc is 2025-07
+            result = parse_comment(comment, override_manager, processing_month="2025-06")
+
+            # Override should be applied because we're processing 2025-06
+            assert result is not None
+            assert "soap" in result
+            assert result["soap"]["normalized"] == "100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas on Fire"
+            assert result["soap"]["overridden"] == "Normalized"
 
         finally:
             override_file.unlink()
@@ -275,7 +345,7 @@ class TestOverrideIntegration:
             override_manager = OverrideManager(override_file)
             override_manager.load_overrides()
 
-            result = parse_comment(comment, override_manager)
+            result = parse_comment(comment, override_manager, processing_month="2025-01")
 
             assert result is not None
             # Razor override
@@ -312,9 +382,10 @@ class TestOverrideIntegration:
             override_manager = OverrideManager(override_file)
             override_manager.load_overrides()
 
-            result = parse_comment(comment, override_manager)
+            # Process as February, override is in January
+            result = parse_comment(comment, override_manager, processing_month="2025-02")
 
-            # Should not apply overrides since comment is from February
+            # Should not apply overrides since processing month is February, not January
             assert result is not None
             assert result["razor"]["original"] == "Ko"
             assert result["razor"]["normalized"] == "Ko"
