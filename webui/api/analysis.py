@@ -32,6 +32,7 @@ def get_data_directory() -> Path:
         # Fallback to relative path for development
         return project_root / "data"
 
+
 # Import the existing FilteredEntriesManager instead of duplicating logic
 from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
 
@@ -1520,18 +1521,29 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                     expected_knot_brand = getattr(issue, "expected_knot_brand", None)
                     expected_knot_model = getattr(issue, "expected_knot_model", None)
 
-                    # Create handle match if we have handle data
-                    if expected_handle_brand is not None:
-                        processed_issue["current_handle_match"] = {
-                            "brand": expected_handle_brand or "",
-                            "model": expected_handle_model or "",
-                        }
-                    # Create knot match if we have knot data
-                    if expected_knot_brand is not None:
-                        processed_issue["current_knot_match"] = {
-                            "brand": expected_knot_brand or "",
-                            "model": expected_knot_model or "",
-                        }
+                    # Create handle match - always include even if None/_no_brand (needed for auto-fix)
+                    # This preserves the original location even if it was _no_brand/_no_model
+                    processed_issue["current_handle_match"] = {
+                        "brand": (
+                            expected_handle_brand
+                            if expected_handle_brand is not None
+                            else "_no_brand"
+                        ),
+                        "model": (
+                            expected_handle_model
+                            if expected_handle_model is not None
+                            else "_no_model"
+                        ),
+                    }
+                    # Create knot match - always include even if None/_no_brand
+                    processed_issue["current_knot_match"] = {
+                        "brand": (
+                            expected_knot_brand if expected_knot_brand is not None else "_no_brand"
+                        ),
+                        "model": (
+                            expected_knot_model if expected_knot_model is not None else "_no_model"
+                        ),
+                    }
                 elif issue.expected_section == "handle":
                     expected_handle_brand = getattr(issue, "expected_handle_brand", None)
                     expected_handle_model = getattr(issue, "expected_handle_model", None)
@@ -1549,27 +1561,73 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                             "model": expected_knot_model or "",
                         }
 
-                # Add expected handle/knot match details (from current matcher)
-                if issue.actual_section == "handle_knot":
-                    if hasattr(issue, "actual_handle_brand") and issue.actual_handle_brand:
-                        processed_issue["expected_handle_match"] = {
-                            "brand": issue.actual_handle_brand,
-                            "model": issue.actual_handle_model,
-                        }
-                    if hasattr(issue, "actual_knot_brand") and issue.actual_knot_brand:
-                        processed_issue["expected_knot_match"] = {
-                            "brand": issue.actual_knot_brand,
-                            "model": issue.actual_knot_model,
-                        }
-                        # Add fiber and knot size if available
-                        actual_knot_fiber = getattr(issue, "actual_knot_fiber", None)
-                        if actual_knot_fiber:
-                            processed_issue["expected_knot_match"]["fiber"] = actual_knot_fiber
-                        actual_knot_size_mm = getattr(issue, "actual_knot_size_mm", None)
-                        if actual_knot_size_mm:
-                            processed_issue["expected_knot_match"][
-                                "knot_size_mm"
-                            ] = actual_knot_size_mm
+            # For data_mismatch issues with handle_knot entries, also populate current_handle_match/current_knot_match
+            # This ensures we can preserve correct components when only one component has a mismatch
+            if issue.issue_type == "data_mismatch" and (issue.expected_section == "handle_knot" or issue.actual_section == "handle_knot"):
+                expected_handle_brand = getattr(issue, "expected_handle_brand", None)
+                expected_handle_model = getattr(issue, "expected_handle_model", None)
+                expected_knot_brand = getattr(issue, "expected_knot_brand", None)
+                expected_knot_model = getattr(issue, "expected_knot_model", None)
+
+                # Create handle match - always include even if None/_no_brand (needed for auto-fix)
+                # This preserves the original location even if it was _no_brand/_no_model
+                processed_issue["current_handle_match"] = {
+                    "brand": (
+                        expected_handle_brand
+                        if expected_handle_brand is not None
+                        else "_no_brand"
+                    ),
+                    "model": (
+                        expected_handle_model
+                        if expected_handle_model is not None
+                        else "_no_model"
+                    ),
+                }
+                # Create knot match - always include even if None/_no_brand
+                processed_issue["current_knot_match"] = {
+                    "brand": (
+                        expected_knot_brand if expected_knot_brand is not None else "_no_brand"
+                    ),
+                    "model": (
+                        expected_knot_model if expected_knot_model is not None                         else "_no_model"
+                    ),
+                }
+
+            # Add expected handle/knot match details (from current matcher OR current correct_matches)
+            # For handle_knot entries, always include both handle and knot data
+            # This ensures we preserve correct values when only one component needs fixing
+            if issue.expected_section == "handle_knot" or issue.actual_section == "handle_knot":
+                # Handle: use actual_handle_brand if mismatch exists (and is not None),
+                # otherwise use current_handle_match
+                if hasattr(issue, "actual_handle_brand") and issue.actual_handle_brand is not None:
+                    processed_issue["expected_handle_match"] = {
+                        "brand": issue.actual_handle_brand,
+                        "model": getattr(issue, "actual_handle_model", None),
+                    }
+                elif processed_issue.get("current_handle_match"):
+                    # Handle is correct, preserve current values
+                    processed_issue["expected_handle_match"] = processed_issue[
+                        "current_handle_match"
+                    ].copy()
+
+                # Knot: use actual_knot_brand if mismatch exists (and is not None), otherwise use current_knot_match
+                if hasattr(issue, "actual_knot_brand") and issue.actual_knot_brand is not None:
+                    processed_issue["expected_knot_match"] = {
+                        "brand": issue.actual_knot_brand,
+                        "model": getattr(issue, "actual_knot_model", None),
+                    }
+                    # Add fiber and knot size if available
+                    actual_knot_fiber = getattr(issue, "actual_knot_fiber", None)
+                    if actual_knot_fiber:
+                        processed_issue["expected_knot_match"]["fiber"] = actual_knot_fiber
+                    actual_knot_size_mm = getattr(issue, "actual_knot_size_mm", None)
+                    if actual_knot_size_mm:
+                        processed_issue["expected_knot_match"]["knot_size_mm"] = actual_knot_size_mm
+                elif processed_issue.get("current_knot_match"):
+                    # Knot is correct, preserve current values
+                    processed_issue["expected_knot_match"] = processed_issue[
+                        "current_knot_match"
+                    ].copy()
 
             processed_issues.append(processed_issue)
 
@@ -1927,6 +1985,16 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                             f"Invalid entry data: missing expected_handle_match or expected_knot_match for structural change: {entry}"
                         )
                         continue
+                elif (
+                    issue_type in ["data_mismatch", "catalog_pattern_mismatch"]
+                    and actual_section == "handle_knot"
+                ):
+                    # For handle_knot data_mismatch, we need expected_handle_match and expected_knot_match
+                    if not expected_handle_match or not expected_knot_match:
+                        errors.append(
+                            f"Invalid entry data: missing expected_handle_match or expected_knot_match for handle_knot data_mismatch: {entry}"
+                        )
+                        continue
                 elif not actual_brand or not actual_section:
                     # For other cases, we need actual_brand and actual_section
                     errors.append(
@@ -2109,30 +2177,93 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                             added_count += 1
 
                 elif issue_type in ["data_mismatch", "catalog_pattern_mismatch"]:
-                    # Update brand/model in same section
-                    matched = {
-                        "brand": actual_brand,
-                        "model": actual_model if actual_model else None,
-                    }
+                    # Handle handle_knot entries separately - update both handle and knot sections
+                    if (
+                        actual_section == "handle_knot"
+                        and expected_handle_match
+                        and expected_knot_match
+                    ):
+                    # Use expected_handle_match and expected_knot_match directly
+                        # These now always contain correct values (from matcher if mismatch,
+                        # from current_* if correct)
+                        handle_brand = expected_handle_match.get("brand")
+                        handle_model = expected_handle_match.get("model")
 
-                    # For blades, preserve format
-                    if request.field == "blade" and expected_format:
-                        matched["format"] = expected_format
+                        # Normalize None to _no_brand only if truly no brand (shouldn't happen now)
+                        if handle_brand is None:
+                            handle_brand = "_no_brand"
+                        if handle_model is None:
+                            handle_model = "_no_model"
 
-                    match_data_to_save = {
-                        "original": correct_match,
-                        "matched": matched,
-                        "field": (
-                            actual_section if actual_section != "handle_knot" else request.field
-                        ),
-                    }
-                    match_key = manager.create_match_key(
-                        actual_section if actual_section != "handle_knot" else request.field,
-                        correct_match,
-                        matched,
-                    )
-                    manager.mark_match_as_correct(match_key, match_data_to_save)
-                    added_count += 1
+                        knot_brand = expected_knot_match.get("brand")
+                        knot_model = expected_knot_match.get("model")
+
+                        # Normalize None to _no_brand only if truly no brand
+                        if knot_brand is None:
+                            knot_brand = "_no_brand"
+                        if knot_model is None:
+                            knot_model = "_no_model"
+
+                        # Update handle section
+                        handle_matched = {
+                            "brand": handle_brand,
+                            "model": handle_model,
+                        }
+                        handle_match_data = {
+                            "original": correct_match,
+                            "matched": handle_matched,
+                            "field": "handle",
+                        }
+                        handle_match_key = manager.create_match_key(
+                            "handle", correct_match, handle_matched
+                        )
+                        manager.mark_match_as_correct(handle_match_key, handle_match_data)
+                        added_count += 1
+
+                        # Update knot section
+                        knot_matched = {
+                            "brand": knot_brand,
+                            "model": knot_model,
+                        }
+                        if expected_knot_match.get("fiber"):
+                            knot_matched["fiber"] = expected_knot_match["fiber"]
+                        if expected_knot_match.get("knot_size_mm"):
+                            knot_matched["knot_size_mm"] = expected_knot_match["knot_size_mm"]
+                        knot_match_data = {
+                            "original": correct_match,
+                            "matched": knot_matched,
+                            "field": "knot",
+                        }
+                        knot_match_key = manager.create_match_key(
+                            "knot", correct_match, knot_matched
+                        )
+                        manager.mark_match_as_correct(knot_match_key, knot_match_data)
+                        added_count += 1
+                    else:
+                        # Update brand/model in same section (for non-handle_knot entries)
+                        matched = {
+                            "brand": actual_brand,
+                            "model": actual_model if actual_model else None,
+                        }
+
+                        # For blades, preserve format
+                        if request.field == "blade" and expected_format:
+                            matched["format"] = expected_format
+
+                        match_data_to_save = {
+                            "original": correct_match,
+                            "matched": matched,
+                            "field": (
+                                actual_section if actual_section != "handle_knot" else request.field
+                            ),
+                        }
+                        match_key = manager.create_match_key(
+                            actual_section if actual_section != "handle_knot" else request.field,
+                            correct_match,
+                            matched,
+                        )
+                        manager.mark_match_as_correct(match_key, match_data_to_save)
+                        added_count += 1
 
                 elif issue_type == "cross_section_conflict":
                     # For cross-section conflicts, we need to determine where it should go
@@ -2200,6 +2331,11 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
             except Exception as e:
                 errors.append(f"Error saving YAML files after removal: {e}")
                 logger.error(f"Error saving YAML files: {e}")
+
+        # NOTE: We do NOT reload the manager after removals because:
+        # 1. mark_match_as_correct will overwrite entries with the same match_key (based on original text)
+        # 2. Reloading would clear newly added entries before we save them
+        # 3. The old entries in memory will be overwritten by the new entries we add
 
         # Save correct matches (for additions)
         if added_count > 0:

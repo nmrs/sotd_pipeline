@@ -731,8 +731,22 @@ class ActualMatchingValidator:
                     actual_handle_brand = handle_data.get("brand")
                     actual_handle_model = handle_data.get("model")
 
+                    # Normalize None <-> _no_brand for comparison
+                    def normalize_brand_for_comparison(brand):
+                        """Normalize brand value for comparison: None and _no_brand are equivalent."""
+                        if brand is None or brand == "_no_brand":
+                            return "_no_brand"
+                        return brand
+
+                    normalized_expected_handle_brand = normalize_brand_for_comparison(
+                        expected_handle_brand
+                    )
+                    normalized_actual_handle_brand = normalize_brand_for_comparison(
+                        actual_handle_brand
+                    )
+
                     if (
-                        expected_handle_brand != actual_handle_brand
+                        normalized_expected_handle_brand != normalized_actual_handle_brand
                         or expected_handle_model != actual_handle_model
                     ):
                         issues.append(
@@ -751,7 +765,7 @@ class ActualMatchingValidator:
                                 ),
                                 suggested_action=(
                                     f"Update correct_matches directory handle section to reflect "
-                                    f"new brand/model: '{actual_handle_brand} "
+                                    f"new brand/model: '{actual_handle_brand if actual_handle_brand else '_no_brand'} "
                                     f"{actual_handle_model}'"
                                 ),
                                 matched_pattern=result.pattern if result else None,
@@ -764,8 +778,20 @@ class ActualMatchingValidator:
                     actual_knot_brand = knot_data.get("brand")
                     actual_knot_model = knot_data.get("model")
 
+                    # Normalize None <-> _no_brand for comparison
+                    def normalize_brand_for_comparison(brand):
+                        """Normalize brand value for comparison: None and _no_brand are equivalent."""
+                        if brand is None or brand == "_no_brand":
+                            return "_no_brand"
+                        return brand
+
+                    normalized_expected_knot_brand = normalize_brand_for_comparison(
+                        expected_knot_brand
+                    )
+                    normalized_actual_knot_brand = normalize_brand_for_comparison(actual_knot_brand)
+
                     if (
-                        expected_knot_brand != actual_knot_brand
+                        normalized_expected_knot_brand != normalized_actual_knot_brand
                         or expected_knot_model != actual_knot_model
                     ):
                         issues.append(
@@ -787,12 +813,115 @@ class ActualMatchingValidator:
                                 suggested_action=(
                                     f"Update correct_matches directory knot "
                                     f"section to reflect new brand/model: "
-                                    f"'{actual_knot_brand} "
+                                    f"'{actual_knot_brand if actual_knot_brand else '_no_brand'} "
                                     f"{actual_knot_model}'"
                                 ),
                                 matched_pattern=result.pattern if result else None,
                             )
                         )
+
+            elif expected_section == "handle_knot":
+                # Composite brush validation for handle_knot entries
+                handle_data = matched_data.get("handle", {})
+                knot_data = matched_data.get("knot", {})
+
+                # Extract expected handle/knot brand/model from expected_data
+                expected_handle_brand = expected_data.get("handle_maker")
+                expected_handle_model = expected_data.get("handle_model")
+                expected_knot_brand = expected_data.get("knot_brand")
+                expected_knot_model = expected_data.get("knot_model")
+
+                # Extract actual handle/knot brand/model from matched_data
+                actual_handle_brand = handle_data.get("brand")
+                actual_handle_model = handle_data.get("model")
+                actual_knot_brand = knot_data.get("brand")
+                actual_knot_model = knot_data.get("model")
+
+                # Normalize None <-> _no_brand for comparison
+                # correct_matches uses _no_brand, matcher returns None - treat as equivalent
+                def normalize_brand_for_comparison(brand):
+                    """Normalize brand value for comparison: None and _no_brand are equivalent."""
+                    if brand is None or brand == "_no_brand":
+                        return "_no_brand"
+                    return brand
+
+                normalized_expected_handle_brand = normalize_brand_for_comparison(
+                    expected_handle_brand
+                )
+                normalized_actual_handle_brand = normalize_brand_for_comparison(actual_handle_brand)
+                normalized_expected_knot_brand = normalize_brand_for_comparison(expected_knot_brand)
+                normalized_actual_knot_brand = normalize_brand_for_comparison(actual_knot_brand)
+
+                # Validate handle match
+                if (
+                    normalized_expected_handle_brand != normalized_actual_handle_brand
+                    or expected_handle_model != actual_handle_model
+                ):
+                    issues.append(
+                        ValidationIssue(
+                            issue_type="data_mismatch",
+                            severity="high",
+                            correct_match=brush_string,
+                            expected_section=expected_section,
+                            actual_section=actual_section,  # Set actual_section for handle_knot entries
+                            expected_handle_brand=expected_handle_brand,
+                            expected_handle_model=expected_handle_model,
+                            actual_handle_brand=actual_handle_brand,
+                            actual_handle_model=actual_handle_model,
+                            # Always include expected knot values for handle_knot entries
+                            # so API can preserve correct knot values when only handle has mismatch
+                            expected_knot_brand=expected_knot_brand,
+                            expected_knot_model=expected_knot_model,
+                            details=(
+                                f"Handle brand/model mismatch: expected "
+                                f"'{expected_handle_brand} {expected_handle_model}', got "
+                                f"'{actual_handle_brand} {actual_handle_model}'"
+                            ),
+                            suggested_action=(
+                                f"Update correct_matches directory handle section to reflect "
+                                f"new brand/model: '{actual_handle_brand if actual_handle_brand else '_no_brand'} "
+                                f"{actual_handle_model}'"
+                            ),
+                            matched_pattern=result.pattern if result else None,
+                        )
+                    )
+
+                # Validate knot match
+                if (
+                    normalized_expected_knot_brand != normalized_actual_knot_brand
+                    or expected_knot_model != actual_knot_model
+                ):
+                    issues.append(
+                        ValidationIssue(
+                            issue_type="data_mismatch",
+                            severity="high",
+                            correct_match=brush_string,
+                            expected_section=expected_section,
+                            actual_section=actual_section,  # Set actual_section for handle_knot entries
+                            expected_knot_brand=expected_knot_brand,
+                            expected_knot_model=expected_knot_model,
+                            actual_knot_brand=actual_knot_brand,
+                            actual_knot_model=actual_knot_model,
+                            # Always include expected handle values for handle_knot entries
+                            # so API can preserve correct handle values when only knot has mismatch
+                            expected_handle_brand=expected_handle_brand,
+                            expected_handle_model=expected_handle_model,
+                            details=(
+                                f"Knot brand/model mismatch: expected "
+                                f"'{expected_knot_brand} "
+                                f"{expected_knot_model}', got "
+                                f"'{actual_knot_brand} "
+                                f"{actual_knot_model}'"
+                            ),
+                            suggested_action=(
+                                f"Update correct_matches directory knot "
+                                f"section to reflect new brand/model: "
+                                f"'{actual_knot_brand if actual_knot_brand else '_no_brand'} "
+                                f"{actual_knot_model}'"
+                            ),
+                            matched_pattern=result.pattern if result else None,
+                        )
+                    )
 
         except Exception as e:
             # Fail fast on internal errors
