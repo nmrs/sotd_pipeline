@@ -29,10 +29,13 @@ def parse_comment(
 
     result = {}
 
-    # Process fields with pattern priority: try each pattern across all lines
-    # This ensures high-priority patterns (explicit markers) are checked before
-    # low-priority patterns (ambiguous), regardless of line order
-    # Pattern priority is enforced across all aliases, not per alias
+    # Process fields with line-by-line extraction and priority buckets
+    # Algorithm:
+    # 1. First pass: For each line (in order), try all high-priority patterns (0-14b with explicit markers)
+    #    Return on first match found
+    # 2. Second pass: If no match found, for each line (in order), try all low-priority patterns (15, ambiguous)
+    #    Return on first match found
+    # This ensures earlier lines (product listings) are preferred over later lines (descriptions)
     for field in ("razor", "blade", "brush", "soap"):
         if field in result:
             continue  # Already found this field
@@ -40,31 +43,45 @@ def parse_comment(
         # Get all aliases for this field
         aliases = FIELD_ALIASES.get(field, [field])
 
-        # Get patterns grouped by priority level (pattern number)
-        # This ensures pattern 0 for all aliases is tried before pattern 1 for any alias
-        max_patterns = len(get_patterns(aliases[0])) if aliases else 0
-        patterns_by_priority = [[] for _ in range(max_patterns)]
+        # Collect all patterns grouped by priority bucket
+        # High priority: patterns 0-14b (indices 0-15) with explicit markers (:,-,=)
+        # Low priority: pattern 15 (index 16) with ambiguous format (no explicit markers)
+        high_priority_patterns = []  # Patterns 0-14b (explicit markers)
+        low_priority_patterns = []  # Pattern 15 (ambiguous)
 
         for alias in aliases:
             alias_patterns = get_patterns(alias)
             for pattern_num, pattern in enumerate(alias_patterns):
-                patterns_by_priority[pattern_num].append((alias, pattern))
+                # Pattern 15 (ambiguous) is at index 16, all others are high priority
+                if pattern_num < len(alias_patterns) - 1:  # All except last pattern
+                    high_priority_patterns.append((alias, pattern))
+                else:  # Last pattern is low priority (pattern 15)
+                    low_priority_patterns.append((alias, pattern))
 
-        # Try each priority level across all aliases and all lines
-        # Pattern priority ensures list items (* **alias:**) are tried before narrative (**alias:**)
-        for priority_level, patterns_at_level in enumerate(patterns_by_priority):
-            for alias, pattern in patterns_at_level:
-                for line in lines:
+        # First pass: Try high-priority patterns line by line
+        for line in lines:
+            for alias, pattern in high_priority_patterns:
+                value = extract_field_with_pattern(line, field, pattern)
+                if value:
+                    # Found a match with high-priority pattern - use it
+                    normalized_value = normalize_for_matching(value, field=field)
+                    result[field] = {"original": value, "normalized": normalized_value}
+                    break  # Found match, move to next field
+            if field in result:
+                break  # Found match for this field
+
+        # Second pass: Try low-priority patterns line by line (only if no match found)
+        if field not in result:
+            for line in lines:
+                for alias, pattern in low_priority_patterns:
                     value = extract_field_with_pattern(line, field, pattern)
                     if value:
-                        # Found a match with this priority level - use it
+                        # Found a match with low-priority pattern - use it
                         normalized_value = normalize_for_matching(value, field=field)
                         result[field] = {"original": value, "normalized": normalized_value}
                         break  # Found match, move to next field
                 if field in result:
-                    break  # Found match for this field, try next field
-            if field in result:
-                break  # Found match for this field, try next field
+                    break  # Found match for this field
 
     # Apply overrides if override manager is provided
     # Use processing_month if provided, otherwise fall back to extracting from created_utc

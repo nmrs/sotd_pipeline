@@ -510,3 +510,55 @@ def test_parse_comment_multi_field_same_line():
         "Stirling Soap Co. - r/wetshaving l, Rich Moose soap. Post Shave: "
         "Stirling Soap Co. - Satsuma splash. Post Shave: Stirling Soap Co. - Satsuma balm"
     )
+
+
+def test_parse_comment_multiple_lather_entries_line_order():
+    """Test that earlier Lather entry is preferred over later Spotlight On entry."""
+    comment = {
+        "body": "\n".join(
+            [
+                "**Lather**: B&M Eigengrau Excelsior",
+                "",
+                "**Spotlight On:**",
+                "",
+                "**Lather:** B&M has a dark Gothic Teutonic side. This can be seen very clearly in Eigengrau. The chilly iris note blends well with the fir notes from First Snow, and the overall tone is somber, reserved, and Arctic. Only thing lacking here is menthol, but that addition may have messed the fine olfactory poise seen here up.",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    assert result["soap"]["original"] == "B&M Eigengrau Excelsior"
+    assert result["soap"]["normalized"] == "B&M Eigengrau Excelsior"
+
+
+def test_parse_comment_low_priority_fallback():
+    """Test that low-priority patterns are tried if high-priority finds nothing."""
+    comment = {
+        "body": "\n".join(
+            [
+                "Some narrative text",
+                "Soap B&M Eigengrau",  # Ambiguous pattern (no colon/dash)
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    assert result["soap"]["original"] == "B&M Eigengrau"
+
+
+def test_parse_comment_line_order_high_priority():
+    """Test that line order matters for high-priority patterns."""
+    comment = {
+        "body": "\n".join(
+            [
+                "**Soap:** First Soap",
+                "**Soap:** Second Soap",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert "soap" in result
+    assert result["soap"]["original"] == "First Soap"
