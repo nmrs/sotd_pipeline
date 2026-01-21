@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,11 @@ const CatalogValidator: React.FC = () => {
   const [selectedIssues, setSelectedIssues] = useState<Set<number>>(new Set());
   const [removing, setRemoving] = useState(false);
   const [fixing, setFixing] = useState(false);
+
+  // Keyboard navigation state
+  const [activeIssueIndex, setActiveIssueIndex] = useState<number>(-1);
+  const [keyboardNavigationEnabled, setKeyboardNavigationEnabled] = useState<boolean>(false);
+  const lastNavigationWasKeyboard = useRef<boolean>(false);
 
   // Helper function to format section names for display
   const formatSectionName = (section: string | undefined): string => {
@@ -75,6 +80,8 @@ const CatalogValidator: React.FC = () => {
       setResults(null);
       // Clear selection when starting new validation
       setSelectedIssues(new Set());
+      // Reset active issue index
+      setActiveIssueIndex(-1);
 
       const result = await validateCatalogAgainstCorrectMatches({
         field: selectedField,
@@ -122,6 +129,38 @@ const CatalogValidator: React.FC = () => {
     () => filteredIssues.length > 0 && filteredIssues.every((_, index) => selectedIssues.has(index)),
     [filteredIssues, selectedIssues]
   );
+
+  // Enable keyboard navigation when results are available
+  useEffect(() => {
+    if (results && filteredIssues.length > 0) {
+      setKeyboardNavigationEnabled(true);
+    } else {
+      setKeyboardNavigationEnabled(false);
+    }
+  }, [results, filteredIssues.length]);
+
+  // Reset active issue index when filtered issues change
+  useEffect(() => {
+    setActiveIssueIndex(-1);
+  }, [filteredIssues]);
+
+  // Refs for issue elements to enable scrolling
+  const issueRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  // Scroll active issue into view when it changes via keyboard (not mouse)
+  useEffect(() => {
+    if (activeIssueIndex >= 0 && keyboardNavigationEnabled && lastNavigationWasKeyboard.current) {
+      const issueElement = issueRefs.current.get(activeIssueIndex);
+      if (issueElement) {
+        issueElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      }
+    }
+    // Reset the flag after scrolling
+    lastNavigationWasKeyboard.current = false;
+  }, [activeIssueIndex, keyboardNavigationEnabled]);
 
   // New functions for multi-select functionality
   const handleRemoveSelected = async () => {
@@ -296,6 +335,86 @@ const CatalogValidator: React.FC = () => {
       setFixing(false);
     }
   };
+
+  // Store latest function references in refs to avoid dependency issues
+  const handleIssueSelectRef = useRef(handleIssueSelect);
+  const handleAutoFixSelectedRef = useRef(handleAutoFixSelected);
+  
+  useEffect(() => {
+    handleIssueSelectRef.current = handleIssueSelect;
+  }, [handleIssueSelect]);
+  
+  useEffect(() => {
+    handleAutoFixSelectedRef.current = handleAutoFixSelected;
+  }, [handleAutoFixSelected]);
+
+  // Keyboard navigation handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle keyboard navigation if focus is on an input field
+      const activeElement = document.activeElement;
+
+      if (activeElement) {
+        const tagName = activeElement.tagName.toLowerCase();
+        const isInput = tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+        const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
+
+        if (isInput || isContentEditable) {
+          // If we're in an input field, let it handle all events including space bar
+          return; // Let the input field handle all events
+        }
+      }
+
+      // Only handle keyboard navigation if enabled
+      if (!keyboardNavigationEnabled) {
+        return;
+      }
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          lastNavigationWasKeyboard.current = true;
+          if (activeIssueIndex > 0) {
+            setActiveIssueIndex(activeIssueIndex - 1);
+          }
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          lastNavigationWasKeyboard.current = true;
+          if (activeIssueIndex >= 0 && activeIssueIndex < filteredIssues.length - 1) {
+            setActiveIssueIndex(activeIssueIndex + 1);
+          } else if (activeIssueIndex === -1 && filteredIssues.length > 0) {
+            // Only jump to first if we haven't selected anything yet
+            setActiveIssueIndex(0);
+          }
+          break;
+        case ' ':
+          event.preventDefault();
+          if (activeIssueIndex >= 0 && activeIssueIndex < filteredIssues.length) {
+            const isCurrentlySelected = selectedIssues.has(activeIssueIndex);
+            handleIssueSelectRef.current(activeIssueIndex, !isCurrentlySelected);
+          }
+          break;
+        case 'Enter':
+          event.preventDefault();
+          if (hasFixableIssues && !fixing && !removing) {
+            handleAutoFixSelectedRef.current();
+          }
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [
+    keyboardNavigationEnabled,
+    activeIssueIndex,
+    filteredIssues,
+    selectedIssues,
+    hasFixableIssues,
+    fixing,
+    removing,
+  ]);
 
   const getDisplayModeCounts = () => {
     if (!results) {
@@ -655,8 +774,30 @@ const CatalogValidator: React.FC = () => {
                 {filteredIssues.map((issue, index) => (
                   <div
                     key={index}
+                    ref={(el) => {
+                      if (el) {
+                        issueRefs.current.set(index, el);
+                      } else {
+                        issueRefs.current.delete(index);
+                      }
+                    }}
+                    onClick={(e) => {
+                      // Always update active index on click, unless clicking directly on checkbox
+                      const target = e.target as HTMLElement;
+                      const isCheckbox = target.closest('input[type="checkbox"]');
+                      
+                      // Update active index when clicking on the div (but not when clicking checkbox directly)
+                      if (!isCheckbox) {
+                        lastNavigationWasKeyboard.current = false; // Mark as mouse click
+                        setActiveIssueIndex(index);
+                        // Ensure keyboard navigation is enabled when clicking on an issue
+                        if (results && filteredIssues.length > 0) {
+                          setKeyboardNavigationEnabled(true);
+                        }
+                      }
+                    }}
                     className={`border rounded-lg p-4 ${getIssueSeverityColor(issue.severity)} ${selectedIssues.has(index) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                      }`}
+                      } ${keyboardNavigationEnabled && activeIssueIndex === index ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
                   >
                     <div className='flex items-start gap-3'>
                       {/* Checkbox for selection */}
@@ -1085,7 +1226,7 @@ const CatalogValidator: React.FC = () => {
                           </p>
                           <p className='text-sm text-gray-600'>
                             {issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch'
-                              ? `Update correct_matches directory to reflect new brand/model: '${issue.actual_brand} ${issue.actual_model}'`
+                              ? issue.suggested_action || `Update correct_matches directory to reflect new brand/model: '${issue.actual_brand || ''} ${issue.actual_model || ''}'`
                               : issue.issue_type === 'structural_change'
                                 ? `Update correct_matches directory structure: move from '${issue.expected_section}' section to '${issue.actual_section}' section`
                                 : issue.issue_type === 'duplicate_string'
