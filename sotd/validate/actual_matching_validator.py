@@ -731,12 +731,18 @@ class ActualMatchingValidator:
                     actual_handle_brand = handle_data.get("brand")
                     actual_handle_model = handle_data.get("model")
 
-                    # Normalize None <-> _no_brand for comparison
+                    # Normalize None <-> _no_brand/_no_model for comparison
                     def normalize_brand_for_comparison(brand):
                         """Normalize brand value for comparison: None and _no_brand are equivalent."""
                         if brand is None or brand == "_no_brand":
                             return "_no_brand"
                         return brand
+
+                    def normalize_model_for_comparison(model):
+                        """Normalize model value for comparison: None and _no_model are equivalent."""
+                        if model is None or model == "_no_model":
+                            return "_no_model"
+                        return model
 
                     normalized_expected_handle_brand = normalize_brand_for_comparison(
                         expected_handle_brand
@@ -744,10 +750,16 @@ class ActualMatchingValidator:
                     normalized_actual_handle_brand = normalize_brand_for_comparison(
                         actual_handle_brand
                     )
+                    normalized_expected_handle_model = normalize_model_for_comparison(
+                        expected_handle_model
+                    )
+                    normalized_actual_handle_model = normalize_model_for_comparison(
+                        actual_handle_model
+                    )
 
                     if (
                         normalized_expected_handle_brand != normalized_actual_handle_brand
-                        or expected_handle_model != actual_handle_model
+                        or normalized_expected_handle_model != normalized_actual_handle_model
                     ):
                         issues.append(
                             ValidationIssue(
@@ -778,21 +790,33 @@ class ActualMatchingValidator:
                     actual_knot_brand = knot_data.get("brand")
                     actual_knot_model = knot_data.get("model")
 
-                    # Normalize None <-> _no_brand for comparison
+                    # Normalize None <-> _no_brand/_no_model for comparison
                     def normalize_brand_for_comparison(brand):
                         """Normalize brand value for comparison: None and _no_brand are equivalent."""
                         if brand is None or brand == "_no_brand":
                             return "_no_brand"
                         return brand
 
+                    def normalize_model_for_comparison(model):
+                        """Normalize model value for comparison: None and _no_model are equivalent."""
+                        if model is None or model == "_no_model":
+                            return "_no_model"
+                        return model
+
                     normalized_expected_knot_brand = normalize_brand_for_comparison(
                         expected_knot_brand
                     )
                     normalized_actual_knot_brand = normalize_brand_for_comparison(actual_knot_brand)
+                    normalized_expected_knot_model = normalize_model_for_comparison(
+                        expected_knot_model
+                    )
+                    normalized_actual_knot_model = normalize_model_for_comparison(
+                        actual_knot_model
+                    )
 
                     if (
                         normalized_expected_knot_brand != normalized_actual_knot_brand
-                        or expected_knot_model != actual_knot_model
+                        or normalized_expected_knot_model != normalized_actual_knot_model
                     ):
                         issues.append(
                             ValidationIssue(
@@ -837,25 +861,41 @@ class ActualMatchingValidator:
                 actual_knot_brand = knot_data.get("brand")
                 actual_knot_model = knot_data.get("model")
 
-                # Normalize None <-> _no_brand for comparison
-                # correct_matches uses _no_brand, matcher returns None - treat as equivalent
+                # Normalize None <-> _no_brand/_no_model for comparison
+                # correct_matches uses _no_brand/_no_model, matcher returns None - treat as equivalent
                 def normalize_brand_for_comparison(brand):
                     """Normalize brand value for comparison: None and _no_brand are equivalent."""
                     if brand is None or brand == "_no_brand":
                         return "_no_brand"
                     return brand
 
+                def normalize_model_for_comparison(model):
+                    """Normalize model value for comparison: None and _no_model are equivalent."""
+                    if model is None or model == "_no_model":
+                        return "_no_model"
+                    return model
+
                 normalized_expected_handle_brand = normalize_brand_for_comparison(
                     expected_handle_brand
                 )
                 normalized_actual_handle_brand = normalize_brand_for_comparison(actual_handle_brand)
+                normalized_expected_handle_model = normalize_model_for_comparison(
+                    expected_handle_model
+                )
+                normalized_actual_handle_model = normalize_model_for_comparison(
+                    actual_handle_model
+                )
                 normalized_expected_knot_brand = normalize_brand_for_comparison(expected_knot_brand)
                 normalized_actual_knot_brand = normalize_brand_for_comparison(actual_knot_brand)
+                normalized_expected_knot_model = normalize_model_for_comparison(
+                    expected_knot_model
+                )
+                normalized_actual_knot_model = normalize_model_for_comparison(actual_knot_model)
 
                 # Validate handle match
                 if (
                     normalized_expected_handle_brand != normalized_actual_handle_brand
-                    or expected_handle_model != actual_handle_model
+                    or normalized_expected_handle_model != normalized_actual_handle_model
                 ):
                     issues.append(
                         ValidationIssue(
@@ -889,7 +929,7 @@ class ActualMatchingValidator:
                 # Validate knot match
                 if (
                     normalized_expected_knot_brand != normalized_actual_knot_brand
-                    or expected_knot_model != actual_knot_model
+                    or normalized_expected_knot_model != normalized_actual_knot_model
                 ):
                     issues.append(
                         ValidationIssue(

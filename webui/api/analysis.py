@@ -2113,9 +2113,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         "knot",
                     ]:
                         # Moving from handle/knot to brush
+                        # Normalize None to _no_brand/_no_model for saving
+                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
+                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
                         matched = {
-                            "brand": actual_brand,
-                            "model": actual_model if actual_model else None,
+                            "brand": normalized_actual_brand,
+                            "model": normalized_actual_model,
                         }
                         if expected_knot_match:
                             if expected_knot_match.get("fiber"):
@@ -2156,9 +2159,16 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
 
                         # Add knot entry
                         if expected_knot_match:
+                            # Normalize None to _no_brand/_no_model for saving
+                            knot_brand = expected_knot_match.get("brand")
+                            knot_model = expected_knot_match.get("model")
+                            if knot_brand is None:
+                                knot_brand = "_no_brand"
+                            if knot_model is None:
+                                knot_model = "_no_model"
                             knot_matched = {
-                                "brand": expected_knot_match.get("brand"),
-                                "model": expected_knot_match.get("model"),
+                                "brand": knot_brand,
+                                "model": knot_model,
                             }
                             if expected_knot_match.get("fiber"):
                                 knot_matched["fiber"] = expected_knot_match["fiber"]
@@ -2241,9 +2251,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         added_count += 1
                     else:
                         # Update brand/model in same section (for non-handle_knot entries)
+                        # Normalize None to _no_brand/_no_model for saving
+                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
+                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
                         matched = {
-                            "brand": actual_brand,
-                            "model": actual_model if actual_model else None,
+                            "brand": normalized_actual_brand,
+                            "model": normalized_actual_model,
                         }
 
                         # For blades, preserve format
@@ -2270,9 +2283,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     # by running the actual matcher. If actual_brand/actual_section are provided,
                     # use those. Otherwise, we can't auto-fix (should be filtered out in frontend)
                     if actual_brand and actual_section:
+                        # Normalize None to _no_brand/_no_model for saving
+                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
+                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
                         matched = {
-                            "brand": actual_brand,
-                            "model": actual_model if actual_model else None,
+                            "brand": normalized_actual_brand,
+                            "model": normalized_actual_model,
                         }
 
                         # For blades, preserve format
