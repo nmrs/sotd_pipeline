@@ -184,4 +184,7 @@ def test_aggregate_user_analysis_comment_urls():
 
     user_analysis = result["user1"]
     assert "comment_urls" in user_analysis
-    assert user_analysis["comment_urls"]["comment1"] == "https://reddit.com/r/wetshaving/comments/abc123/comment1"
+    assert (
+        user_analysis["comment_urls"]["comment1"]
+        == "https://reddit.com/r/wetshaving/comments/abc123/comment1"
+    )

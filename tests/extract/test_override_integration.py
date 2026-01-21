@@ -234,7 +234,10 @@ class TestOverrideIntegration:
             # Override should be applied because we're processing 2025-06
             assert result is not None
             assert "soap" in result
-            assert result["soap"]["normalized"] == "100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas on Fire"
+            assert (
+                result["soap"]["normalized"]
+                == "100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas on Fire"
+            )
             assert result["soap"]["overridden"] == "Normalized"
 
         finally:

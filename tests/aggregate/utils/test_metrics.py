@@ -98,9 +98,15 @@ class TestSoapMetrics:
         """Test that non-countable scents are excluded from unique soap counts."""
         records = [
             {"soap": {"matched": {"brand": "Brand1", "scent": "Scent1"}}},  # Countable (default)
-            {"soap": {"matched": {"brand": "Brand1", "scent": "Tri-Mix", "countable": False}}},  # Non-countable
+            {
+                "soap": {"matched": {"brand": "Brand1", "scent": "Tri-Mix", "countable": False}}
+            },  # Non-countable
             {"soap": {"matched": {"brand": "Brand2", "scent": "Scent2"}}},  # Countable (default)
-            {"soap": {"matched": {"brand": "Brand1", "scent": "Sample Mashup", "countable": False}}},  # Non-countable
+            {
+                "soap": {
+                    "matched": {"brand": "Brand1", "scent": "Sample Mashup", "countable": False}
+                }
+            },  # Non-countable
         ]
         result = calculate_unique_soaps(records)
         # Should only count Brand1-Scent1 and Brand2-Scent2 (2 unique)
@@ -118,8 +124,12 @@ class TestSoapMetrics:
     def test_calculate_unique_soaps_defaults_to_countable(self):
         """Test that scents without countable flag default to countable (True)."""
         records = [
-            {"soap": {"matched": {"brand": "Brand1", "scent": "Scent1"}}},  # No flag, should be countable
-            {"soap": {"matched": {"brand": "Brand1", "scent": "Scent2"}}},  # No flag, should be countable
+            {
+                "soap": {"matched": {"brand": "Brand1", "scent": "Scent1"}}
+            },  # No flag, should be countable
+            {
+                "soap": {"matched": {"brand": "Brand1", "scent": "Scent2"}}
+            },  # No flag, should be countable
         ]
         result = calculate_unique_soaps(records)
         # Both should be counted

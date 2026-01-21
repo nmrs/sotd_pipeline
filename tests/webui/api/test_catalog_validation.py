@@ -133,9 +133,7 @@ class TestCatalogValidation:
                             "astra green",
                             "astra platinum",
                         ],
-                        "Old Model Name": [  # This model was renamed
-                            "old model pattern"
-                        ],
+                        "Old Model Name": ["old model pattern"],  # This model was renamed
                     }
                 }
             }
@@ -249,13 +247,7 @@ class TestCatalogValidation:
     def test_brush_validation_with_complete_brush_section(self, tmp_path):
         """Test brush validation with complete brush section."""
         # Create brush data with complete brush section
-        brush_data = {
-            "brush": {
-                "Test Brand": {
-                    "Test Model": ["test brush pattern"]
-                }
-            }
-        }
+        brush_data = {"brush": {"Test Brand": {"Test Model": ["test brush pattern"]}}}
 
         # Create temporary correct_matches.yaml
         correct_matches_file = tmp_path / "correct_matches.yaml"
@@ -278,13 +270,7 @@ class TestCatalogValidation:
     def test_api_brush_validation_with_temp_data(self, tmp_path):
         """Test API brush validation with temporary correct_matches.yaml data."""
         # Create test brush data
-        test_brush_data = {
-            "brush": {
-                "Chisel & Hound": {
-                    "v26": ["chisel & hound v26", "c&h v26"]
-                }
-            }
-        }
+        test_brush_data = {"brush": {"Chisel & Hound": {"v26": ["chisel & hound v26", "c&h v26"]}}}
 
         # Create temporary correct_matches.yaml
         correct_matches_file = tmp_path / "correct_matches.yaml"
@@ -345,7 +331,10 @@ class TestCatalogValidation:
         test_brush_data = {
             "brush": {
                 "Chisel & Hound": {
-                    "v26": ["dinos'mores v27", "dinos mores v27"]  # Stored as v26 but pattern is v27
+                    "v26": [
+                        "dinos'mores v27",
+                        "dinos mores v27",
+                    ]  # Stored as v26 but pattern is v27
                 }
             }
         }
@@ -395,10 +384,6 @@ class TestCatalogValidation:
                 assert (
                     issue["stored_model"] == "v26"
                 ), f"Expected 'v26', got {issue['stored_model']}"
-
-        finally:
-            # Clean up
-            pass
 
     # This test has been removed as it tests webui API logic,
     # not core pipeline validation
@@ -482,8 +467,7 @@ class TestCatalogValidationIntegration:
         if response.status_code == 200:
             data = response.json()
             print(
-                f"API Response: {data['total_entries']} entries, "
-                f"{len(data['issues'])} issues"
+                f"API Response: {data['total_entries']} entries, " f"{len(data['issues'])} issues"
             )
 
             # API should return validation results
@@ -498,13 +482,7 @@ class TestCatalogValidationIntegration:
         # It will be skipped if not running in integration mode
 
         # Create test brush data
-        test_brush_data = {
-            "brush": {
-                "Chisel & Hound": {
-                    "v26": ["chisel & hound v26", "c&h v26"]
-                }
-            }
-        }
+        test_brush_data = {"brush": {"Chisel & Hound": {"v26": ["chisel & hound v26", "c&h v26"]}}}
 
         # Create temporary file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -674,13 +652,7 @@ class TestMoveCatalogEntries:
     def test_move_data_mismatch_entry(self, tmp_path):
         """Test moving a data_mismatch entry (updating brand/model in same section)."""
         # Create initial correct_matches data
-        initial_data = {
-            "razor": {
-                "Old Brand": {
-                    "Old Model": ["test razor pattern"]
-                }
-            }
-        }
+        initial_data = {"razor": {"Old Brand": {"Old Model": ["test razor pattern"]}}}
 
         correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
 
@@ -713,6 +685,7 @@ class TestMoveCatalogEntries:
 
         # Mock project_root to point to tmp_path
         import webui.api.analysis as analysis_module
+
         original_project_root = getattr(analysis_module, "project_root", None)
         analysis_module.project_root = tmp_path
 
@@ -750,16 +723,8 @@ class TestMoveCatalogEntries:
         """Test moving a structural_change entry from handle_knot to brush."""
         # Create initial correct_matches data with handle and knot entries
         initial_data = {
-            "handle": {
-                "Handle Brand": {
-                    "Handle Model": ["test brush pattern"]
-                }
-            },
-            "knot": {
-                "Knot Brand": {
-                    "Knot Model": ["test brush pattern"]
-                }
-            }
+            "handle": {"Handle Brand": {"Handle Model": ["test brush pattern"]}},
+            "knot": {"Knot Brand": {"Knot Model": ["test brush pattern"]}},
         }
 
         correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
@@ -799,6 +764,7 @@ class TestMoveCatalogEntries:
 
         # Mock project_root
         import webui.api.analysis as analysis_module
+
         original_project_root = getattr(analysis_module, "project_root", None)
         analysis_module.project_root = tmp_path
 
@@ -829,15 +795,7 @@ class TestMoveCatalogEntries:
     def test_move_blade_with_format_preservation(self, tmp_path):
         """Test moving a blade entry while preserving format information."""
         # Create initial correct_matches data
-        initial_data = {
-            "blade": {
-                "DE": {
-                    "Old Brand": {
-                        "Old Model": ["test blade pattern"]
-                    }
-                }
-            }
-        }
+        initial_data = {"blade": {"DE": {"Old Brand": {"Old Model": ["test blade pattern"]}}}}
 
         correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
 
@@ -870,6 +828,7 @@ class TestMoveCatalogEntries:
 
         # Mock project_root
         import webui.api.analysis as analysis_module
+
         original_project_root = getattr(analysis_module, "project_root", None)
         analysis_module.project_root = tmp_path
 
@@ -932,6 +891,7 @@ class TestMoveCatalogEntries:
 
         # Mock project_root
         import webui.api.analysis as analysis_module
+
         original_project_root = getattr(analysis_module, "project_root", None)
         analysis_module.project_root = tmp_path
 

@@ -185,6 +185,80 @@ class TestActualMatchingValidator:
         assert structural_issues[0].expected_section == "brush"
         assert structural_issues[0].actual_section == "handle_knot"
 
+    @patch("sotd.validate.actual_matching_validator.BrushMatcher")
+    def test_validate_brush_entry_handle_knot_mismatch(self, mock_brush_matcher_class):
+        """Test brush entry validation for handle_knot entries with knot mismatch."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "handle": {
+                "brand": "Dogwood",
+                "model": "Unspecified",
+            },
+            "knot": {
+                "brand": "Declaration Grooming",
+                "model": "B9A",  # Missing the + that should be in B9A+
+            },
+        }
+        mock_result.pattern = "exact_match"
+        mock_matcher.match.return_value = mock_result
+        mock_brush_matcher_class.return_value = mock_matcher
+
+        expected_data = {
+            "handle_maker": "Dogwood",
+            "handle_model": "Unspecified",
+            "knot_brand": "Declaration Grooming",
+            "knot_model": "B9A+",  # Expected B9A+ but got B9A
+        }
+        issues = self.validator._validate_brush_entry(
+            "dogwood handcrafts 26mm declaration b9a+",
+            expected_data,
+            "handle_knot",
+        )
+
+        assert len(issues) == 1
+        assert issues[0].issue_type == "data_mismatch"
+        assert issues[0].severity == "high"
+        assert issues[0].expected_knot_model == "B9A+"
+        assert issues[0].actual_knot_model == "B9A"
+
+    @patch("sotd.validate.actual_matching_validator.BrushMatcher")
+    def test_validate_brush_entry_handle_knot_no_brand_normalization(
+        self, mock_brush_matcher_class
+    ):
+        """Test that None and _no_brand are treated as equivalent for handle_knot entries."""
+        mock_matcher = Mock()
+        mock_result = Mock()
+        mock_result.matched = {
+            "handle": {
+                "brand": None,  # Matcher returns None for no brand
+                "model": "Unspecified",
+            },
+            "knot": {
+                "brand": None,  # Matcher returns None for no brand
+                "model": "Boar",
+            },
+        }
+        mock_result.pattern = "exact_match"
+        mock_matcher.match.return_value = mock_result
+        mock_brush_matcher_class.return_value = mock_matcher
+
+        # correct_matches uses _no_brand for entries without brands
+        expected_data = {
+            "handle_maker": "_no_brand",
+            "handle_model": "Unspecified",
+            "knot_brand": "_no_brand",
+            "knot_model": "Boar",
+        }
+        issues = self.validator._validate_brush_entry(
+            "my own brush with 20mm boar knot",
+            expected_data,
+            "handle_knot",
+        )
+
+        # Should have no issues since None and _no_brand are equivalent
+        assert len(issues) == 0
+
     @patch("sotd.validate.actual_matching_validator.RazorMatcher")
     def test_validate_simple_entry_no_match(self, mock_razor_matcher_class):
         """Test simple entry validation when no match is found."""

@@ -208,4 +208,7 @@ def test_aggregate_product_usage_comment_urls():
 
     product_analysis = result["razors"]["Gillette|Tech"]
     assert "comment_urls" in product_analysis
-    assert product_analysis["comment_urls"]["comment1"] == "https://reddit.com/r/wetshaving/comments/abc123/comment1"
+    assert (
+        product_analysis["comment_urls"]["comment1"]
+        == "https://reddit.com/r/wetshaving/comments/abc123/comment1"
+    )
