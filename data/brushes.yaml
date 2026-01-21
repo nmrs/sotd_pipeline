@@ -3121,6 +3121,10 @@ other_brushes:
     patterns:
       - turn.{1,5}shave
       - tns
+  Turtleship:
+    default: Synthetic
+    patterns:
+      - turtleship
   Van der Hagen:
     default: Boar
     patterns:

@@ -168,6 +168,7 @@ DE:
     - gillette 7 o'clock sharp (yellow)
     - gillette 7 o'clock sharp edge
     - gillette 7 o'clock sharp edge (yellow)
+    - gillette 7 o'clock sharp edge (yellows)
     - gillette 7 o'clock sharpe edge yellow
     - gillette 7 o'clock sharpedge
     - gillette 7 o'clock sharpedge (yellow)
@@ -1135,6 +1136,7 @@ DE:
     Stainless:
     - van der hagen
     - van der hagen - stainless
+    - van der hagen :(
     - van der hagen stainless
   Veesta:
     Ultra Platinum:
@@ -1222,6 +1224,7 @@ DE:
 FHS:
   Feather:
     FHS-1:
+    - feather - fhs 10 hi stainless
     - feather asd-10
     - feather fhs 10 hi stainless
     - feather fhs-10
@@ -1259,6 +1262,7 @@ GEM:
     - gem
     - gem - ptfe
     - gem accuforge
+    - gem accutec pro
     - gem accutec pro gem
     - gem blade
     - gem blade given to me by u/visceralwatch

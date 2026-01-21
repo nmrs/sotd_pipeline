@@ -12,6 +12,9 @@
     Estes:
       patterns:
       - 345.*estes
+    Fresh Cut Fade:
+      patterns:
+      - 345.*fresh cut fade
     Jet Setter:
       patterns:
       - 345.*jet setter
@@ -155,6 +158,9 @@ Adopted Acres:
     Cherry Barbershop:
       patterns:
       - adopted acres.*cherry barb
+    Imaginarium:
+      patterns:
+      - adopted.*imaginarium
     Mint Cherry Barbershop:
       patterns:
       - adopted acres.*mint cherry barb
@@ -264,6 +270,9 @@ Ariana & Evans:
     Emerald Moss:
       patterns:
       - emerald moss
+    Empyrean Bay Rum:
+      patterns:
+      - empyrean bay rum
     Forbidden Fruit:
       patterns:
       - (arian|a&e).*forb+id+en fruit
@@ -688,7 +697,7 @@ Barrister and Mann:
     Mûir(e) Wood:
       patterns:
       - m[uû]ir.*wood
-      - (barrister|\bb[&a\+]m\b).*wood$
+      - (barrister|\bb[&a\+]m\b).*\bwood\b$
     Night Music:
       patterns:
       - (barris|\bb ?(and|&|\+) ?m\b).*night music
@@ -746,6 +755,7 @@ Barrister and Mann:
       - barrister.*roam.*(2|II|two)?
       - roma two
       - roam two
+      wsdb_slug: barrister-and-mann-roam-soap
     Saeryan:
       patterns:
       - saeryan
@@ -933,6 +943,10 @@ Böker:
 Bricktown Grooming:
   patterns:
   - bricktown( grooming)?
+  scents:
+    No Quarter:
+      patterns:
+      - bricktown.*no quarter
 Brion:
   default format: Cream
   patterns:
@@ -1209,6 +1223,9 @@ Catie's Bubbles:
     Top of the World:
       patterns:
       - cat.*bub.*top.*world
+    Two to Mango:
+      patterns:
+      - two to mango
     Verdigris:
       patterns:
       - (catie|cb).*verdigris
@@ -1258,7 +1275,7 @@ Cella:
       - \bcella\b.*mandorla
     Aloe Vera:
       patterns:
-      - \bcella\b.*(?:aloe|bio|green)
+      - \bcella\b.*(?:aloe|bio|green|blue)
     Buongiorno al Sandalo:
       format: Cream
       patterns:
@@ -1504,6 +1521,10 @@ Cremo:
 Crowne & Crane:
   patterns:
   - crown.*crane
+  scents:
+    Rose on Fire:
+      patterns:
+      - crown.*rose on fire
 Cyril R. Salter:
   patterns:
   - cyril.*salter
@@ -1600,6 +1621,7 @@ Declaration Grooming:
     Cerberus:
       patterns:
       - cerberus
+      wsdb_slug: house-of-mammoth-cerberus-soap
     Chaipre:
       patterns:
       - (declaration|\bdg\b).*chaipre
@@ -1888,6 +1910,9 @@ Elysian:
     Green Fig:
       patterns:
       - elysia\w\b.*green fig
+    Shaved Ice:
+      patterns:
+      - elysia\w\b.*shaved ice
     Styx:
       patterns:
       - elysia\w\b.*styx
@@ -2095,6 +2120,12 @@ Gentleman's Nod:
     Musashi:
       patterns:
       - mush?ashi
+    Royale:
+      patterns:
+      - (gentlem|zaharof+).*royale
+    Sir Arthur:
+      patterns:
+      - gentlem.*sir arthur
     Tusitala:
       patterns:
       - gentlem.*tusitala
@@ -2187,6 +2218,9 @@ Grooming Dept:
     Aion:
       patterns:
       - grooming.*aion
+    After the Fire:
+      patterns:
+      - grooming.*after the fire
     Cascade:
       patterns:
       - grooming.*cascade
@@ -2243,6 +2277,12 @@ HAGS:
     Eulogy:
       patterns:
       - hags.*eulogy
+    Return of the Mean One:
+      patterns:
+      - hags.*return of the mean one
+    Return of the Mean One II:
+      patterns:
+      - hags.*return of the mean one (\bii\b|2|two)
     Ritual:
       patterns:
       - hags.*ritual
@@ -2303,6 +2343,9 @@ Hendrix Classics & Co:
       patterns:
       - hendrix classics(.*\bco.?)?.*magiq
       - hc&c.*magiq
+    Neon Moon:
+      patterns:
+      - (hendrix.*|hc&c).*neon moon
     Roasted:
       patterns:
       - hendrix classics(.*\bco.?)?.*roasted
@@ -2607,6 +2650,9 @@ KEPKINH:
   patterns:
   - ke[pr]k[in]+h
   scents:
+    Aroania:
+      patterns:
+      - kepkinh.*aroania
     Barbersoap:
       patterns:
       - kepkinh.*barber
@@ -2631,6 +2677,10 @@ Key West:
 Klar Seifen:
   patterns:
   - 'klar(?: seifen)?'
+  scents:
+    Kabinett:
+      patterns:
+      - klar.*kabinett
 Kupa:
   patterns:
   - (kупа|kupa)
@@ -2829,6 +2879,9 @@ MacDuff's Soap Company:
     Birth of the Cool:
       patterns:
       - birth of the cool
+    Cardamom Chai:
+      patterns:
+      - macduff.*cardamom.*chai
     Catalina:
       patterns:
       - macduff.*catalina
@@ -2883,6 +2936,10 @@ Mama Bear's Soaps:
     Haitian Vetyver:
       patterns:
       - mama bear.*haitian
+    Sample Mashup:
+      countable: false
+      patterns:
+      - mama bear.*tri-mix
 Mario Fissi:
   default format: Cream
   patterns:
@@ -3041,7 +3098,7 @@ Midnight & Two:
   - midnight.*two
 Miraculum:
   patterns:
-    - miraculum
+  - miraculum
   scents:
     Lider:
       patterns:
@@ -3157,8 +3214,8 @@ Musgo Real:
   scents:
     Classic Scent:
       patterns:
+      - musgo.*original
       - musgo.*classic
-      - musgo.*cream
 Mystic Water:
   patterns:
   - mystic water
@@ -3270,6 +3327,7 @@ Noble Otter:
       patterns:
       - (noble|no).*marbles
       - marbles.*noble
+      wsdb_slug: noble-otter-marbles-soap
     Monarch:
       patterns:
       - (noble|no).*monarch
@@ -3345,6 +3403,9 @@ Oaken Lab:
     Batavia Barber:
       patterns:
       - oaken.*batavia
+    Serious Moonlight:
+      patterns:
+      - oaken.*serious.*moonlight
 Oatcake:
   patterns:
   - oatcake
@@ -3412,6 +3473,10 @@ Oxyskin Cosmetics:
 Oz Shaving Co.:
   patterns:
   - oz shaving( co.?)?
+  scents:
+    Full Moon:
+      patterns:
+      - \boz\b.*full moon
 PAA:
   patterns:
   - phoenix.*ments
@@ -3492,6 +3557,10 @@ Pereira:
 Phoenix & Beau:
   patterns:
   - phoenix.*beau
+  scents:
+    Sanskrit:
+      patterns:
+      - phoenix.*sanskrit
 Pinnacle Grooming:
   patterns:
   - pinnacle grooming
@@ -3841,6 +3910,9 @@ Siliski Soaps:
     Apothecary Cellars:
       patterns:
       - siliski.*apothecary cellars
+    Internal Calamity:
+      patterns:
+      - siliski.*internal calamity
     Unscented:
       patterns:
       - siliski.*unscented
@@ -3854,6 +3926,9 @@ Soap Commander:
   patterns:
   - soap commander
   scents:
+    Charisma:
+      patterns:
+      - soap commander..*charisma
     Endurance:
       patterns:
       - soap commander.*endurance
@@ -4366,7 +4441,7 @@ Stirling Soap Co.:
       - stirling noir
     Stirling One:
       patterns:
-      - st[ie]rling.*one
+      - st[ie]rling.*\bone\b
     Stirling Spice:
       patterns:
       - stirling.*spice
@@ -4438,6 +4513,9 @@ Strike Gold Shave:
     Grant:
       patterns:
       - strike ?gold.*grant
+    Hoover:
+      patterns:
+      - strike.*hoover
     Jelly Rings:
       patterns:
       - strike.*jelly ring
@@ -4671,6 +4749,9 @@ Talent Soap Factory:
     Gato Laranja:
       patterns:
       - gato [nl]aranja
+    Gilmore:
+      patterns:
+      - (talent|tsf).*gilmore
     Hystrix Citrus:
       patterns:
       - (talent|tsf).*hystrix
@@ -4830,7 +4911,7 @@ Tcheon Fung Sing:
       - tcheon.*torino
 The American Gentleman:
   patterns:
-    - (the )?american gentleman( soap( (co\.?(mpany)?)?)?)?
+  - (the )?american gentleman( soap( (co\.?(mpany)?)?)?)?
   scents:
     Honey & Leather:
       patterns:
@@ -4911,6 +4992,9 @@ The Goodfellas' Smile:
     Abysso:
       patterns:
       - \babysso\b
+    Chronos:
+      patterns:
+      - goodfella.*chronos
     Orange Empire:
       patterns:
       - orange empire
@@ -4949,6 +5033,9 @@ The Los Angeles Shaving Soap Company:
     Topanga Fougère:
       patterns:
       - ^(?!.*(chis|cf)).*topanga foug
+    Vert Noir:
+      patterns:
+      - (\bla\b|los angeles).*vert noir
 The Razor Company:
   patterns:
   - the razor company
@@ -5295,6 +5382,9 @@ Wholly Kaw:
     Rebelle:
       patterns:
       - \bkaw\b.*rebelle
+    Timmerman Red Label 1869:
+      patterns:
+      - timmerman.*red
     Valentynka:
       patterns:
       - valentynka
@@ -5319,6 +5409,13 @@ Wild Stone:
 Wilkinson Sword:
   patterns:
   - wilk.*sword
+  scents:
+    Black:
+      patterns:
+      - wilk.*black
+    Blue:
+      patterns:
+      - wilk.*blue
 Williams:
   patterns:
   - williams
@@ -5328,6 +5425,7 @@ Williams:
       - william'?s.*mug
       - williams shave soap
       - ^williams$
+      wsdb_slug: williams-mug-soap-soap
     Tonsorial:
       patterns:
       - william'?s.*tonso
@@ -5456,6 +5554,9 @@ Zingari Man:
     The Royal:
       patterns:
       - zingari.*royal
+    The Stargazer:
+      patterns:
+      - zingari.*stargazer
     The Traditionalist:
       patterns:
       - (zingari|romani|y).*traditionalist

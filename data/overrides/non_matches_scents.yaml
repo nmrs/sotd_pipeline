@@ -22,17 +22,42 @@ Antica Barbieria Colla:
   Almond Oil:
   - Sandalo Rosso
 Ariana & Evans:
+  Agarwood:
+  - Lavender and Wood
+  - Sandalwood
+  - Wood and Lavender
+  Amber Rose:
+  - Emerald Moss
   Bahian Leather:
   - Corinthian Leather
+  Baklava:
+  - Black
   Barbiere Classico:
   - Barbiere Sofisticato
   Barbiere di Famiglia - Trastevere:
   - Barbiere di Famiglia Christmas
+  Bhang:
+  - Boca Negra
+  Black:
+  - Legacy
   Boca Negra:
   - Boo
+  El Gaucho:
+  - Legacy
+  Emerald Moss:
+  - Mimosa & Melon
+  - Pamplemousse
+  Incense & Oud:
+  - Talc & Lavender
   Kaizen:
   - Khalifa
+  Latte e Menta:
+  - Tibetan Temple
+  Lavender Noir:
+  - Never Alone
+  - Wood and Lavender
   Lavender and Wood:
+  - Lavender Noir
   - Talc & Lavender
   Never Alone:
   - Never Alone 5
@@ -43,6 +68,7 @@ Ariana & Evans:
   Spartacus:
   - St. Barts
   Talc & Lavender:
+  - Vanille Vendetta
   - Wood and Lavender
   Vanille de Tabac:
   - Vanille Vendetta
@@ -68,6 +94,8 @@ Barrister and Mann:
   - Adagio
   Adagio:
   - Adumbrare
+  Amazelnut:
+  - Samhain
   Classic:
   - Clusterfig
   Diamond:
@@ -89,16 +117,25 @@ Barrister and Mann:
   - Kalyptos
   Latha Limon:
   - Latha Original
+  - Samhain
   Lavanille:
   - Lavender
   Lavender:
   - Laviathan
   Le Grand Chypre:
   - Le Petit Chypre
+  Leviathan:
+  - Samhain
   Lime:
+  - Limon
   - Lyssa
+  - Solstice
   Lyssa:
   - Marilyn
+  Marilyn:
+  - Samhain
+  Osmanthus:
+  - Samhain
   Petrichor:
   - Presto
   Presto:
@@ -107,6 +144,11 @@ Barrister and Mann:
   - Ravish
   Saeryan:
   - Saguesera
+  - Samhain
+  Samhain:
+  - Solarion
+  Season of the Witch:
+  - 'The Four Horsemen: War'
   'The Four Horsemen: Famine':
   - 'The Four Horsemen: Plague'
   'The Four Horsemen: Plague':
@@ -132,6 +174,11 @@ Castle Forbes:
   Lavender Essential Oil:
   - Lime Essential Oil
 Catie's Bubbles:
+  Blugère:
+  - Crangère
+  Crangère:
+  - Pomander
+  - Retreat
   Dranks:
   - Dusk
   Inspirazione Di Parma:
@@ -147,6 +194,10 @@ Catie's Bubbles:
   - Maggards MeetUp 2025
   Reflection:
   - Revolution
+Cella:
+  Aloe Vera:
+  - Cella
+  - Milano Crema Da Barba
 Chicago Grooming Co.:
   Armonía:
   - Bonaire
@@ -166,6 +217,18 @@ Col. Ichabod Conk:
   - Amber
   Amber:
   - Bay rum
+Cremo:
+  Classic Citrus (Original):
+  - Sage & Citrus
+Crowne & Crane:
+  Caribbean Spice:
+  - Green Tea
+  Deep Ellum:
+  - Green Tea
+  Green Tea:
+  - Rose Garden
+  - Rose on Fire
+  - Venetian Bellini
 Declaration Grooming:
   Bandwagon:
   - Bangarang
@@ -187,6 +250,8 @@ Elysian:
   Atlantis Blue:
   - Atlantis Deep
 Gentleman's Nod:
+  Sidama:
+  - Tusitala
   Zaharoff Signature:
   - Zaharoff Signature Rosé
 Geo. F. Trumper:
@@ -201,10 +266,28 @@ Hendrix Classics & Co:
   Year of the Dragon:
   - Year of the Snake
 House of Mammoth:
+  Alive:
+  - Dammusi
+  Cerberus:
+  - Dammusi
+  Cirrus:
+  - Dammusi
   Clean:
   - Cookie
   Dammusi:
   - Damocles
+  - Fu Dao
+  - Iced Tea
+  - Indonesian Leather
+  - JARVIS
+  - Marine
+  - Misfit
+  - Mood Indigo
+  - Sandalorian
+  - Shire
+  - Smash
+  - Snippid
+  - Uitwaaien
   Shire:
   - Smash
   Snippid:
@@ -234,6 +317,9 @@ MacDuff's Soap Company:
 Master Soap Creations:
   Frosted Bay Rum:
   - Frosted Lavender
+Moon Soaps:
+  Havana:
+  - Koa Mahina
 Murphy and McNeil:
   Barbershop de Los Muertos 2:
   - Barbershop de Los Muertos 3
@@ -245,6 +331,8 @@ Noble Otter:
   - Bare
   Bare:
   - Barrbarr
+  Nectar Amissa:
+  - Sanctum
   Rainroot:
   - Rawr
 Pannacrema:
@@ -263,6 +351,16 @@ Southern Witchcrafts:
   Gravefruit (with APR):
   - Gravefruit II
 Spearhead Shaving Company:
+  Ardennes:
+  - Seaforth! Roman Spice
+  Barbershop:
+  - Seaforth! Roman Spice
+  Bergamot & Sandalwood:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Cedar, Clarysage, Bergamot:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
   Experimental 17.3:
   - Experimental 18.1
   - Experimental 19.1
@@ -272,10 +370,40 @@ Spearhead Shaving Company:
   - Experimental 20.1
   Experimental 20.1:
   - Experimental 22.1
+  Friseur:
+  - Seaforth! Roman Spice
+  Lavender & Tonka:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Lavender & Vanilla:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Nutmeg & Heliotrope:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Oakmoss & Sandalwood:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
   Seaforth! 3 Scots:
   - Seaforth! Black Watch
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Seaforth! Black Watch:
+  - Seaforth! Leather
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Seaforth! Fleur de France:
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
   Seaforth! Heather:
   - Seaforth! Leather
+  - Seaforth! Leather (r/wetshaving exclusive)
+  - Seaforth! Roman Spice
+  Seaforth! Leather (r/wetshaving exclusive):
+  - Seaforth! Sea Ice Lime
+  - Seaforth! Sea Spice Lime
+  - Seaforth! Spiced
+  - Silver
   Seaforth! Roman Spice:
   - Seaforth! Sea Ice Lime
   - Seaforth! Sea Spice Lime
@@ -287,26 +415,54 @@ Spearhead Shaving Company:
 Stirling Soap Co.:
   Agar:
   - Alighieri
+  Almond:
+  - Falkor
+  Baker Street:
+  - Seine Reserve
   Bay Laurel:
   - Bay Rum
   Black Cherry:
   - Black Ice
   Bonafide:
   - Bonaparte
+  Dirty South Shavers:
+  - I, Rich Moose (r/wetshaving exclusive)
   Duchess:
   - Duke
   Duke:
   - Dunshire
   Electric Sheep:
   - Glacial Electric Sheep
+  - Seine Reserve
+  Evergreen forest:
+  - Seine Reserve
+  Evie:
+  - Seine Reserve
+  Frankincense & Myrrh:
+  - Friends to the End
+  - I, Rich Moose (r/wetshaving exclusive)
+  Friends to the End:
+  - Gin & Tonic
+  - Gin & Tonic on the Rocks
+  Gin & Tonic on the Rocks:
+  - I, Rich Moose (r/wetshaving exclusive)
+  Gingerbread Man:
+  - Intrepid Man
+  - Island Man
+  - Wintergreen
   Glacial Lemon Chill:
   - Lemon Chill
+  I, Rich Moose (r/wetshaving exclusive):
+  - Unscented with Beeswax
+  - Unscented with Menthol
   Intrepid Man:
   - Island Man
   Lavender:
   - Lavender Sage
   Oud Sigma:
   - Outdoor Man
+  Seine Reserve:
+  - Stirling Green
   Stirling Black:
   - Stirling Blu
   - Stirling Spice
@@ -344,10 +500,15 @@ Summer Break Soaps:
 Talent Soap Factory:
   2 Deer:
   - 2nd Wind
+  Art Loeb:
+  - Love, Betty
   Banana:
   - Banana Kush
   Froggr:
   - Fuzz
+  Gilmore:
+  - Lemon
+  - Nevermore
   Liberty:
   - Lionheart
   Sage:
@@ -357,21 +518,64 @@ Tallow + Steel:
   - Maya
   Rainforest:
   - Rainforest Two
+Tcheon Fung Sing:
+  Granducato Toscano:
+  - Mandarino Tachibana
+Test Brand:
+  Test Scent A:
+  - Test Scent B
 Through the Fire Fine Craft:
+  Birch Forest:
+  - First Born
   Ignite:
   - M
+  - Sunsite
+  Steel:
+  - Sunsite
+Wholly Kaw:
+  Aranceto:
+  - Dance of Agrumes
 Xabons Xavieiro:
   Koko Nudo:
   - Outono
 Zingari Man:
+  El Cantinero:
+  - The Mariner
+  - The Merchant
+  - Wanderer
   The Amir:
   - The Mariner
   - The Rambler
+  The Distiller:
+  - The Essentials
+  - The Explorer
+  - The Healers
+  - The Mariner
+  - The Muse
+  - The Navigator
+  - The Rambler
+  - The Seafarer
+  - The Socialite
+  - The Soloist
+  The Gent:
+  - The Highlander
+  - The Stargazer
+  The Healers:
+  - The Highlander
+  - The Stargazer
+  The Highlander:
+  - The Mariner
+  - The Navigator
+  - The Rambler
   The Mariner:
   - The Master
+  - The Stargazer
   The Master:
   - The Muse
+  The Navigator:
+  - The Stargazer
   The Rambler:
   - The Royal
+  - The Stargazer
   The Seafarer:
   - The Stargazer

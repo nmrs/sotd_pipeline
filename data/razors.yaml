@@ -1061,7 +1061,7 @@ Gillette:
       - ^king c.? gillette.*
       - king.*gil.*et
       - gil.*et.*king(.*c)?
-      - kc gill
+      - k ?c gill
   Knack:
     patterns:
       - Gil.*et.*knack

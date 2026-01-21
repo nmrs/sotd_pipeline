@@ -21,6 +21,7 @@ Above the Tie:
   H1:
   - att h1 with bamboo handle
   H2:
+  - att colossus h2
   - att h2
   - att h2 with bamboo handle
   M2:
@@ -29,9 +30,11 @@ Above the Tie:
   R1:
   - att calypso r1
   - att colossus r1
+  - att kronos r1
   - att r1 calypso
   - att s1 on mr11
   R2:
+  - att colossus r2
   - att oc r2
   - att r2 - gsb
   - att r2 with bamboo handle
@@ -48,10 +51,13 @@ Above the Tie:
   - att s1 slant
   - att s1 ss oc slant
   - att s1 w atlas handle
+  - att s1 with atlas handle
   S2:
+  - above the tie s2
   - above the tie s2 slant
   SE1:
   - above the tie se1
+  - att aluminium se1
   - att calypso se1
   - att se1
   SE2:
@@ -73,7 +79,10 @@ Adopted Acres:
   - adopted acres chisel plow scalloped
 Ale Razors:
   Straight:
+  - ale 13/16 kamisori-style
   - ale 7/8 full hollow spanish point
+  - ale kamisori style 13/16
+  - ale kamisori-style 13/16
   - ale razors 8/8
   - ale razors 8/8 barber's notch
   - ale razors 8/8 near half hollow barber's notch
@@ -251,10 +260,12 @@ Baili:
   TTO:
   - baili br177
   - baili br179
+  - baili butterfly
   - baili chrome br179
   - baili tto
 Bakelite:
   Slant:
+  - bakelite slant
   - fasan - bakelite slant
 Bambaw:
   Safety Razor:
@@ -293,6 +304,7 @@ Blackland:
   - blackbland blackbird ti
   - 'blackland - batch #003 (aluminum blackbird)'
   - blackland - batch#003
+  - blackland - batch#003(aluminium blackbird)
   - blackland - blackbird
   - blackland - blackbird - lite
   - blackland - blackbird and van der hagen - traditional safety razor
@@ -331,6 +343,7 @@ Blackland:
   - blackland blackbird lite plate (ss)
   - blackland blackbird lite ss
   - blackland blackbird lite ss / gillette silver blue
+  - blackland blackbird machined ss
   - blackland blackbird oc
   - blackland blackbird ss
   - blackland blackbird stainless
@@ -352,6 +365,7 @@ Blackland:
   - blackland razors blackbird ti
   - blackland ss
   - blackland tibird
+  - blackland titanium blackbird
   - brass blackbird
   - brassbird
   - polished brassbird oc
@@ -496,13 +510,18 @@ Böker:
   - boker "h boker & tree brand" 8/8 hollow ground razor
   - boker & co tree brand 8/8
   - boker 226 our own - full hollow - square point - 11/16
+  - boker 5/8
+  - boker 5/8 pearl scale tang
   - boker 6/8 curly birch
   - boker damascus - magnetic steel - 6/8 square point
   - boker inox extra-full hollow 5/8
   - boker no.1056 - dreadnought point - full hollow - 5/8
   - boker no.1056 - full hollow - dreadnought point - 5/8
+  - boker the celebrated 5/8 bocote
+  - boker the celebrated 5/8 bocote scales
   - boker the celebrated curly birch - full hollow - square point - 6/8
   - boker the celebrated wenge
+  - boker the celebrated wenge 6/8 square point straight razor
   - boker, the celebrated curly birch 6/8
   - böker - 14er (8/8", extra hollow, carbon steel, square point)
   - böker - custom designed böker 6 /8 with bog oak scale and french head
@@ -537,6 +556,7 @@ C.V. Heljestrand:
   Straight:
   - c. v. heljestrand mk no 31 (square point, full hollow, 5/8", carbon steel)
   - c.v. heljestrand - mk 32
+  - c.v. heljestrand - mk 7 5/8
   - c.v. heljestrand lather catcher
   - c.v. heljestrand mk 10 13/16 half hollow square point
   - c.v. heljestrand mk 31 11/16 söderfors extra specialstål full hollow
@@ -656,11 +676,14 @@ Caveem:
 Charcoal Goods:
   Everyday:
   - cg everyday
+  - charcoal goods - everyday (brass)
   - charcoal goods - everyday razor
   - charcoal goods - gen 3 everyday
   - charcoal goods - gen 3 everyday razor hammered handle
   - charcoal goods brass everyday w/ polsilver si
   - charcoal goods everyday
+  - charcoal goods everyday head and brass bod
+  - charcoal goods everyday head/brass bod
   - charcoal goods everyday razor
   - charcoal goods ss everyday on stinger v1
   - everday - charcoal goods
@@ -677,8 +700,10 @@ Charcoal Goods:
   - cg lvl 2 straight bar
   - cg lvl2 stinger
   - cg maze with level 2 plate
+  - charcoal goods - level 2 - sb
   - charcoal goods - maze - level 2
   - charcoal goods brass level 2
+  - charcoal goods brass stinger v1
   - charcoal goods chiselled level 2
   - charcoal goods gen 1 lvl 2 stinger
   - charcoal goods gen 2 lvl 2 copper
@@ -686,6 +711,7 @@ Charcoal Goods:
   - charcoal goods level 2
   - charcoal goods level 2 (gen.3) torpedo
   - charcoal goods level 2 (gen.3) torpedo handle
+  - charcoal goods level 2 brass
   - charcoal goods level 2 with stinger handle
   - charcoal goods level 2, sb, copper w/ hammered handle
   - charcoal goods lv2 dual comb antique brass
@@ -695,7 +721,9 @@ Charcoal Goods:
   - charcoal goods lvl ii ss on triad aristocrat handle
   - charcoal goods lvl ii ss on triad aristocrat ss handle
   - charcoal goods lvl ii with triad aristocrat handle
+  - charcoal goods lvl2 (copper)
   - charcoal goods maze with level 2 plate
+  - charcoal goods ss level 2
   - charcoal goods stinger v1
   - charcoal goods v2
   - charcoal goods victoria
@@ -704,12 +732,14 @@ Charcoal Goods:
   - charcoal goods - gen 1 level 3
   - charcoal goods - gen 3 level 3
   - charcoal goods - lvl 3
+  - 'charcoal goods custom "thor" #19 level 3 sb brass razor'
 Charlex:
   Straight:
   - '''charlex'' 5/8" bone scales'
   - '''charlex'' 5/8" straight rescaled with bone'
   - '''charlex'' 5/8" straight with recycled bone scales'
   - charlex 5/8" straight
+  - charlex 5/8" straight bone scales
   - charlex 5/8" straight with bone scales
 Chisel & Hound:
   Briar Brushworks Collab Slim:
@@ -1367,10 +1397,12 @@ Gillette:
   - gillette new aristocrat super adjustable (p1)
   Diplomat:
   - 1955 gillette diplomat
+  - 1956 gillette diplomat
   - gillette diplomat
   Fatboy:
   - '''59 gillette fat boy'
   - 1960 f2 gillette fatboy
+  - 1960 f4 gillette fatboy
   - 1960 fatboy
   - 1960 gillette fatboy
   - 1960 gillette fatboy adjustable (setting 4)
@@ -1425,6 +1457,7 @@ Gillette:
   - gillette king c
   - gillette king c gillette
   - gillette king c gillette on barbaros levened handle
+  - k c gillette
   - kc gillette
   - kc gillette w/ razorock mission base plate
   - kc gillette w/ razorock mission baseplate
@@ -1448,6 +1481,7 @@ Gillette:
   - gillette knack (1968)
   Lady Gillette:
   - '''67 lady gillette (blue)'
+  - blue lady gillette
   - gillette - 1966 lady gillette
   - gillette lady gillette (blue)
   - lady gillette (g2) blue starburst
@@ -1588,6 +1622,7 @@ Gillette:
   - 1968 super adjustable "super 109"(black beauty)
   - 1969-1975 super adjustable "super 109"(black beauty)
   - 1979 gillette super adjustable z-1
+  - 1979 z1 gillette super adjustable
   - 1982 gillette black beauty 109 pd
   - gillete super adjustable
   - gillette - black beauty adjustible - long handle
@@ -1649,9 +1684,11 @@ Gillette:
   - 1968 gillette super speed silver tip (first use!)
   - 1969 super speed
   - 1985 gillette super speed black handle
+  - 67 gillette super speed
   - black handled super speed
   - black tip superspeed
   - blue tip ss
+  - british gillette red tip
   - english gillette rocket 1953
   - gilette rocket c.1949
   - gillete rocket c.1949
@@ -1665,6 +1702,7 @@ Gillette:
   - gillette - black tip
   - gillette - black tip x2
   - gillette - blacktip
+  - gillette - blacktip 1952
   - gillette - blacktip superspeed 1952
   - gillette - blacktip x2
   - gillette - blue tip
@@ -1790,6 +1828,7 @@ Gillette:
   - 1938-1945 fat handle gillette tech
   - 1938-1945 gillette fat handle tech
   - 1938-1945 gillette tech
+  - 1940 gilette tech bakelite
   - 1949-50 gillette tech ball end, gold
   - 1950s gillette tech
   - 1951ish gillette featherweight ball end tech
@@ -1804,7 +1843,9 @@ Gillette:
   - 1967 gillette travel tech (m3)
   - 1980 gillette tech ball end
   - 1980's gillette british armed forces falkland war spiral tech
+  - british aluminum handle gillette tech
   - british aluminum handle gillette tech a1
+  - british aluminum handle tech (1980)
   - british aluminum handle tech minus the base plate
   - brittish alluminum handle gillette tech
   - english flat bottom tech
@@ -2181,6 +2222,7 @@ J.A. Henckels:
   - henckels friodur 472 13/16 full hollow on weru burl scales by muninn woodworks
   - henckels friodur 472 13/16 with muninn woodworks scales
   - henckels friodur 472 13/16 with weru burl scales by muninn woodworks
+  - henckels friodur 72-v
   - henckles - friodur 70 1/2, 5/8" round tip half hollow
   - 'j.a. henckels friodur #17'
   - 'j.a. henckels friodur #472'
@@ -2340,6 +2382,7 @@ Karve:
   - brass karve sb-b
   - carve cb
   - cb karve brass sb d
+  - cb karve c plate
   - christopher bradley b sb al plate - maggard handle
   - karve "christopher bradley" brass | 3.25" handle, oc-b plate
   - karve "christopher bradley" brass | 3.25" handle, sb-b plate
@@ -2613,6 +2656,8 @@ Leaf:
   Thorn:
   - leaf thorn
   Twig:
+  - broman/leaf/twig/ fd r50
+  - broman/leaf/twig/r48
   - leaf twig
 Lee Mfg Co.:
   Straight:
@@ -2741,6 +2786,7 @@ Maxwell June:
   - mj double edge
 Merkur:
   15C:
+  - merkur 15c
   - merkur 15c oc
   23C:
   - merker 23c
@@ -2902,6 +2948,7 @@ OliWorks:
   - oliworks m3teorite aluminum (aggressive plate)
   - oliworks m3teorite aluminum (medium plate)
   - oliworks m3teorite aluminum (mild plate)
+  - oliworks m3teorite aluminum aggressive plate
   - oliworks m3teorite plate 1
   - oliworks m3teorite ss
   - oliworks m3teorite stainless
@@ -2932,10 +2979,7 @@ Other DE Clone:
     - schone open comb [fatip near-clone]
 Other Kamisori:
   ? ''
-  : - ale 13/16 kamisori-style
-    - ale kamisori style 13/16
-    - ale kamisori-style 13/16
-    - nobles nobles folding kamisori
+  : - nobles nobles folding kamisori
     - osho kamisori
     - wood handle black kamisori
 Other Shavette:
@@ -3007,10 +3051,12 @@ Other Straight Razor:
     - best solingen 6/8 hollow round point
     - bowdin's wedge
     - bowdins wedge razor
+    - buck salient 6/8
     - celebrated razor - sheffield
     - celebrated wedge - no maker indicated
     - chas r coates & sons trade mark - extra hollow - square point - 6/8
     - chip-a-way razor - custom wood scales
+    - chip-a-way with wood scales
     - coma - the barber - half hollow - round point - 13/16
     - coma the barber - half hollow - french point - 13/16
     - coma the barber - half hollow - round point - 13/16
@@ -3409,6 +3455,7 @@ RazoRock:
   - rr game changer
   - rr game changer .68
   - rr game changer .84
+  - rr game changer 84
   - rr gamechanger 0.84p
   - rr gc .68-r
   - rr gc .84
@@ -3668,6 +3715,7 @@ Rockwell:
   - rockwell 6s (r6 plate)
   - rockwell 6s (r6)
   - 'rockwell 6s - #4'
+  - rockwell 6s - plate 5
   - rockwell 6s - r3
   - rockwell 6s - r6
   - rockwell 6s 4 plate
@@ -4151,6 +4199,7 @@ Utica Knife & Razor Co.:
 Valet:
   Autostrop:
   - valet - autostrop
+  - valet - vc3 (1935 -40)
   - valet auto strop
   - valet autostrop razor vb1
   - valet vc3 (1935-40)
@@ -4402,6 +4451,7 @@ Wolfman:
   - wolfman titanium guerrilla (.54mm sb)
   - wolfman titanium guerrilla (.69mm sb)
   WR1:
+  - antique bronze wolfman wr1 .74
   - wolfman - wr1 .68 dc (aluminum)
   - wolfman - wr1 .68 dc / wrh7 (aluminum)
   - wolfman - wr1 solid bar .46
@@ -4424,6 +4474,7 @@ Wolfman:
   - 1.15oc/1.25sb wr2 on wrh7
   - wolfman - aluminum w2 .68 dc
   - wolfman - aluminum wr2 - .95
+  - wolfman - aluminum wr2 - .95mm
   - wolfman - aluminum wr2 - 1.25
   - wolfman - aluminum wr2 - 1.25mm
   - wolfman - aluminum wr2 - 1.55mm
