@@ -1006,12 +1006,16 @@ class ActualMatchingValidator:
                 for batch in worker_batches
             }
 
-            # Collect results as they complete
+            # Collect results in submission order for deterministic ordering
+            # Store results with their batch index to maintain order
+            batch_results = {}
             for future in as_completed(future_to_batch):
                 batch = future_to_batch[future]
                 try:
                     batch_issues = future.result()
-                    all_issues.extend(batch_issues)
+                    # Find the batch index to maintain submission order
+                    batch_index = worker_batches.index(batch)
+                    batch_results[batch_index] = batch_issues
                 except Exception as e:
                     logger.error(f"Error processing batch: {e}")
                     # Continue processing other batches even if one fails
@@ -1019,6 +1023,10 @@ class ActualMatchingValidator:
                     brush_strings = [entry[0] for entry in batch]
                     logger.error(f"Failed batch contained {len(brush_strings)} entries")
                     raise
+
+            # Combine results in submission order
+            for i in sorted(batch_results.keys()):
+                all_issues.extend(batch_results[i])
 
         return all_issues
 
@@ -1385,7 +1393,9 @@ class ActualMatchingValidator:
                         f"Using sequential processing for {len(brush_string_locations)} brush entries"
                     )
                     sequential_start = time.time()
-                    for brush_string, locations in brush_string_locations.items():
+                    # Sort brush_string_locations items for deterministic ordering
+                    sorted_brush_strings = sorted(brush_string_locations.items(), key=lambda x: x[0].lower())
+                    for brush_string, locations in sorted_brush_strings:
                         # Determine expected structure based on locations
                         expected_section = self._determine_expected_section(locations)
                         expected_data = self._build_expected_data(
@@ -1582,6 +1592,13 @@ class ActualMatchingValidator:
                     and issue.correct_match.lower() in structural_change_patterns
                 )
             ]
+
+            # Sort issues deterministically to ensure consistent ordering
+            # Sort by: issue_type (for grouping), then correct_match (for stable ordering)
+            filtered_issues.sort(key=lambda issue: (
+                issue.issue_type,
+                issue.correct_match.lower(),
+            ))
 
             # Update performance metrics
             field_metrics = {
