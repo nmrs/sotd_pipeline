@@ -464,6 +464,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
     """
     phase_modules = {
         "fetch": "sotd.fetch.run",
+        "fetch_json": "sotd.fetch_via_json.run",  # JSON-based fetch (no PRAW dependency)
         "extract": "sotd.extract.run",
         "match": "sotd.match.run",
         "enrich": "sotd.enrich.run",
@@ -547,17 +548,51 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
             print(f"[DEBUG] {phase} phase args: {phase_args}")
 
         # Capture stdout during phase execution
+        # For fetch_json phase, use Tee-like stdout to show output in real-time
+        # while still capturing it for final output
         output_buffer = io.StringIO()
-        try:
-            with redirect_stdout(output_buffer):
+        
+        if phase == "fetch_json":
+            # Create a Tee-like stdout that writes to both buffer and real stdout
+            class TeeStdout:
+                def __init__(self, buffer: io.StringIO, real_stdout: Any):
+                    self.buffer = buffer
+                    self.real_stdout = real_stdout
+                
+                def write(self, s: str) -> int:
+                    # Write to both buffer and real stdout immediately
+                    self.buffer.write(s)
+                    self.real_stdout.write(s)
+                    self.real_stdout.flush()  # Flush immediately for real-time output
+                    return len(s)
+                
+                def flush(self) -> None:
+                    self.buffer.flush()
+                    self.real_stdout.flush()
+            
+            original_stdout = sys.stdout
+            try:
+                sys.stdout = TeeStdout(output_buffer, original_stdout)
                 # Run the phase with filtered arguments and capture exit code
                 exit_code = module.main(phase_args)
                 exit_code = exit_code if exit_code is not None else 0
-        finally:
-            # Always restore stdout and get captured output
-            captured_output = output_buffer.getvalue()
-            # Print captured output to maintain normal behavior
-            print(captured_output, end="")
+            finally:
+                # Restore original stdout
+                sys.stdout = original_stdout
+                # Get captured output (already printed, but keep for consistency)
+                captured_output = output_buffer.getvalue()
+        else:
+            # For other phases, use standard buffered capture
+            try:
+                with redirect_stdout(output_buffer):
+                    # Run the phase with filtered arguments and capture exit code
+                    exit_code = module.main(phase_args)
+                    exit_code = exit_code if exit_code is not None else 0
+            finally:
+                # Always restore stdout and get captured output
+                captured_output = output_buffer.getvalue()
+                # Print captured output to maintain normal behavior
+                print(captured_output, end="")
 
         return (exit_code, captured_output)
 
@@ -672,15 +707,18 @@ def get_phase_range(phase_range: str) -> List[str]:
     Returns:
         List of phases to run in order
     """
+    # Normal phases for regular operations (fetch_json excluded - it's a fallback only)
     all_phases = ["fetch", "extract", "match", "enrich", "aggregate", "report"]
+    # All available phases including fetch_json (for explicit use)
+    all_available_phases = ["fetch", "fetch_json", "extract", "match", "enrich", "aggregate", "report"]
 
     if not phase_range:
         return all_phases
 
     if ":" not in phase_range:
-        # Single phase
-        if phase_range not in all_phases:
-            raise ValueError(f"Invalid phase: {phase_range}. Valid phases: {', '.join(all_phases)}")
+        # Single phase - allow fetch_json if explicitly specified
+        if phase_range not in all_available_phases:
+            raise ValueError(f"Invalid phase: {phase_range}. Valid phases: {', '.join(all_available_phases)}")
         return [phase_range]
 
     # Parse range
@@ -695,39 +733,58 @@ def get_phase_range(phase_range: str) -> List[str]:
     if not start_phase and not end_phase:
         return all_phases
 
+    # Determine which phase list to use based on whether fetch_json is explicitly requested
+    # If fetch_json is in the range, use all_available_phases, otherwise use all_phases
+    use_fetch_json = (start_phase == "fetch_json" or end_phase == "fetch_json")
+    phases_for_range = all_available_phases if use_fetch_json else all_phases
+
     if not start_phase:
         # :phase - from beginning to phase
-        if end_phase not in all_phases:
+        if end_phase not in phases_for_range:
             raise ValueError(
-                f"Invalid end phase: {end_phase}. Valid phases: {', '.join(all_phases)}"
+                f"Invalid end phase: {end_phase}. Valid phases: {', '.join(phases_for_range)}"
             )
-        end_idx = all_phases.index(end_phase)
-        return all_phases[: end_idx + 1]
+        end_idx = phases_for_range.index(end_phase)
+        result = phases_for_range[: end_idx + 1]
+        # Remove fetch_json from result unless it was explicitly requested
+        if end_phase != "fetch_json" and "fetch_json" in result:
+            result = [p for p in result if p != "fetch_json"]
+        return result
 
     if not end_phase:
         # phase: - from phase to end
-        if start_phase not in all_phases:
+        if start_phase not in phases_for_range:
             raise ValueError(
-                f"Invalid start phase: {start_phase}. Valid phases: {', '.join(all_phases)}"
+                f"Invalid start phase: {start_phase}. Valid phases: {', '.join(phases_for_range)}"
             )
-        start_idx = all_phases.index(start_phase)
-        return all_phases[start_idx:]
+        start_idx = phases_for_range.index(start_phase)
+        result = phases_for_range[start_idx:]
+        # Remove fetch_json from result unless it was explicitly requested
+        if start_phase != "fetch_json" and "fetch_json" in result:
+            result = [p for p in result if p != "fetch_json"]
+        return result
 
     # phase1:phase2 - inclusive range
-    if start_phase not in all_phases:
+    if start_phase not in phases_for_range:
         raise ValueError(
-            f"Invalid start phase: {start_phase}. Valid phases: {', '.join(all_phases)}"
+            f"Invalid start phase: {start_phase}. Valid phases: {', '.join(phases_for_range)}"
         )
-    if end_phase not in all_phases:
-        raise ValueError(f"Invalid end phase: {end_phase}. Valid phases: {', '.join(all_phases)}")
+    if end_phase not in phases_for_range:
+        raise ValueError(
+            f"Invalid end phase: {end_phase}. Valid phases: {', '.join(phases_for_range)}"
+        )
 
-    start_idx = all_phases.index(start_phase)
-    end_idx = all_phases.index(end_phase)
+    start_idx = phases_for_range.index(start_phase)
+    end_idx = phases_for_range.index(end_phase)
 
     if start_idx > end_idx:
         raise ValueError(f"Start phase '{start_phase}' comes after end phase '{end_phase}'")
 
-    return all_phases[start_idx : end_idx + 1]
+    result = phases_for_range[start_idx : end_idx + 1]
+    # Remove fetch_json from result unless it was explicitly requested
+    if not use_fetch_json and "fetch_json" in result:
+        result = [p for p in result if p != "fetch_json"]
+    return result
 
 
 def main(argv: Optional[List[str]] = None) -> int:
