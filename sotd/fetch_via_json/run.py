@@ -1,0 +1,264 @@
+"""HTML-based fetch phase - Phase 2: Thread discovery.
+
+Phase 1: Authentication validation ✅
+Phase 2: Thread discovery ✅ (in progress)
+Phase 3: Comment fetching (not yet implemented)
+"""
+
+from __future__ import annotations
+
+import argparse
+import calendar
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Sequence
+
+from sotd.cli_utils.date_span import month_span
+from sotd.fetch.merge import merge_records
+from sotd.fetch.save import load_month_file, write_month_file
+from sotd.fetch_via_html.comments import fetch_comments_for_threads_html
+from sotd.fetch_via_html.html_scraper import get_reddit_cookies, get_reddit_session
+from sotd.fetch_via_html.search import search_threads_html
+
+
+def get_parser() -> argparse.ArgumentParser:
+    """Get argument parser for fetch_html phase."""
+    parser = argparse.ArgumentParser(description="HTML-based Reddit fetch (Phase 2: Thread discovery)")
+    
+    # Date arguments (same as existing fetch phase)
+    date_group = parser.add_mutually_exclusive_group()
+    date_group.add_argument("--month", type=str, help="Single month in YYYY-MM format")
+    date_group.add_argument("--year", type=int, help="All months in year YYYY")
+    date_group.add_argument("--start", type=str, help="Start month in YYYY-MM format")
+    date_group.add_argument("--end", type=str, help="End month in YYYY-MM format")
+    date_group.add_argument("--range", type=str, help="Month range in YYYY-MM:YYYY-MM format")
+    
+    parser.add_argument("--out-dir", type=str, default="data", help="Output directory (default: data)")
+    parser.add_argument("--force", action="store_true", help="Force re-fetch even if files exist")
+    parser.add_argument("--debug", action="store_true", help="Enable debug output")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    
+    return parser
+
+
+def _process_month(
+    year: int,
+    month: int,
+    args: argparse.Namespace,
+) -> dict:
+    """Fetch threads for one calendar month using HTML/JSON API."""
+    cookies = get_reddit_cookies()
+    
+    if args.debug:
+        print(f"[DEBUG] Searching for threads in {year:04d}-{month:02d}")
+    
+    # Search for threads
+    threads = search_threads_html("wetshaving", year, month, debug=args.debug, cookies=cookies)
+    
+    if args.debug:
+        print(f"[DEBUG] Found {len(threads)} valid threads")
+    
+    out = Path(args.out_dir)
+    threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
+    comments_path = out / "comments" / f"{year:04d}-{month:02d}.json"
+    
+    if args.force:
+        if threads_path.exists():
+            threads_path.unlink()
+        if comments_path.exists():
+            comments_path.unlink()
+    
+    # Convert to thread records (same format as PRAW implementation)
+    new_thread_records = [
+        {
+            "id": thread["id"],
+            "title": thread["title"],
+            "url": thread["url"],
+            "author": thread["author"],
+            "created_utc": thread["created_utc"],
+            "num_comments": thread["num_comments"],
+            "flair": thread.get("flair"),
+        }
+        for thread in threads
+    ]
+    
+    # Merge with existing records (if any)
+    existing_t = None if args.force else load_month_file(threads_path)
+    merged_threads = (
+        merge_records(existing_t[1], new_thread_records)
+        if existing_t is not None
+        else sorted(new_thread_records, key=lambda r: r["created_utc"])
+    )
+    
+    if not merged_threads:
+        print(f"[WARN] No threads found for {year:04d}-{month:02d}; skipping file writes.")
+        # Calculate missing days
+        from datetime import date as _date
+        from sotd.utils import parse_thread_date
+        
+        last_day = calendar.monthrange(year, month)[1]
+        expected: set[_date] = {_date(year, month, d) for d in range(1, last_day + 1)}
+        present: set[_date] = set()
+        for t in threads:
+            d = parse_thread_date(t["title"], year)
+            if d is not None:
+                present.add(d)
+        missing = sorted(expected - present)
+        
+        return {
+            "year": year,
+            "month": month,
+            "threads": 0,
+            "comments": 0,
+            "missing_days": [d.isoformat() for d in missing],
+        }
+    
+    # Calculate missing days
+    from datetime import date as _date
+    from sotd.utils import parse_thread_date
+    
+    last_day = calendar.monthrange(year, month)[1]
+    expected: set[_date] = {_date(year, month, d) for d in range(1, last_day + 1)}
+    present: set[_date] = set()
+    for t in merged_threads:
+        d = parse_thread_date(t["title"], year)
+        if d is not None:
+            present.add(d)
+    missing = sorted(expected - present)
+    
+    # Fetch comments (Phase 3)
+    if args.verbose:
+        print(f"[INFO] Fetching comments for {len(merged_threads)} threads...")
+    
+    cookies = get_reddit_cookies()
+    session = get_reddit_session(cookies=cookies)
+    
+    comment_records = fetch_comments_for_threads_html(
+        merged_threads, cookies=cookies, session=session, verbose=args.verbose
+    )
+    
+    # Merge with existing comments
+    existing_c = None if args.force else load_month_file(comments_path)
+    merged_comments = (
+        merge_records(existing_c[1], comment_records)
+        if existing_c is not None
+        else sorted(comment_records, key=lambda r: r["created_utc"])
+    )
+    
+    # Write threads file
+    ts_iso = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+    threads_meta = {
+        "month": f"{year:04d}-{month:02d}",
+        "extracted_at": ts_iso,
+        "thread_count": len(merged_threads),
+        "expected_days": calendar.monthrange(year, month)[1],
+        "missing_days": [d.isoformat() for d in missing],
+    }
+    write_month_file(threads_path, threads_meta, merged_threads)
+    
+    # Write comments file
+    threads_with_comments = {c["thread_id"] for c in merged_comments}
+    comments_meta = {
+        "month": threads_meta["month"],
+        "extracted_at": ts_iso,
+        "comment_count": len(merged_comments),
+        "thread_count_with_comments": len(threads_with_comments),
+        "missing_days": threads_meta["missing_days"],
+        "threads_missing_comments": [
+            t["id"] for t in merged_threads if t["id"] not in threads_with_comments
+        ],
+    }
+    write_month_file(comments_path, comments_meta, merged_comments)
+    
+    if args.verbose:
+        print(
+            f"[INFO] Fetched {len(merged_threads)} threads, {len(merged_comments)} comments "
+            f"for {year:04d}-{month:02d} ({len(missing)} missing days)"
+        )
+    
+    return {
+        "year": year,
+        "month": month,
+        "threads": len(merged_threads),
+        "comments": len(merged_comments),
+        "missing_days": [d.isoformat() for d in missing],
+    }
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Phase 2: Thread discovery via HTML/JSON API.
+    
+    This implementation:
+    1. Searches Reddit using JSON API (no PRAW)
+    2. Parses thread data from JSON responses
+    3. Filters threads by date
+    4. Saves to same format as PRAW implementation
+    
+    Phase 3 (comment fetching) not yet implemented.
+    """
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
+        
+        # Compute month span
+        months = month_span(args)
+        
+        if not months:
+            print("[ERROR] No months specified. Use --month, --year, --start/--end, or --range")
+            return 1
+        
+        cookies = get_reddit_cookies()
+        if not cookies:
+            print("[WARN] No cookie found. Using unauthenticated requests (10 QPM limit)")
+            print("[INFO] Set REDDIT_SESSION_COOKIE for better rate limits (60+ QPM)")
+        
+        results = []
+        for year, month in months:
+            result = _process_month(year, month, args)
+            results.append(result)
+        
+        # Print summary
+        if len(results) == 1:
+            res = results[0]
+            year = res["year"]
+            month = res["month"]
+            missing_days = res["missing_days"]
+            if args.verbose:
+                print(
+                    f"[INFO] HTML fetch complete for {year:04d}-{month:02d}: "
+                    f"{res['threads']} threads, "
+                    f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
+                )
+        elif len(results) > 1:
+            all_missing_days = sorted(
+                d for res in results for d in (res.get("missing_days") or [])
+            )
+            start_ym = results[0]["year"], results[0]["month"]
+            end_ym = results[-1]["year"], results[-1]["month"]
+            total_threads = sum(res["threads"] for res in results)
+            total_missing = len(all_missing_days)
+            
+            if args.verbose:
+                print(
+                    f"[INFO] HTML fetch complete for "
+                    f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
+                    f"{total_threads} threads, "
+                    f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
+                )
+        
+        print("\n[INFO] ✅ Phase 3 complete! (Thread discovery + comment fetching)")
+        return 0
+    except KeyboardInterrupt:
+        print("\n[INFO] Fetch phase interrupted by user")
+        return 1
+    except Exception as e:
+        print(f"[ERROR] Fetch phase failed: {e}")
+        import traceback
+        if args.debug if 'args' in locals() else False:
+            traceback.print_exc()
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
