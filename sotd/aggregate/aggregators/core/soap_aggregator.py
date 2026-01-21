@@ -45,6 +45,7 @@ class SoapAggregator(BaseAggregator):
 
             brand = get_field_value(matched, "brand")
             scent = get_field_value(matched, "scent")
+            countable = matched.get("countable", True)  # Extract flag, default to True
             author = get_field_value(record, "author")
 
             if brand and author:  # scent can be empty string, which is valid
@@ -60,6 +61,7 @@ class SoapAggregator(BaseAggregator):
                         # Add normalized versions for case-insensitive grouping
                         "brand_normalized": original_brand.lower(),
                         "scent_normalized": original_scent.lower(),
+                        "countable": countable,  # Preserve flag for filtering in other aggregators
                     }
                 )
 

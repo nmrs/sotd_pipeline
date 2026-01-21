@@ -1145,6 +1145,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
 
         brand = matched_data.get("brand", "").strip()
         scent = matched_data.get("scent", "").strip()
+        countable = matched_data.get("countable", True)  # Extract flag, default to True
         match_type = match.get("match_type", "unknown")
 
         if not brand or not scent:
@@ -1167,6 +1168,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
                     "count": match.get("count", 1),
                     "brand": brand,  # Store original case brand
                     "scent": scent,  # Store original case scent
+                    "countable": countable,  # Preserve flag
                 }
             )
 
@@ -1272,11 +1274,15 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
             primary_match_type: match_type_counts.get(primary_match_type, 0),
         }
 
+        # Extract countable flag from first pattern (all patterns in group have same brand/scent)
+        countable = patterns[0].get("countable", True) if patterns else True
+
         results.append(
             {
                 "matched_string": matched_string,
                 "brand": brand,
                 "scent": scent,
+                "countable": countable,  # Include flag for UI indicator
                 "total_count": total_count,
                 "top_patterns": top_patterns_formatted,
                 "remaining_count": max(0, remaining_count),

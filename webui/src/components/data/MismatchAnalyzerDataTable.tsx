@@ -578,6 +578,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           const formattedData = formatMatchedData(item.matched, field, item.enriched);
 
+          // Check for non-countable flag (only for soap field)
+          const isNonCountable = field === 'soap' && 
+            item.matched && 
+            typeof item.matched === 'object' && 
+            (item.matched as any).countable === false;
+
           // Check if there are enrich-phase changes using the enriched data from the API response
           const hasChanges =
             item.enriched &&
@@ -598,20 +604,47 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             }
           };
 
+          // Mashup indicator component
+          const mashupIndicator = isNonCountable ? (
+            <span
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 ml-2"
+              title="This scent does not count toward distinct scent aggregation (mashup/mix)"
+            >
+              <svg
+                className="w-3 h-3 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+              Mashup
+            </span>
+          ) : null;
+
           // For brush field, render with line breaks
           if (field === 'brush' && formattedData.includes('\n')) {
             const content = (
-              <div
-                className={`text-sm text-gray-900 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
-                onClick={hasChanges ? handleEnrichClick : undefined}
-                title={formattedData}
-              >
-                {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
-                {formattedData.split('\n').map((line, index) => (
-                  <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                    {line}
-                  </div>
-                ))}
+              <div className="flex items-start gap-2">
+                <div
+                  className={`text-sm text-gray-900 flex-1 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+                  onClick={hasChanges ? handleEnrichClick : undefined}
+                  title={formattedData}
+                >
+                  {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
+                  {formattedData.split('\n').map((line, index) => (
+                    <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+                {mashupIndicator}
               </div>
             );
 
@@ -620,13 +653,16 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           // For other fields, use the original rendering
           const content = (
-            <div
-              className={`text-sm text-gray-900 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
-              onClick={hasChanges ? handleEnrichClick : undefined}
-              title={formattedData}
-            >
-              {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
-              <span>{formattedData}</span>
+            <div className="flex items-center gap-2">
+              <div
+                className={`text-sm text-gray-900 flex-1 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+                onClick={hasChanges ? handleEnrichClick : undefined}
+                title={formattedData}
+              >
+                {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
+                <span>{formattedData}</span>
+              </div>
+              {mashupIndicator}
             </div>
           );
 

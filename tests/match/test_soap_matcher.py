@@ -502,3 +502,73 @@ def test_brand_match_with_by_connector_case_insensitive(soap_matcher_with_mock):
     assert result.matched["brand"] == "Summer Break Soaps"
     assert result.matched["scent"] == "Steady"  # Should strip " by" from the end
     assert result.match_type == "brand"
+
+
+def test_countable_flag_preserved_in_pattern_compilation(tmp_path):
+    """Test that countable flag is preserved in pattern compilation."""
+    import yaml
+    from pathlib import Path
+
+    mock_catalog = {
+        "Test Brand": {
+            "patterns": ["test"],
+            "scents": {
+                "Tri-Mix": {
+                    "countable": False,
+                    "patterns": ["tri-?mix"],
+                },
+                "Regular": {
+                    "patterns": ["regular"],
+                    # No countable flag - should default to True
+                },
+            },
+        }
+    }
+
+    # Write catalog to temp file
+    catalog_file = tmp_path / "test_soaps.yaml"
+    with open(catalog_file, "w") as f:
+        yaml.dump(mock_catalog, f)
+
+    matcher = SoapMatcher(catalog_path=catalog_file, bypass_correct_matches=True)
+
+    # Check that pattern compilation includes countable flag
+    tri_mix_patterns = [p for p in matcher.scent_patterns if p["scent"] == "Tri-Mix"]
+    assert len(tri_mix_patterns) > 0
+    assert tri_mix_patterns[0].get("countable") is False
+
+    regular_patterns = [p for p in matcher.scent_patterns if p["scent"] == "Regular"]
+    assert len(regular_patterns) > 0
+    assert regular_patterns[0].get("countable") is True  # Defaults to True
+
+
+def test_countable_flag_in_matched_result(tmp_path):
+    """Test that countable flag is included in matched result when False."""
+    import yaml
+
+    mock_catalog = {
+        "Test Brand": {
+            "patterns": ["test"],
+            "scents": {
+                "Tri-Mix": {
+                    "countable": False,
+                    "patterns": [".*tri.*mix.*"],
+                },
+            },
+        }
+    }
+
+    # Write catalog to temp file
+    catalog_file = tmp_path / "test_soaps.yaml"
+    with open(catalog_file, "w") as f:
+        yaml.dump(mock_catalog, f)
+
+    matcher = SoapMatcher(catalog_path=catalog_file, bypass_correct_matches=True)
+
+    # Directly test _match_scent_pattern to verify flag is included
+    # This bypasses normalization issues
+    result = matcher._match_scent_pattern("test tri mix soap", "test tri mix soap")
+    assert result is not None
+    assert result["matched"]["brand"] == "Test Brand"
+    assert result["matched"]["scent"] == "Tri-Mix"
+    assert result["matched"].get("countable") is False

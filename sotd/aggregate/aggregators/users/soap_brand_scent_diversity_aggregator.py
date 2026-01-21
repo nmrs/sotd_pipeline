@@ -58,6 +58,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
 
             brand = get_field_value(matched, "brand")
             scent = get_field_value(matched, "scent")
+            countable = matched.get("countable", True)  # Extract flag, default to True
             author = get_field_value(record, "author")
 
             if brand and author:  # scent can be empty string, which is valid
@@ -66,6 +67,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
                         "brand": brand,
                         "scent": scent,
                         "author": author,  # Keep username clean, add "u/" in report phase
+                        "countable": countable,  # Preserve flag for filtering
                     }
                 )
 
@@ -97,7 +99,14 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
         Returns:
             DataFrame with grouped and aggregated data
         """
+        # Filter to only countable scents for diversity calculations
+        # Default to True if flag is not present (backward compatibility)
+        if "countable" not in df.columns:
+            df["countable"] = True
+        countable_df = df[df["countable"] == True].copy()
+
         # Group by author to count unique brand+scent combinations per user
+        # Use all data (including non-countable) for brand counting
         grouped = (
             df.groupby("author")
             .agg(
@@ -112,12 +121,16 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
         grouped.columns = ["author", "unique_brands"]
 
         # Count unique brand+scent combinations per user
-        # Create composite key for uniqueness counting
-        df["brand_scent_key"] = df["brand"].astype(str) + " - " + df["scent"].astype(str)
-        brand_scent_counts = df.groupby("author")["brand_scent_key"].nunique().reset_index()
+        # Use only countable scents for unique combination counting
+        countable_df["brand_scent_key"] = (
+            countable_df["brand"].astype(str) + " - " + countable_df["scent"].astype(str)
+        )
+        brand_scent_counts = (
+            countable_df.groupby("author")["brand_scent_key"].nunique().reset_index()
+        )
         brand_scent_counts.columns = ["author", "unique_combinations"]
 
-        # Count total shaves per user
+        # Count total shaves per user (all scents, including non-countable)
         shave_counts = df.groupby("author").size().reset_index(name="shaves")  # type: ignore
 
         # Merge all the data
@@ -132,7 +145,10 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
         # Calculate HHI (Herfindahl-Hirschman Index) for each user
         # HHI measures concentration: HHI = Σ p_i² where p_i = count_i / total_shaves
         # For each user, count occurrences of each brand-scent combination
-        soap_counts = df.groupby(["author", "brand_scent_key"]).size().reset_index(name="count")  # type: ignore
+        # Use only countable scents for HHI calculation
+        soap_counts = (
+            countable_df.groupby(["author", "brand_scent_key"]).size().reset_index(name="count")  # type: ignore
+        )
 
         # Merge with total shaves to calculate shares
         soap_counts = soap_counts.merge(grouped[["author", "shaves"]], on="author")

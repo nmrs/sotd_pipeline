@@ -170,6 +170,8 @@ class SoapMatcher(BaseMatcher):
             # Scent-level patterns
             scents = entry.get("scents", {})
             for scent, scent_data in scents.items():
+                # Extract countable flag (defaults to True for backward compatibility)
+                countable = scent_data.get("countable", True)
                 for pattern in scent_data.get("patterns", []):
                     context = create_context_dict(
                         file_path="data/soaps.yaml", brand=brand, scent=scent
@@ -181,6 +183,7 @@ class SoapMatcher(BaseMatcher):
                             "scent": scent,
                             "pattern": pattern,
                             "regex": compiled_regex,
+                            "countable": countable,  # Preserve flag
                         }
                     )
             # Brand-level patterns
@@ -281,9 +284,13 @@ class SoapMatcher(BaseMatcher):
     def _match_scent_pattern(self, original: str, normalized: str) -> Optional[dict]:
         for pattern_info in self.scent_patterns:
             if pattern_info["regex"].search(normalized):
+                matched = {"brand": pattern_info["brand"], "scent": pattern_info["scent"]}
+                # Include countable flag if present (defaults to True if not specified)
+                if "countable" in pattern_info:
+                    matched["countable"] = pattern_info["countable"]
                 return {
                     "original": original,
-                    "matched": {"brand": pattern_info["brand"], "scent": pattern_info["scent"]},
+                    "matched": matched,
                     "pattern": pattern_info["pattern"],
                     "match_type": MatchType.REGEX,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),

@@ -66,7 +66,7 @@ def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
 
 
 def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
-    """Calculate number of unique soaps from records."""
+    """Calculate number of unique soaps from records, excluding non-countable scents."""
     if not records:
         return 0
 
@@ -81,6 +81,12 @@ def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
             if matched and isinstance(matched, dict):
                 brand = matched.get("brand")
                 scent = matched.get("scent")
+                countable = matched.get("countable", True)  # Default to True
+
+                # Skip non-countable scents
+                if not countable:
+                    continue
+
                 if brand and isinstance(brand, str) and scent and isinstance(scent, str):
                     brand = brand.strip()
                     scent = scent.strip()

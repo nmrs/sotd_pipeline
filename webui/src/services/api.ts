@@ -345,6 +345,7 @@ export interface GroupedDataItem {
   matched_string: string;
   brand: string;
   scent: string;
+  countable?: boolean;  // Optional: true by default, false for mashup scents
   total_count: number;
   top_patterns: Array<{
     original: string;
