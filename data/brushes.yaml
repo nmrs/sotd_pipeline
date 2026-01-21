@@ -217,7 +217,8 @@ known_brushes:
       patterns:
         - \bbfm\b(.*50mm)?
         - big ?fu?cking ?mother ?(load|lode)
-        - ^redacted$
+        # - ^redacted$
+        - ^\|*redacted\|*$
         - muninn.*50mm
       knot:
         brand: Boti
@@ -775,6 +776,12 @@ known_brushes:
       knot_loft_mm: 57
       patterns:
         - razorock.*400
+    Barber Handle Plissoft:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+        - razorock.*barber.*plissoft
+        - (razorock|rockwell) barber 24 # catch cases where people are mistagging rockwell on this brush
     Big Bruce:
       fiber: Synthetic
       knot_size_mm: 26

@@ -2496,6 +2496,9 @@ House of Mammoth:
     Beloved:
       patterns:
       - (hom|mamm).*beloved
+    Clean:
+      patterns:
+      - (hom|mammoth).*clean
     Dammusi:
       patterns:
       - dammusi
