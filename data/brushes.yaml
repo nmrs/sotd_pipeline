@@ -1858,8 +1858,12 @@ known_knot_based_brushes:
         - ^(?!.*dog|zen).*\bb8\b
     B9A:
       patterns:
-        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
-        - ^(?!.*dog|zen).*\bb9a\+?\b
+        - ^(?!.*(dog|zen|9a\+)).*(declaration|\bdg\b)?.*\bb9a\b
+        - ^(?!.*(dog|zen|9a\+)).*\bb9a\b
+    B9A+:
+      patterns:
+        - ^(?!.*(dog|zen)).*(declaration|\bdg\b)?.*\bb9a\+
+        - ^(?!.*(dog|zen)).*\bb9a\+
     B9B:
       patterns:
         - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b

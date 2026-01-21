@@ -548,8 +548,8 @@ DE:
         - crystal.*person+a(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - crystal.*plat
         - crystal
-        - israel.*person+a
-        - platinum.*israel
+        - isr[ae]{2}l.*(person+a|red)
+        - platinum.*isr[ae]{2}l
     TOMY:
       patterns:
         - \btomy\b

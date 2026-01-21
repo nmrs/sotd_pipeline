@@ -1002,7 +1002,7 @@ GEM:
       - mmoc
       - ocmm
       - gem.*open.*comb
-      - micromatic\s*open\s*comb
+      - micromatic\s*(open\s*comb|\boc\b)
   Pushbutton:
     format: GEM
     patterns:

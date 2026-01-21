@@ -454,6 +454,7 @@ Blackland:
   - blackland vector (oc)
   - blackland vector lite
   - blackland vector lite (oc)
+  - blackland vector oc
   - blackland vector ti
   - blackland vector ti satin
   - blackland vector titanium
@@ -461,6 +462,7 @@ Blackland:
   - blackland vector with kai proguard mg
   - blackland, vector
   - vector (proline blade) - blackland
+  - vector - blackland razors
   - vector @blacklandrazors schick blade
   - vector ti
   - vector titanium
@@ -539,8 +541,10 @@ Böker:
   - h boker 5/8" with mother of pearl handle and tang
   - h. boker "our very own" 11/16 hollow square point "
   - h. boker "our very own" 6/8 square tip
+  - h. boker & co full hollow
   - h. boker & co. "our very own" 11/16 hollow ground square tip
   - h. boker - "our very own" hollow 11/16 square tip
+  - h. boker and co
   - h. boker kelley-how no. 6702
 C-Mon:
   Straight:
@@ -624,6 +628,7 @@ Carl Rader:
 Cartridge/Disposable:
   ? ''
   : - (part 1 challenge razor) bic 3 blade disposable
+    - atra handle
     - bic - sensitive
     - bic - single blade $platic
     - bic 1 blade disposable
@@ -636,6 +641,7 @@ Cartridge/Disposable:
     - bic sensitive single blade razor
     - bic single blade disposable
     - bic single-blade disposable
+    - disposable schick xtreme 3
     - dorco - pace 6 sport
     - dorco - pace 7 "ultimate comfort edition"
     - equate - 2 blade disposable cartridge
@@ -667,6 +673,8 @@ Cartridge/Disposable:
     - simply smooth triple blade
     - simply smooth triple blade razor
     - some blue disposable schick twin blade thingy with no lube strip thing
+    - store brand gillette venus knock-off leftover from when i forgot my razor on
+      a work trip
     - supply disposable
     - target brand - disposable
     - target disposable
@@ -728,6 +736,7 @@ Charcoal Goods:
   - charcoal goods v2
   - charcoal goods victoria
   - charcoalgoods lv2
+  - v2 ss cg level 2
   Lvl 3:
   - charcoal goods - gen 1 level 3
   - charcoal goods - gen 3 level 3
@@ -854,9 +863,12 @@ Dovo:
   Straight:
   - dovo - 15/16" round point hollow ground
   - dovo 11/16" hollow ground round point
+  - dovo 5/8
+  - dovo 5/8 full hollow grind
   - dovo art of shaving 5/8 hollow ground round point
   - dovo astrale (ebony & m.o.p.) - full hollow - round point - 6/8
   - dovo barbarossa inox (5/8", shortened blade, stainless steel, spanish tip)
+  - dovo best quality 5/8 full hollow ground
   - dovo bismarck 2 (7/8", full hollow, carbon steel)
   - dovo bismarck 6/8" full hollow round point
   - dovo facharbeit 6/8" full hollow square point
@@ -922,6 +934,7 @@ Edwin Jagger:
   - edwin jagger
   - edwin jagger - de89
   - edwin jagger - ej89
+  - edwin jagger 98 w/ long pink handle
   - edwin jagger de
   - edwin jagger de 89l
   - edwin jagger de86
@@ -937,6 +950,7 @@ Edwin Jagger:
   - ej de89l
   - ej kelvin
   - ej lined chrome
+  - ej89
   - ejde89
 Efendi:
   Straight:
@@ -993,7 +1007,9 @@ ERN:
   - ern ator, 6/8 hollow round point
   Straight:
   - c. friedr. ern 72 garantie soligen - half hollow - french point - 13/16
+  - crown & sword ern
   - crown and sword ern 13/16" straight
+  - crown and sword ern 13/16" straight razor
   - ern - 5/8" hollow ground
   - ern - 6/8" round tip extra hollow
   - ern 207 (13/16", full hollow, round point)
@@ -1034,11 +1050,13 @@ Ever-Ready:
   - ever ready 1914
   - ever ready 1914 little lather catcher
   - ever-ready 1914
+  - everready 1914
   - gem everready 24/14
   '1924':
   - 1924 ever ready single edge (brass)
   - ever -ready shovelhead
   - ever ready 1924 paf (1919-1924)
+  - ever ready shovelhead
   - ever-ready - shovelhead 1924
   - ever-ready 1924
   - ever-ready 1924 aka shovelhead
@@ -1047,10 +1065,13 @@ Ever-Ready:
   - ever-ready shovelhead 1924
   - everready - shovelhead 1924 art deco
   - gem 1924
+  - gem shovelhead
   E-Bar:
   - ever-ready natural angle heavy flat top a.k.a the e-bar
   Featherweight:
+  - ever ready featherweight
   - ever-ready - natural angle a.k.a british featherweight
+  - every ready featherweight
   Streamline:
   - ever ready - ambassador
   - ever ready 1930's streamline set
@@ -1100,14 +1121,18 @@ Fatip:
   - fatip grande classic original nickel open comb
   - fatip grande classic original open comb nickel
   - fatip grande open comb
+  - fatip oc grande
+  - fatip oc head on grande handle
   - fatip oc olive wood handle
   - fatip oc olivewood handle
   - fatip olivewood handle oc
+  - fatip open comb
   - fatip piccolo
   - fatip piccolo oc
   - fatip piccolo open comb
   - fatip piccolo slant open comb gold
   - fatip- oc olivewood handle
+  - fattip open comb
   Testina Gentile (Closed Comb):
   - fatip - testina gentile
   - fatip classic testina gentile
@@ -1148,6 +1173,7 @@ Filarmonica:
   '12':
   - filarmonica 12 doble temple 5/8" full hollow
   '13':
+  - filarmonica 13 novodur
   - filarmonica 13 novodur 13/16" para profesionales full hollow
   - filarmonica 13 novodur 6/8" full hollow
   - filly 13
@@ -1171,6 +1197,8 @@ Fine Accoutrements:
   - fine accouterments de5
   Superlight Slant:
   - fine aluminum slant
+  World's Finest:
+  - fine accoutrements - worlds finest
 Flying Eagle:
   Tech Clone:
   - flying eagle - tech clone
@@ -1212,12 +1240,16 @@ GEM:
   '1914':
   - gem 1914
   Clog Pruf:
+  - clog pruf
   - gem - clog pruf -
   - gem - clog-pruf
   - gem - micromatic clog pruf
   - gem - micromatic clog-pruf
   - gem clog pruf
+  - gem clog pruf micromatic
   - gem clog-pruf
+  - gem clog-pruf (large tooth)
+  - gem clog-pruf (large tooth) and gem clog-pruf (small tooth)
   - gem clog-pruf gen 1
   - gem clog-pruf, gen 1
   - gem clog-prug
@@ -1294,6 +1326,7 @@ GEM:
   - gem jr
   - gem jr - nickel (?) - art deco handle
   - gem jr 1912
+  - gem jr. bakelite handle
   - gem jumior
   - gem junior
   - gem junior (gold)
@@ -1313,6 +1346,7 @@ GEM:
   - gem micro-matic open comb
   - gem micro-matic open combat
   - gem micromatic mmoc
+  - gem micromatic oc
   - gem micromatic open comb
   - gem micromatic open comb (first generation)
   - gem micromatic open comb (gen. 2)
@@ -1322,14 +1356,18 @@ GEM:
   - gem micromatic open comb gen 1
   - gem micromatic open comb gen 2
   - gem mmoc
+  - gem mmoc (later model)
   - gem mmoc (special djudge engraving)
   - gem mmoc - gen 1
+  - gem mmoc 2nd gen
   - gem mmoc djudges edition
   - gem mmoc djudges edition, gen 1
+  - gem mmoc gen 1
   - gem mmoc gen 2
   - gem mmoc gen two
   - gem mmoc gen2
   - gem mmoc gold gen2
+  - gem mmoc later model
   - gem mmoc, gen 2
   - gem mmocv2
   - gem ocmm
@@ -1424,11 +1462,13 @@ Gillette:
   - f2 gillette fatboy (9 wtg, 7 xtg, 5 atg)
   - fatboy
   - fatboy w/ nacet
+  - fatboy with chewbacca theme
   - gilette - 1959 (e4) fat boy
   - gillette - 195 (f-3)
   - gillette - e4 fat boy
   - gillette - executive fatboy
   - gillette - fat boy
+  - gillette - fat boy rhodium 1959 (e1)
   - gillette - fat boy rhodium 1959 (e1) (setting 3)
   - gillette - fat boy rhodium 1959 (e1) (setting 4)
   - gillette - fatboy
@@ -1437,6 +1477,8 @@ Gillette:
   - gillette 195 adjustable e-1 "mal"
   - gillette 1958 g3 fatboy
   - gillette e 2 fatboy '59
+  - gillette executive adjustable
+  - gillette executive adjustable d3
   - gillette executive fatboy
   - gillette executive fatboy (d3)
   - gillette fat boy
@@ -1444,9 +1486,12 @@ Gillette:
   - gillette fatboy (9 + 5)
   - gillette fatboy adjustable
   - gillette fatboy adjustable (e3-1959)
+  - gillette fatboy e4
   - 'gillette fatboy e4 (setting: 6)'
+  - gillette fatboy executive
   - gillette fatboy g1
   Heritage:
+  - gillette de heritage
   - gillette heritage
   - gillette heritage inspired
   King C. Gillette:
@@ -1484,8 +1529,10 @@ Gillette:
   - blue lady gillette
   - gillette - 1966 lady gillette
   - gillette lady gillette (blue)
+  - lady gillette
   - lady gillette (g2) blue starburst
   - lady gillette - blue
+  - lady gillette blue
   NEW:
   - 1930's gillette new ball handle gold
   - 1930's gillette new short comb
@@ -1495,6 +1542,8 @@ Gillette:
   - gillette - new
   - gillette - new - lc
   - gillette - new - sc
+  - gillette - new flat bottom
+  - gillette - new long comb
   - gillette bostonian
   - gillette long-comb new
   - gillette new
@@ -1509,6 +1558,7 @@ Gillette:
   - gillette new deluxe / razorock halo
   - gillette new deluxe belmont traveler
   - gillette new deluxe traveler
+  - gillette new lc
   - gillette new long comb
   - gillette new long comb (1930's)
   - gillette new long comb gold
@@ -1521,6 +1571,7 @@ Gillette:
   - gillette new sc
   - gillette new short comb
   - gillette new short comb replated
+  - gillette new short open comb
   - gillette new standard
   - gillette new type
   - gillette raised flat bottom new
@@ -1544,12 +1595,15 @@ Gillette:
   - gillette - old type
   - gillette 1905 double ring
   - gillette ball end old type thin cap
+  - gillette brownie
   - gillette old type
   - gillette old type (no date code)
   - gillette old type (open comb, nickel, e838523, 1918) w/ wcs 175s handle
   - gillette old type (open comb, nickel, e838523, 1918), wcs 175s handle
   - gillette old type (open comb, nickel, e838523, 1918), yaqi stainless steel handle
   - gillette old type ball end
+  - gillette single ring
+  - gillette thick cap old type
   - gillette thin cap old type
   - gillette tuckaway (old type)
   - vintage gillette brownie
@@ -1605,8 +1659,14 @@ Gillette:
   - gillette slim 4
   - gillette slim adjustable
   - gillette slim adjustable (1962)
+  - gillette slim adjustable (5/5/5/1)
+  - gillette slim adjustable (7/6/5/2)
+  - gillette slim adjustable (9/9)
+  - gillette slim adjustable (9/9/9)
+  - gillette slim adjustable (i-2 date code, 1963)
   - gillette slim adjustable (l4, 1966)
   - gillette slim adjustable - date code j3
+  - gillette slim adjustable - h4
   - gillette slim adjustable 1966
   - gillette slim adjustable 1966 set at 7
   - gillette slim adjustable h3 (1962, 3rd quarter)
@@ -1629,6 +1689,7 @@ Gillette:
   - gillette - super 109 adjustable
   - gillette - super adjustable 84
   - gillette - super adjustable u2
+  - gillette 1969 super adjustable 85
   - gillette 1969-1975 super adjustable "super 109"(black beauty)
   - gillette black beauty
   - gillette black beauty t3
@@ -1690,8 +1751,11 @@ Gillette:
   - blue tip ss
   - british gillette red tip
   - english gillette rocket 1953
+  - flare tip ss
   - gilette rocket c.1949
   - gillete rocket c.1949
+  - gillette (h4) super speed tto
+  - gillette (h4) tto
   - gillette - 1940's english parat tto double edge
   - gillette - 1950's flare tip super speed
   - gillette - 1957 blue tip super speed
@@ -1725,13 +1789,17 @@ Gillette:
   - gillette - rocket md 1953. (england)
   - gillette - ss black tip x2
   - gillette - super speed
+  - gillette - super speed 40s style
   - gillette - super speed black tip
   - gillette - super speed black tip x2
   - gillette - super speed blue tip
   - gillette - super speed flare
+  - gillette - super speed red tip
   - gillette - superspeed
   - gillette -blacktip 1952
   - gillette 1940s style super speed
+  - gillette 1940s super speed
+  - gillette 1940s superspeed
   - gillette 1951 black tip super speed
   - gillette 1952 blacktip
   - gillette 1952 super speed
@@ -1757,6 +1825,7 @@ Gillette:
   - gillette flairtip 1962
   - gillette flare red tip
   - gillette flare tip
+  - gillette flare tip ss
   - gillette flare tip super speed
   - gillette flare tip super speed f1
   - gillette flare tip superspeed a1
@@ -1767,6 +1836,7 @@ Gillette:
   - gillette milord tech
   - gillette ranger tech
   - gillette red tip
+  - gillette red tip (1958, d1)
   - gillette red tip (us)
   - gillette red tip c2
   - gillette red tip super speed
@@ -1788,6 +1858,8 @@ Gillette:
   - gillette super speed (h-4)
   - gillette super speed (h4)
   - gillette super speed (tto)
+  - gillette super speed - black tip
+  - gillette super speed - flare tip
   - gillette super speed - red tip
   - gillette super speed 1969
   - gillette super speed 47
@@ -1806,6 +1878,7 @@ Gillette:
   - gillette superspeed (1950)
   - gillette superspeed 1958
   - gillette superspeed 40s ndc
+  - 'gillette superspeed black handle edit: s3'
   - gillette superspeed black tip
   - gillette superspeed flare tip
   - gillette superspeed red tip
@@ -1853,17 +1926,22 @@ Gillette:
   - english tech
   - gilette english flat bottom tech
   - gilette pre-war fat handle tech
+  - gilette tech aluminium
   - gillette - 1946 tech wwii civilian replica gold
   - gillette - 1967 (m3) travel tech
   - gillette - flat bottom tech
   - gillette - gold tech - ball end
   - gillette - gold tech - fat handle
   - gillette - tech
+  - gillette - tech (bakelite)
+  - gillette - tech (flat bottom)
   - gillette - tech (pre-war)
   - gillette - tech - maggard ss handle
   - gillette - tech 1964 solid handle
   - gillette - tech bakelite
   - gillette - tech ball-end 1955 (a1) gold
+  - gillette - tech fat handle (pre-war)
+  - gillette - tech flat-bottom thin bar handle
   - gillette - tech post-war, random
   - gillette - tech with chisel and hound x briar works handle
   - gillette - travel tech
@@ -1887,6 +1965,7 @@ Gillette:
   - gillette ball-end tech k4
   - gillette ball-end tech k4 (1965)
   - gillette ballend tech
+  - gillette british aluminum handle tech (1980)
   - gillette brittish aluminum handle tech a1
   - gillette contract tech
   - gillette english flat bottom tech
@@ -1896,6 +1975,7 @@ Gillette:
   - gillette fat handle
   - gillette fat handle tech
   - gillette fat handle tech gold
+  - gillette fb tech
   - gillette flat bottom tech
   - gillette flat bottom tech (4-piece)
   - gillette flat bottom tech (thanks to u/gfdoto)
@@ -1924,6 +2004,8 @@ Gillette:
   - gillette tech (no date code, oblong slots - 1946-1950)
   - gillette tech (user grade)
   - gillette tech (z-4)
+  - gillette tech - flat-bottom made in england - maggard blue anodized mr11
+  - gillette tech - flat-bottom made in england - maggard blue anodized mrh11
   - gillette tech - pre-war
   - gillette tech - y3
   - gillette tech / west coast shaving 84br
@@ -1940,6 +2022,7 @@ Gillette:
   - gillette tech minora oc
   - gillette tech oc
   - gillette tech w/ flydear
+  - gillette tech with ikon bulldog handle
   - gillette tech y3
   - gillette tech, made in canada, 2nd quarter 1954
   - gillette techpossibly this one made in england
@@ -1948,7 +2031,10 @@ Gillette:
   - gillette travel tech (date code m4)
   - gillette travel tech k-4
   - gillette travel tech k3
+  - gillette triangle tech
+  - gold gillette tech
   - pre war gillette fat handle tech
+  - pre-war tech
   - vintage 1938-1945 gillette tech
   - vintage gillette ball tip
   - wolfman guerrilla + gillette tech
@@ -2070,6 +2156,7 @@ Henson:
   - dr. squatch al-13
   - dr. squatch safety razor
   - dr. squatch x henson al13
+  - hansen al13 medium
   - hensen al13
   - hensen al13+
   - hensen al13+++
@@ -2095,6 +2182,7 @@ Henson:
   - henson al-13 aggressive
   - henson al-13 in copper color
   - henson al-13 medium
+  - henson al-13 medium - blue for the armour of bo katan
   - henson al-13 mild
   - henson al-13+
   - henson al-13+ mild
@@ -2107,6 +2195,7 @@ Henson:
   - henson al13 - aggressive
   - henson al13 - agressive (gray) / yaqi stainless steel handle
   - henson al13 - agressive (gray) w/ yaqi ss handle
+  - henson al13 medium
   - henson al13 medium - gray
   - henson al13 mild
   - henson al13 mild w/alpha shaving works bravo stainless steel handle
@@ -2188,6 +2277,7 @@ Iberia:
 iKon:
   B1:
   - ikon b1 deluxe
+  - ikon b1 oc
   - ikon b1 oss
   - ikon b1oss
   Short Comb:
@@ -2198,6 +2288,8 @@ iKon:
   - ikon shavecraft tek
   X3:
   - ikon x3
+  - ikon x3 slant
+  - ikon x3 slant w/ bulldog aluminium handle
 Iwasaki:
   Straight:
   - iwasaki 13/16" full hollow square point tamahagane
@@ -2212,6 +2304,7 @@ J.A. Henckels:
   Friodur Straight:
   - friodur 14
   - friodur 72 1/2
+  - friodur 72-v quarter hollow
   - henckels - friodur 17
   - henckels 7/8" friodur french point
   - henckels friodur 17 15/16
@@ -2289,6 +2382,7 @@ J.A. Henckels:
   - j.a. henckles 60 - 5/8" round point
   - ja henckels 5/8
   - ja henckels zwillingswerk no. 150
+  - ja.a. henckels "50" 5/8 fh
   - zwilling j. a. henckels 14 (8/8", extra hollow ground, carbon steel)
 J.R. Torrey Razor Co.:
   Straight:
@@ -2354,6 +2448,7 @@ Kai:
   - kai captain folding
   - kai captain standard folding
   Captain Kamisori:
+  - kai captain kamisori
   - kai captain kamisori cap-exj
 Kampfe:
   Star Lather Catcher 1902:
@@ -2391,13 +2486,18 @@ Karve:
   - karve (sb plate c)
   - karve - christopher bradley (oc b plate)
   - karve - christopher bradley (oc c plate)
+  - karve - christopher bradley (sb a plate)
   - karve - christopher bradley (sb c plate)
   - karve - christopher bradley (sb d plate)
   - karve - christopher bradley copper
   - karve a plate
+  - karve alum sb-d
+  - karve aluminum d plate
   - karve b plate
   - karve brass (c)
   - karve brass b plate
+  - karve brass c plate
+  - karve brass c-plate
   - karve brass cb (sb-c)
   - karve brass cb (sb-d)
   - karve brass cb oc-f
@@ -2406,11 +2506,15 @@ Karve:
   - karve brass christopher bradley - sb-c
   - karve brass d plate sb
   - karve brass oc b
+  - karve brass oc c
+  - karve brass sb c
   - karve brass sb d
   - karve brass sb e
   - karve brass sb-c
   - karve brass, sb-c plate
+  - karve brass. b plate
   - karve bronze cb with d sb plate
+  - karve c plate (sb)
   - karve c plate w/ voskhod
   - karve cb
   - karve cb (brass oc-d)
@@ -2421,6 +2525,8 @@ Karve:
   - karve cb (plate c)
   - karve cb (sb-c)
   - karve cb - b plate
+  - karve cb - b plate oc
+  - karve cb - b plate sb
   - karve cb - brass d
   - karve cb - d plate
   - karve cb - oc b
@@ -2435,6 +2541,7 @@ Karve:
   - karve cb brass plate d solid bar
   - karve cb brass sb b
   - karve cb brass sb c
+  - karve cb brass w/ b plate
   - karve cb brass w/ c plate
   - karve cb brass w/ d plate
   - karve cb c
@@ -2478,15 +2585,19 @@ Karve:
   - karve d plate
   - karve every day aluminum
   - karve oc a plate
+  - karve oc c
   - karve oc d plate
   - karve razor - g-orb handle on a b plate (moderately aggressive gap = 0.73mm /
     exposure = zero)
+  - karve sb b
   - karve sb b plate
+  - karve sb b plater
   - karve sb-c plate (brass) w/ gsb
   - karve shaving - cb
   - karve shaving cb (copper) / d plate
   - karve shaving cb (copper) / sb-d plate
   - karve shaving cb / sb-d plate
+  - karve shaving co. - sb (b)
   - karve shaving co. - sb (c)
   - karve shaving co. - sb (c) - brass w/ custom brass handle
   - karve shaving co. christopher bradley copper, sb-d
@@ -2500,11 +2611,13 @@ Karve:
   - karve ss c plate
   - karve ss plate c w/nacet -
   - karve stainless steel (b)
+  - karve stainless steel (c plate)
   - karve w/ d oc plate
   - 'karve: cb brass b plate'
   - karveshavingco
   - ss karve plate e
   - ss karve plate f
+  - ss karve plate g
   Overlander:
   - copper karve overlander
   - karve - outlander (matte black aluminum)
@@ -2659,6 +2772,8 @@ Leaf:
   - broman/leaf/twig/ fd r50
   - broman/leaf/twig/r48
   - leaf twig
+  - leaf/twig
+  - leaf/twig combo
 Lee Mfg Co.:
   Straight:
   - lee manufacturing - lee's warranted
@@ -2673,6 +2788,7 @@ Leresche:
   - leresche 700 oc 1930's
 Like Grandpa:
   Razor:
+  - like grandpa razor
   - likegrandpa
   - the like grandpa razor
 Lion Razor Works:
@@ -2705,6 +2821,7 @@ Maggard:
   - maggard razors - slant + rr ufo handle
   - maggard razors slant head with mr14 matte gray
   - maggard slant
+  - maggards slant on a mr14 handle
   - maggards slant on an mr14 handle
   SS70:
   - maggard cnc
@@ -2721,9 +2838,12 @@ Maggard:
   - maggard mr1 v3a
   - maggard mr1 with v3a head
   - maggard mr11
+  - maggard mr18
   - maggard mr18 v3
   - maggard mr5 w/ v3a head
   - maggard mr7/v3a
+  - maggard razor v3m chrome finish
+  - maggard razors - v3
   - maggard razors de safety razor mr5
   - maggard razors mr14 with ikon bulldog handle
   - maggard razors mr18
@@ -2737,6 +2857,7 @@ Maggard:
   - maggard v3 on a merkur handle
   - maggard v3 with mr6 handle
   - maggard v3a
+  - maggard v3a on mr5 handle
   - maggard v3a/muhle handle
   - maggard v3m
   - maggard v3m/mr5
@@ -2808,26 +2929,33 @@ Merkur:
   - merkur 34(c)
   - merkur 34-g
   - merkur 34c
+  - merkur 34c barber pole black
   - merkur 34c hd
   - merkur 34c two-piece tto (modified, removed safety bar from one side)
   - merkur 34c w/ treet platinum super stainless blade
   - merkur 34g
   - merkur 35c
   - murker 34c
+  - murker 34c with a shim
   - razorock goat & merkur 34c
   37C:
   - merkur - 37c
   - merkur 37c
   - merkur 37c slant
+  - merkur 39c slant
   - merkur slant
   - vtg. mercur slant
   38C:
   - merkur 38c
+  - merkur 38c black barber
   39C:
   - merkur 39c
+  - merkur 39c der vorschlaghammer
   41C:
   - merkur 41c
   - merkur 41c open comb
+  '45':
+  - merkur 45 bakelite
   Futur:
   - mekur future
   - merkur - futur (matte finish)
@@ -2838,6 +2966,9 @@ Merkur:
   - merkur futur matte finish
   - merkur futur style
   Progress:
+  - mergress
+  - mergress @3
+  - mergress on 3
   - merkur - progress
   - merkur progress
   - merkur progress - long handle
@@ -2883,6 +3014,7 @@ Mühle:
   Neo:
   - muhle neo
   R41:
+  - muehle r41
   - muhle - r41 zamac
   - muhle - r41gs
   - muhle r103
@@ -2894,6 +3026,7 @@ Mühle:
   - mühle r41 black/chrome oc
   - mühle r41 gs
   - mühle r41 gt berlin edition
+  - mühle r41 on razorock super knurl handle
   - mühle r41 twist
   - mühle- r41
   R89:
@@ -2912,6 +3045,7 @@ Mühle:
   - muhle rocca birch
   - muhle rocca birch handle
   - muhle rocca in birch finish
+  - muhle rocca jet black
   - muhle rocca r94
   - muhle rocca r95
   - muhle rocca r96
@@ -3151,17 +3285,21 @@ PAA:
   - paa quantum w/ turquoise flare tip
 PAL:
   Adjustable Injector:
+  - pal adjustable injector razor
   - pal adjustable se
   Injectomatic:
   - pal - injectomatic
 Paradigm:
   Diamondback:
+  - paradigm diamondback (2020)
   - paradigm diamondback 2020
   - paradigm diamondback ti
   - paradigm diamondback titanium
+  - paradigm shaveware diamondback (2020)
   SE:
   - paradigm se
   - paradigm ti se
+  - paradigm ti se artist club
 Paragon:
   Don:
   - paragon shaving 'don' de razor
@@ -3320,6 +3458,7 @@ Ralf Aust:
   - 'ralf aust 5/8 (straight shave #141)'
   - ralf aust 5/8 fh round point
   - ralf aust 5/8 full hollow spanish point
+  - ralf aust 5/8 olivewood scales
   - ralf aust 5/8 round point hollow ground
   - ralf aust 5/8 round tip horn scales
   - ralf aust 5/8 stainless full hollow spanish point
@@ -3363,6 +3502,7 @@ RazoRock:
   Game Changer:
   - 84 gamechanger w/ gsb
   - 84 gamechanger w/ suneko
+  - game changer
   - game changer .68p
   - game changer .76-p
   - game changer .76-p (sb)
@@ -3371,9 +3511,11 @@ RazoRock:
   - game changer 0.68
   - game changer 0.84
   - game changer 84
+  - game changer 84p with bulldog handle
   - game changer.68p
   - gamechanger .68
   - gamechanger .84
+  - gamechanger .84p
   - gamechanger 0.68
   - gamechanger 0.84
   - gamechanger 84p
@@ -3381,6 +3523,7 @@ RazoRock:
   - gc .68
   - gc .68 solid bar
   - gc .68p
+  - gc 0.84
   - gc 68
   - gc 68 solid bar
   - gc 84
@@ -3412,6 +3555,7 @@ RazoRock:
   - razorock game changer 0.76-p
   - razorock game changer 0.84
   - razorock game changer 0.84 / mr5
+  - razorock game changer 0.84 jaws
   - razorock game changer 0.84 sb
   - razorock game changer 0.84- p
   - razorock game changer 0.84-p
@@ -3423,8 +3567,10 @@ RazoRock:
   - razorock game changer 76-p (sb)
   - razorock game changer 84
   - razorock game changer 84 open comb
+  - razorock game changer 84p
   - razorock game changer jaws
   - razorock game changer jaws .84 (face) + leaf (2 blades for the dome)
+  - razorock game changer jaws 0.84
   - razorock gamechanger . 84
   - razorock gamechanger .68
   - razorock gamechanger .76-b (cc)
@@ -3446,7 +3592,9 @@ RazoRock:
   - razorock gc .68
   - razorock gc .76
   - razorock gc .84
+  - razorock gc .84-p
   - razorock gc 76 sb
+  - razorock gc jaws68
   - razorock gc.84
   - razorock gc.84 $25
   - razorock ss game changer 76
@@ -3467,6 +3615,7 @@ RazoRock:
   - razorock - german 37 slant razor torsionshobel
   - razorock - german 37 slant razor torsionshobel, with ufo handle
   - razorock german 37
+  - razorock german 37 / maggard mr5
   - razorock german 37 / mr5
   - razorock german 37 / tibam "norsborg" handle
   - razorock german 37 slant
@@ -3533,21 +3682,28 @@ RazoRock:
   - razorock lupo 95 cc
   - razorock lupo 95 oc
   - razorock lupo al
+  - razorock lupo aluminium
+  - razorock lupo aluminuium
   - razorock lupo black
   - razorock lupo dc
   - razorock lupo gold
+  - razorock lupo ss 0.72 sb
   - razorock lupo ss 0.95
+  - razorock lupo ss 95
   - razorock lupo, silver
   - razorock lupo.58
   - razorock ss lupo 72
+  - razorock ss lupo 72 vs lupo (aluminum)
   - razorock ss lupo 72 with super knurl handle
   - razorock ss lupo 72 with titanium halo handle
+  - razorock ss lupo 95
   - razorrock lupo .58
   - rr gc .68 ; rr lupo
   - rr lupo 58
   - rr lupo 72
   - rr lupo 95
   - ss lupo
+  - ss lupo - razorock
   Mamba:
   - razor rock mamba
   - razor rock mamba .70
@@ -3555,14 +3711,18 @@ RazoRock:
   - razorock mamba
   - razorock mamba 70
   - razorock mamba 92
+  - rr mamba 70
   Mentor:
   - razorock frankenrazor - mentor base, mission cap
   - razorock mentor
   Mission:
+  - razorock - mission
   - razorock mission
   - razorock mission - i think
   MJ-90:
   - razorock mj 90
+  MJ-90A:
+  - razorock mj-90a
   Old Type:
   - razorock old type
   SLOC:
@@ -3597,10 +3757,13 @@ Rex:
   Ambassador:
   - rex ambassador
   - rex ambassador (3.5/2.5)
+  - rex ambassador (3.5/3)
   - rex ambassador (3.5/3.5)
+  - rex ambassador (3/2.5)
   - rex ambassador (4.5/3.5)
   - rex ambassador (4/3)
   - rex ambassador (6-3-1 settings)
+  - rex supply co. - ambassador
   - rex supply co. ambassador
   - rexambassador (4.5/3.5)
   Envoy:
@@ -3630,6 +3793,7 @@ RigaRazor:
   Straight:
   - 8/8" riga razor french point
   - riga 8/8"
+  - rigarazor 7/8 near wedge
 Rimei:
   A2001:
   - rimei a2001
@@ -3670,12 +3834,16 @@ Rockwell:
   - rockwell 6c (plate 4)
   - rockwell 6c (plate r2)
   - rockwell 6c (r3 plate)
+  - rockwell 6c (r3)
   - rockwell 6c (r4)
   - rockwell 6c (r6)
   - rockwell 6c - gunmetal
   - rockwell 6c - plate 6
   - rockwell 6c 4/4/2 plate
+  - rockwell 6c gunmetal
   - rockwell 6c gunmetal (level 4)
+  - rockwell 6c gunmetal (plate 4)
+  - rockwell 6c gunmetal plate number 4
   - rockwell 6c on a 5 plate
   - rockwell 6c plate 1 (newbie working on technique)
   - rockwell 6c plate 2
@@ -3684,6 +3852,8 @@ Rockwell:
   - rockwell 6c r2 plate
   - rockwell 6c r4
   - rockwell 6c r4 plate
+  - rockwell 6c r5 plate
+  - rockwell 6c r6
   - rockwell 6c, plate 2
   - rockwell 6c, plate 3
   - rockwell 6c, plate 4
@@ -3692,11 +3862,13 @@ Rockwell:
   - rockwell r6
   - rockwell, r3 plate
   6S:
+  - rickwell 6s
   - rockwell - 6s
   - rockwell 6s
   - rockwell 6s $six
   - rockwell 6s (3 plate)
   - rockwell 6s (4 plate)
+  - rockwell 6s (4, 1/3)
   - rockwell 6s (4/2 plate)
   - rockwell 6s (5/6)
   - rockwell 6s (6, 2)
@@ -3712,9 +3884,14 @@ Rockwell:
   - rockwell 6s (r3)
   - rockwell 6s (r4)
   - rockwell 6s (r45)
+  - rockwell 6s (r5)
+  - rockwell 6s (r5/r4)
   - rockwell 6s (r6 plate)
   - rockwell 6s (r6)
+  - rockwell 6s (r6/r4)
+  - rockwell 6s (r6/r5/r4)
   - 'rockwell 6s - #4'
+  - rockwell 6s - (6 plate)
   - rockwell 6s - plate 5
   - rockwell 6s - r3
   - rockwell 6s - r6
@@ -3724,7 +3901,9 @@ Rockwell:
   - rockwell 6s r3
   - rockwell 6s r4
   - rockwell 6s r6
+  - rockwell 6s ¡first shave
   - rockwell 6s, 6
+  - rockwell 6s, plate 6, hand polished
   - rockwell 6s, r3 plate
   - 'rockwell 6s: 6'
   - rockwell 6s:6
@@ -3735,6 +3914,7 @@ Rockwell:
   - rockwell t2 (face) + leaf (2 blade for the dome)
 Rocnel:
   Elite:
+  - rocnel - elite m
   - rocnel elite 2022
 Rogers Cutlery Co.:
   Straight:
@@ -3744,6 +3924,7 @@ Rolls:
   - rolls
   - rolls - u/priusaurus's rolls
   - rolls razor
+  - rolls razor imperial no 2
   - rolls razor imperial no 2 with accessories
   - rolls razor imperial no. 2
 Romer-7:
@@ -3789,6 +3970,7 @@ Schick:
   - schick "i" hydro-magic injector
   - schick - type i2 (hydro-magic)
   - schick 500 hydromagic
+  - schick eversharp hydro magic injector
   - schick hydro magic
   - schick hydro-magic
   - schick hydro-magic i2
@@ -3801,6 +3983,7 @@ Schick:
   - injector eversharp schick i1
   - injector schick
   - injector schick type e2 wrinkle gold finish
+  - long handle shick injector
   - schick "66"
   - schick "66" g4
   - schick - injector
@@ -3840,6 +4023,7 @@ Schick:
   - schick type l
   - schick type l1
   - shick injector
+  - shick injector paul revere with shick blades
   - stick schick injector
   - vintage schick injector razor type-e (1930-1940s)
   Krona:
@@ -3943,6 +4127,9 @@ Stahly:
   Live Blade:
   - stahly live blade head w/ wcs 175s handle
   - stahly live blade vibrating razor handle + rockwell 6c r2 plate
+Standard Razors:
+  Aluminum Series:
+  - standard razors deep black
 Stando:
   Jaruna Slant:
   - stando jaruna slant
@@ -3964,6 +4151,7 @@ Star Reito:
   - star reito staraet 55 6/8 special steel half hollow square point
 Stirling:
   Stainless Handle DE Razor:
+  - stirling de3p6s
   - stirling de3p7s
   - stirling hyper aggressive razor
   - stirling soap co. - 316 stainless steel razor
@@ -3979,8 +4167,10 @@ Sun Moon:
   - sun & moon green goblin
 Supply:
   SE:
+  - supply
   - supply razor
   - supply se
+  - supply stainless 2.0
   Single Edge (V1/V2):
   - supply - sing edge
   - supply injector v2
@@ -4022,13 +4212,18 @@ Tatara:
   - tatara masamune nodachi ti cc
   - tatara masamune nodachi ti edition
   - tatara masamune nodachi top cap
+  - tatara masamune w/ nodachi base plate
   - tatara masamune/nodachi
   - tatara masamune/nodachi hybrid
   - tatara nodachi
   - tatara nodachi closed
+  - tatara nodachi dark
+  - tatara nodachi head/cap with masamune handle
+  - tatara nodachi hybrid
   - tatara nodachi oc
   - tatara nodachi ti
   - tatara nodachi w/ masamune baseplate
+  - tatara nodachi/masamune hybrid
   - tatara oc masamune nodachi
   Muramasa:
   - tatara - muramasa
@@ -4111,12 +4306,15 @@ Timeless:
   - timeless .38 bronze
   - timeless .68
   - timeless .68 ss scalloped
+  - timeless .68 stainless steel
   - timeless .95
+  - timeless 95 ti
   - timeless al45
   - timeless alsb.45
   - timeless aluminum
   - timeless aluminum 0.45mm
   - timeless aluminum slant
+  - timeless br.38
   - timeless bronze .38
   - timeless bronze .38 sb
   - timeless bronze .38mm sb
@@ -4126,6 +4324,7 @@ Timeless:
   - timeless bronze 0.78mm oc
   - timeless bronze 38
   - timeless bronze 38 sb
+  - timeless bronze br.38
   - timeless bronze oc
   - timeless bronze oc (plate on loan)
   - timeless bronze oc .78 gap
@@ -4151,15 +4350,19 @@ Timeless:
   - timeless razor trbr78 bronze open comb
   - timeless slim oc
   - timeless ss
+  - timeless ss (c) plate
+  - timeless ss .68
   - timeless ss .68 gap
   - timeless ss .68 sb
   - timeless ss.68
   - timeless ti
   - timeless ti .68
+  - timeless ti .68 sb
   - timeless ti .95
   - timeless ti. .68
   - timeless ti.68
   - timeless ti95 .95 dc matte
+  - timeless titanium .68 on a dscosmetics kvt
   - timeless titanium slim
   - yaqi mellon chrome with timeless pineapple ss handle
 TRC:
@@ -4202,6 +4405,7 @@ Valet:
   - valet - vc3 (1935 -40)
   - valet auto strop
   - valet autostrop razor vb1
+  - valet autostrop vc3
   - valet vc3 (1935-40)
 Van Der Hagen:
   Razor:
@@ -4211,6 +4415,7 @@ Van Der Hagen:
 Vikings Blade:
   Chieftain:
   - viking chieftain
+  - viking's blade chieftain 5bc
   - vikings blade chieftain
   Chieftain 5 BC:
   - vikings blade the chieftain 5 bc
@@ -4327,6 +4532,9 @@ Wade & Butcher:
 Wadsworth Razor:
   XLNT:
   - wadsworth razor company xlnt
+Wardonia:
+  ? ''
+  : - wardonia bakelite
 WCS:
   '78':
   - wcs 78b
@@ -4338,6 +4546,7 @@ WCS:
   Multi Titanium Collection Razor:
   - w.c.s. multi titanium collection razor, 84m
   - wcs 84tb w/black titanium handle
+  - wcs titanium collection, bamboo handle
   Slant:
   - wcs x cg slant, yaqi stainless steel handle
 Weber:
@@ -4374,6 +4583,7 @@ Weck:
   - weck hair shaper shavette pink scales
   - weck hairshaper
   - weck hairshaper (short model)
+  - weck junior
   - weck sextobalde - bright red scales
   - weck sextoblade
   - weck sextoblade "trade sample not for sale"
@@ -4437,6 +4647,7 @@ Wolfman:
   - guerrilla razors titanium .84mm solid bar
   - guerrilla razors titanium 84mm sb
   - wolfman - guerrilla
+  - wolfman - guerrilla open comb
   - wolfman - titanium guerrilla
   - wolfman - titanium guerrilla - .54 saftey bar
   - wolfman guerilla
@@ -4462,7 +4673,10 @@ Wolfman:
   - wolfman satin wr1 dual comb 0.74 mm gap head on hollow wrh1 handle
   - wolfman ti wr1 .61
   - wolfman wr1
+  - wolfman wr1 .67 / wrh2
+  - wolfman wr1 .67 oc
   - wolfman wr1 .74 oc
+  - wolfman wr1 0.54mm/wrh7
   - wolfman wr1 0.84
   - wolfman wr1 0.95
   - wolfman wr1 oc .80mm
@@ -4480,6 +4694,7 @@ Wolfman:
   - wolfman - aluminum wr2 - 1.55mm
   - wolfman - wr2 1.15 w/wrh2
   - wolfman - wr2 sb 1.25 basic polish
+  - wolfman - wr2 solid bar .85 polished
   - wolfman .95 wr2
   - wolfman .95 wr2 w/ alpha bravo handle
   - wolfman 1.25 wr2
@@ -4500,7 +4715,9 @@ Wolfman:
   - wolfman wr2 .95 sb
   - wolfman wr2 .95mm sb wrh7 ss polished
   - wolfman wr2 0.95
+  - wolfman wr2 0.95 sb / wrh7
   - wolfman wr2 0.95 sb w h7 handle
+  - wolfman wr2 0.95mm/wrh2
   - wolfman wr2 0.95mm/wrh7
   - wolfman wr2 1.05
   - wolfman wr2 1.05 bronze
@@ -4518,15 +4735,19 @@ Wolfman:
   - wolfman wr2 1.05mm/wrh1
   - wolfman wr2 1.15
   - wolfman wr2 1.25
+  - wolfman wr2 1.25 / wrh7
   - wolfman wr2 1.25 dc / wrh7
   - wolfman wr2 1.25 dc bronze
   - wolfman wr2 1.25 dual comb
   - wolfman wr2 1.25 w/ russian bear titanium
   - wolfman wr2 1.25mm
+  - wolfman wr2 1.35 oc wrh2
   - wolfman wr2 oc
   - wolfman wr2 razorock super knurl handle
   - wolfman wr2 razorock superknurl handle
   - wolfman wr2 razorocl super knurl handle
+  - wolfman wr2 sb 0.95mm - wrh2
+  - wolfman wr2 sb 0.95mm - wrh7
   - wolfman wr2 sb 1.05 wrh7
   - wolfman wr2 sb 1.35mm
   - wolfman wr2 stainless
@@ -4622,15 +4843,24 @@ Yates:
   '921':
   - yates 921 with h hybrid plate
   - yates 921-h
+  - yates 921-hyb plate
   - yates 921-m
+  - yates 921-m (3.25")
   - yates 921-m (hybrid)
   - yates 931-m
+  - yates precision 921-h
+  - yates precision 921-h plate
+  - yates precision 921-hyb
+  - yates precision 921-hyb plate .64mm
   - yates precision manufacturing - 921-m
   - yates precision manufacturing 921-h
   - yates precision manufacturing 921-m
   - yates precision manufacturing 921-m (bead blast finish)
   - yates titanium lather games 2023 m plate
   - yates titanium m plate
+  - yates with h plate
+  - yates with m plate
+  - yates y921-3 (3.25'")
   - ypm model 921-h
   Winning:
   - wsc - winning razor mk1, mirror polished

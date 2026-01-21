@@ -348,7 +348,10 @@ known_knots:
         - ^(?!.*zen).*\bb8\b
     B9A:
       patterns:
-        - \bb0?9a\+?\b
+        - ^(?!.*b9a\+).*\bb0?9a
+    B9A+:
+      patterns:
+        - \bb0?9a\+
     B9B:
       patterns:
         - \bb0?9b\+?\b
@@ -477,6 +480,7 @@ known_knots:
     STF XL:
       knot_size_mm: 25
       patterns:
+        - ^(?!.*(ej|jagger)).*stf.*xl
         - m[uü]hle.*stf.*xl
         - stf.*xl
   Omega:
@@ -616,7 +620,7 @@ known_knots:
       patterns:
         - turn.{1,5}shave.*m\d
         - t[&n]s.*m\d
-        - ^(?!simpson).*\bm\d\b
+        - ^(?!.*(simpson|oumo)).*\bm\d\b
     Plissoft:
       fiber: Synthetic
       knot_size_mm: 24

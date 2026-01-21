@@ -802,7 +802,7 @@ Barrister and Mann:
       - taiga
     Terror:
       patterns:
-      - (barris|\bb ?(and|&|\+) ?m\b).*terror
+      - (barris|\bb ?(and|&|\+) ?m\b).*terror\b
     'The Four Horsemen: Death':
       patterns:
       - \bb ?(and|&|\+) ?m\b.*death
@@ -3037,6 +3037,19 @@ Mäurer & Wirtz:
       patterns:
       - \btabac\b
       - tabac original
+Men Rock:
+  patterns:
+  - men ?rock( shave cream)?
+  scents:
+    Black Pomegranate:
+      patterns:
+      - men ?rock.*pomegranate
+    Sandalwood:
+      patterns:
+      - men ?rock.*sandalwood
+    Sicilian Lime: 
+      patterns:
+      - men ?rock.*lime
 Mickey Lee Soapworks:
   patterns:
   - mickey lee( soapworks)?
@@ -3499,6 +3512,9 @@ PAA:
     Droid Black:
       patterns:
       - droid black
+    Lavender Planet:
+      patterns:
+      - (paa|phoenix).*lavender planet
     Planet Phoenix:
       patterns:
       - planet phoenix
@@ -4206,6 +4222,9 @@ Stirling Soap Co.:
     Eucalyptus Mint:
       patterns:
       - st[ie]rling.*eucalyptus.*mint
+    Evergreen Forest:
+      patterns:
+      - st[ie]rling.*evergreen forest
     Evie:
       patterns:
       - st[ie]rling.*evie
@@ -4267,6 +4286,9 @@ Stirling Soap Co.:
     Glacial Strawberry Lemonade:
       patterns:
       - st[ie]rling.*glacial.*strawberry lemonade
+    Glacial Wintergreen:
+      patterns:
+      - st[ie]rling.*glacial.*wintergreen
     Glastonbury:
       patterns:
       - st[ie]rling.*glastonbury
@@ -4900,6 +4922,9 @@ Tcheon Fung Sing:
       - ^\W*tfs\b.*red
       - ciotola rossa
       - tcheon
+    diVino:
+      patterns:
+      - tcheon.*divino
     Granducato Toscano:
       patterns:
       - granducato toscano
@@ -5014,12 +5039,15 @@ The Holy Black:
       - gunpowder spice
       - holy black.*artisan
       - holy black.*(shaving )?soap
+    Lemon Ice Creeper:
+      patterns:
+      - holy black.*lemon ice( creeper)?
     Mountain Man:
       patterns:
-      - holy black.*mountain m[ae]n
+      - holy black.*mountain m[ae]n(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     The Galleon:
       patterns:
-      - holy.*galleon
+      - holy.*galleon(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 The Los Angeles Shaving Soap Company:
   patterns:
   - ^(the )?los angeles( shaving soap (co\.?(mpany)?)?)?
@@ -5192,6 +5220,7 @@ Vitos:
       patterns:
       - vito.*extra super
       - vito.*super extra
+      - vito.*super.*red
     Extra Super Coco (Red):
       patterns:
       - vito.*(extra super|super extra)?.*coco

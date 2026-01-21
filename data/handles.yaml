@@ -224,6 +224,7 @@ artisan_handles:
       patterns:
         - heritage
         - heritage (collection|shaving)
+        - heritage.*ever[- ]?ready
   Hoosier Latheworks:
     Unspecified:
       patterns:
