@@ -33,9 +33,7 @@ def _generate_product_key(product_type: str, matched: Dict[str, Any]) -> str:
         return ""
 
 
-def _extract_product_info(
-    product_type: str, product_data: Dict[str, Any]
-) -> Dict[str, Any] | None:
+def _extract_product_info(product_type: str, product_data: Dict[str, Any]) -> Dict[str, Any] | None:
     """Extract product information from product data."""
     if not product_data:
         return None

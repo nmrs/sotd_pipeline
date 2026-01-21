@@ -65,7 +65,9 @@ def generate_table():
     lines.append("# Top 3 Razor Manufacturers by Year (2016-2025)")
     lines.append("")
     lines.append("*Data sourced from `data/aggregated/annual/*.json`*")
-    lines.append("*Shows full ranking history for all razor manufacturers that have ever been in the top 3*")
+    lines.append(
+        "*Shows full ranking history for all razor manufacturers that have ever been in the top 3*"
+    )
     lines.append("")
 
     # Header row

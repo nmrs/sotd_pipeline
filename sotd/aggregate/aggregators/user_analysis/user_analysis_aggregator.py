@@ -35,9 +35,7 @@ def _generate_product_key(product_type: str, matched: Dict[str, Any]) -> str:
         return ""
 
 
-def _extract_product_info(
-    product_type: str, product_data: Dict[str, Any]
-) -> Dict[str, Any] | None:
+def _extract_product_info(product_type: str, product_data: Dict[str, Any]) -> Dict[str, Any] | None:
     """Extract product information from product data."""
     if not product_data:
         return None
@@ -201,7 +199,9 @@ def aggregate_user_analysis(records: List[Dict[str, Any]]) -> Dict[str, Dict[str
                 }
                 # Add brush-specific fields
                 if product_type == "brush":
-                    products_dict[product_key]["handle_brand"] = product_info.get("handle_brand", "")
+                    products_dict[product_key]["handle_brand"] = product_info.get(
+                        "handle_brand", ""
+                    )
                     products_dict[product_key]["knot_brand"] = product_info.get("knot_brand", "")
                     products_dict[product_key]["knot_model"] = product_info.get("knot_model", "")
 

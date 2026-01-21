@@ -114,7 +114,9 @@ class AnnualAggregationEngine:
         self.year = year
         self.data_dir = data_dir
         self.monitor = AnnualPerformanceMonitor(year)
-        self._cached_enriched_records: Optional[List[Dict[str, Any]]] = None  # Cache for enriched records
+        self._cached_enriched_records: Optional[List[Dict[str, Any]]] = (
+            None  # Cache for enriched records
+        )
 
     def aggregate_razors(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
         """
@@ -1240,7 +1242,9 @@ class AnnualAggregationEngine:
                 grouped = grouped.merge(
                     unique_combinations_sum[["user", "unique_combinations"]], on="user", how="left"
                 )
-                grouped["unique_combinations"] = grouped["unique_combinations"].fillna(0).astype(int)
+                grouped["unique_combinations"] = (
+                    grouped["unique_combinations"].fillna(0).astype(int)
+                )
                 grouped["hhi"] = 0.0
                 grouped["effective_soaps"] = 0.0
 

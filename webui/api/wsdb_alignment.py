@@ -40,10 +40,10 @@ BATCH_ANALYZE_TIMEOUT: float = 300.0
 @asynccontextmanager
 async def timeout_context(timeout_seconds: float):
     """Context manager for operation timeout.
-    
+
     Args:
         timeout_seconds: Maximum time to allow for the operation
-        
+
     Raises:
         HTTPException: If operation exceeds timeout
     """
@@ -54,7 +54,7 @@ async def timeout_context(timeout_seconds: float):
         logger.warning(f"⚠️ Operation timed out after {timeout_seconds}s")
         raise HTTPException(
             status_code=504,
-            detail=f"Operation timed out after {timeout_seconds}s. Try reducing the number of months or increasing the threshold."
+            detail=f"Operation timed out after {timeout_seconds}s. Try reducing the number of months or increasing the threshold.",
         )
 
 
@@ -376,13 +376,13 @@ async def _load_wsdb_soaps_uncached() -> dict[str, Any]:
 
 async def get_cached_wsdb_data() -> dict[str, Any]:
     """Get WSDB data from cache or load if expired.
-    
+
     Returns:
         Dict containing list of WSDB soaps/creams and metadata
     """
     global _wsdb_cache, _wsdb_cache_timestamp
     current_time = time.time()
-    
+
     if not _wsdb_cache or (current_time - _wsdb_cache_timestamp) > _wsdb_cache_ttl:
         logger.info("🔄 WSDB cache expired or empty, loading fresh data")
         _wsdb_cache = await _load_wsdb_soaps_uncached()
@@ -390,29 +390,29 @@ async def get_cached_wsdb_data() -> dict[str, Any]:
     else:
         cache_age = current_time - _wsdb_cache_timestamp
         logger.debug(f"✅ Using cached WSDB data (age: {cache_age:.1f}s)")
-    
+
     return _wsdb_cache
 
 
 def get_cached_wsdb_normalized(wsdb_soaps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Get pre-normalized WSDB entries from cache or compute if needed.
-    
+
     Args:
         wsdb_soaps: List of WSDB soap dictionaries
-        
+
     Returns:
         List of pre-normalized entry dictionaries
     """
     global _wsdb_normalized_cache, _wsdb_cache_timestamp
     current_time = time.time()
-    
+
     # Invalidate normalized cache if it's stale or if we have new data
     if not _wsdb_normalized_cache or (current_time - _wsdb_cache_timestamp) > _wsdb_cache_ttl:
         logger.debug("🔄 Recomputing normalized WSDB entries")
         _wsdb_normalized_cache = pre_normalize_wsdb_entries(wsdb_soaps)
     else:
         logger.debug("✅ Using cached normalized WSDB entries")
-    
+
     return _wsdb_normalized_cache
 
 
@@ -700,26 +700,24 @@ def is_non_match(
             brand_non_matches_dict = scent_non_matches[source["source_brand"]]
             source_scent_raw = source.get("source_scent", "")
             match_name_raw = match.get("name", "")
-            
+
             # Check if source_scent is a key (canonical form)
             if source_scent_raw in brand_non_matches_dict:
                 list_contents = brand_non_matches_dict[source_scent_raw]
                 # Compare normalized values (normalize_for_matching already trims whitespace)
                 match_found = any(
-                    normalize_for_matching(nm.strip()) == match_scent
-                    for nm in list_contents
+                    normalize_for_matching(nm.strip()) == match_scent for nm in list_contents
                 )
                 if match_found:
                     if source_brand == match_brand:
                         return True
-            
+
             # Check if match name is a key (canonical form) and source_scent is in its list
             if match_name_raw in brand_non_matches_dict:
                 list_contents = brand_non_matches_dict[match_name_raw]
                 # Compare normalized values (normalize_for_matching already trims whitespace)
                 source_found = any(
-                    normalize_for_matching(nm.strip()) == source_scent
-                    for nm in list_contents
+                    normalize_for_matching(nm.strip()) == source_scent for nm in list_contents
                 )
                 if source_found:
                     if source_brand == match_brand:
@@ -732,26 +730,24 @@ def is_non_match(
             brand_non_matches_dict = scent_non_matches[match["brand"]]
             source_scent_raw = source.get("source_scent", "")
             match_name_raw = match.get("name", "")
-            
+
             # Check if match name is a key (canonical form)
             if match_name_raw in brand_non_matches_dict:
                 list_contents = brand_non_matches_dict[match_name_raw]
                 # Compare normalized values (normalize_for_matching already trims whitespace)
                 source_found = any(
-                    normalize_for_matching(nm.strip()) == source_scent
-                    for nm in list_contents
+                    normalize_for_matching(nm.strip()) == source_scent for nm in list_contents
                 )
                 if source_found:
                     if match_brand == source_brand:
                         return True
-            
+
             # Check if source_scent is a key (canonical form) and match name is in its list
             if source_scent_raw in brand_non_matches_dict:
                 list_contents = brand_non_matches_dict[source_scent_raw]
                 # Compare normalized values (normalize_for_matching already trims whitespace)
                 match_found = any(
-                    normalize_for_matching(nm.strip()) == match_scent
-                    for nm in list_contents
+                    normalize_for_matching(nm.strip()) == match_scent for nm in list_contents
                 )
                 if match_found:
                     if match_brand == source_brand:
@@ -811,22 +807,22 @@ async def batch_analyze(
         for soap_entry in pipeline_soaps:
             brand = soap_entry["brand"]
             scents = soap_entry.get("scents", [])
-            
+
             for scent_entry in scents:
                 scent_name = scent_entry.get("name", "").strip()
                 if not scent_name:
                     continue
-                
+
                 # Use brand+scent as key (case-insensitive for grouping)
                 key = f"{brand} - {scent_name}".lower()
-                
+
                 if key not in brand_scent_groups:
                     brand_scent_groups[key] = {
                         "brand": brand,
                         "scent": scent_name,
                         "count": 0,
                     }
-                
+
                 brand_scent_groups[key]["count"] += 1
 
         pipeline_results = []
@@ -998,9 +994,7 @@ async def batch_analyze(
                             score = fuzz.token_sort_ratio(scent_name, wsdb_name)
                             # Also try against virtual alias (stripped "soap")
                             if wsdb_name_virtual:
-                                virtual_score = fuzz.token_sort_ratio(
-                                    scent_name, wsdb_name_virtual
-                                )
+                                virtual_score = fuzz.token_sort_ratio(scent_name, wsdb_name_virtual)
                                 score = max(score, virtual_score)
                             if score > best_scent_score:
                                 best_scent_score = score
@@ -1018,26 +1012,26 @@ async def batch_analyze(
                         confidence = scent_score  # Use scent score directly
 
                         if confidence >= threshold * 100:
-                                matches.append(
-                                    {
-                                        "brand": wsdb_soap.get("brand"),
-                                        "name": wsdb_soap.get("name"),
-                                        "confidence": round(confidence, 2),
-                                        "brand_score": round(brand_score, 2),
-                                        "scent_score": round(scent_score, 2),
-                                        "source": "wsdb",
-                                        "matched_via": matched_via,
-                                        "scent_matched_via": scent_matched_via,
-                                        "details": {
-                                            "slug": wsdb_soap.get("slug"),
-                                            "scent_notes": wsdb_soap.get("scent_notes", []),
-                                            "collaborators": wsdb_soap.get("collaborators", []),
-                                            "tags": wsdb_soap.get("tags", []),
-                                            "category": wsdb_soap.get("category"),
-                                            "type": wsdb_soap.get("type"),
-                                        },
-                                    }
-                                )
+                            matches.append(
+                                {
+                                    "brand": wsdb_soap.get("brand"),
+                                    "name": wsdb_soap.get("name"),
+                                    "confidence": round(confidence, 2),
+                                    "brand_score": round(brand_score, 2),
+                                    "scent_score": round(scent_score, 2),
+                                    "source": "wsdb",
+                                    "matched_via": matched_via,
+                                    "scent_matched_via": scent_matched_via,
+                                    "details": {
+                                        "slug": wsdb_soap.get("slug"),
+                                        "scent_notes": wsdb_soap.get("scent_notes", []),
+                                        "collaborators": wsdb_soap.get("collaborators", []),
+                                        "tags": wsdb_soap.get("tags", []),
+                                        "category": wsdb_soap.get("category"),
+                                        "type": wsdb_soap.get("type"),
+                                    },
+                                }
+                            )
 
                     # Filter non-matches before sorting
                     source_item = {
@@ -1269,19 +1263,19 @@ async def batch_analyze(
                         confidence = scent_score  # Use scent score directly
 
                         if confidence >= threshold * 100:
-                                matches.append(
-                                    {
-                                        "brand": brand_entry["brand"],
-                                        "name": scent["name"],
-                                        "confidence": round(confidence, 2),
-                                        "brand_score": round(brand_score, 2),
-                                        "scent_score": round(scent_score, 2),
-                                        "source": "pipeline",
-                                        "matched_via": matched_via,
-                                        "scent_matched_via": scent_matched_via,
-                                        "details": {"patterns": scent.get("patterns", [])},
-                                    }
-                                )
+                            matches.append(
+                                {
+                                    "brand": brand_entry["brand"],
+                                    "name": scent["name"],
+                                    "confidence": round(confidence, 2),
+                                    "brand_score": round(brand_score, 2),
+                                    "scent_score": round(scent_score, 2),
+                                    "source": "pipeline",
+                                    "matched_via": matched_via,
+                                    "scent_matched_via": scent_matched_via,
+                                    "details": {"patterns": scent.get("patterns", [])},
+                                }
+                            )
 
                 # Filter non-matches before sorting
                 source_item = {
@@ -1709,7 +1703,8 @@ async def batch_analyze_match_files(
             for month in month_list:
                 if not is_valid_month(month):
                     raise HTTPException(
-                        status_code=400, detail=f"Invalid month format: {month}. Use YYYY-MM format."
+                        status_code=400,
+                        detail=f"Invalid month format: {month}. Use YYYY-MM format.",
                     )
 
             logger.info(
@@ -1735,8 +1730,10 @@ async def batch_analyze_match_files(
                     if file_size_mb > 10:
                         logger.warning(f"⚠️ Large file detected: {file_size_mb:.1f}MB for {month}")
                     if file_size_mb > 50:
-                        logger.info(f"📂 Loading large file ({file_size_mb:.1f}MB), this may take a moment...")
-                    
+                        logger.info(
+                            f"📂 Loading large file ({file_size_mb:.1f}MB), this may take a moment..."
+                        )
+
                     with month_file.open("r", encoding="utf-8") as f:
                         match_data = json.load(f)
 
@@ -1770,7 +1767,7 @@ async def batch_analyze_match_files(
                                     if match_type not in ("exact", "regex"):
                                         continue  # Skip dash_split, brand, and other non-canonical matches
                                     records_exact_regex += 1
-                                    
+
                                     # Add comment_id if available
                                     soap_entry = soap.copy()
                                     soap_entry["comment_id"] = record.get(
@@ -1825,7 +1822,9 @@ async def batch_analyze_match_files(
                     brand_scent_groups[key]["comment_ids"].append(soap.get("comment_id"))
                 brand_scent_groups[key]["count"] += 1
 
-            logger.info(f"📊 Grouped into {len(brand_scent_groups)} unique brand+scent combinations")
+            logger.info(
+                f"📊 Grouped into {len(brand_scent_groups)} unique brand+scent combinations"
+            )
 
             # Load WSDB data (cached)
             wsdb_data = await get_cached_wsdb_data()
@@ -1833,8 +1832,10 @@ async def batch_analyze_match_files(
 
             # Get pre-normalized WSDB entries (cached)
             wsdb_normalized = get_cached_wsdb_normalized(wsdb_soaps)
-            
-            logger.info(f"📊 Processing {len(brand_scent_groups)} groups against {len(wsdb_normalized)} WSDB entries")
+
+            logger.info(
+                f"📊 Processing {len(brand_scent_groups)} groups against {len(wsdb_normalized)} WSDB entries"
+            )
 
             # Load pipeline soaps for alias lookup
             pipeline_data = await load_pipeline_soaps()
@@ -1847,7 +1848,7 @@ async def batch_analyze_match_files(
             non_matches_data = await load_non_matches()
             brand_non_matches = non_matches_data.get("brand_non_matches", {})
             scent_non_matches = non_matches_data.get("scent_non_matches", {})
-            
+
             # Pre-compute non-match lookup sets for faster O(1) checking
             # Create bidirectional lookup: (brand, scent1, scent2) and (brand, scent2, scent1)
             scent_non_match_lookup: set[tuple[str, str, str]] = set()
@@ -1870,8 +1871,10 @@ async def batch_analyze_match_files(
 
             # Match each brand+scent combination against WSDB
             total_groups = len(brand_scent_groups)
-            logger.info(f"🔄 Starting matching: {total_groups} groups, threshold={threshold}, brand_threshold={brand_threshold}")
-            
+            logger.info(
+                f"🔄 Starting matching: {total_groups} groups, threshold={threshold}, brand_threshold={brand_threshold}"
+            )
+
             for idx, (key, group_data) in enumerate(brand_scent_groups.items()):
                 # Progress logging every 50 groups
                 if (idx + 1) % 50 == 0 or idx == 0:
@@ -1964,7 +1967,9 @@ async def batch_analyze_match_files(
                     matches = [
                         m
                         for m in matches
-                        if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                        if not is_non_match(
+                            source_item, m, brand_non_matches, scent_non_matches, mode
+                        )
                     ]
 
                     # Sort and limit: prefer Soap over Cream when scores are equal
@@ -2061,7 +2066,9 @@ async def batch_analyze_match_files(
                                 # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
                                 if scent_idx == 0:
                                     scent_matched_via = "canonical"
-                                elif scent_idx == len(scent_names_to_try) - 1 and scent_dict.get("alias"):
+                                elif scent_idx == len(scent_names_to_try) - 1 and scent_dict.get(
+                                    "alias"
+                                ):
                                     scent_matched_via = "virtual_alias"
                                 else:
                                     scent_matched_via = "alias"
@@ -2099,7 +2106,7 @@ async def batch_analyze_match_files(
 
                     # Filter non-matches before sorting
                     source_item = {"source_brand": pipeline_brand, "source_scent": pipeline_scent}
-                    
+
                     # Use optimized lookup set for faster filtering (O(1) instead of O(n) dictionary iteration)
                     if mode == "brand_scent" and scent_non_match_lookup:
                         source_brand_norm = normalize_for_matching(pipeline_brand)
@@ -2110,8 +2117,10 @@ async def batch_analyze_match_files(
                             match_scent_norm = normalize_for_matching(m.get("name", ""))
                             # Check both directions using pre-computed lookup set
                             is_non_match_result = (
-                                (source_brand_norm, source_scent_norm, match_scent_norm) in scent_non_match_lookup
-                                or (source_brand_norm, match_scent_norm, source_scent_norm) in scent_non_match_lookup
+                                (source_brand_norm, source_scent_norm, match_scent_norm)
+                                in scent_non_match_lookup
+                                or (source_brand_norm, match_scent_norm, source_scent_norm)
+                                in scent_non_match_lookup
                             ) and source_brand_norm == match_brand_norm
                             if not is_non_match_result:
                                 filtered_matches.append(m)
@@ -2174,7 +2183,9 @@ async def batch_analyze_match_files(
                     matches = []
 
                     # Match against unique brands from match files
-                    unique_brands = {group_data["brand"] for group_data in brand_scent_groups.values()}
+                    unique_brands = {
+                        group_data["brand"] for group_data in brand_scent_groups.values()
+                    }
                     for pipeline_brand in unique_brands:
                         # Look up brand in pipeline soaps to get aliases
                         brand_entry = brand_lookup.get(
@@ -2229,7 +2240,9 @@ async def batch_analyze_match_files(
                     matches = [
                         m
                         for m in matches
-                        if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                        if not is_non_match(
+                            source_item, m, brand_non_matches, scent_non_matches, mode
+                        )
                     ]
 
                     matches.sort(key=lambda x: x["confidence"], reverse=True)
@@ -2260,7 +2273,9 @@ async def batch_analyze_match_files(
                         brand_entry = brand_lookup.get(
                             pipeline_brand, {"brand": pipeline_brand, "aliases": [], "scents": []}
                         )
-                        pipeline_brand_cache[pipeline_brand] = pre_normalize_pipeline_brand(brand_entry)
+                        pipeline_brand_cache[pipeline_brand] = pre_normalize_pipeline_brand(
+                            brand_entry
+                        )
 
                     # Cache normalized scent if not already cached
                     cache_key = (pipeline_brand, pipeline_scent)
@@ -2313,7 +2328,8 @@ async def batch_analyze_match_files(
                                 f"⚠️ Brand {pipeline_brand} not in cache, computing on-the-fly"
                             )
                             brand_entry = brand_lookup.get(
-                                pipeline_brand, {"brand": pipeline_brand, "aliases": [], "scents": []}
+                                pipeline_brand,
+                                {"brand": pipeline_brand, "aliases": [], "scents": []},
                             )
                             pipeline_brand_cache[pipeline_brand] = pre_normalize_pipeline_brand(
                                 brand_entry
@@ -2325,9 +2341,12 @@ async def batch_analyze_match_files(
                         # Use cached normalized scent
                         cache_key = (pipeline_brand, pipeline_scent)
                         if cache_key not in pipeline_scent_cache:
-                            logger.warning(f"⚠️ Scent {cache_key} not in cache, computing on-the-fly")
+                            logger.warning(
+                                f"⚠️ Scent {cache_key} not in cache, computing on-the-fly"
+                            )
                             brand_entry = brand_lookup.get(
-                                pipeline_brand, {"brand": pipeline_brand, "aliases": [], "scents": []}
+                                pipeline_brand,
+                                {"brand": pipeline_brand, "aliases": [], "scents": []},
                             )
                             scent_dict = None
                             for scent_info in brand_entry.get("scents", []):
@@ -2387,7 +2406,9 @@ async def batch_analyze_match_files(
                                 # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
                                 if scent_idx == 0:
                                     scent_matched_via = "canonical"
-                                elif scent_idx == len(scent_names_to_try) - 1 and scent_dict.get("alias"):
+                                elif scent_idx == len(scent_names_to_try) - 1 and scent_dict.get(
+                                    "alias"
+                                ):
                                     scent_matched_via = "virtual_alias"
                                 else:
                                     scent_matched_via = "alias"
@@ -2418,7 +2439,9 @@ async def batch_analyze_match_files(
                     matches = [
                         m
                         for m in matches
-                        if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+                        if not is_non_match(
+                            source_item, m, brand_non_matches, scent_non_matches, mode
+                        )
                     ]
 
                     matches.sort(key=lambda x: x["confidence"], reverse=True)

@@ -101,7 +101,9 @@ async def get_users_for_month(
         project_root = Path(__file__).parent.parent.parent
 
         # Try to load from pre-computed user analysis file
-        user_analysis_file = project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+        user_analysis_file = (
+            project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+        )
 
         if user_analysis_file.exists():
             try:
@@ -125,7 +127,9 @@ async def get_users_for_month(
                 return users[:50]
 
             except Exception as e:
-                logger.warning(f"Error loading user analysis file for {month}: {e}, falling back to enriched data")
+                logger.warning(
+                    f"Error loading user analysis file for {month}: {e}, falling back to enriched data"
+                )
 
         # Fallback: Load enriched data and process on-demand
         try:
@@ -142,7 +146,8 @@ async def get_users_for_month(
 
             # Convert to our expected format
             users = [
-                {"username": user["user"], "post_count": user["shaves"]} for user in user_aggregations
+                {"username": user["user"], "post_count": user["shaves"]}
+                for user in user_aggregations
             ]
 
             # Apply search filter if provided
@@ -169,7 +174,9 @@ async def get_user_posting_analysis(month: str, username: str) -> UserPostingAna
         project_root = Path(__file__).parent.parent.parent
 
         # Try to load from pre-computed user analysis file
-        user_analysis_file = project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+        user_analysis_file = (
+            project_root / "data" / "aggregated" / "user_analysis" / f"{month}.json"
+        )
 
         if user_analysis_file.exists():
             try:
