@@ -6,17 +6,15 @@ Phase 2: Thread discovery using Reddit's search API.
 from __future__ import annotations
 
 import calendar
+import re
 from collections import defaultdict
 from datetime import date
-from typing import Any, Dict, List, Optional
-
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from sotd.fetch_via_html.html_scraper import get_reddit_cookies, get_reddit_json, get_reddit_session
-from sotd.fetch_via_html.parser import filter_valid_threads_html, parse_thread_from_json
+from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_json, get_reddit_session
+from sotd.fetch_via_json.parser import filter_valid_threads_json, parse_thread_from_json
 from sotd.utils import parse_thread_date
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
@@ -70,12 +68,12 @@ def search_reddit_json(
     return threads
 
 
-def search_threads_html(
+def search_threads_json(
     subreddit_name: str, year: int, month: int, *, debug: bool = False, cookies: Optional[dict] = None
 ) -> List[Dict[str, Any]]:
-    """Search for SOTD threads using Reddit's HTML/JSON API.
+    """Search for SOTD threads using Reddit's JSON API.
     
-    This is the HTML-based equivalent of the PRAW search_threads function.
+    This is the JSON-based equivalent of the PRAW search_threads function.
     It uses the same search strategy: broad queries first, then day-specific
     if we hit the 100-result limit.
     
@@ -115,7 +113,7 @@ def search_threads_html(
         try:
             raw_results = search_reddit_json(subreddit_name, query, limit=100, cookies=cookies, session=session)
             if debug:
-                print(f"[DEBUG] HTML raw results for {query!r}: {len(raw_results)}")
+                print(f"[DEBUG] JSON raw results for {query!r}: {len(raw_results)}")
             
             # Check if we hit the 100-result limit (indicates there might be more results)
             if len(raw_results) >= 100:
@@ -137,7 +135,7 @@ def search_threads_html(
             print("[DEBUG] Analyzing thread patterns to identify missing days")
         
         # First filter the broad results to only current year/month
-        filtered_results = filter_valid_threads_html(
+        filtered_results = filter_valid_threads_json(
             list(all_results.values()), year, month, debug=debug
         )
         
@@ -200,7 +198,7 @@ def search_threads_html(
                             subreddit_name, query, limit=100, cookies=cookies, session=session
                         )
                         if debug:
-                            print(f"[DEBUG] HTML raw results for {query!r}: {len(raw_results)}")
+                            print(f"[DEBUG] JSON raw results for {query!r}: {len(raw_results)}")
                         
                         # Dedupe by Reddit submission ID
                         for thread in raw_results:
@@ -214,9 +212,9 @@ def search_threads_html(
     if debug:
         print(f"[DEBUG] Combined raw results (deduped): {len(combined)}")
     
-    # Process thread overrides (HTML version - no PRAW)
+    # Process thread overrides (JSON version - no PRAW)
     month_str = f"{year:04d}-{month:02d}"
-    override_threads = process_thread_overrides_html(month_str, cookies=cookies, session=session, debug=debug)
+    override_threads = process_thread_overrides_json(month_str, cookies=cookies, session=session, debug=debug)
     
     # Add override threads to results (deduplication by ID)
     for override_thread in override_threads:
@@ -231,7 +229,7 @@ def search_threads_html(
         print(f"[DEBUG] Combined results with overrides: {len(combined)}")
     
     # Filter to valid threads for this year/month
-    valid_threads = filter_valid_threads_html(combined, year, month, debug=debug)
+    valid_threads = filter_valid_threads_json(combined, year, month, debug=debug)
     
     return valid_threads
 
@@ -306,12 +304,12 @@ def fetch_thread_by_url(url: str, cookies: Optional[dict] = None, session: Optio
         return None
 
 
-def process_thread_overrides_html(
+def process_thread_overrides_json(
     month: str, *, cookies: Optional[dict] = None, session: Optional[Any] = None, debug: bool = False
 ) -> List[Dict[str, Any]]:
-    """Process thread overrides from YAML file using HTML/JSON API (no PRAW).
+    """Process thread overrides from YAML file using JSON API (no PRAW).
     
-    This is the HTML-based equivalent of process_thread_overrides.
+    This is the JSON-based equivalent of process_thread_overrides.
     It loads the same YAML file and fetches threads via JSON API.
     
     Args:

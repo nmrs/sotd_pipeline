@@ -1,12 +1,10 @@
-"""HTML/JSON parsing utilities for Reddit content.
+"""JSON parsing utilities for Reddit content.
 
-Phase 2: Thread discovery and parsing.
+Thread and comment parsing from Reddit's JSON API responses.
 """
 
 from __future__ import annotations
 
-import calendar
-from collections import defaultdict
 from datetime import date, datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -93,7 +91,7 @@ def parse_thread_from_json(json_data: Dict[str, Any]) -> Optional[Dict[str, Any]
     }
 
 
-def filter_valid_threads_html(
+def filter_valid_threads_json(
     threads: List[Dict[str, Any]], year: int, month: int, *, debug: bool = False
 ) -> List[Dict[str, Any]]:
     """Filter threads to only those matching the specified year/month.

@@ -44,6 +44,7 @@ debug_*.py
 .aider*
 praw.ini
 .env
+.reddit_cookies.json
 *.bk
 *.bk/data/correct_matches.yaml.backup
 data/backup/

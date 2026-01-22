@@ -539,6 +539,22 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                 i += 1
                 continue
 
+            elif arg.startswith("--skip-unchanged"):
+                # Only pass to fetch_json phase
+                if phase == "fetch_json":
+                    phase_args.append(arg)
+                # If phase doesn't support it, skip it
+                i += 1
+                continue
+
+            elif arg.startswith("--parallel-comments"):
+                # Only pass to fetch_json phase
+                if phase == "fetch_json":
+                    phase_args.append(arg)
+                # If phase doesn't support it, skip it
+                i += 1
+                continue
+
             # Pass through all other arguments (date args, out-dir, debug, force)
             phase_args.append(arg)
             i += 1
@@ -907,6 +923,17 @@ Examples:
         "--verbose",
         action="store_true",
         help="Show INFO messages during pipeline execution",
+    )
+    # fetch_json-specific arguments
+    parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="Skip fetching comments for threads where num_comments hasn't increased (fetch_json only)",
+    )
+    parser.add_argument(
+        "--parallel-comments",
+        action="store_true",
+        help="Use parallel processing for comment fetching (fetch_json only)",
     )
 
     args = parser.parse_args(argv)

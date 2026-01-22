@@ -1,8 +1,11 @@
-"""HTML-based fetch phase - Phase 2: Thread discovery.
+"""JSON-based fetch phase - Complete implementation.
 
 Phase 1: Authentication validation ✅
-Phase 2: Thread discovery ✅ (in progress)
-Phase 3: Comment fetching (not yet implemented)
+Phase 2: Thread discovery ✅
+Phase 3: Comment fetching ✅
+
+This implementation uses Reddit's public JSON endpoints instead of PRAW.
+No OAuth or client credentials required - just HTTP GET requests.
 """
 
 from __future__ import annotations
@@ -14,17 +17,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
 
+from tqdm import tqdm
+
 from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.save import load_month_file, write_month_file
-from sotd.fetch_via_html.comments import fetch_comments_for_threads_html
-from sotd.fetch_via_html.html_scraper import get_reddit_cookies, get_reddit_session
-from sotd.fetch_via_html.search import search_threads_html
+from sotd.fetch_via_json.comments import fetch_comments_for_threads_json
+from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_session
+from sotd.fetch_via_json.search import search_threads_json
 
 
 def get_parser() -> argparse.ArgumentParser:
-    """Get argument parser for fetch_html phase."""
-    parser = argparse.ArgumentParser(description="HTML-based Reddit fetch (Phase 2: Thread discovery)")
+    """Get argument parser for fetch_json phase."""
+    parser = argparse.ArgumentParser(description="JSON-based Reddit fetch (no PRAW dependency)")
     
     # Date arguments (same as existing fetch phase)
     date_group = parser.add_mutually_exclusive_group()
@@ -38,6 +43,14 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--force", action="store_true", help="Force re-fetch even if files exist")
     parser.add_argument("--debug", action="store_true", help="Enable debug output")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("--parallel-comments", action="store_true", help="Use parallel processing for comment fetching")
+    parser.add_argument("--max-workers", type=int, default=5, help="Max worker threads for parallel comment fetching (default: 5)")
+    parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="Skip fetching comments for threads where num_comments hasn't increased. "
+        "Risk: If a comment is deleted and a new one is added (same count), changes may be missed."
+    )
     
     return parser
 
@@ -47,14 +60,14 @@ def _process_month(
     month: int,
     args: argparse.Namespace,
 ) -> dict:
-    """Fetch threads for one calendar month using HTML/JSON API."""
+    """Fetch threads for one calendar month using JSON API."""
     cookies = get_reddit_cookies()
     
     if args.debug:
         print(f"[DEBUG] Searching for threads in {year:04d}-{month:02d}")
     
     # Search for threads
-    threads = search_threads_html("wetshaving", year, month, debug=args.debug, cookies=cookies)
+    threads = search_threads_json("wetshaving", year, month, debug=args.debug, cookies=cookies)
     
     if args.debug:
         print(f"[DEBUG] Found {len(threads)} valid threads")
@@ -127,15 +140,41 @@ def _process_month(
             present.add(d)
     missing = sorted(expected - present)
     
+    # Load existing data for skip-unchanged optimization
+    existing_threads = None
+    existing_comments = None
+    if args.skip_unchanged and not args.force:
+        existing_threads_data = load_month_file(threads_path)
+        existing_comments_data = load_month_file(comments_path)
+        if existing_threads_data:
+            existing_threads = existing_threads_data[1]
+        if existing_comments_data:
+            existing_comments = existing_comments_data[1]
+    
     # Fetch comments (Phase 3)
     if args.verbose:
         print(f"[INFO] Fetching comments for {len(merged_threads)} threads...")
     
+    # Warning for skip-unchanged optimization
+    if args.skip_unchanged:
+        print(
+            "[WARN] Using --skip-unchanged optimization. "
+            "Risk: If a comment is deleted and a new one is added (same count), changes may be missed."
+        )
+    
     cookies = get_reddit_cookies()
     session = get_reddit_session(cookies=cookies)
     
-    comment_records = fetch_comments_for_threads_html(
-        merged_threads, cookies=cookies, session=session, verbose=args.verbose
+    comment_records = fetch_comments_for_threads_json(
+        merged_threads, 
+        cookies=cookies, 
+        session=session, 
+        verbose=args.verbose,
+        parallel=args.parallel_comments,
+        max_workers=args.max_workers,
+        skip_unchanged=args.skip_unchanged,
+        existing_threads=existing_threads,
+        existing_comments=existing_comments
     )
     
     # Merge with existing comments
@@ -177,6 +216,34 @@ def _process_month(
             f"for {year:04d}-{month:02d} ({len(missing)} missing days)"
         )
     
+    # Print skip-unchanged statistics if enabled
+    if args.skip_unchanged and not args.force and existing_threads:
+        # Build lookup map for comparison
+        existing_thread_map = {t.get("id"): t.get("num_comments", 0) for t in existing_threads if t.get("id")}
+        existing_thread_ids = set(existing_thread_map.keys())
+        
+        # Calculate statistics
+        total_threads = len(merged_threads)
+        fetched_count = sum(
+            1 for t in merged_threads
+            if t.get("id") in existing_thread_ids
+            and t.get("num_comments", 0) > existing_thread_map.get(t.get("id"), 0)
+        )
+        skipped_count = sum(
+            1 for t in merged_threads
+            if t.get("id") in existing_thread_ids
+            and t.get("num_comments", 0) <= existing_thread_map.get(t.get("id"), 0)
+        )
+        new_threads_count = sum(1 for t in merged_threads if t.get("id") not in existing_thread_ids)
+        
+        if skipped_count > 0 or fetched_count < total_threads:
+            print(
+                f"[INFO] Skip-unchanged summary: "
+                f"{fetched_count} threads fetched, "
+                f"{skipped_count} threads skipped, "
+                f"{new_threads_count} new threads"
+            )
+    
     return {
         "year": year,
         "month": month,
@@ -187,15 +254,16 @@ def _process_month(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Phase 2: Thread discovery via HTML/JSON API.
+    """JSON-based fetch via Reddit's public JSON endpoints.
     
     This implementation:
     1. Searches Reddit using JSON API (no PRAW)
     2. Parses thread data from JSON responses
     3. Filters threads by date
-    4. Saves to same format as PRAW implementation
+    4. Fetches comments via JSON API
+    5. Saves to same format as PRAW implementation
     
-    Phase 3 (comment fetching) not yet implemented.
+    No OAuth or client credentials required - uses public JSON endpoints.
     """
     try:
         parser = get_parser()
@@ -214,7 +282,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("[INFO] Set REDDIT_SESSION_COOKIE for better rate limits (60+ QPM)")
         
         results = []
-        for year, month in months:
+        for year, month in tqdm(months, desc="Months", unit="month", disable=False):
             result = _process_month(year, month, args)
             results.append(result)
         
@@ -226,7 +294,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             missing_days = res["missing_days"]
             if args.verbose:
                 print(
-                    f"[INFO] HTML fetch complete for {year:04d}-{month:02d}: "
+                    f"[INFO] JSON fetch complete for {year:04d}-{month:02d}: "
                     f"{res['threads']} threads, "
                     f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
                 )
@@ -241,13 +309,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             
             if args.verbose:
                 print(
-                    f"[INFO] HTML fetch complete for "
+                    f"[INFO] JSON fetch complete for "
                     f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
                     f"{total_threads} threads, "
                     f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
                 )
         
-        print("\n[INFO] ✅ Phase 3 complete! (Thread discovery + comment fetching)")
+        print("\n[INFO] ✅ JSON-based fetch complete! (Thread discovery + comment fetching)")
         return 0
     except KeyboardInterrupt:
         print("\n[INFO] Fetch phase interrupted by user")
