@@ -1,5 +1,7 @@
 # 🧸 SOTD Pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Overview
 
 SOTD Pipeline is a Python data processing system for turning r/wetshaving “Shave of the Day” (SOTD)
