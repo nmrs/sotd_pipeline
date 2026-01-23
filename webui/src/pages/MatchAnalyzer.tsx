@@ -40,7 +40,7 @@ const MatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [deltaMonths, setDeltaMonths] = useState<string[]>([]);
-  const [threshold, setThreshold] = useState<number>(3);
+  const [threshold, setThreshold] = useState<number>(0);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [groupByMatched, setGroupByMatched] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
