@@ -720,7 +720,8 @@ class TestMoveCatalogEntries:
             if original_project_root:
                 analysis_module.project_root = original_project_root
 
-    def test_move_structural_change_handle_knot_to_brush(self, tmp_path):
+    @pytest.mark.asyncio
+    async def test_move_structural_change_handle_knot_to_brush(self, tmp_path):
         """Test moving a structural_change entry from handle_knot to brush."""
         # Create initial correct_matches data with handle and knot entries
         initial_data = {
@@ -770,8 +771,8 @@ class TestMoveCatalogEntries:
         analysis_module.project_root = tmp_path
 
         try:
-            # Execute move
-            response = move_catalog_validation_entries(request)
+            # Execute move (await the async function)
+            response = await move_catalog_validation_entries(request)
 
             # Verify response
             assert response.success is True

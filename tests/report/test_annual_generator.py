@@ -23,34 +23,34 @@ class TestAnnualReportGenerator:
                 "missing_months": 0,
             },
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1},
-                {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "position": 2},
+                {"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "rank": 1},
+                {"name": "Merkur 34C", "shaves": 150, "unique_users": 60, "rank": 2},
             ],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1,
+                    "rank": 1,
                 },
-                {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "position": 2},
+                {"name": "Feather Hi-Stainless", "shaves": 200, "unique_users": 85, "rank": 2},
             ],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1},
-                {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "position": 2},
+                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "rank": 1},
+                {"name": "Omega 10049", "shaves": 80, "unique_users": 35, "rank": 2},
             ],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1,
+                    "rank": 1,
                 },
                 {
                     "name": "Stirling Executive Man",
                     "shaves": 100,
                     "unique_users": 45,
-                    "position": 2,
+                    "rank": 2,
                 },
             ],
         }
@@ -176,28 +176,28 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
                 "missing_months": 0,
                 "extra_metadata_field": "should be ignored",
             },
-            "razors": [{"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "position": 1}],
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "unique_users": 80, "rank": 1}],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 250,
                     "unique_users": 90,
-                    "position": 1,
+                    "rank": 1,
                 }
             ],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "position": 1}
+                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "rank": 1}
             ],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 120,
                     "unique_users": 50,
-                    "position": 1,
+                    "rank": 1,
                 }
             ],
             "extra_category": [
-                {"name": "Extra Product", "shaves": 50, "unique_users": 20, "position": 1}
+                {"name": "Extra Product", "shaves": 50, "unique_users": 20, "rank": 1}
             ],
         }
 
@@ -244,19 +244,19 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
         """Test performance with large annual data sets."""
         # Create large dataset with many products
         large_razors = [
-            {"name": f"Razor {i}", "shaves": 100 + i, "unique_users": 50 + i, "position": i}
+            {"name": f"Razor {i}", "shaves": 100 + i, "unique_users": 50 + i, "rank": i}
             for i in range(1, 101)
         ]
         large_blades = [
-            {"name": f"Blade {i}", "shaves": 200 + i, "unique_users": 100 + i, "position": i}
+            {"name": f"Blade {i}", "shaves": 200 + i, "unique_users": 100 + i, "rank": i}
             for i in range(1, 101)
         ]
         large_brushes = [
-            {"name": f"Brush {i}", "shaves": 50 + i, "unique_users": 25 + i, "position": i}
+            {"name": f"Brush {i}", "shaves": 50 + i, "unique_users": 25 + i, "rank": i}
             for i in range(1, 101)
         ]
         large_soaps = [
-            {"name": f"Soap {i}", "shaves": 75 + i, "unique_users": 40 + i, "position": i}
+            {"name": f"Soap {i}", "shaves": 75 + i, "unique_users": 40 + i, "rank": i}
             for i in range(1, 101)
         ]
 
@@ -369,53 +369,53 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
                 ],
             },
             "razors": [
-                {"name": "Rockwell 6C", "shaves": 1200, "unique_users": 300, "position": 1},
-                {"name": "Merkur 34C", "shaves": 800, "unique_users": 250, "position": 2},
-                {"name": "Gillette Super Speed", "shaves": 600, "unique_users": 200, "position": 3},
+                {"name": "Rockwell 6C", "shaves": 1200, "unique_users": 300, "rank": 1},
+                {"name": "Merkur 34C", "shaves": 800, "unique_users": 250, "rank": 2},
+                {"name": "Gillette Super Speed", "shaves": 600, "unique_users": 200, "rank": 3},
             ],
             "blades": [
                 {
                     "name": "Astra Superior Platinum",
                     "shaves": 2000,
                     "unique_users": 400,
-                    "position": 1,
+                    "rank": 1,
                 },
                 {
                     "name": "Feather Hi-Stainless",
                     "shaves": 1500,
                     "unique_users": 350,
-                    "position": 2,
+                    "rank": 2,
                 },
                 {
                     "name": "Gillette Silver Blue",
                     "shaves": 1000,
                     "unique_users": 300,
-                    "position": 3,
+                    "rank": 3,
                 },
             ],
             "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 500, "unique_users": 150, "position": 1},
-                {"name": "Omega 10049", "shaves": 400, "unique_users": 120, "position": 2},
-                {"name": "Yaqi Sagrada Familia", "shaves": 300, "unique_users": 100, "position": 3},
+                {"name": "Simpson Chubby 2", "shaves": 500, "unique_users": 150, "rank": 1},
+                {"name": "Omega 10049", "shaves": 400, "unique_users": 120, "rank": 2},
+                {"name": "Yaqi Sagrada Familia", "shaves": 300, "unique_users": 100, "rank": 3},
             ],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",
                     "shaves": 800,
                     "unique_users": 200,
-                    "position": 1,
+                    "rank": 1,
                 },
                 {
                     "name": "Stirling Executive Man",
                     "shaves": 600,
                     "unique_users": 180,
-                    "position": 2,
+                    "rank": 2,
                 },
                 {
                     "name": "Declaration Grooming Original",
                     "shaves": 400,
                     "unique_users": 120,
-                    "position": 3,
+                    "rank": 3,
                 },
             ],
         }
