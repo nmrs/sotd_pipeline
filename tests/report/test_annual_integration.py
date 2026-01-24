@@ -41,6 +41,22 @@ class TestAnnualReportIntegration:
             ],
             "razor-formats": [{"format": "DE", "shaves": 1000, "unique_users": 100, "rank": 1}],
             "razor-manufacturers": [{"brand": "Rockwell", "shaves": 500, "unique_users": 50, "rank": 1}],
+            "blade-manufacturers": [{"brand": "Astra", "shaves": 800, "unique_users": 80, "rank": 1}],
+            "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}],
+            "brush-knot-makers": [{"brand": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}],
+            "brush-fibers": [{"fiber": "Badger", "shaves": 300, "unique_users": 30, "rank": 1}],
+            "brush-knot-sizes": [{"knot_size": "24mm", "shaves": 200, "unique_users": 20, "rank": 1}],
+            "blackbird-plates": [],
+            "christopher-bradley-plates": [],
+            "game-changer-plates": [],
+            "super-speed-tips": [],
+            "straight-widths": [],
+            "straight-grinds": [],
+            "straight-points": [],
+            "razor-blade-combinations": [],
+            "highest-use-count-per-blade": [],
+            "top-shavers": [],
+            "users": [{"user": "testuser", "shaves": 100, "missed_days": 0, "rank": 1}],
         }
 
     @pytest.fixture
