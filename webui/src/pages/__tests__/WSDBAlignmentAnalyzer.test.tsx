@@ -190,6 +190,7 @@ describe('WSDBAlignmentAnalyzer', () => {
     });
 
     test('handles load error gracefully', async () => {
+      // Mock the first fetch call (load-wsdb) to fail
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
       render(<WSDBAlignmentAnalyzer />);
