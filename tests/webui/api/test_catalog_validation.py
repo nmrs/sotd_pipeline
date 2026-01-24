@@ -764,13 +764,8 @@ class TestMoveCatalogEntries:
             ],
         )
 
-        # Mock project_root
-        import webui.api.analysis as analysis_module
-
-        original_project_root = getattr(analysis_module, "project_root", None)
-        analysis_module.project_root = tmp_path
-
-        try:
+        # Mock get_data_directory to return tmp_path / "data"
+        with patch("webui.api.analysis.get_data_directory", return_value=data_dir):
             # Execute move (await the async function)
             response = await move_catalog_validation_entries(request)
 
