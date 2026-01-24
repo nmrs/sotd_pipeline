@@ -176,8 +176,10 @@ class TestAnalysisAPISplitBrushRemoval:
     def test_mark_matches_as_correct_without_split_brush(self):
         """Test that mark_matches_as_correct endpoint works without split_brush processing"""
 
-        with patch("webui.api.analysis.mark_matches_as_correct") as mock_mark:
-            mock_mark.return_value = {"success": True, "message": "Matches marked as correct"}
+        with patch("webui.api.analysis.QueueManager") as mock_queue_manager_class:
+            # Mock the queue manager to return a successful operation ID
+            mock_queue_manager = mock_queue_manager_class.return_value
+            mock_queue_manager.add_operation.return_value = "test_operation_id"
 
             response = client.post(
                 "/api/analysis/mark-correct",
@@ -202,13 +204,16 @@ class TestAnalysisAPISplitBrushRemoval:
             assert response.status_code == 200
             data = response.json()
             assert data["success"] is True
-            assert "Marked" in data["message"] and "matches as correct" in data["message"]
+            assert "Operation queued for processing" in data["message"]
+            assert "operation_id" in data
 
     def test_remove_matches_from_correct_without_split_brush(self):
         """Test that remove_matches_from_correct endpoint works without split_brush processing"""
 
-        with patch("webui.api.analysis.remove_matches_from_correct") as mock_remove:
-            mock_remove.return_value = {"success": True, "message": "Matches removed from correct"}
+        with patch("webui.api.analysis.QueueManager") as mock_queue_manager_class:
+            # Mock the queue manager to return a successful operation ID
+            mock_queue_manager = mock_queue_manager_class.return_value
+            mock_queue_manager.add_operation.return_value = "test_operation_id"
 
             response = client.post(
                 "/api/analysis/remove-correct",
@@ -226,7 +231,8 @@ class TestAnalysisAPISplitBrushRemoval:
             assert response.status_code == 200
             data = response.json()
             assert data["success"] is True
-            assert "Removed" in data["message"] and "matches from correct" in data["message"]
+            assert "Operation queued for processing" in data["message"]
+            assert "operation_id" in data
 
     def test_error_handling_without_split_brush(self):
         """Test error handling in mismatch endpoint without split_brush functionality"""
