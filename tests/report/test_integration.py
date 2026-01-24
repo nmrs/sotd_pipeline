@@ -128,6 +128,7 @@ class TestReportIntegration:
             "brush-knot-makers": [{"brand": "Simpson", "shaves": 15, "rank": 1}],
             "brush-fibers": [{"fiber": "Badger", "shaves": 15, "rank": 1}],
             "brush-knot-sizes": [{"knot_size": "24mm", "shaves": 15, "rank": 1}],
+            "users": [{"user": "testuser", "shaves": 50, "missed_days": 0, "rank": 1}],
         }
 
         # Test hardware report generation
