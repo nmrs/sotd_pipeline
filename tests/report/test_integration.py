@@ -240,6 +240,7 @@ class TestReportIntegration:
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "unique_users": 10, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 43, "unique_users": 20, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}],
+            "users": [{"user": "testuser", "shaves": 50, "missed_days": 0, "rank": 1}],
         }
 
         comparison_data = {
