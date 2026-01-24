@@ -133,7 +133,7 @@ class ParameterValidator:
     }
 
     # Universal parameters that are always valid
-    UNIVERSAL_PARAMETERS = ["rows", "ranks", "deltas", "columns"]
+    UNIVERSAL_PARAMETERS = ["rows", "ranks", "deltas", "columns", "wsdb"]
 
     def get_available_columns(self, table_name: str) -> List[str]:
         """Get available columns for a table.
