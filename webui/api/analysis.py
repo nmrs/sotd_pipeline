@@ -1044,12 +1044,14 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             if group_key in grouped_items:
                 # Merge with existing item
                 existing = grouped_items[group_key]
-                existing.count += item.count
                 existing.examples.extend(item.examples)
                 # Deduplicate comment_ids when merging
                 # Use a set to track unique comment_ids, then convert back to list to preserve order
                 unique_comment_ids = list(dict.fromkeys(existing.comment_ids + item.comment_ids))
                 existing.comment_ids = unique_comment_ids
+                # Set count to match the number of unique comment_ids
+                # This ensures count accurately represents the number of distinct occurrences
+                existing.count = len(unique_comment_ids)
                 # Merge comment sources
                 existing.comment_sources.update(item.comment_sources)
                 # Keep the highest confidence if available
@@ -1076,6 +1078,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         f"Deduplicated comment_ids for '{item.original}': "
                         f"{original_length} -> {deduplicated_length}"
                     )
+                # Update count to match the number of unique comment_ids after final deduplication
+                # This ensures count is always accurate even if duplicates were removed
+                item.count = len(item.comment_ids)
         all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
 
         logger.info(
