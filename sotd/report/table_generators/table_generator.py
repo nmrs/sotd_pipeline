@@ -944,6 +944,28 @@ class TableGenerator:
         if rows is not None and rows <= 0:
             raise ValueError("rows must be greater than 0")
 
+        # Validate numeric_limits parameters using ParameterValidator
+        if numeric_limits:
+            from ..parameter_validator import ParameterValidator
+            validator = ParameterValidator()
+            # Build parameters dict for validation (include all parameters)
+            all_parameters = {}
+            if ranks is not None:
+                all_parameters["ranks"] = ranks
+            if rows is not None:
+                all_parameters["rows"] = rows
+            if columns is not None:
+                all_parameters["columns"] = columns
+            if deltas:
+                all_parameters["deltas"] = "true"
+            if wsdb:
+                all_parameters["wsdb"] = "true"
+            all_parameters.update(numeric_limits)
+            
+            validation_result = validator.validate_parameters(table_name, all_parameters)
+            if not validation_result.is_valid:
+                raise ValueError(validation_result.errors[0])
+
         # Convert kebab-case template name to snake_case data key
         data_key = table_name.replace("-", "_")
 
