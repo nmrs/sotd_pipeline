@@ -524,6 +524,9 @@ class BrushEnricher(BaseEnricher):
             )
         catalog_fiber = knot_section.get("fiber") if knot_section else matched_data.get("fiber")
 
+        # Track if use_catalog override was set (initialize to False)
+        use_catalog_for_knot_size = False
+
         # Check for enrichment overrides if override_manager and record are available
         if self.override_manager and record:
             month = record.get("_month")  # Month should be added to record metadata
@@ -545,7 +548,6 @@ class BrushEnricher(BaseEnricher):
                 knot_size_override = self.override_manager.get_override(
                     month, comment_id, "brush", "knot_size_mm"
                 )
-                use_catalog_for_knot_size = False
                 if knot_size_override == "use_catalog":
                     # Skip user extraction, use catalog value only
                     user_knot_size = None
