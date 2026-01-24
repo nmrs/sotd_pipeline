@@ -14,6 +14,7 @@ def _process_month(
     force: bool,
     debug: bool,
     delta: bool,
+    output_format: str = "markdown",
 ) -> dict:
     """Process a single month for report generation."""
     month_str = f"{year:04d}-{month:02d}"
@@ -64,39 +65,89 @@ def _process_month(
             print(f"[DEBUG] Generating {report_type} report for {month_str}")
 
         # Check if output already exists and force is not set
-        output_path = save.get_report_file_path(out_dir, year, month, report_type)
-        if output_path.exists() and not force:
-            if debug:
-                print(f"  {month_str} {report_type}: output exists")
+        # Check markdown file if markdown or both is requested
+        should_check_markdown = output_format in ["markdown", "both"]
+        should_check_json = output_format in ["json", "both"]
+        
+        skip_month = False
+        if should_check_markdown:
+            markdown_path = save.get_report_file_path(out_dir, year, month, report_type)
+            if markdown_path.exists() and not force:
+                if debug:
+                    print(f"  {month_str} {report_type}: markdown output exists")
+                if not should_check_json:
+                    skip_month = True
+        if should_check_json and not skip_month:
+            json_path = save.get_json_report_file_path(out_dir, year, month, report_type)
+            if json_path.exists() and not force:
+                if debug:
+                    print(f"  {month_str} {report_type}: JSON output exists")
+                if not should_check_markdown:
+                    skip_month = True
+        
+        if skip_month:
             continue
 
-        try:
-            report_content = process.generate_report_content(
-                report_type, metadata, data, comparison_data, debug
-            )
-        except Exception as e:
-            # Fail fast: re-raise the exception with clear context
-            error_msg = f"Failed to generate {report_type} report for {month_str}: {e}"
-            if debug:
-                print(f"[DEBUG] {error_msg}")
-            raise RuntimeError(error_msg) from e
+        # Create generator for both markdown and JSON generation
+        generator = process.create_report_generator(
+            report_type, metadata, data, comparison_data, debug
+        )
 
-        # Save report to file
-        if debug:
-            print(f"[DEBUG] Saving {report_type} report for {month_str}")
-        try:
-            output_path = save.generate_and_save_report(
-                report_content, out_dir, year, month, report_type, force, debug
-            )
+        # Generate and save markdown if requested
+        if output_format in ["markdown", "both"]:
+            try:
+                report_content = generator.generate_report()
+            except Exception as e:
+                # Fail fast: re-raise the exception with clear context
+                error_msg = f"Failed to generate {report_type} markdown report for {month_str}: {e}"
+                if debug:
+                    print(f"[DEBUG] {error_msg}")
+                raise RuntimeError(error_msg) from e
+
+            # Save markdown report to file
             if debug:
-                print(f"  {month_str} {report_type}: {output_path.name}")
-            reports_generated += 1
-        except Exception as e:
-            # Fail fast: re-raise the exception with clear context
-            error_msg = f"Failed to save {report_type} report for {month_str}: {e}"
+                print(f"[DEBUG] Saving {report_type} markdown report for {month_str}")
+            try:
+                output_path = save.generate_and_save_report(
+                    report_content, out_dir, year, month, report_type, force, debug
+                )
+                if debug:
+                    print(f"  {month_str} {report_type}: {output_path.name}")
+                reports_generated += 1
+            except Exception as e:
+                # Fail fast: re-raise the exception with clear context
+                error_msg = f"Failed to save {report_type} markdown report for {month_str}: {e}"
+                if debug:
+                    print(f"[DEBUG] {error_msg}")
+                raise RuntimeError(error_msg) from e
+
+        # Generate and save JSON if requested
+        if output_format in ["json", "both"]:
+            try:
+                structured_data = generator.get_structured_data()
+            except Exception as e:
+                # Fail fast: re-raise the exception with clear context
+                error_msg = f"Failed to generate {report_type} JSON report for {month_str}: {e}"
+                if debug:
+                    print(f"[DEBUG] {error_msg}")
+                raise RuntimeError(error_msg) from e
+
+            # Save JSON report to file
             if debug:
-                print(f"[DEBUG] {error_msg}")
-            raise RuntimeError(error_msg) from e
+                print(f"[DEBUG] Saving {report_type} JSON report for {month_str}")
+            try:
+                output_path = save.generate_and_save_json_report(
+                    structured_data, out_dir, year, month, report_type, force, debug
+                )
+                if debug:
+                    print(f"  {month_str} {report_type}: {output_path.name}")
+                reports_generated += 1
+            except Exception as e:
+                # Fail fast: re-raise the exception with clear context
+                error_msg = f"Failed to save {report_type} JSON report for {month_str}: {e}"
+                if debug:
+                    print(f"[DEBUG] {error_msg}")
+                raise RuntimeError(error_msg) from e
 
     return {"month": month_str, "status": "success", "reports_generated": reports_generated}
 
@@ -120,6 +171,7 @@ def run_report(args) -> bool:
         print(f"[DEBUG] Report types to generate: {report_types}")
         print(f"[DEBUG] Data root: {args.data_root}")
         print(f"[DEBUG] Output directory: {args.out_dir}")
+        print(f"[DEBUG] Output format: {args.format}")
         print(f"[DEBUG] Force overwrite: {args.force}")
 
     # Convert data root and output directory to Path
@@ -153,6 +205,7 @@ def run_report(args) -> bool:
             args.force,
             args.debug,
             getattr(args, "delta", False),
+            args.format,
         )
         results = processor.process_months_parallel(
             month_tuples, _process_month, process_args, max_workers, "Processing"
@@ -170,6 +223,7 @@ def run_report(args) -> bool:
             args.force,
             args.debug,
             getattr(args, "delta", False),
+            args.format,
         )
         results = processor.process_months_sequential(
             month_tuples, _process_month, process_args, "Months"

@@ -47,6 +47,13 @@ class ReportCLIParser(BaseCLIParser):
             help="Root directory for all input data (default: data)",
         )
 
+        self.add_argument(
+            "--format",
+            choices=["markdown", "json", "both"],
+            default="markdown",
+            help="Output format: markdown, json, or both (default: markdown)",
+        )
+
     def _validate_range_with_annual_support(self, value: str) -> str:
         """Validate range format with support for both monthly and annual formats."""
         # Check if this is an annual range (YYYY:YYYY format)
@@ -146,6 +153,7 @@ CLI matrix
 --type hardware|software|all → report type (default: all)
 --data-root DIR            → root directory for all input data (default: data)
 --out-dir DIR              → output directory for report file (default: data)
+--format markdown|json|both → output format (default: markdown)
 --debug                    → enable debug logging
 --force                    → force overwrite existing files
 """,

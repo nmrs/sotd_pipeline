@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """File output functionality for the report phase."""
 
+import json
 from pathlib import Path
 
 
@@ -59,6 +60,61 @@ def save_report(
         print(f"[DEBUG] Successfully saved report to: {output_path}")
 
 
+def get_json_report_file_path(base_dir: Path, year: int, month: int, report_type: str) -> Path:
+    """Get the path for the output JSON report file.
+
+    Args:
+        base_dir: Base output directory
+        year: Year of the report
+        month: Month of the report
+        report_type: Type of report ('hardware' or 'software')
+
+    Returns:
+        Path to the output JSON report file
+    """
+    filename = f"{year:04d}-{month:02d}-{report_type}.json"
+    return base_dir / "reports" / filename
+
+
+def save_json_report(
+    data: dict,
+    output_path: Path,
+    force: bool = False,
+    debug: bool = False,
+) -> None:
+    """Save structured report data to a JSON file.
+
+    Args:
+        data: Structured report data (dict) to save
+        output_path: Path where to save the file
+        force: Whether to force overwrite existing files
+        debug: Enable debug logging
+
+    Raises:
+        OSError: If there are file system errors
+    """
+    if debug:
+        print(f"[DEBUG] Saving JSON report to: {output_path}")
+
+    # Ensure output directory exists
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Remove existing file if force is True
+    if force and output_path.exists():
+        if debug:
+            print(f"[DEBUG] Force flag set, removing existing file: {output_path}")
+        output_path.unlink()
+
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except OSError as e:
+        raise OSError(f"Failed to write JSON report file {output_path}: {e}") from e
+
+    if debug:
+        print(f"[DEBUG] Successfully saved JSON report to: {output_path}")
+
+
 def generate_and_save_report(
     content: str,
     base_dir: Path,
@@ -88,4 +144,36 @@ def generate_and_save_report(
     """
     output_path = get_report_file_path(base_dir, year, month, report_type)
     save_report(content, output_path, force, debug)
+    return output_path
+
+
+def generate_and_save_json_report(
+    data: dict,
+    base_dir: Path,
+    year: int,
+    month: int,
+    report_type: str,
+    force: bool = False,
+    debug: bool = False,
+) -> Path:
+    """Generate JSON report file path and save structured data.
+
+    Args:
+        data: Structured report data (dict) to save
+        base_dir: Base output directory
+        year: Year of the report
+        month: Month of the report
+        report_type: Type of report ('hardware' or 'software')
+        force: Whether to force overwrite existing files
+        debug: Enable debug logging
+
+    Returns:
+        Path to the saved JSON report file
+
+    Raises:
+        FileExistsError: If file exists and force=False
+        OSError: If there are file system errors
+    """
+    output_path = get_json_report_file_path(base_dir, year, month, report_type)
+    save_json_report(data, output_path, force, debug)
     return output_path

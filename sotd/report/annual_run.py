@@ -46,6 +46,8 @@ def run_annual_report(args) -> None:
             print(f"[DEBUG] Data root: {args.data_root}")
             logger.info(f"Output directory: {args.out_dir}")
             print(f"[DEBUG] Output directory: {args.out_dir}")
+            logger.info(f"Output format: {getattr(args, 'format', 'markdown')}")
+            print(f"[DEBUG] Output format: {getattr(args, 'format', 'markdown')}")
             logger.info(f"Force overwrite: {args.force}")
             print(f"[DEBUG] Force overwrite: {args.force}")
 
@@ -93,14 +95,16 @@ def run_annual_report(args) -> None:
                     logger.info(f"Generating annual {report_type} report for {year}")
                     print(f"[DEBUG] Generating annual {report_type} report for {year}")
 
-                try:
-                    # Generate annual report content
-                    report_content = generate_annual_report(
-                        report_type, year, data_root, args.debug, None
-                    )
-                    total_report_size_chars += len(report_content)
-                    print(f"  {year} {report_type}: generated")
-                except FileNotFoundError as e:
+                output_format = getattr(args, "format", "markdown")
+                
+                # Create generator for both markdown and JSON generation
+                from .annual_generator import create_annual_report_generator
+                from .annual_load import load_annual_data, get_annual_file_path
+                from .annual_comparison_loader import AnnualComparisonLoader
+
+                # Load annual data
+                annual_data_file = get_annual_file_path(data_root, year)
+                if not annual_data_file.exists():
                     years_failed += 1
                     print(
                         f"[ERROR] Annual data not found for {year}. "
@@ -111,35 +115,98 @@ def run_annual_report(args) -> None:
                         f"Annual data not found for {year}. "
                         f"Run the aggregate phase first with --annual --year {year} "
                         f"to generate the required data."
-                    ) from e
-                except Exception as e:
-                    years_failed += 1
-                    print(f"[ERROR] Failed to generate annual {report_type} report content: {e}")
-                    raise RuntimeError(
-                        f"Failed to generate annual {report_type} report content: {e}"
-                    ) from e
-
-                try:
-                    # Save report to file
-                    if args.debug:
-                        logger.info(f"Saving annual {report_type} report for {year}")
-                        print(f"[DEBUG] Saving annual {report_type} report for {year}")
-                    monitor.start_file_io_timing()
-                    output_path = save_annual_report(
-                        report_content, out_dir, year, report_type, args.force, args.debug
                     )
-                    monitor.end_file_io_timing()
-                    print(f"  {year} {report_type}: {output_path.name}")
-                except OSError:
-                    monitor.end_file_io_timing()
-                    years_failed += 1
-                    print(f"[ERROR] Failed to save annual {report_type} report for {year}")
-                    raise
+
+                metadata, data = load_annual_data(annual_data_file, debug=args.debug)
+
+                # Load comparison data for delta calculations
+                comparison_data = {}
+                try:
+                    loader = AnnualComparisonLoader(debug=args.debug)
+                    annual_data_dir = data_root / "aggregated" / "annual"
+                    year_int = int(year)
+                    comparison_years = [str(year_int - 1), str(year_int - 5)]
+                    comparison_years_data = loader.load_comparison_years(comparison_years, annual_data_dir)
+                    for comp_year, comp_data in comparison_years_data.items():
+                        comp_metadata = comp_data.get("metadata", {})
+                        comp_data_section = {k: v for k, v in comp_data.items() if k != "metadata"}
+                        comparison_data[f"{comp_year}-12"] = (comp_metadata, comp_data_section)
                 except Exception as e:
-                    monitor.end_file_io_timing()
-                    years_failed += 1
-                    print(f"[ERROR] Failed to save annual {report_type} report: {e}")
-                    raise RuntimeError(f"Failed to save annual {report_type} report: {e}") from e
+                    if args.debug:
+                        logger.warning(f"Failed to load comparison data: {e}")
+                        print(f"[DEBUG] Warning: Failed to load comparison data: {e}")
+
+                generator = create_annual_report_generator(
+                    report_type, year, metadata, data, comparison_data, args.debug, None
+                )
+
+                # Generate and save markdown if requested
+                if output_format in ["markdown", "both"]:
+                    try:
+                        report_content = generator.generate_report()
+                        total_report_size_chars += len(report_content)
+                        print(f"  {year} {report_type}: generated")
+                    except Exception as e:
+                        years_failed += 1
+                        print(f"[ERROR] Failed to generate annual {report_type} markdown report: {e}")
+                        raise RuntimeError(
+                            f"Failed to generate annual {report_type} markdown report: {e}"
+                        ) from e
+
+                    try:
+                        # Save markdown report to file
+                        if args.debug:
+                            logger.info(f"Saving annual {report_type} markdown report for {year}")
+                            print(f"[DEBUG] Saving annual {report_type} markdown report for {year}")
+                        monitor.start_file_io_timing()
+                        output_path = save_annual_report(
+                            report_content, out_dir, year, report_type, args.force, args.debug
+                        )
+                        monitor.end_file_io_timing()
+                        print(f"  {year} {report_type}: {output_path.name}")
+                    except OSError:
+                        monitor.end_file_io_timing()
+                        years_failed += 1
+                        print(f"[ERROR] Failed to save annual {report_type} markdown report for {year}")
+                        raise
+                    except Exception as e:
+                        monitor.end_file_io_timing()
+                        years_failed += 1
+                        print(f"[ERROR] Failed to save annual {report_type} markdown report: {e}")
+                        raise RuntimeError(f"Failed to save annual {report_type} markdown report: {e}") from e
+
+                # Generate and save JSON if requested
+                if output_format in ["json", "both"]:
+                    try:
+                        structured_data = generator.get_structured_data()
+                    except Exception as e:
+                        years_failed += 1
+                        print(f"[ERROR] Failed to generate annual {report_type} JSON report: {e}")
+                        raise RuntimeError(
+                            f"Failed to generate annual {report_type} JSON report: {e}"
+                        ) from e
+
+                    try:
+                        # Save JSON report to file
+                        if args.debug:
+                            logger.info(f"Saving annual {report_type} JSON report for {year}")
+                            print(f"[DEBUG] Saving annual {report_type} JSON report for {year}")
+                        monitor.start_file_io_timing()
+                        output_path = save_annual_json_report(
+                            structured_data, out_dir, year, report_type, args.force, args.debug
+                        )
+                        monitor.end_file_io_timing()
+                        print(f"  {year} {report_type}: {output_path.name}")
+                    except OSError:
+                        monitor.end_file_io_timing()
+                        years_failed += 1
+                        print(f"[ERROR] Failed to save annual {report_type} JSON report for {year}")
+                        raise
+                    except Exception as e:
+                        monitor.end_file_io_timing()
+                        years_failed += 1
+                        print(f"[ERROR] Failed to save annual {report_type} JSON report: {e}")
+                        raise RuntimeError(f"Failed to save annual {report_type} JSON report: {e}") from e
 
             years_successful += 1
 
@@ -232,6 +299,71 @@ def save_annual_report(
     if debug:
         logger.info(f"Successfully saved report to: {output_path}")
         print(f"[DEBUG] Successfully saved report to: {output_path}")
+
+    return output_path
+
+
+def save_annual_json_report(
+    data: dict,
+    out_dir: Path,
+    year: str,
+    report_type: str,
+    force: bool = False,
+    debug: bool = False,
+) -> Path:
+    """Save annual structured report data to JSON file.
+
+    Args:
+        data: Structured report data (dict) to save
+        out_dir: Output directory for the report file
+        year: Year for the report (YYYY format)
+        report_type: Type of report ('hardware' or 'software')
+        force: Whether to force overwrite existing files
+        debug: Enable debug logging
+
+    Returns:
+        Path to the saved JSON report file
+
+    Raises:
+        FileExistsError: If file exists and force=False
+        OSError: If there are file system errors
+    """
+    import json
+
+    if debug:
+        logger.info(f"Saving annual {report_type} JSON report for {year}")
+        print(f"[DEBUG] Saving annual {report_type} JSON report for {year}")
+        logger.info(f"Output directory: {out_dir}")
+        print(f"[DEBUG] Output directory: {out_dir}")
+
+    # Create annual reports subdirectory (consistent with annual aggregations)
+    reports_dir = out_dir / "reports" / "annual"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate output filename
+    output_filename = f"{year}-{report_type}.json"
+    output_path = reports_dir / output_filename
+
+    if debug:
+        logger.info(f"Output file: {output_path}")
+        print(f"[DEBUG] Output file: {output_path}")
+
+    # Check if file exists and handle force flag
+    if output_path.exists() and not force:
+        print(f"[ERROR] JSON report file already exists: {output_path}")
+        raise FileExistsError(f"JSON report file already exists: {output_path}")
+
+    # Write JSON data to file
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except OSError as e:
+        print(f"[ERROR] Failed to write JSON report file {output_path}: {e}")
+        raise OSError(f"Failed to write JSON report file {output_path}: {e}") from e
+
+    if debug:
+        logger.info(f"Successfully saved JSON report to: {output_path}")
+        print(f"[DEBUG] Successfully saved JSON report to: {output_path}")
 
     return output_path
 

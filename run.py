@@ -519,6 +519,22 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                         i += 1  # Skip just the flag if no value
                 continue
 
+            elif arg.startswith("--format"):
+                # Only pass format to report phase
+                if phase == "report":
+                    phase_args.append(arg)
+                    # Add the value too (next argument)
+                    if i + 1 < len(args):
+                        phase_args.append(args[i + 1])
+                        i += 1  # Skip the value in next iteration
+                else:
+                    # If phase doesn't support it, skip both flag and value
+                    if i + 1 < len(args):
+                        i += 1  # Skip the value in next iteration
+                # Always skip the flag itself
+                i += 1
+                continue
+
             elif arg.startswith("--type"):
                 # Only pass type to report phase
                 if phase == "report":
@@ -567,25 +583,25 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
         # For fetch_json phase, use Tee-like stdout to show output in real-time
         # while still capturing it for final output
         output_buffer = io.StringIO()
-        
+
         if phase == "fetch_json":
             # Create a Tee-like stdout that writes to both buffer and real stdout
             class TeeStdout:
                 def __init__(self, buffer: io.StringIO, real_stdout: Any):
                     self.buffer = buffer
                     self.real_stdout = real_stdout
-                
+
                 def write(self, s: str) -> int:
                     # Write to both buffer and real stdout immediately
                     self.buffer.write(s)
                     self.real_stdout.write(s)
                     self.real_stdout.flush()  # Flush immediately for real-time output
                     return len(s)
-                
+
                 def flush(self) -> None:
                     self.buffer.flush()
                     self.real_stdout.flush()
-            
+
             original_stdout = sys.stdout
             try:
                 sys.stdout = TeeStdout(output_buffer, original_stdout)
@@ -726,7 +742,15 @@ def get_phase_range(phase_range: str) -> List[str]:
     # Normal phases for regular operations (fetch_json excluded - it's a fallback only)
     all_phases = ["fetch", "extract", "match", "enrich", "aggregate", "report"]
     # All available phases including fetch_json (for explicit use)
-    all_available_phases = ["fetch", "fetch_json", "extract", "match", "enrich", "aggregate", "report"]
+    all_available_phases = [
+        "fetch",
+        "fetch_json",
+        "extract",
+        "match",
+        "enrich",
+        "aggregate",
+        "report",
+    ]
 
     if not phase_range:
         return all_phases
@@ -734,7 +758,9 @@ def get_phase_range(phase_range: str) -> List[str]:
     if ":" not in phase_range:
         # Single phase - allow fetch_json if explicitly specified
         if phase_range not in all_available_phases:
-            raise ValueError(f"Invalid phase: {phase_range}. Valid phases: {', '.join(all_available_phases)}")
+            raise ValueError(
+                f"Invalid phase: {phase_range}. Valid phases: {', '.join(all_available_phases)}"
+            )
         return [phase_range]
 
     # Parse range
@@ -751,7 +777,7 @@ def get_phase_range(phase_range: str) -> List[str]:
 
     # Determine which phase list to use based on whether fetch_json is explicitly requested
     # If fetch_json is in the range, use all_available_phases, otherwise use all_phases
-    use_fetch_json = (start_phase == "fetch_json" or end_phase == "fetch_json")
+    use_fetch_json = start_phase == "fetch_json" or end_phase == "fetch_json"
     phases_for_range = all_available_phases if use_fetch_json else all_phases
 
     if not start_phase:
@@ -915,6 +941,12 @@ Examples:
         help="Report type: hardware, software, or all (only applies to report phase)",
     )
     parser.add_argument(
+        "--format",
+        choices=["markdown", "json", "both"],
+        default="markdown",
+        help="Report output format: markdown, json, or both (only applies to report phase, default: markdown)",
+    )
+    parser.add_argument(
         "--annual",
         action="store_true",
         help="Generate annual reports (only applies to report phase, requires --year or --range)",
@@ -1063,6 +1095,8 @@ Examples:
             common_args.extend(["--max-workers", str(args.max_workers)])
         if args.type:
             common_args.extend(["--type", args.type])
+        # Always add format (defaults to "markdown" if not specified)
+        common_args.extend(["--format", args.format])
         if args.annual:
             common_args.append("--annual")
 
