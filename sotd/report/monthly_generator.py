@@ -153,14 +153,12 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     placeholder = f"{{{{tables.{table_name}}}}}"
                     tables[placeholder] = "*No data available for this category*"
             except Exception as e:
+                # Fail fast: re-raise with clear context
+                # Internal/logic errors should fail immediately, not be masked
+                error_msg = f"Failed to generate table '{table_name}': {e}"
                 if self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
-                        f"Error generating table '{table_name}': {e}"
-                    )
-                # Provide a placeholder message for failed tables
-                placeholder = f"{{{{tables.{table_name}}}}}"
-                tables[placeholder] = "*No data available for this category*"
+                    print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                raise RuntimeError(error_msg) from e
 
         # Process enhanced table syntax with parameters
         enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
@@ -294,13 +292,12 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     table_data = table_generator.get_structured_table_data(table_name, deltas=True)
                     available_tables[table_name] = table_data
                 except Exception as e:
+                    # Fail fast: re-raise with clear context
+                    # Internal/logic errors should fail immediately, not be masked
+                    error_msg = f"Failed to get structured data for table '{table_name}': {e}"
                     if self.debug:
-                        print(
-                            f"[DEBUG] MonthlyReport({self.report_type}): "
-                            f"Error getting structured data for '{table_name}': {e}"
-                        )
-                    # Include empty list for failed tables
-                    available_tables[table_name] = []
+                        print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                    raise RuntimeError(error_msg) from e
 
         # Prepare metadata (convert numeric values to appropriate types)
         structured_metadata = {}
