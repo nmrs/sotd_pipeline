@@ -123,6 +123,7 @@ export function DataTable<TData, TValue>({
   const [resizeColumn, setResizeColumn] = useState<string | null>(null);
   const [internalUseRegexMode, setInternalUseRegexMode] = useState<boolean>(false);
   const [regexError, setRegexError] = useState<string | null>(null);
+  const [internalGlobalFilter, setInternalGlobalFilter] = useState<string>('');
   const tableRef = React.useRef<HTMLDivElement>(null);
 
   // Use external regex mode if provided, otherwise use internal
@@ -254,7 +255,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection: effectiveRowSelection,
-      globalFilter: externalGlobalFilter,
+      globalFilter: externalGlobalFilter !== undefined ? externalGlobalFilter : internalGlobalFilter,
     },
     initialState: {
       pagination: {
@@ -470,6 +471,7 @@ export function DataTable<TData, TValue>({
     if (onGlobalFilterChange) {
       onGlobalFilterChange(value);
     } else {
+      setInternalGlobalFilter(value);
       table.setGlobalFilter(value);
     }
     if (useRegexMode) {
@@ -496,7 +498,7 @@ export function DataTable<TData, TValue>({
         <div className='flex items-center gap-2 flex-1'>
           <Input
             placeholder={useRegexMode ? 'Enter regex pattern...' : 'Search all columns...'}
-            value={externalGlobalFilter !== undefined ? externalGlobalFilter : ((table.getState().globalFilter as string) ?? '')}
+            value={externalGlobalFilter !== undefined ? externalGlobalFilter : internalGlobalFilter}
             onChange={event => handleSearchChange(event.target.value)}
             className={`max-w-sm ${regexError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
           />

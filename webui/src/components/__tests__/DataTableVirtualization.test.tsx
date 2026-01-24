@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 

@@ -62,7 +62,7 @@ interface FuzzyMatch {
 interface AlignmentResult {
   source_brand: string;
   source_scent: string;
-  matches: FuzzyMatch[];
+  matches?: FuzzyMatch[];
   expanded?: boolean;
   original_texts?: string[];
   match_types?: string[];
@@ -94,6 +94,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   const [pipelineSoaps, setPipelineSoaps] = useState<PipelineSoap[]>([]);
   const [pipelineResults, setPipelineResults] = useState<AlignmentResult[]>([]);
   const [wsdbResults, setWsdbResults] = useState<AlignmentResult[]>([]);
+  
+  // Ensure all results have matches array initialized
+  const ensureMatchesArray = (results: AlignmentResult[]): AlignmentResult[] => {
+    return results.map(result => ({
+      ...result,
+      matches: result.matches || [],
+    }));
+  };
   const [similarityThreshold, setSimilarityThreshold] = useState(0.7);
   const [resultLimit, setResultLimit] = useState(100);
   const [loading, setLoading] = useState(false);
@@ -730,26 +738,26 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
         const searchTerm = filterText.toLowerCase();
         filtered = filtered.filter(
           result =>
-            result.source_brand.toLowerCase().includes(searchTerm) ||
-            result.source_scent.toLowerCase().includes(searchTerm) ||
-            result.matches.some(
+            (result.source_brand && result.source_brand.toLowerCase().includes(searchTerm)) ||
+            (result.source_scent && result.source_scent.toLowerCase().includes(searchTerm)) ||
+            (result.matches && result.matches.some(
               m =>
-                m.brand.toLowerCase().includes(searchTerm) ||
-                m.name.toLowerCase().includes(searchTerm)
-            ) ||
+                (m.brand && m.brand.toLowerCase().includes(searchTerm)) ||
+                (m.name && m.name.toLowerCase().includes(searchTerm))
+            )) ||
             // Include original_texts in search for match files mode
             (result.original_texts &&
-              result.original_texts.some(original => original.toLowerCase().includes(searchTerm))) ||
+              result.original_texts.some(original => original && original.toLowerCase().includes(searchTerm))) ||
             // Include match_types in search for match files mode
             (result.match_types &&
-              result.match_types.some(mt => mt.toLowerCase().includes(searchTerm)))
+              result.match_types.some(mt => mt && mt.toLowerCase().includes(searchTerm)))
         );
       }
 
       // Confidence filter
       if (confidenceFilter !== 'all') {
         filtered = filtered.filter(result => {
-          if (result.matches.length === 0) return confidenceFilter === 'low';
+          if (!result.matches || result.matches.length === 0) return confidenceFilter === 'low';
           const topConfidence = result.matches[0].confidence;
           
           if (confidenceFilter === 'perfect') return topConfidence === 100;
@@ -768,7 +776,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
 
   const filteredPipelineResults = useMemo(
     () => {
-      const filtered = filterResults(pipelineResults);
+      const resultsWithMatches = ensureMatchesArray(pipelineResults);
+      const filtered = filterResults(resultsWithMatches);
       // Sort based on sort mode
       return [...filtered].sort((a, b) => {
         // Count-based sorting (match files mode)
@@ -792,7 +801,8 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
 
   const filteredWsdbResults = useMemo(
     () => {
-      const filtered = filterResults(wsdbResults);
+      const resultsWithMatches = ensureMatchesArray(wsdbResults);
+      const filtered = filterResults(resultsWithMatches);
       // Sort based on sort mode
       return [...filtered].sort((a, b) => {
         // Count-based sorting (match files mode)
@@ -817,19 +827,19 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
   // Calculate statistics
   const calculateStats = (results: AlignmentResult[]) => {
     const total = results.length;
-    const high = results.filter(r => r.matches.length > 0 && r.matches[0].confidence >= 80).length;
+    const high = results.filter(r => r.matches && r.matches.length > 0 && r.matches[0].confidence >= 80).length;
     const medium = results.filter(
-      r => r.matches.length > 0 && r.matches[0].confidence >= 60 && r.matches[0].confidence < 80
+      r => r.matches && r.matches.length > 0 && r.matches[0].confidence >= 60 && r.matches[0].confidence < 80
     ).length;
     const low = results.filter(
-      r => r.matches.length === 0 || r.matches[0].confidence < 60
+      r => !r.matches || r.matches.length === 0 || (r.matches[0] && r.matches[0].confidence < 60)
     ).length;
 
     return { total, high, medium, low };
   };
 
-  const pipelineStats = useMemo(() => calculateStats(filteredPipelineResults), [filteredPipelineResults]);
-  const wsdbStats = useMemo(() => calculateStats(filteredWsdbResults), [filteredWsdbResults]);
+  const pipelineStats = useMemo(() => calculateStats(filteredPipelineResults || []), [filteredPipelineResults]);
+  const wsdbStats = useMemo(() => calculateStats(filteredWsdbResults || []), [filteredWsdbResults]);
 
   return (
     <div className='container mx-auto p-6 space-y-6'>
@@ -1176,14 +1186,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                 <div className='space-y-2'>
                   {filteredPipelineResults.map((result, index) => {
                     // Filter out pending matches, saved non-matches, and pending slugs for this result
-                    const nonPendingMatches = result.matches.filter(match => 
+                    const nonPendingMatches = (result.matches || []).filter(match => 
                       !isMatchPending(result, match) && 
                       !isNonMatch(result, match) &&
                       !isSlugPending(result, match)
                     );
                     const hasNonPendingMatches = nonPendingMatches.length > 0;
                     // Check if there are any pending operations for this result
-                    const hasPendingOperations = result.matches.some(match => 
+                    const hasPendingOperations = (result.matches || []).some(match => 
                       isMatchPending(result, match) || isSlugPending(result, match)
                     );
                     // Use stable key based on brand+scent to prevent re-rendering
@@ -1503,14 +1513,14 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                 <div className='space-y-2'>
                   {filteredWsdbResults.map((result, index) => {
                     // Filter out pending matches, saved non-matches, and pending slugs for this result
-                    const nonPendingMatches = result.matches.filter(match => 
+                    const nonPendingMatches = (result.matches || []).filter(match => 
                       !isMatchPending(result, match) && 
                       !isNonMatch(result, match) &&
                       !isSlugPending(result, match)
                     );
                     const hasNonPendingMatches = nonPendingMatches.length > 0;
                     // Check if there are any pending operations for this result
-                    const hasPendingOperations = result.matches.some(match => 
+                    const hasPendingOperations = (result.matches || []).some(match => 
                       isMatchPending(result, match) || isSlugPending(result, match)
                     );
                     // Use stable key based on brand+scent to prevent re-rendering

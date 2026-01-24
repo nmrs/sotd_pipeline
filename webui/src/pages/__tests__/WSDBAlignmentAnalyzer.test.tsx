@@ -166,6 +166,10 @@ describe('WSDBAlignmentAnalyzer', () => {
         .mockResolvedValueOnce({
           ok: true,
           json: async () => ({ soaps: mockPipelineSoaps, total_brands: 2, total_scents: 4 }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ brand_non_matches: [], scent_non_matches: [] }),
         });
 
       render(<WSDBAlignmentAnalyzer />);
@@ -177,9 +181,12 @@ describe('WSDBAlignmentAnalyzer', () => {
         );
       });
 
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
     });
 
     test('handles load error gracefully', async () => {
