@@ -26,7 +26,6 @@ class CatalogValidator:
             self.correct_matches_path = project_root / "data" / "correct_matches.yaml"
 
         # Debug logging
-        import os
 
         print(f"DEBUG: Current working directory: {os.getcwd()}")
         print(f"DEBUG: Project root: {project_root}")
