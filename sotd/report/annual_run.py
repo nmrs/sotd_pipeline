@@ -96,7 +96,7 @@ def run_annual_report(args) -> None:
                     print(f"[DEBUG] Generating annual {report_type} report for {year}")
 
                 output_format = getattr(args, "format", "markdown")
-                
+
                 # Create generator for both markdown and JSON generation
                 from .annual_generator import create_annual_report_generator
                 from .annual_load import load_annual_data, get_annual_file_path
@@ -126,7 +126,9 @@ def run_annual_report(args) -> None:
                     annual_data_dir = data_root / "aggregated" / "annual"
                     year_int = int(year)
                     comparison_years = [str(year_int - 1), str(year_int - 5)]
-                    comparison_years_data = loader.load_comparison_years(comparison_years, annual_data_dir)
+                    comparison_years_data = loader.load_comparison_years(
+                        comparison_years, annual_data_dir
+                    )
                     for comp_year, comp_data in comparison_years_data.items():
                         comp_metadata = comp_data.get("metadata", {})
                         comp_data_section = {k: v for k, v in comp_data.items() if k != "metadata"}
@@ -148,7 +150,9 @@ def run_annual_report(args) -> None:
                         print(f"  {year} {report_type}: generated")
                     except Exception as e:
                         years_failed += 1
-                        print(f"[ERROR] Failed to generate annual {report_type} markdown report: {e}")
+                        print(
+                            f"[ERROR] Failed to generate annual {report_type} markdown report: {e}"
+                        )
                         raise RuntimeError(
                             f"Failed to generate annual {report_type} markdown report: {e}"
                         ) from e
@@ -167,13 +171,17 @@ def run_annual_report(args) -> None:
                     except OSError:
                         monitor.end_file_io_timing()
                         years_failed += 1
-                        print(f"[ERROR] Failed to save annual {report_type} markdown report for {year}")
+                        print(
+                            f"[ERROR] Failed to save annual {report_type} markdown report for {year}"
+                        )
                         raise
                     except Exception as e:
                         monitor.end_file_io_timing()
                         years_failed += 1
                         print(f"[ERROR] Failed to save annual {report_type} markdown report: {e}")
-                        raise RuntimeError(f"Failed to save annual {report_type} markdown report: {e}") from e
+                        raise RuntimeError(
+                            f"Failed to save annual {report_type} markdown report: {e}"
+                        ) from e
 
                 # Generate and save JSON if requested
                 if output_format in ["json", "both"]:
@@ -206,7 +214,9 @@ def run_annual_report(args) -> None:
                         monitor.end_file_io_timing()
                         years_failed += 1
                         print(f"[ERROR] Failed to save annual {report_type} JSON report: {e}")
-                        raise RuntimeError(f"Failed to save annual {report_type} JSON report: {e}") from e
+                        raise RuntimeError(
+                            f"Failed to save annual {report_type} JSON report: {e}"
+                        ) from e
 
             years_successful += 1
 

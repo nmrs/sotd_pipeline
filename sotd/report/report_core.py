@@ -68,7 +68,7 @@ def _process_month(
         # Check markdown file if markdown or both is requested
         should_check_markdown = output_format in ["markdown", "both"]
         should_check_json = output_format in ["json", "both"]
-        
+
         skip_month = False
         if should_check_markdown:
             markdown_path = save.get_report_file_path(out_dir, year, month, report_type)
@@ -84,7 +84,7 @@ def _process_month(
                     print(f"  {month_str} {report_type}: JSON output exists")
                 if not should_check_markdown:
                     skip_month = True
-        
+
         if skip_month:
             continue
 
