@@ -154,10 +154,12 @@ class AnnualReportGenerator(BaseReportGenerator):
                     placeholder = f"{{{{tables.{table_name}}}}}"
                     tables[placeholder] = "*No data available for this category*"
             except Exception as e:
+                # Fail fast: re-raise with clear context
+                # Internal/logic errors should fail immediately, not be masked
+                error_msg = f"Failed to generate table '{table_name}': {e}"
                 if self.debug:
-                    print(f"[DEBUG] AnnualReport: Error generating table '{table_name}': {e}")
-                placeholder = f"{{{{tables.{table_name}}}}}"
-                tables[placeholder] = f"*Error generating table {table_name}: {e}*"
+                    print(f"[DEBUG] AnnualReport: {error_msg}")
+                raise RuntimeError(error_msg) from e
 
         # Process enhanced table syntax with parameters (like monthly reports)
         enhanced_tables = self._process_enhanced_table_syntax(template_content, table_generator)
@@ -282,13 +284,12 @@ class AnnualReportGenerator(BaseReportGenerator):
                     table_data = table_generator.get_structured_table_data(table_name, deltas=True)
                     available_tables[table_name] = table_data
                 except Exception as e:
+                    # Fail fast: re-raise with clear context
+                    # Internal/logic errors should fail immediately, not be masked
+                    error_msg = f"Failed to get structured data for table '{table_name}': {e}"
                     if self.debug:
-                        print(
-                            f"[DEBUG] AnnualReport({self.report_type}): "
-                            f"Error getting structured data for '{table_name}': {e}"
-                        )
-                    # Include empty list for failed tables
-                    available_tables[table_name] = []
+                        print(f"[DEBUG] AnnualReport({self.report_type}): {error_msg}")
+                    raise RuntimeError(error_msg) from e
 
         # Prepare metadata (convert numeric values to appropriate types)
         structured_metadata = {}
@@ -517,11 +518,7 @@ class LegacyAnnualReportGenerator:
                 # Add empty placeholder for missing years
                 formatted_comparison[year] = ({}, {})
         tg = TableGenerator(data, formatted_comparison, None, self.debug)
-        try:
-            # Pass deltas=True to include delta columns in the table
-            table_md = tg.generate_table(category, deltas=True)
-        except Exception as e:
-            if self.debug:
-                logger.warning(f"Error generating table for {category}: {e}")
-            return f"*Error generating table for {category}: {e}*"
+        # Pass deltas=True to include delta columns in the table
+        # Fail fast on errors - internal/logic errors should not be masked
+        table_md = tg.generate_table(category, deltas=True)
         return table_md
