@@ -17,6 +17,8 @@ class TestTemplateIntegration:
         }
         data = {
             "razors": [{"name": "Test Razor", "shaves": 1, "rank": 1}],
+            "blades": [{"name": "Test Blade", "shaves": 1, "rank": 1}],
+            "brushes": [{"name": "Test Brush", "shaves": 1, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 1, "rank": 1}],
             "razor-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
         }
