@@ -641,16 +641,16 @@ def test_enhanced_regex_error_reporting():
 
 def test_pattern_traceability_with_format_prioritization(tmp_path):
     """
-    Test that returned pattern corresponds to selected match when format prioritization occurs.
+    Test that returned pattern corresponds to the most specific match when multiple patterns match.
 
-    This test verifies the fix for the bug where multiple patterns match the same text,
-    format prioritization selects a different match, but the pattern returned was from
-    the first match, not the selected match.
+    This test verifies that when multiple patterns match the same text, the most specific
+    pattern (longer, more complex) is selected, and the returned pattern corresponds to
+    that selected match.
 
     Example case: "Personna Twin Pivot Plus Refills, Atra"
-    - Pattern "(personna)?.*twin.*pivot(.*plus)?" (Cartridge/Disposable) matches first
-    - Pattern "person+a" (Personna Lab Blue, DE format) also matches
-    - Code should select DE format match (Lab Blue) and return the DE pattern, not Cartridge/Disposable pattern
+    - Pattern "(personna)?.*twin.*pivot(.*plus)?" (Cartridge/Disposable) is more specific (33 chars)
+    - Pattern "person+a" (Personna Lab Blue, DE format) is less specific (8 chars)
+    - Code should select the more specific Cartridge/Disposable pattern
     """
     # Create a test catalog with multiple patterns that match the same text
     yaml_content = """
@@ -674,16 +674,15 @@ DE:
     blade_text = "Personna Twin Pivot Plus Refills, Atra"
     result = matcher.match(blade_text)
 
-    # Should match DE format (format prioritization)
+    # Should match Cartridge/Disposable format (more specific pattern wins)
     assert result.matched is not None
-    assert result.matched["format"] == "DE"
-    assert result.matched["brand"] == "Personna"
-    assert result.matched["model"] == "Lab Blue"
+    assert result.matched["format"] == "Cartridge/Disposable"
+    assert result.matched["brand"] == "Cartridge/Disposable"
 
-    # The pattern should correspond to the selected match (DE), not the first match (Cartridge/Disposable)
+    # The pattern should correspond to the selected match (Cartridge/Disposable)
     assert result.pattern is not None
-    assert result.pattern == "person+a", f"Expected DE pattern 'person+a', got: {result.pattern}"
-    # Verify it's NOT the Cartridge/Disposable pattern
+    assert "twin.*pivot" in result.pattern, f"Expected Cartridge/Disposable pattern with 'twin.*pivot', got: {result.pattern}"
+    # Verify it's NOT the less specific DE pattern
     assert (
-        "twin.*pivot" not in result.pattern
-    ), f"Pattern should be DE pattern, not Cartridge/Disposable pattern: {result.pattern}"
+        result.pattern != "person+a"
+    ), f"Pattern should be Cartridge/Disposable pattern, not DE pattern: {result.pattern}"
