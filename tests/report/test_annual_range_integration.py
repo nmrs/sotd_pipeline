@@ -223,51 +223,124 @@ class TestAnnualRangeProcessing:
                 if annual_file.exists():
                     annual_file.unlink()
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_run_annual_range_with_force(self, mock_save, mock_generate):
+    def test_run_annual_range_with_force(self, mock_save, mock_create_generator):
         """Test range processing with force flag."""
         parser = get_parser()
         args = parser.parse_args(
             ["--annual", "--range", "2022:2023", "--type", "hardware", "--force"]
         )
+        args.format = "markdown"
 
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances
+        mock_generator_instances = []
+        for year in ["2022", "2023"]:
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
         mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
 
-        run_annual_report(args)
+        # Create data files
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in ["2022", "2023"]:
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": year,
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                        "blades": [],
+                        "brushes": [],
+                        "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-        # Should call save with force=True
-        assert mock_save.call_count == 2
-        for call in mock_save.call_args_list:
-            assert call[0][4] is True  # force flag
+            run_annual_report(args)
 
-    @patch("sotd.report.annual_run.generate_annual_report")
-    def test_run_annual_range_generation_failure(self, mock_generate):
+            # Should call save with force=True
+            assert mock_save.call_count == 2
+            for call in mock_save.call_args_list:
+                assert call[0][4] is True  # force flag
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
+
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
+    def test_run_annual_range_generation_failure(self, mock_create_generator):
         """Test handling of generation failure in range processing."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2022:2023", "--type", "hardware"])
+        args.format = "markdown"
 
-        # Mock generation to fail for one year
-        def mock_generate_side_effect(report_type, year, data_root, debug, comparison_year):
-            if year == "2022":
-                raise RuntimeError("Generation failed for 2022")
-            return "# Test Report Content"
+        # Create mock generator instances - one will fail
+        mock_instance_2022 = Mock()
+        mock_instance_2022.generate_report.side_effect = RuntimeError("Generation failed for 2022")
+        mock_instance_2023 = Mock()
+        mock_instance_2023.generate_report.return_value = "# Test Report Content"
 
-        mock_generate.side_effect = mock_generate_side_effect
+        mock_create_generator.side_effect = [mock_instance_2022, mock_instance_2023]
 
-        # Should raise the error
-        with pytest.raises(RuntimeError, match="Generation failed for 2022"):
-            run_annual_report(args)
+        # Create data files
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in ["2022", "2023"]:
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": year,
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                        "blades": [],
+                        "brushes": [],
+                        "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+            # Should raise the error
+            with pytest.raises(RuntimeError, match="Failed to generate annual hardware markdown report"):
+                run_annual_report(args)
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
+
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_run_annual_range_save_failure(self, mock_save, mock_generate):
+    def test_run_annual_range_save_failure(self, mock_save, mock_create_generator):
         """Test handling of save failure in range processing."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2022:2023", "--type", "hardware"])
+        args.format = "markdown"
 
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances
+        mock_generator_instances = []
+        for year in ["2022", "2023"]:
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
 
         # Mock save to fail for one year
         def mock_save_side_effect(report_content, out_dir, year, report_type, force, debug):
@@ -277,9 +350,37 @@ class TestAnnualRangeProcessing:
 
         mock_save.side_effect = mock_save_side_effect
 
-        # Should raise the error
-        with pytest.raises(OSError, match="Save failed for 2022"):
-            run_annual_report(args)
+        # Create data files
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in ["2022", "2023"]:
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": year,
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                        "blades": [],
+                        "brushes": [],
+                        "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
+
+            # Should raise the error
+            with pytest.raises(OSError, match="Save failed for 2022"):
+                run_annual_report(args)
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
 
 
 class TestAnnualRangeErrorHandling:
