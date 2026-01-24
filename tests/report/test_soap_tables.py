@@ -88,22 +88,24 @@ class TestSoapsTableGenerator:
         table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
         table_generators_dir.mkdir(parents=True)
 
-        # Create mock WSDB data
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
-        wsdb_file = wsdb_dir / "software.json"
+        # Create mock soaps.yaml file that WSDBLookup expects
+        data_dir = tmp_path / "data"
+        data_dir.mkdir(parents=True)
+        soaps_file = data_dir / "soaps.yaml"
 
-        mock_wsdb_data = [
-            {
-                "brand": "Barrister and Mann",
-                "name": "Seville",
-                "slug": "barrister-and-mann-seville",
-                "type": "Soap",
-            },
-        ]
+        mock_soaps_yaml = {
+            "Barrister and Mann": {
+                "scents": {
+                    "Seville": {
+                        "wsdb_slug": "barrister-and-mann-seville"
+                    }
+                }
+            }
+        }
 
-        with wsdb_file.open("w", encoding="utf-8") as f:
-            json.dump(mock_wsdb_data, f)
+        import yaml
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(mock_soaps_yaml, f)
 
         import sotd.report.table_generators.table_generator as tg_module
 
@@ -142,22 +144,24 @@ class TestSoapsTableGenerator:
         table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
         table_generators_dir.mkdir(parents=True)
 
-        # Create mock WSDB data
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
-        wsdb_file = wsdb_dir / "software.json"
+        # Create mock soaps.yaml file that WSDBLookup expects
+        data_dir = tmp_path / "data"
+        data_dir.mkdir(parents=True)
+        soaps_file = data_dir / "soaps.yaml"
 
-        mock_wsdb_data = [
-            {
-                "brand": "Barrister and Mann",
-                "name": "Seville",
-                "slug": "barrister-and-mann-seville",
-                "type": "Soap",
-            },
-        ]
+        mock_soaps_yaml = {
+            "Barrister and Mann": {
+                "scents": {
+                    "Seville": {
+                        "wsdb_slug": "barrister-and-mann-seville"
+                    }
+                }
+            }
+        }
 
-        with wsdb_file.open("w", encoding="utf-8") as f:
-            json.dump(mock_wsdb_data, f)
+        import yaml
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(mock_soaps_yaml, f)
 
         import sotd.report.table_generators.table_generator as tg_module
 
@@ -199,22 +203,24 @@ class TestSoapsTableGenerator:
         table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
         table_generators_dir.mkdir(parents=True)
 
-        # Create mock WSDB data
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
-        wsdb_file = wsdb_dir / "software.json"
+        # Create mock soaps.yaml file that WSDBLookup expects
+        data_dir = tmp_path / "data"
+        data_dir.mkdir(parents=True)
+        soaps_file = data_dir / "soaps.yaml"
 
-        mock_wsdb_data = [
-            {
-                "brand": "Barrister and Mann",
-                "name": "Seville",
-                "slug": "barrister-and-mann-seville",
-                "type": "Soap",
-            },
-        ]
+        mock_soaps_yaml = {
+            "Barrister and Mann": {
+                "scents": {
+                    "Seville": {
+                        "wsdb_slug": "barrister-and-mann-seville"
+                    }
+                }
+            }
+        }
 
-        with wsdb_file.open("w", encoding="utf-8") as f:
-            json.dump(mock_wsdb_data, f)
+        import yaml
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(mock_soaps_yaml, f)
 
         import sotd.report.table_generators.table_generator as tg_module
 
@@ -258,22 +264,24 @@ class TestSoapsTableGenerator:
         table_generators_dir = tmp_path / "sotd" / "report" / "table_generators"
         table_generators_dir.mkdir(parents=True)
 
-        # Create mock WSDB data
-        wsdb_dir = tmp_path / "data" / "wsdb"
-        wsdb_dir.mkdir(parents=True)
-        wsdb_file = wsdb_dir / "software.json"
+        # Create mock soaps.yaml file that WSDBLookup expects
+        data_dir = tmp_path / "data"
+        data_dir.mkdir(parents=True)
+        soaps_file = data_dir / "soaps.yaml"
 
-        mock_wsdb_data = [
-            {
-                "brand": "Barrister and Mann",
-                "name": "Seville",
-                "slug": "barrister-and-mann-seville",
-                "type": "Soap",
-            },
-        ]
+        mock_soaps_yaml = {
+            "Barrister and Mann": {
+                "scents": {
+                    "Seville": {
+                        "wsdb_slug": "barrister-and-mann-seville"
+                    }
+                }
+            }
+        }
 
-        with wsdb_file.open("w", encoding="utf-8") as f:
-            json.dump(mock_wsdb_data, f)
+        import yaml
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(mock_soaps_yaml, f)
 
         import sotd.report.table_generators.table_generator as tg_module
 
