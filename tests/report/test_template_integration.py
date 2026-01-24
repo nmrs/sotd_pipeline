@@ -18,6 +18,7 @@ class TestTemplateIntegration:
         data = {
             "razors": [{"name": "Test Razor", "shaves": 1, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 1, "rank": 1}],
+            "razor-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
         }
 
         generator = MonthlyReportGenerator(
@@ -46,6 +47,8 @@ class TestTemplateIntegration:
         data = {
             "soaps": [{"name": "Test Soap", "shaves": 1, "rank": 1}],
             "soap-makers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
+            "brand-diversity": [{"brand": "Test Brand", "unique_soaps": 1, "rank": 1}],
+            "users": [{"user": "testuser", "shaves": 1, "missed_days": 0, "rank": 1}],
         }
 
         generator = MonthlyReportGenerator(

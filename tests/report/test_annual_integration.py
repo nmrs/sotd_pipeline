@@ -24,8 +24,8 @@ class TestAnnualReportIntegration:
                 "missing_months": ["2024-04"],
             },
             "razors": [
-                {"brand": "Rockwell", "model": "6C", "count": 500},
-                {"brand": "Merkur", "model": "34C", "count": 300},
+                {"name": "Rockwell 6C", "shaves": 500, "unique_users": 50, "rank": 1},
+                {"name": "Merkur 34C", "shaves": 300, "unique_users": 30, "rank": 2},
             ],
             "blades": [
                 {"brand": "Astra", "model": "Superior Platinum", "count": 800},
@@ -40,6 +40,7 @@ class TestAnnualReportIntegration:
                 {"brand": "Stirling", "model": "Executive Man", "count": 500},
             ],
             "razor-formats": [{"format": "DE", "shaves": 1000, "unique_users": 100, "rank": 1}],
+            "razor-manufacturers": [{"brand": "Rockwell", "shaves": 500, "unique_users": 50, "rank": 1}],
         }
 
     @pytest.fixture

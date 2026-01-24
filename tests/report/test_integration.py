@@ -23,11 +23,11 @@ class TestReportIntegration:
                 {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
                 {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
             ],
-            "razor_manufacturers": [
+            "razor-manufacturers": [
                 {"brand": "Gillette", "shaves": 30, "unique_users": 15, "rank": 1},
                 {"brand": "Karve", "shaves": 18, "unique_users": 8, "rank": 2},
             ],
-            "razor_formats": [
+            "razor-formats": [
                 {"format": "DE", "shaves": 45, "unique_users": 20, "rank": 1},
                 {"format": "SE", "shaves": 5, "unique_users": 3, "rank": 2},
             ],
@@ -35,7 +35,7 @@ class TestReportIntegration:
                 {"name": "Gillette Nacet", "shaves": 30, "unique_users": 15, "rank": 1},
                 {"name": "Personna Lab Blue", "shaves": 20, "unique_users": 10, "rank": 2},
             ],
-            "blade_manufacturers": [
+            "blade-manufacturers": [
                 {"brand": "Gillette", "shaves": 35, "unique_users": 18, "rank": 1},
                 {"brand": "Personna", "shaves": 25, "unique_users": 12, "rank": 2},
             ],
@@ -43,19 +43,19 @@ class TestReportIntegration:
                 {"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8, "rank": 1},
                 {"name": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
             ],
-            "brush_handle_makers": [
+            "brush-handle-makers": [
                 {"handle_maker": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1},
                 {"handle_maker": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
             ],
-            "brush_knot_makers": [
+            "brush-knot-makers": [
                 {"brand": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1},
                 {"brand": "AP Shave Co", "shaves": 12, "unique_users": 6, "rank": 2},
             ],
-            "brush_fibers": [
+            "brush-fibers": [
                 {"fiber": "Badger", "shaves": 20, "unique_users": 10, "rank": 1},
                 {"fiber": "Synthetic", "shaves": 10, "unique_users": 5, "rank": 2},
             ],
-            "brush_knot_sizes": [
+            "brush-knot-sizes": [
                 {"knot_size": "24mm", "shaves": 15, "unique_users": 8, "rank": 1},
                 {"knot_size": "26mm", "shaves": 12, "unique_users": 6, "rank": 2},
             ],
@@ -120,6 +120,7 @@ class TestReportIntegration:
             "razors": [{"name": "Gillette Super Speed", "shaves": 25, "rank": 1}],
             "soaps": [{"name": "Test Soap", "shaves": 30, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 25, "rank": 1}],
+            "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "rank": 1}],
         }
 
         # Test hardware report generation
@@ -229,6 +230,7 @@ class TestReportIntegration:
             "blades": [
                 {"name": "Gillette Nacet", "shaves": 20, "unique_users": 10, "rank": 1},
             ],
+            "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "unique_users": 10, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 43, "unique_users": 20, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}],
         }
