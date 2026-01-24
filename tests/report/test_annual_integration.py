@@ -28,16 +28,16 @@ class TestAnnualReportIntegration:
                 {"name": "Merkur 34C", "shaves": 300, "unique_users": 30, "rank": 2},
             ],
             "blades": [
-                {"brand": "Astra", "model": "Superior Platinum", "count": 800},
-                {"brand": "Feather", "model": "Hi-Stainless", "count": 600},
+                {"name": "Astra Superior Platinum", "shaves": 800, "unique_users": 80, "rank": 1},
+                {"name": "Feather Hi-Stainless", "shaves": 600, "unique_users": 60, "rank": 2},
             ],
             "brushes": [
-                {"brand": "Simpson", "model": "Chubby 2", "count": 400},
-                {"brand": "Omega", "model": "10049", "count": 300},
+                {"name": "Simpson Chubby 2", "shaves": 400, "unique_users": 40, "rank": 1},
+                {"name": "Omega 10049", "shaves": 300, "unique_users": 30, "rank": 2},
             ],
             "soaps": [
-                {"brand": "Barrister and Mann", "model": "Seville", "count": 700},
-                {"brand": "Stirling", "model": "Executive Man", "count": 500},
+                {"name": "Barrister and Mann Seville", "shaves": 700, "unique_users": 70, "rank": 1},
+                {"name": "Stirling Executive Man", "shaves": 500, "unique_users": 50, "rank": 2},
             ],
             "razor-formats": [{"format": "DE", "shaves": 1000, "unique_users": 100, "rank": 1}],
             "razor-manufacturers": [{"brand": "Rockwell", "shaves": 500, "unique_users": 50, "rank": 1}],
