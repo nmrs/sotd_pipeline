@@ -731,14 +731,30 @@ class TestMoveCatalogEntries:
 
         correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
 
+        # Create correct_matches directory at tmp_path / "data" / "correct_matches"
+        # (matching the structure expected by get_data_directory())
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        correct_matches_dir = data_dir / "correct_matches"
+        correct_matches_dir.mkdir()
+        
+        # Create handle.yaml and knot.yaml files
+        handle_file = correct_matches_dir / "handle.yaml"
+        with handle_file.open("w") as f:
+            yaml.dump(initial_data["handle"], f)
+        knot_file = correct_matches_dir / "knot.yaml"
+        with knot_file.open("w") as f:
+            yaml.dump(initial_data["knot"], f)
+
         # Import the move endpoint function
         import sys
         from pathlib import Path
+        from unittest.mock import patch
 
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest
+        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
 
         # Create request to move entry from handle_knot to brush
         request = MoveCatalogEntriesRequest(
