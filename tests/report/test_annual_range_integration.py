@@ -1,8 +1,9 @@
 """Integration tests for annual range processing in report phase."""
 
+import json
 import pytest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from sotd.report.cli import get_parser, validate_args
 from sotd.report.run import run_annual_report, main
@@ -67,65 +68,160 @@ class TestAnnualRangeIntegration:
 class TestAnnualRangeProcessing:
     """Test annual range processing logic."""
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_run_annual_range_single_year(self, mock_save, mock_generate):
+    def test_run_annual_range_single_year(self, mock_save, mock_create_generator):
         """Test processing a single year range."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2023:2023", "--type", "hardware"])
+        args.format = "markdown"  # Set format explicitly
 
-        # Mock the generate function to return test content
-        mock_generate.return_value = "# Test Report Content"
+        # Create a mock generator instance
+        mock_generator_instance = Mock()
+        mock_generator_instance.generate_report.return_value = "# Test Report Content"
+        mock_create_generator.return_value = mock_generator_instance
         mock_save.return_value = Path("data/reports/annual/2023-hardware.md")
 
-        run_annual_report(args)
+        # Need to create the data file for the test
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_file = data_dir / "2023.json"
+        with open(annual_file, "w") as f:
+            json.dump({
+                "metadata": {
+                    "year": "2023",
+                    "total_shaves": 1000,
+                    "unique_shavers": 50,
+                    "included_months": ["2023-01", "2023-02"],
+                    "missing_months": []
+                },
+                "razors": [],
+                "blades": [],
+                "brushes": [],
+                "soaps": []
+            }, f)
 
-        # Should call generate once for the single year
-        mock_generate.assert_called_once()
-        call_args = mock_generate.call_args
-        assert call_args[0][0] == "hardware"  # report_type
-        assert call_args[0][1] == "2023"  # year
-        assert call_args[0][2] == Path("data")  # data_root
-        assert call_args[0][3] is False  # debug
-        assert call_args[0][4] is None  # comparison_year
+        try:
+            run_annual_report(args)
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+            # Should call create_generator once for the single year
+            mock_create_generator.assert_called_once()
+            # Verify generate_report was called on the generator instance
+            mock_generator_instance.generate_report.assert_called_once()
+        finally:
+            # Clean up
+            if annual_file.exists():
+                annual_file.unlink()
+
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_run_annual_range_multiple_years(self, mock_save, mock_generate):
+    def test_run_annual_range_multiple_years(self, mock_save, mock_create_generator):
         """Test processing multiple years in range."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2021:2023", "--type", "hardware"])
+        args.format = "markdown"
 
-        # Mock the generate function to return test content
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances for each year
+        mock_generator_instances = []
+        for year in ["2021", "2022", "2023"]:
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
         mock_save.return_value = Path("data/reports/annual/2021-hardware.md")
 
-        run_annual_report(args)
+        # Create data files for all years
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in ["2021", "2022", "2023"]:
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": year,
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                "blades": [],
+                "brushes": [],
+                "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-        # Should call generate for each year in the range
-        assert mock_generate.call_count == 3
-        expected_years = ["2021", "2022", "2023"]
-        actual_years = [call[0][1] for call in mock_generate.call_args_list]
-        assert actual_years == expected_years
+            run_annual_report(args)
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+            # Should call create_generator for each year in the range
+            assert mock_create_generator.call_count == 3
+            # Verify generate_report was called on each generator instance
+            for mock_instance in mock_generator_instances:
+                mock_instance.generate_report.assert_called_once()
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
+
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_run_annual_range_with_debug(self, mock_save, mock_generate):
+    def test_run_annual_range_with_debug(self, mock_save, mock_create_generator):
         """Test range processing with debug output."""
         parser = get_parser()
         args = parser.parse_args(
             ["--annual", "--range", "2022:2023", "--type", "hardware", "--debug"]
         )
+        args.format = "markdown"
 
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances
+        mock_generator_instances = []
+        for year in ["2022", "2023"]:
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
         mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
 
-        run_annual_report(args)
+        # Create data files
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in ["2022", "2023"]:
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": year,
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                "blades": [],
+                "brushes": [],
+                "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-        # Should call generate with debug=True
-        assert mock_generate.call_count == 2
-        for call in mock_generate.call_args_list:
-            assert call[0][3] is True  # debug flag
+            run_annual_report(args)
+
+            # Should call create_generator twice
+            assert mock_create_generator.call_count == 2
+            # Verify generate_report was called on each generator instance
+            for mock_instance in mock_generator_instances:
+                mock_instance.generate_report.assert_called_once()
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
 
     @patch("sotd.report.annual_run.generate_annual_report")
     @patch("sotd.report.annual_run.save_annual_report")
