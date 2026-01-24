@@ -649,7 +649,8 @@ class TestMoveCatalogEntries:
 
         return correct_matches_dir
 
-    def test_move_data_mismatch_entry(self, tmp_path):
+    @pytest.mark.asyncio
+    async def test_move_data_mismatch_entry(self, tmp_path):
         """Test moving a data_mismatch entry (updating brand/model in same section)."""
         # Create initial correct_matches data
         initial_data = {"razor": {"Old Brand": {"Old Model": ["test razor pattern"]}}}
@@ -690,8 +691,8 @@ class TestMoveCatalogEntries:
         analysis_module.project_root = tmp_path
 
         try:
-            # Execute move
-            response = move_catalog_validation_entries(request)
+            # Execute move (await the async function)
+            response = await move_catalog_validation_entries(request)
 
             # Verify response
             assert response.success is True
@@ -792,21 +793,33 @@ class TestMoveCatalogEntries:
             if original_project_root:
                 analysis_module.project_root = original_project_root
 
-    def test_move_blade_with_format_preservation(self, tmp_path):
+    @pytest.mark.asyncio
+    async def test_move_blade_with_format_preservation(self, tmp_path):
         """Test moving a blade entry while preserving format information."""
         # Create initial correct_matches data
         initial_data = {"blade": {"DE": {"Old Brand": {"Old Model": ["test blade pattern"]}}}}
 
-        correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
+        # Create correct_matches directory at tmp_path / "data" / "correct_matches"
+        # (matching the structure expected by get_data_directory())
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        correct_matches_dir = data_dir / "correct_matches"
+        correct_matches_dir.mkdir()
+        
+        # Create blade.yaml file
+        blade_file = correct_matches_dir / "blade.yaml"
+        with blade_file.open("w") as f:
+            yaml.dump(initial_data["blade"], f)
 
         # Import the move endpoint function
         import sys
         from pathlib import Path
+        from unittest.mock import patch
 
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest
+        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
 
         # Create request to move blade entry
         request = MoveCatalogEntriesRequest(
@@ -826,15 +839,10 @@ class TestMoveCatalogEntries:
             ],
         )
 
-        # Mock project_root
-        import webui.api.analysis as analysis_module
-
-        original_project_root = getattr(analysis_module, "project_root", None)
-        analysis_module.project_root = tmp_path
-
-        try:
-            # Execute move
-            response = move_catalog_validation_entries(request)
+        # Mock get_data_directory to return tmp_path / "data"
+        with patch("webui.api.analysis.get_data_directory", return_value=data_dir):
+            # Execute move (await the async function)
+            response = await move_catalog_validation_entries(request)
 
             # Verify response
             assert response.success is True
@@ -850,13 +858,11 @@ class TestMoveCatalogEntries:
             new_brand_data = de_section.get("New Brand", {})
             new_model_patterns = new_brand_data.get("New Model", [])
             assert "test blade pattern" in new_model_patterns
-
-        finally:
-            # Restore original project_root
             if original_project_root:
                 analysis_module.project_root = original_project_root
 
-    def test_move_entry_not_found_error(self, tmp_path):
+    @pytest.mark.asyncio
+    async def test_move_entry_not_found_error(self, tmp_path):
         """Test error handling when entry is not found in source location."""
         # Create empty correct_matches data
         initial_data = {"razor": {}}
@@ -896,8 +902,8 @@ class TestMoveCatalogEntries:
         analysis_module.project_root = tmp_path
 
         try:
-            # Execute move
-            response = move_catalog_validation_entries(request)
+            # Execute move (await the async function)
+            response = await move_catalog_validation_entries(request)
 
             # Should still succeed but with warnings
             # Entry not found should be logged but not cause failure
