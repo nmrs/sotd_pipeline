@@ -1,0 +1,974 @@
+---
+name: Public Web Application
+overview: Create a containerized public-facing read-only web application that displays SOTD pipeline reports and data. The application consists of a React frontend and FastAPI backend, both running in a container that reads data produced by the pipeline container.
+todos:
+  - id: public-api-structure
+    content: Create webui/api/public/ directory structure and base FastAPI app with read-only endpoints and caching
+    status: pending
+  - id: public-api-reports
+    content: Implement read-only reports endpoints that load aggregation data and use existing report generators to extract structured data for interactive rendering
+    status: pending
+  - id: public-api-data
+    content: Implement read-only data endpoints with pagination and efficient date range queries
+    status: pending
+  - id: public-api-products
+    content: Implement product browsing endpoints with search, filter, trend data, and product detail endpoint
+    status: pending
+  - id: public-api-search
+    content: Implement autocomplete/suggestions endpoint for products, users, and reports with fast response time
+    status: pending
+  - id: public-api-users
+    content: Implement user detail endpoint with activity history and statistics
+    status: pending
+  - id: public-api-trends
+    content: Implement trend analysis endpoints for usage trends and comparisons
+    status: pending
+  - id: public-api-stats
+    content: Implement pipeline statistics and status endpoints
+    status: pending
+  - id: public-api-performance
+    content: Add performance optimizations (caching, pagination, efficient queries)
+    status: pending
+  - id: public-frontend-structure
+    content: Create webui/src/public/ directory structure with report-centric routing, using ShadCN UI + Tailwind CSS for beautiful, polished design
+    status: pending
+  - id: public-frontend-homepage
+    content: Implement homepage with latest report prominently displayed
+    status: pending
+  - id: public-frontend-interactive-reports
+    content: Implement interactive report viewer with embedded charts and graphs
+    status: pending
+  - id: public-frontend-search
+    content: Implement autocomplete search bar in header with dropdown suggestions that navigate directly to detail pages
+    status: pending
+  - id: public-frontend-product-detail
+    content: Implement product detail page with usage history, trends, and statistics
+    status: pending
+  - id: public-frontend-user-detail
+    content: Implement user detail page with activity history and product usage
+    status: pending
+  - id: public-frontend-data-exploration
+    content: Implement data exploration pages (product browser, trends, user stats) accessible from reports or search
+    status: pending
+  - id: public-frontend-mobile
+    content: Implement mobile-responsive design with touch-friendly components and mobile navigation
+    status: pending
+  - id: public-frontend-performance
+    content: Add frontend performance optimizations (lazy loading, virtual scrolling, chart optimization)
+    status: pending
+  - id: public-web-container
+    content: Create Dockerfile for public web container (frontend + backend)
+    status: pending
+  - id: docker-compose-public
+    content: Create docker-compose.public.yml with web and pipeline services
+    status: pending
+  - id: public-api-tests
+    content: Write unit and integration tests for public API endpoints
+    status: pending
+  - id: public-frontend-tests
+    content: Write tests for public frontend components
+    status: pending
+  - id: public-deployment-docs
+    content: Create deployment documentation for public web application on Synology NAS
+    status: pending
+---
+
+# Public Web Application Implementation Plan
+
+## Overview
+
+Create a containerized public-facing read-only web application for the r/wetshaving community to view SOTD pipeline reports and data. The application consists of:
+
+1. **Public Web Container**: Read-only React frontend + FastAPI backend (read-only endpoints only)
+2. **Shared Data Volume**: Container reads data produced by the pipeline container
+3. **No Pipeline Logic**: This container only serves data, does not run the pipeline
+
+## Requirements Summary
+
+Based on user requirements discussion:
+
+### Primary Features
+
+- **Report-Centric Navigation**: Start with reports, explore underlying data from there
+- **Homepage**: Latest report prominently displayed
+- **Interactive Reports**: Reports with embedded charts, graphs, and visualizations (not just markdown)
+- **Autocomplete Search**: Search bar in header with autocomplete suggestions for products and users only - clicking suggestions goes directly to detail pages (reports use date picker, not search)
+- **Direct Access**: Direct links to product/user detail pages without navigating through reports
+- **Data Exploration**: Browse products, search/filter, view trends, user statistics
+- **Equal Priority**: Reports and data exploration are equally important features
+
+### User Experience
+
+- **Mobile Support**: Critical - must work well on mobile devices
+- **Time Ranges**: 
+  - Reports: Monthly and annual only (reuse existing aggregations, no arbitrary ranges)
+  - Product/User detail pages: Arbitrary date range selection for flexible data exploration
+- **Performance**: Fast loading even with large date ranges (optimize heavily, especially for product/user detail pages with arbitrary ranges)
+- **Visualizations**: All types - usage trends, top products, comparisons, distributions
+
+### Constraints
+
+- **Read-Only**: No editing, validation, or admin features
+- **No Export**: View-only, no data export functionality
+- **No Side-by-Side**: Single report view (no comparison mode)
+- **Historical Data**: Support all historical data (2016-present) with configurable ranges
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Synology NAS                          │
+│                                                          │
+│  ┌──────────────────┐      ┌──────────────────┐        │
+│  │  Public Web      │      │  Pipeline        │        │
+│  │  Container       │      │  Container       │        │
+│  │                  │      │  (separate plan) │        │
+│  │  - React UI      │      │                  │        │
+│  │  - FastAPI       │      │                  │        │
+│  │  (read-only)     │      │                  │        │
+│  └────────┬─────────┘      └────────┬─────────┘        │
+│           │                         │                   │
+│           └──────────┬──────────────┘                   │
+│                      │                                   │
+│              ┌───────▼────────┐                        │
+│              │  Shared Volume │                        │
+│              │  /data         │                        │
+│              │  - JSON files  │                        │
+│              │  - YAML catalogs│                        │
+│              │  - search_index.json│                    │
+│              └─────────────────┘                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Components
+
+### 1. Public Read-Only API (`webui/api/public/`)
+
+Create a new public API module that only exposes read-only endpoints optimized for fast performance:
+
+**Architecture Decision**: Separate FastAPI app instance for complete isolation
+
+- Create `webui/api/public/main.py` with its own FastAPI app instance
+- Public app only includes public routers (reports, data, products, search, users, trends, stats)
+- Public Dockerfile uses: `CMD ["uvicorn", "webui.api.public.main:app", ...]`
+- Admin code is never imported or loaded in public container, ensuring complete security isolation
+- Public app can import shared utilities from `webui/api/utils/` if needed, but never imports admin routers
+
+**File**: `webui/api/public/main.py`
+
+- New FastAPI app instance for public endpoints (separate from admin app)
+- Only GET endpoints (no POST/PUT/DELETE)
+- CORS configuration: Allow all origins (`allow_origins=["*"]`), no credentials needed (read-only)
+- Performance optimizations: caching, pagination, efficient data loading
+- Endpoints to expose:
+  - `/api/public/health` - Health check (returns `{"status": "healthy", "version": "1.0.0", "data_dir_accessible": true}`, checks API responsiveness + data directory accessibility)
+  - `/api/public/reports/{month}` - Generate report for month from aggregation data (with structured data for interactive rendering)
+  - `/api/public/reports/annual/{year}` - Generate annual report from aggregation data
+  - `/api/public/reports/latest` - Get latest report (for homepage) - generated from latest aggregation
+  - `/api/public/data/{month}/{phase}` - Get processed data (extract, match, enrich, aggregate) with pagination
+  - `/api/public/products/{month}/{type}` - Product usage data with search/filter support
+  - `/api/public/products/{type}/{brand}/{model}` - Get specific product details and usage history (supports date range query params)
+  - `/api/public/products/trends/{type}` - Product usage trends over time (for charts)
+  - `/api/public/search/suggestions` - Autocomplete suggestions for products, users, and reports
+  - `/api/public/users/{username}` - Get specific user details and activity history
+  - `/api/public/users/{month}` - User statistics and activity for a month
+  - `/api/public/months` - List available months with metadata (can also use search index for faster lookup)
+  - `/api/public/stats` - Pipeline statistics (last update, data freshness, summary stats)
+
+**File**: `webui/api/public/reports.py`
+
+- Read-only report endpoints
+- Load aggregation data from `data/aggregate/` (monthly/annual JSON files)
+- Reuse existing report generation classes (`MonthlyReportGenerator`, `AnnualReportGenerator`) from `sotd.report`
+- Use `get_structured_data()` methods on report generators to extract structured data (tables, stats, metadata)
+- **Important**: Structured JSON includes ALL data (no row limits) - row limits are only for markdown generation (Reddit content length enforcement)
+- Return structured JSON data ready for interactive rendering (charts, tables, stats)
+- Generate report data on-the-fly from aggregations (no markdown generation needed)
+
+**File**: `webui/api/public/data.py`
+
+- Read-only data endpoints with performance optimization
+- Load JSON files from `data/{phase}/` directories (no database)
+- Support pagination and filtering
+- Efficient date range queries (load and filter in memory)
+- Cache frequently accessed data in memory
+- Start simple with JSON files, optimize later if needed
+
+**File**: `webui/api/public/products.py`
+
+- Product browsing endpoints
+- Search and filter capabilities
+- Product detail endpoint (specific brand/model with full usage history, supports arbitrary date range filtering)
+- Product usage statistics
+- Trend data for visualizations
+- Top products lists
+
+**File**: `webui/api/public/search.py`
+
+- Autocomplete/suggestions endpoint
+- Load lightweight search index file (`data/search_index.json`) generated by pipeline
+- Search across products (by brand, model, type) - query index file, return top matches
+- Search across users (by username) - query index file, return top matches
+- Return ranked suggestions with type indicators (product/user)
+- Limit results (e.g., top 10 total, top 5 per category)
+- Fast response time for autocomplete UX (single lightweight file, not all aggregation files)
+- Note: Reports are not included in search - use date picker for report navigation
+
+**File**: `webui/api/public/trends.py`
+
+- Trend analysis endpoints
+- Usage trends over time
+- Month-to-month comparisons
+- Year-to-year comparisons
+- Distribution statistics
+
+**File**: `webui/api/public/stats.py`
+
+- Pipeline status and statistics
+- Last pipeline run time
+- Data freshness indicators
+- Summary statistics (total shaves, unique users, etc.)
+
+**File**: `webui/api/public/users.py`
+
+- User detail endpoint (specific user with full activity history, supports arbitrary date range filtering)
+- User statistics for specific months or date ranges
+- User activity timeline (supports date range filtering)
+- User product usage history (supports date range filtering)
+- Load and filter aggregation JSON files for date range queries
+
+### 2. Public Frontend (`webui/src/public/`)
+
+Create a report-centric, mobile-responsive frontend as a separate React app:
+
+**Architecture Decision**: Separate React app for complete isolation
+
+- Create `webui/src/public/` with its own `App.tsx`, `main.tsx`, and routing
+- Separate build process and Dockerfile from admin frontend
+- Complete isolation ensures admin code is never included in public bundle
+- Can evolve to Option D (shared component library) if component reuse is needed - extract shared components to `webui/src/shared/` and import from both apps
+- Public app can import shared utilities, types, and design system components from `webui/src/lib/` or `webui/src/shared/` if needed
+
+**Navigation Structure** (Report-Centric):
+
+- Homepage: Latest report prominently displayed
+- Reports section: Browse monthly/annual reports
+- Data exploration accessible from within reports (drill down)
+- Stats/overview accessible from navigation
+
+**Shared Components** (can be reused via imports if needed):
+
+- Data models and types (import from `webui/src/types/` or create shared)
+- API client utilities (read-only methods - create public-specific or share)
+- Date utilities and formatters (import from `webui/src/utils/` if suitable)
+- Product type definitions (import from `webui/src/types/` if suitable)
+- Chart components (if suitable for public use - import or create public versions)
+- ShadCN UI components (Button, Card, Input, etc. - already shared via `webui/src/lib/`)
+- Tailwind CSS styling system (shared via `tailwind.config.cjs`)
+- Design system patterns and color palette (can reference existing patterns)
+
+**Note**: Start with separate app, extract to `webui/src/shared/` if significant component reuse is needed
+
+**New Public Components**:
+
+**Pages**:
+
+- `webui/src/public/pages/HomePage.tsx` - Landing page with latest report
+- `webui/src/public/pages/ReportPage.tsx` - Interactive report viewer with charts (includes month/year picker for navigation)
+- `webui/src/public/pages/DataExplorerPage.tsx` - Data browser (accessible from reports)
+- `webui/src/public/pages/ProductBrowserPage.tsx` - Browse products by category
+- `webui/src/public/pages/ProductDetailPage.tsx` - Product detail page (brand/model with usage history, arbitrary date range selector)
+- `webui/src/public/pages/UserDetailPage.tsx` - User detail page (username with activity history, arbitrary date range selector)
+- `webui/src/public/pages/TrendsPage.tsx` - View trends and comparisons
+
+**Components**:
+
+- `webui/src/public/components/GlobalSearch.tsx` - Autocomplete search bar (in header/nav) with dropdown suggestions
+- `webui/src/public/components/InteractiveReportViewer.tsx` - Render reports with interactive charts/graphs
+- `webui/src/public/components/ReportCharts.tsx` - Charts for report data (usage trends, top products, distributions)
+- `webui/src/public/components/ProductBrowser.tsx` - Browse/search/filter products
+- `webui/src/public/components/ProductDetail.tsx` - Product detail view (usage history, trends, stats) with date range selector
+- `webui/src/public/components/UserDetail.tsx` - User detail view (activity history, product usage) with date range selector
+- `webui/src/public/components/TrendVisualization.tsx` - Trend charts and comparisons
+- `webui/src/public/components/UserStats.tsx` - User statistics display
+- `webui/src/public/components/ReportDatePicker.tsx` - Month/year picker for report navigation (used on report page/header, uses search index to show only available dates)
+- `webui/src/public/components/DateRangeSelector.tsx` - Arbitrary date range picker (used on product/user detail pages, not reports)
+- `webui/src/public/components/DataTable.tsx` - Read-only data tables (mobile-responsive)
+- `webui/src/public/components/LastUpdate.tsx` - Show data freshness
+- `webui/src/public/components/MobileNavigation.tsx` - Mobile-friendly navigation
+
+**Features**:
+
+- **Reports**: Interactive monthly/annual reports with embedded charts and visualizations
+- **Report Navigation**: Month/year picker on report page or in header for quick navigation to any report (no separate list page, no search needed)
+- **Search**: Autocomplete search bar in header - shows product/user suggestions as you type, clicking goes directly to detail pages (reports not included - use date picker instead)
+- **Direct Access**: Direct links to product detail pages (brand/model) and user detail pages (username)
+- **Data Exploration**: Browse products, search/filter, view trends, user stats (accessible from reports or search)
+- **Product Details**: Full product usage history, trends, and statistics on dedicated pages with arbitrary date range selection
+- **User Details**: Full user activity history, product usage, and statistics on dedicated pages with arbitrary date range selection
+- **Performance**: Fast loading with optimized queries, pagination, and caching
+- **Mobile**: Critical - fully responsive design, touch-friendly, mobile navigation
+- **Design**: Beautiful, polished UI using ShadCN UI + Tailwind CSS (same stack as admin, but with enhanced aesthetics)
+- **Time Ranges**: 
+  - Reports: Monthly/annual selection only (reuse existing report files)
+  - Product/User details: Arbitrary date range selection for flexible exploration
+- **Visualizations**: Usage trends, top products, comparisons, distributions
+- **No Export**: View-only, no data export functionality
+- **No Side-by-Side**: Single report view (no comparison mode)
+
+### 3. Public Web Container
+
+**File**: `docker/public-web/Dockerfile`
+
+- Multi-stage build for public web app
+- Stage 1: Build React frontend (public app)
+- Stage 2: Build FastAPI backend (public API)
+- Stage 3: Production nginx + uvicorn setup
+- Or separate Dockerfiles: `docker/public-web/frontend.Dockerfile` and `docker/public-web/backend.Dockerfile`
+
+### 4. Docker Compose Configuration
+
+**File**: `docker-compose.public.yml`
+
+- `public-web` service (frontend + backend)
+- `pipeline` service (from separate plan)
+- Shared volume for data:
+  - Bind mount from host path (configurable via `SOTD_DATA_DIR` env var)
+  - Default: `/data` in container
+  - Both containers mount same host path
+  - Ensure proper read/write permissions
+- Network configuration
+- Environment variables:
+  - `SOTD_DATA_DIR` (path to data directory in container, defaults to `/data`)
+  - Host path configured in docker-compose volume mount
+
+## Implementation Plan
+
+### Phase 1: Public API Foundation
+
+**Goal**: Create public API structure and basic endpoints
+
+**Prerequisites**: Report generator structured data support (from pipeline container plan)
+
+**Steps**:
+
+1. Create `webui/api/public/` directory structure
+   - `__init__.py`, `main.py`
+
+2. Implement `webui/api/public/main.py`:
+   - Create FastAPI app instance (separate from admin)
+   - Add CORS middleware (allow all origins, no credentials)
+   - Add request logging middleware
+   - Add global exception handler
+   - Add health check endpoint (`/api/public/health`)
+     - Check data directory accessibility
+     - Return `{"status": "healthy", "version": "1.0.0", "data_dir_accessible": true}`
+
+3. Create router modules (empty for now):
+   - `reports.py`, `data.py`, `products.py`, `search.py`, `users.py`, `trends.py`, `stats.py`
+
+4. Include routers in `main.py` (with `/api/public` prefix)
+5. Test: Start API server, verify health endpoint works
+
+**Validation**: API starts, health endpoint returns correct response
+
+---
+
+### Phase 2: Reports API Endpoints
+
+**Goal**: Implement report endpoints using structured data
+
+**Prerequisites**: Phase 1 complete, report generator structured data support available
+
+**Steps**:
+
+1. Implement `webui/api/public/reports.py`:
+   - `GET /api/public/reports/latest` - Get latest report (find latest month, generate structured data)
+   - `GET /api/public/reports/{month}` - Generate monthly report structured data
+   - `GET /api/public/reports/annual/{year}` - Generate annual report structured data
+   - Load aggregation data from `data/aggregate/`
+   - Use `get_structured_data()` from report generators
+   - Return JSON response
+
+2. Add error handling:
+   - 404 for missing months/years
+   - 400 for invalid month/year format
+
+3. Write unit tests for report endpoints
+4. Test with real aggregation data
+
+**Validation**: All report endpoints return structured JSON, handle errors correctly
+
+---
+
+### Phase 3: Search and Data Endpoints
+
+**Goal**: Implement search and basic data endpoints
+
+**Prerequisites**: Phase 2 complete, search index available from pipeline
+
+**Steps**:
+
+1. Implement `webui/api/public/search.py`:
+   - `GET /api/public/search/suggestions?q={query}`
+   - Load `data/search_index.json`
+   - Search products (brand, model, type) and users (username)
+   - Return top 10 matches with type indicators
+   - Fast response (<100ms target)
+
+2. Implement `webui/api/public/data.py`:
+   - `GET /api/public/data/{month}/{phase}` - Get processed data with pagination
+   - Load JSON files from `data/{phase}/` directories
+   - Support pagination (limit, offset query params)
+   - Return paginated results
+
+3. Implement `webui/api/public/months`:
+   - `GET /api/public/months` - List available months
+   - Use search index for fast lookup
+
+4. Write unit tests
+5. Test with real data
+
+**Validation**: Search returns fast results, data endpoints support pagination
+
+---
+
+### Phase 4: Products and Users Endpoints
+
+**Goal**: Implement product and user detail endpoints
+
+**Prerequisites**: Phase 3 complete
+
+**Steps**:
+
+1. Implement `webui/api/public/products.py`:
+   - `GET /api/public/products/{month}/{type}` - Product usage for month/type
+   - `GET /api/public/products/{type}/{brand}/{model}` - Product detail with date range query params
+   - `GET /api/public/products/trends/{type}` - Product trends over time
+   - Load aggregation data, filter by date range if provided
+   - Return usage history, trends, statistics
+
+2. Implement `webui/api/public/users.py`:
+   - `GET /api/public/users/{username}` - User detail with date range query params
+   - `GET /api/public/users/{month}` - User stats for month
+   - Load aggregation data, filter by date range
+   - Return activity history, product usage
+
+3. Write unit tests
+4. Test with real data and date ranges
+
+**Validation**: Product/user endpoints return correct data, date range filtering works
+
+---
+
+### Phase 5: Trends and Stats Endpoints
+
+**Goal**: Implement trend analysis and pipeline stats endpoints
+
+**Prerequisites**: Phase 4 complete
+
+**Steps**:
+
+1. Implement `webui/api/public/trends.py`:
+   - `GET /api/public/trends/{type}` - Usage trends over time
+   - Month-to-month and year-to-year comparisons
+   - Distribution statistics
+
+2. Implement `webui/api/public/stats.py`:
+   - `GET /api/public/stats` - Pipeline statistics
+   - Last pipeline run time (check data file timestamps)
+   - Data freshness indicators
+   - Summary statistics (total shaves, unique users, etc.)
+
+3. Write unit tests
+4. Test with real data
+
+**Validation**: Trends and stats endpoints return correct data
+
+---
+
+### Phase 6: API Performance Optimization
+
+**Goal**: Add caching and optimize queries
+
+**Prerequisites**: Phases 1-5 complete
+
+**Steps**:
+
+1. Implement in-memory caching for frequently accessed data:
+   - Cache loaded aggregation files
+   - Cache search index
+   - Cache computed statistics
+   - TTL-based cache invalidation
+
+2. Optimize date range queries:
+   - Load only relevant files for date range
+   - Filter in memory efficiently
+
+3. Add response compression (FastAPI middleware)
+4. Performance testing:
+   - Measure response times
+   - Test with large date ranges
+   - Verify caching improves performance
+
+5. Document performance characteristics
+
+**Validation**: API responses are fast (<500ms for most endpoints, <100ms for search)
+
+---
+
+### Phase 7: Public Frontend Foundation
+
+**Goal**: Create separate React app structure
+
+**Prerequisites**: Phase 2 complete (need reports API)
+
+**Steps**:
+
+1. Create `webui/src/public/` directory structure:
+   - `App.tsx`, `main.tsx`
+   - `pages/`, `components/`, `services/`, `types/`, `utils/`
+
+2. Setup public app:
+   - Create `main.tsx` with React Router
+   - Create `App.tsx` with routing structure
+   - Setup public API client in `services/api.ts`
+
+3. Create shared utilities (if needed):
+   - Import from `webui/src/lib/` or create public-specific
+
+4. Setup build configuration:
+   - Update `vite.config.ts` or create separate config
+   - Configure public API URL
+
+5. Test: Build and run public app locally
+
+**Validation**: Public app builds and runs, can connect to public API
+
+---
+
+### Phase 8: Homepage and Report Viewer
+
+**Goal**: Implement homepage and interactive report viewer
+
+**Prerequisites**: Phase 7 complete, Phase 2 complete
+
+**Steps**:
+
+1. Implement `HomePage.tsx`:
+   - Fetch latest report from `/api/public/reports/latest`
+   - Display prominently with beautiful design
+   - Add navigation to reports
+
+2. Implement `ReportPage.tsx`:
+   - Fetch report data from API (structured JSON)
+   - Display report sections with charts
+   - Add month/year picker (`ReportDatePicker` component)
+   - Use search index to show only available dates
+
+3. Create `InteractiveReportViewer` component:
+   - Render report sections
+   - Display tables from structured data
+   - Add charts using chart library
+
+4. Create `ReportCharts` component:
+   - Usage trends charts
+   - Top products charts
+   - Distribution charts
+
+5. Test: View reports, navigate between months/years
+
+**Validation**: Homepage shows latest report, report viewer displays interactive reports correctly
+
+---
+
+### Phase 9: Search and Detail Pages
+
+**Goal**: Implement search and product/user detail pages
+
+**Prerequisites**: Phase 8 complete, Phase 3-4 complete
+
+**Steps**:
+
+1. Create `GlobalSearch` component:
+   - Search bar in header
+   - Autocomplete dropdown
+   - Call `/api/public/search/suggestions`
+   - Navigate to detail pages on click
+
+2. Implement `ProductDetailPage.tsx`:
+   - Fetch product data from API
+   - Display usage history, trends, stats
+   - Add `DateRangeSelector` component for arbitrary date ranges
+
+3. Implement `UserDetailPage.tsx`:
+   - Fetch user data from API
+   - Display activity history, product usage
+   - Add `DateRangeSelector` component
+
+4. Create `DateRangeSelector` component:
+   - Date range picker (start/end dates)
+   - Update API calls with date range params
+
+5. Test: Search works, detail pages display correctly, date ranges work
+
+**Validation**: Search autocomplete works, detail pages show correct data with date filtering
+
+---
+
+### Phase 10: Data Exploration Pages
+
+**Goal**: Implement product browser and trends pages
+
+**Prerequisites**: Phase 9 complete
+
+**Steps**:
+
+1. Implement `ProductBrowserPage.tsx`:
+   - Browse products by category
+   - Search/filter products
+   - Display product lists
+
+2. Implement `TrendsPage.tsx`:
+   - View usage trends
+   - Month-to-month comparisons
+   - Year-to-year comparisons
+
+3. Create `TrendVisualization` component:
+   - Trend charts
+   - Comparison visualizations
+
+4. Test: Browse products, view trends
+
+**Validation**: Data exploration pages work correctly
+
+---
+
+### Phase 11: Mobile Responsiveness
+
+**Goal**: Make frontend mobile-responsive
+
+**Prerequisites**: Phases 8-10 complete
+
+**Steps**:
+
+1. Create `MobileNavigation` component:
+   - Mobile-friendly menu
+   - Touch-friendly interactions
+
+2. Make all pages mobile-responsive:
+   - Responsive layouts
+   - Touch-friendly buttons/inputs
+   - Mobile-optimized charts and tables
+
+3. Test on mobile devices:
+   - Test navigation
+   - Test all pages
+   - Test interactions
+
+4. Fix mobile-specific issues
+
+**Validation**: App works well on mobile devices
+
+---
+
+### Phase 12: Frontend Performance Optimization
+
+**Goal**: Optimize frontend performance
+
+**Prerequisites**: Phase 11 complete
+
+**Steps**:
+
+1. Implement lazy loading:
+   - Lazy load historical data
+   - Lazy load heavy components (charts)
+
+2. Add virtual scrolling for large lists
+3. Optimize chart rendering:
+   - Aggregate/sample data for large date ranges
+
+4. Implement API request batching and debouncing
+5. Add client-side caching
+6. Performance testing:
+   - Measure load times
+   - Test with large datasets
+   - Verify optimizations work
+
+**Validation**: Frontend loads quickly, handles large datasets efficiently
+
+---
+
+### Phase 13: Public Web Container
+
+**Goal**: Create public web container
+
+**Prerequisites**: Phases 6, 12 complete
+
+**Steps**:
+
+1. Create `docker/public-web/` directory
+2. Create `docker/public-web/Dockerfile`:
+   - Multi-stage build
+   - Stage 1: Build React frontend (public app)
+   - Stage 2: Build FastAPI backend (public API)
+   - Stage 3: Production setup (nginx for frontend, uvicorn for backend)
+
+3. Create nginx configuration for frontend
+4. Test container locally:
+   - Build container
+   - Run container
+   - Verify frontend and backend work
+
+**Validation**: Container builds, frontend and backend work correctly
+
+---
+
+### Phase 14: Docker Compose Setup
+
+**Goal**: Create docker-compose configuration
+
+**Prerequisites**: Phase 13 complete, pipeline container available
+
+**Steps**:
+
+1. Create `docker-compose.public.yml`:
+   - `public-web` service (frontend + backend)
+   - `pipeline` service (from separate plan)
+   - Shared volume mount (bind mount from host)
+   - Network configuration
+   - Environment variables:
+     - `SOTD_DATA_DIR` (defaults to `/data`)
+
+2. Test full stack locally:
+   - Start all services
+   - Verify containers communicate
+   - Verify shared volume works
+   - Test API endpoints
+   - Test frontend
+
+**Validation**: Full stack runs correctly, all services work together
+
+---
+
+### Phase 15: Testing
+
+**Goal**: Comprehensive testing
+
+**Prerequisites**: All previous phases complete
+
+**Steps**:
+
+1. Write unit tests for public API endpoints
+2. Write unit tests for public frontend components
+3. Write integration tests:
+   - API with real data files
+   - Frontend with public API
+   - Full stack integration
+
+4. Performance testing:
+   - API response times
+   - Frontend load times
+   - Large dataset handling
+
+5. Security review:
+   - Verify read-only enforcement
+   - Verify no admin endpoints exposed
+   - Verify input validation
+
+6. Mobile testing on real devices
+
+**Validation**: All tests pass, performance acceptable, security verified
+
+---
+
+### Phase 16: Deployment Documentation
+
+**Goal**: Create deployment documentation
+
+**Prerequisites**: Phase 14 complete
+
+**Steps**:
+
+1. Create deployment guide:
+   - Synology NAS setup steps
+   - Docker setup instructions
+   - Volume mount configuration
+   - Environment variable configuration
+   - Reverse proxy setup (optional)
+
+2. Create troubleshooting guide:
+   - Common issues and solutions
+   - How to check logs
+   - How to restart services
+
+**Validation**: Documentation is complete and accurate
+
+## File Structure
+
+```
+sotd_pipeline/
+├── docker/
+│   └── public-web/
+│       └── Dockerfile
+├── docker-compose.public.yml
+├── webui/
+│   ├── api/
+│   │   └── public/
+│   │       ├── __init__.py
+│   │       ├── main.py
+│   │       ├── reports.py
+│   │       ├── data.py
+│   │       ├── products.py
+│   │       ├── search.py
+│   │       ├── users.py
+│   │       ├── trends.py
+│   │       └── stats.py
+│   └── src/
+│       └── public/
+│           ├── App.tsx
+│           ├── pages/
+│           │   ├── HomePage.tsx
+│           │   ├── ReportPage.tsx
+│           │   ├── DataExplorerPage.tsx
+│           │   ├── ProductBrowserPage.tsx
+│           │   ├── ProductDetailPage.tsx
+│           │   ├── UserDetailPage.tsx
+│           │   └── TrendsPage.tsx
+│           └── components/
+│               ├── GlobalSearch.tsx
+│               ├── InteractiveReportViewer.tsx
+│               ├── ReportCharts.tsx
+│               ├── ProductBrowser.tsx
+│               ├── ProductDetail.tsx
+│               ├── UserDetail.tsx
+│               ├── TrendVisualization.tsx
+│               ├── UserStats.tsx
+│               ├── ReportDatePicker.tsx
+│               ├── DateRangeSelector.tsx
+│               ├── DataTable.tsx
+│               ├── LastUpdate.tsx
+│               └── MobileNavigation.tsx
+```
+
+## Key Design Decisions
+
+1. **Separate Containers**: Web and pipeline are separate for independent scaling and failure isolation
+2. **Shared Volume**: Both containers access same host path via bind mount (configurable via `SOTD_DATA_DIR` env var, defaults to `/data` in container). Ensure proper read/write permissions for containers.
+3. **Frontend Architecture**: Separate React app (`webui/src/public/`) for public frontend - ensures admin code is never included in public bundle. Can evolve to shared component library (`webui/src/shared/`) if component reuse is needed.
+4. **Code Sharing**: Public app can import shared utilities, types, and design system components, but starts as completely separate app for maximum isolation
+5. **API Architecture**: Separate FastAPI app instance (`webui/api/public/main.py`) for public endpoints - ensures admin code is never loaded in public container, providing complete security isolation. Public Dockerfile explicitly uses public entry point.
+6. **Report Data Extraction**: Use `get_structured_data()` methods from report generators - returns complete structured JSON with ALL data (no row limits). Row limits are only for markdown generation (Reddit content length enforcement), not for structured JSON API responses.
+7. **Read-Only Enforcement**: Public API only exposes GET endpoints; no write operations
+8. **Data Storage**: Start simple with JSON files only (no database) - load and filter in memory, cache frequently accessed data. Can add SQLite later if performance becomes an issue.
+9. **Search Index**: Use lightweight `search_index.json` file generated by pipeline for fast autocomplete queries and date picker validation (avoids loading all aggregation files).
+10. **UI Framework**: Use ShadCN UI + Tailwind CSS (same stack as admin UI) but with enhanced aesthetics - polished design, smooth animations, modern layouts, better spacing, and attention to visual details for public-facing site.
+
+## Testing Requirements
+
+### Unit Tests
+
+- Public API endpoints (read-only operations)
+- Public frontend components
+- API client utilities
+
+### Integration Tests
+
+- Public API with real data files
+- Frontend with public API
+- Full stack integration
+
+### Test Coverage
+
+- Minimum 80% coverage for new public API code
+- Critical paths: report loading, data access, stats endpoints
+- Error handling: missing files, invalid months, corrupted data
+
+## Performance Considerations
+
+Given the requirement for fast loading even with large date ranges (2016-present), implement:
+
+1. **API-Level Optimizations**:
+   - Response caching (in-memory) for frequently accessed data
+   - Pagination for large datasets (default to recent data, load historical on demand)
+   - Efficient JSON parsing (stream large files, use generators)
+   - In-memory filtering for date range queries (load relevant files, filter in memory)
+   - Lazy loading of historical data
+   - Cache loaded JSON files in memory to avoid repeated file I/O
+
+2. **Frontend Optimizations**:
+   - Lazy loading of historical data (load recent first, historical on scroll/request)
+   - Virtual scrolling for large product lists
+   - Chart data optimization (aggregate/sample for large date ranges)
+   - API request batching and debouncing
+   - Client-side caching of frequently accessed data
+   - Progressive loading (show skeleton/loading states)
+
+3. **Data Structure Optimizations**:
+   - Pre-aggregate common queries (top products, trends) - already done in aggregation phase
+   - Cache computed statistics in memory
+   - Use existing JSON file structure (no changes needed)
+   - Cache loaded aggregation files in memory to avoid repeated parsing
+   - Consider adding SQLite database later if performance becomes an issue
+
+4. **Mobile Performance**:
+   - Optimize bundle size (code splitting, tree shaking)
+   - Lazy load heavy components (charts, large tables)
+   - Optimize images and assets
+   - Minimize API calls on mobile
+
+## UI/Design Considerations
+
+1. **UI Framework**: Use ShadCN UI + Tailwind CSS (same stack as admin UI) for consistency and code reuse
+2. **Enhanced Aesthetics**: 
+   - Polished, modern design with attention to visual details
+   - Smooth animations and transitions (using Tailwind's animation utilities)
+   - Better spacing, typography, and visual hierarchy
+   - Professional color scheme and consistent design language
+   - Beautiful charts and data visualizations
+
+3. **Design Patterns**:
+   - Card-based layouts for content sections
+   - Clean, spacious layouts (not cramped like admin UI)
+   - Modern navigation patterns
+   - Polished interactive elements (hover states, transitions)
+   - Beautiful loading states and skeletons
+
+4. **Mobile-First**: Responsive design that looks great on all devices
+5. **Accessibility**: Maintain accessibility standards while enhancing aesthetics
+
+## Security Considerations
+
+1. **Read-Only Enforcement**: Public API must not expose any write endpoints
+2. **Input Validation**: Validate all input parameters (months, years, product types)
+3. **Error Handling**: Standard JSON error format `{"error": "message", "detail": "optional detail"}`. HTTP status codes: 400 (bad request), 404 (not found), 500 (server error). User-friendly messages in production, technical details only in debug mode.
+4. **Error Messages**: Don't expose internal paths or sensitive info in errors
+5. **Rate Limiting**: Start without rate limiting (can add later if needed). Rate limiting can be added via Synology reverse proxy if abuse occurs.
+6. **CORS**: Configure CORS appropriately for public access (allow all origins for public read-only API)
+
+## Documentation
+
+1. **Deployment Guide**: How to deploy on Synology NAS
+2. **Troubleshooting**: Common issues and solutions
+
+## Dependencies
+
+- React + TypeScript
+- FastAPI
+- All existing pipeline dependencies (for report generators)
+- ShadCN UI + Tailwind CSS
+- Chart library (TBD)
+- Docker
+
+## Success Criteria
+
+1. Public web application runs successfully on remote server
+2. All API endpoints return correct data
+3. Frontend displays reports and data correctly
+4. Search autocomplete works with fast response times
+5. Product and user detail pages support arbitrary date ranges
+6. Mobile-responsive design works on all devices
+7. Performance is acceptable (<500ms for most endpoints, <100ms for search)
+8. All tests pass
+9. Documentation is complete
+10. Application is ready for public use

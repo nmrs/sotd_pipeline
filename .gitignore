@@ -33,7 +33,9 @@ data/correct_matches/.status.json
 data/correct_matches/.status.archive.*.json
 # Ignore generated report files
 data/reports/*.md
+data/reports/*.json
 data/reports/annual/*.md
+data/reports/annual/*.json
 # Ignore learning data files
 data/learning/brush_user_actions/*.yaml
 

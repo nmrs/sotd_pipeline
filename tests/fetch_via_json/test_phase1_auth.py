@@ -33,11 +33,11 @@ def test_authenticated_request() -> bool:
     try:
         cookies = get_reddit_cookies()
         session = get_reddit_session(cookies=cookies)
-        
+
         # Try to fetch a simple Reddit page
         test_url = "https://www.reddit.com/r/wetshaving/about.json"
         response = session.get(test_url, timeout=10)
-        
+
         if response.status_code == 200:
             print(f"[TEST] ✅ Successfully fetched {test_url}")
             print(f"[TEST] ✅ Response status: {response.status_code}")
@@ -55,8 +55,10 @@ def test_json_fetch() -> bool:
     print("\n[TEST] Testing JSON fetch...")
     try:
         cookies = get_reddit_cookies()
-        json_data = get_reddit_json("https://www.reddit.com/r/wetshaving/about.json", cookies=cookies)
-        
+        json_data = get_reddit_json(
+            "https://www.reddit.com/r/wetshaving/about.json", cookies=cookies
+        )
+
         if json_data and isinstance(json_data, dict):
             print(f"[TEST] ✅ Successfully fetched JSON data")
             return True
@@ -73,18 +75,18 @@ def main() -> None:
     print("=" * 60)
     print("Phase 1 Validation: Authentication and Cookie Handling")
     print("=" * 60)
-    
+
     results = []
-    
+
     # Test 1: Cookie retrieval
     results.append(("Cookie Retrieval", test_cookie_retrieval()))
-    
+
     # Test 2: Authenticated request
     results.append(("Authenticated Request", test_authenticated_request()))
-    
+
     # Test 3: JSON fetch
     results.append(("JSON Fetch", test_json_fetch()))
-    
+
     # Summary
     print("\n" + "=" * 60)
     print("Phase 1 Validation Summary:")
@@ -92,7 +94,7 @@ def main() -> None:
     for test_name, passed in results:
         status = "✅ PASS" if passed else "❌ FAIL"
         print(f"  {test_name}: {status}")
-    
+
     all_passed = all(result[1] for result in results)
     if all_passed:
         print("\n✅ Phase 1 validation PASSED - ready to proceed to Phase 2")

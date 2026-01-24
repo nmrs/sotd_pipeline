@@ -1,0 +1,488 @@
+---
+name: Pipeline Container Setup
+overview: Create a containerized pipeline that runs on a remote server (Synology NAS) to produce the data that the public web site will need. The pipeline will run hourly via cron, process all phases, and generate a search index for fast lookups.
+todos:
+  - id: pipeline-container-dockerfile
+    content: Create Dockerfile for pipeline container with Python 3.11 and cron
+    status: pending
+  - id: pipeline-container-scripts
+    content: Create run-pipeline.sh, generate_search_index.py, and entrypoint.sh scripts for pipeline container
+    status: pending
+  - id: pipeline-container-cron
+    content: Setup cron configuration for hourly pipeline execution
+    status: pending
+  - id: search-index-generator
+    content: Create scripts/generate_search_index.py to generate lightweight search index from aggregations
+    status: pending
+  - id: report-structured-data
+    content: Add get_structured_data() methods to report generators for API consumption
+    status: completed
+  - id: report-format-flag
+    content: Add --format CLI flag (markdown/json/both) to control report output format
+    status: completed
+  - id: data-migration-script
+    content: Create script to migrate all historical data to NAS
+    status: pending
+  - id: yaml-sync-script
+    content: Create script to sync YAML files from laptop to NAS
+    status: pending
+  - id: pipeline-container-tests
+    content: Write tests for pipeline container scripts and search index generation
+    status: pending
+  - id: pipeline-deployment-docs
+    content: Create deployment documentation for pipeline container on Synology NAS
+    status: pending
+---
+
+# Pipeline Container Setup Implementation Plan
+
+## Overview
+
+Create a containerized pipeline that runs on a remote server (Synology NAS) to produce all the data that the public web site will need. The pipeline container will:
+
+1. Run all pipeline phases (fetch → extract → match → enrich → aggregate → report) on a schedule
+2. Generate a lightweight search index for fast autocomplete queries
+3. Ensure data is available for the public web application
+4. Handle data migration and YAML synchronization
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Synology NAS                          │
+│                                                          │
+│  ┌──────────────────┐                                   │
+│  │  Pipeline        │                                   │
+│  │  Container       │                                   │
+│  │                  │                                   │
+│  │  - Cron (hourly) │                                   │
+│  │  - run.py        │                                   │
+│  │  - All phases    │                                   │
+│  │  - Search index  │                                   │
+│  └────────┬─────────┘                                   │
+│           │                                              │
+│           └──────────┬───────────────────────────────────┘
+│                      │                                   │
+│              ┌───────▼────────┐                        │
+│              │  Data Volume   │                        │
+│              │  /data         │                        │
+│              │  - JSON files  │                        │
+│              │  - YAML catalogs│                        │
+│              │  - search_index.json│                    │
+│              └─────────────────┘                        │
+└─────────────────────────────────────────────────────────┘
+           ▲
+           │ (YAML sync script)
+           │
+    ┌──────┴──────┐
+    │   Laptop    │
+    │  (Admin)     │
+    └─────────────┘
+```
+
+## Components
+
+### 1. Pipeline Container
+
+**File**: `docker/pipeline/Dockerfile`
+
+- Base image: `python:3.11-slim`
+- Install pipeline dependencies from `requirements.txt`
+- Copy pipeline code (`sotd/`, `run.py`)
+- Copy `scripts/generate_search_index.py` to container
+- Copy `docker/pipeline/run-pipeline.sh` and `docker/pipeline/entrypoint.sh`
+- Install cron
+- Entry point: `entrypoint.sh` (generates crontab and starts cron daemon)
+
+**File**: `docker/pipeline/crontab`
+
+- Cron schedule configurable via `CRON_SCHEDULE` environment variable
+- Default: `0 * * * *` (hourly) if `CRON_SCHEDULE` not set
+- Entrypoint script generates crontab dynamically from env var
+- Processes both current and previous month (to catch any delays)
+- Runs all phases: fetch → extract → match → enrich → aggregate → report
+
+**File**: `docker/pipeline/run-pipeline.sh`
+
+- Script to run pipeline for current and previous month (both)
+- Run all phases: fetch → extract → match → enrich → aggregate → report
+- File-based lock at `/tmp/sotd_pipeline.lock` to prevent overlapping runs
+- Error handling: Log failures to file, don't retry automatically (let next cron run handle it)
+- After aggregate phase completes, call `scripts/generate_search_index.py` to generate search index
+- Search index generation errors are logged but don't fail the pipeline
+- Log all operations to log file for debugging
+
+**File**: `docker/pipeline/entrypoint.sh`
+
+- Read `CRON_SCHEDULE` environment variable (default: `0 * * * *` if not set)
+- Generate crontab dynamically with schedule from env var
+- Start cron daemon
+- Setup environment
+- Handle signals gracefully
+
+### 2. Search Index Generator
+
+**File**: `scripts/generate_search_index.py`
+
+- Standalone utility script (not a pipeline phase)
+- Can run locally for testing, copied into container
+- Called by `run-pipeline.sh` after aggregate phase completes
+- Scans all monthly/annual aggregation JSON files in `data/aggregate/`
+- Extracts unique products: `{type, brand, model, first_seen, last_seen}`
+- Extracts unique users: `{username, first_seen, last_seen}`
+- Extracts available months and years (for date picker validation)
+- Writes lightweight `data/search_index.json` file
+- Fast to generate, small file size, enables fast autocomplete and date picker validation
+- Error handling: Log errors but continue (don't fail pipeline if search index generation fails)
+
+**Search Index File Structure**:
+
+```json
+{
+  "products": [
+    {
+      "type": "razor",
+      "brand": "Rockwell",
+      "model": "6S",
+      "first_seen": "2016-01",
+      "last_seen": "2025-12"
+    },
+    ...
+  ],
+  "users": [
+    {
+      "username": "example_user",
+      "first_seen": "2016-01",
+      "last_seen": "2025-12"
+    },
+    ...
+  ],
+  "available_months": [
+    "2016-01",
+    "2016-02",
+    ...
+  ],
+  "available_years": [
+    "2016",
+    "2017",
+    ...
+  ],
+  "generated_at": "2026-01-23T12:00:00Z"
+}
+```
+
+### 3. Report Generator Structured Data Support
+
+**Goal**: Enable report generators to return structured JSON data (not just markdown) for API consumption.
+
+**File**: `sotd/report/base.py`
+
+- Add `get_structured_data()` method to `BaseReportGenerator`
+- Returns dict with: `{"metadata": {...}, "tables": {...}, "stats": {...}}`
+- Access data before row limits are applied (no row limits for JSON)
+
+**File**: `sotd/report/monthly_report_generator.py`
+
+- Implement `get_structured_data()` in `MonthlyReportGenerator`
+- Extract all tables as structured data (no row limits)
+- Include metadata and stats
+- Return complete data structure
+
+**File**: `sotd/report/annual_report_generator.py`
+
+- Implement `get_structured_data()` in `AnnualReportGenerator`
+- Same approach as monthly
+
+### 4. Data Migration Script
+
+**File**: `scripts/migrate-data-to-nas.sh`
+
+- One-time script to copy all processed data to NAS
+- Handles large file transfers
+- Progress reporting
+- Verification (checksums)
+- Copies all JSON files from `data/` subdirectories
+- Preserves directory structure
+
+### 5. YAML Sync Script
+
+**File**: `scripts/sync-yamls-to-nas.sh`
+
+- Script to copy catalog and correct_matches YAMLs to NAS
+- Sync catalog files: `razors.yaml`, `blades.yaml`, `soaps.yaml`, `brushes.yaml`, `handles.yaml`, `knots.yaml`
+- Sync `correct_matches/*.yaml` files
+- No backup needed for now (can be added later if needed)
+- Can be run manually when catalogs are updated
+
+## Implementation Plan
+
+### Phase 1: Report Generator Structured Data Support
+
+**Goal**: Enable report generators to return structured JSON data (not just markdown)
+
+**Prerequisites**: None
+
+**Steps**:
+
+1. Add `get_structured_data()` method to `BaseReportGenerator` in `sotd/report/base.py`
+   - Returns dict with: `{"metadata": {...}, "tables": {...}, "stats": {...}}`
+   - Access data before row limits are applied (no row limits for JSON)
+
+2. Implement `get_structured_data()` in `MonthlyReportGenerator`
+   - Extract all tables as structured data (no row limits)
+   - Include metadata and stats
+   - Return complete data structure
+
+3. Implement `get_structured_data()` in `AnnualReportGenerator`
+   - Same approach as monthly
+
+4. Write unit tests for `get_structured_data()` methods
+   - Test with sample aggregation data
+   - Verify no row limits applied
+   - Verify all data included
+
+**Validation**: Run tests, verify structured data includes all rows (not limited)
+
+---
+
+### Phase 2: Search Index Generator
+
+**Goal**: Create script to generate search index from aggregations
+
+**Prerequisites**: None (can run in parallel with Phase 1)
+
+**Steps**:
+
+1. Create `scripts/generate_search_index.py`:
+   - Scan all files in `data/aggregate/` (monthly and annual)
+   - Extract unique products: `{type, brand, model, first_seen, last_seen}`
+   - Extract unique users: `{username, first_seen, last_seen}`
+   - Extract available months and years
+   - Write `data/search_index.json` with structure defined above
+
+2. Add error handling: Log errors but don't fail
+3. Test script locally with real aggregation data
+4. Verify search index file is created correctly
+5. Write unit tests for search index generation
+
+**Validation**: Script generates valid search index, handles missing files gracefully
+
+---
+
+### Phase 3: Pipeline Container
+
+**Goal**: Create pipeline container with cron
+
+**Prerequisites**: Phase 2 complete
+
+**Steps**:
+
+1. Create `docker/` directory
+2. Create `docker/pipeline/` directory
+3. Create `docker/pipeline/Dockerfile`:
+   - Base: `python:3.11-slim`
+   - Install pipeline dependencies
+   - Copy `sotd/`, `run.py`, `scripts/generate_search_index.py`
+   - Copy `docker/pipeline/run-pipeline.sh`, `docker/pipeline/entrypoint.sh`
+   - Install cron
+
+4. Create `docker/pipeline/run-pipeline.sh`:
+   - File lock at `/tmp/sotd_pipeline.lock`
+   - Run pipeline for current and previous month (all phases)
+   - Call `generate_search_index.py` after aggregate phase
+   - Error handling: Log failures, don't retry
+
+5. Create `docker/pipeline/entrypoint.sh`:
+   - Read `CRON_SCHEDULE` env var (default: `0 * * * *`)
+   - Generate crontab dynamically
+   - Start cron daemon
+
+6. Test container locally:
+   - Build container
+   - Run container
+   - Verify cron runs pipeline
+   - Verify lock file prevents overlaps
+   - Verify search index is generated
+
+**Validation**: Container builds, cron runs pipeline, lock file works, search index generated
+
+---
+
+### Phase 4: Data Migration Script
+
+**Goal**: Create script to migrate data to NAS
+
+**Prerequisites**: None
+
+**Steps**:
+
+1. Create `scripts/migrate-data-to-nas.sh`:
+   - Copy all processed data to NAS
+   - Handle large file transfers
+   - Progress reporting
+   - Verification (checksums)
+
+2. Test script locally (dry run)
+3. Document usage
+
+**Validation**: Script successfully migrates data
+
+---
+
+### Phase 5: YAML Sync Script
+
+**Goal**: Create script to sync YAML files to NAS
+
+**Prerequisites**: None
+
+**Steps**:
+
+1. Create `scripts/sync-yamls-to-nas.sh`:
+   - Copy catalog files to NAS
+   - Copy correct_matches files to NAS
+   - Preserve directory structure
+
+2. Test script locally
+3. Document usage
+
+**Validation**: Script successfully syncs YAML files
+
+---
+
+### Phase 6: Testing
+
+**Goal**: Comprehensive testing of pipeline container
+
+**Prerequisites**: Phases 1-5 complete
+
+**Steps**:
+
+1. Write unit tests for search index generation
+2. Write unit tests for report generator structured data methods
+3. Write integration tests for pipeline container:
+   - Test cron execution
+   - Test lock file prevents overlaps
+   - Test search index generation after pipeline run
+   - Test error handling
+
+4. Test data migration script
+5. Test YAML sync script
+
+**Validation**: All tests pass
+
+---
+
+### Phase 7: Deployment Documentation
+
+**Goal**: Create deployment documentation
+
+**Prerequisites**: Phase 3 complete
+
+**Steps**:
+
+1. Create deployment guide:
+   - Synology NAS setup steps
+   - Docker setup instructions
+   - Volume mount configuration
+   - Environment variable configuration (`CRON_SCHEDULE`, `SOTD_DATA_DIR`)
+
+2. Create troubleshooting guide:
+   - Common issues and solutions
+   - How to check logs
+   - How to restart services
+   - How to verify pipeline is running
+
+3. Document YAML sync process
+4. Document data migration process
+
+**Validation**: Documentation is complete and accurate
+
+## File Structure
+
+```
+sotd_pipeline/
+├── docker/
+│   └── pipeline/
+│       ├── Dockerfile
+│       ├── run-pipeline.sh
+│       └── entrypoint.sh
+├── scripts/
+│   ├── generate_search_index.py
+│   ├── migrate-data-to-nas.sh
+│   └── sync-yamls-to-nas.sh
+└── sotd/
+    └── report/
+        ├── base.py (add get_structured_data method)
+        ├── monthly_report_generator.py (implement get_structured_data)
+        └── annual_report_generator.py (implement get_structured_data)
+```
+
+## Key Design Decisions
+
+1. **Separate Container**: Pipeline runs in its own container for independent operation and failure isolation
+2. **Cron-Based Execution**: Hourly execution via cron (configurable via `CRON_SCHEDULE` env var)
+3. **File-Based Locking**: Lock file prevents overlapping pipeline runs
+4. **Search Index Generation**: Lightweight index file enables fast lookups without loading all aggregation files
+5. **Structured Report Data**: Report generators return structured JSON (not just markdown) for API consumption
+6. **Error Handling**: Failures are logged but don't stop the pipeline; next cron run will retry
+7. **Data Volume**: Pipeline writes to shared volume that will be accessed by public web container
+8. **Manual YAML Sync**: Simple script-based approach for catalog updates (low frequency operation)
+
+## Testing Requirements
+
+### Unit Tests
+
+- Search index generation script
+- Report generator `get_structured_data()` methods
+- Pipeline container scripts
+
+### Integration Tests
+
+- Pipeline container execution
+- Cron job execution
+- Lock file functionality
+- Search index generation after pipeline run
+
+### Test Coverage
+
+- Minimum 80% coverage for new code
+- Critical paths: search index generation, structured data extraction
+- Error handling: missing files, corrupted data, lock file conflicts
+
+## Performance Considerations
+
+1. **Search Index**: Lightweight file (<1MB expected) for fast autocomplete queries
+2. **Structured Data**: Complete data extraction (no row limits) for API consumption
+3. **Lock File**: Prevents resource contention from overlapping runs
+4. **Error Recovery**: Next cron run handles failures automatically
+
+## Security Considerations
+
+1. **File Permissions**: Ensure proper read/write permissions for data volume
+2. **Error Messages**: Don't expose sensitive paths in error logs
+3. **Lock File**: Secure location (`/tmp/`) with proper permissions
+
+## Documentation
+
+1. **Deployment Guide**: How to deploy pipeline container on Synology NAS
+2. **YAML Sync Guide**: How to update catalogs
+3. **Pipeline Configuration**: How to adjust cron schedule
+4. **Troubleshooting**: Common issues and solutions
+
+## Dependencies
+
+- Python 3.11
+- All pipeline dependencies from `requirements.txt`
+- Docker
+- Cron (installed in container)
+
+## Success Criteria
+
+1. Pipeline container runs successfully on remote server
+2. Cron executes pipeline hourly (or as configured)
+3. Search index is generated after each pipeline run
+4. Data is available in shared volume for public web application
+5. YAML files can be synced from laptop to NAS
+6. Historical data can be migrated to NAS
+7. All tests pass
+8. Documentation is complete

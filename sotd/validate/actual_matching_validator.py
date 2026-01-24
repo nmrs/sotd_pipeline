@@ -810,9 +810,7 @@ class ActualMatchingValidator:
                     normalized_expected_knot_model = normalize_model_for_comparison(
                         expected_knot_model
                     )
-                    normalized_actual_knot_model = normalize_model_for_comparison(
-                        actual_knot_model
-                    )
+                    normalized_actual_knot_model = normalize_model_for_comparison(actual_knot_model)
 
                     if (
                         normalized_expected_knot_brand != normalized_actual_knot_brand
@@ -882,14 +880,10 @@ class ActualMatchingValidator:
                 normalized_expected_handle_model = normalize_model_for_comparison(
                     expected_handle_model
                 )
-                normalized_actual_handle_model = normalize_model_for_comparison(
-                    actual_handle_model
-                )
+                normalized_actual_handle_model = normalize_model_for_comparison(actual_handle_model)
                 normalized_expected_knot_brand = normalize_brand_for_comparison(expected_knot_brand)
                 normalized_actual_knot_brand = normalize_brand_for_comparison(actual_knot_brand)
-                normalized_expected_knot_model = normalize_model_for_comparison(
-                    expected_knot_model
-                )
+                normalized_expected_knot_model = normalize_model_for_comparison(expected_knot_model)
                 normalized_actual_knot_model = normalize_model_for_comparison(actual_knot_model)
 
                 # Validate handle match
@@ -1434,7 +1428,9 @@ class ActualMatchingValidator:
                     )
                     sequential_start = time.time()
                     # Sort brush_string_locations items for deterministic ordering
-                    sorted_brush_strings = sorted(brush_string_locations.items(), key=lambda x: x[0].lower())
+                    sorted_brush_strings = sorted(
+                        brush_string_locations.items(), key=lambda x: x[0].lower()
+                    )
                     for brush_string, locations in sorted_brush_strings:
                         # Determine expected structure based on locations
                         expected_section = self._determine_expected_section(locations)
@@ -1635,10 +1631,12 @@ class ActualMatchingValidator:
 
             # Sort issues deterministically to ensure consistent ordering
             # Sort by: issue_type (for grouping), then correct_match (for stable ordering)
-            filtered_issues.sort(key=lambda issue: (
-                issue.issue_type,
-                issue.correct_match.lower(),
-            ))
+            filtered_issues.sort(
+                key=lambda issue: (
+                    issue.issue_type,
+                    issue.correct_match.lower(),
+                )
+            )
 
             # Update performance metrics
             field_metrics = {

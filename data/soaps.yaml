@@ -1205,6 +1205,9 @@ Catie's Bubbles:
     Santal Sensuelle:
       patterns:
       - (catie|cb).*santal.*sens
+    Spanish Holiday:
+      patterns:
+      - spanish holiday
     Sunday Brunch:
       patterns:
       - (catie|cb).*sunday brunch
@@ -2053,6 +2056,9 @@ First Line Shave:
     North French Broad Ave:
       patterns:
       - first line.*french broad
+    Room 237:
+      patterns:
+      - room 237
     The Weight:
       patterns:
       - first line.*weight
@@ -2461,6 +2467,9 @@ Hoffman's:
     Burn the Ships:
       patterns:
       - burn the ships
+    Bushido:
+      patterns:
+      - hoffman.*bushido
     Drone Wars:
       patterns:
       - hoffman.*drone war
@@ -4592,6 +4601,9 @@ Summer Break Soaps:
     Cannonball!:
       patterns:
       - (summer|sbs).*cannon ?ball
+    Cedar, Pepper, Peach: #Steady precursor made for Secret Santa gift exchange (https://www.reddit.com/r/Wetshaving/comments/1qir0oy/comment/o13mhfh/)
+      patterns:
+      - (summer|sbs).*cedar.*pepper.*peach
     Daydream:
       patterns:
       - summer.*day ?dream
@@ -5420,6 +5432,9 @@ Wholly Kaw:
     Valentynka:
       patterns:
       - valentynka
+    Vor V:
+      patterns:
+      - \bvor\b \bv\b
     Yuzu/Rose/Patchouli:
       patterns:
       - \bkaw\b.*yuzu.*rose.*patch
