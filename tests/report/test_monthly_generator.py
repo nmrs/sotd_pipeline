@@ -300,6 +300,7 @@ class TestMonthlyReportGenerator:
         # Test that error handling follows fail-fast approach
         # The implementation now fails fast on internal/logic errors
         import pytest
+
         with pytest.raises(RuntimeError, match="Failed to generate table"):
             generator.generate_notes_and_caveats()
 

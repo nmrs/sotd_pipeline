@@ -36,16 +36,31 @@ class TestAnnualReportIntegration:
                 {"name": "Omega 10049", "shaves": 300, "unique_users": 30, "rank": 2},
             ],
             "soaps": [
-                {"name": "Barrister and Mann Seville", "shaves": 700, "unique_users": 70, "rank": 1},
+                {
+                    "name": "Barrister and Mann Seville",
+                    "shaves": 700,
+                    "unique_users": 70,
+                    "rank": 1,
+                },
                 {"name": "Stirling Executive Man", "shaves": 500, "unique_users": 50, "rank": 2},
             ],
             "razor-formats": [{"format": "DE", "shaves": 1000, "unique_users": 100, "rank": 1}],
-            "razor-manufacturers": [{"brand": "Rockwell", "shaves": 500, "unique_users": 50, "rank": 1}],
-            "blade-manufacturers": [{"brand": "Astra", "shaves": 800, "unique_users": 80, "rank": 1}],
-            "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}],
-            "brush-knot-makers": [{"brand": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}],
+            "razor-manufacturers": [
+                {"brand": "Rockwell", "shaves": 500, "unique_users": 50, "rank": 1}
+            ],
+            "blade-manufacturers": [
+                {"brand": "Astra", "shaves": 800, "unique_users": 80, "rank": 1}
+            ],
+            "brush-handle-makers": [
+                {"handle_maker": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}
+            ],
+            "brush-knot-makers": [
+                {"brand": "Simpson", "shaves": 400, "unique_users": 40, "rank": 1}
+            ],
             "brush-fibers": [{"fiber": "Badger", "shaves": 300, "unique_users": 30, "rank": 1}],
-            "brush-knot-sizes": [{"knot_size": "24mm", "shaves": 200, "unique_users": 20, "rank": 1}],
+            "brush-knot-sizes": [
+                {"knot_size": "24mm", "shaves": 200, "unique_users": 20, "rank": 1}
+            ],
             "blackbird-plates": [],
             "christopher-bradley-plates": [],
             "game-changer-plates": [],
@@ -94,7 +109,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
         ):
 
@@ -135,7 +152,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
             patch("builtins.print") as mock_print,
         ):
@@ -184,7 +203,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance = Mock()
         mock_generator_instance.generate_report.side_effect = ValueError("Invalid report type")
 
-        with patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator:
+        with patch(
+            "sotd.report.annual_generator.create_annual_report_generator"
+        ) as mock_create_generator:
             mock_create_generator.return_value = mock_generator_instance
 
             # Run the annual report generation
@@ -212,7 +233,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
         ):
 
@@ -244,7 +267,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
         ):
 
@@ -285,7 +310,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
         ):
 
@@ -319,7 +346,9 @@ class TestAnnualReportIntegration:
         mock_generator_instance.generate_report.return_value = mock_report_content
 
         with (
-            patch("sotd.report.annual_generator.create_annual_report_generator") as mock_create_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
             patch("sotd.report.annual_run.PerformanceMonitor") as mock_monitor_class,
         ):

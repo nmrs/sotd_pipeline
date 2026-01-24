@@ -57,6 +57,7 @@ class TestMonthlyUserPostsAPI:
     @patch("webui.api.monthly_user_posts.open", create=True)
     def test_get_users_for_month_with_search(self, mock_open, mock_json_load, mock_path_class):
         """Test user search functionality."""
+
         # Create a mock Path object that returns True for exists() when it's a user_analysis file
         def path_side_effect(*args):
             mock_path = MagicMock()
@@ -103,6 +104,7 @@ class TestMonthlyUserPostsAPI:
     @patch("webui.api.monthly_user_posts.open", create=True)
     def test_get_user_posting_analysis_success(self, mock_open, mock_json_load, mock_path_class):
         """Test successful user posting analysis."""
+
         # Create a mock Path object that returns True for exists() when it's a user_analysis file
         def path_side_effect(*args):
             mock_path = MagicMock()

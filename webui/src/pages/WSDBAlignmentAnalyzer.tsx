@@ -160,7 +160,20 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     }
   }, []);
 
-  const loadData = async () => {
+  const loadNonMatches = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+      if (response.ok) {
+        const data = await response.json();
+        setNonMatches(data);
+      }
+    } catch (err) {
+      console.error('Failed to load non-matches:', err);
+      // Don't show error to user, non-matches are optional
+    }
+  }, []);
+
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -186,20 +199,23 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Load data on mount and when switching modes
   React.useEffect(() => {
-    if (dataSource === 'catalog') {
-      loadData();
-      loadNonMatches();
-    } else {
-      // In match files mode, we still need pipeline soaps for slug lookup
-      // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
-      reloadPipelineSoaps();
-      loadNonMatches();
-    }
-  }, [dataSource, reloadPipelineSoaps]);
+    const loadDataSequentially = async () => {
+      if (dataSource === 'catalog') {
+        await loadData();
+        await loadNonMatches();
+      } else {
+        // In match files mode, we still need pipeline soaps for slug lookup
+        // Load just pipeline soaps (WSDB is loaded by backend in match files mode)
+        await reloadPipelineSoaps();
+        await loadNonMatches();
+      }
+    };
+    loadDataSequentially();
+  }, [dataSource, loadData, loadNonMatches, reloadPipelineSoaps]);
 
   // Clear results when switching data sources and update sort mode
   React.useEffect(() => {
@@ -210,19 +226,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
     // Update sort mode based on data source
     setSortMode(dataSource === 'match_files' ? 'count' : 'alphabetical');
   }, [dataSource]);
-
-  const loadNonMatches = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
-      if (response.ok) {
-        const data = await response.json();
-        setNonMatches(data);
-      }
-    } catch (err) {
-      console.error('Failed to load non-matches:', err);
-      // Don't show error to user, non-matches are optional
-    }
-  };
 
   const refreshWSDBData = async () => {
     try {
@@ -301,11 +304,6 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('Analysis response received:', {
-        pipeline_count: data.pipeline_results?.length || 0,
-        wsdb_count: data.wsdb_results?.length || 0,
-        mode: data.mode,
-      });
       
       // Preserve expanded state when updating results
       const preserveExpandedState = (oldResults: AlignmentResult[], newResults: AlignmentResult[]): AlignmentResult[] => {

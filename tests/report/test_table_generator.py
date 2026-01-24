@@ -854,22 +854,15 @@ class TestTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             },
             "Stirling Soap Co.": {
-                "scents": {
-                    "Executive Man": {
-                        "wsdb_slug": "stirling-soap-co-executive-man"
-                    }
-                }
-            }
+                "scents": {"Executive Man": {"wsdb_slug": "stirling-soap-co-executive-man"}}
+            },
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 
@@ -885,10 +878,14 @@ class TestTableGenerator:
 
         # Test slug lookup
         slug = generator._get_wsdb_slug("Barrister and Mann", "Seville")
-        assert slug == "barrister-and-mann-seville", f"Expected 'barrister-and-mann-seville', got {slug}"
+        assert (
+            slug == "barrister-and-mann-seville"
+        ), f"Expected 'barrister-and-mann-seville', got {slug}"
 
         slug2 = generator._get_wsdb_slug("Stirling Soap Co.", "Executive Man")
-        assert slug2 == "stirling-soap-co-executive-man", f"Expected 'stirling-soap-co-executive-man', got {slug2}"
+        assert (
+            slug2 == "stirling-soap-co-executive-man"
+        ), f"Expected 'stirling-soap-co-executive-man', got {slug2}"
 
         # Note: WSDBLookup is case-sensitive, so case-insensitive matching is not supported
         # Test non-existent soap
@@ -935,22 +932,15 @@ class TestTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             },
             "Stirling Soap Co.": {
-                "scents": {
-                    "Executive Man": {
-                        "wsdb_slug": "stirling-soap-co-executive-man"
-                    }
-                }
-            }
+                "scents": {"Executive Man": {"wsdb_slug": "stirling-soap-co-executive-man"}}
+            },
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 
@@ -1078,15 +1068,12 @@ class TestTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    composed_melange: {
-                        "wsdb_slug": "barrister-and-mann-melange"
-                    }
-                }
+                "scents": {composed_melange: {"wsdb_slug": "barrister-and-mann-melange"}}
             }
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f, allow_unicode=True)
 

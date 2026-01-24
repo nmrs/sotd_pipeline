@@ -87,19 +87,22 @@ class TestAnnualRangeProcessing:
         data_dir.mkdir(parents=True, exist_ok=True)
         annual_file = data_dir / "2023.json"
         with open(annual_file, "w") as f:
-            json.dump({
-                "metadata": {
-                    "year": "2023",
-                    "total_shaves": 1000,
-                    "unique_shavers": 50,
-                    "included_months": ["2023-01", "2023-02"],
-                    "missing_months": []
+            json.dump(
+                {
+                    "metadata": {
+                        "year": "2023",
+                        "total_shaves": 1000,
+                        "unique_shavers": 50,
+                        "included_months": ["2023-01", "2023-02"],
+                        "missing_months": [],
+                    },
+                    "razors": [],
+                    "blades": [],
+                    "brushes": [],
+                    "soaps": [],
                 },
-                "razors": [],
-                "blades": [],
-                "brushes": [],
-                "soaps": []
-            }, f)
+                f,
+            )
 
         try:
             run_annual_report(args)
@@ -139,19 +142,22 @@ class TestAnnualRangeProcessing:
             for year in ["2021", "2022", "2023"]:
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": year,
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": year,
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                "blades": [],
-                "brushes": [],
-                "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             run_annual_report(args)
@@ -195,19 +201,22 @@ class TestAnnualRangeProcessing:
             for year in ["2022", "2023"]:
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": year,
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": year,
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                "blades": [],
-                "brushes": [],
-                "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             run_annual_report(args)
@@ -251,19 +260,22 @@ class TestAnnualRangeProcessing:
             for year in ["2022", "2023"]:
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": year,
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": year,
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                        "blades": [],
-                        "brushes": [],
-                        "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             run_annual_report(args)
@@ -301,23 +313,28 @@ class TestAnnualRangeProcessing:
             for year in ["2022", "2023"]:
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": year,
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": year,
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                        "blades": [],
-                        "brushes": [],
-                        "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             # Should raise the error
-            with pytest.raises(RuntimeError, match="Failed to generate annual hardware markdown report"):
+            with pytest.raises(
+                RuntimeError, match="Failed to generate annual hardware markdown report"
+            ):
                 run_annual_report(args)
         finally:
             # Clean up
@@ -358,19 +375,22 @@ class TestAnnualRangeProcessing:
             for year in ["2022", "2023"]:
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": year,
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": year,
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                        "blades": [],
-                        "brushes": [],
-                        "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             # Should raise the error
@@ -449,19 +469,22 @@ class TestAnnualRangePerformance:
             for year in range(2015, 2025):
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": str(year),
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": str(year),
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                        "blades": [],
-                        "brushes": [],
-                        "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             # Should process all 10 years without performance issues
@@ -501,19 +524,22 @@ class TestAnnualRangePerformance:
             for year in range(2020, 2025):
                 annual_file = data_dir / f"{year}.json"
                 with open(annual_file, "w") as f:
-                    json.dump({
-                        "metadata": {
-                            "year": str(year),
-                            "total_shaves": 1000,
-                            "unique_shavers": 50,
-                            "included_months": [f"{year}-01", f"{year}-02"],
-                            "missing_months": []
+                    json.dump(
+                        {
+                            "metadata": {
+                                "year": str(year),
+                                "total_shaves": 1000,
+                                "unique_shavers": 50,
+                                "included_months": [f"{year}-01", f"{year}-02"],
+                                "missing_months": [],
+                            },
+                            "razors": [],
+                            "blades": [],
+                            "brushes": [],
+                            "soaps": [],
                         },
-                        "razors": [],
-                        "blades": [],
-                        "brushes": [],
-                        "soaps": []
-                    }, f)
+                        f,
+                    )
                 annual_files.append(annual_file)
 
             # Process should complete without memory issues

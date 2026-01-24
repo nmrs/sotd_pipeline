@@ -392,7 +392,10 @@ class TestEnhancedReportGeneration:
 
         # The code should fail fast on invalid parameters (internal/logic errors)
         # The error might come from basic table generation or enhanced table processing
-        with pytest.raises(RuntimeError, match="(Failed to process enhanced table placeholder|Failed to generate table)"):
+        with pytest.raises(
+            RuntimeError,
+            match="(Failed to process enhanced table placeholder|Failed to generate table)",
+        ):
             generate_report_content(
                 "hardware", metadata, data, template_path=str(tmp_path), debug=False
             )

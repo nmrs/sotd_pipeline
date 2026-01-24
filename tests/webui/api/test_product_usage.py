@@ -53,7 +53,7 @@ class TestProductUsageAPI:
         """Test getting products for razor type."""
         # Patch Path.exists directly on the class
         original_exists = Path.exists
-        
+
         def exists_side_effect(self):
             # product_usage_file path should not exist
             if "product_usage" in str(self):
@@ -62,9 +62,9 @@ class TestProductUsageAPI:
             if "enriched" in str(self):
                 return True
             return original_exists(self)
-        
+
         Path.exists = exists_side_effect
-        
+
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -117,16 +117,16 @@ class TestProductUsageAPI:
         """Test product search functionality."""
         # Patch Path.exists directly on the class
         original_exists = Path.exists
-        
+
         def exists_side_effect(self):
             if "product_usage" in str(self):
                 return False
             if "enriched" in str(self):
                 return True
             return original_exists(self)
-        
+
         Path.exists = exists_side_effect
-        
+
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -167,16 +167,16 @@ class TestProductUsageAPI:
         """Test getting products for soap type."""
         # Patch Path.exists directly on the class
         original_exists = Path.exists
-        
+
         def exists_side_effect(self):
             if "product_usage" in str(self):
                 return False
             if "enriched" in str(self):
                 return True
             return original_exists(self)
-        
+
         Path.exists = exists_side_effect
-        
+
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -211,16 +211,16 @@ class TestProductUsageAPI:
         """Test successful product usage analysis."""
         # Patch Path.exists directly on the class
         original_exists = Path.exists
-        
+
         def exists_side_effect(self):
             if "product_usage" in str(self):
                 return False
             if "enriched" in str(self):
                 return True
             return original_exists(self)
-        
+
         Path.exists = exists_side_effect
-        
+
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -258,7 +258,9 @@ class TestProductUsageAPI:
 
         try:
             with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-                with patch("webui.api.product_usage._extract_date_from_thread_title") as mock_extract:
+                with patch(
+                    "webui.api.product_usage._extract_date_from_thread_title"
+                ) as mock_extract:
                     # Mock date extraction
                     from datetime import datetime
 
@@ -326,16 +328,16 @@ class TestProductUsageAPI:
         """Test getting products for brush type."""
         # Patch Path.exists directly on the class
         original_exists = Path.exists
-        
+
         def exists_side_effect(self):
             if "product_usage" in str(self):
                 return False
             if "enriched" in str(self):
                 return True
             return original_exists(self)
-        
+
         Path.exists = exists_side_effect
-        
+
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)

@@ -123,7 +123,9 @@ class TestReportIntegration:
             "soaps": [{"name": "Test Soap", "shaves": 30, "rank": 1}],
             "soap-makers": [{"brand": "Test Brand", "shaves": 30, "rank": 1}],
             "brand-diversity": [{"brand": "Test Brand", "unique_soaps": 1, "rank": 1}],
-            "user-soap-brand-scent-diversity": [{"user": "testuser", "unique_combinations": 1, "shaves": 30, "rank": 1}],
+            "user-soap-brand-scent-diversity": [
+                {"user": "testuser", "unique_combinations": 1, "shaves": 30, "rank": 1}
+            ],
             "razor-formats": [{"format": "DE", "shaves": 25, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "rank": 1}],
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "rank": 1}],
@@ -242,13 +244,19 @@ class TestReportIntegration:
                 {"name": "Gillette Nacet", "shaves": 20, "unique_users": 10, "rank": 1},
             ],
             "brushes": [{"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8, "rank": 1}],
-            "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1}],
+            "brush-handle-makers": [
+                {"handle_maker": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1}
+            ],
             "brush-knot-makers": [{"brand": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1}],
             "brush-fibers": [{"fiber": "Badger", "shaves": 15, "unique_users": 8, "rank": 1}],
             "brush-knot-sizes": [{"knot_size": "24mm", "shaves": 15, "unique_users": 8, "rank": 1}],
-            "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "unique_users": 10, "rank": 1}],
+            "blade-manufacturers": [
+                {"brand": "Gillette", "shaves": 20, "unique_users": 10, "rank": 1}
+            ],
             "razor-formats": [{"format": "DE", "shaves": 43, "unique_users": 20, "rank": 1}],
-            "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}],
+            "razor-manufacturers": [
+                {"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}
+            ],
             "users": [{"user": "testuser", "shaves": 50, "missed_days": 0, "rank": 1}],
         }
 

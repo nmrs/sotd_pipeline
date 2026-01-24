@@ -396,9 +396,7 @@ class TestCatalogValidation:
                     stored_brand == "Chisel & Hound"
                 ), f"Expected 'Chisel & Hound', got {stored_brand}"
                 stored_model = issue.get("stored_model") or issue.get("expected_model")
-                assert (
-                    stored_model == "v26"
-                ), f"Expected 'v26', got {stored_model}"
+                assert stored_model == "v26", f"Expected 'v26', got {stored_model}"
 
     # This test has been removed as it tests webui API logic,
     # not core pipeline validation
@@ -676,7 +674,7 @@ class TestMoveCatalogEntries:
         data_dir.mkdir()
         correct_matches_dir = data_dir / "correct_matches"
         correct_matches_dir.mkdir()
-        
+
         # Create razor.yaml file
         razor_file = correct_matches_dir / "razor.yaml"
         with razor_file.open("w") as f:
@@ -691,7 +689,11 @@ class TestMoveCatalogEntries:
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
+        from webui.api.analysis import (
+            move_catalog_validation_entries,
+            MoveCatalogEntriesRequest,
+            get_data_directory,
+        )
 
         # Create request to move entry
         request = MoveCatalogEntriesRequest(
@@ -753,7 +755,7 @@ class TestMoveCatalogEntries:
         data_dir.mkdir()
         correct_matches_dir = data_dir / "correct_matches"
         correct_matches_dir.mkdir()
-        
+
         # Create handle.yaml and knot.yaml files
         handle_file = correct_matches_dir / "handle.yaml"
         with handle_file.open("w") as f:
@@ -770,7 +772,11 @@ class TestMoveCatalogEntries:
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
+        from webui.api.analysis import (
+            move_catalog_validation_entries,
+            MoveCatalogEntriesRequest,
+            get_data_directory,
+        )
 
         # Create request to move entry from handle_knot to brush
         request = MoveCatalogEntriesRequest(
@@ -828,7 +834,7 @@ class TestMoveCatalogEntries:
         data_dir.mkdir()
         correct_matches_dir = data_dir / "correct_matches"
         correct_matches_dir.mkdir()
-        
+
         # Create blade.yaml file
         blade_file = correct_matches_dir / "blade.yaml"
         with blade_file.open("w") as f:
@@ -842,7 +848,11 @@ class TestMoveCatalogEntries:
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
+        from webui.api.analysis import (
+            move_catalog_validation_entries,
+            MoveCatalogEntriesRequest,
+            get_data_directory,
+        )
 
         # Create request to move blade entry
         request = MoveCatalogEntriesRequest(

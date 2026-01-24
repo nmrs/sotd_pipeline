@@ -106,7 +106,11 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=args.out_dir, debug=args.debug, force=args.force, annual_mode=None
+            months=["2023-01"],
+            data_dir=args.out_dir,
+            debug=args.debug,
+            force=args.force,
+            annual_mode=None,
         )
 
     @patch("sotd.aggregate.run.process_months_parallel")
@@ -186,7 +190,11 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=args.out_dir, debug=True, force=args.force, annual_mode=None
+            months=["2023-01"],
+            data_dir=args.out_dir,
+            debug=True,
+            force=args.force,
+            annual_mode=None,
         )
 
     @patch("sotd.aggregate.run.process_months")
@@ -198,7 +206,11 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=Path("/custom/path"), debug=args.debug, force=args.force, annual_mode=None
+            months=["2023-01"],
+            data_dir=Path("/custom/path"),
+            debug=args.debug,
+            force=args.force,
+            annual_mode=None,
         )
 
     @patch("sotd.aggregate.run.process_annual")

@@ -681,7 +681,9 @@ DE:
 
     # The pattern should correspond to the selected match (Cartridge/Disposable)
     assert result.pattern is not None
-    assert "twin.*pivot" in result.pattern, f"Expected Cartridge/Disposable pattern with 'twin.*pivot', got: {result.pattern}"
+    assert (
+        "twin.*pivot" in result.pattern
+    ), f"Expected Cartridge/Disposable pattern with 'twin.*pivot', got: {result.pattern}"
     # Verify it's NOT the less specific DE pattern
     assert (
         result.pattern != "person+a"

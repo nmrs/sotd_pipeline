@@ -95,15 +95,12 @@ class TestSoapsTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             }
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 
@@ -151,15 +148,12 @@ class TestSoapsTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             }
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 
@@ -210,15 +204,12 @@ class TestSoapsTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             }
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 
@@ -271,15 +262,12 @@ class TestSoapsTableGenerator:
 
         mock_soaps_yaml = {
             "Barrister and Mann": {
-                "scents": {
-                    "Seville": {
-                        "wsdb_slug": "barrister-and-mann-seville"
-                    }
-                }
+                "scents": {"Seville": {"wsdb_slug": "barrister-and-mann-seville"}}
             }
         }
 
         import yaml
+
         with soaps_file.open("w", encoding="utf-8") as f:
             yaml.dump(mock_soaps_yaml, f)
 

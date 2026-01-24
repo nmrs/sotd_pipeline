@@ -185,9 +185,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
                     "rank": 1,
                 }
             ],
-            "brushes": [
-                {"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "rank": 1}
-            ],
+            "brushes": [{"name": "Simpson Chubby 2", "shaves": 100, "unique_users": 40, "rank": 1}],
             "soaps": [
                 {
                     "name": "Barrister and Mann Seville",

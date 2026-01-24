@@ -947,6 +947,7 @@ class TableGenerator:
         # Validate numeric_limits parameters using ParameterValidator
         if numeric_limits:
             from ..parameter_validator import ParameterValidator
+
             validator = ParameterValidator()
             # Build parameters dict for validation (include all parameters)
             all_parameters = {}
@@ -961,7 +962,7 @@ class TableGenerator:
             if wsdb:
                 all_parameters["wsdb"] = "true"
             all_parameters.update(numeric_limits)
-            
+
             validation_result = validator.validate_parameters(table_name, all_parameters)
             if not validation_result.is_valid:
                 raise ValueError(validation_result.errors[0])
