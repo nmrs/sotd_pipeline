@@ -126,6 +126,7 @@ class TestReportIntegration:
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "rank": 1}],
             "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 15, "rank": 1}],
             "brush-knot-makers": [{"brand": "Simpson", "shaves": 15, "rank": 1}],
+            "brush-fibers": [{"fiber": "Badger", "shaves": 15, "rank": 1}],
         }
 
         # Test hardware report generation
