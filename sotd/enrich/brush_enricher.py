@@ -545,9 +545,11 @@ class BrushEnricher(BaseEnricher):
                 knot_size_override = self.override_manager.get_override(
                     month, comment_id, "brush", "knot_size_mm"
                 )
+                use_catalog_for_knot_size = False
                 if knot_size_override == "use_catalog":
                     # Skip user extraction, use catalog value only
                     user_knot_size = None
+                    use_catalog_for_knot_size = True
                 elif knot_size_override is not None and knot_size_override != "use_catalog":
                     # Explicit value override
                     user_knot_size = knot_size_override
@@ -596,6 +598,13 @@ class BrushEnricher(BaseEnricher):
 
         # Use BaseEnricher's source tracking method
         enriched_data = self._create_enriched_data(user_data, catalog_data)
+
+        # Override _extraction_source if use_catalog was set for knot_size and no user data exists
+        # This ensures that when use_catalog: true is set and user didn't extract other fields,
+        # the source reflects catalog-only usage
+        if use_catalog_for_knot_size and not user_data:
+            # Only catalog data was used (user_data is empty)
+            enriched_data["_extraction_source"] = "catalog_data"
 
         # Add handle maker inference metadata if used
         if handle_maker_knot_size is not None:

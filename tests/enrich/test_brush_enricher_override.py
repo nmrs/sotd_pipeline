@@ -177,7 +177,9 @@ class TestBrushEnricherOverride:
         }
 
         # User comment that might extract different size
-        original_comment = "Vielong Mixed Hair BADGER 28mm"
+        # Use a comment that doesn't extract fiber to avoid user_data being non-empty
+        # "28mm" will be extracted but overridden by use_catalog: true
+        original_comment = "Vielong 28mm"
         record = {"id": "m99b8f9", "_month": "2026-01"}
 
         result = enricher.enrich(field_data, original_comment, record)
@@ -185,6 +187,7 @@ class TestBrushEnricherOverride:
         assert result is not None
         # Should use catalog knot_size, not user-extracted
         assert result["knot_size_mm"] == 21.0
+        # When use_catalog: true is set and no user data is extracted, source should be catalog_data
         assert result["_extraction_source"] == "catalog_data"
 
     def test_multiple_field_overrides(self, enricher, override_manager, tmp_path):
