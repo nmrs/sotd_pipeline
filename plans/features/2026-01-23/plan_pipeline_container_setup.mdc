@@ -16,7 +16,7 @@ todos:
     status: completed
   - id: search-index-generator
     content: Create scripts/generate_search_index.py to generate lightweight search index from aggregations
-    status: pending
+    status: completed
   - id: report-structured-data
     content: Add get_structured_data() methods to report generators for API consumption
     status: completed
