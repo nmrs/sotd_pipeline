@@ -287,7 +287,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "missing_months": [],
         }
         data = {
-            "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}],
+            "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "rank": 1}],
             # Add empty lists for all specialized tables that the software template expects
             "soap-makers": [],
             "brand-diversity": [],
