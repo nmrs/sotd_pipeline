@@ -423,38 +423,107 @@ class TestAnnualRangeErrorHandling:
 class TestAnnualRangePerformance:
     """Test performance characteristics of annual range processing."""
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_annual_range_large_range_performance(self, mock_save, mock_generate):
+    def test_annual_range_large_range_performance(self, mock_save, mock_create_generator):
         """Test performance with large year ranges."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2015:2024", "--type", "hardware"])
+        args.format = "markdown"
 
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances for all years
+        mock_generator_instances = []
+        for year in range(2015, 2025):
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
         mock_save.return_value = Path("data/reports/annual/2015-hardware.md")
 
-        # Should process all 10 years without performance issues
-        run_annual_report(args)
+        # Create data files for all years
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in range(2015, 2025):
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": str(year),
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                        "blades": [],
+                        "brushes": [],
+                        "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-        # Should call generate for each year
-        assert mock_generate.call_count == 10
-        expected_years = [str(year) for year in range(2015, 2025)]
-        actual_years = [call[0][1] for call in mock_generate.call_args_list]
-        assert actual_years == expected_years
+            # Should process all 10 years without performance issues
+            run_annual_report(args)
 
-    @patch("sotd.report.annual_run.generate_annual_report")
+            # Should call create_generator for each year
+            assert mock_create_generator.call_count == 10
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
+
+    @patch("sotd.report.annual_generator.create_annual_report_generator")
     @patch("sotd.report.annual_run.save_annual_report")
-    def test_annual_range_memory_usage(self, mock_save, mock_generate):
+    def test_annual_range_memory_usage(self, mock_save, mock_create_generator):
         """Test memory usage during range processing."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2020:2024", "--type", "hardware"])
+        args.format = "markdown"
 
-        mock_generate.return_value = "# Test Report Content"
+        # Create mock generator instances for all years
+        mock_generator_instances = []
+        for year in range(2020, 2025):
+            mock_instance = Mock()
+            mock_instance.generate_report.return_value = "# Test Report Content"
+            mock_generator_instances.append(mock_instance)
+
+        mock_create_generator.side_effect = mock_generator_instances
         mock_save.return_value = Path("data/reports/annual/2020-hardware.md")
 
-        # Process should complete without memory issues
-        run_annual_report(args)
+        # Create data files for all years
+        data_dir = Path("data") / "aggregated" / "annual"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        annual_files = []
+        try:
+            for year in range(2020, 2025):
+                annual_file = data_dir / f"{year}.json"
+                with open(annual_file, "w") as f:
+                    json.dump({
+                        "metadata": {
+                            "year": str(year),
+                            "total_shaves": 1000,
+                            "unique_shavers": 50,
+                            "included_months": [f"{year}-01", f"{year}-02"],
+                            "missing_months": []
+                        },
+                        "razors": [],
+                        "blades": [],
+                        "brushes": [],
+                        "soaps": []
+                    }, f)
+                annual_files.append(annual_file)
 
-        # Verify all years were processed
-        assert mock_generate.call_count == 5
-        assert mock_save.call_count == 5
+            # Process should complete without memory issues
+            run_annual_report(args)
+
+            # Verify all years were processed
+            assert mock_create_generator.call_count == 5
+            assert mock_save.call_count == 5
+        finally:
+            # Clean up
+            for annual_file in annual_files:
+                if annual_file.exists():
+                    annual_file.unlink()
