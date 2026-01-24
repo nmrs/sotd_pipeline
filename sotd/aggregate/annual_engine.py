@@ -144,7 +144,7 @@ class AnnualAggregationEngine:
             df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
             # Calculate median
             median_values = self._calculate_medians_for_category("razors", df, "name", "name")
-            df["median_shaves_per_user"] = median_values
+            df["median_shaves_per_user"] = median_values.fillna(0.0)
             # Update result with recalculated values
             for idx, row in df.iterrows():
                 idx_int = int(idx) if isinstance(idx, (int, float)) else 0
@@ -180,7 +180,7 @@ class AnnualAggregationEngine:
             df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
             # Calculate median
             median_values = self._calculate_medians_for_category("blades", df, "name", "name")
-            df["median_shaves_per_user"] = median_values
+            df["median_shaves_per_user"] = median_values.fillna(0.0)
             # Update result with recalculated values
             for idx, row in df.iterrows():
                 idx_int = int(idx) if isinstance(idx, (int, float)) else 0
@@ -216,7 +216,7 @@ class AnnualAggregationEngine:
             df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
             # Calculate median
             median_values = self._calculate_medians_for_category("brushes", df, "name", "name")
-            df["median_shaves_per_user"] = median_values
+            df["median_shaves_per_user"] = median_values.fillna(0.0)
             # Update result with recalculated values
             for idx, row in df.iterrows():
                 idx_int = int(idx) if isinstance(idx, (int, float)) else 0
@@ -252,7 +252,7 @@ class AnnualAggregationEngine:
             df.loc[df["unique_users"] == 0, "avg_shaves_per_user"] = 0.0
             # Calculate median
             median_values = self._calculate_medians_for_category("soaps", df, "name", "name")
-            df["median_shaves_per_user"] = median_values
+            df["median_shaves_per_user"] = median_values.fillna(0.0)
             # Update result with recalculated values
             for idx, row in df.iterrows():
                 idx_int = int(idx) if isinstance(idx, (int, float)) else 0
@@ -332,7 +332,7 @@ class AnnualAggregationEngine:
             median_values = self._calculate_medians_for_category(
                 "razor_blade_combinations", df, "name", "name"
             )
-            df["median_shaves_per_user"] = median_values
+            df["median_shaves_per_user"] = median_values.fillna(0.0)
             # Update result with recalculated values
             for idx, row in df.iterrows():
                 idx_int = int(idx) if isinstance(idx, (int, float)) else 0
@@ -494,7 +494,7 @@ class AnnualAggregationEngine:
         median_values = self._calculate_medians_for_category(
             category, grouped, "name", identifier_in_extracted
         )
-        grouped["median_shaves_per_user"] = median_values
+        grouped["median_shaves_per_user"] = median_values.fillna(0.0)
 
         # Reorder columns: rank, identifier, then metrics
         column_order = ["rank", "name"]
@@ -608,7 +608,7 @@ class AnnualAggregationEngine:
         median_values = self._calculate_medians_for_category(
             category, grouped, final_identifier, identifier_in_extracted
         )
-        grouped["median_shaves_per_user"] = median_values
+        grouped["median_shaves_per_user"] = median_values.fillna(0.0)
 
         # Reorder columns: rank, identifier, then metrics
         column_order = ["rank", final_identifier]
@@ -795,21 +795,22 @@ class AnnualAggregationEngine:
         all_enriched_records = self._load_enriched_records()
 
         if not all_enriched_records:
-            # If no enriched records, return zeros
-            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+            # If no enriched records, return zeros with same index as grouped DataFrame
+            return pd.Series(0, index=grouped.index, dtype=int)
 
         # Get the appropriate aggregator class to extract data
         aggregator_class = self._get_aggregator_class_for_category(category)
         if not aggregator_class:
-            # If aggregator not found, return zeros
-            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+            # If aggregator not found, return zeros with same index as grouped DataFrame
+            return pd.Series(0, index=grouped.index, dtype=int)
 
         # Create aggregator instance and extract data
         aggregator = aggregator_class()
         extracted_data = aggregator._extract_data(all_enriched_records)
 
         if not extracted_data:
-            return pd.Series(0, index=grouped[identifier_col], dtype=int)
+            # If no extracted data, return zeros with same index as grouped DataFrame
+            return pd.Series(0, index=grouped.index, dtype=int)
 
         # Convert to DataFrame
         df = pd.DataFrame(extracted_data)
@@ -1579,7 +1580,7 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
             logger.info(f"Missing months: {missing_months}")
             print(f"[DEBUG] Missing months: {missing_months}")
 
-        # Aggregate monthly data
+        # Aggregate monthly data (will handle empty data gracefully)
         monitor.start_processing_timing()
         aggregated_data = aggregate_monthly_data(
             year, monthly_data, included_months, missing_months, data_dir

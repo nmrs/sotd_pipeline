@@ -13,7 +13,11 @@ from .save import save_aggregated_data, save_product_usage_data, save_user_analy
 
 
 def process_months(
-    months: Sequence[str], data_dir: Path, debug: bool = False, force: bool = False
+    months: Sequence[str],
+    data_dir: Path,
+    debug: bool = False,
+    force: bool = False,
+    annual_mode: bool = False,
 ) -> bool:
     """Main orchestration for aggregating SOTD data for one or more months."""
     # Show progress bar for processing
@@ -93,11 +97,22 @@ def process_months(
 
     # Display error details for failed months
     if errors:
-        print("\n❌ Error Details:")
-        for error_result in errors:
-            month = error_result.get("month", "unknown")
-            error_msg = error_result.get("error", "unknown error")
-            print(f"  {month}: {error_msg}")
+        if annual_mode:
+            # In annual mode, these are expected warnings, not errors
+            print("\n⚠️  Warning: Some months could not be aggregated (missing enriched data):")
+            for error_result in errors:
+                month = error_result.get("month", "unknown")
+                error_msg = error_result.get("error", "unknown error")
+                # Remove "Run enrich phase first." from the message for annual mode
+                error_msg = error_msg.replace(". Run enrich phase first.", "")
+                print(f"  {month}: {error_msg}")
+            print("  (Annual aggregation will use available monthly aggregated files)")
+        else:
+            print("\n❌ Error Details:")
+            for error_result in errors:
+                month = error_result.get("month", "unknown")
+                error_msg = error_result.get("error", "unknown error")
+                print(f"  {month}: {error_msg}")
 
     # Print summary using standardized formatter
     if len(months) == 1:
@@ -130,6 +145,7 @@ def process_months_parallel(
     debug: bool = False,
     force: bool = False,
     max_workers: int = 8,
+    annual_mode: bool = False,
 ) -> bool:
     """Process multiple months in parallel using ProcessPoolExecutor."""
     print(f"Processing {len(months)} months in parallel...")
@@ -163,11 +179,22 @@ def process_months_parallel(
 
     # Display error details for failed months
     if errors:
-        print("\n❌ Error Details:")
-        for error_result in errors:
-            month = error_result.get("month", "unknown")
-            error_msg = error_result.get("error", "unknown error")
-            print(f"  {month}: {error_msg}")
+        if annual_mode:
+            # In annual mode, these are expected warnings, not errors
+            print("\n⚠️  Warning: Some months could not be aggregated (missing enriched data):")
+            for error_result in errors:
+                month = error_result.get("month", "unknown")
+                error_msg = error_result.get("error", "unknown error")
+                # Remove "Run enrich phase first." from the message for annual mode
+                error_msg = error_msg.replace(". Run enrich phase first.", "")
+                print(f"  {month}: {error_msg}")
+            print("  (Annual aggregation will use available monthly aggregated files)")
+        else:
+            print("\n❌ Error Details:")
+            for error_result in errors:
+                month = error_result.get("month", "unknown")
+                error_msg = error_result.get("error", "unknown error")
+                print(f"  {month}: {error_msg}")
 
     # Print summary
     wall_clock_time = time.time() - wall_clock_start
