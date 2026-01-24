@@ -668,11 +668,11 @@ DE:
     catalog_file = tmp_path / "test_blades.yaml"
     catalog_file.write_text(yaml_content)
 
-    matcher = BladeMatcher(catalog_path=catalog_file)
+    matcher = BladeMatcher(catalog_path=catalog_file, bypass_correct_matches=True)
 
     # This text matches both patterns
     blade_text = "Personna Twin Pivot Plus Refills, Atra"
-    result = matcher.match(blade_text)
+    result = matcher.match(blade_text, bypass_correct_matches=True)
 
     # Should match Cartridge/Disposable format (more specific pattern wins)
     assert result.matched is not None
