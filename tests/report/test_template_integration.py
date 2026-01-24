@@ -21,6 +21,7 @@ class TestTemplateIntegration:
             "brushes": [{"name": "Test Brush", "shaves": 1, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 1, "rank": 1}],
             "razor-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
+            "blade-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
         }
 
         generator = MonthlyReportGenerator(

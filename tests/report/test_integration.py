@@ -233,6 +233,7 @@ class TestReportIntegration:
                 {"name": "Gillette Nacet", "shaves": 20, "unique_users": 10, "rank": 1},
             ],
             "brushes": [{"name": "Simpson Chubby 2", "shaves": 15, "unique_users": 8, "rank": 1}],
+            "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 15, "unique_users": 8, "rank": 1}],
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "unique_users": 10, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 43, "unique_users": 20, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}],
