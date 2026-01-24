@@ -858,8 +858,6 @@ class TestMoveCatalogEntries:
             new_brand_data = de_section.get("New Brand", {})
             new_model_patterns = new_brand_data.get("New Model", [])
             assert "test blade pattern" in new_model_patterns
-            if original_project_root:
-                analysis_module.project_root = original_project_root
 
     @pytest.mark.asyncio
     async def test_move_entry_not_found_error(self, tmp_path):
