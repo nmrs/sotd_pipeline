@@ -117,8 +117,9 @@ class TestReportIntegration:
         }
 
         data = {
-            "razors": [{"name": "Gillette Super Speed", "shaves": 25}],
-            "soaps": [{"name": "Test Soap", "shaves": 30}],
+            "razors": [{"name": "Gillette Super Speed", "shaves": 25, "rank": 1}],
+            "soaps": [{"name": "Test Soap", "shaves": 30, "rank": 1}],
+            "razor-formats": [{"format": "DE", "shaves": 25, "rank": 1}],
         }
 
         # Test hardware report generation
@@ -157,14 +158,15 @@ class TestReportIntegration:
                 {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10, "rank": 1},
                 {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8, "rank": 2},
             ],
-            "soap_makers": [
+            "soap-makers": [
                 {"brand": "Declaration Grooming", "shaves": 20, "unique_users": 10, "rank": 1},
                 {"brand": "Stirling Soap Co", "shaves": 15, "unique_users": 8, "rank": 2},
             ],
-            "brand_diversity": [
+            "brand-diversity": [
                 {"brand": "Declaration Grooming", "unique_soaps": 5, "rank": 1},
                 {"brand": "Stirling Soap Co", "unique_soaps": 5, "rank": 2},
             ],
+            "user-soap-brand-scent-diversity": [],
             "users": [
                 {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1, "rank": 1},
                 {"user": "user2", "shaves": 28, "missed_days": 3, "position": 2, "rank": 2},
@@ -223,7 +225,12 @@ class TestReportIntegration:
             "razors": [
                 {"name": "Gillette Super Speed", "shaves": 25, "unique_users": 12, "rank": 1},
                 {"name": "Karve CB", "shaves": 18, "unique_users": 8, "rank": 2},
-            ]
+            ],
+            "blades": [
+                {"name": "Gillette Nacet", "shaves": 20, "unique_users": 10, "rank": 1},
+            ],
+            "razor-formats": [{"format": "DE", "shaves": 43, "unique_users": 20, "rank": 1}],
+            "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "unique_users": 12, "rank": 1}],
         }
 
         comparison_data = {

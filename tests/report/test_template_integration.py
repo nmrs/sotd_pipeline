@@ -15,7 +15,10 @@ class TestTemplateIntegration:
             "unique_shavers": 567,
             "avg_shaves_per_user": 2.2,
         }
-        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
+        data = {
+            "razors": [{"name": "Test Razor", "shaves": 1, "rank": 1}],
+            "razor-formats": [{"format": "DE", "shaves": 1, "rank": 1}],
+        }
 
         generator = MonthlyReportGenerator(
             "hardware", metadata, data, template_path=str(template_dir)
@@ -40,7 +43,10 @@ class TestTemplateIntegration:
             "unique_soaps": 100,
             "unique_brands": 25,
         }
-        data = {"soaps": [{"name": "Test Soap", "shaves": 1}]}  # Minimal valid data
+        data = {
+            "soaps": [{"name": "Test Soap", "shaves": 1, "rank": 1}],
+            "soap-makers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
+        }
 
         generator = MonthlyReportGenerator(
             "software", metadata, data, template_path=str(template_dir)

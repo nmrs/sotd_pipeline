@@ -39,6 +39,7 @@ class TestAnnualReportIntegration:
                 {"brand": "Barrister and Mann", "model": "Seville", "count": 700},
                 {"brand": "Stirling", "model": "Executive Man", "count": 500},
             ],
+            "razor-formats": [{"format": "DE", "shaves": 1000, "unique_users": 100, "rank": 1}],
         }
 
     @pytest.fixture

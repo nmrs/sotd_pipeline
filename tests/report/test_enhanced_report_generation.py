@@ -322,21 +322,21 @@ class TestEnhancedReportGeneration:
         template_file = tmp_path / "hardware.md"
         template_file.write_text(template_content)
 
-        # Sample data
+        # Sample data with rank columns (required for basic tables)
         metadata = {"month": "2025-01", "total_shaves": 100}
         data = {
             "razors": [
-                {"name": "Razor 1", "shaves": 10, "unique_users": 5},
-                {"name": "Razor 2", "shaves": 8, "unique_users": 4},
+                {"name": "Razor 1", "shaves": 10, "unique_users": 5, "rank": 1},
+                {"name": "Razor 2", "shaves": 8, "unique_users": 4, "rank": 2},
             ],
             "blades": [
-                {"name": "High Use Blade", "shaves": 15, "unique_users": 8},
-                {"name": "Medium Use Blade", "shaves": 8, "unique_users": 4},
-                {"name": "Low Use Blade", "shaves": 3, "unique_users": 2},
+                {"name": "High Use Blade", "shaves": 15, "unique_users": 8, "rank": 1},
+                {"name": "Medium Use Blade", "shaves": 8, "unique_users": 4, "rank": 2},
+                {"name": "Low Use Blade", "shaves": 3, "unique_users": 2, "rank": 3},
             ],
             "brushes": [
-                {"name": "Brush 1", "shaves": 12, "unique_users": 6},
-                {"name": "Brush 2", "shaves": 9, "unique_users": 4},
+                {"name": "Brush 1", "shaves": 12, "unique_users": 6, "rank": 1},
+                {"name": "Brush 2", "shaves": 9, "unique_users": 4, "rank": 2},
             ],
         }
 

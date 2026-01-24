@@ -297,15 +297,11 @@ class TestMonthlyReportGenerator:
 
         generator = MonthlyReportGenerator("hardware", metadata, data)
 
-        # Test that error handling follows graceful approach (current implementation)
-        # The current implementation catches exceptions and continues, doesn't raise them
-        result = generator.generate_notes_and_caveats()
-
-        # Verify that the report was generated despite the error
-        assert result == "Generated report"
-
-        # Verify that the error was handled gracefully (table generation continues)
-        mock_table_generator.generate_table.assert_called()
+        # Test that error handling follows fail-fast approach
+        # The implementation now fails fast on internal/logic errors
+        import pytest
+        with pytest.raises(RuntimeError, match="Failed to generate table"):
+            generator.generate_notes_and_caveats()
 
     def test_month_parsing_valid_format(self):
         """Test month parsing with valid YYYY-MM format."""

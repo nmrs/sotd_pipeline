@@ -825,7 +825,7 @@ class TestTableGenerator:
 
         generator = TableGenerator(data)
 
-        with pytest.raises(ValueError, match="Column 'nonexistent_column' not found in table data"):
+        with pytest.raises(ValueError, match="'nonexistent_column' is not a sorting column"):
             generator.generate_table("soap-makers", nonexistent_column=10)
 
     def test_numeric_column_limits_invalid_threshold(self):

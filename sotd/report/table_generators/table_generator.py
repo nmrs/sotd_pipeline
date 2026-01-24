@@ -968,19 +968,27 @@ class TableGenerator:
 
         # Convert kebab-case template name to snake_case data key
         data_key = table_name.replace("-", "_")
+        # Also try converting snake_case to kebab-case (reverse conversion)
+        kebab_key = table_name.replace("_", "-") if "_" in table_name else None
 
         # Handle both flat and nested data structures
-        # Try snake_case first (converted), then original kebab-case
+        # Try multiple key variations: snake_case (converted), original, kebab-case (reverse)
         if data_key in self.data:
             table_data = self.data[data_key]
         elif table_name in self.data:
-            # Original kebab-case key exists
+            # Original key exists (could be kebab-case or snake_case)
             table_data = self.data[table_name]
+        elif kebab_key and kebab_key in self.data:
+            # Reverse conversion: snake_case -> kebab-case
+            table_data = self.data[kebab_key]
         elif "data" in self.data and data_key in self.data["data"]:
             table_data = self.data["data"][data_key]
         elif "data" in self.data and table_name in self.data["data"]:
-            # Original kebab-case key exists in nested data
+            # Original key exists in nested data
             table_data = self.data["data"][table_name]
+        elif kebab_key and "data" in self.data and kebab_key in self.data["data"]:
+            # Reverse conversion in nested data
+            table_data = self.data["data"][kebab_key]
         else:
             available_keys = list(self.data.keys())
             if "data" in self.data:
@@ -1198,19 +1206,27 @@ class TableGenerator:
         """
         # Convert kebab-case template name to snake_case data key
         data_key = table_name.replace("-", "_")
+        # Also try converting snake_case to kebab-case (reverse conversion)
+        kebab_key = table_name.replace("_", "-") if "_" in table_name else None
 
         # Handle both flat and nested data structures
-        # Try snake_case first (converted), then original kebab-case
+        # Try multiple key variations: snake_case (converted), original, kebab-case (reverse)
         if data_key in self.data:
             table_data = self.data[data_key]
         elif table_name in self.data:
-            # Original kebab-case key exists
+            # Original key exists (could be kebab-case or snake_case)
             table_data = self.data[table_name]
+        elif kebab_key and kebab_key in self.data:
+            # Reverse conversion: snake_case -> kebab-case
+            table_data = self.data[kebab_key]
         elif "data" in self.data and data_key in self.data["data"]:
             table_data = self.data["data"][data_key]
         elif "data" in self.data and table_name in self.data["data"]:
-            # Original kebab-case key exists in nested data
+            # Original key exists in nested data
             table_data = self.data["data"][table_name]
+        elif kebab_key and "data" in self.data and kebab_key in self.data["data"]:
+            # Reverse conversion in nested data
+            table_data = self.data["data"][kebab_key]
         else:
             available_keys = list(self.data.keys())
             if "data" in self.data:
