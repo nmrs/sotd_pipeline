@@ -968,7 +968,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
                 onClick={analyzeAlignment}
                 disabled={
                   loading ||
-                  (dataSource === 'catalog' && (pipelineSoaps.length === 0 || wsdbSoaps.length === 0)) ||
+                  (dataSource === 'catalog' && ((pipelineSoaps?.length ?? 0) === 0 || (wsdbSoaps?.length ?? 0) === 0)) ||
                   (dataSource === 'match_files' && selectedMonths.length === 0)
                 }
                 className='w-full'
