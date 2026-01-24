@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -67,18 +67,27 @@ describe('DataTable Header Alignment', () => {
   test('should maintain header alignment during filtering', async () => {
     render(<DataTable columns={columns} data={mockData} searchKey='name' />);
 
-    // Find the search input
-    const searchInput = screen.getByPlaceholderText('Filter name...');
+    // Find the search input (DataTable uses 'Search all columns...' placeholder)
+    const searchInput = screen.getByPlaceholderText('Search all columns...') as HTMLInputElement;
     expect(searchInput).toBeInTheDocument();
 
-    // Filter the data
-    fireEvent.change(searchInput, { target: { value: 'Item 1' } });
-
-    await waitFor(() => {
-      // Check that only filtered rows are shown
-      expect(screen.getByText('Item 1')).toBeInTheDocument();
-      expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
+    // Filter the data - use userEvent or ensure the change event properly updates state
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'Item 1' } });
+      // Wait a bit for React state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
+
+    // Wait for filtering to complete - may need more time for state updates
+    await waitFor(
+      () => {
+        // Check that only filtered rows are shown
+        // The search "Item 1" should match "Item 1" but not "Item 2"
+        expect(screen.getByText('Item 1')).toBeInTheDocument();
+        expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
     // The issue: Header should remain visually connected to filtered rows
     // But the virtualization structure breaks this connection

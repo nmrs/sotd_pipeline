@@ -125,17 +125,25 @@ describe('BrushSplitTable', () => {
       // checkbox[4]: Validated for row 3 (unchecked) - should be unchecked since validated: false
       // checkbox[5]: Don't split for row 3 (checked) - should be checked since should_not_split: true
 
+      // Filter checkboxes by aria-label to get the right ones
+      const validatedCheckboxes = checkboxes.filter(
+        cb => cb.getAttribute('aria-label')?.includes('Validated')
+      );
+      const dontSplitCheckboxes = checkboxes.filter(
+        cb => cb.getAttribute('aria-label')?.includes("Don't split")
+      );
+
       // First row: should_not_split = false, validated = false
-      expect(checkboxes[0]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 1)
-      expect(checkboxes[1]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 1)
+      expect(validatedCheckboxes[0]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 1)
+      expect(dontSplitCheckboxes[0]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 1)
 
       // Second row: should_not_split = false, validated = true
-      expect(checkboxes[2]).toHaveAttribute('data-state', 'checked'); // Validated checkbox (row 2) - should be checked since validated: true
-      expect(checkboxes[3]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 2)
+      expect(validatedCheckboxes[1]).toHaveAttribute('data-state', 'checked'); // Validated checkbox (row 2) - should be checked since validated: true
+      expect(dontSplitCheckboxes[1]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 2)
 
       // Third row: should_not_split = true, validated = false
-      expect(checkboxes[4]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 3)
-      expect(checkboxes[5]).toHaveAttribute('data-state', 'checked'); // Don't Split checkbox (row 3) - should be checked
+      expect(validatedCheckboxes[2]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 3)
+      expect(dontSplitCheckboxes[2]).toHaveAttribute('data-state', 'checked'); // Don't Split checkbox (row 3) - should be checked
     });
 
     it("allows toggling Don't Split checkbox", async () => {

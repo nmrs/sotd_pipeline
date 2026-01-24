@@ -53,7 +53,7 @@ describe('API Cache-Busting Tests', () => {
       expect(checkFilteredStatusSource).not.toContain('_t=${Date.now()}');
 
       // The functions should use simple URLs without manual cache-busting
-      expect(analyzeUnmatchedSource).toContain('/analyze/unmatched');
+      expect(analyzeUnmatchedSource).toContain('/analysis/unmatched');
       expect(checkFilteredStatusSource).toContain('/filtered/check');
     });
   });

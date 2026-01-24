@@ -117,7 +117,8 @@ describe('MismatchAnalyzerDataTable', () => {
       const commentButtons = screen.getAllByText('123');
       fireEvent.click(commentButtons[0]);
 
-      expect(onCommentClick).toHaveBeenCalledWith('123');
+      // onCommentClick is called with (commentId, allCommentIds)
+      expect(onCommentClick).toHaveBeenCalledWith('123', ['123', '456']);
     });
   });
 
@@ -130,8 +131,12 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.getByText('Select')).toBeInTheDocument();
 
       // Should have checkboxes for each row (2 items in test data)
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(2); // One for each visible data item (2 items in test data)
+      // Filter out the regex-mode checkbox from the search input
+      const allCheckboxes = screen.getAllByRole('checkbox');
+      const rowCheckboxes = allCheckboxes.filter(
+        cb => cb.getAttribute('id') !== 'regex-mode' && cb.getAttribute('type') === 'checkbox'
+      );
+      expect(rowCheckboxes).toHaveLength(2); // One for each visible data item (2 items in test data)
     });
 
     test('renders confirmation status when isItemConfirmed is provided', () => {
@@ -167,9 +172,13 @@ describe('MismatchAnalyzerDataTable', () => {
         />
       );
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      // Click the first row checkbox (index 0, since there's no "Select All" checkbox)
-      fireEvent.click(checkboxes[0]);
+      // Filter out the regex-mode checkbox from the search input
+      const allCheckboxes = screen.getAllByRole('checkbox');
+      const rowCheckboxes = allCheckboxes.filter(
+        cb => cb.getAttribute('id') !== 'regex-mode' && cb.getAttribute('type') === 'checkbox'
+      );
+      // Click the first row checkbox
+      fireEvent.click(rowCheckboxes[0]);
 
       expect(onItemSelection).toHaveBeenCalledWith('razor:test razor 1', true);
     });
@@ -186,11 +195,15 @@ describe('MismatchAnalyzerDataTable', () => {
         />
       );
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      // The first row checkbox (index 0) should be checked
-      expect(checkboxes[0]).toBeChecked();
-      // The second row checkbox (index 1) should not be checked
-      expect(checkboxes[1]).not.toBeChecked();
+      // Filter out the regex-mode checkbox from the search input
+      const allCheckboxes = screen.getAllByRole('checkbox');
+      const rowCheckboxes = allCheckboxes.filter(
+        cb => cb.getAttribute('id') !== 'regex-mode' && cb.getAttribute('type') === 'checkbox'
+      );
+      // The first row checkbox should be checked
+      expect(rowCheckboxes[0]).toBeChecked();
+      // The second row checkbox should not be checked
+      expect(rowCheckboxes[1]).not.toBeChecked();
     });
 
     test('does not render selection or status columns when props are not provided', () => {

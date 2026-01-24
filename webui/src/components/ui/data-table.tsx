@@ -204,6 +204,13 @@ export function DataTable<TData, TValue>({
             }
           }
 
+          // Fallback: search all string fields in the row data (for test data and generic use cases)
+          for (const [key, value] of Object.entries(rowData)) {
+            if (value && typeof value === 'string' && regex.test(value)) {
+              return true;
+            }
+          }
+
           return false;
         } catch (error) {
           // Invalid regex - return false to show no matches
@@ -215,6 +222,7 @@ export function DataTable<TData, TValue>({
       const searchTermLower = searchTerm.toLowerCase();
       const searchableFields = ['original', 'matched_string', 'brand', 'model', 'match_type', 'mismatch_type'];
       
+      // First, try the hardcoded searchable fields
       for (const field of searchableFields) {
         const value = rowData[field];
         if (value && typeof value === 'string' && value.toLowerCase().includes(searchTermLower)) {
@@ -229,6 +237,13 @@ export function DataTable<TData, TValue>({
           if (value && typeof value === 'string' && value.toLowerCase().includes(searchTermLower)) {
             return true;
           }
+        }
+      }
+
+      // Fallback: search all string fields in the row data (for test data and generic use cases)
+      for (const [key, value] of Object.entries(rowData)) {
+        if (value && typeof value === 'string' && value.toLowerCase().includes(searchTermLower)) {
+          return true;
         }
       }
 

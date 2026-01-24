@@ -59,14 +59,15 @@ describe('DeltaMonthsInfoPanel', () => {
       );
 
       // Check that primary months are displayed correctly
-      const primaryText = screen.getByText(/Primary months:/);
-      expect(primaryText).toBeInTheDocument();
-      expect(primaryText.textContent).toContain('2025-01');
-      expect(primaryText.textContent).toContain('2025-02');
-      expect(primaryText.textContent).toContain('2025-03');
+      // The months are in the same <li> element as the label
+      const primaryListItem = screen.getByText(/Primary months:/).closest('li');
+      expect(primaryListItem).toBeInTheDocument();
+      expect(primaryListItem?.textContent).toContain('2025-01');
+      expect(primaryListItem?.textContent).toContain('2025-02');
+      expect(primaryListItem?.textContent).toContain('2025-03');
       // Should not contain delta months
-      expect(primaryText.textContent).not.toContain('2024-01');
-      expect(primaryText.textContent).not.toContain('2024-02');
+      expect(primaryListItem?.textContent).not.toContain('2024-01');
+      expect(primaryListItem?.textContent).not.toContain('2024-02');
     });
 
     test('correctly displays delta months', () => {
@@ -77,10 +78,10 @@ describe('DeltaMonthsInfoPanel', () => {
         <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
       );
 
-      const deltaText = screen.getByText(/Delta months:/);
-      expect(deltaText).toBeInTheDocument();
-      expect(deltaText.textContent).toContain('2024-01');
-      expect(deltaText.textContent).toContain('2024-02');
+      const deltaListItem = screen.getByText(/Delta months:/).closest('li');
+      expect(deltaListItem).toBeInTheDocument();
+      expect(deltaListItem?.textContent).toContain('2024-01');
+      expect(deltaListItem?.textContent).toContain('2024-02');
     });
 
     test('correctly calculates total months as selectedMonths.length (not sum)', () => {
@@ -92,10 +93,10 @@ describe('DeltaMonthsInfoPanel', () => {
         <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
       );
 
-      const totalText = screen.getByText(/Total months:/);
-      expect(totalText).toBeInTheDocument();
-      expect(totalText.textContent).toContain('6');
-      expect(totalText.textContent).not.toContain('9');
+      const totalListItem = screen.getByText(/Total months:/).closest('li');
+      expect(totalListItem).toBeInTheDocument();
+      expect(totalListItem?.textContent).toContain('6');
+      expect(totalListItem?.textContent).not.toContain('9');
     });
 
     test('handles Year to Date scenario correctly (12 primary + 24 delta = 36 total)', () => {
@@ -147,9 +148,9 @@ describe('DeltaMonthsInfoPanel', () => {
         <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
       );
 
-      const totalText = screen.getByText(/Total months:/);
-      expect(totalText.textContent).toContain('36');
-      expect(totalText.textContent).not.toContain('60'); // Should not be 12 + 24 + 24 = 60
+      const totalListItem = screen.getByText(/Total months:/).closest('li');
+      expect(totalListItem?.textContent).toContain('36');
+      expect(totalListItem?.textContent).not.toContain('60'); // Should not be 12 + 24 + 24 = 60
     });
   });
 
@@ -169,7 +170,11 @@ describe('DeltaMonthsInfoPanel', () => {
       expect(screen.getByText(/Total months:/)).toBeInTheDocument();
       expect(screen.getByText(/Delta months include:/)).toBeInTheDocument();
       expect(screen.getByText(/month-1, month-1year, month-5years/)).toBeInTheDocument();
-      expect(screen.getByText(/CLI.*--delta.*flag/)).toBeInTheDocument();
+      // The component mentions CLI --delta flag in the description
+      // The text is: "This provides the same comprehensive view as the CLI <code>--delta</code> flag."
+      // The text is split across elements (CLI and --delta are in different elements)
+      expect(screen.getByText(/CLI/i)).toBeInTheDocument();
+      expect(screen.getByText(/--delta/i)).toBeInTheDocument();
     });
 
     test('displays months in correct format', () => {
@@ -180,8 +185,8 @@ describe('DeltaMonthsInfoPanel', () => {
         />
       );
 
-      const primaryText = screen.getByText(/Primary months:/);
-      expect(primaryText.textContent).toMatch(/2025-01.*2025-02/);
+      const primaryListItem = screen.getByText(/Primary months:/).closest('li');
+      expect(primaryListItem?.textContent).toMatch(/2025-01.*2025-02/);
     });
   });
 
@@ -202,9 +207,9 @@ describe('DeltaMonthsInfoPanel', () => {
         <DeltaMonthsInfoPanel selectedMonths={selectedMonths} deltaMonths={deltaMonths} />
       );
 
-      const primaryText = screen.getByText(/Primary months:/);
+      const primaryListItem = screen.getByText(/Primary months:/).closest('li');
       // Primary months should be empty (all are delta)
-      expect(primaryText.textContent).toMatch(/Primary months:\s*$/);
+      expect(primaryListItem?.textContent).toMatch(/Primary months:\s*$/);
     });
 
     test('handles no overlap between selected and delta months', () => {
@@ -216,9 +221,9 @@ describe('DeltaMonthsInfoPanel', () => {
       );
 
       // In this case, selectedMonths should equal primaryMonths
-      const primaryText = screen.getByText(/Primary months:/);
-      expect(primaryText.textContent).toContain('2025-01');
-      expect(primaryText.textContent).toContain('2025-02');
+      const primaryListItem = screen.getByText(/Primary months:/).closest('li');
+      expect(primaryListItem?.textContent).toContain('2025-01');
+      expect(primaryListItem?.textContent).toContain('2025-02');
     });
   });
 });

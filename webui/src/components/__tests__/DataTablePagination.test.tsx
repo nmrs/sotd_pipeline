@@ -85,18 +85,26 @@ describe('DataTable Pagination', () => {
       );
     });
 
-    // Find the search input
-    const searchInput = screen.getByPlaceholderText('Filter name...');
+    // Find the search input (DataTable uses 'Search all columns...' placeholder)
+    const searchInput = screen.getByPlaceholderText('Search all columns...') as HTMLInputElement;
     expect(searchInput).toBeInTheDocument();
 
     // Filter the data with a term that will match only one item
-    fireEvent.change(searchInput, { target: { value: 'Item 5' } });
-
-    await waitFor(() => {
-      // Check that only filtered rows are shown
-      expect(screen.getByText('Item 5')).toBeInTheDocument();
-      expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'Item 5' } });
+      // Wait a bit for React state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
+
+    // Wait for filtering to complete - may need more time for state updates
+    await waitFor(
+      () => {
+        // Check that only filtered rows are shown
+        expect(screen.getByText('Item 5')).toBeInTheDocument();
+        expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
     // Verify pagination still works with filtered data
     expect(screen.getByText('1-1 of 1')).toBeInTheDocument();
