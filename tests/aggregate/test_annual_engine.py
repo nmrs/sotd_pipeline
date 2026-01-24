@@ -17,6 +17,149 @@ from sotd.aggregate.annual_engine import (
 )
 
 
+def create_enriched_records_for_razors(razor_data: list[dict]) -> list[dict]:
+    """Create enriched records that match the razor data for testing.
+    
+    Args:
+        razor_data: List of dicts with "name", "shaves", "unique_users"
+        
+    Returns:
+        List of enriched records with appropriate razor matches and authors
+    """
+    enriched_records = []
+    for razor in razor_data:
+        name = razor["name"]
+        unique_users = razor["unique_users"]
+        shaves = razor["shaves"]
+        
+        # Parse name into brand and model (assume "Brand Model" format)
+        parts = name.split(" ", 1)
+        brand = parts[0]
+        model = parts[1] if len(parts) > 1 else ""
+        
+        # Create unique_users number of unique authors
+        for user_idx in range(unique_users):
+            # Create multiple shaves per user if needed
+            shaves_per_user = shaves // unique_users
+            remaining_shaves = shaves % unique_users
+            user_shaves = shaves_per_user + (1 if user_idx < remaining_shaves else 0)
+            
+            for _ in range(user_shaves):
+                enriched_records.append({
+                    "author": f"user_{name}_{user_idx}",
+                    "razor": {
+                        "matched": {
+                            "brand": brand,
+                            "model": model,
+                            "format": "DE",
+                        }
+                    }
+                })
+    
+    return enriched_records
+
+
+def create_enriched_records_for_category(category: str, product_data: list[dict]) -> list[dict]:
+    """Create enriched records for a product category.
+    
+    Args:
+        category: "razors", "blades", "brushes", or "soaps"
+        product_data: List of dicts with "name", "shaves", "unique_users"
+        
+    Returns:
+        List of enriched records
+    """
+    if category == "razors":
+        return create_enriched_records_for_razors(product_data)
+    elif category == "blades":
+        # Similar structure for blades
+        enriched_records = []
+        for blade in product_data:
+            name = blade["name"]
+            unique_users = blade["unique_users"]
+            shaves = blade["shaves"]
+            parts = name.split(" ", 1)
+            brand = parts[0]
+            model = parts[1] if len(parts) > 1 else ""
+            for user_idx in range(unique_users):
+                shaves_per_user = shaves // unique_users
+                remaining_shaves = shaves % unique_users
+                user_shaves = shaves_per_user + (1 if user_idx < remaining_shaves else 0)
+                for _ in range(user_shaves):
+                    enriched_records.append({
+                        "author": f"user_{name}_{user_idx}",
+                        "blade": {
+                            "matched": {
+                                "brand": brand,
+                                "model": model,
+                                "format": "DE",
+                            }
+                        }
+                    })
+        return enriched_records
+    elif category == "brushes":
+        # Brushes have handle_maker and knot_maker structure
+        enriched_records = []
+        for brush in product_data:
+            name = brush["name"]
+            unique_users = brush["unique_users"]
+            shaves = brush["shaves"]
+            # Assume format like "HandleMaker KnotMaker" or just "Brand"
+            parts = name.split(" ", 1)
+            brand = parts[0]
+            model = parts[1] if len(parts) > 1 else ""
+            for user_idx in range(unique_users):
+                shaves_per_user = shaves // unique_users
+                remaining_shaves = shaves % unique_users
+                user_shaves = shaves_per_user + (1 if user_idx < remaining_shaves else 0)
+                for _ in range(user_shaves):
+                    enriched_records.append({
+                        "author": f"user_{name}_{user_idx}",
+                        "brush": {
+                            "matched": {
+                                "brand": brand,
+                                "model": model,
+                            }
+                        }
+                    })
+        return enriched_records
+    elif category == "soaps":
+        enriched_records = []
+        for soap in product_data:
+            name = soap["name"]
+            unique_users = soap["unique_users"]
+            shaves = soap["shaves"]
+            # Soaps use "Brand Scent" format in monthly data, but enriched creates "Brand - Scent"
+            # Handle both formats for matching
+            if " - " in name:
+                # Already in "Brand - Scent" format
+                parts = name.split(" - ", 1)
+                brand = parts[0]
+                scent = parts[1] if len(parts) > 1 else ""
+            else:
+                # "Brand Scent" format - split on first space
+                parts = name.split(" ", 1)
+                brand = parts[0]
+                scent = parts[1] if len(parts) > 1 else ""
+            for user_idx in range(unique_users):
+                shaves_per_user = shaves // unique_users
+                remaining_shaves = shaves % unique_users
+                user_shaves = shaves_per_user + (1 if user_idx < remaining_shaves else 0)
+                for _ in range(user_shaves):
+                    enriched_records.append({
+                        "author": f"user_{name}_{user_idx}",
+                        "soap": {
+                            "matched": {
+                                "brand": brand,
+                                "scent": scent,
+                            }
+                        }
+                    })
+        return enriched_records
+    else:
+        return []
+
+
 class TestAnnualAggregationEngine:
     """Test the AnnualAggregationEngine class."""
 
@@ -36,7 +179,8 @@ class TestAnnualAggregationEngine:
         with pytest.raises(ValueError, match="Year must be numeric"):
             AnnualAggregationEngine("abcd", Path("/data"))
 
-    def test_aggregate_razors_single_month(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_razors_single_month(self, mock_load_enriched):
         """Test aggregating razors from a single month."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -52,6 +196,13 @@ class TestAnnualAggregationEngine:
             }
         }
 
+        # Mock enriched records to match the monthly data
+        enriched_records = create_enriched_records_for_category("razors", [
+            {"name": "Razor A", "shaves": 30, "unique_users": 25},
+            {"name": "Razor B", "shaves": 20, "unique_users": 15},
+        ])
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.aggregate_razors(monthly_data)
 
         assert len(result) == 2
@@ -64,7 +215,8 @@ class TestAnnualAggregationEngine:
         assert result[1]["unique_users"] == 15
         assert result[1]["rank"] == 2
 
-    def test_aggregate_razors_multiple_months(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_razors_multiple_months(self, mock_load_enriched):
         """Test aggregating razors from multiple months."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -88,6 +240,29 @@ class TestAnnualAggregationEngine:
                 },
             },
         }
+
+        # Mock enriched records - aggregate across months (45 unique users for Razor A)
+        # Need to create records that when aggregated give the correct unique_users
+        enriched_records = []
+        # Razor A: 25 users from month 1 + 20 users from month 2 (some overlap possible, but we'll create 45 unique)
+        for user_idx in range(45):
+            enriched_records.append({
+                "author": f"user_Razor_A_{user_idx}",
+                "razor": {"matched": {"brand": "Razor", "model": "A", "format": "DE"}}
+            })
+        # Razor B: 15 users
+        for user_idx in range(15):
+            enriched_records.append({
+                "author": f"user_Razor_B_{user_idx}",
+                "razor": {"matched": {"brand": "Razor", "model": "B", "format": "DE"}}
+            })
+        # Razor C: 10 users
+        for user_idx in range(10):
+            enriched_records.append({
+                "author": f"user_Razor_C_{user_idx}",
+                "razor": {"matched": {"brand": "Razor", "model": "C", "format": "DE"}}
+            })
+        mock_load_enriched.return_value = enriched_records
 
         result = engine.aggregate_razors(monthly_data)
 
@@ -127,7 +302,8 @@ class TestAnnualAggregationEngine:
         result = engine.aggregate_razors(monthly_data)
         assert result == []
 
-    def test_aggregate_blades_single_month(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_blades_single_month(self, mock_load_enriched):
         """Test aggregating blades from a single month."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -143,6 +319,13 @@ class TestAnnualAggregationEngine:
             }
         }
 
+        # Mock enriched records
+        enriched_records = create_enriched_records_for_category("blades", [
+            {"name": "Blade A", "shaves": 40, "unique_users": 30},
+            {"name": "Blade B", "shaves": 30, "unique_users": 20},
+        ])
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.aggregate_blades(monthly_data)
 
         assert len(result) == 2
@@ -155,7 +338,8 @@ class TestAnnualAggregationEngine:
         assert result[1]["unique_users"] == 20
         assert result[1]["rank"] == 2
 
-    def test_aggregate_brushes_single_month(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_brushes_single_month(self, mock_load_enriched):
         """Test aggregating brushes from a single month."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -171,6 +355,13 @@ class TestAnnualAggregationEngine:
             }
         }
 
+        # Mock enriched records
+        enriched_records = create_enriched_records_for_category("brushes", [
+            {"name": "Brush A", "shaves": 35, "unique_users": 25},
+            {"name": "Brush B", "shaves": 25, "unique_users": 15},
+        ])
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.aggregate_brushes(monthly_data)
 
         assert len(result) == 2
@@ -183,7 +374,8 @@ class TestAnnualAggregationEngine:
         assert result[1]["unique_users"] == 15
         assert result[1]["rank"] == 2
 
-    def test_aggregate_soaps_single_month(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_soaps_single_month(self, mock_load_enriched):
         """Test aggregating soaps from a single month."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -192,26 +384,34 @@ class TestAnnualAggregationEngine:
                 "meta": {"total_shaves": 100, "unique_shavers": 50},
                 "data": {
                     "soaps": [
-                        {"name": "Soap A", "shaves": 45, "unique_users": 35},
-                        {"name": "Soap B", "shaves": 35, "unique_users": 25},
+                        {"name": "Soap - A", "shaves": 45, "unique_users": 35},
+                        {"name": "Soap - B", "shaves": 35, "unique_users": 25},
                     ],
                 },
             }
         }
 
+        # Mock enriched records
+        enriched_records = create_enriched_records_for_category("soaps", [
+            {"name": "Soap - A", "shaves": 45, "unique_users": 35},
+            {"name": "Soap - B", "shaves": 35, "unique_users": 25},
+        ])
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.aggregate_soaps(monthly_data)
 
         assert len(result) == 2
-        assert result[0]["name"] == "Soap A"
+        assert result[0]["name"] == "Soap - A"
         assert result[0]["shaves"] == 45
         assert result[0]["unique_users"] == 35
         assert result[0]["rank"] == 1
-        assert result[1]["name"] == "Soap B"
+        assert result[1]["name"] == "Soap - B"
         assert result[1]["shaves"] == 35
         assert result[1]["unique_users"] == 25
         assert result[1]["rank"] == 2
 
-    def test_generate_metadata_single_month(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_generate_metadata_single_month(self, mock_load_enriched):
         """Test generating metadata from a single month."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -224,6 +424,10 @@ class TestAnnualAggregationEngine:
             }
         }
 
+        # Mock enriched records with 50 unique authors
+        enriched_records = [{"author": f"user_{i}"} for i in range(50)]
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.generate_metadata(monthly_data)
 
         assert result["year"] == "2024"
@@ -234,7 +438,8 @@ class TestAnnualAggregationEngine:
         expected_missing = [f"2024-{month:02d}" for month in range(2, 13)]
         assert result["missing_months"] == expected_missing
 
-    def test_generate_metadata_multiple_months(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_generate_metadata_multiple_months(self, mock_load_enriched):
         """Test generating metadata from multiple months."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -253,6 +458,10 @@ class TestAnnualAggregationEngine:
             },
         }
 
+        # Mock enriched records with 90 unique authors (50+40, some overlap possible)
+        enriched_records = [{"author": f"user_{i}"} for i in range(90)]
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.generate_metadata(monthly_data)
 
         assert result["year"] == "2024"
@@ -263,7 +472,8 @@ class TestAnnualAggregationEngine:
         expected_missing = [f"2024-{month:02d}" for month in range(3, 13)]
         assert result["missing_months"] == expected_missing
 
-    def test_generate_metadata_with_missing_months(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_generate_metadata_with_missing_months(self, mock_load_enriched):
         """Test generating metadata with missing months."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -282,6 +492,10 @@ class TestAnnualAggregationEngine:
             },
         }
 
+        # Mock enriched records with 90 unique authors
+        enriched_records = [{"author": f"user_{i}"} for i in range(90)]
+        mock_load_enriched.return_value = enriched_records
+
         result = engine.generate_metadata(monthly_data)
 
         assert result["year"] == "2024"
@@ -292,7 +506,8 @@ class TestAnnualAggregationEngine:
         expected_missing = ["2024-02"] + [f"2024-{month:02d}" for month in range(4, 13)]
         assert result["missing_months"] == expected_missing
 
-    def test_aggregate_all_categories(self):
+    @patch.object(AnnualAggregationEngine, "_load_enriched_records")
+    def test_aggregate_all_categories(self, mock_load_enriched):
         """Test aggregating all categories."""
         engine = AnnualAggregationEngine("2024", Path("/data"))
 
@@ -303,10 +518,54 @@ class TestAnnualAggregationEngine:
                     "razors": [{"name": "Razor A", "shaves": 30, "unique_users": 25}],
                     "blades": [{"name": "Blade A", "shaves": 40, "unique_users": 30}],
                     "brushes": [{"name": "Brush A", "shaves": 35, "unique_users": 25}],
-                    "soaps": [{"name": "Soap A", "shaves": 45, "unique_users": 35}],
+                    "soaps": [{"name": "Soap - A", "shaves": 45, "unique_users": 35}],
                 },
             }
         }
+
+        # Mock enriched records for all categories
+        # We need exactly 50 unique authors total for unique_shavers
+        # Create records where authors overlap across categories to reach exactly 50 unique
+        enriched_records = []
+        
+        # Create 50 unique authors that use different combinations of products
+        # This simulates real-world where users use multiple product types
+        all_authors = [f"user_{i}" for i in range(50)]
+        
+        # Distribute authors across categories (with overlap)
+        # Razor A: first 25 authors
+        for author in all_authors[:25]:
+            enriched_records.append({
+                "author": author,
+                "razor": {"matched": {"brand": "Razor", "model": "A", "format": "DE"}}
+            })
+        
+        # Blade A: authors 10-39 (overlaps with razors)
+        for author in all_authors[10:40]:
+            enriched_records.append({
+                "author": author,
+                "blade": {"matched": {"brand": "Blade", "model": "A", "format": "DE"}}
+            })
+        
+        # Brush A: authors 15-39 (overlaps with razors and blades)
+        for author in all_authors[15:40]:
+            enriched_records.append({
+                "author": author,
+                "brush": {"matched": {"brand": "Brush", "model": "A"}}
+            })
+        
+        # Soap A: authors 0-34 (overlaps with all)
+        for author in all_authors[0:35]:
+            enriched_records.append({
+                "author": author,
+                "soap": {"matched": {"brand": "Soap", "scent": "A"}}
+            })
+        
+        # Add remaining authors (40-49) with just author field to reach 50 total unique
+        for author in all_authors[40:50]:
+            enriched_records.append({"author": author})
+        
+        mock_load_enriched.return_value = enriched_records
 
         result = engine.aggregate_all_categories(monthly_data)
 
@@ -327,7 +586,7 @@ class TestAnnualAggregationEngine:
         assert len(result["brushes"]) == 1
         assert result["brushes"][0]["name"] == "Brush A"
         assert len(result["soaps"]) == 1
-        assert result["soaps"][0]["name"] == "Soap A"
+        assert result["soaps"][0]["name"] == "Soap - A"
 
     def test_aggregate_all_categories_empty_data(self):
         """Test aggregating all categories with empty data."""
@@ -424,7 +683,8 @@ class TestAnnualAggregationEngine:
 class TestAggregateMonthlyData:
     """Test the aggregate_monthly_data function."""
 
-    def test_aggregate_monthly_data_success(self):
+    @patch("sotd.aggregate.annual_engine.AnnualAggregationEngine._load_enriched_records")
+    def test_aggregate_monthly_data_success(self, mock_load_enriched):
         """Test successful aggregation of monthly data."""
         monthly_data = {
             "2024-01": {
@@ -440,6 +700,25 @@ class TestAggregateMonthlyData:
                 },
             },
         }
+
+        # Mock enriched records - 45 unique users for Razor A, 90 unique shavers total
+        enriched_records = []
+        razor_authors = set()
+        for user_idx in range(45):
+            author = f"user_Razor_A_{user_idx}"
+            enriched_records.append({
+                "author": author,
+                "razor": {"matched": {"brand": "Razor", "model": "A", "format": "DE"}}
+            })
+            razor_authors.add(author)
+        
+        # Add additional authors to reach 90 unique shavers total
+        # Some may overlap, so ensure we have exactly 90 unique
+        for i in range(len(razor_authors), 90):
+            author = f"user_extra_{i}"
+            enriched_records.append({"author": author})
+        
+        mock_load_enriched.return_value = enriched_records
 
         result = aggregate_monthly_data("2024", monthly_data)
 
@@ -506,12 +785,13 @@ class TestProcessAnnual:
 
         # Verify calls
         mock_load.assert_called_once_with("2024", Path("/data/aggregated"))
-        mock_aggregate.assert_called_once_with(
-            "2024",
-            mock_load.return_value["monthly_data"],
-            mock_load.return_value["included_months"],
-            mock_load.return_value["missing_months"],
-        )
+        # aggregate_monthly_data now includes data_dir parameter
+        mock_aggregate.assert_called_once()
+        call_args = mock_aggregate.call_args
+        assert call_args[0][0] == "2024"
+        assert call_args[0][1] == mock_load.return_value["monthly_data"]
+        assert call_args[0][2] == mock_load.return_value["included_months"]
+        assert call_args[0][3] == mock_load.return_value["missing_months"]
         mock_save.assert_called_once_with(mock_aggregate.return_value, "2024", Path("/data"))
 
     @patch("sotd.aggregate.annual_engine.load_annual_data")

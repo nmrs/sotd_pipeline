@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock the API calls
 jest.mock('../../services/api', () => ({
@@ -168,7 +169,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should render month selector', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     expect(screen.getByText('Product Usage')).toBeInTheDocument();
@@ -177,7 +182,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should render product type selector after month is selected', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Wait for months to load
@@ -194,7 +203,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should fetch and display products when month and product type are selected', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Wait for months to load
@@ -211,7 +224,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should filter products by search input', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // This test would require setting up the component state with products
@@ -222,7 +239,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should display table view correctly', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Table view is the default, but we need product analysis data to see it
@@ -252,7 +273,11 @@ describe('ProductUsage Component Tests', () => {
     );
 
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Loading state would be shown during API call
@@ -266,7 +291,11 @@ describe('ProductUsage Component Tests', () => {
     ).mockRejectedValue(new Error('API Error'));
 
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Error would be displayed in the error card
@@ -275,7 +304,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should open comment modal on comment click', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Comment modal would open when a comment is clicked
@@ -285,7 +318,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should display all product types in selector', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Product type selector should show all four types
@@ -295,7 +332,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should fetch and display yearly summary when product is selected', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Wait for months to load
@@ -310,7 +351,11 @@ describe('ProductUsage Component Tests', () => {
 
   test('should display yearly summary table with correct columns', async () => {
     await act(async () => {
-      render(<ProductUsage />);
+      render(
+        <MemoryRouter>
+          <ProductUsage />
+        </MemoryRouter>
+      );
     });
 
     // Yearly summary table would display Month, Shaves, Unique Users, Rank columns

@@ -134,7 +134,7 @@ class AnnualAggregationEngine:
             import pandas as pd
 
             df = pd.DataFrame(result)
-            # Recalculate unique_users from enriched records
+            # Recalculate unique_users from enriched records for accuracy
             unique_users_values = self._calculate_unique_users_for_category(
                 "razors", df, "name", "name"
             )
@@ -170,7 +170,7 @@ class AnnualAggregationEngine:
             import pandas as pd
 
             df = pd.DataFrame(result)
-            # Recalculate unique_users from enriched records
+            # Recalculate unique_users from enriched records for accuracy
             unique_users_values = self._calculate_unique_users_for_category(
                 "blades", df, "name", "name"
             )
@@ -206,7 +206,7 @@ class AnnualAggregationEngine:
             import pandas as pd
 
             df = pd.DataFrame(result)
-            # Recalculate unique_users from enriched records
+            # Recalculate unique_users from enriched records for accuracy
             unique_users_values = self._calculate_unique_users_for_category(
                 "brushes", df, "name", "name"
             )
@@ -242,7 +242,7 @@ class AnnualAggregationEngine:
             import pandas as pd
 
             df = pd.DataFrame(result)
-            # Recalculate unique_users from enriched records
+            # Recalculate unique_users from enriched records for accuracy
             unique_users_values = self._calculate_unique_users_for_category(
                 "soaps", df, "name", "name"
             )
@@ -320,7 +320,7 @@ class AnnualAggregationEngine:
             import pandas as pd
 
             df = pd.DataFrame(result)
-            # Recalculate unique_users from enriched records
+            # Recalculate unique_users from enriched records for accuracy
             unique_users_values = self._calculate_unique_users_for_category(
                 "razor_blade_combinations", df, "name", "name"
             )

@@ -135,12 +135,17 @@ class TestAnnualAggregatorIntegration:
             },
         }
 
-    def test_end_to_end_annual_aggregation_workflow(self, temp_data_dir, sample_monthly_data):
+    @patch("sotd.aggregate.annual_engine.AnnualAggregationEngine._load_enriched_records")
+    def test_end_to_end_annual_aggregation_workflow(self, mock_load_enriched, temp_data_dir, sample_monthly_data):
         """Test complete annual aggregation workflow from CLI to output."""
         # Create sample monthly files
         for month, data in sample_monthly_data.items():
             month_file = temp_data_dir / f"{month}.json"
             save_json_data(data, month_file)
+
+        # Mock enriched records - need 110 unique authors total (50 + 60)
+        enriched_records = [{"author": f"user_{i}"} for i in range(110)]
+        mock_load_enriched.return_value = enriched_records
 
         # Mock CLI arguments
         args = Mock()
@@ -176,11 +181,16 @@ class TestAnnualAggregatorIntegration:
             assert "2024-02" in metadata["included_months"]
             assert len(metadata["missing_months"]) == 10  # 12 - 2
 
-    def test_cli_integration_with_missing_months(self, temp_data_dir, sample_monthly_data):
+    @patch("sotd.aggregate.annual_engine.AnnualAggregationEngine._load_enriched_records")
+    def test_cli_integration_with_missing_months(self, mock_load_enriched, temp_data_dir, sample_monthly_data):
         """Test CLI integration when some months are missing."""
         # Create only one month of data
         month_file = temp_data_dir / "2024-01.json"
         save_json_data(sample_monthly_data["2024-01"], month_file)
+
+        # Mock enriched records - need 50 unique authors
+        enriched_records = [{"author": f"user_{i}"} for i in range(50)]
+        mock_load_enriched.return_value = enriched_records
 
         with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save:
             # Pass the parent directory since process_annual expects data_dir/aggregated
@@ -343,7 +353,11 @@ class TestAnnualAggregatorIntegration:
             month_file = temp_data_dir / f"{month}.json"
             save_json_data(data, month_file)
 
-        with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save:
+        # Mock enriched records - need 6000 unique authors total (12 * 500)
+        enriched_records = [{"author": f"user_{i}"} for i in range(6000)]
+        
+        with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save, \
+             patch("sotd.aggregate.annual_engine.AnnualAggregationEngine._load_enriched_records", return_value=enriched_records):
             import time
 
             start_time = time.time()
