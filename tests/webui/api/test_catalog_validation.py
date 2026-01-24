@@ -655,17 +655,28 @@ class TestMoveCatalogEntries:
         # Create initial correct_matches data
         initial_data = {"razor": {"Old Brand": {"Old Model": ["test razor pattern"]}}}
 
-        correct_matches_dir = self.create_temp_correct_matches_dir(initial_data, tmp_path)
+        # Create correct_matches directory at tmp_path / "data" / "correct_matches"
+        # (matching the structure expected by get_data_directory())
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        correct_matches_dir = data_dir / "correct_matches"
+        correct_matches_dir.mkdir()
+        
+        # Create razor.yaml file
+        razor_file = correct_matches_dir / "razor.yaml"
+        with razor_file.open("w") as f:
+            yaml.dump(initial_data["razor"], f)
 
         # Import the move endpoint function
         import sys
         from pathlib import Path
+        from unittest.mock import patch
 
         # Add project root to path for imports
         project_root = Path(__file__).parent.parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest
+        from webui.api.analysis import move_catalog_validation_entries, MoveCatalogEntriesRequest, get_data_directory
 
         # Create request to move entry
         request = MoveCatalogEntriesRequest(
@@ -684,13 +695,8 @@ class TestMoveCatalogEntries:
             ],
         )
 
-        # Mock project_root to point to tmp_path
-        import webui.api.analysis as analysis_module
-
-        original_project_root = getattr(analysis_module, "project_root", None)
-        analysis_module.project_root = tmp_path
-
-        try:
+        # Mock get_data_directory to return tmp_path / "data"
+        with patch("webui.api.analysis.get_data_directory", return_value=data_dir):
             # Execute move (await the async function)
             response = await move_catalog_validation_entries(request)
 
@@ -714,11 +720,6 @@ class TestMoveCatalogEntries:
             new_brand_data = razor_data.get("New Brand", {})
             new_model_patterns = new_brand_data.get("New Model", [])
             assert "test razor pattern" in new_model_patterns
-
-        finally:
-            # Restore original project_root
-            if original_project_root:
-                analysis_module.project_root = original_project_root
 
     @pytest.mark.asyncio
     async def test_move_structural_change_handle_knot_to_brush(self, tmp_path):
