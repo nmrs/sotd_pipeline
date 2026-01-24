@@ -970,10 +970,17 @@ class TableGenerator:
         data_key = table_name.replace("-", "_")
 
         # Handle both flat and nested data structures
+        # Try snake_case first (converted), then original kebab-case
         if data_key in self.data:
             table_data = self.data[data_key]
+        elif table_name in self.data:
+            # Original kebab-case key exists
+            table_data = self.data[table_name]
         elif "data" in self.data and data_key in self.data["data"]:
             table_data = self.data["data"][data_key]
+        elif "data" in self.data and table_name in self.data["data"]:
+            # Original kebab-case key exists in nested data
+            table_data = self.data["data"][table_name]
         else:
             available_keys = list(self.data.keys())
             if "data" in self.data:
@@ -1193,10 +1200,17 @@ class TableGenerator:
         data_key = table_name.replace("-", "_")
 
         # Handle both flat and nested data structures
+        # Try snake_case first (converted), then original kebab-case
         if data_key in self.data:
             table_data = self.data[data_key]
+        elif table_name in self.data:
+            # Original kebab-case key exists
+            table_data = self.data[table_name]
         elif "data" in self.data and data_key in self.data["data"]:
             table_data = self.data["data"][data_key]
+        elif "data" in self.data and table_name in self.data["data"]:
+            # Original kebab-case key exists in nested data
+            table_data = self.data["data"][table_name]
         else:
             available_keys = list(self.data.keys())
             if "data" in self.data:

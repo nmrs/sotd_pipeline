@@ -25,7 +25,7 @@ class TestAnnualGeneratorRefactoring:
             "included_months": ["2024-01", "2024-02"],
             "missing_months": [],
         }
-        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
+        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "rank": 1}]}
 
         # Test creating generator
         generator = create_annual_report_generator("hardware", "2024", metadata, data, debug=True)
@@ -51,7 +51,7 @@ class TestAnnualGeneratorRefactoring:
             "included_months": ["2024-01", "2024-02"],
             "missing_months": [],
         }
-        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}]}
+        data = {"razors": [{"name": "Rockwell 6C", "shaves": 200, "rank": 1}]}
 
         # Create a simplified test template
         template_dir = tmp_path / "test_templates"
@@ -94,7 +94,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
         }
         # Provide minimal data for all expected tables to satisfy template validation
         data = {
-            "razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}],
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "rank": 1}],
             "blades": [],
             "brushes": [],
             "razor-formats": [],
@@ -114,6 +114,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -166,6 +167,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -187,7 +189,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "missing_months": [],
         }
         data = {
-            "razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}],
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "rank": 1}],
             "blades": [],
             "brushes": [],
             "razor-formats": [],
@@ -207,11 +209,12 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
         comparison_data = {
             "2023": (
                 {"total_shaves": 1000, "unique_shavers": 80},
-                {"razors": [{"name": "Merkur 34C", "shaves": 150, "position": 1}]},
+                {"razors": [{"name": "Merkur 34C", "shaves": 150, "rank": 1}]},
             )
         }
 
@@ -235,10 +238,10 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
                 "included_months": ["2024-01", "2024-02"],
                 "missing_months": [],
             },
-            "razors": [{"name": "Rockwell 6C", "shaves": 200, "position": 1}],
-            "blades": [{"name": "Astra Superior Platinum", "shaves": 250, "position": 1}],
-            "brushes": [{"name": "Simpson Chubby 2", "shaves": 100, "position": 1}],
-            "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "position": 1}],
+            "razors": [{"name": "Rockwell 6C", "shaves": 200, "rank": 1}],
+            "blades": [{"name": "Astra Superior Platinum", "shaves": 250, "rank": 1}],
+            "brushes": [{"name": "Simpson Chubby 2", "shaves": 100, "rank": 1}],
+            "soaps": [{"name": "Barrister and Mann Seville", "shaves": 120, "rank": 1}],
             # Add empty lists for all specialized tables that the template expects
             "razor-formats": [],
             "razor-manufacturers": [],
@@ -257,6 +260,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
 
         # Create test annual data file
@@ -346,6 +350,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
 
         generator = AnnualReportGenerator("2024", "hardware", metadata, data, debug=True)
@@ -390,6 +395,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "razor-blade-combinations": [],
             "highest-use-count-per-blade": [],
             "top-shavers": [],
+            "users": [],
         }
 
         # Test that performance monitoring is included in generate_annual_report
