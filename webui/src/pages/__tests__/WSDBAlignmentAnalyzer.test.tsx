@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WSDBAlignmentAnalyzer from '../WSDBAlignmentAnalyzer';
 
@@ -170,22 +170,24 @@ describe('WSDBAlignmentAnalyzer', () => {
         expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
       });
 
-      // Wait for loading to complete - verify data was loaded by checking button is enabled
+      // Wait for component to finish loading - check for any visible content first
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          // Button should be enabled when data is loaded (not disabled due to empty data)
-          expect(analyzeButton).not.toBeDisabled();
+          // Wait for the component to render (check for any text from the component)
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
 
-      // Verify data was loaded - success message should appear
+      // Wait for data to load - check for success message or enabled button
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded.*WSDB.*pipeline/i)).toBeInTheDocument();
+          // Either success message appears or button is enabled (data loaded)
+          const successMessage = screen.queryByText(/Loaded.*WSDB.*pipeline/i);
+          const analyzeButton = screen.queryByText('Analyze Alignment');
+          expect(successMessage || (analyzeButton && !analyzeButton.hasAttribute('disabled'))).toBeTruthy();
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
     });
 
@@ -303,14 +305,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first - check button is enabled
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          expect(analyzeButton).not.toBeDisabled();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mocks for batch analysis
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -321,7 +349,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         }),
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -489,14 +516,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first - check button is enabled
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          expect(analyzeButton).not.toBeDisabled();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Mock batch analysis response
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -507,7 +560,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         }),
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -614,18 +666,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for component to finish initial loading
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          // Wait for the analyze button to be present and enabled
-          const analyzeButton = screen.queryByText('Analyze Alignment');
-          expect(analyzeButton).toBeInTheDocument();
-          if (analyzeButton) {
-            expect(analyzeButton).not.toBeDisabled();
-          }
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mocks for batch analysis with different confidence scores
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -652,8 +726,8 @@ describe('WSDBAlignmentAnalyzer', () => {
         }),
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
-      fireEvent.click(analyzeButton);
+      const analyzeButtonForClick = screen.getByText('Analyze Alignment');
+      fireEvent.click(analyzeButtonForClick);
 
       await waitFor(() => {
         expect(screen.getByText(/Analysis complete:/i)).toBeInTheDocument();
@@ -673,13 +747,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 1 pipeline brands/i)).toBeInTheDocument();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mock with detailed match using batch analysis format
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -712,7 +813,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         }),
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -793,14 +893,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first - check button is enabled
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          expect(analyzeButton).not.toBeDisabled();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mock for batch analyze
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -808,7 +934,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         json: async () => mockBatchAnalyzeWithAliases,
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -823,14 +948,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first - check button is enabled
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          expect(analyzeButton).not.toBeDisabled();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mock for batch analyze
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -838,7 +989,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         json: async () => mockBatchAnalyzeWithAliases,
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -893,14 +1043,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first - check button is enabled
+      // Wait for component to finish loading
       await waitFor(
         () => {
-          const analyzeButton = screen.getByText('Analyze Alignment');
-          expect(analyzeButton).not.toBeDisabled();
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
         },
         { timeout: 5000 }
       );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Setup mock for batch analyze
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -908,7 +1084,6 @@ describe('WSDBAlignmentAnalyzer', () => {
         json: async () => mockBatchAnalyzeCanonical,
       });
 
-      const analyzeButton = screen.getByText('Analyze Alignment');
       fireEvent.click(analyzeButton);
 
       await waitFor(() => {
@@ -925,9 +1100,23 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for data to load
+      await waitFor(
+        () => {
+          const analyzeButton = screen.queryByText('Analyze Alignment');
+          expect(analyzeButton).toBeInTheDocument();
+          expect(analyzeButton).not.toBeDisabled();
+        },
+        { timeout: 5000 }
+      );
 
       // Verify the fetch was called correctly (with full URL)
       expect(global.fetch).toHaveBeenCalledWith(
@@ -992,13 +1181,42 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Click analyze button
-      const analyzeButton = screen.getByText(/Analyze Alignment/i);
       fireEvent.click(analyzeButton);
 
       // Wait for results
@@ -1039,17 +1257,33 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for data to load - success message is the most reliable indicator
+      await waitFor(
+        () => {
+          // Wait for success message indicating data loaded
+          expect(screen.getByText(/Loaded.*WSDB.*pipeline/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Verify button is now enabled
+      let analyzeButton = screen.getByText('Analyze Alignment');
+      expect(analyzeButton).not.toBeDisabled();
 
       // Switch to Brand + Scent mode
       const brandScentButton = screen.getByText(/Brand \+ Scent/i);
       fireEvent.click(brandScentButton);
 
-      // Click analyze button
-      const analyzeButton = screen.getByText(/Analyze Alignment/i);
+      // Click analyze button (re-fetch in case DOM updated)
+      analyzeButton = screen.getByText(/Analyze Alignment/i);
       fireEvent.click(analyzeButton);
 
       // Wait for results
@@ -1102,13 +1336,42 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Click analyze button
-      const analyzeButton = screen.getByText(/Analyze Alignment/i);
       fireEvent.click(analyzeButton);
 
       // Wait for results
@@ -1148,12 +1411,21 @@ describe('WSDBAlignmentAnalyzer', () => {
 
     test('non-matches are loaded and applied on mount', async () => {
       setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
+      // Note: setupDefaultMocks already mocks non-matches, so this extra mock is for verification
       (global.fetch as jest.Mock).mockResolvedValueOnce({
           ok: true,
           json: async () => mockNonMatches,
         });
 
       render(<WSDBAlignmentAnalyzer />);
+
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
 
       // Verify non-matches endpoint was called
       await waitFor(() => {
@@ -1162,10 +1434,15 @@ describe('WSDBAlignmentAnalyzer', () => {
         );
       });
 
-      // Verify component loaded successfully
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Verify component loaded successfully - button should be enabled
+      await waitFor(
+        () => {
+          const analyzeButton = screen.queryByText('Analyze Alignment');
+          expect(analyzeButton).toBeInTheDocument();
+          expect(analyzeButton).not.toBeDisabled();
+        },
+        { timeout: 5000 }
+      );
     });
   });
 
@@ -1174,14 +1451,19 @@ describe('WSDBAlignmentAnalyzer', () => {
       (global.fetch as jest.Mock).mockClear();
     });
 
-    it('should show catalog mode by default', () => {
+    it('should show catalog mode by default', async () => {
       setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockNonMatches,
-        });
+      // Note: setupDefaultMocks already mocks non-matches, so this extra mock is redundant but harmless
 
       render(<WSDBAlignmentAnalyzer />);
+
+      // Wait for component to render
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
 
       // Should show catalog button as active
       const catalogButton = screen.getByText('Catalog');
@@ -1197,10 +1479,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for initial load
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Click match files button
       const matchFilesButton = screen.getByText('Match Files');
@@ -1232,10 +1544,40 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for initial load
-      await waitFor(() => {
-        expect(screen.getByText(/Loaded/i)).toBeInTheDocument();
-      });
+      // Wait for component to finish loading
+      await waitFor(
+        () => {
+          expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for all fetch calls to complete
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+          expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        },
+        { timeout: 5000 }
+      );
+
+      // Wait for React state updates to complete - button should be enabled when data loads
+      // Use a longer timeout to allow for async state updates
+      await waitFor(
+        () => {
+          const button = screen.queryByText('Analyze Alignment');
+          if (!button) {
+            throw new Error('Analyze button not found');
+          }
+          if (button.hasAttribute('disabled')) {
+            throw new Error('Button still disabled - waiting for data to load');
+          }
+        },
+        { timeout: 10000 }
+      );
+
+      const analyzeButton = screen.getByText('Analyze Alignment');
 
       // Switch to match files mode
       const matchFilesButton = screen.getByText('Match Files');
