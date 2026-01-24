@@ -333,7 +333,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
         # Verify the report was generated correctly
         assert result is not None
         assert "Welcome to your Annual SOTD Hardware Report for 2024" in result
-        assert "50,000 shave reports from 1000 distinct shavers during 2024" in result
+        assert "50,000 shave reports from 1,000 distinct shavers during 2024" in result
         assert "Razor 1" in result
         assert "Blade 1" in result
         assert "Brush 1" in result

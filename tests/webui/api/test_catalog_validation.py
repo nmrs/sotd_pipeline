@@ -789,11 +789,6 @@ class TestMoveCatalogEntries:
                 brush_model_patterns = brush_brand_data.get("Brush Model", [])
                 assert "test brush pattern" in brush_model_patterns
 
-        finally:
-            # Restore original project_root
-            if original_project_root:
-                analysis_module.project_root = original_project_root
-
     @pytest.mark.asyncio
     async def test_move_blade_with_format_preservation(self, tmp_path):
         """Test moving a blade entry while preserving format information."""
