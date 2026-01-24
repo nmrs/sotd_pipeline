@@ -135,12 +135,13 @@ class BaseAggregator(ABC):
         # Build aggregation dictionary: metrics + preserve brand/model/scent if present
         agg_dict = {"author": ["count", "nunique"]}
 
-        # Preserve brand/model/scent if they exist (use first() since all rows in group have same values)
-        if "brand" in df.columns:
+        # Preserve brand/model/scent if they exist and are NOT already grouping columns
+        # (if they're grouping columns, they're already preserved)
+        if "brand" in df.columns and "brand" not in group_columns:
             agg_dict["brand"] = "first"
-        if "model" in df.columns:
+        if "model" in df.columns and "model" not in group_columns:
             agg_dict["model"] = "first"
-        if "scent" in df.columns:
+        if "scent" in df.columns and "scent" not in group_columns:
             agg_dict["scent"] = "first"
 
         # Group by columns and calculate metrics

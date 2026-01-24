@@ -168,9 +168,7 @@ def _create_annual_files(
                     )
         else:
             if debug:
-                print(
-                    f"[DEBUG] No months found for {year}, skipping annual file creation"
-                )
+                print(f"[DEBUG] No months found for {year}, skipping annual file creation")
 
     # Process years with progress bar
     if years_to_process:

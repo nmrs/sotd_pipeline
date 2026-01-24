@@ -1525,6 +1525,9 @@ Crowne & Crane:
   patterns:
   - crown.*crane
   scents:
+    Peppered Plum:
+      patterns:
+      - crown.*peppered plum
     Rose on Fire:
       patterns:
       - crown.*rose on fire
@@ -2900,6 +2903,9 @@ MacDuff's Soap Company:
     Harvest Sky:
       patterns:
       - macduff.*harvest sky
+    Kananaskis Explorer:
+      patterns:
+      - kananaskis.*explorer
     Little Caribbean:
       patterns:
       - macduff.*little.*caribbean
@@ -3941,6 +3947,9 @@ Siliski Soaps:
     Internal Calamity:
       patterns:
       - siliski.*internal calamity
+    Patchouli Blend:
+      patterns:
+      - siliski.*patchouli blend
     Unscented:
       patterns:
       - siliski.*unscented
@@ -5313,6 +5322,9 @@ Wet Shaving Products:
   - wet ?sha\wing.*products
   - ^\W*wsp\b
   scents:
+    Black Amber Vanille:
+      patterns:
+      - black amber vanille
     Gaelic Tweed:
       patterns:
       - wet ?shaving products.*gaelic
