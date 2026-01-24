@@ -1046,7 +1046,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 existing = grouped_items[group_key]
                 existing.count += item.count
                 existing.examples.extend(item.examples)
-                existing.comment_ids.extend(item.comment_ids)
+                # Deduplicate comment_ids when merging
+                # Use a set to track unique comment_ids, then convert back to list to preserve order
+                unique_comment_ids = list(dict.fromkeys(existing.comment_ids + item.comment_ids))
+                existing.comment_ids = unique_comment_ids
                 # Merge comment sources
                 existing.comment_sources.update(item.comment_sources)
                 # Keep the highest confidence if available
@@ -1060,6 +1063,19 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         # Convert back to list and sort
         all_items = list(grouped_items.values())
+        # Final deduplication pass for comment_ids (safety check)
+        for item in all_items:
+            if item.comment_ids:
+                original_length = len(item.comment_ids)
+                # Use dict.fromkeys to preserve order while removing duplicates
+                item.comment_ids = list(dict.fromkeys(item.comment_ids))
+                deduplicated_length = len(item.comment_ids)
+                # Log if duplicates were found and removed
+                if original_length != deduplicated_length:
+                    logger.debug(
+                        f"Deduplicated comment_ids for '{item.original}': "
+                        f"{original_length} -> {deduplicated_length}"
+                    )
         all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
 
         logger.info(
@@ -1563,7 +1579,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
             # For data_mismatch issues with handle_knot entries, also populate current_handle_match/current_knot_match
             # This ensures we can preserve correct components when only one component has a mismatch
-            if issue.issue_type == "data_mismatch" and (issue.expected_section == "handle_knot" or issue.actual_section == "handle_knot"):
+            if issue.issue_type == "data_mismatch" and (
+                issue.expected_section == "handle_knot" or issue.actual_section == "handle_knot"
+            ):
                 expected_handle_brand = getattr(issue, "expected_handle_brand", None)
                 expected_handle_model = getattr(issue, "expected_handle_model", None)
                 expected_knot_brand = getattr(issue, "expected_knot_brand", None)
@@ -1573,14 +1591,10 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                 # This preserves the original location even if it was _no_brand/_no_model
                 processed_issue["current_handle_match"] = {
                     "brand": (
-                        expected_handle_brand
-                        if expected_handle_brand is not None
-                        else "_no_brand"
+                        expected_handle_brand if expected_handle_brand is not None else "_no_brand"
                     ),
                     "model": (
-                        expected_handle_model
-                        if expected_handle_model is not None
-                        else "_no_model"
+                        expected_handle_model if expected_handle_model is not None else "_no_model"
                     ),
                 }
                 # Create knot match - always include even if None/_no_brand
@@ -1589,7 +1603,7 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                         expected_knot_brand if expected_knot_brand is not None else "_no_brand"
                     ),
                     "model": (
-                        expected_knot_model if expected_knot_model is not None                         else "_no_model"
+                        expected_knot_model if expected_knot_model is not None else "_no_model"
                     ),
                 }
 
@@ -2114,8 +2128,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     ]:
                         # Moving from handle/knot to brush
                         # Normalize None to _no_brand/_no_model for saving
-                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
-                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
+                        normalized_actual_brand = (
+                            actual_brand if actual_brand is not None else "_no_brand"
+                        )
+                        normalized_actual_model = (
+                            actual_model if actual_model is not None else "_no_model"
+                        )
                         matched = {
                             "brand": normalized_actual_brand,
                             "model": normalized_actual_model,
@@ -2193,7 +2211,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         and expected_handle_match
                         and expected_knot_match
                     ):
-                    # Use expected_handle_match and expected_knot_match directly
+                        # Use expected_handle_match and expected_knot_match directly
                         # These now always contain correct values (from matcher if mismatch,
                         # from current_* if correct)
                         handle_brand = expected_handle_match.get("brand")
@@ -2252,8 +2270,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     else:
                         # Update brand/model in same section (for non-handle_knot entries)
                         # Normalize None to _no_brand/_no_model for saving
-                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
-                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
+                        normalized_actual_brand = (
+                            actual_brand if actual_brand is not None else "_no_brand"
+                        )
+                        normalized_actual_model = (
+                            actual_model if actual_model is not None else "_no_model"
+                        )
                         matched = {
                             "brand": normalized_actual_brand,
                             "model": normalized_actual_model,
@@ -2284,8 +2306,12 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                     # use those. Otherwise, we can't auto-fix (should be filtered out in frontend)
                     if actual_brand and actual_section:
                         # Normalize None to _no_brand/_no_model for saving
-                        normalized_actual_brand = actual_brand if actual_brand is not None else "_no_brand"
-                        normalized_actual_model = actual_model if actual_model is not None else "_no_model"
+                        normalized_actual_brand = (
+                            actual_brand if actual_brand is not None else "_no_brand"
+                        )
+                        normalized_actual_model = (
+                            actual_model if actual_model is not None else "_no_model"
+                        )
                         matched = {
                             "brand": normalized_actual_brand,
                             "model": normalized_actual_model,
