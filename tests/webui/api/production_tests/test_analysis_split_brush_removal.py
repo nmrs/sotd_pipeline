@@ -176,7 +176,7 @@ class TestAnalysisAPISplitBrushRemoval:
     def test_mark_matches_as_correct_without_split_brush(self):
         """Test that mark_matches_as_correct endpoint works without split_brush processing"""
 
-        with patch("webui.api.analysis.QueueManager") as mock_queue_manager_class:
+        with patch("webui.api.queue_manager.QueueManager") as mock_queue_manager_class:
             # Mock the queue manager to return a successful operation ID
             mock_queue_manager = mock_queue_manager_class.return_value
             mock_queue_manager.add_operation.return_value = "test_operation_id"
@@ -210,7 +210,7 @@ class TestAnalysisAPISplitBrushRemoval:
     def test_remove_matches_from_correct_without_split_brush(self):
         """Test that remove_matches_from_correct endpoint works without split_brush processing"""
 
-        with patch("webui.api.analysis.QueueManager") as mock_queue_manager_class:
+        with patch("webui.api.queue_manager.QueueManager") as mock_queue_manager_class:
             # Mock the queue manager to return a successful operation ID
             mock_queue_manager = mock_queue_manager_class.return_value
             mock_queue_manager.add_operation.return_value = "test_operation_id"

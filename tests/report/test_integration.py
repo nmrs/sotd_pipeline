@@ -124,6 +124,7 @@ class TestReportIntegration:
             "razor-formats": [{"format": "DE", "shaves": 25, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "rank": 1}],
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "rank": 1}],
+            "brush-handle-makers": [{"handle_maker": "Simpson", "shaves": 15, "rank": 1}],
         }
 
         # Test hardware report generation

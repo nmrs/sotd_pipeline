@@ -52,18 +52,26 @@ class TestMonthlyUserPostsAPI:
         data = response.json()
         assert data == []
 
-    @patch("webui.api.monthly_user_posts.Path.exists")
+    @patch("webui.api.monthly_user_posts.Path")
     @patch("webui.api.monthly_user_posts.json.load")
-    def test_get_users_for_month_with_search(self, mock_json_load, mock_exists):
+    @patch("webui.api.monthly_user_posts.open", create=True)
+    def test_get_users_for_month_with_search(self, mock_open, mock_json_load, mock_path_class):
         """Test user search functionality."""
-        # Mock user_analysis_file.exists() to return True (pre-computed file exists)
-        def exists_side_effect(path):
-            # Return True for user_analysis_file, False for enriched_file
-            if "user_analysis" in str(path):
-                return True
-            return False
+        # Create a mock Path object that returns True for exists() when it's a user_analysis file
+        def path_side_effect(*args):
+            mock_path = MagicMock()
+            path_str = "/".join(str(arg) for arg in args) if args else ""
+            if "user_analysis" in path_str:
+                mock_path.exists.return_value = True
+            else:
+                mock_path.exists.return_value = False
+            mock_path.__truediv__ = lambda self, other: path_side_effect(str(self), str(other))
+            mock_path.__str__ = lambda self: path_str
+            return mock_path
 
-        mock_exists.side_effect = exists_side_effect
+        mock_path_class.side_effect = path_side_effect
+        mock_open.return_value.__enter__.return_value = Mock()
+        mock_open.return_value.__exit__.return_value = None
 
         # Mock the user analysis data structure
         mock_json_load.return_value = {

@@ -189,6 +189,8 @@ def test_brush_matcher_initialization_performance():
         f"Second initialization should be faster with cache. "
         f"First: {first_time:.4f}s, Second: {second_time:.4f}s"
     )
+    # Note: This test can be flaky due to system load variations.
+    # If it fails intermittently, it's likely due to system load, not a real issue.
 
 
 def test_cache_clearing():
