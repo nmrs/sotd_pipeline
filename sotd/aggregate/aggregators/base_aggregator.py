@@ -132,16 +132,47 @@ class BaseAggregator(ABC):
         # Get grouping columns (name + any additional grouping fields)
         group_columns = self._get_group_columns(df)
 
-        # Group by columns and calculate metrics
-        grouped = df.groupby(group_columns).agg({"author": ["count", "nunique"]}).reset_index()
+        # Build aggregation dictionary: metrics + preserve brand/model/scent if present
+        agg_dict = {"author": ["count", "nunique"]}
 
-        # Flatten column names - preserve original column names
-        if len(group_columns) == 1:
-            # Single grouping column - preserve original name
-            grouped.columns = list(group_columns) + ["shaves", "unique_users"]
+        # Preserve brand/model/scent if they exist (use first() since all rows in group have same values)
+        if "brand" in df.columns:
+            agg_dict["brand"] = "first"
+        if "model" in df.columns:
+            agg_dict["model"] = "first"
+        if "scent" in df.columns:
+            agg_dict["scent"] = "first"
+
+        # Group by columns and calculate metrics
+        grouped = df.groupby(group_columns).agg(agg_dict).reset_index()
+
+        # Flatten column names - handle both single and multi-level column names
+        # When we have preserved fields (brand/model/scent), the agg result has MultiIndex columns
+        # We need to flatten them properly
+        if isinstance(grouped.columns, pd.MultiIndex):
+            # Flatten MultiIndex columns
+            # Grouping columns come first, then aggregated columns
+            flat_columns = []
+            for col in grouped.columns:
+                if col[1] == "":
+                    # Grouping column (no aggregation)
+                    flat_columns.append(col[0])
+                else:
+                    # Aggregated column - use the aggregation name (count/nunique/first)
+                    if col[1] == "count":
+                        flat_columns.append("shaves")
+                    elif col[1] == "nunique":
+                        flat_columns.append("unique_users")
+                    else:
+                        # Preserved field (first aggregation)
+                        flat_columns.append(col[0])
+            grouped.columns = flat_columns
         else:
-            # Multiple grouping columns
-            grouped.columns = list(group_columns) + ["shaves", "unique_users"]
+            # Simple case: only grouping columns + metrics
+            if len(group_columns) == 1:
+                grouped.columns = list(group_columns) + ["shaves", "unique_users"]
+            else:
+                grouped.columns = list(group_columns) + ["shaves", "unique_users"]
 
         return grouped
 

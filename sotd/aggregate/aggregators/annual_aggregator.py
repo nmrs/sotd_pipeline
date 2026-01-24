@@ -76,6 +76,13 @@ class AnnualAggregator(BaseAggregator):
                                 "unique_users": item.get("unique_users", 0),
                                 "rank": item.get("rank", 0),  # Use rank field instead of position
                             }
+                            # Preserve brand/model/scent if they exist in monthly data
+                            if "brand" in item:
+                                record["brand"] = item["brand"]
+                            if "model" in item:
+                                record["model"] = item["model"]
+                            if "scent" in item:
+                                record["scent"] = item["scent"]
                             records.append(record)
 
         return records
@@ -90,17 +97,23 @@ class AnnualAggregator(BaseAggregator):
             List of dictionaries with extracted data fields
         """
         # For annual aggregation, records are already in the correct format
-        # Just ensure they have the required fields
+        # Just ensure they have the required fields and preserve brand/model/scent
         extracted_data = []
         for record in records:
             if "name" in record and "shaves" in record and "unique_users" in record:
-                extracted_data.append(
-                    {
-                        "name": record["name"],
-                        "shaves": record["shaves"],
-                        "unique_users": record["unique_users"],
-                    }
-                )
+                extracted_item = {
+                    "name": record["name"],
+                    "shaves": record["shaves"],
+                    "unique_users": record["unique_users"],
+                }
+                # Preserve brand/model/scent if they exist
+                if "brand" in record:
+                    extracted_item["brand"] = record["brand"]
+                if "model" in record:
+                    extracted_item["model"] = record["model"]
+                if "scent" in record:
+                    extracted_item["scent"] = record["scent"]
+                extracted_data.append(extracted_item)
 
         return extracted_data
 
@@ -125,8 +138,35 @@ class AnnualAggregator(BaseAggregator):
         Returns:
             DataFrame with grouped and aggregated data
         """
+        # Build aggregation dictionary: metrics + preserve brand/model/scent if present
+        agg_dict = {"shaves": "sum", "unique_users": "sum"}
+
+        # Preserve brand/model/scent if they exist (use first() since all rows in group have same values)
+        if "brand" in df.columns:
+            agg_dict["brand"] = "first"
+        if "model" in df.columns:
+            agg_dict["model"] = "first"
+        if "scent" in df.columns:
+            agg_dict["scent"] = "first"
+
         # For annual aggregation, we sum the shaves and unique_users across months
-        grouped = df.groupby("name").agg({"shaves": "sum", "unique_users": "sum"}).reset_index()
+        grouped = df.groupby("name").agg(agg_dict).reset_index()
+
+        # Flatten MultiIndex columns if needed
+        if isinstance(grouped.columns, pd.MultiIndex):
+            flat_columns = []
+            for col in grouped.columns:
+                if col[1] == "":
+                    # Grouping column (no aggregation)
+                    flat_columns.append(col[0])
+                else:
+                    # Aggregated column - use the aggregation name (sum/first)
+                    if col[1] == "sum":
+                        flat_columns.append(col[0])
+                    else:
+                        # Preserved field (first aggregation)
+                        flat_columns.append(col[0])
+            grouped.columns = flat_columns
 
         # Calculate average shaves per user
         if "unique_users" in grouped.columns:

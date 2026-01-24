@@ -677,3 +677,76 @@ class TestBaseAggregator:
         # Verify that ranks follow competition ranking pattern with ties
         ranks = [item["rank"] for item in result]
         assert ranks == [1, 2, 2, 4], f"Expected [1, 2, 2, 4], got {ranks}"
+
+    def test_brand_model_preservation(self, test_aggregator):
+        """Test that brand and model fields are preserved in aggregated output."""
+        records = [
+            {
+                "test_product": {"matched": {"brand": "Rockwell", "model": "6S"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Rockwell", "model": "6S"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Merkur", "model": "34C"}},
+                "author": "user1",
+            },
+        ]
+
+        result = test_aggregator.aggregate(records)
+
+        assert len(result) == 2
+
+        # Check first item (Rockwell 6S)
+        assert result[0]["name"] == "Rockwell 6S"
+        assert result[0]["brand"] == "Rockwell"
+        assert result[0]["model"] == "6S"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+
+        # Check second item (Merkur 34C)
+        assert result[1]["name"] == "Merkur 34C"
+        assert result[1]["brand"] == "Merkur"
+        assert result[1]["model"] == "34C"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+    def test_brand_model_preservation_with_ties(self, test_aggregator):
+        """Test that brand and model are preserved even when items are tied."""
+        records = [
+            # Rockwell 6S: 2 shaves, 2 users
+            {
+                "test_product": {"matched": {"brand": "Rockwell", "model": "6S"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Rockwell", "model": "6S"}},
+                "author": "user2",
+            },
+            # Merkur 34C: 2 shaves, 2 users (tied)
+            {
+                "test_product": {"matched": {"brand": "Merkur", "model": "34C"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Merkur", "model": "34C"}},
+                "author": "user2",
+            },
+        ]
+
+        result = test_aggregator.aggregate(records)
+
+        assert len(result) == 2
+
+        # Both should have brand and model preserved
+        assert "brand" in result[0]
+        assert "model" in result[0]
+        assert "brand" in result[1]
+        assert "model" in result[1]
+
+        # Verify values are correct
+        assert result[0]["brand"] in ["Rockwell", "Merkur"]
+        assert result[1]["brand"] in ["Rockwell", "Merkur"]
+        assert result[0]["brand"] != result[1]["brand"]  # Different brands

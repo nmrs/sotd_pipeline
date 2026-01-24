@@ -111,8 +111,32 @@ class SoapAggregator(BaseAggregator):
             .reset_index()
         )
 
-        # Flatten column names
-        grouped.columns = list(group_columns) + ["shaves", "unique_users", "brand", "scent", "name"]
+        # Flatten MultiIndex columns
+        if isinstance(grouped.columns, pd.MultiIndex):
+            flat_columns = []
+            for col in grouped.columns:
+                if col[1] == "":
+                    # Grouping column (no aggregation)
+                    flat_columns.append(col[0])
+                else:
+                    # Aggregated column - use the aggregation name (count/nunique/first)
+                    if col[1] == "count":
+                        flat_columns.append("shaves")
+                    elif col[1] == "nunique":
+                        flat_columns.append("unique_users")
+                    else:
+                        # Preserved field (first aggregation)
+                        flat_columns.append(col[0])
+            grouped.columns = flat_columns
+        else:
+            # Fallback: simple column assignment
+            grouped.columns = list(group_columns) + [
+                "shaves",
+                "unique_users",
+                "brand",
+                "scent",
+                "name",
+            ]
 
         return grouped
 

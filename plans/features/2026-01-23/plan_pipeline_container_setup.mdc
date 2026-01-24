@@ -11,6 +11,9 @@ todos:
   - id: pipeline-container-cron
     content: Setup cron configuration for hourly pipeline execution
     status: pending
+  - id: aggregator-brand-model-preservation
+    content: Update aggregators to preserve brand/model/scent fields in output
+    status: completed
   - id: search-index-generator
     content: Create scripts/generate_search_index.py to generate lightweight search index from aggregations
     status: pending
@@ -147,6 +150,13 @@ Create a containerized pipeline that runs on a remote server (Synology NAS) to p
       "first_seen": "2016-01",
       "last_seen": "2025-12"
     },
+    {
+      "type": "soap",
+      "brand": "Barrister and Mann",
+      "scent": "Seville",
+      "first_seen": "2016-01",
+      "last_seen": "2025-12"
+    },
     ...
   ],
   "users": [
@@ -245,17 +255,37 @@ Create a containerized pipeline that runs on a remote server (Synology NAS) to p
 
 ---
 
+### Phase 1.5: Update Aggregators to Preserve Brand/Model/Scent Fields
+
+**Goal**: Update aggregators to preserve brand/model/scent fields in output
+
+**Prerequisites**: None
+
+**Steps**:
+
+1. Update `BaseAggregator._group_and_aggregate()` to preserve brand/model/scent fields
+2. Verify all product aggregators extract brand/model (or scent for soaps)
+3. Write/update tests for brand/model/scent preservation
+4. Verify annual aggregation preserves these fields
+
+**Note**: Soaps will preserve `scent` field (not mapped to `model`) for semantic accuracy.
+
+**Validation**: All aggregators output brand/model/scent, backward compatibility maintained
+
+---
+
 ### Phase 2: Search Index Generator
 
 **Goal**: Create script to generate search index from aggregations
 
-**Prerequisites**: None (can run in parallel with Phase 1)
+**Prerequisites**: Phase 1.5 complete (aggregators preserve brand/model/scent)
 
 **Steps**:
 
 1. Create `scripts/generate_search_index.py`:
-   - Scan all files in `data/aggregate/` (monthly and annual)
-   - Extract unique products: `{type, brand, model, first_seen, last_seen}`
+   - Scan all files in `data/aggregated/` (monthly and annual)
+   - Extract unique products: `{type, brand, model, first_seen, last_seen}` for razors/blades/brushes
+   - Extract unique products: `{type, brand, scent, first_seen, last_seen}` for soaps
    - Extract unique users: `{username, first_seen, last_seen}`
    - Extract available months and years
    - Write `data/search_index.json` with structure defined above

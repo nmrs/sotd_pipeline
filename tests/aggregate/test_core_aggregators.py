@@ -32,10 +32,14 @@ class TestRazorAggregator:
 
         assert len(result) == 2
         assert result[0]["name"] == "Gillette Tech"
+        assert result[0]["brand"] == "Gillette"
+        assert result[0]["model"] == "Tech"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
         assert result[0]["rank"] == 1
         assert result[1]["name"] == "Fatip Grande"
+        assert result[1]["brand"] == "Fatip"
+        assert result[1]["model"] == "Grande"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
         assert result[1]["rank"] == 2
@@ -81,10 +85,14 @@ class TestBladeAggregator:
 
         assert len(result) == 2
         assert result[0]["name"] == "Gillette Minora"
+        assert result[0]["brand"] == "Gillette"
+        assert result[0]["model"] == "Minora"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
         assert result[0]["rank"] == 1
         assert result[1]["name"] == "Personna Lab Blue"
+        assert result[1]["brand"] == "Personna"
+        assert result[1]["model"] == "Lab Blue"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
         assert result[1]["rank"] == 2
@@ -161,10 +169,14 @@ class TestBrushAggregator:
 
         assert len(result) == 2
         assert result[0]["name"] == "Semogue 610"
+        assert result[0]["brand"] == "Semogue"
+        assert result[0]["model"] == "610"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
         assert result[0]["rank"] == 1
         assert result[1]["name"] == "AP Shave Co MiG"
+        assert result[1]["brand"] == "AP Shave Co"
+        assert result[1]["model"] == "MiG"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
         assert result[1]["rank"] == 2
@@ -205,10 +217,16 @@ class TestSoapAggregator:
 
         assert len(result) == 2
         assert result[0]["name"] == "Grooming Dept - Laundry II"
+        assert result[0]["brand"] == "Grooming Dept"
+        assert result[0]["scent"] == "Laundry II"
+        assert "model" not in result[0]  # Soaps have scent, not model
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
         assert result[0]["rank"] == 1
         assert result[1]["name"] == "Declaration Grooming - Persephone"
+        assert result[1]["brand"] == "Declaration Grooming"
+        assert result[1]["scent"] == "Persephone"
+        assert "model" not in result[1]  # Soaps have scent, not model
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
         assert result[1]["rank"] == 2
