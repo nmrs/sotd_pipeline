@@ -22,6 +22,11 @@ class TestTemplateIntegration:
             "razor-formats": [{"format": "DE", "shaves": 1, "rank": 1}],
             "razor-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
             "blade-manufacturers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
+            "brush-handle-makers": [{"handle_maker": "Test Brand", "shaves": 1, "rank": 1}],
+            "brush-knot-makers": [{"brand": "Test Brand", "shaves": 1, "rank": 1}],
+            "brush-fibers": [{"fiber": "Badger", "shaves": 1, "rank": 1}],
+            "brush-knot-sizes": [{"knot_size": "24mm", "shaves": 1, "rank": 1}],
+            "users": [{"user": "testuser", "shaves": 1, "missed_days": 0, "rank": 1}],
         }
 
         generator = MonthlyReportGenerator(
