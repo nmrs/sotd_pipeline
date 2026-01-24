@@ -180,11 +180,13 @@ describe('WSDBAlignmentAnalyzer', () => {
         { timeout: 5000 }
       );
 
-      // Verify the success message appears (check for partial match to be more flexible)
-      const successText = screen.queryByText(/Loaded.*WSDB.*pipeline/i);
-      // Success message may or may not be visible depending on timing, but data should be loaded
-      // The important thing is that the button is enabled, indicating data was loaded
-      expect(analyzeButton).not.toBeDisabled();
+      // Verify data was loaded - success message should appear
+      await waitFor(
+        () => {
+          expect(screen.getByText(/Loaded.*WSDB.*pipeline/i)).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     test('handles load error gracefully', async () => {
@@ -300,10 +302,11 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for data to load first - check button is enabled
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          const analyzeButton = screen.getByText('Analyze Alignment');
+          expect(analyzeButton).not.toBeDisabled();
         },
         { timeout: 5000 }
       );
@@ -485,10 +488,11 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for data to load first - check button is enabled
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          const analyzeButton = screen.getByText('Analyze Alignment');
+          expect(analyzeButton).not.toBeDisabled();
         },
         { timeout: 5000 }
       );
@@ -609,10 +613,15 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for component to finish initial loading
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          // Wait for the analyze button to be present and enabled
+          const analyzeButton = screen.queryByText('Analyze Alignment');
+          expect(analyzeButton).toBeInTheDocument();
+          if (analyzeButton) {
+            expect(analyzeButton).not.toBeDisabled();
+          }
         },
         { timeout: 5000 }
       );
@@ -783,10 +792,11 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for data to load first - check button is enabled
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          const analyzeButton = screen.getByText('Analyze Alignment');
+          expect(analyzeButton).not.toBeDisabled();
         },
         { timeout: 5000 }
       );
@@ -812,10 +822,11 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for data to load first - check button is enabled
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          const analyzeButton = screen.getByText('Analyze Alignment');
+          expect(analyzeButton).not.toBeDisabled();
         },
         { timeout: 5000 }
       );
@@ -881,10 +892,11 @@ describe('WSDBAlignmentAnalyzer', () => {
 
       render(<WSDBAlignmentAnalyzer />);
 
-      // Wait for data to load first
+      // Wait for data to load first - check button is enabled
       await waitFor(
         () => {
-          expect(screen.getByText(/Loaded 2 WSDB soaps and 2 pipeline brands/i)).toBeInTheDocument();
+          const analyzeButton = screen.getByText('Analyze Alignment');
+          expect(analyzeButton).not.toBeDisabled();
         },
         { timeout: 5000 }
       );

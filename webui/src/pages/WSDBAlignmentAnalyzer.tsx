@@ -153,7 +153,7 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       const pipelineResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
       if (!pipelineResponse.ok) throw new Error('Failed to load pipeline soaps');
       const pipelineData = await pipelineResponse.json();
-      setPipelineSoaps(pipelineData.soaps);
+      setPipelineSoaps(pipelineData.soaps ?? []);
     } catch (err) {
       console.error('Failed to reload pipeline soaps:', err);
       // Don't show error to user, just log it
@@ -169,16 +169,16 @@ const WSDBAlignmentAnalyzer: React.FC = () => {
       const wsdbResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-wsdb');
       if (!wsdbResponse.ok) throw new Error('Failed to load WSDB soaps');
       const wsdbData = await wsdbResponse.json();
-      setWsdbSoaps(wsdbData.soaps);
+      setWsdbSoaps(wsdbData.soaps ?? []);
 
       // Load pipeline soaps
       const pipelineResponse = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
       if (!pipelineResponse.ok) throw new Error('Failed to load pipeline soaps');
       const pipelineData = await pipelineResponse.json();
-      setPipelineSoaps(pipelineData.soaps);
+      setPipelineSoaps(pipelineData.soaps ?? []);
 
       setSuccessMessage(
-        `Loaded ${wsdbData.total_count} WSDB soaps and ${pipelineData.total_brands} pipeline brands`
+        `Loaded ${wsdbData.total_count ?? 0} WSDB soaps and ${pipelineData.total_brands ?? 0} pipeline brands`
       );
     } catch (err) {
       console.error('Failed to load data:', err);
