@@ -106,7 +106,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=args.out_dir, debug=args.debug, force=args.force
+            months=["2023-01"], data_dir=args.out_dir, debug=args.debug, force=args.force, annual_mode=None
         )
 
     @patch("sotd.aggregate.run.process_months_parallel")
@@ -138,6 +138,7 @@ class TestAggregateRun:
             debug=args.debug,
             force=args.force,
             max_workers=8,
+            annual_mode=True,
         )
 
     @patch("sotd.aggregate.run.process_months_parallel")
@@ -155,6 +156,7 @@ class TestAggregateRun:
             debug=args.debug,
             force=args.force,
             max_workers=8,
+            annual_mode=True,
         )
 
     @patch("sotd.aggregate.run.process_months_parallel")
@@ -172,6 +174,7 @@ class TestAggregateRun:
             debug=args.debug,
             force=args.force,
             max_workers=8,
+            annual_mode=None,
         )
 
     @patch("sotd.aggregate.run.process_months")
@@ -183,7 +186,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=args.out_dir, debug=True, force=args.force
+            months=["2023-01"], data_dir=args.out_dir, debug=True, force=args.force, annual_mode=None
         )
 
     @patch("sotd.aggregate.run.process_months")
@@ -195,7 +198,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_months.assert_called_once_with(
-            months=["2023-01"], data_dir=Path("/custom/path"), debug=args.debug, force=args.force
+            months=["2023-01"], data_dir=Path("/custom/path"), debug=args.debug, force=args.force, annual_mode=None
         )
 
     @patch("sotd.aggregate.run.process_annual")
@@ -210,19 +213,21 @@ class TestAggregateRun:
             year="2023", data_dir=args.out_dir, debug=args.debug, force=args.force
         )
 
-    @patch("sotd.aggregate.run.process_annual_range")
-    def test_run_with_annual_range(self, mock_process_annual_range):
+    @patch("sotd.aggregate.run.process_annual_range_parallel")
+    def test_run_with_annual_range(self, mock_process_annual_range_parallel):
         """Test run function with annual and range arguments."""
         parser = get_parser()
         args = parser.parse_args(["--annual", "--range", "2021:2024"])
 
         run(args)
 
-        mock_process_annual_range.assert_called_once_with(
+        # With multiple years, parallel processing is used by default
+        mock_process_annual_range_parallel.assert_called_once_with(
             years=["2021", "2022", "2023", "2024"],
             data_dir=args.out_dir,
             debug=args.debug,
             force=args.force,
+            max_workers=8,
         )
 
     @patch("sotd.aggregate.run.process_annual")
@@ -295,12 +300,12 @@ class TestAggregateMain:
             main()
         mock_process_annual.assert_called_once()
 
-    @patch("sotd.aggregate.run.process_annual_range")
-    def test_main_with_annual_range(self, mock_process_annual_range):
+    @patch("sotd.aggregate.run.process_annual_range_parallel")
+    def test_main_with_annual_range(self, mock_process_annual_range_parallel):
         """Test main function with annual and range arguments."""
         with patch("sys.argv", ["aggregate", "--annual", "--range", "2021:2024"]):
             main()
-        mock_process_annual_range.assert_called_once()
+        mock_process_annual_range_parallel.assert_called_once()
 
     @patch("sotd.aggregate.run.process_annual")
     def test_main_with_annual_debug_force(self, mock_process_annual):
