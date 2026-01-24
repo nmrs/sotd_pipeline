@@ -123,6 +123,7 @@ class TestReportIntegration:
             "soaps": [{"name": "Test Soap", "shaves": 30, "rank": 1}],
             "soap-makers": [{"brand": "Test Brand", "shaves": 30, "rank": 1}],
             "brand-diversity": [{"brand": "Test Brand", "unique_soaps": 1, "rank": 1}],
+            "user-soap-brand-scent-diversity": [{"user": "testuser", "unique_combinations": 1, "shaves": 30, "rank": 1}],
             "razor-formats": [{"format": "DE", "shaves": 25, "rank": 1}],
             "razor-manufacturers": [{"brand": "Gillette", "shaves": 25, "rank": 1}],
             "blade-manufacturers": [{"brand": "Gillette", "shaves": 20, "rank": 1}],
