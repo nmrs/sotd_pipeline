@@ -263,3 +263,66 @@ class MonthlyReportGenerator(BaseReportGenerator):
         # This method is kept for backward compatibility but is no longer used
         # Tables are now generated through the template system
         return []
+
+    def get_structured_data(self) -> Dict[str, Any]:
+        """Get structured data for API consumption (no row limits).
+
+        Returns:
+            Dictionary with keys: metadata, tables, stats
+            - metadata: Report metadata (month, counts, etc.)
+            - tables: Dictionary of table names to list of row dictionaries
+            - stats: Additional statistics
+        """
+        # Get metadata from the data structure
+        if "meta" in self.data:
+            data_metadata = self.data["meta"]
+        else:
+            data_metadata = self.metadata
+
+        # Initialize table generator
+        table_generator = TableGenerator(
+            self.data,
+            self.comparison_data,
+            current_month=self.metadata.get("month"),
+            debug=self.debug,
+        )
+
+        # Get all available table names from the data
+        available_tables = {}
+        for key in self.data.keys():
+            if isinstance(self.data[key], list):
+                # Convert snake_case to kebab-case for table names
+                table_name = key.replace("_", "-")
+                try:
+                    # Get structured data without row limits
+                    # Empty lists will return empty list from get_structured_table_data
+                    table_data = table_generator.get_structured_table_data(table_name, deltas=True)
+                    available_tables[table_name] = table_data
+                except Exception as e:
+                    if self.debug:
+                        print(
+                            f"[DEBUG] MonthlyReport({self.report_type}): "
+                            f"Error getting structured data for '{table_name}': {e}"
+                        )
+                    # Include empty list for failed tables
+                    available_tables[table_name] = []
+
+        # Prepare metadata (convert numeric values to appropriate types)
+        structured_metadata = {}
+        for key, value in data_metadata.items():
+            if isinstance(value, (int, float)):
+                structured_metadata[key] = value
+            else:
+                structured_metadata[key] = str(value)
+
+        # Calculate stats
+        stats = {
+            "total_tables": len(available_tables),
+            "tables_with_data": sum(1 for v in available_tables.values() if len(v) > 0),
+        }
+
+        return {
+            "metadata": structured_metadata,
+            "tables": available_tables,
+            "stats": stats,
+        }

@@ -1141,3 +1141,122 @@ class TableGenerator:
             ValueError: If table name is not recognized or parameters are invalid
         """
         return self.generate_table(table_name)
+
+    def get_structured_table_data(
+        self,
+        table_name: str,
+        deltas: bool = False,
+        wsdb: bool = False,
+        **numeric_limits,
+    ) -> List[Dict[str, Any]]:
+        """Get structured table data as a list of dictionaries (no row limits).
+
+        This method returns the complete table data without applying row limits,
+        suitable for API consumption. It processes the data similarly to generate_table()
+        but returns structured data instead of markdown.
+
+        Args:
+            table_name: Name of the table (e.g., 'soap-makers', 'razors')
+            deltas: Whether to include delta calculations
+            wsdb: Whether to add WSDB links to soap names (only applies to soaps table)
+            **numeric_limits: Single numeric column limit (e.g., shaves=50)
+
+        Returns:
+            List of dictionaries representing table rows
+
+        Raises:
+            ValueError: If table name is not recognized or parameters are invalid
+        """
+        # Convert kebab-case template name to snake_case data key
+        data_key = table_name.replace("-", "_")
+
+        # Handle both flat and nested data structures
+        if data_key in self.data:
+            table_data = self.data[data_key]
+        elif "data" in self.data and data_key in self.data["data"]:
+            table_data = self.data["data"][data_key]
+        else:
+            available_keys = list(self.data.keys())
+            if "data" in self.data:
+                available_keys.extend([f"data.{k}" for k in self.data["data"].keys()])
+            raise ValueError(
+                f"Unknown table: {table_name} (converted to '{data_key}'). "
+                f"Available keys: {available_keys}"
+            )
+
+        # Convert data to DataFrame first
+        df = pd.DataFrame(table_data)
+
+        if df.empty:
+            return []
+
+        # Extract sort information from columns parameter if provided
+        # For structured data, we don't apply column operations, but we may need sorting
+        sort_info = []
+
+        # Apply numeric column limits if specified
+        if numeric_limits:
+            limited_df = self._apply_numeric_limits(df, numeric_limits)
+            if isinstance(limited_df, pd.DataFrame):
+                df = limited_df
+
+        # Validate that rank column exists only when needed
+        rank_required = deltas
+
+        if rank_required and "rank" not in df.columns:
+            raise ValueError(f"Data for {table_name} is missing 'rank' column")
+
+        # Add delta columns if requested
+        if deltas:
+            current_month = self.current_month or "2025-06"  # TODO: Make this configurable
+            data_key = table_name.replace("-", "_")
+            delta_df = self._calculate_deltas(df, data_key, current_month, sort_info)
+            if isinstance(delta_df, pd.DataFrame):
+                df = delta_df
+
+            # Format delta column names
+            if current_month.endswith("-12"):
+                year = current_month.split("-")[0]
+                year_int = int(year)
+                delta_name_mapping = {}
+                if "Δ vs Previous Year" in df.columns:
+                    delta_name_mapping["Δ vs Previous Year"] = f"Δ vs {year_int - 1}"
+                if "Δ vs 5 Years Ago" in df.columns:
+                    delta_name_mapping["Δ vs 5 Years Ago"] = f"Δ vs {year_int - 5}"
+                if "Δ vs Previous Month" in df.columns:
+                    df = df.drop(columns=["Δ vs Previous Month"])
+            else:
+                delta_name_mapping = self._format_delta_column_names(current_month)
+            if delta_name_mapping:
+                df = df.rename(columns=delta_name_mapping)  # type: ignore
+
+        # Format rank column if needed (for display consistency)
+        if "rank" in df.columns:
+            rank_series: pd.Series = df["rank"]  # type: ignore
+            if rank_series.duplicated().any():
+                formatted_df = self._format_rank_column(df)
+                if isinstance(formatted_df, pd.DataFrame):
+                    df = formatted_df
+
+        # Format soap names with WSDB links (only for soaps table when wsdb=True)
+        df = self._format_soap_links(df, table_name, enable_wsdb=wsdb)
+
+        # Format hhi as percentage
+        df = self._format_hhi_percentage(df)
+
+        # Format effective_soaps to 1 decimal place
+        df = self._format_effective_soaps(df)
+
+        # Format column names to Title Case with acronym preservation
+        formatted_df = self._format_column_names(df)
+        if isinstance(formatted_df, pd.DataFrame):
+            df = formatted_df
+
+        # Format usernames with "u/" prefix for Reddit display
+        df = self._format_usernames(df)
+
+        # Convert DataFrame to list of dictionaries
+        # Use orient='records' to get list of dicts
+        result = df.to_dict(orient="records")
+
+        return result if result is not None else []

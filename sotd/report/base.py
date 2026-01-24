@@ -57,3 +57,15 @@ class BaseReportGenerator(ABC):
         # With the new templating system, the template contains the complete report structure
         # including the welcome message and all sections, so we just return the rendered template
         return self.generate_notes_and_caveats()
+
+    @abstractmethod
+    def get_structured_data(self) -> Dict[str, Any]:
+        """Get structured data for API consumption (no row limits).
+
+        Returns:
+            Dictionary with keys: metadata, tables, stats
+            - metadata: Report metadata (month/year, counts, etc.)
+            - tables: Dictionary of table names to list of row dictionaries
+            - stats: Additional statistics
+        """
+        pass

@@ -253,6 +253,67 @@ class AnnualReportGenerator(BaseReportGenerator):
         # Tables are now generated through the template system
         return []
 
+    def get_structured_data(self) -> Dict[str, Any]:
+        """Get structured data for API consumption (no row limits).
+
+        Returns:
+            Dictionary with keys: metadata, tables, stats
+            - metadata: Report metadata (year, counts, etc.)
+            - tables: Dictionary of table names to list of row dictionaries
+            - stats: Additional statistics
+        """
+        # Create table generator for table data
+        # For annual reports, use year-12 (December) as the "current month" for delta calculations
+        current_month_for_deltas = f"{self.year}-12"
+        table_generator = TableGenerator(
+            self.data, self.comparison_data, current_month_for_deltas, self.debug
+        )
+
+        # Get all available table names from the data
+        available_tables = {}
+        for key in self.data.keys():
+            if isinstance(self.data[key], list):
+                # Convert snake_case to kebab-case for table names
+                table_name = key.replace("_", "-")
+                try:
+                    # Get structured data without row limits
+                    # Empty lists will return empty list from get_structured_table_data
+                    table_data = table_generator.get_structured_table_data(table_name, deltas=True)
+                    available_tables[table_name] = table_data
+                except Exception as e:
+                    if self.debug:
+                        print(
+                            f"[DEBUG] AnnualReport({self.report_type}): "
+                            f"Error getting structured data for '{table_name}': {e}"
+                        )
+                    # Include empty list for failed tables
+                    available_tables[table_name] = []
+
+        # Prepare metadata (convert numeric values to appropriate types)
+        structured_metadata = {}
+        for key, value in self.metadata.items():
+            if isinstance(value, (int, float)):
+                structured_metadata[key] = value
+            elif isinstance(value, list):
+                structured_metadata[key] = value
+            else:
+                structured_metadata[key] = str(value)
+
+        # Add year to metadata
+        structured_metadata["year"] = self.year
+
+        # Calculate stats
+        stats = {
+            "total_tables": len(available_tables),
+            "tables_with_data": sum(1 for v in available_tables.values() if len(v) > 0),
+        }
+
+        return {
+            "metadata": structured_metadata,
+            "tables": available_tables,
+            "stats": stats,
+        }
+
 
 def create_annual_report_generator(
     report_type: str,

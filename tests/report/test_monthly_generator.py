@@ -452,3 +452,115 @@ class TestMonthlyReportGenerator:
 
             # Verify no debug output was generated
             assert mock_print.call_count == 0
+
+    def test_get_structured_data_basic(self):
+        """Test get_structured_data returns correct structure."""
+        metadata = {"month": "2025-01", "total_shaves": 100, "unique_shavers": 50}
+        data = {
+            "razors": [
+                {"rank": 1, "name": "Test Razor", "shaves": 10},
+                {"rank": 2, "name": "Another Razor", "shaves": 5},
+            ],
+            "blades": [{"rank": 1, "name": "Test Blade", "shaves": 8}],
+        }
+
+        generator = MonthlyReportGenerator("hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify structure
+        assert "metadata" in result
+        assert "tables" in result
+        assert "stats" in result
+
+        # Verify metadata
+        assert result["metadata"]["month"] == "2025-01"
+        assert result["metadata"]["total_shaves"] == 100
+        assert result["metadata"]["unique_shavers"] == 50
+
+        # Verify tables
+        assert "razors" in result["tables"]
+        assert "blades" in result["tables"]
+        assert len(result["tables"]["razors"]) == 2  # No row limits
+        assert len(result["tables"]["blades"]) == 1
+
+        # Verify table data structure
+        assert isinstance(result["tables"]["razors"][0], dict)
+        # Column names are formatted to Title Case
+        assert "Name" in result["tables"]["razors"][0]
+        assert "Shaves" in result["tables"]["razors"][0]
+
+        # Verify stats
+        assert result["stats"]["total_tables"] == 2
+        assert result["stats"]["tables_with_data"] == 2
+
+    def test_get_structured_data_no_row_limits(self):
+        """Test get_structured_data returns all rows (no limits)."""
+        metadata = {"month": "2025-01", "total_shaves": 100}
+        # Create data with many rows
+        data = {
+            "razors": [
+                {"rank": i, "name": f"Razor {i}", "shaves": 10 - i}
+                for i in range(1, 101)  # 100 razors
+            ]
+        }
+
+        generator = MonthlyReportGenerator("hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify all rows are included (no row limits)
+        assert len(result["tables"]["razors"]) == 100
+
+    def test_get_structured_data_empty_tables(self):
+        """Test get_structured_data handles empty tables."""
+        metadata = {"month": "2025-01", "total_shaves": 10}
+        # Need at least one non-empty table to pass constructor validation
+        data = {
+            "razors": [{"rank": 1, "name": "Test Razor", "shaves": 10}],
+            "blades": [],  # Empty table
+        }
+
+        generator = MonthlyReportGenerator("hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify structure still correct
+        assert "tables" in result
+        assert "razors" in result["tables"]
+        assert "blades" in result["tables"]
+
+        # Empty tables should be empty lists
+        assert result["tables"]["blades"] == []
+
+        # Stats should reflect empty tables
+        assert result["stats"]["tables_with_data"] == 1  # Only razors has data
+
+    def test_get_structured_data_with_comparison_data(self):
+        """Test get_structured_data with comparison data for deltas."""
+        metadata = {"month": "2025-01", "total_shaves": 100}
+        data = {
+            "razors": [
+                {"rank": 1, "name": "Test Razor", "shaves": 10},
+            ],
+        }
+        comparison_data = {
+            "2024-12": (
+                {"month": "2024-12"},
+                {"razors": [{"rank": 1, "name": "Test Razor", "shaves": 5}]},
+            )
+        }
+
+        generator = MonthlyReportGenerator("hardware", metadata, data, comparison_data)
+
+        result = generator.get_structured_data()
+
+        # Verify structure
+        assert "tables" in result
+        assert "razors" in result["tables"]
+
+        # Deltas should be included in structured data
+        razor_data = result["tables"]["razors"][0]
+        # Delta columns may be present if delta calculation succeeds
+        # We just verify the data structure is correct
+        assert isinstance(razor_data, dict)

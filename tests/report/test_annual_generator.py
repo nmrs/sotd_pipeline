@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from sotd.report import annual_generator
+from sotd.report.annual_generator import AnnualReportGenerator
 
 
 class TestAnnualReportGenerator:
@@ -492,3 +493,117 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
         assert "{{year}}" not in result  # Template variables should be substituted
         assert "{{total_shaves}}" not in result
         assert "{{unique_shavers}}" not in result
+
+    def test_get_structured_data_basic(self):
+        """Test get_structured_data returns correct structure."""
+        metadata = {
+            "year": "2024",
+            "total_shaves": 1200,
+            "unique_shavers": 100,
+            "included_months": 12,
+            "missing_months": 0,
+        }
+        data = {
+            "razors": [
+                {"rank": 1, "name": "Test Razor", "shaves": 200},
+                {"rank": 2, "name": "Another Razor", "shaves": 150},
+            ],
+            "blades": [{"rank": 1, "name": "Test Blade", "shaves": 250}],
+        }
+
+        generator = AnnualReportGenerator("2024", "hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify structure
+        assert "metadata" in result
+        assert "tables" in result
+        assert "stats" in result
+
+        # Verify metadata
+        assert result["metadata"]["year"] == "2024"
+        assert result["metadata"]["total_shaves"] == 1200
+        assert result["metadata"]["unique_shavers"] == 100
+
+        # Verify tables
+        assert "razors" in result["tables"]
+        assert "blades" in result["tables"]
+        assert len(result["tables"]["razors"]) == 2  # No row limits
+        assert len(result["tables"]["blades"]) == 1
+
+        # Verify table data structure
+        assert isinstance(result["tables"]["razors"][0], dict)
+        # Column names are formatted to Title Case
+        assert "Name" in result["tables"]["razors"][0]
+        assert "Shaves" in result["tables"]["razors"][0]
+
+        # Verify stats
+        assert result["stats"]["total_tables"] == 2
+        assert result["stats"]["tables_with_data"] == 2
+
+    def test_get_structured_data_no_row_limits(self):
+        """Test get_structured_data returns all rows (no limits)."""
+        metadata = {"year": "2024", "total_shaves": 1200}
+        # Create data with many rows
+        data = {
+            "razors": [
+                {"rank": i, "name": f"Razor {i}", "shaves": 200 - i}
+                for i in range(1, 101)  # 100 razors
+            ]
+        }
+
+        generator = AnnualReportGenerator("2024", "hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify all rows are included (no row limits)
+        assert len(result["tables"]["razors"]) == 100
+
+    def test_get_structured_data_with_missing_months(self):
+        """Test get_structured_data handles missing months in metadata."""
+        metadata = {
+            "year": "2024",
+            "total_shaves": 1000,
+            "included_months": 10,
+            "missing_months": ["2024-03", "2024-07"],
+        }
+        data = {
+            "razors": [{"rank": 1, "name": "Test Razor", "shaves": 100}],
+        }
+
+        generator = AnnualReportGenerator("2024", "hardware", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify metadata includes missing months as list
+        assert result["metadata"]["missing_months"] == ["2024-03", "2024-07"]
+        assert result["metadata"]["included_months"] == 10
+
+    def test_get_structured_data_software_report(self):
+        """Test get_structured_data for software reports."""
+        metadata = {
+            "year": "2024",
+            "total_shaves": 1200,
+            "unique_shavers": 100,
+        }
+        data = {
+            "soaps": [
+                {"rank": 1, "name": "Test Soap", "shaves": 150},
+            ],
+            "soap_makers": [
+                {"rank": 1, "name": "Test Maker", "shaves": 200},
+            ],
+        }
+
+        generator = AnnualReportGenerator("2024", "software", metadata, data)
+
+        result = generator.get_structured_data()
+
+        # Verify structure
+        assert "tables" in result
+        assert "soaps" in result["tables"]
+        assert "soap-makers" in result["tables"]  # Converted to kebab-case
+
+        # Verify all rows included
+        assert len(result["tables"]["soaps"]) == 1
+        assert len(result["tables"]["soap-makers"]) == 1
