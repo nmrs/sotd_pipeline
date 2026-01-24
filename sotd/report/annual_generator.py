@@ -233,13 +233,14 @@ class AnnualReportGenerator(BaseReportGenerator):
                     )
 
             except Exception as e:
-                # Handle enhanced table syntax errors gracefully
+                # Fail fast: re-raise with clear context
+                # Internal/logic errors should fail immediately, not be masked
+                error_msg = (
+                    f"Failed to process enhanced table placeholder '{full_placeholder}': {e}"
+                )
                 if self.debug:
-                    print(
-                        f"[DEBUG] AnnualReport({self.report_type}): "
-                        f"Error processing enhanced table '{full_placeholder}': {e}"
-                    )
-                enhanced_tables[full_placeholder] = f"*Error processing enhanced table syntax: {e}*"
+                    print(f"[DEBUG] AnnualReport({self.report_type}): {error_msg}")
+                raise RuntimeError(error_msg) from e
 
         return enhanced_tables
 

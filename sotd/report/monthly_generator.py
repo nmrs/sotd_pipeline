@@ -238,19 +238,14 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     )
 
             except Exception as e:
-                # Handle enhanced table syntax errors gracefully
+                # Fail fast: re-raise with clear context
+                # Internal/logic errors should fail immediately, not be masked
+                error_msg = (
+                    f"Failed to process enhanced table placeholder '{full_placeholder}': {e}"
+                )
                 if self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
-                        f"Enhanced table syntax error for "
-                        f"'{full_placeholder}' - {e}. "
-                        "Adding error message placeholder."
-                    )
-
-                # Add error message placeholder so the template processor can replace it
-                # This ensures the placeholder doesn't appear as raw text in the output
-                enhanced_tables[full_placeholder] = "*No data available for this category*"
-                continue
+                    print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                raise RuntimeError(error_msg) from e
 
         return enhanced_tables
 

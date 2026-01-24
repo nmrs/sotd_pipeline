@@ -388,20 +388,13 @@ class TestEnhancedReportGeneration:
         }
 
         # Generate report - should fail fast on invalid syntax
-        # The exception is caught and replaced with error message, but we can check
-        # that the invalid parameter causes an error
         import pytest
 
-        # The code catches exceptions and replaces them with error messages,
-        # so we check that the invalid parameter is handled (not that it raises)
-        # Actually, let's check if the error message appears in the output
-        result = generate_report_content(
-            "hardware", metadata, data, template_path=str(tmp_path), debug=False
-        )
-        # The invalid parameter should cause an error message to appear
-        # Check that the error is handled (either in output or by checking the exception was caught)
-        # Since exceptions are caught, we verify the error handling works
-        assert "*No data available for this category*" in result or "invalid_param" in result.lower()
+        # The code should fail fast on invalid parameters (internal/logic errors)
+        with pytest.raises(RuntimeError, match="Failed to process enhanced table placeholder"):
+            generate_report_content(
+                "hardware", metadata, data, template_path=str(tmp_path), debug=False
+            )
 
     def test_enhanced_table_empty_data_handling(self, tmp_path):
         """Test enhanced table handling with empty or minimal data."""
