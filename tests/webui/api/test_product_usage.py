@@ -48,11 +48,23 @@ class TestProductUsageAPI:
         data = response.json()
         assert data == []
 
-    @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
-    def test_get_products_for_month_razor(self, mock_open, mock_exists):
+    def test_get_products_for_month_razor(self, mock_open):
         """Test getting products for razor type."""
-        mock_exists.return_value = True
+        # Patch Path.exists directly on the class
+        original_exists = Path.exists
+        
+        def exists_side_effect(self):
+            # product_usage_file path should not exist
+            if "product_usage" in str(self):
+                return False
+            # enriched_file path should exist
+            if "enriched" in str(self):
+                return True
+            return original_exists(self)
+        
+        Path.exists = exists_side_effect
+        
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -85,22 +97,36 @@ class TestProductUsageAPI:
             ]
         }
 
-        with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            response = client.get("/api/product-usage/products/2025-06/razor")
-            assert response.status_code == 200
-            data = response.json()
-            assert len(data) == 2
-            # Should be sorted by usage count
-            assert data[0]["brand"] == "Gillette"
-            assert data[0]["model"] == "Tech"
-            assert data[0]["usage_count"] == 2
-            assert data[0]["unique_users"] == 2
+        try:
+            with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                response = client.get("/api/product-usage/products/2025-06/razor")
+                assert response.status_code == 200
+                data = response.json()
+                assert len(data) == 2
+                # Should be sorted by usage count
+                assert data[0]["brand"] == "Gillette"
+                assert data[0]["model"] == "Tech"
+                assert data[0]["usage_count"] == 2
+                assert data[0]["unique_users"] == 2
+        finally:
+            # Restore original exists method
+            Path.exists = original_exists
 
-    @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
-    def test_get_products_for_month_with_search(self, mock_open, mock_exists):
+    def test_get_products_for_month_with_search(self, mock_open):
         """Test product search functionality."""
-        mock_exists.return_value = True
+        # Patch Path.exists directly on the class
+        original_exists = Path.exists
+        
+        def exists_side_effect(self):
+            if "product_usage" in str(self):
+                return False
+            if "enriched" in str(self):
+                return True
+            return original_exists(self)
+        
+        Path.exists = exists_side_effect
+        
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -126,18 +152,31 @@ class TestProductUsageAPI:
             ]
         }
 
-        with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            response = client.get("/api/product-usage/products/2025-06/razor?search=Gillette")
-            assert response.status_code == 200
-            data = response.json()
-            assert len(data) == 1
-            assert data[0]["brand"] == "Gillette"
+        try:
+            with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                response = client.get("/api/product-usage/products/2025-06/razor?search=Gillette")
+                assert response.status_code == 200
+                data = response.json()
+                assert len(data) == 1
+                assert data[0]["brand"] == "Gillette"
+        finally:
+            Path.exists = original_exists
 
-    @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
-    def test_get_products_for_month_soap(self, mock_open, mock_exists):
+    def test_get_products_for_month_soap(self, mock_open):
         """Test getting products for soap type."""
-        mock_exists.return_value = True
+        # Patch Path.exists directly on the class
+        original_exists = Path.exists
+        
+        def exists_side_effect(self):
+            if "product_usage" in str(self):
+                return False
+            if "enriched" in str(self):
+                return True
+            return original_exists(self)
+        
+        Path.exists = exists_side_effect
+        
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -156,19 +195,32 @@ class TestProductUsageAPI:
             ]
         }
 
-        with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            response = client.get("/api/product-usage/products/2025-06/soap")
-            assert response.status_code == 200
-            data = response.json()
-            assert len(data) == 1
-            assert data[0]["brand"] == "Grooming Dept"
-            assert data[0]["model"] == "Laundry II"
+        try:
+            with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                response = client.get("/api/product-usage/products/2025-06/soap")
+                assert response.status_code == 200
+                data = response.json()
+                assert len(data) == 1
+                assert data[0]["brand"] == "Grooming Dept"
+                assert data[0]["model"] == "Laundry II"
+        finally:
+            Path.exists = original_exists
 
-    @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
-    def test_get_product_usage_analysis_success(self, mock_open, mock_exists):
+    def test_get_product_usage_analysis_success(self, mock_open):
         """Test successful product usage analysis."""
-        mock_exists.return_value = True
+        # Patch Path.exists directly on the class
+        original_exists = Path.exists
+        
+        def exists_side_effect(self):
+            if "product_usage" in str(self):
+                return False
+            if "enriched" in str(self):
+                return True
+            return original_exists(self)
+        
+        Path.exists = exists_side_effect
+        
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -204,31 +256,34 @@ class TestProductUsageAPI:
             ]
         }
 
-        with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            with patch("webui.api.product_usage._extract_date_from_thread_title") as mock_extract:
-                # Mock date extraction
-                from datetime import datetime
+        try:
+            with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                with patch("webui.api.product_usage._extract_date_from_thread_title") as mock_extract:
+                    # Mock date extraction
+                    from datetime import datetime
 
-                def extract_date(title):
-                    if "Jun 01" in title:
+                    def extract_date(title):
+                        if "Jun 01" in title:
+                            return datetime(2025, 6, 1)
+                        elif "Jun 02" in title:
+                            return datetime(2025, 6, 2)
                         return datetime(2025, 6, 1)
-                    elif "Jun 02" in title:
-                        return datetime(2025, 6, 2)
-                    return datetime(2025, 6, 1)
 
-                mock_extract.side_effect = extract_date
+                    mock_extract.side_effect = extract_date
 
-                response = client.get("/api/product-usage/analysis/2025-06/razor/Gillette/Tech")
-                assert response.status_code == 200
-                data = response.json()
-                assert data["product"]["brand"] == "Gillette"
-                assert data["product"]["model"] == "Tech"
-                assert data["total_usage"] == 3
-                assert data["unique_users"] == 2
-                assert len(data["users"]) == 2
-                # user1 should have higher usage count
-                assert data["users"][0]["username"] == "user1"
-                assert data["users"][0]["usage_count"] == 2
+                    response = client.get("/api/product-usage/analysis/2025-06/razor/Gillette/Tech")
+                    assert response.status_code == 200
+                    data = response.json()
+                    assert data["product"]["brand"] == "Gillette"
+                    assert data["product"]["model"] == "Tech"
+                    assert data["total_usage"] == 3
+                    assert data["unique_users"] == 2
+                    assert len(data["users"]) == 2
+                    # user1 should have higher usage count
+                    assert data["users"][0]["username"] == "user1"
+                    assert data["users"][0]["usage_count"] == 2
+        finally:
+            Path.exists = original_exists
 
     @patch("webui.api.product_usage.Path.exists")
     def test_get_product_usage_analysis_no_data(self, mock_exists):
@@ -266,11 +321,21 @@ class TestProductUsageAPI:
             assert response.status_code == 404
             assert "not found" in response.json()["detail"].lower()
 
-    @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
-    def test_get_products_for_month_brush(self, mock_open, mock_exists):
+    def test_get_products_for_month_brush(self, mock_open):
         """Test getting products for brush type."""
-        mock_exists.return_value = True
+        # Patch Path.exists directly on the class
+        original_exists = Path.exists
+        
+        def exists_side_effect(self):
+            if "product_usage" in str(self):
+                return False
+            if "enriched" in str(self):
+                return True
+            return original_exists(self)
+        
+        Path.exists = exists_side_effect
+        
         mock_file = Mock()
         mock_file.__enter__ = Mock(return_value=mock_file)
         mock_file.__exit__ = Mock(return_value=False)
@@ -294,13 +359,16 @@ class TestProductUsageAPI:
             ]
         }
 
-        with patch("webui.api.product_usage.json.load", return_value=enriched_data):
-            response = client.get("/api/product-usage/products/2025-06/brush")
-            assert response.status_code == 200
-            data = response.json()
-            assert len(data) == 1
-            assert data[0]["brand"] == "Semogue"
-            assert data[0]["model"] == "610"
+        try:
+            with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                response = client.get("/api/product-usage/products/2025-06/brush")
+                assert response.status_code == 200
+                data = response.json()
+                assert len(data) == 1
+                assert data[0]["brand"] == "Semogue"
+                assert data[0]["model"] == "610"
+        finally:
+            Path.exists = original_exists
 
     @patch("webui.api.product_usage.Path.exists")
     @patch("webui.api.product_usage.Path.open")
