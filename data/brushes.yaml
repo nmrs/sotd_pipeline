@@ -1610,7 +1610,7 @@ known_knot_based_brushes:
       knot_size_mm: 24
       patterns:
         - apluxury
-        - \bap\b.*luxury
+        - \ba ?p\b.*luxury
     Cashmere:
       fiber: Synthetic
       patterns:

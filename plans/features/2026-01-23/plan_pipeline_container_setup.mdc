@@ -4,13 +4,13 @@ overview: Create a containerized pipeline that runs on a remote server (Synology
 todos:
   - id: pipeline-container-dockerfile
     content: Create Dockerfile for pipeline container with Python 3.11 and cron
-    status: pending
+    status: completed
   - id: pipeline-container-scripts
     content: Create run-pipeline.sh, generate_search_index.py, and entrypoint.sh scripts for pipeline container
-    status: pending
+    status: completed
   - id: pipeline-container-cron
     content: Setup cron configuration for hourly pipeline execution
-    status: pending
+    status: completed
   - id: aggregator-brand-model-preservation
     content: Update aggregators to preserve brand/model/scent fields in output
     status: completed
@@ -25,16 +25,16 @@ todos:
     status: completed
   - id: data-migration-script
     content: Create script to migrate all historical data to NAS
-    status: pending
+    status: completed
   - id: yaml-sync-script
     content: Create script to sync YAML files from laptop to NAS
-    status: pending
+    status: completed
   - id: pipeline-container-tests
     content: Write tests for pipeline container scripts and search index generation
     status: pending
   - id: pipeline-deployment-docs
     content: Create deployment documentation for pipeline container on Synology NAS
-    status: pending
+    status: completed
 ---
 
 # Pipeline Container Setup Implementation Plan
@@ -516,3 +516,62 @@ sotd_pipeline/
 6. Historical data can be migrated to NAS
 7. All tests pass
 8. Documentation is complete
+
+## Implementation Status
+
+### Completed (2026-01-24)
+
+**Phase 3: Pipeline Container** ✅
+- Created `docker/pipeline/Dockerfile` with Python 3.11 and cron
+- Created `docker/pipeline/entrypoint.sh` for dynamic cron configuration
+- Created `docker/pipeline/run-pipeline.sh` for pipeline execution with lock file protection
+- Created `docker/pipeline/docker-compose.yml` for easy deployment
+- All scripts are executable and ready for deployment
+
+**Phase 4: Data Migration Script** ✅
+- Created `scripts/migrate-data-to-nas.sh` for migrating all processed data to NAS
+- Includes progress reporting and verification options
+- Handles all phase output directories
+
+**Phase 5: YAML Sync Script** ✅
+- Created `scripts/sync-yamls-to-nas.sh` for syncing catalog files and correct_matches
+- Simple rsync-based approach for manual catalog updates
+
+**Phase 7: Deployment Documentation** ✅
+- Created `docs/pipeline_container_deployment.md` with comprehensive deployment guide
+- Includes setup instructions, troubleshooting, and maintenance procedures
+- Documents environment variables, cron schedule configuration, and integration with WebUI
+
+### Remaining Tasks
+
+**Phase 6: Testing** ⏳
+- Unit tests for pipeline container scripts
+- Integration tests for cron execution and lock file functionality
+- Tests for search index generation (already exists in scripts/generate_search_index.py)
+
+### Key Implementation Decisions
+
+1. **Lock File Protection**: Uses `/tmp/sotd_pipeline.lock` to prevent overlapping runs
+2. **Error Handling**: Phase failures are logged but don't stop the pipeline; next cron run retries
+3. **Search Index Generation**: Non-fatal - failures are logged but don't fail the pipeline
+4. **Date Calculation**: Uses Python for cross-platform previous month calculation
+5. **Logging**: All operations logged to `/data/logs/pipeline.log` for debugging
+6. **Cron Schedule**: Configurable via `CRON_SCHEDULE` environment variable (default: hourly)
+
+### Files Created
+
+- `docker/pipeline/Dockerfile`
+- `docker/pipeline/entrypoint.sh`
+- `docker/pipeline/run-pipeline.sh`
+- `docker/pipeline/docker-compose.yml`
+- `scripts/migrate-data-to-nas.sh`
+- `scripts/sync-yamls-to-nas.sh`
+- `docs/pipeline_container_deployment.md`
+
+### Next Steps
+
+1. Write tests for pipeline container scripts (Phase 6)
+2. Test container build and deployment locally
+3. Deploy to Synology NAS
+4. Verify cron execution and pipeline runs
+5. Monitor logs and verify data generation

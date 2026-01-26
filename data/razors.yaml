@@ -1969,6 +1969,7 @@ PAA:
       - '(phoenix|p\.?a\.?a\.?).*doc'
       - '(phoenix|p\.?a\.?a\.?).*double.*comb'
       - paa.*comb
+      - doc head(.*neo handle)?
   La Criatura:
     patterns:
       - criatura

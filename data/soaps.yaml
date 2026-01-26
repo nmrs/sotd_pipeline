@@ -1232,6 +1232,9 @@ Catie's Bubbles:
     Verdigris:
       patterns:
       - (catie|cb).*verdigris
+    Vintage:
+      patterns:
+      - cat.*bub.*vintage
     Waterlyptus:
       patterns:
       - waterlyptus
@@ -1578,6 +1581,10 @@ Daisho:
 Dapper Dragon:
   patterns:
   - dapper dragon
+  scents:
+    Signature:
+      patterns:
+      - dapper dragon.*signature
 De Vergulde Hand:
   patterns:
   - de vergul.*hand
@@ -2900,6 +2907,9 @@ MacDuff's Soap Company:
     Catalina:
       patterns:
       - macduff.*catalina
+    Coast to Coast:
+      patterns:
+      - macduff.*coast.*to.*coast
     Harvest Sky:
       patterns:
       - macduff.*harvest sky
@@ -4706,6 +4716,9 @@ Taconic Shave:
     Lime:
       patterns:
       - taconic.*lime
+    Urban Woods:
+      patterns:
+      - taconic.*urban woods
 Talbot Shaving:
   patterns:
   - talbot(?:\w? Shaving(.*maol grooming)?)?
