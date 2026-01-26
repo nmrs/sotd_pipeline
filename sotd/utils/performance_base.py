@@ -210,9 +210,9 @@ class PipelinePerformanceTracker:
 
     def print_pipeline_summary(self) -> None:
         """Print a summary of all phase performances."""
-        print("=" * 80)
-        print("PIPELINE PERFORMANCE SUMMARY")
-        print("=" * 80)
+        logger.info("=" * 80)
+        logger.info("PIPELINE PERFORMANCE SUMMARY")
+        logger.info("=" * 80)
 
         total_time = 0.0
         total_records = 0
@@ -223,17 +223,17 @@ class PipelinePerformanceTracker:
             total_time += phase_time
             total_records += phase_records
 
-            print(f"\n{phase_name.upper()}:")
-            print(f"  Time: {phase_time:.2f}s")
-            print(f"  Records: {phase_records:,}")
+            logger.info(f"\n{phase_name.upper()}:")
+            logger.info(f"  Time: {phase_time:.2f}s")
+            logger.info(f"  Records: {phase_records:,}")
             if phase_time > 0:
                 rate = phase_records / phase_time
-                print(f"  Rate: {rate:.1f} records/second")
+                logger.info(f"  Rate: {rate:.1f} records/second")
 
-        print("\nTOTAL PIPELINE:")
-        print(f"  Time: {total_time:.2f}s")
-        print(f"  Records: {total_records:,}")
+        logger.info("\nTOTAL PIPELINE:")
+        logger.info(f"  Time: {total_time:.2f}s")
+        logger.info(f"  Records: {total_records:,}")
         if total_time > 0:
             rate = total_records / total_time
-            print(f"  Rate: {rate:.1f} records/second")
-        print("=" * 80)
+            logger.info(f"  Rate: {rate:.1f} records/second")
+        logger.info("=" * 80)

@@ -18,7 +18,7 @@ def get_report_file_path(base_dir: Path, year: int, month: int, report_type: str
         Path to the output report file
     """
     filename = f"{year:04d}-{month:02d}-{report_type}.md"
-    return base_dir / "reports" / filename
+    return base_dir / "report" / filename
 
 
 def save_report(
@@ -73,7 +73,7 @@ def get_json_report_file_path(base_dir: Path, year: int, month: int, report_type
         Path to the output JSON report file
     """
     filename = f"{year:04d}-{month:02d}-{report_type}.json"
-    return base_dir / "reports" / filename
+    return base_dir / "report" / filename
 
 
 def save_json_report(

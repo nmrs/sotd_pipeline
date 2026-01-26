@@ -36,6 +36,11 @@ from sotd.fetch.reddit import (
 )
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils import parse_thread_date
+from sotd.utils.logging_config import setup_pipeline_logging
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------- #
 # helper: find missing days in month                                         #
@@ -80,7 +85,7 @@ def _process_month(
     threads = search_threads("wetshaving", year, month, debug=args.debug)
 
     if args.debug:
-        print(f"[DEBUG] Found {len(threads)} valid threads")
+        logger.debug(f"Found {len(threads)} valid threads")
 
     out = Path(args.out_dir)
     threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
@@ -117,7 +122,7 @@ def _process_month(
     )
 
     if not merged_threads:
-        print(f"[WARN] No threads found for {year:04d}-{month:02d}; skipping file writes.")
+        logger.warning(f"No threads found for {year:04d}-{month:02d}; skipping file writes.")
         missing = _calc_missing(year, month, threads)
         return {
             "year": year,
@@ -129,7 +134,7 @@ def _process_month(
 
     # comment records with parallel processing
     if args.verbose:
-        print(f"[INFO] Fetching comments for {len(threads)} threads using parallel processing...")
+        logger.info(f"Fetching comments for {len(threads)} threads using parallel processing...")
     comment_results = fetch_top_level_comments_parallel(
         threads, max_workers=10, return_metrics=True
     )
@@ -137,7 +142,7 @@ def _process_month(
     if isinstance(comment_results, tuple):
         new_comment_records, metrics = comment_results
         if args.verbose:
-            print(f"[INFO] Parallel processing metrics: {metrics}")
+            logger.info(f"Parallel processing metrics: {metrics}")
     else:
         new_comment_records = comment_results
 
@@ -208,16 +213,23 @@ def _process_month(
 # main                                                                        #
 # --------------------------------------------------------------------------- #
 def main(argv: Sequence[str] | None = None) -> int:  # easier to test
+    # Setup logging with timestamp format matching shell script
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         # If --list-months is set, list months and exit
         if args.list_months:
             months_found = list_available_months(args.out_dir)
             if months_found:
                 for month in months_found:
-                    print(month)
+                    logger.info(month)
                 return 0
             else:
                 return 0
@@ -230,15 +242,15 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
             any_missing = False
             # Print missing files
             for mf in missing_info.get("missing_files", []):
-                print(f"[MISSING FILE] {mf}")
+                logger.warning(f"MISSING FILE: {mf}")
                 any_missing = True
             # Print missing days per month
             for month_str, days in missing_info.get("missing_days", {}).items():
                 for d in days:
-                    print(f"{month_str}: {d}")
+                    logger.warning(f"{month_str}: {d}")
                     any_missing = True
             if not any_missing:
-                print("[INFO] Audit successful: no missing files or days detected.")
+                logger.info("Audit successful: no missing files or days detected.")
                 return 0
             else:
                 return 1
@@ -268,10 +280,10 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
             ):
                 for d in missing_days:
                     if args.verbose:
-                        print(f"[WARN] Missing day: {d}")
+                        logger.warning(f"Missing day: {d}")
             if args.verbose:
-                print(
-                    f"[INFO] SOTD fetch complete for {year:04d}-{month:02d}: "
+                logger.info(
+                    f"SOTD fetch complete for {year:04d}-{month:02d}: "
                     f"{res['threads']} threads, "
                     f"{res['comments']} comments, "
                     f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
@@ -285,7 +297,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
             )
             for d in all_missing_days:
                 if args.verbose:
-                    print(f"[WARN] Missing day: {d}")
+                    logger.warning(f"Missing day: {d}")
             start_ym = valid_results[0]["year"], valid_results[0]["month"]
             end_ym = valid_results[-1]["year"], valid_results[-1]["month"]
             total_threads = sum(res["threads"] for res in valid_results)
@@ -293,8 +305,8 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
             total_missing = len(all_missing_days)
 
             if args.verbose:
-                print(
-                    f"[INFO] SOTD fetch complete for "
+                logger.info(
+                    f"SOTD fetch complete for "
                     f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
                     f"{total_threads} threads, "
                     f"{total_comments} comments, "
@@ -303,10 +315,13 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
 
         return 0  # Success
     except KeyboardInterrupt:
-        print("\n[INFO] Fetch phase interrupted by user")
+        logger.info("Fetch phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Fetch phase failed: {e}")
+        logger.error(f"Fetch phase failed: {e}")
+        import traceback
+
+        traceback.print_exc()
         return 1  # Error
 
 

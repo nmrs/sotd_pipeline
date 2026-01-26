@@ -1,4 +1,7 @@
+import logging
 from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
 
 from .aggregators.brush_specialized import (
     aggregate_fibers,
@@ -132,21 +135,21 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         records = validate_records(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Record validation failed: {e}")
+            logger.debug(f"Record validation failed: {e}")
         raise
 
     try:
         records = normalize_fields(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Field normalization failed: {e}")
+            logger.debug(f"Field normalization failed: {e}")
         raise
 
     try:
         check_data_quality(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Data quality check failed: {e}")
+            logger.debug(f"Data quality check failed: {e}")
         raise
 
     # Generate metadata
@@ -154,7 +157,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         meta = calculate_metadata(records, month)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Metadata calculation failed: {e}")
+            logger.debug(f"Metadata calculation failed: {e}")
         raise
 
     # Run all aggregators
@@ -168,14 +171,14 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         aggregated_data["data"]["razors"] = aggregate_razors(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Razor aggregation failed: {e}")
+            logger.debug(f"Razor aggregation failed: {e}")
         aggregated_data["data"]["razors"] = []
 
     try:
         aggregated_data["data"]["blades"] = aggregate_blades(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Blade aggregation failed: {e}")
+            logger.debug(f"Blade aggregation failed: {e}")
         aggregated_data["data"]["blades"] = []
 
     try:
@@ -184,21 +187,21 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         )
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Blade usage distribution aggregation failed: {e}")
+            logger.debug(f"Blade usage distribution aggregation failed: {e}")
         aggregated_data["data"]["blade_usage_distribution"] = []
 
     try:
         aggregated_data["data"]["brushes"] = aggregate_brushes(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Brush aggregation failed: {e}")
+            logger.debug(f"Brush aggregation failed: {e}")
         aggregated_data["data"]["brushes"] = []
 
     try:
         aggregated_data["data"]["soaps"] = aggregate_soaps(records)
     except Exception as e:
         if debug:
-            print(f"[DEBUG] Soap aggregation failed: {e}")
+            logger.debug(f"Soap aggregation failed: {e}")
         aggregated_data["data"]["soaps"] = []
 
     # Sample aggregations

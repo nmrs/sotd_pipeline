@@ -1,6 +1,7 @@
 """Annual report generator for SOTD pipeline."""
 
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -301,8 +302,11 @@ class AnnualReportGenerator(BaseReportGenerator):
             else:
                 structured_metadata[key] = str(value)
 
-        # Add year to metadata
+        # Add year and timestamp to metadata
         structured_metadata["year"] = self.year
+        structured_metadata["generated_at"] = (
+            datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+        )
 
         # Calculate stats
         stats = {

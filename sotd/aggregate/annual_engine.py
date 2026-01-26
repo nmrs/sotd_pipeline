@@ -9,6 +9,7 @@ import logging
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -82,17 +83,17 @@ class AnnualPerformanceMonitor(BasePerformanceMonitor):
     def print_summary(self) -> None:
         """Print a human-readable performance summary."""
         metrics = self.metrics
-        print(f"\n=== Annual Aggregation Performance Summary ({metrics.year}) ===")
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"Data Loading Time: {metrics.data_loading_time:.2f}s")
-        print(f"Aggregation Time: {metrics.aggregation_time:.2f}s")
-        print(f"File I/O Time: {metrics.file_io_time:.2f}s")
-        print(f"Months Processed: {metrics.month_count}")
-        print(f"Total Shaves: {metrics.total_shaves:,}")
-        print(f"Unique Shavers: {metrics.unique_shavers:,}")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
-        print(f"Input File Size: {metrics.input_file_size_mb:.1f}MB")
-        print(f"Output File Size: {metrics.output_file_size_mb:.1f}MB")
+        logger.info(f"\n=== Annual Aggregation Performance Summary ({metrics.year}) ===")
+        logger.info(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
+        logger.info(f"Data Loading Time: {metrics.data_loading_time:.2f}s")
+        logger.info(f"Aggregation Time: {metrics.aggregation_time:.2f}s")
+        logger.info(f"File I/O Time: {metrics.file_io_time:.2f}s")
+        logger.info(f"Months Processed: {metrics.month_count}")
+        logger.info(f"Total Shaves: {metrics.total_shaves:,}")
+        logger.info(f"Unique Shavers: {metrics.unique_shavers:,}")
+        logger.info(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
+        logger.info(f"Input File Size: {metrics.input_file_size_mb:.1f}MB")
+        logger.info(f"Output File Size: {metrics.output_file_size_mb:.1f}MB")
 
 
 class AnnualAggregationEngine:
@@ -1380,6 +1381,7 @@ class AnnualAggregationEngine:
 
         return {
             "year": self.year,
+            "aggregated_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
             "total_shaves": total_shaves,
             "unique_shavers": total_unique_shavers,
             "avg_shaves_per_user": avg_shaves_per_user,
@@ -1554,12 +1556,9 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
 
     try:
         if debug:
-            logger.info(f"Processing annual aggregation for {year}")
-            print(f"[DEBUG] Processing annual aggregation for {year}")
-            logger.info(f"Data directory: {data_dir}")
-            print(f"[DEBUG] Data directory: {data_dir}")
-            logger.info(f"Force: {force}")
-            print(f"[DEBUG] Force: {force}")
+            logger.debug(f"Processing annual aggregation for {year}")
+            logger.debug(f"Data directory: {data_dir}")
+            logger.debug(f"Force: {force}")
 
         # Load monthly data from the aggregated subdirectory
         monthly_data_dir = data_dir / "aggregated"
@@ -1573,12 +1572,9 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
         missing_months = load_result["missing_months"]
 
         if debug:
-            logger.info(f"Loaded {len(monthly_data)} months of data")
-            print(f"[DEBUG] Loaded {len(monthly_data)} months of data")
-            logger.info(f"Included months: {included_months}")
-            print(f"[DEBUG] Included months: {included_months}")
-            logger.info(f"Missing months: {missing_months}")
-            print(f"[DEBUG] Missing months: {missing_months}")
+            logger.debug(f"Loaded {len(monthly_data)} months of data")
+            logger.debug(f"Included months: {included_months}")
+            logger.debug(f"Missing months: {missing_months}")
 
         # Aggregate monthly data (will handle empty data gracefully)
         monitor.start_processing_timing()
@@ -1588,12 +1584,9 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
         monitor.end_processing_timing()
 
         if debug:
-            logger.info("Aggregated data generated")
-            print("[DEBUG] Aggregated data generated")
-            logger.info(f"Total shaves: {aggregated_data['metadata']['total_shaves']}")
-            print(f"[DEBUG] Total shaves: {aggregated_data['metadata']['total_shaves']}")
-            logger.info(f"Unique shavers: {aggregated_data['metadata']['unique_shavers']}")
-            print(f"[DEBUG] Unique shavers: {aggregated_data['metadata']['unique_shavers']}")
+            logger.debug("Aggregated data generated")
+            logger.debug(f"Total shaves: {aggregated_data['metadata']['total_shaves']}")
+            logger.debug(f"Unique shavers: {aggregated_data['metadata']['unique_shavers']}")
 
         # Save aggregated data
         monitor.start_file_io_timing()
@@ -1606,8 +1599,7 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
         monitor.metrics.month_count = len(included_months)
 
         if debug:
-            logger.info(f"Annual aggregation for {year} completed")
-            print(f"[DEBUG] Annual aggregation for {year} completed")
+            logger.debug(f"Annual aggregation for {year} completed")
 
     finally:
         monitor.end_total_timing()
@@ -1668,7 +1660,7 @@ def process_annual_range_parallel(
     Returns:
         True if there were errors, False otherwise
     """
-    print(f"Processing {len(years)} years in parallel...")
+    logger.info(f"Processing {len(years)} years in parallel...")
 
     wall_clock_start = time.time()
 
@@ -1688,7 +1680,7 @@ def process_annual_range_parallel(
                 if result:
                     results.append(result)
             except Exception as e:
-                print(f"[ERROR] Failed to process {year}: {e}")
+                logger.error(f"Failed to process {year}: {e}")
 
     # Filter results and check for errors
     errors = [r for r in results if r and r.get("status") == "error"]
@@ -1696,20 +1688,20 @@ def process_annual_range_parallel(
 
     # Display error details
     if errors:
-        print("\n❌ Error Details:")
+        logger.error("\n❌ Error Details:")
         for error_result in errors:
             year = error_result.get("year", "unknown")
             error_msg = error_result.get("error", "unknown error")
-            print(f"  {year}: {error_msg}")
+            logger.error(f"  {year}: {error_msg}")
 
     # Print summary
     wall_clock_time = time.time() - wall_clock_start
     if completed:
-        print(
-            f"[INFO] Annual aggregation complete for {years[0]}…{years[-1]}: "
+        logger.info(
+            f"Annual aggregation complete for {years[0]}…{years[-1]}: "
             f"{len(completed)} year(s) processed"
         )
-    print(f"Parallel processing completed in {wall_clock_time:.2f}s")
+    logger.info(f"Parallel processing completed in {wall_clock_time:.2f}s")
 
     return len(errors) > 0
 
@@ -1731,7 +1723,7 @@ def process_annual_range(
         logger.info(f"Data directory: {data_dir}")
         logger.info(f"Force: {force}")
 
-    print(f"Processing annual aggregation for {len(years)} year(s)...")
+    logger.info(f"Processing annual aggregation for {len(years)} year(s)...")
     for year in tqdm(years, desc="Annual aggregation", unit="year"):
         try:
             process_annual(year, data_dir, debug=debug, force=force)

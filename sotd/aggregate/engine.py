@@ -1,3 +1,4 @@
+import logging
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -11,6 +12,8 @@ from .load import load_enriched_data
 from .processor import aggregate_all
 from .save import save_aggregated_data, save_product_usage_data, save_user_analysis_data
 
+logger = logging.getLogger(__name__)
+
 
 def process_months(
     months: Sequence[str],
@@ -21,7 +24,7 @@ def process_months(
 ) -> bool:
     """Main orchestration for aggregating SOTD data for one or more months."""
     # Show progress bar for processing
-    print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+    logger.info(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
     results = []
     for month in tqdm(months, desc="Months", unit="month"):
@@ -31,7 +34,7 @@ def process_months(
         # Check if output already exists and force is not set
         output_path = data_dir / "aggregated" / f"{month}.json"
         if output_path.exists() and not force:
-            print(f"  {month}: output exists")
+            logger.debug(f"  {month}: output exists")
             continue
 
         try:
@@ -40,7 +43,7 @@ def process_months(
             monitor.end_file_io_timing()
 
             if debug:
-                print(f"Loaded {len(records)} records for {month}")
+                logger.debug(f"Loaded {len(records)} records for {month}")
 
             monitor.set_record_count(len(records))
 
@@ -63,7 +66,7 @@ def process_months(
             monitor.end_total_timing()
             if debug:
                 monitor.print_summary()
-                print(f"Saved aggregated data for {month}")
+                logger.debug(f"Saved aggregated data for {month}")
 
             # Collect results for summary
             results.append(
@@ -99,20 +102,22 @@ def process_months(
     if errors:
         if annual_mode:
             # In annual mode, these are expected warnings, not errors
-            print("\n⚠️  Warning: Some months could not be aggregated (missing enriched data):")
+            logger.warning(
+                "\n⚠️  Warning: Some months could not be aggregated (missing enriched data):"
+            )
             for error_result in errors:
                 month = error_result.get("month", "unknown")
                 error_msg = error_result.get("error", "unknown error")
                 # Remove "Run enrich phase first." from the message for annual mode
                 error_msg = error_msg.replace(". Run enrich phase first.", "")
-                print(f"  {month}: {error_msg}")
-            print("  (Annual aggregation will use available monthly aggregated files)")
+                logger.warning(f"  {month}: {error_msg}")
+            logger.warning("  (Annual aggregation will use available monthly aggregated files)")
         else:
-            print("\n❌ Error Details:")
+            logger.error("\n❌ Error Details:")
             for error_result in errors:
                 month = error_result.get("month", "unknown")
                 error_msg = error_result.get("error", "unknown error")
-                print(f"  {month}: {error_msg}")
+                logger.error(f"  {month}: {error_msg}")
 
     # Print summary using standardized formatter
     if len(months) == 1:
@@ -121,7 +126,7 @@ def process_months(
         if completed:
             stats = completed[0]
             summary = PipelineOutputFormatter.format_single_month_summary("aggregate", month, stats)
-            print(summary)
+            logger.info(summary)
     else:
         # Multi-month summary
         start_month = months[0]
@@ -133,7 +138,7 @@ def process_months(
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "aggregate", start_month, end_month, total_stats
         )
-        print(summary)
+        logger.info(summary)
 
     # Return True if there were errors, False otherwise
     return len(errors) > 0
@@ -148,7 +153,7 @@ def process_months_parallel(
     annual_mode: bool = False,
 ) -> bool:
     """Process multiple months in parallel using ProcessPoolExecutor."""
-    print(f"Processing {len(months)} months in parallel...")
+    logger.info(f"Processing {len(months)} months in parallel...")
 
     # Start wall clock timing
     wall_clock_start = time.time()
@@ -171,7 +176,7 @@ def process_months_parallel(
                 if result:
                     results.append(result)
             except Exception as e:
-                print(f"[ERROR] Failed to process {month}: {e}")
+                logger.error(f"Failed to process {month}: {e}")
 
     # Filter results and check for errors
     errors = [r for r in results if r and "error" in r]
@@ -181,31 +186,33 @@ def process_months_parallel(
     if errors:
         if annual_mode:
             # In annual mode, these are expected warnings, not errors
-            print("\n⚠️  Warning: Some months could not be aggregated (missing enriched data):")
+            logger.warning(
+                "\n⚠️  Warning: Some months could not be aggregated (missing enriched data):"
+            )
             for error_result in errors:
                 month = error_result.get("month", "unknown")
                 error_msg = error_result.get("error", "unknown error")
                 # Remove "Run enrich phase first." from the message for annual mode
                 error_msg = error_msg.replace(". Run enrich phase first.", "")
-                print(f"  {month}: {error_msg}")
-            print("  (Annual aggregation will use available monthly aggregated files)")
+                logger.warning(f"  {month}: {error_msg}")
+            logger.warning("  (Annual aggregation will use available monthly aggregated files)")
         else:
-            print("\n❌ Error Details:")
+            logger.error("\n❌ Error Details:")
             for error_result in errors:
                 month = error_result.get("month", "unknown")
                 error_msg = error_result.get("error", "unknown error")
-                print(f"  {month}: {error_msg}")
+                logger.error(f"  {month}: {error_msg}")
 
     # Print summary
     wall_clock_time = time.time() - wall_clock_start
     total_records = sum(r.get("record_count", 0) for r in completed)
 
     if completed:
-        print(
-            f"[INFO] SOTD aggregate complete for {months[0]}…{months[-1]}: "
+        logger.info(
+            f"SOTD aggregate complete for {months[0]}…{months[-1]}: "
             f"{total_records} records processed"
         )
-    print(f"Parallel processing completed in {wall_clock_time:.2f}s")
+    logger.info(f"Parallel processing completed in {wall_clock_time:.2f}s")
 
     # Return True if there were errors, False otherwise
     return len(errors) > 0
@@ -229,7 +236,7 @@ def process_single_month(
         monitor.end_file_io_timing()
 
         if debug:
-            print(f"Loaded {len(records)} records for {month}")
+            logger.debug(f"Loaded {len(records)} records for {month}")
 
         monitor.set_record_count(len(records))
 

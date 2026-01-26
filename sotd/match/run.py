@@ -1,6 +1,8 @@
 import json
+import logging
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -14,6 +16,9 @@ from sotd.match.types import MatchResult
 from sotd.match.utils import calculate_match_statistics, format_match_statistics_for_display
 from sotd.match.utils.performance import PerformanceMonitor
 from sotd.utils.filtered_entries import load_filtered_entries
+from sotd.utils.logging_config import setup_pipeline_logging
+
+logger = logging.getLogger(__name__)
 
 # Load filtered entries at module level for performance
 _filtered_entries_manager = None
@@ -108,7 +113,9 @@ def match_record(
 
     if "razor" in result and enable_razor:
         if debug:
-            print(f"  🔪 Processing razor: {result['razor'].get('original', 'Unknown')[:50]}...")
+            logger.debug(
+                f"  🔪 Processing razor: {result['razor'].get('original', 'Unknown')[:50]}..."
+            )
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["razor"])
@@ -123,7 +130,7 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print("    ⏭️  Razor filtered, skipping")
+                logger.debug("    ⏭️  Razor filtered, skipping")
         else:
             razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
             # Use MatchResult consistently
@@ -134,13 +141,13 @@ def match_record(
                 if debug:
                     brand = razor_result.matched.get("brand", "Unknown")
                     model = razor_result.matched.get("model", "Unknown")
-                    print(f"    ✅ Razor matched: {brand} {model}")
+                    logger.debug(f"    ✅ Razor matched: {brand} {model}")
             elif razor_result is not None:
                 # Matcher returned a result but it's not matched
                 razor_result.normalized = result["razor"]["normalized"]
                 result["razor"] = razor_result
                 if debug:
-                    print("    ❌ Razor no match")
+                    logger.debug("    ❌ Razor no match")
             else:
                 result["razor"] = MatchResult(
                     original=result["razor"]["original"],
@@ -150,12 +157,14 @@ def match_record(
                     pattern=None,
                 )
                 if debug:
-                    print("    ❌ Razor no match")
+                    logger.debug("    ❌ Razor no match")
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result and enable_blade:
         if debug:
-            print(f"  🪒 Processing blade: {result['blade'].get('original', 'Unknown')[:50]}...")
+            logger.debug(
+                f"  🪒 Processing blade: {result['blade'].get('original', 'Unknown')[:50]}..."
+            )
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["blade"])
@@ -170,7 +179,7 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print("    ⏭️  Blade filtered, skipping")
+                logger.debug("    ⏭️  Blade filtered, skipping")
         else:
             # Check razor format and handle blade matching accordingly
             razor_result = result.get("razor")
@@ -184,7 +193,7 @@ def match_record(
                     blade_result.normalized = result["blade"]["normalized"]
                     result["blade"] = blade_result
                     if debug:
-                        print(
+                        logger.debug(
                             f"    ✅ Blade auto-matched to Cartridge/Disposable for {razor_format}"
                         )
 
@@ -198,7 +207,7 @@ def match_record(
                         pattern=None,
                     )
                     if debug:
-                        print(f"    ⏭️  Blade irrelevant for {razor_format}")
+                        logger.debug(f"    ⏭️  Blade irrelevant for {razor_format}")
 
                 # For other formats, use context-aware matching to ensure correct format
                 else:
@@ -213,9 +222,9 @@ def match_record(
                             if blade_result.matched:
                                 brand = blade_result.matched.get("brand", "Unknown")
                                 model = blade_result.matched.get("model", "Unknown")
-                                print(f"    ✅ Blade matched: {brand} {model}")
+                                logger.debug(f"    ✅ Blade matched: {brand} {model}")
                             else:
-                                print("    ❌ Blade no match")
+                                logger.debug("    ❌ Blade no match")
                     else:
                         result["blade"] = MatchResult(
                             original=result["blade"]["original"],
@@ -225,7 +234,7 @@ def match_record(
                             pattern=None,
                         )
                         if debug:
-                            print("    ❌ Blade no match")
+                            logger.debug("    ❌ Blade no match")
             else:
                 # Handle legacy dict format for razor
                 razor_matched = (
@@ -246,7 +255,7 @@ def match_record(
                             pattern=None,
                         )
                         if debug:
-                            print(f"    ⏭️  Blade irrelevant for {razor_format}")
+                            logger.debug(f"    ⏭️  Blade irrelevant for {razor_format}")
                     else:
                         # For other formats, use context-aware matching to ensure correct format
                         blade_result = blade_matcher.match_with_context(
@@ -257,9 +266,9 @@ def match_record(
                             if blade_result and blade_result.matched:
                                 brand = blade_result.matched.get("brand", "Unknown")
                                 model = blade_result.matched.get("model", "Unknown")
-                                print(f"    ✅ Blade matched: {brand} {model}")
+                                logger.debug(f"    ✅ Blade matched: {brand} {model}")
                             else:
-                                print("    ❌ Blade no match")
+                                logger.debug("    ❌ Blade no match")
                 else:
                     # No razor context, use basic matching
                     blade_result = blade_matcher.match(normalized_text, result["blade"]["original"])
@@ -268,14 +277,16 @@ def match_record(
                         if blade_result and blade_result.matched:
                             blade_brand = blade_result.matched.get("brand", "Unknown")
                             blade_model = blade_result.matched.get("model", "Unknown")
-                            print(f"    ✅ Blade matched: {blade_brand} {blade_model}")
+                            logger.debug(f"    ✅ Blade matched: {blade_brand} {blade_model}")
                         else:
-                            print("    ❌ Blade no match")
+                            logger.debug("    ❌ Blade no match")
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result and enable_soap:
         if debug:
-            print(f"  🧼 Processing soap: {result['soap'].get('original', 'Unknown')[:50]}...")
+            logger.debug(
+                f"  🧼 Processing soap: {result['soap'].get('original', 'Unknown')[:50]}..."
+            )
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["soap"])
@@ -290,7 +301,7 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print("    ⏭️  Soap filtered, skipping")
+                logger.debug("    ⏭️  Soap filtered, skipping")
         else:
             soap_result = soap_matcher.match(normalized_text, result["soap"]["original"])
             result["soap"] = soap_result
@@ -298,14 +309,16 @@ def match_record(
                 if soap_result and soap_result.matched:
                     soap_brand = soap_result.matched.get("brand", "Unknown")
                     soap_model = soap_result.matched.get("model", "Unknown")
-                    print(f"    ✅ Soap matched: {soap_brand} {soap_model}")
+                    logger.debug(f"    ✅ Soap matched: {soap_brand} {soap_model}")
                 else:
-                    print("    ❌ Soap no match")
+                    logger.debug("    ❌ Soap no match")
         monitor.record_matcher_timing("soap", time.time() - start_time)
 
     if "brush" in result and enable_brush:
         if debug:
-            print(f"  🖌️  Processing brush: {result['brush'].get('original', 'Unknown')[:50]}...")
+            logger.debug(
+                f"  🖌️  Processing brush: {result['brush'].get('original', 'Unknown')[:50]}..."
+            )
         start_time = time.time()
         # Extract normalized and original text
         normalized_text = extract_text(result["brush"])
@@ -320,10 +333,10 @@ def match_record(
                 pattern=None,
             )
             if debug:
-                print("    ⏭️  Brush filtered, skipping")
+                logger.debug("    ⏭️  Brush filtered, skipping")
         else:
             if debug:
-                print("    🎯 Running brush matcher strategies...")
+                logger.debug("    🎯 Running brush matcher strategies...")
             brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
             # Convert MatchResult to dict for consistency
             if brush_result is not None:
@@ -339,9 +352,11 @@ def match_record(
                         brand = brush_result.matched.get("brand", "Unknown")
                         model = brush_result.matched.get("model", "Unknown")
                         strategy = getattr(brush_result, "strategy", "unknown")
-                        print(f"    ✅ Brush matched: {brand} {model} (strategy: {strategy})")
+                        logger.debug(
+                            f"    ✅ Brush matched: {brand} {model} (strategy: {strategy})"
+                        )
                     else:
-                        print("    ❌ Brush no match")
+                        logger.debug("    ❌ Brush no match")
             else:
                 result["brush"] = {
                     "original": result["brush"]["original"],
@@ -351,7 +366,7 @@ def match_record(
                     "pattern": None,
                 }
                 if debug:
-                    print("    ❌ Brush no match")
+                    logger.debug("    ❌ Brush no match")
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
     return result
@@ -395,31 +410,54 @@ def process_month(
             data = json.load(f)
         monitor.end_file_io_timing()
 
-        # Initialize matchers
+        # Initialize matchers with catalog paths based on base_path
         monitor.start_processing_timing()
-        blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
+        # Use base_path to construct catalog paths (base_path is the data directory)
+        blades_path = base_path / "blades.yaml"
+        razors_path = base_path / "razors.yaml"
+        soaps_path = base_path / "soaps.yaml"
+        brushes_path = base_path / "brushes.yaml"
+        handles_path = base_path / "handles.yaml"
+        knots_path = base_path / "knots.yaml"
+        brush_scoring_config_path = base_path / "brush_scoring_config.yaml"
+
+        # Use base_path for correct_matches if not explicitly provided
+        if correct_matches_path is None:
+            correct_matches_path = base_path / "correct_matches"
+
+        blade_matcher = BladeMatcher(
+            catalog_path=blades_path, correct_matches_path=correct_matches_path
+        )
 
         # Initialize brush matcher using the new multi-strategy scoring system
         brush_matcher = BrushMatcher(
             correct_matches_path=correct_matches_path,
+            brushes_path=brushes_path,
+            handles_path=handles_path,
+            knots_path=knots_path,
+            brush_scoring_config_path=brush_scoring_config_path,
             debug=debug,
         )
 
-        razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
-        soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
+        razor_matcher = RazorMatcher(
+            catalog_path=razors_path, correct_matches_path=correct_matches_path
+        )
+        soap_matcher = SoapMatcher(
+            catalog_path=soaps_path, correct_matches_path=correct_matches_path
+        )
 
         # Process records
         records = data.get("data", [])
         monitor.set_record_count(len(records))
 
         if debug:
-            print(f"🎯 Processing {len(records)} records...")
+            logger.debug(f"🎯 Processing {len(records)} records...")
 
         for i, record in enumerate(records):
             if debug:
-                print(f"\n📝 Record {i + 1}/{len(records)}")
+                logger.debug(f"\n📝 Record {i + 1}/{len(records)}")
                 comment_id = record.get("comment_id", "unknown")
-                print(f"   Comment ID: {comment_id}")
+                logger.debug(f"   Comment ID: {comment_id}")
 
             # Use the match_record function that includes blade clearing logic
             matched_record = match_record(
@@ -499,6 +537,7 @@ def process_month(
         output_data = {
             "metadata": {
                 "month": month,
+                "matched_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
                 "record_count": len(records),
                 "performance": monitor.get_summary(),
                 "match_statistics": match_statistics,
@@ -510,7 +549,7 @@ def process_month(
         monitor.end_file_io_timing()
 
         if debug:
-            print(f"Saved data to: {output_path}")
+            logger.debug(f"Saved data to: {output_path}")
 
         # End timing and get performance summary
         monitor.end_total_timing()
@@ -523,7 +562,7 @@ def process_month(
             monitor.print_summary()
 
             # Display enhanced match statistics
-            print("\n" + format_match_statistics_for_display(match_statistics))
+            logger.debug("\n" + format_match_statistics_for_display(match_statistics))
             import sys
 
             sys.stdout.flush()
@@ -613,18 +652,18 @@ def run_match(args):
     skipped = [r for r in results if r.get("status") == "skipped"]
 
     if errors:
-        print("\n❌ Error Details:")
+        logger.error("\n❌ Error Details:")
         for error_result in errors:
             month = error_result.get("month", "unknown")
             error_msg = error_result.get("error", "unknown error")
-            print(f"  {month}: {error_msg}")
+            logger.error(f"  {month}: {error_msg}")
 
     if skipped:
-        print("\n⚠️  Skipped Months:")
+        logger.warning("\n⚠️  Skipped Months:")
         for skipped_result in skipped:
             month = skipped_result.get("month", "unknown")
             reason = skipped_result.get("reason", "unknown reason")
-            print(f"  {month}: {reason}")
+            logger.warning(f"  {month}: {reason}")
 
     # Return True if there were errors, False otherwise
     return len(errors) > 0
@@ -666,14 +705,21 @@ def run_analysis(args):
                 check=True,
             )
         elif args.debug:
-            print(f"Skipping missing file: {matched_path}")
+            logger.debug(f"Skipping missing file: {matched_path}")
 
 
 def main(argv=None) -> int:
     """Main entry point for the match phase."""
+    # Setup logging with timestamp format matching shell script
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         if args.mode == "match":
             has_errors = run_match(args)
@@ -683,10 +729,10 @@ def main(argv=None) -> int:
 
         return 0  # Success
     except KeyboardInterrupt:
-        print("\n[INFO] Match phase interrupted by user")
+        logger.info("Match phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Match phase failed: {e}")
+        logger.error(f"Match phase failed: {e}")
         return 1  # Error
 
 

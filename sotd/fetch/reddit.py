@@ -14,6 +14,10 @@ import praw
 from praw.models import Comment, Submission
 from prawcore.exceptions import NotFound, RequestException
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # PRAW 7.x has RateLimitExceeded; newer prawcore switched to TooManyRequests.
 try:
     from prawcore.exceptions import RateLimitExceeded  # type: ignore[attr-defined]
@@ -68,7 +72,7 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
             if call_duration > 2.0 and attempt > 0:
                 rate_limit_hits += 1
                 duration_str = f"{call_duration:.1f}s"
-                print(f"[WARN] Slow response detected ({duration_str}); treating as rate limit")
+                logger.warning(f"Slow response detected ({duration_str}); treating as rate limit")
                 # Simulate rate limit behavior for slow responses
                 time.sleep(5)  # Brief delay for slow responses
                 continue
@@ -115,8 +119,8 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
 
                 # Enhanced logging with rate limit statistics and attempt info
                 total_duration = time.time() - start_time
-                print(
-                    f"[WARN] Reddit rate-limit hit (hit #{rate_limit_hits} in "
+                logger.warning(
+                    f"Reddit rate-limit hit (hit #{rate_limit_hits} in "
                     f"{total_duration:.1f}s, attempt {attempt + 1}/{max_attempts}); "
                     f"waiting {mins}m {secs}s ({delay_source})…"
                 )
@@ -125,14 +129,14 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
             else:
                 # Final attempt failed
                 total_duration = time.time() - start_time
-                print(
-                    f"[WARN] Rate limit exceeded after {rate_limit_hits} hits in "
+                logger.warning(
+                    f"Rate limit exceeded after {rate_limit_hits} hits in "
                     f"{total_duration:.1f}s (max attempts reached)"
                 )
                 raise
 
         except (ConnectionError, RuntimeError, RequestException, NotFound, ValueError) as exc:
-            print(f"[WARN] Reddit API error: {exc}")
+            logger.warning(f"Reddit API error: {exc}")
             return None
 
 
@@ -148,7 +152,11 @@ def _require_env(key: str) -> str:
 
 def get_reddit() -> praw.Reddit:  # noqa: D401
     """Return a PRAW instance using the section in praw.ini."""
-    return praw.Reddit()  # relies on praw.ini in project root
+    try:
+        reddit = praw.Reddit()
+        return reddit
+    except Exception as e:
+        raise
 
 
 # --------------------------------------------------------------------------- #
@@ -176,21 +184,19 @@ def search_threads(
     # Try broad searches first
     for query in broad_queries:
         if debug:
-            print(f"[DEBUG] Search query: {query!r}")
+            logger.debug(f"Search query: {query!r}")
         raw_results = safe_call(subreddit.search, query, sort="relevance", syntax="lucene")
         if raw_results is None:
             raw_results = []
         raw_results = list(raw_results)
         if debug:
-            print(f"[DEBUG] PRAW raw results for {query!r}: {len(raw_results)}")
+            logger.debug(f"PRAW raw results for {query!r}: {len(raw_results)}")
 
         # Check if we hit the 100-result limit (indicates there might be more results)
         if len(raw_results) >= 100:
             hit_limit = True
             if debug:
-                print(
-                    f"[DEBUG] Hit 100-result limit with {query!r}, will use day-specific searches"
-                )
+                logger.debug(f"Hit 100-result limit with {query!r}, will use day-specific searches")
 
         for sub in raw_results:
             all_results[sub.id] = sub  # dedupe by Reddit submission ID
@@ -198,7 +204,7 @@ def search_threads(
     # If we hit the limit, use smart pattern detection to find missing threads
     if hit_limit:
         if debug:
-            print("[DEBUG] Analyzing thread patterns to identify missing days")
+            logger.debug("Analyzing thread patterns to identify missing days")
 
         # First filter the broad results to only current year/month
         filtered_results = filter_valid_threads(
@@ -223,10 +229,10 @@ def search_threads(
         )
 
         if debug:
-            print(f"[DEBUG] Found max {max_threads_per_day} threads per day")
+            logger.debug(f"Found max {max_threads_per_day} threads per day")
             for day in sorted(threads_by_day.keys()):
                 count = len(threads_by_day[day])
-                print(f"[DEBUG] Day {day}: {count} threads")
+                logger.debug(f"Day {day}: {count} threads")
 
         # Find days that are missing threads
         # For current month, only check up to current date
@@ -245,15 +251,15 @@ def search_threads(
                 missing_count = max_threads_per_day - current_count
                 missing_days.append((day, missing_count))
                 if debug:
-                    print(
-                        f"[DEBUG] Day {day}: missing {missing_count} threads "
+                    logger.debug(
+                        f"Day {day}: missing {missing_count} threads "
                         f"(has {current_count}, need {max_threads_per_day})"
                     )
 
         # Search for missing threads on specific days
         if missing_days:
             if debug:
-                print(f"[DEBUG] Searching for missing threads on {len(missing_days)} days")
+                logger.debug(f"Searching for missing threads on {len(missing_days)} days")
 
             for day, missing_count in missing_days:
                 day_queries = [
@@ -265,7 +271,7 @@ def search_threads(
 
                 for query in day_queries:
                     if debug:
-                        print(f"[DEBUG] Missing thread query: {query!r}")
+                        logger.debug(f"Missing thread query: {query!r}")
                     raw_results = safe_call(
                         subreddit.search, query, sort="relevance", syntax="lucene"
                     )
@@ -273,14 +279,14 @@ def search_threads(
                         raw_results = []
                     raw_results = list(raw_results)
                     if debug:
-                        print(f"[DEBUG] PRAW raw results for {query!r}: {len(raw_results)}")
+                        logger.debug(f"PRAW raw results for {query!r}: {len(raw_results)}")
 
                     for sub in raw_results:
                         all_results[sub.id] = sub  # dedupe by Reddit submission ID
 
     combined = list(all_results.values())
     if debug:
-        print(f"[DEBUG] Combined raw results (deduped): {len(combined)}")
+        logger.debug(f"Combined raw results (deduped): {len(combined)}")
 
     # Process thread overrides
     month_str = f"{year:04d}-{month:02d}"
@@ -291,12 +297,12 @@ def search_threads(
         all_results[override_thread.id] = override_thread
 
     if debug and override_threads:
-        print(f"[DEBUG] Added {len(override_threads)} override threads")
+        logger.debug(f"Added {len(override_threads)} override threads")
 
     # Re-combine and filter
     combined = list(all_results.values())
     if debug:
-        print(f"[DEBUG] Combined results with overrides: {len(combined)}")
+        logger.debug(f"Combined results with overrides: {len(combined)}")
 
     valid = filter_valid_threads(combined, year, month, debug=debug)
     return valid
@@ -317,16 +323,16 @@ def filter_valid_threads(
             try:
                 d = datetime.strptime(sub._override_date, "%Y-%m-%d").date()
                 if debug:
-                    print(f"[DEBUG] Used fallback date for {sub.title}: {d}")
+                    logger.debug(f"Used fallback date for {sub.title}: {d}")
             except Exception:
                 d = None
         if d is None:
             if debug:
-                print(f"[DEBUG] Skip (no-date) {sub.title}")
+                logger.debug(f"Skip (no-date) {sub.title}")
             continue
         if (d.year, d.month) != (year, month):
             if debug:
-                print(f"[DEBUG] Skip (wrong-month) {sub.title}")
+                logger.debug(f"Skip (wrong-month) {sub.title}")
             continue
         kept.append(sub)
 
@@ -342,7 +348,7 @@ def filter_valid_threads(
 
     kept.sort(key=sort_key)
     if debug:
-        print(f"[DEBUG] Valid threads:     {len(kept)}")
+        logger.debug(f"Valid threads:     {len(kept)}")
     return kept
 
 
@@ -412,7 +418,7 @@ def fetch_top_level_comments_parallel(
             # Handle rate limits and other errors gracefully
             if "rate limit" in str(e).lower() or "429" in str(e):
                 rate_limit_hits += 1
-            print(f"[WARN] Error fetching comments for {submission.id}: {e}")
+            logger.warning(f"Error fetching comments for {submission.id}: {e}")
             return (submission.id, [])
 
     # Determine optimal worker count
@@ -428,7 +434,7 @@ def fetch_top_level_comments_parallel(
                     else:
                         sequential_results.append(comments)
                 except Exception as e:
-                    print(f"[WARN] Error in sequential fallback for {submission.id}: {e}")
+                    logger.warning(f"Error in sequential fallback for {submission.id}: {e}")
                     sequential_results.append([])
 
             if return_metrics:
@@ -449,9 +455,8 @@ def fetch_top_level_comments_parallel(
         # Reduce workers if we're hitting rate limits
         adjusted_workers = max(1, max_workers - min(rate_limit_hits, max_workers - 1))
         if adjusted_workers != max_workers:
-            print(
-                f"[INFO] Adjusting workers from {max_workers} to {adjusted_workers} "
-                f"due to rate limits"
+            logger.info(
+                f"Adjusting workers from {max_workers} to {adjusted_workers} due to rate limits"
             )
             max_workers = adjusted_workers
 
@@ -477,19 +482,21 @@ def fetch_top_level_comments_parallel(
                     parallel_results[index] = comments
                     completed_count += 1
                 except concurrent.futures.TimeoutError:
-                    print(f"[WARN] Timeout while fetching comments for submission at index {index}")
+                    logger.warning(
+                        f"Timeout while fetching comments for submission at index {index}"
+                    )
                     parallel_results[index] = []
                 except Exception as e:
-                    print(f"[WARN] Exception in worker for submission at index {index}: {e}")
+                    logger.warning(f"Exception in worker for submission at index {index}: {e}")
                     parallel_results[index] = []
 
             # Calculate worker utilization
             worker_utilization = completed_count / len(submissions) if submissions else 0.0
 
     except Exception as e:
-        print(f"[WARN] Parallel processing failed: {e}")
+        logger.warning(f"Parallel processing failed: {e}")
         if fallback_to_sequential:
-            print("[INFO] Falling back to sequential processing")
+            logger.info("Falling back to sequential processing")
             return fetch_top_level_comments_parallel(
                 submissions,
                 max_workers=0,
@@ -569,7 +576,7 @@ def load_thread_overrides(month: str) -> List[str]:
         return urls
     except Exception as e:
         # Handle YAML errors gracefully
-        print(f"[WARN] Failed to load thread overrides: {e}")
+        logger.warning(f"Failed to load thread overrides: {e}")
         return []
 
 
@@ -608,16 +615,16 @@ def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Su
     override_path = Path("data/thread_overrides.yaml")
     if not override_path.exists():
         if debug:
-            print(f"[DEBUG] No thread overrides found for {month}")
+            logger.debug(f"No thread overrides found for {month}")
         return []
     try:
         data = load_yaml_with_nfc(override_path)
         if not data:
             if debug:
-                print(f"[DEBUG] No thread overrides found for {month}")
+                logger.debug(f"No thread overrides found for {month}")
             return []
     except Exception as e:
-        print(f"[WARN] Failed to load thread overrides: {e}")
+        logger.warning(f"Failed to load thread overrides: {e}")
         return []
 
     # Build list of (date_key, url) for the month
@@ -637,11 +644,11 @@ def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Su
 
     if not url_date_pairs:
         if debug:
-            print(f"[DEBUG] No thread overrides found for {month}")
+            logger.debug(f"No thread overrides found for {month}")
         return []
 
     if debug:
-        print(f"[DEBUG] Processing {len(url_date_pairs)} thread overrides for {month}")
+        logger.debug(f"Processing {len(url_date_pairs)} thread overrides for {month}")
 
     valid_submissions = []
 
@@ -652,15 +659,14 @@ def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Su
             setattr(submission, "_override_date", date_str)
             valid_submissions.append(submission)
             if debug:
-                print(f"[DEBUG] Validated override: {submission.title}")
+                logger.debug(f"Validated override: {submission.title}")
         except ValueError as e:
-            print(f"[WARN] Failed to fetch thread override: {url} - {e}")
+            logger.warning(f"Failed to fetch thread override: {url} - {e}")
             continue
 
     if debug:
-        print(
-            f"[DEBUG] Successfully processed {len(valid_submissions)}/"
-            f"{len(url_date_pairs)} overrides"
+        logger.debug(
+            f"Successfully processed {len(valid_submissions)}/{len(url_date_pairs)} overrides"
         )
 
     return valid_submissions

@@ -1,8 +1,10 @@
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
+from sotd.utils.logging_config import setup_pipeline_logging
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
@@ -11,9 +13,7 @@ from .comment import run_extraction_for_month
 from .override_manager import OverrideManager
 from .save import save_month_file
 
-logger = logging.getLogger()
-if not logger.hasHandlers():
-    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
 
 
 def _process_month(
@@ -35,7 +35,7 @@ def _process_month(
     monitor.end_file_io_timing()
     if all_comments is None:
         if debug:
-            logging.warning("Skipped missing input file: %s/comments/%s.json", base_path, ym)
+            logger.warning("Skipped missing input file: %s/comments/%s.json", base_path, ym)
         return None
 
     extracted = []
@@ -54,6 +54,7 @@ def _process_month(
     result = {
         "meta": {
             "month": ym,
+            "extracted_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
             "shave_count": len(extracted),
             "missing_count": len(missing),
             "skipped_count": len(skipped),
@@ -151,7 +152,7 @@ def run(args) -> None:
             summary = PipelineOutputFormatter.format_single_month_summary(
                 "extract", month_str, stats
             )
-            print(summary)
+            logger.info(summary)
     else:
         # Multi-month summary
         start_year, start_month = months[0]
@@ -167,25 +168,33 @@ def run(args) -> None:
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "extract", start_str, end_str, total_stats
         )
-        print(summary)
+        logger.info(summary)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Main entry point for the extract phase."""
+    # Setup logging with timestamp format matching shell script
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         run(args)
         return 0  # Success
     except KeyboardInterrupt:
-        print("\n[INFO] Extract phase interrupted by user")
+        logger.info("Extract phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        error_msg = f"[ERROR] Extract phase failed: {e}"
-        print(error_msg)
+        error_msg = f"Extract phase failed: {e}"
+        logger.error(error_msg)
         # Show more context for ValueError (validation errors)
         if isinstance(e, ValueError):
-            print(f"\n[ERROR] Details: {type(e).__name__}: {e}")
+            logger.error(f"Details: {type(e).__name__}: {e}")
         return 1  # Error
 
 

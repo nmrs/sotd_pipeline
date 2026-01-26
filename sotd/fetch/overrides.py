@@ -15,8 +15,11 @@ The JSON file ``overrides/sotd_thread_overrides.json`` must follow:
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple
+
+logger = logging.getLogger(__name__)
 
 import praw
 from praw.models import Submission
@@ -89,13 +92,13 @@ def apply_overrides(
                 kept.append(sub)
                 present_ids.add(tid)
                 if debug:
-                    print(f"[DEBUG] Override include added {tid}")
+                    logger.debug(f"Override include added {tid}")
             else:
                 if debug:
-                    print(f"[WARN] Override include id {tid} could not be fetched (None)")
+                    logger.warning(f"Override include id {tid} could not be fetched (None)")
         except NotFound:
             if debug:
-                print(f"[WARN] Override include id {tid} not found")
+                logger.warning(f"Override include id {tid} not found")
 
     # 3️⃣ deduplicate (should be no dups now) & sort by parsed date
     unique: Dict[str, Submission] = {t.id: t for t in kept}

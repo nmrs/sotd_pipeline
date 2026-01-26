@@ -5,11 +5,14 @@ This module provides standardized parallel month processing functionality
 to eliminate code duplication across extract, match, enrich, and other phases.
 """
 
+import logging
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any, Callable, Dict, List, Tuple
 
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 class ParallelMonthProcessor:
@@ -85,7 +88,7 @@ class ParallelMonthProcessor:
         Returns:
             List of results from processing each month
         """
-        print(f"Processing {len(months)} months in parallel...")
+        logger.info(f"Processing {len(months)} months in parallel...")
 
         # Start wall clock timing
         wall_clock_start = time.time()
@@ -108,7 +111,7 @@ class ParallelMonthProcessor:
                     if result:
                         results.append(result)
                 except Exception as e:
-                    print(f"Error processing {month}: {e}")
+                    logger.error(f"Error processing {month}: {e}")
                     results.append({"month": month, "error": str(e)})
 
         # Calculate wall clock time
@@ -138,7 +141,7 @@ class ParallelMonthProcessor:
         Returns:
             List of results from processing each month
         """
-        print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+        logger.info(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
         # Start wall clock timing
         wall_clock_start = time.time()
@@ -224,9 +227,9 @@ class ParallelMonthProcessor:
         completed = [r for r in results if "error" not in r]
         errors = [r for r in results if "error" in r]
 
-        print("\nParallel processing summary:")
-        print(f"  Completed: {len(completed)} months")
-        print(f"  Errors: {len(errors)} months")
+        logger.info("\nParallel processing summary:")
+        logger.info(f"  Completed: {len(completed)} months")
+        logger.info(f"  Errors: {len(errors)} months")
 
         if completed:
             # Print phase-specific summary
@@ -251,18 +254,18 @@ class ParallelMonthProcessor:
                 r.get("meta", {}).get("skipped_count", 0) for r in completed_results
             )
 
-            print("\nExtraction Summary:")
-            print(f"  Total Shaves: {total_shaves:,}")
-            print(f"  Total Missing: {total_missing:,}")
-            print(f"  Total Skipped: {total_skipped:,}")
+            logger.info("\nExtraction Summary:")
+            logger.info(f"  Total Shaves: {total_shaves:,}")
+            logger.info(f"  Total Missing: {total_missing:,}")
+            logger.info(f"  Total Skipped: {total_skipped:,}")
 
         elif phase_name == "enrich":
             total_records = sum(r.get("records_processed", 0) for r in completed_results)
             total_enriched = sum(r.get("total_enriched", 0) for r in completed_results)
 
-            print("\nEnrichment Summary:")
-            print(f"  Total Records: {total_records:,}")
-            print(f"  Total Enriched: {total_enriched:,}")
+            logger.info("\nEnrichment Summary:")
+            logger.info(f"  Total Records: {total_records:,}")
+            logger.info(f"  Total Enriched: {total_enriched:,}")
 
         elif phase_name == "match":
             # Get wall clock timing from first result
@@ -283,19 +286,19 @@ class ParallelMonthProcessor:
             theoretical_sequential_time = total_individual_time
             speedup = theoretical_sequential_time / wall_clock_time if wall_clock_time > 0 else 1.0
 
-            print("\nPerformance Summary:")
-            print(f"  Total Records: {total_records:,}")
-            print(f"  Wall Clock Time: {wall_clock_time:.2f}s")
-            print(f"  Parallel Workers: {parallel_workers}")
-            print(f"  True Throughput: {true_throughput:.0f} records/sec")
-            print(f"  Parallel Speedup: {speedup:.2f}x")
-            print(f"  Parallel Efficiency: {parallel_efficiency:.1f}%")
+            logger.info("\nPerformance Summary:")
+            logger.info(f"  Total Records: {total_records:,}")
+            logger.info(f"  Wall Clock Time: {wall_clock_time:.2f}s")
+            logger.info(f"  Parallel Workers: {parallel_workers}")
+            logger.info(f"  True Throughput: {true_throughput:.0f} records/sec")
+            logger.info(f"  Parallel Speedup: {speedup:.2f}x")
+            logger.info(f"  Parallel Efficiency: {parallel_efficiency:.1f}%")
 
             # Show individual month performance for comparison
             if len(completed_results) > 1:
                 avg_individual_time = total_individual_time / len(completed_results)
-                print(f"  Avg Individual Month Time: {avg_individual_time:.2f}s")
-                print(f"  Theoretical Sequential Time: {theoretical_sequential_time:.2f}s")
+                logger.info(f"  Avg Individual Month Time: {avg_individual_time:.2f}s")
+                logger.info(f"  Theoretical Sequential Time: {theoretical_sequential_time:.2f}s")
 
             # Aggregate and display enhanced match statistics
             self._print_aggregated_match_statistics(completed_results)
@@ -357,25 +360,25 @@ class ParallelMonthProcessor:
         )
 
         # Display aggregated statistics
-        print("\nMatch Statistics Summary:")
-        print("=" * 50)
-        print(f"Total Records: {total_records:,}")
-        print(f"Total Matched: {total_matched:,}")
-        print(f"Total Unmatched: {total_unmatched:,}")
-        print(f"Overall Match Rate: {overall_match_rate:.1f}%")
+        logger.info("\nMatch Statistics Summary:")
+        logger.info("=" * 50)
+        logger.info(f"Total Records: {total_records:,}")
+        logger.info(f"Total Matched: {total_matched:,}")
+        logger.info(f"Total Unmatched: {total_unmatched:,}")
+        logger.info(f"Overall Match Rate: {overall_match_rate:.1f}%")
 
         # Field presence
-        print("\nField Presence:")
+        logger.info("\nField Presence:")
         for field, count in field_presence.most_common():
-            print(f"  {field.capitalize()}: {count:,}")
+            logger.info(f"  {field.capitalize()}: {count:,}")
 
         # Overall match types
-        print("\nOverall Match Types:")
+        logger.info("\nOverall Match Types:")
         for match_type, count in match_type_counts.most_common():
-            print(f"  {match_type}: {count:,}")
+            logger.info(f"  {match_type}: {count:,}")
 
         # Field-specific analysis
-        print("\nField-Specific Analysis:")
+        logger.info("\nField-Specific Analysis:")
         for field in ["razor", "blade", "brush", "soap"]:
             field_total = field_presence.get(field, 0)
             if field_total > 0:
@@ -383,15 +386,15 @@ class ParallelMonthProcessor:
                 total_field_matches = sum(field_matches.values())
                 success_rate = (total_field_matches / field_total * 100) if field_total > 0 else 0
 
-                print(f"\n  {field.capitalize()}:")
-                print(f"    Present: {field_total:,}")
-                print(f"    Success Rate: {success_rate:.1f}%")
+                logger.info(f"\n  {field.capitalize()}:")
+                logger.info(f"    Present: {field_total:,}")
+                logger.info(f"    Success Rate: {success_rate:.1f}%")
 
                 # Show all match types for this field
                 for match_type, count in field_matches.most_common():
                     if count > 0:
                         percentage = (count / field_total * 100) if field_total > 0 else 0
-                        print(f"      {match_type}: {count:,} ({percentage:.1f}%)")
+                        logger.info(f"      {match_type}: {count:,} ({percentage:.1f}%)")
 
 
 def create_parallel_processor(phase_name: str) -> ParallelMonthProcessor:

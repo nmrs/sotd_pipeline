@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Main entry point for the aggregate phase of the SOTD pipeline."""
 
+import logging
 from pathlib import Path
 from typing import Optional, Sequence
 
 from tqdm import tqdm
 
 from ..cli_utils.date_span import month_span
+from ..utils.logging_config import setup_pipeline_logging
 from .annual_engine import process_annual, process_annual_range, process_annual_range_parallel
 from .annual_loader import load_annual_data
 from .cli import get_parser
 from .engine import process_months, process_months_parallel
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "run",
@@ -151,59 +155,67 @@ def _create_annual_files(
             annual_file = monthly_data_dir / "annual" / f"{year}.json"
             if annual_file.exists() and not force:
                 if debug:
-                    print(
-                        f"[DEBUG] Annual file for {year} already exists, skipping (use --force to regenerate)"
+                    logger.debug(
+                        f"Annual file for {year} already exists, skipping (use --force to regenerate)"
                     )
                 continue
             years_to_process.append(year)
             if debug:
                 missing_count = 12 - len(months_present)
                 if missing_count > 0:
-                    print(
-                        f"[DEBUG] Found {len(months_present)} months for {year} ({missing_count} missing), will create annual aggregation"
+                    logger.debug(
+                        f"Found {len(months_present)} months for {year} ({missing_count} missing), will create annual aggregation"
                     )
                 else:
-                    print(
-                        f"[DEBUG] All 12 months present for {year}, creating annual aggregation file"
+                    logger.debug(
+                        f"All 12 months present for {year}, creating annual aggregation file"
                     )
         else:
             if debug:
-                print(f"[DEBUG] No months found for {year}, skipping annual file creation")
+                logger.debug(f"No months found for {year}, skipping annual file creation")
 
     # Process years with progress bar
     if years_to_process:
-        print(f"Creating annual aggregation files for {len(years_to_process)} year(s)...")
+        logger.info(f"Creating annual aggregation files for {len(years_to_process)} year(s)...")
         for year in tqdm(years_to_process, desc="Annual aggregation", unit="year"):
             try:
                 # Create the annual file (will aggregate whatever months are available)
                 try:
                     process_annual(year=year, data_dir=data_dir, debug=debug, force=force)
                     if debug:
-                        print(f"[DEBUG] Created annual aggregation file for {year}")
+                        logger.debug(f"Created annual aggregation file for {year}")
                 except Exception as e:
                     if debug:
-                        print(f"[DEBUG] Could not create annual file for {year}: {e}")
+                        logger.debug(f"Could not create annual file for {year}: {e}")
                     # Continue with other years even if one fails
                     continue
             except Exception as e:
                 if debug:
-                    print(f"[DEBUG] Error checking/creating annual file for {year}: {e}")
+                    logger.debug(f"Error checking/creating annual file for {year}: {e}")
                 # Continue with other years even if one fails
                 continue
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Main CLI entry point for the aggregate phase."""
+    # Setup logging with timestamp format matching shell script
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         has_errors = run(args)
         return 1 if has_errors else 0
     except KeyboardInterrupt:
-        print("\n[INFO] Aggregate phase interrupted by user")
+        logger.info("Aggregate phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Aggregate phase failed: {e}")
+        logger.error(f"Aggregate phase failed: {e}")
         return 1  # Error
 
 

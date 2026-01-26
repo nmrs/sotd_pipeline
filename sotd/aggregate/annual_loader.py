@@ -64,15 +64,15 @@ class AnnualLoaderPerformanceMonitor(BasePerformanceMonitor):
     def print_summary(self) -> None:
         """Print a human-readable performance summary."""
         metrics = self.metrics
-        print(f"\n=== Annual Loader Performance Summary ({metrics.year}) ===")
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"File I/O Time: {metrics.file_io_time:.2f}s")
-        print(f"Files Loaded: {metrics.files_loaded}")
-        print(f"Files Missing: {metrics.files_missing}")
-        print(f"Files Corrupted: {metrics.files_corrupted}")
-        print(f"Validation Errors: {metrics.validation_errors}")
-        print(f"Total File Size: {metrics.total_file_size_mb:.1f}MB")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
+        logger.info(f"\n=== Annual Loader Performance Summary ({metrics.year}) ===")
+        logger.info(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
+        logger.info(f"File I/O Time: {metrics.file_io_time:.2f}s")
+        logger.info(f"Files Loaded: {metrics.files_loaded}")
+        logger.info(f"Files Missing: {metrics.files_missing}")
+        logger.info(f"Files Corrupted: {metrics.files_corrupted}")
+        logger.info(f"Validation Errors: {metrics.validation_errors}")
+        logger.info(f"Total File Size: {metrics.total_file_size_mb:.1f}MB")
+        logger.info(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
 
 
 def validate_monthly_data_structure(data: Dict) -> bool:

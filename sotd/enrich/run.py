@@ -5,14 +5,15 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
-
-logger = logging.getLogger(__name__)
 from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.override_manager import EnrichmentOverrideManager
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
+from sotd.utils.logging_config import setup_pipeline_logging
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
+
+logger = logging.getLogger(__name__)
 
 
 def _process_month(
@@ -96,11 +97,11 @@ def _process_month(
 
     if debug:
         monitor.print_summary()
-        print(f"Enriched {len(enriched_comments)} records for {ym}")
-        print(f"  Blade enriched: {enrichment_stats['blade_enriched']}")
-        print(f"  Razor enriched: {enrichment_stats['razor_enriched']}")
-        print(f"  Brush enriched: {enrichment_stats['brush_enriched']}")
-        print(f"  Soap enriched: {enrichment_stats['soap_enriched']}")
+        logger.debug(f"Enriched {len(enriched_comments)} records for {ym}")
+        logger.debug(f"  Blade enriched: {enrichment_stats['blade_enriched']}")
+        logger.debug(f"  Razor enriched: {enrichment_stats['razor_enriched']}")
+        logger.debug(f"  Brush enriched: {enrichment_stats['brush_enriched']}")
+        logger.debug(f"  Soap enriched: {enrichment_stats['soap_enriched']}")
 
     return {
         "status": "completed",
@@ -151,18 +152,18 @@ def run(args: argparse.Namespace) -> bool:
 
     # Display error details for failed months
     if errors:
-        print("\n❌ Error Details:")
+        logger.error("\n❌ Error Details:")
         for error_result in errors:
             month = error_result.get("month", "unknown")
             error_msg = error_result.get("error", "unknown error")
-            print(f"  {month}: {error_msg}")
+            logger.error(f"  {month}: {error_msg}")
 
     if skipped:
-        print("\n⚠️  Skipped Months:")
+        logger.warning("\n⚠️  Skipped Months:")
         for skipped_result in skipped:
             month = skipped_result.get("month", "unknown")
             reason = skipped_result.get("reason", "unknown reason")
-            print(f"  {month}: {reason}")
+            logger.warning(f"  {month}: {reason}")
 
     # Print summary using standardized formatter
     if not months:
@@ -176,7 +177,7 @@ def run(args: argparse.Namespace) -> bool:
             summary = PipelineOutputFormatter.format_single_month_summary(
                 "enrich", month_str, stats
             )
-            print(summary)
+            logger.info(summary)
     else:
         # Multi-month summary
         start_year, start_month = months[0]
@@ -191,14 +192,14 @@ def run(args: argparse.Namespace) -> bool:
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "enrich", start_str, end_str, total_stats
         )
-        print(summary)
+        logger.info(summary)
 
     if args.debug and completed:
-        print("\nEnrichment Summary:")
+        logger.debug("\nEnrichment Summary:")
         total_records = sum(r.get("records_processed", 0) for r in completed)
         total_enriched = sum(r.get("total_enriched", 0) for r in completed)
-        print(f"  Total records processed: {total_records}")
-        print(f"  Total records enriched: {total_enriched}")
+        logger.debug(f"  Total records processed: {total_records}")
+        logger.debug(f"  Total records enriched: {total_enriched}")
 
     # Return True if there were errors, False otherwise
     return len(errors) > 0
@@ -206,17 +207,24 @@ def run(args: argparse.Namespace) -> bool:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Main CLI entry point for the enrich phase."""
+    # Setup logging with timestamp format matching shell script
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
 
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         has_errors = run(args)
         return 1 if has_errors else 0
     except KeyboardInterrupt:
-        print("\n[INFO] Enrich phase interrupted by user")
+        logger.info("Enrich phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Enrich phase failed: {e}")
+        logger.error(f"Enrich phase failed: {e}")
         return 1  # Error
 
 

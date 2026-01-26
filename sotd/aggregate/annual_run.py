@@ -62,13 +62,13 @@ class AnnualRunPerformanceMonitor(BasePerformanceMonitor):
     def print_summary(self) -> None:
         """Print a human-readable performance summary."""
         metrics = self.metrics
-        print(f"\n=== Annual Run Performance Summary ({metrics.year}) ===")
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"Years Processed: {metrics.years_processed}")
-        print(f"Years Failed: {metrics.years_failed}")
-        print(f"Validation Passed: {metrics.validation_passed}")
-        print(f"Validation Errors: {metrics.validation_errors}")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
+        logger.info(f"\n=== Annual Run Performance Summary ({metrics.year}) ===")
+        logger.info(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
+        logger.info(f"Years Processed: {metrics.years_processed}")
+        logger.info(f"Years Failed: {metrics.years_failed}")
+        logger.info(f"Validation Passed: {metrics.validation_passed}")
+        logger.info(f"Validation Errors: {metrics.validation_errors}")
+        logger.info(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
 
 
 def run_annual_aggregation(

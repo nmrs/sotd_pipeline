@@ -9,13 +9,17 @@ CLI matrix
 --annual --year YYYY       → annual report for specific year
 --annual --range YYYY:YYYY → annual reports for year range
 --type hardware|software   → report type (default: hardware)
---data-root DIR            → root directory for all input data (default: data)
---out-dir DIR              → output directory for report file (default: data)
+--out-dir DIR              → output directory for report file and input data (default: data)
 --debug                    → enable debug logging
 --force                    → force overwrite existing files
 """
 
+import logging
+import os
+from pathlib import Path
 from typing import Sequence
+
+from sotd.utils.logging_config import setup_pipeline_logging
 
 from . import cli
 from .annual_run import run_annual_report
@@ -24,10 +28,18 @@ from .report_core import run_report
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Main entry point for the report phase."""
+    # Setup logging with timestamp format matching shell script
+    # Note: Don't use file handler - shell script redirects stdout to log file
+    # Set logging level based on debug flag (will be updated after parsing args)
+    setup_pipeline_logging(log_file=None, level=logging.INFO)
+
     try:
         parser = cli.get_parser()
         args = parser.parse_args(argv)
-        # Remove the standalone validation call - parser already handles validation
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         # Route to appropriate function based on annual flag
         if args.annual:
@@ -38,12 +50,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             has_errors = run_report(args)
             return 1 if has_errors else 0
     except KeyboardInterrupt:
-        print("\n[INFO] Report generation interrupted by user")
+        logger = logging.getLogger(__name__)
+        logger.info("Report generation interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Report generation failed: {e}")
-        # Note: args might not be defined if parse_report_args fails
-        # We'll handle this in the exception handler
+        logger = logging.getLogger(__name__)
+        logger.error(f"Report generation failed: {e}")
         return 1  # Error
 
 

@@ -1,6 +1,7 @@
 """Unified monthly report generator for the SOTD pipeline report phase."""
 
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -306,6 +307,12 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 structured_metadata[key] = value
             else:
                 structured_metadata[key] = str(value)
+
+        # Add month and timestamp to metadata
+        structured_metadata["month"] = self.metadata.get("month", "")
+        structured_metadata["generated_at"] = (
+            datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+        )
 
         # Calculate stats
         stats = {
