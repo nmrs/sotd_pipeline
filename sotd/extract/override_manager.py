@@ -26,9 +26,7 @@ class OverrideManager:
         self.overrides: Dict[str, Dict[str, Dict[str, str]]] = {}
         self._file_lines: Optional[List[str]] = None
 
-    def _find_field_line_number(
-        self, month: str, comment_id: str, field: str
-    ) -> Optional[int]:
+    def _find_field_line_number(self, month: str, comment_id: str, field: str) -> Optional[int]:
         """Find the line number where a field appears in the YAML file.
 
         Args:
@@ -171,8 +169,7 @@ class OverrideManager:
                         if line_num:
                             error_msg += f" (line {line_num})"
                         error_msg += (
-                            f" must be a string, got: {type(value).__name__} "
-                            f"(value: {repr(value)})"
+                            f" must be a string, got: {type(value).__name__} (value: {repr(value)})"
                         )
                         raise ValueError(error_msg)
 

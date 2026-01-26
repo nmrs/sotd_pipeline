@@ -96,6 +96,7 @@ def run(args) -> None:
             logger.error(error_msg)
             if args.debug:
                 import traceback
+
                 logger.error("Full traceback:\n%s", traceback.format_exc())
             raise
 

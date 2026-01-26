@@ -23,7 +23,9 @@ class TestRunPipelineScript:
         lock_file.touch()
 
         # Mock the script execution
-        script_path = Path(__file__).parent.parent.parent / "docker" / "pipeline" / "run-pipeline.sh"
+        script_path = (
+            Path(__file__).parent.parent.parent / "docker" / "pipeline" / "run-pipeline.sh"
+        )
 
         # Set up environment
         env = os.environ.copy()
