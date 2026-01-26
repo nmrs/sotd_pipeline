@@ -129,7 +129,7 @@ python -m sotd.report run --month 2025-05 --type software --force
 ### Options
 - `--month`: Required month (YYYY-MM format)
 - `--type`: Report type (hardware|software)
-- `--out-dir`: Base directory (default: "data")
+- `--data-dir`: Data directory (default: "data", or `SOTD_DATA_DIR` env var)
 - `--debug`: Enable verbose output
 - `--force`: Overwrite existing files (default: error if file exists)
 

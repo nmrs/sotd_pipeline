@@ -144,8 +144,7 @@ CLI matrix
 --annual --year YYYY       → annual reports for specific year, both report types
 --annual --range YYYY:YYYY → annual reports for year range, both report types
 --type hardware|software|all → report type (default: all)
---data-root DIR            → root directory for all input data (default: data)
---out-dir DIR              → output directory for report file (default: data)
+--data-dir DIR             → data directory for report file and input data (default: data, or SOTD_DATA_DIR env var)
 --format markdown|json|both → output format (default: markdown)
 --debug                    → enable debug logging
 --force                    → force overwrite existing files

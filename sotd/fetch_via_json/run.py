@@ -22,6 +22,7 @@ from tqdm import tqdm
 from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.save import load_month_file, write_month_file
+from sotd.utils.data_dir import get_data_dir
 from sotd.fetch_via_json.comments import fetch_comments_for_threads_json
 from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_session
 from sotd.fetch_via_json.search import search_threads_json
@@ -40,7 +41,7 @@ def get_parser() -> argparse.ArgumentParser:
     date_group.add_argument("--range", type=str, help="Month range in YYYY-MM:YYYY-MM format")
 
     parser.add_argument(
-        "--out-dir", type=str, default="data", help="Output directory (default: data)"
+        "--data-dir", type=str, default="data", help="Data directory (default: data, or SOTD_DATA_DIR env var)"
     )
     parser.add_argument("--force", action="store_true", help="Force re-fetch even if files exist")
     parser.add_argument("--debug", action="store_true", help="Enable debug output")
@@ -83,9 +84,9 @@ def _process_month(
     if args.debug:
         print(f"[DEBUG] Found {len(threads)} valid threads")
 
-    out = Path(args.out_dir)
-    threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
-    comments_path = out / "comments" / f"{year:04d}-{month:02d}.json"
+    data_dir = get_data_dir(args.data_dir)
+    threads_path = data_dir / "threads" / f"{year:04d}-{month:02d}.json"
+    comments_path = data_dir / "comments" / f"{year:04d}-{month:02d}.json"
 
     if args.force:
         if threads_path.exists():

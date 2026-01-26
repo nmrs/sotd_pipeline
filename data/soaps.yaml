@@ -1241,6 +1241,9 @@ Catie's Bubbles:
     Whack and Unwrap:
       patterns:
       - whack.*unwrap
+    V:
+      patterns:
+      - cat.*bub.*\bv\b
     X:
       patterns:
       - cat.*bub.*\bx\b

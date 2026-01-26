@@ -296,7 +296,7 @@ class TestAggregateIntegration:
 
         # Test single month processing
         with patch(
-            "sys.argv", ["aggregate", "--month", "2025-01", "--out-dir", str(temp_data_dir)]
+            "sys.argv", ["aggregate", "--month", "2025-01", "--data-dir", str(temp_data_dir)]
         ):
             main()
 

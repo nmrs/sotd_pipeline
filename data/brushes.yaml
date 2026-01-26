@@ -2734,6 +2734,11 @@ other_brushes:
       - jequil
       - corenveo
       - je&co
+  Knothead Brushworks:
+    default: Synthetic
+    patterns:
+      - knot ?head
+      - \bkh\b
   L'Occitane en Provence:
     default: Synthetic
     patterns:

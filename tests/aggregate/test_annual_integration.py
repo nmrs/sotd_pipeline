@@ -154,7 +154,7 @@ class TestAnnualAggregatorIntegration:
         args.year = "2024"
         args.force = True
         args.verbose = False
-        args.out_dir = temp_data_dir
+        args.data_dir = temp_data_dir
 
         # Run annual aggregation
         with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save:

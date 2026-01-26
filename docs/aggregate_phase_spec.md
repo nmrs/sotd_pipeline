@@ -428,7 +428,7 @@ python -m sotd.aggregate run --range 2025-01:2025-05
 - `--year`: All months in year (e.g., 2025)
 - `--range`: Date range (e.g., 2025-01:2025-05)
 - `--start` / `--end`: Override range boundaries
-- `--out-dir`: Base directory (default: "data")
+- `--data-dir`: Data directory (default: "data", or `SOTD_DATA_DIR` env var)
 - `--debug`: Enable verbose output
 - `--force`: Overwrite existing files
 

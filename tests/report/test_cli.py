@@ -157,7 +157,7 @@ class TestReportMain:
         """Test main function with data root and out dir arguments."""
         with patch(
             "sys.argv",
-            ["report", "--month", "2023-01", "--data-root", "/data", "--out-dir", "/output"],
+            ["report", "--month", "2023-01", "--data-root", "/data", "--data-dir", "/output"],
         ):
             main()
 

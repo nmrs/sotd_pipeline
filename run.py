@@ -571,7 +571,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                 i += 1
                 continue
 
-            # Pass through all other arguments (date args, out-dir, debug, force)
+            # Pass through all other arguments (date args, data-dir, debug, force)
             phase_args.append(arg)
             i += 1
 
@@ -925,7 +925,7 @@ Examples:
         type=validate_range,
         help="Date range (YYYY-MM:YYYY-MM for monthly, YYYY:YYYY for annual)",
     )
-    parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
+    parser.add_argument("--data-dir", default="data", help="Data directory (default: data, or SOTD_DATA_DIR env var)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
     parser.add_argument(
@@ -1096,8 +1096,8 @@ Examples:
             if args.debug:
                 print(f"[DEBUG] No date arguments provided, defaulting to: {default_month}")
 
-        if args.out_dir:
-            common_args.extend(["--out-dir", args.out_dir])
+        if args.data_dir:
+            common_args.extend(["--data-dir", args.data_dir])
         if args.debug:
             common_args.append("--debug")
         if args.force:

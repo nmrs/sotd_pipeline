@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.logging_config import setup_pipeline_logging
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
@@ -80,26 +81,28 @@ def _process_month(
 def run(args) -> None:
     """Run the extract phase with the given arguments."""
     months = list(month_span(args))
-    base_path = Path(args.out_dir)
+    base_path = get_data_dir(args.data_dir)
 
-    # Initialize override manager if override file is specified
+    # Override file is always relative to data directory
+    override_file_path = base_path / "extract_overrides.yaml"
+
+    # Initialize override manager
     override_manager = None
-    if hasattr(args, "override_file") and args.override_file:
-        try:
-            override_manager = OverrideManager(args.override_file)
-            override_manager.load_overrides()
-            if override_manager.has_overrides():
-                logger.info("Loaded overrides from: %s", args.override_file)
-            else:
-                logger.info("No overrides found in: %s", args.override_file)
-        except Exception as e:
-            error_msg = f"Failed to load overrides from {args.override_file}: {e}"
-            logger.error(error_msg)
-            if args.debug:
-                import traceback
+    try:
+        override_manager = OverrideManager(override_file_path)
+        override_manager.load_overrides()
+        if override_manager.has_overrides():
+            logger.info("Loaded overrides from: %s", override_file_path)
+        else:
+            logger.debug("No overrides found in: %s", override_file_path)
+    except Exception as e:
+        error_msg = f"Failed to load overrides from {override_file_path}: {e}"
+        logger.error(error_msg)
+        if args.debug:
+            import traceback
 
-                logger.error("Full traceback:\n%s", traceback.format_exc())
-            raise
+            logger.error("Full traceback:\n%s", traceback.format_exc())
+        raise
 
     # Create parallel processor for extract phase
     processor = create_parallel_processor("extract")

@@ -61,39 +61,39 @@ run_pipeline_for_month() {
     cd /app
     
     # Run all phases with --force to ensure fresh processing
-    # Pass --out-dir to all phases to use the mounted data directory
+    # Phases auto-detect data directory from SOTD_DATA_DIR env var
     log "Running fetch phase for $month..."
-    if ! $PYTHON_CMD /app/run.py fetch --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py fetch --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Fetch phase failed for $month"
         return 1
     fi
     
     log "Running extract phase for $month..."
-    if ! $PYTHON_CMD /app/run.py extract --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py extract --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Extract phase failed for $month"
         return 1
     fi
     
     log "Running match phase for $month..."
-    if ! $PYTHON_CMD /app/run.py match --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py match --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Match phase failed for $month"
         return 1
     fi
     
     log "Running enrich phase for $month..."
-    if ! $PYTHON_CMD /app/run.py enrich --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py enrich --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Enrich phase failed for $month"
         return 1
     fi
     
     log "Running aggregate phase for $month..."
-    if ! $PYTHON_CMD /app/run.py aggregate --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py aggregate --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Aggregate phase failed for $month"
         return 1
     fi
     
     log "Running report phase for $month..."
-    if ! $PYTHON_CMD /app/run.py report --month "$month" --out-dir "$DATA_DIR" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
+    if ! $PYTHON_CMD /app/run.py report --month "$month" --force >> "$LOG_DIR/pipeline.log" 2>&1; then
         log "ERROR: Report phase failed for $month"
         return 1
     fi

@@ -18,7 +18,7 @@ def test_save_extraction_result_writes_file_correctly():
         out_dir.mkdir(parents=True, exist_ok=True)
         out_file = out_dir / "2025-04.json"
 
-        save_month_file("2025-04", result, out_dir=out_dir)
+        save_month_file("2025-04", result, data_dir=out_dir)
 
         with open(out_file, "r", encoding="utf-8") as f:
             loaded = json.load(f)

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Sequence
 
 from sotd.report.report_core import run_report  # Import run_report from new module
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.performance import PerformanceMonitor
 
 from . import cli
@@ -37,14 +38,14 @@ def run_annual_report(args) -> None:
             logger.debug(f"Year: {args.year}")
             logger.debug(f"Range: {args.range}")
             logger.debug(f"Report type: {args.type}")
-            logger.debug(f"Output directory: {args.out_dir}")
+            logger.debug(f"Output directory: {args.data_dir}")
             logger.debug(f"Output format: {getattr(args, 'format', 'markdown')}")
             logger.debug(f"Force overwrite: {args.force}")
 
         # Convert output directory to Path
-        # For consistency with other phases, use out_dir for both input (aggregated data) and output (reports)
-        out_dir = Path(args.out_dir)
-        data_root = out_dir  # Use out_dir for reading aggregated data, consistent with other phases
+        # For consistency with other phases, use data_dir for both input (aggregated data) and output (reports)
+        out_dir = get_data_dir(args.data_dir)
+        data_root = out_dir  # Use data_dir for reading aggregated data, consistent with other phases
 
         # Determine years to process
         if args.year:

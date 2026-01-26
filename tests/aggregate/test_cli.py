@@ -107,7 +107,7 @@ class TestAggregateRun:
 
         mock_process_months.assert_called_once_with(
             months=["2023-01"],
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=args.debug,
             force=args.force,
             annual_mode=None,
@@ -138,7 +138,7 @@ class TestAggregateRun:
         ]
         mock_process_months_parallel.assert_called_once_with(
             months=expected_months,
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=args.debug,
             force=args.force,
             max_workers=8,
@@ -156,7 +156,7 @@ class TestAggregateRun:
         expected_months = ["2023-01", "2023-02", "2023-03"]
         mock_process_months_parallel.assert_called_once_with(
             months=expected_months,
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=args.debug,
             force=args.force,
             max_workers=8,
@@ -174,7 +174,7 @@ class TestAggregateRun:
         expected_months = ["2023-01", "2023-02", "2023-03"]
         mock_process_months_parallel.assert_called_once_with(
             months=expected_months,
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=args.debug,
             force=args.force,
             max_workers=8,
@@ -191,17 +191,17 @@ class TestAggregateRun:
 
         mock_process_months.assert_called_once_with(
             months=["2023-01"],
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=True,
             force=args.force,
             annual_mode=None,
         )
 
     @patch("sotd.aggregate.run.process_months")
-    def test_run_with_custom_out_dir(self, mock_process_months):
-        """Test run function with custom output directory."""
+    def test_run_with_custom_data_dir(self, mock_process_months):
+        """Test run function with custom data directory."""
         parser = get_parser()
-        args = parser.parse_args(["--month", "2023-01", "--out-dir", "/custom/path"])
+        args = parser.parse_args(["--month", "2023-01", "--data-dir", "/custom/path"])
 
         run(args)
 
@@ -222,7 +222,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_annual.assert_called_once_with(
-            year="2023", data_dir=args.out_dir, debug=args.debug, force=args.force
+            year="2023", data_dir=args.data_dir, debug=args.debug, force=args.force
         )
 
     @patch("sotd.aggregate.run.process_annual_range_parallel")
@@ -236,7 +236,7 @@ class TestAggregateRun:
         # With multiple years, parallel processing is used by default
         mock_process_annual_range_parallel.assert_called_once_with(
             years=["2021", "2022", "2023", "2024"],
-            data_dir=args.out_dir,
+            data_dir=args.data_dir,
             debug=args.debug,
             force=args.force,
             max_workers=8,
@@ -251,7 +251,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_annual.assert_called_once_with(
-            year="2023", data_dir=args.out_dir, debug=True, force=args.force
+            year="2023", data_dir=args.data_dir, debug=True, force=args.force
         )
 
     @patch("sotd.aggregate.run.process_annual")
@@ -263,7 +263,7 @@ class TestAggregateRun:
         run(args)
 
         mock_process_annual.assert_called_once_with(
-            year="2023", data_dir=args.out_dir, debug=args.debug, force=True
+            year="2023", data_dir=args.data_dir, debug=args.debug, force=True
         )
 
 

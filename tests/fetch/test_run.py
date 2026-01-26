@@ -53,7 +53,7 @@ class MockComment:
 def mock_args():
     """Create mock command line arguments."""
     args = argparse.Namespace()
-    args.out_dir = "test_data"
+    args.data_dir = "test_data"
     args.debug = False
     args.force = False
     args.verbose = False
@@ -497,7 +497,7 @@ def test_main_argument_parsing():
             with patch("sotd.fetch.run._process_month", return_value=None):
                 with patch("sotd.fetch.run.tqdm", return_value=[]):
                     # Test various argument combinations
-                    main(["--month", "2025-05", "--debug", "--force", "--out-dir", "custom_data"])
+                    main(["--month", "2025-05", "--debug", "--force", "--data-dir", "custom_data"])
 
     # Verify that month_span was called (indicating args were parsed)
     mock_span.assert_called_once()

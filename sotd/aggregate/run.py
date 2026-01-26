@@ -8,6 +8,7 @@ from typing import Optional, Sequence
 from tqdm import tqdm
 
 from ..cli_utils.date_span import month_span
+from ..utils.data_dir import get_data_dir
 from ..utils.logging_config import setup_pipeline_logging
 from .annual_engine import process_annual, process_annual_range, process_annual_range_parallel
 from .annual_loader import load_annual_data
@@ -27,12 +28,13 @@ __all__ = [
 
 def run(args) -> bool:
     """Run the aggregate phase for the specified date range."""
+    data_dir = get_data_dir(args.data_dir)
     if args.annual:
         # Handle annual aggregation (annual handles missing files gracefully)
         if args.year:
             # Single year - use sequential processing
             process_annual(
-                year=args.year, data_dir=args.out_dir, debug=args.debug, force=args.force
+                year=args.year, data_dir=data_dir, debug=args.debug, force=args.force
             )
             return False  # Annual aggregation handles missing files gracefully
         elif args.range:
@@ -50,7 +52,7 @@ def run(args) -> bool:
                 max_workers = getattr(args, "max_workers", 8)
                 has_errors = process_annual_range_parallel(
                     years=years,
-                    data_dir=args.out_dir,
+                    data_dir=data_dir,
                     debug=args.debug,
                     force=args.force,
                     max_workers=max_workers,
@@ -59,7 +61,7 @@ def run(args) -> bool:
             else:
                 # Use sequential processing
                 process_annual_range(
-                    years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
+                    years=years, data_dir=data_dir, debug=args.debug, force=args.force
                 )
                 return False  # Annual aggregation handles missing files gracefully
         else:
@@ -86,7 +88,7 @@ def run(args) -> bool:
             max_workers = getattr(args, "max_workers", 8)
             has_errors = process_months_parallel(
                 months=months,
-                data_dir=args.out_dir,
+                data_dir=data_dir,
                 debug=args.debug,
                 force=args.force,
                 max_workers=max_workers,
@@ -96,7 +98,7 @@ def run(args) -> bool:
             # Use sequential processing
             has_errors = process_months(
                 months=months,
-                data_dir=args.out_dir,
+                data_dir=data_dir,
                 debug=args.debug,
                 force=args.force,
                 annual_mode=is_annual_mode,
@@ -105,7 +107,7 @@ def run(args) -> bool:
         # After monthly aggregation, check if we should create annual files
         # This happens when --year or --range is specified (not --month)
         if is_annual_mode:
-            _create_annual_files(months, args.out_dir, args.debug, args.force)
+            _create_annual_files(months, data_dir, args.debug, args.force)
             # In annual mode, monthly aggregation errors are expected if enriched data is missing
             # The annual aggregation will work with whatever monthly aggregated files exist
             # So we don't treat monthly errors as fatal failures

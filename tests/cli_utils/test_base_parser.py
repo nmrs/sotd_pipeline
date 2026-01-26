@@ -30,7 +30,7 @@ class TestBaseCLIParser:
         assert "--range" in help_text
         assert "--start" in help_text
         assert "--end" in help_text
-        assert "--out-dir" in help_text
+        assert "--data-dir" in help_text
         assert "--debug" in help_text
         assert "--force" in help_text
 
@@ -51,7 +51,7 @@ class TestBaseCLIParser:
         assert "--range" not in help_text
         assert "--start" not in help_text
         assert "--end" not in help_text
-        assert "--out-dir" in help_text
+        assert "--data-dir" in help_text
         assert "--debug" not in help_text
         assert "--force" in help_text
 
@@ -149,7 +149,7 @@ class TestBaseCLIParser:
         assert args.range is None
         assert args.start is None
         assert args.end is None
-        assert args.out_dir == Path("data")
+        assert args.data_dir == Path("data")
         assert not args.debug
         assert not args.force
 
@@ -190,11 +190,11 @@ class TestBaseCLIParser:
         """Test parsing with debug and force options."""
         parser = BaseCLIParser(description="Test")
         args = parser.parse_args(
-            ["--month", "2023-06", "--out-dir", "/custom/path", "--debug", "--force"]
+            ["--month", "2023-06", "--data-dir", "/custom/path", "--debug", "--force"]
         )
 
         assert args.month == "2023-06"
-        assert args.out_dir == Path("/custom/path")
+        assert args.data_dir == Path("/custom/path")
         assert args.debug
         assert args.force
 
@@ -295,7 +295,7 @@ class TestBaseCLIParser:
         assert "--range" in help_text
         assert "--start" in help_text
         assert "--end" in help_text
-        assert "--out-dir" in help_text
+        assert "--data-dir" in help_text
         assert "--debug" in help_text
         assert "--force" in help_text
         assert "--custom" in help_text

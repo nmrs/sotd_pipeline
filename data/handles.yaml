@@ -233,6 +233,11 @@ artisan_handles:
     Unspecified:
       patterns:
         - jayaruh
+  Knothead Brushworks:
+    Unspecified:
+      patterns:
+        - knot ?head
+        - \bkh\b
   Lancaster Brushworks:
     Unspecified:
       patterns:

@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from sotd.cli_utils.date_span import month_span
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor
 
@@ -174,15 +175,15 @@ def run_report(args) -> bool:
         logger.debug("Report phase started")
         logger.debug(f"Report type: {args.type}")
         logger.debug(f"Report types to generate: {report_types}")
-        logger.debug(f"Output directory: {args.out_dir}")
+        logger.debug(f"Output directory: {args.data_dir}")
         logger.debug(f"Output format: {args.format}")
         logger.debug(f"Force overwrite: {args.force}")
 
     # Convert output directory to Path
-    # For consistency with other phases, use out_dir for both input (aggregated data) and output (reports)
-    # (Other phases: match reads from out_dir/extracted/, writes to out_dir/matched/)
-    out_dir = Path(args.out_dir)
-    data_root = out_dir  # Use out_dir for reading aggregated data, consistent with other phases
+    # For consistency with other phases, use data_dir for both input (aggregated data) and output (reports)
+    # (Other phases: match reads from data_dir/extracted/, writes to data_dir/matched/)
+    out_dir = get_data_dir(args.data_dir)
+    data_root = out_dir  # Use data_dir for reading aggregated data, consistent with other phases
 
     # Get months to process using month_span
     try:

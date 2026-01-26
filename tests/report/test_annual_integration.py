@@ -83,7 +83,7 @@ class TestAnnualReportIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.out_dir = tmp_path / "data" / "report"
+        args.data_dir = tmp_path / "data" / "report"
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format
@@ -128,7 +128,7 @@ class TestAnnualReportIntegration:
 
             # Verify saver was called correctly
             mock_saver.assert_called_once_with(
-                mock_report_content, mock_args.out_dir, "2024", "hardware", False, False
+                mock_report_content, mock_args.data_dir, "2024", "hardware", False, False
             )
 
     def test_run_annual_report_with_debug(self, mock_args, mock_annual_data, tmp_path):
@@ -286,7 +286,7 @@ class TestAnnualReportIntegration:
 
             # Verify saver was called with software type
             mock_saver.assert_called_once_with(
-                mock_report_content, mock_args.out_dir, "2024", "software", False, False
+                mock_report_content, mock_args.data_dir, "2024", "software", False, False
             )
 
     def test_run_annual_report_with_force(self, mock_args, mock_annual_data, tmp_path):
@@ -324,7 +324,7 @@ class TestAnnualReportIntegration:
 
             # Verify saver was called with force=True
             mock_saver.assert_called_once_with(
-                mock_report_content, mock_args.out_dir, "2024", "hardware", True, False
+                mock_report_content, mock_args.data_dir, "2024", "hardware", True, False
             )
 
     def test_run_annual_report_performance_monitoring(self, mock_args, mock_annual_data, tmp_path):
@@ -424,7 +424,7 @@ class TestAnnualReportCLIIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.out_dir = tmp_path / "data" / "report"
+        args.data_dir = tmp_path / "data" / "report"
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format

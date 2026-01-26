@@ -30,12 +30,7 @@ def get_parser() -> BaseCLIParser:
     # Add delta processing support
     parser.add_delta_arguments()
 
-    # Add override file argument
-    parser.add_argument(
-        "--override-file",
-        type=Path,
-        default=Path("data/extract_overrides.yaml"),
-        help="Path to override file for field corrections (default: data/extract_overrides.yaml)",
-    )
+    # Note: override file is now automatically relative to --data-dir
+    # No need for --override-file flag - it's always data_dir/extract_overrides.yaml
 
     return parser

@@ -36,6 +36,7 @@ from sotd.fetch.reddit import (
 )
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils import parse_thread_date
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.logging_config import setup_pipeline_logging
 
 import logging
@@ -87,9 +88,9 @@ def _process_month(
     if args.debug:
         logger.debug(f"Found {len(threads)} valid threads")
 
-    out = Path(args.out_dir)
-    threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
-    comments_path = out / "comments" / f"{year:04d}-{month:02d}.json"
+    data_dir = get_data_dir(args.data_dir)
+    threads_path = data_dir / "threads" / f"{year:04d}-{month:02d}.json"
+    comments_path = data_dir / "comments" / f"{year:04d}-{month:02d}.json"
 
     if args.force:
         if threads_path.exists():
@@ -226,7 +227,8 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
 
         # If --list-months is set, list months and exit
         if args.list_months:
-            months_found = list_available_months(args.out_dir)
+            data_dir = get_data_dir(args.data_dir)
+            months_found = list_available_months(data_dir)
             if months_found:
                 for month in months_found:
                     logger.info(month)
@@ -238,7 +240,8 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
         months = month_span(args)
 
         if args.audit:
-            missing_info = _audit_months(months, args.out_dir)
+            data_dir = get_data_dir(args.data_dir)
+            missing_info = _audit_months(months, data_dir)
             any_missing = False
             # Print missing files
             for mf in missing_info.get("missing_files", []):

@@ -90,9 +90,9 @@ class BaseCLIParser(argparse.ArgumentParser):
         self.add_argument("--end", type=self._validate_month, help="End month for range (YYYY-MM)")
 
     def _add_output_arguments(self) -> None:
-        """Add standardized output directory argument."""
+        """Add standardized data directory argument."""
         self.add_argument(
-            "--out-dir", type=Path, default=Path("data"), help="Output directory (default: data)"
+            "--data-dir", type=Path, default=Path("data"), help="Data directory (default: data, or SOTD_DATA_DIR env var)"
         )
 
     def _add_debug_arguments(self) -> None:

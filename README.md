@@ -34,10 +34,10 @@ The pipeline runs in six sequential phases:
   - Product catalogs in `data/*.yaml` (and manual overrides under `data/`)
   - `praw.ini` in the project root (required for the `fetch` phase)
 - **Outputs**:
-  - Intermediate JSON artifacts per phase under `--out-dir` (default: `data/`)
+  - Intermediate JSON artifacts per phase under `--data-dir` (default: `data/`, or `SOTD_DATA_DIR` env var)
   - Final markdown reports under `data/report/` (monthly + annual)
 
-#### Artifact layout (default `--out-dir data`)
+#### Artifact layout (default `--data-dir data`)
 
 - **Fetch**:
   - `data/threads/YYYY-MM.json`

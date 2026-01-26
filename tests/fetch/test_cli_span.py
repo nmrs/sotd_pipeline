@@ -28,7 +28,7 @@ def test_month_span_success(monkeypatch, argv, expect):
         range=None,
         start=None,
         end=None,
-        out_dir="data",
+        data_dir="data",
         debug=False,
         force=False,
     )
@@ -60,7 +60,7 @@ def test_conflict(monkeypatch, argv, expect):
         range=None,
         start=None,
         end=None,
-        out_dir="data",
+        data_dir="data",
         debug=False,
         force=False,
     )

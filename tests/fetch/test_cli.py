@@ -24,7 +24,7 @@ class TestFetchCLI:
 
         # Test common arguments
         assert args.month == "2025-01"
-        assert args.out_dir == Path("data")
+        assert args.data_dir == Path("data")
         assert not args.debug
         assert not args.force
 
@@ -81,7 +81,7 @@ class TestFetchCLI:
         assert "--range" in help_text
         assert "--start" in help_text
         assert "--end" in help_text
-        assert "--out-dir" in help_text
+        assert "--data-dir" in help_text
         assert "--debug" in help_text
         assert "--force" in help_text
         assert "--audit" in help_text

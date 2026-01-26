@@ -9,6 +9,7 @@ from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.override_manager import EnrichmentOverrideManager
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.logging_config import setup_pipeline_logging
 from sotd.utils.parallel_processor import create_parallel_processor
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
@@ -115,7 +116,7 @@ def _process_month(
 def run(args: argparse.Namespace) -> bool:
     """Run the enrich phase for the specified date range."""
     months = list(month_span(args))
-    base_path = Path(args.out_dir)
+    base_path = get_data_dir(args.data_dir)
 
     # Set up enrichers once at the start - this is a major performance optimization
     setup_enrichers()

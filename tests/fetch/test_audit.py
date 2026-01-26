@@ -99,7 +99,7 @@ def run_cli_with_list_months(tmp_path, extra_files=None):
         print("  ", file.relative_to(data_dir))
     env = os.environ.copy()
     env["PYTHONPATH"] = str(Path(__file__).resolve().parent.parent.parent)
-    cli = [sys.executable, "-m", "sotd.fetch.run", "--out-dir", str(data_dir), "--list-months"]
+    cli = [sys.executable, "-m", "sotd.fetch.run", "--data-dir", str(data_dir), "--list-months"]
     result = subprocess.run(cli, capture_output=True, text=True, env=env, check=True)
     return result.stdout, result.returncode
 

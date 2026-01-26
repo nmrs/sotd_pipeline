@@ -15,6 +15,7 @@ from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils import calculate_match_statistics, format_match_statistics_for_display
 from sotd.match.utils.performance import PerformanceMonitor
+from sotd.utils.data_dir import get_data_dir
 from sotd.utils.filtered_entries import load_filtered_entries
 from sotd.utils.logging_config import setup_pipeline_logging
 
@@ -611,7 +612,7 @@ def process_month(
 
 
 def run_match(args):
-    base_path = Path(args.out_dir)
+    base_path = get_data_dir(args.data_dir)
     months = list(month_span(args))
 
     # Create parallel processor for match phase
@@ -697,8 +698,9 @@ def _process_month_for_sequential(
 
 
 def run_analysis(args):
+    data_dir = get_data_dir(args.data_dir)
     for year, month in month_span(args):
-        matched_path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
+        matched_path = data_dir / "matched" / f"{year:04d}-{month:02d}.json"
         if matched_path.exists():
             subprocess.run(
                 ["python", "sotd/match/tools/analyze_unmatched_razors.py", str(matched_path)],
