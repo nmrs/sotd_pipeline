@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -397,6 +398,7 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     return {
         "month": month,
+        "aggregated_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
         "total_shaves": total_shaves,
         "unique_shavers": unique_shavers,
         "avg_shaves_per_user": avg_shaves_per_user,
