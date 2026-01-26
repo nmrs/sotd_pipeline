@@ -12,6 +12,8 @@ from typing import Any, Callable, Dict, List, Tuple
 
 from tqdm import tqdm
 
+from sotd.utils.logging_config import should_disable_tqdm
+
 logger = logging.getLogger(__name__)
 
 
@@ -103,7 +105,11 @@ class ParallelMonthProcessor:
             # Process results as they complete
             results = []
             for future in tqdm(
-                as_completed(future_to_month), total=len(future_to_month), desc=desc, unit="month"
+                as_completed(future_to_month),
+                total=len(future_to_month),
+                desc=desc,
+                unit="month",
+                disable=should_disable_tqdm(),
             ):
                 month = future_to_month[future]
                 try:
@@ -147,7 +153,7 @@ class ParallelMonthProcessor:
         wall_clock_start = time.time()
 
         results = []
-        for year, month in tqdm(months, desc=desc, unit="month"):
+        for year, month in tqdm(months, desc=desc, unit="month", disable=should_disable_tqdm()):
             result = process_func(year, month, *process_args)
             if result:
                 results.append(result)

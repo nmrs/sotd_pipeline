@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from tqdm import tqdm
 
+from ..utils.logging_config import should_disable_tqdm
 from ..utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
 from .aggregators.annual_aggregator import (
     aggregate_annual_blades,
@@ -1672,7 +1673,11 @@ def process_annual_range_parallel(
 
         results = []
         for future in tqdm(
-            as_completed(future_to_year), total=len(years), desc="Processing", unit="year"
+            as_completed(future_to_year),
+            total=len(years),
+            desc="Processing",
+            unit="year",
+            disable=should_disable_tqdm(),
         ):
             year = future_to_year[future]
             try:
@@ -1724,7 +1729,7 @@ def process_annual_range(
         logger.info(f"Force: {force}")
 
     logger.info(f"Processing annual aggregation for {len(years)} year(s)...")
-    for year in tqdm(years, desc="Annual aggregation", unit="year"):
+    for year in tqdm(years, desc="Annual aggregation", unit="year", disable=should_disable_tqdm()):
         try:
             process_annual(year, data_dir, debug=debug, force=force)
         except Exception as e:

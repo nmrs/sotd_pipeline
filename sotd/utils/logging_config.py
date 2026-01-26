@@ -45,19 +45,22 @@ def setup_pipeline_logging(
     # Remove existing handlers to avoid duplicates
     logger.handlers.clear()
 
-    # Console handler (stdout) - always add for terminal mode
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(level)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    # File handler if log file specified (Docker mode)
+    # In Docker mode (log_file specified), stdout is already redirected to log file,
+    # so we only need the file handler to avoid duplicates.
+    # In terminal mode (log_file is None), we only need the console handler.
     if log_file:
+        # Docker mode: only add file handler (stdout is already redirected)
         log_file.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(log_file, encoding="utf-8")
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
+    else:
+        # Terminal mode: only add console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(level)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
 
     return logger
 
@@ -72,3 +75,15 @@ def get_logger(name: str) -> logging.Logger:
         Logger instance
     """
     return logging.getLogger(name)
+
+
+def should_disable_tqdm() -> bool:
+    """Determine if tqdm progress bars should be disabled.
+
+    In Docker mode (when LOG_DIR is set), tqdm progress bars add noise to log files
+    since stdout is redirected. Disable them in Docker mode, but keep them in terminal mode.
+
+    Returns:
+        True if tqdm should be disabled (Docker mode), False otherwise (terminal mode)
+    """
+    return os.getenv("LOG_DIR") is not None

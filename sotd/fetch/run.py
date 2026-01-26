@@ -37,7 +37,7 @@ from sotd.fetch.reddit import (
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils import parse_thread_date
 from sotd.utils.data_dir import get_data_dir
-from sotd.utils.logging_config import setup_pipeline_logging
+from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 
 import logging
 
@@ -261,7 +261,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
         reddit = get_reddit()
 
         results = []
-        for year, month in tqdm(months, desc="Months", unit="month", disable=False):
+        for year, month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
             result = _process_month(
                 year,
                 month,

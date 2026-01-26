@@ -6,6 +6,7 @@ from typing import Sequence
 
 from tqdm import tqdm
 
+from sotd.utils.logging_config import should_disable_tqdm
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 from .load import load_enriched_data
@@ -27,7 +28,7 @@ def process_months(
     logger.info(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
     results = []
-    for month in tqdm(months, desc="Months", unit="month"):
+    for month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
         monitor = PerformanceMonitor("aggregate")
         monitor.start_total_timing()
 
@@ -168,7 +169,11 @@ def process_months_parallel(
         # Process results as they complete
         results = []
         for future in tqdm(
-            as_completed(future_to_month), total=len(months), desc="Processing", unit="month"
+            as_completed(future_to_month),
+            total=len(months),
+            desc="Processing",
+            unit="month",
+            disable=should_disable_tqdm(),
         ):
             month = future_to_month[future]
             try:

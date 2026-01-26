@@ -28,8 +28,10 @@ fi
 mkdir -p "$LOG_DIR"
 
 # Log function
+# Write directly to log file (stdout is already redirected to log file via cron entry,
+# so using tee would cause duplicates)
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_DIR/pipeline.log"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_DIR/pipeline.log"
 }
 
 # Check for lock file

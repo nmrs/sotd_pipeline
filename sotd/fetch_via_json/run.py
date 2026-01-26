@@ -23,6 +23,7 @@ from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils.data_dir import get_data_dir
+from sotd.utils.logging_config import should_disable_tqdm
 from sotd.fetch_via_json.comments import fetch_comments_for_threads_json
 from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_session
 from sotd.fetch_via_json.search import search_threads_json
@@ -298,7 +299,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("[INFO] Set REDDIT_SESSION_COOKIE for better rate limits (60+ QPM)")
 
         results = []
-        for year, month in tqdm(months, desc="Months", unit="month", disable=False):
+        for year, month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
             result = _process_month(year, month, args)
             results.append(result)
 

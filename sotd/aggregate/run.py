@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from ..cli_utils.date_span import month_span
 from ..utils.data_dir import get_data_dir
-from ..utils.logging_config import setup_pipeline_logging
+from ..utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 from .annual_engine import process_annual, process_annual_range, process_annual_range_parallel
 from .annual_loader import load_annual_data
 from .cli import get_parser
@@ -179,7 +179,7 @@ def _create_annual_files(
     # Process years with progress bar
     if years_to_process:
         logger.info(f"Creating annual aggregation files for {len(years_to_process)} year(s)...")
-        for year in tqdm(years_to_process, desc="Annual aggregation", unit="year"):
+        for year in tqdm(years_to_process, desc="Annual aggregation", unit="year", disable=should_disable_tqdm()):
             try:
                 # Create the annual file (will aggregate whatever months are available)
                 try:
