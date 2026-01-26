@@ -15,59 +15,43 @@ from sotd.fetch_via_json.json_scraper import (
 )
 
 
-def test_cookie_retrieval() -> bool:
+def test_cookie_retrieval() -> None:
     """Test that we can retrieve cookies."""
     print("\n[TEST] Testing cookie retrieval...")
     cookies = get_reddit_cookies()
     if cookies:
         print(f"[TEST] ✅ Cookie retrieved: {list(cookies.keys())}")
-        return True
     else:
         print("[TEST] ⚠️  No cookie found (will use unauthenticated)")
-        return False
+    # Test passes if no exception is raised
+    assert True  # Cookie retrieval doesn't fail, just may return None
 
 
-def test_authenticated_request() -> bool:
+def test_authenticated_request() -> None:
     """Test that we can make an authenticated request to Reddit."""
     print("\n[TEST] Testing authenticated request to Reddit...")
-    try:
-        cookies = get_reddit_cookies()
-        session = get_reddit_session(cookies=cookies)
+    cookies = get_reddit_cookies()
+    session = get_reddit_session(cookies=cookies)
 
-        # Try to fetch a simple Reddit page
-        test_url = "https://www.reddit.com/r/wetshaving/about.json"
-        response = session.get(test_url, timeout=10)
+    # Try to fetch a simple Reddit page
+    test_url = "https://www.reddit.com/r/wetshaving/about.json"
+    response = session.get(test_url, timeout=10)
 
-        if response.status_code == 200:
-            print(f"[TEST] ✅ Successfully fetched {test_url}")
-            print(f"[TEST] ✅ Response status: {response.status_code}")
-            return True
-        else:
-            print(f"[TEST] ⚠️  Got status code {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"[TEST] ❌ Error: {e}")
-        return False
+    print(f"[TEST] Response status: {response.status_code}")
+    assert response.status_code == 200, f"Expected status 200, got {response.status_code}"
 
 
-def test_json_fetch() -> bool:
+def test_json_fetch() -> None:
     """Test that we can fetch JSON from Reddit."""
     print("\n[TEST] Testing JSON fetch...")
-    try:
-        cookies = get_reddit_cookies()
-        json_data = get_reddit_json(
-            "https://www.reddit.com/r/wetshaving/about.json", cookies=cookies
-        )
+    cookies = get_reddit_cookies()
+    json_data = get_reddit_json(
+        "https://www.reddit.com/r/wetshaving/about.json", cookies=cookies
+    )
 
-        if json_data and isinstance(json_data, dict):
-            print(f"[TEST] ✅ Successfully fetched JSON data")
-            return True
-        else:
-            print(f"[TEST] ⚠️  Got invalid JSON data")
-            return False
-    except Exception as e:
-        print(f"[TEST] ❌ Error: {e}")
-        return False
+    assert json_data is not None, "JSON data should not be None"
+    assert isinstance(json_data, dict), f"Expected dict, got {type(json_data)}"
+    print(f"[TEST] ✅ Successfully fetched JSON data")
 
 
 def main() -> None:
@@ -79,13 +63,25 @@ def main() -> None:
     results = []
 
     # Test 1: Cookie retrieval
-    results.append(("Cookie Retrieval", test_cookie_retrieval()))
+    try:
+        test_cookie_retrieval()
+        results.append(("Cookie Retrieval", True))
+    except AssertionError:
+        results.append(("Cookie Retrieval", False))
 
     # Test 2: Authenticated request
-    results.append(("Authenticated Request", test_authenticated_request()))
+    try:
+        test_authenticated_request()
+        results.append(("Authenticated Request", True))
+    except AssertionError:
+        results.append(("Authenticated Request", False))
 
     # Test 3: JSON fetch
-    results.append(("JSON Fetch", test_json_fetch()))
+    try:
+        test_json_fetch()
+        results.append(("JSON Fetch", True))
+    except AssertionError:
+        results.append(("JSON Fetch", False))
 
     # Summary
     print("\n" + "=" * 60)

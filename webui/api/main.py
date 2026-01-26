@@ -4,9 +4,10 @@
 import logging
 import os
 import sys
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, AsyncGenerator, Dict
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -82,11 +83,50 @@ setup_logging()
 
 logger = logging.getLogger(__name__)
 
+# Global queue manager instance
+_queue_manager = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Lifespan event handler - manage background queue worker lifecycle."""
+    global _queue_manager
+    # Startup
+    try:
+        from webui.api.queue_manager import QueueManager
+
+        # Support SOTD_DATA_DIR environment variable for containerized deployments
+        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
+        if sotd_data_dir:
+            data_dir = Path(sotd_data_dir)
+            correct_matches_path = data_dir / "correct_matches"
+        else:
+            # Fallback to relative path for development
+            project_root = Path(__file__).parent.parent.parent
+            correct_matches_path = project_root / "data" / "correct_matches"
+        _queue_manager = QueueManager(correct_matches_path)
+        _queue_manager.start_background_worker()
+        logger.info("✅ Background queue worker started")
+    except Exception as e:
+        logger.error(f"❌ Failed to start background queue worker: {e}", exc_info=True)
+
+    yield
+
+    # Shutdown
+    if _queue_manager:
+        try:
+            _queue_manager.stop_background_worker()
+            logger.info("✅ Background queue worker stopped")
+        except Exception as e:
+            logger.error(f"❌ Error stopping background queue worker: {e}")
+
+
 # Create FastAPI app
 app = FastAPI(
     title="SOTD Pipeline Analyzer API",
     description="API for analyzing SOTD pipeline data",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Include routers
@@ -140,45 +180,6 @@ async def log_requests(request: Request, call_next):
     )
 
     return response
-
-
-# Global queue manager instance
-_queue_manager = None
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Startup event handler - initialize background queue worker."""
-    global _queue_manager
-    try:
-        from webui.api.queue_manager import QueueManager
-
-        # Support SOTD_DATA_DIR environment variable for containerized deployments
-        sotd_data_dir = os.environ.get("SOTD_DATA_DIR")
-        if sotd_data_dir:
-            data_dir = Path(sotd_data_dir)
-            correct_matches_path = data_dir / "correct_matches"
-        else:
-            # Fallback to relative path for development
-            project_root = Path(__file__).parent.parent.parent
-            correct_matches_path = project_root / "data" / "correct_matches"
-        _queue_manager = QueueManager(correct_matches_path)
-        _queue_manager.start_background_worker()
-        logger.info("✅ Background queue worker started")
-    except Exception as e:
-        logger.error(f"❌ Failed to start background queue worker: {e}", exc_info=True)
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Shutdown event handler - stop background queue worker."""
-    global _queue_manager
-    if _queue_manager:
-        try:
-            _queue_manager.stop_background_worker()
-            logger.info("✅ Background queue worker stopped")
-        except Exception as e:
-            logger.error(f"❌ Error stopping background queue worker: {e}")
 
 
 @app.get("/")
