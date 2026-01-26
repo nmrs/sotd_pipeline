@@ -1974,6 +1974,8 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
         removed_count = 0
         added_count = 0
         errors = []
+        # Track which entries were removed from which sections for manager cleanup
+        removed_entries_by_section = {}  # {section: set(correct_match strings)}
 
         for entry in request.matches:
             try:
@@ -2084,6 +2086,10 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                         patterns.pop(i)
                                                         removed = True
                                                         removed_count += 1
+                                                        # Track this removal for manager cleanup
+                                                        if section not in removed_entries_by_section:
+                                                            removed_entries_by_section[section] = set()
+                                                        removed_entries_by_section[section].add(correct_match)
                                                     else:
                                                         i += 1
                         else:
@@ -2102,6 +2108,10 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                     patterns.pop(i)
                                                     removed = True
                                                     removed_count += 1
+                                                    # Track this removal for manager cleanup
+                                                    if section not in removed_entries_by_section:
+                                                        removed_entries_by_section[section] = set()
+                                                    removed_entries_by_section[section].add(correct_match)
                                                 else:
                                                     i += 1
                     else:
@@ -2120,6 +2130,10 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                 patterns.pop(i)
                                                 removed = True
                                                 removed_count += 1
+                                                # Track this removal for manager cleanup
+                                                if section not in removed_entries_by_section:
+                                                    removed_entries_by_section[section] = set()
+                                                removed_entries_by_section[section].add(correct_match)
                                             else:
                                                 i += 1
 
@@ -2375,6 +2389,21 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                 allow_unicode=True,
                                 sort_keys=False,
                             )
+                
+                # Remove entries from manager's in-memory data structures
+                # This prevents save_correct_matches() from overwriting our removals
+                from sotd.utils.extract_normalization import normalize_for_matching
+                for section, removed_matches in removed_entries_by_section.items():
+                    for correct_match in removed_matches:
+                        # Create match key using the same normalization as the manager
+                        normalized_original = normalize_for_matching(correct_match, None, section).lower().strip()
+                        match_key = f"{section}:{normalized_original}"
+                        
+                        # Remove from manager's data structures
+                        if match_key in manager._correct_matches:
+                            manager._correct_matches.discard(match_key)
+                        if match_key in manager._correct_matches_data:
+                            del manager._correct_matches_data[match_key]
             except Exception as e:
                 errors.append(f"Error saving YAML files after removal: {e}")
                 logger.error(f"Error saving YAML files: {e}")
