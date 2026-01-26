@@ -92,7 +92,7 @@ def run(args) -> None:
         override_manager = OverrideManager(override_file_path)
         override_manager.load_overrides()
         if override_manager.has_overrides():
-            logger.info("Loaded overrides from: %s", override_file_path)
+            logger.debug("Loaded overrides from: %s", override_file_path)
         else:
             logger.debug("No overrides found in: %s", override_file_path)
     except Exception as e:

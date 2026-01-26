@@ -1,5 +1,6 @@
 """Unified monthly report generator for the SOTD pipeline report phase."""
 
+import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,6 +10,8 @@ from sotd.utils.template_processor import TemplateProcessor
 
 from .base import BaseReportGenerator
 from .table_generators.table_generator import TableGenerator
+
+logger = logging.getLogger(__name__)
 
 
 class MonthlyReportGenerator(BaseReportGenerator):
@@ -158,7 +161,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 # Internal/logic errors should fail immediately, not be masked
                 error_msg = f"Failed to generate table '{table_name}': {e}"
                 if self.debug:
-                    print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                    logger.debug(f"MonthlyReport({self.report_type}): {error_msg}")
                 raise RuntimeError(error_msg) from e
 
         # Process enhanced table syntax with parameters
@@ -203,8 +206,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 table_name, parameters = parser.parse_placeholder(full_placeholder)
 
                 if self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                    logger.debug(
+                        f"MonthlyReport({self.report_type}): "
                         f"Processing enhanced table: {table_name} "
                         f"with parameters: {parameters}"
                     )
@@ -231,8 +234,8 @@ class MonthlyReportGenerator(BaseReportGenerator):
                 enhanced_tables[full_placeholder] = table_content
 
                 if self.debug:
-                    print(
-                        f"[DEBUG] MonthlyReport({self.report_type}): "
+                    logger.debug(
+                        f"MonthlyReport({self.report_type}): "
                         f"Generated enhanced table for {table_name}"
                     )
 
@@ -243,7 +246,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     f"Failed to process enhanced table placeholder '{full_placeholder}': {e}"
                 )
                 if self.debug:
-                    print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                    logger.debug(f"MonthlyReport({self.report_type}): {error_msg}")
                 raise RuntimeError(error_msg) from e
 
         return enhanced_tables
@@ -297,7 +300,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     # Internal/logic errors should fail immediately, not be masked
                     error_msg = f"Failed to get structured data for table '{table_name}': {e}"
                     if self.debug:
-                        print(f"[DEBUG] MonthlyReport({self.report_type}): {error_msg}")
+                        logger.debug(f"MonthlyReport({self.report_type}): {error_msg}")
                     raise RuntimeError(error_msg) from e
 
         # Prepare metadata (convert numeric values to appropriate types)

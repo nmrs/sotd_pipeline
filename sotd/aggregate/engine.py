@@ -25,7 +25,7 @@ def process_months(
 ) -> bool:
     """Main orchestration for aggregating SOTD data for one or more months."""
     # Show progress bar for processing
-    logger.info(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+    logger.debug(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
     results = []
     for month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
@@ -154,7 +154,7 @@ def process_months_parallel(
     annual_mode: bool = False,
 ) -> bool:
     """Process multiple months in parallel using ProcessPoolExecutor."""
-    logger.info(f"Processing {len(months)} months in parallel...")
+    logger.debug(f"Processing {len(months)} months in parallel...")
 
     # Start wall clock timing
     wall_clock_start = time.time()

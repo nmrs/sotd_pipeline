@@ -159,7 +159,7 @@ class AnnualReportGenerator(BaseReportGenerator):
                 # Internal/logic errors should fail immediately, not be masked
                 error_msg = f"Failed to generate table '{table_name}': {e}"
                 if self.debug:
-                    print(f"[DEBUG] AnnualReport: {error_msg}")
+                    logger.debug(f"AnnualReport: {error_msg}")
                 raise RuntimeError(error_msg) from e
 
         # Process enhanced table syntax with parameters (like monthly reports)
@@ -202,8 +202,8 @@ class AnnualReportGenerator(BaseReportGenerator):
                 table_name, parameters = parser.parse_placeholder(full_placeholder)
 
                 if self.debug:
-                    print(
-                        f"[DEBUG] AnnualReport({self.report_type}): "
+                    logger.debug(
+                        f"AnnualReport({self.report_type}): "
                         f"Processing enhanced table: {table_name} "
                         f"with parameters: {parameters}"
                     )
@@ -230,8 +230,8 @@ class AnnualReportGenerator(BaseReportGenerator):
                 enhanced_tables[full_placeholder] = table_content
 
                 if self.debug:
-                    print(
-                        f"[DEBUG] AnnualReport({self.report_type}): "
+                    logger.debug(
+                        f"AnnualReport({self.report_type}): "
                         f"Generated enhanced table for {table_name}"
                     )
 
@@ -242,7 +242,7 @@ class AnnualReportGenerator(BaseReportGenerator):
                     f"Failed to process enhanced table placeholder '{full_placeholder}': {e}"
                 )
                 if self.debug:
-                    print(f"[DEBUG] AnnualReport({self.report_type}): {error_msg}")
+                    logger.debug(f"AnnualReport({self.report_type}): {error_msg}")
                 raise RuntimeError(error_msg) from e
 
         return enhanced_tables
@@ -289,7 +289,7 @@ class AnnualReportGenerator(BaseReportGenerator):
                     # Internal/logic errors should fail immediately, not be masked
                     error_msg = f"Failed to get structured data for table '{table_name}': {e}"
                     if self.debug:
-                        print(f"[DEBUG] AnnualReport({self.report_type}): {error_msg}")
+                        logger.debug(f"AnnualReport({self.report_type}): {error_msg}")
                     raise RuntimeError(error_msg) from e
 
         # Prepare metadata (convert numeric values to appropriate types)
@@ -456,16 +456,12 @@ def generate_annual_report(
                 comparison_data[f"{comp_year}-12"] = (comp_metadata, comp_data_section)
 
             if debug:
-                logger.info(
+                logger.debug(
                     f"Loaded comparison data for years: {list(comparison_years_data.keys())}"
-                )
-                print(
-                    f"[DEBUG] Loaded comparison data for years: {list(comparison_years_data.keys())}"
                 )
         except Exception as e:
             if debug:
                 logger.warning(f"Failed to load comparison data: {e}")
-                print(f"[DEBUG] Warning: Failed to load comparison data: {e}")
             comparison_data = {}
 
         # Generate report content using unified patterns

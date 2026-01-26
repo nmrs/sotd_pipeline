@@ -8,11 +8,14 @@ Individual phases can be run separately or as part of a complete pipeline workfl
 import argparse
 import datetime
 import io
+import logging
 import re
 import sys
 import time
 from contextlib import redirect_stdout
 from typing import Any, Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 def validate_month(value: str) -> str:
@@ -473,8 +476,8 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
     }
 
     if phase not in phase_modules:
-        print(f"[ERROR] Unknown phase: {phase}")
-        print(f"[INFO] Available phases: {', '.join(phase_modules.keys())}")
+        logger.error(f"Unknown phase: {phase}")
+        logger.info(f"Available phases: {', '.join(phase_modules.keys())}")
         return 1
 
     try:
@@ -577,7 +580,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
 
         # Debug output to see what arguments are being passed
         if debug:
-            print(f"[DEBUG] {phase} phase args: {phase_args}")
+            logger.debug(f"{phase} phase args: {phase_args}")
 
         # Capture stdout during phase execution
         # For fetch_json phase, use Tee-like stdout to show output in real-time
@@ -629,10 +632,10 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
         return (exit_code, captured_output)
 
     except ImportError as e:
-        print(f"[ERROR] Failed to import {phase} phase: {e}")
+        logger.error(f"Failed to import {phase} phase: {e}")
         return (1, "")
     except Exception as e:
-        print(f"[ERROR] Failed to run {phase} phase: {e}")
+        logger.error(f"Failed to run {phase} phase: {e}")
         return (1, "")
 
 
@@ -649,8 +652,8 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         Exit code (0 for success, non-zero for failure)
     """
     if debug:
-        print(f"[DEBUG] Running pipeline phases: {', '.join(phases)}")
-        print(f"[DEBUG] Base arguments: {args}")
+        logger.debug(f"Running pipeline phases: {', '.join(phases)}")
+        logger.debug(f"Base arguments: {args}")
 
     # Track pipeline timing and results
     pipeline_start_time = time.time()
@@ -670,7 +673,7 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
             print(f"PHASE {i + 1}/{len(phases)}: {phase.upper()}")
             print(f"{'=' * 50}")
         elif debug:
-            print(f"\n[DEBUG] Running phase {i + 1}/{len(phases)}: {phase}")
+            logger.debug(f"Running phase {i + 1}/{len(phases)}: {phase}")
 
         # Track phase timing
         phase_start_time = time.time()
@@ -721,7 +724,7 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
             return exit_code
 
         if debug:
-            print(f"[DEBUG] Phase {phase} completed successfully")
+            logger.debug(f"Phase {phase} completed successfully")
 
     # Calculate total pipeline time
     total_time = time.time() - pipeline_start_time
@@ -998,30 +1001,30 @@ Examples:
     if len(active_date_args) > 1:
         # Check for specific conflicts
         if args.month and args.ytd:
-            print("[ERROR] Cannot use --month and --ytd together. Use one or the other.")
+            logger.error("Cannot use --month and --ytd together. Use one or the other.")
             return 1
         if args.month and args.range:
-            print("[ERROR] Cannot use --month and --range together. Use one or the other.")
+            logger.error("Cannot use --month and --range together. Use one or the other.")
             return 1
         if args.year and args.ytd:
-            print("[ERROR] Cannot use --year and --ytd together. Use one or the other.")
+            logger.error("Cannot use --year and --ytd together. Use one or the other.")
             return 1
         if args.year and args.range:
-            print("[ERROR] Cannot use --year and --range together. Use one or the other.")
+            logger.error("Cannot use --year and --range together. Use one or the other.")
             return 1
         if args.ytd and args.range:
-            print("[ERROR] Cannot use --ytd and --range together. Use one or the other.")
+            logger.error("Cannot use --ytd and --range together. Use one or the other.")
             return 1
         if args.ytd and (args.start or args.end):
-            print("[ERROR] Cannot use --ytd with --start/--end. Use one or the other.")
+            logger.error("Cannot use --ytd with --start/--end. Use one or the other.")
             return 1
         if args.range and (args.start or args.end):
-            print("[ERROR] Cannot use --range with --start/--end. Use one or the other.")
+            logger.error("Cannot use --range with --start/--end. Use one or the other.")
             return 1
 
         # Generic error for other combinations
-        print(f"[ERROR] Multiple conflicting date arguments specified: {active_date_args}")
-        print("Use only one of: --month, --year, --range, --start/--end, or --ytd")
+        logger.error(f"Multiple conflicting date arguments specified: {active_date_args}")
+        logger.error("Use only one of: --month, --year, --range, --start/--end, or --ytd")
         return 1
 
     try:
@@ -1029,15 +1032,15 @@ Examples:
         try:
             phases = get_phase_range(args.phase_range)
         except ValueError as e:
-            print(f"[ERROR] {e}")
+            logger.error(str(e))
             return 1
 
         if not phases:
-            print("[ERROR] No phases specified to run")
+            logger.error("No phases specified to run")
             return 1
 
         if args.debug:
-            print(f"[DEBUG] Running phases: {', '.join(phases)}")
+            logger.debug(f"Running phases: {', '.join(phases)}")
 
         # Build common arguments
         common_args = []
@@ -1051,8 +1054,8 @@ Examples:
             # Delta mode: process current month(s) + historical comparison months
             delta_months = calculate_delta_months(args)
             if args.debug:
-                print(
-                    f"[DEBUG] Delta mode: processing {len(delta_months)} months: "
+                logger.debug(
+                    f"Delta mode: processing {len(delta_months)} months: "
                     f"{', '.join(delta_months)}"
                 )
             # Pass delta-months to all phases - they will filter as needed
@@ -1077,7 +1080,7 @@ Examples:
             ytd_start = f"{current_year}-01"
             ytd_end = f"{current_year}-{current_month:02d}"
             if args.debug:
-                print(f"[DEBUG] YTD mode: processing range {ytd_start} to {ytd_end}")
+                logger.debug(f"YTD mode: processing range {ytd_start} to {ytd_end}")
             common_args.extend(["--start", ytd_start, "--end", ytd_end])
         elif args.month:
             common_args.extend(["--month", args.month])
@@ -1094,7 +1097,7 @@ Examples:
             default_month = get_default_month()
             common_args.extend(["--month", default_month])
             if args.debug:
-                print(f"[DEBUG] No date arguments provided, defaulting to: {default_month}")
+                logger.debug(f"No date arguments provided, defaulting to: {default_month}")
 
         if args.data_dir:
             common_args.extend(["--data-dir", args.data_dir])
@@ -1116,14 +1119,14 @@ Examples:
         return run_pipeline(phases, common_args, debug=args.debug)
 
     except KeyboardInterrupt:
-        print("\n[INFO] Interrupted by user")
+        logger.info("Interrupted by user")
         return 1
     except Exception as e:
-        print(f"[ERROR] Unexpected error: {e}")
+        logger.error(f"Unexpected error: {e}")
         if args.debug:
             import traceback
 
-            traceback.print_exc()
+            logger.debug("Full traceback:\n%s", traceback.format_exc())
         return 1
 
 

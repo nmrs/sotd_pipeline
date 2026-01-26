@@ -465,11 +465,12 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    # Setup logging
+    # Setup logging with standardized format
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(
         level=log_level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        format="[%(asctime)s] [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # Generate search index

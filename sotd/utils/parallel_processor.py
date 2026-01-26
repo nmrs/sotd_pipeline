@@ -90,7 +90,7 @@ class ParallelMonthProcessor:
         Returns:
             List of results from processing each month
         """
-        logger.info(f"Processing {len(months)} months in parallel...")
+        logger.debug(f"Processing {len(months)} months in parallel...")
 
         # Start wall clock timing
         wall_clock_start = time.time()
@@ -147,7 +147,7 @@ class ParallelMonthProcessor:
         Returns:
             List of results from processing each month
         """
-        logger.info(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+        logger.debug(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
         # Start wall clock timing
         wall_clock_start = time.time()

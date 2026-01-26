@@ -218,7 +218,7 @@ class OverrideManager:
             if month_overrides:
                 self.overrides[month] = month_overrides
 
-        logger.info(
+        logger.debug(
             "Loaded %d overrides from %s", len(duplicate_overrides), self.override_file_path
         )
 

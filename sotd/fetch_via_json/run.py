@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import calendar
+import logging
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,10 +24,12 @@ from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils.data_dir import get_data_dir
-from sotd.utils.logging_config import should_disable_tqdm
+from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 from sotd.fetch_via_json.comments import fetch_comments_for_threads_json
 from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_session
 from sotd.fetch_via_json.search import search_threads_json
+
+logger = logging.getLogger(__name__)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -77,13 +80,13 @@ def _process_month(
     cookies = get_reddit_cookies()
 
     if args.debug:
-        print(f"[DEBUG] Searching for threads in {year:04d}-{month:02d}")
+        logger.debug(f"Searching for threads in {year:04d}-{month:02d}")
 
     # Search for threads
     threads = search_threads_json("wetshaving", year, month, debug=args.debug, cookies=cookies)
 
     if args.debug:
-        print(f"[DEBUG] Found {len(threads)} valid threads")
+        logger.debug(f"Found {len(threads)} valid threads")
 
     data_dir = get_data_dir(args.data_dir)
     threads_path = data_dir / "threads" / f"{year:04d}-{month:02d}.json"
@@ -118,7 +121,7 @@ def _process_month(
     )
 
     if not merged_threads:
-        print(f"[WARN] No threads found for {year:04d}-{month:02d}; skipping file writes.")
+        logger.warning(f"No threads found for {year:04d}-{month:02d}; skipping file writes.")
         # Calculate missing days
         from datetime import date as _date
         from sotd.utils import parse_thread_date
@@ -166,12 +169,12 @@ def _process_month(
 
     # Fetch comments (Phase 3)
     if args.verbose:
-        print(f"[INFO] Fetching comments for {len(merged_threads)} threads...")
+        logger.info(f"Fetching comments for {len(merged_threads)} threads...")
 
     # Warning for skip-unchanged optimization
     if args.skip_unchanged:
-        print(
-            "[WARN] Using --skip-unchanged optimization. "
+        logger.warning(
+            "Using --skip-unchanged optimization. "
             "Risk: If a comment is deleted and a new one is added (same count), changes may be missed."
         )
 
@@ -224,8 +227,8 @@ def _process_month(
     write_month_file(comments_path, comments_meta, merged_comments)
 
     if args.verbose:
-        print(
-            f"[INFO] Fetched {len(merged_threads)} threads, {len(merged_comments)} comments "
+        logger.info(
+            f"Fetched {len(merged_threads)} threads, {len(merged_comments)} comments "
             f"for {year:04d}-{month:02d} ({len(missing)} missing days)"
         )
 
@@ -254,8 +257,8 @@ def _process_month(
         new_threads_count = sum(1 for t in merged_threads if t.get("id") not in existing_thread_ids)
 
         if skipped_count > 0 or fetched_count < total_threads:
-            print(
-                f"[INFO] Skip-unchanged summary: "
+            logger.info(
+                f"Skip-unchanged summary: "
                 f"{fetched_count} threads fetched, "
                 f"{skipped_count} threads skipped, "
                 f"{new_threads_count} new threads"
@@ -282,21 +285,28 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     No OAuth or client credentials required - uses public JSON endpoints.
     """
+    # Setup logging
+    setup_pipeline_logging(level=logging.INFO)
+
     try:
         parser = get_parser()
         args = parser.parse_args(argv)
+
+        # Update logging level if debug is enabled
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         # Compute month span
         months = month_span(args)
 
         if not months:
-            print("[ERROR] No months specified. Use --month, --year, --start/--end, or --range")
+            logger.error("No months specified. Use --month, --year, --start/--end, or --range")
             return 1
 
         cookies = get_reddit_cookies()
         if not cookies:
-            print("[WARN] No cookie found. Using unauthenticated requests (10 QPM limit)")
-            print("[INFO] Set REDDIT_SESSION_COOKIE for better rate limits (60+ QPM)")
+            logger.warning("No cookie found. Using unauthenticated requests (10 QPM limit)")
+            logger.info("Set REDDIT_SESSION_COOKIE for better rate limits (60+ QPM)")
 
         results = []
         for year, month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
@@ -310,8 +320,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             month = res["month"]
             missing_days = res["missing_days"]
             if args.verbose:
-                print(
-                    f"[INFO] JSON fetch complete for {year:04d}-{month:02d}: "
+                logger.info(
+                    f"JSON fetch complete for {year:04d}-{month:02d}: "
                     f"{res['threads']} threads, "
                     f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
                 )
@@ -323,24 +333,24 @@ def main(argv: Sequence[str] | None = None) -> int:
             total_missing = len(all_missing_days)
 
             if args.verbose:
-                print(
-                    f"[INFO] JSON fetch complete for "
+                logger.info(
+                    f"JSON fetch complete for "
                     f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
                     f"{total_threads} threads, "
                     f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
                 )
 
-        print("\n[INFO] ✅ JSON-based fetch complete! (Thread discovery + comment fetching)")
+        logger.info("JSON-based fetch complete! (Thread discovery + comment fetching)")
         return 0
     except KeyboardInterrupt:
-        print("\n[INFO] Fetch phase interrupted by user")
+        logger.info("Fetch phase interrupted by user")
         return 1
     except Exception as e:
-        print(f"[ERROR] Fetch phase failed: {e}")
+        logger.error(f"Fetch phase failed: {e}")
         import traceback
 
         if args.debug if "args" in locals() else False:
-            traceback.print_exc()
+            logger.debug("Full traceback:\n%s", traceback.format_exc())
         return 1
 
 
