@@ -80,8 +80,8 @@ def main():
     # Compare reports
     for month in ["2025-06", "2025-07"]:
         for report_type in ["hardware", "software"]:
-            baseline_file = baseline_dir / "reports" / f"{month}-{report_type}.md"
-            current_file = Path(f"data/reports/{month}-{report_type}.md")
+            baseline_file = baseline_dir / "report" / f"{month}-{report_type}.md"
+            current_file = Path(f"data/report/{month}-{report_type}.md")
 
             if current_file.exists():
                 if not compare_md_files(

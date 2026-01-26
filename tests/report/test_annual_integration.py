@@ -83,7 +83,7 @@ class TestAnnualReportIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.out_dir = tmp_path / "data" / "reports"
+        args.out_dir = tmp_path / "data" / "report"
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format
@@ -116,7 +116,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_create_generator.return_value = mock_generator_instance
-            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
+            mock_saver.return_value = Path("data/report/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -160,7 +160,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_create_generator.return_value = mock_generator_instance
-            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
+            mock_saver.return_value = Path("data/report/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -274,7 +274,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_create_generator.return_value = mock_generator_instance
-            mock_saver.return_value = Path("data/reports/annual/2024-software.md")
+            mock_saver.return_value = Path("data/report/annual/2024-software.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -317,7 +317,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_create_generator.return_value = mock_generator_instance
-            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
+            mock_saver.return_value = Path("data/report/annual/2024-hardware.md")
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
@@ -354,7 +354,7 @@ class TestAnnualReportIntegration:
         ):
 
             mock_create_generator.return_value = mock_generator_instance
-            mock_saver.return_value = Path("data/reports/annual/2024-hardware.md")
+            mock_saver.return_value = Path("data/report/annual/2024-hardware.md")
 
             # Create a proper mock monitor with the required attributes
             mock_monitor = Mock()
@@ -385,7 +385,7 @@ class TestAnnualReportIntegration:
             json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
-        output_path = Path("data/reports/annual/2024-hardware.md")
+        output_path = Path("data/report/annual/2024-hardware.md")
 
         with (
             patch("sotd.report.annual_run.generate_annual_report") as mock_generator,
@@ -424,7 +424,7 @@ class TestAnnualReportCLIIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.out_dir = tmp_path / "data" / "reports"
+        args.out_dir = tmp_path / "data" / "report"
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format
@@ -530,7 +530,7 @@ class TestAnnualReportSaveIntegration:
         assert output_path.exists()
         assert output_path.name == "2024-hardware.md"
         assert output_path.parent.name == "annual"
-        assert output_path.parent.parent.name == "reports"
+        assert output_path.parent.parent.name == "report"
 
         # Verify content was written correctly
         with open(output_path, "r") as f:
@@ -543,7 +543,7 @@ class TestAnnualReportSaveIntegration:
         out_dir = tmp_path
 
         # Create existing file in annual subdirectory
-        annual_dir = out_dir / "reports" / "annual"
+        annual_dir = out_dir / "report" / "annual"
         annual_dir.mkdir(parents=True)
         existing_file = annual_dir / "2024-hardware.md"
         with open(existing_file, "w") as f:
@@ -565,7 +565,7 @@ class TestAnnualReportSaveIntegration:
         out_dir = tmp_path
 
         # Create existing file in annual subdirectory
-        annual_dir = out_dir / "reports" / "annual"
+        annual_dir = out_dir / "report" / "annual"
         annual_dir.mkdir(parents=True)
         existing_file = annual_dir / "2024-hardware.md"
         with open(existing_file, "w") as f:
@@ -581,7 +581,7 @@ class TestAnnualReportSaveIntegration:
         out_dir = tmp_path
 
         # Directory doesn't exist yet
-        annual_dir = out_dir / "reports" / "annual"
+        annual_dir = out_dir / "report" / "annual"
         assert not annual_dir.exists()
 
         output_path = annual_run.save_annual_report(
@@ -607,7 +607,7 @@ class TestAnnualReportSaveIntegration:
         assert output_path.exists()
         assert output_path.name == "2024-software.md"
         assert output_path.parent.name == "annual"
-        assert output_path.parent.parent.name == "reports"
+        assert output_path.parent.parent.name == "report"
 
         # Verify correct filename
         assert output_path.name == "2024-software.md"

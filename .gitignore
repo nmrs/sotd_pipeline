@@ -32,10 +32,10 @@ data/correct_matches/.queue.jsonl
 data/correct_matches/.status.json
 data/correct_matches/.status.archive.*.json
 # Ignore generated report files
-data/reports/*.md
-data/reports/*.json
-data/reports/annual/*.md
-data/reports/annual/*.json
+data/report/*.md
+data/report/*.json
+data/report/annual/*.md
+data/report/annual/*.json
 data/search_index.json
 # Ignore learning data files
 data/learning/brush_user_actions/*.yaml

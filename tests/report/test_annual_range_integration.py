@@ -80,7 +80,7 @@ class TestAnnualRangeProcessing:
         mock_generator_instance = Mock()
         mock_generator_instance.generate_report.return_value = "# Test Report Content"
         mock_create_generator.return_value = mock_generator_instance
-        mock_save.return_value = Path("data/reports/annual/2023-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2023-hardware.md")
 
         # Need to create the data file for the test
         data_dir = Path("data") / "aggregated" / "annual"
@@ -132,7 +132,7 @@ class TestAnnualRangeProcessing:
             mock_generator_instances.append(mock_instance)
 
         mock_create_generator.side_effect = mock_generator_instances
-        mock_save.return_value = Path("data/reports/annual/2021-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2021-hardware.md")
 
         # Create data files for all years
         data_dir = Path("data") / "aggregated" / "annual"
@@ -191,7 +191,7 @@ class TestAnnualRangeProcessing:
             mock_generator_instances.append(mock_instance)
 
         mock_create_generator.side_effect = mock_generator_instances
-        mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2022-hardware.md")
 
         # Create data files
         data_dir = Path("data") / "aggregated" / "annual"
@@ -250,7 +250,7 @@ class TestAnnualRangeProcessing:
             mock_generator_instances.append(mock_instance)
 
         mock_create_generator.side_effect = mock_generator_instances
-        mock_save.return_value = Path("data/reports/annual/2022-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2022-hardware.md")
 
         # Create data files
         data_dir = Path("data") / "aggregated" / "annual"
@@ -363,7 +363,7 @@ class TestAnnualRangeProcessing:
         def mock_save_side_effect(report_content, out_dir, year, report_type, force, debug):
             if year == "2022":
                 raise OSError("Save failed for 2022")
-            return Path(f"data/reports/annual/{year}-{report_type}.md")
+            return Path(f"data/report/annual/{year}-{report_type}.md")
 
         mock_save.side_effect = mock_save_side_effect
 
@@ -459,7 +459,7 @@ class TestAnnualRangePerformance:
             mock_generator_instances.append(mock_instance)
 
         mock_create_generator.side_effect = mock_generator_instances
-        mock_save.return_value = Path("data/reports/annual/2015-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2015-hardware.md")
 
         # Create data files for all years
         data_dir = Path("data") / "aggregated" / "annual"
@@ -514,7 +514,7 @@ class TestAnnualRangePerformance:
             mock_generator_instances.append(mock_instance)
 
         mock_create_generator.side_effect = mock_generator_instances
-        mock_save.return_value = Path("data/reports/annual/2020-hardware.md")
+        mock_save.return_value = Path("data/report/annual/2020-hardware.md")
 
         # Create data files for all years
         data_dir = Path("data") / "aggregated" / "annual"

@@ -41,13 +41,6 @@ class ReportCLIParser(BaseCLIParser):
         )
 
         self.add_argument(
-            "--data-root",
-            type=Path,
-            default=Path("data"),
-            help="Root directory for all input data (default: data)",
-        )
-
-        self.add_argument(
             "--format",
             choices=["markdown", "json", "both"],
             default="markdown",
