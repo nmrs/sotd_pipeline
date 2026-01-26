@@ -1,0 +1,26 @@
+services:
+  sotd-pipeline:
+    build:
+      context: ../..
+      dockerfile: docker/pipeline/Dockerfile
+    container_name: sotd-pipeline-local
+    restart: "no"  # Don't auto-restart for local testing
+    volumes:
+      # Mount local data directory for testing
+      - type: bind
+        source: ../../data  # Local data directory
+        target: /data
+    environment:
+      # Test with a faster schedule (every 5 minutes) or manual execution
+      - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}  # Every 5 minutes for testing
+      - SOTD_DATA_DIR=/data
+      - LOG_DIR=/data/logs
+      # Reddit API credentials (PRAW environment variables)
+      # These override praw.ini if set. Get values from your praw.ini file.
+      # OAuth script-type authentication only requires client_id, client_secret, and user_agent.
+      # Note: PRAW requires lowercase 'praw_' prefix. Use lowercase in .env file.
+      - praw_client_id=${praw_client_id:-${PRAW_CLIENT_ID}}
+      - praw_client_secret=${praw_client_secret:-${PRAW_CLIENT_SECRET}}
+      - praw_user_agent=${praw_user_agent:-${PRAW_USER_AGENT:-SOTD Pipeline}}
+    # Keep container running (cron runs in foreground)
+    command: ["./entrypoint.sh"]

@@ -35,7 +35,7 @@ The pipeline runs in six sequential phases:
   - `praw.ini` in the project root (required for the `fetch` phase)
 - **Outputs**:
   - Intermediate JSON artifacts per phase under `--out-dir` (default: `data/`)
-  - Final markdown reports under `data/reports/` (monthly + annual)
+  - Final markdown reports under `data/report/` (monthly + annual)
 
 #### Artifact layout (default `--out-dir data`)
 
@@ -49,8 +49,8 @@ The pipeline runs in six sequential phases:
   - Monthly: `data/aggregated/YYYY-MM.json`
   - Annual: `data/aggregated/annual/YYYY.json`
 - **Report**:
-  - Monthly: `data/reports/YYYY-MM-{hardware|software}.md`
-  - Annual: `data/reports/annual/YYYY-{hardware|software}.md`
+  - Monthly: `data/report/YYYY-MM-{hardware|software}.md`
+  - Annual: `data/report/annual/YYYY-{hardware|software}.md`
 
 #### Common operator override files
 
