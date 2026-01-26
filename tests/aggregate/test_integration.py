@@ -360,17 +360,18 @@ class TestAggregateIntegration:
         assert aggregated_data["meta"]["total_shaves"] == 1
         assert aggregated_data["meta"]["unique_shavers"] == 1
 
-    def test_debug_mode_coverage(self, sample_enriched_data, temp_data_dir, capsys):
+    def test_debug_mode_coverage(self, sample_enriched_data, temp_data_dir, caplog):
         """Test debug mode provides useful output."""
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
             json.dump(sample_enriched_data, f, ensure_ascii=False)
 
-        process_months(["2025-01"], temp_data_dir, debug=True)
+        with caplog.at_level("DEBUG"):
+            process_months(["2025-01"], temp_data_dir, debug=True)
 
-        captured = capsys.readouterr()
-        assert "Loaded 3 records for 2025-01" in captured.out
-        assert "Saved aggregated data for 2025-01" in captured.out
+        log_output = caplog.text
+        assert "Loaded 3 records for 2025-01" in log_output
+        assert "Saved aggregated data for 2025-01" in log_output
 
     def test_multiple_months_processing(self, sample_enriched_data, temp_data_dir):
         """Test processing multiple months."""

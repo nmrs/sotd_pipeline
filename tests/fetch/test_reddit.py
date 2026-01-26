@@ -426,7 +426,7 @@ class TestExponentialBackoff:
         assert calls == 3
         assert len(sleep_calls) == 2
 
-    def test_exponential_backoff_real_time_feedback(self, monkeypatch, capsys):
+    def test_exponential_backoff_real_time_feedback(self, monkeypatch, caplog):
         """Test that exponential backoff provides real-time feedback."""
         calls = 0
 
@@ -440,13 +440,14 @@ class TestExponentialBackoff:
         sleep_calls = []
         monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
+        log_output = caplog.text
         # Check for real-time feedback in the warning message
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 8s" in output
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m 8s" in log_output
 
     def test_exponential_backoff_metrics_in_output(self, monkeypatch):
         """Test that exponential backoff includes metrics in fetch phase output."""
@@ -539,7 +540,7 @@ class TestEnhancedRateLimitDetection:
         # Should have attempted 3 times
         assert rate_limit_hits == 3
 
-    def test_enhanced_logging_for_rate_limits(self, monkeypatch, capsys):
+    def test_enhanced_logging_for_rate_limits(self, monkeypatch, caplog):
         """Test enhanced logging for rate limit events."""
         calls = 0
 
@@ -552,14 +553,15 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 10s" in output
+        log_output = caplog.text
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m 10s" in log_output
 
-    def test_rate_limit_detection_with_retry_after(self, monkeypatch, capsys):
+    def test_rate_limit_detection_with_retry_after(self, monkeypatch, caplog):
         """Test rate limit detection using retry_after attribute."""
         calls = 0
 
@@ -572,14 +574,15 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 1" in output  # With jitter, exact time may vary
+        log_output = caplog.text
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m 1" in log_output  # With jitter, exact time may vary
 
-    def test_rate_limit_detection_with_default_timing(self, monkeypatch, capsys):
+    def test_rate_limit_detection_with_default_timing(self, monkeypatch, caplog):
         """Test rate limit detection with default timing when no attributes available."""
         calls = 0
 
@@ -592,12 +595,13 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 1s" in output
+        log_output = caplog.text
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m 1s" in log_output
 
     def test_rate_limit_detection_performance_metrics(self, monkeypatch):
         """Test that rate limit detection includes performance metrics."""
@@ -623,7 +627,7 @@ class TestEnhancedRateLimitDetection:
         # With new behavior, slow responses don't trigger retries on first attempt
         assert result == "slow_response"
 
-    def test_rate_limit_detection_debugging_info(self, monkeypatch, capsys):
+    def test_rate_limit_detection_debugging_info(self, monkeypatch, caplog):
         """Test that rate limit detection provides debugging information."""
         calls = 0
 
@@ -636,13 +640,14 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
+        log_output = caplog.text
         # Check for debugging information in the warning message
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 3" in output  # With jitter, exact time may vary
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m" in log_output  # With jitter, exact time may vary (30s with jitter could be 29-31s)
 
     def test_rate_limit_detection_integration_with_search(self, monkeypatch):
         """Test rate limit detection integration with search operations."""
@@ -720,7 +725,7 @@ class TestEnhancedRateLimitDetection:
         assert result == "success"
         assert calls == 2
 
-    def test_rate_limit_detection_real_time_feedback(self, monkeypatch, capsys):
+    def test_rate_limit_detection_real_time_feedback(self, monkeypatch, caplog):
         """Test that rate limit detection provides real-time feedback."""
         calls = 0
 
@@ -733,13 +738,14 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        result = safe_call(failing_function)
+        with caplog.at_level("WARNING"):
+            result = safe_call(failing_function)
         assert result == "success"
 
-        output = capsys.readouterr().out
+        log_output = caplog.text
         # Check for real-time feedback in the warning message
-        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "waiting 0m 8s" in output
+        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "waiting 0m 8s" in log_output
 
     def test_rate_limit_detection_metrics_in_output(self, monkeypatch):
         """Test that rate limit detection includes metrics in fetch phase output."""
@@ -813,7 +819,7 @@ def test_get_reddit_configuration_error(mock_reddit_class):
 # --------------------------------------------------------------------------- #
 # Safe call rate limiting tests (extended)                                     #
 # --------------------------------------------------------------------------- #
-def test_safe_call_rate_limit_with_sleep_time(monkeypatch, capsys):
+def test_safe_call_rate_limit_with_sleep_time(monkeypatch, caplog):
     """safe_call should use sleep_time attribute when available."""
     calls = 0
 
@@ -827,18 +833,19 @@ def test_safe_call_rate_limit_with_sleep_time(monkeypatch, capsys):
     sleep_calls = []
     monkeypatch.setattr(time, "sleep", sleep_calls.append)
 
-    result = safe_call(failing_function)
+    with caplog.at_level("WARNING"):
+        result = safe_call(failing_function)
 
     assert result == "success"
     assert calls == 2
     assert 4.5 <= sleep_calls[0] <= 5.5  # sleep_time with jitter
 
-    output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "waiting 0m 5s" in output
+    log_output = caplog.text
+    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "waiting 0m 5s" in log_output
 
 
-def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
+def test_safe_call_rate_limit_with_retry_after(monkeypatch, caplog):
     """safe_call should fall back to retry_after when sleep_time not available."""
     calls = 0
 
@@ -852,17 +859,18 @@ def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
     sleep_calls = []
     monkeypatch.setattr(time, "sleep", sleep_calls.append)
 
-    result = safe_call(failing_function)
+    with caplog.at_level("WARNING"):
+        result = safe_call(failing_function)
 
     assert result == "success"
     assert 2.7 <= sleep_calls[0] <= 3.3  # retry_after with jitter
 
-    output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "waiting 0m 3s" in output
+    log_output = caplog.text
+    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "waiting 0m 3s" in log_output
 
 
-def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
+def test_safe_call_rate_limit_no_timing_info(monkeypatch, caplog):
     """safe_call should use default 60s when no timing attributes available."""
     calls = 0
 
@@ -876,14 +884,15 @@ def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
     sleep_calls = []
     monkeypatch.setattr(time, "sleep", sleep_calls.append)
 
-    result = safe_call(failing_function)
+    with caplog.at_level("WARNING"):
+        result = safe_call(failing_function)
 
     assert result == "success"
     assert 0.9 <= sleep_calls[0] <= 1.1  # default exponential backoff with jitter
 
-    output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "waiting 0m 1s" in output
+    log_output = caplog.text
+    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "waiting 0m 1s" in log_output
 
 
 def test_safe_call_rate_limit_double_failure(monkeypatch):
@@ -966,21 +975,22 @@ def test_search_threads_deduplication():
     assert result[0].id == "duplicate"
 
 
-def test_search_threads_debug_output(capsys):
+def test_search_threads_debug_output(caplog):
     """search_threads should print debug information when debug=True."""
     submission = MockSubmission("s1", "SOTD Thread May 01, 2025")
     mock_subreddit = MockSubreddit([submission])
     mock_reddit = MockReddit(mock_subreddit)
 
     with patch("sotd.fetch.reddit.get_reddit", return_value=mock_reddit):
-        search_threads("wetshaving", 2025, 5, debug=True)
+        with caplog.at_level("DEBUG"):
+            search_threads("wetshaving", 2025, 5, debug=True)
 
-    output = capsys.readouterr().out
-    assert "[DEBUG] Search query: 'flair:SOTD may may 2025'" in output
-    assert "[DEBUG] Search query: 'flair:SOTD may may 2025SOTD'" in output
-    assert "[DEBUG] PRAW raw results for" in output
-    assert "[DEBUG] Combined raw results (deduped):" in output
-    assert "[DEBUG] Valid threads:" in output
+    log_output = caplog.text
+    assert "Search query: 'flair:SOTD may may 2025'" in log_output
+    assert "Search query: 'flair:SOTD may may 2025SOTD'" in log_output
+    assert "PRAW raw results for" in log_output
+    assert "Combined raw results (deduped):" in log_output
+    assert "Valid threads:" in log_output
 
 
 def test_search_threads_reddit_api_error():
@@ -1033,30 +1043,32 @@ def test_filter_valid_threads_sorting():
     assert result[2].id == "day15"  # May 15
 
 
-def test_filter_valid_threads_debug_output(capsys):
+def test_filter_valid_threads_debug_output(caplog):
     """filter_valid_threads should print debug information when debug=True."""
     submissions = [
         MockSubmission("valid", "SOTD Thread May 01, 2025"),
         MockSubmission("invalid", "Weekly Discussion"),
     ]
 
-    filter_valid_threads(submissions, 2025, 5, debug=True)
+    with caplog.at_level("DEBUG"):
+        filter_valid_threads(submissions, 2025, 5, debug=True)
 
-    output = capsys.readouterr().out
-    assert "[DEBUG] Skip (no-date)" in output
-    assert "[DEBUG] Valid threads:" in output
+    log_output = caplog.text
+    assert "Skip (no-date)" in log_output
+    assert "Valid threads:" in log_output
 
 
-def test_filter_valid_threads_wrong_month_debug(capsys):
+def test_filter_valid_threads_wrong_month_debug(caplog):
     """filter_valid_threads should debug wrong month submissions."""
     submissions = [
         MockSubmission("wrong_month", "SOTD Thread June 01, 2025"),
     ]
 
-    filter_valid_threads(submissions, 2025, 5, debug=True)
+    with caplog.at_level("DEBUG"):
+        filter_valid_threads(submissions, 2025, 5, debug=True)
 
-    output = capsys.readouterr().out
-    assert "[DEBUG] Skip (wrong-month)" in output
+    log_output = caplog.text
+    assert "Skip (wrong-month)" in log_output
 
 
 def test_filter_valid_threads_empty_list():
@@ -1666,7 +1678,7 @@ class TestThreadOverrides:
         assert result[0] == mock_submission
         # Note: Warning behavior is tested in test_process_thread_overrides_all_invalid
 
-    def test_process_thread_overrides_all_invalid(self, tmp_path, monkeypatch, capsys):
+    def test_process_thread_overrides_all_invalid(self, tmp_path, monkeypatch, caplog):
         """Test processing thread overrides with all invalid threads."""
         from sotd.fetch.reddit import process_thread_overrides
         from unittest.mock import patch, Mock
@@ -1686,13 +1698,14 @@ class TestThreadOverrides:
 
         mock_reddit = Mock()
         mock_reddit.submission.side_effect = submission_side_effect
-        result = process_thread_overrides("2025-06", mock_reddit)
+        with caplog.at_level("WARNING"):
+            result = process_thread_overrides("2025-06", mock_reddit)
         assert result == []
         # Check at least one warning was printed
-        captured = capsys.readouterr()
-        assert "[WARN] Failed to fetch thread override" in captured.out
+        log_output = caplog.text
+        assert "Failed to fetch thread override" in log_output
 
-    def test_process_thread_overrides_debug_mode(self, tmp_path, monkeypatch, capsys):
+    def test_process_thread_overrides_debug_mode(self, tmp_path, monkeypatch, caplog):
         """Test processing thread overrides with debug mode enabled."""
         from sotd.fetch.reddit import process_thread_overrides
         from unittest.mock import patch, Mock
@@ -1710,12 +1723,13 @@ class TestThreadOverrides:
         mock_submission.author = "test_user"
         mock_reddit = Mock()
         mock_reddit.submission.return_value = mock_submission
-        result = process_thread_overrides("2025-06", mock_reddit, debug=True)
+        with caplog.at_level("DEBUG"):
+            result = process_thread_overrides("2025-06", mock_reddit, debug=True)
         assert len(result) == 1
         assert result[0] == mock_submission
         # Check debug output
-        captured = capsys.readouterr()
-        assert "DEBUG" in captured.out or "debug" in captured.out
+        log_output = caplog.text
+        assert "DEBUG" in log_output or "debug" in log_output
 
     def test_search_threads_with_overrides_integration(self, monkeypatch):
         """Test integration of thread overrides with search_threads."""

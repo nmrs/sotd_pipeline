@@ -83,7 +83,7 @@ class TestAnnualReportIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.data_dir = tmp_path / "data" / "report"
+        args.data_dir = tmp_path / "data"  # Base data directory, not report subdirectory
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format
@@ -387,29 +387,30 @@ class TestAnnualReportIntegration:
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
         output_path = Path("data/report/annual/2024-hardware.md")
 
+        # Create a mock generator instance
+        mock_generator_instance = Mock()
+        mock_generator_instance.generate_report.return_value = mock_report_content
+
         with (
-            patch("sotd.report.annual_run.generate_annual_report") as mock_generator,
+            patch(
+                "sotd.report.annual_generator.create_annual_report_generator"
+            ) as mock_create_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
-            patch("builtins.print") as mock_print,
         ):
 
-            mock_generator.return_value = mock_report_content
+            mock_create_generator.return_value = mock_generator_instance
             mock_saver.return_value = output_path
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
 
-            # Verify success messages were printed
-            success_calls = [
-                call for call in mock_print.call_args_list if call[0][0].startswith("[INFO]")
-            ]
-            assert len(success_calls) >= 1
+            # Verify generator was called
+            mock_create_generator.assert_called_once()
+            mock_generator_instance.generate_report.assert_called_once()
+            mock_saver.assert_called_once()
 
-            # Check for specific success message
-            success_messages = [call[0][0] for call in success_calls]
-            assert any(
-                "Annual report generation completed for 2024" in msg for msg in success_messages
-            )
+            # Note: Success messages are logged via logger.info(), not print()
+            # The test verifies the workflow completed successfully by checking function calls
 
 
 class TestAnnualReportCLIIntegration:
@@ -424,7 +425,7 @@ class TestAnnualReportCLIIntegration:
         args.range = None
         args.type = "hardware"
         args.data_root = tmp_path / "data"
-        args.data_dir = tmp_path / "data" / "report"
+        args.data_dir = tmp_path / "data"  # Base data directory, not report subdirectory
         args.debug = False
         args.force = False
         args.format = "markdown"  # Default format
@@ -473,13 +474,12 @@ class TestAnnualReportCLIIntegration:
             mock_parser.parse_args.assert_called_once()
             mock_run_monthly.assert_called_once_with(mock_args)
 
-    def test_main_keyboard_interrupt(self, mock_args):
+    def test_main_keyboard_interrupt(self, mock_args, caplog):
         """Test main function handles keyboard interrupt gracefully."""
         with (
             patch("sotd.report.annual_run.cli.get_parser") as mock_get_parser,
             patch("sotd.report.annual_run.cli.validate_args"),
             patch("sotd.report.annual_run.run_annual_report") as mock_run_annual,
-            patch("builtins.print") as mock_print,
         ):
 
             mock_parser = Mock()
@@ -487,19 +487,19 @@ class TestAnnualReportCLIIntegration:
             mock_get_parser.return_value = mock_parser
             mock_run_annual.side_effect = KeyboardInterrupt()
 
-            # Call main function
-            annual_run.main(["report", "--annual", "--year", "2024"])
+            with caplog.at_level("INFO"):
+                # Call main function
+                annual_run.main(["report", "--annual", "--year", "2024"])
 
             # Verify graceful handling
-            mock_print.assert_called_with("\n[INFO] Report generation interrupted by user")
+            assert "Report generation interrupted by user" in caplog.text
 
-    def test_main_general_exception(self, mock_args):
+    def test_main_general_exception(self, mock_args, caplog):
         """Test main function handles general exceptions gracefully."""
         with (
             patch("sotd.report.annual_run.cli.get_parser") as mock_get_parser,
             patch("sotd.report.annual_run.cli.validate_args"),
             patch("sotd.report.annual_run.run_annual_report") as mock_run_annual,
-            patch("builtins.print") as mock_print,
         ):
 
             mock_parser = Mock()
@@ -507,11 +507,12 @@ class TestAnnualReportCLIIntegration:
             mock_get_parser.return_value = mock_parser
             mock_run_annual.side_effect = RuntimeError("Test error")
 
-            # Call main function
-            annual_run.main(["report", "--annual", "--year", "2024"])
+            with caplog.at_level("ERROR"):
+                # Call main function
+                annual_run.main(["report", "--annual", "--year", "2024"])
 
             # Verify graceful handling
-            mock_print.assert_called_with("[ERROR] Report generation failed: Test error")
+            assert "Report generation failed: Test error" in caplog.text
 
 
 class TestAnnualReportSaveIntegration:

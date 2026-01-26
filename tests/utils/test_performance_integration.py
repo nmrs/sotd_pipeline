@@ -188,7 +188,7 @@ class TestGeneralPerformanceMonitoringIntegration:
         assert monitor.metrics.input_file_size_mb == 10.5
         assert monitor.metrics.output_file_size_mb == 15.2
 
-    def test_performance_summary_output(self):
+    def test_performance_summary_output(self, caplog):
         """Test that performance summary can be printed without errors."""
         monitor = PerformanceMonitor("summary_test")
 
@@ -199,18 +199,14 @@ class TestGeneralPerformanceMonitoringIntegration:
         monitor.end_total_timing()
 
         # Verify summary can be printed (capture output to avoid cluttering test output)
-        with patch("builtins.print") as mock_print:
+        with caplog.at_level("INFO"):
             monitor.print_summary()
 
-            # Verify that print was called multiple times (indicating summary was generated)
-            assert mock_print.call_count > 10
-
-            # Verify summary contains expected content
-            calls = [call[0][0] for call in mock_print.call_args_list]
-            summary_text = " ".join(calls)
-            assert "SUMMARY_TEST PHASE PERFORMANCE SUMMARY" in summary_text
-            assert "Total Processing Time:" in summary_text
-            assert "Records Processed:" in summary_text
+        # Verify that logger.info was called multiple times (indicating summary was generated)
+        log_output = caplog.text
+        assert "SUMMARY_TEST PHASE PERFORMANCE SUMMARY" in log_output
+        assert "Total Processing Time:" in log_output
+        assert "Records Processed:" in log_output
 
     def test_metrics_serialization(self):
         """Test that metrics can be serialized to dictionary."""

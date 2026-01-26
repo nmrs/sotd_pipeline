@@ -154,10 +154,10 @@ class TestReportMain:
 
     @patch("sotd.report.run.run_report")
     def test_main_with_data_root_and_out_dir(self, mock_run_report):
-        """Test main function with data root and out dir arguments."""
+        """Test main function with data dir argument."""
         with patch(
             "sys.argv",
-            ["report", "--month", "2023-01", "--data-root", "/data", "--data-dir", "/output"],
+            ["report", "--month", "2023-01", "--data-dir", "/output"],
         ):
             main()
 

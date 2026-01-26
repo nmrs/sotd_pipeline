@@ -5,6 +5,7 @@ This module provides abstract base classes and common functionality for performa
 monitoring across all pipeline phases, eliminating code duplication.
 """
 
+import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -12,6 +13,8 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import psutil
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

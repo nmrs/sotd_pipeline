@@ -2316,7 +2316,14 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                             correct_match,
                             matched,
                         )
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(f"Adding entry: match_key={match_key}, match_data={match_data_to_save}")
+                            logger.debug(f"Manager has {len(manager._correct_matches_data)} entries before mark_match_as_correct")
                         manager.mark_match_as_correct(match_key, match_data_to_save)
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(f"Manager has {len(manager._correct_matches_data)} entries after mark_match_as_correct")
+                            if match_key in manager._correct_matches_data:
+                                logger.debug(f"Entry confirmed in manager: {manager._correct_matches_data[match_key]}")
                         added_count += 1
 
                 elif issue_type == "cross_section_conflict":
@@ -2392,6 +2399,19 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                 
                 # Remove entries from manager's in-memory data structures
                 # This prevents save_correct_matches() from overwriting our removals
+                # IMPORTANT: We only remove the OLD entries that were in the file, NOT the new entries
+                # we just added via mark_match_as_correct(). The new entries have the same correct_match
+                # string but different brand/model, so they should have the same match_key.
+                # However, since we're moving the entry (same original text, different brand/model),
+                # the match_key will be the same, and we'll accidentally remove the new entry too!
+                # 
+                # Solution: Only remove entries that match the OLD brand/model, not just the correct_match.
+                # But actually, the match_key is based on the original text, not the brand/model.
+                # So if we remove by match_key, we'll remove both old and new entries.
+                #
+                # Better solution: Don't remove from _correct_matches_data at all if we've already
+                # added a new entry with the same match_key. The new entry will overwrite the old one
+                # in _correct_matches_data anyway.
                 from sotd.utils.extract_normalization import normalize_for_matching
                 for section, removed_matches in removed_entries_by_section.items():
                     for correct_match in removed_matches:
@@ -2399,11 +2419,36 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         normalized_original = normalize_for_matching(correct_match, None, section).lower().strip()
                         match_key = f"{section}:{normalized_original}"
                         
-                        # Remove from manager's data structures
-                        if match_key in manager._correct_matches:
-                            manager._correct_matches.discard(match_key)
-                        if match_key in manager._correct_matches_data:
-                            del manager._correct_matches_data[match_key]
+                        # Only remove if this match_key doesn't have a new entry (i.e., wasn't just added)
+                        # Check if the match_key exists and if it has the OLD brand/model
+                        # Actually, we can't easily check the old brand/model here, so we'll just
+                        # skip removal if the match_key was added in this operation.
+                        # But we don't track which keys were added...
+                        #
+                        # Actually, the simplest solution: Don't remove from _correct_matches_data
+                        # at all. The new entry added via mark_match_as_correct() will overwrite
+                        # the old entry in _correct_matches_data (since they have the same match_key).
+                        # Then save_correct_matches() will save the new entry, and the old entry
+                        # won't be in the file (because we already removed it via direct YAML write).
+                        #
+                        # So we should NOT remove from _correct_matches_data here - let the new
+                        # entry overwrite the old one, and the direct YAML write already removed
+                        # it from the file.
+                        if logger.isEnabledFor(logging.DEBUG):
+                            logger.debug(f"Would remove match_key={match_key} from manager, but skipping to preserve new entries")
+                        # Skip removal - the new entry will overwrite the old one in _correct_matches_data
+                        # and the direct YAML write already removed it from the file
+                        # if match_key in manager._correct_matches:
+                        #     manager._correct_matches.discard(match_key)
+                        # if match_key in manager._correct_matches_data:
+                        #     del manager._correct_matches_data[match_key]
+                
+                # After removing entries, we need to reload the manager to sync with the file
+                # BUT we do this AFTER removals and BEFORE additions, so new entries added
+                # via mark_match_as_correct() will be preserved
+                # Actually, wait - if we reload, it will clear any entries we just added via mark_match_as_correct()
+                # So we should NOT reload. Instead, we need to ensure mark_match_as_correct() is called
+                # AFTER we remove from _correct_matches_data, so the new entry is in there when we save.
             except Exception as e:
                 errors.append(f"Error saving YAML files after removal: {e}")
                 logger.error(f"Error saving YAML files: {e}")
@@ -2412,14 +2457,38 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
         # 1. mark_match_as_correct will overwrite entries with the same match_key (based on original text)
         # 2. Reloading would clear newly added entries before we save them
         # 3. The old entries in memory will be overwritten by the new entries we add
+        #
+        # However, we need to ensure the manager's _correct_matches_data is in sync with the file
+        # after direct YAML writes. The manager's save_correct_matches() reads from _correct_matches_data,
+        # so we need to make sure all new entries are in there before saving.
 
         # Save correct matches (for additions)
         if added_count > 0:
             try:
+                # Debug: Verify entries are in manager before saving
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(f"Manager has {len(manager._correct_matches_data)} entries before save")
+                    for key in manager._correct_matches_data.keys():
+                        if "razor" in key:
+                            logger.debug(f"  Razor entry: {key} -> {manager._correct_matches_data[key]}")
+                
+                # Ensure the manager has all the new entries before saving
+                # The mark_match_as_correct() calls should have already added them to _correct_matches_data
                 manager.save_correct_matches()
+                
+                # Debug: Verify file was written
+                if logger.isEnabledFor(logging.DEBUG):
+                    razor_file = correct_matches_dir / "razor.yaml"
+                    if razor_file.exists():
+                        import yaml
+                        with razor_file.open("r") as f:
+                            saved_data = yaml.safe_load(f) or {}
+                            logger.debug(f"File after save has keys: {list(saved_data.keys())}")
             except Exception as e:
                 errors.append(f"Error saving correct matches after addition: {e}")
                 logger.error(f"Error saving correct matches: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
 
         moved_count = min(removed_count, added_count)  # Count of successfully moved entries
 

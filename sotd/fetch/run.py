@@ -231,7 +231,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
             months_found = list_available_months(data_dir)
             if months_found:
                 for month in months_found:
-                    logger.info(month)
+                    print(month)
                 return 0
             else:
                 return 0

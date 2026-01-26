@@ -734,9 +734,37 @@ class TestMoveCatalogEntries:
             assert "test razor pattern" not in old_model_patterns
 
             # Verify the entry was added to new location
+            # The manager normalizes strings before saving, so we need to check the normalized version
+            from sotd.utils.extract_normalization import normalize_for_matching
+            
+            # Debug: Check what's actually in the file
+            import json
+            if "New Brand" not in razor_data:
+                # The manager's save_correct_matches() should have added it
+                # This might indicate the manager isn't saving correctly after direct YAML writes
+                # Let's check if we need to reload the manager or if there's a different issue
+                available_keys = list(razor_data.keys())
+                raise AssertionError(
+                    f"'New Brand' not found in razor_data after move operation. "
+                    f"Available keys: {available_keys}. "
+                    f"Full data: {json.dumps(razor_data, indent=2, default=str)}. "
+                    f"This suggests manager.save_correct_matches() didn't persist the new entry."
+                )
+            
             new_brand_data = razor_data.get("New Brand", {})
             new_model_patterns = new_brand_data.get("New Model", [])
-            assert "test razor pattern" in new_model_patterns
+            if not new_model_patterns:
+                raise AssertionError(
+                    f"'New Model' not found or empty in 'New Brand'. "
+                    f"New Brand data: {new_brand_data}. "
+                    f"Full razor_data: {json.dumps(razor_data, indent=2, default=str)}"
+                )
+            # Check for normalized version of the pattern
+            normalized_pattern = normalize_for_matching("test razor pattern", None, "razor")
+            assert normalized_pattern in new_model_patterns or "test razor pattern" in new_model_patterns, (
+                f"Pattern not found. Normalized: '{normalized_pattern}', "
+                f"Original: 'test razor pattern', Available: {new_model_patterns}"
+            )
 
     @pytest.mark.asyncio
     async def test_move_structural_change_handle_knot_to_brush(self, tmp_path):

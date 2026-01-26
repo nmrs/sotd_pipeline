@@ -25,7 +25,7 @@ class DummyRL(RateLimitExceeded):
         super().__init__(response=mock_response)  # type: ignore[arg-type]
 
 
-def test_safe_call_success(monkeypatch, capsys):
+def test_safe_call_success(monkeypatch, caplog):
     """safe_call retries once after a RateLimitExceeded and returns the result."""
     calls = {"n": 0}
 
@@ -38,14 +38,15 @@ def test_safe_call_success(monkeypatch, capsys):
     slept: list[int] = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(int(s)))
 
-    result = safe_call(fn)
+    with caplog.at_level("WARNING"):
+        result = safe_call(fn)
 
     assert result == "ok"
     assert slept == [1]  # sleep_time with exponential backoff
-    out = capsys.readouterr().out
+    log_output = caplog.text
     # With jitter, the exact message may vary, so check for key parts
-    assert "[WARN] Reddit rate-limit hit (hit #1 in 0.0s, attempt 1/3)" in out
-    assert "waiting 0m 1s" in out
+    assert "Reddit rate-limit hit (hit #1 in 0.0s, attempt 1/3)" in log_output
+    assert "waiting 0m 1s" in log_output
 
 
 def test_safe_call_double_fail(monkeypatch):

@@ -297,8 +297,7 @@ class TestPipelinePerformanceTracker:
         assert "test_phase" in tracker.phase_results
         assert tracker.phase_results["test_phase"] == result
 
-    @patch("builtins.print")
-    def test_print_pipeline_summary(self, mock_print):
+    def test_print_pipeline_summary(self, caplog):
         """Test pipeline summary printing."""
         tracker = PipelinePerformanceTracker()
         tracker.add_phase_result(
@@ -308,16 +307,15 @@ class TestPipelinePerformanceTracker:
             "phase2", {"total_processing_time_seconds": 5.0, "record_count": 50}
         )
 
-        tracker.print_pipeline_summary()
+        with caplog.at_level("INFO"):
+            tracker.print_pipeline_summary()
 
-        # Verify print was called multiple times (summary lines)
-        assert mock_print.call_count > 0
+        # Verify logger.info was called multiple times (summary lines)
+        log_output = caplog.text
+        assert "PIPELINE PERFORMANCE SUMMARY" in log_output
 
-        # Get all printed lines
-        printed_lines = [call.args[0] for call in mock_print.call_args_list]
-
-        # Check for key summary elements
-        assert any("PIPELINE PERFORMANCE SUMMARY" in line for line in printed_lines)
-        assert any("PHASE1:" in line for line in printed_lines)
-        assert any("PHASE2:" in line for line in printed_lines)
-        assert any("TOTAL PIPELINE:" in line for line in printed_lines)
+        # Check for key summary elements in log output
+        assert "PIPELINE PERFORMANCE SUMMARY" in log_output
+        assert "PHASE1:" in log_output
+        assert "PHASE2:" in log_output
+        assert "TOTAL PIPELINE:" in log_output

@@ -268,20 +268,15 @@ class TestAnnualAggregatorIntegration:
             save_json_data(data, month_file)
 
         with patch("sotd.aggregate.annual_engine.save_annual_data"):
-            # Capture stdout instead of logs since code uses print()
-            import io
-            from contextlib import redirect_stdout
-
-            f = io.StringIO()
-            with redirect_stdout(f):
+            with caplog.at_level("DEBUG"):
                 # Pass the parent directory since process_annual expects data_dir/aggregated
                 process_annual("2024", temp_data_dir.parent, debug=True, force=True)
 
-            output = f.getvalue()
-            # Verify debug output contains expected messages
-            assert "Processing annual aggregation for 2024" in output
-            assert "Loaded 2 months of data" in output
-            assert "Annual aggregation for 2024 completed" in output
+            # Verify debug output contains expected messages in logs
+            log_output = caplog.text
+            assert "Processing annual aggregation for 2024" in log_output
+            assert "Loaded 2 months of data" in log_output
+            assert "Annual aggregation for 2024 completed" in log_output
 
     def test_error_handling_across_components(self, temp_data_dir):
         """Test error handling across all components."""

@@ -193,6 +193,7 @@ def test_process_month_basic_flow(
 def test_process_month_no_threads_found(
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
+    caplog,
 ):
     """_process_month should handle case when no threads are found."""
     # Setup mocks for no threads
@@ -200,7 +201,7 @@ def test_process_month_no_threads_found(
 
     mock_reddit = Mock()
 
-    with patch("builtins.print") as mock_print:
+    with caplog.at_level("WARNING"):
         result = _process_month(
             2025,
             5,
@@ -208,8 +209,8 @@ def test_process_month_no_threads_found(
             reddit=mock_reddit,
         )
 
-    # Should print warning
-    mock_print.assert_called_with("[WARN] No threads found for 2025-05; skipping file writes.")
+    # Should log warning
+    assert "No threads found for 2025-05; skipping file writes." in caplog.text
 
     # Should return summary with zero counts
     assert result["year"] == 2025
@@ -293,25 +294,24 @@ def test_process_month_debug_output(
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
+    caplog,
 ):
     """_process_month should print debug information when verbose=True."""
     mock_args.verbose = True
     mock_search.return_value = sample_threads
 
-    mock_fetch_comments.return_value = []
+    mock_fetch_comments.return_value = ([], {"submissions_processed": 3, "successful_fetches": 0})
 
-    with patch("builtins.print") as mock_print:
+    with caplog.at_level("INFO"):
         with patch("sotd.fetch.run.load_month_file", return_value=None):
             with patch("sotd.fetch.run.write_month_file"):
                 _process_month(2025, 5, mock_args, reddit=Mock())
 
-            # Should print debug info about overrides (but parallel processing happens first)
-        # The debug message is printed after parallel processing, so we check for the metrics
-        # The actual metrics will have real timing values, so we check for key parts
-        output = mock_print.call_args[0][0]
-        assert "[INFO] Parallel processing metrics:" in output
-        assert "'submissions_processed': 3" in output
-        assert "'successful_fetches': 0" in output
+    # Should log debug info about parallel processing metrics
+    log_output = caplog.text
+    assert "Parallel processing metrics:" in log_output
+    assert "'submissions_processed': 3" in log_output
+    assert "'successful_fetches': 0" in log_output
 
 
 @patch("sotd.fetch.run.search_threads")
@@ -402,7 +402,7 @@ def test_main_audit_mode_with_issues(mock_audit, capsys):
     assert exit_code == 1
 
     output = capsys.readouterr().out
-    assert "[MISSING FILE] threads/2025-05.json" in output
+    assert "MISSING FILE: threads/2025-05.json" in output
     assert "2025-05: 2025-05-01" in output
     assert "2025-05: 2025-05-02" in output
 
@@ -427,10 +427,10 @@ def test_main_single_month_processing(mock_process, mock_get_reddit, capsys):
             main(["--month", "2025-05", "--verbose"])
 
     output = capsys.readouterr().out
-    assert "[WARN] Missing day: 2025-05-02" in output
-    assert "[WARN] Missing day: 2025-05-15" in output
+    assert "Missing day: 2025-05-02" in output
+    assert "Missing day: 2025-05-15" in output
     assert (
-        "[INFO] SOTD fetch complete for 2025-05: 15 threads, 89 comments, 2 missing days" in output
+        "SOTD fetch complete for 2025-05: 15 threads, 89 comments, 2 missing days" in output
     )
 
 
@@ -454,10 +454,10 @@ def test_main_multi_month_processing(mock_process, mock_get_reddit, capsys):
 
     output = capsys.readouterr().out
     # Missing days should be properly sorted as date strings
-    assert "[WARN] Missing day: 2025-01-15" in output
-    assert "[WARN] Missing day: 2025-03-01" in output
+    assert "Missing day: 2025-01-15" in output
+    assert "Missing day: 2025-03-01" in output
     assert (
-        "[INFO] SOTD fetch complete for 2025-01…2025-03: 37 threads, 185 comments, 2 missing days"
+        "SOTD fetch complete for 2025-01…2025-03: 37 threads, 185 comments, 2 missing days"
         in output
     )
 
