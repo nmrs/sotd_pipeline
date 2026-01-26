@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  pipeline:
+  sotd-pipeline:
     build:
       context: ../..
       dockerfile: docker/pipeline/Dockerfile
@@ -22,5 +20,12 @@ services:
       - CRON_SCHEDULE=${CRON_SCHEDULE:-0 * * * *}
       - SOTD_DATA_DIR=/data
       - LOG_DIR=/data/logs
+      # Reddit API credentials (PRAW environment variables)
+      # These override praw.ini if set. Get values from your praw.ini file.
+      # OAuth script-type authentication only requires client_id, client_secret, and user_agent.
+      # Note: PRAW requires lowercase 'praw_' prefix. Use lowercase in .env file.
+      - praw_client_id=${praw_client_id:-${PRAW_CLIENT_ID}}
+      - praw_client_secret=${praw_client_secret:-${PRAW_CLIENT_SECRET}}
+      - praw_user_agent=${praw_user_agent:-${PRAW_USER_AGENT:-SOTD Pipeline}}
     # Keep container running (cron runs in foreground)
     command: ["./entrypoint.sh"]
