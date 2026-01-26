@@ -697,9 +697,21 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         if exit_code != 0:
             print(f"\n{'=' * 60}")
             print(f"PIPELINE FAILED: Phase {phase} failed with exit code {exit_code}")
-            print(f"Completed phases: {', '.join(phases[:i])}")
+            print(f"Completed phases: {', '.join(phases[:i]) if phases[:i] else 'none'}")
             print(f"Failed phase: {phase}")
-            print(f"Remaining phases: {', '.join(phases[i + 1 :])}")
+            print(f"Remaining phases: {', '.join(phases[i + 1 :]) if phases[i + 1:] else 'none'}")
+            # Show error details from captured output if available
+            if captured_output:
+                # Extract error lines from captured output
+                error_lines = [
+                    line for line in captured_output.split("\n")
+                    if "[ERROR]" in line or "ERROR" in line or "Error" in line or "error" in line
+                ]
+                if error_lines:
+                    print(f"\nError details from {phase} phase:")
+                    for error_line in error_lines[-5:]:  # Show last 5 error lines
+                        if error_line.strip():
+                            print(f"  {error_line}")
             print(f"{'=' * 60}\n")
             # Show summary up to failure point
             if len(phases) > 1:

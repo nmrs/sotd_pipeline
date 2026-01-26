@@ -92,7 +92,11 @@ def run(args) -> None:
             else:
                 logger.info("No overrides found in: %s", args.override_file)
         except Exception as e:
-            logger.error("Failed to load overrides from %s: %s", args.override_file, e)
+            error_msg = f"Failed to load overrides from {args.override_file}: {e}"
+            logger.error(error_msg)
+            if args.debug:
+                import traceback
+                logger.error("Full traceback:\n%s", traceback.format_exc())
             raise
 
     # Create parallel processor for extract phase
@@ -176,7 +180,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("\n[INFO] Extract phase interrupted by user")
         return 1  # Interrupted
     except Exception as e:
-        print(f"[ERROR] Extract phase failed: {e}")
+        error_msg = f"[ERROR] Extract phase failed: {e}"
+        print(error_msg)
+        # Show more context for ValueError (validation errors)
+        if isinstance(e, ValueError):
+            print(f"\n[ERROR] Details: {type(e).__name__}: {e}")
         return 1  # Error
 
 

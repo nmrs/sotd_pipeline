@@ -24,6 +24,74 @@ class OverrideManager:
         """
         self.override_file_path = override_file_path
         self.overrides: Dict[str, Dict[str, Dict[str, str]]] = {}
+        self._file_lines: Optional[List[str]] = None
+
+    def _find_field_line_number(
+        self, month: str, comment_id: str, field: str
+    ) -> Optional[int]:
+        """Find the line number where a field appears in the YAML file.
+
+        Args:
+            month: Month in YYYY-MM format
+            comment_id: Reddit comment ID
+            field: Field name to find
+
+        Returns:
+            Line number (1-indexed) or None if not found
+        """
+        if self._file_lines is None:
+            try:
+                with self.override_file_path.open("r", encoding="utf-8") as f:
+                    self._file_lines = f.readlines()
+            except (OSError, IOError):
+                return None
+
+        # Search for the field in the context of the month and comment_id
+        in_target_month = False
+        in_target_comment = False
+        indent_level = 0
+
+        for line_num, line in enumerate(self._file_lines, start=1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+
+            # Check if we're in the target month
+            if stripped.startswith(month + ":"):
+                in_target_month = True
+                in_target_comment = False
+                indent_level = len(line) - len(line.lstrip())
+                continue
+
+            # Check if we've moved to a different month
+            if in_target_month and not line.strip().startswith(" ") and stripped.endswith(":"):
+                if not stripped.startswith(month):
+                    break
+
+            if not in_target_month:
+                continue
+
+            # Check if we're in the target comment
+            current_indent = len(line) - len(line.lstrip())
+            if current_indent > indent_level and stripped.startswith(comment_id + ":"):
+                in_target_comment = True
+                comment_indent = current_indent
+                continue
+
+            # Check if we've moved to a different comment
+            if in_target_comment:
+                if current_indent <= indent_level:
+                    in_target_comment = False
+                    continue
+                if current_indent == comment_indent and stripped.endswith(":"):
+                    in_target_comment = False
+                    continue
+
+            # Check if this line contains the field
+            if in_target_comment and stripped.startswith(field + ":"):
+                return line_num
+
+        return None
 
     def load_overrides(self) -> None:
         """Load overrides from YAML file with validation.
@@ -40,9 +108,18 @@ class OverrideManager:
 
         try:
             with self.override_file_path.open("r", encoding="utf-8") as f:
+                self._file_lines = f.readlines()
+                # Reset file pointer and load YAML
+                f.seek(0)
                 content = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            raise ValueError(f"Invalid YAML syntax in override file: {e}")
+            # Try to extract line number from YAML error if available
+            error_msg = f"Invalid YAML syntax in {self.override_file_path}"
+            if hasattr(e, "problem_mark") and e.problem_mark:
+                line_num = e.problem_mark.line + 1  # YAML line numbers are 0-indexed
+                error_msg += f" at line {line_num}"
+            error_msg += f": {e}"
+            raise ValueError(error_msg)
 
         if content is None:
             # Empty file is valid
@@ -69,34 +146,61 @@ class OverrideManager:
                 for field, value in field_data.items():
                     # Validate field name
                     if field not in self.VALID_FIELDS:
-                        raise ValueError(
-                            f"Invalid field '{field}' in comment '{comment_id}' month '{month}'. "
-                            f"Valid fields: {', '.join(sorted(self.VALID_FIELDS))}"
+                        # Find line number for better error reporting
+                        line_num = self._find_field_line_number(month, comment_id, field)
+                        error_msg = (
+                            f"Invalid field '{field}' in comment '{comment_id}' month '{month}' "
+                            f"in {self.override_file_path}"
                         )
+                        if line_num:
+                            error_msg += f" (line {line_num})"
+                        error_msg += (
+                            f".\n  Field value: {repr(value) if isinstance(value, str) else value}\n"
+                            f"  Valid fields: {', '.join(sorted(self.VALID_FIELDS))}\n"
+                            f"  Hint: Did you mean 'soap' instead of '{field}'?"
+                        )
+                        raise ValueError(error_msg)
 
                     # Validate override value
                     if not isinstance(value, str):
-                        raise ValueError(
+                        line_num = self._find_field_line_number(month, comment_id, field)
+                        error_msg = (
                             f"Override value for field '{field}' in comment "
-                            f"'{comment_id}' month '{month}' must be a string, "
-                            f"got: {type(value).__name__}"
+                            f"'{comment_id}' month '{month}' in {self.override_file_path}"
                         )
+                        if line_num:
+                            error_msg += f" (line {line_num})"
+                        error_msg += (
+                            f" must be a string, got: {type(value).__name__} "
+                            f"(value: {repr(value)})"
+                        )
+                        raise ValueError(error_msg)
 
                     if not value.strip():
-                        raise ValueError(
+                        line_num = self._find_field_line_number(month, comment_id, field)
+                        error_msg = (
                             f"Override value for field '{field}' in comment "
-                            f"'{comment_id}' month '{month}' cannot be empty "
-                            f"or whitespace-only"
+                            f"'{comment_id}' month '{month}' in {self.override_file_path}"
                         )
+                        if line_num:
+                            error_msg += f" (line {line_num})"
+                        error_msg += " cannot be empty or whitespace-only"
+                        raise ValueError(error_msg)
 
                     # Check for reasonable length (prevent extremely long values)
                     if len(value.strip()) > 200:
-                        raise ValueError(
+                        line_num = self._find_field_line_number(month, comment_id, field)
+                        error_msg = (
                             f"Override value for field '{field}' in comment "
-                            f"'{comment_id}' month '{month}' is too long "
-                            f"({len(value.strip())} characters). "
+                            f"'{comment_id}' month '{month}' in {self.override_file_path}"
+                        )
+                        if line_num:
+                            error_msg += f" (line {line_num})"
+                        error_msg += (
+                            f" is too long ({len(value.strip())} characters). "
                             f"Maximum length: 200 characters"
                         )
+                        raise ValueError(error_msg)
 
                     # Check for duplicate overrides
                     override_key = f"{month}:{comment_id}:{field}"
