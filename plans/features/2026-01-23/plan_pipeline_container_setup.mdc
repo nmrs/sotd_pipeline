@@ -31,7 +31,7 @@ todos:
     status: completed
   - id: pipeline-container-tests
     content: Write tests for pipeline container scripts and search index generation
-    status: pending
+    status: completed
   - id: pipeline-deployment-docs
     content: Create deployment documentation for pipeline container on Synology NAS
     status: completed
@@ -542,12 +542,19 @@ sotd_pipeline/
 - Includes setup instructions, troubleshooting, and maintenance procedures
 - Documents environment variables, cron schedule configuration, and integration with WebUI
 
-### Remaining Tasks
-
-**Phase 6: Testing** ⏳
-- Unit tests for pipeline container scripts
-- Integration tests for cron execution and lock file functionality
-- Tests for search index generation (already exists in scripts/generate_search_index.py)
+**Phase 6: Testing** ✅
+- Created `tests/docker/test_pipeline_container_scripts.py` with comprehensive test coverage
+- 24 unit and integration tests covering:
+  - Lock file mechanism (creation, detection, cleanup)
+  - Previous month calculation logic
+  - Environment variable handling
+  - Cron schedule configuration
+  - Error handling and error counting
+  - Search index generation integration
+  - Phase execution order
+  - Month processing logic
+- All tests pass successfully
+- Search index generation tests already exist in `tests/scripts/test_generate_search_index.py`
 
 ### Key Implementation Decisions
 
@@ -567,10 +574,12 @@ sotd_pipeline/
 - `scripts/migrate-data-to-nas.sh`
 - `scripts/sync-yamls-to-nas.sh`
 - `docs/pipeline_container_deployment.md`
+- `tests/docker/test_pipeline_container_scripts.py`
+- `tests/docker/__init__.py`
 
 ### Next Steps
 
-1. Write tests for pipeline container scripts (Phase 6)
+1. ✅ Write tests for pipeline container scripts (Phase 6) - **COMPLETE**
 2. Test container build and deployment locally
 3. Deploy to Synology NAS
 4. Verify cron execution and pipeline runs
