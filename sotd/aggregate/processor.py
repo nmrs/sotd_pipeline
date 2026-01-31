@@ -1,8 +1,6 @@
 import logging
 from typing import Any, Dict, List
 
-logger = logging.getLogger(__name__)
-
 from .aggregators.brush_specialized import (
     aggregate_fibers,
     aggregate_handle_makers,
@@ -31,6 +29,7 @@ from .aggregators.manufacturers import (
     aggregate_razor_manufacturers,
     aggregate_soap_makers,
 )
+from .aggregators.product_usage import aggregate_product_usage
 from .aggregators.razor_specialized import (
     aggregate_blackbird_plates,
     aggregate_christopher_bradley_plates,
@@ -40,7 +39,6 @@ from .aggregators.razor_specialized import (
     aggregate_straight_widths,
     aggregate_super_speed_tips,
 )
-from .aggregators.product_usage import aggregate_product_usage
 from .aggregators.user_analysis import aggregate_user_analysis
 from .aggregators.users import (
     aggregate_blade_diversity,
@@ -55,6 +53,8 @@ from .aggregators.users import (
     aggregate_users,
 )
 from .utils.metrics import calculate_metadata
+
+logger = logging.getLogger(__name__)
 
 
 def validate_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:

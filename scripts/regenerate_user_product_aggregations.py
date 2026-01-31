@@ -12,10 +12,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.aggregate.engine import process_single_month
-from sotd.aggregate.load import load_enriched_data
-from sotd.aggregate.processor import aggregate_all
-from sotd.aggregate.save import save_product_usage_data, save_user_analysis_data
+from sotd.aggregate.load import load_enriched_data  # noqa: E402
+from sotd.aggregate.processor import aggregate_all  # noqa: E402
+from sotd.aggregate.save import save_product_usage_data, save_user_analysis_data  # noqa: E402
 
 
 def find_available_months(data_dir: Path) -> list[str]:

@@ -1038,7 +1038,6 @@ async def batch_analyze(
                         "source_brand": brand_entry["brand"],
                         "source_scent": scent["name"],
                     }
-                    matches_before_filter = len(matches)
                     filtered_matches = []
                     for m in matches:
                         is_non_match_result = is_non_match(

@@ -258,8 +258,9 @@ class TestProductUsageAPI:
 
         try:
             with patch("webui.api.product_usage.json.load", return_value=enriched_data):
+                # Patch where date extraction is used (product_usage_aggregator imports it)
                 with patch(
-                    "webui.api.product_usage._extract_date_from_thread_title"
+                    "sotd.aggregate.aggregators.product_usage.product_usage_aggregator._extract_date_from_thread_title"
                 ) as mock_extract:
                     # Mock date extraction
                     from datetime import datetime

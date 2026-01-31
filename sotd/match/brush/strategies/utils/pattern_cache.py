@@ -10,12 +10,11 @@ import hashlib
 import json
 from typing import Any, Callable, Dict, List
 
-
 # Module-level cache (per process)
 # Use object identity as primary key for fast lookup, fallback to content hash
-_pattern_cache_by_id: Dict[tuple, List[Dict[str, Any]]] = (
-    {}
-)  # (id(catalog), pattern_type) -> patterns
+_pattern_cache_by_id: Dict[
+    tuple, List[Dict[str, Any]]
+] = {}  # (id(catalog), pattern_type) -> patterns
 _pattern_cache_by_hash: Dict[str, List[Dict[str, Any]]] = {}  # hash_key -> patterns
 
 

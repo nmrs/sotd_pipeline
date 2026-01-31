@@ -21,7 +21,6 @@ def get_all_dates_in_year(year: int) -> set[date]:
 def extract_date_from_thread_title(thread_title: str) -> date:
     """Extract date from thread title using the same logic as the pipeline."""
     import re
-    from datetime import datetime
 
     # Month name lookup (full and abbreviated)
     month_names = {
@@ -41,7 +40,6 @@ def extract_date_from_thread_title(thread_title: str) -> date:
         "feb": 2,
         "mar": 3,
         "apr": 4,
-        "may": 5,
         "jun": 6,
         "jul": 7,
         "aug": 8,
@@ -205,7 +203,7 @@ def compare_with_aggregated_data(results: dict[str, dict], year: int, data_dir: 
         val_missed = validation["missed_days"]
 
         print(f"\n{user}:")
-        print(f"  Validation (from match files):")
+        print("  Validation (from match files):")
         print(f"    Total posts: {val_posts}")
         print(f"    Unique days posted: {val_unique_days}")
         print(f"    Missed days: {val_missed}")
@@ -214,7 +212,7 @@ def compare_with_aggregated_data(results: dict[str, dict], year: int, data_dir: 
             if len(validation["missed_dates"]) > 10:
                 print(f"    ... and {len(validation['missed_dates']) - 10} more")
 
-        print(f"  Aggregated data:")
+        print("  Aggregated data:")
         print(f"    Shaves: {agg_shaves}")
         print(f"    Missed days: {agg_missed}")
 
@@ -222,7 +220,7 @@ def compare_with_aggregated_data(results: dict[str, dict], year: int, data_dir: 
         posts_match = val_posts == agg_shaves
         missed_match = val_missed == agg_missed
 
-        print(f"  Comparison:")
+        print("  Comparison:")
         print(f"    Posts match: {posts_match} {'✓' if posts_match else '✗'}")
         print(f"    Missed days match: {missed_match} {'✓' if missed_match else '✗'}")
 
@@ -233,7 +231,7 @@ def compare_with_aggregated_data(results: dict[str, dict], year: int, data_dir: 
 
         # Show monthly breakdown for users with discrepancies
         if not missed_match or not posts_match:
-            print(f"  Monthly breakdown:")
+            print("  Monthly breakdown:")
             for month, stats in sorted(validation["monthly_breakdown"].items()):
                 print(
                     f"    {month}: {stats['posts']} posts, {stats['unique_days']} unique days, "

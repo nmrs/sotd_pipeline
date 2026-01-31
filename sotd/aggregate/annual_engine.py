@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
+import pandas as pd
 from tqdm import tqdm
 
 from ..utils.logging_config import should_disable_tqdm
@@ -20,16 +21,9 @@ from ..utils.performance_base import BasePerformanceMetrics, BasePerformanceMoni
 from .aggregators.annual_aggregator import (
     aggregate_annual_blades,
     aggregate_annual_brushes,
-    aggregate_annual_highest_use_count_per_blade,
     aggregate_annual_razor_blade_combinations,
     aggregate_annual_razors,
     aggregate_annual_soaps,
-)
-from .aggregators.brush_specialized import (
-    aggregate_fibers,
-    aggregate_handle_makers,
-    aggregate_knot_makers,
-    aggregate_knot_sizes,
 )
 from .annual_loader import load_annual_data
 
@@ -990,8 +984,9 @@ class AnnualAggregationEngine:
         if not all_records:
             return []
 
-        import pandas as pd
         from calendar import monthrange
+
+        import pandas as pd
 
         # Convert to DataFrame
         df = pd.DataFrame(all_records)
@@ -1046,13 +1041,10 @@ class AnnualAggregationEngine:
             user_months = user_months_map.get(user, set())
             missing_months = all_months - user_months
             # Add missed days for months where user didn't appear
-            for missing_month in missing_months:
-                year, month_num = int(missing_month[:4]), int(missing_month[5:7])
-                days_in_missing_month = monthrange(year, month_num)[1]
-                # User missed all days in this month
-                user_idx = grouped[grouped["user"] == user].index[0]
-                # unique_days_in_month is already summed, so we don't need to add anything
-                # (it's already 0 for missing months since user didn't appear)
+            for _missing_month in missing_months:
+                # User missed all days in this month; unique_days_in_month is already
+                # summed (0 for missing months since user didn't appear)
+                pass
 
         # Calculate annual missed_days: 365 - total_unique_days
         # This correctly accounts for months where user didn't appear (unique_days = 0)
@@ -1188,10 +1180,10 @@ class AnnualAggregationEngine:
         # for accurate annual values. Load enriched records for all months and recalculate
         # from combined distribution to get true unique combinations across the year.
         try:
-            from .load import load_enriched_data
             from .aggregators.users.soap_brand_scent_diversity_aggregator import (
                 SoapBrandScentDiversityAggregator,
             )
+            from .load import load_enriched_data
 
             # Collect all enriched records for the year
             all_enriched_records = []
@@ -1342,12 +1334,12 @@ class AnnualAggregationEngine:
 
         # Calculate sample-related metrics from enriched records
         from sotd.aggregate.utils.metrics import (
-            calculate_total_samples,
-            calculate_sample_users,
-            calculate_sample_brands,
-            calculate_unique_sample_soaps,
-            calculate_total_mashup_shaves,
             calculate_mashup_users,
+            calculate_sample_brands,
+            calculate_sample_users,
+            calculate_total_mashup_shaves,
+            calculate_total_samples,
+            calculate_unique_sample_soaps,
         )
 
         total_samples = 0

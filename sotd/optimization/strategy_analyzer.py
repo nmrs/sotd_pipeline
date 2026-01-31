@@ -276,9 +276,9 @@ class StrategyAnalyzer:
                     weight = max(weight, 20)  # Minimum 20 for any winning strategy
 
                 recommendations["base_strategy_weights"][strategy] = weight
-                recommendations["rationale"][
-                    strategy
-                ] = f"Won {wins}/{total_wins} cases ({win_rate:.1%})"
+                recommendations["rationale"][strategy] = (
+                    f"Won {wins}/{total_wins} cases ({win_rate:.1%})"
+                )
 
         # Analyze input type preferences
         for input_type, strategy_counts in self.input_type_analysis.items():
@@ -295,9 +295,9 @@ class StrategyAnalyzer:
                         recommendations["base_strategy_weights"][strategy] = min(
                             current_weight + 20, 100
                         )
-                        recommendations["rationale"][
-                            f"{strategy}_boost"
-                        ] = f"Dominates {input_type} inputs ({percentage:.1%})"
+                        recommendations["rationale"][f"{strategy}_boost"] = (
+                            f"Dominates {input_type} inputs ({percentage:.1%})"
+                        )
 
         return recommendations
 

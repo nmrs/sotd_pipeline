@@ -189,7 +189,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
         # Pattern to match enhanced table syntax: {{tables.table_name|param:value|param:value}}
         # This pattern specifically looks for the pipe character to identify enhanced syntax
         # It must contain at least one pipe character to be considered enhanced
-        enhanced_pattern = r"\{\{tables\.([^|}]+)\|[^}]+\}\}"
+        _enhanced_pattern = r"\{\{tables\.([^|}]+)\|[^}]+\}\}"
 
         # Find all unique full placeholders (not just table names) to handle multiple
         # placeholders with the same table name but different parameters

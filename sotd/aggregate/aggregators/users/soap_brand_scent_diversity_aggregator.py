@@ -103,7 +103,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator, UserDiversityMixin):
         # Default to True if flag is not present (backward compatibility)
         if "countable" not in df.columns:
             df["countable"] = True
-        countable_df = df[df["countable"] == True].copy()
+        countable_df = df[df["countable"]].copy()
 
         # Group by author to count unique brand+scent combinations per user
         # Use all data (including non-countable) for brand counting

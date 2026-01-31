@@ -9,7 +9,6 @@ This script:
 5. Saves updated YAML
 """
 
-import json
 import sys
 from pathlib import Path
 
@@ -19,7 +18,7 @@ import yaml
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.utils.wsdb_lookup import WSDBLookup
+from sotd.utils.wsdb_lookup import WSDBLookup  # noqa: E402
 
 
 def convert_aliases_to_slugs():
@@ -91,7 +90,7 @@ def convert_aliases_to_slugs():
 
     temp_file.replace(soaps_file)
 
-    print(f"\nConversion complete:")
+    print("\nConversion complete:")
     print(f"  - Converted {converted_count} scent aliases to slugs")
     print(f"  - Removed {removed_brand_aliases} brand alias lists")
     if failed_conversions:

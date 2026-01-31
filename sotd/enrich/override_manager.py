@@ -204,7 +204,7 @@ class EnrichmentOverrideManager:
             # Validate type matches expected type
             if not isinstance(override_spec, expected_type):
                 # Allow string to be converted to float/int if needed
-                if expected_type == float and isinstance(override_spec, (int, str)):
+                if expected_type is float and isinstance(override_spec, (int, str)):
                     try:
                         override_spec = float(override_spec)
                     except (ValueError, TypeError):
@@ -213,7 +213,7 @@ class EnrichmentOverrideManager:
                             f"'{comment_id}' month '{month}' must be {expected_type.__name__}, "
                             f"got: {type(override_spec).__name__}"
                         )
-                elif expected_type == int and isinstance(override_spec, (float, str)):
+                elif expected_type is int and isinstance(override_spec, (float, str)):
                     try:
                         override_spec = int(float(override_spec))
                     except (ValueError, TypeError):
@@ -230,7 +230,7 @@ class EnrichmentOverrideManager:
                     )
 
             # Validate string values are not empty
-            if expected_type == str and isinstance(override_spec, str):
+            if expected_type is str and isinstance(override_spec, str):
                 if not override_spec.strip():
                     raise ValueError(
                         f"Override value for {field}.{enrichment_key} in comment "
