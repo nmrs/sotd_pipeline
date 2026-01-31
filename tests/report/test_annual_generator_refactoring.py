@@ -292,6 +292,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "soap-makers": [],
             "brand-diversity": [],
             "top-shavers": [],
+            "soap-mashup-users": [],
             "user-soap-brand-scent-diversity": [],
         }
 

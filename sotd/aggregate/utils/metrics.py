@@ -175,6 +175,43 @@ def calculate_sample_users(records: List[Dict[str, Any]]) -> int:
     return len(user_series.unique())
 
 
+def calculate_total_mashup_shaves(records: List[Dict[str, Any]]) -> int:
+    """Calculate total number of shaves that used a mashup (soap.enriched.is_mashup)."""
+    if not records:
+        return 0
+
+    count = 0
+    for record in records:
+        soap = record.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            if enriched and enriched.get("is_mashup") is True:
+                count += 1
+    return count
+
+
+def calculate_mashup_users(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique users who used a mashup (soap.enriched.is_mashup)."""
+    if not records:
+        return 0
+
+    mashup_users = []
+    for record in records:
+        soap = record.get("soap")
+        if soap is not None and isinstance(soap, dict):
+            enriched = soap.get("enriched", {})
+            if enriched and enriched.get("is_mashup") is True:
+                author = record.get("author")
+                if author and isinstance(author, str) and author.strip():
+                    mashup_users.append(author.strip())
+
+    if not mashup_users:
+        return 0
+
+    user_series = pd.Series(mashup_users)
+    return len(user_series.unique())
+
+
 def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique brands sampled."""
     if not records:
@@ -390,6 +427,12 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     unique_sample_soaps = calculate_unique_sample_soaps(records)
 
+    total_mashup_shaves = calculate_total_mashup_shaves(records)
+    mashup_users = calculate_mashup_users(records)
+    mashup_percentage = (
+        round((total_mashup_shaves / total_shaves) * 100, 1) if total_shaves > 0 else 0.0
+    )
+
     unique_razors = calculate_unique_razors(records)
 
     unique_blades = calculate_unique_blades(records)
@@ -409,6 +452,9 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         "sample_users": sample_users,
         "sample_brands": sample_brands,
         "unique_sample_soaps": unique_sample_soaps,
+        "total_mashup_shaves": total_mashup_shaves,
+        "mashup_users": mashup_users,
+        "mashup_percentage": mashup_percentage,
         "unique_razors": unique_razors,
         "unique_blades": unique_blades,
         "unique_brushes": unique_brushes,

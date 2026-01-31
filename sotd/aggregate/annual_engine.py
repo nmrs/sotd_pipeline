@@ -1346,23 +1346,34 @@ class AnnualAggregationEngine:
             calculate_sample_users,
             calculate_sample_brands,
             calculate_unique_sample_soaps,
+            calculate_total_mashup_shaves,
+            calculate_mashup_users,
         )
 
         total_samples = 0
         sample_users = 0
         sample_brands = 0
         unique_sample_soaps = 0
+        total_mashup_shaves = 0
+        mashup_users = 0
 
         if all_enriched_records:
             total_samples = calculate_total_samples(all_enriched_records)
             sample_users = calculate_sample_users(all_enriched_records)
             sample_brands = calculate_sample_brands(all_enriched_records)
             unique_sample_soaps = calculate_unique_sample_soaps(all_enriched_records)
+            total_mashup_shaves = calculate_total_mashup_shaves(all_enriched_records)
+            mashup_users = calculate_mashup_users(all_enriched_records)
 
         # Calculate sample percentage
         sample_percentage = 0.0
         if total_shaves > 0:
             sample_percentage = round((total_samples / total_shaves) * 100, 1)
+
+        # Calculate mashup percentage
+        mashup_percentage = 0.0
+        if total_shaves > 0:
+            mashup_percentage = round((total_mashup_shaves / total_shaves) * 100, 1)
 
         # Use provided lists or calculate from monthly_data keys
         if included_months is None:
@@ -1392,6 +1403,9 @@ class AnnualAggregationEngine:
             "sample_brands": sample_brands,
             "unique_sample_soaps": unique_sample_soaps,
             "sample_percentage": sample_percentage,
+            "total_mashup_shaves": total_mashup_shaves,
+            "mashup_users": mashup_users,
+            "mashup_percentage": mashup_percentage,
             "included_months": sorted(included_months),
             "missing_months": sorted(missing_months),
         }

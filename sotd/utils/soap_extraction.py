@@ -4,6 +4,26 @@
 import re
 from typing import Optional, Tuple
 
+# v1: "mashup", "mash up", "mash-up" only (word-boundary, case-insensitive)
+_MASHUP_PATTERN = re.compile(r"\bmash[- ]?up\b", re.IGNORECASE)
+
+
+def detect_soap_mashup(text: str) -> bool:
+    """Detect mashup indicators in soap field text (original or normalized).
+
+    v1 patterns: "mashup", "mash up", "mash-up" only. Used to count unbranded
+    mashup shaves (e.g. "soap mashup", "Sample mashup") when matched is null.
+
+    Args:
+        text: Soap field text (original or normalized)
+
+    Returns:
+        True if text contains a mashup indicator, False otherwise.
+    """
+    if not text or not isinstance(text, str):
+        return False
+    return _MASHUP_PATTERN.search(text.strip()) is not None
+
 
 def extract_soap_sample_via_normalization(
     original_text: str, normalized_text: str

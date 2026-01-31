@@ -12,6 +12,8 @@ from sotd.aggregate.utils.metrics import (
     calculate_sample_users,
     calculate_sample_brands,
     calculate_unique_sample_soaps,
+    calculate_total_mashup_shaves,
+    calculate_mashup_users,
     calculate_unique_razors,
     calculate_unique_blades,
     calculate_unique_brushes,
@@ -264,6 +266,51 @@ class TestSampleMetrics:
         assert result == 2
 
 
+class TestMashupMetrics:
+    """Test mashup-related metric calculations (soap.enriched.is_mashup)."""
+
+    def test_calculate_total_mashup_shaves_empty(self):
+        """Test total mashup shaves with empty records."""
+        result = calculate_total_mashup_shaves([])
+        assert result == 0
+
+    def test_calculate_total_mashup_shaves_with_valid_data(self):
+        """Test total mashup shaves with is_mashup in enriched."""
+        records = [
+            {
+                "soap": {
+                    "matched": {"brand": "Mama Bear", "scent": "Sample Mashup", "countable": False},
+                    "enriched": {"is_mashup": True},
+                },
+            },
+            {"soap": {"matched": {"brand": "B&M", "scent": "Seville"}, "enriched": {}}},
+            {
+                "soap": {
+                    "original": "soap mashup",
+                    "normalized": "soap mashup",
+                    "enriched": {"is_mashup": True},
+                }
+            },
+        ]
+        result = calculate_total_mashup_shaves(records)
+        assert result == 2
+
+    def test_calculate_mashup_users_empty(self):
+        """Test mashup users with empty records."""
+        result = calculate_mashup_users([])
+        assert result == 0
+
+    def test_calculate_mashup_users_with_valid_data(self):
+        """Test mashup users with is_mashup in enriched."""
+        records = [
+            {"author": "user1", "soap": {"enriched": {"is_mashup": True}}},
+            {"author": "user2", "soap": {"enriched": {"is_mashup": True}}},
+            {"author": "user1", "soap": {"enriched": {"is_mashup": True}}},
+        ]
+        result = calculate_mashup_users(records)
+        assert result == 2
+
+
 class TestHardwareMetrics:
     """Test hardware-related metric calculations."""
 
@@ -369,6 +416,9 @@ class TestMetadataCalculation:
         assert result["sample_users"] == 0
         assert result["sample_brands"] == 0
         assert result["unique_sample_soaps"] == 0
+        assert result["total_mashup_shaves"] == 0
+        assert result["mashup_users"] == 0
+        assert result["mashup_percentage"] == 0.0
         assert result["unique_razors"] == 0
         assert result["unique_blades"] == 0
         assert result["unique_brushes"] == 0
@@ -406,6 +456,9 @@ class TestMetadataCalculation:
         assert result["sample_users"] == 1
         assert result["sample_brands"] == 1
         assert result["unique_sample_soaps"] == 1
+        assert result["total_mashup_shaves"] == 0
+        assert result["mashup_users"] == 0
+        assert result["mashup_percentage"] == 0.0
         assert result["unique_razors"] == 2
         assert result["unique_blades"] == 2
         assert result["unique_brushes"] == 2

@@ -104,7 +104,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
             elif key == "avg_shaves_per_user" or key == "median_shaves_per_user":
                 # Format decimal numbers
                 variables[key] = f"{value:.1f}"
-            elif key == "sample_percentage":
+            elif key == "sample_percentage" or key == "mashup_percentage":
                 # Format percentage
                 variables[key] = f"{value:.1f}%"
             elif isinstance(value, (int, float)):

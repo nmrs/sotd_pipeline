@@ -126,6 +126,7 @@ class ParameterValidator:
         # Software tables
         "soap-brands": ["shaves", "unique_users"],  # Alias for soap-makers
         "top-sampled-soaps": ["shaves", "unique_users"],
+        "soap-mashup-users": ["shaves", "unique_users"],
         # User diversity tables
         "user-soap-brand-scent-diversity": ["unique_combinations", "shaves"],
         # Testing

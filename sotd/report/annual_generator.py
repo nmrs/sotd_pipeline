@@ -73,6 +73,8 @@ class AnnualReportGenerator(BaseReportGenerator):
         total_samples = self.metadata.get("total_samples", 0)
         sample_users = self.metadata.get("sample_users", 0)
         sample_brands = self.metadata.get("sample_brands", 0)
+        total_mashup_shaves = self.metadata.get("total_mashup_shaves", 0)
+        mashup_users = self.metadata.get("mashup_users", 0)
 
         # Calculate unique counts from aggregated data for software reports
         unique_soaps = 0
@@ -97,6 +99,9 @@ class AnnualReportGenerator(BaseReportGenerator):
             "sample_percentage": f"{self.metadata.get('sample_percentage', 0):.1f}%",
             "sample_users": f"{sample_users:,}",
             "sample_brands": f"{sample_brands:,}",
+            "total_mashup_shaves": f"{total_mashup_shaves:,}",
+            "mashup_users": f"{mashup_users:,}",
+            "mashup_percentage": f"{self.metadata.get('mashup_percentage', 0):.1f}%",
             "included_months": f"{included_months_count:,}",
             "missing_months": f"{missing_months_count:,}",
             "missing_months_note": (

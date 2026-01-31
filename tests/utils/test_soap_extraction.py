@@ -4,9 +4,37 @@
 import pytest
 
 from sotd.utils.soap_extraction import (
+    detect_soap_mashup,
     extract_soap_sample_via_normalization,
     normalize_soap_suffixes,
 )
+
+
+class TestDetectSoapMashup:
+    """Test mashup detection (v1: mashup, mash up, mash-up only)."""
+
+    def test_empty_or_none(self):
+        assert detect_soap_mashup("") is False
+        assert detect_soap_mashup("   ") is False
+
+    def test_mashup_word(self):
+        assert detect_soap_mashup("soap mashup") is True
+        assert detect_soap_mashup("Sample mashup") is True
+        assert detect_soap_mashup("MASHUP") is True
+        assert detect_soap_mashup("  mashup  ") is True
+
+    def test_mash_up_space(self):
+        assert detect_soap_mashup("mash up") is True
+        assert detect_soap_mashup("soap mash up") is True
+
+    def test_mash_hyphen_up(self):
+        assert detect_soap_mashup("mash-up") is True
+        assert detect_soap_mashup("soap mash-up") is True
+
+    def test_no_mashup(self):
+        assert detect_soap_mashup("Barrister and Mann - Seville") is False
+        assert detect_soap_mashup("sample") is False
+        assert detect_soap_mashup("tri-mix") is False
 
 
 class TestNormalizeSoapSuffixes:

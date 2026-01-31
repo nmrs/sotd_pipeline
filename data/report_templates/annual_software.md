@@ -1,6 +1,6 @@
 # {{year}} Lather Log: Year-End Wrap-Up
 
-Welcome to your {{year}} Lather Log. {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands. {{total_samples}} of those shaves used samples of {{unique_sample_soaps}} unique soaps.
+Welcome to your {{year}} Lather Log. {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands. {{total_samples}} of those shaves used samples of {{unique_sample_soaps}} unique soaps. {{total_mashup_shaves}} of those shaves used mashup/mix soaps ({{mashup_users}} users).
 
 ## Observations
 
@@ -27,6 +27,10 @@ Welcome to your {{year}} Lather Log. {{total_shaves}} shave reports from {{uniqu
 ## Brand Diversity
 
 {{tables.brand-diversity|unique_soaps:10|deltas:true}}
+
+## Top Mashup Users
+
+{{tables.soap-mashup-users|shaves:10|columns:rank, user, shaves, unique_users|deltas:true}}
 
 ## Soap Diversity by User
 

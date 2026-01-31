@@ -13,6 +13,7 @@ from .aggregators.core import (
     aggregate_blade_usage_distribution,
     aggregate_blades,
     aggregate_brushes,
+    aggregate_mashup_usage_metrics,
     aggregate_razors,
     aggregate_sample_usage_metrics,
     aggregate_soap_sample_brand_scents,
@@ -49,6 +50,7 @@ from .aggregators.users import (
     aggregate_razor_format_users,
     aggregate_soap_brand_diversity,
     aggregate_soap_brand_scent_diversity,
+    aggregate_soap_mashup_users,
     aggregate_soap_sample_users,
     aggregate_users,
 )
@@ -210,6 +212,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         records
     )
     aggregated_data["data"]["sample_usage_metrics"] = aggregate_sample_usage_metrics(records)
+    aggregated_data["data"]["mashup_usage_metrics"] = aggregate_mashup_usage_metrics(records)
 
     # Manufacturer aggregations
     aggregated_data["data"]["razor_manufacturers"] = aggregate_razor_manufacturers(records)
@@ -252,6 +255,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
 
     # User diversity aggregations
     aggregated_data["data"]["soap_sample_users"] = aggregate_soap_sample_users(records)
+    aggregated_data["data"]["soap_mashup_users"] = aggregate_soap_mashup_users(records)
     aggregated_data["data"]["user_razor_diversity"] = aggregate_razor_diversity(records)
     aggregated_data["data"]["user_blade_diversity"] = aggregate_blade_diversity(records)
     aggregated_data["data"]["user_brush_diversity"] = aggregate_brush_diversity(records)

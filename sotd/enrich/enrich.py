@@ -10,6 +10,7 @@ from .game_changer_enricher import GameChangerEnricher
 from .override_manager import EnrichmentOverrideManager
 from .razor_format_enricher import RazorFormatEnricher
 from .registry import enricher_registry
+from .soap_mashup_enricher import SoapMashupEnricher
 from .soap_sample_enricher import SoapSampleEnricher
 from .straight_razor_enricher import StraightRazorEnricher
 from .super_speed_tip_enricher import SuperSpeedTipEnricher
@@ -54,6 +55,7 @@ def setup_enrichers(override_manager: Optional[EnrichmentOverrideManager] = None
     enricher_registry.register(ChristopherBradleyEnricher())
     enricher_registry.register(BlackbirdPlateEnricher())
     enricher_registry.register(SoapSampleEnricher())
+    enricher_registry.register(SoapMashupEnricher())
     enricher_registry.register(SuperSpeedTipEnricher())
     enricher_registry.register(RazorFormatEnricher())
 
