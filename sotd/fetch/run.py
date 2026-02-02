@@ -18,9 +18,9 @@ from __future__ import annotations
 
 import argparse
 import calendar
+import logging
 from datetime import date as _date
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import List, Sequence, Set
 
 from tqdm import tqdm
@@ -38,8 +38,6 @@ from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils import parse_thread_date
 from sotd.utils.data_dir import get_data_dir
 from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
-
-import logging
 
 logger = logging.getLogger(__name__)
 

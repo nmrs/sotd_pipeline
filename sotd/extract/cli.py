@@ -5,8 +5,6 @@ This module provides standardized CLI argument parsing for the extract phase
 using the BaseCLIParser to eliminate code duplication.
 """
 
-from pathlib import Path
-
 from sotd.cli_utils.base_parser import BaseCLIParser
 
 

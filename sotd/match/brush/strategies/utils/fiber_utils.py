@@ -10,7 +10,7 @@ _FIBER_PATTERNS = {
     "Mixed Boar/Horse": r"(boar/horse|horse/boar)",
     # Specific fiber types with detailed patterns
     "Mixed Badger/Boar": (
-        r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|(?:badg|boar).*hybrid|hybrid.*(?:badg|boar)|fusion|"
+        r"^(?!.*badger[ -]dyed).*(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|(?:badg|boar).*hybrid|hybrid.*(?:badg|boar)|fusion|"
         r"badger.*cased|tasso et setola)"
     ),
     "Synthetic": (
@@ -20,11 +20,11 @@ _FIBER_PATTERNS = {
         r"\bmig\b|synthetic badger|mother ?(lode|load)|\bg\d\b|\bt4\b)"
     ),
     # General fiber types (checked last)
+    "Boar": r"\b(board?|shoat|badger[- ]dyed.*boar)\b",
     "Badger": (
         r"(hmw|high.*mo|(2|3|two|three)[\s-]*band|shd|badger|silvertip|super|"
         r"gelo|gelous|gelousy|finest|best|ultralux|[fm]anchurian|\blod\b)"
     ),
-    "Boar": r"\b(board?|shoat)\b",
     "Horse": r"\bhorse(hair)?\b",
 }
 

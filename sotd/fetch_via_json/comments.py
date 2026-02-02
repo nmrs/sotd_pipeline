@@ -501,7 +501,6 @@ def _fetch_comments_parallel(
         List of all comment dictionaries
     """
     import concurrent.futures
-    from typing import List as ListType
 
     if cookies is None:
         cookies = get_reddit_cookies()

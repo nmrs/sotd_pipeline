@@ -15,7 +15,6 @@ import calendar
 import logging
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Sequence
 
 from tqdm import tqdm
@@ -23,11 +22,11 @@ from tqdm import tqdm
 from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.save import load_month_file, write_month_file
-from sotd.utils.data_dir import get_data_dir
-from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 from sotd.fetch_via_json.comments import fetch_comments_for_threads_json
 from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_session
 from sotd.fetch_via_json.search import search_threads_json
+from sotd.utils.data_dir import get_data_dir
+from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +44,10 @@ def get_parser() -> argparse.ArgumentParser:
     date_group.add_argument("--range", type=str, help="Month range in YYYY-MM:YYYY-MM format")
 
     parser.add_argument(
-        "--data-dir", type=str, default="data", help="Data directory (default: data, or SOTD_DATA_DIR env var)"
+        "--data-dir",
+        type=str,
+        default="data",
+        help="Data directory (default: data, or SOTD_DATA_DIR env var)",
     )
     parser.add_argument("--force", action="store_true", help="Force re-fetch even if files exist")
     parser.add_argument("--debug", action="store_true", help="Enable debug output")
@@ -124,6 +126,7 @@ def _process_month(
         logger.warning(f"No threads found for {year:04d}-{month:02d}; skipping file writes.")
         # Calculate missing days
         from datetime import date as _date
+
         from sotd.utils import parse_thread_date
 
         last_day = calendar.monthrange(year, month)[1]
@@ -145,6 +148,7 @@ def _process_month(
 
     # Calculate missing days
     from datetime import date as _date
+
     from sotd.utils import parse_thread_date
 
     last_day = calendar.monthrange(year, month)[1]

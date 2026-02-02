@@ -92,7 +92,10 @@ class BaseCLIParser(argparse.ArgumentParser):
     def _add_output_arguments(self) -> None:
         """Add standardized data directory argument."""
         self.add_argument(
-            "--data-dir", type=Path, default=Path("data"), help="Data directory (default: data, or SOTD_DATA_DIR env var)"
+            "--data-dir",
+            type=Path,
+            default=Path("data"),
+            help="Data directory (default: data, or SOTD_DATA_DIR env var)",
         )
 
     def _add_debug_arguments(self) -> None:

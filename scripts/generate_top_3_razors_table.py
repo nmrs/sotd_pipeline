@@ -2,8 +2,8 @@
 """Generate markdown table showing full ranking history for all razors that have ever been in the top 3."""
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 # Find project root (parent of scripts directory)
 SCRIPT_DIR = Path(__file__).parent

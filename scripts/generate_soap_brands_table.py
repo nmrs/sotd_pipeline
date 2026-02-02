@@ -2,8 +2,8 @@
 """Generate markdown table showing ranking history for soap brands from 2016-2025."""
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 # Find project root (parent of scripts directory)
 SCRIPT_DIR = Path(__file__).parent
@@ -68,7 +68,7 @@ def generate_table():
     lines.append("# Soap Brands Ranking History (2016-2025)")
     lines.append("")
     lines.append("*Data sourced from `data/aggregated/annual/*.json`*")
-    lines.append(f"*Shows ranking history for all brands that have ever been in the top 3*")
+    lines.append("*Shows ranking history for all brands that have ever been in the top 3*")
     lines.append("")
 
     # Header row

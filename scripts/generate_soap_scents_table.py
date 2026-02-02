@@ -2,8 +2,8 @@
 """Generate markdown table showing ranking history for soap scents from 2016-2025."""
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 # Find project root (parent of scripts directory)
 SCRIPT_DIR = Path(__file__).parent

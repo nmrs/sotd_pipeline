@@ -7,7 +7,6 @@ using the BaseCLIParser to eliminate code duplication.
 
 import argparse
 import datetime
-from pathlib import Path
 
 from sotd.cli_utils.base_parser import BaseCLIParser
 

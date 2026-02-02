@@ -15,8 +15,6 @@ CLI matrix
 """
 
 import logging
-import os
-from pathlib import Path
 from typing import Sequence
 
 from sotd.utils.logging_config import setup_pipeline_logging

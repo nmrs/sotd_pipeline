@@ -11,7 +11,6 @@ from ..cli_utils.date_span import month_span
 from ..utils.data_dir import get_data_dir
 from ..utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 from .annual_engine import process_annual, process_annual_range, process_annual_range_parallel
-from .annual_loader import load_annual_data
 from .cli import get_parser
 from .engine import process_months, process_months_parallel
 
@@ -33,9 +32,7 @@ def run(args) -> bool:
         # Handle annual aggregation (annual handles missing files gracefully)
         if args.year:
             # Single year - use sequential processing
-            process_annual(
-                year=args.year, data_dir=data_dir, debug=args.debug, force=args.force
-            )
+            process_annual(year=args.year, data_dir=data_dir, debug=args.debug, force=args.force)
             return False  # Annual aggregation handles missing files gracefully
         elif args.range:
             # Parse year range for annual mode
@@ -132,7 +129,6 @@ def _create_annual_files(
         debug: Enable debug logging
         force: Force regeneration of existing annual files
     """
-    from collections import defaultdict
 
     # Group months by year and find all unique years
     years = set(month.split("-")[0] for month in months)
@@ -179,7 +175,9 @@ def _create_annual_files(
     # Process years with progress bar
     if years_to_process:
         logger.info(f"Creating annual aggregation files for {len(years_to_process)} year(s)...")
-        for year in tqdm(years_to_process, desc="Annual aggregation", unit="year", disable=should_disable_tqdm()):
+        for year in tqdm(
+            years_to_process, desc="Annual aggregation", unit="year", disable=should_disable_tqdm()
+        ):
             try:
                 # Create the annual file (will aggregate whatever months are available)
                 try:

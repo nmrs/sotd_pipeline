@@ -1685,9 +1685,10 @@ def _validate_brush_entry_worker(
     """
     from pathlib import Path
 
+    from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader
+
     # Import here to avoid circular imports at module level
     from sotd.match.brush_matcher import BrushMatcher
-    from sotd.match.brush.comparison.splits_loader import BrushSplitsLoader
 
     # Initialize matcher and splits_loader in worker process
     data_path = Path(data_path_str)

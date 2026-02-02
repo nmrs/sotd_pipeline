@@ -5,6 +5,7 @@ a small `safe_call` wrapper that handles Reddit's `RateLimitExceeded`.
 from __future__ import annotations
 
 import calendar
+import logging
 import os
 import time
 from datetime import date as _date
@@ -13,8 +14,6 @@ from typing import List, Sequence, TypeVar, cast
 import praw
 from praw.models import Comment, Submission
 from prawcore.exceptions import NotFound, RequestException
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +154,7 @@ def get_reddit() -> praw.Reddit:  # noqa: D401
     try:
         reddit = praw.Reddit()
         return reddit
-    except Exception as e:
+    except Exception:
         raise
 
 

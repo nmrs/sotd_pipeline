@@ -928,7 +928,11 @@ Examples:
         type=validate_range,
         help="Date range (YYYY-MM:YYYY-MM for monthly, YYYY:YYYY for annual)",
     )
-    parser.add_argument("--data-dir", default="data", help="Data directory (default: data, or SOTD_DATA_DIR env var)")
+    parser.add_argument(
+        "--data-dir",
+        default="data",
+        help="Data directory (default: data, or SOTD_DATA_DIR env var)",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
     parser.add_argument(
@@ -1055,8 +1059,7 @@ Examples:
             delta_months = calculate_delta_months(args)
             if args.debug:
                 logger.debug(
-                    f"Delta mode: processing {len(delta_months)} months: "
-                    f"{', '.join(delta_months)}"
+                    f"Delta mode: processing {len(delta_months)} months: {', '.join(delta_months)}"
                 )
             # Pass delta-months to all phases - they will filter as needed
             common_args.extend(["--delta-months", ",".join(delta_months)])

@@ -137,7 +137,7 @@ def generate_table():
 
     print(f"**Overall Winner:** {overall_winner}")
     print()
-    print(f"**Monthly Wins:**")
+    print("**Monthly Wins:**")
     print(f"- Stirling: {stirling_wins} months")
     print(f"- B&M: {bam_wins} months")
     print(f"- Ties: {ties} months")

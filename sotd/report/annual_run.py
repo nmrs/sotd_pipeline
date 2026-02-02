@@ -45,7 +45,9 @@ def run_annual_report(args) -> None:
         # Convert output directory to Path
         # For consistency with other phases, use data_dir for both input (aggregated data) and output (reports)
         out_dir = get_data_dir(args.data_dir)
-        data_root = out_dir  # Use data_dir for reading aggregated data, consistent with other phases
+        data_root = (
+            out_dir  # Use data_dir for reading aggregated data, consistent with other phases
+        )
 
         # Determine years to process
         if args.year:
@@ -88,9 +90,9 @@ def run_annual_report(args) -> None:
                 output_format = getattr(args, "format", "markdown")
 
                 # Create generator for both markdown and JSON generation
-                from .annual_generator import create_annual_report_generator
-                from .annual_load import load_annual_data, get_annual_file_path
                 from .annual_comparison_loader import AnnualComparisonLoader
+                from .annual_generator import create_annual_report_generator
+                from .annual_load import get_annual_file_path, load_annual_data
 
                 # Load annual data
                 annual_data_file = get_annual_file_path(data_root, year)

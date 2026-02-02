@@ -2,8 +2,8 @@
 """Compare timing between PRAW fetch and JSON fetch for year 2025."""
 
 import subprocess
-import time
 import sys
+import time
 
 
 def run_command(cmd, label):

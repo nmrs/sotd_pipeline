@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """User analysis aggregation for detailed user posting analysis with comment IDs and product usage."""
 
-from calendar import monthrange
 from datetime import date
 from typing import Any, Dict, List
 
