@@ -580,6 +580,29 @@ const ProductUsage: React.FC = () => {
     }
   };
 
+  // Build (date, commentId) pairs from comments_by_date so date labels match the comment opened (fixes wrong-date link bug).
+  const getOrderedDateCommentPairs = (
+    commentIds: string[],
+    commentsByDate: Record<string, string[]>
+  ): { dates: string[]; commentIds: string[] } => {
+    const pairs: { date: string; commentId: string }[] = [];
+    const commentIdToDate: Record<string, string> = {};
+    Object.entries(commentsByDate).forEach(([date, ids]) => {
+      ids.forEach(id => {
+        commentIdToDate[id] = date;
+      });
+    });
+    commentIds.forEach(commentId => {
+      const date = commentIdToDate[commentId];
+      if (date) pairs.push({ date, commentId });
+    });
+    pairs.sort((a, b) => b.date.localeCompare(a.date)); // latest first
+    return {
+      dates: pairs.map(p => p.date),
+      commentIds: pairs.map(p => p.commentId),
+    };
+  };
+
   // Helper function to get dates with URLs for a user (uses cached URLs)
   const getUserUsageDatesWithUrls = (
     commentIds: string[],
@@ -938,31 +961,37 @@ const ProductUsage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {aggregatedAnalysis.users.map((user, index) => (
-                <tr key={user.username} className='hover:bg-muted/50'>
-                  <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
-                  <td className='border border-border p-2'>{user.username}</td>
-                  <td className='border border-border p-2 text-center'>{user.usage_count}</td>
-                  <td className='border border-border p-2'>
-                    <CommentDisplay
-                      commentIds={user.comment_ids}
-                      onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                      displayMode='dates'
-                      dates={user.usage_dates}
-                      expanded={expandedUsers[user.username]}
-                      onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                    />
-                  </td>
-                  <td className='border border-border p-2'>
-                    <CommentDisplay
-                      commentIds={user.comment_ids}
-                      onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                      expanded={expandedUsers[user.username]}
-                      onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {aggregatedAnalysis.users.map((user, index) => {
+                const ordered = getOrderedDateCommentPairs(
+                  user.comment_ids,
+                  aggregatedAnalysis.comments_by_date
+                );
+                return (
+                  <tr key={user.username} className='hover:bg-muted/50'>
+                    <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
+                    <td className='border border-border p-2'>{user.username}</td>
+                    <td className='border border-border p-2 text-center'>{user.usage_count}</td>
+                    <td className='border border-border p-2'>
+                      <CommentDisplay
+                        commentIds={ordered.commentIds}
+                        onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                        displayMode='dates'
+                        dates={ordered.dates}
+                        expanded={expandedUsers[user.username]}
+                        onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                      />
+                    </td>
+                    <td className='border border-border p-2'>
+                      <CommentDisplay
+                        commentIds={ordered.commentIds}
+                        onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
+                        expanded={expandedUsers[user.username]}
+                        onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -1671,39 +1700,55 @@ const ProductUsage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {aggregatedAnalysis.users.map((user, index) => (
-                    <tr key={user.username} className='hover:bg-muted/50'>
-                      <td className='border border-border p-2 text-center font-medium'>{index + 1}</td>
-                      <td className='border border-border p-2'>
-                        <button
-                          onClick={() => handleUsernameClick(user.username)}
-                          className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
-                          type='button'
-                        >
-                          {user.username}
-                        </button>
-                      </td>
-                      <td className='border border-border p-2 text-center'>{user.usage_count}</td>
-                      <td className='border border-border p-2'>
-                        <CommentDisplay
-                          commentIds={user.comment_ids}
-                          onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                          displayMode='dates'
-                          dates={user.usage_dates}
-                          expanded={expandedUsers[user.username]}
-                          onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                        />
-                      </td>
-                      <td className='border border-border p-2'>
-                        <CommentDisplay
-                          commentIds={user.comment_ids}
-                          onCommentClick={commentId => handleCommentClick(commentId, user.comment_ids)}
-                          expanded={expandedUsers[user.username]}
-                          onExpandChange={expanded => handleUserExpandChange(user.username, expanded)}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {aggregatedAnalysis.users.map((user, userIndex) => {
+                    const ordered = getOrderedDateCommentPairs(
+                      user.comment_ids,
+                      aggregatedAnalysis.comments_by_date
+                    );
+                    return (
+                      <tr key={user.username} className='hover:bg-muted/50'>
+                        <td className='border border-border p-2 text-center font-medium'>
+                          {userIndex + 1}
+                        </td>
+                        <td className='border border-border p-2'>
+                          <button
+                            onClick={() => handleUsernameClick(user.username)}
+                            className='text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium'
+                            type='button'
+                          >
+                            {user.username}
+                          </button>
+                        </td>
+                        <td className='border border-border p-2 text-center'>{user.usage_count}</td>
+                        <td className='border border-border p-2'>
+                          <CommentDisplay
+                            commentIds={ordered.commentIds}
+                            onCommentClick={commentId =>
+                              handleCommentClick(commentId, user.comment_ids)
+                            }
+                            displayMode='dates'
+                            dates={ordered.dates}
+                            expanded={expandedUsers[user.username]}
+                            onExpandChange={expanded =>
+                              handleUserExpandChange(user.username, expanded)
+                            }
+                          />
+                        </td>
+                        <td className='border border-border p-2'>
+                          <CommentDisplay
+                            commentIds={ordered.commentIds}
+                            onCommentClick={commentId =>
+                              handleCommentClick(commentId, user.comment_ids)
+                            }
+                            expanded={expandedUsers[user.username]}
+                            onExpandChange={expanded =>
+                              handleUserExpandChange(user.username, expanded)
+                            }
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -392,6 +392,29 @@ const MonthlyUserPosts: React.FC = () => {
     return usageDates.sort(); // Sort dates chronologically
   };
 
+  // Build (date, commentId) pairs from comments_by_date so date labels match the comment opened (fixes wrong-date link bug).
+  const getOrderedDateCommentPairs = (
+    commentIds: string[],
+    commentsByDate: Record<string, string[]>
+  ): { dates: string[]; commentIds: string[] } => {
+    const pairs: { date: string; commentId: string }[] = [];
+    const commentIdToDate: Record<string, string> = {};
+    Object.entries(commentsByDate).forEach(([date, ids]) => {
+      ids.forEach(id => {
+        commentIdToDate[id] = date;
+      });
+    });
+    commentIds.forEach(commentId => {
+      const date = commentIdToDate[commentId];
+      if (date) pairs.push({ date, commentId });
+    });
+    pairs.sort((a, b) => b.date.localeCompare(a.date)); // latest first
+    return {
+      dates: pairs.map(p => p.date),
+      commentIds: pairs.map(p => p.commentId),
+    };
+  };
+
   // Helper function to generate unique product keys
   const getProductKey = (productType: string, product: any): string => {
     switch (productType) {
@@ -1491,12 +1514,18 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center'>{razor.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={razor.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                razor.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, razor.comment_ids)
                               }
                               displayMode='dates'
-                              dates={getProductUsageDates(razor.comment_ids)}
+                              dates={getOrderedDateCommentPairs(
+                                razor.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).dates}
                               expanded={expandedProducts[getProductKey('razor', razor)]}
                               onExpandChange={expanded =>
                                 handleProductExpandChange(getProductKey('razor', razor), expanded)
@@ -1505,7 +1534,10 @@ const MonthlyUserPosts: React.FC = () => {
                           </td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={razor.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                razor.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, razor.comment_ids)
                               }
@@ -1606,12 +1638,18 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center'>{blade.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={blade.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                blade.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, blade.comment_ids)
                               }
                               displayMode='dates'
-                              dates={getProductUsageDates(blade.comment_ids)}
+                              dates={getOrderedDateCommentPairs(
+                                blade.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).dates}
                               expanded={expandedProducts[getProductKey('blade', blade)]}
                               onExpandChange={expanded =>
                                 handleProductExpandChange(getProductKey('blade', blade), expanded)
@@ -1620,7 +1658,10 @@ const MonthlyUserPosts: React.FC = () => {
                           </td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={blade.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                blade.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, blade.comment_ids)
                               }
@@ -1735,12 +1776,18 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center'>{brush.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={brush.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                brush.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, brush.comment_ids)
                               }
                               displayMode='dates'
-                              dates={getProductUsageDates(brush.comment_ids)}
+                              dates={getOrderedDateCommentPairs(
+                                brush.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).dates}
                               expanded={expandedProducts[getProductKey('brush', brush)]}
                               onExpandChange={expanded =>
                                 handleProductExpandChange(getProductKey('brush', brush), expanded)
@@ -1749,7 +1796,10 @@ const MonthlyUserPosts: React.FC = () => {
                           </td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={brush.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                brush.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, brush.comment_ids)
                               }
@@ -1850,12 +1900,18 @@ const MonthlyUserPosts: React.FC = () => {
                           <td className='border border-border p-2 text-center'>{soap.count}</td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={soap.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                soap.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, soap.comment_ids)
                               }
                               displayMode='dates'
-                              dates={getProductUsageDates(soap.comment_ids)}
+                              dates={getOrderedDateCommentPairs(
+                                soap.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).dates}
                               expanded={expandedProducts[getProductKey('soap', soap)]}
                               onExpandChange={expanded =>
                                 handleProductExpandChange(getProductKey('soap', soap), expanded)
@@ -1864,7 +1920,10 @@ const MonthlyUserPosts: React.FC = () => {
                           </td>
                           <td className='border border-border p-2'>
                             <CommentDisplay
-                              commentIds={soap.comment_ids}
+                              commentIds={getOrderedDateCommentPairs(
+                                soap.comment_ids,
+                                aggregatedAnalysis.comments_by_date
+                              ).commentIds}
                               onCommentClick={commentId =>
                                 handleCommentClick(commentId, soap.comment_ids)
                               }
