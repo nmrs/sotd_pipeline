@@ -3482,7 +3482,7 @@ Officina Artigiana:
       - artigiana.*wellness
 Ogallala:
   patterns:
-  - og+(?:al+)?al+a
+  - og+(?:al+)?al+a( bay rum (toiletry co\.?)?)?
   scents:
     Bay Rum:
       patterns:
@@ -4870,6 +4870,9 @@ Talent Soap Factory:
     Save the Earth:
       patterns:
       - save the earth
+    Shrinking Violets:
+      patterns:
+      - shrinking violet
     Slow Dancing in the Dark:
       patterns:
       - (talent|tsf|slow).*dancing.*dark
