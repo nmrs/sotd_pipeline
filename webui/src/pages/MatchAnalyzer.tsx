@@ -11,6 +11,7 @@ import {
   CorrectMatchesResponse,
   getCommentDetail,
   getCorrectMatches,
+  getQueueErrors,
   markMatchesAsCorrect,
   removeMatchesFromCorrect,
   updateFilteredEntries,
@@ -22,9 +23,9 @@ import {
   GroupedDataItem,
   AnalyzerDataItem,
   isGroupedDataItem,
+  QueueErrorsResponse,
+  QueueErrorEntry,
 } from '@/services/api';
-import { useOperationStatus } from '@/hooks/useOperationStatus';
-import { OperationProgress } from '@/components/domain/OperationProgress';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import ErrorDisplay from '@/components/feedback/ErrorDisplay';
@@ -73,14 +74,11 @@ const MatchAnalyzer: React.FC = () => {
   const [removingCorrect, setRemovingCorrect] = useState(false);
   const [visibleRows, setVisibleRows] = useState<AnalyzerDataItem[]>([]);
   
-  // Async operation state
-  const [currentOperationId, setCurrentOperationId] = useState<string | null>(null);
-  const { status: operationStatus, error: operationError, isPolling } = useOperationStatus(currentOperationId);
-  const [pendingOperationIds, setPendingOperationIds] = useState<string[]>([]); // Queue of operation IDs to poll
-  
-  // Pending items state - tracks items submitted but not yet processed
+  // Pending items state - tracks items submitted (optimistic) but not yet processed by queue
   const [pendingItems, setPendingItems] = useState<Set<string>>(new Set());
-  const [operationItemsMap, setOperationItemsMap] = useState<Map<string, Set<string>>>(new Map());
+
+  // Queue errors from GET /api/analysis/queue-errors; failedItemKeys derived from errors
+  const [queueErrors, setQueueErrors] = useState<QueueErrorsResponse | null>(null);
 
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
@@ -135,6 +133,16 @@ const MatchAnalyzer: React.FC = () => {
     }
   }, [selectedField]);
 
+  const fetchQueueErrors = useCallback(async () => {
+    try {
+      const data = await getQueueErrors();
+      setQueueErrors(data);
+    } catch (err: unknown) {
+      console.warn('Failed to fetch queue errors:', err);
+      setQueueErrors(null);
+    }
+  }, []);
+
   const loadYamlBrushSplitsData = useCallback(async () => {
     try {
       const data = await loadYamlBrushSplits();
@@ -144,6 +152,16 @@ const MatchAnalyzer: React.FC = () => {
       // Don't show error to user, just log it
     }
   }, []);
+
+  // Derive failed item keys from queue-errors (field:original.toLowerCase()) for row highlighting
+  const failedItemKeys = useMemo(() => {
+    if (!queueErrors?.errors?.length) return new Set<string>();
+    const keys = new Set<string>();
+    for (const e of queueErrors.errors) {
+      keys.add(`${e.field}:${(e.original || '').toLowerCase()}`);
+    }
+    return keys;
+  }, [queueErrors?.errors]);
 
   // Load correct matches when field changes
   useEffect(() => {
@@ -159,6 +177,11 @@ const MatchAnalyzer: React.FC = () => {
     loadYamlBrushSplitsData();
   }, [loadYamlBrushSplitsData]);
 
+  // Fetch queue errors on page load and when field or month changes
+  useEffect(() => {
+    fetchQueueErrors();
+  }, [selectedField, selectedMonths, fetchQueueErrors]);
+
   const handleAnalyze = useCallback(async (overrideGroupByMatched?: boolean) => {
     if (selectedMonths.length === 0) {
       setError('Please select at least one month to analyze');
@@ -171,6 +194,8 @@ const MatchAnalyzer: React.FC = () => {
       setResults(null);
       setGroupedResults(null);
       setSelectedItems(new Set()); // Clear selections
+      // Clear pendingItems so table reflects server state after full load
+      setPendingItems(new Set());
 
       // When delta months are enabled, selectedMonths already contains all months (primary + delta)
       // So we use selectedMonths directly to avoid double-counting
@@ -215,78 +240,10 @@ const MatchAnalyzer: React.FC = () => {
       setError(handleApiError(err));
     } finally {
       setLoading(false);
+      // Refresh queue errors so panel shows current failures (even if month/field unchanged)
+      fetchQueueErrors();
     }
-  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched]);
-
-  // Handle operation completion - MUST be after loadCorrectMatches and handleAnalyze are defined
-  useEffect(() => {
-    if (operationStatus?.status === 'completed' || operationStatus?.status === 'failed') {
-      // Get the operation ID from currentOperationId
-      const operationId = currentOperationId;
-      if (operationId) {
-        // Find items associated with this operation
-        const operationItems = operationItemsMap.get(operationId);
-        if (operationItems) {
-          // Remove items from pending set
-          setPendingItems(prev => {
-            const newPending = new Set(prev);
-            operationItems.forEach(key => newPending.delete(key));
-            return newPending;
-          });
-          // Remove operation from map
-          setOperationItemsMap(prev => {
-            const newMap = new Map(prev);
-            newMap.delete(operationId);
-            return newMap;
-          });
-        }
-      }
-    }
-    
-    if (operationStatus?.status === 'completed') {
-      // Operation completed - reload data
-      loadCorrectMatches();
-      
-      // For grouped view, we don't need to re-analyze - filtering will handle it
-      // For regular view, re-run analysis to get updated mismatch data
-      if (selectedMonths.length > 0 && !(groupByMatched && selectedField === 'soap')) {
-        handleAnalyze();
-      }
-      
-      // Clear operation ID and start polling next operation if any
-      setTimeout(() => {
-        setCurrentOperationId(null);
-        setMarkingCorrect(false);
-        setRemovingCorrect(false);
-        
-        // Start polling next operation in queue
-        setPendingOperationIds(prev => {
-          if (prev.length > 0) {
-            const [nextOperationId, ...remaining] = prev;
-            setCurrentOperationId(nextOperationId);
-            return remaining;
-          }
-          return prev;
-        });
-      }, 2000);
-    } else if (operationStatus?.status === 'failed') {
-      // Operation failed - show error
-      setError(operationStatus.result?.error || 'Operation failed');
-      setCurrentOperationId(null);
-      setMarkingCorrect(false);
-      setRemovingCorrect(false);
-      
-      // Start polling next operation in queue
-      setPendingOperationIds(prev => {
-        if (prev.length > 0) {
-          const [nextOperationId, ...remaining] = prev;
-          setCurrentOperationId(nextOperationId);
-          return remaining;
-        }
-        return prev;
-      });
-    }
-  }, [operationStatus?.status, currentOperationId, operationItemsMap, selectedMonths, groupByMatched, selectedField, loadCorrectMatches, handleAnalyze]);
+  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, fetchQueueErrors]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
@@ -697,33 +654,17 @@ const MatchAnalyzer: React.FC = () => {
         force: true,
       });
 
-      if (response.success && response.operation_id) {
-        // Capture selected item keys before clearing selection
+      if (response.success) {
+        // Optimistic: add selected items to pendingItems (hide rows), clear selection, re-enable
         const selectedItemKeys = new Set(selectedItems);
-        
-        // Add items to pending set and store operation mapping
         setPendingItems(prev => {
           const newPending = new Set(prev);
           selectedItemKeys.forEach(key => newPending.add(key));
           return newPending;
         });
-        setOperationItemsMap(prev => {
-          const newMap = new Map(prev);
-          newMap.set(response.operation_id, selectedItemKeys);
-          return newMap;
-        });
-        
-        // Start polling this operation if no operation is currently being polled
-        if (!currentOperationId) {
-          setCurrentOperationId(response.operation_id);
-        } else {
-          // Queue this operation to be polled after current one completes
-          setPendingOperationIds(prev => [...prev, response.operation_id]);
-        }
-        
         setSelectedItems(new Set());
         setError(null);
-        setMarkingCorrect(false); // Re-enable button immediately after queuing
+        setMarkingCorrect(false);
       } else {
         setError(`Failed to queue operation: ${response.message}`);
         setMarkingCorrect(false);
@@ -868,33 +809,17 @@ const MatchAnalyzer: React.FC = () => {
         force: true,
       });
 
-      if (response.success && response.operation_id) {
-        // Capture selected item keys before clearing selection
+      if (response.success) {
+        // Optimistic: add selected items to pendingItems (hide rows), clear selection, re-enable
         const selectedItemKeys = new Set(selectedItems);
-        
-        // Add items to pending set and store operation mapping
         setPendingItems(prev => {
           const newPending = new Set(prev);
           selectedItemKeys.forEach(key => newPending.add(key));
           return newPending;
         });
-        setOperationItemsMap(prev => {
-          const newMap = new Map(prev);
-          newMap.set(response.operation_id, selectedItemKeys);
-          return newMap;
-        });
-        
-        // Start polling this operation if no operation is currently being polled
-        if (!currentOperationId) {
-          setCurrentOperationId(response.operation_id);
-        } else {
-          // Queue this operation to be polled after current one completes
-          setPendingOperationIds(prev => [...prev, response.operation_id]);
-        }
-        
         setSelectedItems(new Set());
         setError(null);
-        setRemovingCorrect(false); // Re-enable button immediately after queuing
+        setRemovingCorrect(false);
       } else {
         setError(`Failed to queue operation: ${response.message}`);
         setRemovingCorrect(false);
@@ -2076,12 +2001,40 @@ const MatchAnalyzer: React.FC = () => {
         </div>
       )}
 
-      {currentOperationId && (
-        <OperationProgress
-          status={operationStatus}
-          error={operationError}
-          isPolling={isPolling}
-        />
+      {/* Correct matches queue errors panel */}
+      {queueErrors && queueErrors.errors.length > 0 && (
+        <div className='mb-4 rounded-lg border border-amber-200 bg-amber-50'>
+          <details className='group' open={queueErrors.errors.length > 0}>
+            <summary className='cursor-pointer list-none px-4 py-2 font-medium text-amber-900'>
+              Correct matches queue errors ({queueErrors.source})
+            </summary>
+            <div className='border-t border-amber-200 px-4 py-3'>
+              <ul className='space-y-2 text-sm'>
+                {queueErrors.errors.map((e: QueueErrorEntry, i: number) => (
+                  <li key={i} className='rounded bg-white/80 p-2'>
+                    <span className='font-medium'>{e.field}</span>
+                    {e.original && (
+                      <span className='ml-1 text-gray-700'>
+                        &quot;{e.original}&quot;
+                      </span>
+                    )}
+                    {e.retry_count > 0 && (
+                      <span className='ml-1 text-amber-700'>
+                        (retry {e.retry_count})
+                      </span>
+                    )}
+                    <div className='mt-1 text-red-700'>{e.error || e.message}</div>
+                    {e.completed_at > 0 && (
+                      <div className='mt-0.5 text-xs text-gray-500'>
+                        {new Date(e.completed_at * 1000).toLocaleString()}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </details>
+        </div>
       )}
 
       {/* Results Table */}
@@ -2239,6 +2192,7 @@ const MatchAnalyzer: React.FC = () => {
                     onGlobalFilterChange={setTableSearch}
                     useRegexMode={tableUseRegex}
                     onUseRegexModeChange={setTableUseRegex}
+                    failedItemKeys={failedItemKeys}
                   />
                 ) : (
                 <MismatchAnalyzerDataTable
@@ -2267,6 +2221,7 @@ const MatchAnalyzer: React.FC = () => {
                   onBrushTypeFilterChange={setBrushTypeFilter}
                   strategyFilter={strategyFilter}
                   onStrategyFilterChange={setStrategyFilter}
+                  failedItemKeys={failedItemKeys}
                 />
                 );
               })()

@@ -230,6 +230,26 @@ class RemoveCorrectResponse(BaseModel):
     errors: List[str] = []
 
 
+class QueueErrorEntry(BaseModel):
+    """One error entry from the queue-errors API (per row)."""
+
+    field: str
+    original: str
+    matched: Optional[Dict[str, Any]] = None
+    message: str = ""
+    error: str = ""
+    retry_count: int = 0
+    completed_at: float = 0.0
+    operation_type: str = ""
+
+
+class QueueErrorsResponse(BaseModel):
+    """Response model for GET /api/analysis/queue-errors."""
+
+    source: str = "correct_matches"
+    errors: List[QueueErrorEntry] = Field(default_factory=list)
+
+
 class CorrectMatchesResponse(BaseModel):
     """Response model for correct matches data."""
 
@@ -1370,6 +1390,37 @@ async def get_operation_status(operation_id: str):
     except Exception as e:
         logger.error(f"Error getting operation status: {e}")
         raise HTTPException(status_code=500, detail=f"Error getting operation status: {str(e)}")
+
+
+QUEUE_ERRORS_LIMIT = 20
+
+
+@router.get("/queue-errors", response_model=QueueErrorsResponse)
+async def get_queue_errors():
+    """Get recent failed queue operations (correct_matches queue) for UI display."""
+    try:
+        from webui.api.queue_manager import QueueManager
+
+        correct_matches_path = get_data_directory() / "correct_matches"
+        queue_manager = QueueManager(correct_matches_path)
+        raw_errors = queue_manager.get_recent_failed_operations(limit=QUEUE_ERRORS_LIMIT)
+        entries = [
+            QueueErrorEntry(
+                field=e.get("field", ""),
+                original=e.get("original", ""),
+                matched=e.get("matched"),
+                message=e.get("message", ""),
+                error=e.get("error", ""),
+                retry_count=e.get("retry_count", 0),
+                completed_at=e.get("completed_at", 0.0),
+                operation_type=e.get("operation_type", ""),
+            )
+            for e in raw_errors
+        ]
+        return QueueErrorsResponse(source="correct_matches", errors=entries)
+    except Exception as e:
+        logger.error(f"Error getting queue errors: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting queue errors: {str(e)}")
 
 
 @router.delete("/correct-matches/{field}")

@@ -75,6 +75,7 @@ interface DataTableProps<TData, TValue> {
   onGlobalFilterChange?: (value: string) => void; // Callback for search changes
   useRegexMode?: boolean; // External regex mode state
   onUseRegexModeChange?: (value: boolean) => void; // Callback for regex mode changes
+  getRowClassName?: (row: Row<TData>, index: number) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -104,6 +105,7 @@ export function DataTable<TData, TValue>({
   onGlobalFilterChange,
   useRegexMode: externalUseRegexMode,
   onUseRegexModeChange,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
   // Simple search - no column selection needed
@@ -635,7 +637,7 @@ export function DataTable<TData, TValue>({
                     className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
                       ? 'bg-blue-50 border-l-4 border-l-blue-500'
                       : ''
-                      }`}
+                      } ${getRowClassName ? getRowClassName(row, index) : ''}`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell

@@ -652,6 +652,32 @@ export interface CorrectMatchesResponse {
   entries: Record<string, any>;
 }
 
+export interface QueueErrorEntry {
+  field: string;
+  original: string;
+  matched?: Record<string, unknown> | null;
+  message: string;
+  error: string;
+  retry_count: number;
+  completed_at: number;
+  operation_type: string;
+}
+
+export interface QueueErrorsResponse {
+  source: string;
+  errors: QueueErrorEntry[];
+}
+
+export const getQueueErrors = async (): Promise<QueueErrorsResponse> => {
+  try {
+    const response = await api.get('/analysis/queue-errors');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get queue errors:', error);
+    throw error;
+  }
+};
+
 export const getCorrectMatches = async (field: string): Promise<CorrectMatchesResponse> => {
   try {
     const response = await api.get(`/analysis/correct-matches/${field}`);

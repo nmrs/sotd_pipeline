@@ -116,6 +116,7 @@ interface MismatchAnalyzerDataTableProps {
   onBrushTypeFilterChange?: (filter: Set<string>) => void;
   strategyFilter?: Set<string>;
   onStrategyFilterChange?: (filter: Set<string>) => void;
+  failedItemKeys?: Set<string>;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -143,6 +144,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onBrushTypeFilterChange,
   strategyFilter: externalStrategyFilter,
   onStrategyFilterChange,
+  failedItemKeys,
 }) => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -1074,6 +1076,15 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         onGlobalFilterChange={onGlobalFilterChange}
         useRegexMode={externalUseRegexMode}
         onUseRegexModeChange={onUseRegexModeChange}
+        getRowClassName={
+          failedItemKeys?.size
+            ? (row) => {
+                const item = row.original as { original?: string };
+                const key = `${field}:${item.original?.toLowerCase() || 'unknown'}`;
+                return failedItemKeys.has(key) ? 'bg-amber-100 border-l-4 border-l-amber-500' : '';
+              }
+            : undefined
+        }
       />
 
       {/* Enrich Phase Modal */}

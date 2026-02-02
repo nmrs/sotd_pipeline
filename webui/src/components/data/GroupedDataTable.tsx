@@ -22,6 +22,7 @@ interface GroupedDataTableProps {
   onGlobalFilterChange?: (value: string) => void;
   useRegexMode?: boolean;
   onUseRegexModeChange?: (value: boolean) => void;
+  failedItemKeys?: Set<string>;
 }
 
 const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
@@ -42,6 +43,7 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
   onGlobalFilterChange,
   useRegexMode: externalUseRegexMode,
   onUseRegexModeChange,
+  failedItemKeys,
 }) => {
   // Sorting state - use external if provided, otherwise internal
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
@@ -209,6 +211,15 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
       onGlobalFilterChange={onGlobalFilterChange}
       useRegexMode={externalUseRegexMode}
       onUseRegexModeChange={onUseRegexModeChange}
+      getRowClassName={
+        failedItemKeys?.size
+          ? (row) => {
+              const item = row.original;
+              const key = `${field}:${item.matched_string?.toLowerCase() || 'unknown'}`;
+              return failedItemKeys.has(key) ? 'bg-amber-100 border-l-4 border-l-amber-500' : '';
+            }
+          : undefined
+      }
     />
   );
 };

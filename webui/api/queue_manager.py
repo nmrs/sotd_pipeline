@@ -476,15 +476,121 @@ class QueueManager:
 
         except Exception as e:
             logger.error(f"Error processing operation {operation_id}: {e}", exc_info=True)
+            # Compute retry_count: get previous status (may be in archive), increment if already failed
+            retry_count = 1
+            prev_status = self.get_operation_status(operation_id)
+            if prev_status and prev_status.get("status") == "failed":
+                prev_result = prev_status.get("result") or {}
+                prev_retry = prev_result.get("retry_count")
+                if prev_retry is not None:
+                    retry_count = prev_retry + 1
+            # Store field, operation_type, matches so queue-errors API can emit one entry per row
+            result = {
+                "error": str(e),
+                "retry_count": retry_count,
+                "field": field,
+                "operation_type": operation_type,
+                "matches": [
+                    {"original": m.get("original", ""), "matched": m.get("matched")}
+                    for m in matches
+                ],
+            }
             self._update_status(
                 operation_id,
                 "failed",
                 0.0,
                 f"Error: {str(e)}",
-                {"error": str(e)},
+                result,
             )
             # Don't remove from queue on failure - allow retry
             return False
+
+    def get_recent_failed_operations(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Get recent failed operations as one error entry per row (per match).
+
+        Reads live status file and all monthly archives for status == "failed",
+        expands each failed op to one entry per match, sorts by completed_at descending,
+        returns up to `limit` entries. No operation_id in response.
+
+        Returns:
+            List of error entries: { field, original, matched?, message, error,
+            retry_count, completed_at, operation_type }
+        """
+        collected: List[tuple[float, Dict[str, Any]]] = []
+
+        # Live status
+        if self.status_file.exists():
+            try:
+                with self.status_file.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
+                for op_id, entry in data.items():
+                    if entry.get("status") == "failed":
+                        completed_at = entry.get("completed_at") or entry.get("updated_at")
+                        if completed_at is not None:
+                            collected.append((completed_at, entry))
+            except Exception as e:
+                logger.error(f"Failed to read status file for queue-errors: {e}")
+
+        # All monthly archives
+        if self.correct_matches_path.exists():
+            for path in sorted(self.correct_matches_path.iterdir()):
+                if path.name.startswith(".status.archive.") and path.name.endswith(".json"):
+                    try:
+                        with path.open("r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        for op_id, entry in data.items():
+                            if entry.get("status") == "failed":
+                                completed_at = entry.get("completed_at") or entry.get("updated_at")
+                                if completed_at is not None:
+                                    collected.append((completed_at, entry))
+                    except Exception as e:
+                        logger.warning(f"Failed to read archive {path.name} for queue-errors: {e}")
+
+        # Sort by completed_at descending (newest first)
+        collected.sort(key=lambda x: x[0], reverse=True)
+
+        errors: List[Dict[str, Any]] = []
+        for completed_at, entry in collected:
+            if len(errors) >= limit:
+                break
+            result = entry.get("result") or {}
+            field = result.get("field", "")
+            operation_type = result.get("operation_type", "")
+            message = entry.get("message", "")
+            err_str = result.get("error", message)
+            retry_count = result.get("retry_count", 0)
+            matches = result.get("matches") or []
+            if not matches:
+                errors.append(
+                    {
+                        "field": field,
+                        "original": "",
+                        "matched": None,
+                        "message": message,
+                        "error": err_str,
+                        "retry_count": retry_count,
+                        "completed_at": completed_at,
+                        "operation_type": operation_type,
+                    }
+                )
+            else:
+                for m in matches:
+                    if len(errors) >= limit:
+                        break
+                    errors.append(
+                        {
+                            "field": field,
+                            "original": m.get("original", ""),
+                            "matched": m.get("matched"),
+                            "message": message,
+                            "error": err_str,
+                            "retry_count": retry_count,
+                            "completed_at": completed_at,
+                            "operation_type": operation_type,
+                        }
+                    )
+        return errors
 
     def _cleanup_old_completed_operations(self) -> None:
         """
