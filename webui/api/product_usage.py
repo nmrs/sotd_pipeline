@@ -4,7 +4,6 @@
 import json
 import logging
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
@@ -17,9 +16,6 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from sotd.aggregate.aggregators.product_usage import aggregate_product_usage  # noqa: E402
-from sotd.aggregate.aggregators.users.user_aggregator import (  # noqa: E402
-    _extract_date_from_thread_title,
-)
 
 logger = logging.getLogger(__name__)
 

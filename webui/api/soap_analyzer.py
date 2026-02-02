@@ -5,7 +5,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, List, Optional
 
-import yaml
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
@@ -16,10 +15,10 @@ from webui.api.utils.non_matches import (
     _canonicalize_scent_pair,
     load_non_matches,
     save_brand_non_match,
-    save_scent_non_match,
     save_cross_brand_scent_non_match,
+    save_scent_non_match,
 )
-from webui.api.wsdb_alignment import normalize_for_matching, PROJECT_ROOT
+from webui.api.wsdb_alignment import normalize_for_matching
 
 logger = logging.getLogger(__name__)
 

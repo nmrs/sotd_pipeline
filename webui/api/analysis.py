@@ -2087,9 +2087,16 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                         removed = True
                                                         removed_count += 1
                                                         # Track this removal for manager cleanup
-                                                        if section not in removed_entries_by_section:
-                                                            removed_entries_by_section[section] = set()
-                                                        removed_entries_by_section[section].add(correct_match)
+                                                        if (
+                                                            section
+                                                            not in removed_entries_by_section
+                                                        ):
+                                                            removed_entries_by_section[section] = (
+                                                                set()
+                                                            )
+                                                        removed_entries_by_section[section].add(
+                                                            correct_match
+                                                        )
                                                     else:
                                                         i += 1
                         else:
@@ -2111,7 +2118,9 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                     # Track this removal for manager cleanup
                                                     if section not in removed_entries_by_section:
                                                         removed_entries_by_section[section] = set()
-                                                    removed_entries_by_section[section].add(correct_match)
+                                                    removed_entries_by_section[section].add(
+                                                        correct_match
+                                                    )
                                                 else:
                                                     i += 1
                     else:
@@ -2133,7 +2142,9 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                                 # Track this removal for manager cleanup
                                                 if section not in removed_entries_by_section:
                                                     removed_entries_by_section[section] = set()
-                                                removed_entries_by_section[section].add(correct_match)
+                                                removed_entries_by_section[section].add(
+                                                    correct_match
+                                                )
                                             else:
                                                 i += 1
 
@@ -2317,13 +2328,21 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                             matched,
                         )
                         if logger.isEnabledFor(logging.DEBUG):
-                            logger.debug(f"Adding entry: match_key={match_key}, match_data={match_data_to_save}")
-                            logger.debug(f"Manager has {len(manager._correct_matches_data)} entries before mark_match_as_correct")
+                            logger.debug(
+                                f"Adding entry: match_key={match_key}, match_data={match_data_to_save}"
+                            )
+                            logger.debug(
+                                f"Manager has {len(manager._correct_matches_data)} entries before mark_match_as_correct"
+                            )
                         manager.mark_match_as_correct(match_key, match_data_to_save)
                         if logger.isEnabledFor(logging.DEBUG):
-                            logger.debug(f"Manager has {len(manager._correct_matches_data)} entries after mark_match_as_correct")
+                            logger.debug(
+                                f"Manager has {len(manager._correct_matches_data)} entries after mark_match_as_correct"
+                            )
                             if match_key in manager._correct_matches_data:
-                                logger.debug(f"Entry confirmed in manager: {manager._correct_matches_data[match_key]}")
+                                logger.debug(
+                                    f"Entry confirmed in manager: {manager._correct_matches_data[match_key]}"
+                                )
                         added_count += 1
 
                 elif issue_type == "cross_section_conflict":
@@ -2396,7 +2415,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                                 allow_unicode=True,
                                 sort_keys=False,
                             )
-                
+
                 # Remove entries from manager's in-memory data structures
                 # This prevents save_correct_matches() from overwriting our removals
                 # IMPORTANT: We only remove the OLD entries that were in the file, NOT the new entries
@@ -2404,7 +2423,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                 # string but different brand/model, so they should have the same match_key.
                 # However, since we're moving the entry (same original text, different brand/model),
                 # the match_key will be the same, and we'll accidentally remove the new entry too!
-                # 
+                #
                 # Solution: Only remove entries that match the OLD brand/model, not just the correct_match.
                 # But actually, the match_key is based on the original text, not the brand/model.
                 # So if we remove by match_key, we'll remove both old and new entries.
@@ -2413,12 +2432,15 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                 # added a new entry with the same match_key. The new entry will overwrite the old one
                 # in _correct_matches_data anyway.
                 from sotd.utils.extract_normalization import normalize_for_matching
+
                 for section, removed_matches in removed_entries_by_section.items():
                     for correct_match in removed_matches:
                         # Create match key using the same normalization as the manager
-                        normalized_original = normalize_for_matching(correct_match, None, section).lower().strip()
+                        normalized_original = (
+                            normalize_for_matching(correct_match, None, section).lower().strip()
+                        )
                         match_key = f"{section}:{normalized_original}"
-                        
+
                         # Only remove if this match_key doesn't have a new entry (i.e., wasn't just added)
                         # Check if the match_key exists and if it has the OLD brand/model
                         # Actually, we can't easily check the old brand/model here, so we'll just
@@ -2435,14 +2457,16 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                         # entry overwrite the old one, and the direct YAML write already removed
                         # it from the file.
                         if logger.isEnabledFor(logging.DEBUG):
-                            logger.debug(f"Would remove match_key={match_key} from manager, but skipping to preserve new entries")
+                            logger.debug(
+                                f"Would remove match_key={match_key} from manager, but skipping to preserve new entries"
+                            )
                         # Skip removal - the new entry will overwrite the old one in _correct_matches_data
                         # and the direct YAML write already removed it from the file
                         # if match_key in manager._correct_matches:
                         #     manager._correct_matches.discard(match_key)
                         # if match_key in manager._correct_matches_data:
                         #     del manager._correct_matches_data[match_key]
-                
+
                 # After removing entries, we need to reload the manager to sync with the file
                 # BUT we do this AFTER removals and BEFORE additions, so new entries added
                 # via mark_match_as_correct() will be preserved
@@ -2467,20 +2491,25 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
             try:
                 # Debug: Verify entries are in manager before saving
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug(f"Manager has {len(manager._correct_matches_data)} entries before save")
+                    logger.debug(
+                        f"Manager has {len(manager._correct_matches_data)} entries before save"
+                    )
                     for key in manager._correct_matches_data.keys():
                         if "razor" in key:
-                            logger.debug(f"  Razor entry: {key} -> {manager._correct_matches_data[key]}")
-                
+                            logger.debug(
+                                f"  Razor entry: {key} -> {manager._correct_matches_data[key]}"
+                            )
+
                 # Ensure the manager has all the new entries before saving
                 # The mark_match_as_correct() calls should have already added them to _correct_matches_data
                 manager.save_correct_matches()
-                
+
                 # Debug: Verify file was written
                 if logger.isEnabledFor(logging.DEBUG):
                     razor_file = correct_matches_dir / "razor.yaml"
                     if razor_file.exists():
                         import yaml
+
                         with razor_file.open("r") as f:
                             saved_data = yaml.safe_load(f) or {}
                             logger.debug(f"File after save has keys: {list(saved_data.keys())}")
@@ -2488,6 +2517,7 @@ async def move_catalog_validation_entries(request: MoveCatalogEntriesRequest):
                 errors.append(f"Error saving correct matches after addition: {e}")
                 logger.error(f"Error saving correct matches: {e}")
                 import traceback
+
                 logger.error(traceback.format_exc())
 
         moved_count = min(removed_count, added_count)  # Count of successfully moved entries

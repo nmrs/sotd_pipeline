@@ -5,13 +5,11 @@ import json
 import logging
 import random
 import string
-import time
 import threading
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from rich.console import Console
 
 logger = logging.getLogger(__name__)
 
@@ -392,6 +390,7 @@ class QueueManager:
 
             # Import here to avoid circular dependencies
             from rich.console import Console
+
             from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
 
             console = Console()

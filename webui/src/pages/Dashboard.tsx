@@ -53,21 +53,29 @@ const Dashboard: React.FC = () => {
     checkSystemStatus();
   }, []);
 
-  const analyzerCards = [
+  type ToolCard = {
+    title: string;
+    description: string;
+    icon: string;
+    color: 'blue' | 'green' | 'purple' | 'amber' | 'slate';
+    path: string;
+  };
+
+  const analyzerCards: ToolCard[] = [
     {
       title: 'Unmatched Analyzer',
       description:
         'Identify unmatched items across selected months to find potential catalog additions.',
       icon: '🔍',
       color: 'blue',
-      path: '/unmatched',
+      path: '/unmatched-analyzer',
     },
     {
-      title: 'Mismatch Analyzer',
+      title: 'Match Analyzer',
       description:
         'Analyze mismatched items to identify potential catalog conflicts and inconsistencies.',
-      icon: '⚠️',
-      color: 'green',
+      icon: '📊',
+      color: 'blue',
       path: '/mismatch',
     },
     {
@@ -78,7 +86,120 @@ const Dashboard: React.FC = () => {
       color: 'purple',
       path: '/soap-analyzer',
     },
+    {
+      title: 'Monthly User Posts',
+      description: 'View SOTD posting activity by user and date across selected months.',
+      icon: '📅',
+      color: 'blue',
+      path: '/monthly-user-posts',
+    },
+    {
+      title: 'Product Usage',
+      description: 'Explore product usage statistics and yearly summaries by category.',
+      icon: '📦',
+      color: 'blue',
+      path: '/product-usage',
+    },
+    {
+      title: 'Format Compatibility',
+      description: 'Check format compatibility and data structure consistency across months.',
+      icon: '⚠️',
+      color: 'purple',
+      path: '/format-compatibility',
+    },
   ];
+
+  const validatorCards: ToolCard[] = [
+    {
+      title: 'Catalog Validator',
+      description: 'Validate catalog entries against correct_matches and fix mismatches.',
+      icon: '✅',
+      color: 'green',
+      path: '/catalog-validator',
+    },
+    {
+      title: 'Brush Validator',
+      description: 'Validate brush splits from SOTD comments and manage brush_splits.yaml.',
+      icon: '🪒',
+      color: 'green',
+      path: '/brush-split-validator',
+    },
+    {
+      title: 'Brush Validation',
+      description: 'Review brush match validation entries and strategy distribution.',
+      icon: '🖊️',
+      color: 'green',
+      path: '/brush-validation',
+    },
+  ];
+
+  const toolCards: ToolCard[] = [
+    {
+      title: 'Brush Matching',
+      description: 'Test brush strings and see scoring results from the brush matching system.',
+      icon: '🧹',
+      color: 'amber',
+      path: '/brush-matching-analyzer',
+    },
+    {
+      title: 'WSDB Alignment',
+      description: 'Compare soap catalog data with Wet Shaving Database for alignment.',
+      icon: '🗃️',
+      color: 'slate',
+      path: '/wsdb-alignment',
+    },
+    {
+      title: 'Performance Test',
+      description: 'Benchmark table rendering and data handling performance.',
+      icon: '⚡',
+      color: 'slate',
+      path: '/performance-test',
+    },
+  ];
+
+  const cardButtonClass = (color: ToolCard['color']) =>
+    color === 'blue'
+      ? 'bg-blue-600 text-white hover:bg-blue-700'
+      : color === 'green'
+        ? 'bg-green-600 text-white hover:bg-green-700'
+        : color === 'purple'
+          ? 'bg-purple-600 text-white hover:bg-purple-700'
+          : color === 'amber'
+            ? 'bg-amber-600 text-white hover:bg-amber-700'
+            : 'bg-slate-600 text-white hover:bg-slate-700';
+
+  const renderToolCards = (cards: ToolCard[]) =>
+    cards.map(card => (
+      <div
+        key={card.path}
+        className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200'
+      >
+        <div className='flex items-center space-x-3 mb-4'>
+          <span className='text-2xl'>{card.icon}</span>
+          <h3 className='text-lg font-semibold text-gray-900'>{card.title}</h3>
+        </div>
+        <p className='text-gray-600 mb-4'>{card.description}</p>
+        <Link
+          to={card.path}
+          className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${cardButtonClass(card.color)}`}
+        >
+          Open Tool
+          <svg
+            className='ml-2 h-4 w-4'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M9 5l7 7-7 7'
+            />
+          </svg>
+        </Link>
+      </div>
+    ));
 
   if (error) {
     return (
@@ -121,49 +242,19 @@ const Dashboard: React.FC = () => {
             </SectionLayout>
           )}
 
-          {/* Analyzer Cards */}
-          <SectionLayout title='Analysis Tools'>
-            <GridLayout cols={4}>
-              {analyzerCards.map(card => (
-                <div
-                  key={card.path}
-                  className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200'
-                >
-                  <div className='flex items-center space-x-3 mb-4'>
-                    <span className='text-2xl'>{card.icon}</span>
-                    <h3 className='text-lg font-semibold text-gray-900'>{card.title}</h3>
-                  </div>
-                  <p className='text-gray-600 mb-4'>{card.description}</p>
-                  <Link
-                    to={card.path}
-                    className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      card.color === 'blue'
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : card.color === 'green'
-                          ? 'bg-green-600 text-white hover:bg-green-700'
-                          : card.color === 'purple'
-                            ? 'bg-purple-600 text-white hover:bg-purple-700'
-                            : 'bg-gray-600 text-white hover:bg-gray-700'
-                    }`}
-                  >
-                    Open Tool
-                    <svg
-                      className='ml-2 h-4 w-4'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M9 5l7 7-7 7'
-                      />
-                    </svg>
-                  </Link>
-                </div>
-              ))}
-            </GridLayout>
+          {/* Analyzers */}
+          <SectionLayout title='Analyzers'>
+            <GridLayout cols={4}>{renderToolCards(analyzerCards)}</GridLayout>
+          </SectionLayout>
+
+          {/* Validators */}
+          <SectionLayout title='Validators'>
+            <GridLayout cols={4}>{renderToolCards(validatorCards)}</GridLayout>
+          </SectionLayout>
+
+          {/* Tools */}
+          <SectionLayout title='Tools'>
+            <GridLayout cols={4}>{renderToolCards(toolCards)}</GridLayout>
           </SectionLayout>
 
           {/* Quick Actions */}

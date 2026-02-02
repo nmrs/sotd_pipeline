@@ -25,18 +25,14 @@ const CommentModal: React.FC<CommentModalProps> = ({
   onNavigate,
   remainingCommentIds = [],
 }) => {
-  if (!isOpen || !comment) {
-    return null;
-  }
-
-  // Consider both loaded comments and remaining IDs for navigation
+  // Compute navigation state unconditionally (before any early return) so hook order is stable
   const totalCommentCount = comments.length + remainingCommentIds.length;
   const hasMultipleComments = totalCommentCount > 1;
   const canGoPrev = hasMultipleComments && currentIndex > 0;
   const canGoNext =
     hasMultipleComments && (currentIndex < comments.length - 1 || remainingCommentIds.length > 0);
 
-  // Handle keyboard navigation
+  // Handle keyboard navigation - must run unconditionally (Rules of Hooks)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) return;
@@ -64,6 +60,11 @@ const CommentModal: React.FC<CommentModalProps> = ({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, canGoPrev, canGoNext, onNavigate, onClose]);
+
+  // Early return after all hooks to satisfy Rules of Hooks
+  if (!isOpen || !comment) {
+    return null;
+  }
 
   const formatDate = (dateString: string) => {
     try {
