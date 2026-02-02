@@ -8,6 +8,10 @@ alwaysApply: true
 ## Project Overview
 This is a Python 3.11 data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community. The pipeline consists of 6 sequential phases: fetch, extract, match, enrich, aggregate, and report.
 
+## Model Identification (MANDATORY)
+- **See `.cursor/rules/model-identification.mdc`** for the full rule.
+- At the start and end of every response, output the **actual model** that is generating the reply (e.g. from `.cursor/config.json`: `agentModel` in agent mode, `model` in chat). **Never** use "Model: Auto" — Auto is the router, not the model.
+
 ## Pipeline --force Rule (MANDATORY)
 - **When running any pipeline step, ALWAYS use the `--force` flag unless the user explicitly says NOT to use `--force`.**
 - This ensures fresh data processing, avoids cached results, and guarantees that all code changes are actually tested.
