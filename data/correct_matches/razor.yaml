@@ -149,6 +149,7 @@ Art Razor:
   - straight art_razor_ua dolphin by yurii kravchenko
   - straight art_razor_ua dolphin by yurii kravchenko 8/8
   - straight art_razor_ua dolphin by yurii kravchenko 8/8 full hollow
+  - straight art_razor_ua dolphin by yurii kravchenko 8/8 rehoned by frank misa
   - straight yurii kravcenko konsul
   - yurii kravcenko centurio extra full hollow 8/8
   - yurii kravcenko hunter half hollow 8/8
@@ -319,6 +320,7 @@ Blackland:
   - blackland - blackbird, de safety razor, brass, 101 mm handle - "brassbird"
   - blackland - blackbird, de safety razor, brass, 101 mm handle \- "brassbird"
   - blackland - blackbrid
+  - blackland - titanium blackbird
   - blackland - titanium blackbird - lite
   - 'blackland -batch #003'
   - blackland alumibird
@@ -417,6 +419,7 @@ Blackland:
   - blackland sabre v2
   - blackland sabre v2 lvl 2
   - blackland sabre v2 lvl 4
+  - blackland sabre v2 lvl2
   Square (Workshop Batch 002):
   - blackland - batch 002
   - blackland - square thing
@@ -752,6 +755,11 @@ Charlex:
   - charlex 5/8" straight
   - charlex 5/8" straight bone scales
   - charlex 5/8" straight with bone scales
+Chip A Way:
+  Straight:
+  - chip-a-way razor
+  - chip-a-way razor - custom wood scales
+  - chip-a-way with wood scales
 Chisel & Hound:
   Briar Brushworks Collab Slim:
   - tech with chisel and hound x briar works slim handle
@@ -1352,6 +1360,7 @@ GEM:
   - gem micromatic oc
   - gem micromatic open comb
   - gem micromatic open comb (first generation)
+  - gem micromatic open comb (gen. 1)
   - gem micromatic open comb (gen. 2)
   - gem micromatic open comb (mmoc)
   - gem micromatic open comb (second generation, djudge razor)
@@ -1736,6 +1745,7 @@ Gillette:
   - 1957 gillette flare tip super speed
   - 1957 gillette flare tip super-speed
   - 1957 gillette flare tip superspeed
+  - 1957 gillette flare tip superspeed (c1)
   - 1958 gillette flare tip super speed
   - 1958 gillette red tip heavy super speed
   - 1958 gillette red tip superspeed
@@ -1809,6 +1819,7 @@ Gillette:
   - gillette 1951 black tip super speed
   - gillette 1952 blacktip
   - gillette 1952 super speed
+  - gillette 1953 gillette super speed
   - gillette 1953 superspeed
   - gillette 1954 flare tip
   - gillette 1958 tv special
@@ -2963,6 +2974,7 @@ Merkur:
   '45':
   - merkur 45 bakelite
   Futur:
+  - futur 700
   - mekur future
   - merkur - futur (matte finish)
   - merkur futur
@@ -2976,6 +2988,7 @@ Merkur:
   - mergress @3
   - mergress on 3
   - merkur - progress
+  - merkur 500c
   - merkur progress
   - merkur progress - long handle
   - merkur progress 500
@@ -3195,8 +3208,6 @@ Other Straight Razor:
     - celebrated razor - sheffield
     - celebrated wedge - no maker indicated
     - chas r coates & sons trade mark - extra hollow - square point - 6/8
-    - chip-a-way razor - custom wood scales
-    - chip-a-way with wood scales
     - coma - the barber - half hollow - round point - 13/16
     - coma the barber - half hollow - french point - 13/16
     - coma the barber - half hollow - round point - 13/16
@@ -3244,6 +3255,7 @@ Other Straight Razor:
     - s. k. colling custom blue paua scaled - full hollow - french point - 6/8
     - shavesmith kamisori (3/4 width, spanish point)
     - sheffield cutlery - red stripe scales
+    - sheffield cutlery - striped scales
     - sheffield cutlery company
     - sheffield cutlery company - striped scales
     - silver orchid - 6/8 - full hollow - round point
@@ -3263,6 +3275,7 @@ Other Straight Razor:
     - straight phoenix cutlery co no 40. made ny 5/8
     - sun ray hair prep co. square sun b1 - 6/8 square point
     - sun ray hair prep co. square sun b1 - 6/8 square point hollow grind
+    - t noonan & sons razor
     - t. noonan & sons - mecca
     - t. noonan & sons mecca
     - t. r. cadman & sons straight
@@ -3638,6 +3651,7 @@ RazoRock:
   GOAT:
   - razorock - goat
   - razorock goat
+  - razorock goat +
   - razorock goat double-edge safety razor
   - razorock goat w/ 82mm hollow hd short handle
   - razorock the goat
@@ -3862,6 +3876,7 @@ Rockwell:
   - rockwell 6c on a 5 plate
   - rockwell 6c plate 1 (newbie working on technique)
   - rockwell 6c plate 2
+  - rockwell 6c plate 3
   - rockwell 6c plate 4
   - rockwell 6c plate)
   - rockwell 6c r2 plate
@@ -4172,6 +4187,7 @@ Stirling:
   - stirling hyper aggressive razor
   - stirling soap co. - 316 stainless steel razor
   - stirling soap co. de3p1s
+  - stirling soap company - stirling stainless steel (austin handle / ha plate)
   - stirling soap company - stirling stainless steel (austin handle / st plate) serial
     no. st-01-084
   - stirling ss hyper aggressive
@@ -4180,6 +4196,7 @@ Stirling:
   - stirling stainless standard head
 Sun Moon:
   Straight:
+  - sun & moon - green goblin - 11/16
   - sun & moon green goblin
 Supply:
   SE:
@@ -4330,6 +4347,7 @@ Timeless:
   - timeless aluminum
   - timeless aluminum 0.45mm
   - timeless aluminum slant
+  - timeless aluminum slant .86
   - timeless br.38
   - timeless bronze .38
   - timeless bronze .38 sb
@@ -4480,6 +4498,7 @@ Wade & Butcher:
   - w&b celebrated hollow
   - w&b celebrated hollow 6/8
   - w&b celebrated hollow fbu, 8/8 barber's notch
+  - w&b celebrated hollow ground
   - w&b celebrated hollow ground, 6/8 barber's notch in cherry heartwood
   - w&b celebrated hollow in cherry heartwood
   - w&b celebrated hollow w/ spine stamping
@@ -4557,6 +4576,8 @@ Wardonia:
 WCS:
   '78':
   - wcs 78b
+  '84':
+  - wcs classic collection razor 84s, stainless steel, closed comb
   El Capitan:
   - wcs el capitan
   - wcs~el capitan
@@ -4712,6 +4733,9 @@ Wolfman:
   - wolfman - aluminum wr2 - 1.25
   - wolfman - aluminum wr2 - 1.25mm
   - wolfman - aluminum wr2 - 1.55mm
+  - wolfman - aluminum wr2 .95
+  - wolfman - aluminum wr2 1.25
+  - wolfman - wr2 - dual comb 1.25
   - wolfman - wr2 1.15 w/wrh2
   - wolfman - wr2 sb 1.25 basic polish
   - wolfman - wr2 solid bar .85 polished
@@ -4854,6 +4878,7 @@ Yates:
   '''Merica':
   - yates 'merica
   - yates 'merica (brass)
+  - yates - merica
   - yates merica
   - yates merica (brass)
   - yates merica stainless

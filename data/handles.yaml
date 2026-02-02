@@ -451,6 +451,10 @@ artisan_handles:
       patterns:
         - tgn
         - golden.*nib
+  The Rustic Bee:
+    Unspecified:
+      patterns:
+        - rustic.*bee
   Tony Forsyth:
     Unspecified:
       patterns:

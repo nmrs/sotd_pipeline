@@ -460,6 +460,11 @@ Chinchilla:
   Razor:
     patterns:
       - chinchilla
+Chip A Way:
+  Straight:
+    format: Straight
+    patterns:
+      - chip.*a.*way(?:.*\d{1,2}/(8|16))?
 Chisel & Hound:
   Briar Brushworks Collab Slim:
     patterns:
@@ -1738,6 +1743,7 @@ Merkur:
   Progress:
     patterns:
       - (pro|mer|di)gress
+      - merkur.*500c?
   Vision:
     patterns:
       - vision

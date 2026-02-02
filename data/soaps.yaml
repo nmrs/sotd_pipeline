@@ -108,13 +108,13 @@ Aion Skincare:
     Fleur d'Iris:
       patterns:
       - aion.*fl\w+r.*iris
-    Mallard Amore:
+    Amore:
       patterns:
-      - mallard amore
-    Mallard Tonka:
+      - (aion|mallard).*amore
+    Tonka:
       patterns:
-      - mallard tonka
-    Mallard Peaches and Cream:
+      - (aion|mallard).*tonka
+    Peaches and Cream:
       patterns:
       - aion.*peaches
     Raspberry Gateau:
@@ -1075,6 +1075,9 @@ Catie's Bubbles:
       patterns:
       - catie.*bubbles.*b\w+g\w+t bay
       - \bcb\b.*b\w+g\w+t bay
+    Black Bergamot:
+      patterns:
+      - black bergamot
     Blugère:
       patterns:
       - blug(e|è)re
@@ -1371,6 +1374,9 @@ Chiseled Face:
     Bay Rum:
       patterns:
       - ^(?!.*monica).*(cf|chisel).*bay rum
+    "Bespoke #1":
+      patterns:
+      - "bespoke #1"
     Cedar & Spice:
       patterns:
       - cedar.*spice
@@ -2574,6 +2580,9 @@ House of Mammoth:
       patterns:
       - hou.*mammoth.*smash
       - \bhom\b.*smash
+    Snippid:
+      patterns:
+      - snippid
     Sonder:
       patterns:
       - (hous.*mammoth|\bhom\b).*sonder
@@ -2925,6 +2934,9 @@ MacDuff's Soap Company:
     Prarie Blooms:
       patterns:
       - macduff.*p\w+ie.*bloom
+    Prairie Rum Runner:
+      patterns:
+      - prairie.*rum.*runner
     Rosemary Sea Salt:
       patterns:
       - rosemary sea salt
@@ -2939,6 +2951,9 @@ Maggard Razors:
   - maggard\b( razor?s?)?
   - maggards
   scents:
+    Lilac:
+      patterns:
+      - magg.*lilac
     Limes & Bergamot:
       patterns:
       - magg.*lime.*ber?g
@@ -2971,6 +2986,7 @@ Mama Bear's Soaps:
       countable: false
       patterns:
       - mama bear.*tri-mix
+      - mama bear.*mash[ -]?up
 Mario Fissi:
   default format: Cream
   patterns:
@@ -3468,9 +3484,12 @@ Ogallala:
   patterns:
   - og+(?:al+)?al+a
   scents:
+    Bay Rum:
+      patterns:
+      - og+(?:al+)?al+a.*bay rum
     NWSC 2018:
       patterns:
-      - ogallala.*nwsc 2018
+      - og+(?:al+)?al+a.*nwsc 2018
 Old Spice:
   patterns:
   - old spice
@@ -3799,14 +3818,6 @@ Romano:
 Rustic Art:
   patterns:
   - rustic art\b
-SUPPLY:
-  patterns:
-  - ^\W?supply
-  scents:
-    Ultra Lather Lavender and Lemon:
-      format: Cream
-      patterns:
-      - supply.*lavender.*lemon
 Santa Maria Novella:
   patterns:
   - santa maria novella
@@ -3862,6 +3873,13 @@ Savonnerie du Nebbiu:
     Savon à Barbe:
       patterns:
       - (la )?savon+erie du neb+iu
+Scentsy:
+  patterns:
+  - scentsy
+  scents:
+    Sandalwood Tangerine:
+      patterns:
+      - scentsy.*sandalwood.*tangerine
 Schmiere:
   patterns:
   - schmiere
@@ -4214,6 +4232,9 @@ Stirling Soap Co.:
     Christmas Eve:
       patterns:
       - stirling.*christmas eve
+    City Slicker:
+      patterns:
+      - stirling.*city slicker
     Clementine:
       patterns:
       - st[ie]rling.*clementine
@@ -4705,6 +4726,14 @@ Summer Break Soaps:
       patterns:
       - summer break( soaps)?.*wood ?shop
       - ^\W*sbs\b.*wood ?shop
+SUPPLY:
+  patterns:
+  - ^\W?supply
+  scents:
+    Ultra Lather Lavender and Lemon:
+      format: Cream
+      patterns:
+      - supply.*lavender.*lemon
 Sweet Comb Chicago:
   patterns:
   - sweet comb chicago
@@ -4805,6 +4834,9 @@ Talent Soap Factory:
     Flying Dutchman:
       patterns:
       - (talent|tsf).*flying dutchman
+    Frankie Mermaid:
+      patterns:
+      - (talent|tsf).*frankie mermaid
     Galaxy Grape:
       patterns:
       - (talent|tsf).*galaxy grape
@@ -4889,6 +4921,9 @@ Tallow + Steel:
     1Up:
       patterns:
       - tallow.*1 ?up
+    Himalaya:
+      patterns:
+      - tallow.*himalaya
     Morning Coffee in the Canadian Wilderness:
       patterns:
       - morning.*coffee.*candadian
@@ -4962,6 +4997,7 @@ Tcheon Fung Sing:
       - ^\W*tfs\b.*red
       - ciotola rossa
       - tcheon
+      - \btfs\b
     diVino:
       patterns:
       - tcheon.*divino
@@ -5004,6 +5040,10 @@ The Artisan Soap Shoppe:
 The Black Stuff:
   patterns:
   - (the )?black stuff
+  scents:
+    Dublin Rose:
+      patterns:
+      - black stuff.*dublin rose
 The Body Shop:
   default format: Cream
   patterns:
@@ -5149,6 +5189,9 @@ Through the Fire Fine Craft:
     Birch Forest:
       patterns:
       - (through.*fire|ttffc).*birch forest
+    Northern Lights:
+      patterns:
+      - (through.*fire|ttffc).*northern? lights
     Sunsite:
       patterns:
       - (through.*fire|ttffc).*sunset
@@ -5353,6 +5396,10 @@ Wet Shaving Products:
       patterns:
       - wet ?shaving products.*olympus
       - ^\W*wsp\b.*olympus
+    Tobacco:
+      patterns:
+      - wet ?shaving products.*tobacco
+      - ^\W*wsp\b.*tobacco
 Wet the Face:
   patterns:
   - wet the face

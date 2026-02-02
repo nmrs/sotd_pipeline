@@ -394,6 +394,8 @@ DE:
       patterns:
         - gil.*et.*wilk.*swor
         - \bgws\b
+        - wilk.*sword.*brazil
+        - brazil.*wilk.*sword
     Winner:
       patterns:
         - gil.*winner
@@ -508,6 +510,10 @@ DE:
     Premium Platinum:
       patterns:
         - parker(?:.*premium)?(?:.*plat)?
+  Perma-Sharp:
+    Super Stainless (Sheffield):
+      patterns:
+        - perma.*sharp.*(vintage|sheffield)
   Personna:
     "74":
       patterns:
@@ -521,11 +527,10 @@ DE:
         - personna.*diamond.*glide
     Lab Blue:
       patterns:
-        - (person+a)?.*lab *blue
-        - person+a.*blue
+        - (person+a)?.*lab[ -]?blue
         - person+a.*comf.*coat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - person+a
         - accuforge
+        - person.*\bcc\b
     Med Prep:
       patterns:
         - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -534,8 +539,10 @@ DE:
         - person+a.*prep
     Platinum:
       patterns:
-        - person.*plat
+        - person.*plat.*(blue)?
         - person.*red
+        - person.*blue
+        - platinum.*isr[ae]{2}l
     Super Stainless:
       patterns:
         - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -548,11 +555,12 @@ DE:
         - crystal.*person+a(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - crystal.*plat
         - crystal
-        - isr[ae]{2}l.*(person+a|red)
-        - platinum.*isr[ae]{2}l
     TOMY:
       patterns:
         - \btomy\b
+    Unspecified:
+      patterns:
+        - person+a
   Polsilver:
     Super Iridium:
       patterns:

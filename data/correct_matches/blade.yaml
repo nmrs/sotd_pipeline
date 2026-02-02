@@ -175,6 +175,7 @@ DE:
     - gillette 7 o'clock sharp edge
     - gillette 7 o'clock sharp edge (yellow)
     - gillette 7 o'clock sharp edge (yellows)
+    - gillette 7 o'clock sharp edge yellow
     - gillette 7 o'clock sharpe edge yellow
     - gillette 7 o'clock sharpedge
     - gillette 7 o'clock sharpedge (yellow)
@@ -187,6 +188,7 @@ DE:
     - gillette 7 oclock sharp edge
     - gillette 7 oclock yellow
     - gillette 7' oclock yellow
+    - gillette 7'clock sharp edge
     - gillette 7:00 yellow
     - gillette 7o'clock sharp (yellow)
     - gillette 7oclock yellow
@@ -735,6 +737,8 @@ DE:
     - gws india
     - indian gillette wilkinson sword
     - indian gws
+    - wilkinson sword (brazil)
+    - wilkinson sword brazil
     Winner:
     - gillette winner
     - gillette winner special stainless
@@ -871,6 +875,9 @@ DE:
     - parker platinum
     - parker premium platinum
     - parker stainless steel
+  Perma-Sharp:
+    Super Stainless (Sheffield):
+    - perma sharp - sheffield - super stainless
   Personna:
     '74':
     - p-74
@@ -889,10 +896,7 @@ DE:
     - accuforge - microcoat
     - accutec accuforge
     - gilette lab blue
-    - persona
     - persona - lab blue
-    - persona blue
-    - persona blues
     - persona comfort coat
     - persona lab blue
     - personna - comfort coated
@@ -903,7 +907,6 @@ DE:
     - 'personna - lab blue (use #4)'
     - 'personna - lab blue (use #5ish)'
     - personna - lab blue 2)
-    - personna blue
     - personna cc
     - personna comfort coat
     - personna comfort coated
@@ -924,16 +927,28 @@ DE:
     - personna med prep
     - personna prep
     Platinum:
+    - persona blue
+    - persona blues
     - persona platinum
     - persona red
+    - personna "israeli red"
     - personna - platinum
     - personna - platinum (for both)
     - personna - platinum chrome
+    - personna - platinum chrome israeli red
+    - personna blue
+    - personna israeli red
     - personna platimum
     - personna platinum
+    - personna platinum (blue box)
+    - personna platinum (israeli red)
+    - personna platinum (isreali red)
+    - personna platinum blue box
     - personna platinum chrome
     - personna platinum chrome/german red
+    - personna platinum/israeli red
     - personna red
+    - super platinum (israel)
     Super Stainless:
     - person super stainless
     - persona super
@@ -954,19 +969,14 @@ DE:
     - crystal stainless (israeli personna)
     - crystal super platinum
     - crystal super+ platinum
-    - israeli personna
-    - personna "israeli red"
     - personna (crystal) platinum
-    - personna - platinum chrome israeli red
     - personna blue crystal
     - personna crystal blue
     - personna crystal super
-    - personna israeli red
     - personna platinum (crystal)
-    - personna platinum (israeli red)
-    - personna platinum (isreali red)
-    - personna platinum/israeli red
-    - super platinum (israel)
+    Unspecified:
+    - israeli personna
+    - persona
   Polsilver:
     Super Iridium:
     - gillette - polsilver super iridium

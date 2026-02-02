@@ -1395,7 +1395,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-        - sag?rada
+        - s[ae]g?rada
   Zenith:
     205 SE:
       fiber: Boar
@@ -2670,6 +2670,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - frugal.*shave
+  Gents:
+    default: Badger
+    patterns:
+      - \bgents\b
   Geo F. Trumper:
     default: Badger
     patterns:
@@ -3123,6 +3127,10 @@ other_brushes:
     patterns:
       - razor.*co
       - trc
+  The Rustic Bee:
+    default: Badger
+    patterns:
+      - rustic.*bee
   Tony Forsyth:
     default: Badger
     patterns:

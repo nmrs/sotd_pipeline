@@ -74,6 +74,7 @@ AP Shave Co:
   - apshave co 24mm 2bed
   APLuxury:
   - a p shaveco 24mm luxury badger mix
+  - a p shaveco 24mm luxury mixed badger
   - a p shaveco 24mm mixed luxury knot
   - a p shaveco luxury knot
   - a p shaveco luxury knot boar mix
@@ -1434,6 +1435,9 @@ Frugal Shave:
 Gentleman's Groom Room:
   Seillean Badger:
   - groom room seillean badger
+Gents:
+  Badger:
+  - gents silvertip
 Gilette:
   Synthetic:
   - gillette - travel brush nylon 15mm
@@ -1885,7 +1889,7 @@ NOM:
   - nom marten 21cr 21mm synthetic
   - nom marten 21mm synthetic
 Nom:
-  Badger:
+  Boar:
   - nom, super market boar
   Synthetic:
   - nom black fibre
@@ -1907,6 +1911,7 @@ Omega:
   - omega - s-brush s10065
   - omega 10065
   - omega 10065 boar
+  - omega- 10065 boar 23mm knot green handle
   '10066':
   - boar omega 10066
   - omega 10066
@@ -2039,6 +2044,7 @@ Omega:
   - omega 24mm boar
   - omega ash handle boar
   - omega ash handle inverted boar
+  - omega badger dyed boar
   - omega boar
   - omega boar 24mm
   - omega boar brush
@@ -2401,6 +2407,8 @@ Rad Dinosaur Creations:
   - rad dinosaur creations royale burl
   - rad dinosaur twilight 26mm soft tux bulb
   - rdc with a motherload
+  Tuxedo:
+  - rad dinosaur creations menage a lavender hive w/ 28mm tuxedo synth
 Rad Dinosaur Creations x Summer Break Soaps:
   Optimism:
   - rad dinosaur creations x summer break soaps - optimism brush
@@ -3035,6 +3043,7 @@ Stirling:
   - stirling soap co. kong synthetic
   Li'l Brudder:
   - stirling - li'l brudder synthetic, 22mm link
+  - stirling - synthetic li'l brudder
   - stirling -lil' brudder, 22 mm (synthetic) link
   - stirling lil brudder synthetic 22mm link
   - stirling lil brudder synthetic shaving brush, 24mm link
@@ -3148,6 +3157,10 @@ The Razor Company:
   - trc - synthetic 24mm
   - trc cream soda 28mm
   - trc cream soda acrylic
+The Rustic Bee:
+  Badger:
+  - the rustic bee olive wood. 26mm badger
+  - the rustic bee, olive wood badger
 Thäter:
   4125/4:
   - thaeter - 4125-4 silvertip
@@ -3501,6 +3514,9 @@ Yaqi:
   - yaqi sagrada familia tuxedo synth
   - yaqi sarada
   - yaqi sarada 24mm
+  - yaqi segrada familia
+  - yaqi segrada familia 24mm
+  - yaqi segrada familia tuxedo
   - yaqu sarada
   Synthetic:
   - (26mm) yaqi mysterious space
@@ -3591,8 +3607,6 @@ Yaqi:
   - yaqi rainbow synthetic brush
   - yaqi rainbow synthetic shave brush
   - yaqi red marble 26mm tux
-  - yaqi segrada familia
-  - yaqi segrada familia tuxedo
   - yaqi synth 22mm
   - yaqi synth, 22mm
   - yaqi synthetic 22mm
