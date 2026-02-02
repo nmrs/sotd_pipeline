@@ -736,9 +736,10 @@ class TestMoveCatalogEntries:
             # Verify the entry was added to new location
             # The manager normalizes strings before saving, so we need to check the normalized version
             from sotd.utils.extract_normalization import normalize_for_matching
-            
+
             # Debug: Check what's actually in the file
             import json
+
             if "New Brand" not in razor_data:
                 # The manager's save_correct_matches() should have added it
                 # This might indicate the manager isn't saving correctly after direct YAML writes
@@ -750,7 +751,7 @@ class TestMoveCatalogEntries:
                     f"Full data: {json.dumps(razor_data, indent=2, default=str)}. "
                     f"This suggests manager.save_correct_matches() didn't persist the new entry."
                 )
-            
+
             new_brand_data = razor_data.get("New Brand", {})
             new_model_patterns = new_brand_data.get("New Model", [])
             if not new_model_patterns:
@@ -761,7 +762,10 @@ class TestMoveCatalogEntries:
                 )
             # Check for normalized version of the pattern
             normalized_pattern = normalize_for_matching("test razor pattern", None, "razor")
-            assert normalized_pattern in new_model_patterns or "test razor pattern" in new_model_patterns, (
+            assert (
+                normalized_pattern in new_model_patterns
+                or "test razor pattern" in new_model_patterns
+            ), (
                 f"Pattern not found. Normalized: '{normalized_pattern}', "
                 f"Original: 'test razor pattern', Available: {new_model_patterns}"
             )

@@ -429,9 +429,7 @@ def test_main_single_month_processing(mock_process, mock_get_reddit, capsys):
     output = capsys.readouterr().out
     assert "Missing day: 2025-05-02" in output
     assert "Missing day: 2025-05-15" in output
-    assert (
-        "SOTD fetch complete for 2025-05: 15 threads, 89 comments, 2 missing days" in output
-    )
+    assert "SOTD fetch complete for 2025-05: 15 threads, 89 comments, 2 missing days" in output
 
 
 @patch("sotd.fetch.run.get_reddit")

@@ -647,7 +647,9 @@ class TestEnhancedRateLimitDetection:
         log_output = caplog.text
         # Check for debugging information in the warning message
         assert "Reddit rate-limit hit (hit #1 in" in log_output
-        assert "waiting 0m" in log_output  # With jitter, exact time may vary (30s with jitter could be 29-31s)
+        assert (
+            "waiting 0m" in log_output
+        )  # With jitter, exact time may vary (30s with jitter could be 29-31s)
 
     def test_rate_limit_detection_integration_with_search(self, monkeypatch):
         """Test rate limit detection integration with search operations."""

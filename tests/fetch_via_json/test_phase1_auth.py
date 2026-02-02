@@ -45,9 +45,7 @@ def test_json_fetch() -> None:
     """Test that we can fetch JSON from Reddit."""
     print("\n[TEST] Testing JSON fetch...")
     cookies = get_reddit_cookies()
-    json_data = get_reddit_json(
-        "https://www.reddit.com/r/wetshaving/about.json", cookies=cookies
-    )
+    json_data = get_reddit_json("https://www.reddit.com/r/wetshaving/about.json", cookies=cookies)
 
     assert json_data is not None, "JSON data should not be None"
     assert isinstance(json_data, dict), f"Expected dict, got {type(json_data)}"
