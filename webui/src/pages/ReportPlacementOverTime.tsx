@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -67,6 +67,7 @@ const ReportPlacementOverTime: React.FC = () => {
   const [pivoted, setPivoted] = useState<ReportRankingsPivotedResponse | null>(null);
   const [loadingPivoted, setLoadingPivoted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const prevViewModeRef = useRef<'by-item' | 'by-position'>(viewMode);
 
   const fetchTables = useCallback(async () => {
     try {
@@ -142,6 +143,14 @@ const ReportPlacementOverTime: React.FC = () => {
       cancelled = true;
     };
   }, [viewMode, selectedTableId]);
+
+  useEffect(() => {
+    const prev = prevViewModeRef.current;
+    prevViewModeRef.current = viewMode;
+    if (prev === 'by-position' && viewMode === 'by-item' && selectedTableId && selectedItems.length > 0) {
+      handleLoadSeries();
+    }
+  }, [viewMode, selectedTableId, selectedItems.length]);
 
   const handleLoadSeries = async () => {
     if (!selectedTableId || selectedItems.length === 0) {
@@ -245,17 +254,43 @@ const ReportPlacementOverTime: React.FC = () => {
 
           {selectedTableId && (
             <div className="grid gap-2">
-              <Label>View</Label>
-              <Tabs value={viewMode} onValueChange={v => setViewMode(v as 'by-item' | 'by-position')}>
-                <TabsList>
-                  <TabsTrigger value="by-item">By item</TabsTrigger>
-                  <TabsTrigger value="by-position">By position</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="flex flex-wrap items-center gap-2">
+                <Label className="shrink-0">View</Label>
+                <Tabs value={viewMode} onValueChange={v => setViewMode(v as 'by-item' | 'by-position')}>
+                  <TabsList>
+                    <TabsTrigger value="by-item">By item</TabsTrigger>
+                    <TabsTrigger value="by-position">By position</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                {selectedItems.length > 0 && (
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {selectedItems.map((item, i) => {
+                      const color = CHART_COLORS[i % CHART_COLORS.length];
+                      return (
+                        <Badge
+                          key={item}
+                          variant="secondary"
+                          className="pl-2 pr-1 py-1 gap-1.5 cursor-pointer border-l-2"
+                          style={{ borderLeftColor: color }}
+                          onClick={() => removeItem(item)}
+                        >
+                          <span
+                            className="rounded-full shrink-0"
+                            style={{ backgroundColor: color, width: 8, height: 8 }}
+                            aria-hidden
+                          />
+                          {item}
+                          <X className="h-3 w-3" />
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {selectedTableId && viewMode === 'by-item' && (
+          {selectedTableId && (
             <div className="grid gap-2">
               <Label>Items to track</Label>
               <div className="flex flex-wrap gap-2 items-center">
@@ -280,17 +315,6 @@ const ReportPlacementOverTime: React.FC = () => {
                       ))}
                   </SelectContent>
                 </Select>
-                {selectedItems.map(item => (
-                  <Badge
-                    key={item}
-                    variant="secondary"
-                    className="pl-2 pr-1 py-1 gap-1 cursor-pointer"
-                    onClick={() => removeItem(item)}
-                  >
-                    {item}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                ))}
               </div>
             </div>
           )}
@@ -376,13 +400,32 @@ const ReportPlacementOverTime: React.FC = () => {
                               {arrow}
                             </span>
                           );
+                          const highlightIndex = pt.item != null ? selectedItems.indexOf(pt.item) : -1;
+                          const highlightColor =
+                            highlightIndex >= 0 ? CHART_COLORS[highlightIndex % CHART_COLORS.length] : undefined;
+                          const hasItem = pt.item != null && pt.item !== '';
                           return (
-                            <TableCell key={pt.month} className="whitespace-nowrap">
-                              {tooltipContent ? (
-                                <CellTooltip content={tooltipContent}>{cellContent}</CellTooltip>
-                              ) : (
-                                cellContent
+                            <TableCell
+                              key={pt.month}
+                              className="whitespace-nowrap relative"
+                              onClick={hasItem ? () => addItem(pt.item!) : undefined}
+                              role={hasItem ? 'button' : undefined}
+                              style={hasItem ? { cursor: 'pointer' } : undefined}
+                            >
+                              {highlightColor && (
+                                <span
+                                  className="absolute inset-0 pointer-events-none"
+                                  style={{ backgroundColor: highlightColor, opacity: 0.12 }}
+                                  aria-hidden
+                                />
                               )}
+                              <span className="relative">
+                                {tooltipContent ? (
+                                  <CellTooltip content={tooltipContent}>{cellContent}</CellTooltip>
+                                ) : (
+                                  cellContent
+                                )}
+                              </span>
                             </TableCell>
                           );
                         })}

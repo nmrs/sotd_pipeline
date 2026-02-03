@@ -211,4 +211,64 @@ describe('ReportPlacementOverTime', () => {
       expect(screen.getByText('No pivoted data for this aggregation.')).toBeInTheDocument();
     });
   });
+
+  it('clicking a swim lane cell with an item adds that item to selection', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ReportPlacementOverTime />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(mockGetTables).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getAllByRole('combobox')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Razors')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Razors'));
+    await user.click(screen.getByRole('tab', { name: /By position/i }));
+    await waitFor(() => {
+      expect(mockGetPivoted).toHaveBeenCalledWith('razors');
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Swim lanes (top 20)')).toBeInTheDocument();
+    });
+    const razorACells = screen.getAllByRole('button', { name: /Razor A/ });
+    await user.click(razorACells[0]);
+    await user.click(screen.getByRole('tab', { name: /By item/i }));
+    const loadButton = screen.getByRole('button', { name: /Load series/i });
+    expect(loadButton).not.toBeDisabled();
+  });
+
+  it('shows highlighted cells in swim lane when items are pre-selected', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ReportPlacementOverTime />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(mockGetTables).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getAllByRole('combobox')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Razors')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Razors'));
+    await user.click(screen.getByRole('tab', { name: /By position/i }));
+    await waitFor(() => {
+      expect(mockGetPivoted).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Swim lanes (top 20)')).toBeInTheDocument();
+    });
+    const razorACells = screen.getAllByRole('button', { name: /Razor A/ });
+    await user.click(razorACells[0]);
+    const cellsWithRazorA = screen.getAllByText(/Razor A/);
+    const tableCellWithHighlight = cellsWithRazorA.find(
+      el => el.closest('td')?.querySelector('span[style*="opacity"]') != null
+    );
+    expect(tableCellWithHighlight).toBeDefined();
+  });
 });
