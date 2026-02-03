@@ -71,6 +71,29 @@ class SeriesResponse(BaseModel):
     series: List[SeriesEntry]
 
 
+class PivotedPoint(BaseModel):
+    """One month's item at a rank slot, with previous-month rank for movement."""
+
+    month: str
+    item: Optional[str] = None
+    shaves: Optional[int] = None
+    prev_rank: Optional[int] = None
+
+
+class PivotedLane(BaseModel):
+    """One rank slot (1..20) with points per month."""
+
+    rank: int
+    points: List[PivotedPoint]
+
+
+class PivotedResponse(BaseModel):
+    """Top-20-by-month pivoted data for swim lanes."""
+
+    months: List[str]
+    lanes: List[PivotedLane]
+
+
 def _get_aggregated_dir() -> Path:
     """Return path to data/aggregated directory."""
     env_dir = os.environ.get("SOTD_DATA_DIR")
@@ -266,3 +289,92 @@ async def get_series(
         for item in item_list
     ]
     return SeriesResponse(months=valid_months, series=series_entries)
+
+
+def _row_rank(row: Dict[str, Any]) -> Optional[int]:
+    """Extract numeric rank from a table row."""
+    rank = row.get("rank", row.get("Rank"))
+    if rank is None:
+        return None
+    if isinstance(rank, str):
+        try:
+            return int(rank.replace("=", "").strip())
+        except ValueError:
+            return None
+    return int(rank) if rank is not None else None
+
+
+@router.get("/pivoted", response_model=PivotedResponse)
+async def get_pivoted(
+    table: str = Query(..., description="Table id (snake_case or kebab-case)"),
+) -> PivotedResponse:
+    """Get top-20-by-month pivoted data for swim lanes (rank per month, with prev_rank for movement)."""
+    aggregated_dir = _get_aggregated_dir()
+    months = _get_available_months(aggregated_dir)
+    if not months:
+        return PivotedResponse(months=[], lanes=[])
+
+    table_name = table.replace("_", "-") if "_" in table else table
+    TOP_N = 20
+
+    # Build per-month: list of (display_name, shaves) for ranks 1..TOP_N
+    month_rows: List[List[tuple]] = []  # month_rows[i] = [(name, shaves), ...] for month i
+    valid_months: List[str] = []
+
+    for month_str in months:
+        file_path = aggregated_dir / f"{month_str}.json"
+        if not file_path.exists():
+            continue
+        try:
+            _, data = load_aggregated_data(file_path, debug=False)
+            generator = TableGenerator(data, comparison_data={}, current_month=month_str)
+            rows = generator.get_structured_table_data(table_name, deltas=False)
+        except Exception as e:
+            logger.debug(f"Skip month {month_str}: {e}")
+            continue
+
+        valid_months.append(month_str)
+        slot_list: List[tuple] = []
+        for r in rows[:TOP_N]:
+            name = _row_display_name(r)
+            shaves = r.get("shaves", r.get("Shaves"))
+            if isinstance(shaves, str):
+                try:
+                    shaves = int(shaves.replace(",", "").strip())
+                except ValueError:
+                    shaves = None
+            slot_list.append((name or "", shaves))
+        while len(slot_list) < TOP_N:
+            slot_list.append(("", None))
+        month_rows.append(slot_list)
+
+    if not valid_months:
+        return PivotedResponse(months=[], lanes=[])
+
+    # For each month i, build item -> rank (1-based) for previous month i-1 (for prev_rank)
+    def prev_rank_for(month_index: int, slot_index: int) -> Optional[int]:
+        if month_index == 0:
+            return None
+        name, _ = month_rows[month_index][slot_index]
+        if not name or not name.strip():
+            return None
+        norm = _normalize_name(name)
+        prev_slots = month_rows[month_index - 1]
+        for r, (n, _) in enumerate(prev_slots):
+            if n and _normalize_name(n) == norm:
+                return r + 1
+        return None
+
+    lanes: List[PivotedLane] = []
+    for rank_one_based in range(1, TOP_N + 1):
+        slot_index = rank_one_based - 1
+        points: List[PivotedPoint] = []
+        for mi, month_str in enumerate(valid_months):
+            name, shaves = month_rows[mi][slot_index]
+            prev_r = prev_rank_for(mi, slot_index)
+            points.append(
+                PivotedPoint(month=month_str, item=name or None, shaves=shaves, prev_rank=prev_r)
+            )
+        lanes.append(PivotedLane(rank=rank_one_based, points=points))
+
+    return PivotedResponse(months=valid_months, lanes=lanes)

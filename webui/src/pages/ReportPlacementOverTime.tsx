@@ -40,12 +40,16 @@ import {
   getReportRankingsTables,
   getReportRankingsItems,
   getReportRankingsSeries,
+  getReportRankingsPivoted,
   ReportRankingsTable,
   ReportRankingsSeriesResponse,
+  ReportRankingsPivotedResponse,
 } from '@/services/api';
 import { handleApiError } from '@/services/api';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
-import { ChevronDown, X } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import CellTooltip from '@/components/ui/tooltip';
+import { ChevronDown, X, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -59,6 +63,9 @@ const ReportPlacementOverTime: React.FC = () => {
   const [loadingItems, setLoadingItems] = useState(false);
   const [loadingSeries, setLoadingSeries] = useState(false);
   const [series, setSeries] = useState<ReportRankingsSeriesResponse | null>(null);
+  const [viewMode, setViewMode] = useState<'by-item' | 'by-position'>('by-item');
+  const [pivoted, setPivoted] = useState<ReportRankingsPivotedResponse | null>(null);
+  const [loadingPivoted, setLoadingPivoted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTables = useCallback(async () => {
@@ -112,6 +119,29 @@ const ReportPlacementOverTime: React.FC = () => {
       cancelled = true;
     };
   }, [selectedTableId]);
+
+  useEffect(() => {
+    if (viewMode !== 'by-position' || !selectedTableId) {
+      setPivoted(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoadingPivoted(true);
+        setError(null);
+        const data = await getReportRankingsPivoted(selectedTableId);
+        if (!cancelled) setPivoted(data);
+      } catch (err: unknown) {
+        if (!cancelled) setError(handleApiError(err));
+      } finally {
+        if (!cancelled) setLoadingPivoted(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [viewMode, selectedTableId]);
 
   const handleLoadSeries = async () => {
     if (!selectedTableId || selectedItems.length === 0) {
@@ -215,6 +245,18 @@ const ReportPlacementOverTime: React.FC = () => {
 
           {selectedTableId && (
             <div className="grid gap-2">
+              <Label>View</Label>
+              <Tabs value={viewMode} onValueChange={v => setViewMode(v as 'by-item' | 'by-position')}>
+                <TabsList>
+                  <TabsTrigger value="by-item">By item</TabsTrigger>
+                  <TabsTrigger value="by-position">By position</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+
+          {selectedTableId && viewMode === 'by-item' && (
+            <div className="grid gap-2">
               <Label>Items to track</Label>
               <div className="flex flex-wrap gap-2 items-center">
                 <Select
@@ -253,19 +295,21 @@ const ReportPlacementOverTime: React.FC = () => {
             </div>
           )}
 
-          <Button
-            onClick={handleLoadSeries}
-            disabled={!selectedTableId || selectedItems.length === 0 || loadingSeries}
-          >
-            {loadingSeries ? (
-              <>
-                <LoadingSpinner className="mr-2 h-4 w-4" />
-                Loading…
-              </>
-            ) : (
-              'Load series'
-            )}
-          </Button>
+          {viewMode === 'by-item' && (
+            <Button
+              onClick={handleLoadSeries}
+              disabled={!selectedTableId || selectedItems.length === 0 || loadingSeries}
+            >
+              {loadingSeries ? (
+                <>
+                  <LoadingSpinner className="mr-2 h-4 w-4" />
+                  Loading…
+                </>
+              ) : (
+                'Load series'
+              )}
+            </Button>
+          )}
 
           {error && (
             <p className="text-sm text-destructive" role="alert">
@@ -275,7 +319,84 @@ const ReportPlacementOverTime: React.FC = () => {
         </CardContent>
       </Card>
 
-      {series && (
+      {viewMode === 'by-position' && selectedTableId && (
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle>Swim lanes (top 20)</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Who was in each rank each month. ↑ moved up, ↓ moved down, — same or first month.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {loadingPivoted && (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner className="h-8 w-8" />
+              </div>
+            )}
+            {!loadingPivoted && pivoted && (pivoted.months.length === 0 || !pivoted.lanes.length) && (
+              <p className="text-muted-foreground py-4">No pivoted data for this aggregation.</p>
+            )}
+            {!loadingPivoted && pivoted && pivoted.months.length > 0 && pivoted.lanes.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="sticky left-0 z-10 bg-background min-w-[4rem]">Rank</TableHead>
+                      {pivoted.months.map(m => (
+                        <TableHead key={m} className="whitespace-nowrap">
+                          {m}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pivoted.lanes.map(lane => (
+                      <TableRow key={lane.rank}>
+                        <TableCell className="font-medium sticky left-0 z-10 bg-background">
+                          {lane.rank}
+                        </TableCell>
+                        {lane.points.map(pt => {
+                          const currentRank = lane.rank;
+                          const prevRank = pt.prev_rank;
+                          let arrow: React.ReactNode = null;
+                          if (prevRank !== null && prevRank !== undefined) {
+                            if (prevRank > currentRank) arrow = <ArrowUp className="h-3 w-3 inline text-green-600" />;
+                            else if (prevRank < currentRank) arrow = <ArrowDown className="h-3 w-3 inline text-red-600" />;
+                            else arrow = <Minus className="h-3 w-3 inline text-muted-foreground" />;
+                          }
+                          const tooltipParts = [pt.item ?? ''];
+                          if (pt.shaves != null) tooltipParts.push(`${pt.shaves} shaves`);
+                          if (prevRank != null && prevRank !== currentRank) {
+                            tooltipParts.push(prevRank > currentRank ? `Moved up from rank ${prevRank}` : `Moved down from rank ${prevRank}`);
+                          }
+                          const tooltipContent = tooltipParts.filter(Boolean).join(' — ');
+                          const cellContent = (
+                            <span className="inline-flex items-center gap-1 max-w-[140px] truncate">
+                              {pt.item ?? '—'}
+                              {arrow}
+                            </span>
+                          );
+                          return (
+                            <TableCell key={pt.month} className="whitespace-nowrap">
+                              {tooltipContent ? (
+                                <CellTooltip content={tooltipContent}>{cellContent}</CellTooltip>
+                              ) : (
+                                cellContent
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {series && viewMode === 'by-item' && (
         <>
           <Card className="mb-4">
             <CardHeader>
@@ -368,7 +489,7 @@ const ReportPlacementOverTime: React.FC = () => {
         </>
       )}
 
-      {!series && selectedTableId && selectedItems.length > 0 && !loadingSeries && !error && (
+      {viewMode === 'by-item' && !series && selectedTableId && selectedItems.length > 0 && !loadingSeries && !error && (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
             Click &quot;Load series&quot; to load rank-over-time data.

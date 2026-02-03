@@ -1183,6 +1183,32 @@ export interface ReportRankingsSeriesResponse {
   series: ReportRankingsSeriesEntry[];
 }
 
+export interface ReportRankingsPivotedPoint {
+  month: string;
+  item: string | null;
+  shaves: number | null;
+  prev_rank: number | null;
+}
+
+export interface ReportRankingsPivotedLane {
+  rank: number;
+  points: ReportRankingsPivotedPoint[];
+}
+
+export interface ReportRankingsPivotedResponse {
+  months: string[];
+  lanes: ReportRankingsPivotedLane[];
+}
+
+export const getReportRankingsPivoted = async (
+  tableId: string
+): Promise<ReportRankingsPivotedResponse> => {
+  const response = await api.get<ReportRankingsPivotedResponse>('/report-rankings/pivoted', {
+    params: { table: tableId },
+  });
+  return response.data;
+};
+
 export const getReportRankingsMonths = async (): Promise<string[]> => {
   const response = await api.get<{ months: string[] }>('/report-rankings/months');
   return response.data.months;

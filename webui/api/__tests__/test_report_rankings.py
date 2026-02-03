@@ -139,3 +139,73 @@ def test_report_rankings_series_returns_shape(tmp_path):
     assert "Razor B" in items
     assert len(items["Razor A"]) == len(data["months"])
     assert len(items["Razor B"]) == len(data["months"])
+
+
+def test_report_rankings_pivoted_empty_when_no_months(tmp_path):
+    """GET /api/report-rankings/pivoted returns empty months and lanes when no data."""
+    with patch("api.report_rankings._get_aggregated_dir", return_value=tmp_path):
+        resp = client.get("/api/report-rankings/pivoted", params={"table": "razors"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["months"] == []
+    assert data["lanes"] == []
+
+
+def test_report_rankings_pivoted_returns_20_lanes_and_prev_rank(tmp_path):
+    """GET /api/report-rankings/pivoted returns 20 lanes, months align, prev_rank set when applicable."""
+    # Month 1: Razor A=1, Razor B=2, Razor C=3. Month 2: Razor B=1, Razor A=2, Razor C=3.
+    return_2025_06 = [
+        {"name": "Razor A", "rank": 1, "shaves": 100},
+        {"name": "Razor B", "rank": 2, "shaves": 80},
+        {"name": "Razor C", "rank": 3, "shaves": 60},
+    ]
+    return_2025_07 = [
+        {"name": "Razor B", "rank": 1, "shaves": 90},
+        {"name": "Razor A", "rank": 2, "shaves": 70},
+        {"name": "Razor C", "rank": 3, "shaves": 50},
+    ]
+
+    def load_side_effect(file_path, debug=False):
+        content = json.loads(file_path.read_text(encoding="utf-8"))
+        return content["meta"], content["data"]
+
+    (tmp_path / "2025-06.json").write_text(
+        json.dumps(_mock_aggregated_content(), indent=2), encoding="utf-8"
+    )
+    (tmp_path / "2025-07.json").write_text(
+        json.dumps(_mock_aggregated_content(), indent=2), encoding="utf-8"
+    )
+
+    with patch("api.report_rankings._get_aggregated_dir", return_value=tmp_path):
+        with patch("api.report_rankings.load_aggregated_data", side_effect=load_side_effect):
+            with patch("api.report_rankings.TableGenerator") as tg_mock:
+                gen = tg_mock.return_value
+                gen.get_structured_table_data.side_effect = [
+                    return_2025_06,
+                    return_2025_07,
+                ]
+                resp = client.get("/api/report-rankings/pivoted", params={"table": "razors"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "months" in data
+    assert "lanes" in data
+    assert data["months"] == ["2025-06", "2025-07"]
+    assert len(data["lanes"]) == 20
+    for i, lane in enumerate(data["lanes"]):
+        assert lane["rank"] == i + 1
+        assert len(lane["points"]) == 2
+        for pt in lane["points"]:
+            assert "month" in pt
+            assert "item" in pt
+            assert "prev_rank" in pt
+    # Lane 1 (rank 1): month 1 = Razor A (prev_rank null), month 2 = Razor B (prev_rank 2)
+    lane1 = data["lanes"][0]
+    assert lane1["points"][0]["item"] == "Razor A"
+    assert lane1["points"][0]["prev_rank"] is None
+    assert lane1["points"][1]["item"] == "Razor B"
+    assert lane1["points"][1]["prev_rank"] == 2
+    # Lane 2 (rank 2): month 1 = Razor B (prev_rank null), month 2 = Razor A (prev_rank 1)
+    lane2 = data["lanes"][1]
+    assert lane2["points"][0]["item"] == "Razor B"
+    assert lane2["points"][1]["item"] == "Razor A"
+    assert lane2["points"][1]["prev_rank"] == 1
