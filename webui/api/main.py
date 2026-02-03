@@ -24,6 +24,7 @@ from .filtered import router as filtered_router
 from .format_compatibility import router as format_compatibility_router
 from .monthly_user_posts import router as monthly_user_posts_router
 from .product_usage import router as product_usage_router
+from .report_rankings import router as report_rankings_router
 from .soap_analyzer import router as soap_analyzer_router
 from .wsdb_alignment import router as wsdb_alignment_router
 
@@ -140,6 +141,7 @@ app.include_router(brush_matching_router)
 app.include_router(soap_analyzer_router)
 app.include_router(monthly_user_posts_router)
 app.include_router(product_usage_router)
+app.include_router(report_rankings_router)
 app.include_router(format_compatibility_router)
 app.include_router(wsdb_alignment_router)
 

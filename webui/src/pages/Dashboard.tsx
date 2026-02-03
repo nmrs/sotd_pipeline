@@ -107,6 +107,13 @@ const Dashboard: React.FC = () => {
       color: 'purple',
       path: '/format-compatibility',
     },
+    {
+      title: 'Rankings over time',
+      description: 'See how report table rows placed over time by aggregation and item.',
+      icon: '📈',
+      color: 'blue',
+      path: '/report-placement',
+    },
   ];
 
   const validatorCards: ToolCard[] = [

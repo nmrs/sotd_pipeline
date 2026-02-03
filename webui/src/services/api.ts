@@ -1160,3 +1160,55 @@ export const getProductYearlySummary = async (
     throw error;
   }
 };
+
+// Report rankings (placement over time)
+export interface ReportRankingsTable {
+  id: string;
+  label: string;
+}
+
+export interface ReportRankingsSeriesPoint {
+  month: string;
+  rank: number | null;
+  shaves: number | null;
+}
+
+export interface ReportRankingsSeriesEntry {
+  item: string;
+  data: ReportRankingsSeriesPoint[];
+}
+
+export interface ReportRankingsSeriesResponse {
+  months: string[];
+  series: ReportRankingsSeriesEntry[];
+}
+
+export const getReportRankingsMonths = async (): Promise<string[]> => {
+  const response = await api.get<{ months: string[] }>('/report-rankings/months');
+  return response.data.months;
+};
+
+export const getReportRankingsTables = async (): Promise<ReportRankingsTable[]> => {
+  const response = await api.get<{ tables: ReportRankingsTable[] }>('/report-rankings/tables');
+  return response.data.tables;
+};
+
+export const getReportRankingsItems = async (
+  table: string,
+  month?: string
+): Promise<string[]> => {
+  const params = month ? { table, month } : { table };
+  const response = await api.get<{ items: string[] }>('/report-rankings/items', { params });
+  return response.data.items;
+};
+
+export const getReportRankingsSeries = async (
+  table: string,
+  items: string[]
+): Promise<ReportRankingsSeriesResponse> => {
+  const params = { table, items: items.join(',') };
+  const response = await api.get<ReportRankingsSeriesResponse>('/report-rankings/series', {
+    params,
+  });
+  return response.data;
+};

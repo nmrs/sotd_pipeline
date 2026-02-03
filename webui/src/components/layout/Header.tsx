@@ -48,6 +48,7 @@ const Header: React.FC = () => {
         { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },
         { path: '/product-usage', label: 'Product Usage', icon: '📦' },
         { path: '/format-compatibility', label: 'Format Compatibility', icon: '⚠️' },
+        { path: '/report-placement', label: 'Rankings over time', icon: '📈' },
       ],
     },
     {
