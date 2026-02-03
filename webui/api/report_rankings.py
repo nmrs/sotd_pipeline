@@ -50,11 +50,12 @@ class ItemsResponse(BaseModel):
 
 
 class SeriesPoint(BaseModel):
-    """One month's rank/shaves for an item."""
+    """One month's rank/shaves/unique_users for an item."""
 
     month: str
     rank: Optional[int] = None
     shaves: Optional[int] = None
+    unique_users: Optional[int] = None
 
 
 class SeriesEntry(BaseModel):
@@ -77,6 +78,7 @@ class PivotedPoint(BaseModel):
     month: str
     item: Optional[str] = None
     shaves: Optional[int] = None
+    unique_users: Optional[int] = None
     prev_rank: Optional[int] = None
 
 
@@ -152,6 +154,9 @@ def _row_display_name(row: Dict[str, Any]) -> Optional[str]:
     col = _identifier_column(row)
     if col and col in row:
         return str(row[col]).strip() or None
+    # Tables with only numeric columns (e.g. blade_usage_distribution): use use_count as label
+    if "use_count" in row and row["use_count"] is not None:
+        return str(row["use_count"])
     return None
 
 
@@ -193,36 +198,50 @@ async def get_tables() -> TablesResponse:
 @router.get("/items", response_model=ItemsResponse)
 async def get_items(
     table: str = Query(..., description="Table id (snake_case)"),
-    month: Optional[str] = Query(None, description="Month YYYY-MM; default latest"),
+    month: Optional[str] = Query(None, description="Month YYYY-MM; when omitted, items from all months"),
 ) -> ItemsResponse:
-    """List item names (row labels) for a table, from a given month."""
+    """List item names (row labels) for a table. When month is omitted, returns the union of
+    items across all available months so that formats/categories that appear in some months
+    but not others (e.g. AC razors) are still selectable."""
     aggregated_dir = _get_aggregated_dir()
     months = _get_available_months(aggregated_dir)
     if not months:
         return ItemsResponse(items=[])
 
-    use_month = month if month and month in months else months[-1]
-    file_path = aggregated_dir / f"{use_month}.json"
-    if not file_path.exists():
-        return ItemsResponse(items=[])
+    table_name = table.replace("_", "-") if "_" in table else table
+    # normalized name -> first display name seen (canonical for dropdown)
+    by_normalized: Dict[str, str] = {}
 
-    try:
-        _, data = load_aggregated_data(file_path, debug=False)
-        generator = TableGenerator(data, comparison_data={}, current_month=use_month)
-        # TableGenerator accepts kebab or snake; data keys are snake_case
-        table_name = table.replace("_", "-") if "_" in table else table
-        rows = generator.get_structured_table_data(table_name, deltas=False)
-    except Exception as e:
-        logger.warning(f"Failed to get items for table {table}: {e}")
-        raise HTTPException(status_code=400, detail=str(e)) from e
+    if month and month in months:
+        # Single month: use only that month
+        months_to_scan = [month]
+    else:
+        # No month: union across all months so all items ever present are selectable
+        months_to_scan = months
 
-    names: List[str] = []
-    seen: set = set()
-    for row in rows:
-        name = _row_display_name(row)
-        if name and _normalize_name(name) not in seen:
-            seen.add(_normalize_name(name))
-            names.append(name)
+    for use_month in months_to_scan:
+        file_path = aggregated_dir / f"{use_month}.json"
+        if not file_path.exists():
+            continue
+        try:
+            _, data = load_aggregated_data(file_path, debug=False)
+            generator = TableGenerator(data, comparison_data={}, current_month=use_month)
+            rows = generator.get_structured_table_data(
+                table_name, deltas=False, format_column_names=False
+            )
+        except Exception as e:
+            logger.debug(f"Skip month {use_month} for items: {e}")
+            continue
+        for row in rows:
+            name = _row_display_name(row)
+            if not name:
+                continue
+            norm = _normalize_name(name)
+            if norm not in by_normalized:
+                by_normalized[norm] = name
+
+    # Preserve a stable order: sort by normalized name so dropdown order is consistent
+    names = sorted(by_normalized.values(), key=lambda s: _normalize_name(s))
     return ItemsResponse(items=names)
 
 
@@ -254,7 +273,9 @@ async def get_series(
         try:
             _, data = load_aggregated_data(file_path, debug=False)
             generator = TableGenerator(data, comparison_data={}, current_month=month_str)
-            rows = generator.get_structured_table_data(table_name, deltas=False)
+            rows = generator.get_structured_table_data(
+                table_name, deltas=False, format_column_names=False
+            )
         except Exception as e:
             logger.debug(f"Skip month {month_str}: {e}")
             continue
@@ -268,21 +289,34 @@ async def get_series(
 
         for norm, orig in wanted.items():
             row = by_name.get(norm)
-            rank = row.get("rank", row.get("Rank")) if row else None
-            shaves = row.get("shaves", row.get("Shaves")) if row else None
+            rank = row.get("rank") if row else None
+            shaves = row.get("shaves") if row else None
+            unique_users = row.get("unique_users") if row else None
             if rank is not None and isinstance(rank, str):
                 try:
                     rank = int(rank.replace("=", "").strip())
                 except ValueError:
                     rank = None
-            series_by_item[orig].append({"month": month_str, "rank": rank, "shaves": shaves})
+            if unique_users is not None and isinstance(unique_users, str):
+                try:
+                    unique_users = int(unique_users.replace(",", "").strip())
+                except ValueError:
+                    unique_users = None
+            series_by_item[orig].append(
+                {"month": month_str, "rank": rank, "shaves": shaves, "unique_users": unique_users}
+            )
 
     # Build response: ensure every item has an entry for every valid month (null if missing)
     series_entries = [
         SeriesEntry(
             item=item,
             data=[
-                SeriesPoint(month=p["month"], rank=p["rank"], shaves=p.get("shaves"))
+                SeriesPoint(
+                    month=p["month"],
+                    rank=p["rank"],
+                    shaves=p.get("shaves"),
+                    unique_users=p.get("unique_users"),
+                )
                 for p in series_by_item[item]
             ],
         )
@@ -293,7 +327,7 @@ async def get_series(
 
 def _row_rank(row: Dict[str, Any]) -> Optional[int]:
     """Extract numeric rank from a table row."""
-    rank = row.get("rank", row.get("Rank"))
+    rank = row.get("rank")
     if rank is None:
         return None
     if isinstance(rank, str):
@@ -317,8 +351,8 @@ async def get_pivoted(
     table_name = table.replace("_", "-") if "_" in table else table
     TOP_N = 20
 
-    # Build per-month: list of (display_name, shaves) for ranks 1..TOP_N
-    month_rows: List[List[tuple]] = []  # month_rows[i] = [(name, shaves), ...] for month i
+    # Build per-month: list of (display_name, shaves, unique_users) for ranks 1..TOP_N
+    month_rows: List[List[tuple]] = []  # month_rows[i] = [(name, shaves, unique_users), ...]
     valid_months: List[str] = []
 
     for month_str in months:
@@ -328,7 +362,9 @@ async def get_pivoted(
         try:
             _, data = load_aggregated_data(file_path, debug=False)
             generator = TableGenerator(data, comparison_data={}, current_month=month_str)
-            rows = generator.get_structured_table_data(table_name, deltas=False)
+            rows = generator.get_structured_table_data(
+                table_name, deltas=False, format_column_names=False
+            )
         except Exception as e:
             logger.debug(f"Skip month {month_str}: {e}")
             continue
@@ -337,15 +373,21 @@ async def get_pivoted(
         slot_list: List[tuple] = []
         for r in rows[:TOP_N]:
             name = _row_display_name(r)
-            shaves = r.get("shaves", r.get("Shaves"))
+            shaves = r.get("shaves")
             if isinstance(shaves, str):
                 try:
                     shaves = int(shaves.replace(",", "").strip())
                 except ValueError:
                     shaves = None
-            slot_list.append((name or "", shaves))
+            unique_users = r.get("unique_users")
+            if isinstance(unique_users, str):
+                try:
+                    unique_users = int(unique_users.replace(",", "").strip())
+                except ValueError:
+                    unique_users = None
+            slot_list.append((name or "", shaves, unique_users))
         while len(slot_list) < TOP_N:
-            slot_list.append(("", None))
+            slot_list.append(("", None, None))
         month_rows.append(slot_list)
 
     if not valid_months:
@@ -355,12 +397,12 @@ async def get_pivoted(
     def prev_rank_for(month_index: int, slot_index: int) -> Optional[int]:
         if month_index == 0:
             return None
-        name, _ = month_rows[month_index][slot_index]
+        name, _, _ = month_rows[month_index][slot_index]
         if not name or not name.strip():
             return None
         norm = _normalize_name(name)
         prev_slots = month_rows[month_index - 1]
-        for r, (n, _) in enumerate(prev_slots):
+        for r, (n, _, _) in enumerate(prev_slots):
             if n and _normalize_name(n) == norm:
                 return r + 1
         return None
@@ -370,10 +412,16 @@ async def get_pivoted(
         slot_index = rank_one_based - 1
         points: List[PivotedPoint] = []
         for mi, month_str in enumerate(valid_months):
-            name, shaves = month_rows[mi][slot_index]
+            name, shaves, unique_users = month_rows[mi][slot_index]
             prev_r = prev_rank_for(mi, slot_index)
             points.append(
-                PivotedPoint(month=month_str, item=name or None, shaves=shaves, prev_rank=prev_r)
+                PivotedPoint(
+                    month=month_str,
+                    item=name or None,
+                    shaves=shaves,
+                    unique_users=unique_users,
+                    prev_rank=prev_r,
+                )
             )
         lanes.append(PivotedLane(rank=rank_one_based, points=points))
 
