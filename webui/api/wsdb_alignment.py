@@ -4,6 +4,7 @@
 import asyncio
 import json
 import logging
+import re
 import time
 import traceback
 import unicodedata
@@ -171,6 +172,7 @@ def pre_normalize_wsdb_entries(wsdb_soaps: list[dict]) -> list[dict]:
     - name_norm: normalized name (if present)
     - brand_virtual_norm: normalized brand with trailing "soap" stripped (if applicable)
     - name_virtual_norm: normalized name with trailing "soap" stripped (if applicable)
+    - slug_space_norm: slug with hyphens replaced by spaces, normalized (for regex/pattern matching)
     - original: original WSDB soap dict (for slug, etc.)
 
     Args:
@@ -183,9 +185,13 @@ def pre_normalize_wsdb_entries(wsdb_soaps: list[dict]) -> list[dict]:
     for soap in wsdb_soaps:
         brand = soap.get("brand", "")
         name = soap.get("name", "")
+        slug = soap.get("slug", "")
 
         brand_norm = normalize_for_matching(brand)
         name_norm = normalize_for_matching(name) if name else ""
+
+        # Slug with hyphens replaced by spaces, then normalized (so pipeline regex patterns match)
+        slug_space_norm = normalize_for_matching(slug.replace("-", " ")) if slug else ""
 
         # Pre-compute virtual aliases
         brand_virtual = strip_trailing_soap(brand_norm)
@@ -200,6 +206,7 @@ def pre_normalize_wsdb_entries(wsdb_soaps: list[dict]) -> list[dict]:
                 "name_norm": name_norm,
                 "brand_virtual_norm": brand_virtual_norm,
                 "name_virtual_norm": name_virtual_norm,
+                "slug_space_norm": slug_space_norm,
                 "original": soap,  # Keep original for slug, etc.
             }
         )
@@ -480,9 +487,11 @@ async def load_pipeline_soaps() -> dict[str, Any]:
                         brand_data["aliases"] if isinstance(brand_data["aliases"], list) else []
                     )
 
-                # Extract scents
+                # Extract scents (exclude mashups: countable false — we never match WSDB to a mashup)
                 if "scents" in brand_data:
                     for scent_name, scent_data in brand_data["scents"].items():
+                        if isinstance(scent_data, dict) and scent_data.get("countable") is False:
+                            continue  # Mashup scents are excluded from WSDB alignment
                         scent_alias = None
                         if isinstance(scent_data, dict) and "alias" in scent_data:
                             scent_alias = (
@@ -756,6 +765,598 @@ def is_non_match(
         return False
 
 
+async def run_batch_analyze(
+    threshold: float = 0.7,
+    limit: int = 100,
+    mode: str = "brand_scent",
+    brand_threshold: float = 0.8,
+) -> dict[str, Any]:
+    """
+    Run batch analysis of pipeline and WSDB soaps (catalog mode).
+
+    Loads data, builds pipeline_results and wsdb_results using the same matching
+    and exclusion logic as the API. Callable from the batch-analyze endpoint or
+    from scripts (e.g. auto_assign_single_100_slugs).
+
+    Args:
+        threshold: Minimum confidence threshold (0.0-1.0)
+        limit: Maximum results per view (used by frontend; not applied here)
+        mode: "brands" or "brand_scent"
+        brand_threshold: Minimum brand match threshold for brand+scent mode (0.0-1.0, default 0.8)
+
+    Returns:
+        Dict with pipeline_results, wsdb_results, mode, threshold, analyzed_at
+    """
+    logger.info(
+        f"🔄 Starting batch analysis (mode: {mode}, threshold: {threshold}, brand_threshold: {brand_threshold})"
+    )
+
+    # Load both datasets
+    wsdb_data = await get_cached_wsdb_data()
+    pipeline_data = await load_pipeline_soaps()
+
+    wsdb_soaps = wsdb_data["soaps"]
+    pipeline_soaps = pipeline_data["soaps"]
+
+    # Get pre-normalized WSDB entries (cached)
+    wsdb_normalized = get_cached_wsdb_normalized(wsdb_soaps)
+
+    # Load non-matches for filtering
+    non_matches_data = await load_non_matches()
+    brand_non_matches = non_matches_data.get("brand_non_matches", {})
+    scent_non_matches = non_matches_data.get("scent_non_matches", {})
+
+    # Initialize WSDB lookup to check for existing slugs
+    wsdb_lookup = WSDBLookup(project_root=PROJECT_ROOT)
+
+    # Exclude WSDB entries whose slug is already assigned in soaps.yaml (speed)
+    assigned_slugs = wsdb_lookup.get_all_assigned_slugs()
+    wsdb_to_consider = [
+        e for e in wsdb_normalized if (e.get("original") or {}).get("slug") not in assigned_slugs
+    ]
+    logger.info(
+        f"Excluding {len(assigned_slugs)} assigned slugs, considering {len(wsdb_to_consider)} WSDB entries"
+    )
+
+    # Build brand_lookup for quick brand access
+    brand_lookup = {entry["brand"]: entry for entry in pipeline_soaps}
+
+    # Group pipeline soaps by brand+scent combinations
+    brand_scent_groups: dict[str, dict[str, Any]] = {}
+    for soap_entry in pipeline_soaps:
+        brand = soap_entry["brand"]
+        scents = soap_entry.get("scents", [])
+
+        for scent_entry in scents:
+            scent_name = scent_entry.get("name", "").strip()
+            if not scent_name:
+                continue
+
+            # Use brand+scent as key (case-insensitive for grouping)
+            key = f"{brand} - {scent_name}".lower()
+
+            if key not in brand_scent_groups:
+                brand_scent_groups[key] = {
+                    "brand": brand,
+                    "scent": scent_name,
+                    "count": 0,
+                }
+
+            brand_scent_groups[key]["count"] += 1
+
+    pipeline_results = []
+    wsdb_results = []
+
+    # Pipeline → WSDB matches
+    logger.info(f"📊 Analyzing Pipeline → WSDB ({len(pipeline_soaps)} brands)")
+    # In both modes, analyze all items (result limit is applied by frontend filtering)
+    logger.info(
+        f"🔄 Starting Pipeline → WSDB analysis ({len(brand_scent_groups)} brand+scent combinations)..."
+    )
+    for idx, (key, group_data) in enumerate(brand_scent_groups.items()):
+        if (idx + 1) % 100 == 0:
+            logger.info(
+                f"📊 Processed {idx + 1}/{len(brand_scent_groups)} brand+scent combinations..."
+            )
+        pipeline_brand = group_data["brand"]
+        pipeline_scent = group_data["scent"]
+
+        # Look up brand in pipeline soaps to get aliases
+        brand_entry = brand_lookup.get(
+            pipeline_brand, {"brand": pipeline_brand, "aliases": [], "scents": []}
+        )
+        # Pre-normalize pipeline brand once
+        pipeline_brand_norm = pre_normalize_pipeline_brand(brand_entry)
+        names_to_try = pipeline_brand_norm["names_to_try"]
+        brand_virtual_alias = pipeline_brand_norm["brand_virtual_norm"]
+
+        # In brands mode, analyze once per brand; in brand_scent mode, once per scent
+        if mode == "brands":
+            matches = []
+
+            for wsdb_entry in wsdb_to_consider:
+                wsdb_brand = wsdb_entry["brand_norm"]
+                wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
+                wsdb_soap = wsdb_entry["original"]
+
+                # Try matching with each name (canonical + aliases + virtual alias)
+                best_score = 0
+                matched_via = "canonical"
+
+                for idx, name in enumerate(names_to_try):
+                    # Try against original WSDB brand
+                    score = fuzz.ratio(name, wsdb_brand)
+                    # Also try against virtual alias (stripped "soap")
+                    if wsdb_brand_virtual:
+                        virtual_score = fuzz.ratio(name, wsdb_brand_virtual)
+                        score = max(score, virtual_score)
+                    if score > best_score:
+                        best_score = score
+                        # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
+                        if idx == 0:
+                            matched_via = "canonical"
+                        elif brand_virtual_alias and idx == len(names_to_try) - 1:
+                            matched_via = "virtual_alias"
+                        else:
+                            matched_via = "alias"
+
+                brand_score = best_score
+                confidence = brand_score
+
+                if confidence >= threshold * 100:
+                    matches.append(
+                        {
+                            "brand": wsdb_soap.get("brand"),
+                            "name": wsdb_soap.get("name"),
+                            "confidence": round(confidence, 2),
+                            "brand_score": round(brand_score, 2),
+                            "scent_score": 0.0,
+                            "source": "wsdb",
+                            "matched_via": matched_via,
+                            "details": {
+                                "slug": wsdb_soap.get("slug"),
+                                "scent_notes": wsdb_soap.get("scent_notes", []),
+                                "collaborators": wsdb_soap.get("collaborators", []),
+                                "tags": wsdb_soap.get("tags", []),
+                                "category": wsdb_soap.get("category"),
+                                "type": wsdb_soap.get("type"),
+                            },
+                        }
+                    )
+
+            # Filter non-matches before sorting
+            source_item = {"source_brand": brand_entry["brand"], "source_scent": ""}
+            matches = [
+                m
+                for m in matches
+                if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+            ]
+
+            # Sort and limit: prefer Soap over Cream when scores are equal
+            matches.sort(
+                key=lambda x: (
+                    -x["confidence"],  # Negative for descending
+                    0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                )
+            )
+
+            pipeline_results.append(
+                {
+                    "source_brand": brand_entry["brand"],
+                    "source_scent": "",  # Empty for brands mode
+                    "matches": matches,
+                    "expanded": False,
+                }
+            )
+        else:
+            # Brand + Scent mode: process only the current group's scent (one result per unique brand+scent)
+            # Find the scent entry that matches this group (same name); use first if multiple.
+            scent = None
+            for s in brand_entry["scents"]:
+                if (s.get("name") or "").strip() == pipeline_scent:
+                    scent = s
+                    break
+            if scent is None:
+                continue
+
+            # Skip if this brand+scent already has a wsdb_slug in the catalog
+            existing_slug = wsdb_lookup.get_wsdb_slug(brand_entry["brand"], scent["name"])
+            if existing_slug:
+                logger.debug(
+                    f"⏭️ Skipping {brand_entry['brand']} - {scent['name']}: already has slug '{existing_slug}'"
+                )
+                continue
+
+            # Use pre-normalized brand data
+            names_to_try = pipeline_brand_norm["names_to_try"]
+            brand_virtual_alias = pipeline_brand_norm["brand_virtual_norm"]
+
+            # Pre-normalize scent once
+            scent_norm = pre_normalize_pipeline_scent(scent, scent["name"])
+            scent_names_to_try = scent_norm["scent_names_to_try"]
+
+            # Compile pipeline scent patterns once for slug-space matching (hyphens → spaces)
+            compiled_scent_patterns: list[re.Pattern[str]] = []
+            for pat in scent.get("patterns", []):
+                if not pat or not isinstance(pat, str):
+                    continue
+                try:
+                    compiled_scent_patterns.append(re.compile(pat, re.IGNORECASE))
+                except re.error:
+                    continue
+
+            matches = []
+
+            for wsdb_entry in wsdb_to_consider:
+                wsdb_brand = wsdb_entry["brand_norm"]
+                wsdb_name = wsdb_entry["name_norm"]
+                wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
+                wsdb_name_virtual = wsdb_entry["name_virtual_norm"]
+                wsdb_soap = wsdb_entry["original"]
+
+                # Try matching with each brand name (canonical + aliases + virtual alias)
+                best_brand_score = 0
+                matched_via = "canonical"
+
+                for idx, name in enumerate(names_to_try):
+                    # Try against original WSDB brand
+                    score = fuzz.ratio(name, wsdb_brand)
+                    # Also try against virtual alias (stripped "soap")
+                    if wsdb_brand_virtual:
+                        virtual_score = fuzz.ratio(name, wsdb_brand_virtual)
+                        score = max(score, virtual_score)
+                    if score > best_brand_score:
+                        best_brand_score = score
+                        # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
+                        if idx == 0:
+                            matched_via = "canonical"
+                        elif brand_virtual_alias and idx == len(names_to_try) - 1:
+                            matched_via = "virtual_alias"
+                        else:
+                            matched_via = "alias"
+
+                brand_score = best_brand_score
+
+                # Early termination: if brand score too low, skip this entry entirely
+                if brand_score < brand_threshold * 100:
+                    continue  # Skip scent matching entirely
+
+                # Try matching with each scent name (canonical + alias + virtual alias)
+                best_scent_score = 0
+                scent_matched_via = "canonical"
+
+                for idx, scent_name in enumerate(scent_names_to_try):
+                    # Try against original WSDB name
+                    score = fuzz.token_sort_ratio(scent_name, wsdb_name)
+                    # Also try against virtual alias (stripped "soap")
+                    if wsdb_name_virtual:
+                        virtual_score = fuzz.token_sort_ratio(scent_name, wsdb_name_virtual)
+                        score = max(score, virtual_score)
+                    if score > best_scent_score:
+                        best_scent_score = score
+                        # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
+                        if idx == 0:
+                            scent_matched_via = "canonical"
+                        elif idx == len(scent_names_to_try) - 1 and any(
+                            s.get("alias") for s in [scent] if s.get("alias")
+                        ):
+                            scent_matched_via = "virtual_alias"
+                        else:
+                            scent_matched_via = "alias"
+
+                scent_score = best_scent_score
+                confidence = scent_score  # Use scent score directly
+
+                # Pattern match: pipeline scent regex vs slug with hyphens replaced by spaces
+                slug_space_norm = wsdb_entry.get("slug_space_norm") or ""
+                pattern_match = bool(
+                    slug_space_norm
+                    and compiled_scent_patterns
+                    and any(c.search(slug_space_norm) for c in compiled_scent_patterns)
+                )
+                if pattern_match and confidence < 95:
+                    confidence = 95  # Ensure pattern matches appear in results
+
+                if confidence >= threshold * 100 or pattern_match:
+                    details = {
+                        "slug": wsdb_soap.get("slug"),
+                        "scent_notes": wsdb_soap.get("scent_notes", []),
+                        "collaborators": wsdb_soap.get("collaborators", []),
+                        "tags": wsdb_soap.get("tags", []),
+                        "category": wsdb_soap.get("category"),
+                        "type": wsdb_soap.get("type"),
+                    }
+                    if pattern_match:
+                        details["slug_pattern_match"] = True
+                    matches.append(
+                        {
+                            "brand": wsdb_soap.get("brand"),
+                            "name": wsdb_soap.get("name"),
+                            "confidence": round(confidence, 2),
+                            "brand_score": round(brand_score, 2),
+                            "scent_score": round(scent_score, 2),
+                            "source": "wsdb",
+                            "matched_via": matched_via,
+                            "scent_matched_via": scent_matched_via,
+                            "details": details,
+                        }
+                    )
+
+            # Filter non-matches before sorting
+            source_item = {
+                "source_brand": brand_entry["brand"],
+                "source_scent": scent["name"],
+            }
+            filtered_matches = []
+            for m in matches:
+                is_non_match_result = is_non_match(
+                    source_item, m, brand_non_matches, scent_non_matches, mode
+                )
+                if not is_non_match_result:
+                    filtered_matches.append(m)
+            matches = filtered_matches
+
+            # Sort: prefer Soap over Cream when scores are equal (all matches above threshold)
+            matches.sort(
+                key=lambda x: (
+                    -x["confidence"],  # Negative for descending
+                    0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
+                )
+            )
+
+            pipeline_results.append(
+                {
+                    "source_brand": brand_entry["brand"],
+                    "source_scent": scent["name"],
+                    "matches": matches,
+                    "expanded": False,
+                }
+            )
+    # WSDB → Pipeline matches
+    logger.info(f"📊 Analyzing WSDB → Pipeline ({len(wsdb_soaps)} soaps)")
+
+    if mode == "brands":
+        # In brands mode, group WSDB entries by brand first
+        wsdb_brands_map = {}
+        for wsdb_entry in wsdb_to_consider:
+            brand = wsdb_entry["original"].get("brand", "")
+            if brand not in wsdb_brands_map:
+                wsdb_brands_map[brand] = []
+            wsdb_brands_map[brand].append(wsdb_entry)
+
+        # Sort brands alphabetically
+        sorted_brands = sorted(wsdb_brands_map.items(), key=lambda x: x[0].lower())
+
+        # In brands mode, analyze all brands (typically not too many)
+        # Analyze once per brand
+        for wsdb_brand, wsdb_entries in sorted_brands:
+            # Use first entry for normalized values (all entries for same brand have same normalized brand)
+            first_entry = wsdb_entries[0]
+            query_brand = first_entry["brand_norm"]
+            query_brand_virtual = first_entry["brand_virtual_norm"]
+            matches = []
+
+            for brand_entry in pipeline_soaps:
+                # Pre-normalize pipeline brand once
+                pipeline_brand_norm = pre_normalize_pipeline_brand(brand_entry)
+                names_to_try = pipeline_brand_norm["names_to_try"]
+                pipeline_brand_virtual = pipeline_brand_norm["brand_virtual_norm"]
+
+                # Try matching with each name (against both original and virtual WSDB brand)
+                best_score = 0
+                matched_via = "canonical"
+
+                for idx, name in enumerate(names_to_try):
+                    # Try against original WSDB brand
+                    score = fuzz.ratio(query_brand, name)
+                    # Also try against virtual alias (stripped "soap")
+                    if query_brand_virtual:
+                        virtual_score = fuzz.ratio(query_brand_virtual, name)
+                        score = max(score, virtual_score)
+                    if score > best_score:
+                        best_score = score
+                        # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
+                        if idx == 0:
+                            matched_via = "canonical"
+                        elif pipeline_brand_virtual and idx == len(names_to_try) - 1:
+                            matched_via = "virtual_alias"
+                        else:
+                            matched_via = "alias"
+
+                brand_score = best_score
+                confidence = brand_score
+
+                if confidence >= threshold * 100:
+                    matches.append(
+                        {
+                            "brand": brand_entry["brand"],
+                            "name": "",
+                            "confidence": round(confidence, 2),
+                            "brand_score": round(brand_score, 2),
+                            "scent_score": 0.0,
+                            "source": "pipeline",
+                            "matched_via": matched_via,
+                            "details": {"patterns": []},
+                        }
+                    )
+
+            # Filter non-matches before sorting
+            source_item = {"source_brand": wsdb_brand, "source_scent": ""}
+            matches = [
+                m
+                for m in matches
+                if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+            ]
+
+            # Sort by confidence (all matches above threshold)
+            matches.sort(key=lambda x: x["confidence"], reverse=True)
+
+            wsdb_results.append(
+                {
+                    "source_brand": wsdb_brand,
+                    "source_scent": "",  # Empty in brands mode
+                    "matches": matches,
+                    "expanded": False,
+                }
+            )
+    else:
+        # Brand + Scent mode: analyze each scent individually
+        # Sort soaps alphabetically by brand, then scent name
+        sorted_wsdb_soaps = sorted(
+            wsdb_soaps, key=lambda x: (x.get("brand", "").lower(), x.get("name", "").lower())
+        )
+
+        for wsdb_soap in sorted_wsdb_soaps:
+            query_brand = normalize_for_matching(wsdb_soap.get("brand", ""))
+            query_scent = normalize_for_matching(wsdb_soap.get("name", ""))
+            # Also try matching against WSDB brand/name with stripped "soap" (virtual alias)
+            query_brand_virtual = strip_trailing_soap(query_brand)
+            if query_brand_virtual:
+                query_brand_virtual = normalize_for_matching(query_brand_virtual)
+            query_scent_virtual = strip_trailing_soap(query_scent)
+            if query_scent_virtual:
+                query_scent_virtual = normalize_for_matching(query_scent_virtual)
+            matches = []
+
+            for brand_entry in pipeline_soaps:
+                pipeline_brand = normalize_for_matching(brand_entry["brand"])
+
+                # Get all names to try: canonical + aliases + virtual alias (stripped "soap")
+                names_to_try = [pipeline_brand]
+                if brand_entry.get("aliases"):
+                    names_to_try.extend(
+                        [normalize_for_matching(alias) for alias in brand_entry["aliases"]]
+                    )
+                # Add virtual alias: strip trailing "soap" if present
+                pipeline_brand_virtual = strip_trailing_soap(pipeline_brand)
+                if pipeline_brand_virtual:
+                    pipeline_brand_virtual_normalized = normalize_for_matching(
+                        pipeline_brand_virtual
+                    )
+                    if pipeline_brand_virtual_normalized not in names_to_try:
+                        names_to_try.append(pipeline_brand_virtual_normalized)
+
+                for scent in brand_entry["scents"]:
+                    # Get scent names to try: canonical + single alias + virtual alias (stripped "soap")
+                    pipeline_scent = normalize_for_matching(scent["name"])
+                    scent_alias = scent.get("alias")
+                    scent_names_to_try = [pipeline_scent]
+                    if scent_alias:
+                        scent_alias = normalize_for_matching(scent_alias)
+                        scent_names_to_try.append(scent_alias)
+                    # Add virtual alias: strip trailing "soap" if present
+                    pipeline_scent_virtual = strip_trailing_soap(pipeline_scent)
+                    if pipeline_scent_virtual:
+                        pipeline_scent_virtual_normalized = normalize_for_matching(
+                            pipeline_scent_virtual
+                        )
+                        if pipeline_scent_virtual_normalized not in scent_names_to_try:
+                            scent_names_to_try.append(pipeline_scent_virtual_normalized)
+
+                    # Try matching with each brand name (canonical + aliases + virtual alias)
+                    best_brand_score = 0
+                    matched_via = "canonical"
+
+                    for idx, name in enumerate(names_to_try):
+                        # Try against original WSDB brand
+                        score = fuzz.ratio(query_brand, name)
+                        # Also try against virtual alias (stripped "soap")
+                        if query_brand_virtual:
+                            virtual_score = fuzz.ratio(query_brand_virtual, name)
+                            score = max(score, virtual_score)
+                        if score > best_brand_score:
+                            best_brand_score = score
+                            # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
+                            if idx == 0:
+                                matched_via = "canonical"
+                            elif pipeline_brand_virtual and idx == len(names_to_try) - 1:
+                                matched_via = "virtual_alias"
+                            else:
+                                matched_via = "alias"
+
+                    brand_score = best_brand_score
+
+                    # Early termination: if brand score too low, skip this entry entirely
+                    if brand_score < brand_threshold * 100:
+                        continue  # Skip scent matching entirely
+
+                    # Try matching with each scent name (canonical + alias + virtual alias)
+                    best_scent_score = 0
+                    scent_matched_via = "canonical"
+
+                    for idx, scent_name in enumerate(scent_names_to_try):
+                        # Try against original WSDB scent
+                        score = fuzz.token_sort_ratio(query_scent, scent_name)
+                        # Also try against virtual alias (stripped "soap")
+                        if query_scent_virtual:
+                            virtual_score = fuzz.token_sort_ratio(query_scent_virtual, scent_name)
+                            score = max(score, virtual_score)
+                        if score > best_scent_score:
+                            best_scent_score = score
+                            # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
+                            if idx == 0:
+                                scent_matched_via = "canonical"
+                            elif idx == len(scent_names_to_try) - 1 and any(
+                                s.get("alias") for s in [scent] if s.get("alias")
+                            ):
+                                scent_matched_via = "virtual_alias"
+                            else:
+                                scent_matched_via = "alias"
+
+                    scent_score = best_scent_score
+                    confidence = scent_score  # Use scent score directly
+
+                    if confidence >= threshold * 100:
+                        matches.append(
+                            {
+                                "brand": brand_entry["brand"],
+                                "name": scent["name"],
+                                "confidence": round(confidence, 2),
+                                "brand_score": round(brand_score, 2),
+                                "scent_score": round(scent_score, 2),
+                                "source": "pipeline",
+                                "matched_via": matched_via,
+                                "scent_matched_via": scent_matched_via,
+                                "details": {"patterns": scent.get("patterns", [])},
+                            }
+                        )
+
+            # Filter non-matches before sorting
+            source_item = {
+                "source_brand": wsdb_soap.get("brand"),
+                "source_scent": wsdb_soap.get("name"),
+            }
+            matches = [
+                m
+                for m in matches
+                if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
+            ]
+
+            # Sort by confidence (all matches above threshold)
+            matches.sort(key=lambda x: x["confidence"], reverse=True)
+
+            wsdb_results.append(
+                {
+                    "source_brand": wsdb_soap.get("brand"),
+                    "source_scent": wsdb_soap.get("name"),
+                    "matches": matches,
+                    "expanded": False,
+                }
+            )
+
+    logger.info(
+        f"✅ Batch analysis complete: {len(pipeline_results)} pipeline results, {len(wsdb_results)} WSDB results"
+    )
+
+    return {
+        "pipeline_results": pipeline_results,
+        "wsdb_results": wsdb_results,
+        "mode": mode,
+        "threshold": threshold,
+        "analyzed_at": datetime.now().isoformat(),
+    }
+
+
 @router.post("/batch-analyze")
 async def batch_analyze(
     threshold: float = 0.7,
@@ -777,541 +1378,12 @@ async def batch_analyze(
         Dict with pipeline_results and wsdb_results
     """
     try:
-        logger.info(
-            f"🔄 Starting batch analysis (mode: {mode}, threshold: {threshold}, brand_threshold: {brand_threshold})"
+        return await run_batch_analyze(
+            threshold=threshold,
+            limit=limit,
+            mode=mode,
+            brand_threshold=brand_threshold,
         )
-
-        # Load both datasets
-        wsdb_data = await get_cached_wsdb_data()
-        pipeline_data = await load_pipeline_soaps()
-
-        wsdb_soaps = wsdb_data["soaps"]
-        pipeline_soaps = pipeline_data["soaps"]
-
-        # Get pre-normalized WSDB entries (cached)
-        wsdb_normalized = get_cached_wsdb_normalized(wsdb_soaps)
-
-        # Load non-matches for filtering
-        non_matches_data = await load_non_matches()
-        brand_non_matches = non_matches_data.get("brand_non_matches", {})
-        scent_non_matches = non_matches_data.get("scent_non_matches", {})
-
-        # Initialize WSDB lookup to check for existing slugs
-        wsdb_lookup = WSDBLookup(project_root=PROJECT_ROOT)
-
-        # Build brand_lookup for quick brand access
-        brand_lookup = {entry["brand"]: entry for entry in pipeline_soaps}
-
-        # Group pipeline soaps by brand+scent combinations
-        brand_scent_groups: dict[str, dict[str, Any]] = {}
-        for soap_entry in pipeline_soaps:
-            brand = soap_entry["brand"]
-            scents = soap_entry.get("scents", [])
-
-            for scent_entry in scents:
-                scent_name = scent_entry.get("name", "").strip()
-                if not scent_name:
-                    continue
-
-                # Use brand+scent as key (case-insensitive for grouping)
-                key = f"{brand} - {scent_name}".lower()
-
-                if key not in brand_scent_groups:
-                    brand_scent_groups[key] = {
-                        "brand": brand,
-                        "scent": scent_name,
-                        "count": 0,
-                    }
-
-                brand_scent_groups[key]["count"] += 1
-
-        pipeline_results = []
-        wsdb_results = []
-
-        # Pipeline → WSDB matches
-        logger.info(f"📊 Analyzing Pipeline → WSDB ({len(pipeline_soaps)} brands)")
-        # In both modes, analyze all items (result limit is applied by frontend filtering)
-        logger.info(
-            f"🔄 Starting Pipeline → WSDB analysis ({len(brand_scent_groups)} brand+scent combinations)..."
-        )
-        for idx, (key, group_data) in enumerate(brand_scent_groups.items()):
-            if (idx + 1) % 100 == 0:
-                logger.info(
-                    f"📊 Processed {idx + 1}/{len(brand_scent_groups)} brand+scent combinations..."
-                )
-            pipeline_brand = group_data["brand"]
-            pipeline_scent = group_data["scent"]
-
-            # Look up brand in pipeline soaps to get aliases
-            brand_entry = brand_lookup.get(
-                pipeline_brand, {"brand": pipeline_brand, "aliases": [], "scents": []}
-            )
-            # Pre-normalize pipeline brand once
-            pipeline_brand_norm = pre_normalize_pipeline_brand(brand_entry)
-            names_to_try = pipeline_brand_norm["names_to_try"]
-            brand_virtual_alias = pipeline_brand_norm["brand_virtual_norm"]
-
-            # In brands mode, analyze once per brand; in brand_scent mode, once per scent
-            if mode == "brands":
-                matches = []
-
-                for wsdb_entry in wsdb_normalized:
-                    wsdb_brand = wsdb_entry["brand_norm"]
-                    wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
-                    wsdb_soap = wsdb_entry["original"]
-
-                    # Try matching with each name (canonical + aliases + virtual alias)
-                    best_score = 0
-                    matched_via = "canonical"
-
-                    for idx, name in enumerate(names_to_try):
-                        # Try against original WSDB brand
-                        score = fuzz.ratio(name, wsdb_brand)
-                        # Also try against virtual alias (stripped "soap")
-                        if wsdb_brand_virtual:
-                            virtual_score = fuzz.ratio(name, wsdb_brand_virtual)
-                            score = max(score, virtual_score)
-                        if score > best_score:
-                            best_score = score
-                            # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
-                            if idx == 0:
-                                matched_via = "canonical"
-                            elif brand_virtual_alias and idx == len(names_to_try) - 1:
-                                matched_via = "virtual_alias"
-                            else:
-                                matched_via = "alias"
-
-                    brand_score = best_score
-                    confidence = brand_score
-
-                    if confidence >= threshold * 100:
-                        matches.append(
-                            {
-                                "brand": wsdb_soap.get("brand"),
-                                "name": wsdb_soap.get("name"),
-                                "confidence": round(confidence, 2),
-                                "brand_score": round(brand_score, 2),
-                                "scent_score": 0.0,
-                                "source": "wsdb",
-                                "matched_via": matched_via,
-                                "details": {
-                                    "slug": wsdb_soap.get("slug"),
-                                    "scent_notes": wsdb_soap.get("scent_notes", []),
-                                    "collaborators": wsdb_soap.get("collaborators", []),
-                                    "tags": wsdb_soap.get("tags", []),
-                                    "category": wsdb_soap.get("category"),
-                                    "type": wsdb_soap.get("type"),
-                                },
-                            }
-                        )
-
-                # Filter non-matches before sorting
-                source_item = {"source_brand": brand_entry["brand"], "source_scent": ""}
-                matches = [
-                    m
-                    for m in matches
-                    if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
-                ]
-
-                # Sort and limit: prefer Soap over Cream when scores are equal
-                matches.sort(
-                    key=lambda x: (
-                        -x["confidence"],  # Negative for descending
-                        0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
-                    )
-                )
-                matches = matches[:5]
-
-                pipeline_results.append(
-                    {
-                        "source_brand": brand_entry["brand"],
-                        "source_scent": "",  # Empty for brands mode
-                        "matches": matches,
-                        "expanded": False,
-                    }
-                )
-            else:
-                # Brand + Scent mode: match each scent individually
-                for scent in brand_entry["scents"]:
-                    # Skip if this brand+scent already has a wsdb_slug in the catalog
-                    existing_slug = wsdb_lookup.get_wsdb_slug(brand_entry["brand"], scent["name"])
-                    if existing_slug:
-                        logger.debug(
-                            f"⏭️ Skipping {brand_entry['brand']} - {scent['name']}: already has slug '{existing_slug}'"
-                        )
-                        continue
-
-                    # Use pre-normalized brand data
-                    names_to_try = pipeline_brand_norm["names_to_try"]
-                    brand_virtual_alias = pipeline_brand_norm["brand_virtual_norm"]
-
-                    # Pre-normalize scent once
-                    scent_norm = pre_normalize_pipeline_scent(scent, scent["name"])
-                    scent_names_to_try = scent_norm["scent_names_to_try"]
-
-                    matches = []
-
-                    for wsdb_entry in wsdb_normalized:
-                        wsdb_brand = wsdb_entry["brand_norm"]
-                        wsdb_name = wsdb_entry["name_norm"]
-                        wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
-                        wsdb_name_virtual = wsdb_entry["name_virtual_norm"]
-                        wsdb_soap = wsdb_entry["original"]
-
-                        # Try matching with each brand name (canonical + aliases + virtual alias)
-                        best_brand_score = 0
-                        matched_via = "canonical"
-
-                        for idx, name in enumerate(names_to_try):
-                            # Try against original WSDB brand
-                            score = fuzz.ratio(name, wsdb_brand)
-                            # Also try against virtual alias (stripped "soap")
-                            if wsdb_brand_virtual:
-                                virtual_score = fuzz.ratio(name, wsdb_brand_virtual)
-                                score = max(score, virtual_score)
-                            if score > best_brand_score:
-                                best_brand_score = score
-                                # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
-                                if idx == 0:
-                                    matched_via = "canonical"
-                                elif brand_virtual_alias and idx == len(names_to_try) - 1:
-                                    matched_via = "virtual_alias"
-                                else:
-                                    matched_via = "alias"
-
-                        brand_score = best_brand_score
-
-                        # Early termination: if brand score too low, skip this entry entirely
-                        if brand_score < brand_threshold * 100:
-                            continue  # Skip scent matching entirely
-
-                        # Try matching with each scent name (canonical + alias + virtual alias)
-                        best_scent_score = 0
-                        scent_matched_via = "canonical"
-
-                        for idx, scent_name in enumerate(scent_names_to_try):
-                            # Try against original WSDB name
-                            score = fuzz.token_sort_ratio(scent_name, wsdb_name)
-                            # Also try against virtual alias (stripped "soap")
-                            if wsdb_name_virtual:
-                                virtual_score = fuzz.token_sort_ratio(scent_name, wsdb_name_virtual)
-                                score = max(score, virtual_score)
-                            if score > best_scent_score:
-                                best_scent_score = score
-                                # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
-                                if idx == 0:
-                                    scent_matched_via = "canonical"
-                                elif idx == len(scent_names_to_try) - 1 and any(
-                                    s.get("alias") for s in [scent] if s.get("alias")
-                                ):
-                                    scent_matched_via = "virtual_alias"
-                                else:
-                                    scent_matched_via = "alias"
-
-                        scent_score = best_scent_score
-                        confidence = scent_score  # Use scent score directly
-
-                        if confidence >= threshold * 100:
-                            matches.append(
-                                {
-                                    "brand": wsdb_soap.get("brand"),
-                                    "name": wsdb_soap.get("name"),
-                                    "confidence": round(confidence, 2),
-                                    "brand_score": round(brand_score, 2),
-                                    "scent_score": round(scent_score, 2),
-                                    "source": "wsdb",
-                                    "matched_via": matched_via,
-                                    "scent_matched_via": scent_matched_via,
-                                    "details": {
-                                        "slug": wsdb_soap.get("slug"),
-                                        "scent_notes": wsdb_soap.get("scent_notes", []),
-                                        "collaborators": wsdb_soap.get("collaborators", []),
-                                        "tags": wsdb_soap.get("tags", []),
-                                        "category": wsdb_soap.get("category"),
-                                        "type": wsdb_soap.get("type"),
-                                    },
-                                }
-                            )
-
-                    # Filter non-matches before sorting
-                    source_item = {
-                        "source_brand": brand_entry["brand"],
-                        "source_scent": scent["name"],
-                    }
-                    filtered_matches = []
-                    for m in matches:
-                        is_non_match_result = is_non_match(
-                            source_item, m, brand_non_matches, scent_non_matches, mode
-                        )
-                        if not is_non_match_result:
-                            filtered_matches.append(m)
-                    matches = filtered_matches
-
-                    # Sort and limit: prefer Soap over Cream when scores are equal
-                    matches.sort(
-                        key=lambda x: (
-                            -x["confidence"],  # Negative for descending
-                            0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
-                        )
-                    )
-                    matches = matches[:5]
-
-                    pipeline_results.append(
-                        {
-                            "source_brand": brand_entry["brand"],
-                            "source_scent": scent["name"],
-                            "matches": matches,
-                            "expanded": False,
-                        }
-                    )
-        # WSDB → Pipeline matches
-        logger.info(f"📊 Analyzing WSDB → Pipeline ({len(wsdb_soaps)} soaps)")
-
-        if mode == "brands":
-            # In brands mode, group WSDB entries by brand first
-            wsdb_brands_map = {}
-            for wsdb_entry in wsdb_normalized:
-                brand = wsdb_entry["original"].get("brand", "")
-                if brand not in wsdb_brands_map:
-                    wsdb_brands_map[brand] = []
-                wsdb_brands_map[brand].append(wsdb_entry)
-
-            # Sort brands alphabetically
-            sorted_brands = sorted(wsdb_brands_map.items(), key=lambda x: x[0].lower())
-
-            # In brands mode, analyze all brands (typically not too many)
-            # Analyze once per brand
-            for wsdb_brand, wsdb_entries in sorted_brands:
-                # Use first entry for normalized values (all entries for same brand have same normalized brand)
-                first_entry = wsdb_entries[0]
-                query_brand = first_entry["brand_norm"]
-                query_brand_virtual = first_entry["brand_virtual_norm"]
-                matches = []
-
-                for brand_entry in pipeline_soaps:
-                    # Pre-normalize pipeline brand once
-                    pipeline_brand_norm = pre_normalize_pipeline_brand(brand_entry)
-                    names_to_try = pipeline_brand_norm["names_to_try"]
-                    pipeline_brand_virtual = pipeline_brand_norm["brand_virtual_norm"]
-
-                    # Try matching with each name (against both original and virtual WSDB brand)
-                    best_score = 0
-                    matched_via = "canonical"
-
-                    for idx, name in enumerate(names_to_try):
-                        # Try against original WSDB brand
-                        score = fuzz.ratio(query_brand, name)
-                        # Also try against virtual alias (stripped "soap")
-                        if query_brand_virtual:
-                            virtual_score = fuzz.ratio(query_brand_virtual, name)
-                            score = max(score, virtual_score)
-                        if score > best_score:
-                            best_score = score
-                            # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
-                            if idx == 0:
-                                matched_via = "canonical"
-                            elif pipeline_brand_virtual and idx == len(names_to_try) - 1:
-                                matched_via = "virtual_alias"
-                            else:
-                                matched_via = "alias"
-
-                    brand_score = best_score
-                    confidence = brand_score
-
-                    if confidence >= threshold * 100:
-                        matches.append(
-                            {
-                                "brand": brand_entry["brand"],
-                                "name": "",
-                                "confidence": round(confidence, 2),
-                                "brand_score": round(brand_score, 2),
-                                "scent_score": 0.0,
-                                "source": "pipeline",
-                                "matched_via": matched_via,
-                                "details": {"patterns": []},
-                            }
-                        )
-
-                # Filter non-matches before sorting
-                source_item = {"source_brand": wsdb_brand, "source_scent": ""}
-                matches = [
-                    m
-                    for m in matches
-                    if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
-                ]
-
-                # Sort and limit
-                matches.sort(key=lambda x: x["confidence"], reverse=True)
-                matches = matches[:5]
-
-                wsdb_results.append(
-                    {
-                        "source_brand": wsdb_brand,
-                        "source_scent": "",  # Empty in brands mode
-                        "matches": matches,
-                        "expanded": False,
-                    }
-                )
-        else:
-            # Brand + Scent mode: analyze each scent individually
-            # Sort soaps alphabetically by brand, then scent name
-            sorted_wsdb_soaps = sorted(
-                wsdb_soaps, key=lambda x: (x.get("brand", "").lower(), x.get("name", "").lower())
-            )
-
-            for wsdb_soap in sorted_wsdb_soaps:
-                query_brand = normalize_for_matching(wsdb_soap.get("brand", ""))
-                query_scent = normalize_for_matching(wsdb_soap.get("name", ""))
-                # Also try matching against WSDB brand/name with stripped "soap" (virtual alias)
-                query_brand_virtual = strip_trailing_soap(query_brand)
-                if query_brand_virtual:
-                    query_brand_virtual = normalize_for_matching(query_brand_virtual)
-                query_scent_virtual = strip_trailing_soap(query_scent)
-                if query_scent_virtual:
-                    query_scent_virtual = normalize_for_matching(query_scent_virtual)
-                matches = []
-
-                for brand_entry in pipeline_soaps:
-                    pipeline_brand = normalize_for_matching(brand_entry["brand"])
-
-                    # Get all names to try: canonical + aliases + virtual alias (stripped "soap")
-                    names_to_try = [pipeline_brand]
-                    if brand_entry.get("aliases"):
-                        names_to_try.extend(
-                            [normalize_for_matching(alias) for alias in brand_entry["aliases"]]
-                        )
-                    # Add virtual alias: strip trailing "soap" if present
-                    pipeline_brand_virtual = strip_trailing_soap(pipeline_brand)
-                    if pipeline_brand_virtual:
-                        pipeline_brand_virtual_normalized = normalize_for_matching(
-                            pipeline_brand_virtual
-                        )
-                        if pipeline_brand_virtual_normalized not in names_to_try:
-                            names_to_try.append(pipeline_brand_virtual_normalized)
-
-                    for scent in brand_entry["scents"]:
-                        # Get scent names to try: canonical + single alias + virtual alias (stripped "soap")
-                        pipeline_scent = normalize_for_matching(scent["name"])
-                        scent_alias = scent.get("alias")
-                        scent_names_to_try = [pipeline_scent]
-                        if scent_alias:
-                            scent_alias = normalize_for_matching(scent_alias)
-                            scent_names_to_try.append(scent_alias)
-                        # Add virtual alias: strip trailing "soap" if present
-                        pipeline_scent_virtual = strip_trailing_soap(pipeline_scent)
-                        if pipeline_scent_virtual:
-                            pipeline_scent_virtual_normalized = normalize_for_matching(
-                                pipeline_scent_virtual
-                            )
-                            if pipeline_scent_virtual_normalized not in scent_names_to_try:
-                                scent_names_to_try.append(pipeline_scent_virtual_normalized)
-
-                        # Try matching with each brand name (canonical + aliases + virtual alias)
-                        best_brand_score = 0
-                        matched_via = "canonical"
-
-                        for idx, name in enumerate(names_to_try):
-                            # Try against original WSDB brand
-                            score = fuzz.ratio(query_brand, name)
-                            # Also try against virtual alias (stripped "soap")
-                            if query_brand_virtual:
-                                virtual_score = fuzz.ratio(query_brand_virtual, name)
-                                score = max(score, virtual_score)
-                            if score > best_brand_score:
-                                best_brand_score = score
-                                # Determine matched_via: canonical (first), alias (middle), or virtual_alias (last if virtual alias exists)
-                                if idx == 0:
-                                    matched_via = "canonical"
-                                elif pipeline_brand_virtual and idx == len(names_to_try) - 1:
-                                    matched_via = "virtual_alias"
-                                else:
-                                    matched_via = "alias"
-
-                        brand_score = best_brand_score
-
-                        # Early termination: if brand score too low, skip this entry entirely
-                        if brand_score < brand_threshold * 100:
-                            continue  # Skip scent matching entirely
-
-                        # Try matching with each scent name (canonical + alias + virtual alias)
-                        best_scent_score = 0
-                        scent_matched_via = "canonical"
-
-                        for idx, scent_name in enumerate(scent_names_to_try):
-                            # Try against original WSDB scent
-                            score = fuzz.token_sort_ratio(query_scent, scent_name)
-                            # Also try against virtual alias (stripped "soap")
-                            if query_scent_virtual:
-                                virtual_score = fuzz.token_sort_ratio(
-                                    query_scent_virtual, scent_name
-                                )
-                                score = max(score, virtual_score)
-                            if score > best_scent_score:
-                                best_scent_score = score
-                                # Determine scent_matched_via: canonical (first), alias (middle), or virtual_alias (last)
-                                if idx == 0:
-                                    scent_matched_via = "canonical"
-                                elif idx == len(scent_names_to_try) - 1 and any(
-                                    s.get("alias") for s in [scent] if s.get("alias")
-                                ):
-                                    scent_matched_via = "virtual_alias"
-                                else:
-                                    scent_matched_via = "alias"
-
-                        scent_score = best_scent_score
-                        confidence = scent_score  # Use scent score directly
-
-                        if confidence >= threshold * 100:
-                            matches.append(
-                                {
-                                    "brand": brand_entry["brand"],
-                                    "name": scent["name"],
-                                    "confidence": round(confidence, 2),
-                                    "brand_score": round(brand_score, 2),
-                                    "scent_score": round(scent_score, 2),
-                                    "source": "pipeline",
-                                    "matched_via": matched_via,
-                                    "scent_matched_via": scent_matched_via,
-                                    "details": {"patterns": scent.get("patterns", [])},
-                                }
-                            )
-
-                # Filter non-matches before sorting
-                source_item = {
-                    "source_brand": wsdb_soap.get("brand"),
-                    "source_scent": wsdb_soap.get("name"),
-                }
-                matches = [
-                    m
-                    for m in matches
-                    if not is_non_match(source_item, m, brand_non_matches, scent_non_matches, mode)
-                ]
-
-                # Sort and limit
-                matches.sort(key=lambda x: x["confidence"], reverse=True)
-                matches = matches[:5]
-
-                wsdb_results.append(
-                    {
-                        "source_brand": wsdb_soap.get("brand"),
-                        "source_scent": wsdb_soap.get("name"),
-                        "matches": matches,
-                        "expanded": False,
-                    }
-                )
-
-        logger.info(
-            f"✅ Batch analysis complete: {len(pipeline_results)} pipeline results, {len(wsdb_results)} WSDB results"
-        )
-
-        return {
-            "pipeline_results": pipeline_results,
-            "wsdb_results": wsdb_results,
-            "mode": mode,
-            "threshold": threshold,
-            "analyzed_at": datetime.now().isoformat(),
-        }
-
     except Exception as e:
         logger.error(f"❌ Batch analysis failed: {e}")
         logger.error(f"❌ Traceback: {traceback.format_exc()}")
@@ -1761,6 +1833,9 @@ async def batch_analyze_match_files(
                                 records_with_matched += 1
                                 if matched.get("brand") and matched.get("scent"):
                                     records_with_brand_scent += 1
+                                    # Skip mashups (countable false) — we never get a WSDB match to a mashup
+                                    if matched.get("countable") is False:
+                                        continue
                                     # Only process exact or regex matches (canonical catalog entries)
                                     match_type = soap.get("match_type", "unknown")
                                     if match_type not in ("exact", "regex"):
@@ -1865,6 +1940,17 @@ async def batch_analyze_match_files(
             # Initialize WSDB lookup to check for existing slugs
             wsdb_lookup = WSDBLookup(project_root=PROJECT_ROOT)
 
+            # Exclude WSDB entries whose slug is already assigned in soaps.yaml (speed)
+            assigned_slugs = wsdb_lookup.get_all_assigned_slugs()
+            wsdb_to_consider = [
+                e
+                for e in wsdb_normalized
+                if (e.get("original") or {}).get("slug") not in assigned_slugs
+            ]
+            logger.info(
+                f"Excluding {len(assigned_slugs)} assigned slugs, considering {len(wsdb_to_consider)} WSDB entries"
+            )
+
             pipeline_results = []
             wsdb_results = []
 
@@ -1911,7 +1997,7 @@ async def batch_analyze_match_files(
 
                     matches = []
 
-                    for wsdb_entry in wsdb_normalized:
+                    for wsdb_entry in wsdb_to_consider:
                         wsdb_brand = wsdb_entry["brand_norm"]
                         wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
                         wsdb_soap = wsdb_entry["original"]
@@ -1971,14 +2057,13 @@ async def batch_analyze_match_files(
                         )
                     ]
 
-                    # Sort and limit: prefer Soap over Cream when scores are equal
+                    # Sort: prefer Soap over Cream when scores are equal (all matches above threshold)
                     matches.sort(
                         key=lambda x: (
                             -x["confidence"],  # Negative for descending
                             0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
                         )
                     )
-                    matches = matches[:5]
 
                     pipeline_results.append(
                         {
@@ -2013,9 +2098,19 @@ async def batch_analyze_match_files(
                     scent_norm = pre_normalize_pipeline_scent(scent_dict, pipeline_scent)
                     scent_names_to_try = scent_norm["scent_names_to_try"]
 
+                    # Compile pipeline scent patterns once for slug-space matching (hyphens → spaces)
+                    compiled_scent_patterns_mf: list[re.Pattern[str]] = []
+                    for pat in scent_dict.get("patterns", []):
+                        if not pat or not isinstance(pat, str):
+                            continue
+                        try:
+                            compiled_scent_patterns_mf.append(re.compile(pat, re.IGNORECASE))
+                        except re.error:
+                            continue
+
                     matches = []
 
-                    for wsdb_entry in wsdb_normalized:
+                    for wsdb_entry in wsdb_to_consider:
                         wsdb_brand = wsdb_entry["brand_norm"]
                         wsdb_name = wsdb_entry["name_norm"]
                         wsdb_brand_virtual = wsdb_entry["brand_virtual_norm"]
@@ -2076,13 +2171,35 @@ async def batch_analyze_match_files(
                         # Brand + Scent: 60% brand + 40% scent
                         confidence = (brand_score * 0.6) + (scent_score * 0.4)
 
+                        # Pattern match: pipeline scent regex vs slug with hyphens replaced by spaces
+                        slug_space_norm_mf = wsdb_entry.get("slug_space_norm") or ""
+                        pattern_match_mf = bool(
+                            slug_space_norm_mf
+                            and compiled_scent_patterns_mf
+                            and any(
+                                c.search(slug_space_norm_mf) for c in compiled_scent_patterns_mf
+                            )
+                        )
+                        if pattern_match_mf and confidence < 95:
+                            confidence = 95
+
                         # Early termination: if maximum possible confidence can't reach threshold, skip
                         # Worst case: brand_score * 0.6 + 100 * 0.4 = brand_score * 0.6 + 40
                         max_possible_confidence = (brand_score * 0.6) + 40
-                        if max_possible_confidence < threshold * 100:
+                        if max_possible_confidence < threshold * 100 and not pattern_match_mf:
                             continue  # Skip adding to matches
 
-                        if confidence >= threshold * 100:
+                        if confidence >= threshold * 100 or pattern_match_mf:
+                            details_mf = {
+                                "slug": wsdb_soap.get("slug"),
+                                "scent_notes": wsdb_soap.get("scent_notes", []),
+                                "collaborators": wsdb_soap.get("collaborators", []),
+                                "tags": wsdb_soap.get("tags", []),
+                                "category": wsdb_soap.get("category"),
+                                "type": wsdb_soap.get("type"),
+                            }
+                            if pattern_match_mf:
+                                details_mf["slug_pattern_match"] = True
                             match_entry = {
                                 "brand": wsdb_soap.get("brand"),
                                 "name": wsdb_soap.get("name"),
@@ -2092,14 +2209,7 @@ async def batch_analyze_match_files(
                                 "source": "wsdb",
                                 "matched_via": matched_via,
                                 "scent_matched_via": scent_matched_via,
-                                "details": {
-                                    "slug": wsdb_soap.get("slug"),
-                                    "scent_notes": wsdb_soap.get("scent_notes", []),
-                                    "collaborators": wsdb_soap.get("collaborators", []),
-                                    "tags": wsdb_soap.get("tags", []),
-                                    "category": wsdb_soap.get("category"),
-                                    "type": wsdb_soap.get("type"),
-                                },
+                                "details": details_mf,
                             }
                             matches.append(match_entry)
 
@@ -2135,14 +2245,13 @@ async def batch_analyze_match_files(
                                 filtered_matches.append(m)
                         matches = filtered_matches
 
-                    # Sort and limit: prefer Soap over Cream when scores are equal
+                    # Sort: prefer Soap over Cream when scores are equal (all matches above threshold)
                     matches.sort(
                         key=lambda x: (
                             -x["confidence"],  # Negative for descending
                             0 if x.get("details", {}).get("type") == "Soap" else 1,  # Soap first
                         )
                     )
-                    matches = matches[:5]
 
                     result_entry = {
                         "source_brand": pipeline_brand,
@@ -2166,7 +2275,7 @@ async def batch_analyze_match_files(
             if mode == "brands":
                 # Group WSDB entries by brand
                 wsdb_brands_map = {}
-                for wsdb_entry in wsdb_normalized:
+                for wsdb_entry in wsdb_to_consider:
                     brand = wsdb_entry["original"].get("brand", "")
                     if brand not in wsdb_brands_map:
                         wsdb_brands_map[brand] = []
@@ -2245,7 +2354,6 @@ async def batch_analyze_match_files(
                     ]
 
                     matches.sort(key=lambda x: x["confidence"], reverse=True)
-                    matches = matches[:5]
 
                     wsdb_results.append(
                         {
@@ -2294,7 +2402,7 @@ async def batch_analyze_match_files(
                         )
 
                 sorted_wsdb_entries = sorted(
-                    wsdb_normalized,
+                    wsdb_to_consider,
                     key=lambda x: (
                         x["original"].get("brand", "").lower(),
                         x["original"].get("name", "").lower(),
@@ -2444,7 +2552,6 @@ async def batch_analyze_match_files(
                     ]
 
                     matches.sort(key=lambda x: x["confidence"], reverse=True)
-                    matches = matches[:5]
 
                     wsdb_results.append(
                         {
