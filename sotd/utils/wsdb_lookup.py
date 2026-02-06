@@ -117,3 +117,18 @@ class WSDBLookup:
             return wsdb_slug
 
         return None
+
+    def get_all_assigned_slugs(self) -> set[str]:
+        """Return the set of all WSDB slugs already assigned in soaps.yaml.
+
+        Returns:
+            Set of non-empty wsdb_slug values from the pipeline catalog.
+        """
+        pipeline_soaps = self._load_pipeline_soaps()
+        assigned = set()
+        for brand_entry in pipeline_soaps.values():
+            for scent_info in (brand_entry.get("scents") or {}).values():
+                wsdb_slug = scent_info.get("wsdb_slug") if isinstance(scent_info, dict) else None
+                if isinstance(wsdb_slug, str) and wsdb_slug:
+                    assigned.add(wsdb_slug)
+        return assigned

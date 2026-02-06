@@ -198,7 +198,9 @@ async def get_tables() -> TablesResponse:
 @router.get("/items", response_model=ItemsResponse)
 async def get_items(
     table: str = Query(..., description="Table id (snake_case)"),
-    month: Optional[str] = Query(None, description="Month YYYY-MM; when omitted, items from all months"),
+    month: Optional[str] = Query(
+        None, description="Month YYYY-MM; when omitted, items from all months"
+    ),
 ) -> ItemsResponse:
     """List item names (row labels) for a table. When month is omitted, returns the union of
     items across all available months so that formats/categories that appear in some months

@@ -121,3 +121,4 @@ Data persists at each stage, enabling individual phase re-runs and debugging.
 - **Hybrid Fetching**: Combines Reddit API with Pushshift for completeness
 - **Error Handling**: Graceful degradation when APIs fail
 - **Analysis Tools**: Utilities in `sotd/match/tools/` for debugging matches
+- **WebUI – WSDB Alignment Analyzer**: Two modes—**Alignment** (bidirectional pipeline vs WSDB, catalog or match files, two tabs) and **Slug finder** (pipeline scents from soaps.yaml → suggested WSDB slugs from software.json, catalog-only, single “Slug suggestions” view)

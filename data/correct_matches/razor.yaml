@@ -1096,6 +1096,7 @@ Ever-Ready:
   - ever-ready streamline jewel
   - ever-ready streamline jewel gen 2
   - everready streamline strop outfit gen 2
+  - gem ever-ready streamline (gen 2)
   - gem streamline
 Everyday:
   Stinger:
@@ -1349,6 +1350,7 @@ GEM:
   - gem - 1930s micromatic - gen 2
   - gem micromatic
   Micromatic Open Comb:
+  - djudges edition mmoc, gen 1
   - gem - 1930s micromatic open comb gen 2
   - gem - micromatic open comb
   - gem - micromatic open comb (second generation)
@@ -1432,6 +1434,7 @@ Gillette:
   - 1948-50 gillette aristocrat
   - british aristocrat jr
   - 'gillette #58 1956'
+  - 'gillette - #58 1956'
   - gillette - aristocrat (46-47)
   - gillette - aristocrat (48-50)
   - gillette - aristocrat - no.20
@@ -1549,6 +1552,10 @@ Gillette:
   - lady gillette (g2) blue starburst
   - lady gillette - blue
   - lady gillette blue
+  Milord:
+  - gillette - milord
+  - gillette - milord (1946)
+  - gillette milord tech
   NEW:
   - 1930's gillette new ball handle gold
   - 1930's gillette new short comb
@@ -1626,6 +1633,26 @@ Gillette:
   President:
   - gillette president y-2
   - gillette president y-2 (revamp)
+  Ranger Tech:
+  - gillette 1941 ranger tech
+  - gillette ranger tech
+  Rocket:
+  - english gillette rocket 1953
+  - gilette rocket c.1949
+  - gillete rocket c.1949
+  - gillette - 1940's english parat tto double edge
+  - gillette - rocket 1952
+  - gillette - rocket hd
+  - gillette - rocket hd 500
+  - gillette - rocket hd500 (england)
+  - gillette - rocket md 1953
+  - gillette - rocket md 1953. (england)
+  - gillette rocket (c.1949)
+  - gillette rocket c.1949
+  - gillette rocket hd
+  - gillette rocket hd 500 (nos)
+  - gillette rocket md 1953
+  - gillette rocket md 1953 made in england
   Service Razor:
   - british gillette 1940's wwii service razor
   - gillette 1940s open comb service razor, made in england
@@ -1767,13 +1794,8 @@ Gillette:
   - black tip superspeed
   - blue tip ss
   - british gillette red tip
-  - english gillette rocket 1953
   - flare tip ss
-  - gilette rocket c.1949
-  - gillete rocket c.1949
   - gillette (h4) super speed tto
-  - gillette (h4) tto
-  - gillette - 1940's english parat tto double edge
   - gillette - 1950's flare tip super speed
   - gillette - 1957 blue tip super speed
   - gillette - 1957 flare tip super speed
@@ -1793,18 +1815,9 @@ Gillette:
   - gillette - flare tip super speed
   - gillette - flare tip super speed - 1956
   - gillette - gillette flare tip super speed (1954 z3)
-  - gillette - milord
-  - gillette - milord (1946)
-  - gillette - r2 tto - 1971
   - gillette - red tip
   - gillette - red tip (a-3)
   - gillette - red tip super speed
-  - gillette - rocket 1952
-  - gillette - rocket hd
-  - gillette - rocket hd 500
-  - gillette - rocket hd500 (england)
-  - gillette - rocket md 1953
-  - gillette - rocket md 1953. (england)
   - gillette - ss black tip x2
   - gillette - super speed
   - gillette - super speed 40s style
@@ -1852,8 +1865,6 @@ Gillette:
   - gillette flare-tip super speed
   - gillette flaretip
   - gillette flaretip superspeed
-  - gillette milord tech
-  - gillette ranger tech
   - gillette red tip
   - gillette red tip (1958, d1)
   - gillette red tip (us)
@@ -1865,12 +1876,6 @@ Gillette:
   - gillette red-tip (c4 --> q4 1957)
   - gillette red-tip w/ gsb
   - gillette red-tip w/ nacet
-  - gillette rocket (c.1949)
-  - gillette rocket c.1949
-  - gillette rocket hd
-  - gillette rocket hd 500 (nos)
-  - gillette rocket md 1953
-  - gillette rocket md 1953 made in england
   - gillette ss (h4)
   - gillette super speed
   - gillette super speed (1950)
@@ -1901,7 +1906,6 @@ Gillette:
   - gillette superspeed black tip
   - gillette superspeed flare tip
   - gillette superspeed red tip
-  - gillette tto (w1)
   - gillette- flairtip 1962
   - gold plated gillette super speed 47
   - red tip
@@ -2061,6 +2065,10 @@ Gillette:
   - gillette - toggle 1960 f4
   - gillette toggle
   - gillette toggle (d1)
+  TTO (Unspecified):
+  - gillette (h4) tto
+  - gillette - r2 tto - 1971
+  - gillette tto (w1)
   Tuckaway:
   - gillette silver plated tuckaway
   - gillette tuckaway
@@ -4009,6 +4017,7 @@ Schick:
   - schick type i2 hydro-magic
   Injector:
   - 1972 schick l7 "championship"
+  - eversharp schick
   - eversharp-schick g1 twin-jector
   - gillette~~ schick l7 "championship" injector
   - injector

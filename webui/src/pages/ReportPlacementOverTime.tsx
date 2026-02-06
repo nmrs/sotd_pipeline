@@ -53,6 +53,50 @@ import { ChevronDown, X, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
+export type RankChartTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ payload: Record<string, string | number> }>;
+  label?: string;
+};
+export type RankChartTooltipSeries = { item: string }[];
+
+/** Custom tooltip content for rank-over-time chart: shows rank, shaves, unique users per item. Exported for tests. */
+export function RankChartTooltipContent(
+  props: RankChartTooltipProps,
+  series: RankChartTooltipSeries | null
+): React.ReactNode {
+  const { active, payload, label } = props;
+  if (!active || !payload?.length || !series) return null;
+  const row = payload[0].payload;
+  const month = row.month ?? label;
+  return (
+    <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-md">
+      <p className="font-medium mb-1.5">Month: {String(month)}</p>
+      {series.map((entry, i) => {
+        const rank = row[entry.item];
+        const shaves = row[`${entry.item}_shaves`];
+        const uniqueUsers = row[`${entry.item}_unique_users`];
+        const color = CHART_COLORS[i % CHART_COLORS.length];
+        const parts: string[] = [];
+        if (rank !== '' && rank !== undefined) parts.push(`rank #${rank}`);
+        if (shaves !== '' && shaves !== undefined) parts.push(`${shaves} shaves`);
+        if (uniqueUsers !== '' && uniqueUsers !== undefined) parts.push(`${uniqueUsers} users`);
+        const line = parts.length ? parts.join(', ') : '—';
+        return (
+          <p key={entry.item} className="flex items-center gap-1.5">
+            <span
+              className="shrink-0 rounded-full"
+              style={{ backgroundColor: color, width: 8, height: 8 }}
+              aria-hidden
+            />
+            <span><strong>{entry.item}:</strong> {line}</span>
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 const ReportPlacementOverTime: React.FC = () => {
   const [tables, setTables] = useState<ReportRankingsTable[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<string>('');
@@ -68,6 +112,9 @@ const ReportPlacementOverTime: React.FC = () => {
   const [loadingPivoted, setLoadingPivoted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const prevViewModeRef = useRef<'by-item' | 'by-position'>(viewMode);
+  const [chartPrimaryMetric, setChartPrimaryMetric] = useState<
+    'rank' | 'shaves' | 'unique_users'
+  >('rank');
 
   const fetchTables = useCallback(async () => {
     try {
@@ -196,15 +243,17 @@ const ReportPlacementOverTime: React.FC = () => {
 
   const chartData = React.useMemo(() => {
     if (!series || series.months.length === 0) return [];
-    return series.months.map(month => {
+    const points = series.months.map(month => {
       const point: Record<string, string | number> = { month };
       series.series.forEach(entry => {
         const d = entry.data.find(p => p.month === month);
         point[entry.item] = d?.rank ?? '';
         point[`${entry.item}_shaves`] = d?.shaves ?? '';
+        point[`${entry.item}_unique_users`] = d?.unique_users ?? '';
       });
       return point;
     });
+    return points.reverse();
   }, [series]);
 
   const maxRank = React.useMemo(() => {
@@ -217,6 +266,21 @@ const ReportPlacementOverTime: React.FC = () => {
     });
     return m || 10;
   }, [series]);
+
+  const maxChartValue = React.useMemo(() => {
+    if (!series || (chartPrimaryMetric !== 'shaves' && chartPrimaryMetric !== 'unique_users'))
+      return 10;
+    const field = chartPrimaryMetric === 'shaves' ? 'shaves' : 'unique_users';
+    let m = 0;
+    series.series.forEach(entry => {
+      entry.data.forEach(p => {
+        const v = p[field];
+        if (v != null && typeof v === 'number' && v > m) m = v;
+      });
+    });
+    const padded = Math.ceil(m * 1.05) || 10;
+    return Math.max(padded, 1);
+  }, [series, chartPrimaryMetric]);
 
   return (
     <div className="w-full p-4 max-w-full overflow-x-hidden">
@@ -360,13 +424,15 @@ const ReportPlacementOverTime: React.FC = () => {
             {!loadingPivoted && pivoted && (pivoted.months.length === 0 || !pivoted.lanes.length) && (
               <p className="text-muted-foreground py-4">No pivoted data for this aggregation.</p>
             )}
-            {!loadingPivoted && pivoted && pivoted.months.length > 0 && pivoted.lanes.length > 0 && (
+            {!loadingPivoted && pivoted && pivoted.months.length > 0 && pivoted.lanes.length > 0 && (() => {
+              const monthsNewestFirst = [...pivoted.months].reverse();
+              return (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="sticky left-0 z-10 bg-background min-w-[4rem]">Rank</TableHead>
-                      {pivoted.months.map(m => (
+                      {monthsNewestFirst.map(m => (
                         <TableHead key={m} className="whitespace-nowrap">
                           {m}
                         </TableHead>
@@ -374,12 +440,14 @@ const ReportPlacementOverTime: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pivoted.lanes.map(lane => (
+                    {pivoted.lanes.map(lane => {
+                      const pointsNewestFirst = [...lane.points].reverse();
+                      return (
                       <TableRow key={lane.rank}>
                         <TableCell className="font-medium sticky left-0 z-10 bg-background">
                           {lane.rank}
                         </TableCell>
-                        {lane.points.map(pt => {
+                        {pointsNewestFirst.map(pt => {
                           const currentRank = lane.rank;
                           const prevRank = pt.prev_rank;
                           let arrow: React.ReactNode = null;
@@ -390,6 +458,7 @@ const ReportPlacementOverTime: React.FC = () => {
                           }
                           const tooltipParts = [pt.item ?? ''];
                           if (pt.shaves != null) tooltipParts.push(`${pt.shaves} shaves`);
+                          if (pt.unique_users != null) tooltipParts.push(`${pt.unique_users} users`);
                           if (prevRank != null && prevRank !== currentRank) {
                             tooltipParts.push(prevRank > currentRank ? `Moved up from rank ${prevRank}` : `Moved down from rank ${prevRank}`);
                           }
@@ -430,11 +499,13 @@ const ReportPlacementOverTime: React.FC = () => {
                           );
                         })}
                       </TableRow>
-                    ))}
+                    );
+                    })}
                   </TableBody>
                 </Table>
               </div>
-            )}
+              );
+            })()}
           </CardContent>
         </Card>
       )}
@@ -444,6 +515,31 @@ const ReportPlacementOverTime: React.FC = () => {
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Rank over time</CardTitle>
+              {chartData.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <Label className="text-sm font-normal text-muted-foreground shrink-0">
+                    Chart metric
+                  </Label>
+                  <Tabs
+                    value={chartPrimaryMetric}
+                    onValueChange={v =>
+                      setChartPrimaryMetric(v as 'rank' | 'shaves' | 'unique_users')
+                    }
+                  >
+                    <TabsList className="h-8">
+                      <TabsTrigger value="rank" className="text-xs px-2 py-1">
+                        Rank
+                      </TabsTrigger>
+                      <TabsTrigger value="shaves" className="text-xs px-2 py-1">
+                        Shaves
+                      </TabsTrigger>
+                      <TabsTrigger value="unique_users" className="text-xs px-2 py-1">
+                        Unique users
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {chartData.length === 0 ? (
@@ -455,30 +551,47 @@ const ReportPlacementOverTime: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                       <YAxis
-                        domain={[maxRank + 1, 1]}
+                        domain={
+                          chartPrimaryMetric === 'rank'
+                            ? [maxRank + 1, 1]
+                            : [0, maxChartValue]
+                        }
                         tick={{ fontSize: 12 }}
-                        label={{ value: 'Rank (1 = top)', angle: -90, position: 'insideLeft' }}
+                        label={{
+                          value:
+                            chartPrimaryMetric === 'rank'
+                              ? 'Rank (1 = top)'
+                              : chartPrimaryMetric === 'shaves'
+                                ? 'Shaves'
+                                : 'Unique users',
+                          angle: -90,
+                          position: 'insideLeft',
+                        }}
                       />
                       <Tooltip
-                        formatter={(value, name) => {
-                          if (typeof name === 'string' && name.endsWith('_shaves')) return [value, 'Shaves'];
-                          return [value, name];
-                        }}
-                        labelFormatter={label => `Month: ${label}`}
+                        content={(props) => RankChartTooltipContent(props, series.series)}
                       />
                       <Legend />
-                      {series.series.map((entry, i) => (
-                        <Line
-                          key={entry.item}
-                          type="monotone"
-                          dataKey={entry.item}
-                          stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                          strokeWidth={2}
-                          dot={{ r: 3 }}
-                          connectNulls={false}
-                          name={entry.item}
-                        />
-                      ))}
+                      {series.series.map((entry, i) => {
+                        const dataKey =
+                          chartPrimaryMetric === 'rank'
+                            ? entry.item
+                            : chartPrimaryMetric === 'shaves'
+                              ? `${entry.item}_shaves`
+                              : `${entry.item}_unique_users`;
+                        return (
+                          <Line
+                            key={entry.item}
+                            type="monotone"
+                            dataKey={dataKey}
+                            stroke={CHART_COLORS[i % CHART_COLORS.length]}
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
+                            connectNulls={false}
+                            name={entry.item}
+                          />
+                        );
+                      })}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -511,12 +624,23 @@ const ReportPlacementOverTime: React.FC = () => {
                           {series.series.map(entry => {
                             const rank = row[entry.item];
                             const shaves = row[`${entry.item}_shaves`];
-                            const cell =
-                              rank !== '' && rank !== undefined
-                                ? shaves !== '' && shaves !== undefined
-                                  ? `#${rank} (${shaves})`
-                                  : `#${rank}`
-                                : '—';
+                            const uniqueUsers = row[`${entry.item}_unique_users`];
+                            let cell: string;
+                            if (rank === '' || rank === undefined) {
+                              cell = '—';
+                            } else {
+                              const hasShaves = shaves !== '' && shaves !== undefined;
+                              const hasUsers = uniqueUsers !== '' && uniqueUsers !== undefined;
+                              if (hasShaves && hasUsers) {
+                                cell = `#${rank} (${shaves} shaves, ${uniqueUsers} users)`;
+                              } else if (hasShaves) {
+                                cell = `#${rank} (${shaves})`;
+                              } else if (hasUsers) {
+                                cell = `#${rank} (${uniqueUsers} users)`;
+                              } else {
+                                cell = `#${rank}`;
+                              }
+                            }
                             return (
                               <TableCell key={entry.item}>{cell}</TableCell>
                             );

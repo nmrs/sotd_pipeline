@@ -124,7 +124,7 @@ const SoapAnalyzer: React.FC = () => {
   React.useEffect(() => {
     const loadWSDBData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/wsdb-alignment/load-wsdb');
+        const response = await fetch('/api/wsdb-alignment/load-wsdb');
         if (response.ok) {
           const data = await response.json();
           setWsdbSoaps(data.soaps || []);
@@ -137,7 +137,7 @@ const SoapAnalyzer: React.FC = () => {
 
     const loadPipelineSoaps = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/wsdb-alignment/load-pipeline');
+        const response = await fetch('/api/wsdb-alignment/load-pipeline');
         if (response.ok) {
           const data = await response.json();
           setPipelineSoaps(data.soaps || []);
@@ -150,7 +150,7 @@ const SoapAnalyzer: React.FC = () => {
 
     const loadNonMatches = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+        const response = await fetch('/api/wsdb-alignment/non-matches');
         if (response.ok) {
           const data = await response.json();
           setNonMatches(data);
@@ -207,7 +207,7 @@ const SoapAnalyzer: React.FC = () => {
       // When delta months are enabled, selectedMonths already contains all months (primary + delta)
       const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/api/soaps/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
+      const url = `/api/soaps/duplicates?months=${monthsParam}&similarity_threshold=${similarityThreshold}&limit=${limit}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -253,7 +253,7 @@ const SoapAnalyzer: React.FC = () => {
       // When delta months are enabled, selectedMonths already contains all months (primary + delta)
       const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/api/soaps/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
+      const url = `/api/soaps/neighbor-similarity?months=${monthsParam}&mode=${mode}&similarity_threshold=${similarityThreshold}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -311,7 +311,7 @@ const SoapAnalyzer: React.FC = () => {
       // When delta months are enabled, selectedMonths already contains all months (primary + delta)
       const allMonths = selectedMonths;
       const monthsParam = allMonths.join(',');
-      const url = `http://localhost:8000/api/soaps/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
+      const url = `/api/soaps/pattern-suggestions?months=${monthsParam}&limit=${limit}`;
 
       const response = await fetch(url);
       if (response.ok) {
@@ -461,7 +461,7 @@ const SoapAnalyzer: React.FC = () => {
       };
 
       // Call API to save non-match
-      const response = await fetch('http://localhost:8000/api/soaps/non-matches', {
+      const response = await fetch('/api/soaps/non-matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -481,7 +481,7 @@ const SoapAnalyzer: React.FC = () => {
 
       // Reload non-matches
       try {
-        const nonMatchesResponse = await fetch('http://localhost:8000/api/wsdb-alignment/non-matches');
+        const nonMatchesResponse = await fetch('/api/wsdb-alignment/non-matches');
         if (nonMatchesResponse.ok) {
           const nonMatchesData = await nonMatchesResponse.json();
           setNonMatches(nonMatchesData);

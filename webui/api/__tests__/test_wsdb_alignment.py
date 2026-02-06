@@ -14,6 +14,7 @@ import httpx
 import pytest
 import yaml
 from api.main import app
+from api.wsdb_alignment import pre_normalize_wsdb_entries
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
@@ -113,6 +114,33 @@ def mock_data_files(tmp_path):
         yaml.dump(MOCK_PIPELINE_DATA, f)
 
     return data_dir
+
+
+class TestPreNormalizeWsdbEntries:
+    """Tests for pre_normalize_wsdb_entries (slug_space_norm, hyphens to spaces)."""
+
+    def test_slug_space_norm_present_and_has_spaces(self):
+        """Pre-normalized entries include slug_space_norm with hyphens replaced by spaces."""
+        soaps = [
+            {
+                "brand": "Abbate Y La Mantia",
+                "name": "Matteo 9-11",
+                "type": "Soap",
+                "slug": "abbate-y-la-mantia-matteo-911-soap",
+            },
+        ]
+        entries = pre_normalize_wsdb_entries(soaps)
+        assert len(entries) == 1
+        assert "slug_space_norm" in entries[0]
+        # Hyphens replaced by spaces, then normalize_for_matching (lowercase, etc.)
+        assert entries[0]["slug_space_norm"] == "abbate y la mantia matteo 911 soap"
+
+    def test_slug_space_norm_empty_slug(self):
+        """Entries with empty or missing slug get empty slug_space_norm."""
+        soaps = [{"brand": "X", "name": "Y", "type": "Soap"}]
+        entries = pre_normalize_wsdb_entries(soaps)
+        assert len(entries) == 1
+        assert entries[0]["slug_space_norm"] == ""
 
 
 class TestLoadWSDBSoaps:
@@ -231,6 +259,38 @@ class TestLoadPipelineSoaps:
 
         assert response.status_code == 500
         assert "parse" in response.json()["detail"].lower()
+
+    @patch("api.wsdb_alignment.PROJECT_ROOT")
+    def test_load_pipeline_soaps_excludes_mashup_scents(self, mock_root, tmp_path):
+        """Test that scents with countable: false (mashups) are excluded from load-pipeline."""
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+        soaps_file = data_dir / "soaps.yaml"
+        pipeline_with_mashup = {
+            "Barrister and Mann": {
+                "patterns": ["barrister.*mann"],
+                "scents": {
+                    "Seville": {"patterns": ["seville"]},
+                    "Sample Mashup": {"countable": False, "patterns": ["sample.*mashup"]},
+                },
+            },
+        }
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(pipeline_with_mashup, f)
+
+        mock_root.__truediv__ = lambda self, other: tmp_path / other
+
+        response = client.get("/api/wsdb-alignment/load-pipeline")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_brands"] == 1
+        assert data["total_scents"] == 1  # Only Seville; Sample Mashup excluded
+        bm = data["soaps"][0]
+        assert bm["brand"] == "Barrister and Mann"
+        scent_names = [s["name"] for s in bm["scents"]]
+        assert "Seville" in scent_names
+        assert "Sample Mashup" not in scent_names
 
 
 class TestFuzzyMatch:
@@ -714,6 +774,74 @@ class TestAliasFuzzyMatch:
         # (May not be exactly 100 due to fuzzy matching algorithm)
         assert top_match["confidence"] >= 70.0
 
+    @patch("api.wsdb_alignment.PROJECT_ROOT")
+    def test_batch_analyze_pattern_matches_slug_space_norm(self, mock_root, mock_data_files):
+        """Pipeline scent regex pattern matching slug (hyphens→spaces) produces a match.
+
+        Pattern has a space (e.g. "caledonia rose"); slug has hyphens. Pre-processing
+        converts slug to space-separated text so the pattern matches.
+        """
+        # WSDB: slug with hyphens; pipeline pattern assumes spaces: (barris|bam).*caledonia rose
+        wsdb_soaps = [
+            {
+                "brand": "Barrister and Mann",
+                "name": "Caledonia Rose",
+                "type": "Soap",
+                "slug": "barrister-mann-caledonia-rose-soap",
+                "scent_notes": [],
+                "collaborators": [],
+                "tags": [],
+                "category": "software",
+            },
+        ]
+        pipeline_soaps = {
+            "Barrister and Mann": {
+                "patterns": ["barrister.*mann", "bam"],
+                "scents": {
+                    "Caledonia Rose": {
+                        "patterns": ["(barris|bam).*caledonia rose"],
+                    },
+                },
+            },
+        }
+        software_file = mock_data_files / "wsdb" / "software.json"
+        with software_file.open("w", encoding="utf-8") as f:
+            json.dump(wsdb_soaps, f)
+        soaps_file = mock_data_files / "soaps.yaml"
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(pipeline_soaps, f)
+
+        mock_root_path = mock_data_files.parent
+        mock_root.__truediv__ = lambda self, other: mock_root_path / other
+
+        # Invalidate cache so our new WSDB data is loaded
+        from api.wsdb_alignment import invalidate_wsdb_cache
+
+        invalidate_wsdb_cache()
+
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze?mode=brand_scent&threshold=0.9&limit=100",
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        result = next(
+            (
+                r
+                for r in data["pipeline_results"]
+                if r["source_brand"] == "Barrister and Mann"
+                and r["source_scent"] == "Caledonia Rose"
+            ),
+            None,
+        )
+        assert (
+            result is not None
+        ), "Expected pipeline result for Barrister and Mann - Caledonia Rose"
+        assert len(result["matches"]) > 0, "Expected at least one match from slug pattern match"
+        match = result["matches"][0]
+        assert match["details"]["slug"] == "barrister-mann-caledonia-rose-soap"
+        assert match["details"].get("slug_pattern_match") is True
+
 
 def test_load_non_matches(mock_data_files):
     """Test loading non-matches from new hierarchical YAML files."""
@@ -880,6 +1008,77 @@ def test_non_match_filtering_brand_scent_mode(mock_data_files):
             if m["brand"] == "Barrister and Mann" and m["name"] == "Leviathan"
         ]
         assert len(leviathan_matches) == 0
+
+
+def test_batch_analyze_excludes_assigned_slugs_from_wsdb(mock_data_files):
+    """Test that WSDB entries whose slug is already assigned in soaps.yaml are excluded from matching."""
+    # Pipeline: Seville has wsdb_slug (assigned); Seville EDT has no slug
+    pipeline_with_slug = copy.deepcopy(MOCK_PIPELINE_DATA)
+    pipeline_with_slug["Barrister and Mann"]["scents"]["Seville"] = {
+        "patterns": ["seville"],
+        "wsdb_slug": "barrister-and-mann-seville",
+    }
+    pipeline_with_slug["Barrister and Mann"]["scents"]["Seville EDT"] = {
+        "patterns": ["seville.*edt", "seville edt"],
+    }
+
+    # WSDB: two entries - one assigned (Seville), one unassigned (Seville EDT)
+    wsdb_with_both = [
+        {
+            "brand": "Barrister and Mann",
+            "name": "Seville",
+            "type": "Soap",
+            "slug": "barrister-and-mann-seville",
+            "scent_notes": [],
+            "collaborators": [],
+            "tags": [],
+            "category": "Traditional",
+        },
+        {
+            "brand": "Barrister and Mann",
+            "name": "Seville EDT",
+            "type": "Soap",
+            "slug": "barrister-and-mann-seville-edt",
+            "scent_notes": [],
+            "collaborators": [],
+            "tags": [],
+            "category": "Traditional",
+        },
+    ]
+
+    soaps_file = mock_data_files / "soaps.yaml"
+    with soaps_file.open("w", encoding="utf-8") as f:
+        yaml.dump(pipeline_with_slug, f)
+
+    wsdb_file = mock_data_files / "wsdb" / "software.json"
+    with wsdb_file.open("w", encoding="utf-8") as f:
+        json.dump(wsdb_with_both, f)
+
+    with patch("api.wsdb_alignment.PROJECT_ROOT", mock_data_files.parent):
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze?threshold=0.5&limit=100&mode=brand_scent"
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+    # Barrister and Mann - Seville is skipped (has slug). Find Seville EDT result.
+    seville_edt_result = next(
+        (
+            r
+            for r in data["pipeline_results"]
+            if r["source_brand"] == "Barrister and Mann" and r["source_scent"] == "Seville EDT"
+        ),
+        None,
+    )
+    assert seville_edt_result is not None, "Seville EDT result not found"
+
+    # Assigned slug must not appear as a suggestion (excluded from wsdb_to_consider)
+    assigned_slug_matches = [
+        m
+        for m in seville_edt_result["matches"]
+        if m.get("details", {}).get("slug") == "barrister-and-mann-seville"
+    ]
+    assert len(assigned_slug_matches) == 0, "Assigned slug should be excluded from suggestions"
 
 
 def test_bidirectional_filtering(mock_data_files):
@@ -1268,7 +1467,7 @@ class TestBatchAnalyzeMatchFiles:
                     "soap": {
                         "original": "Barrister and Mann - Seville",
                         "matched": {"brand": "Barrister and Mann", "scent": "Seville"},
-                        "match_type": "brand",
+                        "match_type": "regex",
                     },
                 },
                 {
@@ -1279,7 +1478,7 @@ class TestBatchAnalyzeMatchFiles:
                             "brand": "Declaration Grooming",
                             "scent": "Massacre of the Innocents",
                         },
-                        "match_type": "brand",
+                        "match_type": "regex",
                     },
                 },
             ],
@@ -1302,7 +1501,7 @@ class TestBatchAnalyzeMatchFiles:
         mock_root_path = mock_data_files.parent
         mock_root.__truediv__ = lambda self, other: mock_root_path / other
 
-        # Test the endpoint
+        # Test the endpoint (match_type_filter=brand is query param; backend only includes exact/regex matches)
         response = client.post(
             "/api/wsdb-alignment/batch-analyze-match-files?months=2025-05&threshold=0.5&mode=brand_scent&match_type_filter=brand"
         )
@@ -1329,6 +1528,66 @@ class TestBatchAnalyzeMatchFiles:
         assert "match_types" in bm_result
         assert "count" in bm_result
         assert bm_result["count"] == 1
+
+    @patch("api.wsdb_alignment.PROJECT_ROOT")
+    def test_batch_analyze_match_files_excludes_mashup_matches(self, mock_root, mock_data_files):
+        """Test that soap matches with countable: false (mashups) are excluded from results."""
+        matched_dir = mock_data_files / "matched"
+        matched_dir.mkdir(exist_ok=True)
+        match_file = matched_dir / "2025-05.json"
+        match_data = {
+            "meta": {"month": "2025-05"},
+            "data": [
+                {
+                    "id": "c1",
+                    "soap": {
+                        "original": "Barrister and Mann - Seville",
+                        "matched": {"brand": "Barrister and Mann", "scent": "Seville"},
+                        "match_type": "regex",
+                    },
+                },
+                {
+                    "id": "c2",
+                    "soap": {
+                        "original": "Mama Bear - Sample Mashup",
+                        "matched": {
+                            "brand": "Mama Bear",
+                            "scent": "Sample Mashup",
+                            "countable": False,
+                        },
+                        "match_type": "regex",
+                    },
+                },
+            ],
+        }
+        with match_file.open("w", encoding="utf-8") as f:
+            json.dump(match_data, f)
+
+        wsdb_dir = mock_data_files / "wsdb"
+        wsdb_dir.mkdir(exist_ok=True)
+        with (wsdb_dir / "software.json").open("w", encoding="utf-8") as f:
+            json.dump(MOCK_WSDB_DATA, f)
+        soaps_file = mock_data_files / "soaps.yaml"
+        with soaps_file.open("w", encoding="utf-8") as f:
+            yaml.dump(MOCK_PIPELINE_DATA, f)
+
+        mock_root_path = mock_data_files.parent
+        mock_root.__truediv__ = lambda self, other: mock_root_path / other
+
+        response = client.post(
+            "/api/wsdb-alignment/batch-analyze-match-files?months=2025-05&threshold=0.5&mode=brand_scent&match_type_filter=all"
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        # Only Barrister and Mann - Seville; Mama Bear Sample Mashup (countable false) excluded
+        assert data["total_entries"] == 1
+        assert len(data["pipeline_results"]) == 1
+        assert data["pipeline_results"][0]["source_brand"] == "Barrister and Mann"
+        assert data["pipeline_results"][0]["source_scent"] == "Seville"
+        # No Mama Bear / Sample Mashup in results
+        mama_results = [r for r in data["pipeline_results"] if r["source_brand"] == "Mama Bear"]
+        assert len(mama_results) == 0
 
     @patch("api.wsdb_alignment.PROJECT_ROOT")
     def test_batch_analyze_match_files_filter_by_match_type(self, mock_root, mock_data_files):

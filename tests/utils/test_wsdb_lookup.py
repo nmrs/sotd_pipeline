@@ -144,3 +144,39 @@ def test_missing_soaps_yaml(temp_project_root):
     slug = lookup.get_wsdb_slug("Barrister and Mann", "Seville")
 
     assert slug is None
+
+
+def test_get_all_assigned_slugs(temp_project_root, mock_pipeline_soaps):
+    """Test get_all_assigned_slugs returns exactly the wsdb_slug values from the catalog."""
+    lookup = WSDBLookup(project_root=temp_project_root)
+
+    assigned = lookup.get_all_assigned_slugs()
+
+    assert assigned == {
+        "barrister-and-mann-seville",
+        "artisan-shave-shoppe-crisp-vetiver",
+        "stirling-soap-co-executive-man",
+    }
+
+
+def test_get_all_assigned_slugs_excludes_empty_and_missing(temp_project_root, mock_pipeline_soaps):
+    """Test get_all_assigned_slugs excludes scents without wsdb_slug."""
+    soaps_file = temp_project_root / "data" / "soaps.yaml"
+    with soaps_file.open("r", encoding="utf-8") as f:
+        soaps_data = yaml.safe_load(f)
+
+    soaps_data["Barrister and Mann"]["scents"]["No Slug"] = {"patterns": ["no"]}
+    soaps_data["Barrister and Mann"]["scents"]["Empty Slug"] = {
+        "patterns": ["empty"],
+        "wsdb_slug": "",
+    }
+
+    with soaps_file.open("w", encoding="utf-8") as f:
+        yaml.dump(soaps_data, f)
+
+    lookup = WSDBLookup(project_root=temp_project_root)
+    assigned = lookup.get_all_assigned_slugs()
+
+    assert "barrister-and-mann-seville" in assigned
+    assert "No Slug" not in assigned
+    assert "" not in assigned

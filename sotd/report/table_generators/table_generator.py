@@ -1185,6 +1185,7 @@ class TableGenerator:
         table_name: str,
         deltas: bool = False,
         wsdb: bool = False,
+        format_column_names: bool = True,
         **numeric_limits,
     ) -> List[Dict[str, Any]]:
         """Get structured table data as a list of dictionaries (no row limits).
@@ -1197,6 +1198,8 @@ class TableGenerator:
             table_name: Name of the table (e.g., 'soap-makers', 'razors')
             deltas: Whether to include delta calculations
             wsdb: Whether to add WSDB links to soap names (only applies to soaps table)
+            format_column_names: If True, apply Title Case to column names (for display).
+                If False, keep snake_case keys (e.g. for API consumers).
             **numeric_limits: Single numeric column limit (e.g., shaves=50)
 
         Returns:
@@ -1300,10 +1303,11 @@ class TableGenerator:
         # Format effective_soaps to 1 decimal place
         df = self._format_effective_soaps(df)
 
-        # Format column names to Title Case with acronym preservation
-        formatted_df = self._format_column_names(df)
-        if isinstance(formatted_df, pd.DataFrame):
-            df = formatted_df
+        # Format column names to Title Case with acronym preservation (skip when False for API/snake_case)
+        if format_column_names:
+            formatted_df = self._format_column_names(df)
+            if isinstance(formatted_df, pd.DataFrame):
+                df = formatted_df
 
         # Format usernames with "u/" prefix for Reddit display
         df = self._format_usernames(df)

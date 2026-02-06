@@ -1074,6 +1074,9 @@ Gillette:
     patterns:
       - lady.*gil.*et
       - gil.*et.*lady
+  Milord:
+    patterns:
+      - gil.*mi+lord
   NEW:
     patterns:
       - gil\w*te.*new
@@ -1106,6 +1109,14 @@ Gillette:
   President:
     patterns:
       - president
+  Ranger Tech:
+    patterns:
+      - ranger.*tech
+  Rocket:
+    patterns:
+      - gil.*rocket
+      - rocket.*hd
+      - gil\w*te.*parat
   Senator:
     patterns:
       - senator
@@ -1140,16 +1151,11 @@ Gillette:
       - gil.*super click
   Super Speed:
     patterns:
-      - Super.*speed
+      - (gil.*)?super.*speed
       - (red|black|blue|flare|flair).*tip
-      - gillette.*tto
       - 'gil.*\bss\b'
       - (?<!\.)\b(?:\d{2}|19\d{2})\b \bss\b
       - TV special
-      - gil.*rocket
-      - rocket.*hd
-      - gil.*mi+lord
-      - ranger tech
   Super Stainless:
     patterns:
       - gil.*super\s*stainless
@@ -1166,6 +1172,9 @@ Gillette:
   Toggle:
     patterns:
       - (gil.*)?toggle
+  TTO (Unspecified):
+    patterns:
+      - gil\w*te.*tto
   Tuckaway:
     patterns:
       - gil.*tuckaway

@@ -1171,6 +1171,7 @@ export interface ReportRankingsSeriesPoint {
   month: string;
   rank: number | null;
   shaves: number | null;
+  unique_users: number | null;
 }
 
 export interface ReportRankingsSeriesEntry {
@@ -1187,6 +1188,7 @@ export interface ReportRankingsPivotedPoint {
   month: string;
   item: string | null;
   shaves: number | null;
+  unique_users: number | null;
   prev_rank: number | null;
 }
 

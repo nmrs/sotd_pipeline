@@ -156,6 +156,236 @@ describe('WSDBAlignmentAnalyzer', () => {
         expect(screen.getByText(/WSDB → Pipeline/i)).toBeInTheDocument();
       });
     });
+
+    test('renders mode selector (Alignment and Slug finder)', async () => {
+      setupDefaultMocks();
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /^Alignment$/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /^Slug finder$/ })).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Slug finder mode', () => {
+    test('switching to Slug finder updates description and shows single-tab view', async () => {
+      setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Align pipeline soap brands and scents with the Wet Shaving Database/i)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /^Slug finder$/ }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Find potential WSDB slugs for each scent in soaps.yaml/i)
+        ).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Find slug suggestions/i })).toBeInTheDocument();
+      });
+
+      // In slug finder mode, Data source and Analysis mode are hidden (catalog + brand_scent only)
+      expect(screen.queryByText('Data Source')).not.toBeInTheDocument();
+      expect(screen.queryByText('Analysis Mode')).not.toBeInTheDocument();
+      // Single tab: Slug suggestions (WSDB → Pipeline tab hidden)
+      expect(screen.getByRole('tab', { name: /Slug suggestions/i })).toBeInTheDocument();
+      expect(screen.queryByText(/WSDB → Pipeline/i)).not.toBeInTheDocument();
+    });
+
+    test('Analyze in Slug finder mode calls batch-analyze with mode=brand_scent', async () => {
+      setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        const btn = screen.getByRole('button', { name: /Analyze Alignment|Find slug suggestions/i });
+        expect(btn).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /^Slug finder$/ }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Find slug suggestions/i })).toBeInTheDocument();
+      });
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pipeline_results: [{ source_brand: 'Barrister and Mann', source_scent: 'Seville', matches: [] }],
+          wsdb_results: [],
+        }),
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Find slug suggestions/i }));
+
+      await waitFor(() => {
+        const batchCalls = (global.fetch as jest.Mock).mock.calls.filter(
+          (call: [string]) => typeof call[0] === 'string' && call[0].includes('batch-analyze')
+        );
+        expect(batchCalls.length).toBeGreaterThanOrEqual(1);
+        const batchUrl = batchCalls[batchCalls.length - 1][0];
+        expect(batchUrl).toMatch(/\/api\/wsdb-alignment\/batch-analyze/);
+        expect(batchUrl).toMatch(/mode=brand_scent/);
+        expect(batchUrl).not.toMatch(/batch-analyze-match-files/);
+      });
+    });
+
+    test('slug finder expanded result shows Add Slug button', async () => {
+      setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pipeline_results: [
+            {
+              source_brand: '345 Soap Co.',
+              source_scent: 'Estes',
+              matches: [
+                {
+                  brand: '345 Soap Co.',
+                  name: 'Estes',
+                  confidence: 85,
+                  brand_score: 90,
+                  scent_score: 80,
+                  source: 'wsdb',
+                  details: { slug: '345-soap-co-estes' },
+                },
+              ],
+              expanded: false,
+            },
+          ],
+          wsdb_results: [],
+        }),
+      });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/WSDB Alignment Analyzer/i)).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded.*WSDB.*pipeline/i)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /^Slug finder$/ }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Find slug suggestions/i })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Find slug suggestions/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Analysis complete/i)).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(screen.getByText(/345 Soap Co./i)).toBeInTheDocument();
+        expect(screen.getByText(/Estes/i)).toBeInTheDocument();
+      });
+
+      const rowContainer = screen.getByText(/345 Soap Co./i).closest(
+        'div.flex.items-center.justify-between.cursor-pointer'
+      ) || screen.getByText(/345 Soap Co./i).closest('div.border.rounded-lg');
+      if (rowContainer) {
+        fireEvent.click(rowContainer);
+      } else {
+        fireEvent.click(screen.getByText(/345 Soap Co./i));
+      }
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Add Slug/i })).toBeInTheDocument();
+      }, { timeout: 5000 });
+    });
+
+    test('row is removed after successful Add Slug', async () => {
+      setupDefaultMocks(mockWSDBSoaps, mockPipelineSoaps);
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            pipeline_results: [
+              {
+                source_brand: '345 Soap Co.',
+                source_scent: 'Estes',
+                matches: [
+                  {
+                    brand: '345 Soap Co.',
+                    name: 'Estes',
+                    confidence: 85,
+                    brand_score: 90,
+                    scent_score: 80,
+                    source: 'wsdb',
+                    details: { slug: '345-soap-co-estes' },
+                  },
+                ],
+                expanded: false,
+              },
+            ],
+            wsdb_results: [],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            success: true,
+            message: 'Added WSDB slug for 345 Soap Co. - Estes',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            soaps: mockPipelineSoaps,
+            total_brands: mockPipelineSoaps.length,
+            total_scents: mockPipelineSoaps.reduce((sum, s) => sum + (s.scents?.length || 0), 0),
+          }),
+        });
+
+      render(<WSDBAlignmentAnalyzer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Loaded.*WSDB.*pipeline/i)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /^Slug finder$/ }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Find slug suggestions/i })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Find slug suggestions/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/345 Soap Co./i)).toBeInTheDocument();
+        expect(screen.getByText(/Estes/i)).toBeInTheDocument();
+      });
+
+      const rowContainer = screen.getByText(/345 Soap Co./i).closest(
+        'div.flex.items-center.justify-between.cursor-pointer'
+      ) || screen.getByText(/345 Soap Co./i).closest('div.border.rounded-lg');
+      if (rowContainer) {
+        fireEvent.click(rowContainer);
+      } else {
+        fireEvent.click(screen.getByText(/345 Soap Co./i));
+      }
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Add Slug/i })).toBeInTheDocument();
+      }, { timeout: 5000 });
+
+      fireEvent.click(screen.getByRole('button', { name: /Add Slug/i }));
+
+      // Row should disappear after successful add (optimistic: gone when pending; then stays gone after API success)
+      await waitFor(
+        () => {
+          expect(screen.queryByText(/345 Soap Co./i)).not.toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
+    });
   });
 
   describe('Data Loading', () => {
@@ -165,11 +395,9 @@ describe('WSDBAlignmentAnalyzer', () => {
       render(<WSDBAlignmentAnalyzer />);
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/load-wsdb');
-        expect(global.fetch).toHaveBeenCalledWith(
-          'http://localhost:8000/api/wsdb-alignment/load-pipeline'
-        );
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/wsdb-alignment/non-matches');
+        expect(global.fetch).toHaveBeenCalledWith('/api/wsdb-alignment/load-wsdb');
+        expect(global.fetch).toHaveBeenCalledWith('/api/wsdb-alignment/load-pipeline');
+        expect(global.fetch).toHaveBeenCalledWith('/api/wsdb-alignment/non-matches');
       });
 
       // Wait for component to finish loading - check for any visible content first
@@ -577,11 +805,12 @@ describe('WSDBAlignmentAnalyzer', () => {
       fireEvent.click(lowButton);
       await waitFor(() => {
         expect(screen.getByText('Brand F - Scent 6')).toBeInTheDocument();
-        expect(screen.getByText('Brand G - Scent 7')).toBeInTheDocument();
+        // Brand G has matches: [] so it is not shown (rows with no actionable matches are hidden)
+        expect(screen.queryByText('Brand G - Scent 7')).not.toBeInTheDocument();
         expect(screen.queryByText('Brand E - Scent 5')).not.toBeInTheDocument();
       });
 
-      // Test All filter (show everything)
+      // Test All filter (show everything that has at least one match)
       const allButton = screen.getByText('All');
       fireEvent.click(allButton);
       await waitFor(() => {
@@ -591,7 +820,8 @@ describe('WSDBAlignmentAnalyzer', () => {
         expect(screen.getByText('Brand D - Scent 4')).toBeInTheDocument();
         expect(screen.getByText('Brand E - Scent 5')).toBeInTheDocument();
         expect(screen.getByText('Brand F - Scent 6')).toBeInTheDocument();
-        expect(screen.getByText('Brand G - Scent 7')).toBeInTheDocument();
+        // Brand G has matches: [] so it is never shown
+        expect(screen.queryByText('Brand G - Scent 7')).not.toBeInTheDocument();
       });
     });
   });
@@ -1119,9 +1349,9 @@ describe('WSDBAlignmentAnalyzer', () => {
         fireEvent.click(brandText);
       }
 
-      // Wait for "Not a Match" button to appear
+      // Wait for "Not a Match" button to appear (per-row button; bulk button also contains "not a match")
       await waitFor(() => {
-        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /✕ Not a Match/ })).toBeInTheDocument();
       }, { timeout: 5000 });
     });
 
@@ -1193,9 +1423,9 @@ describe('WSDBAlignmentAnalyzer', () => {
         fireEvent.click(brandText);
       }
 
-      // Wait for "Not a Match" button to appear
+      // Wait for "Not a Match" button to appear (per-row button; bulk button also contains "not a match")
       await waitFor(() => {
-        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /✕ Not a Match/ })).toBeInTheDocument();
       }, { timeout: 5000 });
     });
 
@@ -1276,13 +1506,13 @@ describe('WSDBAlignmentAnalyzer', () => {
         fireEvent.click(brandText);
       }
 
-      // Wait for "Not a Match" button
+      // Wait for "Not a Match" button (per-row button; bulk button also contains "not a match")
       await waitFor(() => {
-        expect(screen.getByText(/Not a Match/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /✕ Not a Match/ })).toBeInTheDocument();
       }, { timeout: 5000 });
 
       // Click "Not a Match" button
-      const notMatchButton = screen.getByText(/Not a Match/i);
+      const notMatchButton = screen.getByRole('button', { name: /✕ Not a Match/ });
       fireEvent.click(notMatchButton);
 
       // Verify POST request was made

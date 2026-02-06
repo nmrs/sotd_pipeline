@@ -146,16 +146,20 @@ app.include_router(format_compatibility_router)
 app.include_router(wsdb_alignment_router)
 
 # Add CORS middleware for local development
+# Vite dev server uses port 5173; include 3000 and 8000 for other setups
+_app_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+if os.getenv("ENVIRONMENT") == "test":
+    _app_origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        # Allow all origins for test environment
-        "*" if os.getenv("ENVIRONMENT") == "test" else None,
-    ],
+    allow_origins=_app_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

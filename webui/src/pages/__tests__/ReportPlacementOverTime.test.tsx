@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -10,7 +11,7 @@ jest.mock('../../services/api', () => ({
   handleApiError: jest.fn((err: unknown) => (err instanceof Error ? err.message : 'API Error')),
 }));
 
-import ReportPlacementOverTime from '../ReportPlacementOverTime';
+import ReportPlacementOverTime, { RankChartTooltipContent } from '../ReportPlacementOverTime';
 import * as api from '../../services/api';
 
 const mockGetTables = api.getReportRankingsTables as jest.MockedFunction<
@@ -37,15 +38,39 @@ describe('ReportPlacementOverTime', () => {
     mockGetSeries.mockResolvedValue({
       months: ['2025-06', '2025-07'],
       series: [
-        { item: 'Razor A', data: [{ month: '2025-06', rank: 1, shaves: 100 }, { month: '2025-07', rank: 2, shaves: 80 }] },
-        { item: 'Razor B', data: [{ month: '2025-06', rank: 2, shaves: 80 }, { month: '2025-07', rank: 1, shaves: 90 }] },
+        {
+          item: 'Razor A',
+          data: [
+            { month: '2025-06', rank: 1, shaves: 100, unique_users: 10 },
+            { month: '2025-07', rank: 2, shaves: 80, unique_users: 8 },
+          ],
+        },
+        {
+          item: 'Razor B',
+          data: [
+            { month: '2025-06', rank: 2, shaves: 80, unique_users: 8 },
+            { month: '2025-07', rank: 1, shaves: 90, unique_users: 9 },
+          ],
+        },
       ],
     });
     mockGetPivoted.mockResolvedValue({
       months: ['2025-06', '2025-07'],
       lanes: [
-        { rank: 1, points: [{ month: '2025-06', item: 'Razor A', shaves: 100, prev_rank: null }, { month: '2025-07', item: 'Razor B', shaves: 90, prev_rank: 2 }] },
-        { rank: 2, points: [{ month: '2025-06', item: 'Razor B', shaves: 80, prev_rank: null }, { month: '2025-07', item: 'Razor A', shaves: 80, prev_rank: 1 }] },
+        {
+          rank: 1,
+          points: [
+            { month: '2025-06', item: 'Razor A', shaves: 100, unique_users: 10, prev_rank: null },
+            { month: '2025-07', item: 'Razor B', shaves: 90, unique_users: 9, prev_rank: 2 },
+          ],
+        },
+        {
+          rank: 2,
+          points: [
+            { month: '2025-06', item: 'Razor B', shaves: 80, unique_users: 8, prev_rank: null },
+            { month: '2025-07', item: 'Razor A', shaves: 80, unique_users: 8, prev_rank: 1 },
+          ],
+        },
       ],
     });
   });
@@ -270,5 +295,96 @@ describe('ReportPlacementOverTime', () => {
       el => el.closest('td')?.querySelector('span[style*="opacity"]') != null
     );
     expect(tableCellWithHighlight).toBeDefined();
+  });
+
+  it('shows shaves and unique users in By item data table when series has unique_users', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ReportPlacementOverTime />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(mockGetTables).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getAllByRole('combobox')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Razors')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Razors'));
+    await user.click(screen.getByRole('tab', { name: /By position/i }));
+    await waitFor(() => {
+      expect(mockGetPivoted).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Swim lanes (top 20)')).toBeInTheDocument();
+    });
+    const razorACells = screen.getAllByRole('button', { name: /Razor A/ });
+    await user.click(razorACells[0]);
+    await user.click(screen.getByRole('tab', { name: /By item/i }));
+    await waitFor(() => {
+      expect(mockGetSeries).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Data table')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/100 shaves, 10 users/)).toBeInTheDocument();
+  });
+
+  it('chart metric control is present and switching to Shaves works', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ReportPlacementOverTime />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(mockGetTables).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getAllByRole('combobox')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Razors')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Razors'));
+    await user.click(screen.getByRole('tab', { name: /By position/i }));
+    await waitFor(() => {
+      expect(mockGetPivoted).toHaveBeenCalled();
+    });
+    const razorACells = screen.getAllByRole('button', { name: /Razor A/ });
+    await user.click(razorACells[0]);
+    await user.click(screen.getByRole('tab', { name: /By item/i }));
+    await waitFor(() => {
+      expect(mockGetSeries).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Chart metric')).toBeInTheDocument();
+    });
+    const shavesTab = screen.getByRole('tab', { name: /Shaves/i });
+    await user.click(shavesTab);
+    expect(screen.getByText('Rank over time')).toBeInTheDocument();
+  });
+
+  it('chart tooltip content shows shaves and unique users for payload', () => {
+    const payload = [
+      {
+        payload: {
+          month: '2025-06',
+          'Razor A': 1,
+          'Razor A_shaves': 100,
+          'Razor A_unique_users': 10,
+        },
+      },
+    ];
+    const series = [{ item: 'Razor A' }];
+    const { container } = render(
+      <>
+        {RankChartTooltipContent(
+          { active: true, payload, label: '2025-06' },
+          series
+        )}
+      </>
+    );
+    expect(container.textContent).toMatch(/100 shaves/);
+    expect(container.textContent).toMatch(/10 users/);
   });
 });
