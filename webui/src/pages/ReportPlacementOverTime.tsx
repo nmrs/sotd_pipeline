@@ -14,6 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -49,9 +50,13 @@ import { handleApiError } from '@/services/api';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CellTooltip from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { ChevronDown, X, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
 const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+
+/** When an aggregation has more than this many items, use type-ahead instead of Select. */
+const ITEMS_SELECT_TYPEAHEAD_THRESHOLD = 50;
 
 export type RankChartTooltipProps = {
   active?: boolean;
@@ -115,6 +120,12 @@ const ReportPlacementOverTime: React.FC = () => {
   const [chartPrimaryMetric, setChartPrimaryMetric] = useState<
     'rank' | 'shaves' | 'unique_users'
   >('rank');
+  const [typeAheadOpen, setTypeAheadOpen] = useState(false);
+  const [typeAheadQuery, setTypeAheadQuery] = useState('');
+  const [typeAheadHighlightedIndex, setTypeAheadHighlightedIndex] = useState(0);
+  const typeAheadListId = 'report-rankings-items-listbox';
+  const typeAheadHighlightedRef = useRef<HTMLDivElement | null>(null);
+  const typeAheadInputRef = useRef<HTMLInputElement | null>(null);
 
   const fetchTables = useCallback(async () => {
     try {
@@ -143,9 +154,15 @@ const ReportPlacementOverTime: React.FC = () => {
       setItemsOptions([]);
       setSelectedItems([]);
       setItemToAdd('');
+      setTypeAheadQuery('');
+      setTypeAheadOpen(false);
+      setTypeAheadHighlightedIndex(0);
       setSeries(null);
       return;
     }
+    setTypeAheadQuery('');
+    setTypeAheadOpen(false);
+    setTypeAheadHighlightedIndex(0);
     let cancelled = false;
     (async () => {
       try {
@@ -167,6 +184,21 @@ const ReportPlacementOverTime: React.FC = () => {
       cancelled = true;
     };
   }, [selectedTableId]);
+
+  useEffect(() => {
+    if (typeAheadOpen) {
+      typeAheadHighlightedRef.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [typeAheadOpen, typeAheadHighlightedIndex]);
+
+  // Keep focus in the type-ahead input when query changes (Radix may move focus to trigger div)
+  useEffect(() => {
+    if (!typeAheadOpen) return;
+    const id = window.setTimeout(() => {
+      typeAheadInputRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(id);
+  }, [typeAheadOpen, typeAheadQuery]);
 
   useEffect(() => {
     if (viewMode !== 'by-position' || !selectedTableId) {
@@ -358,27 +390,161 @@ const ReportPlacementOverTime: React.FC = () => {
             <div className="grid gap-2">
               <Label>Items to track</Label>
               <div className="flex flex-wrap gap-2 items-center">
-                <Select
-                  value={itemToAdd}
-                  onValueChange={v => {
-                    setItemToAdd(v);
-                    addItem(v);
-                  }}
-                  disabled={loadingItems}
-                >
-                  <SelectTrigger className="w-[280px]">
-                    <SelectValue placeholder={loadingItems ? 'Loading…' : 'Add an item'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itemsOptions
-                      .filter(i => !selectedItems.includes(i))
-                      .map(i => (
-                        <SelectItem key={i} value={i}>
-                          {i}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                {itemsOptions.length <= ITEMS_SELECT_TYPEAHEAD_THRESHOLD ? (
+                  <Select
+                    value={itemToAdd}
+                    onValueChange={v => {
+                      setItemToAdd(v);
+                      addItem(v);
+                    }}
+                    disabled={loadingItems}
+                  >
+                    <SelectTrigger className="w-[280px]">
+                      <SelectValue placeholder={loadingItems ? 'Loading…' : 'Add an item'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {itemsOptions
+                        .filter(i => !selectedItems.includes(i))
+                        .map(i => (
+                          <SelectItem key={i} value={i}>
+                            {i}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <DropdownMenu
+                    open={typeAheadOpen}
+                    onOpenChange={open => {
+                      setTypeAheadOpen(open);
+                      if (!open) setTypeAheadHighlightedIndex(0);
+                    }}
+                    modal={false}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <div className="w-[280px] rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring">
+                        <input
+                          ref={typeAheadInputRef}
+                          id={typeAheadListId + '-input'}
+                          role="combobox"
+                          aria-expanded={typeAheadOpen}
+                          aria-controls={typeAheadListId}
+                          aria-autocomplete="list"
+                          aria-disabled={loadingItems}
+                          disabled={loadingItems}
+                          value={typeAheadQuery}
+                          onChange={e => {
+                            setTypeAheadQuery(e.target.value);
+                            setTypeAheadOpen(true);
+                            setTypeAheadHighlightedIndex(0);
+                          }}
+                          onFocus={() => setTypeAheadOpen(true)}
+                          onKeyDown={e => {
+                            const available = itemsOptions.filter(i => !selectedItems.includes(i));
+                            const q = typeAheadQuery.trim().toLowerCase();
+                            const filtered = q
+                              ? available.filter(i => i.toLowerCase().includes(q))
+                              : available;
+                            const displayList = filtered.slice(0, ITEMS_SELECT_TYPEAHEAD_THRESHOLD);
+                            if (e.key === 'Escape') {
+                              setTypeAheadOpen(false);
+                              e.preventDefault();
+                              return;
+                            }
+                            if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              setTypeAheadHighlightedIndex(i =>
+                                i < displayList.length - 1 ? i + 1 : 0
+                              );
+                              return;
+                            }
+                            if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              setTypeAheadHighlightedIndex(i =>
+                                i > 0 ? i - 1 : displayList.length - 1
+                              );
+                              return;
+                            }
+                            if (e.key === 'Enter' && displayList.length > 0) {
+                              e.preventDefault();
+                              const item = displayList[typeAheadHighlightedIndex];
+                              if (item) {
+                                addItem(item);
+                                setTypeAheadQuery('');
+                                setTypeAheadHighlightedIndex(0);
+                              }
+                            }
+                          }}
+                          placeholder={loadingItems ? 'Loading…' : 'Type to search…'}
+                          className="flex h-9 w-full rounded-md border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      id={typeAheadListId}
+                      role="listbox"
+                      className="max-h-[300px] overflow-y-auto min-w-[280px] p-0"
+                      onCloseAutoFocus={e => e.preventDefault()}
+                      onInteractOutside={e => {
+                        const target = e.target as Node;
+                        if (
+                          typeAheadInputRef.current &&
+                          (target === typeAheadInputRef.current ||
+                            typeAheadInputRef.current.contains(target))
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      {(() => {
+                        const available = itemsOptions.filter(i => !selectedItems.includes(i));
+                        const q = typeAheadQuery.trim().toLowerCase();
+                        const filtered = q
+                          ? available.filter(i => i.toLowerCase().includes(q))
+                          : available;
+                        const displayList = filtered.slice(0, ITEMS_SELECT_TYPEAHEAD_THRESHOLD);
+                        const hasMore = filtered.length > ITEMS_SELECT_TYPEAHEAD_THRESHOLD;
+                        if (displayList.length === 0) {
+                          return (
+                            <div className="px-2 py-3 text-sm text-muted-foreground">
+                              {q ? 'No matches' : 'Type to search'}
+                            </div>
+                          );
+                        }
+                        return (
+                          <>
+                            {displayList.map((item, idx) => (
+                              <DropdownMenuItem
+                                key={item}
+                                ref={idx === typeAheadHighlightedIndex ? typeAheadHighlightedRef : null}
+                                role="option"
+                                aria-selected={idx === typeAheadHighlightedIndex}
+                                data-highlighted={idx === typeAheadHighlightedIndex}
+                                className={cn(
+                                  'cursor-pointer',
+                                  idx === typeAheadHighlightedIndex && 'bg-accent'
+                                )}
+                                onSelect={e => {
+                                  e.preventDefault();
+                                  addItem(item);
+                                  setTypeAheadQuery('');
+                                  setTypeAheadHighlightedIndex(0);
+                                }}
+                              >
+                                {item}
+                              </DropdownMenuItem>
+                            ))}
+                            {hasMore && (
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground border-t">
+                                Type to narrow
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           )}

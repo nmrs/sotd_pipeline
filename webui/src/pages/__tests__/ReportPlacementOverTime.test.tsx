@@ -387,4 +387,86 @@ describe('ReportPlacementOverTime', () => {
     expect(container.textContent).toMatch(/100 shaves/);
     expect(container.textContent).toMatch(/10 users/);
   });
+
+  describe('type-ahead when aggregation has more than 50 items', () => {
+    const manyItems = [
+      ...Array.from({ length: 48 }, (_, i) => `Soap ${i + 1}`),
+      'Razor A',
+      'Razor B',
+      'Razor C',
+    ];
+
+    beforeEach(() => {
+      mockGetItems.mockResolvedValue(manyItems);
+      mockGetSeries.mockResolvedValue({
+        months: ['2025-06', '2025-07'],
+        series: [
+          {
+            item: 'Razor A',
+            data: [
+              { month: '2025-06', rank: 1, shaves: 100, unique_users: 10 },
+              { month: '2025-07', rank: 2, shaves: 80, unique_users: 8 },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('shows type-to-search input instead of Select when items exceed 50', async () => {
+      render(
+        <MemoryRouter>
+          <ReportPlacementOverTime />
+        </MemoryRouter>
+      );
+      await waitFor(() => {
+        expect(mockGetTables).toHaveBeenCalled();
+      });
+      fireEvent.click(screen.getAllByRole('combobox')[0]);
+      await waitFor(() => {
+        expect(screen.getByText('Razors')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText('Razors'));
+      await waitFor(() => {
+        expect(mockGetItems).toHaveBeenCalledWith('razors');
+      });
+      const itemsInput = screen.getByPlaceholderText('Type to search…');
+      expect(itemsInput).toBeInTheDocument();
+      expect(itemsInput).toHaveAttribute('role', 'combobox');
+    });
+
+    it('typing filters the list and selecting an item adds it to selection', async () => {
+      const user = userEvent.setup();
+      render(
+        <MemoryRouter>
+          <ReportPlacementOverTime />
+        </MemoryRouter>
+      );
+      await waitFor(() => {
+        expect(mockGetTables).toHaveBeenCalled();
+      });
+      fireEvent.click(screen.getAllByRole('combobox')[0]);
+      await waitFor(() => {
+        expect(screen.getByText('Razors')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText('Razors'));
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Type to search…')).toBeInTheDocument();
+      });
+      const itemsInput = screen.getByPlaceholderText('Type to search…');
+      await user.click(itemsInput);
+      await waitFor(() => {
+        expect(screen.getByText('Soap 1')).toBeInTheDocument();
+      });
+      fireEvent.change(itemsInput, { target: { value: 'Razor' } });
+      await waitFor(() => {
+        expect(screen.getByText('Razor A')).toBeInTheDocument();
+        expect(screen.getByText('Razor B')).toBeInTheDocument();
+        expect(screen.getByText('Razor C')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText('Razor A'));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Load series/i })).not.toBeDisabled();
+      });
+    });
+  });
 });
