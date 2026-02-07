@@ -21,6 +21,8 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
+* When available, soap names in the Soaps table link to their entry on Wet Shaving Database, where you can see scent notes, descriptions, and ingredient lists.
+
 ## Soap Brands
 
 {{tables.soap-makers|shaves:5|deltas:true}}
