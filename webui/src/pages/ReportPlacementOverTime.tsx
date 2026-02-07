@@ -314,6 +314,23 @@ const ReportPlacementOverTime: React.FC = () => {
     return Math.max(padded, 1);
   }, [series, chartPrimaryMetric]);
 
+  const placementSummary = React.useMemo(() => {
+    if (!series?.series?.length) return { firstPlaces: 0, podiums: 0, top10s: 0 };
+    let firstPlaces = 0;
+    let podiums = 0;
+    let top10s = 0;
+    series.series.forEach(entry => {
+      entry.data.forEach(p => {
+        const r = p.rank;
+        if (r == null) return;
+        if (r === 1) firstPlaces += 1;
+        if (r >= 1 && r <= 3) podiums += 1;
+        if (r >= 1 && r <= 10) top10s += 1;
+      });
+    });
+    return { firstPlaces, podiums, top10s };
+  }, [series]);
+
   return (
     <div className="w-full p-4 max-w-full overflow-x-hidden">
       <div className="mb-4">
@@ -773,7 +790,19 @@ const ReportPlacementOverTime: React.FC = () => {
               {chartData.length === 0 ? (
                 <p className="text-muted-foreground">No data to show.</p>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                  <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
+                    <span className="text-muted-foreground">
+                      1st places: <span className="font-medium text-foreground">{placementSummary.firstPlaces}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      Podiums (1–3): <span className="font-medium text-foreground">{placementSummary.podiums}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      Top 10s: <span className="font-medium text-foreground">{placementSummary.top10s}</span>
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -816,6 +845,7 @@ const ReportPlacementOverTime: React.FC = () => {
                     </TableBody>
                   </Table>
                 </div>
+                </>
               )}
             </CardContent>
           </Card>

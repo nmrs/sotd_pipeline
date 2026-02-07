@@ -331,6 +331,42 @@ describe('ReportPlacementOverTime', () => {
     expect(screen.getByText(/100 shaves, 10 users/)).toBeInTheDocument();
   });
 
+  it('shows placement summary above data table with 1st places, podiums, and top 10s', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ReportPlacementOverTime />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(mockGetTables).toHaveBeenCalled();
+    });
+    fireEvent.click(screen.getAllByRole('combobox')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Razors')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Razors'));
+    await user.click(screen.getByRole('tab', { name: /By position/i }));
+    await waitFor(() => {
+      expect(mockGetPivoted).toHaveBeenCalled();
+    });
+    const razorACells = screen.getAllByRole('button', { name: /Razor A/ });
+    await user.click(razorACells[0]);
+    await user.click(screen.getByRole('tab', { name: /By item/i }));
+    await waitFor(() => {
+      expect(mockGetSeries).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Data table')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/1st places:/)).toBeInTheDocument();
+    expect(screen.getByText(/Podiums \(1–3\):/)).toBeInTheDocument();
+    expect(screen.getByText(/Top 10s:/)).toBeInTheDocument();
+    const summaryDiv = screen.getByText(/1st places:/).closest('div');
+    expect(summaryDiv).toHaveTextContent('2');
+    expect(summaryDiv).toHaveTextContent('4');
+  });
+
   it('chart metric control is present and switching to Shaves works', async () => {
     const user = userEvent.setup();
     render(
