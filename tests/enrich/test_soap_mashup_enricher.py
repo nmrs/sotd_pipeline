@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Tests for soap mashup enricher."""
 
+from pathlib import Path
+
 import pytest
 
 from sotd.enrich.soap_mashup_enricher import SoapMashupEnricher
@@ -100,4 +102,46 @@ class TestSoapMashupEnricher:
             "matched": None,
         }
         result = self.enricher.enrich(field_data, "")
+        assert result == {"is_mashup": False}
+
+    def test_enrich_from_catalog_lookup_when_countable_absent(self, tmp_path: Path):
+        """Test is_mashup True when matched has brand+scent but no countable (e.g. correct_matches)."""
+        soaps_yaml = tmp_path / "soaps.yaml"
+        soaps_yaml.write_text(
+            """
+Mama Bear's Soaps:
+  scents:
+    Sample Mashup:
+      countable: false
+      patterns: []
+"""
+        )
+        enricher = SoapMashupEnricher(soaps_path=soaps_yaml)
+        field_data = {
+            "original": "Mama Bear's Soap Tri-Mix",
+            "normalized": "mama bear's soap tri-mix",
+            "matched": {"brand": "Mama Bear's Soaps", "scent": "Sample Mashup"},
+        }
+        result = enricher.enrich(field_data, "")
+        assert result == {"is_mashup": True}
+
+    def test_enrich_from_catalog_lookup_countable_true_not_mashup(self, tmp_path: Path):
+        """Test is_mashup False when catalog lookup returns countable true."""
+        soaps_yaml = tmp_path / "soaps.yaml"
+        soaps_yaml.write_text(
+            """
+Some Brand:
+  scents:
+    Normal Scent:
+      countable: true
+      patterns: []
+"""
+        )
+        enricher = SoapMashupEnricher(soaps_path=soaps_yaml)
+        field_data = {
+            "original": "Some Brand - Normal Scent",
+            "normalized": "some brand - normal scent",
+            "matched": {"brand": "Some Brand", "scent": "Normal Scent"},
+        }
+        result = enricher.enrich(field_data, "")
         assert result == {"is_mashup": False}
