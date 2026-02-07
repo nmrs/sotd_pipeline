@@ -558,6 +558,13 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
                 i += 1
                 continue
 
+            elif arg.startswith("--no-slug"):
+                # Only pass to report phase
+                if phase == "report":
+                    phase_args.append(arg)
+                i += 1
+                continue
+
             elif arg.startswith("--skip-unchanged"):
                 # Only pass to fetch_json phase
                 if phase == "fetch_json":
@@ -967,6 +974,11 @@ Examples:
         help="Report output format: markdown, json, or both (only applies to report phase, default: markdown)",
     )
     parser.add_argument(
+        "--no-slug",
+        action="store_true",
+        help="Do not add WSDB links to soap names (only applies to report phase)",
+    )
+    parser.add_argument(
         "--annual",
         action="store_true",
         help="Generate annual reports (only applies to report phase, requires --year or --range)",
@@ -1116,6 +1128,8 @@ Examples:
             common_args.extend(["--type", args.type])
         # Always add format (defaults to "markdown" if not specified)
         common_args.extend(["--format", args.format])
+        if args.no_slug:
+            common_args.append("--no-slug")
         if args.annual:
             common_args.append("--annual")
 
