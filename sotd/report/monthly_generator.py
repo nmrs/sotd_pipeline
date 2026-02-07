@@ -25,6 +25,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
         comparison_data: Optional[Dict[str, Any]] = None,
         debug: bool = False,
         template_path: Optional[str] = None,
+        no_slug: bool = False,
     ):
         """Initialize the unified monthly report generator.
 
@@ -35,6 +36,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
             comparison_data: Historical data for delta calculations
             debug: Enable debug logging
             template_path: Optional custom path to template file for testing
+            no_slug: If True, do not add WSDB links to soap names
 
         Raises:
             ValueError: If there's no meaningful data to process (fail-fast behavior)
@@ -58,6 +60,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
 
         super().__init__(metadata, data, comparison_data, debug, template_path)
         self.report_type = report_type
+        self.no_slug = no_slug
 
     def generate_header(self) -> str:
         """Generate the report header.
@@ -226,7 +229,7 @@ class MonthlyReportGenerator(BaseReportGenerator):
                     rows=parameters.get("rows"),
                     columns=parameters.get("columns"),
                     deltas=parameters.get("deltas") == "true",
-                    wsdb=parameters.get("wsdb") == "true",
+                    wsdb=(parameters.get("wsdb") == "true") and not self.no_slug,
                     **numeric_limits,
                 )
 

@@ -14,6 +14,7 @@ def create_report_generator(
     comparison_data: Optional[Dict[str, Any]] = None,
     debug: bool = False,
     template_path: Optional[str] = None,
+    no_slug: bool = False,
 ) -> BaseReportGenerator:
     """Create a report generator based on the report type.
 
@@ -24,6 +25,7 @@ def create_report_generator(
         comparison_data: Historical data for delta calculations
         debug: Enable debug logging
         template_path: Optional custom path to template file for testing
+        no_slug: If True, do not add WSDB links to soap names
 
     Returns:
         Appropriate report generator instance
@@ -36,7 +38,7 @@ def create_report_generator(
 
     if report_type in ["hardware", "software"]:
         return MonthlyReportGenerator(
-            report_type, metadata, data, comparison_data, debug, template_path
+            report_type, metadata, data, comparison_data, debug, template_path, no_slug
         )
     else:
         raise ValueError(f"Unsupported report type: {report_type}")

@@ -19,6 +19,7 @@ def _process_month(
     debug: bool,
     delta: bool,
     output_format: str = "markdown",
+    no_slug: bool = False,
 ) -> dict:
     """Process a single month for report generation."""
     month_str = f"{year:04d}-{month:02d}"
@@ -96,7 +97,7 @@ def _process_month(
         # Construct template path from data_root (templates are in data_root/report_templates)
         template_path = str(data_root / "report_templates")
         generator = process.create_report_generator(
-            report_type, metadata, data, comparison_data, debug, template_path
+            report_type, metadata, data, comparison_data, debug, template_path, no_slug
         )
 
         # Generate and save markdown if requested
@@ -213,6 +214,7 @@ def run_report(args) -> bool:
             args.debug,
             getattr(args, "delta", False),
             args.format,
+            getattr(args, "no_slug", False),
         )
         results = processor.process_months_parallel(
             month_tuples, _process_month, process_args, max_workers, "Processing"
@@ -231,6 +233,7 @@ def run_report(args) -> bool:
             args.debug,
             getattr(args, "delta", False),
             args.format,
+            getattr(args, "no_slug", False),
         )
         results = processor.process_months_sequential(
             month_tuples, _process_month, process_args, "Months"

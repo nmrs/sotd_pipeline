@@ -46,6 +46,13 @@ class ReportCLIParser(BaseCLIParser):
             help="Output format: markdown, json, or both (default: markdown)",
         )
 
+        self.add_argument(
+            "--no-slug",
+            action="store_true",
+            default=False,
+            help="Do not add WSDB links to soap names in reports",
+        )
+
     def _validate_range_with_annual_support(self, value: str) -> str:
         """Validate range format with support for both monthly and annual formats."""
         # Check if this is an annual range (YYYY:YYYY format)
@@ -145,6 +152,7 @@ CLI matrix
 --type hardware|software|all → report type (default: all)
 --data-dir DIR             → data directory for report file and input data (default: data, or SOTD_DATA_DIR env var)
 --format markdown|json|both → output format (default: markdown)
+--no-slug                  → do not add WSDB links to soap names
 --debug                    → enable debug logging
 --force                    → force overwrite existing files
 """,

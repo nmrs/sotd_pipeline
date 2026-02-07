@@ -1005,6 +1005,23 @@ class TableGenerator:
         if df.empty:
             return ""
 
+        # Most Boring Shaver table: apply minimum shaves in one place (DRY). Monthly uses 5,
+        # annual uses 50. Template can still pass shaves:N to override.
+        if table_name == "user-soap-brand-scent-diversity" and columns and "hhi" in columns:
+            if "shaves" not in numeric_limits:
+                numeric_limits = dict(numeric_limits)
+                numeric_limits["shaves"] = (
+                    50 if (self.current_month or "").endswith("-12") else 5
+                )
+
+        # Apply numeric column limits first (e.g. shaves:5) so filtering happens before
+        # sorting/ranking. This ensures tables like "Most Boring Shaver" exclude low-activity
+        # rows regardless of sort/rank logic.
+        if numeric_limits:
+            limited_df = self._apply_numeric_limits(df, numeric_limits)
+            if isinstance(limited_df, pd.DataFrame):
+                df = limited_df
+
         # Extract sort information from columns parameter if provided
         sort_info = []
         if columns:
@@ -1013,26 +1030,6 @@ class TableGenerator:
             except ValueError:
                 # If parsing fails, we'll catch it later in _apply_column_operations
                 pass
-
-        # Apply numeric column limits BEFORE sorting if:
-        # 1. Custom sort is specified (sort_info is not empty)
-        # 2. AND the sort column is different from the numeric limit column
-        # This ensures we filter before ranking when sorting by a different column
-        numeric_limits_applied_early = False
-        if numeric_limits and sort_info:
-            # Get the sort column name (first sort column)
-            sort_column = sort_info[0][0] if sort_info else None
-
-            # Get the numeric limit column name
-            limit_column = next(iter(numeric_limits.keys())) if numeric_limits else None
-
-            # If sort column differs from limit column, apply limit before sorting
-            if sort_column and limit_column and sort_column != limit_column:
-                limited_df = self._apply_numeric_limits(df, numeric_limits)
-                if isinstance(limited_df, pd.DataFrame):
-                    df = limited_df
-                # Mark that we've applied the limit early
-                numeric_limits_applied_early = True
 
         # Apply sorting early if sort directions are specified
         if sort_info:
@@ -1074,12 +1071,6 @@ class TableGenerator:
         # Ensure df is DataFrame for type checking
         if not isinstance(df, pd.DataFrame):
             raise ValueError("Expected DataFrame but got other type")
-
-        # Apply numeric column limits if specified (only if not already applied before sorting)
-        if numeric_limits and not numeric_limits_applied_early:
-            limited_df = self._apply_numeric_limits(df, numeric_limits)
-            if isinstance(limited_df, pd.DataFrame):
-                df = limited_df
 
         # Add delta columns if requested (BEFORE rank formatting so numeric ranks are available)
         if deltas:

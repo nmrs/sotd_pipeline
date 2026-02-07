@@ -65,6 +65,24 @@ class TestMonthlyReportGenerator:
 
         assert generator.template_path == template_path
 
+    def test_init_with_no_slug(self):
+        """Test initialization with no_slug=True disables WSDB links."""
+        metadata = {"month": "2025-01", "total_shaves": 100}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
+
+        generator = MonthlyReportGenerator("hardware", metadata, data, no_slug=True)
+
+        assert generator.no_slug is True
+
+    def test_init_no_slug_default_false(self):
+        """Test that no_slug defaults to False when not provided."""
+        metadata = {"month": "2025-01", "total_shaves": 100}
+        data = {"razors": [{"name": "Test Razor", "shaves": 1}]}  # Minimal valid data
+
+        generator = MonthlyReportGenerator("hardware", metadata, data)
+
+        assert getattr(generator, "no_slug", False) is False
+
     def test_generate_header_deprecated(self):
         """Test that generate_header returns empty string (deprecated)."""
         metadata = {"month": "2025-01", "total_shaves": 100}
@@ -240,6 +258,39 @@ class TestMonthlyReportGenerator:
         )
 
         assert result == "Generated software report"
+
+    @patch("sotd.report.monthly_generator.TemplateProcessor")
+    @patch("sotd.report.monthly_generator.TableGenerator")
+    def test_no_slug_forces_wsdb_false_in_enhanced_table(
+        self, mock_table_generator_class, mock_template_processor_class
+    ):
+        """Test that with no_slug=True, generate_table is called with wsdb=False even when template has wsdb:true."""
+        mock_table_generator = Mock()
+        mock_table_generator.generate_table.return_value = (
+            "| Soap | Shaves |\n|------|--------|\n| Test | 10 |"
+        )
+        mock_table_generator_class.return_value = mock_table_generator
+
+        mock_processor = Mock()
+        # Template with enhanced syntax that requests wsdb:true
+        mock_processor.get_template.return_value = (
+            "# Software Report\n\n{{tables.soaps|wsdb:true|rows:5}}"
+        )
+        mock_processor.process_template.return_value = "Generated report"
+        mock_template_processor_class.return_value = mock_processor
+
+        metadata = {"month": "2025-01", "total_shaves": 100}
+        data = {"soaps": [{"name": "Test Soap", "brand": "Brand", "scent": "Scent", "shaves": 1}]}
+
+        generator = MonthlyReportGenerator("software", metadata, data, no_slug=True)
+        generator.generate_notes_and_caveats()
+
+        # Should have been called with wsdb=False because no_slug=True overrides template wsdb:true
+        mock_table_generator.generate_table.assert_called()
+        calls = mock_table_generator.generate_table.call_args_list
+        soaps_call = next((c for c in calls if c[0][0] == "soaps"), None)
+        assert soaps_call is not None
+        assert soaps_call[1].get("wsdb") is False
 
     @patch("sotd.report.monthly_generator.TemplateProcessor")
     @patch("sotd.report.monthly_generator.TableGenerator")

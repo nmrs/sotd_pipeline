@@ -132,7 +132,14 @@ def run_annual_report(args) -> None:
                 # Construct template path from data_root (templates are in data_root/report_templates)
                 template_path = str(data_root / "report_templates")
                 generator = create_annual_report_generator(
-                    report_type, year, metadata, data, comparison_data, args.debug, template_path
+                    report_type,
+                    year,
+                    metadata,
+                    data,
+                    comparison_data,
+                    args.debug,
+                    template_path,
+                    no_slug=getattr(args, "no_slug", False),
                 )
 
                 # Generate and save markdown if requested

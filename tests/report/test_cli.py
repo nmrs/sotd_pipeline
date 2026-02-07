@@ -95,6 +95,18 @@ class TestReportCLI:
         assert "--annual" in help_text
         assert "annual report" in help_text.lower()
 
+    def test_no_slug_argument_parsing(self):
+        """Test --no-slug argument parsing."""
+        parser = get_parser()
+        args = parser.parse_args(["--month", "2023-01", "--no-slug"])
+        assert getattr(args, "no_slug", False) is True
+
+    def test_no_slug_default_false(self):
+        """Test that no_slug defaults to False when not provided."""
+        parser = get_parser()
+        args = parser.parse_args(["--month", "2023-01"])
+        assert getattr(args, "no_slug", False) is False
+
     def test_annual_backward_compatibility_monthly(self):
         """Test that annual flag doesn't break monthly functionality."""
         parser = get_parser()

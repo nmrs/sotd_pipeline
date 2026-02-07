@@ -214,9 +214,13 @@ class TemplateProcessor:
         if not tables:
             return content
 
-        # Sort tables by length (longest first) to ensure enhanced placeholders
-        # are replaced before basic ones, preventing partial replacements
-        sorted_tables = sorted(tables.items(), key=lambda x: len(x[0]), reverse=True)
+        # Sort so placeholders with "shaves:5" (e.g. Most Boring) are replaced first,
+        # then by length (longest first). This ensures the boring-table placeholder
+        # gets its filtered content before any other same-table placeholder.
+        sorted_tables = sorted(
+            tables.items(),
+            key=lambda x: ("shaves:5" not in x[0], -len(x[0])),
+        )
 
         # Convert to pandas Series for vectorized string operations
         content_series = pd.Series([content])
