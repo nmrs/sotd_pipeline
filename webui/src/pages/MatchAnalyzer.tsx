@@ -49,12 +49,14 @@ const MatchAnalyzer: React.FC = () => {
     | 'all'
     | 'unconfirmed'
     | 'regex'
+    | 'unmatched'
     | 'intentionally_unmatched'
     | 'complete_brushes'
     | 'matches'
     | 'brand'
     | 'dash_split'
   >('mismatches');
+  const [resultLimit, setResultLimit] = useState<number>(1000);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MismatchAnalysisResult | null>(null);
@@ -218,18 +220,16 @@ const MatchAnalyzer: React.FC = () => {
         setResults(null);
       } else {
         // Don't pass display_mode to API for modes that require frontend filtering
-        // The backend's filtering logic doesn't match the frontend's expectations
-        // (e.g., backend filters regex by mismatch_type, frontend filters by match_type)
-        // Instead, always fetch all data and let the frontend filter it
-        const apiDisplayMode = ['regex', 'brand', 'dash_split'].includes(displayMode) 
-          ? 'all' 
+        const apiDisplayMode = ['regex', 'brand', 'dash_split'].includes(displayMode)
+          ? 'all'
           : displayMode;
         const result = await analyzeMismatch({
           field: selectedField,
-          months: allMonths, // Pass combined months array
+          months: allMonths,
           threshold,
           use_enriched_data: useEnrichedData,
           display_mode: apiDisplayMode,
+          limit: resultLimit,
         });
 
         setResults(result);
@@ -243,7 +243,7 @@ const MatchAnalyzer: React.FC = () => {
       // Refresh queue errors so panel shows current failures (even if month/field unchanged)
       fetchQueueErrors();
     }
-  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, fetchQueueErrors]);
+  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, resultLimit, fetchQueueErrors]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
@@ -1227,9 +1227,15 @@ const MatchAnalyzer: React.FC = () => {
         break;
 
       case 'intentionally_unmatched':
-        // Show only intentionally unmatched items
         filtered = results.mismatch_items.filter(
           item => item.mismatch_type === 'intentionally_unmatched'
+        );
+        break;
+
+      case 'unmatched':
+        // Show only truly unmatched items (no match from catalog)
+        filtered = results.mismatch_items.filter(
+          item => item.mismatch_type === 'unmatched'
         );
         break;
 
@@ -1382,9 +1388,10 @@ const MatchAnalyzer: React.FC = () => {
         all: groups.length,
         unconfirmed: groups.filter(g => groupHasMatchingPatterns(g, 'unconfirmed')).length,
         regex: groups.filter(g => groupHasMatchingPatterns(g, 'regex')).length,
-        intentionally_unmatched: 0, // Not applicable for grouped view
+        unmatched: 0,
+        intentionally_unmatched: 0,
         matches: groups.filter(g => groupHasMatchingPatterns(g, 'matches')).length,
-        complete_brushes: 0, // Not applicable for soap field
+        complete_brushes: 0,
         brand: groups.filter(g => groupHasMatchingPatterns(g, 'brand')).length,
         dash_split: groups.filter(g => groupHasMatchingPatterns(g, 'dash_split')).length,
       };
@@ -1397,6 +1404,7 @@ const MatchAnalyzer: React.FC = () => {
         all: 0,
         unconfirmed: 0,
         regex: 0,
+        unmatched: 0,
         intentionally_unmatched: 0,
         matches: 0,
         complete_brushes: 0,
@@ -1451,6 +1459,9 @@ const MatchAnalyzer: React.FC = () => {
     const intentionallyUnmatchedCount = returnedItems.filter(
       item => item.mismatch_type === 'intentionally_unmatched'
     ).length;
+    const unmatchedCount = returnedItems.filter(
+      item => item.mismatch_type === 'unmatched'
+    ).length;
     const matchesCount = returnedItems.filter(item => isItemConfirmed(item)).length;
     const completeBrushesCount = returnedItems.filter(
       item => (item as any).is_complete_brush === true
@@ -1484,9 +1495,10 @@ const MatchAnalyzer: React.FC = () => {
 
     return {
       mismatches: mismatchesCount,
-      all: returnedItems.length, // Use actual returned items count instead of totalMatches
+      all: returnedItems.length,
       unconfirmed: unconfirmedCount,
       regex: unconfirmedRegexMatches.length,
+      unmatched: unmatchedCount,
       intentionally_unmatched: intentionallyUnmatchedCount,
       matches: matchesCount,
       complete_brushes: completeBrushesCount,
@@ -1803,6 +1815,26 @@ const MatchAnalyzer: React.FC = () => {
                 </span>
                 <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
                   Show only regex matches that need confirmation
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('unmatched')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'unmatched' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only unmatched items (no catalog match)'
+              >
+                <Filter className='h-4 w-4' />
+                Unmatched
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unmatched'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().unmatched}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only unmatched items (no catalog match)
                 </span>
               </Button>
               <Button

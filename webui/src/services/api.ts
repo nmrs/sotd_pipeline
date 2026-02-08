@@ -137,61 +137,22 @@ export const getCommentDetail = async (
   }
 };
 
-// Analysis operations
-export interface UnmatchedAnalysisRequest {
-  field: string;
-  months: string[];
-  limit?: number;
-}
-
-export interface UnmatchedItem {
-  item: string;
-  count: number;
-  examples: string[];
-  comment_ids: string[];
-  // Optional fields for brush matching data
-  match_type?: string;
-  matched?: Record<string, unknown>;
-  unmatched?: Record<string, unknown>;
-}
-
-export interface UnmatchedAnalysisResult {
-  field: string;
-  months: string[];
-  total_unmatched: number;
-  unmatched_items: UnmatchedItem[];
-  processing_time: number;
-  partial_results?: boolean;
-  error?: string;
-  missing_data?: boolean;
-}
-
-export const analyzeUnmatched = async (
-  request: UnmatchedAnalysisRequest
-): Promise<UnmatchedAnalysisResult> => {
-  try {
-    const response = await api.post('/analysis/unmatched', request);
-    return response.data;
-  } catch (error) {
-    console.error('Failed to analyze unmatched items:', error);
-    throw error;
-  }
-};
-
-// Mismatch analyzer types and functions
+// Mismatch analyzer types and functions (includes unmatched via display_mode: 'unmatched')
 export interface MismatchAnalysisRequest {
   field: string;
-  months: string[]; // Changed from month: string to months: string[]
+  months: string[];
   threshold?: number;
   use_enriched_data?: boolean;
   display_mode?:
-  | 'mismatches'
-  | 'all'
-  | 'unconfirmed'
-  | 'regex'
-  | 'intentionally_unmatched'
-  | 'complete_brushes'
-  | 'matches';
+    | 'mismatches'
+    | 'all'
+    | 'unconfirmed'
+    | 'regex'
+    | 'intentionally_unmatched'
+    | 'complete_brushes'
+    | 'matches'
+    | 'unmatched';
+  limit?: number;
 }
 
 export interface MismatchItem {

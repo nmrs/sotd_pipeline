@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import BrushSplitValidator from './pages/BrushSplitValidator';
 import BrushValidation from './pages/BrushValidation';
-import UnmatchedAnalyzer from './pages/UnmatchedAnalyzer';
 import PerformanceTest from './components/data/PerformanceTest';
 import Header from './components/layout/Header';
 import MessageDisplay from './components/feedback/MessageDisplay';
@@ -31,7 +30,6 @@ function App() {
             <Route path='/' element={<Dashboard />} />
             <Route path='/brush-split-validator' element={<BrushSplitValidator />} />
             <Route path='/brush-validation' element={<BrushValidation />} />
-            <Route path='/unmatched-analyzer' element={<UnmatchedAnalyzer />} />
             <Route path='/performance-test' element={<PerformanceTest />} />
             <Route path='/mismatch' element={<MatchAnalyzer />} />
             <Route path='/catalog-validator' element={<CatalogValidator />} />

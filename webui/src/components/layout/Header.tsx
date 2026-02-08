@@ -42,7 +42,6 @@ const Header: React.FC = () => {
       icon: '📊',
       items: [
         { path: '/', label: 'Dashboard', icon: '🏠' },
-        { path: '/unmatched-analyzer', label: 'Unmatched', icon: '🔍' },
         { path: '/mismatch', label: 'Match Analyzer', icon: '📊' },
         { path: '/soap-analyzer', label: 'Soap Analyzer', icon: '🧼' },
         { path: '/monthly-user-posts', label: 'Monthly User Posts', icon: '📅' },

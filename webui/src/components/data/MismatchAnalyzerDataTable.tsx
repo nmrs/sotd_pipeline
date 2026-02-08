@@ -269,6 +269,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return '✨';
       case 'exact_matches':
         return '✅';
+      case 'unmatched':
+        return '⬜';
+      case 'intentionally_unmatched':
+        return '🚫';
       default:
         return '❓';
     }
@@ -296,6 +300,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return 'text-red-600';
       case 'no_match_found':
         return 'text-red-600';
+      case 'unmatched':
+        return 'text-amber-600';
+      case 'intentionally_unmatched':
+        return 'text-slate-600';
       default:
         return 'text-gray-600';
     }
@@ -325,6 +333,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return 'Perfect Regex Matches';
       case 'exact_matches':
         return 'Exact Match';
+      case 'unmatched':
+        return 'Unmatched';
+      case 'intentionally_unmatched':
+        return 'Intentionally Unmatched';
       default:
         return mismatchType;
     }

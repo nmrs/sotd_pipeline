@@ -63,14 +63,6 @@ const Dashboard: React.FC = () => {
 
   const analyzerCards: ToolCard[] = [
     {
-      title: 'Unmatched Analyzer',
-      description:
-        'Identify unmatched items across selected months to find potential catalog additions.',
-      icon: '🔍',
-      color: 'blue',
-      path: '/unmatched-analyzer',
-    },
-    {
       title: 'Match Analyzer',
       description:
         'Analyze mismatched items to identify potential catalog conflicts and inconsistencies.',
