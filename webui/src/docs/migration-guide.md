@@ -75,7 +75,6 @@ For specialized use cases, use our specialized table components:
 ```tsx
 // ✅ NEW - Specialized table components
 import { BrushSplitDataTable } from '@/components/data/BrushSplitDataTable';
-import { UnmatchedAnalyzerDataTable } from '@/components/data/UnmatchedAnalyzerDataTable';
 import { PerformanceDataTable } from '@/components/data/PerformanceDataTable';
 import { BrushDataTable } from '@/components/data/BrushDataTable';
 
@@ -86,13 +85,8 @@ import { BrushDataTable } from '@/components/data/BrushDataTable';
   onSelectionChange={handleSelectionChange}
 />
 
-// For unmatched analyzer with filtering and virtualization
-<UnmatchedAnalyzerDataTable
-  data={unmatchedData}
-  filteredStatus={filteredStatus}
-  onFilteredStatusChange={handleFilteredStatusChange}
-  fieldType="brush"
-/>
+// For unmatched items: use Match Analyzer page with display mode "Unmatched"
+// (MismatchAnalyzerDataTable shows mismatch_type 'unmatched' and supports Exclude/Include)
 
 // For performance metrics with monitoring
 <PerformanceDataTable data={performanceData} />

@@ -468,34 +468,8 @@ import { BrushSplitDataTable } from '@/components/data/BrushSplitDataTable';
 - `onSelectionChange`: (selectedIndices: number[]) => void - Selection handler
 - `selectedIndices`: number[] - Currently selected indices
 
-### UnmatchedAnalyzerDataTable
-**Purpose**: Data table for unmatched analyzer with filtering and virtualization
-**Foundation**: ShadCN DataTable with virtualization and filtering
-
-```tsx
-import { UnmatchedAnalyzerDataTable } from '@/components/data/UnmatchedAnalyzerDataTable';
-
-<UnmatchedAnalyzerDataTable
-  data={unmatchedData}
-  filteredStatus={filteredStatus}
-  pendingChanges={pendingChanges}
-  onFilteredStatusChange={handleFilteredStatusChange}
-  onCommentClick={handleCommentClick}
-  commentLoading={commentLoading}
-  fieldType="brush"
-  columnWidths={columnWidths}
-/>
-```
-
-**Props**:
-- `data`: UnmatchedItem[] - Array of unmatched items
-- `filteredStatus`: Record<string, boolean> - Filter status for each item
-- `pendingChanges`: Record<string, boolean> - Pending changes
-- `onFilteredStatusChange`: (itemName: string, isFiltered: boolean) => void - Filter change handler
-- `onCommentClick`: (commentId: string) => void - Comment click handler
-- `commentLoading`: boolean - Comment loading state
-- `fieldType`: 'razor' | 'blade' | 'soap' | 'brush' - Field type
-- `columnWidths`: object - Column width configuration
+### Unmatched items in Match Analyzer
+Unmatched items (no catalog match) are shown in **Match Analyzer** via the **MismatchAnalyzerDataTable** with display mode "Unmatched". Use the Match Analyzer page, select field and months, then click the "Unmatched" filter to see items with `mismatch_type === 'unmatched'`. Exclude/Include (mark as intentionally unmatched) is available via row selection and the "Mark as intentionally unmatched" / "Remove from intentionally unmatched" actions.
 
 ### PerformanceDataTable
 **Purpose**: Data table for performance metrics with monitoring
