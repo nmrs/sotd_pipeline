@@ -421,6 +421,20 @@ class MismatchAnalyzer(AnalysisTool):
                 f"[yellow]Warning: Could not update cache info for {field}: {e}[/yellow]"
             )
 
+    def _load_filtered_items(self, field: str) -> set:
+        """Load intentionally unmatched item keys for the given field (case-insensitive)."""
+        try:
+            from sotd.utils.filtered_entries import FilteredEntriesManager
+
+            filtered_file = project_root / "data" / "intentionally_unmatched.yaml"
+            if filtered_file.exists():
+                manager = FilteredEntriesManager(filtered_file)
+                manager.load()
+                return set(manager._data.get(field, {}).keys())
+        except Exception as e:
+            self.console.print(f"[yellow]Warning: Could not load filtered items: {e}[/yellow]")
+        return set()
+
     def identify_mismatches(self, data: Dict, field: str, args) -> Dict[str, List[Dict]]:
         """Identify potential mismatches in the data for a given field."""
         mismatches = {
@@ -430,7 +444,8 @@ class MismatchAnalyzer(AnalysisTool):
             "exact_matches": [],
             "perfect_regex_matches": [],
             "good_matches": [],
-            "intentionally_unmatched": [],  # Add new category for intentionally unmatched items
+            "intentionally_unmatched": [],
+            "unmatched": [],  # Truly unmatched (no match, not in intentionally_unmatched)
         }
 
         # Extract the actual records from the data structure
@@ -438,6 +453,8 @@ class MismatchAnalyzer(AnalysisTool):
         if not records:
             self.console.print("[yellow]No records found in data[/yellow]")
             return mismatches
+
+        filtered_items = self._load_filtered_items(field)
 
         # Debug: Show correct matches loading info
         if args.debug:
@@ -523,8 +540,53 @@ class MismatchAnalyzer(AnalysisTool):
                 )
                 continue
 
-            # Skip records without matched data (except for intentionally unmatched)
+            # Records without matched data: treat as intentionally_unmatched if in filter list,
+            # otherwise as truly unmatched (single pass - no separate unmatched analyzer).
             if not matched:
+                key_lower = normalized.lower()
+                if key_lower in filtered_items:
+                    mismatches["intentionally_unmatched"].append(
+                        {
+                            "record": record,
+                            "is_confirmed": True,
+                            "reason": "Intentionally unmatched item",
+                            "confidence": 1.0,
+                            "count": 1,
+                            "examples": (
+                                [str(record.get("_source_file", ""))]
+                                if record.get("_source_file")
+                                else []
+                            ),
+                            "comment_ids": (
+                                [str(record.get("id", ""))] if record.get("id") else []
+                            ),
+                            "is_split_brush": is_split_brush,
+                            "handle_component": handle_component,
+                            "knot_component": knot_component,
+                        }
+                    )
+                else:
+                    mismatches["unmatched"].append(
+                        {
+                            "record": record,
+                            "field_data": field_data,
+                            "is_confirmed": False,
+                            "reason": "No match",
+                            "confidence": 0.0,
+                            "count": 1,
+                            "examples": (
+                                [str(record.get("_source_file", ""))]
+                                if record.get("_source_file")
+                                else []
+                            ),
+                            "comment_ids": (
+                                [str(record.get("id", ""))] if record.get("id") else []
+                            ),
+                            "is_split_brush": is_split_brush,
+                            "handle_component": handle_component,
+                            "knot_component": knot_component,
+                        }
+                    )
                 continue
 
             # Debug: Show processing info for first few records

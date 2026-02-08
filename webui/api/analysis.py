@@ -7,7 +7,6 @@ import subprocess
 import sys
 import time
 import traceback
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -38,25 +37,14 @@ from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
 
 try:
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer  # noqa: E402
-    from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer  # noqa: E402
 
     logger.info("✅ MismatchAnalyzer imported successfully")
-    logger.info("✅ UnmatchedAnalyzer imported successfully")
 except ImportError as e:
     # Fallback for development
     logger.error(f"❌ Failed to import analyzers: {e}")
-    UnmatchedAnalyzer = None
     MismatchAnalyzer = None
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
-
-
-class UnmatchedAnalysisRequest(BaseModel):
-    """Request model for unmatched analysis."""
-
-    field: str = Field(..., description="Field to analyze (razor, blade, brush, soap, soap_brand)")
-    months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
-    limit: int = Field(default=50, ge=1, description="Maximum number of results to return")
 
 
 class MismatchAnalysisRequest(BaseModel):
@@ -71,8 +59,15 @@ class MismatchAnalysisRequest(BaseModel):
     display_mode: Optional[str] = Field(
         default="mismatches",
         description=(
-            "Display mode: 'mismatches' (default), 'matches' (confirmed matches only), or 'all'"
+            "Display mode: 'mismatches', 'matches', 'all', 'unmatched', "
+            "'intentionally_unmatched', 'regex', 'unconfirmed', 'complete_brushes'"
         ),
+    )
+    limit: Optional[int] = Field(
+        default=1000,
+        ge=1,
+        le=10000,
+        description="Max combined results (matched + unmatched) to return (default 1000)",
     )
 
 
@@ -127,28 +122,6 @@ class CommentDetail(BaseModel):
     url: str
     product_data: Optional[CommentProductData] = None
     data_source: Optional[str] = None  # "enriched" or "matched"
-
-
-class UnmatchedItem(BaseModel):
-    """Model for individual unmatched item."""
-
-    item: str
-    count: int
-    examples: List[str]
-    comment_ids: List[str]
-    unmatched: Optional[dict] = None
-
-
-class UnmatchedAnalysisResponse(BaseModel):
-    """Response model for unmatched analysis."""
-
-    field: str
-    months: List[str]
-    total_unmatched: int
-    unmatched_items: List[UnmatchedItem]
-    processing_time: float
-    partial_results: bool = False
-    error: Optional[str] = None
 
 
 class MismatchItem(BaseModel):
@@ -584,180 +557,6 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
         raise HTTPException(status_code=500, detail=f"Error running match phase: {str(e)}")
 
 
-@router.post("/unmatched", response_model=UnmatchedAnalysisResponse)
-async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnalysisResponse:
-    """Analyze unmatched field values for the specified months."""
-    try:
-        # Validate input parameters
-        validate_field(request.field)
-        validate_months(request.months)
-
-        logger.info(
-            f"Starting unmatched analysis for field '{request.field}' "
-            f"across {len(request.months)} months"
-        )
-
-        # Create analyzer instance
-        if UnmatchedAnalyzer is None:
-            raise HTTPException(
-                status_code=500,
-                detail=(
-                    "UnmatchedAnalyzer not available. "
-                    "Please ensure the SOTD pipeline is properly installed."
-                ),
-            )
-        analyzer = UnmatchedAnalyzer()
-
-        # Process each month individually to handle non-sequential months correctly
-        all_results = []
-
-        for month in request.months:
-            # Create args object for each month
-            class Args:
-                def __init__(self):
-                    self.month = month  # Single month
-                    self.year = None
-                    self.range = None
-                    self.start = None
-                    self.end = None
-                    self.delta_months = None  # Add this to match month_span function
-                    self.field = request.field
-                    self.limit = request.limit
-                    self.out_dir = get_data_directory()
-                    self.debug = False
-
-            args = Args()
-
-            try:
-                # Use the same logic as command line tool - call analyze_unmatched directly
-                result = analyzer.analyze_unmatched(args)
-                all_results.append(result)
-                logger.info(f"Processed {month}: {len(result)} unmatched items")
-            except Exception as e:
-                logger.warning(f"Error processing month {month}: {e}")
-                continue
-
-        # Combine results from all months using the same logic as command line tool
-        combined_unmatched = defaultdict(list)
-
-        for result in all_results:
-            for item, file_infos in result.items():
-                # For brush field, use case-insensitive grouping
-                if request.field == "brush":
-                    # Use lowercase as the key for case-insensitive grouping
-                    key = item.lower()
-                    combined_unmatched[key].extend(file_infos)
-                else:
-                    # For other fields, use the original item as key
-                    combined_unmatched[item].extend(file_infos)
-
-        # Convert to response format
-        unmatched_items = []
-        case_groups = {}  # Initialize for both brush and non-brush cases
-
-        # For brush field, we need to handle case-insensitive grouping
-        if request.field == "brush":
-            # Use the first occurrence of each case-insensitive group as the display text
-            for key, file_infos in combined_unmatched.items():
-                # Find the first occurrence of this key in the original results
-                first_occurrence = None
-                for result in all_results:
-                    for item, _ in result.items():
-                        if item.lower() == key:
-                            first_occurrence = item
-                            break
-                    if first_occurrence:
-                        break
-
-                # Use the first occurrence, or the key if not found
-                display_text = first_occurrence or key
-                case_groups[display_text] = file_infos
-
-            # Sort by the display text (alphabetically), then by count descending
-            sorted_items = sorted(case_groups.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
-                : request.limit
-            ]
-        else:
-            # For other fields, use the original sorting logic
-            sorted_items = sorted(
-                combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1]))
-            )[: request.limit]
-
-        for original_text, file_infos in sorted_items:
-            # Extract comment IDs and examples from file_infos (same as command line tool)
-            comment_ids = [
-                info.get("comment_id", "") for info in file_infos if info.get("comment_id")
-            ]
-            examples = [info.get("file", "") for info in file_infos]
-
-            # Sort comment IDs by month (newest first) - return ALL comment IDs
-            unique_comment_ids = []
-            if comment_ids:
-                # Get all comment IDs with their source files, prioritizing newer months
-                comment_files = {}
-                for info in file_infos:
-                    comment_id = info.get("comment_id", "")
-                    if comment_id:
-                        # Get source file (month) for sorting
-                        source_file = info.get("file", "")
-                        # Only keep if we haven't seen this comment_id, or if this month is newer
-                        if (
-                            comment_id not in comment_files
-                            or source_file > comment_files[comment_id]
-                        ):
-                            comment_files[comment_id] = source_file
-
-                # Sort by filename (month) newest first - return ALL comment IDs
-                sorted_comments = sorted(comment_files.items(), key=lambda x: x[1], reverse=True)
-                unique_comment_ids = [comment_id for comment_id, _ in sorted_comments]
-
-            unique_examples = list(set(examples))[:5] if examples else []
-
-            # Extract unmatched components data for brush field
-            unmatched_components = None
-            if request.field == "brush" and file_infos:
-                # Check if any file_info has unmatched_components
-                for file_info in file_infos:
-                    if isinstance(file_info, dict) and "unmatched_components" in file_info:
-                        unmatched_components = file_info["unmatched_components"]
-                        break
-
-            unmatched_items.append(
-                UnmatchedItem(
-                    item=original_text,
-                    count=len(file_infos),
-                    examples=unique_examples,
-                    comment_ids=unique_comment_ids,
-                    unmatched=unmatched_components,
-                )
-            )
-
-        # Use the correct total count based on field type
-        if request.field == "brush":
-            total_unmatched = len(case_groups)
-        else:
-            total_unmatched = len(combined_unmatched)
-
-        logger.info(f"Analysis complete. Found {total_unmatched} unmatched items across all months")
-
-        return UnmatchedAnalysisResponse(
-            field=request.field,
-            months=request.months,
-            total_unmatched=total_unmatched,
-            unmatched_items=unmatched_items,
-            processing_time=0.0,  # TODO: Add actual timing
-        )
-
-    except HTTPException:
-        # Re-raise HTTP exceptions as-is
-        raise
-    except Exception as e:
-        logger.error(f"Error in unmatched analysis: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Error performing unmatched analysis: {str(e)}"
-        )
-
-
 @router.get("/debug/version")
 async def debug_version():
     """Debug endpoint to check if the server is using updated code."""
@@ -941,6 +740,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     # For intentionally unmatched mode, only show those items
                     if mismatch_type != "intentionally_unmatched":
                         continue
+                elif request.display_mode == "unmatched":
+                    # For unmatched mode, only show truly unmatched items (no match)
+                    if mismatch_type != "unmatched":
+                        continue
                 elif request.display_mode == "complete_brushes":
                     # For complete brushes mode, only show split brush items
                     # Filter out items that don't meet the threshold
@@ -963,13 +766,15 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 match_type = field_data.get("match_type", "")
                 record_id = record.get("id", "")
 
-                # Handle intentionally unmatched items differently - they don't have matched data
+                # Handle intentionally unmatched and truly unmatched - they have no matched data
                 if mismatch_type == "intentionally_unmatched":
-                    # For intentionally unmatched items, use empty matched dict and set
-                    # match_type to "filtered"
                     matched = {}
                     enriched = {}
                     match_type = "filtered"
+                elif mismatch_type == "unmatched":
+                    matched = {}
+                    enriched = field_data.get("enriched", {}) or {}
+                    match_type = "unmatched"
                 else:
                     # When using enriched data, get original matched data from matched_data_map
                     if request.use_enriched_data and data.get("matched_data_map"):
@@ -1104,6 +909,12 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 item.count = len(item.comment_ids)
         all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
 
+        # Apply result limit to combined list (matched + unmatched)
+        limit = request.limit or 1000
+        partial_results = len(all_items) > limit
+        if partial_results:
+            all_items = all_items[:limit]
+            logger.info(f"Result list capped at {limit} (partial_results=True)")
         logger.info(
             f"Mismatch analysis: total_records={len(records)}, "
             f"returned={len(all_items)}, "
@@ -1118,7 +929,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             total_mismatches=total_mismatches,
             mismatch_items=all_items,
             processing_time=0.0,
-            partial_results=False,
+            partial_results=partial_results,
             error=None,
             matched_data_map=(data.get("matched_data_map") if request.use_enriched_data else None),  # type: ignore
         )
