@@ -905,29 +905,30 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         continue
                 elif request.display_mode == "mismatches":
                     # For mismatches mode, exclude confirmed matches
-                    # But always include dash_split records (they're fallback guesses that need review)
+                    # Include dash_split (fallback guesses) and brand-only (soap partial matches)
+                    # so they appear in Match Analyzer for review (e.g. "Valobra - stick" -> Valobra)
                     if mismatch_type == "exact_matches":
                         continue
                     elif mismatch_type == "good_matches":
-                        # Filter to only include dash_split records from good_matches
                         items = [
                             item
                             for item in items
-                            if item.get("field_data", {}).get("match_type") == "dash_split"
+                            if item.get("field_data", {}).get("match_type")
+                            in ("dash_split", "brand")
                         ]
                         if not items:
                             continue
                 elif request.display_mode == "unconfirmed":
                     # For unconfirmed mode, only show unconfirmed items
-                    # But always include dash_split records (they're fallback guesses that need review)
+                    # Include dash_split and brand-only from good_matches for review
                     if mismatch_type == "exact_matches":
                         continue
                     elif mismatch_type == "good_matches":
-                        # Filter to only include dash_split records from good_matches
                         items = [
                             item
                             for item in items
-                            if item.get("field_data", {}).get("match_type") == "dash_split"
+                            if item.get("field_data", {}).get("match_type")
+                            in ("dash_split", "brand")
                         ]
                     items = [item for item in items if not item.get("is_confirmed", False)]
                     if not items:
