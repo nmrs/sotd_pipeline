@@ -987,13 +987,17 @@ Baume.be:
       format: Cream
       patterns:
       - baume.?be
-BBS:
+BBS Soaps:
   patterns:
   - '\bbbs\b(?: shops?)?'
+  - \bbbs soap company\b
   scents:
-    byzantio:
+    Byzantio:
       patterns:
       - bbs.*byzantio
+    Nile Lotus:
+      patterns:
+      - bbs.*nile lotus
 Beak & Snout:
   patterns:
   - br?eak.*snout( apothecary)?
@@ -2138,6 +2142,23 @@ Dollar Shave Club:
 Dr. Bronner's:
   patterns:
   - dr\.? br?onner'?s?
+  scents:
+    Lavender:
+      patterns:
+      - dr\.? br?onner'?s?.*lavender
+    Lemongrass Lime:
+      patterns:
+      - dr\.? br?onner'?s?.*lemongrass
+    Peppermint:
+      patterns:
+      - dr\.? br?onner'?s?.*peppermint
+    Tea Tree:
+      patterns:
+      - dr\.? br?onner'?s?.*tea
+    Unscented:
+      patterns:
+      - dr\.? br?onner'?s?.*unscented
+      - dr\.? br?onner'?s?
 Dr. Jon's:
   patterns:
   - dr.*joh?n'?s?
@@ -3108,6 +3129,9 @@ KEPKINH:
     Erebus:
       patterns:
       - ke[pr]k[in]+h.*erebus
+    Hades:
+      patterns:
+      - ke[pr]k[in]+h.*hades
 Kent:
   patterns:
   - ^kent\b
@@ -3244,6 +3268,9 @@ Lockhart's:
   patterns:
   - lockhart'?s( authentic( grooming)?( co\.?,?( llc)?)?)?
   scents:
+    Goon Grease:
+      patterns:
+      - lockhart'?s.*goon grease
     Sex Machine:
       patterns:
       - lockhart'?s.*sex machine
@@ -3650,6 +3677,10 @@ Moon Soaps:
       - amaretto speciale
       - moon.*amaretto
       wsdb_slug: moon-soaps-amaretto-speciale-soap
+    Astoria:
+      patterns:
+      - moon.*astoria
+      wsdb_slug: moon-soaps-astoria-soap
     Bixby:
       patterns:
       - moon.*bixby
@@ -3962,6 +3993,9 @@ Nomad Theory:
   patterns:
   - nomad theory
   scents:
+    Kyoto:
+      patterns:
+      - nomad.*kyoto
     Sorrento:
       patterns:
       - nomad.*sorrento
@@ -4278,6 +4312,10 @@ Razor Emporium:
   patterns:
   - razor emporium
   scents:
+    Barbershop:
+      patterns:
+      - razor emporium.*barbershop
+      wsdb_slug: razor-emporium-barbershop-soap
     Element 47:
       patterns:
       - element 47
@@ -5547,6 +5585,10 @@ Talent Soap Factory:
     Digital Dude:
       patterns:
       - digital dude
+    Dusty Mauve:
+      patterns:
+      - (talent|tsf).*dusty mauve
+      wsdb_slug: talent-soap-factory-dusty-mauve-soap
     Fantasy Donut:
       patterns:
       - fantasy do(ugh)?nut
@@ -5770,6 +5812,7 @@ Tcheon Fung Sing:
     Vecchia Torino:
       patterns:
       - tcheon.*torino
+      wsdb_slug: tcheon-fung-sing-vecchia-torino-soap
 The American Gentleman:
   patterns:
   - (the )?american gentleman( soap( (co\.?(mpany)?)?)?)?
@@ -6030,6 +6073,10 @@ Valobra:
       patterns:
       - valobra.*foug
       wsdb_slug: valobra-fougere-soap
+    Shaving Soap Stick:
+      patterns:
+      - valobra.*stick
+      - valobra
 Van Der Hagen:
   patterns:
   - van de?r hag(a|e)n
@@ -6403,6 +6450,9 @@ Yaqi:
     Lemon, Lime & Cedarwood:
       patterns:
       - yaqi.*lime.*cedar
+    Ouds:
+      patterns:
+      - yaqi.*ouds
     Velvet Rose:
       patterns:
       - yaqi.*velvet rose

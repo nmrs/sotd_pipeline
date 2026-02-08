@@ -987,6 +987,9 @@ Baume.be:
 BBS:
   byzantio:
   - bbs soaps - byzantio
+BBS Soaps:
+  Nile Lotus:
+  - bbs soap shop - nile lotus
 Beak & Snout:
   Bard's Barbershop:
   - beak & snout apothecary - barbershop
@@ -1849,6 +1852,9 @@ DentonMajik:
 Derby:
   Shaving Soap:
   - derby
+Dr. Bronner's:
+  Unscented:
+  - dr. bronner's organic
 Dr. Jon's:
   Black Label:
   - dr. jon's - black label
@@ -2352,6 +2358,8 @@ KEPKINH:
   Erebus:
   - kepkinh - erebus
   - kerkinh - erebus
+  Hades:
+  - kepkinh hades
 Key West:
   Shaving Cream:
   - keywest
@@ -2390,6 +2398,9 @@ LEA:
   Shaving Stick:
   - lea
   - lea - shave cream original
+Lockhart's:
+  Goon Grease:
+  - lockhart's goon grease
 London Razors:
   Coffee & Contemplation:
   - london razors - coffee & contemplation
@@ -2687,6 +2698,8 @@ Moon Soaps:
   Amaretto Speciale:
   - moon soaps - amaretto speciale
   - moon soaps amaretto speciale
+  Astoria:
+  - moon soaps astoria
   Bixby:
   - moon soaps - bixby
   Havana:
@@ -2937,6 +2950,8 @@ Noble Otter:
   - noble otter two kings
   - two kings by noble otter
 Nomad Theory:
+  Kyoto:
+  - nomad theory kyoto
   Sorrento:
   - nomad theory sorrento
 Nõberu of Sweden:
@@ -3071,6 +3086,8 @@ Ralph Lauren:
   Safari:
   - ralph lauren - safari
 Razor Emporium:
+  Barbershop:
+  - razor emporium barbershop soap
   Element 47:
   - razor emporium element 47
 RazoRock:
@@ -4292,6 +4309,8 @@ Talent Soap Factory:
   Digital Dude:
   - talent soap factory - digital dude
   - talent soap factory - digital dude's
+  Dusty Mauve:
+  - talent soap factory dusty mauve
   Fantasy Donut:
   - talent factory - fantasy donut
   - talent soap factory - fantasy donut
@@ -4565,6 +4584,9 @@ Truefitt & Hill:
   Sandalwood:
   - truefitt & hill - sandalwood
   - truefitt & hill sandalwood
+Valobra:
+  Shaving Soap Stick:
+  - valobra
 Van Der Hagen:
   Scented Luxury:
   - van der hagen - luxury scented
@@ -4739,6 +4761,8 @@ Yaqi:
   Lemon, Lime & Cedarwood:
   - yaqi lime lemon & cedarwood
   - yaqi lime lemon and cedarwood
+  Ouds:
+  - yaqi ouds
   Velvet Rose:
   - yaqi velvet rose
   - yaqi velvet rose (smoky rose)
