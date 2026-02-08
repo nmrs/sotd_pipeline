@@ -275,6 +275,44 @@ class TestValidatePatternsFormat:
         # Should include line number (line 3 where "pattern1" appears)
         assert "line" in error_msg.lower() or "(line" in error_msg
 
+    def test_line_number_uses_full_path_when_key_repeats(self, tmp_path):
+        """When the same key appears in multiple branches (e.g. two 'Kyoto' scents),
+        the reported line number must match the path that has the error, not the first match."""
+        catalog_path = tmp_path / "soaps.yaml"
+        yaml_content = """First Brand:
+  patterns:
+  - first
+  scents:
+    Kyoto:
+      patterns:
+      - first.*kyoto
+Second Brand:
+  patterns:
+  - second
+  scents:
+    Kyoto:
+      patterns:
+      bad_value
+"""
+        catalog_path.write_text(yaml_content, encoding="utf-8")
+
+        data = {
+            "First Brand": {
+                "patterns": ["first"],
+                "scents": {"Kyoto": {"patterns": ["first.*kyoto"]}},
+            },
+            "Second Brand": {
+                "patterns": ["second"],
+                "scents": {"Kyoto": {"patterns": "bad_value"}},  # Invalid
+            },
+        }
+        with pytest.raises(ValueError) as exc_info:
+            validate_patterns_format(data, catalog_path)
+        error_msg = str(exc_info.value)
+        assert "Second Brand -> scents -> Kyoto -> patterns" in error_msg
+        # Should point to the second Kyoto (around line 14), not the first (line 8)
+        assert "(line 14)" in error_msg or "(line 15)" in error_msg
+
     def test_non_dict_data_does_not_raise(self):
         """Test that non-dict data doesn't cause errors (just returns)."""
         catalog_path = Path("data/soaps.yaml")

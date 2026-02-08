@@ -64,6 +64,10 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
     """
     Find the line number where a patterns key is located in the YAML file.
 
+    Uses the full path (e.g. "Nomad Theory -> scents -> Kyoto -> patterns") so
+    duplicate key names in different branches (e.g. two "Kyoto" scents under
+    different brands) report the correct line.
+
     Args:
         catalog_path: Path to the catalog file
         location: Location in the structure (e.g., "Miraculum -> patterns")
@@ -73,8 +77,7 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
     """
     try:
         # Parse the location path to get the key hierarchy
-        # e.g., "Miraculum -> patterns" -> ["Miraculum", "patterns"]
-        # or "DE -> Brand1 -> Model1 -> patterns" -> ["DE", "Brand1", "Model1", "patterns"]
+        # e.g., "Nomad Theory -> scents -> Kyoto -> patterns" -> ["Nomad Theory", "scents", "Kyoto", "patterns"]
         path_parts = [part.strip() for part in location.split(" -> ")]
 
         if len(path_parts) < 2 or path_parts[-1] != "patterns":
@@ -84,61 +87,70 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
         with catalog_path.open("r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        # Find the parent key (the key that contains patterns)
-        parent_key = path_parts[-2] if len(path_parts) >= 2 else None
-        if not parent_key:
+        # Walk the full path so we match the right occurrence when keys repeat (e.g. two "Kyoto" scents)
+        # path_parts[:-1] = hierarchy leading to the key that contains "patterns"
+        key_chain = path_parts[:-1]  # e.g. ["Nomad Theory", "scents", "Kyoto"]
+        if not key_chain:
             return None
 
-        # Search for the parent key, then find "patterns:" that follows it
-        # We need to match the structure based on indentation
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            # Look for the parent key (must end with ":")
-            if parent_key in stripped and stripped.endswith(":"):
-                # Found the parent key, now look for "patterns:" in the following lines
-                # Check indentation - patterns should be indented more than the parent
-                parent_indent = len(line) - len(line.lstrip())
+        # Find each key in order at the correct indentation level
+        # Candidates: list of (line_index, indent) for the current key level
+        candidates = [(0, -1)]  # start at line 0 with indent -1 so any indent is deeper
 
-                for j in range(i + 1, min(len(lines), i + 20)):  # Check up to 20 lines ahead
-                    check_line = lines[j]
-                    check_stripped = check_line.strip()
-                    check_indent = len(check_line) - len(check_line.lstrip())
-
-                    # If we hit a line with same or less indentation, we've gone too far
-                    if (
-                        check_stripped
-                        and check_indent <= parent_indent
-                        and not check_stripped.startswith("#")
-                    ):
+        for key_idx, key_name in enumerate(key_chain):
+            next_candidates = []
+            for start_i, parent_indent in candidates:
+                # Start after the parent line when we have a real parent, so we don't break on the parent's own indent
+                start = start_i + 1 if parent_indent >= 0 else start_i
+                for i in range(start, len(lines)):
+                    line = lines[i]
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#"):
+                        continue
+                    indent = len(line) - len(line.lstrip())
+                    # Same or less indent than parent means we left the parent block
+                    if indent <= parent_indent and parent_indent >= 0:
                         break
+                    # Exact match: key name followed by ":" (key: or "key":)
+                    if stripped == f"{key_name}:" or stripped.startswith(f'"{key_name}"'):
+                        next_candidates.append((i, indent))
+                        # Don't break: there might be another occurrence later (wrong branch)
+            if not next_candidates:
+                return None
+            candidates = next_candidates
 
-                    # Look for "patterns:" that's indented more than parent
-                    if check_stripped.startswith("patterns:") and check_indent > parent_indent:
-                        # Found patterns line - check if it's followed by a non-list value
-                        # (which would indicate the error)
-                        for k in range(j + 1, min(len(lines), j + 3)):
-                            next_line = lines[k]
-                            next_stripped = next_line.strip()
-                            next_indent = len(next_line) - len(next_line.lstrip())
+        # candidates now holds (line_index, indent) for the last key in the chain (e.g. Kyoto)
+        # Find "patterns:" under that key and return its line or the following invalid value line
+        for parent_i, parent_indent in candidates:
+            for j in range(parent_i + 1, min(len(lines), parent_i + 25)):
+                check_line = lines[j]
+                check_stripped = check_line.strip()
+                check_indent = len(check_line) - len(check_line.lstrip())
 
-                            # If we hit a line with same or less indentation, stop
+                if (
+                    check_stripped
+                    and check_indent <= parent_indent
+                    and not check_stripped.startswith("#")
+                ):
+                    break
+
+                if check_stripped.startswith("patterns:") and check_indent > parent_indent:
+                    for k in range(j + 1, min(len(lines), j + 3)):
+                        next_line = lines[k]
+                        next_stripped = next_line.strip()
+                        next_indent = len(next_line) - len(next_line.lstrip())
+
+                        if next_stripped and not next_stripped.startswith("#"):
+                            # Check for non-list value first (same indent as patterns: is the value line)
                             if (
-                                next_stripped
-                                and next_indent <= check_indent
-                                and not next_stripped.startswith("#")
+                                not next_stripped.startswith("-")
+                                and (next_indent <= check_indent or next_indent == check_indent)
                             ):
+                                return k + 1  # 1-indexed (value line)
+                            if next_indent <= check_indent:
                                 break
 
-                            # If we find a non-list value (no "-" prefix), this is the error
-                            if (
-                                next_stripped
-                                and not next_stripped.startswith("-")
-                                and not next_stripped.startswith("#")
-                            ):
-                                return k + 1  # 1-indexed
-
-                        # If patterns: is found but we can't find the value line, return patterns line
-                        return j + 1  # 1-indexed
+                    return j + 1  # 1-indexed (patterns line)
 
         return None
     except Exception:
