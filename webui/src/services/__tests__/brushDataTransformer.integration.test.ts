@@ -7,17 +7,16 @@ import {
 
 // Mock the API service for integration testing
 jest.mock('../api', () => ({
-  analyzeUnmatched: jest.fn(),
+  analyzeMismatch: jest.fn(),
   getCommentDetail: jest.fn(),
   checkFilteredStatus: jest.fn(),
 }));
 
-// Import the mocked function
-import { analyzeUnmatched } from '../api';
+import { analyzeMismatch } from '../api';
 
 describe('BrushData Transformer Integration Tests', () => {
   beforeEach(() => {
-    (analyzeUnmatched as jest.Mock).mockClear();
+    (analyzeMismatch as jest.Mock).mockClear();
   });
 
   describe('Real Data Integration', () => {

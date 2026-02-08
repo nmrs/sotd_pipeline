@@ -47,7 +47,7 @@ export interface MockFetchConfig {
  * const mockApi = createMockApi({
  *   responses: {
  *     getAvailableMonths: ['2024-01', '2024-02'],
- *     analyzeUnmatched: { total_unmatched: 5 }
+ *     analyzeMismatch: { total_mismatches: 5 }
  *   },
  *   errors: {
  *     getMonthData: new Error('Network error')
@@ -65,13 +65,18 @@ export function createMockApi(config?: MockApiConfig) {
       included_months: ['2024-01'],
       missing_months: [],
     },
-    analyzeUnmatched: {
+    analyzeMismatch: {
       field: 'brush',
       months: ['2024-01'],
-      total_unmatched: 1,
-      unmatched_items: [
+      total_matches: 0,
+      total_mismatches: 1,
+      mismatch_items: [
         {
-          item: 'Test Brush',
+          original: 'Test Brush',
+          matched: {},
+          pattern: '',
+          match_type: 'unmatched',
+          mismatch_type: 'unmatched',
           count: 5,
           comment_ids: ['123', '456'],
           examples: ['Example 1', 'Example 2'],
@@ -108,7 +113,7 @@ export function createMockApi(config?: MockApiConfig) {
   const apiMethods = [
     'getAvailableMonths',
     'getMonthData',
-    'analyzeUnmatched',
+    'analyzeMismatch',
     'loadBrushSplits',
     'saveBrushSplit',
     'getCommentDetail',

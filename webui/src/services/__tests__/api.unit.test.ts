@@ -1,26 +1,31 @@
 // Mock the entire api module to avoid axios.create issues
 jest.mock('../api', () => ({
-  analyzeUnmatched: jest.fn(),
+  analyzeMismatch: jest.fn(),
   getCommentDetail: jest.fn(),
   checkFilteredStatus: jest.fn(),
 }));
 
-import { analyzeUnmatched, getCommentDetail, checkFilteredStatus } from '../api';
+import { analyzeMismatch, getCommentDetail, checkFilteredStatus } from '../api';
 
 describe('API Service Unit Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('analyzeUnmatched', () => {
+  describe('analyzeMismatch', () => {
     test('should handle successful API call', async () => {
       const mockResponse = {
         field: 'brush',
         months: ['2024-01'],
-        total_unmatched: 1,
-        unmatched_items: [
+        total_matches: 0,
+        total_mismatches: 1,
+        mismatch_items: [
           {
-            item: 'Simpson Chubby 2',
+            original: 'Simpson Chubby 2',
+            matched: {},
+            pattern: '',
+            match_type: 'unmatched',
+            mismatch_type: 'unmatched',
             count: 5,
             comment_ids: ['123', '456'],
             examples: ['Example 1', 'Example 2'],
@@ -29,59 +34,62 @@ describe('API Service Unit Tests', () => {
         processing_time: 0.5,
       };
 
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+      (analyzeMismatch as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await analyzeUnmatched({
+      const result = await analyzeMismatch({
         field: 'brush',
         months: ['2024-01'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
-      // Verify function was called with correct parameters
-      expect(analyzeUnmatched).toHaveBeenCalledWith({
+      expect(analyzeMismatch).toHaveBeenCalledWith({
         field: 'brush',
         months: ['2024-01'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
-      // Verify return value
       expect(result).toEqual(mockResponse);
     });
 
     test('should handle API errors gracefully', async () => {
       const mockError = new Error('Network error');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('Network error');
     });
 
     test('should handle timeout errors', async () => {
       const mockError = new Error('timeout of 5000ms exceeded');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('timeout of 5000ms exceeded');
     });
 
     test('should handle malformed response data', async () => {
-      const mockResponse = null; // Malformed response
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+      const mockResponse = null;
+      (analyzeMismatch as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await analyzeUnmatched({
+      const result = await analyzeMismatch({
         field: 'brush',
         months: ['2024-01'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
       expect(result).toBeNull();
@@ -168,52 +176,56 @@ describe('API Service Unit Tests', () => {
   describe('Error Handling Edge Cases', () => {
     test('should handle network connectivity issues', async () => {
       const mockError = new Error('Network Error');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('Network Error');
     });
 
     test('should handle server errors (500)', async () => {
       const mockError = new Error('Internal server error');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('Internal server error');
     });
 
     test('should handle unauthorized errors (401)', async () => {
       const mockError = new Error('Unauthorized');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('Unauthorized');
     });
 
     test('should handle rate limiting errors (429)', async () => {
       const mockError = new Error('Too many requests');
-      (analyzeUnmatched as jest.Mock).mockRejectedValue(mockError);
+      (analyzeMismatch as jest.Mock).mockRejectedValue(mockError);
 
       await expect(
-        analyzeUnmatched({
+        analyzeMismatch({
           field: 'brush',
           months: ['2024-01'],
-          limit: 10,
+          display_mode: 'unmatched',
+          limit: 1000,
         })
       ).rejects.toThrow('Too many requests');
     });
@@ -224,23 +236,26 @@ describe('API Service Unit Tests', () => {
       const mockResponse = {
         field: '',
         months: ['2024-01'],
-        total_unmatched: 0,
-        unmatched_items: [],
+        total_matches: 0,
+        total_mismatches: 0,
+        mismatch_items: [],
         processing_time: 0.1,
       };
 
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+      (analyzeMismatch as jest.Mock).mockResolvedValue(mockResponse);
 
-      await analyzeUnmatched({
+      await analyzeMismatch({
         field: '',
         months: ['2024-01'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
-      expect(analyzeUnmatched).toHaveBeenCalledWith({
+      expect(analyzeMismatch).toHaveBeenCalledWith({
         field: '',
         months: ['2024-01'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
     });
 
@@ -248,47 +263,26 @@ describe('API Service Unit Tests', () => {
       const mockResponse = {
         field: 'brush',
         months: ['invalid-month'],
-        total_unmatched: 0,
-        unmatched_items: [],
+        total_matches: 0,
+        total_mismatches: 0,
+        mismatch_items: [],
         processing_time: 0.1,
       };
 
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+      (analyzeMismatch as jest.Mock).mockResolvedValue(mockResponse);
 
-      await analyzeUnmatched({
+      await analyzeMismatch({
         field: 'brush',
         months: ['invalid-month'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
-      expect(analyzeUnmatched).toHaveBeenCalledWith({
+      expect(analyzeMismatch).toHaveBeenCalledWith({
         field: 'brush',
         months: ['invalid-month'],
-        limit: 10,
-      });
-    });
-
-    test('should handle negative limit', async () => {
-      const mockResponse = {
-        field: 'brush',
-        months: ['2024-01'],
-        total_unmatched: 0,
-        unmatched_items: [],
-        processing_time: 0.1,
-      };
-
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
-
-      await analyzeUnmatched({
-        field: 'brush',
-        months: ['2024-01'],
-        limit: -1,
-      });
-
-      expect(analyzeUnmatched).toHaveBeenCalledWith({
-        field: 'brush',
-        months: ['2024-01'],
-        limit: -1,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
     });
 
@@ -296,34 +290,35 @@ describe('API Service Unit Tests', () => {
       const mockResponse = {
         field: 'blade',
         months: ['2025-08', '2020-08'],
-        total_unmatched: 1,
-        unmatched_items: [
+        total_matches: 0,
+        total_mismatches: 1,
+        mismatch_items: [
           {
-            item: 'Lord',
-            count: 6, // 1 from 2025-08, 5 from 2020-08
-            comment_ids: ['n9d8qy1', 'g00m6ou', 'g042aih', 'g0706vx', 'g0b8wta'], // 2025-08 first, then 2020-08
+            original: 'Lord',
+            matched: {},
+            pattern: '',
+            match_type: 'unmatched',
+            mismatch_type: 'unmatched',
+            count: 6,
+            comment_ids: ['n9d8qy1', 'g00m6ou', 'g042aih', 'g0706vx', 'g0b8wta'],
             examples: ['2025-08.json', '2020-08.json'],
           },
         ],
         processing_time: 0.5,
       };
 
-      (analyzeUnmatched as jest.Mock).mockResolvedValue(mockResponse);
+      (analyzeMismatch as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await analyzeUnmatched({
+      const result = await analyzeMismatch({
         field: 'blade',
         months: ['2025-08', '2020-08'],
-        limit: 10,
+        display_mode: 'unmatched',
+        limit: 1000,
       });
 
-      // Verify that comment IDs are sorted by month (newest first)
-      const commentIds = result.unmatched_items[0].comment_ids;
+      const commentIds = result.mismatch_items[0].comment_ids;
       expect(commentIds).toEqual(['n9d8qy1', 'g00m6ou', 'g042aih', 'g0706vx', 'g0b8wta']);
-
-      // Verify that the first comment ID is from 2025-08 (newer month)
-      // This would be verified by checking the actual data, but in the test we're mocking
-      // the expected behavior where newer months appear first
-      expect(commentIds[0]).toBe('n9d8qy1'); // 2025-08 comment ID should be first
+      expect(commentIds[0]).toBe('n9d8qy1');
     });
   });
 });

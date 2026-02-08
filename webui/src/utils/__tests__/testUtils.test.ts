@@ -7,7 +7,7 @@ describe('Test Utilities', () => {
 
       expect(mockApi.getAvailableMonths).toBeDefined();
       expect(mockApi.getMonthData).toBeDefined();
-      expect(mockApi.analyzeUnmatched).toBeDefined();
+      expect(mockApi.analyzeMismatch).toBeDefined();
       expect(mockApi.loadBrushSplits).toBeDefined();
     });
 
@@ -151,7 +151,7 @@ describe('Test Utilities', () => {
           },
         },
         errors: {
-          analyzeUnmatched: new Error('Test error'),
+          analyzeMismatch: new Error('Test error'),
         },
       };
 
