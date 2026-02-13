@@ -902,10 +902,11 @@ class ActualMatchingValidator:
                             expected_handle_model=expected_handle_model,
                             actual_handle_brand=actual_handle_brand,
                             actual_handle_model=actual_handle_model,
-                            # Always include expected knot values for handle_knot entries
-                            # so API can preserve correct knot values when only handle has mismatch
+                            # Include expected knot for fix logic; include actual knot so UI shows full matcher result
                             expected_knot_brand=expected_knot_brand,
                             expected_knot_model=expected_knot_model,
+                            actual_knot_brand=actual_knot_brand,
+                            actual_knot_model=actual_knot_model,
                             details=(
                                 f"Handle brand/model mismatch: expected "
                                 f"'{expected_handle_brand} {expected_handle_model}', got "
@@ -936,10 +937,11 @@ class ActualMatchingValidator:
                             expected_knot_model=expected_knot_model,
                             actual_knot_brand=actual_knot_brand,
                             actual_knot_model=actual_knot_model,
-                            # Always include expected handle values for handle_knot entries
-                            # so API can preserve correct handle values when only knot has mismatch
+                            # Include expected handle for fix logic; include actual handle so UI shows full matcher result
                             expected_handle_brand=expected_handle_brand,
                             expected_handle_model=expected_handle_model,
+                            actual_handle_brand=actual_handle_brand,
+                            actual_handle_model=actual_handle_model,
                             details=(
                                 f"Knot brand/model mismatch: expected "
                                 f"'{expected_knot_brand} "

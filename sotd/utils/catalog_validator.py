@@ -142,9 +142,8 @@ def _find_line_number(catalog_path: Path, location: str) -> Optional[int]:
 
                         if next_stripped and not next_stripped.startswith("#"):
                             # Check for non-list value first (same indent as patterns: is the value line)
-                            if (
-                                not next_stripped.startswith("-")
-                                and (next_indent <= check_indent or next_indent == check_indent)
+                            if not next_stripped.startswith("-") and (
+                                next_indent <= check_indent or next_indent == check_indent
                             ):
                                 return k + 1  # 1-indexed (value line)
                             if next_indent <= check_indent:

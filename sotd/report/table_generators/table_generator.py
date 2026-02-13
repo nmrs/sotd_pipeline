@@ -1010,9 +1010,7 @@ class TableGenerator:
         if table_name == "user-soap-brand-scent-diversity" and columns and "hhi" in columns:
             if "shaves" not in numeric_limits:
                 numeric_limits = dict(numeric_limits)
-                numeric_limits["shaves"] = (
-                    50 if (self.current_month or "").endswith("-12") else 5
-                )
+                numeric_limits["shaves"] = 50 if (self.current_month or "").endswith("-12") else 5
 
         # Apply numeric column limits first (e.g. shaves:5) so filtering happens before
         # sorting/ranking. This ensures tables like "Most Boring Shaver" exclude low-activity

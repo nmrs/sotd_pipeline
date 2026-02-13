@@ -1,25 +1,5 @@
 known_brushes:
   AKA Brushworx:
-    AK4:
-      fiber: Synthetic
-      knot_size_mm: 26
-      patterns:
-        - ak4
-    AK47:
-      fiber: Synthetic
-      knot_size_mm: 26
-      patterns:
-        - ak47
-    AK5:
-      fiber: Synthetic
-      knot_size_mm: 26
-      patterns:
-        - ak5
-    AK7:
-      fiber: Synthetic
-      knot_size_mm: 26
-      patterns:
-        - ak7
     AK7/DoughMan Hybrid:
       fiber: Mixed Badger/Synthetic
       knot_size_mm: 26
@@ -1501,6 +1481,12 @@ known_brushes:
       knot_loft_mm: 64
       patterns:
         - \b80b\b
+    A28 XSE:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 64
+      patterns:
+        - zenith.*\ba28\b.*xse
     B15:
       fiber: Boar
       knot_size_mm: 27.5
@@ -1604,6 +1590,27 @@ known_brushes:
         - z.*feidu
 
 known_knot_based_brushes:
+  AKA Brushworx:
+    AK4:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak4
+    AK47:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak47
+    AK5:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak5
+    AK7:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - ak7
   AP Shave Co:
     APLuxury:
       fiber: Mixed Badger/Boar
@@ -1827,6 +1834,26 @@ known_knot_based_brushes:
         - chis.*[fh]ou.*v28
         - \bc(?:\&|and|\+)h\b.*v28
         - \bch\b.*v28
+    v29:
+      patterns:
+        - chis.*[fh]ou.*v29
+        - \bc(?:\&|and|\+)h\b.*v29
+        - \bch\b.*v29
+    v30:
+      patterns:
+        - chis.*[fh]ou.*v30
+        - \bc(?:\&|and|\+)h\b.*v30
+        - \bch\b.*v30
+    v31:
+      patterns:
+        - chis.*[fh]ou.*v31
+        - \bc(?:\&|and|\+)h\b.*v31
+        - \bch\b.*v31
+    v32:
+      patterns:
+        - chis.*[fh]ou.*v32
+        - \bc(?:\&|and|\+)h\b.*v32
+        - \bch\b.*v32
   Declaration Grooming:
     fiber: Badger
     handle_matching: true
@@ -2670,6 +2697,13 @@ other_brushes:
     default: Synthetic
     patterns:
       - frugal.*shave
+  Generic:
+    default: Synthetic
+    patterns:
+      - generic
+      - unmarked
+      - unknown
+      - unbranded
   Gents:
     default: Badger
     patterns:
@@ -3127,6 +3161,11 @@ other_brushes:
     patterns:
       - razor.*co
       - trc
+  RazoRock:
+    default: Synthetic
+    patterns:
+      - razorock
+      - \brr\b
   The Rustic Bee:
     default: Badger
     patterns:

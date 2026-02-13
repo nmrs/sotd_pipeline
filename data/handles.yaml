@@ -49,8 +49,8 @@ artisan_handles:
   Bristle Brushwerks:
     Unspecified:
       patterns:
-        - huck
-        - bristle.*brush(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - huck
+      - ^(?!.*horse bristle).*bristle.*brush
   Brushcraft:
     Unspecified:
       patterns:

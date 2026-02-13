@@ -46,6 +46,18 @@ Boar RV Semogue Knot Rudy Vey B&B Forum Brush:
   system_knot: Rudy Vey B&B Forum Brush
   system_confidence: high
   system_reasoning: 'Fiber-hint split: knot contains fiber indicator'
+Boar RV Semogue Knot Rudy Vey B&B Forum Brush 2025:
+  handle: null
+  knot: Boar RV Semogue Knot Rudy Vey B&B Forum Brush 2025
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-12.json
+    comment_ids:
+    - ntngop6
+    - nw6njv3
 Boar Rudy Vey SOC knot 24mm:
   handle: null
   knot: null

@@ -40,6 +40,12 @@ blade:
     - file: 2025-04.json
       id: mkum44v
       source: user
+  edge by roman:
+    added_date: '2026-02-08'
+    comment_ids:
+    - file: 2026-02.json
+      id: o3svupl
+      source: user
   i don't even know, tbh; i don't remember the last time i swapped this blade:
     added_date: '2025-07-19'
     comment_ids:
@@ -63,6 +69,12 @@ blade:
     comment_ids:
     - file: 2025-01.json
       id: m68avhv
+      source: user
+  jnat refresh - translucent ark refresh:
+    added_date: '2026-02-08'
+    comment_ids:
+    - file: 2026-02.json
+      id: o2zidwu
       source: user
   leave:
     added_date: '2025-07-19'

@@ -151,6 +151,17 @@ Made Rite - 500 PB (Oumo - 26mm SHD):
   - file: 2025-09.json
     comment_ids:
     - nfexjs4
+Marble handle w/ G5 Maggard:
+  handle: Marble handle
+  knot: G5 Maggard
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2025-03.json
+    comment_ids:
+    - mhxbwy8
 Oumo X Twoface Brothers Maggard SHD 26mm Badger:
   handle: Oumo X Twoface Brothers
   knot: Maggard SHD 26mm Badger

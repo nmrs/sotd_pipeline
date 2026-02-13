@@ -304,6 +304,26 @@ known_knots:
         - \bc(?:\&|and|\+)h\b.*v28
         - \bch\b.*v28
         - \bv28\b
+    v29:
+      patterns:
+        - chis.*[fh]ou.*v29
+        - \bc(?:\&|and|\+)h\b.*v29
+        - \bch\b.*v29
+    v30:
+      patterns:
+        - chis.*[fh]ou.*v30
+        - \bc(?:\&|and|\+)h\b.*v30
+        - \bch\b.*v30
+    v31:
+      patterns:
+        - chis.*[fh]ou.*v31
+        - \bc(?:\&|and|\+)h\b.*v31
+        - \bch\b.*v31
+    v32:
+      patterns:
+        - chis.*[fh]ou.*v32
+        - \bc(?:\&|and|\+)h\b.*v32
+        - \bch\b.*v32
     Soot Sprite:
       fiber: Synthetic
       patterns:
@@ -562,6 +582,13 @@ known_knots:
       fiber: Badger
       patterns:
         - shavemac.*d01
+  Stirling:
+    Finest Badger:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+        - stirling.*finest
+        - stirling.*24.*(badger|fan)
   Trotter Handcrafts:
     T1 Manchurian Badger:
       fiber: Badger
@@ -819,7 +846,7 @@ other_knots:
   Bristle Brushwerks:
     default: Badger
     patterns:
-      - bristle.*brush
+      - ^(?!.*horse bristle).*bristle.*brush
   Brushcraft:
     default: Synthetic
     patterns:
@@ -1199,7 +1226,7 @@ other_knots:
   Semogue:
     default: Boar
     patterns:
-      - semogue
+      - semogue(?!#pad for priority length xxxxxxxxxxxx)
   Simpson:
     default: Badger
     patterns:
@@ -1246,6 +1273,7 @@ other_knots:
     patterns:
       - tgn
       - golden.*nib
+      - tgn boar(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   The Holy Black:
     default: Synthetic
     patterns:

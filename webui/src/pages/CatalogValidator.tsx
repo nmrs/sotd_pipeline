@@ -868,29 +868,95 @@ const CatalogValidator: React.FC = () => {
 
                           {issue.issue_type === 'catalog_pattern_mismatch' || issue.issue_type === 'data_mismatch' ? (
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
-                              <div>
-                                <p className='font-medium text-gray-700'>Currently Stored Under:</p>
-                                <p className='text-gray-600'>
-                                  {issue.expected_brand} {issue.expected_model}
-                                </p>
-                                <p className='text-xs text-gray-500 mt-1'>
+                              <div className='p-3 bg-gray-50 rounded border border-gray-200'>
+                                <p className='font-medium text-gray-700 mb-2'>Currently Stored Under:</p>
+                                {issue.current_handle_match || issue.current_knot_match ? (
+                                  <div className='space-y-2'>
+                                    {issue.current_handle_match && (
+                                      <div className='bg-white p-2 rounded border border-gray-100'>
+                                        <p className='text-xs font-semibold text-gray-700 mb-1'>HANDLE:</p>
+                                        <p className='text-sm text-gray-600'>
+                                          {issue.current_handle_match.brand && issue.current_handle_match.brand !== '_no_brand'
+                                            ? issue.current_handle_match.brand
+                                            : '—'}{' '}
+                                          {issue.current_handle_match.model && issue.current_handle_match.model !== '_no_model'
+                                            ? issue.current_handle_match.model
+                                            : ''}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {issue.current_knot_match && (
+                                      <div className='bg-white p-2 rounded border border-gray-100'>
+                                        <p className='text-xs font-semibold text-gray-700 mb-1'>KNOT:</p>
+                                        <p className='text-sm text-gray-600'>
+                                          {issue.current_knot_match.brand && issue.current_knot_match.brand !== '_no_brand'
+                                            ? issue.current_knot_match.brand
+                                            : '—'}{' '}
+                                          {issue.current_knot_match.model && issue.current_knot_match.model !== '_no_model'
+                                            ? issue.current_knot_match.model
+                                            : ''}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p className='text-gray-600'>
+                                    {(issue.expected_brand || issue.expected_model)
+                                      ? `${issue.expected_brand || ''} ${issue.expected_model || ''}`.trim()
+                                      : '—'}
+                                  </p>
+                                )}
+                                <p className='text-xs text-gray-500 mt-2'>
                                   (in correct_matches directory)
                                 </p>
                               </div>
-                              <div>
-                                <p className='font-medium text-gray-700'>Matcher Suggests:</p>
-                                <p className='text-gray-600'>
-                                  {issue.actual_brand} {issue.actual_model}
-                                </p>
-                                <p className='text-xs text-gray-500 mt-1'>
+                              <div className='p-3 bg-blue-50 rounded border border-blue-200'>
+                                <p className='font-medium text-blue-800 mb-2'>Matcher Suggests:</p>
+                                {issue.expected_handle_match || issue.expected_knot_match ? (
+                                  <div className='space-y-2'>
+                                    {issue.expected_handle_match && (
+                                      <div className='bg-white p-2 rounded border border-blue-100'>
+                                        <p className='text-xs font-semibold text-blue-700 mb-1'>HANDLE:</p>
+                                        <p className='text-sm text-gray-700'>
+                                          {issue.expected_handle_match.brand} {issue.expected_handle_match.model}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {issue.expected_knot_match && (
+                                      <div className='bg-white p-2 rounded border border-blue-100'>
+                                        <p className='text-xs font-semibold text-blue-700 mb-1'>KNOT:</p>
+                                        <p className='text-sm text-gray-700'>
+                                          {issue.expected_knot_match.brand} {issue.expected_knot_match.model}
+                                        </p>
+                                        {issue.expected_knot_match.fiber && (
+                                          <p className='text-xs text-gray-600 mt-1'>
+                                            Fiber: {issue.expected_knot_match.fiber}
+                                          </p>
+                                        )}
+                                        {issue.expected_knot_match.knot_size_mm != null && (
+                                          <p className='text-xs text-gray-600'>
+                                            Size: {issue.expected_knot_match.knot_size_mm}mm
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p className='text-gray-700'>
+                                    {(issue.actual_brand || issue.actual_model)
+                                      ? `${issue.actual_brand || ''} ${issue.actual_model || ''}`.trim()
+                                      : '—'}
+                                  </p>
+                                )}
+                                <p className='text-xs text-blue-600 mt-2'>
                                   (based on current matching system)
                                 </p>
                                 {issue.matched_pattern && (
-                                  <div className='mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md'>
+                                  <div className='mt-2 p-2 bg-blue-100 border border-blue-200 rounded-md'>
                                     <p className='text-xs font-medium text-blue-800 mb-1'>
                                       Matched Regex Pattern:
                                     </p>
-                                    <code className='text-xs text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded break-all'>
+                                    <code className='text-xs text-blue-700 bg-white px-1.5 py-0.5 rounded break-all'>
                                       {issue.matched_pattern}
                                     </code>
                                   </div>
