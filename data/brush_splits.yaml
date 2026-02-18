@@ -245,6 +245,18 @@ Prometheus Red Boti Fan 28mm:
     - n0cz3se
     - n0p42jo
     - n0p5geu
+razorock/ zenith blondie boar in olive wood handle:
+  handle: null
+  knot: null
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2025-06.json
+    comment_ids:
+    - lxq1zf1
+
 Rudy Vey B&B Forum Brush sOC knot:
   handle: null
   knot: null
