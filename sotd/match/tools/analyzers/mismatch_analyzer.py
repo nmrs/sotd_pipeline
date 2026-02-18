@@ -542,7 +542,11 @@ class MismatchAnalyzer(AnalysisTool):
 
             # Records without matched data: treat as intentionally_unmatched if in filter list,
             # otherwise as truly unmatched (single pass - no separate unmatched analyzer).
+            # Skip blade entries that the pipeline marked as irrelevant (e.g. blade count on
+            # straight razor shaves) so they don't appear in Match Analyzer as "unmatched".
             if not matched:
+                if field == "blade" and match_type == "irrelevant_razor_format":
+                    continue
                 key_lower = normalized.lower()
                 if key_lower in filtered_items:
                     mismatches["intentionally_unmatched"].append(
