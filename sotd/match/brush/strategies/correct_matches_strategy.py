@@ -13,6 +13,7 @@ from sotd.match.types import MatchResult
 from .base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
+from .utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
@@ -157,17 +158,8 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
         matched_data = {
             "brand": brand,
             "model": model,
-            # Always create nested sections for complete brushes
-            "handle": {
-                "brand": brand,  # Handle brand same as brush brand for complete brushes
-                "model": None,  # Handle model not specified in catalog
-            },
-            "knot": {
-                "brand": brand,  # Knot brand same as brush brand for complete brushes
-                "model": model,  # Knot model same as brush model for complete brushes
-                "fiber": None,  # Fiber not specified without catalog
-                "knot_size_mm": None,  # Knot size not specified without catalog
-            },
+            "handle": build_handle_subdict(brand, None),
+            "knot": build_knot_subdict(brand, model),
         }
 
         if not self.catalogs:
@@ -190,17 +182,10 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             "brand": brand,
             "model": model,
             "handle_maker": brush_data.get("handle_maker"),
-            # Always create nested sections for complete brushes
-            "handle": {
-                "brand": brand,  # Handle brand same as brush brand for complete brushes
-                "model": None,  # Handle model not specified in catalog
-            },
-            "knot": {
-                "brand": brand,  # Knot brand same as brush brand for complete brushes
-                "model": model,  # Knot model same as brush model for complete brushes
-                "fiber": brush_data.get("fiber"),
-                "knot_size_mm": brush_data.get("knot_size_mm"),
-            },
+            "handle": build_handle_subdict(brand, None),
+            "knot": build_knot_subdict(
+                brand, model, brush_data.get("fiber"), brush_data.get("knot_size_mm")
+            ),
         }
 
         # Override nested sections if they exist in catalog
@@ -236,23 +221,19 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
 
         # Reconstruct the simplified structure for composite brushes
         matched_data = {
-            # Top-level fields (required for aggregation compatibility)
-            "brand": None,  # Composite brushes don't have top-level brand
-            "model": None,  # Composite brushes don't have top-level model
-            # Handle section (nested)
-            "handle": {
-                "brand": self._convert_placeholder_to_none(handle_maker),
-                "model": self._convert_placeholder_to_none(handle_model),
-            },
-            # Knot section (nested)
-            "knot": {
-                "brand": self._convert_placeholder_to_none(knot_info.get("brand")),
-                "model": self._convert_placeholder_to_none(knot_info.get("model")),
-                "fiber": knot_info.get("fiber"),
-                "knot_size_mm": knot_info.get("knot_size_mm"),
-            },
-            # Match metadata
-            "source_text": value,  # Original input string
+            "brand": None,
+            "model": None,
+            "handle": build_handle_subdict(
+                self._convert_placeholder_to_none(handle_maker),
+                self._convert_placeholder_to_none(handle_model),
+            ),
+            "knot": build_knot_subdict(
+                self._convert_placeholder_to_none(knot_info.get("brand")),
+                self._convert_placeholder_to_none(knot_info.get("model")),
+                knot_info.get("fiber"),
+                knot_info.get("knot_size_mm"),
+            ),
+            "source_text": value,
             "_matched_by": "CorrectMatchesStrategy",
             "_pattern": "exact_match",
             "strategy": "correct_matches",
@@ -286,23 +267,14 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
 
         # Reconstruct the nested structure to match regex result
         matched_data = {
-            # Top-level fields (required for aggregation compatibility)
-            "brand": None,  # Handle-only entries don't have top-level brand
-            "model": None,  # Handle-only entries don't have top-level model
-            # Handle section (nested)
-            "handle": {
-                "brand": self._convert_placeholder_to_none(handle_maker),
-                "model": self._convert_placeholder_to_none(handle_model),
-            },
-            # Knot section (nested but null values)
-            "knot": {
-                "brand": None,
-                "model": None,
-                "fiber": None,
-                "knot_size_mm": None,
-            },
-            # Match metadata
-            "source_text": value,  # Original input string
+            "brand": None,
+            "model": None,
+            "handle": build_handle_subdict(
+                self._convert_placeholder_to_none(handle_maker),
+                self._convert_placeholder_to_none(handle_model),
+            ),
+            "knot": build_knot_subdict(None, None),
+            "source_text": value,
             "_matched_by": "CorrectMatchesStrategy",
             "_pattern": "exact_match",
             "strategy": "correct_matches",
@@ -335,23 +307,16 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
 
         # Reconstruct the nested structure to match regex result
         matched_data = {
-            # Top-level fields (required for aggregation compatibility)
-            "brand": None,  # Knot-only entries don't have top-level brand
-            "model": None,  # Knot-only entries don't have top-level model
-            # Handle section (nested but null values)
-            "handle": {
-                "brand": None,
-                "model": None,
-            },
-            # Knot section (nested with actual data)
-            "knot": {
-                "brand": self._convert_placeholder_to_none(knot_brand),
-                "model": self._convert_placeholder_to_none(knot_model),
-                "fiber": knot_info.get("fiber"),
-                "knot_size_mm": knot_info.get("knot_size_mm"),
-            },
-            # Match metadata
-            "source_text": value,  # Original input string
+            "brand": None,
+            "model": None,
+            "handle": build_handle_subdict(None, None),
+            "knot": build_knot_subdict(
+                self._convert_placeholder_to_none(knot_brand),
+                self._convert_placeholder_to_none(knot_model),
+                knot_info.get("fiber"),
+                knot_info.get("knot_size_mm"),
+            ),
+            "source_text": value,
             "_matched_by": "CorrectMatchesStrategy",
             "_pattern": "exact_match",
             "strategy": "correct_matches",
@@ -384,23 +349,14 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
 
         # Reconstruct the nested structure to match regex result
         matched_data = {
-            # Top-level fields (required for aggregation compatibility)
             "brand": brush_brand,
             "model": brush_model,
-            # Handle section (nested)
-            "handle": {
-                "brand": brush_brand,  # Handle brand same as brush brand for complete brushes
-                "model": None,  # Handle model not specified in correct_matches.yaml
-            },
-            # Knot section (nested)
-            "knot": {
-                "brand": brush_brand,  # Knot brand same as brush brand for complete brushes
-                "model": brush_model,  # Knot model same as brush model for complete brushes
-                "fiber": brush_data.get("fiber"),
-                "knot_size_mm": brush_data.get("knot_size_mm"),
-            },
-            # Match metadata
-            "source_text": value,  # Original input string
+            "handle": build_handle_subdict(brush_brand, None),
+            "knot": build_knot_subdict(
+                brush_brand, brush_model,
+                brush_data.get("fiber"), brush_data.get("knot_size_mm"),
+            ),
+            "source_text": value,
             "_matched_by": "CorrectMatchesStrategy",
             "_pattern": "exact_match",
             "strategy": "correct_matches",

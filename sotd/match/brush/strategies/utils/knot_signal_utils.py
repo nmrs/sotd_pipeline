@@ -8,7 +8,7 @@ by elimination.
 This module is the single source of truth for:
   - Knot signal detection (KNOT_SIGNAL_RE, knot_signal_spans)
   - Knot-likeness scoring (knot_signal_score)
-  - Handle/knot term lists (HANDLE_TERMS, KNOT_TERMS)
+  - Handle/knot term lists (HANDLE_CRAFT_TERMS, HANDLE_MATERIAL_TERMS, HANDLE_ALL_TERMS, KNOT_TERMS)
   - Side assignment (assign_sides)
 """
 
@@ -25,13 +25,24 @@ from .knot_size_utils import parse_knot_size
 KNOT_TERMS: frozenset = frozenset({
     "badger", "boar", "synthetic", "synth", "nylon", "horse", "cashmere",
     "tuxedo", "silvertip", "fanchurian", "fan", "knot", "shoat",
+    "tip", "density",
 })
 
-HANDLE_TERMS: frozenset = frozenset({
+HANDLE_CRAFT_TERMS: frozenset = frozenset({
     "handle", "resin", "wood", "burl", "acrylic", "marble", "ebonite",
     "butterscotch", "stabilized", "turned", "stock", "custom", "artisan",
     "zebra",
 })
+
+HANDLE_MATERIAL_TERMS: frozenset = frozenset({
+    "metal", "brass", "aluminum", "steel", "titanium",
+    "ivory", "horn", "bone", "stone", "granite",
+})
+
+HANDLE_ALL_TERMS: frozenset = HANDLE_CRAFT_TERMS | HANDLE_MATERIAL_TERMS
+
+# Keep backward-compatible alias
+HANDLE_TERMS: frozenset = HANDLE_CRAFT_TERMS
 
 # ---------------------------------------------------------------------------
 # Compiled signal regexes — single source of truth
@@ -59,7 +70,7 @@ KNOT_SIGNAL_RE = re.compile(
       \d{2}\s*mm\b                    # knot size  (25mm, 26 mm)
     | \b(?:badger|boar|synthetic|synth|nylon|horse|cashmere
           |tuxedo|silvertip|fan(?:churian)?)\b   # fiber words
-    | \bknot\b                        # "knot" keyword
+    | \b(?:knot|tip|density)\b         # knot-related keywords
     | \b[Bb]\d{1,2}\b                 # Declaration batches (B3, B15)
     | \b[Vv]\d{1,2}\b                 # Chisel & Hound versions (V10)
     | \bSHD\b | \bHMW\b | \b2BED\b   # knot series tokens
@@ -71,7 +82,7 @@ KNOT_SIGNAL_RE = re.compile(
 
 # Handle material words — if present, text is LESS likely to be a knot
 _HANDLE_MATERIAL_PATTERN = re.compile(
-    r"\b(handle|resin|wood|burl|acrylic|marble|ebonite|butterscotch|stabilized|turned)\b",
+    r"\b(" + "|".join(sorted(HANDLE_CRAFT_TERMS)) + r")\b",
     re.IGNORECASE,
 )
 
@@ -106,8 +117,8 @@ def knot_signal_score(text: str) -> float:
     if match_fiber(text) is not None:
         score += 10.0
 
-    # The word "knot" itself
-    if re.search(r"\bknot\b", text, re.IGNORECASE):
+    # Knot-related keywords: "knot", "tip", "density"
+    if re.search(r"\b(knot|tip|density)\b", text, re.IGNORECASE):
         score += 8.0
 
     # Knot series tokens (B3, B15, V10, SHD, HMW, G5C, etc.)

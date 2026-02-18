@@ -12,6 +12,7 @@ import yaml
 from sotd.match.types import MatchResult
 
 from .config import BrushScoringConfig
+from .strategies.utils.subdict_builders import build_handle_subdict, build_knot_subdict
 from .handle_matcher import HandleMatcher
 from .knot_matcher import KnotMatcher
 from .knot_matcher_factory import KnotMatcherFactory
@@ -511,33 +512,28 @@ class BrushMatcher:
         # Extract handle data from HandleMatcher result
         handle_data = handle_result.matched or {}
 
-        # Create brush format result
+        # Create brush format result with nested handle/knot structure
+        src = handle_data.get("_source_text", handle_result.original)
+        pat = handle_data.get("_pattern_used")
         brush_data = {
             "brand": handle_data.get("handle_maker"),
             "model": handle_data.get("handle_model"),
-            "source_text": handle_data.get("_source_text", handle_result.original),
+            "source_text": src,
             "_matched_by": "HandleMatcher",
-            "_pattern": handle_data.get("_pattern_used"),
-        }
-
-        # Create nested handle/knot structure to match legacy format
-        brush_data["handle"] = {
-            "brand": handle_data.get("handle_maker"),
-            "model": handle_data.get("handle_model"),
-            "source_text": handle_data.get("_source_text", handle_result.original),
-            "_matched_by": "HandleMatcher",
-            "_pattern": handle_data.get("_pattern_used"),
-        }
-
-        # Create empty knot section for composite brush
-        brush_data["knot"] = {
-            "brand": None,
-            "model": None,
-            "fiber": None,
-            "knot_size_mm": None,
-            "source_text": handle_data.get("_source_text", handle_result.original),
-            "_matched_by": "HandleMatcher",
-            "_pattern": handle_data.get("_pattern_used"),
+            "_pattern": pat,
+            "handle": build_handle_subdict(
+                handle_data.get("handle_maker"),
+                handle_data.get("handle_model"),
+                source_text=src,
+                matched_by="HandleMatcher",
+                pattern=pat,
+            ),
+            "knot": build_knot_subdict(
+                None, None,
+                source_text=src,
+                matched_by="HandleMatcher",
+                pattern=pat,
+            ),
         }
 
         return MatchResult(
@@ -577,33 +573,29 @@ class BrushMatcher:
             # Fall back to handle brand if brands don't match
             top_level_brand = handle_brand
 
-        # Create combined brush data
+        # Create combined brush data with nested handle/knot structure
         brush_data = {
             "brand": top_level_brand,
             "model": handle_data.get("handle_model"),
             "source_text": handle_data.get("_source_text", handle_result.original),
             "_matched_by": "HandleMatcher+KnotMatcher",
             "_pattern": handle_data.get("_pattern_used"),
-        }
-
-        # Create handle section
-        brush_data["handle"] = {
-            "brand": handle_data.get("handle_maker"),
-            "model": handle_data.get("handle_model"),
-            "source_text": handle_data.get("_source_text", handle_result.original),
-            "_matched_by": "HandleMatcher",
-            "_pattern": handle_data.get("_pattern_used"),
-        }
-
-        # Create knot section with knot data
-        brush_data["knot"] = {
-            "brand": knot_data.get("brand"),
-            "model": knot_data.get("model"),
-            "fiber": knot_data.get("fiber"),
-            "knot_size_mm": knot_data.get("knot_size_mm"),
-            "source_text": knot_data.get("source_text", handle_result.original),
-            "_matched_by": "KnotMatcher",
-            "_pattern": knot_data.get("_pattern_used"),
+            "handle": build_handle_subdict(
+                handle_data.get("handle_maker"),
+                handle_data.get("handle_model"),
+                source_text=handle_data.get("_source_text", handle_result.original),
+                matched_by="HandleMatcher",
+                pattern=handle_data.get("_pattern_used"),
+            ),
+            "knot": build_knot_subdict(
+                knot_data.get("brand"),
+                knot_data.get("model"),
+                knot_data.get("fiber"),
+                knot_data.get("knot_size_mm"),
+                source_text=knot_data.get("source_text", handle_result.original),
+                matched_by="KnotMatcher",
+                pattern=knot_data.get("_pattern_used"),
+            ),
         }
 
         return MatchResult(
@@ -626,35 +618,32 @@ class BrushMatcher:
         """
         knot_data = knot_result.matched or {}
 
-        # Create brush format result
+        # Create brush format result with nested handle/knot structure
+        src = knot_data.get("source_text", knot_result.original)
+        pat = knot_data.get("_pattern_used")
         brush_data = {
             "brand": knot_data.get("brand"),
             "model": knot_data.get("model"),
             "fiber": knot_data.get("fiber"),
             "knot_size_mm": knot_data.get("knot_size_mm"),
-            "source_text": knot_data.get("source_text", knot_result.original),
+            "source_text": src,
             "_matched_by": "KnotMatcher",
-            "_pattern": knot_data.get("_pattern_used"),
-        }
-
-        # Create empty handle section for knot-only brush
-        brush_data["handle"] = {
-            "brand": None,
-            "model": None,
-            "source_text": knot_data.get("source_text", knot_result.original),
-            "_matched_by": "KnotMatcher",
-            "_pattern": knot_data.get("_pattern_used"),
-        }
-
-        # Create knot section
-        brush_data["knot"] = {
-            "brand": knot_data.get("brand"),
-            "model": knot_data.get("model"),
-            "fiber": knot_data.get("fiber"),
-            "knot_size_mm": knot_data.get("knot_size_mm"),
-            "source_text": knot_data.get("source_text", knot_result.original),
-            "_matched_by": "KnotMatcher",
-            "_pattern": knot_data.get("_pattern_used"),
+            "_pattern": pat,
+            "handle": build_handle_subdict(
+                None, None,
+                source_text=src,
+                matched_by="KnotMatcher",
+                pattern=pat,
+            ),
+            "knot": build_knot_subdict(
+                knot_data.get("brand"),
+                knot_data.get("model"),
+                knot_data.get("fiber"),
+                knot_data.get("knot_size_mm"),
+                source_text=src,
+                matched_by="KnotMatcher",
+                pattern=pat,
+            ),
         }
 
         return MatchResult(

@@ -15,6 +15,7 @@ from ..base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 from ..utils.pattern_cache import get_compiled_patterns
+from ..utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
@@ -151,28 +152,28 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                     "_pattern": pattern_info["pattern"],
                     "_brush_name": pattern_info["brush_name"],
                     # Add nested handle and knot sections for modifier functions
-                    "handle": {
-                        "brand": handle_maker,
-                        "model": handle_model,
-                        "source_text": handle,
-                        "_matched_by": (
+                    "handle": build_handle_subdict(
+                        handle_maker,
+                        handle_model,
+                        source_text=handle,
+                        matched_by=(
                             "HandleMatcher" if handle_result else "KnownSplitWrapperStrategy"
                         ),
-                        "_pattern": (
+                        pattern=(
                             handle_result.pattern if handle_result else pattern_info["pattern"]
                         ),
-                    },
-                    "knot": {
-                        "brand": brand,
-                        "model": model,
-                        "fiber": fiber,
-                        "knot_size_mm": knot_size_mm,
-                        "source_text": knot,
-                        "_matched_by": (
+                    ),
+                    "knot": build_knot_subdict(
+                        brand,
+                        model,
+                        fiber,
+                        knot_size_mm,
+                        source_text=knot,
+                        matched_by=(
                             "KnotMatcher" if knot_result else "KnownSplitWrapperStrategy"
                         ),
-                        "_pattern": knot_result.pattern if knot_result else pattern_info["pattern"],
-                    },
+                        pattern=knot_result.pattern if knot_result else pattern_info["pattern"],
+                    ),
                 }
 
                 # Component scores are now calculated externally by the scoring engine

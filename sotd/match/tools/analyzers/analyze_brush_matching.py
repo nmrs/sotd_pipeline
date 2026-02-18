@@ -18,6 +18,8 @@ import re
 import sys
 from pathlib import Path
 
+from sotd.match.brush.strategies.utils.knot_signal_utils import HANDLE_ALL_TERMS, HANDLE_CRAFT_TERMS
+
 # Add the project root to the path
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
@@ -677,8 +679,7 @@ def _show_simplified_component_modifier_details(
             print("              brand_match: +0.0")
 
         # Check for handle indicators in text
-        handle_indicators = ["wood", "resin", "metal", "turned", "custom", "artisan", "stock"]
-        if any(indicator in input_text.lower() for indicator in handle_indicators):
+        if any(indicator in input_text.lower() for indicator in HANDLE_CRAFT_TERMS):
             print(
                 f"              handle_indicators: "
                 f"+{handle_config.get('handle_indicators', 0.0):.1f}"
@@ -772,26 +773,9 @@ def _calculate_modifier_value(
 
     elif modifier_name == "handle_indicators":
         # Check for handle-specific indicators in the input text
-        handle_indicators = [
-            r"\bhandle\b",
-            r"\bwood\b",
-            r"\bresin\b",
-            r"\bacrylic\b",
-            r"\bmetal\b",
-            r"\bbrass\b",
-            r"\baluminum\b",
-            r"\bsteel\b",
-            r"\btitanium\b",
-            r"\bebonite\b",
-            r"\bivory\b",
-            r"\bhorn\b",
-            r"\bbone\b",
-            r"\bstone\b",
-            r"\bmarble\b",
-            r"\bgranite\b",
-        ]
-        for pattern in handle_indicators:
-            if re.search(pattern, input_text.lower()):
+        input_lower = input_text.lower()
+        for term in HANDLE_ALL_TERMS:
+            if term in input_lower:
                 return 1.0
         return 0.0
 

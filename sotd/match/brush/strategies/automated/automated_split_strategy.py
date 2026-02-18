@@ -18,6 +18,7 @@ from ...text_splitter import normalize_text, split_on_delimiters
 from ..base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
+from ..utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
@@ -141,48 +142,48 @@ class AutomatedSplitStrategy(BaseMultiResultBrushMatchingStrategy):
                 "split_priority": priority,
                 "_delimiter_priority": priority,
                 "high_priority_delimiter": priority == "high",
-                "handle": {
-                    "brand": (
+                "handle": build_handle_subdict(
+                    (
                         handle_result.matched.get("handle_maker")
                         if handle_result and handle_result.matched
                         else None
                     ),
-                    "model": (
+                    (
                         handle_result.matched.get("handle_model")
                         if handle_result and handle_result.matched
                         else None
                     ),
-                    "source_text": handle,
-                    "_matched_by": "automated_split",
-                    "_pattern": (handle_result.pattern if handle_result else "unknown"),
-                    "priority": getattr(handle_result, "priority", None),
-                },
-                "knot": {
-                    "brand": (
+                    source_text=handle,
+                    matched_by="automated_split",
+                    pattern=(handle_result.pattern if handle_result else "unknown"),
+                    priority=getattr(handle_result, "priority", None),
+                ),
+                "knot": build_knot_subdict(
+                    (
                         knot_result.matched.get("brand")
                         if knot_result and knot_result.matched
                         else None
                     ),
-                    "model": (
+                    (
                         knot_result.matched.get("model")
                         if knot_result and knot_result.matched
                         else None
                     ),
-                    "fiber": (
+                    (
                         knot_result.matched.get("fiber")
                         if knot_result and knot_result.matched
                         else None
                     ),
-                    "knot_size_mm": (
+                    (
                         knot_result.matched.get("knot_size_mm")
                         if knot_result and knot_result.matched
                         else None
                     ),
-                    "source_text": knot,
-                    "_matched_by": "automated_split",
-                    "_pattern": (knot_result.pattern if knot_result else "unknown"),
-                    "priority": getattr(knot_result, "priority", None),
-                },
+                    source_text=knot,
+                    matched_by="automated_split",
+                    pattern=(knot_result.pattern if knot_result else "unknown"),
+                    priority=getattr(knot_result, "priority", None),
+                ),
             },
             match_type="split_brush",
             pattern=f"split_on_{priority}_priority_delimiter",

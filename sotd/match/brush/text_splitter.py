@@ -12,7 +12,11 @@ from typing import Optional
 
 from .delimiter_patterns import BrushDelimiterPatterns
 from .strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
-from .strategies.utils.knot_signal_utils import assign_sides, knot_signal_score
+from .strategies.utils.knot_signal_utils import (
+    HANDLE_CRAFT_TERMS,
+    assign_sides,
+    knot_signal_score,
+)
 from .strategies.utils.knot_size_utils import parse_knot_size
 
 
@@ -129,26 +133,11 @@ def _looks_like_brand_alias(alias_part: str, size_fiber_part: str) -> bool:
 def _looks_like_handle_description(text: str) -> bool:
     """Return True when *text* looks like a handle description."""
     text_lower = text.lower()
-    handle_terms = ["handle", "custom", "artisan", "turned", "wood", "resin", "zebra", "burl"]
-    for term in handle_terms:
+    for term in HANDLE_CRAFT_TERMS:
         if term in text_lower:
             return True
     if parse_knot_size(text) is not None or match_fiber(text) is not None:
         return False
-    return False
-
-
-def _looks_like_complete_knot(text: str) -> bool:
-    """Return True when *text* has clear knot signals (size, fiber, version)."""
-    text_lower = text.lower()
-    if parse_knot_size(text) is not None:
-        return True
-    if match_fiber(text) is not None:
-        return True
-    if re.search(r"\b[bv]\d{1,2}\b", text_lower):
-        return True
-    if re.search(r"\b(knot|tip|density)\b", text_lower):
-        return True
     return False
 
 
@@ -199,7 +188,7 @@ def _split_smart(text: str, delimiter: str) -> tuple[Optional[str], Optional[str
                         best_split = (handle, knot)
         else:
             # For " - " without second dash: require knot signals
-            if delimiter == " - " and not _looks_like_complete_knot(part2):
+            if delimiter == " - ":
                 if knot_signal_score(part1) <= 0 and knot_signal_score(part2) <= 0:
                     continue
 

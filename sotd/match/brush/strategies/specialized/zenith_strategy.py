@@ -7,6 +7,7 @@ from ..utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
+from ..utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class ZenithBrushMatchingStrategy:
@@ -36,18 +37,8 @@ class ZenithBrushMatchingStrategy:
                 "handle_maker": None,
                 "source_text": model_match.group(0),
                 "source_type": "exact",
-                # Create nested handle section
-                "handle": {
-                    "brand": brand,  # Handle brand same as brush brand for Zenith
-                    "model": None,  # Handle model not specified for Zenith
-                },
-                # Create nested knot section with fiber and size info
-                "knot": {
-                    "brand": brand,  # Knot brand same as brush brand for Zenith
-                    "model": model_num,  # Knot model same as brush model for Zenith
-                    "fiber": "Boar",
-                    "knot_size_mm": None,
-                },
+                "handle": build_handle_subdict(brand, None),
+                "knot": build_knot_subdict(brand, model_num, "Boar", None),
             }
 
             return create_strategy_result(

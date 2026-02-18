@@ -13,6 +13,7 @@ from .base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
 from .utils.knot_signal_utils import KNOT_SIGNAL_RE, knot_signal_spans
+from .utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
@@ -465,26 +466,26 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             "_original_handle_text": handle_data.get("source_text"),
             "_original_knot_text": knot_data.get("source_text"),
             # Add nested handle and knot sections for modifier functions
-            "handle": {
-                "brand": handle_data.get("handle_maker"),
-                "model": handle_data.get("handle_model"),
-                "source_text": handle_data.get("source_text", value),
-                "_matched_by": "HandleMatcher",
-                "_pattern": handle_data.get("_pattern_used"),
-            },
-            "knot": {
-                "brand": knot_data.get("brand"),
-                "model": knot_data.get("model"),
-                "fiber": knot_data.get("fiber"),
-                "knot_size_mm": knot_data.get("knot_size_mm"),
-                "source_text": knot_data.get("source_text", value),
-                "_matched_by": "KnotMatcher",
-                "_pattern": (
+            "handle": build_handle_subdict(
+                handle_data.get("handle_maker"),
+                handle_data.get("handle_model"),
+                source_text=handle_data.get("source_text", value),
+                matched_by="HandleMatcher",
+                pattern=handle_data.get("_pattern_used"),
+            ),
+            "knot": build_knot_subdict(
+                knot_data.get("brand"),
+                knot_data.get("model"),
+                knot_data.get("fiber"),
+                knot_data.get("knot_size_mm"),
+                source_text=knot_data.get("source_text", value),
+                matched_by="KnotMatcher",
+                pattern=(
                     knot_result.pattern
                     if hasattr(knot_result, "pattern")
                     else knot_data.get("_pattern_used")
                 ),
-            },
+            ),
         }
 
         # Component scores are now calculated externally by the scoring engine
@@ -520,26 +521,20 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             "_matched_by": "HandleMatcher",
             "_pattern": handle_data.get("_pattern_used"),
             # Add nested handle and knot sections for modifier functions
-            "handle": {
-                "brand": handle_data.get("handle_maker"),
-                "model": handle_data.get("handle_model"),
-                "source_text": handle_data.get("source_text", ""),
-                "_matched_by": "HandleMatcher",
-                "_pattern": handle_data.get("_pattern_used"),
-            },
-            "knot": {
-                "brand": None,
-                "model": None,
-                "fiber": None,
-                "knot_size_mm": None,
-                "source_text": "",
-                "_matched_by": "HandleMatcher",
-                "_pattern": handle_data.get("_pattern_used"),
-            },
+            "handle": build_handle_subdict(
+                handle_data.get("handle_maker"),
+                handle_data.get("handle_model"),
+                source_text=handle_data.get("source_text", ""),
+                matched_by="HandleMatcher",
+                pattern=handle_data.get("_pattern_used"),
+            ),
+            "knot": build_knot_subdict(
+                None, None,
+                source_text="",
+                matched_by="HandleMatcher",
+                pattern=handle_data.get("_pattern_used"),
+            ),
         }
-
-        # Component scores are now calculated externally by the scoring engine
-        # No need to pre-calculate scores here
 
         return MatchResult(
             original="",  # Handle matcher doesn't provide original text
@@ -563,26 +558,22 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             "_matched_by": "KnotMatcher",
             "_pattern": knot_pattern,
             # Add nested handle and knot sections for modifier functions
-            "handle": {
-                "brand": None,
-                "model": None,
-                "source_text": "",
-                "_matched_by": "KnotMatcher",
-                "_pattern": knot_pattern,
-            },
-            "knot": {
-                "brand": knot_data.get("brand"),
-                "model": knot_data.get("model"),
-                "fiber": knot_data.get("fiber"),
-                "knot_size_mm": knot_data.get("knot_size_mm"),
-                "source_text": knot_data.get("source_text", ""),
-                "_matched_by": "KnotMatcher",
-                "_pattern": knot_pattern,
-            },
+            "handle": build_handle_subdict(
+                None, None,
+                source_text="",
+                matched_by="KnotMatcher",
+                pattern=knot_pattern,
+            ),
+            "knot": build_knot_subdict(
+                knot_data.get("brand"),
+                knot_data.get("model"),
+                knot_data.get("fiber"),
+                knot_data.get("knot_size_mm"),
+                source_text=knot_data.get("source_text", ""),
+                matched_by="KnotMatcher",
+                pattern=knot_pattern,
+            ),
         }
-
-        # Component scores are now calculated externally by the scoring engine
-        # No need to pre-calculate scores here
 
         return MatchResult(
             original="",  # Knot matcher doesn't provide original text

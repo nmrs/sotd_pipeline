@@ -15,6 +15,7 @@ from ..utils.pattern_cache import get_compiled_patterns
 from ..utils.pattern_utils import (
     compile_catalog_patterns,
 )
+from ..utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
 class BaseKnownBrushMatchingStrategy(BaseBrushMatchingStrategy, ABC):
@@ -127,18 +128,8 @@ class BaseKnownBrushMatchingStrategy(BaseBrushMatchingStrategy, ABC):
             "brand": brand,
             "model": model,
             "_pattern_used": pattern_data.get("pattern", "unknown"),
-            # Create nested handle section
-            "handle": {
-                "brand": handle_brand,
-                "model": handle_model,
-            },
-            # Create nested knot section with fiber and size info
-            "knot": {
-                "brand": knot_brand,
-                "model": knot_model,
-                "fiber": knot_fiber,
-                "knot_size_mm": knot_size,
-            },
+            "handle": build_handle_subdict(handle_brand, handle_model),
+            "knot": build_knot_subdict(knot_brand, knot_model, knot_fiber, knot_size),
         }
 
         # Add strategy information to root level

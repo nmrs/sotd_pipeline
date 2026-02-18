@@ -11,6 +11,7 @@ from sotd.match.types import MatchResult, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 from .fiber_utils import match_fiber
+from .knot_signal_utils import HANDLE_CRAFT_TERMS
 
 
 def validate_string_input(value: Any) -> Optional[str]:
@@ -359,14 +360,9 @@ def has_handle_indicators(text: str) -> bool:
     if not text:
         return False
 
-    # Explicit handle keyword
-    if "handle" in text.lower():
-        return True
-
-    # Handle-specific terms
-    handle_terms = ["stock", "turned", "wood", "resin"]
-    for term in handle_terms:
-        if term in text.lower():
+    text_lower = text.lower()
+    for term in HANDLE_CRAFT_TERMS:
+        if term in text_lower:
             return True
 
     return False

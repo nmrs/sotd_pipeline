@@ -11,6 +11,7 @@ from typing import Any, List, Optional
 import yaml
 
 from sotd.match.brush.scoring.calculator import ComponentScoreCalculator
+from sotd.match.brush.strategies.utils.knot_signal_utils import HANDLE_ALL_TERMS
 from sotd.match.types import MatchResult
 
 
@@ -700,26 +701,9 @@ class ScoringEngine:
         if strategy_name not in ["handle_matching", "knot_matching", "handle_only", "knot_only"]:
             return 0.0
 
-        handle_indicators = [
-            r"\bhandle\b",
-            r"\bwood\b",
-            r"\bresin\b",
-            r"\bacrylic\b",
-            r"\bmetal\b",
-            r"\bbrass\b",
-            r"\baluminum\b",
-            r"\bsteel\b",
-            r"\btitanium\b",
-            r"\bebonite\b",
-            r"\bivory\b",
-            r"\bhorn\b",
-            r"\bbone\b",
-            r"\bstone\b",
-            r"\bmarble\b",
-            r"\bgranite\b",
-        ]
-        for pattern in handle_indicators:
-            if re.search(pattern, input_text.lower()):
+        input_lower = input_text.lower()
+        for term in HANDLE_ALL_TERMS:
+            if term in input_lower:
                 return 1.0
         return 0.0
 
