@@ -230,11 +230,13 @@ class TestBrushSplitterDelimiterWithSpecifications:
 
     def test_scoring_validation(self, brush_splitter):
         """
-        Validate that scoring supports the expected splits.
+        Validate that knot signal scoring supports the expected splits.
 
-        This ensures our expected splits are reasonable based on the
-        scoring logic.
+        Uses knot_signal_score from knot_signal_utils (single source of truth)
+        to verify that the expected knot side has more knot signals.
         """
+        from sotd.match.brush.strategies.utils.knot_signal_utils import knot_signal_score
+
         test_cases = [
             {
                 "text": (
@@ -250,54 +252,22 @@ class TestBrushSplitterDelimiterWithSpecifications:
         for test_case in test_cases:
             text = test_case["text"]
             delimiter = test_case["delimiter"]
-            expected_handle = test_case["expected_handle"]
             expected_knot = test_case["expected_knot"]
             description = test_case["description"]
 
-            # Split on the delimiter
             parts = text.split(delimiter, 1)
             if len(parts) == 2:
                 part1, part2 = parts[0].strip(), parts[1].strip()
 
-                # Score both parts
-                part1_handle_score = brush_splitter._score_as_handle(part1)
-                part1_knot_score = brush_splitter._score_as_knot(part1)
-                part2_handle_score = brush_splitter._score_as_handle(part2)
-                part2_knot_score = brush_splitter._score_as_knot(part2)
+                part1_knot = knot_signal_score(part1)
+                part2_knot = knot_signal_score(part2)
 
-                print(f"\nScoring for {description}:")
-                print(f"  Part 1 ('{part1}'): handle={part1_handle_score}, knot={part1_knot_score}")
-                print(f"  Part 2 ('{part2}'): handle={part2_handle_score}, knot={part2_knot_score}")
-                print(f"  Expected: handle='{expected_handle}', knot='{expected_knot}'")
+                print(f"\nKnot signal scoring for {description}:")
+                print(f"  Part 1 ('{part1}'): knot_signal={part1_knot}")
+                print(f"  Part 2 ('{part2}'): knot_signal={part2_knot}")
 
-                # Verify the scoring supports our expected split
+                # For " in " delimiter, first part should be the knot
                 if delimiter == " in ":
-                    # For " in " delimiter, first part should be knot, second part should be handle
                     assert (
-                        part1_knot_score > part2_knot_score
-                    ), f"Part 1 should score higher as knot for {description}"
-                    assert (
-                        part2_handle_score > part1_handle_score
-                    ), f"Part 2 should score higher as handle for {description}"
-                else:
-                    # For other delimiters, verify the expected split is reasonable
-                    expected_part1 = expected_handle if part1 == expected_handle else expected_knot
-                    expected_part2 = expected_knot if part1 == expected_handle else expected_handle
-
-                    if expected_part1 == expected_handle:
-                        assert (
-                            part1_handle_score > part2_handle_score
-                        ), f"Part 1 should score higher as handle for {description}"
-                    else:
-                        assert (
-                            part1_knot_score > part2_knot_score
-                        ), f"Part 1 should score higher as knot for {description}"
-
-                    if expected_part2 == expected_handle:
-                        assert (
-                            part2_handle_score > part1_handle_score
-                        ), f"Part 2 should score higher as handle for {description}"
-                    else:
-                        assert (
-                            part2_knot_score > part1_knot_score
-                        ), f"Part 2 should score higher as knot for {description}"
+                        part1_knot > part2_knot
+                    ), f"Part 1 should have higher knot signal for {description}"

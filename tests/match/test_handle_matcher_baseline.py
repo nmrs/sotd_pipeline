@@ -244,18 +244,6 @@ class TestHandleMatcherBaseline:
         assert handle_matcher.is_known_handle_maker("declaration grooming") is True
         assert handle_matcher.is_known_handle_maker("JAYARUH") is True
 
-    def test_score_as_handle(self, handle_matcher):
-        """Test score_as_handle method."""
-        # Test strong handle indicators
-        assert handle_matcher.score_as_handle("Declaration Grooming Washington handle") > 0
-        assert handle_matcher.score_as_handle("Jayaruh handle") > 0
-
-        # Test knot indicators (should score lower)
-        knot_text = "Declaration Grooming B2 badger knot"
-        handle_score = handle_matcher.score_as_handle("Declaration Grooming Washington")
-        knot_score = handle_matcher.score_as_handle(knot_text)
-        assert handle_score > knot_score
-
     def test_resolve_handle_maker(self, handle_matcher):
         """Test resolve_handle_maker method."""
         # Test with full text

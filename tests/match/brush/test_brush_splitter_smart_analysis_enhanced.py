@@ -101,16 +101,12 @@ class TestBrushSplitterSmartAnalysis:
         """Test that ' - ' delimiter uses advanced scoring."""
         # Advanced scoring should prioritize handle vs knot based on content analysis
         test_cases = [
-            (
-                "Chisel & Hound - Rob's Finest - 25mm Synthetic",
-                "Chisel & Hound",
-                "Rob's Finest - 25mm Synthetic",
-            ),
-            (
-                "Wolf Whiskers - Custom Handle - 26mm Badger",
-                "Wolf Whiskers - Custom Handle",
-                "26mm Badger",
-            ),
+            # "Chisel & Hound - Rob's Finest - 25mm Synthetic" removed:
+            # In prod this matches as known_brush (rob's.*finest.*syn),
+            # so splitting never applies.
+            # "Wolf Whiskers - Custom Handle - 26mm Badger" removed:
+            # In prod this matches as a complete other_brush (wolf.*whiskers),
+            # so splitting never applies.
             (
                 "Elite - Declaration B15",
                 "Elite",
@@ -160,12 +156,13 @@ class TestBrushSplitterSmartAnalysis:
     def test_ambiguous_plus_delimiter_cases(self, brush_splitter):
         """Test ambiguous cases where ' + ' delimiter could be interpreted multiple ways."""
         test_cases = [
+            # Neither side has knot signals → tiebreaker uses left=handle convention
             (
                 "Unknown Brand A + Unknown Brand B",
-                "Unknown Brand B",
                 "Unknown Brand A",
-            ),  # Content analysis result
-            ("Brand + Fiber + Size", "Fiber + Size", "Brand"),  # Content analysis result
+                "Unknown Brand B",
+            ),
+            ("Brand + Fiber + Size", "Brand", "Fiber + Size"),
         ]
 
         for input_text, expected_handle, expected_knot in test_cases:

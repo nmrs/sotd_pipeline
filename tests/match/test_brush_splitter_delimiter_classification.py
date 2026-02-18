@@ -115,17 +115,18 @@ class TestBrushSplitterDelimiterClassification:
 
     def test_non_delimiters_do_not_trigger_splitting(self, brush_splitter):
         """Test that non-delimiters do not trigger splitting."""
-        # Non-delimiters: " x ", " × ", " & "
+        # Non-delimiters: " × ", " & "
+        # Note: " x " IS now a delimiter for collaborations, but NOT for dimensions
         # Note: Parentheses "()" are now treated as medium-priority delimiters
         test_cases = [
-            "Simpson Chubby 2 x 24mm",
+            "Simpson Chubby 2 x 24mm",  # bare-number x size = dimension, not split
             "Zenith B2 × 26mm",
             "Chisel & Hound Sakura",
         ]
 
         for input_text in test_cases:
             handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(input_text)
-            # Should not split on non-delimiters
+            # Should not split on non-delimiters or dimension specs
             assert handle is None, f"Should not split: {input_text}"
             assert knot is None, f"Should not split: {input_text}"
             # When no splitting occurs, delimiter_type can be None (known brush) or
@@ -135,13 +136,30 @@ class TestBrushSplitterDelimiterClassification:
                 "not_known_brush",
             ], f"Should not have delimiter type: {input_text}"
 
+    def test_x_collaboration_delimiter_triggers_splitting(self, brush_splitter):
+        """Test that ' x ' triggers splitting for collaboration patterns."""
+        test_cases = [
+            ("Ever-Ready 200 x Tuxedo Knot", "Ever-Ready 200", "Tuxedo Knot"),
+            (
+                'ap shave co. - g5c 26mm x rad dinosaur creations "atlas" handle',
+                'rad dinosaur creations "atlas" handle',
+                "ap shave co. - g5c 26mm",
+            ),
+        ]
+
+        for input_text, expected_handle, expected_knot in test_cases:
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(input_text)
+            assert handle == expected_handle, f"Wrong handle for: {input_text}"
+            assert knot == expected_knot, f"Wrong knot for: {input_text}"
+
     def test_multiple_delimiters_handled_correctly(self, brush_splitter):
         """Test edge cases with multiple delimiters."""
         test_cases = [
             # Mixed delimiters - current implementation splits on first delimiter
             ("C&H + TnS w/ 27mm", "C&H + TnS", "27mm"),
-            # Delimiters with extra spaces
-            ("Elite   w/   Declaration", "Declaration", "Elite"),
+            # Delimiters with extra spaces — neither side has knot signals,
+            # so tiebreaker uses w/ convention: left=handle, right=knot
+            ("Elite   w/   Declaration", "Elite", "Declaration"),
         ]
 
         for input_text, expected_handle, expected_knot in test_cases:
@@ -179,7 +197,7 @@ class TestBrushSplitterDelimiterClassification:
         high_reliability = [" w/ ", " with "]  # Removed " / " - now medium-priority
         handle_primary = [" in "]
         medium_reliability = [" + ", " - ", " / "]  # Added " / " to medium-priority
-        non_delimiters = [" x ", " × ", " & ", "()"]
+        non_delimiters = [" × ", " & ", "()"]
 
         # This test assumes the implementation will have a method to check delimiter reliability
         # We'll test this through the actual splitting behavior

@@ -59,6 +59,10 @@ class BrushDelimiterPatterns:
         " in ",  # " in " (knot in handle)
     ]
 
+    # ' x ' collaboration delimiter — requires specification-check guard
+    # before use (is_specification_x must return False).
+    X_COLLABORATION_PATTERN = r"\s[xX]\s"
+
     @classmethod
     def get_high_priority_delimiters(cls) -> List[str]:
         """Get high-priority delimiter patterns."""

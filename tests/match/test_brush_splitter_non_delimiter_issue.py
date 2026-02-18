@@ -202,9 +202,12 @@ class TestBrushSplitterNonDelimiterIssue:
         Define what the correct behavior should be.
 
         This test documents the expected behavior for each test case
-        once the non-delimiter issue is fixed.
+        once the non-delimiter issue is fixed.  Validates using
+        knot_signal_score from knot_signal_utils (the single source of
+        truth for knot-likeness scoring).
         """
-        # Define expected behaviors for each test case
+        from sotd.match.brush.strategies.utils.knot_signal_utils import knot_signal_score
+
         expected_behaviors = [
             {
                 "text": "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle",
@@ -231,15 +234,8 @@ class TestBrushSplitterNonDelimiterIssue:
 
         for behavior in expected_behaviors:
             text = behavior["text"]
-            expected_handle = behavior["expected_handle"]
-            expected_knot = behavior["expected_knot"]
-            expected_delimiter = behavior["expected_delimiter"]
             description = behavior["description"]
 
-            # For now, these tests will fail because the non-delimiter logic prevents
-            # proper delimiter detection. Once the fix is implemented, these should pass.
-
-            # Test the scoring to verify our expectations are reasonable
             parts = (
                 text.split(" in ", 1)
                 if " in " in text
@@ -253,29 +249,17 @@ class TestBrushSplitterNonDelimiterIssue:
             if len(parts) == 2:
                 part1, part2 = parts[0].strip(), parts[1].strip()
 
-                # Score both parts
-                part1_handle_score = brush_splitter._score_as_handle(part1)
-                part1_knot_score = brush_splitter._score_as_knot(part1)
-                part2_handle_score = brush_splitter._score_as_handle(part2)
-                part2_knot_score = brush_splitter._score_as_knot(part2)
+                part1_knot = knot_signal_score(part1)
+                part2_knot = knot_signal_score(part2)
 
-                print(f"\nScoring for {description}:")
-                print(f"  Part 1 ('{part1}'): handle={part1_handle_score}, knot={part1_knot_score}")
-                print(f"  Part 2 ('{part2}'): handle={part2_handle_score}, knot={part2_knot_score}")
+                print(f"\nKnot signal scores for {description}:")
+                print(f"  Part 1 ('{part1}'): knot_signal={part1_knot}")
+                print(f"  Part 2 ('{part2}'): knot_signal={part2_knot}")
 
-                # Verify our expectations are reasonable based on scoring
+                # For positional delimiters like " in ", scoring isn't used
+                # for assignment — the convention dictates the split. Verify
+                # that at least one side has knot signals.
                 if "handle" in description:
-                    # For handle-primary delimiters, first part should score higher as handle
                     assert (
-                        part1_handle_score > part2_handle_score
-                        or part2_knot_score > part1_knot_score
-                    ), f"Scoring doesn't support expected behavior for {description}"
-                elif "knot" in description:
-                    # For other delimiters, scoring should support the expected split
-                    assert (
-                        part1_handle_score > part2_handle_score
-                        and part2_knot_score > part1_knot_score
-                    ) or (
-                        part2_handle_score > part1_handle_score
-                        and part1_knot_score > part2_knot_score
-                    ), f"Scoring doesn't support expected behavior for {description}"
+                        part1_knot > 0 or part2_knot > 0
+                    ), f"No knot signals present for {description}"

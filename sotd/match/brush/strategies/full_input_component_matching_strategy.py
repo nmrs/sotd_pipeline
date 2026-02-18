@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Unified component matching strategy that handles both dual and single component matches."""
 
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -11,6 +12,7 @@ from ..comparison.splits_loader import BrushSplitsLoader
 from .base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
+from .utils.knot_signal_utils import KNOT_SIGNAL_RE, knot_signal_spans
 
 
 class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
@@ -105,6 +107,18 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             # Extract brands for comparison
             handle_brand = self._extract_brand_from_result(handle_result)
             knot_brand = self._extract_brand_from_result(knot_result)
+
+            # Validate assignment: when both matchers fire on the full text,
+            # the handle brand should appear BEFORE the knot brand (convention:
+            # "Handle Knot").  If positions are reversed, re-match the substrings.
+            if handle_brand and knot_brand and handle_brand != knot_brand:
+                corrected = self._correct_brand_positions(
+                    text, handle_result, knot_result
+                )
+                if corrected:
+                    handle_result, knot_result = corrected
+                    handle_brand = self._extract_brand_from_result(handle_result)
+                    knot_brand = self._extract_brand_from_result(knot_result)
 
             # Always include the original combination
             combination_key = (handle_brand, knot_brand)
@@ -259,6 +273,137 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
         except Exception:
             # Knot matcher failed, return None
             return None
+
+    # ------------------------------------------------------------------
+    # Brand-position validation for dual-component matches
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _find_brand_span(text: str, brand_name: str) -> tuple[int, int]:
+        """Return (start, end) of a brand name in *text* (case-insensitive).
+
+        Handles the common variation where the canonical name has a
+        trailing 's' but the user's text does not
+        (e.g. "DS Cosmetics" vs "DS Cosmetic").
+
+        Returns (-1, -1) when the brand cannot be located.
+        """
+        text_lower = text.lower()
+        brand_lower = brand_name.lower()
+
+        pos = text_lower.find(brand_lower)
+        if pos != -1:
+            return pos, pos + len(brand_lower)
+
+        if brand_lower.endswith("s"):
+            shorter = brand_lower[:-1]
+            pos = text_lower.find(shorter)
+            if pos != -1:
+                return pos, pos + len(shorter)
+
+        return -1, -1
+
+    def _correct_brand_positions(self, text, handle_result, knot_result):
+        """Validate handle/knot assignment using proximity to knot signals.
+
+        When both matchers fire on the full text they each grab the first
+        brand their patterns match, which may assign the roles backwards.
+
+        This method locates every knot-indicative token (mm sizes, fiber
+        words, "knot", batch codes …) and both brand names, then checks
+        which brand is *closer* to those knot signals.  The closer brand
+        is the knot maker; the other is the handle maker.
+
+        If the current assignment is already correct (or there are no knot
+        signals to disambiguate), returns None.  Otherwise re-matches the
+        two substrings with the correct matchers and returns the corrected
+        (handle_result, knot_result) tuple.
+        """
+        # Get original-case brand names
+        if hasattr(handle_result, "matched"):
+            handle_brand = (handle_result.matched or {}).get("handle_maker", "")
+        else:
+            handle_brand = (handle_result or {}).get("handle_maker", "")
+
+        if hasattr(knot_result, "matched"):
+            knot_brand = (knot_result.matched or {}).get("brand", "")
+        else:
+            knot_brand = (knot_result or {}).get("brand", "")
+
+        if not handle_brand or not knot_brand:
+            return None
+
+        # If the knot result has a specific model (known_knots match like B13,
+        # G5C, v27), the KnotMatcher's assignment is authoritative — don't
+        # override it with a proximity heuristic.
+        if hasattr(knot_result, "matched"):
+            knot_model = (knot_result.matched or {}).get("model")
+        else:
+            knot_model = (knot_result or {}).get("model")
+        if knot_model and knot_model.lower() not in ("unspecified", ""):
+            return None
+
+        # Locate each brand in the text
+        handle_start, handle_end = self._find_brand_span(text, handle_brand)
+        knot_start, knot_end = self._find_brand_span(text, knot_brand)
+
+        if handle_start == -1 or knot_start == -1:
+            return None
+
+        # Locate knot-signal tokens (as spans)
+        signal_spans = knot_signal_spans(text)
+        if not signal_spans:
+            return None  # no knot signals → nothing to disambiguate
+
+        # Proximity = minimum gap between brand span and any signal span.
+        # A gap of 0 means they overlap or are adjacent.
+        # The brand whose span is closest to a knot signal is the knot maker.
+        def _span_gap(a_start: int, a_end: int, b_start: int, b_end: int) -> int:
+            """Compute the gap between two spans (0 if overlapping/adjacent)."""
+            return max(0, max(a_start - b_end, b_start - a_end))
+
+        handle_proximity = min(
+            _span_gap(handle_start, handle_end, s_start, s_end)
+            for s_start, s_end in signal_spans
+        )
+        knot_proximity = min(
+            _span_gap(knot_start, knot_end, s_start, s_end)
+            for s_start, s_end in signal_spans
+        )
+
+        if handle_proximity >= knot_proximity:
+            # Current assignment looks correct (or tied) — no swap needed
+            return None
+
+        # The "handle" brand is actually the knot maker.  Split the text so
+        # each matcher gets the substring containing its brand.
+        # actual_knot_pos  = where the true knot brand (currently labelled handle) sits
+        # actual_handle_pos = where the true handle brand (currently labelled knot) sits
+        actual_knot_pos = handle_start
+        actual_handle_pos = knot_start
+
+        if actual_knot_pos > actual_handle_pos:
+            # True handle appears first, true knot appears second
+            handle_text = text[:actual_knot_pos].strip()
+            knot_text = text[actual_knot_pos:].strip()
+        else:
+            # True knot appears first, true handle appears second
+            knot_text = text[:actual_handle_pos].strip()
+            handle_text = text[actual_handle_pos:].strip()
+
+        if not handle_text or not knot_text:
+            return None
+
+        try:
+            new_handle = self.handle_matcher.match_handle_maker(handle_text)
+            new_knot = self.knot_matcher.match(knot_text, full_string=text)
+        except Exception:
+            return None
+
+        if new_handle and new_knot:
+            return new_handle, new_knot
+
+        return None
 
     def _extract_brand_from_result(self, result) -> str:
         """

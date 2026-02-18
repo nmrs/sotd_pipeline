@@ -104,12 +104,12 @@ class TestAutomatedSplitStrategyMulti:
 
     def test_match_all_mixed_priority_delimiters(self, strategy):
         """Test match_all with mixed priority delimiters."""
-        # Test case: "handle with knot / extra"
-        results = strategy.match_all("handle with knot / extra")
+        # "with" = high priority, " + " = medium priority
+        results = strategy.match_all("Dogwood with 26mm Tuxedo + Omega")
 
         # Should return 2 results:
-        # 1. High priority: "handle" with "knot / extra"
-        # 2. Medium priority: "handle with knot" / "extra"
+        # 1. High priority: "Dogwood" with "26mm Tuxedo + Omega"
+        # 2. Medium priority: "Dogwood with 26mm Tuxedo" + "Omega"
         assert len(results) == 2
 
         # Find high priority result
@@ -117,16 +117,18 @@ class TestAutomatedSplitStrategyMulti:
             (r for r in results if r.matched["split_priority"] == "high"), None
         )
         assert high_priority_result is not None
-        assert high_priority_result.matched["handle_text"] == "handle"
-        assert high_priority_result.matched["knot_text"] == "knot / extra"
+        assert high_priority_result.matched["handle_text"] == "Dogwood"
+        assert high_priority_result.matched["knot_text"] == "26mm Tuxedo + Omega"
 
-        # Find medium priority result
+        # Find medium priority result — signal scoring assigns sides based on
+        # knot signals: "Dogwood with 26mm Tuxedo" has knot signals (26mm, Tuxedo)
+        # so it becomes the knot; "Omega" becomes the handle.
         medium_priority_result = next(
             (r for r in results if r.matched["split_priority"] == "medium"), None
         )
         assert medium_priority_result is not None
-        assert medium_priority_result.matched["handle_text"] == "handle with knot"
-        assert medium_priority_result.matched["knot_text"] == "extra"
+        assert medium_priority_result.matched["handle_text"] == "Omega"
+        assert medium_priority_result.matched["knot_text"] == "Dogwood with 26mm Tuxedo"
 
     def test_match_all_no_delimiters(self, strategy):
         """Test match_all with no delimiters."""
