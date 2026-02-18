@@ -1511,6 +1511,29 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
                         "current_knot_match"
                     ].copy()
 
+            # Filter false positives: if the matcher suggestion fell back to
+            # the stored values for BOTH handle and knot, there's nothing to
+            # change — skip this issue so it doesn't confuse the user.
+            expected_h = processed_issue.get("expected_handle_match")
+            expected_k = processed_issue.get("expected_knot_match")
+            current_h = processed_issue.get("current_handle_match")
+            current_k = processed_issue.get("current_knot_match")
+            if (
+                expected_h
+                and current_h
+                and expected_k
+                and current_k
+                and expected_h.get("brand") == current_h.get("brand")
+                and expected_h.get("model") == current_h.get("model")
+                and expected_k.get("brand") == current_k.get("brand")
+                and expected_k.get("model") == current_k.get("model")
+            ):
+                logger.debug(
+                    f"Skipping false positive for '{processed_issue.get('correct_match')}': "
+                    f"matcher suggestion identical to stored values"
+                )
+                continue
+
             processed_issues.append(processed_issue)
 
         logger.info(f"Returning {len(processed_issues)} processed issues")

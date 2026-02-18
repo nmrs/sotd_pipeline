@@ -29,6 +29,11 @@ import {
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import ErrorDisplay from '@/components/feedback/ErrorDisplay';
+import DecisionToast, {
+  PendingDecision,
+  DecisionAction,
+  UNDO_DELAY_MS,
+} from '@/components/feedback/DecisionToast';
 import MonthSelector from '@/components/forms/MonthSelector';
 import CommentModal from '@/components/domain/CommentModal';
 import DeltaMonthsInfoPanel from '@/components/domain/DeltaMonthsInfoPanel';
@@ -78,6 +83,14 @@ const MatchAnalyzer: React.FC = () => {
   
   // Pending items state - tracks items submitted (optimistic) but not yet processed by queue
   const [pendingItems, setPendingItems] = useState<Set<string>>(new Set());
+
+  // Undo queue - decisions waiting to be committed (delayed API calls)
+  const [decisionQueue, setDecisionQueue] = useState<PendingDecision[]>([]);
+  const decisionQueueRef = useRef<PendingDecision[]>([]);
+  // Keep ref in sync so flush/cleanup can access latest queue without stale closures
+  useEffect(() => {
+    decisionQueueRef.current = decisionQueue;
+  }, [decisionQueue]);
 
   // Queue errors from GET /api/analysis/queue-errors; failedItemKeys derived from errors
   const [queueErrors, setQueueErrors] = useState<QueueErrorsResponse | null>(null);
@@ -155,6 +168,103 @@ const MatchAnalyzer: React.FC = () => {
     }
   }, []);
 
+  // --- Undo queue helpers ---
+
+  const enqueueDecision = useCallback(
+    (
+      action: DecisionAction,
+      field: string,
+      itemKeys: Set<string>,
+      execute: () => Promise<void>
+    ) => {
+      const id = crypto.randomUUID();
+      const createdAt = Date.now();
+
+      const timerId = setTimeout(async () => {
+        // Timer expired — commit the decision
+        try {
+          await execute();
+        } catch (err) {
+          console.error(`Decision ${id} failed:`, err);
+          setError(handleApiError(err));
+        }
+        // Remove from queue after execution
+        setDecisionQueue(prev => prev.filter(d => d.id !== id));
+      }, UNDO_DELAY_MS);
+
+      const decision: PendingDecision = {
+        id,
+        action,
+        field,
+        itemCount: itemKeys.size,
+        itemKeys,
+        execute,
+        timerId,
+        createdAt,
+      };
+
+      // Add item keys to pendingItems (optimistic hide)
+      setPendingItems(prev => {
+        const next = new Set(prev);
+        itemKeys.forEach(k => next.add(k));
+        return next;
+      });
+
+      setDecisionQueue(prev => [...prev, decision]);
+      setSelectedItems(new Set());
+    },
+    []
+  );
+
+  const undoDecision = useCallback((id: string) => {
+    setDecisionQueue(prev => {
+      const decision = prev.find(d => d.id === id);
+      if (!decision) return prev;
+
+      // Cancel the timer
+      clearTimeout(decision.timerId);
+
+      // Remove item keys from pendingItems (unhide rows)
+      setPendingItems(prevPending => {
+        const next = new Set(prevPending);
+        decision.itemKeys.forEach(k => next.delete(k));
+        return next;
+      });
+
+      return prev.filter(d => d.id !== id);
+    });
+  }, []);
+
+  const flushDecisionQueue = useCallback(async () => {
+    const queue = decisionQueueRef.current;
+    if (queue.length === 0) return;
+
+    // Clear all timers and execute immediately
+    for (const decision of queue) {
+      clearTimeout(decision.timerId);
+      try {
+        await decision.execute();
+      } catch (err) {
+        console.error(`Flush: decision ${decision.id} failed:`, err);
+      }
+    }
+
+    setDecisionQueue([]);
+  }, []);
+
+  // Flush queue on unmount
+  useEffect(() => {
+    return () => {
+      const queue = decisionQueueRef.current;
+      for (const decision of queue) {
+        clearTimeout(decision.timerId);
+        decision.execute().catch(err =>
+          console.error(`Cleanup: decision ${decision.id} failed:`, err)
+        );
+      }
+    };
+  }, []);
+
   // Derive failed item keys from queue-errors (field:original.toLowerCase()) for row highlighting
   const failedItemKeys = useMemo(() => {
     if (!queueErrors?.errors?.length) return new Set<string>();
@@ -191,6 +301,9 @@ const MatchAnalyzer: React.FC = () => {
     }
 
     try {
+      // Flush any pending undo-queue decisions before re-analyzing
+      await flushDecisionQueue();
+
       setLoading(true);
       setError(null);
       setResults(null);
@@ -243,7 +356,7 @@ const MatchAnalyzer: React.FC = () => {
       // Refresh queue errors so panel shows current failures (even if month/field unchanged)
       fetchQueueErrors();
     }
-  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, resultLimit, fetchQueueErrors]);
+  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, resultLimit, fetchQueueErrors, flushDecisionQueue]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
@@ -630,47 +743,24 @@ const MatchAnalyzer: React.FC = () => {
         return;
       }
 
-      // Debug logging for Rubberset 400
-      if (selectedField === 'brush') {
-        const rubbersetMatches = matches.filter(m => 
-          m.original.toLowerCase().includes('rubberset') && 
-          m.original.toLowerCase().includes('400')
-        );
-        if (rubbersetMatches.length > 0) {
-          console.log('🔍 DEBUG MatchAnalyzer: Sending Rubberset 400 matches to API:', {
-            matches: rubbersetMatches,
-            fullRequest: {
-              field: selectedField,
-              matches,
-              force: true,
-            },
-          });
-        }
-      }
+      const capturedField = selectedField;
+      const capturedItemKeys = new Set(selectedItems);
 
-      const response = await markMatchesAsCorrect({
-        field: selectedField,
-        matches,
-        force: true,
+      enqueueDecision('mark_correct', capturedField, capturedItemKeys, async () => {
+        const response = await markMatchesAsCorrect({
+          field: capturedField,
+          matches,
+          force: true,
+        });
+        if (!response.success) {
+          setError(`Failed to queue operation: ${response.message}`);
+        }
       });
 
-      if (response.success) {
-        // Optimistic: add selected items to pendingItems (hide rows), clear selection, re-enable
-        const selectedItemKeys = new Set(selectedItems);
-        setPendingItems(prev => {
-          const newPending = new Set(prev);
-          selectedItemKeys.forEach(key => newPending.add(key));
-          return newPending;
-        });
-        setSelectedItems(new Set());
-        setError(null);
-        setMarkingCorrect(false);
-      } else {
-        setError(`Failed to queue operation: ${response.message}`);
-        setMarkingCorrect(false);
-      }
+      setError(null);
     } catch (err: unknown) {
       setError(handleApiError(err));
+    } finally {
       setMarkingCorrect(false);
     }
   };
@@ -803,29 +893,24 @@ const MatchAnalyzer: React.FC = () => {
         return;
       }
 
-      const response = await removeMatchesFromCorrect({
-        field: selectedField,
-        matches,
-        force: true,
+      const capturedField = selectedField;
+      const capturedItemKeys = new Set(selectedItems);
+
+      enqueueDecision('remove_correct', capturedField, capturedItemKeys, async () => {
+        const response = await removeMatchesFromCorrect({
+          field: capturedField,
+          matches,
+          force: true,
+        });
+        if (!response.success) {
+          setError(`Failed to queue operation: ${response.message}`);
+        }
       });
 
-      if (response.success) {
-        // Optimistic: add selected items to pendingItems (hide rows), clear selection, re-enable
-        const selectedItemKeys = new Set(selectedItems);
-        setPendingItems(prev => {
-          const newPending = new Set(prev);
-          selectedItemKeys.forEach(key => newPending.add(key));
-          return newPending;
-        });
-        setSelectedItems(new Set());
-        setError(null);
-        setRemovingCorrect(false);
-      } else {
-        setError(`Failed to queue operation: ${response.message}`);
-        setRemovingCorrect(false);
-      }
+      setError(null);
     } catch (err: unknown) {
       setError(handleApiError(err));
+    } finally {
       setRemovingCorrect(false);
     }
   };
@@ -879,25 +964,23 @@ const MatchAnalyzer: React.FC = () => {
         return;
       }
 
-      const response = await updateFilteredEntries({
-        category: selectedField,
-        entries: allEntries,
-        reason: reasonText.trim() || undefined,
+      const capturedField = selectedField;
+      const capturedItemKeys = new Set(selectedItems);
+      const capturedReason = reasonText.trim() || undefined;
+
+      enqueueDecision('mark_unmatched', capturedField, capturedItemKeys, async () => {
+        const response = await updateFilteredEntries({
+          category: capturedField,
+          entries: allEntries,
+          reason: capturedReason,
+        });
+        if (!response.success) {
+          setError(`Failed to update filtered entries: ${response.message}`);
+        }
       });
 
-      if (response.success) {
-        // Clear selections and reason
-        setSelectedItems(new Set());
-        setReasonText('');
-        setError(null);
-
-        // Re-run analysis to get updated data
-        if (selectedMonths.length > 0) {
-          await handleAnalyze();
-        }
-      } else {
-        setError(`Failed to update filtered entries: ${response.message}`);
-      }
+      setReasonText('');
+      setError(null);
     } catch (err: unknown) {
       setError(handleApiError(err));
     } finally {
@@ -1000,25 +1083,23 @@ const MatchAnalyzer: React.FC = () => {
           };
         });
 
-      const response = await removeMatchesFromCorrect({
-        field: selectedField,
-        matches,
-        force: true,
+      const capturedField = selectedField;
+      const capturedItemKeys = new Set(selectedItems);
+
+      enqueueDecision('mark_incorrect', capturedField, capturedItemKeys, async () => {
+        const response = await removeMatchesFromCorrect({
+          field: capturedField,
+          matches,
+          force: true,
+        });
+        if (response.success) {
+          await loadCorrectMatches();
+        } else {
+          setError(`Failed to mark items as incorrect: ${response.message}`);
+        }
       });
 
-      if (response.success) {
-        // Reload correct matches and re-analyze to get fresh data
-        await loadCorrectMatches();
-        setSelectedItems(new Set());
-        setError(null);
-
-        // Re-run analysis to get updated mismatch data
-        if (selectedMonths.length > 0) {
-          await handleAnalyze();
-        }
-      } else {
-        setError(`Failed to mark items as incorrect: ${response.message}`);
-      }
+      setError(null);
     } catch (err: unknown) {
       setError(handleApiError(err));
     }
@@ -2304,6 +2385,9 @@ const MatchAnalyzer: React.FC = () => {
           onSave={handleBrushSplitSave}
         />
       )}
+
+      {/* Undo Decision Toast Stack */}
+      <DecisionToast decisions={decisionQueue} onUndo={undoDecision} />
     </div>
   );
 };
