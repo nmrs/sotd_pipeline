@@ -35,6 +35,9 @@ AC:
       patterns:
         - feather.*soft.*guard
   Generic:
+    Artist Club:
+      patterns:
+        - (generic|unbranded|unknown).*artist\s*club
     Kai Clone:
       patterns:
         - kai.*clone
@@ -349,7 +352,7 @@ DE:
         - nacrt
     Perma-Sharp:
       patterns:
-        - (?:gil)?.*perma\s*-*sharp
+        - (?:gil)?.*perma.*sharp
     Platinum:
       patterns:
         - gil.*pla
@@ -612,11 +615,11 @@ DE:
       patterns:
         - (?:schick)?.*krona
   Shark:
-    Chrome:
+    Super Chrome:
       patterns:
         - shark.*chr
         - lord.*shark.*chr
-    Platinum:
+    Super Platinum:
       patterns:
         - shark.*plat
     Stainless:
@@ -705,8 +708,13 @@ DE:
         - tatra.*carb
     Platinum:
       patterns:
-        - tatra.*plat
+        - tatra.*plat(.*stain)?
         - tatra
+    Superior:
+      patterns:
+        - tatra.*sup
+        - tatra.*\bss\b
+        - tatra.*stain
   Tiger:
     Platinum:
       patterns:

@@ -66,6 +66,8 @@ AC:
     - feather soft guard ac
     - feather softguard
   Generic:
+    Artist Club:
+    - unknown artist club
     Kai Clone:
     - chinese kai clone
   Kai:
@@ -658,6 +660,7 @@ DE:
     - perma-sharp gillette
     - perma-sharp stainless
     - perma-sharp super
+    - permanent sharp
     - permasharp (no idea, like 4)
     - permasharp - stainless
     - permasharp super
@@ -1152,6 +1155,9 @@ DE:
     - czech blades tatra platinum stainless
     - tatra
     - tatra platinum
+    - tatra- platinum
+    Superior:
+    - tatra - stainless
   Tiger:
     Platinum:
     - czech blades tiger

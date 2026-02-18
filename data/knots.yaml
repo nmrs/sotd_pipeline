@@ -523,6 +523,10 @@ known_knots:
       fiber: Badger
       patterns:
         - oumo.*kirin
+    Manchuria:
+      fiber: Badger
+      patterns:
+        - oumo.*manchuria
     Meri-2:
       fiber: Badger
       patterns:

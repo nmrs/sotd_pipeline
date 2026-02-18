@@ -1226,32 +1226,6 @@ known_brushes:
       patterns:
         - stirl.*(?:2|two)(?:-|\s)+band
         - stirl.*24.*synth
-    Boar Brush:
-      fiber: Boar
-      knot_size_mm: 24
-      knot_loft_mm: 57
-      patterns:
-        - st[ie]rling.*boar
-    Finest Badger:
-      fiber: Badger
-      knot_size_mm: 24
-      patterns:
-        - stirling.*finest
-        - stirling.*24.*(badger|fan)
-    Kong Synthetic:
-      fiber: Synthetic
-      knot_size_mm: 26
-      patterns:
-        - st?[ie]rling.*kong
-    Li'l Brudder:
-      fiber: Synthetic
-      knot_size_mm: 22
-      patterns:
-        - st[ie]rling.*brudder
-    Synthetic:
-      fiber: Synthetic
-      patterns:
-        - st[ie]rling.*syn
     510SE:
       knot:
         brand: Zenith
@@ -1274,6 +1248,38 @@ known_brushes:
       patterns:
         - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
+    Boar Brush:
+      fiber: Boar
+      knot_size_mm: 24
+      knot_loft_mm: 57
+      patterns:
+        - st[ie]rling.*boar
+    Finest Badger:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+        - stirling.*finest
+        - stirling.*24.*(badger|fan)
+    Kong Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+        - st?[ie]rling.*kong
+    Li'l Brudder:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+        - st[ie]rling.*brudder
+    Pro-Handle:
+      fiber: Synthetic
+      knot_size_mm: 26
+      knot_loft_mm: 57
+      patterns:
+        - st[ie]rling.*pro[-\s]handle
+    Synthetic:
+      fiber: Synthetic
+      patterns:
+        - st[ie]rling.*syn
   Tatara:
     Masamune Boar:
       knot:
@@ -2723,7 +2729,7 @@ other_brushes:
   Grizzly Bay:
     default: Badger
     patterns:
-      - grizzly.*bay.*(?:v\d{1,2})?
+      - grizzl?y.*bay.*(?:v\d{1,2})?
   Half Rotten Hardwoods:
     default: Badger
     patterns:

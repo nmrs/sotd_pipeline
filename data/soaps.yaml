@@ -130,6 +130,9 @@ Aion Skincare:
     Fleur d'Iris:
       patterns:
       - aion.*fl\w+r.*iris
+    Kulfi:
+      patterns:
+      - aion.*kulfi
     Tonka:
       patterns:
       - (aion|mallard).*tonka
@@ -867,7 +870,7 @@ Barrister and Mann:
       wsdb_slug: barrister-and-mann-petrichor-soap
     Presto:
       patterns:
-      - (barris|ba?m).*presto
+      - (barris|ba?m).*prest[oō]
     Promises:
       patterns:
       - (barris|ba?m).*promises
@@ -1394,6 +1397,9 @@ Catie's Bubbles:
       patterns:
       - ^catie.*miracle
       wsdb_slug: caties-bubbles-miracle-soap
+    Moustache Mint:
+      patterns:
+      - moustache mint
     Parma Inspiration:
       patterns:
       - parma inspiration
@@ -1542,6 +1548,9 @@ Chicago Grooming Co.:
   - chicago grooming( co.?)?
   - 'oleo(?: soap(?:works)?)?'
   scents:
+    "40":
+      patterns:
+      - (chicago|cg|oleo).*\b40\b
     AG 1889:
       patterns:
       - '1889'
@@ -1613,6 +1622,9 @@ Chicago Grooming Co.:
     Susurro:
       patterns:
       - sus+[uo]r+o
+    Two-Bit:
+      patterns:
+      - (chicago|cg|oleo).*two[- ]?bit
     Windy City Barbershop:
       patterns:
       - windy city barber
@@ -2156,6 +2168,9 @@ DentonMajik:
     Flores de Amor:
       patterns:
       - denton.*flor.*amor
+    KRS Classic:
+      patterns:
+      - denton.*krs
     Mayberry Man:
       patterns:
       - denton.*mayberry man
@@ -2593,6 +2608,9 @@ Gentleman's Nod:
     Tusitala:
       patterns:
       - gentlem.*tusitala
+    Vincent:
+      patterns:
+      - gentlem.*vincent
 Geo. F. Trumper:
   default format: Cream
   patterns:
@@ -2702,7 +2720,7 @@ Grooming Dept:
       wsdb_slug: grooming-dept-coconut-rum-soap
     Earl Grey Gelato:
       patterns:
-      - early? grey gelato
+      - early? grey gel+ato
       wsdb_slug: grooming-dept-earl-grey-gelato-soap
     Kulfi:
       patterns:
@@ -2847,6 +2865,9 @@ Hendrix Classics & Co:
     Neon Moon:
       patterns:
       - (hendrix.*|hc&c).*neon moon
+    Qing Long:
+      patterns:
+      - qing l[io]ng
     Roasted:
       patterns:
       - hendrix classics(.*\bco.?)?.*roasted
@@ -3476,6 +3497,12 @@ MacDuff's Soap Company:
     Catalina:
       patterns:
       - macduff.*catalina
+    Christmas Tree:
+      patterns:
+      - macduff.*christmas tree
+    Christmas Morning:
+      patterns:
+      - macduff.*christmas morning
     Coast to Coast:
       patterns:
       - macduff.*coast.*to.*coast
@@ -3483,6 +3510,9 @@ MacDuff's Soap Company:
     Harvest Sky:
       patterns:
       - macduff.*harvest sky
+    Haunted Cabin:
+      patterns:
+      - macduff.*haunted cabin
     Kananaskis Explorer:
       patterns:
       - kananaskis.*explorer
@@ -4169,7 +4199,7 @@ Old Spice:
     Classic:
       patterns:
       - old spi?ce
-      - ^all spice cream$
+      - ^all spice( cream)?$
       wsdb_slug: old-spice-classic-soap
     Fresh Lime:
       patterns:
@@ -4400,6 +4430,9 @@ RazoRock:
   - razorock
   - ^rr\b
   scents:
+    Acqua:
+      patterns:
+      - razorock.*acqua
     American Barber:
       patterns:
       - razorock.*american barber
@@ -4454,6 +4487,9 @@ Red House Farm:
   patterns:
   - red house farms?
   scents:
+    1920 Barbershop:
+      patterns:
+      - red house.*1920
     Kitchen Sink:
       patterns:
       - red house.*kitchen sink
@@ -4615,6 +4651,10 @@ Shannon's Soaps:
   patterns:
   - ^shannon'?s?( soaps?)?
   scents:
+    2022 Ohio Wet Shavers Meetup:
+      patterns:
+      - shannon.*ohio.*meetup
+      wsdb_slug: shannons-soaps-2022-ohio-wet-shavers-meetup-soap
     25th Street Lime:
       patterns:
       - shannon.*25.*lime
@@ -4630,6 +4670,9 @@ Shannon's Soaps:
       patterns:
       - shannon.*soaps?.*vet\wver
       wsdb_slug: shannons-soaps-haymarket-vetiver-soap
+    Indigo Oud:
+      patterns:
+      - shannon.*indigo.*oud
     Lady Luck:
       patterns:
       - shannon.*lady luck
@@ -4642,10 +4685,6 @@ Shannon's Soaps:
       patterns:
       - shannon.*\b(to)?fou\b
       wsdb_slug: shannons-soaps-oh-tofou-soap
-    2022 Ohio Wet Shavers Meetup:
-      patterns:
-      - shannon.*ohio.*meetup
-      wsdb_slug: shannons-soaps-2022-ohio-wet-shavers-meetup-soap
     Pina Colada:
       patterns:
       - shannon.*colada
@@ -5335,7 +5374,7 @@ Stirling Soap Co.:
       wsdb_slug: stirling-soap-co-scots-pine-sheep-soap
     Seine Reserve:
       patterns:
-      - seine.*reserve
+      - seine.*res[er]+ve
     Sharp Dressed Man:
       patterns:
       - sharp dressed man

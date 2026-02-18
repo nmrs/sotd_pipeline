@@ -141,6 +141,7 @@ artisan_handles:
         - dogc*l
         - ^voa
         - \bd[wh]\b
+        - noble.*dogwood( handcrafts?)?
   Doug Korn:
     Unspecified:
       patterns:
