@@ -31,8 +31,9 @@ const isBrushSplit = (matched: Record<string, unknown>): boolean => {
 const getBrushType = (
   matched: Record<string, unknown>
 ): { type: string; isValid: boolean; error?: string } => {
+  // No matched data or empty/invalid structure: show as Unmatched (same as razors, blades, soaps)
   if (!matched || typeof matched !== 'object') {
-    return { type: 'Unknown', isValid: false, error: 'No matched data' };
+    return { type: 'Unmatched', isValid: true };
   }
 
   const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined;
@@ -87,8 +88,8 @@ const getBrushType = (
     return { type: 'Composite', isValid: true };
   }
 
-  // Fallback for other cases
-  return { type: 'Unknown', isValid: false, error: 'Invalid brush structure' };
+  // Matched data doesn't fit known brush structure: show as Unmatched (same as other product types)
+  return { type: 'Unmatched', isValid: true };
 };
 
 interface MismatchAnalyzerDataTableProps {
@@ -810,12 +811,17 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const brushType = getBrushType(item.matched);
+          const isUnmatched = brushType.type === 'Unmatched';
+          const pillClass = isUnmatched
+            ? 'bg-blue-100 text-blue-800'
+            : brushType.isValid
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800';
 
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${pillClass}`}
               >
                 {brushType.type}
               </span>

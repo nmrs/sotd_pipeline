@@ -79,13 +79,13 @@ export const formatMatchedData = (
         const enrichedObj = enriched as Record<string, unknown>;
         if (enrichedObj.format) {
           parts.push(String(enrichedObj.format));
-          return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+          return parts.length > 0 ? parts.join(' - ') : 'N/A';
         }
       }
-      
+
       // Fall back to matched format if no enriched format
       if (matchedObj.format) parts.push(String(matchedObj.format));
-      return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+      return parts.length > 0 ? parts.join(' - ') : 'N/A';
     }
 
     // Special handling for brush field
@@ -112,7 +112,7 @@ export const formatMatchedData = (
           parts.push(String(matchedObj.handle_maker));
         }
 
-        return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+        return parts.length > 0 ? parts.join(' - ') : 'N/A';
       } else if (hasHandle && hasKnot) {
         // Composite brush: has handle/knot components but missing either brand or model
         // This includes cases where there's a top-level brand but no model
@@ -134,11 +134,11 @@ export const formatMatchedData = (
         if (matchedObj.knot_size_mm) parts.push(`${matchedObj.knot_size_mm}mm`);
         if (matchedObj.handle_maker) parts.push(String(matchedObj.handle_maker));
 
-        return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+        return parts.length > 0 ? parts.join(' - ') : 'N/A';
       }
     }
 
-    // For other fields, use the original logic
+    // For other fields (blade, soap, etc.), use the original logic
     const parts = [];
     if (matchedObj.brand) parts.push(String(matchedObj.brand));
     if (matchedObj.model) parts.push(String(matchedObj.model));
@@ -146,7 +146,7 @@ export const formatMatchedData = (
     if (matchedObj.maker) parts.push(String(matchedObj.maker));
     if (matchedObj.scent) parts.push(String(matchedObj.scent));
 
-    return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
+    return parts.length > 0 ? parts.join(' - ') : 'N/A';
   }
 
   return String(matched);

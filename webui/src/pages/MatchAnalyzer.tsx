@@ -332,16 +332,15 @@ const MatchAnalyzer: React.FC = () => {
         // Clear regular results when using grouped data
         setResults(null);
       } else {
-        // Don't pass display_mode to API for modes that require frontend filtering
-        const apiDisplayMode = ['regex', 'brand', 'dash_split'].includes(displayMode)
-          ? 'all'
-          : displayMode;
+        // Always request full data; filtering by display mode is done on the frontend.
+        // Passing display_mode to the API would re-fetch a reduced list when switching tabs,
+        // causing mismatch count to change (e.g. "Mismatches (3)" → "Mismatches (1)").
         const result = await analyzeMismatch({
           field: selectedField,
           months: allMonths,
           threshold,
           use_enriched_data: useEnrichedData,
-          display_mode: apiDisplayMode,
+          display_mode: 'all',
           limit: resultLimit,
         });
 
@@ -356,7 +355,7 @@ const MatchAnalyzer: React.FC = () => {
       // Refresh queue errors so panel shows current failures (even if month/field unchanged)
       fetchQueueErrors();
     }
-  }, [selectedMonths, selectedField, threshold, useEnrichedData, displayMode, groupByMatched, resultLimit, fetchQueueErrors, flushDecisionQueue]);
+  }, [selectedMonths, selectedField, threshold, useEnrichedData, groupByMatched, resultLimit, fetchQueueErrors, flushDecisionQueue]);
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     if (!commentId) return;
