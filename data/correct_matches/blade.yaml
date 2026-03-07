@@ -34,6 +34,7 @@ AC:
     - feather pro ac
     - feather pro injector
     - feather professional
+    - feather professional - ac professional
     - feather professional ac
     - feather professional ac blade
     - feather professional artist club
@@ -72,6 +73,7 @@ AC:
     - chinese kai clone
   Kai:
     Captain:
+    - kai - captain
     - kai - captain original
     - kai ac
     - kai captain original
@@ -106,6 +108,7 @@ AC:
     - kai pink feather cut blade
     Salon Select Premium Guard:
     - kai salon select premium guard
+    - kai salon select premium guard obif
   Kamisori:
     AC:
     - kamisori artist club
@@ -118,6 +121,7 @@ AC:
     - schick - p-30 proline artist club style
     - schick - proline p-30
     - schick ac
+    - schick p-30
     - schick p-30 proline artist club (se)
     - schick p30
     - schick proline
@@ -139,6 +143,7 @@ Cartridge/Disposable:
       - cartridge
       - dorco - pace 6 blade cartridge
       - gillette - joy
+      - gillette fusion5
       - gillette guard
       - gillette mach 3
       - gillette mach3
@@ -146,6 +151,7 @@ Cartridge/Disposable:
       - gillette trac-ii plus
       - harry's cartridge
       - harry's five blade cartridge
+      - personna single blade disposable
       - personna twin pivot plus
       - personna twin pivot plus (?)
       - personna twin pivot plus (atra) cart
@@ -222,6 +228,7 @@ DE:
     - gillette - 7 o'clock super platinum
     - gillette - 7 o'clock super platinum (black)
     - gillette - 7'oclock black
+    - gillette -7 o'clock super platinum
     - gillette 7 o clock super platinum
     - gillette 7 o'clock (black)
     - gillette 7 o'clock (black) u
@@ -799,6 +806,9 @@ DE:
     - king c. gillette
     - king c. gillette (?)
     - king c. gillette stock
+  L3VEL3:
+    Platinum:
+    - l3vel3 platinum
   Ladas:
     Super Stainless:
     - lada
@@ -820,6 +830,7 @@ DE:
   Lord:
     Blue Sword Platinum:
     - blue sword platinum
+    - 'blue sword platinum (unknown # of shaves; years old)'
     Classic:
     - lord classic
     - lord classic super stainless
@@ -899,6 +910,7 @@ DE:
     - gem platinum diamond glide
     - persona gem platinum diamond glide
     - personna gem de
+    - personna gem de blade
     - personna gem platinum diamond glide
     - personna platinum diamond glide
     Lab Blue:
@@ -926,6 +938,7 @@ DE:
     - personna lab blue
     - personna lab blue (verona, va. usa)
     - personna lab blue super
+    - personna labs
     - personna super (aka lab blue)
     - personna super comfort coated (aka lab blue)
     Med Prep:
@@ -1059,6 +1072,7 @@ DE:
     - schick krona
     Stainless (DE):
     - schick (?)
+    - schick - 2002
     - schick - stainless steel de
     - schick de
     - schick de blade
@@ -1066,16 +1080,6 @@ DE:
     - schick, de
     - shick de blade
   Shark:
-    Chrome:
-    - lord shark - super chrome
-    - shark - super chrome
-    - shark chrome
-    - shark super chrome
-    - shark super chrome half de
-    - shark super chromes
-    Platinum:
-    - lord shark platinum
-    - shark platinum
     Stainless:
     - lord shark - super stainless
     - shark
@@ -1084,6 +1088,16 @@ DE:
     - shark ss
     - shark stainless
     - shark super stainless
+    Super Chrome:
+    - lord shark - super chrome
+    - shark - super chrome
+    - shark chrome
+    - shark super chrome
+    - shark super chrome half de
+    - shark super chromes
+    Super Platinum:
+    - lord shark platinum
+    - shark platinum
   Sharp:
     7AM Super Platinum:
     - sharp 7am plus high platinum
@@ -1235,6 +1249,9 @@ DE:
   Veesta:
     Ultra Platinum:
     - veesta ultra platinum
+  Vertice One:
+    Super Stainless:
+    - vertice one stainless steel
   Vi-John:
     Chrome Platinum:
     - vi john chrome platinum
@@ -1357,7 +1374,9 @@ GEM:
     - accutec pro premium
     - accutec pro premium (gem)
     - accutec pro single edge
+    - accutec pro- se stainless steel coated
     - accutek pro gem blades
+    - acutech pro
     - 'blade: personna - gem ptfe coated'
     - gem
     - gem - ptfe
@@ -1481,6 +1500,7 @@ Half DE:
     - dorco hst300 1/2 de
     HST-300R-1P Prime:
     - dorco red 1/2 de
+    - dorconred 1/2 de
   Facón:
     SE:
     - facōn
@@ -1498,6 +1518,9 @@ Half DE:
   Misaki:
     Platinum SE:
     - misaka - platinum
+  Parker:
+    Premium Platinum SE:
+    - parker platinum se
 Injector:
   Generic:
     Injector:
@@ -1539,7 +1562,6 @@ Injector:
     - schick injector blades
     - schick injector razor blades
     - schick injector yellow
-    - schick p-30
     - schick plus
     - schick proline b-series injector
     - schick stainless steel injector

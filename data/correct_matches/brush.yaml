@@ -117,6 +117,7 @@ AP Shave Co:
   - ap shave co. w/ 28mm g5b synthetic
   - ap shave g5b 24mm
   G5C:
+  - a p shaveco g5c
   - a p shaveco g5c fan synthetic
   - a p shaveco g5c synthetic
   - a p shaveco g5c synthetic knot
@@ -173,6 +174,7 @@ AP Shave Co:
   MiG:
   - a p shaveco 22mm mig synthetic
   - a p shaveco mig knot synthetic
+  - a p shaveco mig synthetic
   - ap shave co - mig synthetic 26mm
   - ap shave co mig synthetic 26mm
   - ap shave co. - mig
@@ -585,6 +587,7 @@ Chisel & Hound:
   Synthetic:
   - chisel & hound "rainbow" 26mm timberwolf
   - chisel & hound - ivory mortar 30mm mother lode
+  - chisel & hound - ivory mortar 30mm w. mother lode
   - chisel & hound - ivory mortar w/ mother lode
   - chisel & hound - ivory mortar w/ mother lode knot
   - chisel & hound 26mm timberwolf
@@ -811,6 +814,7 @@ Chisel & Hound:
   v29:
   - chisel & hound - black eggonite w/ 26mm v29 fanchurian
   - chisel & hound bordeaux 26mm v29 fanchurian
+  - chisel & hound brownstone 26mm v29 fanchurian
   v3:
   - that darn rob - 26mm v3 fanchurian
   v5:
@@ -1322,6 +1326,7 @@ EldrormR Industries/Muninn Woodworks:
   - '[>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
     woodworks handle]('
   - bfm
+  - bfm 51mm synthetic
   - eldrormr industries/muninn woodworks bfm 50mm motherlode synth
   - muninn big fucking motherlode tropicana
   - muninn woodworks "bfm" 50mm motherlode
@@ -1449,6 +1454,7 @@ Generic:
   - unmarked/generic boar
   Synthetic:
   - amazon - 'unassuming' w/ 20mm unbranded synthetic knot
+  - cheap synthetic (love it!!)
   - generic ivory brush w/ 30mm timberwolf synthetic. (stag brush)
   - unknown - black and white synth
 Gentleman's Groom Room:
@@ -1930,6 +1936,7 @@ Omega:
   '10019':
   - omega 10019
   - omega 10019 boar
+  - omega 10019 boar bristles
   - omega 10019 boar brush
   - omega 10019 shaving brush - boar bristles
   '10065':
@@ -1964,6 +1971,7 @@ Omega:
   - omega 11047 - 20mm boar/badger mix
   - omega 11047 20mm mixed knot
   - omega 11047 43mm x 20mm $mistura
+  - omega 11047 inverted ash handle boar
   - omega 11047 mighty midget
   - omega 11047 mighty midget badger mix
   - omega 11047 mighty midget mix badger
@@ -2009,6 +2017,7 @@ Omega:
   '20102':
   - omega - 20102
   - omega - 20102 - 28mm bleached boar
+  - omega - 20102 - 28mm unbeached boar
   - omega - 20102 - 28mm unbleached boar
   - omega 20102
   - omega 20102 boar
@@ -2110,6 +2119,8 @@ Omega:
   - omega mixed midget
   - omega tasso et setola
   - omega tasso et setola 22mm
+  Mixed Midget (11047):
+  - omega mixed midget 22mm knot
   Pro 48:
   - boar omega 10048
   - 'omega #10048'
@@ -2143,6 +2154,7 @@ Omega:
   - omega 10049 boar
   - omega 10049 pro black 26mm boar
   - omega 10049 red handle boar
+  - omega 10049 red handle large boar
   - omega 1049 red handle boar
   - omega 49
   - omega 49 - (repackaged and sold as proraso professionale)
@@ -2180,6 +2192,7 @@ Omega:
   - omega roma
   - omega roma 22mm synthetic
   - omega roma colosseum
+  - omega roma small synthetic
 Opus Brushworks:
   Badger:
   - opus short barbershop high mountain white badger
@@ -2392,6 +2405,7 @@ Rad Dinosaur Creations:
   - 'rad dino creations #1 "bogues" w/26mm high mountain rex silvertip badger fan
     knot'
   - rad dino with rex silvertip
+  - rad dinosaur creations - tidal 24mm badger
   Black Boarty:
   - rad dinosaur creations - x-626 - 28mm black boarty
   Boar:
@@ -2408,9 +2422,12 @@ Rad Dinosaur Creations:
   - rad dinosaur creations - blue steel jeffaux - 26mm high mountain rex tester2
   - rad dinosaur creations - leo - 26mm high mountain rex silvertip badger fan knot
   - rad dinosaur creations - pastime with high mountain rex 26mm badger
+  - rad dinosaur creations - rook - 26mm high mountain rex tester3
   - rad dinosaur creations - winter fallout - 26mm rad dino high mountain rex
   - rad dinosaur creations x summer break soaps courage handle w/ rdc 26mm high mountain
     rex three-band silvertip knot
+  Mixed Badger/Boar:
+  - rdc w/ mistura
   Raptor:
   - rad dino creations aftermath with 26mm raptor synthetic
   - rad dino lavender milkglass w/ 26mm raptor
@@ -2992,6 +3009,9 @@ Spiffo:
 Spokar:
   Badger:
   - spokar badger
+Stando:
+  Badger:
+  - stando olivewood
 Stirling:
   2-Band Synthetic:
   - stirling - 2 band 24mm synthetic
@@ -3126,6 +3146,9 @@ Stirling:
   - stirling synthetic 26mm
   - stirling synthetic brush
   - stirling tuxedo
+  - stirling white handle
+  The Replicant:
+  - stirling - "the replicant" 24mm synthetic
 Summer Break Soaps:
   Badger:
   - summer break
@@ -3513,6 +3536,8 @@ Wolf Whiskers:
   - wolf whiskers - odyssey - 25mm timberwolf
   - wolf whiskers 25mm black wolf
   - wolf whiskers 25mm synthetic
+  - wolf whiskers custom synthetic
+  - wolf whiskers g5
   - wolf whiskers ginny's joy 25mm black wolf
   - wolf whiskers ginny's joy in julie shape 25mm black wolf bulb
   - wolf whiskers ginny's joy julie 25mm black wolf
@@ -3627,6 +3652,7 @@ Yaqi:
   - yaqi black synthetic
   - yaqi black synthetic $18
   - yaqi bluish violet synthetic
+  - yaqi caramel cat whiskers
   - yaqi caramel cat's whiskers synthetic
   - yaqi cola 22m synthetic
   - yaqi cola 22mm synthetic
@@ -3658,6 +3684,7 @@ Yaqi:
   - yaqi ocean 24mm synthetic
   - yaqi panda tuxedo knot 24mm
   - yaqi pro 24mm synth
+  - yaqi purple haze 24mm
   - yaqi r-2002 lucky dice
   - yaqi rainbow
   - yaqi rainbow 26mm faux horse
@@ -3855,6 +3882,7 @@ Zenith:
   - zenith b36 "brass scrubby"
   - zenith b36 (28mm x 50mm)
   - zenith b36 copper 28mmx50mm boar
+  - zenith copper scrubby
   - zenith copper scrubby 28mm boar
   - zenith copper scrubby 28mm. boar
   E1:
@@ -3882,6 +3910,7 @@ Zenith:
   - zenith pro aluminum handle boar b2
   - zenith pro boar
   - zenith pro plastic xl boar
+  - zenith pro xl boar
   r/wetshaving MOAR BOAR:
   - moar
   - moar boar
@@ -3927,6 +3956,7 @@ Zenith:
   - zenith moar boar sub brush
   - zenith moar boar sub exclusive
   - zenith moar boar sub-exclusive (508a xl) 31mm boar knot
+  - zenith moarboar
   - zenith r/wetshaving 2022 moar boar
   - zenith r/wetshaving 31mm x 57mm moar boar
   - zenith r/wetshaving boar

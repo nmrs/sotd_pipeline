@@ -331,6 +331,10 @@ Bombay Shavimg Company:
   DE:
     patterns:
       - bombay.*shaving.*company
+Boti:
+  Vortex:
+    patterns:
+      - boti.*vortex
 Böker:
   Abalone:
     format: Straight
@@ -415,7 +419,7 @@ Cartridge/Disposable:
       - gil.*et.*(labs|fusion|guard|joy|proglide|sensor|venus)
       - bic.*(disposable|metal|sensitive)?
       - disposable
-      - atra
+      - (gil)?.*\batra\b
       - \bcart\b
       - cartridge
       - dorco.*pace 7
@@ -429,6 +433,7 @@ Cartridge/Disposable:
       - person.*(single blade|face razor)
       - twinblade
       - ^(?!.*(tip|silver blue|lady)).*gil.*blue
+      - m[uü]hle.*fusion
 Caveem:
   Safety Razor:
     patterns:
@@ -712,6 +717,11 @@ ERN:
     format: Straight
     patterns:
       - \bern\b(.*\d{1,2}/(8|16))?
+Ertan Süer:
+  Straight:
+    format: Straight
+    patterns:
+      - ertan s[uü]er
 Ever-Ready:
   "1912":
     format: GEM
@@ -2264,6 +2274,10 @@ RazoRock:
   DE1:
     patterns:
       - razorock.*de1
+  DOC:
+    patterns:
+      - (razorock|rr).*doc
+      - (razorock|rr).*daily open
   Eco:
     format: Half DE
     patterns:
@@ -2571,7 +2585,7 @@ Shield:
   Evolution:
     format: AC
     patterns:
-      - shield.*evo
+      - shield.*evolution
   Predator:
     format: GEM
     patterns:
@@ -2579,8 +2593,12 @@ Shield:
   SE AC:
     format: AC
     patterns:
-      - shield.*se.*ac
-      - shield.*ac
+      - shield.*\bse\b.*\bac\b
+      - shield.*\bac\b
+  SE:
+    format: Half DE
+    patterns:
+      - shield.*\bse\b
 Shumate:
   Barber Deluxe:
     format: Straight
@@ -2634,6 +2652,10 @@ Standard Razors:
       - ^standard$
       - ^standard.*razor
 Stando:
+  Gryf:
+    patterns:
+      - stando.*gryf
+      - stando.*gryphon
   Jaruna Slant:
     patterns:
       - stando.*jaruna
@@ -2802,6 +2824,10 @@ Union Cutlery:
     format: Straight
     patterns:
       - union.*(?:(razor|cutlery))?.*(?:\d{1,2}/(8|16))?
+Urkunet:
+  Assassin:
+    patterns:
+    - urkunet assassin
 Utica Knife & Razor Co.:
   Red Point 917:
     format: Straight

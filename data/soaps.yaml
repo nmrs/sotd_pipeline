@@ -97,6 +97,9 @@ Abbate Y La Mantia:
     Magnifico:
       patterns:
       - abbate.*magnifico
+    Marduk:
+      patterns:
+      - abbate.*marduk    
     Matteo 9-11:
       patterns:
       - abbate.*matteo
@@ -239,7 +242,10 @@ Ariana & Evans:
       - 60'?s cologne
     Agarwood:
       patterns:
-      - agarwood
+      - agarwood    
+    Aqua de Boracay:
+      patterns:
+      - aqua.*boracay
     Asian Pear:
       patterns:
       - (arian|a&e).*asian pear
@@ -273,7 +279,7 @@ Ariana & Evans:
       wsdb_slug: ariana-and-evans-black-birch-stout-soap
     Boca Negra:
       patterns:
-      - (ariana|a&e|club).*boca
+      - (ariana|a&e|club).*boc+a
     Boo:
       patterns:
       - (ariana|a&e|club).*boo
@@ -386,6 +392,7 @@ Ariana & Evans:
     Pistachio:
       patterns:
       - (arian|a&e).*pistachio
+      wsdb_slug: ariana-and-evans-pistachio-soap
     Plum & Bliss:
       patterns:
       - plum.*bliss
@@ -393,6 +400,7 @@ Ariana & Evans:
       format: Cream
       patterns:
       - (arian|a&e).*sandalwood
+      wsdb_slug: ariana-and-evans-sandalwood-soap
     Santorini:
       patterns:
       - (arian|a&e).*santorini
@@ -425,6 +433,9 @@ Ariana & Evans:
     Talc & Lavender:
       patterns:
       - (arian|a&e).*talc.*lavender
+    The City:
+      patterns:
+      - (arian|a&e).*the city
     The Equestrian:
       patterns:
       - (arian|a&e).*equestrian
@@ -446,6 +457,12 @@ Ariana & Evans:
       - undersea
       - (ariana|a&e).*under.*sea
       wsdb_slug: ariana-and-evans-the-undersea-soap
+    Tobacco Cashmere:
+      patterns:
+      - (ariana|a&e).*tobacco.*cashmere
+    Tobacco Oud:
+      patterns:
+      - (arian|a&e).*tobacco.*oud
     Vacanza Romana:
       patterns:
       - vacanza romana
@@ -461,6 +478,7 @@ Ariana & Evans:
     Vetiver Magnifique:
       patterns:
       - vetiver magnifique
+      wsdb_slug: ariana-and-evans-vetiver-magnifique-soap
     Vintage Spice:
       patterns:
       - (arian|a&e).*vintage spice
@@ -502,10 +520,16 @@ Australian Private Reserve:
   - \bapr\b
   - aus\w+ian private res\w+\b
   scents:
+    Bombora:
+      patterns:
+      - bombora
     Coeur de Vert:
       patterns:
       - coeur de vert
       wsdb_slug: australian-private-reserve-coeur-de-vert-soap
+    Fenchurch:
+      patterns:
+      - (australian|apr).*fenchurch
     Fougère Trois:
       patterns:
       - foug[eè]re trois
@@ -526,10 +550,16 @@ Australian Private Reserve:
       patterns:
       - ozy?mandias
       wsdb_slug: australian-private-reserve-ozymandias-soap
+    Passione:
+      patterns:
+      - (aus|apr).*passione
     Raconteur:
       patterns:
       - (aus|apr).*raconteur
       wsdb_slug: australian-private-reserve-raconteur-soap
+    Torchwood:
+      patterns:
+      - (aus|apr).*torchwood
 Aveeno:
   patterns:
   - aveeno
@@ -565,6 +595,10 @@ Badger Creek:
 Ballenclaugh:
   patterns:
   - ballenclaugh
+  scents:
+    Honey & Tobacco:
+      patterns:
+      - ballenclaugh.*honey.*tobacco
 Barbasol:
   default format: Foam
   patterns:
@@ -773,6 +807,9 @@ Barrister and Mann:
       patterns:
       - latha original
       wsdb_slug: barrister-and-mann-latha-original-soap
+    Latha Limon:
+      patterns:
+      - latha limon
     Lavanille:
       patterns:
       - lavan[ie]l+e
@@ -817,8 +854,7 @@ Barrister and Mann:
       wsdb_slug: barrister-and-mann-marilyn-soap
     Mélange:
       patterns:
-      - \bb ?(and|&|\+) ?m\b.*m\wlange
-      - barris.*m\wlange
+      - m[eé]lange
       wsdb_slug: barrister-and-mann-melange-soap
     Midnight Special:
       patterns:
@@ -875,6 +911,9 @@ Barrister and Mann:
       patterns:
       - (barris|ba?m).*promises
       wsdb_slug: barrister-and-mann-promises-soap
+    Ravish:
+      patterns:
+      - barri.*ravish
     Red Letter Day:
       patterns:
       - red letter
@@ -979,6 +1018,7 @@ Barrister and Mann:
       patterns:
       - full measure of man
       - full measure of a man
+      - barr.*fmom
       wsdb_slug: barrister-and-mann-the-full-measure-of-man-soap
     Tuesday:
       patterns:
@@ -1004,6 +1044,10 @@ Barrister and Mann:
 Bartigan & Stark:
   patterns:
   - bartigan (and|&) stark
+  scents:
+    Campione:
+      patterns:
+      - campione
 Baume.be:
   patterns:
   - baume?.?be
@@ -1073,9 +1117,13 @@ Black Ship Grooming:
   patterns:
   - black ?ship( grooming)?( co\.?(mpany)?)?
   scents:
+    Barnacle Bob:
+      patterns:
+      - barnacle bob
     Calypso's Curse:
       patterns:
       - calypso.*curse
+      wsdb_slug: black-ship-grooming-calypsos-curse-soap
     Cap'n Dark Side:
       patterns:
       - cap.*dark ?side
@@ -1114,6 +1162,10 @@ Bombay Shaving Company:
 Böker:
   patterns:
   - b[oö]ker
+  scents:
+    Tobacco:
+      patterns:
+      - b[oö]ker.*tobacco
 Bricktown Grooming:
   patterns:
   - bricktown( grooming)?
@@ -1279,6 +1331,9 @@ Catie's Bubbles:
     Colonia:
       patterns:
       - catie.*col[io]nia\b
+    Cool and Fresh:
+      patterns:
+      - cool and fresh
     Connecticut Shade:
       patterns:
       - connecticut shade
@@ -1314,6 +1369,9 @@ Catie's Bubbles:
       patterns:
       - catie.*bubbles.*\beau\b.*\bth[eé]\b
       wsdb_slug: caties-bubbles-eau-de-the-soap
+    Florentine Fern:
+      patterns:
+      - florentine fern
     Gardenia:
       patterns:
       - (catie|cb).*gardenia
@@ -1349,11 +1407,14 @@ Catie's Bubbles:
       patterns:
       - (catie|cb).*lancaster.*leather
       wsdb_slug: caties-bubbles-lancaster-leather-soap
+    Le Nude:
+      patterns:
+      - (catie|cb).*le.*nude
     La Terre Verte:
       patterns:
       - terre verte?
       wsdb_slug: caties-bubbles-la-terre-verte-soap
-    Le Marche du Rasage:
+    Le Marché du Rasage:
       patterns:
       - march.*ras+age
       wsdb_slug: caties-bubbles-le-marche-du-rasage-soap
@@ -1389,6 +1450,9 @@ Catie's Bubbles:
       patterns:
       - m[eé]n.*lav
       wsdb_slug: caties-bubbles-menage-a-lavande-soap
+    Mile High Menthol:
+      patterns:
+      - mile high menthol
     Mille Chypre:
       patterns:
       - (catie|cb).*mille chypre
@@ -1417,6 +1481,9 @@ Catie's Bubbles:
       patterns:
       - catie.*grapefruit
       wsdb_slug: caties-bubbles-purple-grapefruit-soap
+    Reflection:
+      patterns:
+      - (catie|cb).*reflection
     Retreat:
       patterns:
       - catie.*retreat
@@ -1428,6 +1495,7 @@ Catie's Bubbles:
     Rosée du Matin:
       patterns:
       - ros[ée]e du matin
+      wsdb_slug: caties-bubbles-rosee-du-matin-soap
     Ruds Suds - The Dark Side:
       patterns:
       - ruds suds.*the dark side
@@ -1435,6 +1503,9 @@ Catie's Bubbles:
       patterns:
       - (catie|cb).*santal.*sens
       wsdb_slug: caties-bubbles-santal-sensuelle-soap
+    Saturday Morning:
+      patterns:
+      - saturday.*morning
     Spanish Holiday:
       patterns:
       - spanish holiday
@@ -1466,6 +1537,9 @@ Catie's Bubbles:
       patterns:
       - two to mango
       wsdb_slug: caties-bubbles-two-to-mango-soap
+    Un Jour Gris:
+      patterns:
+      - un jour gris
     Verdigris:
       patterns:
       - (catie|cb).*verdigris
@@ -1548,9 +1622,10 @@ Chicago Grooming Co.:
   - chicago grooming( co.?)?
   - 'oleo(?: soap(?:works)?)?'
   scents:
-    "40":
+    '40':
       patterns:
       - (chicago|cg|oleo).*\b40\b
+      wsdb_slug: chicago-grooming-co-40-soap
     AG 1889:
       patterns:
       - '1889'
@@ -1564,6 +1639,9 @@ Chicago Grooming Co.:
       patterns:
       - armon\wa
       wsdb_slug: chicago-grooming-co-armonia-soap
+    Canaan:
+      patterns:
+      - (chicago|cg|oleo).*canaan
     Caoba:
       patterns:
       - caoba
@@ -1607,10 +1685,14 @@ Chicago Grooming Co.:
     Pucker:
       patterns:
       - (chicago|cg|oleo).*pucker
+      wsdb_slug: chicago-grooming-co-pucker-soap
     Rougére:
       patterns:
       - chicago.*roug[eé]re
       wsdb_slug: chicago-grooming-co-rougere-soap
+    Sandy Cheeks:
+      patterns:
+      - (chicago|cg|oleo).*sandy.*cheeks
     Shiloh:
       patterns:
       - chicago.*shiloh
@@ -1709,6 +1791,13 @@ Chiseled Face:
     Woody Lavender:
       patterns:
       - woody lavend\wr
+ChronnoCrafts SoapWorks:
+  patterns:
+  - chronnocrafts soapworks
+  scents:
+    Shake:
+      patterns:
+      - chronno.*shake
 Cloud Shave:
   patterns:
   - cloud shav(e|ing)
@@ -1737,6 +1826,9 @@ Col. Ichabod Conk:
     Amber:
       patterns:
       - conk.*amber
+    Lime:
+      patterns:
+      - conk.*lime
 Cold River Soap Works:
   patterns:
   - 'cold river(?: soap)? ?works'
@@ -1833,10 +1925,20 @@ Cremo:
     Spiced Amber:
       patterns:
       - cremo.*(508|red|amber)
+Crown Shaving Co.:
+  patterns:
+  - crown shaving( co\.?(mpany)?)?
+  scents:
+    Farzad's Tobacco:
+      patterns:
+      - farz?ad.*tobacco
 Crowne & Crane:
   patterns:
   - crown.*crane
   scents:
+    Green Tea:
+      patterns:
+      - crown.*green ?tea
     Peppered Plum:
       patterns:
       - crown.*peppered plum
@@ -1845,6 +1947,9 @@ Crowne & Crane:
       patterns:
       - crown.*rose on fire
       wsdb_slug: crowne-and-crane-rose-on-fire-soap
+    Tobacco and Amber:
+      patterns:
+      - crown.*tobacco.*amber
 Cyril R. Salter:
   patterns:
   - cyril.*salter
@@ -1872,6 +1977,7 @@ D.R. Harris:
     Almond:
       patterns:
       - harris.*almond
+      wsdb_slug: dr-harris-almond-soap
     Arlington:
       patterns:
       - harris.*arlington
@@ -1948,6 +2054,9 @@ Declaration Grooming:
     B Cubed:
       patterns:
       - \bb[- ]?cubed
+    Bandwagon:
+      patterns:
+      - (declaration|\bdg\b).*bandwagon
     Blackberry Blossom Bay:
       patterns:
       - blackberry blossom bay
@@ -1989,10 +2098,19 @@ Declaration Grooming:
       - declaration.*contemplation
       - dg.*contemplation
       wsdb_slug: declaration-grooming-contemplation-soap
+    Convergence:
+      patterns:
+      - (declaration|\bdg\b).*convergence
+    Cuir et Épices:
+      patterns:
+      - cuir.*[eé]pices
     Darkfall:
       patterns:
       - darkfall
       wsdb_slug: declaration-grooming-darkfall-soap
+    Dayman:
+      patterns:
+      - (declaration|\bdg\b).*dayman
     Delta-V:
       patterns:
       - delta(-|\s)?\bv\b
@@ -2036,6 +2154,7 @@ Declaration Grooming:
     Marooned:
       patterns:
       - (declaration|dg).*marooned
+      wsdb_slug: declaration-grooming-marooned-soap
     Marshlands:
       patterns:
       - marshlands
@@ -2049,6 +2168,9 @@ Declaration Grooming:
       patterns:
       - mayflower
       wsdb_slug: declaration-grooming-mayflower-soap
+    Nightman:
+      patterns:
+      - (declaration|\bdg\b).*nightman
     Opulence:
       patterns:
       - opulence
@@ -2057,6 +2179,9 @@ Declaration Grooming:
       patterns:
       - (declaration|dg).*original
       wsdb_slug: declaration-grooming-original-soap
+    Persephone:
+      patterns:
+      - (declaration|\bdg\b).*persephone
     Peaches + Scream:
       patterns:
       - peaches.*scream
@@ -2078,6 +2203,9 @@ Declaration Grooming:
       patterns:
       - rose santal
       wsdb_slug: declaration-grooming-rose-santal-soap
+    Santal Auster:
+      patterns:
+      - (declaration|\bdg\b|cha.*lux).*santal.*auster
     Scrooge:
       patterns:
       - declaration.*scrooge
@@ -2086,6 +2214,9 @@ Declaration Grooming:
       patterns:
       - declaration.*sellout
       wsdb_slug: declaration-grooming-sellout-soap
+    Semicolon:
+      patterns:
+      - (declaration|\bdg\b).*semicolon
     Shore:
       patterns:
       - (declaration grooming|\bdg\b).*shore
@@ -2106,6 +2237,9 @@ Declaration Grooming:
       patterns:
       - (declaration grooming|\bdg\b).*sweet lemon
       wsdb_slug: declaration-grooming-sweet-lemon-soap
+    Taum Sauk:
+      patterns:
+      - taum sauk
     The Muse:
       patterns:
       - (declaration( grooming)?|\bdg\b).*the muse
@@ -2227,9 +2361,10 @@ Dr. Jon's:
   patterns:
   - dr.*joh?n'?s?
   scents:
-    "13":
+    '13':
       patterns:
       - \bjon\b.*13
+      wsdb_slug: dr-jons-13-soap
     Black Label:
       patterns:
       - \bjon\b.*black label
@@ -2439,10 +2574,19 @@ Fanzine Saponifications:
   patterns:
   - fr?anzine( saponifications?)?
   scents:
+    Almost There:
+      patterns:
+      - fanzine.*almost there
+    Bubblegum Rose:
+      patterns:
+      - bubblegum rose
     Caravaggio:
       patterns:
       - fanzine.*cara?vaggio
       wsdb_slug: fanzine-saponifications-caravaggio-soap
+    Cool Bro Dude Man:
+      patterns:
+      - cool bro dude man
     This is not a Test:
       patterns:
       - fanzine.*not a test
@@ -2611,6 +2755,7 @@ Gentleman's Nod:
     Vincent:
       patterns:
       - gentlem.*vincent
+      wsdb_slug: gentlemans-nod-vincent-soap
 Geo. F. Trumper:
   default format: Cream
   patterns:
@@ -2658,6 +2803,10 @@ Gillette:
       format: Foam
       patterns:
       - gil+et+e
+    Planet Kind:
+      format: Cream
+      patterns:
+      - gil+et+e.*planet kind
 Ginger's Garden:
   patterns:
   - ginger'?s garden
@@ -2730,6 +2879,9 @@ Grooming Dept:
       patterns:
       - grooming.*laundry (2|ii)
       wsdb_slug: grooming-dept-laundry-ii-soap
+    Laundry III:
+      patterns:
+      - grooming.*laundry (3|iii)
     Le Tabac:
       patterns:
       - grooming.*le tabac
@@ -2750,6 +2902,9 @@ Grooming Dept:
       patterns:
       - sandal.*nobile
       wsdb_slug: grooming-dept-sandalwood-nobile-soap
+    Tobacco Oud:
+      patterns:
+      - grooming.*tobacco.*oud
     Unum:
       patterns:
       - grooming.*unum
@@ -3026,6 +3181,9 @@ House of Mammoth:
       patterns:
       - almond leather
       wsdb_slug: house-of-mammoth-almond-leather-soap
+    Ausflug:
+      patterns:
+      - ausflug
     Avocado (Cream):
       format: Cream
       patterns:
@@ -3036,19 +3194,9 @@ House of Mammoth:
       patterns:
       - (hom|mamm).*beloved
       wsdb_slug: house-of-mammoth-beloved-soap
-    Clean:
+    Cirrus:
       patterns:
-      - (hom|mammoth).*clean
-      wsdb_slug: house-of-mammoth-clean-soap
-    Cookie:
-      patterns:
-      - (hom|mammoth).*cookie
-    Dammusi:
-      patterns:
-      - dammusi
-    Damocles:
-      patterns:
-      - (hom|mammoth).*damocles
+      - (mammoth|hom|hou).*cirrus  
     DinoS'mores:
       patterns:
       - dino.*s'?m'?ores
@@ -3063,6 +3211,7 @@ House of Mammoth:
     Funny Valentine:
       patterns:
       - (hom|mammoth).*funny valentine
+      wsdb_slug: house-of-mammoth-funny-valentine-soap
     Fú Dào:
       patterns:
       - \bfu dao\b
@@ -3174,7 +3323,10 @@ Imaginary Authors:
   patterns:
   - imaginary authors
   scents:
-    Telegrama:
+   Soft Lawn:
+      patterns:
+      - imaginary.*soft lawn
+   Telegrama:
       patterns:
       - imagin.*telegrama
       wsdb_slug: imaginary-authors-telegrama-soap
@@ -3215,7 +3367,7 @@ Kali Flower Organics:
   patterns:
   - kali ?flower( organics?)?
   scents:
-     Tjära (Pine Tar):
+    Tjära (Pine Tar):
       patterns:
       - kali.*pine tar
       - kali.*tj[aä]ra
@@ -3428,6 +3580,9 @@ Los Jabones de Joserra:
     Orfeo:
       patterns:
       - jabon.*orfeo
+    Passion Incense:
+      patterns:
+      - jabon.*passion.*incense
 Løthur:
   patterns:
   - l[oø]thur( grooming)?
@@ -3449,19 +3604,6 @@ Lucky Tiger:
       patterns:
       - lucky tiger
       wsdb_slug: lucky-tiger-lucky-tiger-cream
-Meißner Tremonia:
-  patterns:
-  - mei\w+ner tremonia
-MER Shaving:
-  patterns:
-  - \bmer ?shaving
-More for You:
-  patterns:
-  - ^\W*more for you
-  scents:
-    Shaving Soap:
-      patterns:
-      - ^\W*more for you
 MacDuff's Soap Company:
   patterns:
   - ma?c\s*duff['’]?s?(?:\s+(?:soap\s+)?co\.?(?:mpany)?)?
@@ -3500,6 +3642,7 @@ MacDuff's Soap Company:
     Christmas Tree:
       patterns:
       - macduff.*christmas tree
+      wsdb_slug: macduffs-soap-company-christmas-tree-soap
     Christmas Morning:
       patterns:
       - macduff.*christmas morning
@@ -3507,6 +3650,9 @@ MacDuff's Soap Company:
       patterns:
       - macduff.*coast.*to.*coast
       wsdb_slug: macduffs-soap-company-coast-to-coast-soap
+    Hallowed Sky:
+      patterns:
+      - macduff.*hallowed sky
     Harvest Sky:
       patterns:
       - macduff.*harvest sky
@@ -3539,6 +3685,15 @@ MacDuff's Soap Company:
       patterns:
       - macduff.*spring cabin
       wsdb_slug: macduffs-soap-company-spring-cabin-soap
+    Summer Cabin:
+      patterns:
+      - macduff.*summer cabin
+    Trail Tobacco:
+      patterns:
+      - macduff.*trail tobacco
+    Wild Rose Country:
+      patterns:
+      - wild rose country
     Worst Cabin Ever:
       patterns:
       - worst cabin ever
@@ -3547,6 +3702,12 @@ Maggard Razors:
   - maggard\b( razor?s?)?
   - maggards
   scents:
+    Groves of Italy:
+      patterns:
+      - groves.*italy
+    Leather & Tobacco:
+      patterns:
+      - mag.*leather.*tobacco
     Lilac:
       patterns:
       - magg.*lilac
@@ -3637,6 +3798,13 @@ Martin de Candre:
       - martin.*candre.*v[eé]t[iy]ver
       - mdc.*v[eé]t[iy]ver
       wsdb_slug: martin-de-candre-vetyver-soap
+Martin's Razors:
+  patterns:
+  - martin'?s?( razors)?
+  scents:
+    Sandalwood & Amber:
+      patterns:
+      - martin'?s.*sandalwood.*amber
 Marting Soaps:
   patterns:
   - marting( soaps)?
@@ -3711,6 +3879,12 @@ Men Rock:
     Sicilian Lime:
       patterns:
       - men ?rock.*lime
+Meißner Tremonia:
+  patterns:
+  - mei\w+ner tremonia
+MER Shaving:
+  patterns:
+  - \bmer ?shaving
 Mickey Lee Soapworks:
   patterns:
   - mickey lee( soapworks)?
@@ -3740,6 +3914,9 @@ Mickey Lee Soapworks:
       patterns:
       - mickey lee.*souq
       wsdb_slug: mickey-lee-soapworks-souq-soap
+    The Kraken:
+      patterns:
+      - mickey.*kraken
 Mike's Natural Soaps:
   patterns:
   - mike.*natural( soaps?)?
@@ -3789,6 +3966,9 @@ Mike's Natural Soaps:
       patterns:
       - mike.*vetiver
       wsdb_slug: mikes-natural-soaps-vetiver-soap
+    Unscented:
+      patterns:
+      - mike.*unscented
 Midnight & Two:
   patterns:
   - midnight.*two
@@ -3831,6 +4011,9 @@ Moon Soaps:
       patterns:
       - moon.*bixby
       wsdb_slug: moon-soaps-bixby-soap
+    Havana:
+      patterns:
+      - moon.*havana
     Koa Mahina:
       patterns:
       - koa mahina
@@ -3857,6 +4040,13 @@ Moon Soaps:
       patterns:
       - moon.*unioi?n
       wsdb_slug: moon-soaps-union-soap
+More for You:
+  patterns:
+  - ^\W*more for you
+  scents:
+    Shaving Soap:
+      patterns:
+      - ^\W*more for you
 Moss Hill:
   patterns:
   - moss hill
@@ -3917,6 +4107,9 @@ Murphy and McNeil:
       patterns:
       - murphy.*old sport
       wsdb_slug: murphy-and-mcneil-old-sport-soap
+    Olde Bushmalt:
+      patterns:
+      - olde? bushmalt
     Pisgah:
       patterns:
       - \bpisgah\b
@@ -3925,6 +4118,9 @@ Murphy and McNeil:
       patterns:
       - murphy.*st\.? james
       wsdb_slug: murphy-and-mcneil-st-james-soap
+    Tobac Fanaile:
+      patterns:
+      - tobac.*fanaile
 Musgo Real:
   default format: Cream
   patterns:
@@ -3942,6 +4138,10 @@ Mystic Water:
       patterns:
       - mystic.*brown.*windsor
       wsdb_slug: mystic-water-brown-windsor-soap
+    Sweet Briar (Pipe Tobacco):
+      patterns:
+      - mystic.*sweet.*briar
+      - mystic.*pipe.*tobacco
 Mühle:
   patterns:
   - \bm[üu]hle\b( shave care)?
@@ -4147,6 +4347,9 @@ Nomad Theory:
     Kyoto:
       patterns:
       - nomad.*kyoto
+    London:
+      patterns:
+      - nomad.*london
     Sorrento:
       patterns:
       - nomad.*sorrento
@@ -4164,6 +4367,7 @@ Oaken Lab:
     Sanctum:
       patterns:
       - oaken.*sanctum
+      wsdb_slug: oaken-lab-sanctum-soap
     Serious Moonlight:
       patterns:
       - oaken.*serious.*moonlight
@@ -4174,6 +4378,10 @@ Oatcake:
 Obsessive Soap Perfectionist:
   patterns:
   - obsessive.*(soap)?.*perfection(ist)?
+  scents:
+    Old Gold:
+      patterns:
+      - obsessive.*old.*gold
 Officina Artigiana:
   patterns:
   - officina artigiana( milano)?
@@ -4266,6 +4474,9 @@ PAA:
     Droid Black:
       patterns:
       - droid black
+    Future Fiction:
+      patterns:
+      - future.*fiction
     Lavender Planet:
       patterns:
       - (paa|phoenix).*lavender planet
@@ -4432,7 +4643,8 @@ RazoRock:
   scents:
     Acqua:
       patterns:
-      - razorock.*acqua
+      - razo?rock.*acqua
+      wsdb_slug: razorock-acqua-soap
     American Barber:
       patterns:
       - razorock.*american barber
@@ -4476,6 +4688,9 @@ Razor Emporium:
     Element 47:
       patterns:
       - element 47
+    Heritage:
+      patterns:
+      - razor emporium.*heritage
 Razor Master:
   patterns:
   - razor master
@@ -4490,6 +4705,11 @@ Red House Farm:
     1920 Barbershop:
       patterns:
       - red house.*1920
+      wsdb_slug: red-house-farm-1920-barbershop-soap
+    Frankincence, Anise & Orange:
+      patterns:
+      - frank.*anise.*orange
+      - frank.*orange.*anise
     Kitchen Sink:
       patterns:
       - red house.*kitchen sink
@@ -4515,6 +4735,9 @@ Red House Farm:
       patterns:
       - red house.*sandalwood.*bourbon
       wsdb_slug: red-house-farm-sandalwood-and-bourbon-soap
+    Tofino:
+      patterns:
+      - red house.*tofino
 Reef Point Soaps:
   patterns:
   - reef point soaps
@@ -4550,6 +4773,10 @@ Rocky Mountain Barber Company:
       format: Cream
       patterns:
       - rocky mountain.*barbershop
+    Sandalwood:
+      format: Cream
+      patterns:
+      - rocky mountain.*sandalwood
 Romano:
   patterns:
   - romano
@@ -4595,6 +4822,9 @@ Saponificio Varesino:
       patterns:
       - felce aromatica
       wsdb_slug: saponificio-varesino-felce-aromatica-soap
+    Manna di Sicilia:
+      patterns:
+      - manna.*sicilia
     Mirto di Sardegna:
       patterns:
       - mirto.*sardegna
@@ -4673,6 +4903,7 @@ Shannon's Soaps:
     Indigo Oud:
       patterns:
       - shannon.*indigo.*oud
+      wsdb_slug: shannons-soaps-indigo-oud-soap
     Lady Luck:
       patterns:
       - shannon.*lady luck
@@ -4702,6 +4933,10 @@ Shave Dad:
 Shave Dandy:
   patterns:
   - shav.*dandy
+  scents:
+    Coconut Cow:
+      patterns:
+      - coconut cow
 Shavologist:
   patterns:
   - shavologist
@@ -4736,6 +4971,9 @@ Siliski Soaps:
   patterns:
   - 'silis?ks?i(?: soaps)?'
   scents:
+    Apothecary Cellar:
+      patterns:
+      - apothecary cellar
     Apothecary Cellars:
       patterns:
       - siliski.*apothecary cellars
@@ -4819,6 +5057,9 @@ Southern Witchcrafts:
       patterns:
       - s.*w.*grave ?fruit.*(ii|2|two).*
       wsdb_slug: southern-witchcrafts-gravefruit-ii-soap
+    Grey Phetiver:
+      patterns:
+      - grey phetiver
     Incorporeal:
       patterns:
       - witch.*incorporeal
@@ -5170,6 +5411,9 @@ Stirling Soap Co.:
       patterns:
       - glacial electric sheep
       wsdb_slug: stirling-soap-co-glacial-electric-sheep-soap
+    Glacial Iceberg Island:
+      patterns:
+      - iceberg island
     Glacial Lemon Chill:
       patterns:
       - glacial.*lemon chill
@@ -5264,6 +5508,9 @@ Stirling Soap Co.:
     Maggard Meetup 2025:
       patterns:
       - st[ie]rling.*maggard.*meetup.*2025
+    Maribor:
+      patterns:
+      - st[ie]rling.*maribor
     Margaritas in the Arctic:
       patterns:
       - marg.*arc?tic
@@ -5337,6 +5584,9 @@ Stirling Soap Co.:
       patterns:
       - st[ie]rling.*queen.*hearts
       wsdb_slug: stirling-soap-co-queen-of-hearts-soap
+    Praia:
+      patterns:
+      - st[ie]rling.*praia
     Ramblin' Man:
       patterns:
       - ramblin.*man
@@ -5451,6 +5701,9 @@ Stirling Soap Co.:
       patterns:
       - \bvaren\b
       wsdb_slug: stirling-soap-co-varen-soap
+    Weekend in Malibu:
+      patterns:
+      - weekend in malibu
     West Indies Lime:
       patterns:
       - stirl.*west indies
@@ -5482,6 +5735,9 @@ Storybook Soapworks:
       patterns:
       - fresca intens
       wsdb_slug: storybook-soapworks-fresca-intensa-soap
+    Shaken:
+      patterns:
+      - story.*shaken
     Visions and Revisions:
       patterns:
       - visions?.*revisions?
@@ -5698,6 +5954,9 @@ Talbot Shaving:
       patterns:
       - author.*ridge
       wsdb_slug: talbot-shaving-authors-ridge-soap
+    Gates of the Arctic:
+      patterns:
+      - talbot.*gates.*arctic
     Grace:
       patterns:
       - talbot.*grace
@@ -5815,6 +6074,9 @@ Talent Soap Factory:
     Love, Betty:
       patterns:
       - (talent|tsf).*love.*betty
+    Octopus Balls:
+      patterns:
+      - octopus balls
     Peony & Violet:
       patterns:
       - (talent|tsf).*peony.*violet
@@ -5840,6 +6102,9 @@ Talent Soap Factory:
       patterns:
       - (talent|tsf|slow).*dancing.*dark
       wsdb_slug: talent-soap-factory-slow-dancing-in-the-dark-soap
+    Surf Shop:
+      patterns:
+      - (talent|tsf).*surf shop
     Switchback:
       patterns:
       - talent.*switch ?back
@@ -5947,6 +6212,7 @@ Taylor of Old Bond Street:
       format: Cream
       patterns:
       - (taylor|tobs).*jermyn
+      wsdb_slug: taylor-of-old-bond-street-jermyn-street-soap
     Lavender:
       patterns:
       - (taylor|tob'?s).*lavend\wr
@@ -6137,6 +6403,9 @@ The Holy Black:
       patterns:
       - holy black.*mountain m[ae]n(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       wsdb_slug: the-holy-black-mountain-man-soap
+    Tangerine Creeper:
+      patterns:
+      - tangerine creeper
     The Galleon:
       patterns:
       - holy.*galleon(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
@@ -6250,6 +6519,7 @@ Turtleship Shave Co.:
     Coconut:
       patterns:
       - turtleship.*coconut
+      wsdb_slug: turtleship-shave-co-coconut-soap
     Te Java:
       patterns:
       - te\s?java
@@ -6448,6 +6718,9 @@ Wet Shaving Products:
       - wet ?shaving products.*olympus
       - ^\W*wsp\b.*olympus
       wsdb_slug: wet-shaving-products-olympus-soap
+    Rustic Sandalrose:
+      patterns:
+      - rustic sandalrose
     Tobacco:
       patterns:
       - wet ?shaving products.*tobacco
@@ -6495,6 +6768,9 @@ Wholly Kaw:
   - who.*kaw
   - \bwk\b
   scents:
+    Amber Bomba:
+      patterns:
+      - amber bomba
     Aranceto:
       patterns:
       - \bkaw\b.*aranceto
@@ -6534,12 +6810,18 @@ Wholly Kaw:
       patterns:
       - \bkaw\b.*foug.*mania
       wsdb_slug: wholly-kaw-fougere-mania-soap
+    Hiatus:
+      patterns:
+      - \bkaw\b.*hiatus
     Iced Tea:
       patterns:
       - kaw.*iced? tea
     Jupiter:
       patterns:
       - \bkaw\b.*jupiter
+    King of Bourbon:
+      patterns:
+      - king of bourbon
     King of Oud:
       patterns:
       - king of oud
@@ -6548,6 +6830,9 @@ Wholly Kaw:
       patterns:
       - la foug[eéè]re parfait
       wsdb_slug: wholly-kaw-la-fougere-parfaite-soap
+    Lav Sublime:
+      patterns:
+      - lav sublime
     Man from Mayfair:
       patterns:
       - man from mayfair
@@ -6691,6 +6976,9 @@ Zingari Man:
       patterns:
       - zingari.*bon monsieur
       - bon monsieur.*zingari
+    Coconut Nanas:
+      patterns:
+      - coconut nanas
     El Cantinero:
       patterns:
       - zingari.*can?tinero
@@ -6772,6 +7060,7 @@ Zingari Man:
     The Socialite:
       patterns:
       - zingari.*socialite
+      wsdb_slug: zingari-man-the-socialite-soap
     The Stargazer:
       patterns:
       - zingari.*stargazer

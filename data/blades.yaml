@@ -442,6 +442,10 @@ DE:
         - gil.*et.*king.*c
         - \bkcg\b
         - kc gillette
+  L3VEL3:
+    Platinum:
+      patterns:
+        - l3vel3.*plat
   Ladas:
     Super Stainless:
       patterns:
@@ -531,6 +535,7 @@ DE:
     Lab Blue:
       patterns:
         - (person+a)?.*lab[ -]?blue
+        - (person+a)?.*\blabs?\b
         - person+a.*co[mn]f.*coat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - accuforge
         - person.*\bcc\b
@@ -787,6 +792,10 @@ DE:
     Ultra Platinum:
       patterns:
         - veesta.*ultra
+  Vertice One:
+    Super Stainless:
+      patterns:
+        - vertice[ -]?one.*(stain|\bss\b)
   Vi-John:
     Chrome Platinum:
       patterns:
@@ -989,6 +998,10 @@ Half DE:
     Platinum SE:
       patterns:
         - misak[ia]
+  Parker:
+    Premium Platinum SE:
+      patterns:
+        - parker.*plat
 Injector:
   Feather:
     Professional Injector:

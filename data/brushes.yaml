@@ -498,11 +498,12 @@ known_brushes:
       knot_size_mm: 27
       patterns:
         - omega.*10098
-    "11047":
+    Mixed Midget (11047):
       fiber: Mixed Badger/Boar
       knot_size_mm: 22
       patterns:
         - omega.*11047
+        - omega.*mixed midget
     "11126":
       knot_size_mm: 24
       patterns:
@@ -1280,6 +1281,12 @@ known_brushes:
       fiber: Synthetic
       patterns:
         - st[ie]rling.*syn
+    The Replicant:
+      fiber: Synthetic
+      knot_size_mm: 24
+      knot_loft_mm: 55
+      patterns:
+        - stirling.*replicant
   Tatara:
     Masamune Boar:
       knot:
@@ -2460,6 +2467,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - balea
+  Barburys:
+    default: Synthetic
+    patterns:
+      - barburys
   Barrister and Mann:
     default: Synthetic
     patterns:
@@ -2710,6 +2721,7 @@ other_brushes:
       - unmarked
       - unknown
       - unbranded
+      - cheap synthetic
   Gents:
     default: Badger
     patterns:
@@ -3115,6 +3127,10 @@ other_brushes:
     default: Badger
     patterns:
       - spot ?prints ?3d
+  Stando:
+    default: Badger
+    patterns:
+      - \bstando\b
   Stirling:
     default: Synthetic
     patterns:
