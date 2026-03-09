@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Filter, Eye, EyeOff } from 'lucide-react';
 import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
 import GroupedDataTable from '@/components/data/GroupedDataTable';
+import AgentReviewPanel from '@/components/data/AgentReviewPanel';
 import {
   analyzeMismatch,
   MismatchAnalysisResult,
@@ -2420,21 +2421,17 @@ const MatchAnalyzer: React.FC = () => {
       )}
       </>
       ) : (
-        <div className='p-8 text-center text-gray-500'>
-          <p className='text-lg font-medium mb-2'>Agent Review mode</p>
-          {agentLoading ? (
-            <p>Loading...</p>
-          ) : verifiedData ? (
-            <p>
-              {verifiedData.metadata.stats.total_non_exact} entries verified,{' '}
-              {proposedData?.metadata.proposal_count || 0} proposals
-            </p>
-          ) : validatedMonths.length > 0 ? (
-            <p>Select a month with agent data: {validatedMonths.join(', ')}</p>
-          ) : (
-            <p>No agent validation data found. Run /validate-matches first.</p>
-          )}
-        </div>
+        <AgentReviewPanel
+          verifiedData={verifiedData}
+          proposedData={proposedData}
+          loading={agentLoading}
+          month={selectedMonths[0] || ''}
+          onDataRefresh={() => {
+            if (selectedMonths.length > 0) {
+              loadAgentData(selectedMonths[0]);
+            }
+          }}
+        />
       )}
 
       {/* Comment Modal */}
