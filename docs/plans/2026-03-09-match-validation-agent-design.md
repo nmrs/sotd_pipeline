@@ -185,7 +185,8 @@ Displays in the existing table layout with additional columns for agent output (
 
 - Proposed regex patterns MUST be tested against the original text before inclusion
 - Each verification must include reasoning (not just a verdict)
-- Web search should be used for unknown products to gather evidence
+- **New soap scent proposals MUST be verified via web search** — the agent must find evidence the scent exists (artisan website, retailer listing, etc.) before proposing a catalog addition. The proposal must include the correct scent name (not the user's typo), a source URL, and a brief description. If the scent cannot be verified, the entry is flagged as `needs_review` instead of generating a proposal.
+- Web search should be used for unknown products (all fields) to gather evidence
 - Proposals should follow existing catalog naming conventions (learned from correct_matches context)
 
 ## Deferred to v2
