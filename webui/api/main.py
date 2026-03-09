@@ -26,6 +26,8 @@ from .monthly_user_posts import router as monthly_user_posts_router
 from .product_usage import router as product_usage_router
 from .report_rankings import router as report_rankings_router
 from .soap_analyzer import router as soap_analyzer_router
+from .validation import configure as configure_validation
+from .validation import router as validation_router
 from .wsdb_alignment import router as wsdb_alignment_router
 
 # Create logs directory if it doesn't exist
@@ -104,7 +106,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         else:
             # Fallback to relative path for development
             project_root = Path(__file__).parent.parent.parent
-            correct_matches_path = project_root / "data" / "correct_matches"
+            data_dir = project_root / "data"
+            correct_matches_path = data_dir / "correct_matches"
+
+        # Configure validation router with data directory
+        configure_validation(data_dir)
+
         _queue_manager = QueueManager(correct_matches_path)
         _queue_manager.start_background_worker()
         logger.info("✅ Background queue worker started")
@@ -143,6 +150,7 @@ app.include_router(monthly_user_posts_router)
 app.include_router(product_usage_router)
 app.include_router(report_rankings_router)
 app.include_router(format_compatibility_router)
+app.include_router(validation_router)
 app.include_router(wsdb_alignment_router)
 
 # Add CORS middleware for local development
