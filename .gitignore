@@ -126,3 +126,11 @@ analysis/*.yaml
 # Explicitly track report_archive directory
 !data/report_archive/
 !data/report_archive/**/*.md
+
+# Agent validation output
+data/verified/*.json
+data/proposed/*.json
+data/validation/*.json
+
+# Git worktrees
+.worktrees/
