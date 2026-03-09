@@ -25,6 +25,11 @@ import {
   isGroupedDataItem,
   QueueErrorsResponse,
   QueueErrorEntry,
+  VerifiedData,
+  ProposedData,
+  getVerifiedData,
+  getProposedData,
+  getValidatedMonths,
 } from '@/services/api';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
@@ -98,6 +103,13 @@ const MatchAnalyzer: React.FC = () => {
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
   const [updatingFiltered, setUpdatingFiltered] = useState(false);
+
+  // Agent review mode state
+  const [reviewMode, setReviewMode] = useState<'live' | 'agent_review'>('live');
+  const [verifiedData, setVerifiedData] = useState<VerifiedData | null>(null);
+  const [proposedData, setProposedData] = useState<ProposedData | null>(null);
+  const [validatedMonths, setValidatedMonths] = useState<string[]>([]);
+  const [agentLoading, setAgentLoading] = useState(false);
 
   // Brush split modal state
   const [brushSplitModalOpen, setBrushSplitModalOpen] = useState(false);
@@ -293,6 +305,35 @@ const MatchAnalyzer: React.FC = () => {
   useEffect(() => {
     fetchQueueErrors();
   }, [selectedField, selectedMonths, fetchQueueErrors]);
+
+  // Load validated months on mount
+  useEffect(() => {
+    getValidatedMonths().then(data => setValidatedMonths(data.months)).catch(() => {});
+  }, []);
+
+  // Load agent data handler
+  const loadAgentData = useCallback(async (month: string) => {
+    setAgentLoading(true);
+    try {
+      const [verified, proposed] = await Promise.all([
+        getVerifiedData(month),
+        getProposedData(month),
+      ]);
+      setVerifiedData(verified);
+      setProposedData(proposed);
+    } catch (err) {
+      console.error('Failed to load agent data:', err);
+    } finally {
+      setAgentLoading(false);
+    }
+  }, []);
+
+  // Auto-load agent data when switching to agent_review mode if a month is selected
+  useEffect(() => {
+    if (reviewMode === 'agent_review' && selectedMonths.length > 0) {
+      loadAgentData(selectedMonths[0]);
+    }
+  }, [reviewMode, selectedMonths, loadAgentData]);
 
   const handleAnalyze = useCallback(async (overrideGroupByMatched?: boolean) => {
     if (selectedMonths.length === 0) {
@@ -1711,6 +1752,21 @@ const MatchAnalyzer: React.FC = () => {
         <div className='space-y-4 mb-4'>
           {/* First row - Basic controls */}
           <div className='flex flex-wrap gap-4 items-end'>
+            {/* Mode Toggle */}
+            <div className='flex items-center gap-2 mr-4'>
+              <button
+                className={`px-3 py-1 text-sm rounded ${reviewMode === 'live' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
+                onClick={() => setReviewMode('live')}
+              >
+                Live
+              </button>
+              <button
+                className={`px-3 py-1 text-sm rounded ${reviewMode === 'agent_review' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
+                onClick={() => setReviewMode('agent_review')}
+              >
+                Agent Review
+              </button>
+            </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
               <label
                 htmlFor='field-select'
@@ -2149,6 +2205,8 @@ const MatchAnalyzer: React.FC = () => {
         </div>
       )}
 
+      {reviewMode === 'live' ? (
+      <>
       {/* Results Table */}
       {(results || groupedResults) && (
         <div className='bg-white rounded-lg shadow'>
@@ -2358,6 +2416,24 @@ const MatchAnalyzer: React.FC = () => {
               Select a month and field, then click &quot;Analyze&quot; to begin match analysis.
             </p>
           </div>
+        </div>
+      )}
+      </>
+      ) : (
+        <div className='p-8 text-center text-gray-500'>
+          <p className='text-lg font-medium mb-2'>Agent Review mode</p>
+          {agentLoading ? (
+            <p>Loading...</p>
+          ) : verifiedData ? (
+            <p>
+              {verifiedData.metadata.stats.total_non_exact} entries verified,{' '}
+              {proposedData?.metadata.proposal_count || 0} proposals
+            </p>
+          ) : validatedMonths.length > 0 ? (
+            <p>Select a month with agent data: {validatedMonths.join(', ')}</p>
+          ) : (
+            <p>No agent validation data found. Run /validate-matches first.</p>
+          )}
         </div>
       )}
 

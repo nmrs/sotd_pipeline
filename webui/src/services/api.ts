@@ -1201,3 +1201,141 @@ export const getReportRankingsSeries = async (
   });
   return response.data;
 };
+
+// --- Agent Validation Types ---
+
+export interface VerificationItem {
+  comment_id: string;
+  field: string;
+  original: string;
+  matched: Record<string, unknown>;
+  match_type: string;
+  verdict: 'verified' | 'needs_review' | 'incorrect';
+  confidence: number;
+  reasoning: string;
+}
+
+export interface VerifiedData {
+  metadata: {
+    month: string;
+    processed_at: string;
+    stats: {
+      total_non_exact: number;
+      verified_correct: number;
+      needs_review: number;
+      incorrect: number;
+      proposals_generated: number;
+    };
+  };
+  verifications: VerificationItem[];
+}
+
+export interface ProposalItem {
+  type: 'new_scent' | 'new_pattern' | 'new_product';
+  field: string;
+  brand: string;
+  model: string;
+  suggested_pattern: string;
+  suggested_entry?: Record<string, unknown>;
+  evidence: string[];
+  source_url?: string;
+  research?: string;
+  confidence: number;
+  comment_id: string;
+  _status?: 'accepted' | 'rejected';
+  _accepted_at?: number;
+  _rejected_at?: number;
+}
+
+export interface ProposedData {
+  metadata: {
+    month: string;
+    processed_at: string;
+    proposal_count: number;
+  };
+  proposals: ProposalItem[];
+}
+
+export interface ValidatedMonths {
+  months: string[];
+}
+
+// --- Agent Validation API Functions ---
+
+export const getVerifiedData = async (month: string): Promise<VerifiedData> => {
+  try {
+    const response = await api.get(`/validation/verified/${month}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch verified data for ${month}:`, error);
+    throw error;
+  }
+};
+
+export const getProposedData = async (month: string): Promise<ProposedData> => {
+  try {
+    const response = await api.get(`/validation/proposed/${month}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch proposed data for ${month}:`, error);
+    throw error;
+  }
+};
+
+export const getValidatedMonths = async (): Promise<ValidatedMonths> => {
+  try {
+    const response = await api.get('/validation/months');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch validated months:', error);
+    throw error;
+  }
+};
+
+export const acceptProposal = async (
+  month: string,
+  proposalIndex: number,
+  editedProposal?: Record<string, unknown>
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await api.post(`/validation/proposed/${month}/accept/${proposalIndex}`, {
+      edited_proposal: editedProposal,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to accept proposal ${proposalIndex} for ${month}:`, error);
+    throw error;
+  }
+};
+
+export const rejectProposal = async (
+  month: string,
+  proposalIndex: number,
+  reason?: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await api.post(`/validation/proposed/${month}/reject/${proposalIndex}`, {
+      reason,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to reject proposal ${proposalIndex} for ${month}:`, error);
+    throw error;
+  }
+};
+
+export const bulkApproveVerified = async (
+  field: string,
+  matches: Array<{ original: string; matched: Record<string, unknown> }>
+): Promise<{ success: boolean; operation_id: string; message: string }> => {
+  try {
+    const response = await api.post('/validation/verified/bulk-approve', {
+      field,
+      matches,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to bulk approve verified matches:', error);
+    throw error;
+  }
+};
