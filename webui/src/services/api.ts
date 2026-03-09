@@ -1298,8 +1298,10 @@ export const acceptProposal = async (
   editedProposal?: Record<string, unknown>
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.post(`/validation/proposed/${month}/accept/${proposalIndex}`, {
-      edited_proposal: editedProposal,
+    const response = await api.post('/validation/accept-proposal', {
+      month,
+      proposal_index: proposalIndex,
+      edited_proposal: editedProposal || null,
     });
     return response.data;
   } catch (error) {
@@ -1314,8 +1316,10 @@ export const rejectProposal = async (
   reason?: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await api.post(`/validation/proposed/${month}/reject/${proposalIndex}`, {
-      reason,
+    const response = await api.post('/validation/reject-proposal', {
+      month,
+      proposal_index: proposalIndex,
+      reason: reason || null,
     });
     return response.data;
   } catch (error) {
@@ -1329,7 +1333,7 @@ export const bulkApproveVerified = async (
   matches: Array<{ original: string; matched: Record<string, unknown> }>
 ): Promise<{ success: boolean; operation_id: string; message: string }> => {
   try {
-    const response = await api.post('/validation/verified/bulk-approve', {
+    const response = await api.post('/validation/bulk-approve', {
       field,
       matches,
     });
