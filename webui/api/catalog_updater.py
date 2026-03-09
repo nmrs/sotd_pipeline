@@ -176,9 +176,9 @@ class CatalogUpdater:
         if brand not in catalog["known_brushes"]:
             catalog["known_brushes"][brand] = {}
         entry: dict = {"patterns": patterns}
-        if fiber:
+        if fiber is not None:
             entry["fiber"] = fiber
-        if knot_size_mm:
+        if knot_size_mm is not None:
             entry["knot_size_mm"] = knot_size_mm
         catalog["known_brushes"][brand][model] = entry
         self._save_catalog("brush", catalog)
@@ -213,7 +213,9 @@ class CatalogUpdater:
         ptype = proposal["type"]
         field = proposal["field"]
 
-        if ptype == "new_scent" and field == "soap":
+        if ptype == "new_scent":
+            if field != "soap":
+                raise ValueError(f"new_scent is only valid for soap, got field: {field}")
             self.add_soap_scent(
                 proposal["brand"],
                 proposal["model"],

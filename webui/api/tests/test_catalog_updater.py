@@ -442,7 +442,7 @@ class TestApplyProposal:
             "model": "Something",
             "suggested_pattern": "karve.*something",
         }
-        with pytest.raises(ValueError, match="Unknown proposal type"):
+        with pytest.raises(ValueError, match="new_scent is only valid for soap"):
             updater.apply_proposal(proposal)
 
 
