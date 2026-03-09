@@ -75,7 +75,7 @@ Construct each agent's prompt by concatenating:
 6. `"\n\n## Intentionally Unmatched (do not propose these)\n\n"` followed by the relevant section from intentionally_unmatched.yaml
 
 For the soap agent, include this additional instruction at the end:
-`"\n\nREMINDER: You MUST use the WebSearch tool to verify any new scent before proposing a new_catalog_entry. Do not skip this step."`
+`"\n\nREMINDER: You MUST use the WebSearch tool to verify any new scent before proposing a new_scent. Do not skip this step."`
 
 **CATALOG SIZE MANAGEMENT:** Some catalogs are large (soaps.yaml is ~7000 lines). To avoid context overflow:
 - For the catalog reference, only include the brands that appear in the entries being validated. Extract the relevant brand sections from the YAML rather than sending the entire file.
@@ -90,23 +90,26 @@ Each agent must return a JSON object with this exact structure:
       "comment_id": "abc123",
       "field": "soap",
       "original": "user text",
-      "matched_brand": "Brand Name",
-      "matched_value": "Model or Scent",
+      "matched": {"brand": "Brand Name", "model": "Model or Scent"},
       "match_type": "regex",
-      "verdict": "correct|incorrect|uncertain",
+      "verdict": "verified|needs_review|incorrect",
       "confidence": 0.95,
       "reasoning": "Brief explanation of why this verdict was reached"
     }
   ],
   "proposals": [
     {
-      "type": "new_correct_match",
+      "type": "new_scent|new_pattern|new_product",
       "field": "soap",
       "brand": "Brand Name",
-      "value": "Scent Name",
-      "original_text": "the user's original text",
-      "comment_id": "abc123",
-      "reasoning": "Why this should be added to correct_matches"
+      "model": "Model or Scent Name",
+      "suggested_pattern": "regex.*pattern",
+      "suggested_entry": {},
+      "evidence": ["comment abc123: 'original text'"],
+      "source_url": "https://...",
+      "research": "Description of what was found via web search",
+      "confidence": 0.85,
+      "comment_id": "abc123"
     }
   ]
 }
@@ -127,18 +130,14 @@ Build the output files:
 {
   "metadata": {
     "month": "YYYY-MM",
-    "validated_at": "ISO timestamp",
+    "processed_at": "ISO timestamp",
     "source_file": "data/matched/YYYY-MM.json",
-    "entry_counts": {
-      "razor": 0,
-      "blade": 0,
-      "brush": 0,
-      "soap": 0
-    },
-    "verdict_summary": {
-      "correct": 0,
+    "stats": {
+      "total_non_exact": 0,
+      "verified_correct": 0,
+      "needs_review": 0,
       "incorrect": 0,
-      "uncertain": 0
+      "proposals_generated": 0
     }
   },
   "verifications": [...]
@@ -150,13 +149,8 @@ Build the output files:
 {
   "metadata": {
     "month": "YYYY-MM",
-    "proposed_at": "ISO timestamp",
-    "source_file": "data/matched/YYYY-MM.json",
-    "proposal_counts": {
-      "new_correct_match": 0,
-      "new_catalog_entry": 0,
-      "new_pattern": 0
-    }
+    "processed_at": "ISO timestamp",
+    "proposal_count": 0
   },
   "proposals": [...]
 }
@@ -171,14 +165,14 @@ Print a summary:
 Match Validation Complete — {MONTH}
 =====================================
 Verified: {N} entries
-  correct:   {N} ({pct}%)
-  incorrect: {N} ({pct}%)
-  uncertain: {N} ({pct}%)
+  verified:     {N} ({pct}%)
+  needs_review: {N} ({pct}%)
+  incorrect:    {N} ({pct}%)
 
 Proposals: {N} total
-  new_correct_match: {N}
-  new_catalog_entry: {N}
-  new_pattern:       {N}
+  new_scent:   {N}
+  new_pattern: {N}
+  new_product: {N}
 
 Output:
   data/verified/{MONTH}.json
@@ -195,22 +189,22 @@ Output:
 You are a match validation agent for the SOTD (Shave of the Day) pipeline. You are reviewing non-exact matches from the matching phase to determine if they are correct.
 
 Your job:
-1. For each entry, determine if the match is CORRECT, INCORRECT, or UNCERTAIN
+1. For each entry, determine if the match is VERIFIED, NEEDS_REVIEW, or INCORRECT
 2. Propose catalog changes where appropriate
 
 RULES:
-- A "correct" verdict means the matched brand/model/scent accurately represents what the user intended
+- A "verified" verdict means the matched brand/model/scent accurately represents what the user intended
 - An "incorrect" verdict means the match is clearly wrong — the user meant something different
-- An "uncertain" verdict means you cannot confidently determine correctness
-- When uncertain, err on the side of "uncertain" rather than guessing
-- Check the correct_matches file — if the original text (lowercased) already appears there under the matched brand/value, verdict is "correct" with confidence 1.0
+- A "needs_review" verdict means you cannot confidently determine correctness
+- When uncertain, err on the side of "needs_review" rather than guessing
+- Check the correct_matches file — if the original text (lowercased) already appears there under the matched brand/model, verdict is "verified" with confidence 1.0
 - Check intentionally_unmatched — if the original text appears there, do NOT propose it as a new catalog entry
 - Set confidence between 0.0 and 1.0 (0.5 = coin flip, 0.9+ = very confident)
 
 PROPOSAL TYPES:
-- "new_correct_match": The match is correct and the original text should be added to correct_matches for future exact matching. Include: field, brand, value (model/scent), original_text, comment_id, reasoning.
-- "new_catalog_entry": A genuinely new product that should be added to the catalog. Include: field, brand, value, suggested_patterns (array of regex strings), original_text, comment_id, reasoning, verification_url (for soaps).
-- "new_pattern": An existing catalog entry needs an additional regex pattern. Include: field, brand, value, new_pattern (regex string), original_text, comment_id, reasoning.
+- "new_scent": A new soap scent that should be added to the catalog. Include: field, brand, model (scent name), suggested_pattern, evidence, source_url (REQUIRED — from web search), research, confidence, comment_id.
+- "new_pattern": An existing catalog entry needs an additional regex pattern. Include: field, brand, model, suggested_pattern, evidence, confidence, comment_id.
+- "new_product": A genuinely new product (razor, blade, or brush) that should be added to the catalog. Include: field, brand, model, suggested_pattern, suggested_entry (with format/fiber/knot_size_mm as appropriate), evidence, source_url, research, confidence, comment_id.
 
 CRITICAL — REGEX PATTERN VALIDATION:
 Before including ANY proposed regex pattern (in "new_catalog_entry" or "new_pattern"), you MUST test it against the original text using Python's re module via the Bash tool:
@@ -311,7 +305,7 @@ VALIDATION APPROACH:
 - For split_brush: Do both handle and knot components look correctly identified?
 - Look for handle/knot brand confusion (e.g., the handle maker being labeled as the whole brush brand)
 - Verify fiber type makes sense with the model name
-- If proposing new correct_matches: use the format "Brand - Model" or for splits "HandleBrand HandleModel w/ KnotBrand KnotModel"
+- When proposing new products, use the format "Brand - Model" or for splits "HandleBrand HandleModel w/ KnotBrand KnotModel"
 ```
 
 ---
@@ -336,10 +330,9 @@ MATCHING CONTEXT:
 - match_type "unmatched" means nothing matched
 
 CRITICAL — SOAP SCENT VERIFICATION:
-For **every** proposal of type "new_catalog_entry" (a new scent), you MUST verify the scent exists by using the WebSearch tool to search for it. Search for: "{brand} {scent} shaving soap" or check the artisan's website.
-- If you can confirm the scent exists → propose with verification_url
-- If you cannot confirm → set verdict to "uncertain" and do NOT propose a new_catalog_entry
-- You MAY still propose a "new_correct_match" for uncertain scents if the brand match is clearly right
+For **every** proposal of type "new_scent", you MUST verify the scent exists by using the WebSearch tool to search for it. Search for: "{brand} {scent} shaving soap" or check the artisan's website.
+- If you can confirm the scent exists → propose with source_url
+- If you cannot confirm → set verdict to "needs_review" and do NOT propose a new_scent
 
 SOAP-SPECIFIC KNOWLEDGE:
 - Common abbreviations: B&M or B+M = Barrister and Mann, NO = Noble Otter, DG = Declaration Grooming, SBS = Summer Break Soaps, HoM = House of Mammoth, A&E = Ariana & Evans, WK = Wholly Kaw, SV = Saponificio Varesino, CL = Chatillon Lux
