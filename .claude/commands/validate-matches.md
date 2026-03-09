@@ -1,0 +1,387 @@
+# /validate-matches — Match Validation Agent Orchestrator
+
+You are the orchestrator for the SOTD pipeline match validation system. Your job is to review non-exact matches from the matching phase and produce two output files: **verifications** (judgments on existing matches) and **proposals** (suggested catalog changes).
+
+## Step 1: Parse Arguments and Locate Input File
+
+Parse the argument string: `$ARGUMENTS`
+
+- Extract `--month YYYY-MM` if present
+- If no `--month` is provided, find the most recent file in `data/matched/` by listing the directory and sorting by filename
+
+Set `MONTH` to the resolved value.
+
+Read the file `data/matched/{MONTH}.json`. If it does not exist, report the error and stop.
+
+## Step 2: Filter and Partition Entries
+
+The matched file has shape `{ "metadata": {...}, "data": [...] }`.
+
+From the `data` array, examine each entry's four product fields: `razor`, `blade`, `brush`, `soap`.
+
+For each field in each entry, collect the field data if `match_type` is **not** one of: `exact`, `filtered`, `irrelevant_razor_format`, `auto_cartridge`. These are the entries that need validation.
+
+Also skip entries where the field is `null` or has no `match_type`.
+
+Build four lists — one per field — where each item contains:
+- `comment_id`: the entry's `id`
+- `author`: the entry's `author`
+- `original`: the field's `original` text
+- `normalized`: the field's `normalized` text
+- `matched`: the field's `matched` object
+- `match_type`: the field's `match_type`
+- `pattern`: the field's `pattern`
+- `body_excerpt`: first 300 characters of the entry's `body` (for context)
+
+Print the counts per field:
+```
+Entries to validate:
+  razor:  {N}
+  blade:  {N}
+  brush:  {N}
+  soap:   {N}
+  total:  {N}
+```
+
+If total is 0, write empty output files and stop with a message.
+
+## Step 3: Load Reference Data
+
+Read these files in parallel:
+
+| Field | Catalog File | Correct Matches File |
+|-------|-------------|---------------------|
+| razor | `data/razors.yaml` | `data/correct_matches/razor.yaml` |
+| blade | `data/blades.yaml` | `data/correct_matches/blade.yaml` |
+| brush | `data/brushes.yaml` | `data/correct_matches/brush.yaml` |
+| soap  | `data/soaps.yaml` | `data/correct_matches/soap.yaml` |
+
+Also read `data/intentionally_unmatched.yaml` — this contains entries that have been deliberately excluded from matching. Agents should check against this before proposing new catalog entries.
+
+Only load catalog/correct_matches for fields that have entries to validate (skip empty fields).
+
+## Step 4: Dispatch Field Agents
+
+For each non-empty field, dispatch an agent using the **Agent tool**. Run all agents in parallel.
+
+**CRITICAL: Batching** — If a field has more than 40 entries, split into batches of 40 and dispatch one agent per batch. Each batch agent operates independently.
+
+Construct each agent's prompt by concatenating:
+1. The **Common Preamble** from Section 6
+2. The **field-specific instructions** from Section 6 (Razor/Blade/Brush/Soap Agent Instructions)
+3. `"\n\n## Entries to Validate\n\n"` followed by the entries as a JSON array
+4. `"\n\n## Catalog (for reference)\n\n"` followed by the raw YAML catalog content for that field
+5. `"\n\n## Correct Matches (for reference)\n\n"` followed by the raw YAML correct_matches content
+6. `"\n\n## Intentionally Unmatched (do not propose these)\n\n"` followed by the relevant section from intentionally_unmatched.yaml
+
+For the soap agent, include this additional instruction at the end:
+`"\n\nREMINDER: You MUST use the WebSearch tool to verify any new scent before proposing a new_catalog_entry. Do not skip this step."`
+
+**CATALOG SIZE MANAGEMENT:** Some catalogs are large (soaps.yaml is ~7000 lines). To avoid context overflow:
+- For the catalog reference, only include the brands that appear in the entries being validated. Extract the relevant brand sections from the YAML rather than sending the entire file.
+- For correct_matches, similarly filter to only the relevant brands.
+- Always include the full intentionally_unmatched section for the field (it is small).
+
+Each agent must return a JSON object with this exact structure:
+```json
+{
+  "verifications": [
+    {
+      "comment_id": "abc123",
+      "field": "soap",
+      "original": "user text",
+      "matched_brand": "Brand Name",
+      "matched_value": "Model or Scent",
+      "match_type": "regex",
+      "verdict": "correct|incorrect|uncertain",
+      "confidence": 0.95,
+      "reasoning": "Brief explanation of why this verdict was reached"
+    }
+  ],
+  "proposals": [
+    {
+      "type": "new_correct_match",
+      "field": "soap",
+      "brand": "Brand Name",
+      "value": "Scent Name",
+      "original_text": "the user's original text",
+      "comment_id": "abc123",
+      "reasoning": "Why this should be added to correct_matches"
+    }
+  ]
+}
+```
+
+## Step 5: Merge Agent Results
+
+Collect all agent responses. Parse the JSON from each.
+
+Merge all `verifications` arrays into a single list, sorted by field then comment_id.
+
+Merge all `proposals` arrays into a single list, sorted by field then type.
+
+Build the output files:
+
+### `data/verified/{MONTH}.json`
+```json
+{
+  "metadata": {
+    "month": "YYYY-MM",
+    "validated_at": "ISO timestamp",
+    "source_file": "data/matched/YYYY-MM.json",
+    "entry_counts": {
+      "razor": 0,
+      "blade": 0,
+      "brush": 0,
+      "soap": 0
+    },
+    "verdict_summary": {
+      "correct": 0,
+      "incorrect": 0,
+      "uncertain": 0
+    }
+  },
+  "verifications": [...]
+}
+```
+
+### `data/proposed/{MONTH}.json`
+```json
+{
+  "metadata": {
+    "month": "YYYY-MM",
+    "proposed_at": "ISO timestamp",
+    "source_file": "data/matched/YYYY-MM.json",
+    "proposal_counts": {
+      "new_correct_match": 0,
+      "new_catalog_entry": 0,
+      "new_pattern": 0
+    }
+  },
+  "proposals": [...]
+}
+```
+
+Write both files using Python (via bash) to ensure valid JSON with proper formatting.
+
+## Step 6: Print Summary
+
+Print a summary:
+```
+Match Validation Complete — {MONTH}
+=====================================
+Verified: {N} entries
+  correct:   {N} ({pct}%)
+  incorrect: {N} ({pct}%)
+  uncertain: {N} ({pct}%)
+
+Proposals: {N} total
+  new_correct_match: {N}
+  new_catalog_entry: {N}
+  new_pattern:       {N}
+
+Output:
+  data/verified/{MONTH}.json
+  data/proposed/{MONTH}.json
+```
+
+---
+
+## Section 6: Field-Specific Agent Prompts
+
+### Common Preamble (include in every agent prompt)
+
+```
+You are a match validation agent for the SOTD (Shave of the Day) pipeline. You are reviewing non-exact matches from the matching phase to determine if they are correct.
+
+Your job:
+1. For each entry, determine if the match is CORRECT, INCORRECT, or UNCERTAIN
+2. Propose catalog changes where appropriate
+
+RULES:
+- A "correct" verdict means the matched brand/model/scent accurately represents what the user intended
+- An "incorrect" verdict means the match is clearly wrong — the user meant something different
+- An "uncertain" verdict means you cannot confidently determine correctness
+- When uncertain, err on the side of "uncertain" rather than guessing
+- Check the correct_matches file — if the original text (lowercased) already appears there under the matched brand/value, verdict is "correct" with confidence 1.0
+- Check intentionally_unmatched — if the original text appears there, do NOT propose it as a new catalog entry
+- Set confidence between 0.0 and 1.0 (0.5 = coin flip, 0.9+ = very confident)
+
+PROPOSAL TYPES:
+- "new_correct_match": The match is correct and the original text should be added to correct_matches for future exact matching. Include: field, brand, value (model/scent), original_text, comment_id, reasoning.
+- "new_catalog_entry": A genuinely new product that should be added to the catalog. Include: field, brand, value, suggested_patterns (array of regex strings), original_text, comment_id, reasoning, verification_url (for soaps).
+- "new_pattern": An existing catalog entry needs an additional regex pattern. Include: field, brand, value, new_pattern (regex string), original_text, comment_id, reasoning.
+
+CRITICAL — REGEX PATTERN VALIDATION:
+Before including ANY proposed regex pattern (in "new_catalog_entry" or "new_pattern"), you MUST test it against the original text using Python's re module via the Bash tool:
+  python3 -c "import re; print(bool(re.search(r'YOUR_PATTERN', 'ORIGINAL_TEXT', re.IGNORECASE)))"
+Only include the pattern if the test returns True. If a pattern fails, fix it and re-test.
+
+OUTPUT FORMAT:
+Return a single JSON object with "verifications" and "proposals" arrays. Wrap it in a ```json code fence.
+
+IMPORTANT: Every entry you receive MUST appear in your verifications output. Do not skip any.
+```
+
+---
+
+### Razor Agent Instructions
+
+```
+FIELD: razor
+CATALOG STRUCTURE: data/razors.yaml
+  Brand → Model → { format?: string, patterns: string[] }
+
+CORRECT MATCHES STRUCTURE: data/correct_matches/razor.yaml
+  Brand → Model → [original strings]
+
+MATCHING CONTEXT:
+- Razors have brand, model, and optionally format (DE, SE, AC, GEM, etc.)
+- match_type "regex" means a pattern in the catalog matched — verify the brand+model assignment is sensible
+- match_type "brand" means only the brand was identified — check if the model in matched.model exists or is reasonable
+- match_type "unmatched" means nothing matched — check if this is a real razor and if so, propose catalog additions
+- match_type "dash_split" means Brand - Model was parsed from a dash — verify the split is correct
+
+VALIDATION APPROACH:
+- Compare the original text against the matched brand+model
+- Look at the pattern that triggered the match — does it make sense for this text?
+- For brand-only matches: is the extracted model name actually a model of that brand?
+- Common razor brands: Blackland, Karve, RazoRock, Gillette, Merkur, Muhle, Charcoal Goods, Wolfman, etc.
+- Watch for: handle names confused with razor models, blade names mixed in, vintage Gillette model disambiguation
+```
+
+---
+
+### Blade Agent Instructions
+
+```
+FIELD: blade
+CATALOG STRUCTURE: data/blades.yaml
+  Format → Brand → Model → { patterns: string[] }
+  Formats: DE, AC, A77, GEM, Injector, Half DE
+
+CORRECT MATCHES STRUCTURE: data/correct_matches/blade.yaml
+  Brand → Model → [original strings]
+
+MATCHING CONTEXT:
+- Blades have format, brand, and model
+- match_type "regex" means a pattern matched — verify the brand+model+format assignment
+- match_type "unmatched" means nothing matched — check if this is identifiable
+- Blade entries often include use count in parentheses like "(3)" which gets stripped in normalized text
+
+VALIDATION APPROACH:
+- Is the matched blade a real product? Compare original text to matched brand+model
+- Does the format make sense? (e.g., a Feather blade in AC format for an AC razor)
+- Common blade brands: Gillette, Astra, Feather, Personna, Voskhod, Polsilver, Kai, Derby, Nacet
+- Watch for: blade+razor confusion, use count misinterpretation, brand abbreviations (GSB = Gillette Silver Blue)
+- Blade format must match the razor format context when available
+```
+
+---
+
+### Brush Agent Instructions
+
+```
+FIELD: brush
+CATALOG STRUCTURE: data/brushes.yaml
+  known_brushes → Brand → Model → { fiber, knot_size_mm?, patterns: string[] }
+  Some models have handle/knot sub-objects for split brushes
+
+CORRECT MATCHES STRUCTURE: data/correct_matches/brush.yaml
+  Brand → Model → [original strings]
+
+MATCHING CONTEXT:
+- Brushes are the most complex field due to handle+knot combinations
+- match_type "regex" means a catalog pattern matched
+- match_type "brand_default" means only the brand matched and a default model was assigned
+- match_type "split_brush" means handle and knot were identified separately
+- match_type "known_split" means it matched a known handle+knot combination
+- match_type "composite" means multiple signals were combined
+- match_type "unmatched" means nothing matched
+
+BRUSH-SPECIFIC KNOWLEDGE:
+- Many brushes are custom: a handle from one maker + a knot from another
+- Common handle makers: Chisel & Hound, Dogwood Handcrafts, Grizzly Bay, Zenith, Summer Break Soaps
+- Common knot makers/types: Declaration Grooming (B-series badger knots: B1-B16), Maggard (SHD badger, synthetic), Turn-N-Shave, AP Shave Co (G5C, Synbad, Cashmere)
+- Fiber types: Badger, Boar, Synthetic, Horse, Mixed
+- Knot sizes are typically in mm (20-30mm range common)
+
+VALIDATION APPROACH:
+- For brand_default matches: Is there a more specific model that should match?
+- For split_brush: Do both handle and knot components look correctly identified?
+- Look for handle/knot brand confusion (e.g., the handle maker being labeled as the whole brush brand)
+- Verify fiber type makes sense with the model name
+- If proposing new correct_matches: use the format "Brand - Model" or for splits "HandleBrand HandleModel w/ KnotBrand KnotModel"
+```
+
+---
+
+### Soap Agent Instructions
+
+```
+FIELD: soap
+CATALOG STRUCTURE: data/soaps.yaml
+  Brand → { patterns: string[], scents: { Scent → { patterns: string[], wsdb_slug? } } }
+
+CORRECT MATCHES STRUCTURE: data/correct_matches/soap.yaml
+  Brand → Scent → [original strings]
+
+MATCHING CONTEXT:
+- Soaps have brand and scent
+- match_type "regex" means a scent pattern matched — verify brand+scent assignment
+- match_type "brand" means only the brand matched, scent was extracted but not in catalog
+  - The "scent" value in matched.scent was derived from the remaining text after brand matching
+  - This is the MOST COMMON type you will see — many are real scents that just need to be added to the catalog
+- match_type "dash_split" means "Brand - Scent" was parsed from a dash delimiter
+- match_type "unmatched" means nothing matched
+
+CRITICAL — SOAP SCENT VERIFICATION:
+For **every** proposal of type "new_catalog_entry" (a new scent), you MUST verify the scent exists by using the WebSearch tool to search for it. Search for: "{brand} {scent} shaving soap" or check the artisan's website.
+- If you can confirm the scent exists → propose with verification_url
+- If you cannot confirm → set verdict to "uncertain" and do NOT propose a new_catalog_entry
+- You MAY still propose a "new_correct_match" for uncertain scents if the brand match is clearly right
+
+SOAP-SPECIFIC KNOWLEDGE:
+- Common abbreviations: B&M or B+M = Barrister and Mann, NO = Noble Otter, DG = Declaration Grooming, SBS = Summer Break Soaps, HoM = House of Mammoth, A&E = Ariana & Evans, WK = Wholly Kaw, SV = Saponificio Varesino, CL = Chatillon Lux
+- "Set" or "EdP" or "splash" after a scent name is aftershave, not soap — but the scent match is still valid
+- Seasonal/limited releases are common — artisans frequently create one-off scents
+- Collaboration scents (e.g., "Brand1/Brand2 - Scent") may be under either brand in the catalog
+
+VALIDATION APPROACH:
+- For brand-only matches: The scent name in matched.scent is usually correct text extraction, just not in catalog yet
+- For regex matches: Verify the scent captured by the pattern is the right one
+- Watch for: scent name misspellings, alternate names (e.g., "42" vs "The Answer"), version numbers
+- If the same brand+scent appears multiple times across entries, you only need to verify once — but still create a verification entry for each occurrence
+
+PROPOSAL PATTERNS:
+When proposing new patterns for scents, follow the existing catalog style:
+- Use lowercase regex
+- Use .* for flexible matching between brand and scent
+- Example: for brand "Noble Otter", scent "Neon Sun" → pattern: "noble.*otter.*neon.*sun" or "neon.*sun"
+- Prefer more specific patterns that won't false-match other scents
+```
+
+---
+
+## Error Handling
+
+- If `data/matched/{MONTH}.json` does not exist, print an error listing available files and stop.
+- If a catalog or correct_matches file is missing, warn but continue without it.
+- If an agent fails or returns malformed JSON, log the error, include what you can, and note the failure in the summary.
+- If there are no entries for a field, skip dispatching an agent for that field.
+
+## File Path Reference
+
+All paths are relative to the project root:
+- Matched input: `data/matched/{MONTH}.json`
+- Verified output: `data/verified/{MONTH}.json`
+- Proposed output: `data/proposed/{MONTH}.json`
+- Razor catalog: `data/razors.yaml`
+- Blade catalog: `data/blades.yaml`
+- Brush catalog: `data/brushes.yaml`
+- Soap catalog: `data/soaps.yaml`
+- Razor correct matches: `data/correct_matches/razor.yaml`
+- Blade correct matches: `data/correct_matches/blade.yaml`
+- Brush correct matches: `data/correct_matches/brush.yaml`
+- Soap correct matches: `data/correct_matches/soap.yaml`
+- Intentionally unmatched: `data/intentionally_unmatched.yaml`
