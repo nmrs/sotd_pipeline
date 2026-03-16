@@ -8,8 +8,23 @@ Parse the argument string: `$ARGUMENTS`
 
 - Extract `--month YYYY-MM` if present
 - If no `--month` is provided, find the most recent file in `data/matched/` by listing the directory and sorting by filename
+- Extract `--field VALUE` if present. Split on commas to get a list. Valid values: `razor`, `blade`, `brush`, `soap`. If any value is unrecognised, print an error listing valid values and stop.
+- Extract `--mode VALUE` if present. Valid values: `full`, `verify`, `propose`. Default: `full`. If an unrecognised value is given, print an error listing valid values and stop.
+- Extract `--model VALUE` if present. Valid values: `sonnet`, `haiku`, `opus`. Default: `sonnet`. If an unrecognised value is given, print an error listing valid values and stop.
 
-Set `MONTH` to the resolved value.
+Set `MONTH` to the resolved month value.
+Set `ACTIVE_FIELDS` to the resolved field list, or `[razor, blade, brush, soap]` if `--field` was not provided.
+Set `MODE` to the resolved mode.
+Set `MODEL` to the resolved model.
+
+Print the resolved configuration:
+```
+Running validate-matches
+  Month:  {MONTH}
+  Fields: {comma-separated ACTIVE_FIELDS, or "all" if all four are active}
+  Mode:   {MODE}
+  Model:  {MODEL}
+```
 
 Read the file `data/matched/{MONTH}.json`. If it does not exist, report the error and stop.
 
@@ -32,6 +47,8 @@ Build four lists — one per field — where each item contains:
 - `match_type`: the field's `match_type`
 - `pattern`: the field's `pattern`
 - `body_excerpt`: first 300 characters of the entry's `body` (for context)
+- **For blade entries only**: `razor_context` — the entry's `razor` field (full object, or `null` if absent). This gives the blade agent the razor's brand, model, and format to validate blade format compatibility.
+- **For razor entries only**: `blade_context` — the entry's `blade` field (full object, or `null` if absent). This gives the razor agent cross-field context.
 
 Print the counts per field:
 ```
@@ -94,7 +111,9 @@ Each agent must return a JSON object with this exact structure:
       "match_type": "regex",
       "verdict": "verified|needs_review|incorrect",
       "confidence": 0.95,
-      "reasoning": "Brief explanation of why this verdict was reached"
+      "reasoning": "Brief explanation of why this verdict was reached",
+      "source_url": "https://...",
+      "research": "What was found via web search (omit if no search was performed)"
     }
   ],
   "proposals": [
@@ -200,6 +219,7 @@ RULES:
 - Check the correct_matches file — if the original text (lowercased) already appears there under the matched brand/model, verdict is "verified" with confidence 1.0
 - Check intentionally_unmatched — if the original text appears there, do NOT propose it as a new catalog entry
 - Set confidence between 0.0 and 1.0 (0.5 = coin flip, 0.9+ = very confident)
+- When you perform a web search to confirm a match (verified or needs_review), include `source_url` and `research` in the verification entry. These are optional — omit them if you confirmed the match without a web search.
 
 PROPOSAL TYPES:
 - "new_scent": A new soap scent that should be added to the catalog. Include: field, brand, model (scent name), suggested_pattern, evidence, source_url (REQUIRED — from web search), research, confidence, comment_id.
@@ -207,9 +227,15 @@ PROPOSAL TYPES:
 - "new_product": A genuinely new product (razor, blade, or brush) that should be added to the catalog. Include: field, brand, model, suggested_pattern, suggested_entry (with format/fiber/knot_size_mm as appropriate), evidence, source_url, research, confidence, comment_id.
 
 CRITICAL — REGEX PATTERN VALIDATION:
-Before including ANY proposed regex pattern (in "new_catalog_entry" or "new_pattern"), you MUST test it against the original text using Python's re module via the Bash tool:
-  python3 -c "import re; print(bool(re.search(r'YOUR_PATTERN', 'ORIGINAL_TEXT', re.IGNORECASE)))"
-Only include the pattern if the test returns True. If a pattern fails, fix it and re-test.
+Before including ANY proposed regex pattern, you MUST test it against the original text. Write a Python script to a temp file and run it:
+
+  Write to /tmp/test_pattern.py:
+    import re
+    print(bool(re.search(r'YOUR_PATTERN', 'ORIGINAL_TEXT', re.IGNORECASE)))
+
+  Then run: python3 /tmp/test_pattern.py
+
+Only include the pattern if it prints True. If it prints False, fix the pattern and re-test.
 
 OUTPUT FORMAT:
 Return a single JSON object with "verifications" and "proposals" arrays. Wrap it in a ```json code fence.
@@ -235,6 +261,11 @@ MATCHING CONTEXT:
 - match_type "brand" means only the brand was identified — check if the model in matched.model exists or is reasonable
 - match_type "unmatched" means nothing matched — check if this is a real razor and if so, propose catalog additions
 - match_type "dash_split" means Brand - Model was parsed from a dash — verify the split is correct
+
+BLADE CONTEXT:
+Each razor entry includes a `blade_context` field with the blade matched for that same shave. Use it for cross-validation:
+- If blade_context.matched.format doesn't match the razor's format, flag it
+- Example: if razor matched as GEM format but blade_context shows a DE blade, one of them is likely wrong
 
 VALIDATION APPROACH:
 - Compare the original text against the matched brand+model
@@ -263,12 +294,22 @@ MATCHING CONTEXT:
 - match_type "unmatched" means nothing matched — check if this is identifiable
 - Blade entries often include use count in parentheses like "(3)" which gets stripped in normalized text
 
+RAZOR CONTEXT:
+Each blade entry includes a `razor_context` field with the razor matched for that same shave. Use it to determine the expected blade format:
+- If razor_context.matched.format is "DE" → blade should be DE format
+- If razor_context.matched.format is "GEM" → blade should be GEM format
+- If razor_context.matched.format is "AC" → blade should be AC format
+- If razor_context.matched.format is "Injector" → blade should be Injector format
+- If razor_context is null or has no format, rely on the blade text alone
+
+CRITICAL: The razor catalog is the ground truth for razor format. Always check razor_context.matched.format and the blade catalog's format hierarchy to confirm. A user using a DE razor cannot physically use a GEM format blade, and vice versa.
+
 VALIDATION APPROACH:
 - Is the matched blade a real product? Compare original text to matched brand+model
-- Does the format make sense? (e.g., a Feather blade in AC format for an AC razor)
+- Does the format match razor_context? Flag format mismatches as incorrect
 - Common blade brands: Gillette, Astra, Feather, Personna, Voskhod, Polsilver, Kai, Derby, Nacet
 - Watch for: blade+razor confusion, use count misinterpretation, brand abbreviations (GSB = Gillette Silver Blue)
-- Blade format must match the razor format context when available
+- If razor_context shows a DE razor but the blade matched as GEM format (or vice versa), flag as incorrect and check if the blade text could match a differently-formatted entry in the catalog
 ```
 
 ---
