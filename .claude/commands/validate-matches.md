@@ -215,6 +215,7 @@ Write output files using Python (via bash) to ensure valid JSON with proper form
 Print a summary:
 ```
 Match Validation Complete — {MONTH}
+  Fields: {comma-separated ACTIVE_FIELDS, or "all"} | Mode: {MODE} | Model: {MODEL}
 =====================================
 Verified: {N} entries
   verified:     {N} ({pct}%)
