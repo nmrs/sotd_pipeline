@@ -36,6 +36,8 @@ From the `data` array, examine each entry's four product fields: `razor`, `blade
 
 For each field in each entry, collect the field data if `match_type` is **not** one of: `exact`, `filtered`, `irrelevant_razor_format`, `auto_cartridge`. These are the entries that need validation.
 
+Only collect entries for fields in `ACTIVE_FIELDS`. Skip all other fields entirely — do not build a list for them.
+
 Also skip entries where the field is `null` or has no `match_type`.
 
 Build four lists — one per field — where each item contains:
@@ -50,17 +52,19 @@ Build four lists — one per field — where each item contains:
 - **For blade entries only**: `razor_context` — the entry's `razor` field (full object, or `null` if absent). This gives the blade agent the razor's brand, model, and format to validate blade format compatibility.
 - **For razor entries only**: `blade_context` — the entry's `blade` field (full object, or `null` if absent). This gives the razor agent cross-field context.
 
-Print the counts per field:
+Print the counts per field (show `—` for fields not in ACTIVE_FIELDS):
 ```
 Entries to validate:
-  razor:  {N}
-  blade:  {N}
-  brush:  {N}
-  soap:   {N}
+  razor:  {N or —}
+  blade:  {N or —}
+  brush:  {N or —}
+  soap:   {N or —}
   total:  {N}
 ```
 
-If total is 0, write empty output files and stop with a message.
+If total is 0:
+- If `--field` was not specified (all fields active): write empty output files and stop with a message.
+- If `--field` was specified: print the counts (all `—` or `0`), stop with a message, and do **not** modify any existing output files.
 
 ## Step 3: Load Reference Data
 
