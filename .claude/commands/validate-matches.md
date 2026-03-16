@@ -80,6 +80,7 @@ Read these files in parallel:
 Also read `data/intentionally_unmatched.yaml` — this contains entries that have been deliberately excluded from matching. Agents should check against this before proposing new catalog entries.
 
 Only load catalog/correct_matches for fields that have entries to validate (skip empty fields).
+When `--field` is specified, do not load catalogs or correct_matches files for inactive fields, even if existing output files contain entries for those fields.
 
 ## Step 4: Dispatch Field Agents
 
