@@ -85,16 +85,21 @@ When `--field` is specified, do not load catalogs or correct_matches files for i
 ## Step 4: Dispatch Field Agents
 
 For each non-empty field, dispatch an agent using the **Agent tool**. Run all agents in parallel.
+Pass `MODEL` as the `model` parameter to the Agent tool for every field agent dispatched.
 
 **CRITICAL: Batching** — If a field has more than 40 entries, split into batches of 40 and dispatch one agent per batch. Each batch agent operates independently.
 
 Construct each agent's prompt by concatenating:
-1. The **Common Preamble** from Section 6
-2. The **field-specific instructions** from Section 6 (Razor/Blade/Brush/Soap Agent Instructions)
-3. `"\n\n## Entries to Validate\n\n"` followed by the entries as a JSON array
-4. `"\n\n## Catalog (for reference)\n\n"` followed by the raw YAML catalog content for that field
-5. `"\n\n## Correct Matches (for reference)\n\n"` followed by the raw YAML correct_matches content
-6. `"\n\n## Intentionally Unmatched (do not propose these)\n\n"` followed by the relevant section from intentionally_unmatched.yaml
+1. A **mode instruction** (prepended before everything else), if MODE is not `full`:
+   - If MODE is `verify`: prepend `"MODE: verify-only\nYour job is ONLY to produce verifications. Do not generate any proposals.\nReturn an empty proposals array: \"proposals\": []\n\n"`
+   - If MODE is `propose`: prepend `"MODE: propose-only\nYour job is ONLY to generate proposals for new catalog entries.\nReturn an empty verifications array: \"verifications\": []\nDo not perform match verification.\n\n"`
+   - If MODE is `full`: prepend nothing (current behavior)
+2. The **Common Preamble** from Section 6
+3. The **field-specific instructions** from Section 6 (Razor/Blade/Brush/Soap Agent Instructions)
+4. `"\n\n## Entries to Validate\n\n"` followed by the entries as a JSON array
+5. `"\n\n## Catalog (for reference)\n\n"` followed by the raw YAML catalog content for that field
+6. `"\n\n## Correct Matches (for reference)\n\n"` followed by the raw YAML correct_matches content
+7. `"\n\n## Intentionally Unmatched (do not propose these)\n\n"` followed by the relevant section from intentionally_unmatched.yaml
 
 For the soap agent, include this additional instruction at the end:
 `"\n\nREMINDER: You MUST use the WebSearch tool to verify any new scent before proposing a new_scent. Do not skip this step."`
