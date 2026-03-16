@@ -148,13 +148,36 @@ Each agent must return a JSON object with this exact structure:
 
 Collect all agent responses. Parse the JSON from each.
 
-Merge all `verifications` arrays into a single list, sorted by field then comment_id.
+Merge all `verifications` arrays from this run into a single list.
+Merge all `proposals` arrays from this run into a single list.
 
-Merge all `proposals` arrays into a single list, sorted by field then type.
+### Determine which output files to write
 
-Build the output files:
+Based on MODE:
+- `full`: write both `data/verified/{MONTH}.json` and `data/proposed/{MONTH}.json`
+- `verify`: write only `data/verified/{MONTH}.json`; do not touch `data/proposed/{MONTH}.json`
+- `propose`: write only `data/proposed/{MONTH}.json`; do not touch `data/verified/{MONTH}.json`
 
-### `data/verified/{MONTH}.json`
+### Partial merge algorithm (for each file being written)
+
+1. If the output file exists on disk, load it and extract its current entries array (`verifications` or `proposals`).
+2. Remove all entries from the loaded array where `entry.field` is in `ACTIVE_FIELDS`.
+3. Append the new agent results from this run.
+4. Re-sort: verifications by `field` then `comment_id`; proposals by `field` then `type`.
+5. Recalculate stats (for the verified file):
+   - `verified_correct`: count verifications with `verdict == "verified"`
+   - `needs_review`: count verifications with `verdict == "needs_review"`
+   - `incorrect`: count verifications with `verdict == "incorrect"`
+   - `total_non_exact`: sum of the above three
+   - `proposals_generated`: if `data/proposed/{MONTH}.json` exists on disk, count its `proposals` array length; otherwise keep the existing value as-is
+6. Update `metadata.processed_at` to the current ISO timestamp.
+7. Write back.
+
+If the output file does not exist, write from scratch (no merge needed).
+
+### Output file schemas
+
+#### `data/verified/{MONTH}.json`
 ```json
 {
   "metadata": {
@@ -173,7 +196,7 @@ Build the output files:
 }
 ```
 
-### `data/proposed/{MONTH}.json`
+#### `data/proposed/{MONTH}.json`
 ```json
 {
   "metadata": {
@@ -185,7 +208,7 @@ Build the output files:
 }
 ```
 
-Write both files using Python (via bash) to ensure valid JSON with proper formatting.
+Write output files using Python (via bash) to ensure valid JSON with proper formatting.
 
 ## Step 6: Print Summary
 
