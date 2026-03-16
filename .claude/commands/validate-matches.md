@@ -8,7 +8,7 @@ Parse the argument string: `$ARGUMENTS`
 
 - Extract `--month YYYY-MM` if present
 - If no `--month` is provided, find the most recent file in `data/matched/` by listing the directory and sorting by filename
-- Extract `--field VALUE` if present. Split on commas to get a list. Valid values: `razor`, `blade`, `brush`, `soap`. If any value is unrecognised, print an error listing valid values and stop.
+- Extract `--field VALUE` if present. Split on commas to get a list. Valid values: `razor`, `blade`, `brush`, `soap`. If any value in the list is unrecognised, print an error listing valid values and stop. Default: all four fields.
 - Extract `--mode VALUE` if present. Valid values: `full`, `verify`, `propose`. Default: `full`. If an unrecognised value is given, print an error listing valid values and stop.
 - Extract `--model VALUE` if present. Valid values: `sonnet`, `haiku`, `opus`. Default: `sonnet`. If an unrecognised value is given, print an error listing valid values and stop.
 
