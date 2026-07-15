@@ -378,6 +378,16 @@ class BladeMatcher(BaseMatcher):
             - Over 'person+a(?:.*inject)?' (Injector format) due to more
             - non-optional parts and better specificity
         """
+        # Check correct_matches first so confirmed entries return exact, not regex
+        all_correct = self._collect_all_correct_matches(normalized_text)
+        if all_correct:
+            orig = original or normalized_text
+            return create_match_result(
+                original=orig,
+                matched=all_correct[0],
+                match_type="exact",
+                pattern=None,
+            )
         # Try patterns in order until we find a match
         for brand, model, fmt, pattern, compiled, entry in self.patterns:
             if compiled.search(normalized_text):

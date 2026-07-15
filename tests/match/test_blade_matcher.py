@@ -264,6 +264,42 @@ def test_correct_matches_priority_before_regex(correct_matches_matcher):
     assert result.match_type == "exact"
 
 
+def test_global_match_checks_correct_matches_before_regex(tmp_path):
+    """With generic Shavette/Other razor, correct_matches must be used first (exact not regex)."""
+    catalog_content = """
+Hair Shaper:
+  Personna:
+    Hair Shaper:
+      patterns:
+        - "person+a.*hair.*shaper"
+      format: "Hair Shaper"
+"""
+    catalog_file = tmp_path / "blades.yaml"
+    catalog_file.write_text(catalog_content)
+
+    correct_matches_dir = tmp_path / "correct_matches"
+    correct_matches_dir.mkdir()
+    blade_cm = correct_matches_dir / "blade.yaml"
+    blade_cm.write_text(
+        """
+Hair Shaper:
+  Personna:
+    Hair Shaper:
+      - personna hair shaper
+"""
+    )
+
+    matcher = BladeMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_dir)
+    # Generic "Shavette" triggers _find_best_global_match; must return exact from correct_matches
+    result = matcher.match_with_context("personna hair shaper", "Shavette")
+    assert result.matched is not None
+    assert result.matched["brand"] == "Personna"
+    assert result.matched["model"] == "Hair Shaper"
+    assert (
+        result.match_type == "exact"
+    ), "generic Shavette should use correct_matches first, not regex"
+
+
 def test_fail_fast_on_malformed_yaml_data(tmp_path):
     """Test that malformed YAML data causes immediate failure."""
     malformed_yaml = """
