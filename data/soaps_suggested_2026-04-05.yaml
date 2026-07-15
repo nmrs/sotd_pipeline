@@ -1,0 +1,626 @@
+# Suggested soap scents and regex patterns from brand-only matches
+# Source: data/matched/2026-04.json, data/matched/2026-05.json
+# Generated: review before merging into data/soaps.yaml
+# Match type: brand (brand matched, scent not in catalog) or dash_split
+# A A Shaving:
+#   Oak Ash Thorn:
+#     entries:
+#     - A A Shaving - Oak Ash Thorn - Shaving Soap
+#     patterns:
+#     - oak.*ash.*thorn
+# Abbate Y La Mantia:
+#   Garden:
+#     entries:
+#     - Abbate y la Mantia - Garden Soap
+#     patterns:
+#     - (abbate|aylm).*garden
+#   Laureato:
+#     entries:
+#     - Abbate y la Mantia - Laureato Soap
+#     patterns:
+#     - laureato
+# Adopted Acres:
+#   Family First:
+#     entries:
+#     - Adopted Acres - Family First
+#     - Adopted Acres Family First
+#     patterns:
+    # - adopted.*family.*first
+# Aion Skincare:
+#   Ceremony:
+#     entries:
+#     - Aion Skincare - Ceremony
+#     patterns:
+#     - aion.*ceremony
+#   Mallard Coconut Fig:
+#     entries:
+#     - Aion Skincare - Mallard Coconut Fig
+#     patterns:
+#     - mallard.*coconut.*fig
+# Areffa Soap:
+  # Angel's Share:
+  #   entries:
+  #   - Areffa Soap - Angel's Share - Soap
+  #   patterns:
+  #   - areffa.*angel.*share
+  # Raudr Reyk (Red Smoke):
+  #   entries:
+  #   - Areffa Soap - Raudr Reyk (Red Smoke) - Soap
+  #   patterns:
+  #   - areffa.*raudr.*reyk
+# Ariana & Evans:
+#   Café au Lait:
+#     entries:
+#     - Arana & Evans - Cafe au Lait Soap
+#     patterns:
+#     - (ariana|a&e|the club).*caf[eé].*lait
+#   Choco Cubano:
+#     entries:
+#     - A&E Choco Cubano
+#     patterns:
+#     - (ariana|pedro|club).*choco.*cubano
+#   Limoncello:
+#     entries:
+#     - Ariana & Evans - Limoncello - Cream
+#     patterns:
+#     - limoncello
+# Australian Private Reserve:
+  # Fougère Bourbon Rose:
+  #   entries:
+  #   - Australian Private Reserve - Fougère Bourbon Rose - Soap
+  #   patterns:
+  #   - (apr|aus).*foug[eè]re.*bourbon.*rose
+# BBS Soaps:
+#   Mantra:
+#     entries:
+#     - BBS Mantra
+#     patterns:
+#     - bbs.*mantra
+# Barrister and Mann:
+#   Jacinthe:
+#     entries:
+#     - Barrister and Mann - Jacinthe - Soap
+#     patterns:
+#     - jacinthe
+#   Sunny Day:
+#     entries:
+#     - Barrister and Mann - Sunny Day
+#     patterns:
+#     - barri.*sunny.*day
+# Bundubeard:
+#   Boomslang:
+#     entries:
+#     - Bundubeard - Boomslang
+#     patterns:
+#     - boomslang
+# Böker:
+#   Sandalwood:
+#     entries:
+#     - Böker - Sandalwood - Soap
+#     patterns:
+#     - boker.*sandalwood
+# CBL Soaps:
+#   Doc Holiday:
+#     entries:
+#     - CBL Soap - Doc Holiday - Soap
+#     patterns:
+#     - doc.*holiday
+#   Dragon's Milk:
+#     entries:
+#     - CBL Premium Shave Soap - Dragon's Milk
+#     patterns:
+#     - dragon's.*milk
+#   Russian Tea:
+#     entries:
+#     - CBL Soaps - Russian Tea
+#     patterns:
+#     - cbl.*russian.*tea
+# CaYuen Workshop:
+#   Voodoo King:
+#     entries:
+#     - TheCaYuenWorkshop - Voodoo King - Croap
+#     patterns:
+#     - (workshop|cayuen).*voodoo.*king
+# Castle Forbes:
+#   '1445':
+#     entries:
+#     - Castle Forbes - 1445 - Cream
+#     patterns:
+#     - cast.*1445
+# Catie's Bubbles:
+  # Berry Good Noah:
+  #   entries:
+  #   - Catie's Bubbles - Berry Good Noah - Croap
+  #   patterns:
+  #   - berry.*good.*noah
+  # Fougère:
+  #   entries:
+  #   - Catie's Bubbles Fougere
+  #   patterns:
+  #   - foug[eè]re
+  # Noah L' Orange:
+  #   entries:
+  #   - Catie's Bubbles - Noah L' Orange - Croap
+  #   patterns:
+  #   - noah.*l'.*orange
+# Chiseled Face:
+#   Black Fern:
+#     entries:
+#     - Chiseled Face - Black Fern
+#     - Chiseled Face - Blackfern - Croap
+#     patterns:
+#     - (milksteak|chis).*black.*fern
+#   Loyal:
+#     entries:
+#     - Chiseled Face - Loyal
+#     patterns:
+#     - (milksteak|chis).*loyal
+# Cooper & French:
+#   English Garden:
+#     entries:
+#     - Cooper & French - English Garden - Croap
+#     patterns:
+#     - english.*garden
+# Declaration Grooming:
+  # DFS 2017:
+  #   entries:
+  #   - Declaration Grooming - DFS 2017 - Soap
+  #   patterns:
+  #   - declaration.*dfs.*2017
+  # Perigree:
+  #   entries:
+  #   - Declaration Grooming - Perigree - Croap
+  #   patterns:
+  #   - perigree
+  # Vernal:
+  #   entries:
+  #   - Declaration Grooming - Vernal - Croap
+  #   patterns:
+  #   - declaration.*vernal
+# DentonMajik:
+#   Dominate:
+#     entries:
+#     - DentonMajik - Dominate
+#     patterns:
+#     - dominate
+# Dr. Jon's:
+#   Pan's Pipe:
+#     entries:
+#     - Dr. Jon's - Pan's Pipe
+#     patterns:
+#     - jon.*pan's.*pipe
+# Edwin Jagger:
+#   Aloe Vera:
+#     entries:
+#     - Edwin Jagger Aloe Vera Shaving Cream
+#     patterns:
+#     - edwin.*aloe.*vera
+# Elysian:
+#   Atlantis Blue:
+#     entries:
+#     - Elysian Soap Shop - Atlantis Blue - Soap
+#     patterns:
+#     - atlantis.*blue
+#   Olympus:
+#     entries:
+#     - Elysian Soap Shop - Olympus - Soap
+#     patterns:
+#     - olympus
+# Ethos:
+#   Forest Dragon:
+#     entries:
+#     - Ethos - Forest Dragon - Croap
+#     patterns:
+#     - ethos.*forest.*dragon
+# Faena:
+#   Taurus:
+#     entries:
+#     - Faena - Taurus - Puck
+#     patterns:
+#     - faena.*taurus
+# Fanzine Saponifications:
+#   Beta B:
+#     entries:
+#     - Fanzine Saponifications - Beta B*****
+#     patterns:
+#     - (saponifications|fanzine).*beta.*b
+# First Line Shave:
+#   90's Rewind Vol 2:
+#     entries:
+#     - First Line Shave 90's Rewind Vol 2
+#     patterns:
+#     - 90's.*rewind.*vol.*2
+#   Illustrious Oud:
+#     entries:
+#     - First Line Shave - Illustrious Oud
+#     patterns:
+#     - illustrious.*oud
+#   James:
+#     entries:
+#     - First Line Shaves - James - Soap
+#     patterns:
+#     - first.*james
+# Gentleman's Nod:
+#   Mizukaze:
+#     entries:
+#     - Gentleman's Nod Mizukaze
+#     patterns:
+#     - mizukaze
+# HAGS:
+#   Isla Muerta:
+#     entries:
+#     - HAGS- Isla Muerta Soap
+#     patterns:
+#     - hags.*isla.*muerta
+#   Megalodon:
+#     entries:
+#     - HAGS Artisan - Megalodon Soap
+#     patterns:
+#     - megalodon
+#   Timescape:
+#     entries:
+#     - HAGS - Timescape
+#     patterns:
+#     - timescape
+# Hearth and Altar:
+#   Ambrosial Almond:
+#     entries:
+#     - Hearth & Altar - Ambrosial Almond - Croap
+#     patterns:
+#     - ambrosial.*almond
+#   High Olympus Fougère:
+#     entries:
+#     - Hearth and Altar High Olympus Fougère
+#     patterns:
+#     - high.*olympus.*foug[eè]re
+#   Liminal Black Fig & Tobacco:
+#     entries:
+#     - Hearth and Altar Liminal Black Fig & Tobacco
+#     patterns:
+#     - hearth.*liminal.*black.*fig.*&.*tobacco
+#   Radiant Citrus:
+#     entries:
+#     - Hearth and Alter Radiant Citrus shave soap
+#     patterns:
+#     - hearth.*radiant.*citrus
+#   Wildwood Huntress:
+#     entries:
+#     - Hearth and Alter Wildwood Huntress
+#     patterns:
+#     - hearth.*wildwood.*huntress
+# Henri et Victoria:
+#   Absinthe:
+#     entries:
+#     - Henri et Victoria - Absinthe - Puck
+#     patterns:
+#     - henr.*victoria.*absinthe
+#   Bay Rum:
+#     entries:
+#     - Henri et Victoria Bay Rum soap
+#     patterns:
+#     - henr.*victoria.*bay rum
+#   Navigateur:
+#     entries:
+#     - Henri et Victoria - Navigateur
+#     patterns:
+#     - henr.*victoria.*navigateur
+# Heritage Hill:
+#   Continental:
+#     entries:
+#     - Heritage Hill Continental
+#     patterns:
+#     - heritage.*continental
+#   Libertas:
+#     entries:
+#     - Heritage Hill Libertas (sample)
+#     patterns:
+#     - heritage.*libertas
+# KEPKINH:
+#   Athena:
+#     entries:
+#     - KEPKINH - Athena
+#     patterns:
+#     - kepkinh.*athena
+#   Zeus:
+#     entries:
+#     - Kepkinh - Zeus
+#     patterns:
+#     - kepkinh.*zeus
+Klar Seifen:
+  Sandalwood:
+    entries:
+    - Klar Seifen - Sandalwood - Soap
+    patterns:
+    - klar.*sandalwood
+Le Père Lucien:
+  Cèdre Patchouli:
+    entries:
+    - Le Père Lucien - Cèdre Patchouli - Soap
+    patterns:
+    - c[eè]dre.*patchouli
+Los Jabones de Joserra:
+  Sweet & Dandy:
+    entries:
+    - Los Jabones de Josera - Sweet & Dandy
+    patterns:
+    - sweet.*&.*dandy
+MacDuff's Soap Company:
+  Chinook Sky:
+    entries:
+    - Macduff's Soap Company - Chinook Sky - Soap
+    patterns:
+    - chinook.*sky
+  Christmas Cabin Morning:
+    entries:
+    - MacDuff's Soap Company - Christmas Cabin Morning
+    patterns:
+    - christmas.*cabin.*morning
+  Christmas Sky:
+    entries:
+    - MacDuff's Christmas Sky shave soap
+    patterns:
+    - christmas.*sky
+  Cream Soda:
+    entries:
+    - MacDuff's - Cream Soda
+    patterns:
+    - mcd.*cream.*soda
+  Lilacs In Bloom:
+    entries:
+    - MacDuffs - Lilacs In Bloom - Croap
+    patterns:
+    - lilacs.*in.*bloom
+  NYC Odyssey:
+    entries:
+    - Mac Duffs NYC Odyssey
+    - MacDuffs NYC Odyssey
+    patterns:
+    - ma?c\s*duff.*nyc.*odyssey
+    - \bmcd\b.*nyc.*odyssey
+Mickey Lee Soapworks:
+  Ruby's Green:
+    entries:
+    - Mickey Lee Soapworks - Ruby's Green - Soap
+    patterns:
+    - (mickey|mls).*ruby's.*green
+Mystic Water:
+  Orange Spice Tea:
+    entries:
+    - Mystic Water - Orange Spice Tea
+    patterns:
+    - mystic.*orange.*spice.*tea
+  Windjammer:
+    entries:
+    - Mystic Water - Windjammer
+    patterns:
+    - windjammer
+Night Watch:
+  Kauboi:
+    entries:
+    - Night Watch - Kauboi - Croap
+    patterns:
+    - night.*kauboi
+Purely Skinful:
+  Crimson Select:
+    entries:
+    - Purely Skinful Handmade Essentials - Crimson Select
+    patterns:
+    - crimson.*select
+Savonnière du Moulin:
+  Santal:
+    entries:
+    - Savonniere du Moulin - Santal - Soap
+    patterns:
+    - savonniere.*santal
+Scentsy:
+  Perfect Gentleman:
+    entries:
+    - Scentsy Perfect Gentleman Cream Soap
+    patterns:
+    - perfect.*gentleman
+  Tangerine Dream:
+    entries:
+    - Scentsy - Tangerine Dream Cream Soap
+    patterns:
+    - tangerine.*dream
+Shannon's Soaps:
+  Oh... TōFou:
+    entries:
+    - Shannon's Soaps - Oh... TōFou!
+    patterns:
+    - shannon.*oh\.\.\..*tōfou
+Shavologist:
+  Kailash:
+    entries:
+    - Shavologist - Kailash - Croap
+    patterns:
+    - shavologist.*kailash
+Stirling Soap Co.:
+  Maggard Meetup 2026:
+    entries:
+    - '* **Stirling** - **Maggard Meetup 2026**'
+    - Stirling Soap - Maggard Meetup 2026 - Soap
+    patterns:
+    - st[ie]rling.*maggard.*meetup.*2026
+  Regency Man:
+    entries:
+    - Stirling - Regency Man - Croap
+    patterns:
+    - st[ie]rling.*regency.*man
+  Sharp Dress Man:
+    entries:
+    - Stirling - Sharp Dress Man
+    patterns:
+    - st[ie]rling.*sharp.*dress.*man
+Stone Field Shaving Company:
+  Lucky Number 54:
+    entries:
+    - Stone Field Shaving Lucky Number 54
+    patterns:
+    - lucky.*number.*54
+  Sippin' By The Fire:
+    entries:
+    - Stone Field Shaving Co Sippin' By The Fire
+    patterns:
+    - sippin'.*by.*the.*fire
+Subtle Art Soap Co.:
+  Draconis Aqua:
+    entries:
+    - Subtle Art Soap Co - Draconis Aqua - Soap
+    - Subtle Art Soap Co. - Draconis Aqua - Soap
+    patterns:
+    - subtle.*draconis.*aqua
+  Draconis Noctem:
+    entries:
+    - Subtle Art Soap Co. - Draconis Noctem - Soap
+    patterns:
+    - subtle.*draconis.*noctem
+  Lemon & Lavendar:
+    entries:
+    - Subtle Art Soap Lemon & Lavendar Sample
+    patterns:
+    - subtle.*lemon.*lav
+  Mid Cape Barber:
+    entries:
+    - Subtle Art Shaving Co. - Mid Cape Barber - Soap
+    patterns:
+    - mid.*cape.*barber
+Summer Break Soaps:
+  Hay Bales, Dirt, Cedar:
+    entries:
+    - Summer Break Soaps - Hay Bales, Dirt, Cedar
+    patterns:
+    - sbs.*hay.*bales,.*dirt,.*cedar
+Taylor of Old Bond Street:
+  Cedarwood:
+    entries:
+    - TOBS Cedarwood Shaving Cream
+    patterns:
+    - (taylor|tobs).*cedarwood
+  Coconut:
+    entries:
+    - TOBS Coconut
+    patterns:
+    - (taylor|tobs).*coconut
+  Rose:
+    entries:
+    - TOBS - Rose shave cream.
+    patterns:
+    - (taylor|tobs).*rose
+The Black Stuff:
+  Black Stout:
+    entries:
+    - The Black Stuff - Black Stout
+    patterns:
+    - (black|stuff).*black.*stout
+The Cajun Blade:
+  Cuba Libre:
+    entries:
+    - The Cajun Blade - Cuba Libre - Soap
+    patterns:
+    - (blade|cajun).*cuba.*libre
+  Daiquiri Shack:
+    entries:
+    - The Cajun Blade - Daiquiri Shack - Soap
+    patterns:
+    - daiquiri.*shack
+  Dude of Oud:
+    entries:
+    - The Cajun Blade Store - Dude of Oud
+    patterns:
+    - dude.*of.*oud
+  Let'er Buck:
+    entries:
+    - The Cajun Blade - Let'er Buck - Soap
+    patterns:
+    - (blade|cajun).*let'er.*buck
+  Pintail:
+    entries:
+    - The Cajun Blade - Pintail - Soap
+    patterns:
+    - pintail
+  The Drake:
+    entries:
+    - The Cajun Blade Store - The Drake - Croap
+    patterns:
+    - (blade|cajun).*the.*drake
+  The Goat:
+    entries:
+    - The Cajun Blade - The Goat (Sample)
+    patterns:
+    - (blade|cajun).*the.*goat
+The Holy Black:
+  Holy Smoke:
+    entries:
+    - The Holy Black - Holy Smoke
+    patterns:
+    - thb.*holy.*smoke
+The Sudsy Soapery:
+  Brimson Read:
+    entries:
+    - Sudsy Soapery Brimson Read
+    patterns:
+    - brimson.*read
+Van Yulay:
+  El Barbero De SeVilla Tallow:
+    entries:
+    - Van Yulay - El Barbero De SeVilla Tallow
+    patterns:
+    - el.*barbero.*de.*sevilla.*tallow
+WestMan Shaving:
+  Darkman:
+    entries:
+    - Westman - Darkman
+    patterns:
+    - west ?man.*darkman
+  Monolith:
+    entries:
+    - Westman - Monolith
+    patterns:
+    - west ?man.*monolith
+  The Prophecy:
+    entries:
+    - Westman - The prophecy
+    patterns:
+    - west ?man.*prophecy
+Whispers From The Woods:
+  Pomelo:
+    entries:
+    - Whispers From The Woods - Pomelo
+    patterns:
+    - whispers.*pomelo
+Wholly Kaw:
+  Eroe:
+    entries:
+    - Wholly Kaw - Eroe
+    patterns:
+    - \bkaw\b.*eroe
+    - wholly.*kaw.*eroe
+  London:
+    entries:
+    - Wholly Kaw - London
+    patterns:
+    - \bkaw\b.*london
+  Peach Karma:
+    entries:
+    - Wholly Kaw - Peach Karma
+    - Wholly Kaw - Peach Karma - Cream
+    patterns:
+    - \bkaw\b.*peach.*karma
+Wild West Shaving Co.:
+  Aces n Eights:
+    entries:
+    - Wild West Shave Co - Aces n Eights Soap
+    patterns:
+    - aces.*n.*eights
+Zingari Man:
+  Le Corsaire:
+    entries:
+    - Zingari Man - Le Corsaire
+    patterns:
+    - le.*corsaire
+  The Merchant:
+    entries:
+    - Zingari Man - The Merchant
+    patterns:
+    - the.*merchant
