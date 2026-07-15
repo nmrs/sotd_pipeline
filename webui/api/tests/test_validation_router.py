@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def tmp_data_dir(tmp_path):
     """Create a temporary data directory with verified/proposed subdirectories."""
@@ -81,19 +82,11 @@ def tmp_data_dir(tmp_path):
     }
     (tmp_path / "soaps.yaml").write_text(yaml.dump(soaps, default_flow_style=False))
 
-    razors = {
-        "Karve": {
-            "Christopher Bradley": {"patterns": ["karve.*(?:christopher|cb)"]}
-        }
-    }
+    razors = {"Karve": {"Christopher Bradley": {"patterns": ["karve.*(?:christopher|cb)"]}}}
     (tmp_path / "razors.yaml").write_text(yaml.dump(razors, default_flow_style=False))
 
     blades = {
-        "DE": {
-            "Astra": {
-                "Superior Platinum": {"patterns": ["astra.*(?:superior|sp|green)"]}
-            }
-        }
+        "DE": {"Astra": {"Superior Platinum": {"patterns": ["astra.*(?:superior|sp|green)"]}}}
     }
     (tmp_path / "blades.yaml").write_text(yaml.dump(blades, default_flow_style=False))
 
@@ -386,9 +379,7 @@ class TestBulkApprove:
             assert result["success"] is True
             assert result["operation_id"] == "op_12345"
 
-            mock_instance.add_operation.assert_called_once_with(
-                "mark_correct", "soap", matches
-            )
+            mock_instance.add_operation.assert_called_once_with("mark_correct", "soap", matches)
 
     def test_returns_400_for_empty_matches(self, client):
         resp = client.post(

@@ -161,11 +161,10 @@ async def accept_proposal(request: AcceptProposalRequest):
     # Load proposed file
     proposed_path = data_dir / "proposed" / f"{request.month}.json"
     if not proposed_path.exists():
-        raise HTTPException(
-            status_code=404, detail=f"Proposed file not found for {request.month}"
-        )
+        raise HTTPException(status_code=404, detail=f"Proposed file not found for {request.month}")
 
-    proposals = _load_json(proposed_path)
+    proposed_data = _load_json(proposed_path)
+    proposals = proposed_data.get("proposals", [])
 
     if request.proposal_index >= len(proposals):
         raise HTTPException(
@@ -195,7 +194,8 @@ async def accept_proposal(request: AcceptProposalRequest):
     # Mark as accepted in the proposed file
     proposals[request.proposal_index]["_status"] = "accepted"
     proposals[request.proposal_index]["_accepted_at"] = datetime.now(timezone.utc).isoformat()
-    _save_json(proposed_path, proposals)
+    proposed_data["proposals"] = proposals
+    _save_json(proposed_path, proposed_data)
 
     return ActionResponse(success=True, message="Proposal accepted and applied to catalog")
 
@@ -208,11 +208,10 @@ async def reject_proposal(request: RejectProposalRequest):
     # Load proposed file
     proposed_path = data_dir / "proposed" / f"{request.month}.json"
     if not proposed_path.exists():
-        raise HTTPException(
-            status_code=404, detail=f"Proposed file not found for {request.month}"
-        )
+        raise HTTPException(status_code=404, detail=f"Proposed file not found for {request.month}")
 
-    proposals = _load_json(proposed_path)
+    proposed_data = _load_json(proposed_path)
+    proposals = proposed_data.get("proposals", [])
 
     if request.proposal_index >= len(proposals):
         raise HTTPException(
@@ -253,7 +252,8 @@ async def reject_proposal(request: RejectProposalRequest):
     # Mark as rejected in the proposed file
     proposals[request.proposal_index]["_status"] = "rejected"
     proposals[request.proposal_index]["_rejected_at"] = now
-    _save_json(proposed_path, proposals)
+    proposed_data["proposals"] = proposals
+    _save_json(proposed_path, proposed_data)
 
     return ActionResponse(success=True, message="Proposal rejected")
 
@@ -276,9 +276,7 @@ async def bulk_approve(request: BulkApproveRequest):
     queue_manager = QueueManager(correct_matches_path)
 
     try:
-        operation_id = queue_manager.add_operation(
-            "mark_correct", request.field, request.matches
-        )
+        operation_id = queue_manager.add_operation("mark_correct", request.field, request.matches)
         status_url = f"/api/analysis/operation-status/{operation_id}"
 
         return ActionResponse(
@@ -289,6 +287,4 @@ async def bulk_approve(request: BulkApproveRequest):
         )
     except Exception as e:
         logger.error(f"Failed to queue bulk-approve operation: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Failed to queue operation: {e}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to queue operation: {e}")

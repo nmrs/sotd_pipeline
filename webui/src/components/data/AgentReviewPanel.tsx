@@ -48,6 +48,7 @@ interface AgentReviewPanelProps {
   proposedData: ProposedData | null;
   loading: boolean;
   month: string;
+  field: string;
   onDataRefresh: () => void;
 }
 
@@ -128,44 +129,37 @@ function formatMatched(matched: Record<string, unknown>): string {
 
 interface VerificationsTableProps {
   verifications: VerificationItem[];
+  field: string;
   month: string;
   onDataRefresh: () => void;
 }
 
-function VerificationsTable({ verifications, month: _month, onDataRefresh }: VerificationsTableProps) {
+function VerificationsTable({ verifications, field, month: _month, onDataRefresh }: VerificationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'confidence', desc: false },
   ]);
   const [verdictFilter, setVerdictFilter] = useState<string>('all');
-  const [fieldFilter, setFieldFilter] = useState<string>('all');
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [bulkApproving, setBulkApproving] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
 
-  // Compute summary stats
-  const stats = useMemo(() => {
-    const verified = verifications.filter(v => v.verdict === 'verified').length;
-    const needsReview = verifications.filter(v => v.verdict === 'needs_review').length;
-    const incorrect = verifications.filter(v => v.verdict === 'incorrect').length;
-    return { verified, needsReview, incorrect, total: verifications.length };
-  }, [verifications]);
-
-  // Filter data
+  // Filter data by field from page, then by verdict filter
   const filteredData = useMemo(() => {
-    let data = verifications;
+    let data = verifications.filter(v => v.field === field);
     if (verdictFilter !== 'all') {
       data = data.filter(v => v.verdict === verdictFilter);
     }
-    if (fieldFilter !== 'all') {
-      data = data.filter(v => v.field === fieldFilter);
-    }
     return data;
-  }, [verifications, verdictFilter, fieldFilter]);
+  }, [verifications, field, verdictFilter]);
 
-  // Available fields for filter
-  const availableFields = useMemo(() => {
-    return [...new Set(verifications.map(v => v.field))].sort();
-  }, [verifications]);
+  // Compute summary stats from field-filtered data
+  const stats = useMemo(() => {
+    const fieldData = verifications.filter(v => v.field === field);
+    const verified = fieldData.filter(v => v.verdict === 'verified').length;
+    const needsReview = fieldData.filter(v => v.verdict === 'needs_review').length;
+    const incorrect = fieldData.filter(v => v.verdict === 'incorrect').length;
+    return { verified, needsReview, incorrect, total: fieldData.length };
+  }, [verifications, field]);
 
   // Column definitions
   const columns = useMemo<ColumnDef<VerificationItem>[]>(
@@ -231,9 +225,25 @@ function VerificationsTable({ verifications, month: _month, onDataRefresh }: Ver
         },
       },
       {
-        accessorKey: 'reasoning',
+        id: 'reasoning',
         header: 'Reasoning',
-        cell: ({ getValue }) => <ExpandableText text={getValue<string>()} />,
+        accessorFn: row => row.reasoning,
+        cell: ({ row }) => (
+          <div className='space-y-1'>
+            <ExpandableText text={row.original.reasoning} />
+            {row.original.source_url && (
+              <a
+                href={row.original.source_url}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='block text-xs text-blue-600 hover:text-blue-800 truncate max-w-xs'
+                title={row.original.source_url}
+              >
+                {row.original.source_url}
+              </a>
+            )}
+          </div>
+        ),
         enableSorting: false,
       },
     ],
@@ -313,19 +323,6 @@ function VerificationsTable({ verifications, month: _month, onDataRefresh }: Ver
           </SelectContent>
         </Select>
 
-        <Select value={fieldFilter} onValueChange={setFieldFilter}>
-          <SelectTrigger className='w-[140px]'>
-            <SelectValue placeholder='Filter field' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All fields</SelectItem>
-            {availableFields.map(f => (
-              <SelectItem key={f} value={f}>
-                {f.charAt(0).toUpperCase() + f.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         {selectedVerified.length > 0 && (
           <Button
@@ -444,26 +441,32 @@ function VerificationsTable({ verifications, month: _month, onDataRefresh }: Ver
 
 interface ProposalsTableProps {
   proposals: ProposalItem[];
+  field: string;
   month: string;
   onDataRefresh: () => void;
 }
 
-function ProposalsTable({ proposals, month, onDataRefresh }: ProposalsTableProps) {
+function ProposalsTable({ proposals, field, month, onDataRefresh }: ProposalsTableProps) {
   const [showAll, setShowAll] = useState(false);
   const [rejectingIndex, setRejectingIndex] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const fieldProposals = useMemo(
+    () => proposals.filter(p => p.field === field),
+    [proposals, field]
+  );
+
   // Filter out already-acted-on proposals unless showAll
   const filteredProposals = useMemo(() => {
-    if (showAll) return proposals;
-    return proposals.filter(p => !p._status);
-  }, [proposals, showAll]);
+    if (showAll) return fieldProposals;
+    return fieldProposals.filter(p => !p._status);
+  }, [fieldProposals, showAll]);
 
   const pendingCount = useMemo(
-    () => proposals.filter(p => !p._status).length,
-    [proposals]
+    () => fieldProposals.filter(p => !p._status).length,
+    [fieldProposals]
   );
 
   const handleAccept = useCallback(
@@ -507,7 +510,7 @@ function ProposalsTable({ proposals, month, onDataRefresh }: ProposalsTableProps
         <span className='text-sm text-gray-600'>
           <span className='font-semibold'>{pendingCount}</span> pending proposal{pendingCount !== 1 ? 's' : ''}
         </span>
-        <span className='text-sm text-gray-400'>({proposals.length} total)</span>
+        <span className='text-sm text-gray-400'>({fieldProposals.length} total)</span>
         <label className='flex items-center gap-1 text-sm text-gray-600 ml-auto cursor-pointer'>
           <Checkbox
             checked={showAll}
@@ -526,7 +529,7 @@ function ProposalsTable({ proposals, month, onDataRefresh }: ProposalsTableProps
       <div className='space-y-3'>
         {filteredProposals.length === 0 ? (
           <div className='text-center py-8 text-gray-500'>
-            {proposals.length === 0
+            {fieldProposals.length === 0
               ? 'No proposals generated.'
               : 'All proposals have been reviewed.'}
           </div>
@@ -733,6 +736,7 @@ const AgentReviewPanel: React.FC<AgentReviewPanelProps> = ({
   proposedData,
   loading,
   month,
+  field,
   onDataRefresh,
 }) => {
   if (loading) {
@@ -754,9 +758,9 @@ const AgentReviewPanel: React.FC<AgentReviewPanelProps> = ({
     );
   }
 
-  const verificationCount = verifiedData?.verifications?.length ?? 0;
-  const proposalCount = proposedData?.proposals?.length ?? 0;
-  const pendingProposals = proposedData?.proposals?.filter(p => !p._status).length ?? 0;
+  const verificationCount = verifiedData?.verifications?.filter(v => v.field === field).length ?? 0;
+  const proposalCount = proposedData?.proposals?.filter(p => p.field === field).length ?? 0;
+  const pendingProposals = proposedData?.proposals?.filter(p => p.field === field && !p._status).length ?? 0;
 
   return (
     <div className='bg-white rounded-lg shadow'>
@@ -790,6 +794,7 @@ const AgentReviewPanel: React.FC<AgentReviewPanelProps> = ({
             {verifiedData ? (
               <VerificationsTable
                 verifications={verifiedData.verifications}
+                field={field}
                 month={month}
                 onDataRefresh={onDataRefresh}
               />
@@ -802,6 +807,7 @@ const AgentReviewPanel: React.FC<AgentReviewPanelProps> = ({
             {proposedData ? (
               <ProposalsTable
                 proposals={proposedData.proposals}
+                field={field}
                 month={month}
                 onDataRefresh={onDataRefresh}
               />

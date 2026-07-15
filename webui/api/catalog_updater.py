@@ -73,6 +73,7 @@ class CatalogUpdater:
         if "scents" not in catalog[brand]:
             catalog[brand]["scents"] = {}
         catalog[brand]["scents"][scent] = {"patterns": patterns}
+        catalog[brand]["scents"] = dict(sorted(catalog[brand]["scents"].items()))
         self._save_catalog("soap", catalog)
 
     def add_soap_pattern(self, brand: str, scent: str, pattern: str) -> None:
@@ -125,9 +126,7 @@ class CatalogUpdater:
     # Blade operations
     # ------------------------------------------------------------------
 
-    def add_blade_model(
-        self, format: str, brand: str, model: str, patterns: list[str]
-    ) -> None:
+    def add_blade_model(self, format: str, brand: str, model: str, patterns: list[str]) -> None:
         """Add a new blade model. Creates format and brand levels if needed."""
         catalog = self._load_catalog("blade")
         if format not in catalog:
@@ -137,9 +136,7 @@ class CatalogUpdater:
         catalog[format][brand][model] = {"patterns": patterns}
         self._save_catalog("blade", catalog)
 
-    def add_blade_pattern(
-        self, format: str, brand: str, model: str, pattern: str
-    ) -> None:
+    def add_blade_pattern(self, format: str, brand: str, model: str, pattern: str) -> None:
         """Add a regex pattern to an existing blade model.
 
         Raises:
@@ -151,9 +148,7 @@ class CatalogUpdater:
             or brand not in catalog[format]
             or model not in catalog[format][brand]
         ):
-            raise KeyError(
-                f"Blade '{format} / {brand} / {model}' not found in catalog"
-            )
+            raise KeyError(f"Blade '{format} / {brand} / {model}' not found in catalog")
         catalog[format][brand][model]["patterns"].append(pattern)
         self._save_catalog("blade", catalog)
 
@@ -231,9 +226,19 @@ class CatalogUpdater:
     def _apply_new_pattern(self, proposal: dict, field: str) -> None:
         """Dispatch a new_pattern proposal to the right field handler."""
         if field == "soap":
-            self.add_soap_pattern(
-                proposal["brand"], proposal["model"], proposal["suggested_pattern"]
-            )
+            # If the scent doesn't exist yet, create it instead of failing
+            catalog = self._load_catalog("soap")
+            brand_entry = catalog.get(proposal["brand"], {})
+            if proposal["model"] not in brand_entry.get("scents", {}):
+                self.add_soap_scent(
+                    proposal["brand"],
+                    proposal["model"],
+                    [proposal["suggested_pattern"]],
+                )
+            else:
+                self.add_soap_pattern(
+                    proposal["brand"], proposal["model"], proposal["suggested_pattern"]
+                )
         elif field == "razor":
             self.add_razor_pattern(
                 proposal["brand"], proposal["model"], proposal["suggested_pattern"]
@@ -252,9 +257,7 @@ class CatalogUpdater:
                 proposal["brand"], proposal["model"], proposal["suggested_pattern"]
             )
         else:
-            raise ValueError(
-                f"Unknown proposal type: new_pattern for field: {field}"
-            )
+            raise ValueError(f"Unknown proposal type: new_pattern for field: {field}")
 
     def _apply_new_product(self, proposal: dict, field: str) -> None:
         """Dispatch a new_product proposal to the right field handler."""
@@ -283,13 +286,19 @@ class CatalogUpdater:
                 knot_size_mm=entry.get("knot_size_mm"),
             )
         elif field == "soap":
-            # New soap product with existing brand adds a scent
-            self.add_soap_scent(
-                proposal["brand"],
-                proposal["model"],
-                entry.get("patterns", [proposal["suggested_pattern"]]),
-            )
+            catalog = self._load_catalog("soap")
+            brand = proposal["brand"]
+            scent = proposal["model"]
+            scent_patterns = entry.get("patterns", [proposal["suggested_pattern"]])
+            if brand not in catalog:
+                # New brand entirely — create brand entry with patterns and scent
+                brand_patterns = entry.get("patterns", [proposal["suggested_pattern"]])
+                scents_entry = entry.get("scents", {scent: {"patterns": scent_patterns}})
+                catalog[brand] = {"patterns": brand_patterns, "scents": scents_entry}
+                catalog = dict(sorted(catalog.items()))
+                self._save_catalog("soap", catalog)
+            else:
+                # Brand exists — just add the scent
+                self.add_soap_scent(brand, scent, scent_patterns)
         else:
-            raise ValueError(
-                f"Unknown proposal type: new_product for field: {field}"
-            )
+            raise ValueError(f"Unknown proposal type: new_product for field: {field}")

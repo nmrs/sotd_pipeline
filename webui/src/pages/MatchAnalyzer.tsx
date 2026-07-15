@@ -68,7 +68,8 @@ const MatchAnalyzer: React.FC = () => {
     | 'brand'
     | 'dash_split'
   >('mismatches');
-  const [resultLimit, setResultLimit] = useState<number>(1000);
+  /** null = no cap (return all grouped rows from the API) */
+  const [resultLimit, setResultLimit] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MismatchAnalysisResult | null>(null);
@@ -317,12 +318,12 @@ const MatchAnalyzer: React.FC = () => {
   const loadAgentData = useCallback(async (month: string) => {
     setAgentLoading(true);
     try {
-      const [verified, proposed] = await Promise.all([
+      const [verifiedResult, proposedResult] = await Promise.allSettled([
         getVerifiedData(month),
         getProposedData(month),
       ]);
-      setVerifiedData(verified);
-      setProposedData(proposed);
+      setVerifiedData(verifiedResult.status === 'fulfilled' ? verifiedResult.value : null);
+      setProposedData(proposedResult.status === 'fulfilled' ? proposedResult.value : null);
     } catch (err) {
       console.error('Failed to load agent data:', err);
     } finally {
@@ -384,7 +385,7 @@ const MatchAnalyzer: React.FC = () => {
           threshold,
           use_enriched_data: useEnrichedData,
           display_mode: 'all',
-          limit: resultLimit,
+          ...(resultLimit != null && resultLimit > 0 ? { limit: resultLimit } : {}),
         });
 
         setResults(result);
@@ -1325,7 +1326,7 @@ const MatchAnalyzer: React.FC = () => {
         filtered = results.mismatch_items.filter(
           item =>
             item.mismatch_type &&
-            item.mismatch_type !== 'good_match' &&
+            item.mismatch_type !== 'good_matches' &&
             item.mismatch_type !== 'exact_matches' &&
             item.mismatch_type !== 'intentionally_unmatched' &&
             !isItemConfirmed(item)
@@ -1572,7 +1573,7 @@ const MatchAnalyzer: React.FC = () => {
     // Calculate all counts with detailed logging
     const mismatchesCount = returnedItems.filter(
       item =>
-        item.mismatch_type !== 'good_match' &&
+        item.mismatch_type !== 'good_matches' &&
         item.mismatch_type !== 'exact_matches' &&
         item.mismatch_type !== 'intentionally_unmatched' &&
         !isItemConfirmed(item)
@@ -1839,6 +1840,34 @@ const MatchAnalyzer: React.FC = () => {
                 value={threshold}
                 onChange={e => setThreshold(Number(e.target.value))}
                 className='w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <label
+                htmlFor='result-limit'
+                className='block text-sm font-medium text-gray-700 mb-1'
+                title='Cap how many grouped rows are returned. Leave empty for no cap.'
+              >
+                Max rows
+              </label>
+              <input
+                id='result-limit'
+                type='number'
+                min={1}
+                max={100000}
+                placeholder='No limit'
+                value={resultLimit ?? ''}
+                onChange={e => {
+                  const raw = e.target.value;
+                  if (raw === '') {
+                    setResultLimit(null);
+                    return;
+                  }
+                  const n = parseInt(raw, 10);
+                  if (Number.isNaN(n)) return;
+                  setResultLimit(Math.min(100000, Math.max(1, n)));
+                }}
+                className='w-full sm:w-28 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
               />
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
@@ -2270,7 +2299,7 @@ const MatchAnalyzer: React.FC = () => {
                           {
                             (results?.mismatch_items || []).filter(
                               item =>
-                                item.mismatch_type !== 'good_match' &&
+                                item.mismatch_type !== 'good_matches' &&
                                 item.mismatch_type !== 'exact_matches' &&
                                 item.mismatch_type !== 'intentionally_unmatched'
                             ).length
@@ -2447,6 +2476,7 @@ const MatchAnalyzer: React.FC = () => {
           proposedData={proposedData}
           loading={agentLoading}
           month={selectedMonths[0] || ''}
+          field={selectedField}
           onDataRefresh={() => {
             if (selectedMonths.length > 0) {
               loadAgentData(selectedMonths[0]);

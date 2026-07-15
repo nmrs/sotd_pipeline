@@ -14,34 +14,18 @@ def tmp_data_dir(tmp_path):
     soaps = {
         "House of Mammoth": {
             "patterns": ["(?:house of )?mammoth"],
-            "scents": {
-                "Tobacconist": {
-                    "patterns": ["mammoth.*tobacconist"]
-                }
-            },
+            "scents": {"Tobacconist": {"patterns": ["mammoth.*tobacconist"]}},
         }
     }
     (tmp_path / "soaps.yaml").write_text(yaml.dump(soaps, default_flow_style=False))
 
     # razors.yaml
-    razors = {
-        "Karve": {
-            "Christopher Bradley": {
-                "patterns": ["karve.*(?:christopher|cb)"]
-            }
-        }
-    }
+    razors = {"Karve": {"Christopher Bradley": {"patterns": ["karve.*(?:christopher|cb)"]}}}
     (tmp_path / "razors.yaml").write_text(yaml.dump(razors, default_flow_style=False))
 
     # blades.yaml
     blades = {
-        "DE": {
-            "Astra": {
-                "Superior Platinum": {
-                    "patterns": ["astra.*(?:superior|sp|green)"]
-                }
-            }
-        }
+        "DE": {"Astra": {"Superior Platinum": {"patterns": ["astra.*(?:superior|sp|green)"]}}}
     }
     (tmp_path / "blades.yaml").write_text(yaml.dump(blades, default_flow_style=False))
 
@@ -240,9 +224,7 @@ class TestAddBrushModel:
         assert entry["patterns"] == ["chisel.*hound.*v23"]
 
     def test_adds_new_brand(self, updater, tmp_data_dir):
-        updater.add_brush_model(
-            "New Artisan", "Model 1", ["new.*artisan.*model.*1"], fiber="Boar"
-        )
+        updater.add_brush_model("New Artisan", "Model 1", ["new.*artisan.*model.*1"], fiber="Boar")
         catalog = yaml.safe_load((tmp_data_dir / "brushes.yaml").read_text())
         assert "New Artisan" in catalog["known_brushes"]
 
@@ -254,9 +236,7 @@ class TestAddBrushModel:
         assert "V21 Fanchurian" in catalog["known_brushes"]["Chisel & Hound"]
 
     def test_without_knot_size(self, updater, tmp_data_dir):
-        updater.add_brush_model(
-            "New Artisan", "Model 1", ["new.*artisan.*model.*1"], fiber="Boar"
-        )
+        updater.add_brush_model("New Artisan", "Model 1", ["new.*artisan.*model.*1"], fiber="Boar")
         catalog = yaml.safe_load((tmp_data_dir / "brushes.yaml").read_text())
         entry = catalog["known_brushes"]["New Artisan"]["Model 1"]
         assert "knot_size_mm" not in entry
@@ -347,7 +327,9 @@ class TestApplyProposal:
         }
         updater.apply_proposal(proposal)
         catalog = yaml.safe_load((tmp_data_dir / "brushes.yaml").read_text())
-        assert "c.*h.*v21" in catalog["known_brushes"]["Chisel & Hound"]["V21 Fanchurian"]["patterns"]
+        assert (
+            "c.*h.*v21" in catalog["known_brushes"]["Chisel & Hound"]["V21 Fanchurian"]["patterns"]
+        )
 
     def test_applies_new_product_razor(self, updater, tmp_data_dir):
         proposal = {
