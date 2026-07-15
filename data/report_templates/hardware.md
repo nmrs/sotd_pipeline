@@ -63,13 +63,12 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 {{tables.blackbird-plates|deltas:true}}
 
-## Christopher Bradley Plates
-
-{{tables.christopher-bradley-plates|deltas:true}}
-
 ## Game Changer Plates
 
 {{tables.game-changer-plates|columns:rank, gap=plate, shaves, unique_users|deltas:true}}
+
+## Super Speed Tips
+{{tables.super-speed-tips|deltas:true}}
 
 ## Straight Widths
 
