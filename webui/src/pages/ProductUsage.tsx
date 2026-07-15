@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -149,6 +149,32 @@ const ProductUsage: React.FC = () => {
       setFilteredProducts(filtered);
     }
   }, [productSearch, products]);
+
+  // Aggregate razor products by manufacturer (brand) for "how did Karve/Blackland do" view
+  const razorManufacturers = useMemo(() => {
+    if (selectedProductType !== 'razor' || products.length === 0) return [];
+    const byBrand = new Map<
+      string,
+      { usage_count: number; model_count: number; unique_users_sum: number }
+    >();
+    products.forEach(p => {
+      const existing = byBrand.get(p.brand);
+      if (existing) {
+        existing.usage_count += p.usage_count;
+        existing.model_count += 1;
+        existing.unique_users_sum += p.unique_users;
+      } else {
+        byBrand.set(p.brand, {
+          usage_count: p.usage_count,
+          model_count: 1,
+          unique_users_sum: p.unique_users,
+        });
+      }
+    });
+    return Array.from(byBrand.entries())
+      .map(([brand, stats]) => ({ brand, ...stats }))
+      .sort((a, b) => b.usage_count - a.usage_count);
+  }, [selectedProductType, products]);
 
   const fetchProductsForMonths = async (months: string[], productType: string) => {
     try {
@@ -1414,6 +1440,9 @@ const ProductUsage: React.FC = () => {
           <h3 className='text-lg font-semibold'>
             Yearly Summary: {yearlySummary.product.brand} {yearlySummary.product.model}
           </h3>
+          {selectedProductType === 'razor' && (
+            <p className='text-sm text-muted-foreground'>Manufacturer: {yearlySummary.product.brand}</p>
+          )}
           <p className='text-sm text-muted-foreground'>Past 12 Months</p>
         </div>
 
@@ -1510,6 +1539,50 @@ const ProductUsage: React.FC = () => {
             </div>
           )}
 
+          {/* Razor manufacturers: how did each brand do (Karve, Blackland, etc.) */}
+          {selectedProductType === 'razor' && razorManufacturers.length > 0 && (
+            <div className='space-y-2'>
+              <Label>Razor manufacturers</Label>
+              <p className='text-sm text-muted-foreground'>
+                Total usage by brand for selected months. Users is the sum of unique users per model
+                (may overcount if a user used multiple models from the same brand). Click a row to
+                filter products below.
+              </p>
+              <div className='overflow-x-auto border rounded-md max-h-60 overflow-y-auto'>
+                <table className='w-full border-collapse'>
+                  <thead>
+                    <tr className='bg-muted'>
+                      <th className='border border-border p-2 text-left'>Manufacturer</th>
+                      <th className='border border-border p-2 text-center'>Total uses</th>
+                      <th className='border border-border p-2 text-center'>Users</th>
+                      <th className='border border-border p-2 text-center'>Models</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {razorManufacturers.map(
+                      ({ brand, usage_count, model_count, unique_users_sum }) => (
+                        <tr
+                          key={brand}
+                          className='hover:bg-muted/70 cursor-pointer'
+                          onClick={() => setProductSearch(brand)}
+                        >
+                          <td className='border border-border p-2 font-medium'>{brand}</td>
+                          <td className='border border-border p-2 text-center'>
+                            {usage_count.toLocaleString()}
+                          </td>
+                          <td className='border border-border p-2 text-center'>
+                            {unique_users_sum.toLocaleString()}
+                          </td>
+                          <td className='border border-border p-2 text-center'>{model_count}</td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* Product Selection */}
           {selectedMonths.length > 0 && selectedProductType && (
             <div className='space-y-2'>
@@ -1537,9 +1610,16 @@ const ProductUsage: React.FC = () => {
                       className='flex items-center justify-between p-2 hover:bg-muted rounded cursor-pointer'
                       onClick={() => handleProductSelect(product)}
                     >
-                      <span>
-                        {product.brand} {product.model}
-                      </span>
+                      <div className='flex flex-col'>
+                        <span>
+                          {product.brand} {product.model}
+                        </span>
+                        {selectedProductType === 'razor' && (
+                          <span className='text-xs text-muted-foreground'>
+                            Manufacturer: {product.brand}
+                          </span>
+                        )}
+                      </div>
                       <div className='flex items-center space-x-2'>
                         <Badge variant='outline'>{product.usage_count} uses</Badge>
                         <Badge variant='outline'>{product.unique_users} users</Badge>
@@ -1576,12 +1656,19 @@ const ProductUsage: React.FC = () => {
         <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
-              <CardTitle>
-                Usage Analysis for {aggregatedAnalysis.product.brand} {aggregatedAnalysis.product.model} -{' '}
-                {selectedMonths.length === 1
-                  ? selectedMonths[0]
-                  : `${selectedMonths.length} months`}
-              </CardTitle>
+              <div>
+                <CardTitle>
+                  Usage Analysis for {aggregatedAnalysis.product.brand} {aggregatedAnalysis.product.model} -{' '}
+                  {selectedMonths.length === 1
+                    ? selectedMonths[0]
+                    : `${selectedMonths.length} months`}
+                </CardTitle>
+                {selectedProductType === 'razor' && (
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Manufacturer: {aggregatedAnalysis.product.brand}
+                  </p>
+                )}
+              </div>
 
               {/* View Toggle */}
               <div className='flex items-center space-x-2'>

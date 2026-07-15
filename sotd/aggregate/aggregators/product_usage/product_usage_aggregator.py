@@ -45,12 +45,14 @@ def _extract_product_info(product_type: str, product_data: Dict[str, Any]) -> Di
 
     if product_type == "razor":
         brand = matched.get("brand")
-        model = matched.get("model")
-        if brand and model:
+        model = matched.get("model") or ""
+        # Include all matched razors with a brand so manufacturer totals match the report
+        # (report counts by brand only; use empty model as placeholder when missing)
+        if brand:
             return {
-                "key": _generate_product_key(product_type, matched),
+                "key": _generate_product_key(product_type, {**matched, "model": model or ""}),
                 "brand": brand,
-                "model": model,
+                "model": model or "—",
             }
     elif product_type == "blade":
         brand = matched.get("brand")

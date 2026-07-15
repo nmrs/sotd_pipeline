@@ -68,6 +68,33 @@ def test_aggregate_product_usage_basic():
     assert len(product_analysis["users"]) == 2
 
 
+def test_aggregate_product_usage_razor_brand_only():
+    """Razors with brand but no model are included so manufacturer totals match the report."""
+    records = [
+        create_test_record(
+            "user1",
+            "comment1",
+            "SOTD - January 1, 2025",
+            razor={"matched": {"brand": "Filarmonica"}},
+        ),
+        create_test_record(
+            "user2",
+            "comment2",
+            "SOTD - January 2, 2025",
+            razor={"matched": {"brand": "Filarmonica", "model": ""}},
+        ),
+    ]
+    result = aggregate_product_usage(records)
+    assert "razors" in result
+    # Key uses empty model; display model is "—"
+    assert "Filarmonica|" in result["razors"]
+    product_analysis = result["razors"]["Filarmonica|"]
+    assert product_analysis["product"]["brand"] == "Filarmonica"
+    assert product_analysis["product"]["model"] == "—"
+    assert product_analysis["total_usage"] == 2
+    assert product_analysis["unique_users"] == 2
+
+
 def test_aggregate_product_usage_multiple_products():
     """Test aggregation with multiple products."""
     records = [
@@ -189,7 +216,6 @@ def test_aggregate_product_usage_soap_scent():
     product_analysis = result["soaps"]["Barrister|Mann"]
     assert product_analysis["product"]["brand"] == "Barrister"
     assert product_analysis["product"]["model"] == "Mann"  # scent used as model
-
 
 
 def test_aggregate_product_usage_excludes_mashup_soaps():

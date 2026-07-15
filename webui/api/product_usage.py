@@ -200,8 +200,7 @@ async def get_products_for_month(
                         if search_lower in p["brand"].lower() or search_lower in p["model"].lower()
                     ]
 
-                # Limit to top 100 for performance
-                return products[:100]
+                return products
 
             except Exception as e:
                 logger.warning(
@@ -271,8 +270,7 @@ async def get_products_for_month(
                     if search_lower in p["brand"].lower() or search_lower in p["model"].lower()
                 ]
 
-            # Limit to top 100 for performance
-            return products[:100]
+            return products
 
         except Exception as e:
             logger.error(f"Error loading enriched data for {month}: {e}")
