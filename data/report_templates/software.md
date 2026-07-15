@@ -50,8 +50,8 @@ Welcome to your SOTD Lather Log for {{month_year}}
 {{tables.user-single-use-soaps|ranks:20|columns:rank, user, single_use_soaps=exclusive_soaps, shaves|deltas:true}}
 
 ## Most Boring Shaver
-Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occassional. 
+Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occasional. In the case of tied HHI, Shaves descending is the tie breaker, since it's clearly more boring to use the same soap for 20 shaves than it is for 10.
 
 For the mathematically inclined: Boring Score is a diversity/concentration index (HHI in economics, Simpson’s index in ecology). More detail at [Wikipedia: Diversity index](https://en.wikipedia.org/wiki/Diversity_index).
 
-{{tables.user-soap-brand-scent-diversity|ranks:10|columns:rank, user, hhi desc, effective_soaps, unique_combinations=unique_soaps, shaves|deltas:true|shaves:5}}
+{{tables.user-soap-brand-scent-diversity|ranks:10|columns:rank, user, hhi desc, shaves desc, effective_soaps, unique_combinations=unique_soaps|deltas:true|shaves:5}}

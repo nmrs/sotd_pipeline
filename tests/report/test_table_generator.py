@@ -1509,3 +1509,83 @@ class TestTableGenerator:
         assert "0.933" not in result
         assert "0.5176" not in result
         assert "0.4681" not in result
+
+    def test_most_boring_shaver_tie_break_by_shaves_desc(self):
+        """Most Boring Shaver: same HHI ties are broken by shaves descending (more shaves = more boring)."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {
+                    "rank": 1,
+                    "user": "low_activity",
+                    "hhi": 1.0,
+                    "effective_soaps": 1.0,
+                    "unique_combinations": 1,
+                    "shaves": 10,
+                },
+                {
+                    "rank": 2,
+                    "user": "high_activity",
+                    "hhi": 1.0,
+                    "effective_soaps": 1.0,
+                    "unique_combinations": 1,
+                    "shaves": 28,
+                },
+            ]
+        }
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, hhi desc, shaves desc, effective_soaps, unique_combinations=unique_soaps",
+            rows=10,
+        )
+        # 28 shaves with same soap should rank above 10 shaves (more boring)
+        high_pos = result.find("high_activity")
+        low_pos = result.find("low_activity")
+        assert (
+            high_pos < low_pos
+        ), "high_activity (28 shaves) should appear before low_activity (10 shaves)"
+        # Same (hhi, shaves) tie; different shaves break tie. Here only two rows with different shaves → ranks 1 and 2.
+        assert "u/high_activity" in result and "28" in result
+        assert "u/low_activity" in result and "10" in result
+
+    def test_most_boring_shaver_same_hhi_same_shaves_tied(self):
+        """When two users have same HHI and same shaves, they get the same rank (1=)."""
+        data = {
+            "user_soap_brand_scent_diversity": [
+                {
+                    "rank": 1,
+                    "user": "userA",
+                    "hhi": 1.0,
+                    "effective_soaps": 1.0,
+                    "unique_combinations": 1,
+                    "shaves": 28,
+                },
+                {
+                    "rank": 2,
+                    "user": "userB",
+                    "hhi": 1.0,
+                    "effective_soaps": 1.0,
+                    "unique_combinations": 1,
+                    "shaves": 28,
+                },
+                {
+                    "rank": 3,
+                    "user": "userC",
+                    "hhi": 1.0,
+                    "effective_soaps": 1.0,
+                    "unique_combinations": 1,
+                    "shaves": 10,
+                },
+            ]
+        }
+        generator = TableGenerator(data)
+        result = generator.generate_table(
+            "user-soap-brand-scent-diversity",
+            columns="rank, user, hhi desc, shaves desc, effective_soaps, unique_combinations=unique_soaps",
+            rows=10,
+        )
+        # userA and userB both (100%, 28) → tied for 1; userC (100%, 10) → rank 3
+        assert "1=" in result
+        assert result.count("1=") >= 2  # at least two rows show 1=
+        assert "u/userA" in result and "u/userB" in result and "u/userC" in result
+        assert "3 " in result or "| 3\n" in result or "|      3 |" in result  # userC gets rank 3

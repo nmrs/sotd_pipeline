@@ -47,4 +47,4 @@ Boring Score is the chance that two shaves picked at random from a user used the
 
 For the mathematically inclined: Boring Score is a diversity/concentration index (HHI in economics, Simpson’s index in ecology). More detail at [Wikipedia: Diversity index](https://en.wikipedia.org/wiki/Diversity_index).
 
-{{tables.user-soap-brand-scent-diversity|ranks:50|columns:rank, user, hhi=boring score desc, effective_soaps, unique_combinations=unique_soaps, shaves|deltas:true|shaves:50}}
+{{tables.user-soap-brand-scent-diversity|ranks:50|columns:rank, user, hhi=boring score desc, shaves desc, effective_soaps, unique_combinations=unique_soaps|deltas:true|shaves:50}}
