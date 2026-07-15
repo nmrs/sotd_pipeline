@@ -191,6 +191,37 @@ def test_aggregate_product_usage_soap_scent():
     assert product_analysis["product"]["model"] == "Mann"  # scent used as model
 
 
+
+def test_aggregate_product_usage_excludes_mashup_soaps():
+    """Mashup soaps should not appear as distinct products in usage analysis."""
+    records = [
+        create_test_record(
+            "user1",
+            "comment1",
+            "SOTD - January 1, 2025",
+            soap={
+                "matched": {"brand": "Stirling Soap Co.", "scent": "Sample Mash Up"},
+                "enriched": {"is_mashup": True},
+            },
+        ),
+        create_test_record(
+            "user1",
+            "comment2",
+            "SOTD - January 2, 2025",
+            soap={
+                "matched": {"brand": "Barrister", "scent": "Seville"},
+                "enriched": {},
+            },
+        ),
+    ]
+
+    result = aggregate_product_usage(records)
+
+    assert len(result["soaps"]) == 1
+    assert "Barrister|Seville" in result["soaps"]
+    assert "Stirling Soap Co.|Sample Mash Up" not in result["soaps"]
+
+
 def test_aggregate_product_usage_comment_urls():
     """Test that comment URLs are extracted and stored."""
     records = [

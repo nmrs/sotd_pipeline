@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ...utils.soap_scent_filter import is_mashup_soap
 from ..base_aggregator import BaseAggregator
 
 
@@ -38,6 +39,9 @@ class SoapSampleUserAggregator(BaseAggregator):
         sample_data = []
         for record in records:
             soap = record.get("soap", {})
+            if is_mashup_soap(soap):
+                continue
+
             enriched = soap.get("enriched", {})
             matched = soap.get("matched", {})
 

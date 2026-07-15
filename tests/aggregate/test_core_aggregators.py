@@ -241,3 +241,35 @@ class TestSoapAggregator:
         result = aggregate_soaps(records)
 
         assert result == []
+
+    def test_aggregate_soaps_excludes_mashups(self):
+        """Test that mashups are excluded from soap scent aggregation."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Grooming Dept", "scent": "Laundry II"},
+                    "enriched": {},
+                },
+            },
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Stirling Soap Co.", "scent": "Sample Mash Up"},
+                    "enriched": {"is_mashup": True},
+                },
+            },
+            {
+                "author": "user2",
+                "soap": {
+                    "matched": {"brand": "Lisa's Naturals", "scent": "Mash Up"},
+                    "enriched": {"is_mashup": True},
+                },
+            },
+        ]
+
+        result = aggregate_soaps(records)
+
+        assert len(result) == 1
+        assert result[0]["name"] == "Grooming Dept - Laundry II"
+        assert result[0]["shaves"] == 1

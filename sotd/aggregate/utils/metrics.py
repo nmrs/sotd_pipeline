@@ -3,6 +3,8 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from .soap_scent_filter import counts_as_distinct_soap_scent, is_mashup_soap
+
 
 def calculate_shaves(records: List[Dict[str, Any]]) -> int:
     """Calculate total number of shaves from records."""
@@ -67,7 +69,10 @@ def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
 
 
 def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
-    """Calculate number of unique soaps from records, excluding non-countable scents."""
+    """Calculate number of unique soaps from records.
+
+    Excludes non-countable scents and mashups (soap.enriched.is_mashup).
+    """
     if not records:
         return 0
 
@@ -78,15 +83,13 @@ def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
     for _, row in df.iterrows():
         soap = row.get("soap")
         if soap is not None and isinstance(soap, dict):
+            if not counts_as_distinct_soap_scent(soap):
+                continue
+
             matched = soap.get("matched", {})
             if matched and isinstance(matched, dict):
                 brand = matched.get("brand")
                 scent = matched.get("scent")
-                countable = matched.get("countable", True)  # Default to True
-
-                # Skip non-countable scents
-                if not countable:
-                    continue
 
                 if brand and isinstance(brand, str) and scent and isinstance(scent, str):
                     brand = brand.strip()
@@ -144,6 +147,8 @@ def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
         if soap is not None and isinstance(soap, dict):
             enriched = soap.get("enriched", {})
             if enriched and enriched.get("sample_type"):
+                if is_mashup_soap(soap):
+                    continue
                 sample_count += 1
 
     return sample_count
@@ -163,6 +168,8 @@ def calculate_sample_users(records: List[Dict[str, Any]]) -> int:
         if soap is not None and isinstance(soap, dict):
             enriched = soap.get("enriched", {})
             if enriched and enriched.get("sample_type"):
+                if is_mashup_soap(soap):
+                    continue
                 author = row.get("author")
                 if author and isinstance(author, str) and author.strip():
                     sample_users.append(author.strip())
@@ -236,6 +243,9 @@ def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
             if not sample_type:  # This catches None, "", and other falsy values
                 continue
 
+            if is_mashup_soap(soap):
+                continue
+
             if matched and isinstance(matched, dict):
                 brand = matched.get("brand")
                 if brand and isinstance(brand, str):
@@ -273,6 +283,9 @@ def calculate_unique_sample_soaps(records: List[Dict[str, Any]]) -> int:
             # Check if sample_type actually has a value (not None or empty string)
             sample_type = enriched.get("sample_type")
             if not sample_type:  # This catches None, "", and other falsy values
+                continue
+
+            if is_mashup_soap(soap):
                 continue
 
             # Skip if no matched soap data

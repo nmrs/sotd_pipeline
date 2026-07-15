@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ...utils.field_validation import get_field_value, has_required_fields
+from ...utils.soap_scent_filter import counts_as_distinct_soap_scent
 from ..base_aggregator import BaseAggregator
 
 
@@ -36,6 +37,10 @@ class SoapAggregator(BaseAggregator):
         soap_data = []
         for record in records:
             soap = record.get("soap") or {}
+
+            if not counts_as_distinct_soap_scent(soap):
+                continue
+
             matched = soap.get("matched", {})
 
             # Skip if no matched soap data or missing required fields

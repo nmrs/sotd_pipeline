@@ -263,6 +263,32 @@ class TestSoapBrandScentDiversityAggregator:
         assert result[0]["shaves"] == 3
         assert result[0]["unique_users"] == 1
 
+    def test_aggregate_excludes_mashups_from_unique_combinations(self):
+        """Mashups should not increase unique brand+scent combinations."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "enriched": {},
+                },
+            },
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"brand": "Stirling Soap Co.", "scent": "Sample Mash Up"},
+                    "enriched": {"is_mashup": True},
+                },
+            },
+        ]
+
+        result = aggregate_soap_brand_scent_diversity(records)
+
+        assert len(result) == 1
+        assert result[0]["user"] == "user1"
+        assert result[0]["unique_combinations"] == 1
+        assert result[0]["shaves"] == 2
+
     def test_hhi_calculation_single_soap(self):
         """Test HHI calculation for user with single soap (maximum concentration)."""
         # Example A: 32 shaves, 1 soap → HHI = 1.0, effective_soaps = 1.0

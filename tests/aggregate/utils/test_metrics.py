@@ -137,6 +137,26 @@ class TestSoapMetrics:
         # Both should be counted
         assert result == 2
 
+    def test_calculate_unique_soaps_excludes_mashups(self):
+        """Test that mashups are excluded from unique soap counts."""
+        records = [
+            {"soap": {"matched": {"brand": "Brand1", "scent": "Scent1"}, "enriched": {}}},
+            {
+                "soap": {
+                    "matched": {"brand": "Stirling Soap Co.", "scent": "Sample Mash Up"},
+                    "enriched": {"is_mashup": True},
+                }
+            },
+            {
+                "soap": {
+                    "matched": {"brand": "Brand2", "scent": "Scent2"},
+                    "enriched": {"is_mashup": False},
+                }
+            },
+        ]
+        result = calculate_unique_soaps(records)
+        assert result == 2
+
     def test_calculate_unique_brands_empty(self):
         """Test unique brands calculation with empty records."""
         result = calculate_unique_brands([])

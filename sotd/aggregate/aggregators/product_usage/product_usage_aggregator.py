@@ -3,6 +3,7 @@
 
 from typing import Any, Dict, List
 
+from ...utils.soap_scent_filter import counts_as_distinct_soap_scent
 from ..users.user_aggregator import _extract_date_from_thread_title
 
 
@@ -129,6 +130,9 @@ def aggregate_product_usage(records: List[Dict[str, Any]]) -> Dict[str, Dict[str
         for product_type in ["razor", "blade", "brush", "soap"]:
             product_field = record.get(product_type)
             if not product_field:
+                continue
+
+            if product_type == "soap" and not counts_as_distinct_soap_scent(product_field):
                 continue
 
             product_info = _extract_product_info(product_type, product_field)
