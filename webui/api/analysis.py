@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Analysis endpoints for SOTD pipeline analyzer API."""
 
+import json
 import logging
 import os
 import subprocess
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # Add project root to Python path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -20,6 +21,24 @@ if str(project_root) not in sys.path:
 
 # Get logger for this module
 logger = logging.getLogger(__name__)
+
+
+def _mismatch_type_priority(mismatch_type: Optional[str]) -> int:
+    """Sort key: lower = earlier. Puts items that need review before exact_matches so result limits
+    do not drop levenshtein/unmatched rows when combined months exceed the cap."""
+    order = {
+        "unmatched": 0,
+        "intentionally_unmatched": 1,
+        "levenshtein_distance": 2,
+        "multiple_patterns": 3,
+        "low_confidence": 4,
+        "perfect_regex_matches": 5,
+        "good_matches": 6,
+        "exact_matches": 7,
+    }
+    if not mismatch_type:
+        return 50
+    return order.get(mismatch_type, 25)
 
 
 def get_data_directory() -> Path:
@@ -64,11 +83,21 @@ class MismatchAnalysisRequest(BaseModel):
         ),
     )
     limit: Optional[int] = Field(
-        default=1000,
-        ge=1,
-        le=10000,
-        description="Max combined results (matched + unmatched) to return (default 1000)",
+        default=None,
+        description=(
+            "Max grouped rows to return after sorting; omit or null for no cap. "
+            "Use a cap to keep very large analyses from slowing the browser."
+        ),
     )
+
+    @field_validator("limit")
+    @classmethod
+    def validate_limit(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return None
+        if v < 1 or v > 100_000:
+            raise ValueError("limit must be between 1 and 100000, or null for no cap")
+        return v
 
 
 class MatchPhaseRequest(BaseModel):
@@ -644,6 +673,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         try:
             # Always load matched data for comparison
             matched_records = analyzer.load_matched_data(args)
+            enriched_records: List[Dict[str, Any]] = []
 
             if request.use_enriched_data:
                 logger.info("Using enriched data for mismatch analysis")
@@ -655,12 +685,30 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     if record_id:
                         matched_data_map[record_id] = record
 
-                # Use enriched data for analysis but keep matched data for comparison
-                records = enriched_records
+                # Overlay the analyzed field from enrich onto each matched comment so we still
+                # process the full matched-month universe (enriched files are often partial).
+                enriched_by_id: Dict[str, Dict[str, Any]] = {
+                    str(er["id"]): er for er in enriched_records if er.get("id")
+                }
+                fld_merge = request.field
+                merged_records: List[Dict[str, Any]] = []
+                for mr in matched_records:
+                    rid = mr.get("id")
+                    er = enriched_by_id.get(str(rid)) if rid is not None else None
+                    field_from_enriched = (
+                        er.get(fld_merge) if er and isinstance(er.get(fld_merge), dict) else None
+                    )
+                    if field_from_enriched is not None:
+                        merged_records.append({**mr, fld_merge: field_from_enriched})
+                    else:
+                        merged_records.append(mr)
+
+                records = merged_records
                 data = {"data": records, "matched_data_map": matched_data_map}
             else:
                 records = matched_records
                 data = {"data": records}
+
         except Exception as e:
             logger.error(f"Error loading data: {e}")
             raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
@@ -787,11 +835,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                             matched = matched_field_data.get("matched", {})
                         else:
                             matched = {}
-                        enriched = field_data.get("enriched", {})
+                        enriched = field_data.get("enriched", {}) or {}
                     else:
                         # Using matched data directly
                         matched = field_data.get("matched", {})
-                        enriched = field_data.get("enriched", {})
+                        enriched = field_data.get("enriched", {}) or {}
 
                     # Skip records with missing data for other categories
                     if not normalized or not matched:
@@ -907,14 +955,19 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 # Update count to match the number of unique comment_ids after final deduplication
                 # This ensures count is always accurate even if duplicates were removed
                 item.count = len(item.comment_ids)
-        all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
+        all_items.sort(
+            key=lambda x: (_mismatch_type_priority(x.mismatch_type), (x.original or "").lower())
+        )
 
-        # Apply result limit to combined list (matched + unmatched)
-        limit = request.limit or 1000
-        partial_results = len(all_items) > limit
-        if partial_results:
-            all_items = all_items[:limit]
-            logger.info(f"Result list capped at {limit} (partial_results=True)")
+        # Optional cap on returned rows (omit/null = return all grouped rows)
+        cap = request.limit
+        if cap is not None:
+            partial_results = len(all_items) > cap
+            if partial_results:
+                all_items = all_items[:cap]
+                logger.info(f"Result list capped at {cap} (partial_results=True)")
+        else:
+            partial_results = False
         logger.info(
             f"Mismatch analysis: total_records={len(records)}, "
             f"returned={len(all_items)}, "
