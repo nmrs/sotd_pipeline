@@ -48,6 +48,7 @@ from .aggregators.users import (
     aggregate_razor_format_users,
     aggregate_soap_brand_diversity,
     aggregate_soap_brand_scent_diversity,
+    aggregate_user_single_use_soaps,
     aggregate_soap_mashup_users,
     aggregate_soap_sample_users,
     aggregate_users,
@@ -229,6 +230,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     aggregated_data["data"]["user_soap_brand_scent_diversity"] = (
         aggregate_soap_brand_scent_diversity(records)
     )
+    aggregated_data["data"]["user_single_use_soaps"] = aggregate_user_single_use_soaps(records)
 
     # Format aggregations
     aggregated_data["data"]["razor_formats"] = aggregate_razor_formats(records)

@@ -16,6 +16,8 @@ Welcome to your {{year}} Lather Log. {{total_shaves}} shave reports from {{uniqu
 
 * The change Δ vs columns show how an item has moved up or down the rankings since the previous year. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to the previous year. n/a means the item was not present in the previous year.
 
+* An **exclusive soap** is a matched brand+scent used by only one shaver during the year. That shaver earns one point for that soap, no matter how many times they logged it.
+
 ## Soap Brands
 
 {{tables.soap-makers|shaves:50|columns:rank, name=brand, shaves, unique_users, avg_shaves_per_user, median_shaves_per_user|deltas:true}}
@@ -35,6 +37,10 @@ Welcome to your {{year}} Lather Log. {{total_shaves}} shave reports from {{uniqu
 ## Soap Diversity by User
 
 {{tables.user-soap-brand-scent-diversity|ranks:50|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
+
+## Exclusive Soaps
+
+{{tables.user-single-use-soaps|ranks:50|columns:rank, user, single_use_soaps=exclusive_soaps, shaves|deltas:true}}
 
 ## Most Boring Shaver
 Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occassional. 

@@ -707,6 +707,39 @@ class TestAnnualAggregationEngine:
         assert result[1]["hhi"] == 0.0
         assert result[1]["effective_soaps"] == 0.0
 
+    @patch("sotd.aggregate.load.load_enriched_data")
+    def test_aggregate_user_single_use_soaps_from_enriched(self, mock_load_enriched):
+        """Annual exclusive-use soaps are recalculated from combined enriched records."""
+        engine = AnnualAggregationEngine("2024", Path("/data"))
+        monthly_data = {"2024-01": {"data": {}}, "2024-02": {"data": {}}}
+
+        mock_load_enriched.side_effect = [
+            [
+                {
+                    "author": "alice",
+                    "soap": {"matched": {"brand": "A", "scent": "1", "countable": True}},
+                },
+            ],
+            [
+                {
+                    "author": "alice",
+                    "soap": {"matched": {"brand": "A", "scent": "1", "countable": True}},
+                },
+                {
+                    "author": "bob",
+                    "soap": {"matched": {"brand": "B", "scent": "2", "countable": True}},
+                },
+            ],
+        ]
+
+        result = engine._aggregate_user_single_use_soaps(monthly_data)
+
+        by_user = {row["user"]: row for row in result}
+        # Soap A used only by alice across the year -> 1 point (not 2 from summing months)
+        assert by_user["alice"]["single_use_soaps"] == 1
+        assert by_user["alice"]["shaves"] == 2
+        assert by_user["bob"]["single_use_soaps"] == 1
+
 
 class TestAggregateMonthlyData:
     """Test the aggregate_monthly_data function."""

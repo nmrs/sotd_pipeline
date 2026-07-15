@@ -23,6 +23,8 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 * When available, soap names in the Soaps table link to their entry on Wet Shaving Database, where you can see scent notes, descriptions, and ingredient lists.
 
+* An **exclusive soap** is a matched brand+scent used by only one shaver in the month. That shaver earns one point for that soap, no matter how many times they logged it.
+
 ## Soap Brands
 
 {{tables.soap-makers|shaves:5|deltas:true}}
@@ -42,6 +44,10 @@ Welcome to your SOTD Lather Log for {{month_year}}
 ## Soap Diversity by User
 
 {{tables.user-soap-brand-scent-diversity|ranks:20|columns:rank, user, unique_combinations=unique_soaps, shaves, avg_shaves_per_combination=avg_shaves_per_soap|deltas:true}}
+
+## Exclusive Soaps
+
+{{tables.user-single-use-soaps|ranks:20|columns:rank, user, single_use_soaps=exclusive_soaps, shaves|deltas:true}}
 
 ## Most Boring Shaver
 Boring Score is the chance that two shaves picked at random from a user used the same soap (higher means more repetitive). Effective Soaps converts that into an equivalent even-rotation count: the number of soaps they would need to use equally often to produce the same score. Example: someone can log 20 soaps but still have ~2 Effective Soaps if one soap dominates roughly 70% of their shaves and the rest are just occassional. 

@@ -129,6 +129,7 @@ class ParameterValidator:
         "soap-mashup-users": ["shaves", "unique_users"],
         # User diversity tables
         "user-soap-brand-scent-diversity": ["unique_combinations", "shaves"],
+        "user-single-use-soaps": ["single_use_soaps", "shaves"],
         # Testing
         "test_table": ["shaves", "unique_users"],  # For testing purposes
     }

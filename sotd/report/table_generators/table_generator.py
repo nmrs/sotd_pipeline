@@ -615,27 +615,37 @@ class TableGenerator:
 
         # Try to discover field metadata from aggregator classes
         if table_name:
-            aggregator_class = self._get_aggregator_class(table_name)
-            if aggregator_class and hasattr(aggregator_class, "IDENTIFIER_FIELDS"):
-                # Use aggregator's own field classification
-                return [col for col in columns if col in aggregator_class.IDENTIFIER_FIELDS]
+            identifier_fields = self._get_aggregator_identifier_fields(table_name)
+            if identifier_fields:
+                return [col for col in columns if col in identifier_fields]
 
         # Fallback to dynamic classification for unknown tables
         return self._fallback_field_classification(columns)
 
     def _get_aggregator_class(self, table_name: str):
         """Get the aggregator class for a given table name."""
+        snake_name = table_name.replace("-", "_")
         try:
             # Convert table name to module path
             # e.g., "user_razor_diversity" ->
             # "sotd.aggregate.aggregators.users.razor_diversity_aggregator.RazorDiversityAggregator"
-            module_name = f"sotd.aggregate.aggregators.users.{table_name}_aggregator"
-            class_name = f"{table_name.replace('_', ' ').title().replace(' ', '')}Aggregator"
+            module_name = f"sotd.aggregate.aggregators.users.{snake_name}_aggregator"
+            class_name = f"{snake_name.replace('_', ' ').title().replace(' ', '')}Aggregator"
 
             module = __import__(module_name, fromlist=[class_name])
             return getattr(module, class_name)
         except (ImportError, AttributeError):
             # Return None if aggregator class can't be found
+            return None
+
+    def _get_aggregator_identifier_fields(self, table_name: str) -> Optional[List[str]]:
+        """Return IDENTIFIER_FIELDS from the matching user aggregator, if any."""
+        aggregator_class = self._get_aggregator_class(table_name)
+        if not aggregator_class:
+            return None
+        try:
+            return getattr(aggregator_class(), "IDENTIFIER_FIELDS", None)
+        except Exception:
             return None
 
     def _fallback_field_classification(self, columns: list) -> list[str]:
@@ -793,18 +803,10 @@ class TableGenerator:
 
         # Re-rank if rank column exists
         if "rank" in df.columns:
-            # Use competition ranking: same values get same rank, next rank is skipped
-            # Create temporary sequential rank based on sorted order
+            # Competition ranking: same (sort column) values get same rank.
+            # Multiple sort columns break ties for ordering, but equal (hhi, shaves) still tie.
             df["temp_rank"] = range(1, len(df) + 1)
-
-            # Group by sort column values to handle ties
-            # For multi-column sorts, group by all sort columns
-            group_by_cols = sort_columns
-
-            # Get minimum rank for each group (ties get same rank)
-            df["rank"] = df.groupby(group_by_cols, sort=False)["temp_rank"].transform("min")
-
-            # Drop temporary rank column
+            df["rank"] = df.groupby(sort_columns, sort=False)["temp_rank"].transform("min")
             df = df.drop("temp_rank", axis=1)
 
             # Sort by rank and then by sort columns for consistent ordering

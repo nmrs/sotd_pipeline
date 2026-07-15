@@ -1288,6 +1288,35 @@ class AnnualAggregationEngine:
 
         return result
 
+    def _aggregate_user_single_use_soaps(
+        self, monthly_data: Dict[str, Dict]
+    ) -> List[Dict[str, Any]]:
+        """Recalculate exclusive-use soap points from full-year enriched records."""
+        if not monthly_data:
+            return []
+
+        try:
+            from .aggregators.users.user_single_use_soaps_aggregator import (
+                UserSingleUseSoapsAggregator,
+            )
+            from .load import load_enriched_data
+
+            all_enriched_records = []
+            for month in monthly_data.keys():
+                try:
+                    all_enriched_records.extend(load_enriched_data(month, self.data_dir))
+                except FileNotFoundError:
+                    continue
+                except Exception:
+                    continue
+
+            if not all_enriched_records:
+                return []
+
+            return UserSingleUseSoapsAggregator().aggregate(all_enriched_records)
+        except Exception:
+            return []
+
     def generate_metadata(
         self,
         monthly_data: Dict[str, Dict],
@@ -1483,6 +1512,7 @@ class AnnualAggregationEngine:
             "user_soap_brand_scent_diversity": self._aggregate_user_diversity(
                 monthly_data, "user_soap_brand_scent_diversity"
             ),
+            "user_single_use_soaps": self._aggregate_user_single_use_soaps(monthly_data),
         }
 
 

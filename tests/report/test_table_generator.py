@@ -1432,6 +1432,32 @@ class TestTableGenerator:
         user3_index = result.find("user3")
         assert user2_index < user1_index < user3_index
 
+    def test_delta_columns_user_single_use_soaps(self):
+        """Delta generation works for user-single-use-soaps (aggregator module name match)."""
+        data = {
+            "user_single_use_soaps": [
+                {"rank": 1, "user": "alice", "single_use_soaps": 3, "shaves": 20},
+                {"rank": 2, "user": "bob", "single_use_soaps": 2, "shaves": 15},
+            ]
+        }
+        comparison_data = {
+            "2026-03": {
+                "user_single_use_soaps": [
+                    {"rank": 1, "user": "bob", "single_use_soaps": 4, "shaves": 18},
+                    {"rank": 2, "user": "alice", "single_use_soaps": 2, "shaves": 22},
+                ]
+            },
+        }
+        generator = TableGenerator(data, comparison_data, current_month="2026-04")
+        result = generator.generate_table(
+            "user-single-use-soaps",
+            ranks=20,
+            columns="rank, user, single_use_soaps, shaves",
+            deltas=True,
+        )
+        assert "| Δ vs Mar 2026" in result
+        assert "alice" in result
+
     def test_hhi_percentage_formatting(self):
         """Test that hhi (Boring Score) is formatted as a percentage."""
         data = {
