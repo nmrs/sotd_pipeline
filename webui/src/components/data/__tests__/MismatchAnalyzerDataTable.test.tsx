@@ -1092,4 +1092,44 @@ describe('MismatchAnalyzerDataTable', () => {
       // expect(screen.queryByText(/split_priority.*high/)).not.toBeInTheDocument();
     });
   });
+
+  describe('soap mashup exclusion badge', () => {
+    test('shows Mashup badge for text-detected mashup without countable flag', () => {
+      const soapData: MismatchItem[] = [
+        {
+          original: 'Stirling Sample Mash Up',
+          matched: { brand: 'Stirling Soap Co.', scent: 'Sample Mash Up' },
+          enriched: { is_mashup: true },
+          mismatch_type: 'good_matches',
+          match_type: 'brand',
+          pattern: 'stirling',
+          count: 2,
+          comment_ids: ['a', 'b'],
+          examples: [],
+        },
+        {
+          original: 'Barrister and Mann Seville',
+          matched: { brand: 'Barrister and Mann', scent: 'Seville' },
+          mismatch_type: 'good_matches',
+          match_type: 'exact',
+          pattern: 'bm',
+          count: 1,
+          comment_ids: ['c'],
+          examples: [],
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={soapData}
+          field="soap"
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      expect(screen.getAllByText('Mashup').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Stirling Sample Mash Up')).toBeInTheDocument();
+      expect(screen.getByText('Barrister and Mann Seville')).toBeInTheDocument();
+    });
+  });
 });

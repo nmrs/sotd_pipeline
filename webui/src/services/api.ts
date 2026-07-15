@@ -152,6 +152,7 @@ export interface MismatchAnalysisRequest {
     | 'complete_brushes'
     | 'matches'
     | 'unmatched';
+  /** Omit for no cap (server returns every grouped row). */
   limit?: number;
 }
 
@@ -307,6 +308,7 @@ export interface GroupedDataItem {
   brand: string;
   scent: string;
   countable?: boolean;  // Optional: true by default, false for mashup scents
+  is_mashup?: boolean;  // From enrich phase when mashup detected
   total_count: number;
   top_patterns: Array<{
     original: string;
@@ -1213,6 +1215,8 @@ export interface VerificationItem {
   verdict: 'verified' | 'needs_review' | 'incorrect';
   confidence: number;
   reasoning: string;
+  source_url?: string;
+  research?: string;
 }
 
 export interface VerifiedData {

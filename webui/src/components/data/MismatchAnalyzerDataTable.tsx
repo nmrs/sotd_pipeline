@@ -7,7 +7,9 @@ import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
 import ExpandablePatterns from '../ui/ExpandablePatterns';
+import MashupExclusionBadge from '../ui/MashupExclusionBadge';
 import { getBrushComponentPattern, formatBrushComponent, formatMatchedData } from '../../utils/productDataFormatter';
+import { isGroupedSoapMashupExcluded, mismatchItemShowsMashupExclusion } from '../../utils/soapMashup';
 
 // Helper function to check if brush was split into handle/knot components
 const isBrushSplit = (matched: Record<string, unknown>): boolean => {
@@ -548,8 +550,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           // For grouped data, show matched_string instead of original
           if (isGroupedDataItem(item)) {
             return (
-              <div className='font-medium text-gray-900'>
-                {item.matched_string}
+              <div className='font-medium text-gray-900 flex items-center gap-2'>
+                <span>{item.matched_string}</span>
+                {isGroupedSoapMashupExcluded(field, item) && <MashupExclusionBadge />}
               </div>
             );
           }
@@ -568,8 +571,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           }
 
           return (
-            <div className='text-sm text-gray-900' title={item.original}>
-              {item.original}
+            <div className='text-sm text-gray-900 flex items-center gap-2' title={item.original}>
+              <span>{item.original}</span>
+              {mismatchItemShowsMashupExclusion(field, item) && <MashupExclusionBadge />}
             </div>
           );
         },
@@ -593,11 +597,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           const formattedData = formatMatchedData(item.matched, field, item.enriched);
 
-          // Check for non-countable flag (only for soap field)
-          const isNonCountable = field === 'soap' && 
-            item.matched && 
-            typeof item.matched === 'object' && 
-            (item.matched as any).countable === false;
+          const showMashupExclusion = mismatchItemShowsMashupExclusion(field, item);
 
           // Check if there are enrich-phase changes using the enriched data from the API response
           const hasChanges =
@@ -619,29 +619,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             }
           };
 
-          // Mashup indicator component
-          const mashupIndicator = isNonCountable ? (
-            <span
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 ml-2"
-              title="This scent does not count toward distinct scent aggregation (mashup/mix)"
-            >
-              <svg
-                className="w-3 h-3 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-              Mashup
-            </span>
-          ) : null;
+          const mashupIndicator = showMashupExclusion ? <MashupExclusionBadge className="ml-2" /> : null;
 
           // For brush field, render with line breaks
           if (field === 'brush' && formattedData.includes('\n')) {
