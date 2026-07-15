@@ -6,6 +6,8 @@
   - 345 - estes soap
   - 345 co - estes park
   - 345 soap co - estes park
+  Expedition:
+  - 345 soap co. - expedition
   Fresh Cut Fade:
   - 345 soap co. - fresh cut fade
   Jet Setter:
@@ -15,14 +17,24 @@
   Rhumpkin:
   - 345 - rumpkin soap
   RKY MNT Tree Line:
+  - 345 soap co - rky mnt tree line
   - 345 soap co - rky mtn tree line
   - 345 soap co - rky mtn treeline
   - 345 soap co. - rky mnt tree line
   Skinny Dippin':
   - 345 soap co. skinny dipping
+  Trench Lines:
+  - 345 soap co. - trench lines
+  Undercut:
+  - 345 soaps - undercut
   White Buffalo:
   - 345 soap co. - white buffalo
+  - 345 white buffalo
 A A Shaving:
+  Gale:
+  - a a shaving - gale
+  Oak Ash Thorn:
+  - a a shaving - oak ash thorn
   Wapiti:
   - aa shaving - wapiti
 Abbate Y La Mantia:
@@ -38,6 +50,8 @@ Abbate Y La Mantia:
   Fufluns:
   - abbate y la mantia - fufluns
   - abbate y la mantia fufluns soap
+  Garden:
+  - abbate y la mantia - garden soap
   Garibaldi:
   - abbate y la mantia - garibaldi
   - abbate y la mantia - garibaldi soap
@@ -49,16 +63,22 @@ Abbate Y La Mantia:
   - abbate y la mantia - ishtar
   - abbate y la mantia - ishtar soap
   Koké:
+  - abbate y la mantia - koke hard soap
   - abbate y la mantia - koke soap
   - abbate y la mantia - koké
   - abbate y la mantia - koké soap
   Krokos:
   - abbate y la mantia - krokos
   - abbate y la mantia - krokos soap
+  Laureato:
+  - abbate y la mantia - laureato soap
   Magnifico:
+  - abbate y la mantia - magnifico hard soap
   - abbate y la mantia - magnifico soap
   Marduk:
   - abbate y la mantia - marduk
+  Vegano:
+  - abbate y la mantia - vegano soap
   Verbena Toscana:
   - abbate y la mantia - verbena toscana
   - abbate y la mantia verbena toscana
@@ -68,6 +88,7 @@ Abbate Y La Mantia:
   - abbate y la mantia - vulcano
 Ach Brito:
   Lavanda (Cream):
+  - ach brito - lavanda
   - ach brito lavanda
 Acqua Di Parma:
   Barbiere:
@@ -75,16 +96,22 @@ Acqua Di Parma:
   - acqua di parma - barbiere
   - acqua di parma - barbiere - crema soffice (yellow tube)
   - acqua di parma barbiere crema soffice da pennello
+  - acqua di parma, barbiere
 Adopted Acres:
+  Family First:
+  - adopted acres - family first
+  - adopted acres family first
   Gentlemen of the Cabin:
   - adopted acres soap co. - gentlemen of the cabin
   Homestead Barbershop:
   - adopted acres soap company homestead barbershop
   Imaginarium:
   - adopted acres - imaginarium
+  - adopted acres soap co. - imaginarium
   Mint Cherry Barbershop:
   - adopted acres - cherry mint barbershop
   - adopted acres - cherry mint barbeshop
+  - adopted acres soap co - mint cherry barbershop soap
   - adopted acres soap co. - mint cherry barbershop
   - adopted acres soap co. - old fashioned cherry mint barbershop
   - adopted acres soap company - cherry mint barbershop
@@ -98,7 +125,10 @@ Adopted Acres:
   - adopted acres soap company rookie card
   - adopted acres- rookie card
   - adopted acressoap co. - rookie card
+  Roots of Hope:
+  - adopted acres - roots of hope
   Royal Bloom:
+  - adopted acres "royal bloom"
   - adopted acres - royal bloom
   - adopted acres royal bloom
   - adopted acres royal bloom soap
@@ -107,8 +137,12 @@ Adopted Acres:
 Aion Skincare:
   Amore:
   - aion skincare - amore
+  Ceremony:
+  - aion skincare - ceremony
   Chypre Muguet:
   - aion - chypre muguet
+  Coconut Fig:
+  - aion skincare - mallard coconut fig
   Fleur d'Iris:
   - aion skincare - fleur d' iris
   - aion skincare - fleur d'iris
@@ -121,9 +155,16 @@ Aion Skincare:
   - aion skincare - mallard raspberry gateau
   - aion skincare - raspberry gateau
   - aion skincare - rasperry gateau
+  Reverence:
+  - aion skincare - revenance
 Alvarez Gomez:
   Barberia:
   - alvarez gomez - barberia
+American Vintage:
+  Aetherium:
+  - american vintage aetherium
+  Finale:
+  - american vintage finale
 Antica Barbieria Colla:
   Sandalo Rosso:
   - antica barbieria colla - sandalo rosso
@@ -132,14 +173,19 @@ Apothecary 87:
   - apothecary87 sandalwood & vanilla
   - apothecary87 sandalwood & vanilla finished
 Areffa Soap:
+  Angel's Share:
+  - areffa soap - angel's share
   August Moon:
   - areffa soap - august moon
+  Raudr Reyk (Red Smoke):
+  - areffa soap - raudr reyk (red smoke)
 Ariana & Evans:
   60's Cologne:
   - ariana & evans '60s cologne
   - ariana & evans - 60's cologne
   - ariana & evans -60's cologne
   - ariana and evans - 60's cologne - none
+  - ariana and evans - 60s cologne
   - arianna & evans - 60's cologne
   - arianna and evans - 60's cologne
   - arians & evans '60s cologne
@@ -150,22 +196,30 @@ Ariana & Evans:
   - ariana and evans - agarwood
   Aqua de Boracay:
   - ariana & evans - aqua de boracay
+  Ascot and Tweed:
+  - ariana & evans - ascot and tweed
   Asian Pear:
+  - a&e asian pear
   - ariana & evans - asian pear
   - arianna & evans asian pear
   Asian Plum:
   - a&e - asian plum
   - a&e asian plum
   - ariana & evans - asian plum
+  - ariana & evans, asian plum soap
+  Bahian Leather:
+  - arianna and evans bahian leather
   Baklava:
   - a&e - baklava
   - a&e / the club - baklava
   - ariana & evan's - baklava
   Barbiere Classico:
+  - ariana & evans - barbiere classico
   - ariana & evans - barbiere classico soap
   - ariana and evans - barbiere classico ultima
   - ariana and evans - barbiere classico ultima soap
   Barbiere Sofisticato:
+  - a&e barbiere sofisticato
   - ariana & evans - barbiere sofisticato
   - ariana & evans - barbiere sofisticato soap
   Bhang:
@@ -181,14 +235,31 @@ Ariana & Evans:
   - a&e / the club - boo
   - a&e / the club / charky's midnight special - boo
   - the club - boo
+  Cafe au Lait:
+  - arana & evans - cafe au lait soap
+  - ariana & evans - cafe au lait
   Cannabliss Santal:
+  - 'a&e: cannablis santal: i usually use scents she doesn''t like when i shave in
+    the morning since i won''t see her again until the evening when she comes home
+    from work. she''s a teacher and is in-person right now'
+  - a+e cannabliss santal
   - ariana & evans - cannabliss santal
   - ariana & evans - cannabliss santal soap
   - arianna & evans cannabliss santal
   Chasing the Dragon:
   - ariana&evans chasing the dragon
+  Cherry Cola:
+  - ariana & evans - cherry cola
+  - ariana & evans - cherry soda
+  Choco Cubano:
+  - a&e choco cubano
+  Cipresso e Bergamot:
+  - ariana & evans - barbiere di famiglia cipresso e bergamot
   Club Baccara:
   - a&e - club baccara
+  - ariana & evans club baccara k2
+  Corinthian Leather:
+  - a&e - corinthian leather
   Cuban Highball:
   - a&e cuban highball
   - ariana & evans - cuban highball
@@ -196,18 +267,25 @@ Ariana & Evans:
   - ariana and evans - cuban highball
   Dirty Ginger:
   - a&e / the club - dirty ginger
+  - ariana & evans - dirty ginger
   - ariana & evans - dirty ginger soap
   - ariana &evans the dirty ginger
   - the club - dirty ginger soap
   Emerald Moss:
+  - a&e emerald moss
   - ariana & evans - emerald moss
   - ariana & evans - emerald moss (sir irisch moos dupe)
   Empyrean Bay Rum:
   - a & e - empyrean bay rum
+  Fill That Glass:
+  - ariana & evans/trc - fill that glass
   Forbidden Fruit:
   - a&e - forbidden fruit
+  - ariana & evans - forbidden fruit
   Fruit de la Passion:
+  - a&e fruit de la passion
   - ariana & evans - fruit de la passion
+  - ariana & evans - fruit de la passione
   Indo Ink:
   - a&e - indo-ink
   - a&e / the club - indo-ink
@@ -215,6 +293,8 @@ Ariana & Evans:
   Kaizen:
   - a&e - kaizen
   - a&e kaizen
+  - a&e kaizen (last bit; pour one out for my homies)
+  - a+e kaizen
   - ariana & evans - kaizen
   - ariana & evans kaizen
   - ariana & evans- kaizen k2e
@@ -230,39 +310,53 @@ Ariana & Evans:
   - a&e - latte e menta
   - a&e - latte e menta - none
   - a&e latte e menta
+  - ariana & evans - latte e menta
   Lavender Noir:
   - a&e - lavender noir
   - ariana & evans - lavender noir
   Legacy:
+  - a&e - cody soap (insp by maullu nero e rosso)
   - a&e - daniele maullu
   - a&e - daniele maullu - legacy
   - a&e - maullu
   - a&e - maullu - none
+  - a&e daniele maullu legacy
   - a&e maullu legacy
   - adriana & evans maullu
   - ariana & evans - daniele maullu legacy
   - ariana & evans - maullu
   - ariana & evans - maullu legacy soap
   - ariana & evans - maullu soap
+  Limoncello:
+  - ariana & evans - limoncello
   Low-Scent Skeletor:
   - the club - low scent skeletor gets all the babes soap
   Lurch & Fester:
   - a&e - lurch & fester
   - a&e - lurch & fester - none
+  - a&e lurch & fester
   Matcha Tea:
   - a&e - matcha tea
   - a&e matcha tea (ultim base)
   - ariana & evans - matcha tea - ultima
+  Midnight Soiree:
+  - ariana & evans - midnight soiree
   Monte Carlo:
   - ariana & evans - monte carlo
+  Oud Accord:
+  - 'a&e - singles: oud accord'
+  - 'a&e singles: oud accord'
   Ouddiction:
   - a&e - ouddiction
   - a&e - ouddiction - none
   - arianna & evans - ouddiction
+  Patient No. 9:
+  - ariana & evans - patient no 9
   Peach & Cognac:
   - a&e - peach & cognac
   - a&e - peach and cognac
   - a&e - peaches & cognac
+  - a&e peach cognac
   - a&e peaches & cognac
   - ariana & evans - peach & cognac
   - ariana & evans peach & cognac
@@ -278,10 +372,12 @@ Ariana & Evans:
   - a&e - plum and bliss
   - a&e plum & bliss
   - ariana & evans - plum & bliss
+  - ariana & evans - plum bliss
   Sandalwood:
   - ariana & evans - sandalwood
   Santorini:
   - a&e santorini
+  - ariana & evans santorini
   Signature:
   - a&e - signature
   - a&e / the club - signature
@@ -291,6 +387,7 @@ Ariana & Evans:
   SoCal Hipster:
   - a&e socal hipster
   - ariana & evans - socal hipster
+  - arianna and evans socal hipster
   Spartacus:
   - a&e spartacus
   - ariana & evans - spartacus
@@ -301,6 +398,7 @@ Ariana & Evans:
   St. Barts:
   - a&e - st. barts
   - a&e st barts
+  - a&e st. barts
   - ariana & evans - st barts
   - ariana & evans - st. barts
   - ariana and evans st. barts
@@ -334,17 +432,26 @@ Ariana & Evans:
   - the club - the novelist
   The Undersea:
   - a&e - under the sea
+  - a&e the undersea
+  - ariana & evans "the undersea"
   - ariana & evans - the undersea
   - ariana & evans - undersea
   - ariana and evans - the undersea
   - ariana and evans the undersea
   - ariana and evans undersea
+  Timbuktu:
+  - ariana & evans - timbuktu
+  Tobacco Accord:
+  - a&e - singles tobacco accord
+  - 'a&e - singles: tobacco accord'
   Tobacco Cashmere:
   - a&e - tobacco cashmere
+  - ariana and evans - tobacco cashmere
   Tobacco Oud:
   - ariana & evans - tobacco oud
   Vacanza Romana:
   - ariana & evans - vacanza romana
+  - the club - vacanza romana soap
   Vanille de Tabac:
   - a&e - vanille de tabac
   - a&e vanille de tabac
@@ -353,25 +460,31 @@ Ariana & Evans:
   - ariana & evans vanille de tabac
   - ariana and evans - vanille de tabac
   - 'ariana and evans: vanille de tabac'
+  - ariana evans vanille de tabac
   - arianna & evans vanille de tabac
   Vanille Vendetta:
   - a&e - vanillr de tabac
   - a&e / the club - vanille vendetta
+  - a&e vanilla vendetta
   - ariana & evans the club - vanille vendetta
   - the club - vanille vendetta
   Vetiver Magnifique:
   - a&e vetiver magnifique
+  - ariana & evans - vetiver magnifique
+  - ariana evans vetiver magnifique
   Vintage Spice:
   - ariana & evans - vintage spice
   Wake The F' Up:
   - the club wake the f up
   - the club wake the f' up
   Warrior of Howling Fjord:
+  - a&e "the club" - warrior of howling fjord
   - a&e warrior of the howling fjord
   Which One's Pink?:
   - ariana and evans which ones pink?
 Arko:
   Hydrate:
+  - arko - hydrate
   - arko cream - hydrate
   - arko hydrate
   Shaving Soap:
@@ -380,6 +493,7 @@ Arko:
   - arko - arko soap
   - arko - classic
   - arko - classic - none
+  - arko - cool
   - arko - kremli barber
   - arko - original
   - arko fresh scent
@@ -388,6 +502,9 @@ Arko:
   - arko stick (of course)
   - arkooooooo
   - evyap - arko
+Arsenal Grooming:
+  Beach Goer:
+  - arsenal grooming - beach goer
 Australian Private Reserve:
   Bombora:
   - australian private reserve - bombora
@@ -395,7 +512,11 @@ Australian Private Reserve:
   - australian private reserve - coeur de vert
   - austrian private reserve - coeur de vert
   Fenchurch:
+  - apr fenchurch
+  - 'apr: fenchurch'
   - australian private reserve - fenchurch
+  Fougère Bourbon Rose:
+  - australian private reserve - fougère bourbon rose
   Fougère Trois:
   - apr fougere trois
   - australian private reserve - fougere trois
@@ -404,6 +525,7 @@ Australian Private Reserve:
   - australian private reserve - general ledger
   - australian private reserve - general ledger 🫡
   La Violetta:
+  - apr la violetta
   - australian private reserv - lavioletta
   - australian private reserve - lavioletta
   - austrian private reserve - lavioletta
@@ -411,8 +533,10 @@ Australian Private Reserve:
   - australian private reserve - mycroft
   - australian private reserve - mycroft soap
   Ozymandias:
+  - 'apr: ozymandias'
   - australian private reserve - ozymandias
   Passione:
+  - apr passione
   - australian private reserve - passione
   Raconteur:
   - apr raconteur
@@ -420,6 +544,7 @@ Australian Private Reserve:
   - australian private reserve - raconteur soap
   - austrialian private reserve - raconteur
   Torchwood:
+  - apr torchwood
   - australian private reserve - torchwood
 Aveeno:
   Therapeutic Shave Gel:
@@ -428,6 +553,7 @@ Aveeno:
   - aveeno - therapeutic shave gel - cream (no fragrance added)
 Azalane:
   Donkey Milk:
+  - azalane - cold saponified donkey milk
   - azalane cold saponified donkey milk
 Back to Basics Log Cabin:
   Glycerin Shave Soap:
@@ -438,6 +564,8 @@ Back to Basics Log Cabin:
 Ballenclaugh:
   Honey & Tobacco:
   - ballenclaugh - honey & tobacco
+  The Sandman:
+  - ballenclaugh - the sandman
 Barbasol:
   1919 (Cream):
   - barbasol - 1919
@@ -474,9 +602,11 @@ Barrister and Mann:
   - barrister and mann - adumbrare
   - barrister and mann - adumbrare soap
   Amazelnut:
+  - b&m soft heart amazelnut
   - b+m - amazelnut
   - barrister & mann - amazelnut soft heart series
   - barrister and mann - amazelnut
+  - barrister and mann - amazelnut (soft heart)
   Arctique:
   - b+m - arctique
   - barrister and mann - arctique
@@ -497,6 +627,7 @@ Barrister and Mann:
   - barrister and mann, bay rum soap
   Beaudelaire:
   - barrister & mann - beaudelaire
+  - barrister & mann beaudelaire
   - barrister and mann - baudelaire
   - barrister and mann - beaudelaire
   - barrister and mann beaudelaire (black label)
@@ -514,8 +645,12 @@ Barrister and Mann:
   - barrister and mann - braeburn
   - barrister and mann braeburn
   Brew Ha-Ha:
+  - b&m brew ha ha
+  - b&m brew ha ha soft heart base
   - b&m brew haha
+  - barrister & mann - brew ha ha
   - barrister & mann - brew ha-ha
+  - barrister & mann - brew haha
   - 'barrister & mann - softhearts: brew ha-ha'
   - barrister and mann - brew ha-ha
   - barrister and mann - soft heart series brew ha-ha soap
@@ -529,6 +664,7 @@ Barrister and Mann:
   - barrister & mann - cheshire
   - barrister & mann - cheshire (excelsior)
   - barrister & mann - chesire
+  - barrister & mann- cheshire, excelsior base
   - barrister and mann - cheshire
   - barrister and mann - cheshire (white label)
   - barrister and mann - cheshire - excelsior
@@ -539,8 +675,10 @@ Barrister and Mann:
     that's how iced tea should be made, hehehehehe)
   Citricuyá:
   - barrister & mann - citricuya
+  - barrister and mann - citricuya
   - barrister and mann - citricuyá
   Classic:
+  - b & m reserve classic
   - b&m reserve classic
   - barrister and mann - reserve classic
   - barrister and mann reserve - classic
@@ -557,6 +695,7 @@ Barrister and Mann:
   Cool:
   - b&m cool
   - b&m cool reserve base
+  - bam reserve cool
   - barrister and man - cool in soft hearts
   - barrister and mann - cool
   - barrister and mann - cool (floïd blue dupe)
@@ -573,12 +712,14 @@ Barrister and Mann:
   - barrister & mann dickens
   - barrister and mann - dickens
   Dickens Revisited:
+  - barrister & mann dickens revisited
   - barrister & mann, dickens revisited soap
   - barrister and mann - dickens revisited
   - barrister and mann - dickens revisted
   Eigengrau:
   - b&m - eigengrau
   - b&m eigengrau
+  - b&m eigengrau + 3 drops terrorade
   - b&m eigengrau excelsior
   - b&m eigengrau excelsior base
   - barrister & mann - eigengrau
@@ -613,8 +754,10 @@ Barrister and Mann:
   - barrister and mann - first snow
   - barrister and mann first snow
   Fougère Angelique:
+  - b&m fougere angelique reserve base
   - b&m fougère angelique
   - b+m - fougere angelique
+  - barrister & mann - fougere angelique
   - barrister and mann - angelique
   - barrister and mann - foguère angelique
   - barrister and mann - fougere angelique
@@ -630,6 +773,7 @@ Barrister and Mann:
   - barrister and mann - foguere classique
   - barrister and mann - fougere classique
   - barrister and mann - fougère classique
+  - barrister and mann - fougère classique (houbigant fougère royale dupe)
   - barrister and mann fougère classique
   Fougère Gothique:
   - '[barrister and mann - fougère gothique - ][bm]'
@@ -652,11 +796,13 @@ Barrister and Mann:
   - barrister & mann - fougère imperiale (white label)
   - barrister and mann - fougère imperiale
   Frankly My Pear:
+  - barrister & mann - frankly my pear
   - barrister & mann frankly my pear
   - barrister and mann - frankly my pear
   Hallows:
   - b&m hallows
   - b&m hallows (shs)
+  - b&m hallows soft heart base
   - bam - hallows
   - barrister & mann - hallows
   - barrister & mann - hallows (white label)
@@ -664,10 +810,13 @@ Barrister and Mann:
   - barrister & mann x southern witchcrafts - hallows
   - barrister and mann & southern witchcraft - hallows
   - barrister and mann - hallows
+  - barrister and mann - hallows (2020) link
   - barrister and mann - hallows (glissant)
   - barrister and mann - hollows
   - barrister and mann hallows
   - barrister man hallows
+  Jacinthe:
+  - barrister and mann - jacinthe
   Kalyptos:
   - barrister and mann - kalyptos
   - barrister and mann kalypsos
@@ -679,9 +828,13 @@ Barrister and Mann:
   Lavanille:
   - b&m lavanille
   - b&m lavanille excelsior base
+  - bam lavanille
+  - bam lavanille excelsior
   - barrister & mann - lavanille
+  - barrister and man lavanille
   - barrister and mann - lavanille
   - barrister and mann - lavanille (white label)
+  - barrister and mann - lavanille \
   - barrister and mann lavanille
   - lavanille
   Lavender:
@@ -699,16 +852,21 @@ Barrister and Mann:
   - barrister and mann - lavender soap
   - barrister and mann - reserve lavender
   - barrister and mann - reserve lavender soap
+  - barrister and mann lavender spice
   - barrister and mann reserve lavender
   - barrister's reserve lavender
   - barristers reserve lavender
   Le Grand Chypre:
+  - b&m - le grand chypre
   - b&m - le grande chypre
   - b&m le grand chypre
+  - b&m le grand chypre (glissant) (ny)
   - b&m le grand chypre exlcesior base
+  - b&m le grande chypre
   - bam le grand chypre
   - barrister & mann - le gran chypre
   - barrister & mann - le grand chypre
+  - barrister & mann - le grand chyrpre
   - barrister & mann le grand chypre
   - barrister & mann le grande chypre
   - barrister & mann le grande cyphre
@@ -735,12 +893,15 @@ Barrister and Mann:
   - barrister & mann - lime
   - barrister and mann - lime
   - barrister and mann - lime soap
+  - barrister and mann - line soap
   - barrister and mann lime
   Lime, Lavender & Cedarwood:
   - barrister and mann - lime, lavender, and cedarwood
   - barrister and mann - lime, lavender, cedarwood
   Lyssa:
+  - b & m - lyssa
   - barrister & mann - lyssa
+  - barrister & mann lyssa
   - barrister and mann - lyssa
   Marilyn:
   - barrister & mann - marilyn (omnibus)
@@ -787,6 +948,7 @@ Barrister and Mann:
   - barrister and mann noggin' on heaven's door
   Nordost:
   - b&m nordost
+  - b&m nordost excelsior
   - b&m nordost excelsior base
   - barrister & mann - nordost
   - barrister & mann - nordost (omnibus)
@@ -796,6 +958,7 @@ Barrister and Mann:
   - barrister and mann - nordost soap
   - barrister and mann nordost
   O, Delight!:
+  - b&m o delight
   - b&m o, delight
   - barrister & mann o' delight
   - barrister and mann - o, delight
@@ -803,20 +966,26 @@ Barrister and Mann:
   - barrister and mann o' delight
   Oceana:
   - b&m oceana
+  - b&m oceana softish heart base
   - barrister & mann - oceana
+  - barrister & mann oceana
+  - barrister and mann - latha oceana
   - barrister and mann - oceana
   - barrister and mann - oceana (latha)
   - barrister and mann - oceana - latha
+  - barrister and mann - pp8 oceana
   - barrister and mann latha oceana
   Paganini's Violin:
   - b&m - paganini's violin
   - b&m paganini's violin
   - b&m paganini's violin (rws exclusive, soft heart base)
+  - b&m paganini's violin soft heart base (rws exclusive)
   - b+m - paganini's violin
   - barrister & mann - paganini's violin
   - barrister & mann paganini's violin
   - barrister and mann - paganini's violin
   - barrister and mann - paganini's violin (spc.ed'n r/wetshaving)
+  - barrister and mann - paganini's violin (spc.ed'n r/wetshaving) link
   - barrister and mann - paganini's violin link
   - barrister and mann - paganini's violin soap
   - barrister and mann - paganini's violin soap r/wetshaving exclusive
@@ -828,9 +997,12 @@ Barrister and Mann:
   Passiflora:
   - a&e passiflora
   - b&m passiflora
+  - barrister and mann - passaflora
   - barrister and mann - passiflora
   - barrister and mann - passiflora - none
+  - barrister and mann - passiflora soap
   Pencil Pushers:
+  - barrister & mann pencil pusher
   - barrister and mann - pencil pusher
   - barrister and mann - pencil pushers
   - barrister and mann - pencil pushers soap
@@ -854,10 +1026,12 @@ Barrister and Mann:
   Red Letter Day:
   - barrister and mann - red letter day
   Rhapsody:
+  - barrister & mann - rhapsody (soft heart base)
   - barrister & mann rhapsody (soft heart base)
   - barrister and mann - rhapsody
   - barrister and mann - rhapsody (soft heart base)
   - barrister and mann - rhapsody (soft heart)
+  - barrister and mann - rhapsody softheart series
   Roam (I):
   - barrister and mann - roam (glissant base)
   - barrister and mann - roam (glissant)
@@ -869,12 +1043,15 @@ Barrister and Mann:
   - barrister & mann - roam 2
   - barrister & mann - roam two
   - barrister and mann - mf roam 2
+  - barrister and mann - mf roam soap
+  - barrister and mann - mf roam two
   - barrister and mann - roam
   - barrister and mann - roam 2
   - barrister and mann - roam two
   - barrister and mann - roam two soap
   - barrister and mann roam 2
   - barrister and mann roam two
+  - barrister and mann- roam 2
   Saeryan:
   - barrister and mann - saeryan
   Saguesera:
@@ -890,8 +1067,12 @@ Barrister and Mann:
   - barrister and mann samhain
   - barrister and mann/southern witchcrafts - samhain
   Sandalwood:
+  - b&m sandalwood
   - b&m sandalwood (soft hearts)
+  - b&m sandalwood soft heart base
+  - b&m soft hearts sandalwood
   - barrister & mann - softhearts sandalwood
+  - barrister & mann softhearts sandalwood
   - barrister and mann - latha sandalwood
   - barrister and mann - sandalwood
   - barrister and mann - sandalwood in soft hearts
@@ -906,11 +1087,14 @@ Barrister and Mann:
   - barrister & mann - season of the witch
   - barrister and mann - season of the witch
   Seville:
+  - b & m - seville
   - b&m - seville
   - b&m seville
   - b&m seville (excelsior)
+  - b&m seville in excelsior
   - b&m seville white label
   - b&m seville, white label
+  - bam seville
   - barrister & mann - seville
   - barrister & mann - seville (reserve)
   - barrister & mann seville
@@ -942,6 +1126,7 @@ Barrister and Mann:
   - barrister & mann - reservve spice - none
   - barrister & mann - spice
   - barrister & mann - spice (omnibus)
+  - barrister & mann reserve spice
   - barrister & mann spice
   - barrister and mann - barrister's reserve spice
   - barrister and mann - reserve spice
@@ -949,14 +1134,17 @@ Barrister and Mann:
   - barrister and mann - reserve spice soap
   - barrister and mann - spice
   - barrister and mann - spice (shulton old spice dupe)
+  - barrister and mann -spice
   - barrister and mann reserve spice
   - barrister and mann spice
   Sunny Lane:
   - b&m sunny lane
   - b&m sunny lane excelsior base
   - barrister & mann - sunny lane
+  - barrister and mann - sunny day
   - barrister and mann - sunny lane
   - barrister and mann - sunny lane (original release)
+  - barrister and mann sunny lane
   Taiga:
   - barrister and mann - taiga
   - barrister and mann - taiga - soap (le)
@@ -977,11 +1165,22 @@ Barrister and Mann:
   'The Four Horsemen: War':
   - barrister & mann - the four horsemen war
   - 'barrister & mann - the four horsemen: war'
+  - barrister and mann - four horsemenː war
+  - 'barrister and mann - the four horsemen: war'
   - barrister and mann - war
   The Full Measure of Man:
+  - b&m the full measure of man
   - b+m - full measure of man
+  - bam - full measure of man
+  - barrister & mann - full measure of man
+  - barrister & mann - the full measure of man
+  - barrister & mann the full measure of man
   - barrister and mann - fmom
+  - barrister and mann - full measure of a man
+  - barrister and mann - full measure of man
+  - barrister and mann - full measure of man soap
   - barrister and mann - the full measure of man
+  - barrister and mann full measure of a man
   - barrister and mann- full measure of man
   Tuesday:
   - barrister & mann - just right for tuesday
@@ -994,8 +1193,11 @@ Barrister and Mann:
   - barrister and mann ubrique
   Unscented:
   - b&m limited edition unscented
+  - b&m soft heart limited edition unscented
   - b&m unscented
   - barrister & mann - unscented
+  - barrister & mann - unscented vegibus
+  - barrister & mann unscented
   - barrister & mann unscented (vegibus base)
   - barrister & mann unscented (vegibus)
   - barrister and mann - latha unscented
@@ -1028,21 +1230,36 @@ Baume.be:
   Shaving Cream:
   - baume.be - original
 BBS Soaps:
+  '3':
+  - bbs - 3
   Byzantio:
   - bbs soaps - byzantio
+  Mantra:
+  - bbs mantra
   Nile Lotus:
   - bbs soap shop - nile lotus
+  Pacific Horror:
+  - bbs - pacific horror hermes 2.0 base
+  - bbs pacific horror
+  Susanoo:
+  - bbs susanoo
+  Tsurai:
+  - bbs - tsurai gaia base 2.0
+  - bbs tsurai
 Beak & Snout:
   Bard's Barbershop:
   - beak & snout apothecary - barbershop
   - beak & snouth - barbershop
   - beak and snout apothecary - barbershop
+Beefimus:
+  Beef's Clean Laundry:
+  - beefimus - beef's clean laundry
 Benessere Naturale:
   Ione:
   - bennesere natural - ione
-Black Mountain Shaving:
-  DFS Horizons:
-  - dfs horizons - by murphy and mcneil / black mountain
+Biggis Seifenküche:
+  Rasierseife:
+  - biggis seifenkueche - rasierseife
 Black Ship Grooming:
   Barnacle Bob:
   - black ship grooming - barnacle bob
@@ -1063,22 +1280,50 @@ Black Ship Grooming:
   Thomas Tew:
   - black ship grooming - thomas tew
   - black ship grooming thomas tew
+Blue's Soap:
+  Shaving Soap:
+  - blue's goat milk and animal fat from new zealand
+  - blue's goat milk and animal fat shaving soap from new zealand
+  - blue's goat milk shaving soap from new zealand on the label yet really made in
+    china
+  - blue's goat milk shaving soap from new zealand, made in china
+  - blue's shaving soap from new zealand
+  - blues
+  - blues goat milk shaving soap from new zealand, made in china
+Bomb Drop:
+  Dune Goblin:
+  - bomb drop - dune goblin
+Bourbon French:
+  '525':
+  - bourbon french - 525
 Bricktown Grooming:
+  Barbary Pirates:
+  - bricktown grooming - barbary pirates
   No Quarter:
   - bricktown grooming - no quarter
 Brutalt Bra:
   Norwegian Wood:
   - brutalt bra tsn le / norwegian wood
 Bundubeard:
+  Boomslang:
+  - bundubeard - boomslang
   Kletterkees:
   - bundubeard - kletterkees
   - bundubeard kletterbees
 Böker:
+  Sandalwood:
+  - böker - sandalwood
   Tobacco:
   - böker - tobacco
+C.O. Bigelow:
+  Premium Shaving Cream:
+  - c.o. bigelow premium
 Campbell's:
   Shave Cream:
   - burmax - lather time hot lather machine w/ campbell's
+Canada Shaving Soap:
+  Unscented:
+  - canada shaving soap - unscented
 Captain Fawcett:
   Scapicchio:
   - capt. fawcett's - scapicchio
@@ -1105,10 +1350,13 @@ Captain's Choice:
   - captain's choice - venture
   - captain's choice - venture soap
 Castle Forbes:
+  '1445':
+  - castle forbes - 1445
   Lavender:
   - castle forbes - lavendar eo
   - castle forbes - lavender
   - castle forbes - lavender essential oil
+  - castle forbes lavender
   Lime:
   - castle forbes - lime
   - castle forbes lime
@@ -1128,6 +1376,7 @@ Catie's Bubbles:
   - catie's bubbles - a midnight dreary (tom ford black orchid dupe)
   - catie's bubbles - midnight dreary
   - catie's bubbles a midnight dreary
+  - caties bubbles - a midnight dreary
   Azure:
   - catie's bubbles - azure
   - catie's bubbles - azure (premium shaving soap base)
@@ -1140,6 +1389,8 @@ Catie's Bubbles:
   - catie's bubbles - barnegat bay
   - catie's bubbles - barnegat bay mug soap
   - catie's bubbles - barnegat bay original italian style
+  Berry Good Noah:
+  - catie's bubbles - berry good noah
   Black Bergamot:
   - catie's bubbles - black bergamot
   Blugère:
@@ -1157,6 +1408,8 @@ Catie's Bubbles:
   - catie's bubbles - cape cod cranberry
   - catie's bubbles - cape cod cranberry french style soap
   - catie's bubbles - cape code cranberry
+  Celtic Knot:
+  - catie's bubbles - celtic knot
   Chocolate Blueberries:
   - catie's bubbles - chocolate blueberries
   - catie's bubbles - chocolate blueberries soap
@@ -1164,6 +1417,7 @@ Catie's Bubbles:
   Colonia:
   - catie's bubbles - colinia
   - catie's bubbles - colonia
+  - catie's bubbles - colonia (acqua di parma colonia dupe)
   - catie's bubbles - colonia soap
   Connecticut Shade:
   - catie's bubbles - connecticut shade
@@ -1197,14 +1451,19 @@ Catie's Bubbles:
   - catie's bubbles - dranks
   - catie's bubbles - dranks (prem)
   - catie's bubbles - dranks prem
+  - catie's bubbles - porch dranks
   - catie's bubbles - prem dranks
+  - cb dranks
   - cb dranks prem
   Dusk:
   - catie's bubbles - dusk
   Eau de Thé:
   - catie's bubbles - eau de thé
+  - catie's bubbles - eau de thé soap
   Florentine Fern:
   - catie's bubbles - florentine fern
+  - catie's bubbles - florentine fern (luxury cream base)
+  - catie's bubbles - florentine fern lux
   Gardenia:
   - catie's bubbles - gardenia
   - catie's bubbles gardenia
@@ -1220,6 +1479,8 @@ Catie's Bubbles:
   Horizon:
   - catie's bubbles - horizon
   - catie's bubbles/talbot shaving - horizon
+  Inchcolm:
+  - catie's bubbles - inchcolm
   Irish Coffee:
   - catie's bubbles - irish coffee
   - catie's bubbles irish coffee
@@ -1228,10 +1489,13 @@ Catie's Bubbles:
   - catie's bubbles - knee high to a grape
   La Terre Verte:
   - catie's bubbles - la terre verte
+  - catie's bubbles - le terre verte
   Lancaster Leather:
   - catie's bubbles - lancaster leather
   Le Marché du Rasage:
   - cati's bubbles - le marché du rasage luxury soap
+  - catie's bubbles - le march du rasage
+  - catie's bubbles - le march du rasage (bid ass og 8oz pour)
   - catie's bubbles - le marche du rasage
   - catie's bubbles - le marche du rasage link
   - catie's bubbles - le marche du rassage
@@ -1240,16 +1504,21 @@ Catie's Bubbles:
   Le Nude:
   - catie's bubbles - le nude
   Le Piment de la Vie:
+  - catie's bubbles - le pemint de la vie soap
   - catie's bubbles - le piement de la vie
   - catie's bubbles - le piment de la vie
   - catie's bubbles - le piment de la vie big ass 8oz soap
   - catie's bubbles - le piment de la vie soap
   - catie's bubbles le piment de la vie
   Literal Lilac:
+  - catie's bubbles - lileral lilac
   - catie's bubbles - literal lilac
+  - catie's bubbles - literal lilac luxury
   Maggards MeetUp (Year Unspecified):
   - catie's bubbles - maggard meet exclusive
   - catie's bubbles - maggard meet exclusive (luxury cream base)
+  - catie's bubbles - maggards razors meet-up
+  - caties bubbles - maggard meetup soap
   Maggards MeetUp 2019:
   - catie's bubbles - maggard razors 2019 meetup
   Maggards MeetUp 2023:
@@ -1268,6 +1537,7 @@ Catie's Bubbles:
   - catie's bubbles - 2024 maggard meet exclusive
   - catie's bubbles - maggard meet 2024
   - catie's bubbles - maggard meet exclusive (2024)
+  - catie's bubbles - maggard meetup 2024
   - catie's bubbles - maggard razors 2024 meetup
   - catie's bubbles - maggards meet exclusive (2024)
   Maggards MeetUp 2025:
@@ -1277,6 +1547,10 @@ Catie's Bubbles:
   - catie's bubbles - maggard razors 2025 meetup
   - catie's bubbles - maggards razors 2025 meetup
   - caties bubbles - maggard meetup 2025
+  Maggards MeetUp 2026:
+  - catie's bubble - 2026 maggard meet up
+  - catie's bubbles - 2026 maggard meetup
+  - catie's bubbles - maggard meetup 2026
   Massepain:
   - catie's bubbles - massepain
   - catie's bubbles - massepain luxury cream soap
@@ -1287,17 +1561,26 @@ Catie's Bubbles:
   - catie's bubbles - ménage a lavande premium soap
   - catie's bubbles ménage a lavande
   - catie's bubbles ménage de lavande
+  - caties bubbles - ménage a lavande
   - fine accroutrements - lavender pour homme
   Mile High Menthol:
   - catie's bubbles - mile high menthol
+  - caties bubbles- mile high menthol
   Mille Chypre:
   - catie's bubbles - mille chypre
   - catie's bubbles - mille chypre premium soap
   Miracle:
   - catie's bubbles - miracle
+  - catie's bubbles - miracle (prem base)
   - catie's bubbles miracle
+  - caties bubbles - miracle
   Moustache Mint:
   - catie's bubbles - moustache mint
+  Noah L' Orange:
+  - catie's bubbles - noah l' orange
+  Ocean Grove:
+  - catie's bubbles - ocean grove
+  - catie's bubbles - ocean grove luxury soap
   Parma Inspiration:
   - razor blades & more co. - parma inspiration
   Pine Barrens:
@@ -1311,6 +1594,7 @@ Catie's Bubbles:
   - catie's bubbles porch drinks
   Purple Grapefruit:
   - catie's bubbles - purple grapefruit
+  - catie's bubbles - purple grapefruit luxury soap
   - catie's bubbles purple grapefruit
   - catie's bubbles- purple grapefruit
   - caties bubbles - purple grapefruit
@@ -1332,18 +1616,25 @@ Catie's Bubbles:
   - catie's bubbles - spanish holiday
   Sunday Brunch:
   - catie's bubbles - sunday brunch
+  - catie's bubbles - sunday brunch premium soap
   - catie's bubbles - sunday brunch soap
   - caties bubbles - sunday brunch
+  Sunset:
+  - catie's bubbles - sunset
   Tactical Support:
   - catie's bubbles - tactical support
   The Royal Garden:
+  - catie's bubbles - royal garden
   - catie's bubbles - the royal garden
   Tonsorial Parlour:
+  - catie's bubbles - tonsorial parlor
   - catie's bubbles - tonsorial parlour
   - catie's bubbles tonsorial parlour
   Tonsorium:
   - catie's bubbles - tonsorium
+  - catie's bubbles - tonsorium (premium)
   - catie's bubbles tonsorium
+  - catie's bubbles tonsorium (fougere)
   - catie's bubbles tonsorium fougere
   Top of the World:
   - catie's bubbles - top of the world
@@ -1353,6 +1644,7 @@ Catie's Bubbles:
   - catie's bubbles - two to mango
   Un Jour Gris:
   - catie's bubbles - un jour gris
+  - catie's bubbles - un jour gris (tom ford grey vetiver dupe)
   V:
   - catie's bubbles - v
   - catie's bubbles -v
@@ -1360,6 +1652,7 @@ Catie's Bubbles:
   - catie's bubbles - verdigris
   - catie's bubbles verdigris
   - caties bubbles verdigris
+  - cattie's bubbles - verdigris
   - cb verdigris
   Vintage:
   - catie's bubbles - vintage
@@ -1369,10 +1662,20 @@ Catie's Bubbles:
   Whack and Unwrap:
   - catie's bubbles - whack and unwrap
   - catie's bubbles - whack and unwrap soap
+  - catie's bubbles whack and unwrap
   X:
   - catie's bubbles - x
   - catie's bubbles - x premium soap
+CaYuen Workshop:
+  Voodoo King:
+  - thecayuenworkshop - voodoo king
 CBL Soaps:
+  Dragon's Milk:
+  - cbl premium shave soap - dragon's milk
+  Hombres Doc Holiday:
+  - cbl soap - doc holiday
+  Hombres Dos Spaghetti Western:
+  - 'cbl soaps - hombres barbershop: dos - spaghetti western'
   Inconceivable:
   - cbl - inconceivable
   - cbl premium - inconceivable
@@ -1382,6 +1685,8 @@ CBL Soaps:
   Peanut Butter:
   - 'cbl premium shave soap - peanut butter link: peanut butter'
   - cbl soaps - peanut butter
+  Russian Tea:
+  - cbl soaps - russian tea
 Cella:
   All'Olio Di Mandorla:
   - cella - all'olio di mandorla
@@ -1412,6 +1717,7 @@ Cella:
   - cella milano -almond
   - cella milano. (ca. 1899 ce)
   - cella original
+  - cella rapid shaving cream (red)
   - cella red
   - cella shave soap (red)
   - cella w/ jequil&corenveo synthetic
@@ -1432,7 +1738,9 @@ Cella:
   - cella milano organic bio
   - cella organic aloe vera
   - cella organic aloe vera shaving cream (green)
+  - cella organic aloe vera shaving soap (green)
   - cella organic shave soap (blue tub)
+  - cella organic shaving cream (green tube)
   - cella organic shaving cream (green)
   Buongiorno al Sandalo:
   - cella - buongiorno al sandalo
@@ -1444,6 +1752,7 @@ Cella:
   Riserva Fresco:
   - cella - riserva fresco
   - cella milano - riserva fresco
+  - cella riserva fresco
 Chicago Grooming Co.:
   '40':
   - chicago grooming co. - 40
@@ -1463,18 +1772,27 @@ Chicago Grooming Co.:
   - chicago grooming co. (formerly oleo soapworks) - animal crackers
   - chicago grooming co. - animal crackers soap
   Armonía:
+  - cgc - armonía
   - chicago grooming - armonia
+  - chicago grooming co - armonia
   - chicago grooming co - armonía
   - chicago grooming co. (formerly oleo soapworks) - armonía
+  - chicago grooming co. - armonia
   - chicago grooming co. - armonía
   - chicago grooming co. / house of mammoth - armonía
   - chicago grooming/house of mammoth - armonía
+  Bonaire:
+  - chicago grooming - bonaire
+  - chicago grooming co - bonaire
+  - oleo - bonaire
+  - oleo soapworks - bonaire
   Canaan:
   - oleo soapworks - canaan
   Caoba:
   - cgc caoba
   - chicago grooming co - caboa
   - chicago grooming co - caoba
+  - chicago grooming co - coaba
   - chicago grooming co. (formerly oleo soapworks) - caoba
   - chicago grooming co. - caoba
   Classic Clean:
@@ -1487,6 +1805,8 @@ Chicago Grooming Co.:
   - chicago grooming co. - excursion
   - chicago grooming/oleo - excursion
   - oleo - excursion
+  FOMO:
+  - chicago grooming - fomo
   Gold Coast:
   - chicago grooming co. - gold coast (maison francis kurkdjian baccarat rouge 540
     dupe)
@@ -1502,14 +1822,18 @@ Chicago Grooming Co.:
   - chicago grooming - montrose beach
   - chicago grooming co - montrose beach
   - chicago grooming co. - montrose beach
+  - chicago grooming co. - montrose beach creme
   - montrose beach
   No. 11:
   - chicago grooming co. (formerly oleo soapworks) - no. 11
   - chicago grooming co. - no. 11
+  - chicago grooming co. - no. 11 (cream soap)
   - 'chicago grooming co. - no. 11 (maison margiela replica : at the barber''s dupe)'
+  - chicago grooming co. - no. 11 soap
   - chicago grooming company - no. 11
   - oleo - no. 11
   Polar:
+  - chicago grooming co. - polar
   - oleo soapworks - polar
   Pucker:
   - oleo - pucker
@@ -1517,6 +1841,7 @@ Chicago Grooming Co.:
   - chicago grooming - rougere
   - chicago grooming co. (formerly oleo soapworks) - rougére
   - chicago grooming co. - rougere
+  - chicago grooming co. - rougére
   Sandy Cheeks:
   - oleo soapworks - sandy cheeks
   Shiloh:
@@ -1525,13 +1850,18 @@ Chicago Grooming Co.:
   - chicago grooming co - shiloh
   - chicago grooming co. (formerly oleo soapworks) - shiloh
   - chicago grooming co. - shiloh
+  - chicago grooming co. - shiloh (cream)
   Smoke on the Water:
   - chicago grooming co. - smoke on the water
   Susurro:
+  - chicago grooming - susurro
   - chicago grooming co. - susurro
   - chicago grooming company - susurro
   Two-Bit:
+  - chicago grooming co. - two bit
   - chicago grooming co. - two-bit
+  Wayoh:
+  - chicago grooming co - wayoh
   Windy City Barbershop:
   - chicago grooming co - windy city barbershop
   - chicago grooming co. - windy city barbershop
@@ -1547,6 +1877,9 @@ Chiseled Face:
   - chiseled face bay rum
   'Bespoke #1':
   - 'chiseled face - bespoke #1'
+  Black Fern:
+  - chiseled face - black fern
+  - chiseled face - blackfern
   Cedar & Spice:
   - chiseled face - cedar & spice
   - chiseled face - cedar and spice
@@ -1556,8 +1889,10 @@ Chiseled Face:
   - chiseled face - cryogen
   - chiseled face - cryogen with stirling frost drops
   Gemütlichkeit:
+  - cf gemütlichkeit
   - chiseled face - gemutlichkeit soap
   - chiseled face - gemütlichkeit
+  - chiseled face gemutlichkeit
   Ghost Town Barber:
   - cf ghost town barber
   - chiseled face - ghost town barber
@@ -1569,6 +1904,9 @@ Chiseled Face:
   - chiseled face - guy noir
   - chiseled face guy noir
   - chiseled face, guy noir
+  Loyal:
+  - chiseled face - loyal
+  - chiseled face - loyal - silk tallow
   Midnight Stag:
   - chiseled face - midnight
   - chiseled face - midnight stag
@@ -1592,6 +1930,7 @@ Chiseled Face:
   - cf sherlock
   - chiseled face - sherlock
   - chiseled face - sherlock - artisan shaving soap (silk tallow base)
+  - chiseled face groomatorium - sherlock
   Summer Storm:
   - chiseled face - summer storm
   - chiseled face summer storm
@@ -1605,10 +1944,14 @@ Chiseled Face:
 ChronnoCrafts SoapWorks:
   Shake:
   - chronnocrafts soapworks - shake
+Classic Shaving:
+  Bay Rum:
+  - classic shaving - bay rum
 Clubman Pinaud:
-  Classic Barber Shave Cream:
-  - clubman
   Shave Soap:
+  - clubman
+  - clubman pinaud head
+  - clubman shave soap (soap, not cream)
   - pinaud - clubman
   - pinaud clubman
 Col. Ichabod Conk:
@@ -1620,6 +1963,8 @@ Collette Classic Supply Co:
 Cooper & French:
   Chain of Lakes:
   - cooper and french - chain of lakes
+  English Garden:
+  - cooper & french - english garden
   Unscented:
   - cooper & french - unscented
   - cooper & french unscented
@@ -1638,10 +1983,13 @@ Cremo:
   - cremo - palo santo
   Refresing Mint:
   - cremo - refreshing mint
+  - cremo refreshing mint
   - cremo-refreshing mint
   Sandalwood:
   - cremo - sandalwood
   - cremo sandalwood
+  Sensitive:
+  - cremo sensitive
   Silver Water & Birch:
   - cremo - silver water & birch
 Crown Shaving Co.:
@@ -1660,6 +2008,8 @@ Crowne & Crane:
 Cyril R. Salter:
   French Vetiver:
   - cyril r. salter - french vetiver
+  Solid:
+  - cyril r. salter - solid
 D.R. Harris:
   Almond:
   - d.r. harris almond
@@ -1667,12 +2017,17 @@ D.R. Harris:
   - d.r. harris & co - arlington
   - d.r. harris & co. - arlington
   - d.r. harris - arlington
+  - d.r. harris arlington
   - dr harris - arlington
+  Lavender:
+  - d.r. harris lavender
   Marlborough:
   - d.r. harris - marlborough
   - d.r. harris marlborough
   Sandalwood:
   - d.r. harris - sandalwood
+  Twenty Nine:
+  - d.r. harris - twenty nine
   Windsor:
   - d.r. harris - windsor
 Dapper Dragon:
@@ -1685,10 +2040,12 @@ Declaration Grooming:
   88 Chestnut St:
   - chatillon lux/declaration grooming - 88 chestnut street
   - declaration grooming - 88 chestnut st
+  - declaration grooming - 88 chestnut street
   - declaration grooming 88 chestnut st
   - declaration grooming/chatillon lux - 88 chestnut street
   - declaration grooming/chatillon lux 88 chestnut street
   - dg - 88 chestnut st
+  - dg - 88 chestnut st -m
   Admiral:
   - chatillon lux/declaration grooming - admiral
   - declaration grooming - admiral
@@ -1698,12 +2055,17 @@ Declaration Grooming:
   - dg after the rain
   Agua Fresca:
   - chatillon lux/declaration grooming - agua fresca
+  - declaration grooming - agua fresca
+  Apogee:
+  - declaration grooming - apogee
   Auryn:
   - declaration grooming - auryn
   B Cubed:
   - declaration grooming b-cubed
   Bandwagon:
   - declaration grooming - bandwagon
+  Big Soap Energy:
+  - declaration grooming - big soap energy
   Blackberry Blossom Bay:
   - chatillon lux/declaration grooming - blackberry blossom bay
   Bon Vivant:
@@ -1747,23 +2109,33 @@ Declaration Grooming:
   - declaration grooming - convergence
   Cuir et Épices:
   - declaration grooming - cuir et épices
+  Cygnus X-1:
+  - declaration grooming - cygnus x-1
+  Daemon:
+  - declaration grooming - daemon
   Darkfall:
   - darkfall
   - declaration groomin darkfall
   - declaration grooming - darkfall
+  - declaration grooming - darkfall soap
   - declaration grooming darkfall
   - declaration grooming- darkfall
   - dg darkfall
+  - l&l grooming - darkfall
   Dayman:
   - declaration grooming - dayman
   Delta-V:
+  - declaration grooming - delta v
   - declaration grooming delta-v
+  DFS 2017:
+  - declaration grooming - dfs 2017
   Dirtyver:
   - declaration grooming - dirtyver
   - declaration grooming - dirtyver \
   - declaration grooming dirtyver
   Epiphenomenon:
   - declaration grooming - epiphenomenon
+  - declaration grooming - epiphomenon
   - declaration grooming epiphenomenon
   - dg epiphenomenon
   Fake Yellow Light:
@@ -1815,10 +2187,13 @@ Declaration Grooming:
   Peaches + Scream:
   - declaration grooming - peaches & scream
   - declaration grooming - peaches and scream
+  Perigree:
+  - declaration grooming - perigree
   Persephone:
   - declaration grooming - persephone
   Pure Lavender:
   - chatillon lux/declaration grooming - pure lavender
+  - declaration grooming - pure lavender
   Puzzle:
   - declaration ?
   - declaration grooming (l&l era)- puzzle
@@ -1858,6 +2233,7 @@ Declaration Grooming:
   - declaration grooming - scrooge
   Sellout:
   - declaration grooming - sellout
+  - declaration grooming - sellout soap
   - declaration grooming sellout
   Semicolon:
   - declaration grooming - semicolon
@@ -1893,6 +2269,7 @@ Declaration Grooming:
   - declaration grooming trismegistus
   - dg - trismegistus
   - dg trismegistus
+  - l&l grooming - trismegistus
   Try This Soap 2.0:
   - declaration grooming - try this soap 2.0
   TSM Fougère:
@@ -1912,12 +2289,17 @@ Declaration Grooming:
   - declaration unscented
   - declaration unscented bison
   - dg unscented milksteak
+  Vernal:
+  - declaration grooming - vernal
   Vide Poche:
+  - chatillon lux/declaration grooming - vide poche
   - chatillon lux/declaration grooming - vide poche - (le)
   - declaration grooming / chatillon lux - vide poche
   - declaration grooming/chatillon lux - vide poche
   Weinstrasse:
   - chatillon lux - weinstrasse
+  - declaration grooming - weinstrasse
+  - declaration grooming - weinstrasse (icarus base)
   - declaration grooming weinstrasse
   - declaration grooming/chatillon lux weinstrasse
   - declaration x chatillon lux weinstrasse
@@ -1929,6 +2311,7 @@ Declaration Grooming:
   - chatillon lux/wholly kaw - yuzu/rose/patchouli - soap (le)
   - declaration grooming - yuzu rose patchouli
   - declaration grooming - yuzu/rose/patchouli
+  - declaration grooming / chatillon lux - yuzu/rose/patchouli
   - declaration grooming yrp
   - declaration grooming yuzu rose patchouli
   - declaration grooming yuzu/rose/patchouli
@@ -1936,6 +2319,8 @@ Denim:
   Original:
   - denim
 DentonMajik:
+  Dominate:
+  - dentonmajik - dominate
   Flores de Amor:
   - denton majik flores de amor
   KRS Classic:
@@ -1944,22 +2329,35 @@ DentonMajik:
   - dentonmajik - mayberry man
   Ole Fife:
   - dentonmajik - ole fife
+  Pink Floyd:
+  - dentonmajik - pink floyd
 Derby:
+  Shaving Creme:
+  - derby shaving creme
   Shaving Soap:
+  - 345 soap co. - derby
   - derby
+Donna Bee Good Farms:
+  Sage & Cypress:
+  - donnabeegoodfarms - shave soap - sage and cypress
 Dr. Bronner's:
   Unscented:
   - dr. bronner's organic
 Dr. Jon's:
   '13':
   - dr jon's - 13
+  - dr. jon's - 13
   Black Label:
   - dr. jon's - black label
   Flowers in the Dark:
   - dr. jon's - flowers in the dark
   - dr. jon's flowers in the dark
+  January's Sunday Funday:
+  - 'dr. john''s - sunday funday january 2022: blue'
   Lemongrass & Geranium:
   - dr. jon's - lemongrass and geranium
+  Pan's Pipe:
+  - dr. jon's - pan's pipe
   Runaway:
   - dr. jon's - runaway
   - dr. jon's - runaways
@@ -1973,6 +2371,8 @@ Edge:
   Sensitive Skin:
   - edge - sensitive skin
 Edwin Jagger:
+  Aloe Vera:
+  - edwin jagger aloe vera
   Sandalwood:
   - edwin jagger - sandalwood
 Eleven:
@@ -1981,10 +2381,13 @@ Eleven:
   '5':
   - eleven - 5
   - eleven - five
+  Apollo:
+  - eleven shaving - apollo
   Blue Spruce:
   - eleven - blue spruce
   Cedar, Vetiver & Sweetgrass:
   - eleven - cedar, vetiver & sweetgrass
+  - eleven - cedar, vetiver, and sweetgrass
   Clary Sage & Violet:
   - eleven - clary sage & violet
   Lime and Basil:
@@ -1995,6 +2398,12 @@ Eleven:
   - eleven - sicilian lemon
   - eleven sicilian lemon
 Elysian:
+  Atlantis Blue:
+  - elysian soap shop - atlantis blue
+  Augustus:
+  - elysian - augustus
+  Aurelius:
+  - elysian - aurelius
   Cherie Tobacco:
   - elisian cherie tobacco
   - elysian "cherie tobacco"
@@ -2007,13 +2416,20 @@ Elysian:
   - elysian soap shop - el dorado
   Green Fig:
   - elysian - green fig
+  Olympus:
+  - elysian soap shop - olympus
   Shaved Ice:
   - elysian - shaved ice
+  - elysian soap shop - shaved ice soap
   Styx:
   - elysian - styx
 Ethos:
+  Break the Chains:
+  - ethos - break the chains
   Dragonsbeard:
   - ethos grooming essentials - dragonsbeard
+  Forest Dragon:
+  - ethos - forest dragon
   Lavender Suprême:
   - ethos - lavender supreme
   - ethos grooming - lavender supreme
@@ -2044,10 +2460,14 @@ Eufros:
   - eufros - vetiver de haití
   - eufros vetiver de haití
 Extro Cosmesi:
+  Absinthium:
+  - extro cosmesi - absinthium
   Absinthium Artemisia:
   - extro cosmesi - absinthium atemisia
   Caffè:
   - extro cosmesi - caffe
+  Frà Rinik:
+  - extro cosmesi - fra rinik
   Liquirizia & Magnolia:
   - extro cosmesi - liquiriza magnolia
   - extro cosmesi - liquirizia & magnolia
@@ -2056,9 +2476,19 @@ Extro Cosmesi:
   The End:
   - extro - the end (brut dupe)
   - extro cosmesi - the end ( brut dupe)
+  - extro- the end (brut dupe)
+Faena:
+  Taurus:
+  - faena - taurus
 Fanzine Saponifications:
   Almost There:
   - fanzine saponifications - almost there
+  BergaNOT 22:
+  - fanzine saponifications - berganot 22
+  - fanzinesapone - bergamote22
+  Beta Banana:
+  - fanzine saponifications - beta b
+  - fanzine saponifications - beta banana
   Bubblegum Rose:
   - fanzine saponifications - bubblegum rose
   Caravaggio:
@@ -2066,12 +2496,21 @@ Fanzine Saponifications:
   - fanzine caravaggio
   - fanzine sapone - caravaggio
   - fanzine saponifications - caravaggio
+  - fanzine saponifications - caravaggio (smudge)
   - fanzine saponifications - caravaggio soap
+  - fanzine saponifications - caravagio soap
   - fanzine saponifications - carvaggio
   - fanzine soaponifications - caravaggio
   - franzine saponifications - caravaggio
   Cool Bro Dude Man:
   - fanzine saponifications - cool bro dude man
+  P.S. Rittenhouse:
+  - fanzine saponifications - p. s. rittenhouse
+  - fanzine saponifications - p.s. rittenhouse
+  - fanzine saponifications - ps rittenhouse
+  - fanzine saponifications - ps. rittenhouse
+  - fanzine saponifications - rittenhouse
+  - fanzinesapone - p.s. rittenhouse
   Testing... Testing:
   - fanzine saponifications - testing
   - fanzine saponifications - testing... testing
@@ -2089,10 +2528,14 @@ Fanzine Saponifications:
   - 'fanzine saponifications - this is not a test - localizedstringkey(key: "puck",
     hasformatting: false, arguments: )'
   - 'fanzine saponifications - this is not a test issue #0'
+  - fanzine saponifications - this is not a test issue 0
+  - fanzine saponifications - this is not a test issue no. 0
   - fanzine saponifications - this is not a test soap
   - fanzine saponifications - tinat
   - fanzine saponifications not a test
   - fanzine saponifications this is not a test
+  - fanzine saponifications- this is not a test (smudge)
+  - fanzine saponificatios - this is not a test issue no. 0
   - fanzine saponifocations - this is not a test
   - fanzine saponifocations - this is not a test issue
   - fanzine saponifocations - this is not a test issue 0
@@ -2105,6 +2548,7 @@ Fendrihan:
   - fendrihan - coconut vanilla
 Fine Accoutrements:
   American Blend:
+  - fine accouterments - american blend
   - fine accoutrements - american blend
   - fine accoutrements- american blend
   Fresh Vetiver:
@@ -2112,13 +2556,25 @@ Fine Accoutrements:
   Italian Citrus:
   - fine accoutrements 21st century italian citrus
   - fine shave soap (italian citrus)
+  L'Orange Noir:
+  - fine l'orange noir
   Platinum:
   - fine accoutrements - platinum
 First Line Shave:
+  '''90''s Rewind Vol 2':
+  - first line shave 90's rewind vol 2
   Dapper Man:
   - xicano design / first line shave - dapper man
   Dark Necessities:
   - first line shave - dark necessities
+  Fallout:
+  - first line shave - fallout
+  Illustrious Oud:
+  - first line shave - illustrious oud
+  James:
+  - first line shaves - james
+  North French Broad Ave:
+  - first line shave - n. french broad ave
   Room 237:
   - first line shave - room 237
   Vivienne in Wonderland:
@@ -2130,14 +2586,22 @@ Floris London:
   No. 89:
   - floris - no 89
   - floris london - no. 89
+FSC:
+  Hinoki:
+  - fsc - hinoki
 Funky Gallo Toiletries:
   Damasco:
   - funky gallo toiletries - damasco
+  Fiocco:
+  - funky gallo toiletries - fiocco
 Gentleman's Nod:
   Courant Éternel:
   - gentleman's nod courant eternel
   Ernest:
   - gentleman's nod - ernest
+  George:
+  - gentleman's nod - george
+  - gentlemen's nod george
   Jackie:
   - gentleman's nod - jackie
   - gn jackie
@@ -2146,6 +2610,9 @@ Gentleman's Nod:
   - gentleman's nod - juniper reverie soap
   Kensei:
   - gentleman's nod - kensei
+  MizuKaze:
+  - gentleman's nod - mizukaze
+  - gentleman's nod mizukaze
   Musashi:
   - gentleman's nod - musashi
   - gentleman's nod musashi
@@ -2155,6 +2622,8 @@ Gentleman's Nod:
   Royale:
   - gentleman's nod - zaharoff signature royale
   - gentleman's nod zaharoff signature royale
+  Sidama:
+  - gentleman's nod - sidama
   Sir Arthur:
   - gentleman's nod - sir arthur
   Tusitala:
@@ -2164,6 +2633,8 @@ Gentleman's Nod:
 Geo. F. Trumper:
   Eucris:
   - geo f. trumper - eucris
+  Spanish Leather:
+  - geo trumper - spanish leather
 Gillette:
   Gel:
   - gillette pro
@@ -2176,9 +2647,20 @@ Ginger's Garden:
   - gingers garden old spice glycerin
   Vizier:
   - ginger's garden vizier soap
+Glacier Smoothie:
+  Shave Cake:
+  - glacier smoothie - shave cake
+Golddachs:
+  Classis Soap Flakes:
+  - golddachs - classic shaving soap flakes
+Goodfellas Smile:
+  Amber Fougere:
+  - the goodfellas' smile - amber fougere (lavender & sandalwood)
 Grooming Dept:
   After the Fire:
   - grooming dept - after the fire
+  Almond Vanilla:
+  - grooming dept. - almond vanilla
   Cascade:
   - grooming dept - cascade
   - grooming dept - cascade soap
@@ -2192,12 +2674,18 @@ Grooming Dept:
   Laundry II:
   - grooming dept - laundry ii
   - grooming dept - laundry ii soap
+  - grooming dept kairos tallow shaving soap - laundry ii
+  - grooming dept kairos tallow shaving soap - laundry ii soap
   Laundry III:
   - grooming dept - laundry iii soap
   Le Tabac:
   - grooming dept - le tabac
+  Lemon Bay:
+  - grooming dept - lemon bay donkey milk soap
   Maleki:
   - grooming dept - maleki
+  Rêverie:
+  - grooming dept - reverie
   Sandalwood Nobile:
   - grooming dept - sandalwood nobile
   Tobacco Oud:
@@ -2209,15 +2697,29 @@ Grooming Dept:
 HAGS:
   Chá Nova:
   - hags artisan - cha nova
+  - hags artisan - cha nova soap
+  - hags chá nova
   Darkside:
   - hags - darkside (original release)
+  Isla Muerta:
+  - hags- isla muerta soap
+  Megalodon:
+  - hags artisan - megalodon soap
   Return of the Mean One II:
   - hags - return of the mean one ii
   Ritual:
   - hags - ritual
+  - hags artisan- ritual
+  The Trench:
+  - hags artisan - the trench
+  Timescape:
+  - hags - timescape
 Happy Chap:
+  Ghost Stories:
+  - happy chap - ghost stories
   Smoke+Caramel:
   - happy chap - smoke caramel
+  - happy chap - smoke caramel soap
 Haslinger:
   Meeresalgen:
   - haslinger - meeresalgen
@@ -2229,9 +2731,23 @@ Haslinger:
   - haslinger - schafmilch
   - haslinger schafmilch
 Hearth and Altar:
-  Poseidon:
-  - hearth and altar - poseidon
+  Ambrosial Almond:
+  - hearth & altar - ambrosial almond
+  High Olympus Fougère:
+  - hearth and altar - zeus fougere
+  - hearth and altar - zeus/fougere
+  - hearth and altar high olympus fougère
+  Liminal Black Fig & Tobacco:
+  - hearth and altar liminal black fig & tobacco
+  Radiant Citrus:
+  - hearth and alter radiant citrus
+  Shadows & Sandalwood:
+  - hearth and altar - hades (sandalwood)
+  Wildwood Huntress:
+  - hearth and alter wildwood huntress
 Hendrix Classics & Co:
+  Alpine Forest:
+  - hendrix classics & co - alpine forest
   Barbershop:
   - hc&c barbershop
   Lavender:
@@ -2240,6 +2756,7 @@ Hendrix Classics & Co:
   - hc&c - neon moon soap
   Qing Long:
   - hendrix classics & co - qing ling
+  - hendrix classics & co - qing long
   Roasted:
   - hc&c roasted
   - hendrix classics & co - roasted
@@ -2248,9 +2765,14 @@ Hendrix Classics & Co:
   Year of the Dragon:
   - hc&c - year of the dragon soap
 Henri et Victoria:
+  Absinthe:
+  - henri et victoria - absinthe
   Amande:
   - hdv amande
   - henri et victoria - amande
+  - hev amande
+  Bay Rum:
+  - henri et victoria bay rum soap
   Coeur de Vetiver:
   - henri et victoria - coeur de vetiver
   Cognac and Cuban Cigars:
@@ -2260,6 +2782,7 @@ Henri et Victoria:
   - henri et victoria cognac and cuban cigar (triple milled)
   - henri et victoria cognac and cuban cigar triple milled
   - henri et victoria cognac and cuban cigars
+  - hev cognac & cuban cigars
   Duc de Santal:
   - henri et victoria - duc de santal
   - henri et victoria duc de santal
@@ -2268,19 +2791,36 @@ Henri et Victoria:
   La Poire Française:
   - henri et victoria - la poire francaise
   - henri et victoria - la poire française
+  - henri et victoria - la poire française 🍐
   Lime:
   - henri et victoria - lime
+  Navigateur:
+  - henri et victoria - navigateur
+  Unscented:
+  - henri et victoria unscented
 Henry Cavendish:
   Himalaya:
   - henry cavendish himalaya
 Henson:
   Protect:
   - henson protect
+Herc Soap Co:
+  Ranger:
+  - herc soap co - ranger
+Heritage Hill:
+  Continental:
+  - heritage hill continental
+  Founder's Cut:
+  - heritage hill founder's cut
+  Libertas:
+  - heritage hill libertas
 Hess:
   Professional Mug Soap:
+  - hess - professional mug soap
   - hess professional mug soap
 Highland Springs Soap Co.:
   Eclipse (with APR):
+  - apr / hssc - eclipse
   - highland springs co./australian private reserve - eclipse
   - highland springs soap co./australian private reserve - eclipse
   - hssc / ap reserve- eclipse soap
@@ -2322,6 +2862,7 @@ House of Mammoth:
   - house of mammoth - ausflug
   Avocado (Cream):
   - house of mammoth - avocado
+  - house of mammoth - avocado (maggard exclusive)
   - house of mammoth avocado (cream)
   Beloved:
   - house of mammoth - beloved
@@ -2389,6 +2930,7 @@ House of Mammoth:
   - house of mammoth - green kryptonite - none
   - house of mammoth - kryptonite
   - house of mammoth - kryptonite (2005)
+  - house of mammoth - kryptonite (green)
   - house of mammoth - kryptonite 1
   - house of mammoth - kryptonite 2
   - house of mammoth - kryptonite 2 - none
@@ -2412,8 +2954,12 @@ House of Mammoth:
   - house of mammoth - rumble
   Santa Noir:
   - house of mammoth - santa noir
+  - house of mammoth - santa noir for r/wetshaving
   Santal Noir (with APR):
   - apr / hom - santal noir
+  - apr / mammoth soaps santal noir
+  - apr/house of mammoth - santal noir
+  - australian private reserve/house of mammoth - santal noir
   - australian private reserve/mammoth soaps - santal noir
   - mammoth soaps & ap reserve - santal noir
   Shire:
@@ -2423,6 +2969,8 @@ House of Mammoth:
   - house of mammoth - shire (marketing describes "summery tobacco")
   - house of mammoth - shire (smells green)
   - house of mammoth - shire 2
+  - house of mammoth shire 2
+  - house of mammoth shire soap
   - mammoth soaps - shire
   Smash:
   - house of mammoth - smash
@@ -2444,6 +2992,7 @@ House of Mammoth:
   - mammoth stones
   Tobacconist:
   - hom tobacconist
+  - house of mammoth - the tobacconist
   - house of mammoth - tobacconist
   - house of mammoth - tobaconnist
   - house of mammoth tobacconist
@@ -2459,6 +3008,7 @@ House of Mammoth:
   - house of mammoth - you & i
   - house of mammoth - you & i (will
   - house of mammoth - you & i (will die)
+  - house of mammoth - you & i will die
   - house of mammoth - you and i (will die)
   - house of mammoth - you and i will die
   - house of mammoth you and i will die
@@ -2471,6 +3021,7 @@ House of Mammoth:
 Hub City Soap Company:
   Pages:
   - hub city soap co -- pages
+  - hub city soap co. - pages
 Hwayeon Soap Co.:
   Dr. Lion Elixir of Blooms:
   - hwayeon soap co. dr. lion elixir of blooms
@@ -2479,6 +3030,9 @@ Imaginary Authors:
   - imaginary authors - the soft lawn
   Telegrama:
   - imaginary authors - telegrama
+Jikoryen:
+  Shaving Stick:
+  - jikoryen
 Jordan's:
   Blueberry Muffin:
   - jordan's - blueberry muffin
@@ -2486,6 +3040,7 @@ Jordan's:
   - jordan's - lime
 Kali Flower Organics:
   Tjära (Pine Tar):
+  - kaliflower organics- organic pine tar
   - kaliflower organics- pine tar soap
 Kent:
   Luxury:
@@ -2498,32 +3053,45 @@ KEPKINH:
   - kepkinh - aroania
   Artemis:
   - kepkinh - artemis
+  Athena:
+  - kepkinh - athena
   Barbersoap:
+  - kepkinh - barbersoap
   - kepkinh barbersoap
   Erebus:
   - kepkinh - erebus
   - kerkinh - erebus
   Hades:
   - kepkinh hades
+  Zeus:
+  - kepkinh - zeus
 Key West:
   Shaving Cream:
   - keywest
 Klar Seifen:
   Kabinett:
   - klar - kabinett
+  Sandalwood:
+  - klar seifen - sandalwood
 Kyna:
   Shave Cream:
   - kyna
 L'Occitane:
   Cade:
   - l'occitane - cade
+La Châtelaine:
+  Bourbon Vanilla:
+  - lachatelaine - bourbon vanilla soap
 La Toja:
   Shaving Soap:
   - la toja
+  - la toja - la toja
 Lainess:
   Cerise:
   - asinerie de la vioune - cerise
 Lakewood Soap Company:
+  Greenhouse Gases:
+  - lakewood soap co. - greenhouse gases
   Lard Lass Two Weeks With Pay:
   - lakewood soap co. - lard lass "two weeks with pay"
 Le Père Lucien:
@@ -2531,11 +3099,16 @@ Le Père Lucien:
   - le père lucien - bay rum
   - le père lucien bay rum
   Cologne-Fougère:
+  - le pere lucien cologne fougere
   - le pere lucien cologne fougere mix
   - le pere lucien cologne-fougere
   - le père lucien - cologne fougère
   - le père lucien - fougère
+  Cèdre-Patchouli:
+  - le pere lucien cedre-patchouli
+  - le père lucien - cèdre patchouli
   Traditionnel:
+  - le père lucien - traditionnel
   - le père lucien traditionnel
 LEA:
   Classic:
@@ -2543,14 +3116,26 @@ LEA:
   Shaving Stick:
   - lea
   - lea - shave cream original
+  - lea- original
+  - les
+Lisa's Naturals:
+  Mash Up:
+  - lisa's natural herbal creations mash up
 Lockhart's:
   Goon Grease:
   - lockhart's goon grease
+  Mariana Trench:
+  - lockharts - mariana trench
+Lodrino:
+  God Shave the Queen:
+  - lodrino soaps - god shave the queen
 London Razors:
   Coffee & Contemplation:
   - london razors - coffee & contemplation
+  - london razors/summer break soaps - coffee & contemplation
 Long Rifle Soap Co.:
   Hivernant:
+  - long rifle - hivernant
   - long rifle hivernant
   - long rifle shaving co hivernant
   - long rifle soap co - hivernant
@@ -2560,52 +3145,82 @@ Long Rifle Soap Co.:
   - long rifle co. tabac no. 1
   - long rifle soap co. tabac no. 1
 Los Jabones de Joserra:
+  Kush:
+  - los jabones de joserra - kush
   Noir:
   - los jabones de joserra - noir
   Orfeo:
   - los jabones de joserra - orfeo
   Passion Incense:
   - los jabones de joserra - passion incense
+  Sweet & Dandy:
+  - los jabones de josera - sweet & dandy
 Lucky Tiger:
   Shave Cream:
   - lucky tiger
 Løthur:
   Calm:
   - lothur - calm
+  - lothur calm
 MacDuff's Soap Company:
   Autumn Cabin:
   - macduff's soap company autumn cabin
   Back Country Bourbon:
   - macduff's soap co. - back country bourbon
+  Badlands:
+  - macduff's - badlands
+  - macduffs badlands + menthol
+  - macduffs the badlands
   Birch + Root:
   - macduff's soap company - birch + root
+  - macduffs birch + root
   Birth of the Cool:
   - macduff's soap company - birth of the cool
+  Black Rock:
+  - macduff's soap co. - black rock
   Cardamom Chai:
   - macduff's - cardamom chai
   Catalina:
   - macduff's soap company - catalina
   - macduffs soap co. - catalina
+  Chinook Sky:
+  - macduff's soap company - chinook sky
+  Christmas Morning:
+  - macduff's soap company - christmas cabin morning
+  Christmas Sky:
+  - macduff's christmas sky
   Christmas Tree:
   - macduffs soap company - christmas tree
   Coast to Coast:
   - macduff's - coast to coast
   - macduff's soap company - coast to coast
+  Cream Soda:
+  - macduff's - cream soda
   Hallowed Sky:
   - macduffs soap company - hallowed sky
   Haunted Cabin:
   - macduff's soap company - haunted cabin
   Kananaskis Explorer:
   - macduff's - kananaskis explorer
+  - macduff's soap co. - kananaskis explorer
+  - macduffs soap company - kananaskis explorer
+  Lilacs in Bloom:
+  - macduffs - lilacs in bloom
   Little Caribbean:
   - macduffs soap co. x pasteur - little caribbean
+  NYC Odyssey:
+  - mac duffs nyc odyssey
+  - macduffs nyc odyssey
   Old Strathcona:
   - macduffs soap co - old strathcona
+  - macduffs soap company - old strathcona
   Prairie Rum Runner:
+  - macduff's soap co. - prairie rum runner
   - macduffs soap co. - prairie rum runner
   - macduffs soap company - prairie rum runner
   Prarie Blooms:
   - macduff's soap co. - prairie blooms
+  - macduffs soap co - prairie blooms
   Rosemary Sea Salt:
   - macduffs soap company - explorer series rosemary sea salt
   - macduffs soap company - rosemary sea salt
@@ -2613,10 +3228,12 @@ MacDuff's Soap Company:
   Spring Cabin:
   - macduffs soap company - spring cabin
   Summer Cabin:
+  - macduff soap co - summer cabin
   - macduffs - summer cabin
   Trail Tobacco:
   - macduff's co. - trail tobacco
   - macduff's company trail tobacco
+  - macduff's soap co. - trail tobacco
   - macduff's trail tobacco
   - macduffs company - trail tobacco
   Wild Rose Country:
@@ -2638,9 +3255,11 @@ Maggard Razors:
   - maggard razors - limes & bergamot
   - maggard razors limes and bergamot
   London Barbershop:
+  - arianna and evans uno supplemented with maggards london barbershop
   - maggard london barbershop
   - maggard razors (through the fire fine craft) - london barbershop
   - maggard razors - london barbershop
+  - maggards - london barbershop
   - maggards london barbershop
   Mango Sage Tea:
   - maggard razors - mango sage tea
@@ -2663,6 +3282,7 @@ Mama Bear's Soaps:
   - mama bear's soap haitian vetiver
   - mama bear's soaps haitian vetiver
   Sample Mashup:
+  - mama bear's soap - sample mash up
   - mama bear's soap mash up
   - mama bear's soap mash-up (aged spice/vetiver/nag champa)
   - mama bear's soap tri-mix
@@ -2672,10 +3292,13 @@ Martin de Candre:
   - martin de candre absinthe
   - martin de candre absinthe 200g
   - martin de candre absynthe
+  - mdc absynthe
   Agrumes:
   - martin de candre - agrumes
+  - martin de candre - argumes
   - martin de candre agrumes
   - mdc agrumes
+  - mdc agrumes + menthol
   Fougère:
   - martin de canard fougére
   - martin de candre - fougere
@@ -2684,10 +3307,14 @@ Martin de Candre:
   - martin de candre fougère
   - mdc fougere
   - mdc fougère
+  - mdc- fougère
   Magellan:
   - martin de candre - magellan
+  - mdc - magellan
+  - mdc magellan
   Nature:
   - martin de candre nature
+  - martin de candre nature 50ml
   Original:
   - martin de candre - original
   - martin de candre original
@@ -2703,6 +3330,7 @@ Martin de Candre:
   - martin de candre vetiver jar
   - martin de candre vetyver
   - martin de candri - vetyver
+  - mdc - vetyver
   - mdc vetiver
   - mdc vetyver
   - mdc vetyver brain bowl
@@ -2732,6 +3360,7 @@ Martin de Candre:
   - mdc vetyver brain bowl - (day 11)
   - mdc vetyver brain bowl - day 12
   - mdc vetyver brain bowl - day 2
+  - mdc- vetyver
 Martin's Razors:
   Sandalwood & Amber:
   - martin's razors - sandalwood and amber
@@ -2753,7 +3382,12 @@ Mastro Miche:
 Men Rock:
   Sicilian Lime:
   - men rock sicilian lime
+MERShaving:
+  Old Timer Spice:
+  - mershaving - old timer spice
 Mickey Lee Soapworks:
+  Bodhisattva:
+  - mickey lee soapworks - bodhisattva vegan base
   Cape Verde:
   - mickey lee soapworks - cape verde
   Grand Havana:
@@ -2763,6 +3397,8 @@ Mickey Lee Soapworks:
   - mickey lee soapworks - jefferson square
   Lū'au:
   - mickey lee soapworks - lu'au
+  Ruby's Green:
+  - mickey lee soapworks - ruby's green
   Souq:
   - mickey lee soapworks - souq soap
   The Kraken:
@@ -2774,6 +3410,7 @@ Mike's Natural Soaps:
   - mike's natural soaps - barbershop
   - mikes natural soaps - barbershop
   Bay Rum:
+  - mike's natural bay rum
   - mike's natural soap - bay rum
   - mike's natural soaps - bay rum
   - mike's natural soaps bay rum
@@ -2781,6 +3418,7 @@ Mike's Natural Soaps:
   Bergamot, Orange, Ylang-ylang:
   - mikes natural - bergamot, orange, ylang ylang
   Honey & Grapefruit:
+  - mike's natural soap - honey & grapefruit
   - mike's natural soaps - honey & grapefruit
   - mike's natural soaps - honey and grapefruit
   - mike's natural soaps honey & grapefruit
@@ -2798,8 +3436,10 @@ Mike's Natural Soaps:
   Lavandin & Eucalyptus:
   - mikes natural - lavandin & eucalyptus
   Lemongrass & Eucalyptus:
+  - mike's natural soaps - lemongrass & eucalyptus
   - mikes natural - lemongrass & eucalyptus; peppermint & rosemary, lime
   Lime:
+  - mike natural soaps - lime
   - mike's natural - lime
   - mike's natural shaving soap - lime
   - mike's natural soap - lime
@@ -2809,6 +3449,7 @@ Mike's Natural Soaps:
   - mike's - ocbp
   - mike's - orange, cedarwood, and black pepper
   - mike's - orange, cedarwood, black pepper
+  - mike's natural - orange, cedarwood and black pepper
   - mike's natural soap - orange cedarwood black pepper
   - mike's natural soap - orange, cedarwood, and black pepper
   - mike's natural soap - orange, cedarwood, black pepper
@@ -2821,7 +3462,9 @@ Mike's Natural Soaps:
   - mike's natural soaps - orange, cedarwood, & black pepper
   - mike's natural soaps - orange, cedarwood, and black pepper
   - mike's natural soaps - orange, cedarwood, black pepper
+  - mike's natural soaps orange, cedarwood & black pepper
   - mike's natural soaps orange, cedarwood, & black pepper
+  - mike's natural soaps orange, cedarwood, black pepper
   - mike's orange, cedarwood, black papper
   - mike's orange, cedarwood, black pepper
   - mikes natural - orange cedar and black pepper
@@ -2829,6 +3472,7 @@ Mike's Natural Soaps:
   Rose, Patchouli, Cedarwood:
   - mike's natural soap - rose patchouli cedarwood
   - mike's natural soap - rose, patchouli, cedarwood
+  - mike's natural soaps - cedarwood, patchouli, rose
   - mike's natural soaps - rose patchouli cedarwood
   - mike's natural soaps - rose, patchouli, cedarwood
   - mikes natural soap - rose patchouli cedarwood
@@ -2843,6 +3487,7 @@ Mike's Natural Soaps:
 Miraculum:
   Lider:
   - lider classic
+  - lider- classic
   - miraculum - lider
 Mitchell's:
   Wool Fat:
@@ -2862,11 +3507,15 @@ Mitchell's:
   - mwf - tallow formula
   - mwf tallow version
   - mwf, tallow formula
+Monsieur Barbier:
+  Better Shave:
+  - monsieur barbiere - better shave
 Moon Soaps:
   Amaretto Speciale:
   - moon soaps - amaretto speciale
   - moon soaps amaretto speciale
   Astoria:
+  - moon soaps - astoria
   - moon soaps astoria
   Bixby:
   - moon soaps - bixby
@@ -2881,6 +3530,7 @@ Moon Soaps:
   - moon soaps - santa cruz
   Tobacco Flower:
   - moon soaps - tobacco flower
+  - moon soaps - tobacco leaf
   - moonsoaps - tobacco flower
   Trade Winds:
   - moon soap - trade winds
@@ -2897,7 +3547,12 @@ More for You:
 Moss Hill:
   Blue:
   - moss hill blue
+Mudder's Soap:
+  Mintyberg:
+  - mudders soap - mintyberg
 Murphy and McNeil:
+  DFS - Horizons (with Black Mountain Shaving):
+  - dfs - horizons by murphy and mcneil / black mountain
   Gael Laoch Black:
   - m&m gael laoch
   - murphy & mcneil - gael laoch black (aon)
@@ -2913,6 +3568,7 @@ Murphy and McNeil:
   - murphy and mcneil - nantahala
   Old Sport:
   - murphy & mcneal old sport soap
+  - murphy & mcneil "old sport"
   - murphy & mcneil old sport
   - murphy & mcneil old sport mix
   - murphy and mcneil - old sport
@@ -2926,11 +3582,16 @@ Musgo Real:
   Classic Scent:
   - musgo real - classic scent
   - musgo real - original
+  - musgo real - original scent
 Mystic Water:
   Brown Windsor:
   - mystic water soap - the brown windsor
+  Orange Spice Tea:
+  - mystic water - orange spice tea
   Sweet Briar (Pipe Tobacco):
   - mystic water - sweet briar (pipe tobacco)
+  Windjammer:
+  - mystic water - windjammer
 Mäurer & Wirtz:
   Sir Irisch Moos:
   - mäurer & wirtz - sir irisch moos
@@ -2971,6 +3632,7 @@ Mäurer & Wirtz:
   - tabac - original
   - tabac - original (new formula)
   - tabac cream - vegan
+  - tabac cream tube - vegan
   - tabac in tallow base
   - tabac og
   - tabac og soap
@@ -2986,6 +3648,7 @@ Mäurer & Wirtz:
   - tabac tallow base
   - tabac tallow refill
   - tabac tub
+  - tabac vegan
   - tabac vegan 2024
   - tabac vegan 2024 - hard soap
 Mühle:
@@ -2996,10 +3659,14 @@ Mühle:
 Nawal's:
   Summer Bliss:
   - nawal's summer bliss
+Night Watch:
+  Kaubōi:
+  - night watch - kauboi
 Nivea:
   Original Shaving Cream:
   - nivea
   Sensitive Shaving Cream:
+  - nivea - sensitive
   - nivea sensitive
 Noble Otter:
   '''Tis the Season':
@@ -3008,6 +3675,9 @@ Noble Otter:
   - noble otter - 'tiss the season
   - noble otter - tis the season
   - noble otter tis the season
+  Ace:
+  - noble otter - ace
+  - noble otter ace
   Bare:
   - noble otter - bare
   - noble otter bare
@@ -3029,6 +3699,7 @@ Noble Otter:
   - noble otter firefighter
   - 'noble otter: firefighter'
   Hamam:
+  - no - hamami
   - no hamam
   - no hamami
   - noble otter - hamam
@@ -3060,8 +3731,10 @@ Noble Otter:
   Lonestar:
   - noble otter - lonestar
   - noble otter lonestar
+  - noble otter soap company - lonestar
   Lorekeeper:
   - noble otter - lorekeeper
+  - noble otter lorekeeper
   Marbles (with APR):
   - australian private reserve/noble otter - marbles
   - noble otter/australian private reserve - marbles
@@ -3080,8 +3753,10 @@ Noble Otter:
   - noble otter neon sun
   Northern Elixir:
   - no northern elixir
+  - noble otter - northern elixer
   - noble otter - northern elixir
   - noble otter northern elixir
+  - noble otter- northern elixir
   Orbit:
   - no orbit
   - noble otter - orbit
@@ -3089,6 +3764,7 @@ Noble Otter:
   - orbit
   Plunder:
   - noble otter - plunder
+  - noble otter- plunder
   Rainroot:
   - noble otter - rainroot
   - noble otter rainroot
@@ -3099,6 +3775,10 @@ Noble Otter:
   - 'noble otter: rawr'
   Texaus (with APR):
   - no/ap texaus
+  - noble otter / ap reserve - texaus soap
+  - noble otter / australian private reserve - texaus soap
+  - noble otter x australian private reserve - texaus
+  - noble otter/apr- texaus
   - noble otter/australian private reserve - texaus
   The Night Before:
   - (noble otter - the night before - soap)[
@@ -3108,6 +3788,7 @@ Noble Otter:
   - noble otter the night before
   Thé Noir et Vanille:
   - no thé noir et vanille
+  - noble otter - the noir et vanille
   - noble otter - thé noir et vanille
   - noble otter the noir et vanilla
   - noble otter the noir et vanille
@@ -3131,6 +3812,9 @@ Nomad Theory:
   - nomad theory - london
   Sorrento:
   - nomad theory sorrento
+Nordic Shaving Company:
+  Citrus & Ginger:
+  - nordic shave company - citrus & ginger
 Nõberu of Sweden:
   Sandalwood:
   - nõberu of sweden - sandalwood
@@ -3138,11 +3822,18 @@ Oaken Lab:
   Batavia Barber:
   - oaken lab - batavia barber
   - oaken lab - batavia barber - none
+  - oaken lab batavia barber
+  Earth of Mankind:
+  - oaken lab - earth of mankind
   Sanctum:
+  - oaken lab - sanctum
   - oaken lab sanctum
   Serious Moonlight:
   - oaken lab - serious moonlight
   - oaken lab serious moonlight
+Oatcake:
+  Lime:
+  - oatcake - lime
 Obsessive Soap Perfectionist:
   Old Gold:
   - obsessive soap perfectionist - old gold
@@ -3152,6 +3843,8 @@ Officina Artigiana:
 Ogallala:
   Bay Rum:
   - ogalalla bay rum toiletry co. - bay rum
+  - ogallala bay rum - bay rum
+  - ogallala bay rum and sweet orange
   NWSC 2018:
   - ogallala bay rum - nwsc 2018
 Old Spice:
@@ -3160,13 +3853,17 @@ Old Spice:
   - old spce
   - old spice
   - old spice - classic
+  - old spice - old spice
   - old spice - old spice original
   - old spice - original
+  - old spice - shaving creme
+  - old spice canned
   - old spice original
   - shulton - old spice
   - sulton old spice
   Fresh Lime:
   - old spice fresh lime
+  - old spice lime
 Oliver Blossom Soap Co.:
   Banana Cabana:
   - olive blossom soap co. - banana cabana
@@ -3195,13 +3892,23 @@ PAA:
   Lavender Planet:
   - paa lavender planet
   - phoenix artisan accoutrements - lavender planet
+  Shave Chaser:
+  - paa - shave chaser ck-6
+  Tea Party 508:
+  - paa - tea party 508
+Paislay's:
+  Lavender:
+  - paislay's lavender soap
+  - paislays - lavender scented
 Palmolive:
   Classic:
   - palmolive
   - palmolive - classic
   - palmolive - classical cream da barba
+  - palmolive - for men
   - palmolive classic
   - palmolive classic with palm extract
+  - palmolive green
   Rinfrescante:
   - palmolive - rinfrescante
   Sensitive:
@@ -3213,15 +3920,23 @@ Pannacrema:
 Phoenix & Beau:
   Sanskrit:
   - phoenix and beau sanskrit
+Pink Woolf:
+  Oudh & Sandalwood:
+  - pink woolf - oudh & sandalwood
 Proraso:
   Aloe and Vitamin E (Blue):
   - proraso - aloe and vitamin e
   - proraso - aloe and vitamin e - cream)
+  - proraso - protective w/ aloe and vitamin e
   - proraso blue
   - proraso protective shaving cream (blue)
+  Azur Lime:
+  - proraso azur lime
   Green Tea & Oat (White):
   - proraso - green tea & oat
+  - proraso - pelli sensibili (con avena e tè verde)
   - proraso - white
+  - proraso sensitive
   - proraso sensitive shaving cream (white)
   - proraso sensitive shaving soap (white)
   - proraso white
@@ -3234,25 +3949,39 @@ Proraso:
   - proraso - menthol and eucalyptus
   - proraso - menthol and eucalyptus soap
   - proraso - refreshing
+  - proraso - refreshing (a.k.a. green)
+  - proraso - rinfrescante
   - proraso - rinfrescante (aka green)
+  - proraso - rinfrescante eucalyptus & menthol
   - proraso eucalyptus
   - proraso green
   - proraso green sapone da barba rinfrescante con olio di eucalipto e mentolo
+  - proraso green soap
   - proraso menthol & eucalyptus
   - proraso refreshing
   - proraso refreshing shaving cream (green)
   - proraso refreshing shaving soap (green)
+  - prosaso - refreshing and toning (green)
+  - prosaso - tube refreshing and toning (green)
+  - prosaso bowl refreshing formula (green)
+  - prosaso tube - refreshing and toning (green)
+  - prosaso tube refreshing and toning (green)
   - triple milled soap with (just a touch), proraso
   Sandalwood (Red):
   - proraso - coarse beards - sandalwood oil & shea butter
+  - proraso - nourishing (red/sandalwood)
   - proraso - red
   - proraso - sandalwood
   - proraso -red barbe dure
   - proraso -red sapone da barba
+  - proraso nourishing shaving cream (red)
   - proraso red
   - proraso red sandalwood
+  - proraso red shave
+  - proraso red soap
   - proraso red super formula
   - proraso sandalwood
+  - proroaso red + menthol
 Pré de Provence:
   No. 63:
   - pdp no 63
@@ -3270,6 +3999,9 @@ Purely Skinful:
 Ralph Lauren:
   Safari:
   - ralph lauren - safari
+Rasozero:
+  Rinfrescante:
+  - razozero menthol
 Razor Emporium:
   Barbershop:
   - razor emporium barbershop soap
@@ -3277,6 +4009,9 @@ Razor Emporium:
   - razor emporium element 47
   Heritage:
   - razor emporium heritage
+  Nordic:
+  - razor emporium - nordic
+  - razor emporium nordic
 RazoRock:
   Acqua:
   - razorock acqua
@@ -3284,7 +4019,10 @@ RazoRock:
   American Barber:
   - razorock american barber
   - rr american barber
+  For New York:
+  - razorock - for new york
   Green Label:
+  - razorock green
   - razorock green label
   Lime Burst:
   - razorock what the puck - lime
@@ -3292,8 +4030,12 @@ RazoRock:
   - razorock - mudder focker
   Sicily:
   - razorock - sicily
+  Son of Zeus:
+  - razorock - son of zeus
   The Dead Sea:
   - razorock - the dead sea
+  Tuscan Oud:
+  - razorock - tuscan oud
   XXX:
   - razorock xxx
 Red House Farm:
@@ -3301,6 +4043,7 @@ Red House Farm:
   - red house farm - 1920 barbershop
   Frankincence, Anise & Orange:
   - red house farms - frankincense, orange and anise - (aka) pan de muerto
+  - red house farms - frankincense, orange and anise \- (aka) pan de muerto
   Kitchen Sink:
   - red house farm - kitchen sink
   Lumos:
@@ -3312,15 +4055,21 @@ Red House Farm:
   No Scrub:
   - red house farm - no scrub
   - red house farm - no scrubs
+  - red house farm - noscrub - bear tallow
+  - red house farm - noscrub bear tallow r/wetshaving sub exclusive
   - red house farm - noscrub soap
   - red house farm no scrub
   - red house farms - no scrub
   Prairie Dog:
   - red house farm - prairie dog
   Sandalwood & Bourbon:
+  - red house farm - sandalwood & bourbon
   - red house farm sandalwood & bourbon
   Tofino:
   - red house farm - tofino
+Reuzel:
+  Wood & Spice:
+  - reuzel - wood & spice
 Rex Supply Co.:
   '1977':
   - rex supply co. 1977
@@ -3331,6 +4080,11 @@ Rockwell:
   Barbershop:
   - rockwell barbershop
 Rocky Mountain Barber Company:
+  Glacial Spring:
+  - rocky mountain barber glacial spring
+  - rocky mountain glacial spring mixed with an edge of arbo in the old spice mug
+  - rocky mountain shave co. glacial springs soap
+  - rocky mtn barber co glacial spring
   Sandalwood:
   - rocky mountain barber company - sandalwood
 Santa Maria Novella:
@@ -3344,16 +4098,22 @@ Saponificio Varesino:
   - saponificio varesino - 70th anniversary
   - saponificio varesino 70^(th) anniversary
   - saponificio varesino 70th anniversary
+  - saponificio varesino 70th anniversary special edition
   - saponificio varesino settantesimo anniversario - sapone da barba
   80th Anniversary:
   - saponificio varesino - 80th anniversary
+  Cubebe:
+  - sv cubebe
+  - sv cubebe + menthol
   Desert Vetiver:
+  - saponificio varesino - desert vetiver
   - saponificio varesino desert vetiver
   - saponifico varesino - desert vetiver
   Felce Aromatica:
   - saponificio varesino - felce aromatica
   - sv felce aromatica
   Manna di Sicilia:
+  - saponificio varensino manna di sicilia
   - saponificio varesino - manna di sicilia
   Mirto di Sardegna:
   - saponificio varesino - mirto di sardegna
@@ -3368,9 +4128,16 @@ Saponificio Varesino:
 Savonnerie du Nebbiu:
   Savon à Barbe:
   - la savonnerie du nebbiu savon a barbe, savonu du barba
+Savonnière du Moulin:
+  Santal:
+  - savonniere du moulin - santal
 Scentsy:
+  Perfect Gentleman:
+  - scentsy perfect gentleman cream soap
   Sandalwood Tangerine:
   - scentsy - sandalwood tangerine cream soap
+  - scentsy - tangerine dream cream soap
+  - scentsy - tangerine sandalwood cream soap
 Sebum:
   Green:
   - sebum - green
@@ -3380,16 +4147,24 @@ Sebum:
 Shannon's Soaps:
   25th Street Lime:
   - shannon's soaps - 25th street lime
+  - shannon's soaps 25th street lime
   Haymarket Vetiver:
   - shannon's soap's - haymarket vetiver
+  - shannon's soaps haymarket vetiver
   Indigo Oud:
   - shannon's soaps - indigo oud
   Lady Luck:
   - shannon's soaps - lady luck
   Lemon Prosecco:
   - shannon's soaps lemon prosecco
+  NIL:
+  - shannons nil
+  Oh... To Fōu!:
+  - shannon's soaps - oh... tōfou
   Pina Colada:
   - shannon's soaps - piña colada
+  The Scarlet Zone:
+  - shannon's soaps - scarlet zone
   Woody's Victories:
   - shannon's soaps - woody's victories
 Shave Dandy:
@@ -3402,6 +4177,8 @@ Shavologist:
   Invasion:
   - shavologist invasion
   - shavologist invasion set
+  Kailash:
+  - shavologist - kailash
   Ruh Khus:
   - shavologist ruh khus (vetiver)
   The Skull:
@@ -3422,11 +4199,21 @@ Siliski Soaps:
   - siliski - patchouli blend
   Unscented:
   - siliski unscented
+Simpson:
+  Bay Rum:
+  - simpson bay rum
 Soap Commander:
   Charisma:
   - soap commander charisma
+  Courage:
+  - soap commander - courage
   Endurance:
   - soap commander - endurance
+  - soap commander endurance
+Soapy Bathman:
+  Crisp Bay Rum:
+  - soapy bathman bay rum
+  - soapy bathman crisp bay rum
 Southern Witchcrafts:
   Arcane Abyss:
   - southern witchcrafts - arcane abyss
@@ -3438,6 +4225,7 @@ Southern Witchcrafts:
   - southern witchcrafts autumn ash
   Boonana:
   - southern witchcrafts - boonana
+  - southern witchcrafts - boonana soap
   Carpathia:
   - southern wichcrafts - carpathia
   - southern witchcrafts - carpathia
@@ -3457,10 +4245,12 @@ Southern Witchcrafts:
   Gothorum Tonstrina (with TRC):
   - southern witchcrafts - gothorum tonstrina
   Gravefruit (with APR):
+  - apr/southern witchcrafts - gravefruit
   - australian private reserve/southern witchcrafts - gravefruit
   - southern witchcrafts - gravefruit
   - southern witchcrafts / ap reserve - gravefruit soap
   - southern witchcrafts / ap reserve gravefruit
+  - southern witchcrafts / apr - gravefruit
   - southern witchcrafts gravefruit
   - southern witchcrafts x apr gravefruit
   - southern witchcrafts/apr - gravefruit
@@ -3473,6 +4263,7 @@ Southern Witchcrafts:
   Labyrinth:
   - southern witchcrafts - labyrinth
   - southern witchcrafts labyrinth
+  - sw labyrinth
   Lycanthropy:
   - southern witchcraft - lycanthropy
   - southern witchcrafts - lycanthropy
@@ -3492,6 +4283,7 @@ Southern Witchcrafts:
   - southern witchcrafts - samhain
   - southern witchcrafts samhain
   Tres Matres:
+  - southern witchcraft - tres matres
   - southern witchcrafts - tres matres
   - southern witchcrafts tres matres
   Valley of Ashes:
@@ -3513,6 +4305,7 @@ Spearhead Shaving Company:
   - spearhead - 3 scots
   - spearhead - seaforth 3 scots
   - spearhead - seaforth! 3 scots
+  - spearhead seaforth! - 3 scots
   - spearhead shaving - seaforth! 3 scots
   - spearhead shaving co - 3 scots
   - spearhead shaving co - seaforth! 3 scots
@@ -3521,6 +4314,7 @@ Spearhead Shaving Company:
   - spearhead shaving co. - seaforth! 3 scots
   - spearhead shaving company - 3 scots
   - spearhead shaving company - seaforth! 3 scots
+  - spearhead shaving company seaforth! - 3 scots
   - spearheard shaving co - seaforth! 3 scots
   Seaforth! Black Watch:
   - seaforth black watch
@@ -3534,6 +4328,7 @@ Spearhead Shaving Company:
   - spearhead shaving company - seaforth blackwatch
   - spearhead shaving company - seaforth! black watch
   Seaforth! Fleur de France:
+  - seaforth fleur de france
   - seaforth! - fleur de france
   - seaforth! fleur de france
   - spearhead - fleur de france
@@ -3546,9 +4341,12 @@ Spearhead Shaving Company:
   - spearhead shaving company - fleur de france
   - spearhead shaving company - seaforth! fleur de france
   Seaforth! Heather:
+  - seaforth heather
+  - seaforth! - heather
   - seaforth! heather
   - spearhead - heather
   - spearhead - seaforth! heather
+  - spearhead seaforth! - heather
   - spearhead seaforth! heather
   - spearhead shaving - seaforth! heather
   - spearhead shaving - seaforth! heather link
@@ -3593,17 +4391,21 @@ Spearhead Shaving Company:
   - spearhead shaving seaforth! leather
   - spearhead shaving- seaforth! leather
   Seaforth! Roman Spice:
+  - seaforth roman spice
   - seaforth! - roman spice
   - spearhead - roman spice
+  - spearhead - seaforth roman spice
   - spearhead - seaforth! roman spice
   - spearhead - seaforth! roman spice (highland base)
   - spearhead seaforth! - roman spice
   - spearhead seaforth! roman spice
   - spearhead shaving - seaforth! roman spice
+  - spearhead shaving co - roman spice
   - spearhead shaving co - seaforth! roman spice
   - spearhead shaving co. - seaforth! roman ice
   - spearhead shaving co. - seaforth! roman spice
   - spearhead shaving company - roman spice
+  - spearhead shaving company - romine spice
   - spearhead shaving company - seaforth roman spice
   - spearhead shaving company - seaforth! roman spice
   - sperahead shaving company - roman spice
@@ -3626,6 +4428,7 @@ Spearhead Shaving Company:
   - seaforth! - sea spice lime soap
   - seaforth! - sea spiced lime
   - seaforth! sea spice lime
+  - seaforth!-sea spiced lime
   - spearhead - sea spice lime
   - spearhead - seaforth! sea spice lime
   - spearhead seaforth - sea spice lime
@@ -3634,12 +4437,15 @@ Spearhead Shaving Company:
   - spearhead seaforth! sea spice lime
   - spearhead shaving - sea spice lime
   - spearhead shaving - seaforth! sea spice lime
+  - spearhead shaving co - seaforth! sea spice lime
   - spearhead shaving co. - seaforth! sea spice lime
   - spearhead shaving company - seaforth sea spice lime
   - spearhead shaving company - seaforth! sea spice lime
   - spearhead shaving seaforth - sea spice lime
   Seaforth! Spiced:
+  - seaforth spiced
   - spearhead - seaforth spiced
+  - spearhead seaforth! - spiced
   - spearhead shaving - seaforth! spiced
   - spearhead shaving co. - seaforth! spiced
   - spearhead shaving company - seaforth! spiced
@@ -3649,11 +4455,18 @@ Speick:
   - speick - men
   - speick - shave
   - speick rasiercreme
+  - speick shave
   - speick stick (grated)
+St. James of London:
+  Mandarin & Patchouli:
+  - st. james of london, mandarin & patchouli
+  Sandalwood & Bergamot:
+  - st james of london sandalwood and bergamot
 Stirling Soap Co.:
   2025 Ohio Wet Shavers Meetup:
   - 2025 ohio wetshavers meetup soap
   - ohio wetshavers meetup - five
+  - stirling - five, 5th annual ohio wetshavers meetup soap
   - stirling - ohio wet shavers meetup "five"
   - stirling slap co. - 2025 ohio wet shavers meetup exclusive
   - stirling soap co & barrister and mann - 5 ohio wetshavers meetup
@@ -3665,6 +4478,7 @@ Stirling Soap Co.:
   - stirling - 6ix 7even
   - stirling soap co - 6ix 7even
   - stirling soap co. - 6ix 7even
+  - stirling soap co. - 6ix7even
   Agar:
   - stirling soap co. - agar
   - stirling soap co. - agar link
@@ -3683,6 +4497,7 @@ Stirling Soap Co.:
   Arance Mandarini:
   - stirling - arance mandarini
   - stirling soap co. - arance mandarini
+  - stirling soap company - arance mandarini
   Arkadia:
   - stirling - arkadia
   - stirling arkadia
@@ -3754,6 +4569,7 @@ Stirling Soap Co.:
   - stirling boat drinks
   - stirling soap co. - boat drinks
   - stirling soap co. - boat drinks soap
+  - stirling soap company - boat drinks
   Bonafide:
   - stirling - bonafide
   - stirling bonafide
@@ -3789,6 +4605,7 @@ Stirling Soap Co.:
   - stirling soap company - christmas eve
   - stirling's christmas eve
   City Slicker:
+  - stirling - city slicker
   - stirling - city slicker soap
   Clementine:
   - stirling clementine
@@ -3798,6 +4615,7 @@ Stirling Soap Co.:
   - stirling coconut lime
   - stirling lime + coconut lime
   - stirling soap co. - coconut lime
+  - stirling soaps - coconut lime
   - stirling, coconut lime soap
   Coniferous:
   - stirling coniferous
@@ -3811,6 +4629,7 @@ Stirling Soap Co.:
   - stirling cool blue
   - stirling soap co - cool blue
   - stirling soap co. - cool blue
+  - stirling soap co. - coolblue
   - stirling soap company - cool blue
   - stirling- cool blue
   Cypress:
@@ -3839,6 +4658,7 @@ Stirling Soap Co.:
   - stirling soap company - destination unknown
   Deton-8:
   - stirling deton 8
+  - stirling soap - deton-8
   - stirling soap co - deton-8
   - stirling soap co. - deton-8
   - stirling soap company - deton-8
@@ -3864,6 +4684,8 @@ Stirling Soap Co.:
   - stirling soap co. - electric sheep
   - stirling soap co. electric sheep
   - striling electric sheep
+  Eskimo Tuxedo:
+  - stirling soap co. - eskimo tuxedo
   Eucalyptus Mint:
   - stirling eucalyptus mint
   - stirling soap co. - eucalyptus mint
@@ -3881,6 +4703,7 @@ Stirling Soap Co.:
   - stirling soap - executive man
   - stirling soap co - executive man
   - stirling soap co. - executive man
+  - stirling soap co. - executive man (creed aventus dupe)
   - stirling soap co. - executive man soap
   - tbd (stirling executive man)
   Falkor:
@@ -3916,31 +4739,8 @@ Stirling Soap Co.:
   - stirling soap co. - gin and tonic on the rocks
   Gingerbread Man:
   - stirling soap co. - gingerbread man
-  Glacial Citron:
-  - stirling glacial citron
   Glacial Electric Sheep:
   - stirling glacial electric sheep
-  Glacial Iceberg Island:
-  - stirling glacial iceberg island
-  Glacial Lemon Chill:
-  - stirling - lemon chill (glacial)
-  - stirling co. - glacial, lemon chill
-  - stirling glacial lemon chill
-  - stirling soap co. glacial lemon chill
-  Glacial Mango Sunrise:
-  - stirling soap co. - glacial mango sunrise
-  Glacial Obsidian:
-  - stirling soap co. - glacial obsidian
-  - stirling soap co. - glacial, obsidian
-  - stirling soap co. - obsidian (glacial)
-  Glacial Spearmint:
-  - stirling - glacial spearmint
-  - stirling soap co. - glacial spearmint
-  - stirling soap co. - glacial, spearmint
-  Glacial Strawberry Lemonade:
-  - stirling soap co - glacial strawberry lemonade
-  Glacial Wintergreen:
-  - stirling soap co. glacial wintergreen
   Glastonbury:
   - stirling - glastonbury
   - stirling glastonbury
@@ -4014,19 +4814,27 @@ Stirling Soap Co.:
   - stirling soap co - i, rich moose -sheep
   - stirling soap co - i, rich moose mutton le
   - stirling soap co - i, rich moose r/wetshaving exclusive
+  - stirling soap co - i, rich moose r/wetshaving sheep edition
+  - stirling soap co - i, rich moose sheep base
   - stirling soap co - i, rich moose/sheep
+  - stirling soap co. - i rich moose (mutton tallow)
   - stirling soap co. - i, rich moose
   - stirling soap co. - i, rich moose (/r/wetshaving edition)
   - stirling soap co. - i, rich moose (baaaa)
   - stirling soap co. - i, rich moose (beef)
   - stirling soap co. - i, rich moose (mutton -r/wetshaving)
+  - stirling soap co. - i, rich moose (mutton tallow)
+  - stirling soap co. - i, rich moose (mutton)
+  - stirling soap co. - i, rich moose (mutton-base sub exclusive)
   - stirling soap co. - i, rich moose (r/ wetshaving special edition)
   - stirling soap co. - i, rich moose (r/wetshaving edition) (sir irisch moos dupe)
   - stirling soap co. - i, rich moose (r/wetshaving exclusive)
   - stirling soap co. - i, rich moose (r/wetshaving mutton tallow)
   - stirling soap co. - i, rich moose (r/wetshaving special edition)
   - stirling soap co. - i, rich moose (reddit edition)
+  - stirling soap co. - i, rich moose (sheep base)
   - stirling soap co. - i, rich moose (sheep)
+  - stirling soap co. - i, rich moose (sir irisch moos dupe)
   - stirling soap co. - i, rich moose (sub exclusive mutton base)
   - stirling soap co. - i, rich moose (sub exclusive)
   - 'stirling soap co. - i, rich moose (sub exclusive) post shave: stirling soap co.
@@ -4034,12 +4842,14 @@ Stirling Soap Co.:
   - stirling soap co. - i, rich moose (sub-edition)
   - stirling soap co. - i, rich moose (ws exclusive mutton tallow)
   - stirling soap co. - i, rich moose (ws mutton tallow)
+  - stirling soap co. - i, rich moose - r/ws exclusive mutton
   - stirling soap co. - i, rich moose - sheep
   - stirling soap co. - i, rich moose - soap (mutton tallow)
   - stirling soap co. - i, rich moose - 🐑 edition
   - stirling soap co. - i, rich moose /r/wetshaving edition
   - stirling soap co. - i, rich moose r/wetshaving exclusive
   - stirling soap co. - i, rich moose r/wetshaving special edition soap
+  - stirling soap co. - i, rich moose r/wetshaving version
   - stirling soap co. - i, rich moose sheep
   - stirling soap co. - i, rich moose special release for r/wetshaving (mutton base)
   - stirling soap co. - r/wetshaving i, rich moose
@@ -4050,6 +4860,7 @@ Stirling Soap Co.:
   - stirling soap co. x r/wetshaving - i, rich moose (mutton)
   - stirling soap co. x r/ws - i, rich moose
   - stirling soap company - i, rich moose (/r/wetshaving edition)
+  - stirling soap company - i, rich moose (r/wetshaving)
   - stirling soap company - i, rich moose (sub-exclusive sheep tallow)
   - stirling soap company - r/wetshaving i, rich moose mutton le
   - stirling soaps - i rich moose
@@ -4060,7 +4871,9 @@ Stirling Soap Co.:
   Iced Pineapple:
   - stirling - iced pineapple
   - stirling iced pineapple
+  - stirling iced pinnaple
   - stirling soap co. - iced pineapple
+  - stirling- iced pineapple
   Intrepid Man:
   - stirling - intrepid man
   - stirling co. - intrepid man
@@ -4070,6 +4883,7 @@ Stirling Soap Co.:
   - stirling - island man
   - stirling co. - island man
   - stirling island man
+  - stirling island man sampler
   - stirling soap co. - island man
   - stirling soap co. - island man (creed virgin island water dupe)
   Juniper Breeze:
@@ -4079,10 +4893,16 @@ Stirling Soap Co.:
   Lampasas:
   - stirling - lampasas
   - stirling soap co. - lampasas
+  Lavender:
+  - stirling soap co - lemon lavender mint
   Lavender Sage:
   - stirling soap co. - lavender sage
   Lemintense:
+  - stirling lemintense and a dash of proraso green
   - stirling soap co - lemintense
+  Lemon Chill:
+  - stirling lemon chill
+  - stirling soap co. - lemon chill
   Light-ish Red:
   - stirling soap co - lightish red
   - stirling soap co. - light-ish red
@@ -4090,10 +4910,16 @@ Stirling Soap Co.:
   - stirling - lime
   - stirling soap co - lime
   - stirling soap co. - lime
+  Livonia:
+  - stirling soap co. - livonia
   Maggard Meetup 2025:
+  - stirling - maggard meetup 2025
   - stirling co. - maggard meetup 2025
   - stirling soap co. - maggard meetup 2025
   - stirling soap company - maggard meetup 2025
+  Maggard Meetup 2026:
+  - stirling - maggard meetup 2026
+  - stirling soap - maggard meetup 2026
   Margaritas in the Arctic:
   - glacial margaritas in the arctic
   - stirling - margaritas in the arctic
@@ -4109,6 +4935,7 @@ Stirling Soap Co.:
   Maribor:
   - stirling soap co. - maribor
   Mediterranean Man:
+  - stirling soap co - mediterranean man
   - stirling soap co. - mediterranean man
   - stirling soap co. - mediterranean man (creed erolfa dupe)
   Meghalaya:
@@ -4118,6 +4945,7 @@ Stirling Soap Co.:
   - stirling - mountain man
   - stirling co. - mountain man
   - stirling mountain man
+  - stirling soap co - mountain man
   - stirling soap co. - mountain man
   Nag Champa:
   - stirling soap co. - nag champa
@@ -4133,6 +4961,8 @@ Stirling Soap Co.:
   - stirling soap co. - noble man (creed millésime impérial dupe)
   Northumbria:
   - stirling soap co - northumbria
+  Obsidian:
+  - stirling soap co. - obsidian (glacial)
   Orange Chill:
   - stirling orange chill
   - stirling orange chill (that one wont survive this year for sure)
@@ -4141,6 +4971,7 @@ Stirling Soap Co.:
   Oro Valley:
   - stirling - oro valley
   - stirling co. - oro valley
+  - stirling oro valley + menthol
   - stirling soap co. - oro valley
   - stirling soap co. - oro valley (tom ford ombré leather dupe)
   - stirling soap company - oro valley
@@ -4191,12 +5022,16 @@ Stirling Soap Co.:
   Red Eye:
   - stirling - red eye
   - stirling soap co. - red eye
+  Regency Man:
+  - stirling - regency man
   Royal:
   - stirling soap co. - royal
   Saguaro Blossom:
   - stirling soap co. - saguaro blossom
   - stirling soap co. - saguro blossom
   - stirling soaps saguaro blossom
+  Sample Mashup:
+  - stirling sample mash up
   Sandalwood:
   - stirling - sandalwood
   - stirling soap co - sandalwood
@@ -4217,6 +5052,7 @@ Stirling Soap Co.:
   - stirling sample mash up (scarn/b leather/spice/exec)
   - stirling scarn
   - stirling scarn soap
+  - stirling soap co - scarn
   - stirling soap co scarn
   - stirling soap co. - scarn
   - stirling soap scarn
@@ -4238,12 +5074,16 @@ Stirling Soap Co.:
   - stirling soap co. - seine reserve
   - stirling soap company - seine reserve
   - stirling soap company - seine resreve
+  Shadow Orchid:
+  - stirling soap co. - shadow orchid (tom ford black orchid)
   Sharp Dressed Man:
+  - stirling - sharp dress man
   - stirling - sharp dressed man
   - stirling co. - sharp dressed man
   - stirling sharp dressed man
   - stirling soap co. - sharp dressed man
   Sheep:
+  - stirling - glacial sheep
   - stirling - sheep
   - stirling co. - sheep
   - stirling co. sheep 🐑
@@ -4256,6 +5096,8 @@ Stirling Soap Co.:
   - stirling. sheep
   South Padre:
   - stirling soap co. - south padre
+  Spearmint:
+  - stirling soap co. - glacial, spearmint
   Stirling Black:
   - stirling soap co. - black
   Stirling Blu:
@@ -4280,6 +5122,7 @@ Stirling Soap Co.:
   - stirling deep green
   - stirling green
   - stirling soap co. - stirling green
+  - stirling soap co. - stirling green (ralph lauren polo (green) dupe)
   Stirling Noir:
   - stirling soap co. - stirling noir
   Stirling One:
@@ -4297,12 +5140,16 @@ Stirling Soap Co.:
   Stirling Sport:
   - stirling soap co. - stirling sport (ralph lauren polo sport dupe)
   - stirling soap co. stirling sport
+  Tangerine:
+  - stirling tangerine
   Texas on Fire:
   - stirling - texas on fire
+  - stirling texas on fire
   The Fresher:
   - stirling - the fresher
   - stirling soap co. - the fresher
   Triumph:
+  - stirling soap co. - triumph
   - stirling soap co. - triumph (paco rabanne invictus dupe)
   Tsuka:
   - stirling soap co. - tsuka
@@ -4310,6 +5157,7 @@ Stirling Soap Co.:
   - stirling - unscented w/ beeswax
   - stirling - unscented with beeswax
   - stirling soap co. - unscented with beeswax
+  - stirling unscented
   - stirling unscented w/ beeswax
   - stirling unscented with beeswax
   - stirling- unscented with beeswax
@@ -4346,9 +5194,20 @@ Stirling Soap Co.:
 Stone Cottage Soapworks:
   Fougère:
   - stone cottage soapworks - fougère
+Stone Field Shaving Company:
+  Lucky Number 54:
+  - stone field shaving lucky number 54
+  North of Fifty:
+  - stone field shaving co. north of fifty
+  - stone field shaving co. north of fifty soap
+  Sippin' By The Fire:
+  - stone field shaving co sippin' by the fire
+  - stone field shaving co. sippin' by the fire
+  - stone field shaving co. sippin' by the fire soap
 Storybook Soapworks:
   Carnivale (with APR):
   - australian private reserve - carnivale
+  - australian private reserve × storybook soapworks - carnivale
   - storybook soap works & ap reserve - carnivale
   - storybook soapworks x australian private reserve - carnivale
   Fresca Intensa:
@@ -4367,6 +5226,7 @@ Strike Gold Shave:
   Bees Knees:
   - strike gold shave - bee's knees soap
   Grant:
+  - strike gold shave - grant
   - strike gold shave grant. adventist & baccarat rouge blend dupe
   Hoover:
   - strike gold shaves - hoover
@@ -4375,14 +5235,38 @@ Strike Gold Shave:
   - shave dad/ strikegoldshave knockout
   Nostalgia:
   - strike gold shave nostalgia
+  Old Ironsides:
+  - strike first - old ironsides
+  - strike gold shave - old ironsides
+  Red, White & Rugged:
+  - strike gold shave - red white & rugged reagan
+  - strike gold shave - red, white, & rugged
+  - strike gold shave - red, white, and rugged
   TDS:
   - strike gold shave - tds
   - strike gold shaves - tds
   Tippecanoe:
   - strike gold shaves tippacanoe
+Strop Shoppe:
+  Russian Tea:
+  - the stropp shop - russian tea
 Subtle Art Soap Co.:
+  Bay Rum:
+  - subtle art soap co - bay rum
+  - subtle art soap co. - bay rum
+  Draconis Aqua:
+  - subtle art soap co - draconis aqua
+  - subtle art soap co. - draconis aqua
+  Draconis Noctem:
+  - subtle art soap co. - draconis noctem
+  Lemon & Lavender:
+  - subtle art soap lemon & lavendar
   Maple Bourbon:
   - subtle art soap co. - maple bourbon
+  Mid Cape Barber:
+  - subtle art shaving co. - mid cape barber
+  Oats & Honey:
+  - subtle arts soaps - oats and honey
   Orange & Patchouli:
   - subtle art soap - orange & patchouli
   - subtle art soap co. - orange & patchouli
@@ -4395,9 +5279,14 @@ Summer Break Soaps:
   Bell Ringer:
   - summer break - bell ringer
   - summer break soaps - bell ringer
+  - summer break soaps - bell ringer soap
+  Brain Break:
+  - summer break soaps - brain break
   But first... An Experiment:
+  - london razors/summer break soaps - but first, an experiment
   - london razors/summer break soaps - but first... an experiment
   But first... Coffee:
+  - london razors/summer break soaps - but first, coffee
   - summer break soaps / london razors - but first...coffee
   Cannonball!:
   - summer break soaps - cannonball
@@ -4410,14 +5299,18 @@ Summer Break Soaps:
   - sbs daydream
   - summer break soap daydream
   - summer break soaps - daydream
+  - summer break soaps - daydream soap
   - summer break soaps daydream
   - summerbreak soaps - daydream
   - summerbreaksoaps daydream
+  Everything Nice:
+  - summer break soaps - everything nice
   Field Day:
   - summer break soaps - field day
   - summer break soaps - field day (v2)
   History 101:
   - summer break soaps - history 101
+  - summer break soaps - history 101 (v2)
   Homecoming:
   - summer break soaps - homecoming
   - summer break soaps - homecoming soap
@@ -4427,15 +5320,21 @@ Summer Break Soaps:
   - summer break soaps - international studies
   Lather Games ROTY 2020:
   - summer break soaps - lather games 2020 roty
+  - summer break soaps - lg roty 2020
   - summer break soaps - roty 2020
   - summer break soaps lather games roty 2020
+  - summer break soaps lg roty 2020
   Lather Games ROTY 2021:
   - summer break soaps - lather games roty 2021
+  - summer break soaps - roty 2021
   Lather Games ROTY 2022:
   - summer break - roty 2022
+  - summer break soaps - roty 2022
   Lather Games ROTY 2023:
+  - summer break - roty 2023
   - summer break soaps - roty 2023
   Lather Games ROTY 2024:
+  - summer break soaps - rookie of the year 2024
   - summer break soaps - roty 2024
   Mountain Laurel:
   - london razors + summer break soaps - mountain laurel
@@ -4450,17 +5349,23 @@ Summer Break Soaps:
   - summer break soaps picture day
   Prom King:
   - sbs - prom king
+  - summer break prom king
   - summer break soaps - prom king
   - summer break soaps prom king
+  Recess:
+  - summer break soaps - recess
   Remote Learning:
   - summer break soaps - remote learning
   - summer break soaps - remote learning 2023 meme edition
+  - summer break soaps - remote learning soap
+  - summerbreak soaps - remote learning
   Rope Swing:
   - summer break soaps - rope swing
   - summer break soaps rope swing
   Shh!:
   - summer break soaps - shh
   Steady:
+  - sbs - steady
   - sbs steady
   - steady - summer break soaps
   - steady -summer break soaps
@@ -4472,6 +5377,7 @@ Summer Break Soaps:
   - summer break soaps "steady"
   - summer break soaps - steady
   - summer break soaps - steady soap
+  - summer break soaps co. - steady
   - summer break soaps steady
   - summer break steady
   Teacher's Pet:
@@ -4516,6 +5422,7 @@ Talbot Shaving:
   - talbot shaving - marlogue wood
   - talbot shaving/maol - marlogue wood
   Valley of Fire:
+  - catie's bubbles - valley of fire
   - catie's bubbles/talbot shaving - valley of fire
   Winter's Refraction:
   - talbot shaving - winter's refraction
@@ -4532,6 +5439,8 @@ Talent Soap Factory:
   - talent soap factory - 2nd wind
   Absinthe Dream:
   - talent soap factory - absinthe dream soap
+  Alabaster:
+  - tsf alabaster
   Amber:
   - talent soap factory - amber
   Banana:
@@ -4589,6 +5498,10 @@ Talent Soap Factory:
   - talent soap factory - gato naranja
   Gilmore:
   - talent soap factory - gilmore
+  Great Dame:
+  - talent soap factory - great dame soap
+  His Master's Voice:
+  - talent soap factory - his master's voice
   Hystrix Citrus:
   - talent soap factory - hystrix
   - talent soap factory - hystrix citrus
@@ -4605,6 +5518,8 @@ Talent Soap Factory:
   Peony & Violet:
   - talent soap factory - peony and violet
   - talent soap factory peony and violet
+  Peppermint Patti:
+  - talent soap factory - peppermint patti
   Razberri & Tomato Leaf:
   - talent soap factory - razberri tomato leaf
   - talent soap factory - razzberri tomato leaf
@@ -4623,6 +5538,8 @@ Talent Soap Factory:
   - talent soap factory - slow dancing in the dark
   - talent soap factory dancing in the dark
   - talent soap factory slow dancing in the dark
+  Smudge:
+  - talent soap factory - smudge
   Surf Shop:
   - talent factory - surf shop
   Switchback:
@@ -4663,6 +5580,8 @@ Talent Soap Factory:
   - tsf - tumbleweed & co
   Turpesaurus Rex:
   - talent soap factory turpesaurus rex
+  Vandal:
+  - talent soap factory - vandal
   Wallflower:
   - talent soap factory - wallflower
   - talent soap factory - wallflower soap
@@ -4680,6 +5599,8 @@ Tallow + Steel:
   Himalaya:
   - tallow & steel - himalaya soap
   - tallow and steel - himalaya
+  Kyoto:
+  - tallow and steel - kyoto
   Morning Coffee in the Canadian Wilderness:
   - t&s - morning coffee in the canadian wilderness
   Rainforest:
@@ -4694,23 +5615,36 @@ Tallow + Steel:
   - tallow + steel - shag
   - tallow+steel - shag
 Taylor of Old Bond Street:
+  Cedarwood:
+  - tobs cedarwood
+  Coconut:
+  - tobs coconut
+  Eton College:
+  - taylor's of old bond street - eton college
   Grapefruit:
   - taylor of old bond street - grapefruit
   - taylors of old bond street - grapefruit
+  - tobs - grapefruit
   Jermyn Street:
   - taylor of old bond street jermyn street for sensitive skin
+  - tobs - jermyn street
+  - tobs jermyn street sensitive
   Lavender:
   - taylor of old bond street - lavender
   Lime Zest:
   - taylor of old bond street lime zest
   - tobs lime
   - tobs lime zest
+  Organic:
+  - taylor of old bond street organic
   Oud:
   - taylor of old bond street - oud
   Peppermint:
   - taylor of old bond street - peppermint
   - tobs - peppermint
   - tobs peppermint
+  Rose:
+  - tobs - rose
   Royal Forest:
   - taylor of old bond street royal forest
   - tobs royal forest
@@ -4720,19 +5654,26 @@ Taylor of Old Bond Street:
   - taylor of old bond street sandalwood
   - taylors of old bond street - sandalwood soap
   - taylors of old bond street -sandalwood soap
+  - toba sandalwood
   - tobs - sandalwood
   - tobs sandalwood
   - tobs sandalwood soap
   - tobs sandlewood
   - tobs, sandalwood
   Tobacco Leaf:
+  - taylor of bond street - tobacco leaf
   - taylor of old bond street - shaving cream - tobacco leaf
   - taylor of old bond street - tobacco leaf
+  - tobs - tobacco leaf
   - tobs tobacco leaf
 Tcheon Fung Sing:
   Ciotola Rossa:
+  - tcheon fung sing crema purissima
   - tcheon fung sing crema purissima per barba
+  - tfs - classic almond
+  - tfs - original
   - tfs - original soap
+  - tfs rasozero pelli delicate soap
   - tfs- original
   diVino:
   - tcheon fung sing divino
@@ -4747,26 +5688,43 @@ The Art of Shaving:
   Bourbon:
   - art of shaving - bourbon
   Sandalwood:
+  - aos sandalwood valobra
   - art of shaving - sandalwood
   - art of shaving sandalwood
   - the art of shaving - sandalwood
 The Black Stuff:
+  Black Stout:
+  - the black stuff - black stout
   Dublin Rose:
   - the black stuff - dublin rose
 The Body Shop:
   Maca Root & Aloe:
+  - the body shop maca root
   - the body shop maca root & aloe
   - the body shop maca root and aloe
 The Cajun Blade:
   Atchafalaya:
   - cajunblade atchafalaya
   - the cajun blade - atchafalaya
+  - the cajun blade store - atchafalaya
+  Berry Chill (Daquiri Shack):
+  - the cajun blade - daiquiri shack
   Bon Temps Barbershop:
   - the cajun blade - bon temp barbershop
   - the cajun blade - bon temps barbershop
   - the cajun blade bon temps barbershop
+  - thecajunblade bon temps barbershop
   Contraband Bay Rum:
   - the cajun blade - contraband bay rum
+  - the cajun blade - contraband bay rum soap
+  - thecajunblade contraband bay rum
+  Cuba Libre:
+  - the cajun blade - cuba libre
+  Dark Irish Countryside:
+  - thecajunblade - dark irish countryside
+  Dude of Oud:
+  - the cajun blade - dude of oud
+  - the cajun blade store - dude of oud
   Forét De Pins:
   - a cajun blade foret de pins 2.5oz
   Forét De Pins - Morning Frost:
@@ -4776,6 +5734,16 @@ The Cajun Blade:
   - cajun blade la vache soap
   - the cajun blade la vache
   - the cajun blade la vache soap
+  Let'er Buck:
+  - the cajun blade - let'er buck
+  Lumberjack Luxury:
+  - the cajun blade - lumberjack luxury
+  Neutral Grounds:
+  - the cajun blade store - neutral ground
+  Pintail:
+  - the cajun blade - pintail
+  The Goat:
+  - the cajun blade - the goat
   Voodoo Yeti - The Legend Of The Blood Moon:
   - thecajunblade - voodoo yeti - the legend of the blood moon
 The Goodfellas' Smile:
@@ -4785,6 +5753,7 @@ The Goodfellas' Smile:
   Chronos:
   - the goodfellas' smile - chronos
   Orange Empire:
+  - goodfella's smile orange empire
   - tgs- orange empire
   Pino Alpestre:
   - the goodfellas smile pino alpestre
@@ -4797,14 +5766,20 @@ The Holy Black:
   - the holy black - gunpowder spice soap
   - the holy black artisan line - gunpowder spice
   - the holy black gunpowder spice
+  Holy Smoke:
+  - the holy black - holy smoke
+  - the holy black trading company - holy smoke
+  - the holy black trading company - holy smoke soap
   Lemon Ice Creeper:
   - the holy black lemon ice soap
   - the holy black secret stash lemon ice
   Mountain Man:
   - the holy black trading company - mountain men
+  - the holy black trading company - mountain men soap
   Tangerine Creeper:
   - the holy black - tangerine creeper
   - the holy black trading company - tangerine creeper
+  - the holy black trading company - tangerine creeper soap
   The Galleon:
   - the holy black - galleon
   - the holy black - the galleon
@@ -4813,23 +5788,33 @@ The Los Angeles Shaving Soap Company:
   Blackfern:
   - la shaving soap co - blackfern
   - la shaving soap co. - blackfern
+  - the los angeles shaving soap co. - blackfern
   Topanga Fougère:
   - la shaving soap co - topanga fougere
   - la shaving soap company - topanga fougere
   - lassco - topanga fougère
   - lassco topanga fougère
+  - los angeles shaving soap company - topanga fougère
   Vert Noir:
   - la shaving soap co - vert noir
+The Personal Barber:
+  Old N' Spicey:
+  - the personal barber - old n' spicey
 The Sudsy Soapery:
   Bay & Citrus:
   - sudsy soapery - bay and citrus
   Cola:
   - sudsy soapery - cola
+  Crimson Red:
+  - sudsy soapery brimson read
   Delor de Treget:
   - chatillon lux/the sudsy soapery - delor de treget
+  - sudsy soapary chatilion lux - delor de treget
   - sudsy soapery - delor de treget
   Fresh:
   - the sudsy soapery - fresh
+  Lavender & Peppermint:
+  - the sudsy soapery lavender and peppermint
   Lemon Rose Chypre:
   - sudsy soapary - lemon, rose, chypre
   - the sudsy soapery/chatillon lux - lemon rose chypre
@@ -4837,20 +5822,26 @@ The Sudsy Soapery:
   - sudsy soapery white sage and lime
 Through the Fire Fine Craft:
   Birch Forest:
+  - through the fire fine craft - birch forest
   - through the fire fine crafts - birch forest
   Northern Lights:
   - through the fire - norther lights
-  Sunsite:
-  - through the fire fine craft - sunset
+  Sunset:
+  - ttffc - sunset?
   Up North:
+  - through the fire fine craft - up north
   - through the fire fine crafts - up north
 Truefitt & Hill:
+  No. 10 Finest Shaving Cream:
+  - truefitt & hill authentic no. 10 sensitive
   Sandalwood:
   - truefitt & hill - sandalwood
   - truefitt & hill sandalwood
 Turtleship Shave Co.:
   Coconut:
   - turtleship shave - coconut soap
+  Te Java:
+  - turtleship shave co. - tejava
 Valobra:
   Shaving Soap Stick:
   - valobra
@@ -4860,6 +5851,9 @@ Van Der Hagen:
   - van der hagen - luxury scented shave soap (new formula)
   - van der hagen - scented luxury
   - van der hagen luxury
+Van Yulay:
+  El Barbero de SeVilla:
+  - van yulay - el barbero de sevilla tallow
 Vi-John:
   Classic:
   - vi john - original
@@ -4867,6 +5861,9 @@ Vicco:
   Turmeric Sandalwood:
   - vicco sandalwood
   - vicco turmeric sandalwood
+Viking:
+  Norway:
+  - viking shaving soap - norway
 Vitos:
   Extra Super (Red):
   - vitos super red
@@ -4886,24 +5883,39 @@ Wars:
 West Coast Shaving:
   Chypre:
   - west coast shaving - chypre
+  - west coast shaving - chypre duck fat soap
   - west coast shaving/catie's bubbles - chypre
   Fougere:
   - west coast shaving - fougère
   Grapefroot:
+  - catie's bubbles - grapefroot
   - west coast shaving - grapefroot
   - west coast shaving grapefroot
   Pear-Brrr Shoppe:
+  - west coast shaving - pear brrr shoppe
   - west coast shaving - pear-brrr shoppe
 West of Olympia:
+  Lust:
+  - west of olympia - lust
   Tobacco & Coffee:
   - west of olympia - tobacco & coffee
 WestMan Shaving:
   '''71 Bonanza':
+  - westman - 71 bonanza
   - westman shaving - '71 bonanza
+  Alma:
+  - westman shaving - alma
+  Dark Man:
+  - westman - darkman
   Gerês:
   - westman - gerês
+  - westman shaving - gerês
   MazaGran:
   - westman shaving mazagran
+  Monolith:
+  - westman - monolith
+  Prophecy:
+  - westman - the prophecy
   Utopia:
   - westman - utopia
   - westman shaving - utopia
@@ -4915,6 +5927,7 @@ Wet Shaving Products:
   Mahogany:
   - wet shaving products - mahogany
   - wsp - formula t mahogany
+  - wsp formula t- mahogany
   Olympus:
   - wet shaving products - olympus
   - wsp olympus
@@ -4922,13 +5935,28 @@ Wet Shaving Products:
   - wsp rustic sandalrose
   Tobacco:
   - wsp - tobacco
+Whispers from the Woods:
+  Pomelo:
+  - whispers from the woods - pomelo
+Whole Hog Shaving Co.:
+  Unscented:
+  - hugbckt - whole hog 3.0 unscented
+  - whole hog - 3.0 no scent added
+  - whole hog - 3.0 sans parfum
+  - whole hog - 3.0 unscented
+  - whole hog shaving co. - 3.0 unscented
+  - whole hog shaving co. - 4.0 unscented
+  - whole hog shaving co. - 4.1 unscented
 Wholly Kaw:
   Amber Bomba:
   - wholly kaw - amber bomba
   Aranceto:
   - wholly kaw - aranceto (tallow-siero base)
+  Bare Siero:
+  - wholly kaw - bare siero
   Cedrati:
   - wholly kaw - cedrati
+  - wholly kaw cedrati vegan
   Club Yanka:
   - wholly kaw - club yanka
   - wholly kaw club yanka
@@ -4946,10 +5974,13 @@ Wholly Kaw:
   Entropy Man:
   - wholly kaw - entropy man
   - wholly kaw entropy man
+  Eroe:
+  - wholly kaw - eroe
   Fern Concerto:
   - wholly kaw - fern concerto
   Fougère Bouquet:
   - wholly kaw - fougère bouquet
+  - wholly kaw - fougére bouquet
   Fougère Mania:
   - wholly kaw - fougere mania
   - wholly kaw - fougère mania
@@ -4960,6 +5991,8 @@ Wholly Kaw:
   Iced Tea:
   - wholly kaw - iced tea
   - wholly kaw / mammoth soaps - iced tea
+  Jamestown Gentleman:
+  - wholly kaw jamestown gentleman
   Jupiter:
   - wholly kaw - jupiter
   - wholly kaw - jupiter (crème fraiche)
@@ -4974,8 +6007,11 @@ Wholly Kaw:
   - whollykaw - king of oud
   La Fougère Parfaite:
   - wholly kaw - la fougère parfaite
+  - wholly kaw - la fougère parfaite (fabergé brut dupe)
   Lav Sublime:
   - wholly kaw - lav sublime
+  London:
+  - wholly kaw - london
   Man from Mayfair:
   - wholly kaw - man from mayfair
   - wholly kaw - man from mayfair (donkey milk base)
@@ -4985,8 +6021,15 @@ Wholly Kaw:
   Monaco Royale:
   - wholly kaw - monaco royale
   - wholly kaw - monaco royale - premium
+  - wholly kaw monaco royale
   Nightcap:
   - wholly kaw - nightcap
+  Noce di Cocco:
+  - wholly kaw - noce di cocco
+  Old Glory:
+  - wholly kaw - old glory
+  Peach Karma:
+  - wholly kaw - peach karma
   Pompelmo:
   - wholly kaw - pompelmo
   Rebelle:
@@ -5002,9 +6045,19 @@ Wholly Kaw:
 Wickham Soap Co.:
   Club Cola:
   - wickham soap co. - club cola
+  English Rose:
+  - wickham soap co. - english rose
+Wild Fox Rituals:
+  Bergamot & Oakmoss:
+  - wild fox rituals - bergamot & oakmoss
+  Fresh Forest:
+  - wild fox rituals - fresh forest
 Wild Stone:
   Hydra Energy:
   - wild stone hydra energy
+Wild West Shaving Co.:
+  Aces & Eights:
+  - wild west shave co - aces n eights soap
 Wilkinson Sword:
   Black:
   - wilkinson sword black soap
@@ -5024,13 +6077,17 @@ Wooly Wash Soapery:
   Night at the Pub:
   - woolly wash soapery - night at the pub
   - wooly wash soapery - a night at the pub
+  - wooly wash soapery - night at the pub
   Outback:
   - woolly wash soapery - outback
   - wooly wash soapery - outback
   - wooly wash soapery outback
+  Tranquil:
+  - woolly wash soapery - tranquility
   Tropi-Cool:
   - woolly wash soapery - tropi-cool
   - woolly wash soapery tropi-cool
+  - wooly wash soapery - tropi-cool
 Yaqi:
   Lemon, Lime & Cedarwood:
   - yaqi lime lemon & cedarwood
@@ -5049,6 +6106,7 @@ Zingari Man:
   - zingari man - barrel proof
   - zingariman - barrel proof
   Bon Monsieur:
+  - zingari man - bon monsieur
   - zingari man x rogue - bon monsieur
   - zingari man x rogue perfumery bon monsieur
   Coconut Nanas:
@@ -5063,8 +6121,13 @@ Zingari Man:
   - zingari mann - el cantinero
   Il Signore:
   - zingari man - il signore
+  - zingari man - il signore - sego
   - 'zingari man il signore - perfect airy lemon mist, fir, musk, oakmoss blend. borderline
     warm weather fougere imo. note to self: get the matching splash asap'
+  Le Corsaire:
+  - zingari man - le corsair
+  - zingari man - le corsair's
+  - zingari man - le corsaire
   Mousse Illuminee:
   - zingari man - mousse illuminee
   - zingari man - mousse illuminée
@@ -5087,6 +6150,7 @@ Zingari Man:
   - zingari - amir
   - zingari man - amir
   - zingari man amir
+  - zingariman amir
   The Blacksmith:
   - zingari - blacksmith
   The Brewer:
@@ -5097,6 +6161,8 @@ Zingari Man:
   - zingari man - the distiller
   - zingari man - the distiller - sego
   - zingari man the distiller
+  The Essentials:
+  - zingari man - the essentials
   The Explorer:
   - zingari - the explorer
   - zingari man - the explorer
@@ -5119,6 +6185,9 @@ Zingari Man:
   - zingari man - the master
   - zingari man the master
   - zingariman - the master
+  The Merchant:
+  - zingari - the merchant
+  - zingari man - the merchant
   The Navigator:
   - zinagari man - the navigator
   - zingari man - navigator
@@ -5129,6 +6198,7 @@ Zingari Man:
   - zingari - the nomad
   - zingari man - nomad
   - zingari man - the nomad
+  - zingari man nomad
   The Rambler:
   - zinagari man - the rambler
   - zingari - the rambler
@@ -5140,6 +6210,7 @@ Zingari Man:
   - zingari man - the royal
   The Socialite:
   - zingari man - socialite
+  - zingari man - the socialite
   The Stargazer:
   - zingari man - the stargazer
   - zingari man stargazer
@@ -5154,6 +6225,7 @@ Zingari Man:
   - zingari man - wanderer
   - zingari man the wanderer sego
   - zingari wanderer sego base
+  - zingariman wanderer
   The Watchman:
   - zingari - the watchman
   - zingari man - the watchman
