@@ -6,7 +6,7 @@ A77:
   RhinoceRos:
     A77:
       patterns:
-        - rhinoceros.*a77
+        - rhino.*a77
   Snow Mountain Wolf:
     A77:
       patterns:
@@ -24,6 +24,7 @@ AC:
     Pro Light:
       patterns:
         - feather.*light
+        - feather.*mild
     Pro Super:
       patterns:
         - feather.*super
@@ -114,6 +115,7 @@ DE:
         - 7OC.*pla
         - \b7 ?sp\b
         - \b7'o.*black
+        - \b7.*oc.*sp
     Super Stainless (Green):
       patterns:
         - clock.*sta
@@ -181,6 +183,13 @@ DE:
     Super Stainless:
       patterns:
         - baili.*(ss|stain)
+  Barbero:
+    Platinum:
+      patterns:
+        - barbero.*plat
+    Professional:
+      patterns:
+        - barbero.*pro
   Bevel:
     Double Edge:
       patterns:
@@ -252,8 +261,9 @@ DE:
   Derby:
     Extra:
       patterns:
-        - derb.*extra
+        - derb.*extra.(stain|ss)?
         - derby
+        - derby.*green
     Extra Blue:
       patterns:
         - derb.*blue
@@ -274,6 +284,7 @@ DE:
     ST-300:
       patterns:
         - dorco
+        - dorco.*blue
         - dorco.*st.*300
     ST-301:
       patterns:
@@ -298,6 +309,9 @@ DE:
     Cryo:
       patterns:
         - euromax
+    Platinum Coated:
+      patterns:
+        - euromax.*plat
   Eversharp:
     Blue Thin:
       patterns:
@@ -393,6 +407,7 @@ DE:
     Super Thin Platinum:
       patterns:
         - super.*thin.*plat
+        - gil.*thin.*plat
     Wilkinson Sword:
       patterns:
         - gil.*et.*wilk.*swor
@@ -530,8 +545,10 @@ DE:
     GEM Platinum Diamond Glide (DE):
       patterns:
         - person+a.*gem
+        - gem.*person+a
         - (person+a)?.*gem.*diamond.*glide
         - person+a.*(gem)?.*diamond.*glide
+        - person.*pdg
     Lab Blue:
       patterns:
         - (person+a)?.*lab[ -]?blue
@@ -547,13 +564,14 @@ DE:
         - person+a.*prep
     Platinum:
       patterns:
-        - person.*plat.*(blue)?
+        - person.*plat
+        - person.*plat.*(blue|chrome)
         - person.*red
         - person.*blue
         - platinum.*isr[ae]{2}l
     Super Stainless:
       patterns:
-        - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*(diamond)).*person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - ^(?!.*(comfort|lab|plat|crystal)).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super+ Platinum:
@@ -581,9 +599,25 @@ DE:
       patterns:
         - q-?shave
   RK:
+    Chromium Coated:
+      patterns:
+        - \rk\b.*chrom
+    Pro Edge:
+      patterns:
+        - \brk\b.*pro.*edge
     Stainless:
       patterns:
+        - \brk\b.*(stain|ss)
         - \brk\b
+    UltraMan Super Platinum:
+      patterns:
+        - \brk\b.*ultra.*man
+        - \brk\b.*ultra
+        - \brk\b.*plat
+  Racer:
+    Super Stainless:
+      patterns:
+        - racer.*(ss|stain)
   Rainbow:
     Super Stainless:
       patterns:
@@ -599,6 +633,10 @@ DE:
     Swedish:
       patterns:
         - rapira.*swe
+  Rembrandt:
+    Super Stainless:
+      patterns:
+        - rembrandt
   Rex:
     Platinum:
       patterns:
@@ -671,6 +709,10 @@ DE:
     Platinum:
       patterns:
         - \bstatum\b
+  Suneko:
+    Amorphous Diamond:
+      patterns:
+        - suneko(.*diamond)?
   Sunny:
     Supreme Stainless:
       patterns:
@@ -731,7 +773,7 @@ DE:
   Topaz:
     Platinum:
       patterns:
-        - topaz.*plat
+        - topaz(.*plat)?
     Stainless:
       patterns:
         - topaz.*(stain|\bss\b)
@@ -776,6 +818,10 @@ DE:
     Silver Edge Stainless:
       patterns:
         - \btrig\b
+  Triton:
+    R3:
+      patterns:
+        - triton.*r3
   V12:
     Super Platinum:
       patterns:
@@ -801,6 +847,9 @@ DE:
       patterns:
         - vi.*john.*mas
         - vi.*john.*chrome
+    Super Platinum:
+      patterns:
+        - vi.*john.*plat
     Super Stainless:
       patterns:
         - vi.*john
@@ -887,6 +936,7 @@ GEM:
         - (person|ptfe).*gem
         - ptfe
         - ptfs
+        - ptfr
         - gem
         - acc?utec
         - accu.*(coated|p[ft]{2}e)
@@ -902,6 +952,7 @@ GEM:
     Blue Blade (GEM):
       patterns:
         - \bpal\b.*blue
+        - \bpal\b.*gem
 Hair Shaper:
   Annie:
     Hair Shaper:
@@ -969,6 +1020,10 @@ Half DE:
     Premium:
       patterns:
         - derb.*prem
+    Professional:
+      patterns:
+        - derb.*pro
+        - derb.*1/2.*de
     USTA:
       patterns:
         - derb.*usta
@@ -1022,6 +1077,7 @@ Injector:
     Injector:
       patterns:
         - person+a(?:.*inject)?
+        - accutec.*inject
     Mini Hair Shaper:
       patterns:
         - person+a.*mini.*hair.*shaper

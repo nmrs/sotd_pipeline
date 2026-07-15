@@ -31,6 +31,43 @@ known_brushes:
       fiber: Badger
       patterns:
         - all[ -]?star.*grooming
+  Asylum Shave Works:
+    Half Hive:
+      patterns:
+        - asylum.*half.*hive
+      knot:
+        brand: Semogue
+        fiber: Boar
+        knot_size_mm: 26.5
+      handle:
+        brand: Semogue
+    Half Hive Alchemy Fiber:
+      patterns:
+        - asylum.*half.*hive.*(synth|alchemy)
+      knot:
+        brand: Semogue
+        fiber: Synthetic
+        knot_size_mm: 26.5
+      handle:
+        brand: Semogue
+    Half Hive Mistura:
+      patterns:
+        - asylum.*half.*hive.*(synth|alchemy)
+      knot:
+        brand: Semogue
+        fiber: Mixed Badger/Boar
+        knot_size_mm: 26.5
+      handle:
+        brand: Semogue
+    Half Hive Two Band Finest:
+      patterns:
+        - asylum.*half.*hive.*(two band|badger)
+      knot:
+        brand: Semogue
+        fiber: Badger
+        knot_size_mm: 26.5
+      handle:
+        brand: Semogue
   Art of Shaving:
     Pure Badger:
       fiber: Badger
@@ -182,6 +219,11 @@ known_brushes:
       fiber: Boar
       patterns:
         - dreadnought.*avenger
+  Dubl Duck:
+    M3:
+      fiber: Boar
+      patterns:
+        - dubl.*duck.*m3
   Edwin Jagger:
     STF:
       knot:
@@ -199,6 +241,7 @@ known_brushes:
         - big ?fu?cking ?mother ?(load|lode)
         # - ^redacted$
         - ^\|*redacted\|*$
+        - \!Redacted\!
         - muninn.*50mm
       knot:
         brand: Boti
@@ -498,12 +541,13 @@ known_brushes:
       knot_size_mm: 27
       patterns:
         - omega.*10098
+        - omega.*98\b
     Mixed Midget (11047):
       fiber: Mixed Badger/Boar
       knot_size_mm: 22
       patterns:
         - omega.*11047
-        - omega.*mixed midget
+        - o[mn]ega.*mixed midget
     "11126":
       knot_size_mm: 24
       patterns:
@@ -526,7 +570,7 @@ known_brushes:
       knot_size_mm: 28
       knot_loft_mm: 59
       patterns:
-        - omega.*20102
+        - o[mn]ega.*20102
     "20106":
       knot_size_mm: 28
       patterns:
@@ -550,7 +594,13 @@ known_brushes:
       knot_size_mm: 25
       patterns:
         - omega.*46138
-    "50068 Bambino":
+    50014 Travel Brush:
+      fiber: Boar
+      knot_size_mm: 21
+      knot_loft_mm: 50
+      patterns:
+        - omega.*50014
+    50068 Bambino:
       fiber: Synthetic
       knot_size_mm: 18
       patterns:
@@ -598,6 +648,13 @@ known_brushes:
       patterns:
         - omega.*evo
         - evo.*omega
+    EVO 2.0 Sythetic:
+      fiber: Synthetic
+      knot_size_mm: 28
+      knot_loft_mm: 51
+      patterns:
+        - omega.*evo 2
+        - evo 2.*omega
     GT Series:
       fiber: Synthetic
       knot_size_mm: 29
@@ -812,6 +869,13 @@ known_brushes:
       knot_size_mm: 26
       patterns:
         - rich.*man.*ultraluxe*
+  Rubab Men:
+    Hornet:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+        - rubab.*hornet
+        - hornet.*rubab
   Rubberset:
     "203":
       fiber: Boar
@@ -913,7 +977,7 @@ known_brushes:
     "620":
       knot_size_mm: 21
       patterns:
-        - semogue\s*620
+        - semogue.*620
     "730":
       fiber: Badger
       knot_size_mm: 22
@@ -980,6 +1044,13 @@ known_brushes:
       patterns:
         - semogue.*bullgoose
         - semogue.*shave.*nook
+        - tsn.*final
+    Shave Nook Final Edition :
+      knot_size_mm: 26.5
+      patterns:
+        - semogue.*bullgoose
+        - semogue.*shave.*nook
+        - tsn.*final
     Torga C5:
       knot_size_mm: 24
       patterns:
@@ -1017,8 +1088,9 @@ known_brushes:
       fiber: Badger
       knot_size_mm: 19
       patterns:
-        - berkeley.*46
-        - simp.*b46\b
+        - berkele?y.*46
+        - simp.*\b46\b
+        - simp.*berkele?y
     Captain 2:
       fiber: Badger
       knot_size_mm: 24
@@ -1062,6 +1134,7 @@ known_brushes:
       patterns:
         - simp.*classic.*\b1\b
         - simp.*cl1
+        - simp.*\b1\b.*classic
     Classic 1 Synthetic:
       fiber: Synthetic
       knot_size_mm: 21
@@ -1146,6 +1219,10 @@ known_brushes:
       knot_loft_mm: 52
       patterns:
         - simp.*farringdon
+    Harvard:
+      fiber: Badger
+      patterns:
+        - simp.*harvard
     M6 TSN LE (2014):
       fiber: Badger
       knot_size_mm: 22
@@ -1177,6 +1254,7 @@ known_brushes:
       patterns:
         - simp.*traf.*\bt1
         - trafalgar.*\bt1
+        - simp.*t1
     Trafalgar T2:
       fiber: Synthetic
       knot_size_mm: 24
@@ -1222,12 +1300,12 @@ known_brushes:
         - 'supply(?: silvertip)? synthetic'
   Stirling:
     2-Band Synthetic:
-      fibether: Synthetic
+      fiber: Synthetic
       knot_size_mm: 24
       patterns:
         - stirl.*(?:2|two)(?:-|\s)+band
         - stirl.*24.*synth
-    510SE:
+    Zenith Boar Brush (510SE):
       knot:
         brand: Zenith
         fiber: Boar
@@ -1238,6 +1316,7 @@ known_brushes:
         - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
         - stirl.*less boar(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - stirling.*zenith.*boar
     510SE-XL:
       knot:
         brand: Zenith
@@ -1388,7 +1467,7 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-        - s[ae]g?rada
+        - s[ae]g?r[ai]da
   Zenith:
     205 SE:
       fiber: Boar
@@ -1584,6 +1663,7 @@ known_brushes:
         - maor boar
         - zen.*wetshaving
         - zen.*\bmb\b
+        - more bore
       knot:
         brand: Zenith
         fiber: Boar
@@ -2058,6 +2138,12 @@ known_knot_based_brushes:
     V28:
       patterns:
         - grizz.*v28\b
+    V29:
+      patterns:
+        - grizz.*v29\b
+    V30:
+      patterns:
+        - grizz.*v30\b
   Long Shaving:
     Reserve:
       fiber: Badger
@@ -2410,6 +2496,11 @@ known_knot_based_brushes:
         - zenith.*\bm23\b
 
 other_brushes:
+  Abominable Creations:
+    default: Synthetic
+    patterns:
+      - abomin.*creations
+      - abominable
   Acqua di Parma:
     default: Synthetic
     patterns:
@@ -2569,10 +2660,20 @@ other_brushes:
     default: Badger
     patterns:
       - catalin
+  CB Brushworks:
+    default: Synthetic
+    patterns:
+      - \bcb\b.*brushworks
   Century:
     default: Boar
     patterns:
       - century.*vintage
+  Charcoal Goods:
+    default: Badger
+    patterns:
+      - charcoal.*goods
+      - charcoal
+      - \bcg\b
   Chisel & Hound:
     default: Badger
     patterns:
@@ -2640,6 +2741,10 @@ other_brushes:
     patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
+  Echolly:
+    default: Synthetic
+    patterns:
+      - echolly
   Economy Supply Co.:
     default: Boar
     patterns:
@@ -2838,7 +2943,7 @@ other_brushes:
     patterns:
       - lowborn supply
   Lutin Brushworks:
-    default: Synthetic
+    default: Badger
     patterns:
       - lutin
   Made Rite:
@@ -3014,13 +3119,15 @@ other_brushes:
   Rad Dinosaur Creations:
     default: Synthetic
     patterns:
-      - rad dino(saur)?
+      - rad ?dino(saur)?
       - priusaurus
       - rdc
   RazoRock:
     default: Synthetic
     patterns:
       - razorock
+      - razorck
+      - \brr\b
   Rich Man Shaving:
     default: Badger
     patterns:
@@ -3183,11 +3290,6 @@ other_brushes:
     patterns:
       - razor.*co
       - trc
-  RazoRock:
-    default: Synthetic
-    patterns:
-      - razorock
-      - \brr\b
   The Rustic Bee:
     default: Badger
     patterns:

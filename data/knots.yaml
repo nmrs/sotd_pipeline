@@ -402,6 +402,11 @@ known_knots:
     B18:
       patterns:
         - ^(?!.*zen).*\bb18\b
+  Envy Shave:
+    Ubersoft:
+      fiber: Synthetic
+      patterns:
+        - ubersoft
   Frank Shaving:
     Pur-Tech:
       fiber: Synthetic
@@ -518,6 +523,11 @@ known_knots:
       patterns:
         - hi-?brush
         - omega.*syn
+    Proraso Professional:
+      knot_maker: Omega
+      knot_size_mm: 28
+      patterns:
+        - proraso
   Oumo:
     Kirin:
       fiber: Badger
@@ -651,7 +661,7 @@ known_knots:
       patterns:
         - turn.{1,5}shave.*m\d
         - t[&n]s.*m\d
-        - ^(?!.*(simpson|oumo)).*\bm\d\b
+        - ^(?!.*(simpson|oumo|dubl)).*\bm\d\b
     Plissoft:
       fiber: Synthetic
       knot_size_mm: 24

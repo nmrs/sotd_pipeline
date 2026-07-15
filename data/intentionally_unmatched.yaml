@@ -162,12 +162,6 @@ blade:
       id: mxd8vix
       source: user
 brush:
-  '>!redacted!<':
-    added_date: '2025-07-19'
-    comment_ids:
-    - file: 2025-06.json
-      id: mwl00zz
-      source: user
   banana:
     added_date: '2025-07-28'
     comment_ids:

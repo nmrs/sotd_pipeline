@@ -30,6 +30,9 @@ artisan_handles:
     Unspecified:
       patterns:
         - auroro?a\s*groom
+    Hulk-a-Maniac:
+      patterns:
+        - hulk.*a.*maniac
   Billy Goat Brushworks:
     Unspecified:
       patterns:
@@ -92,6 +95,12 @@ artisan_handles:
     Unspecified:
       patterns:
         - century
+  Charcoal Goods:
+    Unspecified:
+      patterns:
+        - charcoal.*goods
+        - charcoal
+        - \bcg\b
   Chisel & Hound:
     Unspecified:
       patterns:
@@ -523,7 +532,7 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - aka.*brush(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-        - aka
+        - aka(?! (less|moar|pro 48))
   AMACK:
     Unspecified:
       patterns:
@@ -894,6 +903,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
         - wilkinson
+  WONTSHED:
+    Unspecified:
+      patterns:
+        - wontshed
   WSP:
     Unspecified:
       patterns:

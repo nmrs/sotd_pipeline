@@ -61,13 +61,10 @@ Above the Tie:
     format: AC
     patterns:
       - (?:\batt\b|tie).*se[- ]?2
-  Windsor Pro SB90:
+  Windsor:
     patterns:
       - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - \b(?:att|tie)\b.*windsor
-  Windsor SSRH2:
-    patterns:
-      - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
   X1 Slant:
     format: AC
     patterns:
@@ -145,6 +142,10 @@ Archibald:
     format: Shavette (A77)
     patterns:
       - archibald.*a77
+Ascender:
+  Skyline:
+    patterns:
+      - ascender.*skyline
 Assured for Men:
   Dollar Tree Safety Razor:
     patterns:
@@ -158,6 +159,10 @@ Asylum:
     format: AC
     patterns:
       - asylum.*evo
+  Injector:
+    format: Injector
+    patterns:
+      - as?ylum.*injector
   Rx:
     format: AC
     patterns:
@@ -251,6 +256,11 @@ Beard Struggle:
   SEAX:
     patterns:
       - '\bseax\b'
+Benetfink & Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - benetfink
 Bengall:
   Straight:
     format: Straight
@@ -403,6 +413,7 @@ Carbon:
       - carbon.*\bti
       - carbon \++
       - carbon razors?
+      - carbon stainless
 Carl Rader:
   Straight:
     format: Straight
@@ -423,7 +434,7 @@ Cartridge/Disposable:
       - \bcart\b
       - cartridge
       - dorco.*pace 7
-      - disposable
+      - dispos[ai]ble
       - harry
       - '\blidl\b'
       - pace.*6
@@ -432,8 +443,13 @@ Cartridge/Disposable:
       - penny shaver
       - person.*(single blade|face razor)
       - twinblade
-      - ^(?!.*(tip|silver blue|lady)).*gil.*blue
+      - ^(?!.*(tip|silver blue|super blue|lady)).*gil.*blue
       - m[uü]hle.*fusion
+Case:
+  Ability:
+    format: Straight
+    patterns:
+      - case.*ability
 Caveem:
   Safety Razor:
     patterns:
@@ -619,6 +635,13 @@ Dovo:
     width: 5/8
     patterns:
       - dovo.*carpe.*diem
+  Masters's:
+    format: Straight
+    grind: Full Hollow
+    point: Round
+    width: 6/8
+    patterns:
+      - dovo.*master
   Runde Sache:
     format: Straight
     grind: Full Hollow
@@ -629,7 +652,7 @@ Dovo:
   Shavette:
     format: Shavette
     patterns:
-      - dovo.*shavette
+      - dovo.*shav?ette
   Straight:
     format: Straight
     patterns:
@@ -690,6 +713,10 @@ Edwin Jagger:
       - '(?:de|ej)\s*8\d'
       - ej lined chrome
 EldrormR Industries:
+  FW24:
+    format: GEM
+    patterns:
+      - \bfw24\b
   MM24:
     format: GEM
     patterns:
@@ -759,7 +786,7 @@ Ever-Ready:
   Streamline:
     format: GEM
     patterns:
-      - '(?:ever|er).*(stream\s*line|ambassador|jewel)'
+      - '(?:ever|er).*(str[ew]am\s*line|ambassador|jewel)'
       - '\bstream\s*line\b'
 Everyday:
   Stinger:
@@ -1110,6 +1137,7 @@ Gillette:
       - gillette.*\bold\b
       - oc.*ball
       - old.*type
+      - gil+.*pocket
       - pocket.*ed
       - (single|double).*ring
       - big.*fellow
@@ -1153,9 +1181,10 @@ Gillette:
       - Super.*adjust
       - 'gil.*et.*\bbb\b'
       - super.*109
+      - gil.*1980.*adj
   Super Blue:
     patterns:
-      - 'super\s*blue'
+      - '(gil.*)?super\s*blue'
   Super Click:
     patterns:
       - gil.*super click
@@ -1286,6 +1315,9 @@ Haircut and Shave Company:
     patterns:
       - haircut.*75
       - 75.*haircut
+  Ti Efficient:
+    patterns:
+      - haircut.*shave.*efficient
 Handlebar:
   Shaving Company Dali:
     patterns:
@@ -1307,7 +1339,7 @@ Hederi & Joseph:
 Henson:
   AL13:
     patterns:
-      - ^(?!.*ti-?22).*henson.*(mild|medium|aggressive)?
+      - ^(?!.*ti-?22|yintal).*henson.*(mild|medium|aggressive)?
       - (henson)?.*al13(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - squatch
       - \bal-?13
@@ -1531,6 +1563,11 @@ Kismet:
     format: Shavette (Hair Shaper)
     patterns:
       - kismet(.*hair|.*shavette)
+Klas Törnblom:
+  Straight:
+    format: Straight
+    patterns:
+      - klas.*t[oöu]rnbl[ou]m
 Knockout:
   Razor:
     patterns:
@@ -1587,7 +1624,7 @@ Lambda:
       - lambda.*ares
   Athena:
     patterns:
-      - lambda.*athena
+      - lamb?da.*athena
       - tithena
 Leaf:
   Razor:
@@ -1638,6 +1675,7 @@ Lord:
   L6:
     patterns:
       - lord.*l6
+      - lord.*cheapo
   S 625:
     patterns:
       - lord.*s ?625
@@ -1814,7 +1852,7 @@ Mühle:
       - liscio
   Neo:
     patterns:
-      - muhle neo
+      - m[uü]hle neo
   R41:
     patterns:
       - R ?(41|103)
@@ -1844,6 +1882,10 @@ Noble Otter:
       - NO(1|2)C
       - 'NOB\d'
       - 'nobc\d'
+Nord:
+  Freyja:
+    patterns:
+      - nord.*freyja
 Oberon:
   Safety Razor:
     patterns:
@@ -1898,7 +1940,7 @@ Other DE:
 Other DE Clone:
   "":
     patterns:
-      - ^(?!.*(futur|eagle|shavette|kami|scales)).*(knockoff|clone)
+      - ^(?!.*(futur|eagle|shavette|kami|scales|ibc)).*(knockoff|clone)
       - merkur.*style
 Other Shavette:
   "":
@@ -1928,6 +1970,7 @@ Other Shavette (AC):
       - bbr-?s.*(shavette|scales)
       - (kai|feather).*[ck]lon(?:e[nm])?.*isori
       - '[ck]lon(?:e[nm])?isori.*(kai|feather)'
+      - ibc clone
 Other Shavette (Disposable):
   "":
     format: Shavette (Disposable)
@@ -2102,6 +2145,10 @@ Parker:
   A1R:
     patterns:
       - parker.*a1r
+  AeroShave:
+    patterns:
+      - parker.*aeroshave
+      - parker.*areoshave
   Adjustable Injector:
     format: Injector
     patterns:
@@ -2245,7 +2292,7 @@ Raido Star:
     point: Square
     width: 8/8
     patterns:
-      - raido star.*(depravity|degenerat).*(?:\d{1,2}/(8|16))?
+      - raido ?star.*(depravity|degenerat).*(?:\d{1,2}/(8|16))?
 Ralf Aust:
   Straight:
     format: Straight
@@ -2271,6 +2318,9 @@ RazoRock:
   Cyber:
     patterns:
       - razorock.*cyber
+  Daily:
+    patterns:
+      - razorock.*daily
   DE1:
     patterns:
       - razorock.*de1
@@ -2327,6 +2377,11 @@ RazoRock:
   Mission:
     patterns:
       - mission
+  Next Level:
+    patterns:
+      - razorock.*next ?level
+      - rr.*next ?level
+      - razorock.*\bnl\b
   Old Type:
     patterns:
       - (razorock|\brr\b).*old.*type
@@ -2370,6 +2425,16 @@ Red Imp:
     format: Straight
     patterns:
       - red.*imp(?:.*\d{1,2}/(8|16))?
+Reggie's Razors:
+  Jupiter:
+    patterns:
+      - reggie.*jupiter
+  Saturn:
+    patterns:
+      - reggie.*saturn
+  Titan:
+    patterns:
+      - reggie.*titan
 Rex:
   Ambassador:
     patterns:
@@ -2416,7 +2481,7 @@ Robeson:
   Shure-Edge:
     format: Straight
     patterns:
-      - robeson.*(shure|sheer)[ -]?edge
+      - robeson.*(shure?|sheer)[ -]?edge
   Straight:
     format: Straight
     patterns:
@@ -2481,6 +2546,8 @@ Romer-7:
       - romer.*ricardo
       - ricardo.*romer
       - ricardo oc
+      - romer.*oc
+      - oc.*romer
   Shivira:
     patterns:
       - \bshivira\b
@@ -2558,6 +2625,12 @@ Segal:
   Unitary:
     patterns:
       - segal
+Seiko:
+  Tip Top:
+    patterns:
+      - seiko.*tip.*top
+      - seiko.*indian
+      - indian.*seiko
 Seygus:
   Zeppelin V2:
     patterns:
@@ -2586,6 +2659,9 @@ Shield:
     format: AC
     patterns:
       - shield.*evolution
+  GR5:
+    patterns:
+      - shield.*gr5
   Predator:
     format: GEM
     patterns:
@@ -2599,6 +2675,10 @@ Shield:
     format: Half DE
     patterns:
       - shield.*\bse\b
+  Stomper:
+    format: Half DE
+    patterns:
+      - shield.*stomper
 Shumate:
   Barber Deluxe:
     format: Straight
@@ -2674,19 +2754,27 @@ Stando:
     patterns:
       - stando.*rod
 Star:
+  "100":
+    patterns:
+      - star.*100
+      - star.*de
+      - star.*double edge
+      - star 3 piece
   Cadet:
     format: GEM
     patterns:
       - star.*cadet
       - star.*1912
-  Double Edge:
-    patterns:
-      - star.*de
 Star Reito:
   Straight:
     format: Straight
     patterns:
       - \breito\b(?:.*\d{1,2}/(8|16))?
+Steer & Webster:
+  Straight:
+    format: Straight
+    patterns:
+      - steer.*webster(?:.*\d{1,2}/(8|16))?
 Stirling:
   Slant:
     patterns:
@@ -2812,6 +2900,9 @@ Treet:
     patterns:
       - treet
 Trident Shaving:
+  Murray:
+    patterns:
+      - trident.*murray
   Varukh:
     patterns:
       - varukh
@@ -2827,7 +2918,8 @@ Union Cutlery:
 Urkunet:
   Assassin:
     patterns:
-    - urkunet assassin
+    - urkunet.*assassin
+    - uruknet.*assassin
 Utica Knife & Razor Co.:
   Red Point 917:
     format: Straight
@@ -3006,16 +3098,21 @@ Werner Breidenbach:
     width: 15/16
     patterns:
       - monte.*rosa.*14(?:.*\d{1,2}/(8|16))?
+wester Bros:
+  Straight:
+    format: Straight
+    patterns:
+    - wester bros
 W.H. Morley & Sons:
   Straight:
     format: Straight
     patterns:
       - w\.? ?h\.? morley(?:.*\d{1,2}/(8|16))?
 Whityle:
-  20T Glide Pro 4D:
+  Glide Pro:
     format: Dual Half DE
     patterns:
-      - whityle.*20t
+      - whityle
 Wilkinson Sword:
   Butterfly:
     patterns:
@@ -3140,6 +3237,7 @@ Yaqi:
   Top Aggressive:
     patterns:
       - yaqi.*top.*ag+res+ive
+      - yaqi.*\btop\b
   Torqx:
     patterns:
       - torqx(.*adjust)?
@@ -3165,6 +3263,13 @@ Yintal:
   Adjustable:
     patterns:
       - yintal.*adj
+  Butterfly:
+    patterns:
+      - yintal.*butter
+  DE:
+    patterns:
+      - ^yintal$
+      - yintal.*henson
   Shavette:
     format: Shavette (Half DE)
     patterns:
