@@ -37,7 +37,7 @@ from .aggregators.razor_specialized import (
     aggregate_straight_grinds,
     aggregate_straight_points,
     aggregate_straight_widths,
-    aggregate_super_speed_tips,
+    aggregate_super_speed_variants,
 )
 from .aggregators.user_analysis import aggregate_user_analysis
 from .aggregators.users import (
@@ -48,9 +48,9 @@ from .aggregators.users import (
     aggregate_razor_format_users,
     aggregate_soap_brand_diversity,
     aggregate_soap_brand_scent_diversity,
-    aggregate_user_single_use_soaps,
     aggregate_soap_mashup_users,
     aggregate_soap_sample_users,
+    aggregate_user_single_use_soaps,
     aggregate_users,
 )
 from .utils.metrics import calculate_metadata
@@ -247,7 +247,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         records
     )
     aggregated_data["data"]["game_changer_plates"] = aggregate_game_changer_plates(records)
-    aggregated_data["data"]["super_speed_tips"] = aggregate_super_speed_tips(records)
+    aggregated_data["data"]["super_speed_variants"] = aggregate_super_speed_variants(records)
     aggregated_data["data"]["straight_widths"] = aggregate_straight_widths(records)
     aggregated_data["data"]["straight_grinds"] = aggregate_straight_grinds(records)
     aggregated_data["data"]["straight_points"] = aggregate_straight_points(records)

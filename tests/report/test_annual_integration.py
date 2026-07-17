@@ -64,7 +64,7 @@ class TestAnnualReportIntegration:
             "blackbird-plates": [],
             "christopher-bradley-plates": [],
             "game-changer-plates": [],
-            "super-speed-tips": [],
+            "super-speed-variants": [],
             "straight-widths": [],
             "straight-grinds": [],
             "straight-points": [],

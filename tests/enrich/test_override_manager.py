@@ -430,7 +430,7 @@ class TestEnrichmentOverrideManager:
       plate: "A"
       plate_type: "B"
       plate_level: "1"
-      super_speed_tip: "Red"
+      super_speed_variant: "Red Tip"
       format: "DE"
 """
         )
@@ -444,5 +444,7 @@ class TestEnrichmentOverrideManager:
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate") == "A"
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate_type") == "B"
         assert manager.get_override("2026-01", "m99b8f9", "razor", "plate_level") == "1"
-        assert manager.get_override("2026-01", "m99b8f9", "razor", "super_speed_tip") == "Red"
+        assert (
+            manager.get_override("2026-01", "m99b8f9", "razor", "super_speed_variant") == "Red Tip"
+        )
         assert manager.get_override("2026-01", "m99b8f9", "razor", "format") == "DE"

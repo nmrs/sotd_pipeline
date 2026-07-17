@@ -232,22 +232,22 @@ All enrichers must include:
 }
 ```
 
-### 6. Super Speed Tip Enricher
+### 6. Super Speed Variant Enricher
 
-**Purpose**: Extract tip colors and variants from Gillette Super Speed razors
+**Purpose**: Classify Gillette Super Speed razors into reporting variants using
+explicit text matches (with precedence) and year-based inference.
 
 **Applies To**: Records where `razor.matched.brand == "Gillette"` and `razor.matched.model == "Super Speed"`
 
-**Extraction Patterns**:
-- Tip colors: `"Red"`, `"Blue"`, `"Black"`
-- Tip variants: `"Flare"` (with `"flair"` as synonym)
+**Canonical variants**:
+`40's Style (NDC)`, `Black Tip`, `Flare Tip`, `Blue Tip`, `Red Tip`,
+`TV Special`, `Black Handle`, `Unknown`
 
 **Example Output**:
 ```python
 "enriched": {
-    "tip_color": "Red",
-    "tip_variant": "Flare",
-    "_enriched_by": "SuperSpeedTipEnricher",
+    "super_speed_variant": "Red Tip",
+    "_enriched_by": "SuperSpeedVariantEnricher",
     "_extraction_source": "user_comment"
 }
 ```

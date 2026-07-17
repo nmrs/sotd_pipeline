@@ -167,4 +167,3 @@ class HandleMatcher:
                 if "_pattern_used" not in updated:
                     updated["_pattern_used"] = model_handle_result["_pattern_used"]
                 return
-

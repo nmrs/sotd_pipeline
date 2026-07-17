@@ -200,18 +200,22 @@ def run_evaluation(categories=None, verbose=False, by_strategy=False):
 
             # Collect mismatches for verbose output
             if not all_correct:
-                mismatches.append({
-                    "input": inp,
-                    "expected": {k: v for k, v in case.items() if k != "input"},
-                    "actual": {k: v for k, v in actual.items() if k not in ("strategy", "score")},
-                    "strategy": strategy_name,
-                    "score": actual.get("score"),
-                    "comparison": comparison,
-                })
+                mismatches.append(
+                    {
+                        "input": inp,
+                        "expected": {k: v for k, v in case.items() if k != "input"},
+                        "actual": {
+                            k: v for k, v in actual.items() if k not in ("strategy", "score")
+                        },
+                        "strategy": strategy_name,
+                        "score": actual.get("score"),
+                        "comparison": comparison,
+                    }
+                )
 
         # Print summary
         total = len(cases)
-        print(f"  No match: {no_match_count}/{total} ({no_match_count/total*100:.1f}%)\n")
+        print(f"  No match: {no_match_count}/{total} ({no_match_count / total * 100:.1f}%)\n")
 
         for field, stats in sorted(field_stats.items()):
             evaluated = stats["correct"] + stats["wrong"] + stats["missing"]
@@ -229,7 +233,9 @@ def run_evaluation(categories=None, verbose=False, by_strategy=False):
             print(f"\n  Strategy breakdown:")
             for strat, stats in sorted(strategy_stats.items(), key=lambda x: -x[1]["total"]):
                 pct = stats["correct"] / stats["total"] * 100 if stats["total"] > 0 else 0
-                print(f"    {strat:40s}  total={stats['total']:4d}  correct={stats['correct']:4d}  ({pct:.1f}%)")
+                print(
+                    f"    {strat:40s}  total={stats['total']:4d}  correct={stats['correct']:4d}  ({pct:.1f}%)"
+                )
 
         # Verbose mismatches
         if verbose and mismatches:
@@ -237,7 +243,7 @@ def run_evaluation(categories=None, verbose=False, by_strategy=False):
             for m in mismatches[:50]:  # cap at 50 to avoid overwhelming output
                 print(f"\n    INPUT: {m['input']}")
                 print(f"    EXPECTED: {m['expected']}")
-                actual_display = {k: v for k, v in m['actual'].items() if v is not None}
+                actual_display = {k: v for k, v in m["actual"].items() if v is not None}
                 print(f"    GOT:      {actual_display}")
                 print(f"    STRATEGY: {m['strategy']}  SCORE: {m['score']}")
             if len(mismatches) > 50:
@@ -250,11 +256,14 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate brush matcher against golden dataset")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show individual mismatches")
     parser.add_argument(
-        "--category", "-c",
+        "--category",
+        "-c",
         choices=["handle", "knot", "brush"],
         help="Evaluate only one category",
     )
-    parser.add_argument("--strategy", "-s", action="store_true", help="Break down results by strategy")
+    parser.add_argument(
+        "--strategy", "-s", action="store_true", help="Break down results by strategy"
+    )
     args = parser.parse_args()
 
     categories = [args.category] if args.category else None

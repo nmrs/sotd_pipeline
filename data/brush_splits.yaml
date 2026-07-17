@@ -9,6 +9,17 @@ AP Shave Co Maggard Mixed $MISTURA:
   - file: 2025-06.json
     comment_ids:
     - mww3zly
+AP Shave Co. x Shavemac -:
+  handle: AP Shave Co. x Shavemac - Crushed Mud
+  knot: 25 mm Mühle STF
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: false
+  occurrences:
+  - file: 2026-07.json
+    comment_ids:
+    - oxde1np
 Boar AP Shave Co Wooden 26 mm Maggards Boar knot:
   handle: AP Shave Co Wooden
   knot: 26 mm Maggards Boar knot
@@ -152,6 +163,17 @@ Grizzly Bay Sophisticated Kaos Bar-Bear w/ V25 Fanchurian Badger:
   system_knot: null
   system_confidence: high
   system_reasoning: Single component brush
+Grizzly Bay w/ V21:
+  handle: null
+  knot: Grizzly Bay w/ V21
+  match_type: null
+  corrected: false
+  validated_at: null
+  should_not_split: true
+  occurrences:
+  - file: 2026-06.json
+    comment_ids:
+    - os8wtnt
 Heritage Shave Collection EverReady Badger:
   handle: null
   knot: null
@@ -198,8 +220,7 @@ Marble handle w/ G5 Maggard:
     - mhxbwy8
 Omega badger for 1st pass, 2nd with Yaqi 26mm Mysterious Space. New. First use. Very soft:
   handle: null
-  knot: Omega badger for 1st pass, 2nd with Yaqi 26mm Mysterious Space. New. First
-    use. Very soft
+  knot: null
   match_type: null
   corrected: false
   validated_at: null

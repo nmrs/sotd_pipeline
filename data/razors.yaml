@@ -717,6 +717,10 @@ EldrormR Industries:
     format: GEM
     patterns:
       - \bfw24\b
+  MM14:
+    format: GEM
+    patterns:
+      - 'm+\s*14'
   MM24:
     format: GEM
     patterns:
@@ -1088,7 +1092,7 @@ Gillette:
       - gil.*diplomat
   Fatboy:
     patterns:
-      - 'fat\s*boy'
+      - '\bfat?\s*boys?\b'
       - 'gil.*et.*\b195\b'
       - gil.*et.*exec
       - gillette.*\bfat\b
@@ -1751,46 +1755,49 @@ Max Sprecher:
     patterns:
       - max sprecher.*(?:\d{1,2}/(8|16))?
 Merkur:
-  "15C":
+  15C:
     patterns:
       - (merkur.*)?15c
-  "23C":
+  23C:
     patterns:
       - (merkur.*)?23-?[bc]
-  "24C":
+  24C:
     patterns:
       - (merkur.*)?24c
-  "33C":
+  25C:
+    patterns:
+      - (merkur.*)?25c
+  33C:
     patterns:
       - (merkur.*)?33-*c
-  "34C":
+  34C:
     patterns:
       - (merkur.*)?34-*[cg]
       - merk.*hd
       - ^HD$
       - merkur
-  "37C":
+  37C:
     patterns:
       - (merkur.*)?37c
       - merkur.*37c.*(slant)*
       - coles slant
       - mer[ck]ur.*slant
-  "38C":
+  38C:
     patterns:
       - (merkur.*)?38c
-  "39C":
+  39C:
     patterns:
       - (merkur.*)?39c
-  "41C":
+  41C:
     patterns:
       - (merkur.*)?41c
-  "43C":
+  43C:
     patterns:
       - (merkur.*)?43c
-  "45":
+  45C:
     patterns:
       - (merkur.*)45\b
-  "51C":
+  51C:
     patterns:
       - (merkur.*)?51c
   Futur:
@@ -1926,6 +1933,11 @@ OneBlade:
     format: FHS
     patterns:
       - oneblade.*hybrid
+Osgar:
+  Straight:
+    format: Straight
+    patterns:
+      - \bosgar\b
 Other AC Clone:
   "":
     format: AC
@@ -1999,7 +2011,7 @@ Other Straight Razor:
   "":
     format: Straight
     patterns:
-      - \d{1,2}/(8|16)
+      - \d{1,2}[/⁄](8|16)
       - hollow
       - straight
       - wedge
@@ -2388,6 +2400,9 @@ RazoRock:
   SLOC:
     patterns:
       - sloc
+  Smile:
+    patterns:
+      - razorock.*smile
   Stealth Slant:
     patterns:
       - stealth.*slant
@@ -2760,6 +2775,7 @@ Star:
       - star.*de
       - star.*double edge
       - star 3 piece
+      - ^star$
   Cadet:
     format: GEM
     patterns:
@@ -2960,10 +2976,10 @@ Vikings Blade:
   Chieftain JR:
     patterns:
       - vik.*chief.*jr
-  Emperor Meiji:
+  Emperor:
     patterns:
-      - vik.*emperor.*meiji
-  The Godfather:
+      - vik.*emperor
+  Godfather:
     patterns:
       - vik.*godfather
 Vikings Revolution:
@@ -3263,6 +3279,7 @@ Yintal:
   Adjustable:
     patterns:
       - yintal.*adj
+      - yintal.*3000s
   Butterfly:
     patterns:
       - yintal.*butter

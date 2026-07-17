@@ -4,10 +4,10 @@ from sotd.aggregate.aggregators.razor_specialized import (
     aggregate_blackbird_plates,
     aggregate_christopher_bradley_plates,
     aggregate_game_changer_plates,
-    aggregate_super_speed_tips,
-    aggregate_straight_widths,
     aggregate_straight_grinds,
     aggregate_straight_points,
+    aggregate_straight_widths,
+    aggregate_super_speed_variants,
 )
 
 
@@ -83,19 +83,19 @@ def test_aggregate_game_changer_plates():
     assert result[1]["rank"] == 2
 
 
-def test_aggregate_super_speed_tips():
+def test_aggregate_super_speed_variants():
     records = [
-        {"author": "user1", "razor": {"enriched": {"super_speed_tip": "Flare"}}},
-        {"author": "user2", "razor": {"enriched": {"super_speed_tip": "Flare"}}},
-        {"author": "user1", "razor": {"enriched": {"super_speed_tip": "Black"}}},
+        {"author": "user1", "razor": {"enriched": {"super_speed_variant": "Flare Tip"}}},
+        {"author": "user2", "razor": {"enriched": {"super_speed_variant": "Flare Tip"}}},
+        {"author": "user1", "razor": {"enriched": {"super_speed_variant": "Black Tip"}}},
     ]
-    result = aggregate_super_speed_tips(records)
+    result = aggregate_super_speed_variants(records)
     assert len(result) == 2
-    assert result[0]["super_speed_tip"] == "Flare"
+    assert result[0]["super_speed_variant"] == "Flare Tip"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
     assert result[0]["rank"] == 1
-    assert result[1]["super_speed_tip"] == "Black"
+    assert result[1]["super_speed_variant"] == "Black Tip"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
     assert result[1]["rank"] == 2

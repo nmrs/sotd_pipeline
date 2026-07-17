@@ -64,6 +64,12 @@ blade:
     - file: 2024-07.json
       id: lf0f1ta
       source: user
+  i forgot:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: owg9ysg
+      source: user
   idk, will edit later:
     added_date: '2025-08-24'
     comment_ids:
@@ -107,6 +113,12 @@ blade:
     - file: 2025-09.json
       id: ngu2m1r
       source: user
+  nichts:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oufz592
+      source: user
   not sure, didn't take it apart to see:
     added_date: '2025-07-19'
     comment_ids:
@@ -118,6 +130,12 @@ blade:
     comment_ids:
     - file: 2025-06.json
       id: mw99op2
+      source: user
+  rutger hauer:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oxesq0q
       source: user
   synthetic 1-4-8-12k - translucent ark finish:
     added_date: '2025-12-11'
@@ -306,6 +324,12 @@ brush:
     - file: 2025-06.json
       id: myg6dwu
       source: user
+  nothing:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oufz592
+      source: user
   palm 190mm:
     added_date: '2026-01-08'
     comment_ids:
@@ -341,6 +365,12 @@ brush:
     comment_ids:
     - file: 2025-06.json
       id: mykp03w
+      source: user
+  talk to ze hand:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oxesq0q
       source: user
   the hands of my children:
     added_date: '2025-07-28'
@@ -392,6 +422,18 @@ razor:
     comment_ids:
     - file: 2024-07.json
       id: lfjrr79
+      source: user
+  nada:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oufz592
+      source: user
+  not even bothering:
+    added_date: '2026-07-15'
+    comment_ids:
+    - file: 2026-07.json
+      id: oxesq0q
       source: user
   ? unknown (i don't remember the model, i got it back in like 2013 through a subscription
     box as my first ever de razor so figured i'd try it again!)

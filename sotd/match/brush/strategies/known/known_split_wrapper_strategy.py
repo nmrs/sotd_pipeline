@@ -169,9 +169,7 @@ class KnownSplitWrapperStrategy(BaseBrushMatchingStrategy):
                         fiber,
                         knot_size_mm,
                         source_text=knot,
-                        matched_by=(
-                            "KnotMatcher" if knot_result else "KnownSplitWrapperStrategy"
-                        ),
+                        matched_by=("KnotMatcher" if knot_result else "KnownSplitWrapperStrategy"),
                         pattern=knot_result.pattern if knot_result else pattern_info["pattern"],
                     ),
                 }

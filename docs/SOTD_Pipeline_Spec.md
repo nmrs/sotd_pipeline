@@ -168,7 +168,7 @@ Analyze matched field values to extract structured metadata that benefits from k
   - Game Changer: gap (.68, .76, .84, 1.05), variant (OC, JAWS)
   - Christopher Bradley: plate (A-G), material (brass, copper, stainless)
   - Blackbird: plate (Standard, Lite, OC/Open Comb)
-  - Super Speed: tip color (Red, Blue, Black), tip variant (Flare/Flair)
+  - Super Speed: variant (40's Style (NDC), Black Tip, Flare Tip, Blue Tip, Red Tip, TV Special, Black Handle, Unknown)
 
 Uses an extensible enricher strategy pattern for sophisticated analysis. Save to:
 

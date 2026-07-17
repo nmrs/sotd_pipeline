@@ -77,7 +77,7 @@ class ParameterValidator:
             "avg_shaves_per_user",
             "median_shaves_per_user",
         ],
-        "super-speed-tips": ["shaves", "unique_users"],
+        "super-speed-variants": ["shaves", "unique_users"],
         "straight-widths": [
             "shaves",
             "unique_users",

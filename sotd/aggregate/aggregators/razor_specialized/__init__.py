@@ -6,7 +6,7 @@ from .game_changer_plate_aggregator import aggregate_game_changer_plates
 from .straight_grind_aggregator import aggregate_straight_grinds
 from .straight_point_aggregator import aggregate_straight_points
 from .straight_width_aggregator import aggregate_straight_widths
-from .super_speed_tip_aggregator import aggregate_super_speed_tips
+from .super_speed_variant_aggregator import aggregate_super_speed_variants
 
 __all__ = [
     "aggregate_blackbird_plates",
@@ -15,5 +15,5 @@ __all__ = [
     "aggregate_straight_grinds",
     "aggregate_straight_points",
     "aggregate_straight_widths",
-    "aggregate_super_speed_tips",
+    "aggregate_super_speed_variants",
 ]

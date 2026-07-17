@@ -827,9 +827,7 @@ class ScoringEngine:
 
         return 0.0
 
-    def _modifier_pattern_specificity(
-        self, input_text: str, result, strategy_name: str
-    ) -> float:
+    def _modifier_pattern_specificity(self, input_text: str, result, strategy_name: str) -> float:
         """
         Return score modifier based on how much of the input is covered by
         the handle and knot regex patterns.
@@ -862,8 +860,16 @@ class ScoringEngine:
             comp = matched.get(component)
             if isinstance(comp, dict):
                 pat = comp.get("_pattern")
-                if pat and isinstance(pat, str) and pat not in (
-                    "unknown", "dual_component", "test_pattern", "test",
+                if (
+                    pat
+                    and isinstance(pat, str)
+                    and pat
+                    not in (
+                        "unknown",
+                        "dual_component",
+                        "test_pattern",
+                        "test",
+                    )
                 ):
                     patterns.append(pat)
 

@@ -277,6 +277,12 @@ known_brushes:
       knot_loft_mm: 50
       patterns:
         - (goodfellas|tgs).*deep
+    Vortice:
+      fiber: Synthetic
+      knot_size_mm: 24
+      knot_loft_mm: 50
+      patterns:
+        - (goodfellas|tgs).*vortice
   Hendrix Classics & Co.:
     Dickel:
       patterns:
@@ -410,12 +416,19 @@ known_brushes:
       patterns:
         - imperial.*travel
   Kent:
+    BK2:
+      fiber: Badger
+      knot_size_mm: 22
+      knot_loft_mm: 55
+      patterns:
+        - kent.*k2
+        - kent.*2k
     BK8:
       fiber: Badger
       knot_size_mm: 27
       knot_loft_mm: 55
       patterns:
-        - kent.*bk8
+        - kent.*k8
     INF1:
       fiber: Synthetic
       knot_size_mm: 22
@@ -530,9 +543,10 @@ known_brushes:
       patterns:
         - omega.*10065
     "10066":
-      knot_size_mm: 28
+      knot_size_mm: 24
+      knot_loft_mm: 56
       patterns:
-        - omega.*10066
+        - omega.*100?66
     "10077":
       knot_size_mm: 23
       patterns:
@@ -561,6 +575,12 @@ known_brushes:
       knot_loft_mm: 47
       patterns:
         - omega.*11573
+    "13109":
+      fiber: Badger
+      knot_size_mm: 23
+      knot_loft_mm: 54
+      patterns:
+        - omega.*13109
     "146818":
       fiber: Synthetic
       knot_size_mm: 25
@@ -600,6 +620,7 @@ known_brushes:
       knot_loft_mm: 50
       patterns:
         - omega.*50014
+        - omega.*travel.*boar
     50068 Bambino:
       fiber: Synthetic
       knot_size_mm: 18
@@ -1408,6 +1429,13 @@ known_brushes:
       knot_loft_mm: 58
       patterns:
         - th([aä]|ae)ter.*4125[/-]4
+  The Holy Black:
+    Heirloom:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+        - holy.*black.*heirloom
+        - holy.*black.*horn\b
   Truefitt & Hill:
     Wellington:
       fiber: Badger
@@ -2200,6 +2228,10 @@ known_knot_based_brushes:
       fiber: Badger
       patterns:
         - rad.*dinosaur.*high.*mountain.*rex
+    Manchuridon:
+      fiber: Badger
+      patterns:
+        - rad.*dino.*manchuridon
     Raptor:
       fiber: Synthetic
       patterns:
@@ -2680,6 +2712,7 @@ other_brushes:
       - chisel.*hound
       - \bc(?:\&|and|\+)h\b
       - darn.*rob
+      - \btdr\b
   Cineen:
     default: Badger
     patterns:
@@ -2839,6 +2872,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - gillette
+  Gimbel Brothers:
+    default: Badger
+    patterns:
+      - gimbels?.*(brothers)?
   Goodfellas Smile:
     default: Synthetic
     patterns:
@@ -2895,6 +2932,10 @@ other_brushes:
       - jequil
       - corenveo
       - je&co
+  Kent:
+    default: Synthetic
+    patterns:
+      - \bkent\b
   Knothead Brushworks:
     default: Synthetic
     patterns:
@@ -3238,6 +3279,10 @@ other_brushes:
     default: Badger
     patterns:
       - \bstando\b
+  Star/Kambro:
+    default: Boar
+    patterns:
+      - star.*kambro
   Stirling:
     default: Synthetic
     patterns:

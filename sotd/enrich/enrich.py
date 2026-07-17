@@ -13,7 +13,7 @@ from .registry import enricher_registry
 from .soap_mashup_enricher import SoapMashupEnricher
 from .soap_sample_enricher import SoapSampleEnricher
 from .straight_razor_enricher import StraightRazorEnricher
-from .super_speed_tip_enricher import SuperSpeedTipEnricher
+from .super_speed_variant_enricher import SuperSpeedVariantEnricher
 
 # Track if enrichers have been set up to avoid repeated setup
 _enrichers_setup = False
@@ -56,7 +56,7 @@ def setup_enrichers(override_manager: Optional[EnrichmentOverrideManager] = None
     enricher_registry.register(BlackbirdPlateEnricher())
     enricher_registry.register(SoapSampleEnricher())
     enricher_registry.register(SoapMashupEnricher())
-    enricher_registry.register(SuperSpeedTipEnricher())
+    enricher_registry.register(SuperSpeedVariantEnricher())
     enricher_registry.register(RazorFormatEnricher())
 
     _enrichers_setup = True

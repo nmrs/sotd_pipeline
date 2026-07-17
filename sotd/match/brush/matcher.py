@@ -529,7 +529,8 @@ class BrushMatcher:
                 pattern=pat,
             ),
             "knot": build_knot_subdict(
-                None, None,
+                None,
+                None,
                 source_text=src,
                 matched_by="HandleMatcher",
                 pattern=pat,
@@ -630,7 +631,8 @@ class BrushMatcher:
             "_matched_by": "KnotMatcher",
             "_pattern": pat,
             "handle": build_handle_subdict(
-                None, None,
+                None,
+                None,
                 source_text=src,
                 matched_by="KnotMatcher",
                 pattern=pat,

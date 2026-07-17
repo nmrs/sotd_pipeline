@@ -353,8 +353,10 @@ class CorrectMatchesStrategy(BaseBrushMatchingStrategy):
             "model": brush_model,
             "handle": build_handle_subdict(brush_brand, None),
             "knot": build_knot_subdict(
-                brush_brand, brush_model,
-                brush_data.get("fiber"), brush_data.get("knot_size_mm"),
+                brush_brand,
+                brush_model,
+                brush_data.get("fiber"),
+                brush_data.get("knot_size_mm"),
             ),
             "source_text": value,
             "_matched_by": "CorrectMatchesStrategy",

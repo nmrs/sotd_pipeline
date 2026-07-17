@@ -40,7 +40,7 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 - **Blackbird Plates**: Plate type aggregation from `razor.enriched.plate`
 - **Christopher Bradley Plates**: Plate type/level aggregation from `razor.enriched.plate_type` and `razor.enriched.plate_level`
 - **Game Changer Plates**: Gap aggregation from `razor.enriched.gap`
-- **Super Speed Tips**: Tip type aggregation from `razor.enriched.super_speed_tip`
+- **Super Speed Variants**: Variant aggregation from `razor.enriched.super_speed_variant`
 - **Straight Razor Widths**: Width aggregation from `razor.enriched.width`
 - **Straight Razor Grinds**: Grind type aggregation from `razor.enriched.grind`
 - **Straight Razor Points**: Point type aggregation from `razor.enriched.point`
@@ -97,7 +97,7 @@ All aggregations must be sorted according to the following rules:
 | blackbird_plates | shaves desc | unique_users desc |
 | christopher_bradley_plates | shaves desc | unique_users desc |
 | game_changer_plates | shaves desc | unique_users desc |
-| super_speed_tips | shaves desc | unique_users desc |
+| super_speed_variants | shaves desc | unique_users desc |
 | straight_widths | shaves desc | unique_users desc |
 | straight_grinds | shaves desc | unique_users desc |
 | straight_points | shaves desc | unique_users desc |
@@ -240,9 +240,9 @@ All aggregations must be sorted according to the following rules:
       {"position": 1, "gap": "1.05", "shaves": 35, "unique_users": 7},
       {"position": 2, "gap": ".84", "shaves": 25, "unique_users": 5}
     ],
-    "super_speed_tips": [
-      {"position": 1, "super_speed_tip": "Flare", "shaves": 45, "unique_users": 12},
-      {"position": 2, "super_speed_tip": "Black", "shaves": 30, "unique_users": 8}
+    "super_speed_variants": [
+      {"position": 1, "super_speed_variant": "Flare Tip", "shaves": 45, "unique_users": 12},
+      {"position": 2, "super_speed_variant": "Black Tip", "shaves": 30, "unique_users": 8}
     ],
     "straight_widths": [
       {"position": 1, "width": "6/8", "shaves": 80, "unique_users": 15},
@@ -335,7 +335,7 @@ All aggregations must be sorted according to the following rules:
 - **Blackbird Plates**: `razor.enriched.plate`
 - **Christopher Bradley Plates**: `razor.enriched.plate_type`, `razor.enriched.plate_level`
 - **Game Changer Plates**: `razor.enriched.gap`
-- **Super Speed Tips**: `razor.enriched.super_speed_tip`
+- **Super Speed Variants**: `razor.enriched.super_speed_variant`
 - **Straight Razor Specs**: `razor.enriched.width`, `razor.enriched.grind`, `razor.enriched.point`
 
 ### Brush Specialized Fields
@@ -398,7 +398,7 @@ All aggregations must be sorted according to the following rules:
 - **Blackbird Plates**: `{"position": N, "plate": "Plate", "shaves": N, "unique_users": N}`
 - **Christopher Bradley Plates**: `{"position": N, "plate_type": "Type", "plate_level": "Level", "shaves": N, "unique_users": N}`
 - **Game Changer Plates**: `{"position": N, "gap": "Gap", "shaves": N, "unique_users": N}`
-- **Super Speed Tips**: `{"position": N, "super_speed_tip": "Tip", "shaves": N, "unique_users": N}`
+- **Super Speed Variants**: `{"position": N, "super_speed_variant": "Flare Tip", "shaves": N, "unique_users": N}`
 - **Straight Widths**: `{"position": N, "width": "Width", "shaves": N, "unique_users": N}`
 - **Straight Grinds**: `{"position": N, "grind": "Grind", "shaves": N, "unique_users": N}`
 - **Straight Points**: `{"position": N, "point": "Point", "shaves": N, "unique_users": N}`

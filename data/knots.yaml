@@ -136,6 +136,10 @@ known_knots:
         - black.*eag.*ht2
         - (?:black.*eag)?.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Boti:
+    Enlightener:
+      fiber: Badger
+      patterns:
+        - boti.*enlightener
     Knight:
       fiber: Synthetic
       patterns:
@@ -381,6 +385,7 @@ known_knots:
     B11:
       patterns:
         - \bb11\b
+        - dgb11
     B12:
       patterns:
         - \bb12\b
@@ -567,7 +572,11 @@ known_knots:
     High Mountain Rex:
       fiber: Badger
       patterns:
-        - rad.*dinosaur.*high.*mountain.*rex
+        - rad.*dino.*high.*mountain.*rex
+    Manchuridon:
+      fiber: Badger
+      patterns:
+        - rad.*dino.*manchuridon    
     Raptor:
       fiber: Synthetic
       patterns:

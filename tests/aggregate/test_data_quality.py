@@ -307,7 +307,7 @@ class TestDataQuality:
             "blackbird_plates",
             "christopher_bradley_plates",
             "game_changer_plates",
-            "super_speed_tips",
+            "super_speed_variants",
             "straight_widths",
             "straight_grinds",
             "straight_points",

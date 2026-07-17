@@ -33,7 +33,7 @@ class EnrichmentOverrideManager:
             "plate": str,
             "plate_type": str,
             "plate_level": str,
-            "super_speed_tip": str,
+            "super_speed_variant": str,
             "format": str,
         },
         "blade": {

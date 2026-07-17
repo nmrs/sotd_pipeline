@@ -128,7 +128,7 @@ DE:
   ABEST:
     Hi Platinum:
       patterns:
-        - abest
+        - \ba ?best\b
   Aeterna:
     Super Stainless:
       patterns:
@@ -176,6 +176,7 @@ DE:
         - astra.*sta(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - astra.*blue(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - astra.*ss(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - blue.*astra
   Baile:
     Platinum:
       patterns:
@@ -189,7 +190,7 @@ DE:
         - barbero.*plat
     Professional:
       patterns:
-        - barbero.*pro
+        - barb[ea]ro.*pro
   Bevel:
     Double Edge:
       patterns:
@@ -336,6 +337,10 @@ DE:
     Super Platinum:
       patterns:
         - flydear
+  Generic:
+    DE:
+      patterns:
+        - (generic|unbranded|nameless)
   Gillette:
     "365":
       patterns:
@@ -502,10 +507,18 @@ DE:
     The Plow 2.0:
       patterns:
         - manscaped
+  Market Basket:
+    Double Edge:
+      patterns:
+        - market.*basket
   Merkur:
     Super Platinum:
       patterns:
         - merkur
+  Ming Shi:
+    Super White:
+      patterns:
+        - ming ?shi
   My-Blades:
     DE:
       patterns:
@@ -549,6 +562,7 @@ DE:
         - (person+a)?.*gem.*diamond.*glide
         - person+a.*(gem)?.*diamond.*glide
         - person.*pdg
+        - gem.*pdg
     Lab Blue:
       patterns:
         - (person+a)?.*lab[ -]?blue

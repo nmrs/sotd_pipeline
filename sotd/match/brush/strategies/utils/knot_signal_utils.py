@@ -22,22 +22,59 @@ from .knot_size_utils import parse_knot_size
 # Canonical term sets — used by any code that needs knot/handle word lists
 # ---------------------------------------------------------------------------
 
-KNOT_TERMS: frozenset = frozenset({
-    "badger", "boar", "synthetic", "synth", "nylon", "horse", "cashmere",
-    "tuxedo", "silvertip", "fanchurian", "fan", "knot", "shoat",
-    "tip", "density",
-})
+KNOT_TERMS: frozenset = frozenset(
+    {
+        "badger",
+        "boar",
+        "synthetic",
+        "synth",
+        "nylon",
+        "horse",
+        "cashmere",
+        "tuxedo",
+        "silvertip",
+        "fanchurian",
+        "fan",
+        "knot",
+        "shoat",
+        "tip",
+        "density",
+    }
+)
 
-HANDLE_CRAFT_TERMS: frozenset = frozenset({
-    "handle", "resin", "wood", "burl", "acrylic", "marble", "ebonite",
-    "butterscotch", "stabilized", "turned", "stock", "custom", "artisan",
-    "zebra",
-})
+HANDLE_CRAFT_TERMS: frozenset = frozenset(
+    {
+        "handle",
+        "resin",
+        "wood",
+        "burl",
+        "acrylic",
+        "marble",
+        "ebonite",
+        "butterscotch",
+        "stabilized",
+        "turned",
+        "stock",
+        "custom",
+        "artisan",
+        "zebra",
+    }
+)
 
-HANDLE_MATERIAL_TERMS: frozenset = frozenset({
-    "metal", "brass", "aluminum", "steel", "titanium",
-    "ivory", "horn", "bone", "stone", "granite",
-})
+HANDLE_MATERIAL_TERMS: frozenset = frozenset(
+    {
+        "metal",
+        "brass",
+        "aluminum",
+        "steel",
+        "titanium",
+        "ivory",
+        "horn",
+        "bone",
+        "stone",
+        "granite",
+    }
+)
 
 HANDLE_ALL_TERMS: frozenset = HANDLE_CRAFT_TERMS | HANDLE_MATERIAL_TERMS
 

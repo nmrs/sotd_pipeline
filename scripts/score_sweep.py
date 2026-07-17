@@ -47,6 +47,7 @@ from sotd.match.brush.matcher import BrushMatcher
 # Evaluation helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_yaml(path: Path) -> dict:
     with open(path) as f:
         return yaml.safe_load(f) or {}
@@ -126,6 +127,7 @@ def _is_correct(expected: dict, actual: dict, category: str) -> bool:
 # Two-phase evaluation: collect once, rescore many times
 # ---------------------------------------------------------------------------
 
+
 def collect_strategy_results(matcher, categories):
     """Phase 1 (expensive): Run strategy execution for all test cases.
 
@@ -151,18 +153,18 @@ def collect_strategy_results(matcher, categories):
     # (handle and knot share inputs, so we avoid running strategies twice)
     input_cache = {}  # input_str → (executable_results, cached_results)
 
-    print(f"  Collecting strategy results for {len(all_cases)} test cases "
-          f"({len(set(c['input'] for c in all_cases))} unique inputs)...",
-          file=sys.stderr)
+    print(
+        f"  Collecting strategy results for {len(all_cases)} test cases "
+        f"({len(set(c['input'] for c in all_cases))} unique inputs)...",
+        file=sys.stderr,
+    )
     t0 = time.time()
 
     for case in all_cases:
         inp = case["input"]
         if inp not in input_cache:
             cached_results = matcher._precompute_handle_knot_results(inp)
-            strategy_results = matcher.strategy_orchestrator.run_all_strategies(
-                inp, cached_results
-            )
+            strategy_results = matcher.strategy_orchestrator.run_all_strategies(inp, cached_results)
             if strategy_results:
                 executable_results = matcher._apply_dependency_constraints(strategy_results)
             else:
@@ -170,8 +172,7 @@ def collect_strategy_results(matcher, categories):
             input_cache[inp] = (executable_results, cached_results)
 
     elapsed = time.time() - t0
-    print(f"  Done in {elapsed:.1f}s ({len(input_cache)} unique inputs cached)",
-          file=sys.stderr)
+    print(f"  Done in {elapsed:.1f}s ({len(input_cache)} unique inputs cached)", file=sys.stderr)
 
     # Build full cache with category/expected info
     cache = []
@@ -198,9 +199,7 @@ def rescore_evaluate(matcher, cache, categories):
         if not executable_results:
             actual = {}
         else:
-            scored = matcher.scoring_engine.score_results(
-                executable_results, inp, cached_results
-            )
+            scored = matcher.scoring_engine.score_results(executable_results, inp, cached_results)
             best = matcher.scoring_engine.get_best_result(scored)
             actual = _extract_fields(best)
 
@@ -208,12 +207,15 @@ def rescore_evaluate(matcher, cache, categories):
             results[category]["correct"] += 1
         else:
             results[category]["mismatches"] += 1
-            results[category]["details"].append({
-                "input": inp,
-                "expected": {k: v for k, v in expected.items()
-                             if k not in ("input", "_category")},
-                "actual": actual,
-            })
+            results[category]["details"].append(
+                {
+                    "input": inp,
+                    "expected": {
+                        k: v for k, v in expected.items() if k not in ("input", "_category")
+                    },
+                    "actual": actual,
+                }
+            )
 
     return results
 
@@ -221,6 +223,7 @@ def rescore_evaluate(matcher, cache, categories):
 # ---------------------------------------------------------------------------
 # Config manipulation
 # ---------------------------------------------------------------------------
+
 
 def get_weight(weights: dict, path: str) -> float:
     keys = path.split(".")
@@ -262,6 +265,7 @@ def parse_override(s: str) -> tuple[str, float]:
 # Output formatting
 # ---------------------------------------------------------------------------
 
+
 def total_mismatches(results: dict) -> int:
     return sum(r["mismatches"] for r in results.values())
 
@@ -294,26 +298,35 @@ def print_details(results: dict, max_per_category: int = 10):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Sweep brush scoring weights to find optimal configuration",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "--sweep", action="append", metavar="PARAM=START:STOP:STEP",
+        "--sweep",
+        action="append",
+        metavar="PARAM=START:STOP:STEP",
         help="Parameter to sweep (repeatable for grid search)",
     )
     parser.add_argument(
-        "--override", action="append", metavar="PARAM=VALUE",
+        "--override",
+        action="append",
+        metavar="PARAM=VALUE",
         help="Set a specific weight value (repeatable)",
     )
     parser.add_argument(
-        "--category", "-c", action="append",
+        "--category",
+        "-c",
+        action="append",
         choices=["handle", "knot", "brush"],
         help="Restrict to specific category (repeatable)",
     )
     parser.add_argument(
-        "--verbose", "-v", action="store_true",
+        "--verbose",
+        "-v",
+        action="store_true",
         help="Show mismatch details for best config (or baseline/override)",
     )
     args = parser.parse_args()
@@ -343,8 +356,10 @@ def main():
         delta = miss - baseline_miss
         delta_str = f"+{delta}" if delta > 0 else str(delta)
         overrides_str = ", ".join(args.override)
-        print(f"OVERRIDE ({miss} mismatches, {delta_str}):  "
-              f"{summary_line(results, categories)}  [{overrides_str}]")
+        print(
+            f"OVERRIDE ({miss} mismatches, {delta_str}):  "
+            f"{summary_line(results, categories)}  [{overrides_str}]"
+        )
 
         if args.verbose:
             print_details(results)

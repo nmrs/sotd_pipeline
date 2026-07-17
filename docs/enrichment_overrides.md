@@ -60,7 +60,7 @@ The override system supports all four product field types (matching `extract_ove
 - `plate` - Blackbird razor plate (string, e.g., "A", "B", "C")
 - `plate_type` - Christopher Bradley plate type (string, e.g., "A", "B", "C")
 - `plate_level` - Christopher Bradley plate level (string, e.g., "1", "2", "3")
-- `super_speed_tip` - Super Speed tip type (string, e.g., "Red", "Blue", "Black")
+- `super_speed_variant` - Super Speed variant (string, e.g., "Red Tip", "Flare Tip", "Unknown")
 - `format` - Razor format (string, e.g., "DE", "Straight", "SE")
 
 #### Blade Enrichment (`blade`)

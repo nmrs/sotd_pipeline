@@ -34,6 +34,7 @@ class SplitCandidate:
 # Text normalisation
 # ---------------------------------------------------------------------------
 
+
 def normalize_text(text: str) -> str:
     """Normalize dashes/spacing so delimiters are detected uniformly.
 
@@ -50,6 +51,7 @@ def normalize_text(text: str) -> str:
 # ---------------------------------------------------------------------------
 # Specification guards
 # ---------------------------------------------------------------------------
+
 
 def is_specification_x(text: str) -> bool:
     """Return True when ' x ' is a dimension spec, not a collaboration.
@@ -82,9 +84,7 @@ def is_specification_slash(text: str, brands_with_slash: set | None = None) -> b
     # Percentage specs
     if re.search(r"\b\d{1,2}/\d{1,2}\b", text, re.IGNORECASE):
         return True
-    if re.search(
-        r"(?:horse|badger|boar|synthetic).*?\d{1,2}/\d{1,2}", text, re.IGNORECASE
-    ):
+    if re.search(r"(?:horse|badger|boar|synthetic).*?\d{1,2}/\d{1,2}", text, re.IGNORECASE):
         return True
 
     # Mixed fiber specs
@@ -118,6 +118,7 @@ def is_specification_slash(text: str, brands_with_slash: set | None = None) -> b
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _find_x_delimiter(text: str) -> str:
     """Return the actual ' x ' / ' X ' variant found in *text*."""
@@ -164,7 +165,7 @@ def _split_smart(text: str, delimiter: str) -> tuple[Optional[str], Optional[str
 
     for pos in delimiter_positions:
         part1 = text[:pos].strip()
-        part2 = text[pos + len(delimiter):].strip()
+        part2 = text[pos + len(delimiter) :].strip()
         if not part1 or not part2:
             continue
 
@@ -200,9 +201,7 @@ def _split_smart(text: str, delimiter: str) -> tuple[Optional[str], Optional[str
     return best_split if best_split else (None, None)
 
 
-def _split_positional(
-    text: str, delimiter: str
-) -> tuple[Optional[str], Optional[str]]:
+def _split_positional(text: str, delimiter: str) -> tuple[Optional[str], Optional[str]]:
     """Positional split: for 'in', first part = knot, second = handle."""
     parts = text.split(delimiter, 1)
     if len(parts) == 2:
@@ -246,7 +245,7 @@ def _splits_at_all_positions(
         if idx == -1:
             break
         part1 = text[:idx].strip()
-        part2 = text[idx + len(delimiter):].strip()
+        part2 = text[idx + len(delimiter) :].strip()
         pos = idx + len(delimiter)
         if not part1 or not part2:
             continue
@@ -266,7 +265,9 @@ def _should_skip_slash_position(text: str, position: int) -> bool:
     return False
 
 
-def _split_slash(text: str, brands_with_slash: set | None = None) -> tuple[Optional[str], Optional[str]]:
+def _split_slash(
+    text: str, brands_with_slash: set | None = None
+) -> tuple[Optional[str], Optional[str]]:
     """Split on '/' as medium-priority delimiter, guarding specs."""
     if is_specification_slash(text, brands_with_slash):
         return None, None
@@ -280,9 +281,7 @@ def _split_slash(text: str, brands_with_slash: set | None = None) -> tuple[Optio
     return None, None
 
 
-def _slash_splits_all(
-    text: str, brands_with_slash: set | None = None
-) -> list[tuple[str, str]]:
+def _slash_splits_all(text: str, brands_with_slash: set | None = None) -> list[tuple[str, str]]:
     """Return (handle, knot) for every valid '/' position in *text*."""
     if is_specification_slash(text, brands_with_slash):
         return []
@@ -296,7 +295,7 @@ def _slash_splits_all(
         if _should_skip_slash_position(text, idx):
             continue
         part1 = text[:idx].strip()
-        part2 = text[idx + 1:].strip()
+        part2 = text[idx + 1 :].strip()
         if part1 and part2:
             handle, knot, _margin = assign_sides(part1, part2)
             results.append((handle, knot))
@@ -306,6 +305,7 @@ def _slash_splits_all(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def split_on_delimiters(
     text: str,
@@ -340,7 +340,7 @@ def split_on_delimiters(
             # Guard: skip "made in" and "in r/", "in u/"
             idx = text.lower().find(delimiter.lower())
             before = text[:idx].strip()
-            after = text[idx + len(delimiter):].strip()
+            after = text[idx + len(delimiter) :].strip()
             if before.lower().endswith("made") or after.lower().startswith(("r/", "u/")):
                 continue
             h, k = _split_positional(text, delimiter)

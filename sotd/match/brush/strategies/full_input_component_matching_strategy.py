@@ -113,9 +113,7 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             # the handle brand should appear BEFORE the knot brand (convention:
             # "Handle Knot").  If positions are reversed, re-match the substrings.
             if handle_brand and knot_brand and handle_brand != knot_brand:
-                corrected = self._correct_brand_positions(
-                    text, handle_result, knot_result
-                )
+                corrected = self._correct_brand_positions(text, handle_result, knot_result)
                 if corrected:
                     handle_result, knot_result = corrected
                     handle_brand = self._extract_brand_from_result(handle_result)
@@ -364,12 +362,10 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             return max(0, max(a_start - b_end, b_start - a_end))
 
         handle_proximity = min(
-            _span_gap(handle_start, handle_end, s_start, s_end)
-            for s_start, s_end in signal_spans
+            _span_gap(handle_start, handle_end, s_start, s_end) for s_start, s_end in signal_spans
         )
         knot_proximity = min(
-            _span_gap(knot_start, knot_end, s_start, s_end)
-            for s_start, s_end in signal_spans
+            _span_gap(knot_start, knot_end, s_start, s_end) for s_start, s_end in signal_spans
         )
 
         if handle_proximity >= knot_proximity:
@@ -529,7 +525,8 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
                 pattern=handle_data.get("_pattern_used"),
             ),
             "knot": build_knot_subdict(
-                None, None,
+                None,
+                None,
                 source_text="",
                 matched_by="HandleMatcher",
                 pattern=handle_data.get("_pattern_used"),
@@ -559,7 +556,8 @@ class FullInputComponentMatchingStrategy(BaseMultiResultBrushMatchingStrategy):
             "_pattern": knot_pattern,
             # Add nested handle and knot sections for modifier functions
             "handle": build_handle_subdict(
-                None, None,
+                None,
+                None,
                 source_text="",
                 matched_by="KnotMatcher",
                 pattern=knot_pattern,
