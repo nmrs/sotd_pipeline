@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Camera } from 'lucide-react';
 
 interface CommentDisplayProps {
   commentIds: string[];
@@ -10,6 +11,8 @@ interface CommentDisplayProps {
   dates?: string[];
   expanded?: boolean;
   onExpandChange?: (expanded: boolean) => void;
+  /** First SOTD header markdown link URL, if any */
+  photoUrl?: string;
 }
 
 export const CommentDisplay: React.FC<CommentDisplayProps> = ({
@@ -22,6 +25,7 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
   dates = [],
   expanded: externalExpanded,
   onExpandChange,
+  photoUrl,
 }) => {
   const [internalExpanded, setInternalExpanded] = useState(false);
 
@@ -92,8 +96,27 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({
     handleExpandToggle();
   };
 
+  const handlePhotoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className={`space-y-1 ${className}`}>
+      {photoUrl && (
+        <a
+          href={photoUrl}
+          target='_blank'
+          rel='noopener noreferrer'
+          onClick={handlePhotoClick}
+          aria-label='View SOTD photo'
+          title='View SOTD photo'
+          className='inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 hover:text-amber-900'
+        >
+          <Camera className='h-3.5 w-3.5' aria-hidden='true' />
+          <span>Photo</span>
+        </a>
+      )}
+
       {displayComments.map((commentId, index) => (
         <button
           key={commentId}

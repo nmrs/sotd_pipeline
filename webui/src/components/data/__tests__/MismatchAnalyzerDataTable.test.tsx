@@ -100,6 +100,28 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.getByText('-')).toBeInTheDocument();
     });
 
+    test('renders SOTD photo link when sotd_photo_url is present', () => {
+      const dataWithPhoto = [
+        {
+          ...mockData[0],
+          sotd_photo_url: 'https://i.ibb.co/Ps8ZgMCb/sotd-2026-07-10.jpg',
+        },
+      ];
+
+      render(<MismatchAnalyzerDataTable {...defaultProps} data={dataWithPhoto} />);
+
+      const photoLink = screen.getByRole('link', { name: /view sotd photo/i });
+      expect(photoLink).toHaveAttribute(
+        'href',
+        'https://i.ibb.co/Ps8ZgMCb/sotd-2026-07-10.jpg'
+      );
+    });
+
+    test('does not render SOTD photo link when sotd_photo_url is absent', () => {
+      render(<MismatchAnalyzerDataTable {...defaultProps} />);
+      expect(screen.queryByRole('link', { name: /view sotd photo/i })).not.toBeInTheDocument();
+    });
+
     test('passes commentLoading prop to CommentDisplay', () => {
       render(<MismatchAnalyzerDataTable {...defaultProps} commentLoading={true} />);
 

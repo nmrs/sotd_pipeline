@@ -177,6 +177,8 @@ export interface MismatchItem {
   knot_component?: string;
   // Strategy field for brush matching
   matched_by_strategy?: string;
+  /** First markdown link on the SOTD header line, if any */
+  sotd_photo_url?: string;
 }
 
 // More specific interface for brush matched data

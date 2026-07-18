@@ -360,4 +360,43 @@ describe('CommentDisplay', () => {
       expect(screen.queryByText('+1 more')).not.toBeInTheDocument();
     });
   });
+
+  describe('SOTD photo link', () => {
+    test('renders photo link when photoUrl is provided', () => {
+      render(
+        <CommentDisplay
+          commentIds={['owperd6']}
+          onCommentClick={mockOnCommentClick}
+          photoUrl='https://i.ibb.co/Ps8ZgMCb/sotd-2026-07-10.jpg'
+        />
+      );
+
+      const photoLink = screen.getByRole('link', { name: /view sotd photo/i });
+      expect(photoLink).toBeInTheDocument();
+      expect(photoLink).toHaveAttribute(
+        'href',
+        'https://i.ibb.co/Ps8ZgMCb/sotd-2026-07-10.jpg'
+      );
+      expect(photoLink).toHaveAttribute('target', '_blank');
+      expect(photoLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    test('does not render photo link when photoUrl is absent', () => {
+      render(<CommentDisplay commentIds={['abc123']} onCommentClick={mockOnCommentClick} />);
+      expect(screen.queryByRole('link', { name: /view sotd photo/i })).not.toBeInTheDocument();
+    });
+
+    test('photo link click does not open comment modal', () => {
+      render(
+        <CommentDisplay
+          commentIds={['owperd6']}
+          onCommentClick={mockOnCommentClick}
+          photoUrl='https://i.ibb.co/example.jpg'
+        />
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: /view sotd photo/i }));
+      expect(mockOnCommentClick).not.toHaveBeenCalled();
+    });
+  });
 });

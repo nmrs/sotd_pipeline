@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Analysis endpoints for SOTD pipeline analyzer API."""
 
-import json
 import logging
 import os
 import subprocess
@@ -53,6 +52,7 @@ def get_data_directory() -> Path:
 
 # Import the existing FilteredEntriesManager instead of duplicating logic
 from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
+from webui.api.sotd_photo import extract_sotd_header_link, prefer_first_photo_url  # noqa: E402
 
 try:
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer  # noqa: E402
@@ -173,6 +173,8 @@ class MismatchItem(BaseModel):
     is_confirmed: Optional[bool] = None
     # Strategy field for brush matching
     matched_by_strategy: Optional[str] = None
+    # First markdown link on the SOTD header line (photo/album), if any
+    sotd_photo_url: Optional[str] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -901,7 +903,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     comment_sources=comment_sources,
                     is_confirmed=is_confirmed,
                     matched_by_strategy=matched_by_strategy,
-                    # Split brush fields from analyzer results
+                    sotd_photo_url=extract_sotd_header_link(record.get("body") or ""),
                 )
 
                 all_items.append(api_item)
@@ -928,6 +930,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 existing.count = len(unique_comment_ids)
                 # Merge comment sources
                 existing.comment_sources.update(item.comment_sources)
+                # Keep first SOTD header photo URL found
+                existing.sotd_photo_url = prefer_first_photo_url(
+                    existing.sotd_photo_url, item.sotd_photo_url
+                )
                 # Keep the highest confidence if available
                 if item.confidence is not None and (
                     existing.confidence is None or item.confidence > existing.confidence

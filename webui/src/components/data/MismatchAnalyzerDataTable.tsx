@@ -995,12 +995,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<AnalyzerDataItem> }) => {
           const item = row.original;
           const commentIds = item.comment_ids || [];
+          const photoUrl = !isGroupedDataItem(item) ? item.sotd_photo_url : undefined;
 
           return (
             <CommentDisplay
               commentIds={commentIds}
               onCommentClick={(commentId) => onCommentClick?.(commentId, commentIds)}
               commentLoading={commentLoading}
+              photoUrl={photoUrl}
             />
           );
         },
