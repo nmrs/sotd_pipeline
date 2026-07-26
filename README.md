@@ -56,7 +56,7 @@ The pipeline runs in six sequential phases:
 
 These are the most commonly edited “control” files (all under `data/`):
 
-- **Thread selection (fetch)**: `data/thread_overrides.yaml`
+- **Thread selection (fetch)**: `data/thread_overrides.yaml` (`include` / `exclude` date→URL maps)
 - **Extraction fixes (extract)**: `data/extract_overrides.yaml` (default path for `--override-file`)
 - **Intentionally unmatched (match)**: `data/intentionally_unmatched.yaml`
 - **Enrichment fixes (enrich)**: `data/enrichment_overrides.yaml`

@@ -5,17 +5,17 @@ import time
 from unittest.mock import Mock, patch
 
 import pytest
-from praw.models import Submission
-from prawcore.exceptions import TooManyRequests, RequestException
 import requests
+from praw.models import Submission
+from prawcore.exceptions import RequestException, TooManyRequests
 
 from sotd.fetch.reddit import (
-    get_reddit,
     _require_env,
-    search_threads,
-    filter_valid_threads,
     fetch_top_level_comments,
+    filter_valid_threads,
+    get_reddit,
     safe_call,
+    search_threads,
 )
 
 
@@ -1479,14 +1479,16 @@ class TestThreadOverrides:
         override_file.write_text(override_content)
 
         # Mock the YAML loading function by patching the actual import
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
-                ],
-                "2025-06-26": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/thursday_sotd_26_june/"
-                ],
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
+                    ],
+                    "2025-06-26": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/thursday_sotd_26_june/"
+                    ],
+                }
             }
 
             # Test loading for June 2025
@@ -1507,7 +1509,7 @@ class TestThreadOverrides:
         from sotd.fetch.reddit import load_thread_overrides
 
         # Mock the YAML loading function to simulate missing file
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.side_effect = FileNotFoundError("File not found")
 
             result = load_thread_overrides("2025-06")
@@ -1519,7 +1521,7 @@ class TestThreadOverrides:
         from sotd.fetch.reddit import load_thread_overrides
 
         # Mock the YAML loading function to return empty data
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = None
 
             result = load_thread_overrides("2025-06")
@@ -1531,9 +1533,13 @@ class TestThreadOverrides:
         from sotd.fetch.reddit import load_thread_overrides
 
         # Mock the YAML loading function with different month data
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-07-01": ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/july_sotd_01/"]
+                "include": {
+                    "2025-07-01": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/july_sotd_01/"
+                    ]
+                }
             }
 
             result = load_thread_overrides("2025-06")
@@ -1542,12 +1548,12 @@ class TestThreadOverrides:
 
     def test_load_thread_overrides_invalid_yaml(self, tmp_path):
         """Test loading malformed YAML file."""
-        from sotd.fetch.reddit import load_thread_overrides
-        import pytest
         from unittest.mock import patch
 
+        from sotd.fetch.reddit import load_thread_overrides
+
         # Mock the YAML loading function to raise an exception
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.side_effect = Exception("Invalid YAML")
             result = load_thread_overrides("2025-06")
             assert result == []  # Should return empty list on YAML error
@@ -1557,12 +1563,14 @@ class TestThreadOverrides:
         from sotd.fetch.reddit import load_thread_overrides
 
         # Mock the YAML loading function with multiple threads for same day
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/",
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/another_thread_25_june/",
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/",
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/another_thread_25_june/",
+                    ]
+                }
             }
 
             result = load_thread_overrides("2025-06")
@@ -1630,15 +1638,18 @@ class TestThreadOverrides:
 
     def test_process_thread_overrides_all_valid(self, tmp_path, monkeypatch):
         """Test processing thread overrides with all valid threads."""
+        from unittest.mock import Mock, patch
+
         from sotd.fetch.reddit import process_thread_overrides
-        from unittest.mock import patch, Mock
 
         # Mock the YAML loading function
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
+                    ]
+                }
             }
         # Mock PRAW submission
         mock_submission = Mock()
@@ -1652,16 +1663,19 @@ class TestThreadOverrides:
 
     def test_process_thread_overrides_some_invalid(self, tmp_path, monkeypatch, capsys):
         """Test processing thread overrides with some invalid threads."""
+        from unittest.mock import Mock, patch
+
         from sotd.fetch.reddit import process_thread_overrides
-        from unittest.mock import patch, Mock
 
         # Mock the YAML loading function
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/",
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread/",
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/",
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread/",
+                    ]
+                }
             }
         # Mock PRAW submission for valid thread, always raise for invalid
         mock_submission = Mock()
@@ -1682,16 +1696,19 @@ class TestThreadOverrides:
 
     def test_process_thread_overrides_all_invalid(self, tmp_path, monkeypatch, caplog):
         """Test processing thread overrides with all invalid threads."""
+        from unittest.mock import Mock, patch
+
         from sotd.fetch.reddit import process_thread_overrides
-        from unittest.mock import patch, Mock
 
         # Mock the YAML loading function
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread_1/",
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread_2/",
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread_1/",
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/invalid_thread_2/",
+                    ]
+                }
             }
 
         # Mock PRAW to always raise exception for all threads
@@ -1709,15 +1726,18 @@ class TestThreadOverrides:
 
     def test_process_thread_overrides_debug_mode(self, tmp_path, monkeypatch, caplog):
         """Test processing thread overrides with debug mode enabled."""
+        from unittest.mock import Mock, patch
+
         from sotd.fetch.reddit import process_thread_overrides
-        from unittest.mock import patch, Mock
 
         # Mock the YAML loading function
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
+                    ]
+                }
             }
         # Mock PRAW submission
         mock_submission = Mock()
@@ -1799,15 +1819,18 @@ class TestThreadOverrides:
 
     def test_override_thread_fallbacks_to_yaml_date_when_title_unparsable(self, monkeypatch):
         """Test that override thread uses YAML date if title is unparsable."""
-        from sotd.fetch.reddit import process_thread_overrides, filter_valid_threads
-        from unittest.mock import patch, Mock
+        from unittest.mock import Mock, patch
+
+        from sotd.fetch.reddit import filter_valid_threads, process_thread_overrides
 
         # Mock the YAML loading function to return a date and URL
-        with patch("sotd.utils.yaml_loader.load_yaml_with_nfc") as mock_load:
+        with patch("sotd.fetch.overrides.load_yaml_with_nfc") as mock_load:
             mock_load.return_value = {
-                "2025-06-25": [
-                    "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
-                ]
+                "include": {
+                    "2025-06-25": [
+                        "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
+                    ]
+                }
             }
         # Mock PRAW submission with unparsable title
         mock_submission = Mock()
@@ -1838,3 +1861,58 @@ class TestThreadOverrides:
         filtered = filter_valid_threads(result, 2025, 6)
         assert len(filtered) == 1
         assert getattr(filtered[0], "_override_date", None) == "2025-06-25"
+
+    def test_search_threads_applies_excludes(self, monkeypatch):
+        """Excluded ids from YAML are dropped even if present in search results."""
+        from sotd.fetch.reddit import search_threads
+
+        def fake_search(*args, **kwargs):
+            return [
+                MockSubmission("keep", "Monday SOTD Thread - Jun 01, 2025"),
+                MockSubmission("1ttrafo", "Monday Lather Games SOTD Thread - Jun 1, 2025"),
+            ]
+
+        monkeypatch.setattr(
+            "sotd.fetch.reddit.filter_valid_threads",
+            lambda threads, year, month, debug=False: threads,
+        )
+        monkeypatch.setattr(
+            "sotd.fetch.reddit.process_thread_overrides",
+            lambda month, reddit, debug=False: [],
+        )
+        monkeypatch.setattr(
+            "sotd.fetch.overrides.load_thread_exclude_ids",
+            lambda month, path=None: {"1ttrafo"},
+        )
+        monkeypatch.setattr("sotd.fetch.reddit.safe_call", lambda *a, **k: fake_search(*a, **k))
+        result = search_threads("wetshaving", 2025, 6)
+        ids = [sub.id for sub in result]
+        assert "keep" in ids
+        assert "1ttrafo" not in ids
+
+    def test_search_threads_exclude_wins_over_include(self, monkeypatch):
+        """Exclude removes a thread even when include overrides added it."""
+        from sotd.fetch.reddit import search_threads
+
+        monkeypatch.setattr(
+            "sotd.fetch.reddit.filter_valid_threads",
+            lambda threads, year, month, debug=False: threads,
+        )
+        monkeypatch.setattr(
+            "sotd.fetch.reddit.process_thread_overrides",
+            lambda month, reddit, debug=False: [
+                MockSubmission("1ttrafo", "Joke Thread - Jun 1, 2025")
+            ],
+        )
+        monkeypatch.setattr(
+            "sotd.fetch.overrides.load_thread_exclude_ids",
+            lambda month, path=None: {"1ttrafo"},
+        )
+        monkeypatch.setattr(
+            "sotd.fetch.reddit.safe_call",
+            lambda *a, **k: [MockSubmission("keep", "Monday SOTD Thread - Jun 01, 2025")],
+        )
+        result = search_threads("wetshaving", 2025, 6)
+        ids = [sub.id for sub in result]
+        assert "keep" in ids
+        assert "1ttrafo" not in ids

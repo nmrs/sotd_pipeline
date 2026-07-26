@@ -191,7 +191,7 @@ Before considering any plan complete, verify:
 - **Brand Normalization**: Follow established patterns for product brand/model separation
 - **Brush Matching**: Use strategy pattern for complex brush matching scenarios with handle/knot splitting
 - **Date Ranges**: Support both individual months and date ranges in CLI
-- **Manual Overrides**: Provide clear validation for manual thread includes/excludes
+- **Manual Overrides**: `data/thread_overrides.yaml` for thread inclusion/exclusion (`include` / `exclude` date→URL maps)
 - **Catalog Data Preservation**: All matchers must preserve complete catalog specifications (e.g., straight razor grind, width, point) in match output, not just basic brand/model/format fields
 - **No Backward Compatibility Required**: Since we own the entire pipeline and can rerun it at any point, backward compatibility is not a concern. Focus on correct data representation and optimal functionality.
 

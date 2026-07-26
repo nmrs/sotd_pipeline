@@ -1,105 +1,153 @@
 """Manual include / exclude overrides for SOTD thread discovery.
 
-The JSON file ``overrides/sotd_thread_overrides.json`` must follow:
+YAML file ``data/thread_overrides.yaml`` schema:
 
-{
-  "include": [
-    {"id": "t3_abc123", "title": "...", "url": "...", "reason": "optional"}
-  ],
-  "exclude": [
-    {"id": "t3_def456", "title": "...", "url": "..."}
-  ]
-}
+```yaml
+include:
+  2016-05-01:
+    - https://www.reddit.com/r/Wetshaving/comments/...
+exclude:
+  2026-06-01:
+    - https://www.reddit.com/r/Wetshaving/comments/1ttrafo/...
+```
 """
 
 from __future__ import annotations
 
-import json
 import logging
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Mapping, Optional, Sequence, TypeVar
+from urllib.parse import urlparse
+
+from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 logger = logging.getLogger(__name__)
 
-import praw
-from praw.models import Submission
-from prawcore.exceptions import NotFound
+OVERRIDE_PATH = Path("data/thread_overrides.yaml")
 
-from sotd.fetch.reddit import filter_valid_threads, safe_call
+_DATE_KEY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-# ruff: noqa: E402
+T = TypeVar("T")
 
 
-OVERRIDE_PATH = Path("overrides/sotd_thread_overrides.json")
+def extract_thread_id_from_url(url: str) -> Optional[str]:
+    """Extract Reddit submission ID from a thread or comment permalink."""
+    if not isinstance(url, str) or not url.strip():
+        return None
+    parsed = urlparse(url.strip())
+    match = re.search(r"/comments/([a-z0-9]+)", parsed.path, re.IGNORECASE)
+    if match:
+        return match.group(1).lower()
+    return None
 
 
-# ------------------------------------------------------------------ #
-# Loader                                                             #
-# ------------------------------------------------------------------ #
-def load_overrides(
-    path: Path = OVERRIDE_PATH,
-) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """
-    Return ``(include_by_id, exclude_by_id)``.
-
-    Dicts are empty when *path* does not exist or is malformed.
-    """
-    if not path.is_file():
-        return {}, {}
-
-    try:
-        obj = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        # Log-friendly error; propagate up
-        raise RuntimeError(f"Invalid JSON in overrides file: {path}") from None
-
-    include = {e["id"]: e for e in obj.get("include", []) if "id" in e}
-    exclude = {e["id"]: e for e in obj.get("exclude", []) if "id" in e}
-    return include, exclude
+def _date_key_to_str(date_key: Any) -> str:
+    if hasattr(date_key, "isoformat"):
+        return date_key.isoformat()
+    return str(date_key)
 
 
-# ------------------------------------------------------------------ #
-# Apply                                                              #
-# ------------------------------------------------------------------ #
-def apply_overrides(
-    threads: Sequence[Submission],
-    include: Dict[str, Any],
-    exclude: Dict[str, Any],
-    *,
-    reddit: praw.Reddit,
-    year: int,
-    month: int,
-    debug: bool = False,
-) -> List[Submission]:
-    """
-    Apply *include* / *exclude* to *threads* list.
+def is_date_key(date_key: Any) -> bool:
+    """Return True when *date_key* is a YYYY-MM-DD date."""
+    return bool(_DATE_KEY_RE.match(_date_key_to_str(date_key)))
 
-    • Remove any thread whose ID appears in *exclude*
-    • Add each *include* ID not already present using ``reddit.submission``
-    • Return list deduplicated and sorted via :func:`filter_valid_threads`
-    """
-    # 1️⃣ apply exclusion
-    kept: List[Submission] = [t for t in threads if t.id not in exclude]
 
-    # 2️⃣ apply inclusion
-    present_ids = {t.id for t in kept}
-    for tid in include:
-        if tid in present_ids:
+def warn_if_legacy_override_schema(data: Mapping[Any, Any], *, path: Path = OVERRIDE_PATH) -> None:
+    """Warn when root-level date keys suggest a pre-migration override file."""
+    legacy_keys = [k for k in data if is_date_key(k)]
+    if legacy_keys:
+        logger.warning(
+            "Legacy thread override schema detected in %s "
+            "(root date keys like %s). Move entries under include:/exclude:.",
+            path,
+            _date_key_to_str(legacy_keys[0]),
+        )
+
+
+def iter_month_urls(section: Mapping[Any, Any] | None, month: str) -> list[tuple[str, str]]:
+    """Yield (date_str, url) pairs from a date→URL map for *month* (YYYY-MM)."""
+    if not section:
+        return []
+
+    pairs: list[tuple[str, str]] = []
+    for date_key, url_list in section.items():
+        if not is_date_key(date_key):
             continue
-        try:
-            sub = safe_call(reddit.submission, tid)
-            if sub is not None:
-                kept.append(sub)
-                present_ids.add(tid)
-                if debug:
-                    logger.debug(f"Override include added {tid}")
-            else:
-                if debug:
-                    logger.warning(f"Override include id {tid} could not be fetched (None)")
-        except NotFound:
-            if debug:
-                logger.warning(f"Override include id {tid} not found")
+        date_str = _date_key_to_str(date_key)
+        if not date_str.startswith(month):
+            continue
+        if url_list is None:
+            continue
+        if isinstance(url_list, list):
+            for url in url_list:
+                if isinstance(url, str) and url.strip():
+                    pairs.append((date_str, url.strip()))
+        elif isinstance(url_list, str) and url_list.strip():
+            pairs.append((date_str, url_list.strip()))
+    return pairs
 
-    # 3️⃣ deduplicate (should be no dups now) & sort by parsed date
-    unique: Dict[str, Submission] = {t.id: t for t in kept}
-    return filter_valid_threads(list(unique.values()), year, month, debug=False)
+
+def load_thread_overrides_data(path: Path = OVERRIDE_PATH) -> dict[Any, Any]:
+    """Load the overrides YAML file. Returns {} if missing or empty."""
+    if not path.is_file():
+        return {}
+    try:
+        data = load_yaml_with_nfc(path)
+    except Exception as e:
+        logger.warning("Failed to load thread overrides from %s: %s", path, e)
+        return {}
+    if not data:
+        return {}
+    if not isinstance(data, dict):
+        logger.warning("Thread overrides root must be a mapping in %s", path)
+        return {}
+    warn_if_legacy_override_schema(data, path=path)
+    return data
+
+
+def load_thread_exclude_ids(month: str, path: Path = OVERRIDE_PATH) -> set[str]:
+    """Load bare submission IDs to exclude for *month* from YAML exclude URLs."""
+    data = load_thread_overrides_data(path)
+    exclude_section = data.get("exclude")
+    if not isinstance(exclude_section, dict):
+        return set()
+
+    ids: set[str] = set()
+    for _date_str, url in iter_month_urls(exclude_section, month):
+        thread_id = extract_thread_id_from_url(url)
+        if thread_id:
+            ids.add(thread_id)
+        else:
+            logger.warning("Could not extract thread id from exclude URL: %s", url)
+    return ids
+
+
+def _thread_id(thread: Any) -> Optional[str]:
+    if isinstance(thread, dict):
+        tid = thread.get("id")
+        return str(tid).lower() if tid is not None else None
+    tid = getattr(thread, "id", None)
+    return str(tid).lower() if tid is not None else None
+
+
+def apply_thread_excludes(
+    threads: Sequence[T],
+    exclude_ids: set[str],
+    *,
+    debug: bool = False,
+) -> list[T]:
+    """Remove threads whose id appears in *exclude_ids* (PRAW or dict threads)."""
+    if not exclude_ids:
+        return list(threads)
+
+    normalized = {eid.lower().removeprefix("t3_") for eid in exclude_ids}
+    kept: list[T] = []
+    for thread in threads:
+        tid = _thread_id(thread)
+        if tid is not None and tid.removeprefix("t3_") in normalized:
+            if debug:
+                logger.debug("Excluded thread override id %s", tid)
+            continue
+        kept.append(thread)
+    return kept

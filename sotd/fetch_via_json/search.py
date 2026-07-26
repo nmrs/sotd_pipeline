@@ -6,17 +6,21 @@ Phase 2: Thread discovery using Reddit's search API.
 from __future__ import annotations
 
 import calendar
-import re
 from collections import defaultdict
 from datetime import date
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
 
+from sotd.fetch.overrides import (
+    OVERRIDE_PATH,
+    apply_thread_excludes,
+    extract_thread_id_from_url,
+    iter_month_urls,
+    load_thread_exclude_ids,
+    load_thread_overrides_data,
+)
 from sotd.fetch_via_json.json_scraper import get_reddit_cookies, get_reddit_json, get_reddit_session
 from sotd.fetch_via_json.parser import filter_valid_threads_json, parse_thread_from_json
 from sotd.utils import parse_thread_date
-from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 
 def search_reddit_json(
@@ -238,8 +242,12 @@ def search_threads_json(
     if debug and override_threads:
         print(f"[DEBUG] Added {len(override_threads)} override threads")
 
-    # Re-combine and filter
-    combined = list(all_results.values())
+    # Apply YAML excludes before date filtering
+    exclude_ids = load_thread_exclude_ids(month_str)
+    combined = apply_thread_excludes(list(all_results.values()), exclude_ids, debug=debug)
+    if debug and exclude_ids:
+        print(f"[DEBUG] Applied {len(exclude_ids)} thread excludes")
+
     if debug:
         print(f"[DEBUG] Combined results with overrides: {len(combined)}")
 
@@ -247,28 +255,6 @@ def search_threads_json(
     valid_threads = filter_valid_threads_json(combined, year, month, debug=debug)
 
     return valid_threads
-
-
-def extract_thread_id_from_url(url: str) -> Optional[str]:
-    """Extract Reddit thread ID from a Reddit URL.
-
-    Examples:
-        https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/
-        -> 1lk3ooa
-
-        /r/wetshaving/comments/1lk3ooa/
-        -> 1lk3ooa
-    """
-    # Parse URL
-    parsed = urlparse(url)
-    path = parsed.path
-
-    # Pattern: /r/{subreddit}/comments/{thread_id}/...
-    match = re.search(r"/comments/([a-z0-9]+)", path)
-    if match:
-        return match.group(1)
-
-    return None
 
 
 def fetch_thread_by_url(
@@ -328,7 +314,7 @@ def process_thread_overrides_json(
     session: Optional[Any] = None,
     debug: bool = False,
 ) -> List[Dict[str, Any]]:
-    """Process thread overrides from YAML file using JSON API (no PRAW).
+    """Process include overrides from YAML using JSON API (no PRAW).
 
     This is the JSON-based equivalent of process_thread_overrides.
     It loads the same YAML file and fetches threads via JSON API.
@@ -342,37 +328,14 @@ def process_thread_overrides_json(
     Returns:
         List of thread dictionaries
     """
-    override_path = Path("data/thread_overrides.yaml")
-    if not override_path.exists():
+    data = load_thread_overrides_data(OVERRIDE_PATH)
+    include = data.get("include")
+    if not isinstance(include, dict):
         if debug:
             print(f"[DEBUG] No thread overrides found for {month}")
         return []
 
-    try:
-        data = load_yaml_with_nfc(override_path)
-        if not data:
-            if debug:
-                print(f"[DEBUG] No thread overrides found for {month}")
-            return []
-    except Exception as e:
-        print(f"[WARN] Failed to load thread overrides: {e}")
-        return []
-
-    # Build list of (date_key, url) for the month
-    url_date_pairs = []
-    for date_key, url_list in data.items():
-        # Convert date_key to string (handle datetime.date or str)
-        if hasattr(date_key, "isoformat"):
-            date_str = date_key.isoformat()
-        else:
-            date_str = str(date_key)
-        if date_str.startswith(month):
-            if isinstance(url_list, list):
-                for url in url_list:
-                    url_date_pairs.append((date_str, url))
-            else:
-                url_date_pairs.append((date_str, url_list))
-
+    url_date_pairs = iter_month_urls(include, month)
     if not url_date_pairs:
         if debug:
             print(f"[DEBUG] No thread overrides found for {month}")

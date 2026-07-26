@@ -287,7 +287,7 @@ def search_threads(
     if debug:
         logger.debug(f"Combined raw results (deduped): {len(combined)}")
 
-    # Process thread overrides
+    # Process thread overrides (includes)
     month_str = f"{year:04d}-{month:02d}"
     override_threads = process_thread_overrides(month_str, reddit, debug=debug)
 
@@ -298,8 +298,14 @@ def search_threads(
     if debug and override_threads:
         logger.debug(f"Added {len(override_threads)} override threads")
 
-    # Re-combine and filter
-    combined = list(all_results.values())
+    # Apply excludes from YAML before date filtering
+    from sotd.fetch.overrides import apply_thread_excludes, load_thread_exclude_ids
+
+    exclude_ids = load_thread_exclude_ids(month_str)
+    combined = apply_thread_excludes(list(all_results.values()), exclude_ids, debug=debug)
+    if debug and exclude_ids:
+        logger.debug(f"Applied {len(exclude_ids)} thread excludes")
+
     if debug:
         logger.debug(f"Combined results with overrides: {len(combined)}")
 
@@ -532,51 +538,21 @@ def fetch_top_level_comments_parallel(
 
 
 def load_thread_overrides(month: str) -> List[str]:
-    """Load manual thread overrides from YAML file.
+    """Load manual include URLs from YAML ``include`` section for *month*.
 
     Args:
         month: Month in YYYY-MM format (e.g., "2025-06")
 
     Returns:
         List of Reddit URLs for manual override threads
-
-    Raises:
-        yaml.YAMLError: If YAML file is malformed
     """
-    from pathlib import Path
+    from sotd.fetch.overrides import OVERRIDE_PATH, iter_month_urls, load_thread_overrides_data
 
-    from sotd.utils.yaml_loader import load_yaml_with_nfc
-
-    override_path = Path("data/thread_overrides.yaml")
-
-    if not override_path.exists():
+    data = load_thread_overrides_data(OVERRIDE_PATH)
+    include = data.get("include")
+    if not isinstance(include, dict):
         return []
-
-    try:
-        data = load_yaml_with_nfc(override_path)
-        if not data:
-            return []
-
-        # Extract URLs for the specified month
-        urls = []
-        for date_key, url_list in data.items():
-            # Convert date_key to string (handle datetime.date or str)
-            if hasattr(date_key, "isoformat"):
-                date_str = date_key.isoformat()
-            else:
-                date_str = str(date_key)
-            if date_str.startswith(month):
-                if isinstance(url_list, list):
-                    urls.extend(url_list)
-                else:
-                    # Handle single URL case
-                    urls.append(url_list)
-
-        return urls
-    except Exception as e:
-        # Handle YAML errors gracefully
-        logger.warning(f"Failed to load thread overrides: {e}")
-        return []
+    return [url for _date_str, url in iter_month_urls(include, month)]
 
 
 def validate_thread_override(url: str, reddit) -> Submission:
@@ -605,42 +581,17 @@ def validate_thread_override(url: str, reddit) -> Submission:
 
 
 def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Submission]:
-    # from datetime import datetime  # Not needed, remove
-    # --- CHANGED: Load mapping of date_key -> list of URLs ---
-    from pathlib import Path
+    """Load and validate include URLs from YAML for *month*."""
+    from sotd.fetch.overrides import OVERRIDE_PATH, iter_month_urls, load_thread_overrides_data
 
-    from sotd.utils.yaml_loader import load_yaml_with_nfc
-
-    override_path = Path("data/thread_overrides.yaml")
-    if not override_path.exists():
+    data = load_thread_overrides_data(OVERRIDE_PATH)
+    include = data.get("include")
+    if not isinstance(include, dict):
         if debug:
             logger.debug(f"No thread overrides found for {month}")
         return []
-    try:
-        data = load_yaml_with_nfc(override_path)
-        if not data:
-            if debug:
-                logger.debug(f"No thread overrides found for {month}")
-            return []
-    except Exception as e:
-        logger.warning(f"Failed to load thread overrides: {e}")
-        return []
 
-    # Build list of (date_key, url) for the month
-    url_date_pairs = []
-    for date_key, url_list in data.items():
-        # Convert date_key to string (handle datetime.date or str)
-        if hasattr(date_key, "isoformat"):
-            date_str = date_key.isoformat()
-        else:
-            date_str = str(date_key)
-        if date_str.startswith(month):
-            if isinstance(url_list, list):
-                for url in url_list:
-                    url_date_pairs.append((date_str, url))
-            else:
-                url_date_pairs.append((date_str, url_list))
-
+    url_date_pairs = iter_month_urls(include, month)
     if not url_date_pairs:
         if debug:
             logger.debug(f"No thread overrides found for {month}")

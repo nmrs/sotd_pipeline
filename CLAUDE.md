@@ -118,7 +118,7 @@ Data persists at each stage, enabling individual phase re-runs and debugging.
 ## Important Implementation Notes
 
 - **Brush Matching**: Most complex due to varied naming (handle + knot combinations)
-- **Manual Overrides**: `overrides/sotd_thread_overrides.json` for thread inclusion/exclusion
+- **Manual Overrides**: `data/thread_overrides.yaml` for thread inclusion/exclusion (`include` / `exclude` date→URL maps)
 - **Hybrid Fetching**: Combines Reddit API with Pushshift for completeness
 - **Error Handling**: Graceful degradation when APIs fail
 - **Analysis Tools**: Utilities in `sotd/match/tools/` for debugging matches

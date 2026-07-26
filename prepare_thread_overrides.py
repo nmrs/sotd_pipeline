@@ -62,17 +62,33 @@ def deduplicate_overrides(overrides):
 
 
 def load_existing_overrides():
-    """Load existing overrides from YAML file."""
+    """Load existing include overrides from YAML file."""
     try:
         with open("data/thread_overrides.yaml", "r") as f:
             data = yaml.safe_load(f)
             if data is None:
                 return {}
+            include = data.get("include", data)
+            if not isinstance(include, dict):
+                return {}
             # Convert all keys to strings and deduplicate
             overrides = {}
-            for key, value in data.items():
+            for key, value in include.items():
                 overrides[str(key)] = value
             return deduplicate_overrides(overrides)
+    except FileNotFoundError:
+        return {}
+
+
+def load_existing_excludes():
+    """Load existing exclude section (preserved on save)."""
+    try:
+        with open("data/thread_overrides.yaml", "r") as f:
+            data = yaml.safe_load(f) or {}
+            exclude = data.get("exclude") or {}
+            if not isinstance(exclude, dict):
+                return {}
+            return {str(k): v for k, v in exclude.items()}
     except FileNotFoundError:
         return {}
 
@@ -134,32 +150,50 @@ def merge_overrides(existing_overrides, new_overrides, all_missing_dates):
     return merged
 
 
-def save_overrides(overrides, filename="data/thread_overrides.yaml"):
-    """Save overrides to YAML file with proper formatting."""
+def save_overrides(overrides, filename="data/thread_overrides.yaml", excludes=None):
+    """Save overrides to YAML file with include:/exclude: schema."""
     # Sort by date for consistent output - ensure all keys are strings
     sorted_overrides = {}
     for key in sorted(overrides.keys()):
         sorted_overrides[str(key)] = overrides[key]
 
+    if excludes is None:
+        excludes = load_existing_excludes()
+
     # Write YAML manually to control formatting
     with open(filename, "w") as f:
-        f.write("# Manual thread overrides for threads that don't match standard search patterns\n")
-        f.write("# Format: YYYY-MM-DD: [list of Reddit URLs]\n")
+        f.write("# Manual thread overrides for SOTD thread discovery.\n")
+        f.write("#\n")
+        f.write("# include: force-fetch threads missed by search (date -> list of Reddit URLs)\n")
         f.write(
-            '# Example: 2025-06-25: ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"]\n\n'
+            "# exclude: drop joke / non-SOTD threads that search still finds "
+            "(date -> list of Reddit URLs)\n\n"
         )
+        f.write("include:\n")
 
         for date_key in sorted(sorted_overrides.keys()):
             urls = sorted_overrides[date_key]
             if urls and isinstance(urls, list) and len(urls) > 0:
-                f.write(f"{date_key}:\n")
+                f.write(f"  {date_key}:\n")
                 for url in urls:
-                    f.write(f"  - {url}\n")
+                    f.write(f"    - {url}\n")
                 f.write("\n")
             else:
-                f.write(f"{date_key}:\n")
-                f.write("  # No threads found for this date\n")
+                f.write(f"  {date_key}:\n")
+                f.write("    # No threads found for this date\n")
                 f.write("\n")
+
+        f.write("exclude:\n")
+        if excludes:
+            for date_key in sorted(excludes.keys()):
+                urls = excludes[date_key]
+                f.write(f"  {date_key}:\n")
+                if urls and isinstance(urls, list):
+                    for url in urls:
+                        f.write(f"    - {url}\n")
+                f.write("\n")
+        else:
+            f.write("  {}\n")
 
 
 def main():
@@ -188,8 +222,8 @@ def main():
     merged_overrides = merge_overrides(existing_overrides, best_matches, all_missing_dates)
     print(f"Total overrides after merge: {len(merged_overrides)} dates")
 
-    # Save updated overrides
-    save_overrides(merged_overrides)
+    # Save updated overrides (preserve existing exclude section)
+    save_overrides(merged_overrides, excludes=load_existing_excludes())
 
     # Print summary of new additions
     new_additions = []

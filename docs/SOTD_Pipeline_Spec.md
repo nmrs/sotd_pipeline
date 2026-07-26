@@ -224,8 +224,7 @@ sotd_fetcher/
 ├── data/
 │   ├── threads/
 │   ├── comments/
-├── overrides/
-│   └── sotd_thread_overrides.json
+│   └── thread_overrides.yaml
 ├── sotd/
 │   ├── fetch/
 │   │   ├── run.py
@@ -557,25 +556,21 @@ Fetches SOTD threads and top-level comments from r/wetshaving for a specified mo
 }
 ```
 
-### 📂 overrides/sotd_thread_overrides.json
-```json
-{
-  "include": [
-    {
-      "id": "t3_abc123",
-      "title": "Tuesday SOTD Thread - Apr 2, 2025",
-      "url": "https://www.reddit.com/r/wetshaving/comments/abc123/"
-    }
-  ],
-  "exclude": [
-    {
-      "id": "t3_xyz456",
-      "title": "SOTD Recap",
-      "url": "https://www.reddit.com/r/wetshaving/comments/xyz456/"
-    }
-  ]
-}
+### 📂 data/thread_overrides.yaml
+```yaml
+include:
+  2025-06-25:
+    - https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/
+exclude:
+  2026-06-01:
+    # Joke / non-SOTD thread that search still finds
+    - https://www.reddit.com/r/Wetshaving/comments/1ttrafo/monday_lather_games_sotd_thread_jun_1_2026/
 ```
+
+- **include**: force-fetch threads missed by search (date → list of Reddit URLs)
+- **exclude**: drop joke / non-SOTD threads found by search (date → list of Reddit URLs; matched by submission id extracted from URL)
+- Month-scoped: only entries whose date keys start with the fetched `YYYY-MM` apply
+- Re-fetch with `--force` is required to drop an already-saved excluded thread from monthly JSON
 
 ### 🔁 Merging Behavior
 - Files are **merged** by default
