@@ -725,6 +725,7 @@ EldrormR Industries:
     format: GEM
     patterns:
       - 'm+\s*24'
+      - EldrormR.*micromatic.*24
   Scrubty-four:
     format: GEM
     patterns:
