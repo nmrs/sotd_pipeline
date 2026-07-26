@@ -39,6 +39,7 @@ data/report/annual/*.json
 data/search_index.json
 # Ignore learning data files
 data/learning/brush_user_actions/*.yaml
+data/proposed/*
 
 # Debug and temporary files
 debug_*.py
