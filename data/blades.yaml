@@ -125,6 +125,8 @@ DE:
         - clock.*super.*stain
         - gil.*super.*stain.*green
         - 7.*oc.*ss
+        - 7.*oc.*rust ?guard
+        - clock.*super.*speed # typo https://www.reddit.com/r/Wetshaving/comments/1q751hq/thursday_sotd_thread_jan_08_2026/nydygjv/
   ABEST:
     Hi Platinum:
       patterns:
@@ -204,6 +206,9 @@ DE:
         - bic.*(chr|pla)
         - bic
   Big Ben:
+    Platinum:
+      patterns:
+        - big ben.*plat(inum)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super Stainless:
       patterns:
         - big ben.*(ss|stain)?
@@ -398,6 +403,9 @@ DE:
     Stainless:
       patterns:
         - gil.*stain
+    Super Blue:
+      patterns:
+        - gil.*super.*blue
     Super Silver:
       patterns:
         - gil.*super.*silver
@@ -442,6 +450,10 @@ DE:
     Double Edge:
       patterns:
         - goodline
+  GreatMax:
+    Super Platinum:
+      patterns:
+        - greatmax
   Inglish:
     Super Stainless:
       patterns:
@@ -462,6 +474,10 @@ DE:
         - gil.*et.*king.*c
         - \bkcg\b
         - kc gillette
+  Kingston:
+    Ultra Platinum-XT:
+      patterns:
+        - kingston.*ultra
   L3VEL3:
     Platinum:
       patterns:
@@ -601,6 +617,9 @@ DE:
     Unspecified:
       patterns:
         - person+a
+    Viking's Sword:
+      patterns:
+        - viking.*sword
   Polsilver:
     Super Iridium:
       patterns:
@@ -675,6 +694,7 @@ DE:
     Super Chrome:
       patterns:
         - shark.*chr
+        - shark.*\bsc\b
         - lord.*shark.*chr
     Super Platinum:
       patterns:
@@ -687,7 +707,7 @@ DE:
     7AM Super Platinum:
       patterns:
         - (?:durablade)?.*sharp.*7am.*plus
-        - (?:durablade)?.*sharp(?! star).*plat
+        - (?:durablade)?.*sharp(?! (star|hi)).*plat
     Titanium:
       patterns:
         - (?:durablade)?.*sharp.*\bti
@@ -696,6 +716,9 @@ DE:
       patterns:
         - (?:durablade)?.*sharp.*hi.*chromium
         - durablade.*chrom
+    Hi Platinum:
+      patterns:
+        - sharp.*hi.*plat
   Sharp Star:
     Platinum:
       patterns:
@@ -1025,7 +1048,7 @@ Half DE:
     SE:
       patterns:
         - american.*razor.*blades
-        - american 1/2 de
+        - american 1/2 \bde?\b
   Crown:
     Super Stainless SE:
       patterns:
@@ -1033,7 +1056,7 @@ Half DE:
   Derby:
     Premium:
       patterns:
-        - derb.*prem
+        - derb.*prem.*1/2
     Professional:
       patterns:
         - derb.*pro

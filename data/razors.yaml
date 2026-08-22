@@ -726,6 +726,9 @@ EldrormR Industries:
     patterns:
       - 'm+\s*24'
       - EldrormR.*micromatic.*24
+  MMTech:
+    patterns:
+      - mmtech
   Scrubty-four:
     format: GEM
     patterns:
@@ -1157,7 +1160,7 @@ Gillette:
       - ranger.*tech
   Rocket:
     patterns:
-      - gil.*rocket
+      - gil.*rocket(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - rocket.*hd
       - gil\w*te.*parat
   Senator:
@@ -1485,6 +1488,11 @@ Jön Engström:
     format: Straight
     patterns:
       - engstr[oö]m(?:.*\d{1,2}/(8|16))?
+Joseph Elliot:
+  Straight:
+    format: Straight
+    patterns:
+      - joseph.*el+iot(?:.*\d{1,2}/(8|16))?
 Joseph Rodgers & Sons:
   The Royal Razor:
     format: Straight
@@ -1539,6 +1547,9 @@ Kanzy:
     patterns:
       - kanzy
 Karve:
+  Alpha:
+    patterns:
+      - karve.*alpha
   Bison:
     patterns:
       - (karve)?.*bison
@@ -1750,6 +1761,7 @@ Maxwell June:
     format: Half DE
     patterns:
       - mj.*double
+      - maxwell june.*double
 Max Sprecher:
   Straight:
     format: Straight
@@ -2042,9 +2054,6 @@ PAA:
   Bakelite Slant:
     patterns:
       - '(phoenix|p\.?a\.?a\.?).*bake.*slant'
-  Chrimson Ghost:
-    patterns:
-      - crimson ghost
   DOC:
     patterns:
       - '(phoenix|p\.?a\.?a\.?).*doc'
@@ -2057,9 +2066,12 @@ PAA:
   Meta-4:
     patterns:
       - '(phoenix|p\.?a\.?a\.?).*meta'
-  Phantom Blue:
+  Open Comb Double Slant:
     patterns:
+      - paa.*slant
+      - paa.*open.*comb.*double.*slant
       - phantom blue
+      - crimson ghost
   Quantum:
     patterns:
       - (paa|ph\w+x).*quantum.*(?:flair.*tip)?
@@ -2358,20 +2370,27 @@ RazoRock:
   GOAT:
     patterns:
       - razorock.*goat
-  Hawk v1:
-    format: AC
-    patterns:
-      - (razorock)?.*hawk.*v?1\b
-  Hawk v2:
-    format: AC
-    patterns:
-      - (razorock)?.*hawk.*v?2\b
-  Hawk v3:
+  Hawk:
     format: AC
     patterns:
       - (razorock)?.*hawk
-      - (razorock)?.*hawk.*3a?
+      - razorock.*blue.*aluminum.*se
       - razorock.*\ba plate\b
+  # Hawk v1:
+  #   format: AC
+  #   patterns:
+  #     - (razorock)?.*hawk.*v?1\b
+  # Hawk v2:
+  #   format: AC
+  #   patterns:
+  #     - (razorock)?.*hawk.*v?2\b
+  #     - razorock.*blue.*aluminum.*se
+  # Hawk v3:
+  #   format: AC
+  #   patterns:
+  #     - (razorock)?.*hawk
+  #     - (razorock)?.*hawk.*3a?
+  #     - razorock.*\ba plate\b
   Lupo:
     patterns:
       - 'lupp?o.*(\.?\d\d)?'
@@ -2911,7 +2930,10 @@ Thomas Turner & Co.:
 Timeless:
   Razor:
     patterns:
-      - '\btime?less?\b.*(\.?\d\d)?'
+      - \btime?less?\b.*(\.?\d\d)?
+  Slant:
+    patterns:
+      - \btime?less?\b.*(\.?\d\d)?.*slant
 Treet:
   TTO:
     patterns:
@@ -2923,6 +2945,10 @@ Trident Shaving:
   Varukh:
     patterns:
       - varukh
+Trowell:
+ T8:
+    patterns:
+      - trowell.*t8
 TryCatch:
   PL13 (3D Printed Henson clone):
     patterns:
@@ -3115,7 +3141,7 @@ Werner Breidenbach:
     width: 15/16
     patterns:
       - monte.*rosa.*14(?:.*\d{1,2}/(8|16))?
-wester Bros:
+Wester Bros:
   Straight:
     format: Straight
     patterns:
@@ -3248,6 +3274,9 @@ Yaqi:
   Sputnik:
     patterns:
       - yaqi.*sput
+  SRH04:
+    patterns:
+      - yaqi.*srh04(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
   Telstar:
     patterns:
       - yaqi.*telstar

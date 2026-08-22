@@ -3,6 +3,10 @@ artisan_handles:
     Unspecified:
       patterns:
         - \b3d\b.*(?:printed)?
+  Aloha Shaving:
+    Unspecified:
+      patterns:
+        - aloha ?shav(ing)?
   Alpha:
     Amber:
       patterns:
@@ -939,7 +943,7 @@ other_handles:
         - \bmob\b
         - my handle
         - handcrafted
-        - custom(?! color)
+        # - custom(?! color)
   Unknown:
     Unspecified:
       patterns:

@@ -550,6 +550,7 @@ known_knots:
       fiber: Boar
       patterns:
         - oumo.*pigsy
+        - pigsy
     Rorschach:
       fiber: Badger
       patterns:

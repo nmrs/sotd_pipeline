@@ -505,7 +505,7 @@ Ariana & Evans:
       wsdb_slug: ariana-and-evans-monte-carlo-soap
     Nero e Rosso:
       patterns:
-      - nero.*rosso
+      - (maul+u.*)?nero.*rosso
     Oud Accord:
       patterns:
       - (ariana|a&e).*oud accord
@@ -5671,6 +5671,9 @@ Old Spice:
     Fresh Lime:
       patterns:
       - old spice.*lime
+    Musk:
+      patterns:
+      - old spice.*musk
 Oliver Blossom Soap Co.:
   patterns:
   - 'oliver blossom(?: soap(?: co.?)?)?'
@@ -7160,6 +7163,7 @@ Stirling Soap Co.:
       countable: false
       patterns:
       - stirl.*sample.*mash ?up
+      - varenbury(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Sandalwood:
       patterns:
       - st[ie]rling.*sandalwood

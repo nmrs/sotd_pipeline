@@ -114,6 +114,12 @@ known_brushes:
       patterns:
         - black.*eag.*ht2
         - black.*eag.*exclusive.*b2(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  Black Ship Grooming:
+    Whaler:
+      fiber: Badger
+      knot_size_mm: 28
+      patterns:
+        - black.*ship.*whaler
   Century:
     Pure Bristle:
       fiber: Boar
@@ -256,6 +262,10 @@ known_brushes:
       knot_size_mm: 19
       patterns:
         - ever-ready.*200t
+    K40:
+      fiber: Badger
+      patterns:
+        - ever-ready.*k40
   Fendrihan:
     Pure Grey Badger:
       fiber: Badger
@@ -283,6 +293,12 @@ known_brushes:
       knot_loft_mm: 50
       patterns:
         - (goodfellas|tgs).*vortice
+  Grizzly Bay:
+    Badger:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+        - tuxedo ursus.*grizzly bay
   Hendrix Classics & Co.:
     Dickel:
       patterns:
@@ -1287,7 +1303,7 @@ known_brushes:
       knot_size_mm: 28
       patterns:
         - simp.*traf.*\bt3
-        - trafalgar.*\bt3
+        - trafalgar.*\bt?3
         - simp.*\bt3\b
     Trafalgar (Unspecified):
       fiber: Synthetic
@@ -1349,6 +1365,7 @@ known_brushes:
       patterns:
         - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
         - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
+        - 510.*xl.*\bse\b
     Boar Brush:
       fiber: Boar
       knot_size_mm: 24
@@ -1589,18 +1606,13 @@ known_brushes:
       knot_loft_mm: 57
       patterns:
         - zen.*509b
-    80N XSE:
+    80 XSE:
       fiber: Boar
       knot_size_mm: 27
       knot_loft_mm: 64
       patterns:
-        - \b80n\b
-    80B XSE:
-      fiber: Boar
-      knot_size_mm: 27
-      knot_loft_mm: 64
-      patterns:
-        - \b80b\b
+        - \b80(a|b|n)\b
+        - 80 xse
     A28 XSE:
       fiber: Boar
       knot_size_mm: 28
@@ -2220,10 +2232,15 @@ known_knot_based_brushes:
       knot_size_mm: 28
       patterns:
         - rad.*dinosaur.*black.*boarty
+    BrontoBoar:
+      fiber: Boar
+      knot_size_mm: 30
+      patterns:
+        - rad.*dino(saur)?.*bronto.*boar
     DinoBoar:
       fiber: Boar
       patterns:
-        - rad.*dinosaur.*dino.*boar
+        - rad.*dino(saur)?.*dino.*boar
     High Mountain Rex:
       fiber: Badger
       patterns:
@@ -2231,7 +2248,7 @@ known_knot_based_brushes:
     Manchuridon:
       fiber: Badger
       patterns:
-        - rad.*dino.*manchuridon
+        - rad.*dino.*m[au]nchuridon
     Raptor:
       fiber: Synthetic
       patterns:
@@ -2542,6 +2559,10 @@ other_brushes:
     patterns:
       - aka.*brush
       - \baka\b
+  Aloha Shaving:
+    default: Badger
+    patterns:
+      - aloha ?shav(ing)?
   Alpha:
     default: Synthetic
     patterns:
@@ -2856,6 +2877,7 @@ other_brushes:
     default: Synthetic
     patterns:
       - generic
+      - unlabeled
       - unmarked
       - unknown
       - unbranded
@@ -2926,6 +2948,10 @@ other_brushes:
     default: Synthetic
     patterns:
       - imperial
+  Indy Brush Worx:
+    default: Boar
+    patterns:
+      - indy.*brush.*worx
   Jequil & Corenveo:
     default: Synthetic
     patterns:
@@ -3000,7 +3026,7 @@ other_brushes:
     patterns:
       - marco.*rinaldi
   Marshall Made Woodshop:
-    default: Synthetic
+    default: Badger
     patterns:
       - marshall.*made
   Maritime Brush Co.:
@@ -3435,7 +3461,7 @@ other_brushes:
   Yaqi:
     default: Synthetic
     patterns:
-      - yaqi
+      - \byaqi?\b
       - mew brown
   Zenith:
     default: Boar
