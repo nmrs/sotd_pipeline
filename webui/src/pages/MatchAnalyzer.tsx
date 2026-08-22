@@ -1295,6 +1295,9 @@ const MatchAnalyzer: React.FC = () => {
             matched_string: group.matched_string,
             brand: group.brand,
             scent: group.scent,
+            countable: group.countable,
+            is_mashup: group.is_mashup,
+            sample_type: group.sample_type,
             total_count: filteredTotalCount, // Use recalculated total from filtered patterns
             top_patterns: filteredTopPatterns.slice(0, 3), // Show top 3 filtered patterns
             remaining_count: remainingCount,

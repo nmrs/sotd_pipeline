@@ -311,6 +311,7 @@ export interface GroupedDataItem {
   scent: string;
   countable?: boolean;  // Optional: true by default, false for mashup scents
   is_mashup?: boolean;  // From enrich phase when mashup detected
+  sample_type?: string | null;  // From enrich phase when sample usage detected
   total_count: number;
   top_patterns: Array<{
     original: string;

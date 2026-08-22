@@ -1162,6 +1162,11 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         if normalized:
             enriched = match.get("enriched") or {}
             is_mashup = enriched.get("is_mashup") is True
+            sample_type = enriched.get("sample_type") or None
+            if isinstance(sample_type, str):
+                sample_type = sample_type.strip() or None
+            else:
+                sample_type = None
             matched_groups[matched_key].append(
                 {
                     "original": normalized,  # Use normalized field for pattern display
@@ -1171,6 +1176,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
                     "scent": scent,  # Store original case scent
                     "countable": countable,  # Preserve flag
                     "is_mashup": is_mashup,
+                    "sample_type": sample_type,
                 }
             )
 
@@ -1279,6 +1285,10 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
         # Extract countable flag from first pattern (all patterns in group have same brand/scent)
         countable = patterns[0].get("countable", True) if patterns else True
         is_mashup = any(p.get("is_mashup") for p in patterns)
+        sample_type = next(
+            (p.get("sample_type") for p in patterns if p.get("sample_type")),
+            None,
+        )
 
         results.append(
             {
@@ -1287,6 +1297,7 @@ def group_soap_matches_by_matched(matches: List[dict], limit: Optional[int] = No
                 "scent": scent,
                 "countable": countable,  # Include flag for UI indicator
                 "is_mashup": is_mashup,
+                "sample_type": sample_type,
                 "total_count": total_count,
                 "top_patterns": top_patterns_formatted,
                 "remaining_count": max(0, remaining_count),

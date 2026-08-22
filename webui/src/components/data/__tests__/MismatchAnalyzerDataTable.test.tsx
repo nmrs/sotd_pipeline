@@ -1154,4 +1154,66 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.getByText('Barrister and Mann Seville')).toBeInTheDocument();
     });
   });
+
+  describe('soap sample usage badge', () => {
+    test('shows Sample and Mashup badges when both enriched flags are set', () => {
+      const soapData: MismatchItem[] = [
+        {
+          original: 'Stirling VarenBury (combined Varen and Glastonbury 1oz samples)',
+          matched: {
+            brand: 'Stirling Soap Co.',
+            scent: 'Sample Mashup',
+            countable: false,
+          },
+          enriched: { sample_type: 'sample', is_mashup: true },
+          mismatch_type: 'good_matches',
+          match_type: 'regex',
+          pattern: 'varenbury',
+          count: 6,
+          comment_ids: ['p2yjpzm'],
+          examples: [],
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={soapData}
+          field="soap"
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      expect(screen.getAllByText('Sample').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Mashup').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getByText('Stirling VarenBury (combined Varen and Glastonbury 1oz samples)')
+      ).toBeInTheDocument();
+    });
+
+    test('does not show Sample badge without sample_type', () => {
+      const soapData: MismatchItem[] = [
+        {
+          original: 'Barrister and Mann Seville',
+          matched: { brand: 'Barrister and Mann', scent: 'Seville' },
+          enriched: { sample_type: null },
+          mismatch_type: 'good_matches',
+          match_type: 'exact',
+          pattern: 'bm',
+          count: 1,
+          comment_ids: ['c'],
+          examples: [],
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={soapData}
+          field="soap"
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      expect(screen.queryByText('Sample')).not.toBeInTheDocument();
+    });
+  });
 });

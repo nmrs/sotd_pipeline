@@ -8,8 +8,14 @@ import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
 import ExpandablePatterns from '../ui/ExpandablePatterns';
 import MashupExclusionBadge from '../ui/MashupExclusionBadge';
+import SampleUsageBadge from '../ui/SampleUsageBadge';
 import { getBrushComponentPattern, formatBrushComponent, formatMatchedData } from '../../utils/productDataFormatter';
 import { isGroupedSoapMashupExcluded, mismatchItemShowsMashupExclusion } from '../../utils/soapMashup';
+import {
+  getSoapSampleType,
+  isGroupedSoapSampleUsage,
+  mismatchItemShowsSampleUsage,
+} from '../../utils/soapSample';
 
 // Helper function to check if brush was split into handle/knot components
 const isBrushSplit = (matched: Record<string, unknown>): boolean => {
@@ -550,9 +556,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           // For grouped data, show matched_string instead of original
           if (isGroupedDataItem(item)) {
             return (
-              <div className='font-medium text-gray-900 flex items-center gap-2'>
+              <div className='font-medium text-gray-900 flex items-start gap-2'>
                 <span>{item.matched_string}</span>
-                {isGroupedSoapMashupExcluded(field, item) && <MashupExclusionBadge />}
+                <div className='flex flex-col items-start gap-1 shrink-0'>
+                  {isGroupedSoapSampleUsage(field, item) && (
+                    <SampleUsageBadge sampleType={getSoapSampleType(item)} />
+                  )}
+                  {isGroupedSoapMashupExcluded(field, item) && <MashupExclusionBadge />}
+                </div>
               </div>
             );
           }
@@ -571,9 +582,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           }
 
           return (
-            <div className='text-sm text-gray-900 flex items-center gap-2' title={item.original}>
+            <div className='text-sm text-gray-900 flex items-start gap-2' title={item.original}>
               <span>{item.original}</span>
-              {mismatchItemShowsMashupExclusion(field, item) && <MashupExclusionBadge />}
+              <div className='flex flex-col items-start gap-1 shrink-0'>
+                {mismatchItemShowsSampleUsage(field, item) && (
+                  <SampleUsageBadge sampleType={getSoapSampleType(item)} />
+                )}
+                {mismatchItemShowsMashupExclusion(field, item) && <MashupExclusionBadge />}
+              </div>
             </div>
           );
         },
@@ -598,6 +614,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const formattedData = formatMatchedData(item.matched, field, item.enriched);
 
           const showMashupExclusion = mismatchItemShowsMashupExclusion(field, item);
+          const showSampleUsage = mismatchItemShowsSampleUsage(field, item);
+          const sampleType = getSoapSampleType(item);
 
           // Check if there are enrich-phase changes using the enriched data from the API response
           const hasChanges =
@@ -619,7 +637,13 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             }
           };
 
-          const mashupIndicator = showMashupExclusion ? <MashupExclusionBadge className="ml-2" /> : null;
+          const statusIndicators =
+            showSampleUsage || showMashupExclusion ? (
+              <div className="flex flex-col items-start gap-1 shrink-0 ml-2">
+                {showSampleUsage ? <SampleUsageBadge sampleType={sampleType} /> : null}
+                {showMashupExclusion ? <MashupExclusionBadge /> : null}
+              </div>
+            ) : null;
 
           // For brush field, render with line breaks
           if (field === 'brush' && formattedData.includes('\n')) {
@@ -637,7 +661,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
                     </div>
                   ))}
                 </div>
-                {mashupIndicator}
+                {statusIndicators}
               </div>
             );
 
@@ -655,7 +679,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
                 {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
                 <span>{formattedData}</span>
               </div>
-              {mashupIndicator}
+              {statusIndicators}
             </div>
           );
 

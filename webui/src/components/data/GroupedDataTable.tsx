@@ -2,7 +2,13 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import MashupExclusionBadge from '../ui/MashupExclusionBadge';
+import SampleUsageBadge from '../ui/SampleUsageBadge';
 import { isGroupedSoapMashupExcluded } from '../../utils/soapMashup';
+import {
+  getSoapSampleType,
+  isGroupedSoapSampleUsage,
+  mismatchItemShowsSampleUsage,
+} from '../../utils/soapSample';
 import { GroupedDataItem, AnalyzerDataItem, isGroupedDataItem } from '../../services/api';
 import ExpandablePatterns from '../ui/ExpandablePatterns';
 
@@ -97,11 +103,18 @@ const GroupedDataTable: React.FC<GroupedDataTableProps> = ({
         cell: ({ row }: { row: Row<GroupedDataItem> }) => {
           const item = row.original;
           const showMashupExclusion = isGroupedSoapMashupExcluded(field, item);
+          const showSampleUsage = isGroupedSoapSampleUsage(field, item);
+          const sampleType = getSoapSampleType(item);
 
           return (
-            <div className="font-medium text-gray-900 flex items-center gap-2">
+            <div className="font-medium text-gray-900 flex items-start gap-2">
               <span>{item.matched_string || 'N/A'}</span>
-              {showMashupExclusion && <MashupExclusionBadge />}
+              {(showSampleUsage || showMashupExclusion) && (
+                <div className="flex flex-col items-start gap-1 shrink-0">
+                  {showSampleUsage && <SampleUsageBadge sampleType={sampleType} />}
+                  {showMashupExclusion && <MashupExclusionBadge />}
+                </div>
+              )}
             </div>
           );
         },
