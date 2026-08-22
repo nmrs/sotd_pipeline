@@ -1,5 +1,5 @@
 """Reddit‐helpers: authentication, searching, comment harvesting – plus
-a small `safe_call` wrapper that handles Reddit's `RateLimitExceeded`.
+a small `safe_call` wrapper that handles Reddit rate limits.
 """
 
 from __future__ import annotations
@@ -13,15 +13,9 @@ from typing import List, Sequence, TypeVar, cast
 
 import praw
 from praw.models import Comment, Submission
-from prawcore.exceptions import NotFound, RequestException
+from prawcore.exceptions import NotFound, RequestException, TooManyRequests
 
 logger = logging.getLogger(__name__)
-
-# PRAW 7.x has RateLimitExceeded; newer prawcore switched to TooManyRequests.
-try:
-    from prawcore.exceptions import RateLimitExceeded  # type: ignore[attr-defined]
-except ImportError:  # pragma: no cover
-    from prawcore.exceptions import TooManyRequests as RateLimitExceeded  # type: ignore
 
 
 T = TypeVar("T")
@@ -78,7 +72,7 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
 
             return result
 
-        except RateLimitExceeded as exc:
+        except TooManyRequests as exc:
             rate_limit_hits += 1
 
             # Calculate delay with smart backoff strategy

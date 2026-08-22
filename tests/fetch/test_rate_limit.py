@@ -1,32 +1,26 @@
 """Module for fetching data from Reddit."""
 
 import time
+
 import pytest
+import requests
+from prawcore.exceptions import TooManyRequests
 
-from sotd.fetch.reddit import safe_call, RateLimitExceeded  # type: ignore[attr-defined]
+from sotd.fetch.reddit import safe_call
 
 
-class DummyRL(RateLimitExceeded):
+class DummyRL(TooManyRequests):
     """A dummy exception class that mimics rate-limit errors."""
 
     def __init__(self, sleep_time: int):
+        response = requests.Response()
+        response.status_code = 429
+        super().__init__(response)
         self.sleep_time = sleep_time
-        self.headers = {"x-ratelimit-reset": str(sleep_time)}  # Required by RateLimitExceeded
-        # Create a mock response object with required attributes
-        mock_response = type(
-            "Response",
-            (),
-            {
-                "headers": self.headers,
-                "text": "Rate limit exceeded",
-                "status_code": 429,
-            },
-        )()
-        super().__init__(response=mock_response)  # type: ignore[arg-type]
 
 
 def test_safe_call_success(monkeypatch, caplog):
-    """safe_call retries once after a RateLimitExceeded and returns the result."""
+    """safe_call retries once after a TooManyRequests and returns the result."""
     calls = {"n": 0}
 
     def fn():
@@ -58,7 +52,7 @@ def test_safe_call_double_fail(monkeypatch):
     def fn():
         raise DummyRL(1)
 
-    with pytest.raises(RateLimitExceeded):
+    with pytest.raises(TooManyRequests):
         safe_call(fn)
 
     # Verify that sleep was called with the expected duration (with jitter)
