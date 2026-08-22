@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Tests for soap sample enricher."""
 
-import pytest
-
 from sotd.enrich.soap_sample_enricher import SoapSampleEnricher
 
 
@@ -245,3 +243,13 @@ class TestSoapSampleEnricher:
             "total_samples": None,
             "extraction_remainder": "(SMUSH)",
         }
+
+    def test_enrich_mashup_of_sized_samples_same_original_normalized(self):
+        """Detect sample when mashup text keeps '1oz samples' in original and normalized."""
+        text = "Stirling VarenBury (combined Varen and Glastonbury 1oz samples)"
+        field_data = {"original": text, "normalized": text}
+        result = self.enricher.enrich(field_data, "")
+        assert result["sample_type"] == "sample"
+        assert result["sample_number"] is None
+        assert result["total_samples"] is None
+        assert result["extraction_remainder"] == ""

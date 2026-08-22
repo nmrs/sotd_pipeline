@@ -70,12 +70,14 @@ def extract_soap_sample_via_normalization(
     # Combine the remainder parts
     remainder = (before_normalized + after_normalized).strip()
 
-    # If no remainder, no sample info was found
-    if not remainder:
-        return None, None, None, remainder
-
-    # Extract sample information from the remainder
+    # Extract sample information from the remainder first
     sample_type, sample_number, total_samples = _extract_sample_patterns(remainder)
+
+    # When sample indicators are kept inside normalized product text (common for
+    # mashups of samples), original == normalized and remainder is empty — fall
+    # back to scanning the full original text.
+    if sample_type is None and original_stripped:
+        sample_type, sample_number, total_samples = _extract_sample_patterns(original_stripped)
 
     return sample_type, sample_number, total_samples, remainder
 
@@ -164,6 +166,26 @@ def _extract_sample_patterns(remainder: str) -> Tuple[Optional[str], Optional[in
     # Pattern 9: (sample) or (smush) with emojis or special characters
     emoji_sample_match = re.search(r"\((?:sample|smush)[^)]*[^\w\s][^)]*\)", remainder_lower)
     if emoji_sample_match:
+        return "sample", None, None
+
+    # Pattern 10: parenthetical describing sample usage (e.g. "1oz samples",
+    # "combined ... samples"). Prefer plural / sized forms so scent names like
+    # "Sample Mashup" are not treated as sample usage.
+    descriptive_paren_match = re.search(
+        r"\([^)]*\b(?:\d+(?:\.\d+)?\s*oz\s+)?(?:samples?|samp|tester|smush)\b[^)]*\)",
+        remainder_lower,
+    )
+    if descriptive_paren_match:
+        token = re.search(r"\b(samples?|samp|tester|smush)\b", descriptive_paren_match.group(0))
+        if token:
+            sample_type = token.group(1)
+            if sample_type in ["samp", "smush", "samples"]:
+                sample_type = "sample"
+            return sample_type, None, None
+
+    # Pattern 11: plural "samples" or sized "N oz sample(s)" outside bare markers
+    # (usage language; avoids matching singular "Sample" in product names).
+    if re.search(r"\b(?:\d+(?:\.\d+)?\s*oz\s+samples?|samples)\b", remainder_lower):
         return "sample", None, None
 
     return None, None, None

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Tests for soap extraction utilities."""
 
-import pytest
-
 from sotd.utils.soap_extraction import (
     detect_soap_mashup,
     extract_soap_sample_via_normalization,
@@ -648,3 +646,31 @@ class TestExtractSoapSampleViaNormalization:
             "completely different text", "summer break soaps - steady"
         )
         assert result == (None, None, None, None)
+
+    def test_embedded_samples_in_parenthetical_same_original_and_normalized(self):
+        """Detect sample usage when 'samples' stays in both original and normalized.
+
+        Real case: mashup of sized samples kept as product text, e.g.
+        'Stirling VarenBury (combined Varen and Glastonbury 1oz samples)'.
+        """
+        text = "Stirling VarenBury (combined Varen and Glastonbury 1oz samples)"
+        result = extract_soap_sample_via_normalization(text, text)
+        assert result[0] == "sample"
+        assert result[1] is None
+        assert result[2] is None
+        assert result[3] == ""
+
+    def test_embedded_samples_in_parenthetical_as_remainder(self):
+        """Detect sample when parenthetical describing samples is the remainder."""
+        result = extract_soap_sample_via_normalization(
+            "Stirling VarenBury (combined Varen and Glastonbury 1oz samples)",
+            "Stirling VarenBury",
+        )
+        assert result[0] == "sample"
+        assert result[3] == "(combined Varen and Glastonbury 1oz samples)"
+
+    def test_sample_mashup_product_name_not_treated_as_sample_usage(self):
+        """Catalog scent names like 'Sample Mashup' alone are not sample usage."""
+        text = "Mama Bear Sample Mashup"
+        result = extract_soap_sample_via_normalization(text, text)
+        assert result == (None, None, None, "")
