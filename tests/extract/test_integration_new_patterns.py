@@ -4,12 +4,41 @@ Integration tests for new extraction patterns using real examples from analysis 
 """
 
 import pytest
+
 from sotd.extract.comment import parse_comment
 from sotd.extract.fields import extract_field
 
 
 class TestRealDataIntegration:
     """Test new patterns with real examples from analysis data."""
+
+    def test_real_wrapped_brush_continuation_from_2026_07(self):
+        """Join a wrapped brush value from a real 2026-07 comment (id p0yftme)."""
+        comment = {
+            "id": "p0yftme",
+            "body": (
+                "**Friday 31 July 2026** - Join us July, Final Day: "
+                "[Hygge and C&H](https://i.imgur.com/7bEy4Ia.jpeg)\n"
+                "\n"
+                "* **Pre-shave:** Maggard Razors - pre-shave oil\n"
+                "* **Brush:** Chisel and Hound -\n"
+                '"DinoS\'mores" w/26 mm v27 Fanchurian\n'
+                "* **Razor:** GEM - Micromatic Open Comb\n"
+                "* **Blade:** Accutec Pro - GEM (22nd use)\n"
+                "* **Lather:** House of Mammoth - Hygge\n"
+                "* **Post Shave:** Thayers - Unscented Facial Toner, "
+                "House of Mammoth - Hygge aftershave splash"
+            ),
+        }
+
+        result = parse_comment(comment)
+        assert result is not None
+        assert result["brush"]["original"] == (
+            'Chisel and Hound - "DinoS\'mores" w/26 mm v27 Fanchurian'
+        )
+        assert result["razor"]["original"] == "GEM - Micromatic Open Comb"
+        assert result["blade"]["original"] == "Accutec Pro - GEM (22nd use)"
+        assert result["soap"]["original"] == "House of Mammoth - Hygge"
 
     def test_real_checkmark_format_examples(self):
         """Test checkmark format with real examples from analysis."""

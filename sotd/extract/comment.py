@@ -13,6 +13,68 @@ from sotd.utils.text import preprocess_body
 
 logger = logging.getLogger(__name__)
 
+# Labels that mark the start of a new SOTD field line, including non-extracted ones
+# (e.g. Post Shave). Used to avoid joining wrapped values into the next field.
+_FIELD_MARKER_ALIASES = sorted(
+    {
+        *(alias for aliases in FIELD_ALIASES.values() for alias in aliases),
+        "pre-shave",
+        "presave",
+        "prep",
+        "post shave",
+        "post-shave",
+        "aftershave",
+        "fragrance",
+        "scent",
+        "edp",
+    },
+    key=len,
+    reverse=True,
+)
+_FIELD_MARKER_PATTERN: Optional[re.Pattern[str]] = None
+
+
+def _get_field_marker_pattern() -> re.Pattern[str]:
+    """Compile (once) a pattern that detects a new field marker on a line."""
+    global _FIELD_MARKER_PATTERN
+    if _FIELD_MARKER_PATTERN is not None:
+        return _FIELD_MARKER_PATTERN
+
+    alias_alt = "|".join(re.escape(alias).replace(r"\ ", r"\s+") for alias in _FIELD_MARKER_ALIASES)
+    _FIELD_MARKER_PATTERN = re.compile(
+        rf"^\s*(?:[-*•]\s+)?(?:\*\*)?(?:{alias_alt})(?:\*\*)?\s*[-:=]",
+        flags=re.IGNORECASE,
+    )
+    return _FIELD_MARKER_PATTERN
+
+
+def _is_field_marker_line(line: str) -> bool:
+    """Return True if the line starts a new SOTD field (extracted or not)."""
+    return bool(_get_field_marker_pattern().match(line))
+
+
+def _maybe_join_wrapped_continuation(value: str, lines: list[str], line_index: int) -> str:
+    """
+    Join a wrapped field continuation when the value ends with a trailing dash.
+
+    Rule (validated against 2024-2026 comment data):
+    - extracted value ends with '-'
+    - next line exists and is non-blank
+    - next line is not a field marker
+
+    Otherwise return the original value unchanged.
+    """
+    if not re.search(r"-\s*$", value):
+        return value
+    if line_index + 1 >= len(lines):
+        return value
+
+    next_line = lines[line_index + 1].strip()
+    if not next_line or _is_field_marker_line(next_line):
+        return value
+
+    return f"{value} {next_line}"
+
 
 def parse_comment(
     comment: dict,
@@ -59,11 +121,11 @@ def parse_comment(
                     low_priority_patterns.append((alias, pattern))
 
         # First pass: Try high-priority patterns line by line
-        for line in lines:
+        for line_index, line in enumerate(lines):
             for alias, pattern in high_priority_patterns:
                 value = extract_field_with_pattern(line, field, pattern)
                 if value:
-                    # Found a match with high-priority pattern - use it
+                    value = _maybe_join_wrapped_continuation(value, lines, line_index)
                     normalized_value = normalize_for_matching(value, field=field)
                     result[field] = {"original": value, "normalized": normalized_value}
                     break  # Found match, move to next field
@@ -72,11 +134,11 @@ def parse_comment(
 
         # Second pass: Try low-priority patterns line by line (only if no match found)
         if field not in result:
-            for line in lines:
+            for line_index, line in enumerate(lines):
                 for alias, pattern in low_priority_patterns:
                     value = extract_field_with_pattern(line, field, pattern)
                     if value:
-                        # Found a match with low-priority pattern - use it
+                        value = _maybe_join_wrapped_continuation(value, lines, line_index)
                         normalized_value = normalize_for_matching(value, field=field)
                         result[field] = {"original": value, "normalized": normalized_value}
                         break  # Found match, move to next field

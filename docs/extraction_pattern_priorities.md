@@ -110,3 +110,23 @@ The extraction logic now processes patterns in priority order:
 
 This ensures that an explicit "Lather:" pattern (pattern 0) will always win over an equals sign pattern (pattern 14a/14b) or an ambiguous "Soap" pattern (pattern 15), even if the lower priority pattern appears earlier in the comment or earlier in the alias list.
 
+## Wrapped Field Continuations (Trailing Dash)
+
+Some comments split a field value across two lines after a brand separator dash:
+
+```
+* **Brush:** Chisel and Hound -
+"DinoS'mores" w/26 mm v27 Fanchurian
+* **Razor:** GEM - Micromatic Open Comb
+```
+
+After a successful line match, extract joins the next line onto the value when:
+
+1. The extracted value ends with `-`
+2. The next line exists and is non-blank
+3. The next line is **not** a field marker (including non-extracted labels like `Post Shave`)
+
+This keeps stylistic trailing dashes before the next field (`DG - The Muse -` → `* **Post Shave:** …`) unchanged, and does not join across blank lines into commentary.
+
+Validated against 2024–2026 comment data: only genuine wrap cases matched; no commentary false positives.
+

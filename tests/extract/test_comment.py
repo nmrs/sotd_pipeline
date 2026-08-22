@@ -562,3 +562,70 @@ def test_parse_comment_line_order_high_priority():
     assert result is not None
     assert "soap" in result
     assert result["soap"]["original"] == "First Soap"
+
+
+def test_parse_comment_joins_wrapped_brush_after_trailing_dash():
+    """Join a wrapped brush model when the field line ends with Brand -."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** Chisel and Hound -",
+                '"DinoS\'mores" w/26 mm v27 Fanchurian',
+                "* **Razor:** GEM - Micromatic Open Comb",
+                "* **Blade:** Accutec Pro - GEM (22nd use)",
+                "* **Lather:** House of Mammoth - Hygge",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert result["brush"]["original"] == 'Chisel and Hound - "DinoS\'mores" w/26 mm v27 Fanchurian'
+    assert result["razor"]["original"] == "GEM - Micromatic Open Comb"
+
+
+def test_parse_comment_joins_unquoted_wrapped_brush_continuation():
+    """Join an unquoted wrapped brush continuation after a trailing dash."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Brush:** AP Shave Co. x Shavemac -",
+                "Crushed Mud w/ 25 mm Mühle STF",
+                "* **Razor:** Oliworks - M3terorite Aluminum",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert result["brush"]["original"] == "AP Shave Co. x Shavemac - Crushed Mud w/ 25 mm Mühle STF"
+    assert result["razor"]["original"] == "Oliworks - M3terorite Aluminum"
+
+
+def test_parse_comment_does_not_join_trailing_dash_when_next_line_is_field():
+    """Keep a stylistic trailing dash when the next line is another field."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Lather:** Bartigan & Stark - Campione -",
+                "* **Post Shave:** Thayers - Unscented Facial Toner",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert result["soap"]["original"] == "Bartigan & Stark - Campione -"
+
+
+def test_parse_comment_does_not_join_trailing_dash_across_blank_line():
+    """Do not treat narrative after a blank line as a wrapped field continuation."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Lather:** Stirling - Christmas Eve -",
+                "",
+                "Great shave today",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result is not None
+    assert result["soap"]["original"] == "Stirling - Christmas Eve -"
