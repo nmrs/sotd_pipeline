@@ -1,6 +1,9 @@
 """Tests for the community_query CLI tool."""
 
 import json
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -222,3 +225,178 @@ class TestThreads:
     def test_missing_month_exits_1(self, capsys):
         code, _, err = run(capsys, ["--data-dir", "/nonexistent", "threads", "--month", "2025-01"])
         assert code == 1
+
+
+class TestThread:
+    def test_renders_tree_indented(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "thread", "--month", "2026-08", "--id", "quiet"],
+        )
+        assert code == 0
+        assert "Quiet question" in out
+        lines = out.splitlines()
+        c2_line = next(line for line in lines if "[c2]" in line)
+        c3_line = next(line for line in lines if "[c3]" in line)
+        assert lines.index(c3_line) > lines.index(c2_line)
+        assert c3_line.startswith("  ") and not c2_line.startswith(" ")
+        assert "(OP)" in c3_line  # c3 has is_submitter=True
+
+    def test_accepts_t3_prefix(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "thread", "--month", "2026-08", "--id", "t3_quiet"],
+        )
+        assert code == 0
+
+    def test_unknown_id_exits_1(self, data_dir, capsys):
+        code, _, err = run(
+            capsys, ["--data-dir", str(data_dir), "thread", "--month", "2026-08", "--id", "nope"]
+        )
+        assert code == 1
+        assert "Unknown thread" in err
+
+    def test_max_comments_caps_render(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "thread",
+                "--month",
+                "2026-08",
+                "--id",
+                "quiet",
+                "--max-comments",
+                "1",
+            ],
+        )
+        assert code == 0
+        assert "[c3]" not in out
+        assert "not shown" in out
+
+    def test_json_output(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "--json",
+                "thread",
+                "--month",
+                "2026-08",
+                "--id",
+                "quiet",
+            ],
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert doc["post"]["id"] == "quiet"
+        assert len(doc["comments"]) == 2
+
+
+class TestSearch:
+    def test_finds_post_and_comment_across_window(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "search",
+                "--months",
+                "2026-08:2026-08",
+                "--query",
+                "question",
+            ],
+        )
+        assert code == 0
+        assert "[post]" in out and "[comment]" in out
+
+    def test_author_filter(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "search",
+                "--months",
+                "2026-08:2026-08",
+                "--query",
+                "verdict",
+                "--author",
+                "judge1",
+            ],
+        )
+        assert code == 0
+        assert "[comment]" in out
+        assert "[post]" not in out  # the disc post is authored by bigcheese
+
+    def test_no_hits_reports(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "search",
+                "--months",
+                "2026-08:2026-08",
+                "--query",
+                "zzznotfound",
+            ],
+        )
+        assert code == 0
+        assert "No matches" in out
+
+    def test_skips_missing_months_with_note(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "search",
+                "--months",
+                "2026-07:2026-08",
+                "--query",
+                "question",
+            ],
+        )
+        assert code == 0
+        assert "no community file" in out.lower()
+
+    def test_window_start_after_end_exits_1(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "search",
+                "--months",
+                "2026-08:2026-07",
+                "--query",
+                "x",
+            ],
+        )
+        assert code == 1
+
+
+class TestModuleEntrypoint:
+    def test_python_m_invocation_exits_1_on_missing_month(self, tmp_path):
+        """Pins the documented `python -m sotd.report.tools.community_query` invocation."""
+        repo_root = Path(__file__).resolve().parents[3]
+        proc = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "sotd.report.tools.community_query",
+                "--data-dir",
+                str(tmp_path),
+                "meta",
+                "--month",
+                "2099-01",
+            ],
+            capture_output=True,
+            text=True,
+            cwd=repo_root,
+        )
+        assert proc.returncode == 1
+        assert "No community file" in proc.stderr

@@ -173,6 +173,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Key off the in_pipeline flag (default all)",
     )
 
+    thread = sub.add_parser("thread", help="One thread with its reconstructed comment tree")
+    thread.add_argument("--month", required=True, help="Month (YYYY-MM)")
+    thread.add_argument("--id", required=True, help="Thread ID (with or without t3_ prefix)")
+    thread.add_argument("--max-comments", type=int, default=50, help="Max comments rendered")
+
+    search = sub.add_parser("search", help="Keyword/author search across a bounded window")
+    search.add_argument("--months", required=True, help="Window YYYY-MM:YYYY-MM (inclusive)")
+    search.add_argument("--query", required=True, help="Case-insensitive substring")
+    search.add_argument("--author", help="Exact author name (case-insensitive)")
+    search.add_argument("--top", type=int, default=20, help="Max results (default 20)")
+
     return parser
 
 
@@ -180,25 +191,186 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-        doc = load_month(args.data_dir, parse_month(args.month))
-        if args.command == "meta":
-            print(cmd_meta(doc, as_json=args.json))
-        elif args.command == "threads":
+        if args.command == "search":
+            start, end = args.months.split(":")
+            months = month_iter(parse_month(start), parse_month(end))
+            docs, missing = _search_docs(args.data_dir, months)
             print(
-                cmd_threads(
-                    doc,
-                    min_comments=args.min_comments,
+                cmd_search(
+                    docs,
+                    query=args.query,
                     author=args.author,
-                    flair=args.flair,
                     top=args.top,
-                    sort=args.sort,
-                    thread_filter=args.filter,
                     as_json=args.json,
+                    missing=missing,
                 )
             )
         else:
-            raise QueryError(f"Unknown command: {args.command}")
+            doc = load_month(args.data_dir, parse_month(args.month))
+            if args.command == "meta":
+                print(cmd_meta(doc, as_json=args.json))
+            elif args.command == "threads":
+                print(
+                    cmd_threads(
+                        doc,
+                        min_comments=args.min_comments,
+                        author=args.author,
+                        flair=args.flair,
+                        top=args.top,
+                        sort=args.sort,
+                        thread_filter=args.filter,
+                        as_json=args.json,
+                    )
+                )
+            elif args.command == "thread":
+                print(cmd_thread(doc, args.id, max_comments=args.max_comments, as_json=args.json))
+            else:
+                raise QueryError(f"Unknown command: {args.command}")
         return 0
     except QueryError as e:
         print(str(e), file=sys.stderr)
         return 1
+
+
+def _flatten_body(body: str) -> str:
+    return " / ".join(line.strip() for line in (body or "").splitlines() if line.strip())
+
+
+def cmd_thread(doc: dict, thread_id: str, *, max_comments: int = 50, as_json: bool = False) -> str:
+    pid = thread_id.removeprefix("t3_")
+    posts = {p["id"]: p for p in doc["data"].get("posts", [])}
+    post = posts.get(pid)
+    if post is None:
+        raise QueryError(f"Unknown thread: {thread_id} (month {doc['meta'].get('month')})")
+    comments = [c for c in doc["data"].get("comments", []) if c["thread_id"] == pid]
+    comments.sort(key=lambda c: c["created_utc"])
+
+    if as_json:
+        return json.dumps({"post": post, "comments": comments}, indent=2)
+
+    lines = [
+        f"{post['id']}  {post['created_utc'][:10]}  u/{post.get('author')}  "
+        f"{comment_counts(doc).get(pid, 0)} comments  score {post['score']}"
+        + (f"  flair={post['flair']}" if post.get("flair") else ""),
+        post["url"],
+        post["title"],
+    ]
+    if post.get("selftext"):
+        lines.append("--- body ---")
+        lines.append(post["selftext"])
+    lines.append(f"--- {len(comments)} comments ---")
+
+    children: dict = {}
+    for c in comments:
+        # Key replies by bare parent id (Reddit stores t1_<id>) so the tree can be
+        # walked by bare comment id; top-level t3_<pid> parents match the walk seed.
+        children.setdefault(c["parent_id"].removeprefix("t1_"), []).append(c)
+
+    rendered = 0
+    truncated = False
+
+    def walk(parent: str, depth: int) -> None:
+        nonlocal rendered, truncated
+        for c in sorted(children.get(parent, []), key=lambda x: x["created_utc"]):
+            if rendered >= max_comments:
+                truncated = True
+                return
+            body = _flatten_body(c["body"])[:200]
+            op = " (OP)" if c.get("is_submitter") else ""
+            lines.append(
+                f"{'  ' * depth}[{c['id']}] u/{c['author']} " f"{c['created_utc'][:10]}{op}: {body}"
+            )
+            rendered += 1
+            walk(c["id"], depth + 1)
+
+    walk(f"t3_{pid}", 0)
+    if truncated:
+        lines.append(f"(comments after the first {max_comments} not shown)")
+    return "\n".join(lines)
+
+
+def _search_docs(data_dir: str, months: list):
+    """Load available months; skip missing ones (reported in output, not an error)."""
+    docs = []
+    missing = []
+    for m in months:
+        try:
+            docs.append((m, load_month(data_dir, m)))
+        except QueryError:
+            missing.append(m)
+    return docs, missing
+
+
+def _snippet(text: str, needle: str, width: int = 160) -> str:
+    flat = _flatten_body(text)
+    idx = flat.lower().find(needle.lower())
+    if idx < 0:
+        return flat[:width]
+    start = max(0, idx - 30)
+    return flat[start : start + width]
+
+
+def cmd_search(
+    docs: list,
+    *,
+    query: str,
+    author: str | None = None,
+    top: int = 20,
+    as_json: bool = False,
+    missing: list | None = None,
+) -> str:
+    hits = []
+    for _month, doc in docs:
+        for p in doc["data"].get("posts", []):
+            haystack = f"{p.get('title', '')}\n{p.get('selftext', '')}"
+            if query.lower() in haystack.lower():
+                if author and (p.get("author") or "").lower() != author.lower():
+                    continue
+                hits.append(
+                    {
+                        "created_utc": p["created_utc"],
+                        "kind": "post",
+                        "thread_id": p["id"],
+                        "author": p.get("author"),
+                        "snippet": _snippet(p.get("title", ""), query),
+                    }
+                )
+        for c in doc["data"].get("comments", []):
+            if query.lower() in (c.get("body") or "").lower():
+                if author and (c.get("author") or "").lower() != author.lower():
+                    continue
+                hits.append(
+                    {
+                        "created_utc": c["created_utc"],
+                        "kind": "comment",
+                        "thread_id": c["thread_id"],
+                        "comment_id": c["id"],
+                        "author": c.get("author"),
+                        "snippet": _snippet(c.get("body") or "", query),
+                    }
+                )
+    hits.sort(key=lambda h: h["created_utc"])
+    hits = hits[:top]
+
+    if as_json:
+        return json.dumps({"matches": hits, "missing_months": missing or []}, indent=2)
+
+    lines = [f"(no community file for {m})" for m in missing or []]
+    if not hits:
+        lines.append("No matches for the query in the given window.")
+        return "\n".join(lines)
+    for h in hits:
+        who = f" u/{h['author']}" if h.get("author") else ""
+        if h["kind"] == "post":
+            lines.append(f"{h['created_utc'][:10]}  [post]     t3_{h['thread_id']}{who}")
+        else:
+            lines.append(
+                f"{h['created_utc'][:10]}  [comment]  t3_{h['thread_id']}  "
+                f"t1_{h['comment_id']}{who}"
+            )
+        lines.append(f"           \"{h['snippet']}\"")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
