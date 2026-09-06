@@ -1,31 +1,44 @@
 import React from 'react';
-import { CommentProductData } from '@/services/api';
+import { CommentProductData, ProductFieldData } from '@/services/api';
 import { formatMatchedData, formatEnrichedData } from '@/utils/productDataFormatter';
 
+export type ProductFieldKey = 'razor' | 'blade' | 'brush' | 'soap';
+
 interface ProductDataTableProps {
-  productData: CommentProductData;
+  productData?: CommentProductData | null;
   dataSource?: 'enriched' | 'matched';
+  isEditing?: boolean;
+  editValues?: Record<ProductFieldKey, string>;
+  onEditChange?: (field: ProductFieldKey, value: string) => void;
 }
 
-const ProductDataTable: React.FC<ProductDataTableProps> = ({ productData, dataSource }) => {
-  const productFields = [
-    { key: 'razor' as const, label: 'Razor' },
-    { key: 'blade' as const, label: 'Blade' },
-    { key: 'brush' as const, label: 'Brush' },
-    { key: 'soap' as const, label: 'Soap' },
-  ];
+const PRODUCT_FIELDS: { key: ProductFieldKey; label: string }[] = [
+  { key: 'razor', label: 'Razor' },
+  { key: 'blade', label: 'Blade' },
+  { key: 'brush', label: 'Brush' },
+  { key: 'soap', label: 'Soap' },
+];
 
-  const rows = productFields
-    .map(field => ({
-      ...field,
-      data: productData[field.key],
-    }))
-    .filter(row => row.data !== null && row.data !== undefined);
-
-  if (rows.length === 0) {
-    return null;
+function overrideDisplay(data?: ProductFieldData | null): {
+  value: string;
+  pending: boolean;
+} {
+  if (!data) {
+    return { value: '', pending: false };
   }
+  if (data.override_value) {
+    return { value: data.override_value, pending: Boolean(data.override_pending) };
+  }
+  return { value: '', pending: false };
+}
 
+const ProductDataTable: React.FC<ProductDataTableProps> = ({
+  productData,
+  dataSource,
+  isEditing = false,
+  editValues,
+  onEditChange,
+}) => {
   return (
     <div className='mt-4'>
       <div className='mb-2 flex items-center justify-between'>
@@ -53,6 +66,9 @@ const ProductDataTable: React.FC<ProductDataTableProps> = ({ productData, dataSo
                 Original
               </th>
               <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200'>
+                Override
+              </th>
+              <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200'>
                 Matched
               </th>
               <th className='px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
@@ -61,21 +77,44 @@ const ProductDataTable: React.FC<ProductDataTableProps> = ({ productData, dataSo
             </tr>
           </thead>
           <tbody className='bg-white divide-y divide-gray-200'>
-            {rows.map((row, index) => {
-              const { data, label } = row;
+            {PRODUCT_FIELDS.map((field, index) => {
+              const data = productData?.[field.key];
               const original = data?.original || '';
               const matched = data?.matched || null;
               const enriched = data?.enriched || null;
-              const formattedMatched = formatMatchedData(matched, row.key);
+              const formattedMatched = formatMatchedData(matched, field.key);
               const formattedEnriched = formatEnrichedData(enriched);
+              const { value: overrideValue, pending } = overrideDisplay(data);
 
               return (
-                <tr key={row.key} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr key={field.key} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className='px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200'>
-                    {label}
+                    {field.label}
                   </td>
                   <td className='px-4 py-3 text-sm text-gray-900 border-r border-gray-200'>
                     {original || <span className='text-gray-400'>-</span>}
+                  </td>
+                  <td className='px-4 py-3 text-sm text-gray-900 border-r border-gray-200'>
+                    {isEditing ? (
+                      <input
+                        type='text'
+                        className='w-full min-w-[10rem] rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        value={editValues?.[field.key] ?? ''}
+                        onChange={e => onEditChange?.(field.key, e.target.value)}
+                        aria-label={`${field.label} override`}
+                      />
+                    ) : overrideValue ? (
+                      <div className='flex items-start gap-2'>
+                        <span className='whitespace-pre-wrap'>{overrideValue}</span>
+                        {pending && (
+                          <span className='shrink-0 px-1.5 py-0.5 text-xs rounded bg-amber-100 text-amber-800'>
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className='text-gray-400'>-</span>
+                    )}
                   </td>
                   <td className='px-4 py-3 text-sm text-gray-700 border-r border-gray-200'>
                     {matched ? (

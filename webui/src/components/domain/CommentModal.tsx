@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { CommentDetail } from '../../services/api';
+import React, { useEffect, useState } from 'react';
+import { CommentDetail, saveExtractOverrides } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ProductDataTable from './ProductDataTable';
+import ProductDataTable, { ProductFieldKey } from './ProductDataTable';
 
 interface CommentModalProps {
   comment: CommentDetail | null;
@@ -14,6 +14,27 @@ interface CommentModalProps {
   onNavigate?: (direction: 'prev' | 'next') => Promise<void>;
   // Additional props for lazy loading
   remainingCommentIds?: string[];
+  /** Optional: refresh comment after override save */
+  onOverridesSaved?: () => void | Promise<void>;
+}
+
+const EMPTY_EDIT: Record<ProductFieldKey, string> = {
+  razor: '',
+  blade: '',
+  brush: '',
+  soap: '',
+};
+
+function initialEditValues(comment: CommentDetail | null): Record<ProductFieldKey, string> {
+  const values = { ...EMPTY_EDIT };
+  if (!comment?.product_data) {
+    return values;
+  }
+  (Object.keys(EMPTY_EDIT) as ProductFieldKey[]).forEach(key => {
+    const field = comment.product_data?.[key];
+    values[key] = field?.override_value || '';
+  });
+  return values;
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
@@ -24,7 +45,14 @@ const CommentModal: React.FC<CommentModalProps> = ({
   currentIndex = 0,
   onNavigate,
   remainingCommentIds = [],
+  onOverridesSaved,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValues, setEditValues] = useState<Record<ProductFieldKey, string>>(EMPTY_EDIT);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   // Compute navigation state unconditionally (before any early return) so hook order is stable
   const totalCommentCount = comments.length + remainingCommentIds.length;
   const hasMultipleComments = totalCommentCount > 1;
@@ -32,10 +60,33 @@ const CommentModal: React.FC<CommentModalProps> = ({
   const canGoNext =
     hasMultipleComments && (currentIndex < comments.length - 1 || remainingCommentIds.length > 0);
 
+  // Reset edit state when comment changes or modal closes
+  useEffect(() => {
+    if (!isOpen || !comment) {
+      setIsEditing(false);
+      setSaveMessage(null);
+      setSaveError(null);
+      return;
+    }
+    setEditValues(initialEditValues(comment));
+    setIsEditing(false);
+    setSaveMessage(null);
+    setSaveError(null);
+  }, [isOpen, comment?.id, comment?.month]);
+
   // Handle keyboard navigation - must run unconditionally (Rules of Hooks)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) return;
+      if (isEditing) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          setIsEditing(false);
+          setEditValues(initialEditValues(comment));
+          setSaveError(null);
+        }
+        return;
+      }
 
       switch (event.key) {
         case 'ArrowLeft':
@@ -59,7 +110,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, canGoPrev, canGoNext, onNavigate, onClose]);
+  }, [isOpen, isEditing, canGoPrev, canGoNext, onNavigate, onClose, comment]);
 
   // Early return after all hooks to satisfy Rules of Hooks
   if (!isOpen || !comment) {
@@ -86,9 +137,47 @@ const CommentModal: React.FC<CommentModalProps> = ({
       .replace(/\n/g, '<br />'); // Line breaks
   };
 
+  const handleEditChange = (field: ProductFieldKey, value: string) => {
+    setEditValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditValues(initialEditValues(comment));
+    setSaveError(null);
+  };
+
+  const handleSave = async () => {
+    if (!comment.month) {
+      setSaveError('Comment month is unknown; cannot save extract overrides.');
+      return;
+    }
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveMessage(null);
+    try {
+      const response = await saveExtractOverrides(comment.month, comment.id, {
+        razor: editValues.razor,
+        blade: editValues.blade,
+        brush: editValues.brush,
+        soap: editValues.soap,
+      });
+      setIsEditing(false);
+      setSaveMessage(response.message);
+      await onOverridesSaved?.();
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        (err instanceof Error ? err.message : 'Failed to save overrides');
+      setSaveError(String(detail));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden'>
+      <div className='bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden'>
         {/* Header */}
         <div className='flex items-center justify-between p-4 border-b border-gray-200'>
           <div className='flex items-center space-x-4'>
@@ -96,6 +185,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
               <h2 className='text-lg font-semibold text-gray-900'>Comment Details</h2>
               <p className='text-sm text-gray-500'>
                 ID: {comment.id} • {formatDate(comment.created_utc)}
+                {comment.month && <span className='ml-2 text-gray-400'>• {comment.month}</span>}
                 {hasMultipleComments && (
                   <span className='ml-2 text-gray-400'>
                     ({currentIndex + 1} of {totalCommentCount})
@@ -105,7 +195,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
             </div>
 
             {/* Navigation arrows */}
-            {hasMultipleComments && (
+            {hasMultipleComments && !isEditing && (
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={() => onNavigate?.('prev')}
@@ -184,16 +274,60 @@ const CommentModal: React.FC<CommentModalProps> = ({
           </div>
 
           {/* Product Data */}
-          {comment.product_data && (
-            <ProductDataTable
-              productData={comment.product_data}
-              dataSource={comment.data_source}
-            />
+          <ProductDataTable
+            productData={comment.product_data}
+            dataSource={comment.data_source}
+            isEditing={isEditing}
+            editValues={editValues}
+            onEditChange={handleEditChange}
+          />
+
+          {saveMessage && (
+            <p className='mt-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2'>
+              {saveMessage}
+            </p>
+          )}
+          {saveError && (
+            <p className='mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2'>
+              {saveError}
+            </p>
           )}
         </div>
 
         {/* Footer */}
-        <div className='flex justify-end p-4 border-t border-gray-200'>
+        <div className='flex justify-between items-center p-4 border-t border-gray-200'>
+          <div className='flex gap-2'>
+            {!isEditing ? (
+              <button
+                onClick={() => {
+                  setEditValues(initialEditValues(comment));
+                  setIsEditing(true);
+                  setSaveMessage(null);
+                  setSaveError(null);
+                }}
+                className='px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              >
+                Edit overrides
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving || !comment.month}
+                  className='px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50'
+                >
+                  {isSaving ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                  className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
           <button
             onClick={onClose}
             className='px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'

@@ -19,6 +19,7 @@ from .brush_matching import router as brush_matching_router
 from .brush_splits import router as brush_splits_router
 from .brush_validation import router as brush_validation_router
 from .catalogs import router as catalogs_router
+from .extract_overrides import router as extract_overrides_router
 from .files import router as files_router
 from .filtered import router as filtered_router
 from .format_compatibility import router as format_compatibility_router
@@ -141,6 +142,7 @@ app = FastAPI(
 app.include_router(files_router)
 app.include_router(catalogs_router)
 app.include_router(analysis_router)
+app.include_router(extract_overrides_router)
 app.include_router(filtered_router)
 app.include_router(brush_splits_router)
 app.include_router(brush_validation_router)

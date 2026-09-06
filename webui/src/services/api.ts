@@ -98,10 +98,14 @@ export const getCatalogContent = async (catalogName: string): Promise<Record<str
 // Comment operations
 export interface ProductFieldData {
   original: string;
+  normalized?: string | null;
   matched: Record<string, any> | null;
   enriched: Record<string, any> | null;
   match_type?: string;
   pattern?: string;
+  overridden?: string | null;
+  override_value?: string | null;
+  override_pending?: boolean;
 }
 
 export interface CommentProductData {
@@ -119,8 +123,17 @@ export interface CommentDetail {
   thread_id: string;
   thread_title: string;
   url: string;
+  month?: string;
   product_data?: CommentProductData;
   data_source?: 'enriched' | 'matched';
+}
+
+export interface ExtractOverrideResponse {
+  success: boolean;
+  message: string;
+  month: string;
+  comment_id: string;
+  fields: Record<string, string>;
 }
 
 export const getCommentDetail = async (
@@ -135,6 +148,20 @@ export const getCommentDetail = async (
     console.error(`Failed to fetch comment ${commentId}:`, error);
     throw error;
   }
+};
+
+export const saveExtractOverrides = async (
+  month: string,
+  commentId: string,
+  fields: {
+    razor?: string | null;
+    blade?: string | null;
+    brush?: string | null;
+    soap?: string | null;
+  }
+): Promise<ExtractOverrideResponse> => {
+  const response = await api.put(`/extract-overrides/${month}/${commentId}`, fields);
+  return response.data;
 };
 
 // Mismatch analyzer types and functions (includes unmatched via display_mode: 'unmatched')

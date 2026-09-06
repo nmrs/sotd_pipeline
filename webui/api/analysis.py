@@ -18,6 +18,8 @@ project_root = Path(__file__).parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from sotd.extract.override_manager import OverrideManager  # noqa: E402
+
 # Get logger for this module
 logger = logging.getLogger(__name__)
 
@@ -124,10 +126,14 @@ class ProductFieldData(BaseModel):
     """Model for product field data (matched and enriched)."""
 
     original: str
+    normalized: Optional[str] = None
     matched: Optional[Dict[str, Any]] = None
     enriched: Optional[Dict[str, Any]] = None
     match_type: Optional[str] = None
     pattern: Optional[str] = None
+    overridden: Optional[str] = None
+    override_value: Optional[str] = None
+    override_pending: bool = False
 
 
 class CommentProductData(BaseModel):
@@ -149,6 +155,7 @@ class CommentDetail(BaseModel):
     thread_id: str
     thread_title: str
     url: str
+    month: Optional[str] = None
     product_data: Optional[CommentProductData] = None
     data_source: Optional[str] = None  # "enriched" or "matched"
 
@@ -359,11 +366,14 @@ def get_filtered_entries_manager() -> FilteredEntriesManager:
     return manager
 
 
-def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dict], Optional[str]]:
+def find_comment_by_id(
+    comment_id: str, months: List[str]
+) -> tuple[Optional[dict], Optional[str], Optional[str]]:
     """Find a comment by its ID across the specified months.
 
     Returns:
-        Tuple of (comment_record, data_source) where data_source is "enriched" or "matched"
+        Tuple of (comment_record, data_source, month) where data_source is
+        "enriched" or "matched"
     """
     import json
 
@@ -377,7 +387,7 @@ def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dic
 
                 for record in data.get("data", []):
                     if record.get("id") == comment_id:
-                        return record, "enriched"
+                        return record, "enriched", month
             except Exception as e:
                 logger.warning(f"Error reading {enriched_path}: {e}")
                 continue
@@ -392,25 +402,68 @@ def find_comment_by_id(comment_id: str, months: List[str]) -> tuple[Optional[dic
 
                 for record in data.get("data", []):
                     if record.get("id") == comment_id:
-                        return record, "matched"
+                        return record, "matched", month
             except Exception as e:
                 logger.warning(f"Error reading {matched_path}: {e}")
                 continue
 
-    return None, None
+    return None, None, None
 
 
-def extract_product_field_data(field_data: Optional[Dict[str, Any]]) -> Optional[ProductFieldData]:
-    """Extract product field data from a comment record field."""
-    if not field_data or not isinstance(field_data, dict):
+def extract_product_field_data(
+    field_data: Optional[Dict[str, Any]],
+    yaml_override: Optional[str] = None,
+) -> Optional[ProductFieldData]:
+    """Extract product field data from a comment record field.
+
+    Merges pending extract_overrides.yaml values when the phase record has not
+    yet applied the override (no overridden flag, or YAML differs).
+    """
+    overridden = None
+    original = ""
+    normalized = None
+    matched = None
+    enriched = None
+    match_type = None
+    pattern = None
+
+    if field_data and isinstance(field_data, dict):
+        original = field_data.get("original", "") or ""
+        normalized = field_data.get("normalized")
+        matched = field_data.get("matched")
+        enriched = field_data.get("enriched")
+        match_type = field_data.get("match_type")
+        pattern = field_data.get("pattern")
+        overridden = field_data.get("overridden")
+
+    # No phase data and no YAML override → omit field
+    if not field_data and not yaml_override:
         return None
 
+    override_value: Optional[str] = None
+    override_pending = False
+
+    if overridden:
+        # Applied: override value is normalized
+        override_value = normalized
+        # Still pending if YAML has a newer value that differs
+        if yaml_override is not None and yaml_override != normalized:
+            override_value = yaml_override
+            override_pending = True
+    elif yaml_override is not None:
+        override_value = yaml_override
+        override_pending = True
+
     return ProductFieldData(
-        original=field_data.get("original", ""),
-        matched=field_data.get("matched"),
-        enriched=field_data.get("enriched"),
-        match_type=field_data.get("match_type"),
-        pattern=field_data.get("pattern"),
+        original=original,
+        normalized=normalized,
+        matched=matched,
+        enriched=enriched,
+        match_type=match_type,
+        pattern=pattern,
+        overridden=overridden,
+        override_value=override_value,
+        override_pending=override_pending,
     )
 
 
@@ -425,19 +478,30 @@ async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
             raise HTTPException(status_code=400, detail="At least one month must be specified")
 
         # Find the comment
-        comment, data_source = find_comment_by_id(comment_id, month_list)
+        comment, data_source, month = find_comment_by_id(comment_id, month_list)
 
         if not comment:
             raise HTTPException(
                 status_code=404, detail=f"Comment {comment_id} not found in the specified months"
             )
 
-        # Extract product data
+        # Load YAML overrides for pending merge
+        yaml_overrides: Dict[str, str] = {}
+        if month:
+            override_path = get_data_directory() / "extract_overrides.yaml"
+            try:
+                manager = OverrideManager(override_path)
+                manager.load_overrides()
+                yaml_overrides = manager.get_comment_overrides(month, comment_id)
+            except Exception as e:
+                logger.warning(f"Could not load extract overrides for comment detail: {e}")
+
+        # Extract product data (include fields that only exist via YAML override)
         product_data = CommentProductData(
-            razor=extract_product_field_data(comment.get("razor")),
-            blade=extract_product_field_data(comment.get("blade")),
-            brush=extract_product_field_data(comment.get("brush")),
-            soap=extract_product_field_data(comment.get("soap")),
+            razor=extract_product_field_data(comment.get("razor"), yaml_overrides.get("razor")),
+            blade=extract_product_field_data(comment.get("blade"), yaml_overrides.get("blade")),
+            brush=extract_product_field_data(comment.get("brush"), yaml_overrides.get("brush")),
+            soap=extract_product_field_data(comment.get("soap"), yaml_overrides.get("soap")),
         )
 
         # Only include product_data if at least one field has data
@@ -458,6 +522,7 @@ async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
             thread_id=comment.get("thread_id", ""),
             thread_title=comment.get("thread_title", ""),
             url=comment.get("url", ""),
+            month=month,
             product_data=product_data if has_product_data else None,
             data_source=data_source,
         )
