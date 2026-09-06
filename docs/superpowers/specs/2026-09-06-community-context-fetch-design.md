@@ -169,9 +169,14 @@ Notes:
   (backfill — oldest-first, one month at a time, writing each summary before moving
   on). Missing month/range → error note, no guessing.
 - **Tools**: Read, Glob, Grep, Bash, Edit.
-- **Inputs**: the raw month file `data/community/YYYY-MM.json` — queried via Bash
-  python/jq, never Read whole (same discipline as the drafter's aggregates); prior
-  months' summaries for continuity of running jokes.
+- **Inputs**: the raw month file `data/community/YYYY-MM.json` — never Read whole
+  (it can run to thousands of comments). The agent works **map-then-drill**: a
+  compact listing of every post (id/date/flair/author/comment count/title, via the
+  `community_query threads` CLI or a jq one-liner) is the map and is small enough
+  to see whole; `community_query search` finds specific topics inside comment
+  bodies; `community_query thread` drills into the handful of threads worth
+  reading, bounded per thread. Prior months' summaries for continuity of running
+  jokes.
 - **Signal vs noise**: the month file contains every SOTD shave comment ("nice
   shave!" banter included). The agent prioritizes non-SOTD posts and unusually
   high-engagement threads; inside SOTD threads the signal is in the replies, not
@@ -246,10 +251,10 @@ The month/window argument is always explicit, structurally enforcing the drafter
 
 ## Testing
 
-- `tests/fetch/community/` — month filtering, `in_pipeline` flagging (with and
-  without a threads file present), full-tree flattening with `parent_id` preserved,
-  meta accounting, pagination-cap behavior, `[removed]`/`[deleted]` preservation.
-  PRAW mocked, following the existing `tests/fetch/` patterns.
+- `tests/fetch/test_community_fetch.py` — month filtering, `in_pipeline` flagging
+  (with and without a threads file present), full-tree flattening with `parent_id`
+  preserved, meta accounting, pagination-cap behavior, `[removed]`/`[deleted]`
+  preservation. PRAW mocked, following the existing `tests/fetch/` patterns.
 - `tests/report/tools/test_community_query.py` — fixture month file; listing
   filters, tree rendering, search windowing, exit codes; mirrors the existing
   report-tools tests.
