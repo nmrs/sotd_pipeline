@@ -41,6 +41,66 @@ def _get_filtered_entries_manager():
     return _filtered_entries_manager
 
 
+PRODUCT_FIELD_KEYS = ("razor", "blade", "brush", "soap")
+
+
+def _with_overridden_from_extract(product_dict: dict, extract_field: Any) -> dict:
+    """Copy extract-phase overridden audit flag onto a matched product dict when present."""
+    if not isinstance(extract_field, dict):
+        return product_dict
+    overridden = extract_field.get("overridden")
+    if not overridden or "overridden" in product_dict:
+        return product_dict
+    return {**product_dict, "overridden": overridden}
+
+
+def _serialize_matched_record(matched_record: dict, extract_record: dict) -> dict:
+    """Convert MatchResult fields to dicts and preserve extract overridden flags."""
+    converted_record: dict[str, Any] = {}
+    for key, value in matched_record.items():
+        if hasattr(value, "original"):  # MatchResult
+            original_structured_data = extract_record.get(key, {})
+
+            if (
+                isinstance(original_structured_data, dict)
+                and "normalized" in original_structured_data
+            ):
+                original_text = original_structured_data["original"]
+                normalized_text = original_structured_data["normalized"]
+            else:
+                original_text = value.original
+                normalized_text = value.original
+
+            base_fields: dict[str, Any] = {
+                "original": original_text,
+                "normalized": normalized_text,
+                "matched": value.matched,
+                "match_type": value.match_type,
+                "pattern": value.pattern,
+            }
+            base_fields = _with_overridden_from_extract(base_fields, original_structured_data)
+
+            strategy = getattr(value, "strategy", None)
+            if strategy is not None:
+                base_fields["strategy"] = strategy
+
+            if key == "brush":
+                base_fields.update(
+                    {
+                        "all_strategies": getattr(value, "all_strategies", None),
+                    }
+                )
+
+            converted_record[key] = base_fields
+        elif isinstance(value, dict) and key in PRODUCT_FIELD_KEYS:
+            converted_record[key] = _with_overridden_from_extract(
+                value, extract_record.get(key, {})
+            )
+        else:
+            converted_record[key] = value
+    return converted_record
+
+
 def is_razor_matched(record: dict) -> bool:
     razor_result = record.get("razor")
     if isinstance(razor_result, MatchResult):
@@ -341,13 +401,16 @@ def match_record(
             brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
             # Convert MatchResult to dict for consistency
             if brush_result is not None:
-                result["brush"] = {
+                brush_dict = {
                     "original": brush_result.original,
                     "normalized": result["brush"]["normalized"],  # Preserve normalized field
                     "matched": brush_result.matched,
                     "match_type": brush_result.match_type,
                     "pattern": brush_result.pattern,
                 }
+                if result["brush"].get("overridden"):
+                    brush_dict["overridden"] = result["brush"]["overridden"]
+                result["brush"] = brush_dict
                 if debug:
                     if brush_result.matched:
                         brand = brush_result.matched.get("brand", "Unknown")
@@ -359,13 +422,16 @@ def match_record(
                     else:
                         logger.debug("    ❌ Brush no match")
             else:
-                result["brush"] = {
+                brush_dict = {
                     "original": result["brush"]["original"],
                     "normalized": result["brush"]["normalized"],  # Preserve normalized field
                     "matched": None,
                     "match_type": None,
                     "pattern": None,
                 }
+                if result["brush"].get("overridden"):
+                    brush_dict["overridden"] = result["brush"]["overridden"]
+                result["brush"] = brush_dict
                 if debug:
                     logger.debug("    ❌ Brush no match")
         monitor.record_matcher_timing("brush", time.time() - start_time)
@@ -475,51 +541,7 @@ def process_month(
                 enable_brush=True,
             )
             # Convert MatchResult objects to dicts for JSON serialization
-            converted_record = {}
-            for key, value in matched_record.items():
-                if hasattr(value, "original"):  # Check if it's a MatchResult
-                    # Get the original structured data from the input record
-                    original_structured_data = record.get(key, {})
-
-                    # Extract original and normalized text from the structured data
-                    if (
-                        isinstance(original_structured_data, dict)
-                        and "normalized" in original_structured_data
-                    ):
-                        original_text = original_structured_data["original"]
-                        normalized_text = original_structured_data["normalized"]
-                    else:
-                        # Fallback to the MatchResult original field
-                        original_text = value.original
-                        normalized_text = value.original
-
-                    # Base fields for all product types
-                    base_fields = {
-                        "original": original_text,
-                        "normalized": normalized_text,
-                        "matched": value.matched,
-                        "match_type": value.match_type,
-                        "pattern": value.pattern,
-                    }
-
-                    # Only include strategy field if it's not None (for brush matcher)
-                    strategy = getattr(value, "strategy", None)
-                    if strategy is not None:
-                        base_fields["strategy"] = strategy
-
-                    # Add brush-specific strategy scoring fields only for brush records
-                    if key == "brush":
-                        base_fields.update(
-                            {
-                                "all_strategies": getattr(value, "all_strategies", None),
-                            }
-                        )
-
-                    converted_record[key] = base_fields
-                else:
-                    converted_record[key] = value
-            # Update the record in the list
-            records[i] = converted_record
+            records[i] = _serialize_matched_record(matched_record, record)
 
         monitor.end_processing_timing()
 

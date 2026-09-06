@@ -304,6 +304,93 @@ class OverrideManager:
         """
         return bool(self.overrides)
 
+    def get_comment_overrides(self, month: str, comment_id: str) -> Dict[str, str]:
+        """Return field overrides for a comment (empty dict if none)."""
+        return dict(self.overrides.get(month, {}).get(comment_id, {}))
+
+    def _validate_override_value(self, field: str, value: str) -> str:
+        """Validate and normalize a single override value."""
+        if field not in self.VALID_FIELDS:
+            raise ValueError(
+                f"Invalid field '{field}'. Valid fields: {', '.join(sorted(self.VALID_FIELDS))}"
+            )
+        if not isinstance(value, str):
+            raise ValueError(
+                f"Override value for field '{field}' must be a string, got: {type(value).__name__}"
+            )
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError(
+                f"Override value for field '{field}' cannot be empty or whitespace-only"
+            )
+        if len(stripped) > 200:
+            raise ValueError(
+                f"Override value for field '{field}' is too long ({len(stripped)} characters). "
+                f"Maximum length: 200 characters"
+            )
+        return stripped
+
+    def _write_overrides_file(self) -> None:
+        """Atomically write current overrides to the YAML file."""
+        from sotd.utils.file_io import save_yaml_data
+
+        # Sort months and comment IDs for stable, readable output
+        ordered: Dict[str, Dict[str, Dict[str, str]]] = {}
+        for month in sorted(self.overrides.keys()):
+            month_data = self.overrides[month]
+            ordered[month] = {
+                comment_id: dict(fields) for comment_id, fields in sorted(month_data.items())
+            }
+        save_yaml_data(ordered, self.override_file_path)
+        self._file_lines = None
+
+    def update_comment_overrides(
+        self, month: str, comment_id: str, fields: Dict[str, Optional[str]]
+    ) -> Dict[str, str]:
+        """Upsert/delete field overrides for a comment and persist to YAML.
+
+        Args:
+            month: Month in YYYY-MM format
+            comment_id: Reddit comment ID
+            fields: Map of field name to value. A string upserts; None or "" deletes that field.
+                Only razor/blade/brush/soap keys are accepted.
+
+        Returns:
+            Resulting field map for the comment after update (empty if all cleared).
+        """
+        if not month or len(month) != 7 or month[4] != "-":
+            raise ValueError(f"Invalid month format: {month}. Expected YYYY-MM")
+        if not comment_id or not str(comment_id).strip():
+            raise ValueError("comment_id is required")
+
+        # Reload from disk so we don't clobber concurrent edits
+        self.load_overrides()
+
+        comment_overrides = dict(self.overrides.get(month, {}).get(comment_id, {}))
+
+        for field, value in fields.items():
+            if field not in self.VALID_FIELDS:
+                raise ValueError(
+                    f"Invalid field '{field}'. Valid fields: {', '.join(sorted(self.VALID_FIELDS))}"
+                )
+            if value is None or (isinstance(value, str) and not value.strip()):
+                comment_overrides.pop(field, None)
+            else:
+                comment_overrides[field] = self._validate_override_value(field, value)
+
+        if month not in self.overrides:
+            self.overrides[month] = {}
+
+        if comment_overrides:
+            self.overrides[month][comment_id] = comment_overrides
+        else:
+            self.overrides[month].pop(comment_id, None)
+            if not self.overrides[month]:
+                del self.overrides[month]
+
+        self._write_overrides_file()
+        return dict(comment_overrides)
+
     def get_override_summary(self) -> Dict[str, Any]:
         """Get summary statistics about loaded overrides.
 

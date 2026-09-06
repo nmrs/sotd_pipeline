@@ -446,3 +446,48 @@ class TestOverrideManager:
         assert summary["field_counts"]["blade"] == 1
         assert summary["field_counts"]["brush"] == 1
         assert summary["field_counts"]["soap"] == 1
+
+    def test_update_comment_overrides_upsert_and_persist(self, tmp_path):
+        """Test upserting overrides writes YAML atomically."""
+        override_file = tmp_path / "overrides.yaml"
+        override_file.write_text("")
+        manager = OverrideManager(override_file)
+
+        result = manager.update_comment_overrides(
+            "2026-08",
+            "p47tzgo",
+            {"razor": "Gillette Tech", "blade": None, "brush": "", "soap": None},
+        )
+
+        assert result == {"razor": "Gillette Tech"}
+        manager2 = OverrideManager(override_file)
+        manager2.load_overrides()
+        assert manager2.get_override("2026-08", "p47tzgo", "razor") == "Gillette Tech"
+
+    def test_update_comment_overrides_delete_field_and_prune(self, tmp_path):
+        """Clearing the last field removes comment and month nodes."""
+        yaml_content = """
+2026-08:
+  p47tzgo:
+    razor: Gillette Tech
+"""
+        override_file = tmp_path / "overrides.yaml"
+        override_file.write_text(yaml_content)
+        manager = OverrideManager(override_file)
+
+        result = manager.update_comment_overrides(
+            "2026-08", "p47tzgo", {"razor": None, "blade": None, "brush": None, "soap": None}
+        )
+
+        assert result == {}
+        manager2 = OverrideManager(override_file)
+        manager2.load_overrides()
+        assert manager2.overrides == {}
+
+    def test_update_comment_overrides_rejects_invalid_field(self, tmp_path):
+        override_file = tmp_path / "overrides.yaml"
+        override_file.write_text("")
+        manager = OverrideManager(override_file)
+
+        with pytest.raises(ValueError, match="Invalid field"):
+            manager.update_comment_overrides("2026-08", "abc", {"aftershave": "Foo"})

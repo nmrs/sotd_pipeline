@@ -1,0 +1,100 @@
+---
+name: Comment Modal Extract Overrides
+overview: Add extract-override viewing/editing in CommentModal (YAML write only), preserve the `overridden` flag through match→enrich, and run a one-time script that reprocesses all months with existing extract overrides.
+todos:
+  - id: pipeline-overridden
+    content: Pass overridden through match serialization (+ filtered branches); add tests
+    status: completed
+  - id: override-writer
+    content: Add OverrideManager upsert/delete/prune; unit tests (no permanent months inventory API)
+    status: completed
+  - id: one-time-months-script
+    content: One-shot script reads extract_overrides.yaml months and runs extract→match→enrich --force for each
+    status: completed
+  - id: api-extract-overrides
+    content: New extract-overrides GET/PUT for comment + extend comment detail (month, normalized, overridden, pending)
+    status: completed
+  - id: ui-comment-modal
+    content: Override column, edit mode, save/clear, pending badge, post-save rematch hint for this month
+    status: completed
+  - id: docs-tests
+    content: Update field_overrides.md; finish API/React tests; run format/lint/typecheck/test
+    status: completed
+isProject: false
+---
+
+# Comment Modal Extract Overrides
+
+## Decisions locked
+- **Override type**: extract overrides only (`data/extract_overrides.yaml`)
+- **After save**: write YAML only; no automatic extract/match/enrich
+- **UI**: edit-mode toggle; columns Product | Original | Override | Matched | Enriched; always show all four fields
+- **Clear on Save**: delete that field under `month → comment_id` in YAML; prune empty comment/month nodes
+- **Display source**: prefer phase data when `overridden` is present; merge YAML for pending (saved, not yet re-extracted); Pending badge when YAML has a value the phase record has not applied
+- **Pipeline**: carry `overridden` from extract through match (and thus enrich)
+- **One-time rematch**: **not** a permanent API/UI feature. After the pass-through ships, a one-shot script reads months from YAML and runs `extract → match → enrich` with `--force` for each. Ongoing saves: YAML only + post-save hint for **this** month.
+
+## 1. Pipeline — preserve `overridden`
+In [`sotd/match/run.py`](sotd/match/run.py), when converting `MatchResult` → dict (~lines 496–518), copy `overridden` from the extract input field if present. Do the same on filtered/unmatched branches that rebuild product dicts with only `original`/`normalized`.
+
+Enrich already forwards product keys; no enrich-specific change expected beyond tests confirming the flag survives.
+
+**Tests**: unit/integration covering an overridden extract record → matched (and enriched) still has `overridden`.
+
+## 2. OverrideManager write
+Extend [`sotd/extract/override_manager.py`](sotd/extract/override_manager.py) (or a small sibling writer used by the API):
+
+- **Upsert** fields for `(month, comment_id)` with existing validation (valid fields, non-empty, ≤200 chars)
+- **Delete** fields when cleared; remove empty comment/month keys
+- Atomic YAML write (temp + replace); preserve file readability (safe_dump with reasonable style)
+
+Git remains backup; no `.bak` files.
+
+## 3. One-time rematch script (not productized)
+After the `overridden` pass-through lands, run a one-shot script (e.g. under `scripts/`) that:
+
+1. Reads months from `data/extract_overrides.yaml` (sorted; print comment/field counts for visibility)
+2. For each month, runs `extract → match → enrich` with `--force` (via `python run.py pipeline --month YYYY-MM --force extract:enrich` or equivalent)
+
+Not exposed as WebUI API or CommentModal panel. Optional to keep as an ops helper afterward; not part of normal CommentModal save flow.
+
+## 4. API
+New router (e.g. [`webui/api/extract_overrides.py`](webui/api/extract_overrides.py)), register in [`webui/api/main.py`](webui/api/main.py):
+
+- `GET /api/extract-overrides/{month}/{comment_id}` → field map for that comment
+- `PUT /api/extract-overrides/{month}/{comment_id}` → body with all four keys; string = upsert, `null` or `""` = delete that field
+
+No permanent `GET .../months` endpoint.
+
+Extend comment detail in [`webui/api/analysis.py`](webui/api/analysis.py):
+
+- Add `month` (from the file that contained the comment)
+- Per-field: `normalized`, `overridden` on [`ProductFieldData`](webui/api/analysis.py)
+- Merge pending YAML overrides into the response (e.g. `override_value`, `override_pending: bool`) so the UI can show Original vs Override before rematch
+
+Client: [`webui/src/services/api.ts`](webui/src/services/api.ts).
+
+## 5. UI
+Update [`ProductDataTable`](webui/src/components/domain/ProductDataTable.tsx) + [`CommentModal`](webui/src/components/domain/CommentModal.tsx):
+
+- Always four product rows
+- Override column: show applied (`overridden` → show `normalized`) or pending YAML value + Pending badge
+- Footer/header: **Edit overrides** / **Save** / **Cancel**
+- After successful Save: message that **this** month needs `extract → match → enrich` (with `--force`) for data to update
+
+Month for writes comes from comment detail’s `month`.
+
+## 6. Docs
+Update [`docs/field_overrides.md`](docs/field_overrides.md): WebUI edit path, `overridden` pass-through, and that applying overrides (or refreshing the flag) requires re-running extract→enrich for affected months.
+
+## Testing (required)
+- **Unit**: OverrideManager upsert/delete/prune; match pass-through of `overridden`
+- **API**: GET/PUT comment overrides; comment detail includes month + override fields + pending merge (tmp YAML only)
+- **React**: ProductDataTable Override column; edit/save/clear; pending badge; post-save rematch hint
+
+No production YAML writes in tests.
+
+## Out of scope
+- Auto-running extract/match/enrich from the modal
+- Permanent months-with-overrides API or UI inventory panel
+- correct_matches / intentionally_unmatched / thread_overrides from this modal

@@ -135,9 +135,32 @@ This will correct all three fields for the same comment.
 The override system maintains a complete audit trail through the `overridden` field:
 
 - **`"Normalized"`** - The `normalized` field was overridden, `original` preserved
-- **`"Original,Normalized"** - Both fields were created from the override value
+- **`"Original,Normalized"`** - Both fields were created from the override value
 
 Fields without overrides do not have an `overridden` field, making it easy to identify what was changed.
+
+The match phase preserves `overridden` into matched (and thus enriched) output so Comment Modal can show Original vs Override from phase data after rematch.
+
+## WebUI (Comment Modal)
+
+From Comment Details in the WebUI you can edit extract overrides for the current comment:
+
+1. Open a comment → **Edit overrides**
+2. Set Override values for razor / blade / brush / soap (clear a field to remove that override)
+3. **Save** writes `data/extract_overrides.yaml` only — it does not re-run the pipeline
+4. Re-run `extract → match → enrich` with `--force` for that month so matched/enriched data (and the `overridden` flag) update
+
+API:
+
+- `GET /api/extract-overrides/{month}/{comment_id}`
+- `PUT /api/extract-overrides/{month}/{comment_id}` — body keys upsert; `null` or `""` deletes that field
+
+One-shot rematch after the `overridden` pass-through (or to refresh all override months):
+
+```bash
+python scripts/rerun_extract_override_months.py --dry-run
+python scripts/rerun_extract_override_months.py
+```
 
 ## Validation and Error Handling
 
