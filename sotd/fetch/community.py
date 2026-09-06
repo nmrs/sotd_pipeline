@@ -223,7 +223,8 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     if sotd_ids:
         for sid in sotd_ids:
             sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
-            if sub is not None and getattr(sub, "title", None):
+            title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
+            if title:
                 found[sub.id] = sub
         per_strategy["thread_seed"] = len(found)
         if found:

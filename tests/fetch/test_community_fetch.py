@@ -472,6 +472,34 @@ class TestBackfillPosts:
         assert strategies == []
         assert per_strategy == {"timestamp_search": 0, "author_histories": 0}
 
+    def test_dead_seed_skipped(self, monkeypatch, tmp_path):
+        class DeadSub:
+            """Fetched seed whose lazy title fetch raises (praw NotFound in production)."""
+
+            id = "dead1"
+
+            @property
+            def title(self):
+                raise RuntimeError("gone")
+
+        class DeadReddit:
+            def submission(self, **kwargs):
+                return DeadSub()
+
+            def subreddit(self, _name):
+                return SearchSubreddit([])
+
+            def redditor(self, name):
+                return FakeRedditor([])
+
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        posts, strategies, per_strategy = community._backfill_posts(
+            DeadReddit(), FakeSubreddit([]), 2025, 7, {"dead1"}, tmp_path
+        )
+        assert posts == []
+        assert strategies == []
+        assert per_strategy == {"thread_seed": 0, "timestamp_search": 0, "author_histories": 0}
+
 
 class TestProcessMonthBackfill:
     def test_backfill_path_used_when_boundary_unreached(self, tmp_path, monkeypatch):
