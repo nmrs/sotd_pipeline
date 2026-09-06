@@ -803,7 +803,10 @@ def get_phase_range(phase_range: str) -> List[str]:
     # Determine which phase list to use based on whether fetch_json is explicitly requested
     # If fetch_json is in the range, use all_available_phases, otherwise use all_phases
     use_fetch_json = start_phase == "fetch_json" or end_phase == "fetch_json"
-    phases_for_range = all_available_phases if use_fetch_json else all_phases
+    # Community is single-phase only - never part of a range (even a fetch_json range)
+    phases_for_range = (
+        [p for p in all_available_phases if p != "community"] if use_fetch_json else all_phases
+    )
 
     if not start_phase:
         # :phase - from beginning to phase
