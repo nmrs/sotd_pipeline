@@ -1,0 +1,154 @@
+"""Tests for the community context fetch module."""
+
+import json
+from datetime import datetime, timezone
+
+from sotd.fetch import community
+from sotd.fetch.save import write_month_file
+
+
+def ts(*parts: int) -> int:
+    """Epoch seconds for a UTC datetime given as (year, month, day[, h, m, s])."""
+    return int(datetime(*parts, tzinfo=timezone.utc).timestamp())
+
+
+class FakeSub:
+    """Duck-typed praw Submission with every field build_post_record reads."""
+
+    def __init__(
+        self,
+        _id,
+        title,
+        created_utc,
+        *,
+        selftext="",
+        author="tester",
+        score=5,
+        num_comments=0,
+        flair=None,
+        permalink="/p",
+        locked=False,
+        stickied=False,
+    ):
+        self.id = _id
+        self.title = title
+        self.created_utc = created_utc
+        self.selftext = selftext
+        self.author = author
+        self.score = score
+        self.num_comments = num_comments
+        self.link_flair_text = flair
+        self.permalink = permalink
+        self.locked = locked
+        self.stickied = stickied
+
+
+class FakeComment:
+    def __init__(
+        self, _id, body, created_utc, *, parent_id="t3_t1", author="u1", score=1, is_submitter=False
+    ):
+        self.id = _id
+        self.body = body
+        self.created_utc = created_utc
+        self.parent_id = parent_id
+        self.author = author
+        self.score = score
+        self.is_submitter = is_submitter
+
+
+class TestBuildPostRecord:
+    def test_full_record(self):
+        sub = FakeSub(
+            "abc123",
+            "Hello",
+            ts(2026, 9, 1, 6, 0, 9),
+            selftext="body text",
+            author="someone",
+            score=12,
+            num_comments=3,
+            flair="Discussion",
+            permalink="/r/wetshaving/comments/abc123/x/",
+        )
+        rec = community.build_post_record(sub, in_pipeline=False)
+        assert rec == {
+            "id": "abc123",
+            "title": "Hello",
+            "selftext": "body text",
+            "author": "someone",
+            "created_utc": "2026-09-01T06:00:09Z",
+            "score": 12,
+            "num_comments": 3,
+            "flair": "Discussion",
+            "url": "https://www.reddit.com/r/wetshaving/comments/abc123/x/",
+            "locked": False,
+            "stickied": False,
+            "in_pipeline": False,
+        }
+
+    def test_deleted_author_and_no_flag_when_unknown(self):
+        sub = FakeSub("abc", "T", ts(2026, 9, 1), author=None)
+        rec = community.build_post_record(sub, in_pipeline=None)
+        assert rec["author"] == "[deleted]"
+        assert "in_pipeline" not in rec
+
+
+class TestBuildCommentRecord:
+    def test_full_record(self):
+        c = FakeComment(
+            "c1",
+            "nice shave",
+            ts(2026, 9, 2),
+            parent_id="t3_abc",
+            author="bob",
+            score=2,
+            is_submitter=True,
+        )
+        rec = community.build_comment_record(c, "abc", "Thread Title")
+        assert rec == {
+            "id": "c1",
+            "thread_id": "abc",
+            "thread_title": "Thread Title",
+            "parent_id": "t3_abc",
+            "author": "bob",
+            "created_utc": "2026-09-02T00:00:00Z",
+            "body": "nice shave",
+            "score": 2,
+            "is_submitter": True,
+        }
+
+    def test_deleted_comment_author(self):
+        c = FakeComment("c2", "[removed]", ts(2026, 9, 2), author=None)
+        assert community.build_comment_record(c, "abc", "T")["author"] == "[deleted]"
+
+
+class TestCommunityFileRoundTrip:
+    def test_write_then_load(self, tmp_path):
+        path = tmp_path / "2026-09.json"
+        meta = {"month": "2026-09", "post_count": 1, "comment_count": 1}
+        posts = [{"id": "abc", "created_utc": "2026-09-01T00:00:00Z"}]
+        comments = [{"id": "c1", "created_utc": "2026-09-01T00:00:01Z"}]
+        community.write_community_file(path, meta, posts, comments)
+        loaded = community.load_community_file(path)
+        assert loaded is not None
+        assert loaded[0]["month"] == "2026-09"
+        assert loaded[1] == {"posts": posts, "comments": comments}
+        # on-disk shape is {"meta": ..., "data": {"posts": [...], "comments": [...]}}
+        raw = json.loads(path.read_text())
+        assert set(raw["data"].keys()) == {"posts", "comments"}
+
+    def test_load_missing_returns_none(self, tmp_path):
+        assert community.load_community_file(tmp_path / "nope.json") is None
+
+
+class TestLoadSotdIds:
+    def test_ids_from_threads_file(self, tmp_path):
+        write_month_file(
+            tmp_path / "threads" / "2026-08.json",
+            {"month": "2026-08"},
+            [{"id": "t1"}, {"id": "t2"}],
+        )
+        ids = community.load_sotd_ids(tmp_path, 2026, 8)
+        assert ids == {"t1", "t2"}
+
+    def test_none_when_file_missing(self, tmp_path):
+        assert community.load_sotd_ids(tmp_path, 2026, 8) is None
