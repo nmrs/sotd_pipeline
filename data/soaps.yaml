@@ -6402,6 +6402,9 @@ Shavologist:
     Aikam-1:
       patterns:
       - aikam-[12]
+    Fougère:
+      patterns:
+      - shavologist.*foug[eè]re
     Invasion:
       patterns:
       - shavologist.*invasion
@@ -6539,6 +6542,9 @@ Soapy Bathman:
     Crisp Bay Rum:
       patterns:
       - soapy bathman.*bay rum
+    Smokin' Amber Infusion:
+      patterns:
+      - soapy bathman.*smokin.*amber
 Southern Witchcrafts:
   patterns:
   - sou?thern? witc?hc?rafts?
@@ -7985,10 +7991,16 @@ Tcheon Fung Sing:
   - tcheon? fung sing( crema puris+ima( per barba)?)?
   - ^\W*tfs\b
   scents:
+    80 Years Anniversary:
+      patterns:
+      - 80 years anniversary
+      - tcheon.*80
+      - \btfs\b.*80
     Ciotola Rossa:
       patterns:
       - ^\W*tfs\b.*red
       - ciotola rossa
+      - tor+ino
       - tcheon
       - \btfs\b
       wsdb_slug: tcheon-fung-sing-ciotola-rossa-soap
@@ -8002,6 +8014,7 @@ Tcheon Fung Sing:
     Rabarbaro Italiano:
       patterns:
       - rabarbaro italiano
+      - italian rhubarb
     Vecchia Torino:
       patterns:
       - tcheon.*torino
@@ -8832,6 +8845,9 @@ Wholly Kaw:
       patterns:
       - \bkaw\b.*pompelmo
       wsdb_slug: wholly-kaw-pompelmo-soap
+    Project Leather:
+      patterns:
+      - \bkaw\b.*project.*leather
     Rebelle:
       patterns:
       - \bkaw\b.*rebelle

@@ -714,7 +714,7 @@ DE:
         - durablade
     Hi Chromium:
       patterns:
-        - (?:durablade)?.*sharp.*hi.*chromium
+        - (?:durablade)?.*sharp(.*hi)?.*chromium
         - durablade.*chrom
     Hi Platinum:
       patterns:

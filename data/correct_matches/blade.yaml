@@ -80,6 +80,7 @@ AC:
     Soft Guard:
     - feather ac - soft guard
     - feather ac pro softguard
+    - feather ac softguard
     - feather artist club soft guard
     - feather pro softguard
     - feather soft guard
@@ -98,6 +99,7 @@ AC:
     - kai - captan
     - kai - kai captain
     - kai ac
+    - kai captain
     - kai captain original
     - kai captain standard
     Captain ProTouch:
@@ -164,6 +166,7 @@ Cartridge/Disposable:
     ? ''
     : - astra sp + personna twin pivot plus
       - bic disposable's own blade
+      - bic sensitive / sensible
       - bic single blade disposable
       - cartridge
       - dorco - pace 6 blade cartridge
@@ -204,6 +207,7 @@ DE:
     - gilette 7 o'clock sharpedge
     - gilette 7 o'clock super stainless (yellow)
     - gilette 7 o'clock yellow sharpedge
+    - gillete sharpedge
     - gillette - 7 o'clock - sharpedge
     - gillette - 7 o'clock sharp edge
     - gillette - 7 o'clock sharpedge
@@ -239,6 +243,7 @@ DE:
     - gillette yellow 7 o'clock
     Super Platinum (Black):
     - 7 o'clock black
+    - 7 o'clock black - super platinum
     - 7 o'clock black platinum
     - 7 o'clock black super platinum
     - 7 o'clock super platinum
@@ -302,6 +307,8 @@ DE:
     - gilette 7 o' clock super stainless (green)
     - gilette 7 o'clock (green)
     - gilette 7 o'clock - super stainless
+    - gillete 7 o'clock green - 4th and final 2 pass shave
+    - gillete 7 o'clock green 3rd - 2 pass shave
     - gillette - 7 o'clock
     - gillette - 7 o'clock (green ofc)
     - gillette - 7 o'clock (green)
@@ -492,6 +499,7 @@ DE:
     Platinum:
     - big ben platinum (egypt) - 1st 2 pass shave
     - big ben platinum (egypt) - 2nd 2 pass shave
+    - big ben platinum (egypt) - 3rd and final 2 pass shave
     Super Stainless:
     - big ben
     - big ben - super stainless
@@ -541,6 +549,7 @@ DE:
     - crown super stainless (green), de
     - crown super stainless 1/2 de
     - crown super stainless, de
+    - lord crown
     - lord crown stainless
   Derby:
     Extra:
@@ -637,7 +646,9 @@ DE:
     - feather hi- stainless
     - feather hi-platinum
     - feather hi-stainess - 1st shave
+    - feather hi-stainess - 2nd 2 pass shave
     - feather hi-stainless
+    - feather hi-stainless - 1st 2 pass shave
     - feather hi-stainless - 2nd shave with it
     - feather hi-stainless - 3rd shave with it
     - feather hi-stainless - 4th shave with it
@@ -766,6 +777,9 @@ DE:
     - gillette green - permasharp
     - gillette perma sharp
     - gillette perma-sharp
+    - gillette perma-sharp (stainless steel)
+    - gillette perma-sharp - 1st 2 pass shave
+    - gillette perma-sharp - 2nd 2 pass shave
     - gillette permasharp
     - gillette permasharp super stainless
     - gillette- perma sharp
@@ -785,6 +799,7 @@ DE:
     - permasharp super stainless
     Platinum:
     - gilette platinum
+    - gillete platinum - 1st 2 pass shave
     - gillette "new swede" platinum
     - gillette 'swede' platinum
     - gillette - platinum
@@ -795,6 +810,7 @@ DE:
     - gillette platinum (?)
     - gillette platinum (going on week 2!)
     - gillette platinum (too many)
+    - gillette platinum - 2nd 2 pass shave
     - gillette platinum - 3rd shave
     - gillette platinum - 4th and final 2 pass shave with this blade
     - gillette platinum - 4th shave
@@ -948,6 +964,8 @@ DE:
     - kc gillette (last one, hooray!)
     - kc gillette, aka gillette platinum
     - king c gillette
+    - king c gillette (chinese) - 2nd 2 pass shave
+    - king c gillette - 1st 2 pass shave
     - king c gillette - 1st try
     - king c gillette - 4th and final shave
     - king c gillette 2nd 2 pass shave
@@ -1027,6 +1045,7 @@ DE:
     - merkur
     - merkur super platinum
     - merkur super platinum - 1st two pass shave
+    - merkur super platinum - 2nd two pass shave
   Ming Shi:
     Super White:
     - ming shi super white
@@ -1052,7 +1071,9 @@ DE:
     - ok (stainless steel, manufactured by lord, 6x)
   PAA:
     Platinum Strangelet Super Sharps:
+    - paa platinum strangelet
     - paa platinum strangelet super sharp
+    - phoenix artisan accoutrements platinum strangelet super sharp
   Parker:
     Premium Platinum:
     - parker
@@ -1119,6 +1140,7 @@ DE:
     - 'personna - lab blue (use #4)'
     - 'personna - lab blue (use #5ish)'
     - personna - lab blue 2)
+    - personna - super comfort coated - ss de blade (aka lab blue)
     - personna cc
     - personna comfort coat
     - personna comfort coated
@@ -1334,6 +1356,7 @@ DE:
     - sharp 7am plus high platinum
     Hi Chromium:
     - durablade sharp hi chromium
+    - sharp chromium
     - sharp hi chromium
     Hi Platinum:
     - sharp hi platinum
@@ -1442,6 +1465,7 @@ DE:
     - topaz platinum -
     - topaz platinum - 1st 2 pass shave
     - topaz platinum - 2nd and final 2 pass shave
+    - topaz platinum - 3rd and final 2 pass shave
     - topaz platinum from india
     Stainless:
     - topaz - stainless
@@ -1483,6 +1507,8 @@ DE:
     - treet - platinum
     - treet - platinum super stainless
     - treet platinum
+    - treet platinum - 1st 2 pass shave
+    - treet platinum - 2nd and final 2 pass shave
     - treet platinum se
     - treet platinum super stainless
     - treet platinum, first shave
@@ -1569,6 +1595,7 @@ DE:
     - wilkinson classic - 1st 2 pass shave
     - wilkinson classic - 2nd 2 pass shave
     - wilkinson classic - 3rd 2 pass shave
+    - wilkinson classic - 4th and final 2 pass shave
     - wilkinson classic, final shave
     - wilkinson india
     - wilkinson super sword edge
@@ -1603,6 +1630,7 @@ DE:
     - wizamet - iridium super
     - wizamet - iridium super extra stainless
     - wizamet - super iridium
+    - wizamet - super iridium - ss de blade
     - wizamet half
     - wizamet i think
     - wizamet iridium
@@ -1703,6 +1731,7 @@ GEM:
     - gem stainless ptfe
     - persona gem ptfe
     - persona ptfe
+    - persona ptfe (good riddance)
     - personna - gem ptfe
     - personna - gem ptfe coated
     - personna gem

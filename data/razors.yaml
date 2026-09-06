@@ -131,12 +131,13 @@ Art Razor:
     format: Straight
     patterns:
       - yurii.*kravch?enko.*(?:\d{1,2}/(8|16))?
-      - \bart\b.*razor.*(?:\d{1,2}/(8|16))?
+      - \bart\s?razor.*(?:\d{1,2}/(8|16))?
   Kamisori:
     format: Straight
     patterns:
       - yurii.*kravcenko.*kami
-      - \bart\b.*razor.*kami
+      - \bart\s?razor.*kami(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \bart\s?razor.*haiku(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxx)
 Archibald:
   A77 Shavette:
     format: Shavette (A77)
@@ -290,6 +291,10 @@ Blackland:
     patterns:
       - blackland.*batch[0\s-]*2
       - blackland.*(square|rectangle)
+  Batch 004:
+    format: GEM
+    patterns:
+      - blackland.*batch[0\s-]*4
   Blackbird:
     patterns:
       - 'bb\s*(sb|oc)'
@@ -961,6 +966,10 @@ Frederick Reynolds:
     format: Straight
     patterns:
       - freder.*reynold(?:.*\d{1,2}/(8|16))?
+Frank Shaving:
+  316L Stainless Steel:
+    patterns:
+      - frank.*shaving.*(stainless|316)  
 FrankenRazor:
   "":
     patterns:
@@ -2908,6 +2917,11 @@ Tennis:
     format: Straight
     patterns:
       - tennis(?:.*\d{1,2}/(8|16))?
+The Cajun Blade:
+  ACR1:
+    patterns:
+      - acr1
+      - cajun.*blade
 The Holy Black:
   Shavette:
     format: Shavette (Half DE)

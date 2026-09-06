@@ -52,6 +52,12 @@ blade:
     - file: 2026-02.json
       id: o3svupl
       source: user
+  gillette ball-end tech k4 (1965):
+    added_date: '2026-08-22'
+    comment_ids:
+    - file: 2026-08.json
+      id: p47tzgo
+      source: user
   i don't even know, tbh; i don't remember the last time i swapped this blade:
     added_date: '2025-07-19'
     comment_ids:
@@ -306,6 +312,12 @@ brush:
     - file: 2025-06.json
       id: myh1k6t
       source: user
+  no brush, just hand:
+    added_date: '2026-08-22'
+    comment_ids:
+    - file: 2026-08.json
+      id: p55bd2e
+      source: user
   non-dominant hand:
     added_date: '2025-07-28'
     comment_ids:
@@ -408,6 +420,12 @@ razor:
     comment_ids:
     - file: 2024-07.json
       id: ldysm3n
+      source: user
+  bumps were wrecking my neck until i started using patrol grooming after every shave. game changer:
+    added_date: '2026-09-04'
+    comment_ids:
+    - file: 2026-09.json
+      id: p7m0u5a
       source: user
   hot wheels play razor:
     added_date: '2025-07-19'

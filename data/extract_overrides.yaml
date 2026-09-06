@@ -1,131 +1,107 @@
-# SOTD Pipeline Extract Phase Overrides
-# This file allows data analysts to override extracted fields when the initial extraction
-# is ambiguous or incorrect, based on user feedback or manual review.
-#
-# Format:
-# YYYY-MM:
-#   comment_id:
-#     field: "corrected_value"
-#
-# Valid fields: razor, blade, brush, soap
-# Comment IDs are Reddit comment IDs from the source data
-# Values should be the corrected, normalized product names
-
 2020-09:
   g764hh5:
-    soap: "Catie's Bubbles - Pine Barrens"
-
+    soap: Catie's Bubbles - Pine Barrens
 2020-11:
   gdgvsde:
-    soap: "Catie's Bubbles - Pine Barrens"
-
+    soap: Catie's Bubbles - Pine Barrens
 2025-01:
-  # Example: "Ko" was extracted but user confirmed it's "Koraat"
-  m99b8f9:
-    razor: "Koraat"
   m68avhv:
-    razor: "Jenes Razor Sheffield Style (RIP)"
-
+    razor: Jenes Razor Sheffield Style (RIP)
+  m99b8f9:
+    razor: Koraat
 2025-02:
   maquis1:
-    brush: "Simpson T2"
-
+    brush: Simpson T2
 2025-03:
   mhd1yxq:
-    brush: "Ever-Ready 450A w/22mm FS Silvertip"
-
+    brush: Ever-Ready 450A w/22mm FS Silvertip
 2025-04:
   mkum44v:
-    razor: "chiseled face legacy"
+    razor: chiseled face legacy
   mo6ngrg:
-    soap: "Taylor's of Old Bond St Grapefruit"
-
+    soap: Taylor's of Old Bond St Grapefruit
 2025-05:
   n6h5c3e:
-    razor: "Blackie Blade"
+    razor: Blackie Blade
 2025-06:
   mvmlmio:
-    razor: "Merkur slant"
-    blade: "feather"
-    soap: "Bricktown Lafayette"
-    brush: "Semogue boar brush"
-  mxt8bx5:
-    razor: "Yaqi - Open Comb"
-  mykchzk:
-    brush: "Z Feidu - Barber Brush"
+    blade: feather
+    brush: Semogue boar brush
+    razor: Merkur slant
+    soap: Bricktown Lafayette
   mwo7dgs:
-    brush: "Z Feidu - Barber Brush"
-  mza74r6:
-    brush: "Z Feidu - Barber Brush"
+    brush: Z Feidu - Barber Brush
   mx12epj:
-    brush: "Zenith 506U N"
-  n0y9seq:
-    soap: "100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas on Fire"
-  n0cf5wr:
-    soap: "Sample Mashup"
+    brush: Zenith 506U N
+  mxt8bx5:
+    razor: Yaqi - Open Comb
+  mykchzk:
+    brush: Z Feidu - Barber Brush
+  mza74r6:
+    brush: Z Feidu - Barber Brush
   n0b7myf:
-    soap: "Barrister and Mann Amazelnut with House of Mammoth Tobcconist"
-
+    soap: Barrister and Mann Amazelnut with House of Mammoth Tobcconist
+  n0cf5wr:
+    soap: Sample Mashup
+  n0y9seq:
+    soap: 100g of Barrister and Mann - Roam Two & 100g of Stirling Soap Co. - Texas
+      on Fire
 2025-07:
   n55ihah:
-    razor: "custom designed Böker 6 /8 with bog oak scale and French head"
-
+    razor: custom designed Böker 6 /8 with bog oak scale and French head
 2025-08:
   n82mv79:
-    razor: "Koraat"
-
+    razor: Koraat
 2025-09:
-  ndpztsw:
-    razor: "Thiers-Issard Spartacus 7/8"
   ndh3l5n:
-    soap: "Stirling Frozen Tundra"
-
+    soap: Stirling Frozen Tundra
+  ndpztsw:
+    razor: Thiers-Issard Spartacus 7/8
 2025-10:
   ni98llv:
-    soap: "Old Spice"
-
+    soap: Old Spice
 2025-11:
   nnvhh45:
-    razor: "Injector Eversharp Schick I1"
-    blade: "Shick Injector, 2nd use"
-    brush: "Boar Zenith Zenith Pro"
-    soap: "Martin De Candre Absinthe 200g Puck"
-
+    blade: Shick Injector, 2nd use
+    brush: Boar Zenith Zenith Pro
+    razor: Injector Eversharp Schick I1
+    soap: Martin De Candre Absinthe 200g Puck
 2026-01:
   o1jartl:
-    soap: "Spearhead Seaforth! Sea Spice Lime"
-    blade: "GEM Accutec Pro (41st use)"
-
+    blade: GEM Accutec Pro (41st use)
+    soap: Spearhead Seaforth! Sea Spice Lime
 2026-03:
-  o9y9a5u:
-    razor: "Personna White Handle Disposable"
   o95pzpc:
-    brush: "Chisel and Hound Brasilia V18 Fanchurian"
-
+    brush: Chisel and Hound Brasilia V18 Fanchurian
+  o9y9a5u:
+    razor: Personna White Handle Disposable
 2026-04:
-  oi9pspa:
-    blade: "Kai"
-  oigww1x:
-    blade: "Kai"
   oe32s6w:
-    soap: "Catie's Bubbles - Tonsorium"
-
+    soap: Catie's Bubbles - Tonsorium
+  oi9pspa:
+    blade: Kai
+  oigww1x:
+    blade: Kai
 2026-05:
   olu7p6c:
-    blade: "Schick double edge"
-  olze4m2:
-    blade: "Schick double edge (2nd use)"
-  om4g244:
-    blade: "Schick double edge (4th use)"
+    blade: Schick double edge
   olxkjvo:
-    soap: "Catie's Bubbles - Tonsorium"
+    soap: Catie's Bubbles - Tonsorium
+  olze4m2:
+    blade: Schick double edge (2nd use)
+  om4g244:
+    blade: Schick double edge (4th use)
   omb9ziv:
-    razor: "Gillette Slim"
-
+    razor: Gillette Slim
 2026-06:
   op3is2v:
-    soap: "Fanzine Saponifications - Bubble Gum Rose/P.S. Rittenhouse mashup"
-
+    soap: Fanzine Saponifications - Bubble Gum Rose/P.S. Rittenhouse mashup
 2026-07:
   p1oq4nc:
-    brush: "Boti Boar"
+    brush: Boti Boar
+2026-08:
+  p47tzgo:
+    razor: Gillette Ball-end Tech K4 (1965)
+2026-09:
+  p7eaxrl:
+    soap: Mashup

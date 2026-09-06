@@ -140,6 +140,7 @@ AP Shave Co:
   - a p shaveco g5c synthetic
   - a p shaveco g5c synthetic knot
   - a.p. shave co amber smoke g5c fan
+  - ap shave 24mm g5c synthetic
   - ap shave 26mm g5c synthetic
   - ap shave co 'deep blue" w/26mm g5c
   - ap shave co 24mm g5c
@@ -355,6 +356,8 @@ AP Shave Co:
   - ap shave co. - tuxedo 24mm synthetic black & butterscotch signature series
   - ap shave co. blue lagoon tuxedo
   - ap shave co. blue lagoon tuxedo 24mm
+  - ap shave co. tuxedo 26mm
+  - apshave co tuxedo fan 26mm
   - apshaveco butterscotch with 24 mm tuxedo knot
 Arno:
   Badger:
@@ -800,6 +803,8 @@ Chisel & Hound:
   - chisel & hound "coffin nail" w/ v21 fanchurian 26mm
   - chisel & hound - cosmo - handle (5146sc) w/ chisel & hound - v21 - 26mm fanchurian
     badger knot
+  - chisel & hound - pueblo opaque - resin handle (4323cc) w/ chisel & hound - v21
+    - 26mm fanchurian badger knot
   - chisel & hound acer pearl v21
   - chisel & hound cosmo handle (5146sc) w/ 26mm v21 fanchurian badger knot
   - chisel & hound cosmo handle (5146sc) w/ c&h 26mm v21 fanchurian badger knot
@@ -982,6 +987,9 @@ Chisel & Hound:
   - chisel & hound brokenjar 26mm v30 badger
   - chisel & hound old gold v30 fanchurian badger
   - chisel & hound w/ 26mm v30 fanchurian
+  v31:
+  - chisel & hound arctic pearl v31 fanchurian badger
+  - chisel & hound fellowes v31 fanchurian badger
   v5:
   - that darn rob (chisel & hound) verdant v5 fanchurian badger
   - that darn rob 1801 verdant 26mm shd fanchurian v5
@@ -1156,6 +1164,7 @@ Declaration Grooming:
   - 1dg b3 jeffington blood of kings 2 band badger
   - declaration 24mm b3 (on loan)
   - declaration b3 nebula
+  - declaration b3 theo "unicorn ivory"
   - declaration grooming "2020 as a brush" jefferson b3
   - declaration grooming - b3
   - declaration grooming - the theodore blood of kings b3 - 27mm fan (finest badger)
@@ -1236,6 +1245,7 @@ Declaration Grooming:
   - washington blue steel b6
   B7:
   - 28mm declaration grooming b7 dark emerald
+  - declaration b7 jefferson "abh (another blue handle)"
   - declaration blood pact b7
   - declaration blood pact jefferson b7
   - declaration grooming b7 "blood pact" jefferson
@@ -1650,6 +1660,7 @@ Frank Shaving:
   - frank shaving pur-tec synthetic
   - frank shaving pur-tech
   Synthetic:
+  - frank g5
   - frank shaving - 20mm silvertip syntheic
   - frank shaving - 20mm silvertip synthetic
   - frank shaving 30mm synthetic
@@ -1660,6 +1671,7 @@ Frank Shaving:
   - frank shaving g7 knot
   - frank shaving mini green synthetic
   - frank shaving small green synthetic
+  - frank shaving synthetic g5
   - frank shaving sys20-eb10 20mm silvertip synthetic
   - frank shaving two face green synthetic
 Freddy Beuty:
@@ -2024,6 +2036,7 @@ Maggard:
   - maggards silvertip 26mm
   - olivewood maggard shd badger
   Boar:
+  - maggard 24mm boar
   - maggard 26mm boar
   - maggard razors 24mm boar
   Mixed Badger/Boar:
@@ -2270,6 +2283,7 @@ Omega:
   - omega professional 10098
   - omega professional boar 10098
   - omega- 10098 professional 27mm boar
+  - omega- professional 10098 27mm boar
   '11126':
   - omega - 11126 banded boar 24mm
   - omega 11126, ovangkol wooden handle
@@ -2287,6 +2301,7 @@ Omega:
   - omega pure bristle 11573
   '13109':
   - omega 13109 23mm pure badger
+  - omega 13109 23mm pure badger knot
   - omega 13109 24mm pure badger
   '13272':
   - omega 13272 24mm
@@ -2373,6 +2388,7 @@ Omega:
   - omega 24mm pure badger
   - omega badger
   - omega badger 24 mm
+  - omega pure badger 23mm
   Boar:
   - omega
   - omega - 20mm boar
@@ -2822,6 +2838,7 @@ Rad Dinosaur Creations:
   DinoBoar:
   - rad dino creations ""bad dino"" with dinoboar
   - rad dino creations "bad dino" with dinoboar
+  - rad dinosaur creations "laferrari" dinoboar
   - rad dinosaur creations - afschuwelijk w/ dinoboar
   - rad dinosaur creations - envy 26mm dinoboar
   - rad dinosaur creations - lowrider - 26mm rad dino dinoboar
@@ -2866,6 +2883,7 @@ Rad Dinosaur Creations:
   - rad dinosaur creations - spalted bruise - 26mm manchuridon two band badger knot
   - rad dinosaur creations - unicorn - 26mm rad dino manchuridon
   - rad dinosaur creations 26mm manchuridon "cupcake, destroyer of worlds"
+  - rad dinosaur creations chathogany manchuridon badger
   - rad dinosaur creations custom 26mm manchuridon
   - rad dinosaur creations nebuloyalty - munchuridon badger
   - rad dinosaur creations ~iss special~ 26mm manchuridon badger
@@ -2970,6 +2988,8 @@ RazoRock:
   - rr blondie boar
   - rr blondie in olive handle
   - rr boar
+  Boar:
+  - razorock boar
   Bruce:
   - razorock bruce
   Hulk:
@@ -2994,6 +3014,7 @@ RazoRock:
   - razorock plissoft 24mm
   - razorock plissoft 25mm
   - razorock plissoft disriptor
+  - razorock plissoft synthetic
   - razorock plissoft synthetic 24 mm
   - razorock plissoft synthetic 24mm
   - razorock plissoft synthetic shaving brush
@@ -3609,6 +3630,7 @@ Stirling:
   - stirling/zenith 510se-xl 31mm boar
   - zenith - 510se-xl stirling 31mm
   - zenith - 510se-xl/stirling
+  - zenith boar 510se-xl
   - zenith stirling 510se-xl
   - zenith/stirling - 510se-xl 31mm boar
   - zenith/stirling - 510se-xl 31mm boar brush
@@ -3684,6 +3706,7 @@ Stirling:
   Synthetic:
   - sterling synthetic
   - stirling - synthetic 24mm
+  - stirling 2 ring synthetic
   - stirling 24mm
   - stirling 24mm tuxedo
   - stirling 26mm synthetic
@@ -4209,8 +4232,10 @@ Yaqi:
   - yaqi dandelion green 24mm cashmere
   - yaqi ferrari cashmere
   - yaqi ferrari in cashmere knot
+  - yaqi janus bifrons 24 mm synthetic cashmere knot
   - yaqi janus bifrons 24mm synthetic cashmere knot
   - yaqi janus bifrons 24mm sythetic cashmere knot
+  - yaqi mysterious space 24mm synthetic cashmere knot
   Ferrari:
   - yaqi - ferrari - boar
   - yaqi - ferrari 26mm
@@ -4378,6 +4403,7 @@ Yaqi:
   - yaqi red marble 26mm tux
   - yaqi synth
   - yaqi synth 22mm
+  - yaqi synth 25mm
   - yaqi synth, 22mm
   - yaqi synth, 25mm
   - yaqi synthetic
@@ -4445,6 +4471,7 @@ Zenith:
   505B SE:
   - boar zenith 505b bleached boar butterscotch handle
   - boar zenith 505b bleached butterscotch handle
+  - zenith 505 chubby bleached boar
   - zenith 505b
   - zenith 505bc
   - zenith b34 boar
@@ -4534,6 +4561,7 @@ Zenith:
   B23:
   - zenith - b23 boar black
   B25:
+  - zenith - b25 boar, olive wood handle
   - zenith - b25 olive wood long handle / 27 mm boar
   - zenith b25 boar, olive wood handle
   - zenith boar b25 27.5mm
