@@ -105,9 +105,11 @@ inside) the normal monthly fetch.
 - `.new()` only reaches a few months back, so older backfill months need
   search/top-listing discovery strategies (Pushshift is dead).
 - **Seeding**: backfill months already have known SOTD thread IDs in
-  `data/threads/YYYY-MM.json` — those posts (and their full trees) are fetched
-  directly, guaranteeing the pipeline-claimed portion of each month regardless of
-  how the remaining strategies perform on non-SOTD posts.
+  `data/threads/YYYY-MM.json` — the *IDs* are seeded from there, and those threads
+  are fetched fresh from Reddit with full comment trees (the pipeline's own
+  `data/comments/` store is top-level-only and is never reused by this fetch). This
+  guarantees the pipeline-claimed portion of each month regardless of how the
+  remaining strategies perform on non-SOTD posts.
 - **Stance: best-effort, multi-strategy, measured.** Probe candidates: Reddit search
   with month-scoped queries (flair terms, common keywords), `top` listings with
   time-range windows, and per-author submission histories of the sub's active
