@@ -17,14 +17,19 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from itertools import islice
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 from praw.models import Comment
+from tqdm import tqdm
 
-from sotd.fetch.reddit import safe_call
+from sotd.cli_utils.base_parser import BaseCLIParser
+from sotd.cli_utils.date_span import month_span
+from sotd.fetch.merge import merge_records
+from sotd.fetch.reddit import get_reddit, safe_call
 from sotd.fetch.save import load_month_file
 from sotd.utils.data_dir import get_data_dir
 from sotd.utils.file_io import load_json_data, save_json_data
+from sotd.utils.logging_config import setup_pipeline_logging, should_disable_tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -143,3 +148,126 @@ def fetch_all_comments(submission) -> List:
     """
     safe_call(submission.comments.replace_more, limit=None)
     return [c for c in submission.comments.list() if isinstance(c, Comment)]
+
+
+# --------------------------------------------------------------------------- #
+# month orchestration                                                         #
+# --------------------------------------------------------------------------- #
+def _process_month(year: int, month: int, args, *, reddit) -> dict:
+    """Fetch + merge + save the community record for one calendar month."""
+    month_str = f"{year:04d}-{month:02d}"
+    data_dir = get_data_dir(args.data_dir)
+    out_path = data_dir / "community" / f"{month_str}.json"
+
+    sotd_ids = load_sotd_ids(args.data_dir, year, month)
+    if sotd_ids is None:
+        logger.warning(f"No threads file for {month_str}; posts will lack the in_pipeline flag")
+
+    if args.force and out_path.exists():
+        out_path.unlink()
+
+    subreddit = reddit.subreddit("wetshaving")
+    posts_new, boundary_reached = discover_month_posts(subreddit, year, month)
+    if not boundary_reached:
+        logger.warning(
+            f"{month_str}: pagination cap reached before month boundary; " "discovery incomplete"
+        )
+
+    new_posts = [
+        build_post_record(s, in_pipeline=None if sotd_ids is None else s.id in sotd_ids)
+        for s in posts_new
+    ]
+
+    new_comments: List[dict] = []
+    for sub in tqdm(posts_new, desc="Threads", unit="thread", disable=should_disable_tqdm()):
+        for c in fetch_all_comments(sub) or []:
+            new_comments.append(build_comment_record(c, sub.id, sub.title))
+
+    existing = None if args.force else load_community_file(out_path)
+    if existing is not None:
+        _existing_meta, existing_data = existing
+        posts = merge_records(existing_data["posts"], new_posts)
+        comments = merge_records(existing_data["comments"], new_comments)
+    else:
+        posts = sorted(new_posts, key=lambda r: r["created_utc"])
+        comments = sorted(new_comments, key=lambda r: r["created_utc"])
+
+    if not posts and not comments and existing is None:
+        logger.warning(f"No community data found for {month_str}; skipping file write.")
+        return {
+            "year": year,
+            "month": month,
+            "posts": 0,
+            "comments": 0,
+            "complete": boundary_reached,
+        }
+
+    meta = {
+        "month": month_str,
+        "extracted_at": datetime.now(timezone.utc).isoformat(),
+        "post_count": len(posts),
+        "comment_count": len(comments),
+        "in_pipeline_post_count": sum(1 for p in posts if p.get("in_pipeline")),
+        "discovery": {
+            "strategies": ["new_listing"],
+            "complete": boundary_reached,
+            "per_strategy": {"new_listing": len(posts_new)},
+        },
+    }
+    write_community_file(out_path, meta, posts, comments)
+    if getattr(args, "verbose", False):
+        logger.info(
+            f"Community fetch complete for {month_str}: "
+            f"{len(posts)} posts, {len(comments)} comments"
+        )
+    return {
+        "year": year,
+        "month": month,
+        "posts": len(posts),
+        "comments": len(comments),
+        "complete": boundary_reached,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# CLI                                                                         #
+# --------------------------------------------------------------------------- #
+def get_parser() -> BaseCLIParser:
+    return BaseCLIParser(
+        description="Fetch the full community record (all posts + full comment trees)"
+    )
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    setup_pipeline_logging(level=logging.INFO)
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
+        months = month_span(args)
+        reddit = get_reddit()
+
+        results = []
+        for year, month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
+            results.append(_process_month(year, month, args, reddit=reddit))
+
+        if results and getattr(args, "verbose", False):
+            total_posts = sum(r["posts"] for r in results)
+            total_comments = sum(r["comments"] for r in results)
+            incomplete = [f"{r['year']:04d}-{r['month']:02d}" for r in results if not r["complete"]]
+            logger.info(
+                f"Community fetch complete: {total_posts} posts, {total_comments} comments"
+                + (f"; incomplete discovery: {', '.join(incomplete)}" if incomplete else "")
+            )
+        return 0
+    except KeyboardInterrupt:
+        logger.info("Community fetch interrupted by user")
+        return 1
+    except Exception as e:
+        logger.error(f"Community fetch failed: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return 1

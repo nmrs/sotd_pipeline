@@ -1,6 +1,7 @@
 """Tests for the community context fetch module."""
 
 import json
+import logging
 from datetime import datetime, timezone
 
 from sotd.fetch import community
@@ -225,3 +226,121 @@ class TestFetchAllComments:
         sub.comments = FakeCommentForest([c])
         result = community.fetch_all_comments(sub)
         assert result[0].body == "[removed]"
+
+
+def write_threads_fixture(tmp_path, month_ids):
+    (tmp_path / "threads").mkdir(exist_ok=True)
+    (tmp_path / "threads" / "2026-08.json").write_text(
+        json.dumps({"meta": {"month": "2026-08"}, "data": [{"id": i} for i in month_ids]})
+    )
+
+
+class FakeArgs:
+    def __init__(self, data_dir, force=True, debug=False, verbose=False):
+        self.data_dir = str(data_dir)
+        self.force = force
+        self.debug = debug
+        self.verbose = verbose
+
+
+class FakeReddit:
+    def subreddit(self, _name):
+        return FakeSubreddit([])
+
+
+class TestProcessMonth:
+    def test_writes_month_file_with_in_pipeline_flags(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, ["sotd1"])
+        posts = [
+            FakeSub("sotd1", "SOTD Thread", ts(2026, 8, 1)),
+            FakeSub("other1", "Discussion", ts(2026, 8, 2)),
+        ]
+
+        def fake_discover(subreddit, year, month):
+            return posts, True
+
+        def fake_comments(sub):
+            return [
+                FakeComment("c1", "body", ts(2026, 8, 2), parent_id=f"t3_{sub.id}"),
+                FakeComment("c2", "[removed]", ts(2026, 8, 2, 1), parent_id="t1_c1", author=None),
+            ]
+
+        monkeypatch.setattr(community, "discover_month_posts", fake_discover)
+        monkeypatch.setattr(community, "fetch_all_comments", fake_comments)
+        result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result == {"year": 2026, "month": 8, "posts": 2, "comments": 4, "complete": True}
+        meta, data = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        assert meta["month"] == "2026-08"
+        assert meta["post_count"] == 2
+        assert meta["comment_count"] == 4
+        assert meta["in_pipeline_post_count"] == 1
+        assert meta["discovery"] == {
+            "strategies": ["new_listing"],
+            "complete": True,
+            "per_strategy": {"new_listing": 2},
+        }
+        flags = {p["id"]: p["in_pipeline"] for p in data["posts"]}
+        assert flags == {"sotd1": True, "other1": False}
+
+    def test_missing_threads_file_warns_and_omits_flag(self, tmp_path, monkeypatch, caplog):
+        posts = [FakeSub("solo", "Solo", ts(2026, 8, 3))]
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: (posts, True))
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        with caplog.at_level(logging.WARNING):
+            community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert "threads file" in caplog.text
+        _, data = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        assert "in_pipeline" not in data["posts"][0]
+
+    def test_incomplete_boundary_recorded(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(
+            community,
+            "discover_month_posts",
+            lambda s, y, m: ([FakeSub("x", "X", ts(2026, 8, 5))], False),
+        )
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        meta, _ = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        assert meta["discovery"]["complete"] is False
+
+    def test_empty_month_writes_no_file(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: ([], True))
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["posts"] == 0
+        assert not (tmp_path / "community" / "2026-08.json").exists()
+
+    def test_rerun_without_force_merges(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        monkeypatch.setattr(
+            community,
+            "discover_month_posts",
+            lambda s, y, m: ([FakeSub("a", "A", ts(2026, 8, 1))], True),
+        )
+        community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        # second run: post "a" moved to a later timestamp, plus new post "b"
+        posts = [FakeSub("a", "A edited", ts(2026, 8, 1, 12)), FakeSub("b", "B", ts(2026, 8, 2))]
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: (posts, True))
+        community._process_month(2026, 8, FakeArgs(tmp_path, force=False), reddit=FakeReddit())
+        _, data = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        by_id = {p["id"]: p for p in data["posts"]}
+        assert set(by_id) == {"a", "b"}
+        assert by_id["a"]["title"] == "A edited"
+
+
+class TestMain:
+    def test_main_runs_months(self, tmp_path, monkeypatch):
+        calls = []
+
+        def fake_process(y, m, args, *, reddit):
+            calls.append((y, m))
+            return {"year": y, "month": m, "posts": 1, "comments": 0, "complete": True}
+
+        monkeypatch.setattr(community, "_process_month", fake_process)
+        monkeypatch.setattr(community, "get_reddit", lambda: FakeReddit())
+        code = community.main(["--month", "2026-08", "--force", "--data-dir", str(tmp_path)])
+        assert code == 0
+        assert calls == [(2026, 8)]
