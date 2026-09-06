@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from itertools import islice
 from typing import List, Optional, Set, Tuple
 
+from praw.models import Comment
+
 from sotd.fetch.reddit import safe_call
 from sotd.fetch.save import load_month_file
 from sotd.utils.data_dir import get_data_dir
@@ -130,3 +132,14 @@ def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
         # listing exhausted without crossing the boundary
         boundary_reached = True
     return in_month, boundary_reached
+
+
+def fetch_all_comments(submission) -> List:
+    """Return every comment under *submission* at all depths.
+
+    Unlike the SOTD fetch (top-level shaves only), community context needs the
+    nested replies — that is where the conversation lives. MoreComment stubs
+    that survive a failed replace_more are dropped.
+    """
+    safe_call(submission.comments.replace_more, limit=None)
+    return [c for c in submission.comments.list() if isinstance(c, Comment)]

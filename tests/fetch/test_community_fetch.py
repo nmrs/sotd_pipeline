@@ -189,3 +189,39 @@ class TestDiscoverMonthPosts:
         in_month, reached = community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
         assert len(in_month) == 3
         assert reached is False
+
+
+class NotComment:
+    """Stand-in for praw's MoreComment stubs that survive a failed replace_more."""
+
+
+class FakeCommentForest:
+    def __init__(self, items):
+        self._items = items
+        self.replace_called = False
+
+    def replace_more(self, limit=None):
+        self.replace_called = True
+
+    def list(self):
+        return self._items
+
+
+class TestFetchAllComments:
+    def test_walks_full_tree_and_drops_non_comments(self, monkeypatch):
+        monkeypatch.setattr(community, "Comment", FakeComment)
+        c1 = FakeComment("t1_a", "root", ts(2026, 9, 2), parent_id="t3_abc")
+        c2 = FakeComment("t1_b", "reply", ts(2026, 9, 2, 1), parent_id="t1_a")
+        more = NotComment()
+        sub = FakeSub("abc", "T", ts(2026, 9, 1))
+        sub.comments = FakeCommentForest([c1, more, c2])
+        result = community.fetch_all_comments(sub)
+        assert [c.id for c in result] == ["t1_a", "t1_b"]
+
+    def test_removed_bodies_preserved(self, monkeypatch):
+        monkeypatch.setattr(community, "Comment", FakeComment)
+        c = FakeComment("t1_x", "[removed]", ts(2026, 9, 2), author=None)
+        sub = FakeSub("abc", "T", ts(2026, 9, 1))
+        sub.comments = FakeCommentForest([c])
+        result = community.fetch_all_comments(sub)
+        assert result[0].body == "[removed]"
