@@ -284,6 +284,7 @@ DE:
     - gillette 7 o'clock super platinum
     - gillette 7 o'clock super platinum (black)
     - gillette 7 o'clock super platinum black
+    - gillette 7 o'clock super platinum black 1st 2 pass shave
     - gillette 7 o-clock super platinum
     - gillette 7'o clock black
     - gillette 7'oc-sp
@@ -539,6 +540,9 @@ DE:
     - cloud
     - cloud super
     - cloud super blades
+  Concord:
+    Stainless:
+    - concord
   Crown:
     Platinum:
     - crown - platinum
@@ -668,6 +672,7 @@ DE:
     - feather stainless
     - feather stainless steel
     - feather super platinum
+    - feather yellow
     - feathers
     - return of the feather
     - super- feather the stainless
@@ -1609,6 +1614,7 @@ DE:
     - wilkinson sword classic (german)
     - wilkinson sword classic (german) 2nd 2-pass shave with it
     - wilkinson sword classic - 1st 2 pass shave
+    - wilkinson sword classic - 2nd 2 pass shave
     - wilkinson sword classic - 3rd 2 pass shave
     - wilkinson sword classic - 4th and final 2 pass shave
     - wilkinson sword germany
@@ -1688,6 +1694,7 @@ GEM:
     - accuforge pro ptfe gem
     - accutec
     - accutec - pro premium coated
+    - accutec - pro se (aka gem ptfe)
     - accutec - pro single edge
     - accutec accuforge gem microcoat
     - accutec gem
@@ -1887,6 +1894,7 @@ Injector:
     - accutec - se injector blade
     - hills (personna) chrome injector
     - persona injector
+    - personna - ptfe - ss injector blade
     - personna injector
     - personna injector (se)
     - personna injector blade

@@ -403,6 +403,7 @@ C.V. Heljestrand:
     patterns:
       - heljestra.*(stra)?(?:.*\d{1,2}/(8|16))?
       - \bcvh\b(?:.*\d{1,2}/(8|16))?
+      - heljastrand
 Campobasso:
   Straight:
     format: Straight
@@ -2922,6 +2923,10 @@ The Cajun Blade:
     patterns:
       - acr1
       - cajun.*blade
+  The Cottonmouth:
+    format: AC
+    patterns:
+      - cajun.*cottonmouth
 The Holy Black:
   Shavette:
     format: Shavette (Half DE)
