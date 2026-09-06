@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fetch the complete r/wetshaving community record for each month (all posts + full comment trees), summarize it via a new agent, and make those summaries the observations-drafter's primary community context.
+**Goal:** Fetch the complete r/wetshaving community record for each month (all posts + full comment trees) into `data/community/` and expose it via a `community_query` CLI. Consumption (summarizer agent, observations-drafter wiring) is deferred to a later project.
 
-**Architecture:** A sidecar fetch module (`sotd/fetch/community.py`, wired into `run.py` like the existing `fetch_json` sidecar) stores one JSON file per month under `data/community/`. A new author-invoked `community-summarizer` agent distills each month into `data/community/summaries/YYYY-MM.md`; a fourth report-tools CLI (`community_query`) lets agents query raw threads. The deterministic 6-phase pipeline is untouched.
+**Architecture:** A sidecar fetch module (`sotd/fetch/community.py`, wired into `run.py` like the existing `fetch_json` sidecar) stores one JSON file per month under `data/community/`; a fourth report-tools CLI (`community_query`) renders that record into bounded slices (listings, thread trees, windowed search) for shell use and future agent consumers. The deterministic 6-phase pipeline is untouched.
 
 **Tech Stack:** Python 3.14, PRAW (Reddit API), pytest, argparse, existing `sotd.cli_utils` / `sotd.utils` helpers.
 
@@ -31,8 +31,6 @@
 | `sotd/fetch/community.py` (create) | Sidecar fetch: discovery (new_listing + backfill strategies), full-tree comments, record building, save/load, month orchestration, CLI entry |
 | `run.py` (modify) | Phase dispatch wiring: `community` in `phase_modules` + `all_available_phases` + epilog (fetch_json sidecar pattern) |
 | `sotd/report/tools/community_query.py` (create) | Point-query CLI: `meta`, `threads`, `thread`, `search` over `data/community/` |
-| `.claude/agents/community-summarizer.md` (create) | Author-invoked agent: raw month file → reviewable summary |
-| `.claude/agents/observations-drafter.md` (modify) | Summaries become primary community context; `community_query` joins allowed CLIs |
 | `CLAUDE.md` (modify) | Community command + artifact layout + operations runbook |
 | `tests/fetch/test_community_fetch.py` (create) | Unit tests for the fetch module (fake PRAW objects, mirroring `tests/fetch/test_fetch.py`) |
 | `tests/test_run_phase_range.py` (create) | Dispatch wiring tests for the `community` phase name |
@@ -202,9 +200,9 @@ comment tree is stored to ``data/community/YYYY-MM.json``::
     {"meta": {...}, "data": {"posts": [...], "comments": [...]}}
 
 This is a sidecar to the 6-phase pipeline: nothing in extract..report consumes
-this data. It feeds the community-summarizer agent and the ``community_query``
-CLI. The pipeline's own ``data/comments/`` store (top-level SOTD comments only)
-is never reused here — everything is fetched fresh from Reddit.
+this data. The ``community_query`` CLI is its access surface (agent consumption
+is a later project). The pipeline's own ``data/comments/`` store (top-level SOTD
+comments only) is never reused here — everything is fetched fresh from Reddit.
 """
 
 # ruff: noqa: E402  # keep imports after docstring for clarity
@@ -1466,8 +1464,8 @@ Create `sotd/report/tools/community_query.py`:
 ```python
 """Point-query CLI for community context data.
 
-Answers the questions the community-summarizer and observations-drafter agents
-need about ``data/community/`` without loading whole month files into context:
+Answers the questions agents and shell debugging need about ``data/community/``
+without loading whole month files into context:
 thread listings, one thread with its reconstructed comment tree, and
 keyword/author search across a bounded month window.
 
@@ -1696,7 +1694,7 @@ git commit -m "feat(report): community_query CLI — meta and threads subcommand
 
 **Interfaces:**
 - Consumes: `load_month`, `QueryError`, `month_iter`, `parse_month`, `comment_counts` (Task 7).
-- Produces: `cmd_thread(doc, thread_id: str, *, max_comments: int, as_json: bool) -> str` and `cmd_search(docs: list, *, query: str, author: str | None, top: int, as_json: bool, missing: list | None) -> str`. These are the surfaces the summarizer agent documents.
+- Produces: `cmd_thread(doc, thread_id: str, *, max_comments: int, as_json: bool) -> str` and `cmd_search(docs: list, *, query: str, author: str | None, top: int, as_json: bool, missing: list | None) -> str`. These are the access surfaces for shell debugging and future agent consumers.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1976,302 +1974,7 @@ git add sotd/report/tools/community_query.py tests/report/tools/test_community_q
 git commit -m "feat(report): community_query thread tree + windowed search"
 ```
 
----
-
-### Task 9: `community-summarizer` agent
-
-**Files:**
-- Create: `.claude/agents/community-summarizer.md`
-
-**Interfaces:**
-- Consumes: `data/community/YYYY-MM.json` (raw, via Bash python/jq — never Read whole), prior summaries under `data/community/summaries/`, the `community_query` CLI (Tasks 7–8).
-- Produces: `data/community/summaries/YYYY-MM.md`. The observations-drafter update (Task 10) references this path; the drafter is its consumer.
-
-Content-only task (no pytest surface); validated by the author running it once after Task 11's operational steps.
-
-- [ ] **Step 1: Write the agent file**
-
-Create `.claude/agents/community-summarizer.md` with exactly this content:
-
-````markdown
----
-name: community-summarizer
-description: Summarizes the monthly community context fetch (data/community/) into a reviewable per-month summary for the observations-drafter agent. Invoke explicitly with a month ("summarize community 2026-09") or a backfill range ("summarize community 2025-07:2025-12"). Do not use for drafting report observations or pipeline work.
-tools: Read, Glob, Grep, Bash, Edit
----
-
-# Community Context Summarizer
-
-You distill the raw community record for one month into a compact, factual,
-quote-bearing summary that the observations-drafter agent (and the author) can
-rely on. Your summaries are **for the author to review and edit** before the
-drafter uses them — err toward verifiable specifics over color.
-
-## Invocation
-
-The invoking prompt specifies a month (`2026-09`) or a range (`2025-07:2025-12`).
-If neither is given, return an error note instead of guessing.
-
-For a range: process months oldest-first, ONE per pass — write that month's
-summary completely before starting the next. Backfill months
-(`data/community/YYYY-MM.json` with `meta.discovery.complete: false`) carry a
-coverage caveat header; check `meta.discovery.strategies` and `per_strategy`
-counts to say what the record may be missing.
-
-## Workflow
-
-1. **Confirm the raw file exists**: `data/community/YYYY-MM.json`. If missing,
-   report that and stop — never fabricate. If a prior month's summary is
-   missing, proceed without continuity and note it under Open questions.
-2. **Query the numbers** (Bash python/jq against the file; NEVER Read it whole):
-   - `.venv/bin/python -c "import json; d=json.load(open('data/community/YYYY-MM.json')); print(d['meta'])"`
-   - Use the `community_query` CLI for listings and drill-down:
-     - `.venv/bin/python -m sotd.report.tools.community_query threads --month YYYY-MM --top 20`
-     - `.venv/bin/python -m sotd.report.tools.community_query threads --month YYYY-MM --filter non-sotd --sort score`
-     - `.venv/bin/python -m sotd.report.tools.community_query thread --month YYYY-MM --id t3_xxx`
-     - `.venv/bin/python -m sotd.report.tools.community_query search --months YYYY-MM:YYYY-MM --query "keyword"`
-3. **Read the selected threads** via `community_query thread` (or jq) — the
-   threads listing from step 2 is the map (every post appears in it); only
-   comment-level reading is selective. Prioritize non-SOTD posts and unusually
-   high-engagement threads. Inside SOTD threads the signal is in the replies, not
-   the shave comments; during contest months (Lather Games, Austere August,
-   March Madness) SOTD-thread replies are primary material, not noise. Skip
-   `[removed]`/`[deleted]` content — they are gaps, not facts.
-4. **Draft the summary** in the fixed output format below.
-5. **Write** `data/community/summaries/YYYY-MM.md`. This is the ONLY file you
-   write. Never touch raw data, archives, or reports.
-
-## Output format (`data/community/summaries/YYYY-MM.md`)
-
-```markdown
-# Community Summary — YYYY-MM
-
-_Generated YYYY-MM-DD from data/community/YYYY-MM.json
-(post_count N, comment_count N; discovery: strategies, complete true/false).
-[Coverage caveat ONLY for backfill months: cite per_strategy counts.]_
-
-## Headline events
-- <what happened, when, thread t3_...>
-
-## Product & vendor news
-- <releases, group buys, brand drama, vendor activity — thread IDs>
-
-## Notable conversations
-- <thread title (t3_...) — what was actually said, with u/ handles and verbatim
-  quotes where colorful; cite comment IDs for specific quotes>
-
-## Emerging running jokes / memes
-- <candidates, each tagged "(new candidate)" — the drafter may propose these;
-  never present them as established>
-
-## Notable users
-- <factual, behavioral, never personal; handles as u/name>
-
-## Threads index
-| id | date | flair | comments | title |
-|----|------|-------|----------|-------|
-| t3_... | 2026-09-14 | Discussion | 87 | ... |
-
-## Open questions
-- <interpretations of *why* you cannot verify from the data; apparent mysteries>
-```
-
-Keep every section skimmable; omit sections with nothing (except Open questions,
-which stays even if just "none observed").
-
-## Hard rules
-
-- Every claim cites its thread ID; specific quotes cite comment IDs and are
-  verbatim — never paraphrase a quote into a stronger claim.
-- No pipeline statistics: do not compute or imply shave counts, rankings, or any
-  number the aggregates own. Community data is events and conversations.
-- Never invent motivations, drama, or running jokes. Mark interpretation as
-  interpretation.
-- Never reference months after the summary month.
-- `[removed]`/`[deleted]` content is a gap — ignore it, don't characterize it.
-- Bash is for read-only analysis (python/jq against `data/community/`, the
-  `community_query` CLI). The only permitted write is the summary file.
-
-## Return format
-
-```
-## Summary written
-<data/community/summaries/YYYY-MM.md path>
-
-## Highlights
-<3-6 bullet digest of what the month held>
-
-## Open questions for the author
-<what the data couldn't answer>
-```
-````
-
-- [ ] **Step 2: Verify file placement and lint-clean repo state**
-
-Run: `ls .claude/agents/ && .venv/bin/python -m ruff check sotd/ tests/`
-Expected: `community-summarizer.md` listed alongside `observations-drafter.md`; ruff clean.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add .claude/agents/community-summarizer.md
-git commit -m "feat(agents): community-summarizer agent for monthly community context"
-```
-
----
-
-### Task 10: observations-drafter update
-
-**Files:**
-- Modify: `.claude/agents/observations-drafter.md`
-
-**Interfaces:**
-- Consumes: `data/community/summaries/YYYY-MM.md` (Task 9), `sotd.report.tools.community_query` (Tasks 7–8).
-- Produces: updated drafter behavior — summaries as primary community context.
-
-- [ ] **Step 1: Insert the community-summary workflow step (renumber 3–9 → 4–11)**
-
-Read `.claude/agents/observations-drafter.md`, then replace the block from step 2's
-closing sentence (`Archive reports are voice/storyline context only — **never a
-numeric source**.`) down to step `9. **Report back** using the return format below.`
-with the following (old steps 3–9 are reproduced verbatim in the old block):
-
-The OLD block to find (steps 3–9, exactly as in the file today):
-
-```
-3. Optionally Read the generated report `data/report/YYYY-MM-{type}.md` for table
-   names and precomputed Δ columns — a rendering, not a source of truth.
-4. **Compute story candidates** from the query outputs (ranks, shaves, unique users,
-   rank differences across months). See the slot lists below.
-5. **Verify every historical claim** ("first time since Oct 2017", "20th time
-   overall", streak counts, lead changes) with `history` queries against
-   `data/aggregated/`. If a claim cannot be verified this way, drop it or list it
-   as an open question. Never approximate a history claim, and never source one
-   from an archive report.
-6. **Verify user-level claims** with the enriched CLI — per-shave records carry the
-   author handles and dates the aggregates anonymize (single-user attributions,
-   double-shave days, per-user streaks, who used a product):
-   - `.venv/bin/python -m sotd.report.tools.enriched_query user --month YYYY-MM --name scribe__`
-   - `.venv/bin/python -m sotd.report.tools.enriched_query usage --month YYYY-MM --category soap --name "Catie's Bubbles - Tonsorium" --by-user`
-   Global flags (`--json`, `--data-dir`) precede the subcommand.
-7. **Draft 10 bullets** following the voice guide, one insight per bullet.
-8. **Apply**: in `data/report_archive/YYYY-MM-{type}.md`, replace ONLY the placeholder
-   line `* [Observations will be generated based on data analysis]` with your drafted
-   bullets (keep `* ` bullet markers). Touch nothing else in the file. If the archive
-   copy does not exist and `data/report/YYYY-MM-{type}.md` still contains the
-   placeholder line, copy that file to `data/report_archive/YYYY-MM-{type}.md` first —
-   never overwrite an existing archive copy, and never bootstrap unless the source
-   still has the placeholder.
-9. **Report back** using the return format below.
-```
-
-Replace with:
-
-```
-3. **Read the community summaries** — `data/community/summaries/{month}.md` plus the
-   prior month's — your **primary community context when present** (events, product
-   news, drama, running-joke candidates). If the report month's summary is missing,
-   flag it under Open questions and fall back to the Event calendar below; never
-   fetch anything yourself.
-4. Optionally Read the generated report `data/report/YYYY-MM-{type}.md` for table
-   names and precomputed Δ columns — a rendering, not a source of truth.
-5. **Compute story candidates** from the query outputs (ranks, shaves, unique users,
-   rank differences across months). See the slot lists below.
-6. **Verify every historical claim** ("first time since Oct 2017", "20th time
-   overall", streak counts, lead changes) with `history` queries against
-   `data/aggregated/`. If a claim cannot be verified this way, drop it or list it
-   as an open question. Never approximate a history claim, and never source one
-   from an archive report.
-7. **Verify user-level claims** with the enriched CLI — per-shave records carry the
-   author handles and dates the aggregates anonymize (single-user attributions,
-   double-shave days, per-user streaks, who used a product):
-   - `.venv/bin/python -m sotd.report.tools.enriched_query user --month YYYY-MM --name scribe__`
-   - `.venv/bin/python -m sotd.report.tools.enriched_query usage --month YYYY-MM --category soap --name "Catie's Bubbles - Tonsorium" --by-user`
-   Global flags (`--json`, `--data-dir`) precede the subcommand.
-8. **Verify community-event claims** — any event from a summary ("LG announced June
-   1st", "the Brain Bowl verdict dropped") must be traceable to the summary's cited
-   thread IDs; drill down when needed:
-   - `.venv/bin/python -m sotd.report.tools.community_query search --months YYYY-MM:YYYY-MM --query "Brain Bowl"`
-   - `.venv/bin/python -m sotd.report.tools.community_query thread --month YYYY-MM --id t3_xxx`
-9. **Draft 10 bullets** following the voice guide, one insight per bullet.
-10. **Apply**: in `data/report_archive/YYYY-MM-{type}.md`, replace ONLY the placeholder
-   line `* [Observations will be generated based on data analysis]` with your drafted
-   bullets (keep `* ` bullet markers). Touch nothing else in the file. If the archive
-   copy does not exist and `data/report/YYYY-MM-{type}.md` still contains the
-   placeholder line, copy that file to `data/report_archive/YYYY-MM-{type}.md` first —
-   never overwrite an existing archive copy, and never bootstrap unless the source
-   still has the placeholder.
-11. **Report back** using the return format below.
-```
-
-- [ ] **Step 2: Update the Event calendar heading line**
-
-Old:
-
-```
-**Event calendar — the first lens on any anomaly.** Contest-juiced stats get called out
-```
-
-New:
-
-```
-**Event calendar — the fallback lens when no community summary exists.** Contest-juiced stats get called out
-```
-
-- [ ] **Step 3: Update the hard rules**
-
-Old:
-
-```
-- Never invent community storylines, in-jokes, or user motivations. The author knows
-  things the archives don't; leave gaps and flag them. Proposing new material is
-  different from inventing: a fresh, data-grounded coinage framed as new (and flagged
-  under Open questions when meant to recur) is welcome — see the Voice guide;
-  presenting lore as established when the archives don't back it is not.
-```
-
-New:
-
-```
-- Never invent community storylines, in-jokes, or user motivations. Community events
-  come from the month's summary (verify thread IDs via `community_query` when quoting
-  one); the author knows things the summaries don't — leave gaps and flag them.
-  Proposing new material is different from inventing: a fresh, data-grounded coinage
-  framed as new (and flagged under Open questions when meant to recur) is welcome —
-  see the Voice guide; presenting lore as established when the archives and summaries
-  don't back it is not.
-```
-
-Old:
-
-```
-- Bash is for read-only analysis: the three `sotd.report.tools` CLIs and ad-hoc
-  python/jq against `data/aggregated/` and `data/enriched/`. No pipeline commands.
-```
-
-New:
-
-```
-- Bash is for read-only analysis: the four `sotd.report.tools` CLIs (including
-  `community_query`) and ad-hoc python/jq against `data/aggregated/`,
-  `data/enriched/`, and `data/community/`. No pipeline commands.
-```
-
-- [ ] **Step 4: Verify the file renders coherently**
-
-Run: `grep -n "^[0-9]*\." .claude/agents/observations-drafter.md | head -20`
-Expected: steps 1–11 in order, no duplicate or missing numbers.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add .claude/agents/observations-drafter.md
-git commit -m "feat(agents): community summaries as primary context for observations-drafter"
-```
-
----
-
-### Task 11: Docs, operational runbook, and agent-memory vault
+### Task 9: Docs, operational runbook, and agent-memory vault
 
 **Files:**
 - Modify: `CLAUDE.md` (Pipeline Execution + artifact layout + operations subsection)
@@ -2293,7 +1996,7 @@ python run.py community --month 2025-05 --force   # Fetch all posts + full comme
 In the artifact layout list (after the Report bullet), add:
 
 ```markdown
-- **Community fetch (sidecar)**: `data/community/YYYY-MM.json` (all posts + full comment trees, `in_pipeline` flags) + `data/community/summaries/YYYY-MM.md` (agent-generated, author-reviewed)
+- **Community fetch (sidecar)**: `data/community/YYYY-MM.json` (all posts + full comment trees, `in_pipeline` flags); consumed via the `community_query` CLI
 ```
 
 - [ ] **Step 3: Add an operations subsection** (end of the Pipeline Execution section)
@@ -2302,24 +2005,24 @@ In the artifact layout list (after the Report bullet), add:
 #### Community context operations
 
 The `community` sidecar is run when needed (sooner after month end = fewer
-lost-to-deletion posts), then summarized, then consumed by the observations drafter:
+lost-to-deletion posts); the author explores the record via the CLI:
 
 ```bash
 # 1. Fetch the month's full community record
 python run.py community --month 2026-09 --force
 
-# 2. (Author) summarize via the community-summarizer agent
-#    "summarize community 2026-09"   (or a backfill range 2025-07:2025-12)
-
-# 3. (Author) draft observations — the drafter reads the summary automatically
-#    "draft observations for 2026-09 hardware"
+# 2. (Author) explore — the CLI renders bounded slices
+python -m sotd.report.tools.community_query threads --month 2026-09 --top 20
+python -m sotd.report.tools.community_query search --months 2026-08:2026-09 --query "group buy"
 ```
+
+Consumption (summarizer agent → observations-drafter) is a later project — see the
+spec's Future work section.
 
 Backfill notes: months `.new()` cannot reach fall back to best-effort discovery
 (SOTD-thread seeding from `data/threads/` + timestamp search + active-author
 histories); each month's `meta.discovery` records what ran and how complete it is.
-Run the voice-era backfill with `python run.py community --range 2025-07:2026-08 --force`,
-then have the summarizer process the range oldest-first, reviewing each summary.
+Run the voice-era backfill with `python run.py community --range 2025-07:2026-08 --force`.
 ```
 
 - [ ] **Step 4: Update the AgentMemory vault**
@@ -2327,8 +2030,8 @@ then have the summarizer process the range oldest-first, reviewing each summary.
 Per repo CLAUDE.md protocol — in `../agent-memory`: `git pull --rebase` first; append
 to `projects/sotd-pipeline/status.md` a dated entry (agent-id: claude-code, date
 2026-09-06) recording: community context fetch shipped (sidecar `run.py community`),
-storage `data/community/`, summarizer agent + `community_query` CLI, summaries are
-the drafter's primary community context (aggregates remain the only numeric truth).
+storage `data/community/`, `community_query` CLI as the access surface; consumption
+(summarizer agent, drafter wiring) deliberately deferred to a later project.
 Commit with attribution. `git push` is **not** automatic — ask the author.
 
 - [ ] **Step 5: Full test suite**
@@ -2348,7 +2051,7 @@ git commit -m "docs: community context fetch command, layout, and operations run
 ## Operational follow-up (post-implementation, author-supervised — not pytest tasks)
 
 These require live Reddit API access (`praw.ini`) and produce real data files; run
-them after Tasks 1–11 are green, in this order:
+them after Tasks 1–9 are green, in this order:
 
 1. **Coverage probe** (before committing to backfill): run
    `python run.py community --month 2025-07 --force`, `--month 2026-01 --force`,
@@ -2359,13 +2062,15 @@ them after Tasks 1–11 are green, in this order:
    sanity check. Record findings before running the full backfill.
 2. **Voice-era backfill**: `python run.py community --range 2025-07:2026-08 --force`
    (long-running; months are processed sequentially).
-3. **Summaries**: invoke the community-summarizer over the range oldest-first;
-   review each month's summary.
-4. **First live draft**: "draft observations for 2026-09 hardware/software" —
-   confirm the drafter cites community material with thread IDs.
+3. **Exploration sanity check**: spot-check a couple of months via
+   `community_query threads` / `search` to confirm the CLI surfaces work against
+   real data (this is also the raw material the future consumption project will
+   design against).
 
 ## Out of scope (unchanged from spec)
 
+- Consumption: community-summarizer agent and all observations-drafter changes
+  (deferred to a later project).
 - Deterministic pipeline phases untouched; no LLM steps inside the pipeline.
 - WebUI integration.
 - Full-history backfill to 2016-05 (voice era only).

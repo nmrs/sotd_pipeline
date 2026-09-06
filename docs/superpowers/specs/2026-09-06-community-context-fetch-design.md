@@ -1,8 +1,8 @@
-# Design: Community Context Fetch — full community record + summaries for the observations-drafter
+# Design: Community Context Fetch — full community record + query CLI
 
 **Date:** 2026-09-06
 **Status:** Approved
-**Scope:** New fetch capability (`community`), new raw data store (`data/community/`), new summarizer agent, new `community_query` CLI, and updates to the `observations-drafter` agent. The deterministic 6-phase pipeline is untouched.
+**Scope:** New fetch capability (`community`), new raw data store (`data/community/`), and a new `community_query` CLI. The deterministic 6-phase pipeline is untouched. **Consumption (summarizer agent, observations-drafter wiring) is deferred to a later project** — see Out of scope.
 
 ---
 
@@ -17,11 +17,13 @@ community context layer:
 
 1. **Fetch** everything from r/wetshaving — all posts in the month (SOTD daily
    threads included) with full comment trees — into `data/community/`.
-2. **Summarize** each month's raw data via a new author-invoked agent, producing
-   `data/community/summaries/YYYY-MM.md`.
-3. **Consume**: the observations-drafter treats the summaries as its primary
-   community context, with a new `community_query` CLI for verifying or quoting raw
-   material. Numeric truth remains `data/aggregated/` exclusively.
+2. **Query**: a fourth report-tools CLI (`community_query`) renders the raw record
+   into bounded slices (thread listings, one thread with its tree, windowed search)
+   for shell use and for future agent consumers.
+
+How the data gets *consumed* (a summarizer agent feeding the observations-drafter,
+or direct drafter CLI access) is a separate design to be done once real data exists
+to design against. This project deliberately ships the record + the access surface.
 
 ### Decisions settled during brainstorming
 
@@ -37,13 +39,14 @@ community context layer:
   the current voice era (2025-07 → 2026-08).
 - **Placement**: explicit sidecar command (`python run.py community …`), not a
   seventh pipeline phase — nothing in extract→report consumes community data, and it
-  is only needed before drafting observations, so it runs whenever the author wants
-  (sooner is better: posts deleted later are lost forever).
-- **Consumption**: `community_query` CLI + summarizer agent; summaries are the
-  drafter's primary community source; the CLI is for drill-down and verification.
-- **LLM placement**: both LLM steps (summarize, draft) stay outside the deterministic
-  pipeline and are human-reviewed (author edits summaries before the drafter uses
-  them).
+  is only needed around report time, so it runs whenever the author wants (sooner is
+  better: posts deleted later are lost forever).
+- **Consumption deferred**: the summarizer agent and all observations-drafter changes
+  were descoped during planning (2026-09-06) — the community_query CLI is the access
+  surface this project ships; the consumption design happens in a later project,
+  against real data.
+- **LLM placement**: this project adds no LLM steps anywhere; fetch + CLI are fully
+  deterministic.
 
 ---
 
@@ -52,12 +55,10 @@ community context layer:
 ```
 Reddit API ──> sotd/fetch/community.py ──> data/community/YYYY-MM.json (raw)
                                                     │
-                                     community-summarizer agent (author-invoked, author-edited)
+                              community_query CLI (meta / threads / thread / search)
+                                                    │
                                                     ▼
-                                     data/community/summaries/YYYY-MM.md
-                                                    │ (primary community context)
-                                                    ▼
-                              observations-drafter ── verify claims via community_query CLI
+                              shell use today; agent consumption = later project
 ```
 
 The deterministic pipeline stays exactly 6 phases. `community` is a new top-level
@@ -85,11 +86,11 @@ inside) the normal monthly fetch.
 - Each post gets `in_pipeline: true/false` by checking its ID against
   `data/threads/YYYY-MM.json` (the SOTD threads the pipeline claimed for that month,
   including `thread_overrides.yaml` includes, which fetch already folds into that
-  file). This gives the CLI and summarizer a free SOTD vs non-SOTD filter.
+  file). This gives the CLI a free SOTD vs non-SOTD filter.
 - It is enrichment, not exclusion: nothing is dropped based on it. If the threads
   file is missing, `in_pipeline` is omitted for that month and a warning is logged
-  (no hard "run fetch first" error — the community fetch no longer depends on the
-  SOTD fetch).
+  (no hard "run fetch first" error — the community fetch does not depend on the SOTD
+  fetch).
 
 ### Comments
 
@@ -98,7 +99,7 @@ inside) the normal monthly fetch.
 - Stored **flat with `parent_id`** (rebuildable threading; consistent with the
   flat-list convention used by `data/comments/`).
 - `[removed]` / `[deleted]` bodies and null authors are preserved as-is — they are
-  real gaps. The summarizer is instructed to ignore them.
+  real gaps.
 
 ### Backfill — 2025-07 → 2026-08 (one-time)
 
@@ -117,14 +118,13 @@ inside) the normal monthly fetch.
   posts each contributed (union after dedupe), and `complete: true/false`.
 - The implementation plan begins with a cheap **coverage probe** on known months
   (e.g. 2025-07, 2026-01, 2026-06) rather than assuming any strategy works.
-- Gaps are documented in meta, never hidden; summaries for backfill months carry a
-  coverage caveat header.
+- Gaps are documented in meta, never hidden.
 
 ---
 
 ## Storage schema (`data/community/YYYY-MM.json`)
 
-One file per month (posts + comments are one logical unit; volumes are modest):
+One file per month (posts + comments are one logical unit):
 
 ```json
 {
@@ -134,7 +134,8 @@ One file per month (posts + comments are one logical unit; volumes are modest):
     "post_count": 205,
     "comment_count": 6500,
     "in_pipeline_post_count": 62,
-    "discovery": {"strategies": ["new_listing"], "complete": true}
+    "discovery": {"strategies": ["new_listing"], "complete": true,
+                  "per_strategy": {"new_listing": 205}}
   },
   "data": {
     "posts": [
@@ -152,50 +153,15 @@ One file per month (posts + comments are one logical unit; volumes are modest):
 Notes:
 
 - `posts` includes SOTD daily threads (identified via `in_pipeline`), so the file is
-  the complete community record of the month. Comment volume roughly doubles versus
-  a non-SOTD-only fetch (~5–10k/month) — still modest.
+  the complete community record of the month.
+- **Scale (measured, not guessed)**: the comparable artifact that exists today —
+  `data/comments/2026-08.json`, top-level SOTD comments only — is 2.0 MB (2,139
+  comments, ~583 chars avg). Full-tree files will exceed that, which is why
+  consumers go through the CLI rather than Reading files whole.
 - Reddit fuzzes scores; they are kept for context ranking only, never quoted as
   facts.
 - `flair` = `link_flair_text`; `is_submitter` marks replies by the thread author
   (useful conversational context).
-- Summaries are generated artifacts, separate from `data/report_archive/` (those are
-  published voice; these are context). Path: `data/community/summaries/YYYY-MM.md`.
-
----
-
-## Summarizer agent (`.claude/agents/community-summarizer.md`)
-
-- **Invocation**: `month 2026-09` (single month) or `range 2025-07:2026-08`
-  (backfill — oldest-first, one month at a time, writing each summary before moving
-  on). Missing month/range → error note, no guessing.
-- **Tools**: Read, Glob, Grep, Bash, Edit.
-- **Inputs**: the raw month file `data/community/YYYY-MM.json` — never Read whole
-  (it can run to thousands of comments). The agent works **map-then-drill**: a
-  compact listing of every post (id/date/flair/author/comment count/title, via the
-  `community_query threads` CLI or a jq one-liner) is the map and is small enough
-  to see whole; `community_query search` finds specific topics inside comment
-  bodies; `community_query thread` drills into the handful of threads worth
-  reading, bounded per thread. Prior months' summaries for continuity of running
-  jokes.
-- **Signal vs noise**: the month file contains every SOTD shave comment ("nice
-  shave!" banter included). The agent prioritizes non-SOTD posts and unusually
-  high-engagement threads; inside SOTD threads the signal is in the replies, not
-  the shave comments themselves (and `in_pipeline` marks which is which). During
-  contest months (Lather Games, Austere August), SOTD-thread replies are primary
-  material, not noise.
-- **Output** (`data/community/summaries/YYYY-MM.md`), fixed sections:
-  - *Headline events* — contests launched/ended, moderator news, sub announcements
-  - *Product & vendor news* — releases, group buys, brand drama, vendor activity
-  - *Notable conversations* — high-engagement threads and what was actually said
-  - *Emerging running jokes / memes* — flagged as candidates (the drafter's coinage
-    rule: propose fresh material, never present as established)
-  - *Notable users* — factual, behavioral not personal
-  - *Threads index* — compact table: id, date, title, flair, comment count
-- **Discipline**: every claim cites thread ID (plus comment ID when specific);
-  quotes verbatim; interpretations of *why* go under open questions; no pipeline
-  statistics (numbers are aggregates' job); coverage caveat header on backfill
-  months; drafts are for the author to review/edit before the drafter uses them.
-- **Writes only its summary file** — never raw data, never archives.
 
 ---
 
@@ -214,25 +180,8 @@ same conventions (`--data-dir`, `--json`, exit 0 success / 1 on query errors):
   keyword/author search across an explicitly bounded window; hits show thread title
   + matching snippet
 
-The month/window argument is always explicit, structurally enforcing the drafter's
-"never see future months" rule (same mechanism as `--end` on history queries).
-
----
-
-## observations-drafter update (`.claude/agents/observations-drafter.md`)
-
-- New workflow step after voice-track extraction: read
-  `data/community/summaries/YYYY-MM.md` plus the prior month's summary (for
-  callbacks). Summaries are the **primary community context when present**.
-- The allowed-CLIs line gains `community_query`; ad-hoc python/jq over
-  `data/community/` joins the permitted read-only analysis.
-- Hard rules updated:
-  - Summary/CLI-verified material may ground event claims ("LG was announced June
-    1st, thread `t3_xxx`") — numeric truth is still aggregates-only.
-  - "The author knows things the archives don't" becomes "the author knows things
-    the summaries don't"; gaps and open questions still get flagged.
-  - Missing summary for the report month → flag as an open question and fall back
-    to the hardcoded event calendar; the drafter never fetches.
+The month/window argument is always explicit, structurally enforcing the "never see
+future months" rule (same mechanism as `--end` on history queries).
 
 ---
 
@@ -244,8 +193,6 @@ The month/window argument is always explicit, structurally enforcing the drafter
   Deleted/removed content preserved as `[removed]`/`[deleted]` bodies.
 - **CLI**: missing month file → exit 1 with a clear message (mirrors
   `aggregate_query`).
-- **Summarizer**: missing raw file → report and stop (never fabricate); missing
-  prior summary → proceed without continuity and note it in the output.
 
 ---
 
@@ -259,15 +206,27 @@ The month/window argument is always explicit, structurally enforcing the drafter
   filters, tree rendering, search windowing, exit codes; mirrors the existing
   report-tools tests.
 - One fixture-based integration test (raw month file → CLI surface).
-- Agent behavior (summarizer, drafter) is validated by the author running them, as
-  today.
+
+---
+
+## Future work (deferred to a later project, 2026-09-06)
+
+- **community-summarizer agent**: distills each month's raw record into a
+  reviewable summary for the observations-drafter. The intended pattern is
+  **map-then-drill**: the `community_query threads` listing (every post, ~200 rows)
+  is the map; `search` finds topics inside comment bodies; `thread` drills into the
+  handful of threads worth reading, bounded per thread — the raw file is never Read
+  whole. Backfill months would carry a coverage caveat citing
+  `meta.discovery.per_strategy`.
+- **observations-drafter wiring**: summaries as primary community context, or direct
+  `community_query` access. Touch nothing in `.claude/agents/` until that design.
 
 ---
 
 ## Out of scope (explicitly)
 
+- **Consumption**: the community-summarizer agent and ALL observations-drafter
+  changes (deferred — designed in a later project against real data).
 - Extract/match/enrich/aggregate/report changes — community data feeds no pipeline
   phase.
 - Full-history backfill to 2016-05 (only the voice era 2025-07 → 2026-08).
-- Automatic/LLM-in-pipeline summarization (summaries are author-invoked and
-  author-reviewed).
