@@ -16,13 +16,19 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Optional, Set
+from itertools import islice
+from typing import List, Optional, Set, Tuple
 
+from sotd.fetch.reddit import safe_call
 from sotd.fetch.save import load_month_file
 from sotd.utils.data_dir import get_data_dir
 from sotd.utils.file_io import load_json_data, save_json_data
 
 logger = logging.getLogger(__name__)
+
+# Discovery stops here even if the month boundary was never reached
+# (30 batches x 100 posts; a target month needs ~4).
+PAGINATION_CAP = 3000
 
 
 # --------------------------------------------------------------------------- #
@@ -90,3 +96,37 @@ def load_sotd_ids(data_dir, year: int, month: int) -> Optional[Set[str]]:
     if existing is None:
         return None
     return {t["id"] for t in existing[1]}
+
+
+# --------------------------------------------------------------------------- #
+# forward discovery                                                            #
+# --------------------------------------------------------------------------- #
+def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
+    """Pull ``subreddit.new()`` until posts older than the month appear.
+
+    Returns (in_month_posts, boundary_reached). ``in_month_posts`` is
+    newest-first. ``boundary_reached`` is False when the pagination cap trips
+    before the boundary — the caller must treat that month as partial.
+    """
+    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    end_exclusive = (
+        datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        if month == 12
+        else datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    )
+
+    pulled = safe_call(lambda: list(islice(subreddit.new(limit=None), PAGINATION_CAP)))
+    in_month: List = []
+    boundary_reached = False
+    for sub in pulled or []:
+        dt = datetime.fromtimestamp(sub.created_utc, tz=timezone.utc)
+        if dt < start:
+            # listings are newest-first: everything after this is older
+            boundary_reached = True
+            break
+        if dt < end_exclusive:
+            in_month.append(sub)
+    if not boundary_reached and pulled is not None and len(pulled) < PAGINATION_CAP:
+        # listing exhausted without crossing the boundary
+        boundary_reached = True
+    return in_month, boundary_reached

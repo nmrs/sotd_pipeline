@@ -152,3 +152,40 @@ class TestLoadSotdIds:
 
     def test_none_when_file_missing(self, tmp_path):
         assert community.load_sotd_ids(tmp_path, 2026, 8) is None
+
+
+class FakeSubreddit:
+    """new() yields submissions newest-first (Reddit listing order)."""
+
+    def __init__(self, submissions):
+        self._subs = submissions
+
+    def new(self, *args, **kwargs):
+        yield from self._subs
+
+
+class TestDiscoverMonthPosts:
+    def test_filters_to_month_and_stops_at_boundary(self):
+        subs = [
+            FakeSub("sep2", "Later", ts(2026, 9, 20)),
+            FakeSub("sep1", "First", ts(2026, 9, 1, 0, 0, 5)),
+            FakeSub("aug31", "Before", ts(2026, 8, 31, 23, 59, 59)),
+        ]
+        subreddit = FakeSubreddit(subs)
+        in_month, reached = community.discover_month_posts(subreddit, 2026, 9)
+        assert [s.id for s in in_month] == ["sep2", "sep1"]
+        assert reached is True
+
+    def test_exhausted_listing_counts_as_boundary(self):
+        # a young sub whose entire history is inside the month
+        subreddit = FakeSubreddit([FakeSub("a", "A", ts(2026, 9, 5))])
+        in_month, reached = community.discover_month_posts(subreddit, 2026, 9)
+        assert len(in_month) == 1
+        assert reached is True
+
+    def test_cap_before_boundary_is_incomplete(self, monkeypatch):
+        monkeypatch.setattr(community, "PAGINATION_CAP", 3)
+        subs = [FakeSub(f"p{i:03d}", f"P{i}", ts(2026, 9, 15)) for i in range(5)]
+        in_month, reached = community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
+        assert len(in_month) == 3
+        assert reached is False
