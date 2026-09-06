@@ -468,6 +468,7 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
     phase_modules = {
         "fetch": "sotd.fetch.run",
         "fetch_json": "sotd.fetch_via_json.run",  # JSON-based fetch (no PRAW dependency)
+        "community": "sotd.fetch.community",  # community context sidecar (not a pipeline phase)
         "extract": "sotd.extract.run",
         "match": "sotd.match.run",
         "enrich": "sotd.enrich.run",
@@ -773,6 +774,7 @@ def get_phase_range(phase_range: str) -> List[str]:
         "enrich",
         "aggregate",
         "report",
+        "community",
     ]
 
     if not phase_range:
@@ -876,6 +878,7 @@ Pipeline Phases:
   enrich     - Enrich matched data with additional information
   aggregate  - Generate statistical summaries
   report     - Generate hardware and software reports
+  community  - Fetch all posts + full comment trees (community context sidecar)
 
 Examples:
   # Run individual phases (defaults to previous month)
@@ -893,6 +896,7 @@ Examples:
   python run.py enrich --month 2025-01
   python run.py aggregate --month 2025-01
   python run.py report --month 2025-01 --type hardware
+  python run.py community --month 2025-05 --force  # Fetch community context
   
   # Run complete pipeline (all phases, defaults to previous month)
   python run.py
