@@ -344,3 +344,164 @@ class TestMain:
         code = community.main(["--month", "2026-08", "--force", "--data-dir", str(tmp_path)])
         assert code == 0
         assert calls == [(2026, 8)]
+
+
+class FakeRedditor:
+    def __init__(self, submissions):
+        self.submissions = self  # exposes .submissions.new(limit=...)
+        self._subs = submissions
+
+    def new(self, limit=None):
+        yield from self._subs
+
+
+class SearchSubreddit(FakeSubreddit):
+    """search() parses the lucene timestamp: query and filters by it."""
+
+    def search(self, query, sort=None, syntax=None, time_filter=None):
+        import re
+
+        m = re.search(r"timestamp:(\d+)\.\.(\d+)", query)
+        lo, hi = int(m.group(1)), int(m.group(2))
+        for s in self._subs:
+            if lo <= s.created_utc <= hi:
+                yield s
+
+
+class BadSub:
+    def search(self, *a, **k):
+        raise RuntimeError("unsupported")
+
+
+class TestDiscoverViaSearch:
+    def test_timestamp_window_query(self):
+        subs = [
+            FakeSub("in1", "In", ts(2025, 7, 10)),
+            FakeSub("out", "Out", ts(2025, 6, 10)),
+        ]
+        subreddit = SearchSubreddit(subs)
+        result = community.discover_via_search(subreddit, ts(2025, 7, 1), ts(2025, 8, 1))
+        assert [s.id for s in result] == ["in1"]
+
+    def test_empty_on_unsupported_syntax(self):
+        # safe_call swallows RuntimeError -> None -> []
+        assert community.discover_via_search(BadSub(), 0, 1) == []
+
+
+class TestEraAuthors:
+    def test_ranks_by_comment_count(self, tmp_path):
+        (tmp_path / "comments").mkdir()
+        comments = [
+            {"id": "x1", "author": "busy", "created_utc": "2025-07-01T00:00:00Z"},
+            {"id": "x2", "author": "busy", "created_utc": "2025-07-02T00:00:00Z"},
+            {"id": "x3", "author": "quiet", "created_utc": "2025-07-03T00:00:00Z"},
+            {"id": "x4", "author": "[deleted]", "created_utc": "2025-07-04T00:00:00Z"},
+        ]
+        (tmp_path / "comments" / "2025-07.json").write_text(
+            json.dumps({"meta": {"month": "2025-07"}, "data": comments})
+        )
+        authors = community.era_authors(tmp_path, ["2025-07"])
+        assert authors == ["busy", "quiet"]
+
+
+class TestDiscoverViaAuthors:
+    def test_filters_window_and_dedupes(self):
+        a1 = FakeSub("a1", "A1", ts(2025, 7, 5))
+        a2 = FakeSub("a2", "A2", ts(2025, 7, 20))
+        old = FakeSub("old", "Old", ts(2025, 5, 1))
+
+        class FakeReddit:
+            def __init__(self):
+                self._people = {"alice": FakeRedditor([a1, old]), "bob": FakeRedditor([a2])}
+
+            def redditor(self, name):
+                return self._people[name]
+
+        reddit = FakeReddit()
+        result = community.discover_via_authors(
+            reddit, ["alice", "alice", "bob"], ts(2025, 7, 1), ts(2025, 8, 1)
+        )
+        assert sorted(s.id for s in result) == ["a1", "a2"]
+
+
+class TestBackfillPosts:
+    def test_union_seeds_search_and_authors(self, monkeypatch, tmp_path):
+        sotd_sub = FakeSub("sotd1", "SOTD Thread", ts(2025, 7, 4))
+        search_hit = FakeSub("sr1", "From search", ts(2025, 7, 11))
+        author_hit = FakeSub("au1", "From author", ts(2025, 7, 21))
+
+        write_threads_fixture(tmp_path, ["sotd1"])
+
+        class FakeReddit:
+            def submission(self, **kwargs):
+                assert kwargs.get("id") == "sotd1"
+                return sotd_sub
+
+            def subreddit(self, _name):
+                return SearchSubreddit([search_hit])
+
+            def redditor(self, name):
+                return FakeRedditor([author_hit])
+
+        monkeypatch.setattr(community, "era_authors", lambda d, months, top_n=100: ["alice"])
+        posts, strategies, per_strategy = community._backfill_posts(
+            FakeReddit(), SearchSubreddit([search_hit]), 2025, 7, {"sotd1"}, tmp_path
+        )
+        assert {s.id for s in posts} == {"sotd1", "sr1", "au1"}
+        assert strategies == ["thread_seed", "timestamp_search", "author_histories"]
+        assert per_strategy == {"thread_seed": 1, "timestamp_search": 1, "author_histories": 1}
+
+    def test_strategy_omitted_when_empty(self, monkeypatch, tmp_path):
+        write_threads_fixture(tmp_path, [])
+
+        class EmptyReddit:
+            def submission(self, **kwargs):
+                raise RuntimeError("none")
+
+            def subreddit(self, _name):
+                return SearchSubreddit([])
+
+            def redditor(self, name):
+                return FakeRedditor([])
+
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        posts, strategies, per_strategy = community._backfill_posts(
+            EmptyReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
+        )
+        assert posts == []
+        assert strategies == []
+        assert per_strategy == {"timestamp_search": 0, "author_histories": 0}
+
+
+class TestProcessMonthBackfill:
+    def test_backfill_path_used_when_boundary_unreached(self, tmp_path, monkeypatch):
+        # brief's write_threads_fixture pins 2026-08; this month needs threads/2025-07.json
+        (tmp_path / "threads").mkdir()
+        (tmp_path / "threads" / "2025-07.json").write_text(
+            json.dumps({"meta": {"month": "2025-07"}, "data": [{"id": "sotd1"}]})
+        )
+        sotd_sub = FakeSub("sotd1", "SOTD Thread", ts(2025, 7, 4))
+
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: ([], False))
+
+        class FakeReddit:
+            def submission(self, **kwargs):
+                return sotd_sub
+
+            def subreddit(self, _name):
+                return SearchSubreddit([FakeSub("sr1", "S", ts(2025, 7, 11))])
+
+            def redditor(self, name):
+                return FakeRedditor([])
+
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        result = community._process_month(2025, 7, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["posts"] == 2 and result["complete"] is False
+        meta, data = community.load_community_file(tmp_path / "community" / "2025-07.json")
+        assert set(meta["discovery"]["strategies"]) == {
+            "new_listing",
+            "thread_seed",
+            "timestamp_search",
+        }
+        assert data["posts"][0]["in_pipeline"] is True

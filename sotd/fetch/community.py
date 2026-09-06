@@ -151,6 +151,104 @@ def fetch_all_comments(submission) -> List:
 
 
 # --------------------------------------------------------------------------- #
+# backfill discovery (months .new() cannot reach)                             #
+# --------------------------------------------------------------------------- #
+def discover_via_search(subreddit, start_ts: int, end_ts: int) -> List:
+    """Reddit search over a UTC timestamp window (lucene ``timestamp:`` syntax).
+
+    Returns [] when the syntax is unsupported/unindexed — the recorded
+    discovery meta then simply shows no contribution from this strategy.
+    """
+    query = f"timestamp:{start_ts}..{end_ts}"
+    search_fn = getattr(subreddit, "search", None)
+    if search_fn is None:
+        return []
+    raw = safe_call(search_fn, query, sort="new", syntax="lucene", time_filter="all")
+    if raw is None:
+        return []
+    return list(raw)
+
+
+def era_authors(data_dir, months: Sequence[str], top_n: int = 100) -> List[str]:
+    """Most active comment authors across *months* (from the pipeline's SOTD comments)."""
+    counts: dict = {}
+    for m in months:
+        existing = load_month_file(get_data_dir(data_dir) / "comments" / f"{m}.json")
+        if existing is None:
+            continue
+        for c in existing[1]:
+            a = c.get("author")
+            if a and a != "[deleted]":
+                counts[a] = counts.get(a, 0) + 1
+    return [a for a, _ in sorted(counts.items(), key=lambda kv: -kv[1])[:top_n]]
+
+
+def discover_via_authors(reddit, authors: Sequence[str], start_ts: int, end_ts: int) -> List:
+    """Submission histories of active authors, filtered to the month window."""
+    out: List = []
+    seen: Set[str] = set()
+    for name in authors:
+        redditor = safe_call(reddit.redditor, name)
+        if redditor is None:
+            continue
+        stream = safe_call(lambda _r=redditor: list(islice(_r.submissions.new(limit=1000), 1000)))
+        for sub in stream or []:
+            if start_ts <= sub.created_utc <= end_ts and sub.id not in seen:
+                seen.add(sub.id)
+                out.append(sub)
+    return out
+
+
+def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir):
+    """Best-effort discovery union for months ``new_listing`` cannot reach.
+
+    Strategies: known SOTD thread IDs (IDs seeded from data/threads/ — full
+    trees are fetched fresh later; the pipeline's top-level-only comment store
+    is never reused), timestamp search, and active-author submission
+    histories. A strategy is listed only when it contributed at least one post.
+    Returns (posts, strategies_used, per_strategy_raw_counts).
+    """
+    start_dt = datetime(year, month, 1, tzinfo=timezone.utc)
+    end_dt = (
+        datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        if month == 12
+        else datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    )
+    start_ts, end_ts = int(start_dt.timestamp()), int(end_dt.timestamp())
+
+    found: dict = {}
+    strategies: List[str] = []
+    per_strategy: dict = {}
+
+    if sotd_ids:
+        for sid in sotd_ids:
+            sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
+            if sub is not None and getattr(sub, "title", None):
+                found[sub.id] = sub
+        per_strategy["thread_seed"] = len(found)
+        if found:
+            strategies.append("thread_seed")
+
+    search_posts = discover_via_search(subreddit, start_ts, end_ts)
+    per_strategy["timestamp_search"] = len(search_posts)
+    if search_posts:
+        strategies.append("timestamp_search")
+    for sub in search_posts:
+        found.setdefault(sub.id, sub)
+
+    author_posts = discover_via_authors(
+        reddit, era_authors(data_dir, [f"{year:04d}-{month:02d}"]), start_ts, end_ts
+    )
+    per_strategy["author_histories"] = len(author_posts)
+    if author_posts:
+        strategies.append("author_histories")
+    for sub in author_posts:
+        found.setdefault(sub.id, sub)
+
+    return list(found.values()), strategies, per_strategy
+
+
+# --------------------------------------------------------------------------- #
 # month orchestration                                                         #
 # --------------------------------------------------------------------------- #
 def _process_month(year: int, month: int, args, *, reddit) -> dict:
@@ -168,10 +266,22 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
 
     subreddit = reddit.subreddit("wetshaving")
     posts_new, boundary_reached = discover_month_posts(subreddit, year, month)
+    strategies_used = ["new_listing"]
+    per_strategy = {"new_listing": len(posts_new)}
     if not boundary_reached:
         logger.warning(
-            f"{month_str}: pagination cap reached before month boundary; " "discovery incomplete"
+            f"{month_str}: pagination cap reached before month boundary; "
+            "falling back to backfill discovery"
         )
+        backfill_posts, strategies, backfill_counts = _backfill_posts(
+            reddit, subreddit, year, month, sotd_ids, args.data_dir
+        )
+        by_id = {s.id: s for s in posts_new}
+        for s in backfill_posts:
+            by_id.setdefault(s.id, s)
+        posts_new = sorted(by_id.values(), key=lambda s: s.created_utc, reverse=True)
+        strategies_used = strategies_used + [s for s in strategies if s not in strategies_used]
+        per_strategy.update(backfill_counts)
 
     new_posts = [
         build_post_record(s, in_pipeline=None if sotd_ids is None else s.id in sotd_ids)
@@ -209,9 +319,9 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         "comment_count": len(comments),
         "in_pipeline_post_count": sum(1 for p in posts if p.get("in_pipeline")),
         "discovery": {
-            "strategies": ["new_listing"],
+            "strategies": strategies_used,
             "complete": boundary_reached,
-            "per_strategy": {"new_listing": len(posts_new)},
+            "per_strategy": per_strategy,
         },
     }
     write_community_file(out_path, meta, posts, comments)
