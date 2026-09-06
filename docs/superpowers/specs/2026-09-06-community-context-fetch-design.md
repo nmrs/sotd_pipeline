@@ -1,4 +1,4 @@
-# Design: Community Context Fetch — non-SOTD posts + summaries for the observations-drafter
+# Design: Community Context Fetch — full community record + summaries for the observations-drafter
 
 **Date:** 2026-09-06
 **Status:** Approved
@@ -15,8 +15,8 @@ group buys, product releases, moderator news, one-off memes — is limited to a
 hardcoded event calendar and what the archives happen to mention. This design adds a
 community context layer:
 
-1. **Fetch** non-SOTD posts from r/wetshaving (all posts minus the SOTD threads the
-   pipeline already claims) with full comment trees, into `data/community/`.
+1. **Fetch** everything from r/wetshaving — all posts in the month (SOTD daily
+   threads included) with full comment trees — into `data/community/`.
 2. **Summarize** each month's raw data via a new author-invoked agent, producing
    `data/community/summaries/YYYY-MM.md`.
 3. **Consume**: the observations-drafter treats the summaries as its primary
@@ -25,10 +25,14 @@ community context layer:
 
 ### Decisions settled during brainstorming
 
-- **Scope**: all non-SOTD posts + full comment trees (not top-level-only, not
-  flair-curated). Conversation lives in nested replies.
-- **SOTD thread reply chains**: out of scope for now (kept possible as a later
-  extension); this fetch covers standalone non-SOTD posts only.
+- **Scope**: everything — all posts (SOTD daily threads included) + full comment
+  trees. A lot of drama and community engagement lives in SOTD-thread replies (e.g.
+  Lather Games daily threads), so excluding SOTD threads would cut the most
+  contest-relevant conversation at its peak. Fetching everything also removes the
+  SOTD-subtraction machinery entirely.
+- **Duplication accepted**: top-level SOTD comments exist in both `data/comments/`
+  (pipeline dataset) and `data/community/` (context record). Different consumers,
+  different purposes.
 - **Time range**: forward-only from 2026-09, plus a one-time best-effort backfill of
   the current voice era (2025-07 → 2026-08).
 - **Placement**: explicit sidecar command (`python run.py community …`), not a
@@ -76,14 +80,16 @@ inside) the normal monthly fetch.
   runaway loops. If the cap trips before the month boundary is reached, record
   `meta.discovery.complete = false` and log a warning — never silently partial.
 
-### SOTD subtraction
+### `in_pipeline` flag (metadata only, not exclusion)
 
-- Every discovered post ID is checked against `data/threads/YYYY-MM.json` (the SOTD
-  threads the pipeline claimed for that month, including `thread_overrides.yaml`
-  includes, which fetch already folds into that file). Survivors are "non-SOTD".
-- This is decided by what the pipeline actually claims — no flair guessing.
-- Requires `data/threads/YYYY-MM.json` to exist; error with "run fetch first" if
-  missing.
+- Each post gets `in_pipeline: true/false` by checking its ID against
+  `data/threads/YYYY-MM.json` (the SOTD threads the pipeline claimed for that month,
+  including `thread_overrides.yaml` includes, which fetch already folds into that
+  file). This gives the CLI and summarizer a free SOTD vs non-SOTD filter.
+- It is enrichment, not exclusion: nothing is dropped based on it. If the threads
+  file is missing, `in_pipeline` is omitted for that month and a warning is logged
+  (no hard "run fetch first" error — the community fetch no longer depends on the
+  SOTD fetch).
 
 ### Comments
 
@@ -98,6 +104,10 @@ inside) the normal monthly fetch.
 
 - `.new()` only reaches a few months back, so older backfill months need
   search/top-listing discovery strategies (Pushshift is dead).
+- **Seeding**: backfill months already have known SOTD thread IDs in
+  `data/threads/YYYY-MM.json` — those posts (and their full trees) are fetched
+  directly, guaranteeing the pipeline-claimed portion of each month regardless of
+  how the remaining strategies perform on non-SOTD posts.
 - **Stance: best-effort, multi-strategy, measured.** Probe candidates: Reddit search
   with month-scoped queries (flair terms, common keywords), `top` listings with
   time-range windows, and per-author submission histories of the sub's active
@@ -119,15 +129,15 @@ One file per month (posts + comments are one logical unit; volumes are modest):
   "meta": {
     "month": "2026-09",
     "extracted_at": "2026-09-06T…",
-    "post_count": 143,
-    "comment_count": 1876,
-    "excluded_sotd_post_count": 62,
+    "post_count": 205,
+    "comment_count": 6500,
+    "in_pipeline_post_count": 62,
     "discovery": {"strategies": ["new_listing"], "complete": true}
   },
   "data": {
     "posts": [
       {"id", "title", "selftext", "author", "created_utc", "score",
-       "num_comments", "flair", "url", "locked", "stickied"}
+       "num_comments", "flair", "url", "locked", "stickied", "in_pipeline"}
     ],
     "comments": [
       {"id", "thread_id", "parent_id", "author", "created_utc",
@@ -139,6 +149,9 @@ One file per month (posts + comments are one logical unit; volumes are modest):
 
 Notes:
 
+- `posts` includes SOTD daily threads (identified via `in_pipeline`), so the file is
+  the complete community record of the month. Comment volume roughly doubles versus
+  a non-SOTD-only fetch (~5–10k/month) — still modest.
 - Reddit fuzzes scores; they are kept for context ranking only, never quoted as
   facts.
 - `flair` = `link_flair_text`; `is_submitter` marks replies by the thread author
@@ -157,6 +170,12 @@ Notes:
 - **Inputs**: the raw month file `data/community/YYYY-MM.json` — queried via Bash
   python/jq, never Read whole (same discipline as the drafter's aggregates); prior
   months' summaries for continuity of running jokes.
+- **Signal vs noise**: the month file contains every SOTD shave comment ("nice
+  shave!" banter included). The agent prioritizes non-SOTD posts and unusually
+  high-engagement threads; inside SOTD threads the signal is in the replies, not
+  the shave comments themselves (and `in_pipeline` marks which is which). During
+  contest months (Lather Games, Austere August), SOTD-thread replies are primary
+  material, not noise.
 - **Output** (`data/community/summaries/YYYY-MM.md`), fixed sections:
   - *Headline events* — contests launched/ended, moderator news, sub announcements
   - *Product & vendor news* — releases, group buys, brand drama, vendor activity
@@ -180,7 +199,8 @@ same conventions (`--data-dir`, `--json`, exit 0 success / 1 on query errors):
 
 - `meta --month YYYY-MM` — counts, discovery strategies/completeness
 - `threads --month YYYY-MM [--min-comments N] [--author X] [--flair X]
-  [--top N] [--sort comments|score|date]` — thread listing
+  [--top N] [--sort comments|score|date] [--filter sotd|non-sotd|all]` — thread
+  listing (`--filter` keys off the `in_pipeline` flag; default `all`)
 - `thread --month YYYY-MM --id t3_xxx [--max-comments N] [--json]` — one thread with
   its comment tree (indented render; `--json` for raw)
 - `search --months YYYY-MM:YYYY-MM --query "text" [--author X] [--top N]` —
@@ -212,9 +232,9 @@ The month/window argument is always explicit, structurally enforcing the drafter
 ## Error handling
 
 - **Fetch**: rate limits via the existing `safe_call`; missing
-  `data/threads/YYYY-MM.json` → hard error ("run fetch first"); pagination
-  boundary not reached within the cap → `complete: false` + warning. Deleted/removed
-  content preserved as `[removed]`/`[deleted]` bodies.
+  `data/threads/YYYY-MM.json` → warning only (`in_pipeline` omitted for that month);
+  pagination boundary not reached within the cap → `complete: false` + warning.
+  Deleted/removed content preserved as `[removed]`/`[deleted]` bodies.
 - **CLI**: missing month file → exit 1 with a clear message (mirrors
   `aggregate_query`).
 - **Summarizer**: missing raw file → report and stop (never fabricate); missing
@@ -224,8 +244,9 @@ The month/window argument is always explicit, structurally enforcing the drafter
 
 ## Testing
 
-- `tests/fetch/community/` — month filtering, SOTD subtraction, `parent_id`
-  flattening, meta accounting, pagination-cap behavior, missing-threads-file error.
+- `tests/fetch/community/` — month filtering, `in_pipeline` flagging (with and
+  without a threads file present), full-tree flattening with `parent_id` preserved,
+  meta accounting, pagination-cap behavior, `[removed]`/`[deleted]` preservation.
   PRAW mocked, following the existing `tests/fetch/` patterns.
 - `tests/report/tools/test_community_query.py` — fixture month file; listing
   filters, tree rendering, search windowing, exit codes; mirrors the existing
@@ -238,7 +259,6 @@ The month/window argument is always explicit, structurally enforcing the drafter
 
 ## Out of scope (explicitly)
 
-- Nested reply chains inside SOTD daily threads (possible later extension).
 - Extract/match/enrich/aggregate/report changes — community data feeds no pipeline
   phase.
 - Full-history backfill to 2016-05 (only the voice era 2025-07 → 2026-08).
