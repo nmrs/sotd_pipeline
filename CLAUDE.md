@@ -31,7 +31,7 @@ python run.py enrich --month 2025-05 --force     # Add metadata
 python run.py aggregate --month 2025-05 --force  # Generate statistics
 python run.py report --month 2025-05 --force     # Generate reports
 python run.py report --month 2025-05 --force --no-slug  # Reports without WSDB links in soap names
-python run.py community --month 2025-05 --force   # Fetch all posts + full comment trees (community context)
+python run.py community --month 2025-05 --force  # Fetch all posts + full comment trees (community context)
 ```
 
 #### Complete Pipeline

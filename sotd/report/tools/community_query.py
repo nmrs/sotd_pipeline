@@ -128,7 +128,9 @@ def cmd_threads(
     rows.sort(key=keymap_for(sort))
 
     if as_json:
-        return json.dumps(rows[:top], indent=2)
+        return json.dumps(
+            [{k: v for k, v in r.items() if k != "_comments"} for r in rows[:top]], indent=2
+        )
 
     lines = [
         f"{'id':<12} {'date':<10} {'flag':<5} {'cmts':>4} {'score':>5}  "
@@ -192,7 +194,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "search":
-            start, end = args.months.split(":")
+            parts = args.months.split(":")
+            if len(parts) != 2:
+                raise QueryError(f"Window must be YYYY-MM:YYYY-MM (got: {args.months})")
+            start, end = parts
             months = month_iter(parse_month(start), parse_month(end))
             docs, missing = _search_docs(args.data_dir, months)
             print(
@@ -246,7 +251,10 @@ def cmd_thread(doc: dict, thread_id: str, *, max_comments: int = 50, as_json: bo
     comments.sort(key=lambda c: c["created_utc"])
 
     if as_json:
-        return json.dumps({"post": post, "comments": comments}, indent=2)
+        payload = {"post": post, "comments": comments[:max_comments]}
+        if len(comments) > max_comments:
+            payload["truncated"] = True
+        return json.dumps(payload, indent=2)
 
     lines = [
         f"{post['id']}  {post['created_utc'][:10]}  u/{post.get('author')}  "
@@ -331,6 +339,7 @@ def cmd_search(
                         "created_utc": p["created_utc"],
                         "kind": "post",
                         "thread_id": p["id"],
+                        "title": p.get("title"),
                         "author": p.get("author"),
                         "snippet": _snippet(p.get("title", ""), query),
                     }
@@ -345,6 +354,7 @@ def cmd_search(
                         "kind": "comment",
                         "thread_id": c["thread_id"],
                         "comment_id": c["id"],
+                        "thread_title": c.get("thread_title"),
                         "author": c.get("author"),
                         "snippet": _snippet(c.get("body") or "", query),
                     }
@@ -361,6 +371,7 @@ def cmd_search(
         return "\n".join(lines)
     for h in hits:
         who = f" u/{h['author']}" if h.get("author") else ""
+        title = h.get("thread_title") or h.get("title") or ""
         if h["kind"] == "post":
             lines.append(f"{h['created_utc'][:10]}  [post]     t3_{h['thread_id']}{who}")
         else:
@@ -368,6 +379,8 @@ def cmd_search(
                 f"{h['created_utc'][:10]}  [comment]  t3_{h['thread_id']}  "
                 f"t1_{h['comment_id']}{who}"
             )
+        if title:
+            lines.append(f"           thread: {title[:60]}")
         lines.append(f"           \"{h['snippet']}\"")
     return "\n".join(lines)
 

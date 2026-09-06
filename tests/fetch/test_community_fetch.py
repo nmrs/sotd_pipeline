@@ -373,6 +373,26 @@ class BadSub:
         raise RuntimeError("unsupported")
 
 
+class LazyIterFailSub:
+    """search() succeeds but iteration raises (praw's ListingGenerator is lazy)."""
+
+    def search(self, *a, **k):
+        class FailingGen:
+            def __iter__(self):
+                raise RuntimeError("rate limit mid-iteration")
+
+        return FailingGen()
+
+
+class FakeForbidden(Exception):
+    """Stand-in for prawcore errors outside safe_call's except tuple."""
+
+
+class ForbiddenSub:
+    def search(self, *a, **k):
+        raise FakeForbidden("forbidden")
+
+
 class TestDiscoverViaSearch:
     def test_timestamp_window_query(self):
         subs = [
@@ -386,6 +406,16 @@ class TestDiscoverViaSearch:
     def test_empty_on_unsupported_syntax(self):
         # safe_call swallows RuntimeError -> None -> []
         assert community.discover_via_search(BadSub(), 0, 1) == []
+
+    def test_iteration_failure_returns_empty(self):
+        # praw's search() is lazy: the HTTP call happens during iteration, so the
+        # list() must run inside safe_call, not after it
+        assert community.discover_via_search(LazyIterFailSub(), 0, 1) == []
+
+    def test_exception_outside_safe_call_tuple_returns_empty(self, caplog):
+        with caplog.at_level(logging.WARNING):
+            assert community.discover_via_search(ForbiddenSub(), 0, 1) == []
+        assert "timestamp search unavailable" in caplog.text
 
 
 class TestEraAuthors:

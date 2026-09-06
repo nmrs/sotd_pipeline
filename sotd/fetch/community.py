@@ -11,7 +11,6 @@ is a later project). The pipeline's own ``data/comments/`` store (top-level SOTD
 comments only) is never reused here — everything is fetched fresh from Reddit.
 """
 
-# ruff: noqa: E402  # keep imports after docstring for clarity
 from __future__ import annotations
 
 import logging
@@ -156,17 +155,24 @@ def fetch_all_comments(submission) -> List:
 def discover_via_search(subreddit, start_ts: int, end_ts: int) -> List:
     """Reddit search over a UTC timestamp window (lucene ``timestamp:`` syntax).
 
-    Returns [] when the syntax is unsupported/unindexed — the recorded
-    discovery meta then simply shows no contribution from this strategy.
+    Returns [] when the search fails for any reason (unsupported/unindexed
+    syntax, rate limit, iteration error) — the recorded discovery meta then
+    simply shows no contribution from this strategy.
     """
     query = f"timestamp:{start_ts}..{end_ts}"
     search_fn = getattr(subreddit, "search", None)
     if search_fn is None:
         return []
-    raw = safe_call(search_fn, query, sort="new", syntax="lucene", time_filter="all")
-    if raw is None:
+    try:
+        # praw's search() is lazy: the HTTP call happens during iteration, so
+        # list() must run inside safe_call to keep failures contained
+        raw = safe_call(
+            lambda: list(search_fn(query, sort="new", syntax="lucene", time_filter="all"))
+        )
+    except Exception as e:
+        logger.warning(f"timestamp search unavailable: {e}")
         return []
-    return list(raw)
+    return list(raw) if raw else []
 
 
 def era_authors(data_dir, months: Sequence[str], top_n: int = 100) -> List[str]:
