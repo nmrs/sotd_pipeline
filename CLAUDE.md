@@ -5,11 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Essential Commands
-- `make all` - Complete development workflow (lint + format + typecheck + test)
-- `make test` - Run tests with pytest (`PYTHONPATH=. pytest tests/`)
+- `make all` - Complete development workflow (preprocess + lint + format + typecheck + test)
+- `make test` - Run Python tests with pytest (`PYTHONPATH=. pytest tests/`)
 - `make lint` - Lint code with Ruff
 - `make typecheck` - Type check with Pyright
-- `make coverage` - Run tests with coverage reporting
+- `make test-coverage` - Run tests with coverage reporting
+
+**Note**: Makefile targets call bare `python`/`pytest`, so activate the venv first (`source .venv/bin/activate`).
+
+### WebUI Commands
+The React/TypeScript WebUI is optional; see `webui/README.md`. Test targets wrap `webui/scripts/manage-servers.sh` (servers start/stop automatically):
+- `make test-react` - React/TypeScript unit tests
+- `make test-e2e` - Playwright end-to-end tests
+- `make start-servers` / `make stop-servers` / `make server-status` - Manage test servers
 
 ### Pipeline Execution
 The pipeline can be run using the unified `run.py` orchestration script:
@@ -64,10 +72,15 @@ The SOTD Pipeline processes Reddit "Shave of the Day" posts through **6 sequenti
 2. **Extract** (`sotd/extract/`) - Parse comments to identify razor/blade/brush/soap mentions
 3. **Match** (`sotd/match/`) - Normalize product names against YAML catalogs (`data/*.yaml`)
 4. **Enrich** (`sotd/enrich/`) - Extract metadata (blade counts, brush fibers, knot sizes)
-5. **Aggregate** (`sotd/aggregate/`) - Generate usage statistics (placeholder)
-6. **Report** (`sotd/report/`) - Create human-readable summaries (placeholder)
+5. **Aggregate** (`sotd/aggregate/`) - Generate usage statistics (monthly + annual)
+6. **Report** (`sotd/report/`) - Render markdown reports (hardware/software × monthly/annual); `--no-slug` omits WSDB links in soap names
 
-Each phase reads from the previous phase's output and writes to `data/{phase}/YYYY-MM.json`.
+Each phase reads from the previous phase's output. Artifact layout under `--data-dir` (default `data/`, or `SOTD_DATA_DIR` env var):
+
+- **Fetch**: `data/threads/YYYY-MM.json` + `data/comments/YYYY-MM.json`
+- **Extract / Match / Enrich**: `data/{extracted,matched,enriched}/YYYY-MM.json`
+- **Aggregate**: `data/aggregated/YYYY-MM.json` (+ `data/aggregated/annual/YYYY.json`)
+- **Report**: `data/report/YYYY-MM-{hardware|software}.md` (+ `data/report/annual/`)
 
 ## Key Design Patterns
 
@@ -84,6 +97,7 @@ The matching phase uses a **strategy pattern** with specialized matchers:
 - Product-specific matchers (`blade_matcher.py`, `soap_matcher.py`, etc.)
 - `brush_matching_strategies/` - Complex brush matching with brand-specific strategies
 - YAML-based product catalogs for normalization
+- Match resolution order: pre-validated matches in `data/correct_matches/*.yaml` are checked first, then catalogs; `data/intentionally_unmatched.yaml` marks strings that should stay unmatched
 
 ### Data Flow
 ```
@@ -97,29 +111,44 @@ Data persists at each stage, enabling individual phase re-runs and debugging.
 - **Framework**: pytest with coverage via pytest-cov
 - **Mocking**: Extensive mocking of external APIs (PRAW) and filesystem operations
 - **Structure**: Tests mirror source structure (`tests/{module}/test_*.py`)
-- **Integration**: End-to-end tests like `test_e2e_enrich.py`
+- **Integration**: `tests/integration/` (e.g. `test_real_catalog_integration.py`, `test_correct_matches_integration.py`); production-catalog tests run via `make test-production`
+- **Skipped tests**: Documented with reasons and action items in `docs/skipped_tests.md`
 - **Run single test**: `PYTHONPATH=. pytest tests/path/to/test_file.py::test_function`
 
 ## Configuration
 
-- **Python 3.11** (enforced by pyrightconfig.json)
+- **Python 3.14** (enforced by pyrightconfig.json)
 - **Black formatting** with 100-char line length
 - **Ruff linting** (E, F, I rules)
-- **Reddit API**: Requires `praw.ini` with credentials (gitignored)
+- **Reddit API**: Requires `praw.ini` in the project root (gitignored); only needed for `fetch`
 - **Type checking**: Pyright with recommended settings
+- **Cursor rules**: `.cursor/rules/` contains phase-specific dev rules (aggregate phase, brush matching, data processing, API handling)
+
+### Operator override files (under `data/`)
+- `thread_overrides.yaml` - Thread inclusion/exclusion for fetch (`include` / `exclude` date→URL maps)
+- `extract_overrides.yaml` - Extraction fixes (default path for extract's `--override-file`)
+- `enrichment_overrides.yaml` - Enrichment fixes
+- `intentionally_unmatched.yaml` - Strings that should intentionally remain unmatched
+- `correct_matches/*.yaml` - Confirmed matches (checked first in the match phase)
 
 ## Data Processing Context
 
-- **Date Range**: 2016-06 to 2025-05
+- **Date Range**: 2016-05 onward, extended month-by-month (data for the current month is present)
 - **Source**: r/wetshaving SOTD threads
-- **Products**: ~4000 soaps, ~800 razors, ~400 blades, complex brush taxonomy
-- **Volume**: ~150k comments processed across 9 years
+- **Catalogs** (`data/*.yaml`): ~800 soaps, ~745 razors, ~165 blades, ~300 brushes, plus separate handle (~208) and knot (~166) catalogs
+- **Pre-validated matches** (`data/correct_matches/*.yaml`): ~1800 soaps, ~600 razors, ~650 brushes, ~145 blades
+- **Volume**: ~150k comments across 10+ years
 
 ## Important Implementation Notes
 
-- **Brush Matching**: Most complex due to varied naming (handle + knot combinations)
-- **Manual Overrides**: `data/thread_overrides.yaml` for thread inclusion/exclusion (`include` / `exclude` date→URL maps)
+- **Brush Matching**: Most complex due to varied naming (handle + knot combinations); see `.cursor/rules/brush-matching.mdc`
 - **Hybrid Fetching**: Combines Reddit API with Pushshift for completeness
 - **Error Handling**: Graceful degradation when APIs fail
 - **Analysis Tools**: Utilities in `sotd/match/tools/` for debugging matches
 - **WebUI – WSDB Alignment Analyzer**: Two modes—**Alignment** (bidirectional pipeline vs WSDB, catalog or match files, two tabs) and **Slug finder** (pipeline scents from soaps.yaml → suggested WSDB slugs from software.json, catalog-only, single “Slug suggestions” view)
+
+## Agent memory
+
+This repo is tracked in the **AgentMemory** vault (`github.com/nmrs/agent-memory`; local clone `../agent-memory`). Before substantive work, read the vault's `INDEX.md` and follow its protocol: `git pull --rebase` first, attribute changes (agent-id + date), record durable knowledge only.
+
+This project's vault entry: `projects/sotd-pipeline/status.md` (repo dir is `sotd-pipeline`, renamed from `sotd_pipeline` on 2026-09-05; the vault entry is kebab-case).

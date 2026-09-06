@@ -6,3 +6,10 @@ pandas
 psutil
 tabulate
 rich
+# WebUI API backend (shares the main venv — see webui/api/README.md)
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+httpx
+rapidfuzz>=3.0.0
