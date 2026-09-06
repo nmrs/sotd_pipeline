@@ -294,6 +294,7 @@ Welcome to your Annual SOTD Hardware Report for {{year}}
             "top-shavers": [],
             "soap-mashup-users": [],
             "user-soap-brand-scent-diversity": [],
+            "user-single-use-soaps": [],
         }
 
         generator = AnnualReportGenerator("2024", "software", metadata, data, debug=True)

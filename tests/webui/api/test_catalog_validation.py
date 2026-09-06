@@ -7,7 +7,6 @@ from typing import Dict, Any
 
 import pytest
 import yaml
-import requests
 
 from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 
@@ -404,7 +403,7 @@ class TestCatalogValidation:
 
 
 class TestCatalogValidationIntegration:
-    """Integration tests for catalog validation with real API."""
+    """Issue-mapping tests for the shared catalog validator (in-process, no server)."""
 
     def create_temp_yaml(self, data: Dict[str, Any]) -> Path:
         """Create a temporary YAML file with test data."""
@@ -413,127 +412,6 @@ class TestCatalogValidationIntegration:
         temp_file.close()
         return Path(temp_file.name)
 
-    @pytest.mark.integration
-    def test_api_validation_with_temp_data(self):
-        """Test API validation with temporary correct_matches.yaml data."""
-        # This test requires the API server to be running
-        # It will be skipped if not running in integration mode
-
-        # Create test data
-        test_data = {
-            "blade": {
-                "DE": {"Astra": {"Superior Platinum (Green)": ["astra green", "astra platinum"]}}
-            }
-        }
-
-        # Create temporary file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(test_data, f)
-            temp_file = Path(f.name)
-
-        try:
-            # Test API endpoint
-            response = requests.post(
-                "http://localhost:8000/api/analysis/validate-catalog",
-                json={"field": "blade"},
-                timeout=10,
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                print(
-                    f"API Response: {data['total_entries']} entries, "
-                    f"{len(data['issues'])} issues"
-                )
-
-                # API should return validation results (may have issues in real catalog)
-                assert "total_entries" in data, "Response should include total_entries"
-                assert "issues" in data, "Response should include issues"
-                assert isinstance(data["issues"], list), "Issues should be a list"
-
-                # If there are issues, they should have the expected structure
-                for issue in data["issues"]:
-                    assert "issue_type" in issue, "Each issue should have an issue_type"
-                    assert "field" in issue, "Each issue should have a field"
-                    assert "severity" in issue, "Each issue should have a severity"
-            else:
-                pytest.fail(f"API returned status code {response.status_code}: {response.text}")
-
-        finally:
-            # Clean up
-            if temp_file.exists():
-                temp_file.unlink()
-
-    @pytest.mark.integration
-    def test_api_validation_with_corrupted_data(self):
-        """Test API validation with corrupted data."""
-        # This test requires the API server to be running
-        # It will be skipped if not running in integration mode
-
-        # Test API endpoint
-        response = requests.post(
-            "http://localhost:8000/api/analysis/validate-catalog",
-            json={"field": "blade"},
-            timeout=10,
-        )
-
-        if response.status_code == 200:
-            data = response.json()
-            print(
-                f"API Response: {data['total_entries']} entries, " f"{len(data['issues'])} issues"
-            )
-
-            # API should return validation results
-            assert "total_entries" in data, "Response should include total_entries"
-            assert "issues" in data, "Response should include issues"
-            assert isinstance(data["issues"], list), "Issues should be a list"
-
-    @pytest.mark.integration
-    def test_api_brush_validation_with_temp_data(self):
-        """Test API brush validation with temporary correct_matches.yaml data."""
-        # This test requires the API server to be running
-        # It will be skipped if not running in integration mode
-
-        # Create test brush data
-        test_brush_data = {"brush": {"Chisel & Hound": {"v26": ["chisel & hound v26", "c&h v26"]}}}
-
-        # Create temporary file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(test_brush_data, f)
-            temp_file = Path(f.name)
-
-        try:
-            # Test API endpoint
-            response = requests.post(
-                "http://localhost:8000/api/analysis/validate-catalog",
-                json={"field": "brush"},
-                timeout=10,
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                print(
-                    f"API Response: {data['total_entries']} entries, "
-                    f"{len(data['issues'])} issues"
-                )
-
-                # API should return validation results
-                assert "total_entries" in data, "Response should include total_entries"
-                assert "issues" in data, "Response should include issues"
-                assert isinstance(data["issues"], list), "Issues should be a list"
-
-                # If there are issues, they should have the expected structure
-                for issue in data["issues"]:
-                    assert "issue_type" in issue, "Each issue should have an issue_type"
-                    assert "field" in issue, "Each issue should have a field"
-                    assert "severity" in issue, "Each issue should have a severity"
-            else:
-                pytest.fail(f"API returned status code {response.status_code}: {response.text}")
-
-        finally:
-            # Clean up
-            if temp_file.exists():
-                temp_file.unlink()
 
     def test_api_issue_type_mapping(self, tmp_path):
         """Test that the API correctly maps issue types and fields from shared validator.

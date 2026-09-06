@@ -4,7 +4,7 @@ This document tracks all tests that have been temporarily skipped in the SOTD Pi
 
 ## Overview
 
-As of **2025-08-28**, we have **33 skipped tests** out of **3,140 total tests** (98.9% pass rate). All skipped tests are documented below with clear reasons and next steps.
+**Current status (2026-09-05)**: the suite has **0 skipped and 0 failing tests** (3,934 passing on Python 3.14). Entries below are historical records from the 2025-08-28 audit; most referenced tests have since been fixed, removed, or replaced — the Catalog Validation entry below reflects the current state.
 
 ## Test Categories
 
@@ -15,18 +15,9 @@ These tests intentionally operate on production data files and need to be proper
 #### Catalog Validation Tests
 **File**: `tests/webui/api/test_catalog_validation.py`
 
-| Test | Reason | Action Required |
-|------|--------|-----------------|
-| `test_step3_composite_brush_validation` | Testing validation logic against production data structures | Redesign to use mock data or temporary catalogs |
-| `test_step4_single_component_brush_validation` | Testing validation logic against production data structures | Redesign to use mock data or temporary catalogs |
-| `test_step1_complete_brush_validation_dinos_mores` | Testing validation logic against production data structures | Redesign to use mock data or temporary catalogs |
-
-**Root Cause**: These tests create temporary catalogs but still test validation logic that expects production data structures and patterns.
-
-**Solution**: 
-- Create proper mock catalog data that mirrors production structure
-- Isolate validation logic from production data dependencies
-- Use dependency injection for catalog data in tests
+**Status (2026-09-05): Resolved.**
+- The live-server integration tests (`test_api_validation_with_temp_data`, `test_api_brush_validation_with_temp_data`, `test_api_validation_with_corrupted_data`) were **removed**: they posted to a hard-coded `http://localhost:8000` that nothing in the suite starts (fresh checkout → `ConnectionError`), never sent their fixtures (the endpoint validates the real repo catalogs), and the corrupted-data variant could not fail. The original step1/step3/step4 test names documented here no longer existed at cleanup time.
+- In-process coverage remains in the same file: `TestCatalogValidation` (validator logic with temp catalogs), `TestCatalogValidationIntegration::test_api_issue_type_mapping` (shared `CatalogValidator` issue mapping with tmp_path data), and `TestMoveCatalogEntries` (endpoint functions in-process).
 
 #### Integration Tests with Production Catalogs
 **File**: `tests/integration/test_real_catalog_integration.py`
