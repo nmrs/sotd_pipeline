@@ -6,6 +6,7 @@ found in data/correct_matches/soap.yaml but missing from data/soaps.yaml.
 
 import re
 import unicodedata
+
 import yaml
 
 # ---------------------------------------------------------------------------

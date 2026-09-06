@@ -230,7 +230,7 @@ def run_evaluation(categories=None, verbose=False, by_strategy=False):
 
         # Strategy breakdown
         if by_strategy and strategy_stats:
-            print(f"\n  Strategy breakdown:")
+            print("\n  Strategy breakdown:")
             for strat, stats in sorted(strategy_stats.items(), key=lambda x: -x[1]["total"]):
                 pct = stats["correct"] / stats["total"] * 100 if stats["total"] > 0 else 0
                 print(

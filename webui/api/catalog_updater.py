@@ -8,9 +8,10 @@ All writes are atomic: data is written to a .tmp file first, then moved into
 place, so a crash mid-write cannot corrupt the catalog.
 """
 
-import yaml
 from pathlib import Path
 from typing import Optional
+
+import yaml
 
 
 class CatalogUpdater:

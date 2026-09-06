@@ -42,7 +42,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sotd.match.brush.matcher import BrushMatcher
 
-
 # ---------------------------------------------------------------------------
 # Evaluation helpers
 # ---------------------------------------------------------------------------

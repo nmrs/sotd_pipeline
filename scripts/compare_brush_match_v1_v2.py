@@ -21,7 +21,7 @@ from pathlib import Path
 repo_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(repo_root))
 
-from brushmatch.phase16_parity import compare_brush_slots, load_matched_data
+from brushmatch.phase16_parity import compare_brush_slots, load_matched_data  # noqa: E402
 
 
 def run_match(month: str, brush_version: str, data_dir: Path) -> int:

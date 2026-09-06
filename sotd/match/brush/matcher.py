@@ -12,7 +12,6 @@ import yaml
 from sotd.match.types import MatchResult
 
 from .config import BrushScoringConfig
-from .strategies.utils.subdict_builders import build_handle_subdict, build_knot_subdict
 from .handle_matcher import HandleMatcher
 from .knot_matcher import KnotMatcher
 from .knot_matcher_factory import KnotMatcherFactory
@@ -50,6 +49,7 @@ from .strategies.specialized.omega_semogue_strategy import (
 from .strategies.specialized.zenith_strategy import (
     ZenithBrushMatchingStrategy,
 )
+from .strategies.utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 # Module-level cache for catalogs to avoid redundant loading
 _catalog_cache = None

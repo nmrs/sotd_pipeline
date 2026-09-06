@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .delimiter_patterns import BrushDelimiterPatterns
-from .strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
+from .strategies.utils.fiber_utils import match_fiber
 from .strategies.utils.knot_signal_utils import (
     HANDLE_CRAFT_TERMS,
     assign_sides,

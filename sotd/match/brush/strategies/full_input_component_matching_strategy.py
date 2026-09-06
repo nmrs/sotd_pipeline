@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Unified component matching strategy that handles both dual and single component matches."""
 
-import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -12,7 +11,7 @@ from ..comparison.splits_loader import BrushSplitsLoader
 from .base_brush_matching_strategy import (
     BaseMultiResultBrushMatchingStrategy,
 )
-from .utils.knot_signal_utils import KNOT_SIGNAL_RE, knot_signal_spans
+from .utils.knot_signal_utils import knot_signal_spans
 from .utils.subdict_builders import build_handle_subdict, build_knot_subdict
 
 
