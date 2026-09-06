@@ -31,6 +31,7 @@ python run.py enrich --month 2025-05 --force     # Add metadata
 python run.py aggregate --month 2025-05 --force  # Generate statistics
 python run.py report --month 2025-05 --force     # Generate reports
 python run.py report --month 2025-05 --force --no-slug  # Reports without WSDB links in soap names
+python run.py community --month 2025-05 --force   # Fetch all posts + full comment trees (community context)
 ```
 
 #### Complete Pipeline
@@ -54,6 +55,28 @@ python run.py pipeline --range 2024-01:2024-06 --force        # Alternative rang
 ```
 
 **Note**: The `--force` flag is MANDATORY for all pipeline operations unless explicitly specified otherwise. This ensures fresh data processing and avoids cached results.
+
+#### Community context operations
+
+The `community` sidecar is run when needed (sooner after month end = fewer
+lost-to-deletion posts); the author explores the record via the CLI:
+
+```bash
+# 1. Fetch the month's full community record
+python run.py community --month 2026-09 --force
+
+# 2. (Author) explore — the CLI renders bounded slices
+python -m sotd.report.tools.community_query threads --month 2026-09 --top 20
+python -m sotd.report.tools.community_query search --months 2026-08:2026-09 --query "group buy"
+```
+
+Consumption (summarizer agent → observations-drafter) is a later project — see the
+spec's Future work section.
+
+Backfill notes: months `.new()` cannot reach fall back to best-effort discovery
+(SOTD-thread seeding from `data/threads/` + timestamp search + active-author
+histories); each month's `meta.discovery` records what ran and how complete it is.
+Run the voice-era backfill with `python run.py community --range 2025-07:2026-08 --force`.
 
 ### Legacy Direct Phase Execution
 Individual phases can still be run directly (though the unified interface is preferred):
@@ -81,6 +104,7 @@ Each phase reads from the previous phase's output. Artifact layout under `--data
 - **Extract / Match / Enrich**: `data/{extracted,matched,enriched}/YYYY-MM.json`
 - **Aggregate**: `data/aggregated/YYYY-MM.json` (+ `data/aggregated/annual/YYYY.json`)
 - **Report**: `data/report/YYYY-MM-{hardware|software}.md` (+ `data/report/annual/`)
+- **Community fetch (sidecar)**: `data/community/YYYY-MM.json` (all posts + full comment trees, `in_pipeline` flags); consumed via the `community_query` CLI
 
 ## Key Design Patterns
 
