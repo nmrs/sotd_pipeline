@@ -732,3 +732,94 @@ class TestDiscoverViaPullpush:
 
         posts = community.discover_via_pullpush(FakeReddit(), 2025, 1)
         assert [s.id for s in posts] == ["good1"]
+
+
+class TestProgressNarration:
+    """Runtime narration: strategies log what they are doing at INFO."""
+
+    def test_backfill_logs_each_strategy_result(self, monkeypatch, tmp_path, caplog):
+        write_threads_fixture(tmp_path, [])
+        seed_subs = {
+            "seed1": FakeSub("seed1", "S1", ts(2025, 7, 5)),
+            "seed2": FakeSub("seed2", "S2", ts(2025, 7, 9)),
+        }
+
+        class SeedReddit:
+            def submission(self, **kwargs):
+                sub = seed_subs.get(kwargs["id"])
+                if sub is None:
+                    raise RuntimeError("gone")
+                return sub
+
+            def subreddit(self, _name):
+                return FakeSubreddit([])
+
+            def redditor(self, _name):
+                return FakeRedditor([])
+
+        monkeypatch.setattr(
+            community,
+            "discover_via_search",
+            lambda s, a, b: [FakeSub("srch", "S3", ts(2025, 7, 15))],
+        )
+        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        with caplog.at_level(logging.INFO):
+            posts, strategies, per_strategy = community._backfill_posts(
+                SeedReddit(), FakeSubreddit([]), 2025, 7, {"seed1", "seed2"}, tmp_path
+            )
+        assert {s.id for s in posts} == {"seed1", "seed2", "srch"}
+        assert "thread_seed: resolving 2 known SOTD threads" in caplog.text
+        assert "thread_seed: resolved 2 of 2" in caplog.text
+        assert "timestamp_search: found 1 posts" in caplog.text
+        assert "author_histories: scanning 0 era authors" in caplog.text
+        assert "author_histories: scanned 0 era authors, found 0 posts" in caplog.text
+        assert (
+            "backfill discovery: 3 unique posts via strategies: thread_seed, timestamp_search"
+            in caplog.text
+        )
+
+    def test_pullpush_paging_logs_pages_and_summary(self, monkeypatch, caplog):
+        pages = [
+            [{"id": f"a{i:02d}", "created_utc": ts(2025, 1, 20)} for i in range(100)],
+            [{"id": "b1", "created_utc": ts(2025, 1, 10)}],
+        ]
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: pages.pop(0))
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        with caplog.at_level(logging.INFO):
+            ids = community.pullpush_submission_ids(2025, 1)
+        assert len(ids) == 101
+        assert "pullpush: page 1: 100 ids (oldest 2025-01-20)" in caplog.text
+        assert "pullpush: page 2: 1 ids (oldest 2025-01-10)" in caplog.text
+        assert "pullpush: 101 archive ids across 2 pages" in caplog.text
+
+    def test_process_month_narrates_without_verbose(self, tmp_path, monkeypatch, caplog):
+        write_threads_fixture(tmp_path, ["sotd1"])
+        posts = [
+            FakeSub("sotd1", "SOTD Thread", ts(2026, 8, 1)),
+            FakeSub("other1", "Discussion", ts(2026, 8, 2)),
+        ]
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: (posts, True))
+        monkeypatch.setattr(
+            community, "fetch_all_comments", lambda s: [FakeComment("c1", "b", ts(2026, 8, 2))]
+        )
+        with caplog.at_level(logging.INFO):
+            community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert "fetching comment trees for 2 threads" in caplog.text
+        assert "wrote 2 posts / 2 comments (discovery: new_listing, complete)" in caplog.text
+
+    def test_listing_logs_progress_and_discovery(self, caplog):
+        subs = [FakeSub(f"p{i:03d}", f"P{i}", ts(2026, 9, 15)) for i in range(1001)]
+        with caplog.at_level(logging.INFO):
+            in_month, reached = community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
+        assert len(in_month) == 1001
+        assert reached is True
+        assert "listing pulled 1000 items" in caplog.text
+        assert "listing discovered 1001 posts (boundary reached)" in caplog.text
+
+    def test_listing_progress_silent_below_1000(self, caplog):
+        subs = [FakeSub(f"p{i:03d}", f"P{i}", ts(2026, 9, 15)) for i in range(3)]
+        with caplog.at_level(logging.INFO):
+            community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
+        assert "listing pulled" not in caplog.text
+        assert "listing discovered 3 posts" in caplog.text

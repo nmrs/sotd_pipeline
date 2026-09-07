@@ -118,6 +118,7 @@ def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
     newest-first. ``boundary_reached`` is False when the pagination cap trips
     before the boundary — the caller must treat that month as partial.
     """
+    month_str = f"{year:04d}-{month:02d}"
     start = datetime(year, month, 1, tzinfo=timezone.utc)
     end_exclusive = (
         datetime(year + 1, 1, 1, tzinfo=timezone.utc)
@@ -125,7 +126,15 @@ def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
         else datetime(year, month + 1, 1, tzinfo=timezone.utc)
     )
 
-    pulled = safe_call(lambda: list(islice(subreddit.new(limit=None), PAGINATION_CAP)))
+    def _listing():
+        # lazy generator so the listing's HTTP calls stay inside safe_call;
+        # logs a heartbeat every 1000 items so long silent stretches are visible
+        for i, sub in enumerate(subreddit.new(limit=None), 1):
+            if i % 1000 == 0:
+                logger.info(f"{month_str}: listing pulled {i} items…")
+            yield sub
+
+    pulled = safe_call(lambda: list(islice(_listing(), PAGINATION_CAP)))
     in_month: List = []
     boundary_reached = False
     for sub in pulled or []:
@@ -139,6 +148,10 @@ def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
     if not boundary_reached and pulled is not None and len(pulled) < PAGINATION_CAP:
         # listing exhausted without crossing the boundary
         boundary_reached = True
+    logger.info(
+        f"{month_str}: listing discovered {len(in_month)} posts "
+        f"(boundary {'reached' if boundary_reached else 'not reached'})"
+    )
     return in_month, boundary_reached
 
 
@@ -203,7 +216,9 @@ def pullpush_submission_ids(year: int, month: int) -> Set[str]:
 
     ids: Set[str] = set()
     cursor = end
+    page_no = 0
     while True:
+        page_no += 1
         url = (
             "https://api.pullpush.io/reddit/search/submission/"
             f"?subreddit=wetshaving&after={start}&before={cursor}&size=100&sort=desc"
@@ -216,10 +231,15 @@ def pullpush_submission_ids(year: int, month: int) -> Set[str]:
             break  # archive served a page we already have; stop instead of looping
         ids |= page_ids
         oldest = min(int(s["created_utc"]) for s in data)
+        logger.info(
+            f"pullpush: page {page_no}: {len(data)} ids "
+            f"(oldest {datetime.fromtimestamp(oldest, tz=timezone.utc):%Y-%m-%d})"
+        )
         if oldest <= start or len(data) < 100:
             break
         cursor = oldest
         time.sleep(PULLPUSH_SLEEP)
+    logger.info(f"pullpush: {len(ids)} archive ids across {page_no} pages")
     return ids
 
 
@@ -236,6 +256,9 @@ def discover_via_pullpush(reddit, year: int, month: int) -> List:
         title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
         if title:
             out.append(sub)
+    logger.info(
+        f"{year:04d}-{month:02d}: pullpush: resolved {len(out)} of {len(ids)} archive ids on Reddit"
+    )
     return out
 
 
@@ -305,6 +328,7 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     A strategy is listed only when it contributed at least one post.
     Returns (posts, strategies_used, per_strategy_raw_counts).
     """
+    month_str = f"{year:04d}-{month:02d}"
     start_dt = datetime(year, month, 1, tzinfo=timezone.utc)
     end_dt = (
         datetime(year + 1, 1, 1, tzinfo=timezone.utc)
@@ -318,17 +342,20 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     per_strategy: dict = {}
 
     if sotd_ids:
+        logger.info(f"{month_str}: thread_seed: resolving {len(sotd_ids)} known SOTD threads…")
         for sid in sotd_ids:
             sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
             title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
-            if title:
+            if sub is not None and title:
                 found[sub.id] = sub
         per_strategy["thread_seed"] = len(found)
+        logger.info(f"{month_str}: thread_seed: resolved {len(found)} of {len(sotd_ids)}")
         if found:
             strategies.append("thread_seed")
 
     search_posts = discover_via_search(subreddit, start_ts, end_ts)
     per_strategy["timestamp_search"] = len(search_posts)
+    logger.info(f"{month_str}: timestamp_search: found {len(search_posts)} posts")
     if search_posts:
         strategies.append("timestamp_search")
     for sub in search_posts:
@@ -341,15 +368,23 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     for sub in pullpush_posts:
         found.setdefault(sub.id, sub)
 
-    author_posts = discover_via_authors(
-        reddit, era_authors(data_dir, [f"{year:04d}-{month:02d}"]), start_ts, end_ts
-    )
+    authors = era_authors(data_dir, [month_str])
+    logger.info(f"{month_str}: author_histories: scanning {len(authors)} era authors…")
+    author_posts = discover_via_authors(reddit, authors, start_ts, end_ts)
     per_strategy["author_histories"] = len(author_posts)
+    logger.info(
+        f"{month_str}: author_histories: scanned {len(authors)} era authors, "
+        f"found {len(author_posts)} posts"
+    )
     if author_posts:
         strategies.append("author_histories")
     for sub in author_posts:
         found.setdefault(sub.id, sub)
 
+    logger.info(
+        f"{month_str}: backfill discovery: {len(found)} unique posts via strategies: "
+        f"{', '.join(strategies) if strategies else '(none)'}"
+    )
     return list(found.values()), strategies, per_strategy
 
 
@@ -407,6 +442,7 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
     ]
 
     new_comments: List[dict] = []
+    logger.info(f"{month_str}: fetching comment trees for {len(posts_new)} threads…")
     for sub in tqdm(posts_new, desc="Threads", unit="thread", disable=should_disable_tqdm()):
         for c in fetch_all_comments(sub) or []:
             new_comments.append(build_comment_record(c, sub.id, sub.title))
@@ -443,11 +479,11 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         },
     }
     write_community_file(out_path, meta, posts, comments)
-    if getattr(args, "verbose", False):
-        logger.info(
-            f"Community fetch complete for {month_str}: "
-            f"{len(posts)} posts, {len(comments)} comments"
-        )
+    logger.info(
+        f"{month_str}: wrote {len(posts)} posts / {len(comments)} comments "
+        f"(discovery: {', '.join(strategies_used)}, "
+        f"{'complete' if boundary_reached else 'INCOMPLETE'})"
+    )
     return {
         "year": year,
         "month": month,
@@ -481,7 +517,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for year, month in tqdm(months, desc="Months", unit="month", disable=should_disable_tqdm()):
             results.append(_process_month(year, month, args, reddit=reddit))
 
-        if results and getattr(args, "verbose", False):
+        if results:
             total_posts = sum(r["posts"] for r in results)
             total_comments = sum(r["comments"] for r in results)
             incomplete = [f"{r['year']:04d}-{r['month']:02d}" for r in results if not r["complete"]]
