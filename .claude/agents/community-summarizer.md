@@ -72,9 +72,9 @@ instead of guessing. One month per run.
    announcement threads whose body is the content (challenge rules, meetup posts),
    a **body read** is the cheap alternative:
    `community_query bodies --month {month} --ids id1,id2,id3 [--max-chars 1000]`
-   — one call prints provenance-prefixed, sliced selftext for the chosen ids
-   (3–6). Mark these "body read" — they are not drilled and don't count against
-   the drill budget.
+   — one call prints provenance-prefixed, sliced bodies for the chosen post or
+   comment ids (t3_/t1_ prefix optional, 3–6 ids). Mark these "body read" — they
+   are not drilled and don't count against the drill budget.
 7. **Author follow-ups** (optional, ≤ 4): `threads --month {month} --author X
    --top 15` and `search --months {month}:{month} --author X --query <word> --top
    15` for contest organizers or users the map makes notable. Feeds User happenings.
@@ -89,8 +89,9 @@ instead of guessing. One month per run.
 ## Community JSON record shape
 
 For bounded ad-hoc python over `data/community/{month}.json` (the sanctioned
-fallback for needs the `community_query` subcommands don't cover), the structure
-is:
+fallback for needs the `community_query` subcommands don't cover — check
+`community_query schema --month {month}` first, it prints this shape without
+loading the file), the structure is:
 
 ```
 { "meta": {...},                       # month, extracted_at, post_count,

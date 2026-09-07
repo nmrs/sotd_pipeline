@@ -50,6 +50,9 @@ def build_parser() -> argparse.ArgumentParser:
     meta = sub.add_parser("meta", help="Print the meta/metadata block for a month or year")
     _add_period_args(meta)
 
+    schema = sub.add_parser("schema", help="List categories with row counts and entry fields")
+    _add_period_args(schema)
+
     top = sub.add_parser("top", help="Print the top N rows of a category")
     _add_period_args(top)
     top.add_argument("--category", required=True, help="Category key (e.g. razors, soaps)")
@@ -63,9 +66,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exclude entries with fewer shaves (use to match report-table thresholds)",
     )
 
-    history = sub.add_parser("history", help="Rank history for one item across months or one year")
+    history = sub.add_parser(
+        "history", help="Rank history for one item (or a multi-item matrix) across months or years"
+    )
     history.add_argument("--category", required=True, help="Category key (e.g. razors, soaps)")
-    history.add_argument("--name", required=True, help="Item name (case-insensitive exact match)")
+    history.add_argument(
+        "--name",
+        required=True,
+        action="append",
+        help="Item name (case-insensitive exact match); repeat for a side-by-side matrix",
+    )
     history.add_argument(
         "--contains", action="store_true", help="Match by case-insensitive substring"
     )
@@ -204,6 +214,26 @@ def _find_entry(entries: list[dict[str, Any]], name: str, contains: bool) -> dic
     return None
 
 
+def query_schema(args: argparse.Namespace) -> dict[str, Any]:
+    """Return per-category row counts and entry-field unions for the period."""
+    data_dir = Path(args.data_dir)
+    path, _ = _resolve_period(args, data_dir)
+    doc = _load(path)
+    container = _category_container(doc)
+    categories: dict[str, Any] = {}
+    for key in sorted(container):
+        value = container[key]
+        if isinstance(value, list):
+            dicts = [entry for entry in value if isinstance(entry, dict)]
+            fields = sorted({field for entry in dicts for field in entry})
+            categories[key] = {"type": "list", "rows": len(value), "fields": fields}
+        elif isinstance(value, dict):
+            categories[key] = {"type": "dict", "keys": sorted(value)}
+        else:
+            categories[key] = {"type": type(value).__name__}
+    return {"file": str(path), "period": args.month or args.year, "categories": categories}
+
+
 def query_meta(args: argparse.Namespace) -> dict[str, Any]:
     """Return the meta/metadata block for the selected period."""
     data_dir = Path(args.data_dir)
@@ -234,11 +264,12 @@ def _entry_int(entry: dict[str, Any], key: str) -> int:
 
 
 def query_history(args: argparse.Namespace) -> dict[str, Any]:
-    """Return per-month (or annual) rank rows for one item."""
+    """Return per-month (or annual) rank rows for one item, or a multi-item matrix."""
     data_dir = Path(args.data_dir)
     labelled, _is_annual, missing = _select_history_files(args, data_dir)
     if not labelled:
         raise QueryError("no aggregated files match the selected period")
+    names: list[str] = args.name
     rows: list[dict[str, Any]] = []
     skipped: list[str] = list(missing)
     for label, path in labelled:
@@ -246,28 +277,47 @@ def query_history(args: argparse.Namespace) -> dict[str, Any]:
             continue
         doc = _load(path)
         entries = _category_list(doc, args.category)
-        entry = _find_entry(entries, args.name, args.contains)
-        if entry is None:
-            rows.append({"period": label, "rank": None, "shaves": None, "unique_users": None})
-            continue
-        if args.min_shaves > 0 and _entry_int(entry, "shaves") < args.min_shaves:
-            rows.append({"period": label, "rank": None, "shaves": None, "unique_users": None})
-            continue
-        rows.append(
-            {
-                "period": label,
-                "rank": entry.get("rank"),
-                "shaves": entry.get("shaves"),
-                "unique_users": entry.get("unique_users"),
-            }
-        )
-    return {"category": args.category, "name": args.name, "rows": rows, "skipped": skipped}
+        row: dict[str, Any] = {"period": label}
+        for name in names:
+            entry = _find_entry(entries, name, args.contains)
+            info = None
+            if entry is not None and (
+                args.min_shaves <= 0 or _entry_int(entry, "shaves") >= args.min_shaves
+            ):
+                info = {
+                    "rank": entry.get("rank"),
+                    "shaves": entry.get("shaves"),
+                    "unique_users": entry.get("unique_users"),
+                }
+            if len(names) == 1:
+                row.update(info or {"rank": None, "shaves": None, "unique_users": None})
+            else:
+                row[name] = info
+        rows.append(row)
+    if len(names) == 1:
+        return {"category": args.category, "name": names[0], "rows": rows, "skipped": skipped}
+    return {"category": args.category, "names": names, "rows": rows, "skipped": skipped}
 
 
 def _render_meta(block: dict[str, Any]) -> str:
     """Render a meta block as aligned key: value lines."""
     width = max((len(k) for k in block), default=0)
     return "\n".join(f"{k:<{width}}  {json.dumps(v)}" for k, v in block.items())
+
+
+def _render_schema(result: dict[str, Any]) -> str:
+    """Render the schema result as aligned per-category lines."""
+    lines = [f"{result['period']}  {result['file']}"]
+    for key, info in result["categories"].items():
+        if info["type"] == "list":
+            fields = ", ".join(info["fields"]) or "(no dict rows)"
+            lines.append(f"  {key:<24} list  rows={info['rows']}  fields: {fields}")
+        elif info["type"] == "dict":
+            keys = ", ".join(info["keys"])
+            lines.append(f"  {key:<24} dict           keys: {keys}")
+        else:
+            lines.append(f"  {key:<24} {info['type']}")
+    return "\n".join(lines)
 
 
 def _render_rows(rows: list[dict[str, Any]], show_rank: bool = True) -> str:
@@ -305,6 +355,30 @@ def _render_top(entries: list[dict[str, Any]]) -> str:
     return f"{header_line}\n{body}" if table else "(no rows)"
 
 
+def _render_matrix(result: dict[str, Any]) -> str:
+    """Render a multi-item history as a period x item matrix of rank shaves/users cells."""
+    names = result["names"]
+    headers = ["period"] + names
+    table: list[list[str]] = []
+    for row in result["rows"]:
+        cells = [str(row["period"])]
+        for name in names:
+            entry = row.get(name)
+            if entry is None:
+                cells.append("-")
+            else:
+                shaves = entry.get("shaves")
+                cell = f"#{entry.get('rank')}"
+                if shaves is not None:
+                    cell += f" {shaves:,}/{entry.get('unique_users')}"
+                cells.append(cell)
+        table.append(cells)
+    widths = [max(len(headers[i]), *(len(r[i]) for r in table)) for i in range(len(headers))]
+    header_line = "  ".join(h.ljust(widths[i]) for i, h in enumerate(headers))
+    body = "\n".join("  ".join(c.ljust(widths[i]) for i, c in enumerate(r)) for r in table)
+    return f"{header_line}\n{body}" if table else "(no rows)"
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point returning a process exit code."""
     args = build_parser().parse_args(argv)
@@ -312,12 +386,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "meta":
             block = query_meta(args)
             output = json.dumps(block, indent=2) if args.json else _render_meta(block)
+        elif args.command == "schema":
+            result = query_schema(args)
+            output = json.dumps(result, indent=2) if args.json else _render_schema(result)
         elif args.command == "top":
             entries = query_top(args)
             output = json.dumps(entries, indent=2) if args.json else _render_top(entries)
         else:
             result = query_history(args)
-            output = json.dumps(result, indent=2) if args.json else _render_rows(result["rows"])
+            if args.json:
+                output = json.dumps(result, indent=2)
+            else:
+                output = (
+                    _render_matrix(result) if "names" in result else _render_rows(result["rows"])
+                )
             if result["skipped"]:
                 output += f"\n(skipped missing files: {', '.join(result['skipped'])})"
     except QueryError as exc:

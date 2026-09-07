@@ -3,7 +3,7 @@
 Answers the questions agents and shell debugging need about ``data/community/``
 without loading whole month files into context:
 thread listings, one thread with its reconstructed comment tree, bounded
-selftext slices for chosen ids ("body reads"), and
+body slices for chosen post or comment ids ("body reads"), and
 keyword/author search across a bounded month window.
 
 Month/window arguments are always explicit — this structurally enforces the
@@ -181,14 +181,20 @@ def build_parser() -> argparse.ArgumentParser:
     thread.add_argument("--id", required=True, help="Thread ID (with or without t3_ prefix)")
     thread.add_argument("--max-comments", type=int, default=50, help="Max comments rendered")
 
-    bodies = sub.add_parser("bodies", help="Bounded selftext slices for chosen post ids")
+    bodies = sub.add_parser("bodies", help="Bounded body slices for chosen post or comment ids")
     bodies.add_argument("--month", required=True, help="Month (YYYY-MM)")
     bodies.add_argument(
-        "--ids", required=True, help="Comma-separated post ids (t3_ prefix optional)"
+        "--ids",
+        "--id",
+        required=True,
+        help="Comma-separated post or comment ids (t3_/t1_ prefix optional)",
     )
     bodies.add_argument(
         "--max-chars", type=int, default=1000, help="Slice each body to this many chars"
     )
+
+    schema = sub.add_parser("schema", help="Show meta keys, counts, and post/comment record keys")
+    schema.add_argument("--month", required=True, help="Month (YYYY-MM)")
 
     search = sub.add_parser("search", help="Keyword/author search across a bounded window")
     search.add_argument("--months", required=True, help="Window YYYY-MM:YYYY-MM (inclusive)")
@@ -239,6 +245,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             elif args.command == "thread":
                 print(cmd_thread(doc, args.id, max_comments=args.max_comments, as_json=args.json))
+            elif args.command == "schema":
+                print(cmd_schema(doc, as_json=args.json))
             elif args.command == "bodies":
                 ids = [s for s in (i.strip() for i in args.ids.split(",")) if s]
                 if not ids:
@@ -314,15 +322,20 @@ def cmd_thread(doc: dict, thread_id: str, *, max_comments: int = 50, as_json: bo
 
 def cmd_bodies(doc: dict, ids: list, *, max_chars: int = 1000, as_json: bool = False) -> str:
     posts = {p["id"]: p for p in doc["data"].get("posts", [])}
+    comments = {c["id"]: c for c in doc["data"].get("comments", [])}
     found = []
     unknown = []
     for raw in ids:
-        pid = raw.removeprefix("t3_")
-        post = posts.get(pid)
-        if post is None:
-            unknown.append(raw)
+        bare = raw.removeprefix("t3_").removeprefix("t1_")
+        post = posts.get(bare)
+        if post is not None:
+            found.append(("post", bare, post))
+            continue
+        comment = comments.get(bare)
+        if comment is not None:
+            found.append(("comment", bare, comment))
         else:
-            found.append((pid, post))
+            unknown.append(raw)
     if not found:
         raise QueryError(
             f"None of the requested ids exist in {doc['meta'].get('month')}: "
@@ -331,38 +344,90 @@ def cmd_bodies(doc: dict, ids: list, *, max_chars: int = 1000, as_json: bool = F
 
     if as_json:
         payload = []
-        for pid, post in found:
-            body = post.get("selftext") or ""
-            payload.append(
-                {
-                    "id": pid,
-                    "title": post.get("title"),
-                    "author": post.get("author"),
-                    "created_utc": post["created_utc"],
-                    "selftext": body[:max_chars],
-                    "truncated": len(body) > max_chars,
-                }
-            )
+        for kind, rid, rec in found:
+            if kind == "post":
+                body = rec.get("selftext") or ""
+                payload.append(
+                    {
+                        "kind": kind,
+                        "id": rid,
+                        "title": rec.get("title"),
+                        "author": rec.get("author"),
+                        "created_utc": rec["created_utc"],
+                        "selftext": body[:max_chars],
+                        "truncated": len(body) > max_chars,
+                    }
+                )
+            else:
+                body = rec.get("body") or ""
+                payload.append(
+                    {
+                        "kind": kind,
+                        "id": rid,
+                        "thread_id": rec.get("thread_id"),
+                        "thread_title": rec.get("thread_title"),
+                        "author": rec.get("author"),
+                        "created_utc": rec["created_utc"],
+                        "body": body[:max_chars],
+                        "truncated": len(body) > max_chars,
+                    }
+                )
         return json.dumps({"bodies": payload, "unknown_ids": unknown}, indent=2)
 
     lines = []
-    for pid, post in found:
-        lines.append(
-            f"t3_{pid}  {post['created_utc'][:10]}  u/{post.get('author')}  {post.get('title')}"
-        )
-        body = post.get("selftext") or ""
+    for kind, rid, rec in found:
+        if kind == "post":
+            lines.append(
+                f"t3_{rid}  {rec['created_utc'][:10]}  u/{rec.get('author')}  {rec.get('title')}"
+            )
+            body = rec.get("selftext") or ""
+        else:
+            lines.append(
+                f"t1_{rid}  {rec['created_utc'][:10]}  u/{rec.get('author')}  "
+                f"in t3_{rec.get('thread_id')}: {rec.get('thread_title')}"
+            )
+            body = rec.get("body") or ""
         if body:
             lines.append(body[:max_chars])
             if len(body) > max_chars:
                 lines.append(f"(truncated at {max_chars} chars)")
         else:
-            lines.append("(no selftext)")
+            lines.append("(no selftext)" if kind == "post" else "(no body)")
         lines.append("")
     if unknown:
         lines.append(f"(unknown ids: {', '.join(unknown)})")
     while lines and not lines[-1]:
         lines.pop()
     return "\n".join(lines)
+
+
+def cmd_schema(doc: dict, *, as_json: bool = False) -> str:
+    """Show meta keys and record shapes so agents don't probe the JSON by hand."""
+    meta = doc["meta"]
+    posts = doc["data"].get("posts", [])
+    comments = doc["data"].get("comments", [])
+    post_keys = sorted({k for p in posts for k in p})
+    comment_keys = sorted({k for c in comments for k in c})
+    if as_json:
+        return json.dumps(
+            {
+                "month": meta.get("month"),
+                "post_count": len(posts),
+                "comment_count": len(comments),
+                "meta_keys": sorted(meta),
+                "post_keys": post_keys,
+                "comment_keys": comment_keys,
+            },
+            indent=2,
+        )
+    return "\n".join(
+        [
+            f"{meta.get('month')}  posts={len(posts)}  comments={len(comments)}",
+            f"meta keys:    {', '.join(sorted(meta))}",
+            f"post keys:    {', '.join(post_keys)}",
+            f"comment keys: {', '.join(comment_keys)}",
+        ]
+    )
 
 
 def _search_docs(data_dir: str, months: list):

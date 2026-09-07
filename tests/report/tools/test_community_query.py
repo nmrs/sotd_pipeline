@@ -437,6 +437,60 @@ class TestBodies:
         assert doc["bodies"][1]["selftext"] == ""
         assert doc["unknown_ids"] == ["nope"]
 
+    def test_comment_ids_render_with_thread_context(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "c4"]
+        )
+        assert code == 0
+        assert "t1_c4" in out
+        assert "final verdict posted" in out
+        assert "Lather Games wrap-up" in out
+
+    def test_accepts_t1_prefix_in_ids(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "t1_c4"]
+        )
+        assert code == 0
+        assert "final verdict posted" in out
+
+    def test_mixed_post_and_comment_ids_render_in_order(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "c4,disc"],
+        )
+        assert code == 0
+        assert out.index("t1_c4") < out.index("t3_disc")
+
+    def test_comment_json_output_carries_thread_fields(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "--json",
+                "bodies",
+                "--month",
+                "2026-08",
+                "--ids",
+                "c4,disc",
+            ],
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert doc["bodies"][0]["kind"] == "comment"
+        assert doc["bodies"][0]["id"] == "c4"
+        assert doc["bodies"][0]["thread_id"] == "disc"
+        assert doc["bodies"][0]["body"] == "final verdict posted"
+        assert doc["bodies"][1]["kind"] == "post"
+        assert doc["bodies"][1]["selftext"] == "the final standings"
+
+    def test_id_alias_is_accepted(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--id", "c4"]
+        )
+        assert code == 0
+        assert "final verdict posted" in out
+
 
 class TestSearch:
     def test_finds_post_and_comment_across_window(self, data_dir, capsys):
@@ -638,3 +692,37 @@ class TestModuleEntrypoint:
         )
         assert proc.returncode == 1
         assert "No community file" in proc.stderr
+
+
+class TestSchema:
+    def test_schema_shows_meta_and_counts(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "schema", "--month", "2026-08"])
+        assert code == 0
+        assert "2026-08" in out
+        assert "posts=3" in out
+        assert "comments=6" in out
+        assert "extracted_at" in out
+
+    def test_schema_shows_post_and_comment_keys(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "schema", "--month", "2026-08"])
+        assert code == 0
+        assert "title" in out
+        assert "selftext" in out
+        assert "thread_id" in out
+        assert "parent_id" in out
+
+    def test_json_output(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--json", "--data-dir", str(data_dir), "schema", "--month", "2026-08"]
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert doc["post_count"] == 3
+        assert doc["comment_count"] == 6
+        assert "selftext" in doc["post_keys"]
+        assert "body" in doc["comment_keys"]
+
+    def test_missing_month_exits_1(self, capsys):
+        code, _, err = run(capsys, ["--data-dir", "/nonexistent", "schema", "--month", "2025-01"])
+        assert code == 1
+        assert "No community file" in err

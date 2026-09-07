@@ -24,8 +24,10 @@ If either is missing, return an error note instead of guessing.
    All numbers come from `data/aggregated/` — monthly files back to 2016-05 plus
    `annual/YYYY.json`. Monthly files are 500–700 KB: query them, never Read them whole.
    - `.venv/bin/python -m sotd.report.tools.aggregate_query meta --month YYYY-MM`
+   - `.venv/bin/python -m sotd.report.tools.aggregate_query schema --month YYYY-MM` (valid categories + their fields, when a category key or field name is uncertain)
    - `.venv/bin/python -m sotd.report.tools.aggregate_query top --month YYYY-MM --category razors --top 10`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end YYYY-MM`
+   - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 14 --end YYYY-MM` (repeat `--name` for a side-by-side rank matrix)
    Always pass `--end <report month>` to history — months after the report month
    are already aggregated on disk, and a bare `--last N` silently returns them.
    Annual data: pass `--year YYYY` to any subcommand. Pass `--min-shaves 5` when a
@@ -67,6 +69,7 @@ If either is missing, return an error note instead of guessing.
    double-shave days, per-user streaks, who used a product):
    - `.venv/bin/python -m sotd.report.tools.enriched_query user --month YYYY-MM --name scribe__`
    - `.venv/bin/python -m sotd.report.tools.enriched_query usage --month YYYY-MM --category soap --name "Catie's Bubbles - Tonsorium" --by-user`
+   - `.venv/bin/python -m sotd.report.tools.enriched_query timeline --months YYYY-MM:YYYY-MM --category razor --name "Schick Injector" --by-day --by-user` (adoption timing: per-month/day counts plus per-user first/last dates and new-vs-returning status; `--since YYYY-MM` bounds the lookback)
    Global flags (`--json`, `--data-dir`) precede the subcommand.
 8. **Draft 10 bullets** following the voice guide, one insight per bullet.
 9. **Apply**: in `data/report_archive/YYYY-MM-{type}.md`, replace ONLY the placeholder
@@ -251,7 +254,9 @@ recycling this list.
   plus the two prior, gathered in step 4) are storyline/arc context with provenance
   ids — never a numeric source. A community event may explain a number; the number
   itself is always queried. If a bullet rests on a summary claim, verify it with
-  `community_query` before it reaches the draft (the ids are in the summary). A
+  `community_query` before it reaches the draft (the ids are in the summary; `bodies`
+  reads t1_ comment bodies directly, and the contest-target-calendar recipe in
+  `sotd/report/tools/README.md` turns daily-target threads into a per-day list). A
   prior-month event may explain this month's number only when framed as background,
   never as a new numeric claim; never cite months after the report month via the
   summaries — they are month-named, so the wrong month's file is a wrong claim.

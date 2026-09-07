@@ -390,3 +390,137 @@ class TestHistory:
         result = json.loads(out)
         assert result["rows"][0]["rank"] == 1
         assert result["rows"][0]["shaves"] == 70
+
+
+class TestSchema:
+    def test_month_schema_lists_categories_with_counts_and_fields(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "schema", "--month", "2026-01"])
+        assert code == 0
+        assert "razors" in out
+        assert "soaps" in out
+        assert "rows=2" in out
+        assert "unique_users" in out
+
+    def test_schema_marks_non_list_sections(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "schema", "--month", "2026-01"])
+        assert code == 0
+        assert "sample_usage_metrics" in out
+        assert "dict" in out
+        assert "total_samples" in out
+
+    def test_annual_schema(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "schema", "--year", "2025"])
+        assert code == 0
+        assert "razors" in out
+        assert "rows=1" in out
+
+    def test_json_output(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--json", "--data-dir", str(data_dir), "schema", "--month", "2026-01"]
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert doc["categories"]["razors"]["rows"] == 2
+        assert "shaves" in doc["categories"]["razors"]["fields"]
+
+    def test_missing_month_exits_1(self, tmp_path, capsys):
+        code, _, err = run(capsys, ["--data-dir", str(tmp_path), "schema", "--month", "2025-01"])
+        assert code == 1
+        assert "file not found" in err
+
+
+class TestHistoryMultiName:
+    def test_two_names_render_side_by_side(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "razors",
+                "--name",
+                "Blackland Blackbird",
+                "--name",
+                "RazoRock Game Changer",
+                "--last",
+                "2",
+            ],
+        )
+        assert code == 0
+        header = next(line for line in out.splitlines() if "Blackland Blackbird" in line)
+        assert "RazoRock Game Changer" in header
+        assert "2026-02" in out and "2026-03" in out
+        # 2026-02: Blackbird #1 80/3, Game Changer #2 15/3
+        assert "#1 80/3" in out
+        assert "#2 15/3" in out
+
+    def test_json_multi_name_rows_carry_per_name_maps(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "razors",
+                "--name",
+                "Blackland Blackbird",
+                "--name",
+                "RazoRock Game Changer",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 0
+        result = json.loads(out)
+        assert result["names"] == ["Blackland Blackbird", "RazoRock Game Changer"]
+        row = result["rows"][0]
+        assert row["period"] == "2026-03"
+        assert row["RazoRock Game Changer"]["shaves"] == 9
+        assert row["Blackland Blackbird"]["rank"] == 1
+
+    def test_multi_name_absent_item_renders_dash(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "razors",
+                "--name",
+                "Blackland Blackbird",
+                "--name",
+                "Gillette Tech",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 0
+        assert "Gillette Tech" in out
+        # the absent item's 2026-03 cell is "-"
+        row = next(line for line in out.splitlines() if line.startswith("2026-03"))
+        assert row.count("-") >= 1
+
+    def test_single_name_json_shape_unchanged(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "razors",
+                "--name",
+                "Blackland Blackbird",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 0
+        result = json.loads(out)
+        assert result["name"] == "Blackland Blackbird"
+        assert result["rows"][0]["rank"] == 1
