@@ -78,14 +78,17 @@ explicitly with a month ("summarize community context for 2026-09"); the
 when drafting and spawns the summarizer itself when a summary is missing. Design:
 `docs/superpowers/specs/2026-09-06-community-summarizer-design.md`.
 
-Backfill notes: months `.new()` cannot reach fall back to an escalation ladder —
-SOTD-thread seeding from `data/threads/`, timestamp search (2026+ months only:
-Reddit's search returns nothing below the ~8.5-month listing horizon), then the
-archive ladder (Arctic Shift IDs primary — no auth — PullPush only if Arctic
-Shift's results don't already contain every known SOTD thread). An archive result
-set containing every known SOTD thread is treated as month completeness
-(`meta.discovery.complete`); each month's `meta.discovery` records what ran.
-All archive strategies are ID-only: the archive discovers, Reddit supplies content.
+Backfill notes: months older than `REDDIT_HORIZON_FLOOR` (`2026-01`) skip Reddit
+discovery entirely — the ~1000-item `/new` window and its timestamp search cannot
+reach them (as of 2026-09 it ends inside Dec 2025) — and go straight to the ladder:
+SOTD-thread seeding from `data/threads/` (timestamp search runs only for horizon
+months), then the archive ladder (Arctic Shift IDs primary — no auth — PullPush
+only if Arctic Shift's results don't already contain every known SOTD thread). An
+archive result set containing every known SOTD thread is treated as month
+completeness (`meta.discovery.complete`); the listing confirms completeness only
+by actually seeing a post older than the month; each month's `meta.discovery`
+records what ran. All archive strategies are ID-only: the archive discovers,
+Reddit supplies content.
 Reddit serves only ~1000 items per `/new` listing (~8 months of r/wetshaving), so
 older months always need backfill — the fetch cross-checks the listing's completeness
 claim against the pipeline's known SOTD thread IDs and flips `meta.discovery.complete`

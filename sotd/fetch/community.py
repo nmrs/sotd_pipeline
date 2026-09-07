@@ -40,10 +40,12 @@ logger = logging.getLogger(__name__)
 # (30 batches x 100 posts; a target month needs ~4).
 PAGINATION_CAP = 3000
 
-# Reddit's timestamp search returns nothing older than the ~8.5-month /new
-# listing horizon (verified live: 0 posts for 2025-12). Months before this
-# floor skip the strategy; bump the floor as the horizon advances.
-TIMESTAMP_SEARCH_FLOOR = "2026-01"
+# Reddit's /new listing and its timestamp search cannot reach months older
+# than the ~1000-item window: as of 2026-09 the window ends inside Dec 2025
+# (verified live: 0 search hits for 2025-12; the listing walk died mid-month).
+# Months before this floor skip Reddit-side discovery entirely; bump the floor
+# as the horizon advances.
+REDDIT_HORIZON_FLOOR = "2026-01"
 
 
 # --------------------------------------------------------------------------- #
@@ -408,7 +410,7 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
         if found:
             strategies.append("thread_seed")
 
-    if month_str >= TIMESTAMP_SEARCH_FLOOR:
+    if month_str >= REDDIT_HORIZON_FLOOR:
         search_posts = discover_via_search(subreddit, start_ts, end_ts)
         per_strategy["timestamp_search"] = len(search_posts)
         logger.info(f"{month_str}: timestamp_search: found {len(search_posts)} posts")
@@ -418,7 +420,7 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
             found.setdefault(sub.id, sub)
     else:
         logger.info(
-            f"{month_str}: timestamp_search: skipped (month before {TIMESTAMP_SEARCH_FLOOR} floor)"
+            f"{month_str}: timestamp_search: skipped (month before {REDDIT_HORIZON_FLOOR} floor)"
         )
 
     def containment(status: str) -> bool:
@@ -484,28 +486,40 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         out_path.unlink()
 
     subreddit = reddit.subreddit("wetshaving")
-    posts_new, boundary_reached = discover_month_posts(subreddit, year, month)
-    # A listing that ENDED (rather than breaking at the boundary) is not proof
-    # the month is complete: Reddit serves only ~1000 listing items, so for
-    # months older than ~8 listings-worth the listing dies mid-history. Cross-
-    # check against the known SOTD thread IDs — any missing means the month was
-    # never fully enumerated, and the backfill strategies must engage.
-    if boundary_reached and sotd_ids:
-        missing_sotd = sotd_ids - {s.id for s in posts_new}
-        if missing_sotd:
-            logger.warning(
-                f"{month_str}: listing ended without reaching the month boundary; "
-                f"{len(missing_sotd)} known SOTD threads missing — engaging backfill discovery"
-            )
-            boundary_reached = False
-    strategies_used = ["new_listing"]
-    per_strategy = {"new_listing": len(posts_new)}
+    boundary_reached = False
+    posts_new: List = []
     archive_confident = False
-    if not boundary_reached:
-        logger.warning(
-            f"{month_str}: listing could not confirm the month boundary; "
-            "engaging backfill discovery"
+    ran_listing = month_str >= REDDIT_HORIZON_FLOOR
+    if ran_listing:
+        posts_new, boundary_reached = discover_month_posts(subreddit, year, month)
+        # A listing that ENDED (rather than breaking at the boundary) is not proof
+        # the month is complete: Reddit serves only ~1000 listing items, so for
+        # months older than ~8 listings-worth the listing dies mid-history. Cross-
+        # check against the known SOTD thread IDs — any missing means the month was
+        # never fully enumerated, and the backfill strategies must engage.
+        if boundary_reached and sotd_ids:
+            missing_sotd = sotd_ids - {s.id for s in posts_new}
+            if missing_sotd:
+                logger.warning(
+                    f"{month_str}: listing ended without reaching the month boundary; "
+                    f"{len(missing_sotd)} known SOTD threads missing — engaging backfill discovery"
+                )
+                boundary_reached = False
+        strategies_used = ["new_listing"]
+        per_strategy = {"new_listing": len(posts_new)}
+    else:
+        logger.info(
+            f"{month_str}: /new listing skipped (month older than {REDDIT_HORIZON_FLOOR}; "
+            "Reddit's listing cannot reach it)"
         )
+        strategies_used = []
+        per_strategy = {}
+    if not boundary_reached:
+        if ran_listing:
+            logger.warning(
+                f"{month_str}: listing could not confirm the month boundary; "
+                "engaging backfill discovery"
+            )
         backfill_posts, strategies, backfill_counts, archive_confident = _backfill_posts(
             reddit, subreddit, year, month, sotd_ids, args.data_dir
         )

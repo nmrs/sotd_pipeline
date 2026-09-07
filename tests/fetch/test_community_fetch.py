@@ -590,7 +590,7 @@ class TestProcessMonthBackfill:
         # 2025-07 is below the timestamp-search floor: only the seed contributes
         assert result["posts"] == 1 and result["complete"] is False
         meta, data = community.load_community_file(tmp_path / "community" / "2025-07.json")
-        assert set(meta["discovery"]["strategies"]) == {"new_listing", "thread_seed"}
+        assert set(meta["discovery"]["strategies"]) == {"thread_seed"}
         assert data["posts"][0]["in_pipeline"] is True
 
 
@@ -600,32 +600,30 @@ class TestDepthCappedListing:
     than ~8 listings-worth the listing dies mid-history. The known SOTD thread
     IDs are the cross-check: any missing -> not complete -> backfill engages."""
 
-    def test_listing_ended_before_boundary_engages_backfill(self, tmp_path, monkeypatch):
-        # brief's write_threads_fixture pins 2026-08; this month needs threads/2025-12.json
-        (tmp_path / "threads").mkdir(exist_ok=True)
-        (tmp_path / "threads" / "2025-12.json").write_text(
-            json.dumps({"meta": {"month": "2025-12"}, "data": [{"id": "sotd1"}, {"id": "sotd2"}]})
-        )
+    def test_listing_boundary_claim_contradicted_engages_backfill(self, tmp_path, monkeypatch):
+        # within the horizon, a claimed boundary missing known SOTD threads is
+        # downgraded and backfill engages (defense against listing gaps)
+        write_threads_fixture(tmp_path, ["sotd1", "sotd2"])
         monkeypatch.setattr(
             community,
             "discover_month_posts",
-            lambda s, y, m: ([FakeSub("sotd1", "S", ts(2025, 12, 31))], True),
+            lambda s, y, m: ([FakeSub("sotd1", "S", ts(2026, 8, 31))], True),
         )
-        monkeypatch.setattr(
-            community,
-            "_backfill_posts",
-            lambda *a, **k: (
-                [FakeSub("sotd2", "S2", ts(2025, 12, 1))],
-                ["thread_seed"],
-                {"thread_seed": 1},
-                False,
-            ),
-        )
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
-        result = community._process_month(2025, 12, FakeArgs(tmp_path), reddit=FakeReddit())
+
+        class SeedReddit:
+            def submission(self, **kwargs):
+                return FakeSub(kwargs["id"], "S", ts(2026, 8, 5))
+
+            def subreddit(self, _name):
+                return FakeSubreddit([])
+
+        result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=SeedReddit())
         assert result["complete"] is False
         assert result["posts"] == 2
-        meta, data = community.load_community_file(tmp_path / "community" / "2025-12.json")
+        meta, data = community.load_community_file(tmp_path / "community" / "2026-08.json")
         assert meta["discovery"]["complete"] is False
         assert set(meta["discovery"]["strategies"]) == {"new_listing", "thread_seed"}
         assert {p["id"] for p in data["posts"]} == {"sotd1", "sotd2"}
@@ -905,3 +903,45 @@ class TestArcticShiftSubmissionIds:
         )
         posts = community.discover_via_arctic_shift(reddit, 2025, 1)
         assert [s.id for s in posts] == ["a1"]
+
+
+class TestRedditHorizonSkip:
+    """Months older than the listing horizon skip Reddit discovery entirely:
+    no /new walk (it cannot reach them — the 1000-item window ends inside
+    Dec 2025) and no timestamp search; backfill starts at thread_seed."""
+
+    def test_listing_walk_skipped_for_2025(self, tmp_path, monkeypatch, caplog):
+        (tmp_path / "threads").mkdir(exist_ok=True)
+        (tmp_path / "threads" / "2025-12.json").write_text(
+            json.dumps({"meta": {"month": "2025-12"}, "data": [{"id": "sotd1"}]})
+        )
+
+        def walk_must_not_run(s, y, m):
+            raise AssertionError("listing walk ran below the horizon floor")
+
+        monkeypatch.setattr(community, "discover_month_posts", walk_must_not_run)
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+
+        class SeedReddit:
+            def submission(self, **kwargs):
+                return FakeSub(kwargs["id"], "S", ts(2025, 12, 5))
+
+            def subreddit(self, _name):
+                return FakeSubreddit([])
+
+        with caplog.at_level(logging.INFO):
+            result = community._process_month(2025, 12, FakeArgs(tmp_path), reddit=SeedReddit())
+        assert result["complete"] is False
+        meta, _data = community.load_community_file(tmp_path / "community" / "2025-12.json")
+        assert set(meta["discovery"]["strategies"]) == {"thread_seed"}
+        assert "new_listing" not in meta["discovery"]["per_strategy"]
+        assert "listing skipped" in caplog.text
+
+    def test_listing_walk_runs_within_horizon(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: ([], True))
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["complete"] is True
