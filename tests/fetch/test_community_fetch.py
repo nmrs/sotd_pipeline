@@ -299,6 +299,7 @@ class TestProcessMonth:
             "discover_month_posts",
             lambda s, y, m: ([FakeSub("x", "X", ts(2026, 8, 5))], False),
         )
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
@@ -475,6 +476,7 @@ class TestBackfillPosts:
                 return FakeRedditor([author_hit])
 
         monkeypatch.setattr(community, "era_authors", lambda d, months, top_n=100: ["alice"])
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             FakeReddit(), SearchSubreddit([search_hit]), 2025, 7, {"sotd1"}, tmp_path
@@ -485,6 +487,7 @@ class TestBackfillPosts:
             "thread_seed": 1,
             "timestamp_search": 1,
             "author_histories": 1,
+            "arctic_shift": 0,
             "pullpush": 0,
         }
 
@@ -502,13 +505,19 @@ class TestBackfillPosts:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             EmptyReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
         )
         assert posts == []
         assert strategies == []
-        assert per_strategy == {"timestamp_search": 0, "author_histories": 0, "pullpush": 0}
+        assert per_strategy == {
+            "timestamp_search": 0,
+            "author_histories": 0,
+            "arctic_shift": 0,
+            "pullpush": 0,
+        }
 
     def test_dead_seed_skipped(self, monkeypatch, tmp_path):
         class DeadSub:
@@ -531,6 +540,7 @@ class TestBackfillPosts:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             DeadReddit(), FakeSubreddit([]), 2025, 7, {"dead1"}, tmp_path
@@ -541,6 +551,7 @@ class TestBackfillPosts:
             "thread_seed": 0,
             "timestamp_search": 0,
             "author_histories": 0,
+            "arctic_shift": 0,
             "pullpush": 0,
         }
 
@@ -567,6 +578,7 @@ class TestProcessMonthBackfill:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         result = community._process_month(2025, 7, FakeArgs(tmp_path), reddit=FakeReddit())
@@ -823,3 +835,113 @@ class TestProgressNarration:
             community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
         assert "listing pulled" not in caplog.text
         assert "listing discovered 3 posts" in caplog.text
+
+
+class TestArcticShiftSubmissionIds:
+    def test_paginates_until_short_page(self, monkeypatch):
+        pages = [
+            [{"id": f"a{i:02d}", "created_utc": ts(2025, 1, 20)} for i in range(100)],
+            [{"id": "b1", "created_utc": ts(2025, 1, 10)}],
+        ]
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: pages.pop(0))
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        ids = community.arctic_shift_submission_ids(2025, 1)
+        assert ids == {f"a{i:02d}" for i in range(100)} | {"b1"}
+
+    def test_drops_ids_outside_month_window(self, monkeypatch):
+        page = [
+            {"id": "in1", "created_utc": ts(2025, 1, 5)},
+            {"id": "future", "created_utc": ts(2025, 2, 5)},
+        ]
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: page)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        assert community.arctic_shift_submission_ids(2025, 1) == {"in1"}
+
+    def test_archive_failure_yields_empty(self, monkeypatch):
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: None)
+        assert community.arctic_shift_submission_ids(2025, 1) == set()
+
+    def test_repeating_page_stops_without_looping(self, monkeypatch):
+        page = [{"id": "same", "created_utc": ts(2025, 1, 10)} for _ in range(100)]
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: page)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        assert community.arctic_shift_submission_ids(2025, 1) == {"same"}
+
+    def test_logs_page_progress_and_summary(self, monkeypatch, caplog):
+        pages = [
+            [{"id": f"a{i:02d}", "created_utc": ts(2025, 1, 20)} for i in range(100)],
+            [{"id": "b1", "created_utc": ts(2025, 1, 10)}],
+        ]
+        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: pages.pop(0))
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        with caplog.at_level(logging.INFO):
+            ids = community.arctic_shift_submission_ids(2025, 1)
+        assert len(ids) == 101
+        assert "arctic_shift: page 1: 100 ids (oldest 2025-01-20)" in caplog.text
+        assert "arctic_shift: page 2: 1 ids (oldest 2025-01-10)" in caplog.text
+        assert "arctic_shift: 101 archive ids across 2 pages" in caplog.text
+
+    def test_discover_resolves_ids_on_reddit(self, monkeypatch):
+        class ArchiveReddit:
+            def __init__(self):
+                self.n = 0
+
+            def submission(self, **kwargs):
+                if kwargs["id"] == "dead":
+                    raise RuntimeError("gone")
+                return FakeSub(kwargs["id"], "T", ts(2025, 1, 5))
+
+        reddit = ArchiveReddit()
+        monkeypatch.setattr(
+            community,
+            "_arctic_shift_get",
+            lambda url: [
+                {"id": "a1", "created_utc": ts(2025, 1, 5)},
+                {"id": "dead", "created_utc": ts(2025, 1, 6)},
+            ],
+        )
+        posts = community.discover_via_arctic_shift(reddit, 2025, 1)
+        assert [s.id for s in posts] == ["a1"]
+
+
+class TestArcticShiftBackfillWiring:
+    def test_arctic_primary_skips_pullpush(self, monkeypatch, tmp_path):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(
+            community,
+            "discover_via_arctic_shift",
+            lambda r, y, m: [FakeSub("arc1", "A", ts(2025, 7, 5))],
+        )
+
+        def pullpush_must_not_run(r, y, m):
+            raise AssertionError("pullpush ran despite arctic hit")
+
+        monkeypatch.setattr(community, "discover_via_pullpush", pullpush_must_not_run)
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        posts, strategies, per_strategy = community._backfill_posts(
+            FakeReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
+        )
+        assert [s.id for s in posts] == ["arc1"]
+        assert "arctic_shift" in strategies
+        assert "pullpush" not in strategies
+        assert "pullpush" not in per_strategy
+
+    def test_pullpush_fallback_when_arctic_empty(self, monkeypatch, tmp_path):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(
+            community,
+            "discover_via_pullpush",
+            lambda r, y, m: [FakeSub("pp1", "P", ts(2025, 7, 5))],
+        )
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        posts, strategies, per_strategy = community._backfill_posts(
+            FakeReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
+        )
+        assert [s.id for s in posts] == ["pp1"]
+        assert "arctic_shift" not in strategies
+        assert "pullpush" in strategies
+        assert per_strategy["arctic_shift"] == 0
+        assert per_strategy["pullpush"] == 1

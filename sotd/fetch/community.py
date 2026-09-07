@@ -167,36 +167,81 @@ def fetch_all_comments(submission) -> List:
 
 
 # --------------------------------------------------------------------------- #
-# pullpush archive discovery (IDs only; Reddit is the content source)         #
+# archive discovery (PullPush / Arctic Shift: IDs only; Reddit is the content  #
+# source)                                                                     #
 # --------------------------------------------------------------------------- #
 PULLPUSH_UA = "sotd-pipeline-community-fetch/1.0 (personal research tool)"
 PULLPUSH_SLEEP = 4.0  # seconds between archive requests; PullPush 429s hot callers
+ARCTIC_SHIFT_UA = "sotd-pipeline-community-fetch/1.0 (personal research tool)"
+ARCTIC_SHIFT_SLEEP = 1.0  # Arctic Shift tolerates far more; stay polite anyway
 
 
-def _pullpush_get(url: str) -> Optional[List]:
-    """GET one PullPush search page, returning its ``data`` array.
+def _archive_get(url: str, ua: str, source: str) -> Optional[List]:
+    """GET one archive search page (PullPush or Arctic Shift), returning its ``data`` array.
 
-    Retries a 429 twice (PullPush rate-limits hot callers hard); returns None
+    Retries a 429 twice (the archives rate-limit hot callers hard); returns None
     on any failure so callers treat the archive as best-effort.
     """
     for attempt in range(3):
-        req = urllib.request.Request(url, headers={"User-Agent": PULLPUSH_UA})
+        req = urllib.request.Request(url, headers={"User-Agent": ua})
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 obj = json.load(resp)
         except HTTPError as exc:
             if exc.code == 429 and attempt < 2:
-                logger.warning("PullPush rate limit hit (429); cooling off…")
+                logger.warning(f"{source} rate limit hit (429); cooling off…")
                 time.sleep(15)
                 continue
-            logger.warning(f"PullPush request failed: {exc}")
+            logger.warning(f"{source} request failed: {exc}")
             return None
         except Exception as exc:
-            logger.warning(f"PullPush request failed: {exc}")
+            logger.warning(f"{source} request failed: {exc}")
             return None
         data = obj.get("data") if isinstance(obj, dict) else None
         return data if isinstance(data, list) else None
     return None
+
+
+def _pullpush_get(url: str) -> Optional[List]:
+    return _archive_get(url, PULLPUSH_UA, "PullPush")
+
+
+def _arctic_shift_get(url: str) -> Optional[List]:
+    return _archive_get(url, ARCTIC_SHIFT_UA, "Arctic Shift")
+
+
+def _page_archive_ids(
+    *, url_for_page, get_page, start: int, end: int, source: str, sleep_s: float
+) -> Set[str]:
+    """Walk an archive's 100-row pages backward from the month end, collecting IDs.
+
+    ``url_for_page(cursor)`` builds the request; ``get_page(url)`` returns the
+    page's ``data`` array or None. Stops on the month boundary, a short page, a
+    page already seen (stale archive), or a fetch failure.
+    """
+    ids: Set[str] = set()
+    cursor = end
+    page_no = 0
+    while True:
+        page_no += 1
+        data = get_page(url_for_page(cursor))
+        if not data:
+            break
+        page_ids = {s["id"] for s in data if s.get("id") and start <= int(s["created_utc"]) < end}
+        if page_ids <= ids:
+            break  # archive served a page we already have; stop instead of looping
+        ids |= page_ids
+        oldest = min(int(s["created_utc"]) for s in data)
+        logger.info(
+            f"{source}: page {page_no}: {len(data)} ids "
+            f"(oldest {datetime.fromtimestamp(oldest, tz=timezone.utc):%Y-%m-%d})"
+        )
+        if oldest <= start or len(data) < 100:
+            break
+        cursor = oldest
+        time.sleep(sleep_s)
+    logger.info(f"{source}: {len(ids)} archive ids across {page_no} pages")
+    return ids
 
 
 def pullpush_submission_ids(year: int, month: int) -> Set[str]:
@@ -214,42 +259,60 @@ def pullpush_submission_ids(year: int, month: int) -> Set[str]:
     )
     end = int(end_dt.timestamp())
 
-    ids: Set[str] = set()
-    cursor = end
-    page_no = 0
-    while True:
-        page_no += 1
-        url = (
+    def url_for(cursor: int) -> str:
+        return (
             "https://api.pullpush.io/reddit/search/submission/"
             f"?subreddit=wetshaving&after={start}&before={cursor}&size=100&sort=desc"
         )
-        data = _pullpush_get(url)
-        if not data:
-            break
-        page_ids = {s["id"] for s in data if s.get("id") and start <= int(s["created_utc"]) < end}
-        if page_ids <= ids:
-            break  # archive served a page we already have; stop instead of looping
-        ids |= page_ids
-        oldest = min(int(s["created_utc"]) for s in data)
-        logger.info(
-            f"pullpush: page {page_no}: {len(data)} ids "
-            f"(oldest {datetime.fromtimestamp(oldest, tz=timezone.utc):%Y-%m-%d})"
-        )
-        if oldest <= start or len(data) < 100:
-            break
-        cursor = oldest
-        time.sleep(PULLPUSH_SLEEP)
-    logger.info(f"pullpush: {len(ids)} archive ids across {page_no} pages")
-    return ids
+
+    return _page_archive_ids(
+        url_for_page=url_for,
+        get_page=_pullpush_get,
+        start=start,
+        end=end,
+        source="pullpush",
+        sleep_s=PULLPUSH_SLEEP,
+    )
 
 
-def discover_via_pullpush(reddit, year: int, month: int) -> List:
-    """Archive-discovered posts: PullPush supplies IDs, Reddit supplies content.
+def arctic_shift_submission_ids(year: int, month: int) -> Set[str]:
+    """Submission IDs the Arctic Shift archive holds for the month (IDs only).
 
-    IDs that no longer resolve on Reddit (deleted posts) are skipped — the same
-    dead-seed skip as thread seeding.
+    Same discovery semantics as the PullPush strategy; Arctic Shift is the
+    primary archive (no auth, generous rate limits, full 2025 coverage measured
+    — e.g. 2025-12: 150 posts, 31/31 known SOTD ids, in 2 requests).
     """
-    ids = pullpush_submission_ids(year, month)
+    start = int(datetime(year, month, 1, tzinfo=timezone.utc).timestamp())
+    end_dt = (
+        datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        if month == 12
+        else datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    )
+    end = int(end_dt.timestamp())
+
+    def url_for(cursor: int) -> str:
+        return (
+            "https://arctic-shift.photon-reddit.com/api/posts/search"
+            f"?subreddit=wetshaving&after={start}&before={cursor}&limit=100&sort=desc"
+        )
+
+    return _page_archive_ids(
+        url_for_page=url_for,
+        get_page=_arctic_shift_get,
+        start=start,
+        end=end,
+        source="arctic_shift",
+        sleep_s=ARCTIC_SHIFT_SLEEP,
+    )
+
+
+def _resolve_archive_posts(reddit, ids: Set[str], year: int, month: int, source: str) -> List:
+    """Convert archive IDs to fresh Reddit submissions; dead IDs are skipped.
+
+    The shared ID-only invariant: the archive discovers, Reddit supplies
+    content (each ID resolves via ``reddit.submission(id=...)`` — not subject
+    to the ~1000-item listing limit — and comment trees are fetched fresh).
+    """
     out: List = []
     for sid in sorted(ids):
         sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
@@ -257,9 +320,21 @@ def discover_via_pullpush(reddit, year: int, month: int) -> List:
         if title:
             out.append(sub)
     logger.info(
-        f"{year:04d}-{month:02d}: pullpush: resolved {len(out)} of {len(ids)} archive ids on Reddit"
+        f"{year:04d}-{month:02d}: {source}: resolved {len(out)} of {len(ids)} archive ids on Reddit"
     )
     return out
+
+
+def discover_via_pullpush(reddit, year: int, month: int) -> List:
+    """PullPush archive-discovered posts (IDs only; Reddit supplies content)."""
+    ids = pullpush_submission_ids(year, month)
+    return _resolve_archive_posts(reddit, ids, year, month, "pullpush")
+
+
+def discover_via_arctic_shift(reddit, year: int, month: int) -> List:
+    """Arctic Shift archive-discovered posts (IDs only; Reddit supplies content)."""
+    ids = arctic_shift_submission_ids(year, month)
+    return _resolve_archive_posts(reddit, ids, year, month, "arctic_shift")
 
 
 # --------------------------------------------------------------------------- #
@@ -323,9 +398,10 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
 
     Strategies: known SOTD thread IDs (IDs seeded from data/threads/ — full
     trees are fetched fresh later; the pipeline's top-level-only comment store
-    is never reused), PullPush archive IDs (IDs only, converted to fresh
-    submissions), timestamp search, and active-author submission histories.
-    A strategy is listed only when it contributed at least one post.
+    is never reused), timestamp search, archive IDs (Arctic Shift primary;
+    PullPush runs only when Arctic Shift contributes nothing — same ID-only
+    semantics, converted to fresh submissions), and active-author submission
+    histories. A strategy is listed only when it contributed at least one post.
     Returns (posts, strategies_used, per_strategy_raw_counts).
     """
     month_str = f"{year:04d}-{month:02d}"
@@ -361,12 +437,21 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     for sub in search_posts:
         found.setdefault(sub.id, sub)
 
-    pullpush_posts = discover_via_pullpush(reddit, year, month)
-    per_strategy["pullpush"] = len(pullpush_posts)
-    if pullpush_posts:
-        strategies.append("pullpush")
-    for sub in pullpush_posts:
+    arctic_posts = discover_via_arctic_shift(reddit, year, month)
+    per_strategy["arctic_shift"] = len(arctic_posts)
+    if arctic_posts:
+        strategies.append("arctic_shift")
+    for sub in arctic_posts:
         found.setdefault(sub.id, sub)
+
+    if not arctic_posts:
+        # fallback: only when the primary archive contributed nothing
+        pullpush_posts = discover_via_pullpush(reddit, year, month)
+        per_strategy["pullpush"] = len(pullpush_posts)
+        if pullpush_posts:
+            strategies.append("pullpush")
+        for sub in pullpush_posts:
+            found.setdefault(sub.id, sub)
 
     authors = era_authors(data_dir, [month_str])
     logger.info(f"{month_str}: author_histories: scanning {len(authors)} era authors…")
