@@ -591,11 +591,12 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> Tuple[int, st
             logger.debug(f"{phase} phase args: {phase_args}")
 
         # Capture stdout during phase execution
-        # For fetch_json phase, use Tee-like stdout to show output in real-time
-        # while still capturing it for final output
+        # For long-running interactive phases (fetch_json, community), use
+        # Tee-like stdout to show output in real-time while still capturing it
+        # for final output. Everything else is buffered until phase completion.
         output_buffer = io.StringIO()
 
-        if phase == "fetch_json":
+        if phase in ("fetch_json", "community"):
             # Create a Tee-like stdout that writes to both buffer and real stdout
             class TeeStdout:
                 def __init__(self, buffer: io.StringIO, real_stdout: Any):
