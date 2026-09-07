@@ -563,3 +563,63 @@ class TestProcessMonthBackfill:
             "timestamp_search",
         }
         assert data["posts"][0]["in_pipeline"] is True
+
+
+class TestDepthCappedListing:
+    """A .new() listing that ends without reaching the month boundary is not
+    proof of completeness: Reddit serves only ~1000 items, so for months older
+    than ~8 listings-worth the listing dies mid-history. The known SOTD thread
+    IDs are the cross-check: any missing -> not complete -> backfill engages."""
+
+    def test_listing_ended_before_boundary_engages_backfill(self, tmp_path, monkeypatch):
+        # brief's write_threads_fixture pins 2026-08; this month needs threads/2025-12.json
+        (tmp_path / "threads").mkdir(exist_ok=True)
+        (tmp_path / "threads" / "2025-12.json").write_text(
+            json.dumps({"meta": {"month": "2025-12"}, "data": [{"id": "sotd1"}, {"id": "sotd2"}]})
+        )
+        monkeypatch.setattr(
+            community,
+            "discover_month_posts",
+            lambda s, y, m: ([FakeSub("sotd1", "S", ts(2025, 12, 31))], True),
+        )
+        monkeypatch.setattr(
+            community,
+            "_backfill_posts",
+            lambda *a, **k: (
+                [FakeSub("sotd2", "S2", ts(2025, 12, 1))],
+                ["thread_seed"],
+                {"thread_seed": 1},
+            ),
+        )
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        result = community._process_month(2025, 12, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["complete"] is False
+        assert result["posts"] == 2
+        meta, data = community.load_community_file(tmp_path / "community" / "2025-12.json")
+        assert meta["discovery"]["complete"] is False
+        assert set(meta["discovery"]["strategies"]) == {"new_listing", "thread_seed"}
+        assert {p["id"] for p in data["posts"]} == {"sotd1", "sotd2"}
+
+    def test_full_sotd_coverage_keeps_listing_verdict(self, tmp_path, monkeypatch):
+        # boundary claimed True and every known SOTD thread present: no downgrade,
+        # no backfill (the 2026-01-style month that genuinely enumerated).
+        (tmp_path / "threads").mkdir(exist_ok=True)
+        (tmp_path / "threads" / "2026-01.json").write_text(
+            json.dumps({"meta": {"month": "2026-01"}, "data": [{"id": "sotd1"}, {"id": "sotd2"}]})
+        )
+        monkeypatch.setattr(
+            community,
+            "discover_month_posts",
+            lambda s, y, m: (
+                [FakeSub("sotd1", "S", ts(2026, 1, 3)), FakeSub("sotd2", "S2", ts(2026, 1, 20))],
+                True,
+            ),
+        )
+        monkeypatch.setattr(community, "_backfill_posts", lambda *a, **k: ([], [], {}))
+        monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
+        result = community._process_month(2026, 1, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["complete"] is True
+        meta, data = community.load_community_file(tmp_path / "community" / "2026-01.json")
+        assert meta["discovery"]["complete"] is True
+        assert meta["discovery"]["strategies"] == ["new_listing"]
+        assert {p["id"] for p in data["posts"]} == {"sotd1", "sotd2"}

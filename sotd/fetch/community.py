@@ -273,6 +273,19 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
 
     subreddit = reddit.subreddit("wetshaving")
     posts_new, boundary_reached = discover_month_posts(subreddit, year, month)
+    # A listing that ENDED (rather than breaking at the boundary) is not proof
+    # the month is complete: Reddit serves only ~1000 listing items, so for
+    # months older than ~8 listings-worth the listing dies mid-history. Cross-
+    # check against the known SOTD thread IDs — any missing means the month was
+    # never fully enumerated, and the backfill strategies must engage.
+    if boundary_reached and sotd_ids:
+        missing_sotd = sotd_ids - {s.id for s in posts_new}
+        if missing_sotd:
+            logger.warning(
+                f"{month_str}: listing ended without reaching the month boundary; "
+                f"{len(missing_sotd)} known SOTD threads missing — engaging backfill discovery"
+            )
+            boundary_reached = False
     strategies_used = ["new_listing"]
     per_strategy = {"new_listing": len(posts_new)}
     if not boundary_reached:
