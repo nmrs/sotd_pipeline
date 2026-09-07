@@ -177,12 +177,13 @@ class TestDiscoverMonthPosts:
         assert [s.id for s in in_month] == ["sep2", "sep1"]
         assert reached is True
 
-    def test_exhausted_listing_counts_as_boundary(self):
-        # a young sub whose entire history is inside the month
+    def test_exhausted_listing_without_boundary_is_incomplete(self):
+        # the listing ended while still inside the month: we did NOT get every
+        # post, even if the SOTD threads all showed up — archives must confirm
         subreddit = FakeSubreddit([FakeSub("a", "A", ts(2026, 9, 5))])
         in_month, reached = community.discover_month_posts(subreddit, 2026, 9)
         assert len(in_month) == 1
-        assert reached is True
+        assert reached is False
 
     def test_cap_before_boundary_is_incomplete(self, monkeypatch):
         monkeypatch.setattr(community, "PAGINATION_CAP", 3)
@@ -420,140 +421,145 @@ class TestDiscoverViaSearch:
         assert "timestamp search unavailable" in caplog.text
 
 
-class TestEraAuthors:
-    def test_ranks_by_comment_count(self, tmp_path):
-        (tmp_path / "comments").mkdir()
-        comments = [
-            {"id": "x1", "author": "busy", "created_utc": "2025-07-01T00:00:00Z"},
-            {"id": "x2", "author": "busy", "created_utc": "2025-07-02T00:00:00Z"},
-            {"id": "x3", "author": "quiet", "created_utc": "2025-07-03T00:00:00Z"},
-            {"id": "x4", "author": "[deleted]", "created_utc": "2025-07-04T00:00:00Z"},
-        ]
-        (tmp_path / "comments" / "2025-07.json").write_text(
-            json.dumps({"meta": {"month": "2025-07"}, "data": comments})
-        )
-        authors = community.era_authors(tmp_path, ["2025-07"])
-        assert authors == ["busy", "quiet"]
+class TestBackfillLadder:
+    """Listing first; when unconfirmed: thread_seed, timestamp search (2026+
+    only), then the archive ladder — Arctic Shift, PullPush — ending complete
+    the moment the archive results contain every known SOTD thread."""
 
-
-class TestDiscoverViaAuthors:
-    def test_filters_window_and_dedupes(self):
-        a1 = FakeSub("a1", "A1", ts(2025, 7, 5))
-        a2 = FakeSub("a2", "A2", ts(2025, 7, 20))
-        old = FakeSub("old", "Old", ts(2025, 5, 1))
-
-        class FakeReddit:
-            def __init__(self):
-                self._people = {"alice": FakeRedditor([a1, old]), "bob": FakeRedditor([a2])}
-
-            def redditor(self, name):
-                return self._people[name]
-
-        reddit = FakeReddit()
-        result = community.discover_via_authors(
-            reddit, ["alice", "alice", "bob"], ts(2025, 7, 1), ts(2025, 8, 1)
-        )
-        assert sorted(s.id for s in result) == ["a1", "a2"]
-
-
-class TestBackfillPosts:
-    def test_union_seeds_search_and_authors(self, monkeypatch, tmp_path):
-        sotd_sub = FakeSub("sotd1", "SOTD Thread", ts(2025, 7, 4))
-        search_hit = FakeSub("sr1", "From search", ts(2025, 7, 11))
-        author_hit = FakeSub("au1", "From author", ts(2025, 7, 21))
-
-        write_threads_fixture(tmp_path, ["sotd1"])
-
-        class FakeReddit:
+    @staticmethod
+    def _seed_reddit(subs):
+        class SeedReddit:
             def submission(self, **kwargs):
-                assert kwargs.get("id") == "sotd1"
-                return sotd_sub
+                sub = subs.get(kwargs["id"])
+                if sub is None:
+                    raise RuntimeError("gone")
+                return sub
 
             def subreddit(self, _name):
-                return SearchSubreddit([search_hit])
+                return FakeSubreddit([])
 
-            def redditor(self, name):
-                return FakeRedditor([author_hit])
+        return SeedReddit()
 
-        monkeypatch.setattr(community, "era_authors", lambda d, months, top_n=100: ["alice"])
-        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
-        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
-        posts, strategies, per_strategy = community._backfill_posts(
-            FakeReddit(), SearchSubreddit([search_hit]), 2025, 7, {"sotd1"}, tmp_path
+    def test_arctic_containment_ends_ladder(self, monkeypatch, tmp_path, caplog):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(
+            community,
+            "discover_via_arctic_shift",
+            lambda r, y, m: [
+                FakeSub("sotd1", "A", ts(2026, 8, 10)),
+                FakeSub("extra", "E", ts(2026, 8, 12)),
+            ],
         )
-        assert {s.id for s in posts} == {"sotd1", "sr1", "au1"}
-        assert strategies == ["thread_seed", "timestamp_search", "author_histories"]
+
+        def pullpush_must_not_run(r, y, m):
+            raise AssertionError("pullpush ran despite arctic containment")
+
+        monkeypatch.setattr(community, "discover_via_pullpush", pullpush_must_not_run)
+        with caplog.at_level(logging.INFO):
+            posts, strategies, per_strategy, confident = community._backfill_posts(
+                self._seed_reddit({"sotd1": FakeSub("sotd1", "S", ts(2026, 8, 5))}),
+                FakeSubreddit([]),
+                2026,
+                8,
+                {"sotd1"},
+                tmp_path,
+            )
+        assert confident is True
+        assert strategies == ["thread_seed", "arctic_shift"]
+        assert per_strategy == {"thread_seed": 1, "timestamp_search": 0, "arctic_shift": 2}
+        assert {s.id for s in posts} == {"sotd1", "extra"}
+        assert "archive containment: all 1 known SOTD threads present" in caplog.text
+        assert (
+            "backfill discovery: 2 unique posts via strategies: thread_seed, arctic_shift"
+            in caplog.text
+        )
+
+    def test_pullpush_fallback_completes_containment(self, monkeypatch, tmp_path, caplog):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(
+            community,
+            "discover_via_pullpush",
+            lambda r, y, m: [
+                FakeSub("sotd1", "P1", ts(2026, 8, 3)),
+                FakeSub("sotd2", "P2", ts(2026, 8, 9)),
+            ],
+        )
+        with caplog.at_level(logging.INFO):
+            posts, strategies, per_strategy, confident = community._backfill_posts(
+                self._seed_reddit(
+                    {
+                        "sotd1": FakeSub("sotd1", "S1", ts(2026, 8, 5)),
+                        "sotd2": FakeSub("sotd2", "S2", ts(2026, 8, 6)),
+                    }
+                ),
+                FakeSubreddit([]),
+                2026,
+                8,
+                {"sotd1", "sotd2"},
+                tmp_path,
+            )
+        assert confident is True
+        assert strategies == ["thread_seed", "pullpush"]
+        assert "archive containment: 0 of 2 known SOTD threads present" in caplog.text
+        assert "engaging pullpush fallback" in caplog.text
+        assert "archive containment: all 2 known SOTD threads present" in caplog.text
+        assert {s.id for s in posts} == {"sotd1", "sotd2"}
+
+    def test_ladder_exhausted_stays_incomplete(self, monkeypatch, tmp_path, caplog):
+        write_threads_fixture(tmp_path, [])
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
+        with caplog.at_level(logging.INFO):
+            posts, strategies, per_strategy, confident = community._backfill_posts(
+                self._seed_reddit({"sotd1": FakeSub("sotd1", "S", ts(2026, 8, 5))}),
+                FakeSubreddit([]),
+                2026,
+                8,
+                {"sotd1"},
+                tmp_path,
+            )
+        assert confident is False
+        assert "archive containment: 0 of 1 known SOTD threads present" in caplog.text
+        assert "month incomplete" in caplog.text
         assert per_strategy == {
             "thread_seed": 1,
-            "timestamp_search": 1,
-            "author_histories": 1,
-            "arctic_shift": 0,
-            "pullpush": 0,
-        }
-
-    def test_strategy_omitted_when_empty(self, monkeypatch, tmp_path):
-        write_threads_fixture(tmp_path, [])
-
-        class EmptyReddit:
-            def submission(self, **kwargs):
-                raise RuntimeError("none")
-
-            def subreddit(self, _name):
-                return SearchSubreddit([])
-
-            def redditor(self, name):
-                return FakeRedditor([])
-
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
-        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
-        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
-        posts, strategies, per_strategy = community._backfill_posts(
-            EmptyReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
-        )
-        assert posts == []
-        assert strategies == []
-        assert per_strategy == {
             "timestamp_search": 0,
-            "author_histories": 0,
             "arctic_shift": 0,
             "pullpush": 0,
         }
 
-    def test_dead_seed_skipped(self, monkeypatch, tmp_path):
-        class DeadSub:
-            """Fetched seed whose lazy title fetch raises (praw NotFound in production)."""
+    def test_timestamp_search_skipped_before_floor(self, monkeypatch, tmp_path, caplog):
+        def search_must_not_run(s, a, b):
+            raise AssertionError("timestamp search ran below the floor")
 
-            id = "dead1"
+        monkeypatch.setattr(community, "discover_via_search", search_must_not_run)
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
+        with caplog.at_level(logging.INFO):
+            _posts, _strategies, per_strategy, _confident = community._backfill_posts(
+                self._seed_reddit({}), FakeSubreddit([]), 2025, 7, set(), tmp_path
+            )
+        assert "timestamp_search" not in per_strategy
+        assert "timestamp_search: skipped" in caplog.text
 
-            @property
-            def title(self):
-                raise RuntimeError("gone")
-
-        class DeadReddit:
-            def submission(self, **kwargs):
-                return DeadSub()
-
-            def subreddit(self, _name):
-                return SearchSubreddit([])
-
-            def redditor(self, name):
-                return FakeRedditor([])
-
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
-        monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
-        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
-        posts, strategies, per_strategy = community._backfill_posts(
-            DeadReddit(), FakeSubreddit([]), 2025, 7, {"dead1"}, tmp_path
+    def test_timestamp_search_runs_from_floor(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(
+            community, "discover_via_search", lambda s, a, b: [FakeSub("srch", "S", ts(2026, 8, 6))]
         )
-        assert posts == []
-        assert strategies == []
-        assert per_strategy == {
-            "thread_seed": 0,
-            "timestamp_search": 0,
-            "author_histories": 0,
-            "arctic_shift": 0,
-            "pullpush": 0,
-        }
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
+        _posts, _strategies, per_strategy, _confident = community._backfill_posts(
+            self._seed_reddit({}), FakeSubreddit([]), 2026, 8, set(), tmp_path
+        )
+        assert per_strategy["timestamp_search"] == 1
+
+    def test_author_strategy_removed(self):
+        assert not hasattr(community, "era_authors")
+        assert not hasattr(community, "discover_via_authors")
 
 
 class TestProcessMonthBackfill:
@@ -577,18 +583,14 @@ class TestProcessMonthBackfill:
             def redditor(self, name):
                 return FakeRedditor([])
 
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
         monkeypatch.setattr(community, "_arctic_shift_get", lambda url: [])
         monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         result = community._process_month(2025, 7, FakeArgs(tmp_path), reddit=FakeReddit())
-        assert result["posts"] == 2 and result["complete"] is False
+        # 2025-07 is below the timestamp-search floor: only the seed contributes
+        assert result["posts"] == 1 and result["complete"] is False
         meta, data = community.load_community_file(tmp_path / "community" / "2025-07.json")
-        assert set(meta["discovery"]["strategies"]) == {
-            "new_listing",
-            "thread_seed",
-            "timestamp_search",
-        }
+        assert set(meta["discovery"]["strategies"]) == {"new_listing", "thread_seed"}
         assert data["posts"][0]["in_pipeline"] is True
 
 
@@ -616,6 +618,7 @@ class TestDepthCappedListing:
                 [FakeSub("sotd2", "S2", ts(2025, 12, 1))],
                 ["thread_seed"],
                 {"thread_seed": 1},
+                False,
             ),
         )
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
@@ -642,7 +645,7 @@ class TestDepthCappedListing:
                 True,
             ),
         )
-        monkeypatch.setattr(community, "_backfill_posts", lambda *a, **k: ([], [], {}))
+        monkeypatch.setattr(community, "_backfill_posts", lambda *a, **k: ([], [], {}, False))
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         result = community._process_month(2026, 1, FakeArgs(tmp_path), reddit=FakeReddit())
         assert result["complete"] is True
@@ -749,45 +752,45 @@ class TestDiscoverViaPullpush:
 class TestProgressNarration:
     """Runtime narration: strategies log what they are doing at INFO."""
 
-    def test_backfill_logs_each_strategy_result(self, monkeypatch, tmp_path, caplog):
+    def test_backfill_logs_ladder_and_containment(self, monkeypatch, tmp_path, caplog):
         write_threads_fixture(tmp_path, [])
-        seed_subs = {
-            "seed1": FakeSub("seed1", "S1", ts(2025, 7, 5)),
-            "seed2": FakeSub("seed2", "S2", ts(2025, 7, 9)),
-        }
+        monkeypatch.setattr(
+            community,
+            "discover_via_search",
+            lambda s, a, b: [FakeSub("srch", "S3", ts(2026, 8, 15))],
+        )
+        monkeypatch.setattr(
+            community,
+            "discover_via_arctic_shift",
+            lambda r, y, m: [
+                FakeSub("sotd1", "A", ts(2026, 8, 10)),
+                FakeSub("sotd2", "A2", ts(2026, 8, 11)),
+            ],
+        )
+
+        def pullpush_must_not_run(r, y, m):
+            raise AssertionError("pullpush ran despite arctic containment")
+
+        monkeypatch.setattr(community, "discover_via_pullpush", pullpush_must_not_run)
 
         class SeedReddit:
             def submission(self, **kwargs):
-                sub = seed_subs.get(kwargs["id"])
-                if sub is None:
-                    raise RuntimeError("gone")
-                return sub
+                return FakeSub(kwargs["id"], "S", ts(2026, 8, 5))
 
             def subreddit(self, _name):
                 return FakeSubreddit([])
 
-            def redditor(self, _name):
-                return FakeRedditor([])
-
-        monkeypatch.setattr(
-            community,
-            "discover_via_search",
-            lambda s, a, b: [FakeSub("srch", "S3", ts(2025, 7, 15))],
-        )
-        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
         with caplog.at_level(logging.INFO):
-            posts, strategies, per_strategy = community._backfill_posts(
-                SeedReddit(), FakeSubreddit([]), 2025, 7, {"seed1", "seed2"}, tmp_path
+            posts, strategies, per_strategy, confident = community._backfill_posts(
+                SeedReddit(), FakeSubreddit([]), 2026, 8, {"sotd1", "sotd2"}, tmp_path
             )
-        assert {s.id for s in posts} == {"seed1", "seed2", "srch"}
+        assert {s.id for s in posts} == {"sotd1", "sotd2", "srch"}
         assert "thread_seed: resolving 2 known SOTD threads" in caplog.text
         assert "thread_seed: resolved 2 of 2" in caplog.text
         assert "timestamp_search: found 1 posts" in caplog.text
-        assert "author_histories: scanning 0 era authors" in caplog.text
-        assert "author_histories: scanned 0 era authors, found 0 posts" in caplog.text
+        assert "archive containment: all 2 known SOTD threads present" in caplog.text
         assert (
-            "backfill discovery: 3 unique posts via strategies: thread_seed, timestamp_search"
+            "backfill discovery: 3 unique posts via strategies: thread_seed, timestamp_search, arctic_shift"
             in caplog.text
         )
 
@@ -825,9 +828,9 @@ class TestProgressNarration:
         with caplog.at_level(logging.INFO):
             in_month, reached = community.discover_month_posts(FakeSubreddit(subs), 2026, 9)
         assert len(in_month) == 1001
-        assert reached is True
+        assert reached is False
         assert "listing pulled 1000 items" in caplog.text
-        assert "listing discovered 1001 posts (boundary reached)" in caplog.text
+        assert "listing discovered 1001 posts (boundary not reached)" in caplog.text
 
     def test_listing_progress_silent_below_1000(self, caplog):
         subs = [FakeSub(f"p{i:03d}", f"P{i}", ts(2026, 9, 15)) for i in range(3)]
@@ -902,46 +905,3 @@ class TestArcticShiftSubmissionIds:
         )
         posts = community.discover_via_arctic_shift(reddit, 2025, 1)
         assert [s.id for s in posts] == ["a1"]
-
-
-class TestArcticShiftBackfillWiring:
-    def test_arctic_primary_skips_pullpush(self, monkeypatch, tmp_path):
-        write_threads_fixture(tmp_path, [])
-        monkeypatch.setattr(
-            community,
-            "discover_via_arctic_shift",
-            lambda r, y, m: [FakeSub("arc1", "A", ts(2025, 7, 5))],
-        )
-
-        def pullpush_must_not_run(r, y, m):
-            raise AssertionError("pullpush ran despite arctic hit")
-
-        monkeypatch.setattr(community, "discover_via_pullpush", pullpush_must_not_run)
-        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
-        posts, strategies, per_strategy = community._backfill_posts(
-            FakeReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
-        )
-        assert [s.id for s in posts] == ["arc1"]
-        assert "arctic_shift" in strategies
-        assert "pullpush" not in strategies
-        assert "pullpush" not in per_strategy
-
-    def test_pullpush_fallback_when_arctic_empty(self, monkeypatch, tmp_path):
-        write_threads_fixture(tmp_path, [])
-        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
-        monkeypatch.setattr(
-            community,
-            "discover_via_pullpush",
-            lambda r, y, m: [FakeSub("pp1", "P", ts(2025, 7, 5))],
-        )
-        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
-        monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
-        posts, strategies, per_strategy = community._backfill_posts(
-            FakeReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
-        )
-        assert [s.id for s in posts] == ["pp1"]
-        assert "arctic_shift" not in strategies
-        assert "pullpush" in strategies
-        assert per_strategy["arctic_shift"] == 0
-        assert per_strategy["pullpush"] == 1

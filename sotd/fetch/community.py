@@ -40,6 +40,11 @@ logger = logging.getLogger(__name__)
 # (30 batches x 100 posts; a target month needs ~4).
 PAGINATION_CAP = 3000
 
+# Reddit's timestamp search returns nothing older than the ~8.5-month /new
+# listing horizon (verified live: 0 posts for 2025-12). Months before this
+# floor skip the strategy; bump the floor as the horizon advances.
+TIMESTAMP_SEARCH_FLOOR = "2026-01"
+
 
 # --------------------------------------------------------------------------- #
 # record building                                                             #
@@ -140,14 +145,13 @@ def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
     for sub in pulled or []:
         dt = datetime.fromtimestamp(sub.created_utc, tz=timezone.utc)
         if dt < start:
-            # listings are newest-first: everything after this is older
+            # listings are newest-first: seeing a post OLDER than the month is
+            # the only proof the walk enumerated the whole month (a listing
+            # that merely ends is not — Reddit serves only ~1000 items)
             boundary_reached = True
             break
         if dt < end_exclusive:
             in_month.append(sub)
-    if not boundary_reached and pulled is not None and len(pulled) < PAGINATION_CAP:
-        # listing exhausted without crossing the boundary
-        boundary_reached = True
     logger.info(
         f"{month_str}: listing discovered {len(in_month)} posts "
         f"(boundary {'reached' if boundary_reached else 'not reached'})"
@@ -363,46 +367,20 @@ def discover_via_search(subreddit, start_ts: int, end_ts: int) -> List:
     return list(raw) if raw else []
 
 
-def era_authors(data_dir, months: Sequence[str], top_n: int = 100) -> List[str]:
-    """Most active comment authors across *months* (from the pipeline's SOTD comments)."""
-    counts: dict = {}
-    for m in months:
-        existing = load_month_file(get_data_dir(data_dir) / "comments" / f"{m}.json")
-        if existing is None:
-            continue
-        for c in existing[1]:
-            a = c.get("author")
-            if a and a != "[deleted]":
-                counts[a] = counts.get(a, 0) + 1
-    return [a for a, _ in sorted(counts.items(), key=lambda kv: -kv[1])[:top_n]]
-
-
-def discover_via_authors(reddit, authors: Sequence[str], start_ts: int, end_ts: int) -> List:
-    """Submission histories of active authors, filtered to the month window."""
-    out: List = []
-    seen: Set[str] = set()
-    for name in authors:
-        redditor = safe_call(reddit.redditor, name)
-        if redditor is None:
-            continue
-        stream = safe_call(lambda _r=redditor: list(islice(_r.submissions.new(limit=1000), 1000)))
-        for sub in stream or []:
-            if start_ts <= sub.created_utc <= end_ts and sub.id not in seen:
-                seen.add(sub.id)
-                out.append(sub)
-    return out
-
-
 def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir):
-    """Best-effort discovery union for months ``new_listing`` cannot reach.
+    """Escalation ladder for months ``new_listing`` cannot confirm.
 
-    Strategies: known SOTD thread IDs (IDs seeded from data/threads/ — full
-    trees are fetched fresh later; the pipeline's top-level-only comment store
-    is never reused), timestamp search, archive IDs (Arctic Shift primary;
-    PullPush runs only when Arctic Shift contributes nothing — same ID-only
-    semantics, converted to fresh submissions), and active-author submission
-    histories. A strategy is listed only when it contributed at least one post.
-    Returns (posts, strategies_used, per_strategy_raw_counts).
+    thread_seed resolves every known SOTD thread ID fresh from Reddit (full
+    trees are fetched later; the pipeline's top-level-only comment store is
+    never reused), timestamp search runs only from TIMESTAMP_SEARCH_FLOOR
+    (Reddit's search returns nothing below the listing horizon), then the
+    archive ladder escalates: Arctic Shift first, PullPush only if the Arctic
+    Shift results do not already contain every known SOTD thread. Containment
+    — an archive result set holding every known SOTD thread — is treated as
+    month completeness; author-submission scanning was removed (it pulled in
+    other subreddits and never earned confidence).
+    A strategy is listed only when it contributed at least one post.
+    Returns (posts, strategies_used, per_strategy_raw_counts, archive_confident).
     """
     month_str = f"{year:04d}-{month:02d}"
     start_dt = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -412,6 +390,7 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
         else datetime(year, month + 1, 1, tzinfo=timezone.utc)
     )
     start_ts, end_ts = int(start_dt.timestamp()), int(end_dt.timestamp())
+    known: Set[str] = sotd_ids or set()
 
     found: dict = {}
     strategies: List[str] = []
@@ -429,13 +408,37 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
         if found:
             strategies.append("thread_seed")
 
-    search_posts = discover_via_search(subreddit, start_ts, end_ts)
-    per_strategy["timestamp_search"] = len(search_posts)
-    logger.info(f"{month_str}: timestamp_search: found {len(search_posts)} posts")
-    if search_posts:
-        strategies.append("timestamp_search")
-    for sub in search_posts:
-        found.setdefault(sub.id, sub)
+    if month_str >= TIMESTAMP_SEARCH_FLOOR:
+        search_posts = discover_via_search(subreddit, start_ts, end_ts)
+        per_strategy["timestamp_search"] = len(search_posts)
+        logger.info(f"{month_str}: timestamp_search: found {len(search_posts)} posts")
+        if search_posts:
+            strategies.append("timestamp_search")
+        for sub in search_posts:
+            found.setdefault(sub.id, sub)
+    else:
+        logger.info(
+            f"{month_str}: timestamp_search: skipped (month before {TIMESTAMP_SEARCH_FLOOR} floor)"
+        )
+
+    def containment(status: str) -> bool:
+        if not known:
+            return False
+        present = len(known & archive_result_ids)
+        if present == len(known):
+            logger.info(
+                f"{month_str}: archive containment: all {len(known)} known SOTD threads "
+                f"present in archive results — month complete"
+            )
+            return True
+        logger.info(
+            f"{month_str}: archive containment: {present} of {len(known)} known SOTD threads "
+            f"present — {status}"
+        )
+        return False
+
+    archive_result_ids: Set[str] = set()
+    archive_confident = False
 
     arctic_posts = discover_via_arctic_shift(reddit, year, month)
     per_strategy["arctic_shift"] = len(arctic_posts)
@@ -443,34 +446,25 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
         strategies.append("arctic_shift")
     for sub in arctic_posts:
         found.setdefault(sub.id, sub)
-
-    if not arctic_posts:
-        # fallback: only when the primary archive contributed nothing
+    archive_result_ids |= {s.id for s in arctic_posts}
+    if containment("engaging pullpush fallback"):
+        archive_confident = True
+    else:
         pullpush_posts = discover_via_pullpush(reddit, year, month)
         per_strategy["pullpush"] = len(pullpush_posts)
         if pullpush_posts:
             strategies.append("pullpush")
         for sub in pullpush_posts:
             found.setdefault(sub.id, sub)
-
-    authors = era_authors(data_dir, [month_str])
-    logger.info(f"{month_str}: author_histories: scanning {len(authors)} era authors…")
-    author_posts = discover_via_authors(reddit, authors, start_ts, end_ts)
-    per_strategy["author_histories"] = len(author_posts)
-    logger.info(
-        f"{month_str}: author_histories: scanned {len(authors)} era authors, "
-        f"found {len(author_posts)} posts"
-    )
-    if author_posts:
-        strategies.append("author_histories")
-    for sub in author_posts:
-        found.setdefault(sub.id, sub)
+        archive_result_ids |= {s.id for s in pullpush_posts}
+        if containment("month incomplete"):
+            archive_confident = True
 
     logger.info(
         f"{month_str}: backfill discovery: {len(found)} unique posts via strategies: "
         f"{', '.join(strategies) if strategies else '(none)'}"
     )
-    return list(found.values()), strategies, per_strategy
+    return list(found.values()), strategies, per_strategy, archive_confident
 
 
 # --------------------------------------------------------------------------- #
@@ -506,12 +500,13 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
             boundary_reached = False
     strategies_used = ["new_listing"]
     per_strategy = {"new_listing": len(posts_new)}
+    archive_confident = False
     if not boundary_reached:
         logger.warning(
-            f"{month_str}: pagination cap reached before month boundary; "
-            "falling back to backfill discovery"
+            f"{month_str}: listing could not confirm the month boundary; "
+            "engaging backfill discovery"
         )
-        backfill_posts, strategies, backfill_counts = _backfill_posts(
+        backfill_posts, strategies, backfill_counts, archive_confident = _backfill_posts(
             reddit, subreddit, year, month, sotd_ids, args.data_dir
         )
         by_id = {s.id: s for s in posts_new}
@@ -551,6 +546,9 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
             "complete": boundary_reached,
         }
 
+    # completeness: the listing enumerated the month, OR the archive results
+    # contained every known SOTD thread (the backfill ladder's success signal)
+    complete = boundary_reached or archive_confident
     meta = {
         "month": month_str,
         "extracted_at": datetime.now(timezone.utc).isoformat(),
@@ -559,7 +557,7 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         "in_pipeline_post_count": sum(1 for p in posts if p.get("in_pipeline")),
         "discovery": {
             "strategies": strategies_used,
-            "complete": boundary_reached,
+            "complete": complete,
             "per_strategy": per_strategy,
         },
     }
@@ -567,14 +565,14 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
     logger.info(
         f"{month_str}: wrote {len(posts)} posts / {len(comments)} comments "
         f"(discovery: {', '.join(strategies_used)}, "
-        f"{'complete' if boundary_reached else 'INCOMPLETE'})"
+        f"{'complete' if complete else 'INCOMPLETE'})"
     )
     return {
         "year": year,
         "month": month,
         "posts": len(posts),
         "comments": len(comments),
-        "complete": boundary_reached,
+        "complete": complete,
     }
 
 
