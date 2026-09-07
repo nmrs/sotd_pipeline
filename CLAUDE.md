@@ -81,6 +81,10 @@ when drafting and spawns the summarizer itself when a summary is missing. Design
 Backfill notes: months `.new()` cannot reach fall back to best-effort discovery
 (SOTD-thread seeding from `data/threads/` + timestamp search + active-author
 histories); each month's `meta.discovery` records what ran and how complete it is.
+Reddit serves only ~1000 items per `/new` listing (~8 months of r/wetshaving), so
+older months always need backfill — the fetch cross-checks the listing's completeness
+claim against the pipeline's known SOTD thread IDs and flips `meta.discovery.complete`
+to `false` when the listing ended mid-history (never silently partial).
 Run the voice-era backfill with `python run.py community --range 2025-07:2026-08 --force`.
 
 ### Legacy Direct Phase Execution
