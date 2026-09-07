@@ -70,8 +70,13 @@ python -m sotd.report.tools.community_query threads --month 2026-09 --top 20
 python -m sotd.report.tools.community_query search --months 2026-08:2026-09 --query "group buy"
 ```
 
-Consumption (summarizer agent → observations-drafter) is a later project — see the
-spec's Future work section.
+Consumption: the `community-summarizer` agent (`.claude/agents/community-summarizer.md`)
+distills one fetched month into `data/community/summaries/YYYY-MM.md` — storyline
+context with thread/comment provenance, gitignored, never a numeric source. Invoke it
+explicitly with a month ("summarize community context for 2026-09"); the
+`observations-drafter` reads that summary (plus the two prior months', as arc context)
+when drafting and spawns the summarizer itself when a summary is missing. Design:
+`docs/superpowers/specs/2026-09-06-community-summarizer-design.md`.
 
 Backfill notes: months `.new()` cannot reach fall back to best-effort discovery
 (SOTD-thread seeding from `data/threads/` + timestamp search + active-author

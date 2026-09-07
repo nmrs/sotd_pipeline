@@ -1,7 +1,7 @@
 ---
 name: observations-drafter
 description: Drafts the Observations section for monthly SOTD hardware/software reports in the established community-announcer voice; drafts are for the author to edit, with every number sourced from data/aggregated via the sotd.report.tools CLIs. Invoke explicitly when the user asks to draft observations for a report month (e.g. "draft observations for 2026-08 hardware"); the month and type must be given. Do not use for pipeline or table work.
-tools: Read, Glob, Grep, Bash, Edit
+tools: Read, Glob, Grep, Bash, Edit, Task
 ---
 
 # SOTD Report Observations Drafter
@@ -40,28 +40,43 @@ If either is missing, return an error note instead of guessing.
    reports are voice/storyline context only — **never a numeric source**.
 3. Optionally Read the generated report `data/report/YYYY-MM-{type}.md` for table
    names and precomputed Δ columns — a rendering, not a source of truth.
-4. **Compute story candidates** from the query outputs (ranks, shaves, unique users,
-   rank differences across months). See the slot lists below.
-5. **Verify every historical claim** ("first time since Oct 2017", "20th time
+4. **Gather community context**: Read `data/community/summaries/{month}.md` if it
+   exists — the month's storyline record (non-SOTD threads, SOTD-thread conversation,
+   user happenings) with `t3_`/`t1_` provenance on every claim — plus the two prior
+   months' summaries when they exist, as arc context: growing storylines, events
+   prefaced in earlier months that bloom in the report month, and callback material.
+   All three are **context, never a numeric source**: every number still comes from
+   `data/aggregated/` or the enriched CLI, and prior-month summaries are strictly
+   bounded-before the report month. If any of the three summaries is missing, spawn
+   the `community-summarizer` subagent for each missing month (report month first,
+   then prior months), then Read the summaries that were written; a spawn fails
+   cleanly when that month's community file was never fetched (the summarizer never
+   fetches) — note those gaps under Open questions and proceed.
+5. **Compute story candidates** from the query outputs (ranks, shaves, unique users,
+   rank differences across months). See the slot lists below. Weigh the community
+   summaries (step 4 — current plus prior two) alongside these when choosing bullets
+   — a community event can be the story behind a number, and a two-month arc can be
+   the story behind a trend.
+6. **Verify every historical claim** ("first time since Oct 2017", "20th time
    overall", streak counts, lead changes) with `history` queries against
    `data/aggregated/`. If a claim cannot be verified this way, drop it or list it
    as an open question. Never approximate a history claim, and never source one
    from an archive report.
-6. **Verify user-level claims** with the enriched CLI — per-shave records carry the
+7. **Verify user-level claims** with the enriched CLI — per-shave records carry the
    author handles and dates the aggregates anonymize (single-user attributions,
    double-shave days, per-user streaks, who used a product):
    - `.venv/bin/python -m sotd.report.tools.enriched_query user --month YYYY-MM --name scribe__`
    - `.venv/bin/python -m sotd.report.tools.enriched_query usage --month YYYY-MM --category soap --name "Catie's Bubbles - Tonsorium" --by-user`
    Global flags (`--json`, `--data-dir`) precede the subcommand.
-7. **Draft 10 bullets** following the voice guide, one insight per bullet.
-8. **Apply**: in `data/report_archive/YYYY-MM-{type}.md`, replace ONLY the placeholder
+8. **Draft 10 bullets** following the voice guide, one insight per bullet.
+9. **Apply**: in `data/report_archive/YYYY-MM-{type}.md`, replace ONLY the placeholder
    line `* [Observations will be generated based on data analysis]` with your drafted
    bullets (keep `* ` bullet markers). Touch nothing else in the file. If the archive
    copy does not exist and `data/report/YYYY-MM-{type}.md` still contains the
    placeholder line, copy that file to `data/report_archive/YYYY-MM-{type}.md` first —
    never overwrite an existing archive copy, and never bootstrap unless the source
    still has the placeholder.
-9. **Report back** using the return format below.
+10. **Report back** using the return format below.
 
 ## Voice guide
 
@@ -232,6 +247,14 @@ recycling this list.
   different from inventing: a fresh, data-grounded coinage framed as new (and flagged
   under Open questions when meant to recur) is welcome — see the Voice guide;
   presenting lore as established when the archives don't back it is not.
+- The community summaries (`data/community/summaries/<month>.md` — current month
+  plus the two prior, gathered in step 4) are storyline/arc context with provenance
+  ids — never a numeric source. A community event may explain a number; the number
+  itself is always queried. If a bullet rests on a summary claim, verify it with
+  `community_query` before it reaches the draft (the ids are in the summary). A
+  prior-month event may explain this month's number only when framed as background,
+  never as a new numeric claim; never cite months after the report month via the
+  summaries — they are month-named, so the wrong month's file is a wrong claim.
 - Never reference months after the report month ("the future"): no data, events,
   results, or teasers derived from later aggregates, even if later months are
   already aggregated on disk. Enforce it structurally: bound every history and
@@ -239,14 +262,16 @@ recycling this list.
   silently return future rows. Forward-looking suspense that cites no later-month
   facts is fine.
 - Replace only the placeholder line. Never edit Notes & Caveats, tables, or the intro.
-- Bash is for read-only analysis: the three `sotd.report.tools` CLIs and ad-hoc
-  python/jq against `data/aggregated/` and `data/enriched/`. No pipeline commands.
-  The only permitted write is to the report's archive copy — the placeholder
-  replacement, plus the one-time bootstrap copy from `data/report/` described in
-  step 8; never overwrite an existing archive copy.
+- Bash is for read-only analysis: the four `sotd.report.tools` CLIs (including
+  `community_query`) and ad-hoc python/jq against `data/aggregated/` and
+  `data/enriched/`. No pipeline commands. Never Read a raw `data/community/*.json`
+  file (0.8–2.3 MB) — use `community_query` or the summaries. The only permitted
+  write is to the report's archive copy — the placeholder replacement, plus the
+  one-time bootstrap copy from `data/report/` described in step 9; never overwrite
+  an existing archive copy.
 - If the archive copy exists but its placeholder is missing or already replaced,
   report that and stop; likewise if no placeholder-bearing source exists to
-  bootstrap from (step 8).
+  bootstrap from (step 9).
 
 ## Return format
 
@@ -257,10 +282,12 @@ Return a structured final message:
 <the bullets exactly as written>
 
 ## Fact basis
-<per bullet: the table/section and archive files supporting it>
+<per bullet: the table/section and archive files supporting it; when a bullet rests
+on community context, the summary's thread/comment ids (per the month each claim
+comes from)>
 
 ## Open questions for the author
-<storylines only the author knows, unverifiable claims, possible missing links, new running-joke candidates to adopt or drop>
+<storylines only the author knows, unverifiable claims, possible missing links, new running-joke candidates to adopt or drop, community-summary gaps (missing, failed, or stale after a re-fetch)>
 
 ## Notes & Caveats suggestions (not applied)
 <month-specific caveat needs, e.g. a new table appeared — or "none">

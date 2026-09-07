@@ -220,13 +220,18 @@ future months" rule (same mechanism as `--end` on history queries).
   `meta.discovery.per_strategy`.
 - **observations-drafter wiring**: summaries as primary community context, or direct
   `community_query` access. Touch nothing in `.claude/agents/` until that design.
+  Both items designed 2026-09-06 in
+  `2026-09-06-community-summarizer-design.md` — summaries at
+  `data/community/summaries/YYYY-MM.md`; the drafter reads the current and prior two
+  summaries and spawns the summarizer when one is missing.
 
 ---
 
 ## Out of scope (explicitly)
 
 - **Consumption**: the community-summarizer agent and ALL observations-drafter
-  changes (deferred — designed in a later project against real data).
+  changes (deferred — designed in a later project against real data; that design
+  landed as `2026-09-06-community-summarizer-design.md`).
 - Extract/match/enrich/aggregate/report changes — community data feeds no pipeline
   phase.
 - Full-history backfill to 2016-05 (only the voice era 2025-07 → 2026-08).
