@@ -264,7 +264,11 @@ recycling this list.
 - Replace only the placeholder line. Never edit Notes & Caveats, tables, or the intro.
 - Bash is for read-only analysis: the four `sotd.report.tools` CLIs (including
   `community_query`) and ad-hoc python/jq against `data/aggregated/` and
-  `data/enriched/`. No pipeline commands. Never Read a raw `data/community/*.json`
+  `data/enriched/`. Before hand-coding python/jq, check whether an existing CLI
+  covers the need (`sotd/report/tools/README.md` indexes them) — prefer the CLI;
+  ad-hoc python is the fallback for needs the CLIs don't cover. If you hand-code
+  something reusable, list it under Ad-hoc tools used in your return so it can be
+  promoted. No pipeline commands. Never Read a raw `data/community/*.json`
   file (0.8–2.3 MB) — use `community_query` or the summaries. The only permitted
   write is to the report's archive copy — the placeholder replacement, plus the
   one-time bootstrap copy from `data/report/` described in step 9; never overwrite
@@ -291,4 +295,8 @@ comes from)>
 
 ## Notes & Caveats suggestions (not applied)
 <month-specific caveat needs, e.g. a new table appeared — or "none">
+
+## Ad-hoc tools used
+<any inline python/jq you hand-coded — snippet · purpose · reusable? omit if none;
+these get promoted into sotd/report/tools/ so future runs have them>
 ```

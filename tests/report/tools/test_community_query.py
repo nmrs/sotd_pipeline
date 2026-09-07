@@ -326,6 +326,118 @@ class TestThread:
         assert doc["truncated"] is True
 
 
+class TestBodies:
+    def test_renders_bounded_bodies_for_chosen_ids(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "disc,quiet"],
+        )
+        assert code == 0
+        assert "t3_disc" in out
+        assert "the final standings" in out
+        assert "(no selftext)" in out  # quiet has an empty body
+
+    def test_accepts_t3_prefix_in_ids(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "t3_disc"],
+        )
+        assert code == 0
+        assert "the final standings" in out
+
+    def test_max_chars_slices_long_body_and_marks_truncated(self, data_dir, capsys):
+        make_community_file(
+            data_dir / "community" / "2026-07.json",
+            "2026-07",
+            posts=[
+                {
+                    "id": "longpost",
+                    "title": "Austere August rules",
+                    "selftext": "x" * 2500,
+                    "author": "mod",
+                    "created_utc": "2026-07-01T06:00:00Z",
+                    "score": 5,
+                    "num_comments": 0,
+                    "flair": None,
+                    "url": "u9",
+                    "locked": False,
+                    "stickied": False,
+                    "in_pipeline": False,
+                }
+            ],
+            comments=[],
+        )
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "bodies",
+                "--month",
+                "2026-07",
+                "--ids",
+                "longpost",
+                "--max-chars",
+                "500",
+            ],
+        )
+        assert code == 0
+        assert "x" * 500 in out
+        assert "x" * 501 not in out
+        assert "(truncated at 500 chars)" in out
+
+    def test_unknown_ids_listed_while_found_ones_render(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "disc,nope"],
+        )
+        assert code == 0
+        assert "the final standings" in out
+        assert "(unknown ids: nope)" in out
+
+    def test_all_unknown_ids_exits_1(self, data_dir, capsys):
+        code, _, err = run(
+            capsys, ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", "nope"]
+        )
+        assert code == 1
+        assert "nope" in err
+
+    def test_empty_ids_exits_1(self, data_dir, capsys):
+        code, _, err = run(
+            capsys, ["--data-dir", str(data_dir), "bodies", "--month", "2026-08", "--ids", " , "]
+        )
+        assert code == 1
+        assert "No ids" in err
+
+    def test_missing_month_exits_1(self, capsys):
+        code, _, err = run(
+            capsys, ["--data-dir", "/nonexistent", "bodies", "--month", "2025-01", "--ids", "x"]
+        )
+        assert code == 1
+        assert "No community file" in err
+
+    def test_json_output_carries_sliced_selftext_and_unknown_ids(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "--json",
+                "bodies",
+                "--month",
+                "2026-08",
+                "--ids",
+                "disc,quiet,nope",
+            ],
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert [b["id"] for b in doc["bodies"]] == ["disc", "quiet"]
+        assert doc["bodies"][0]["selftext"] == "the final standings"
+        assert doc["bodies"][1]["selftext"] == ""
+        assert doc["unknown_ids"] == ["nope"]
+
+
 class TestSearch:
     def test_finds_post_and_comment_across_window(self, data_dir, capsys):
         code, out, _ = run(

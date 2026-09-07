@@ -2,7 +2,8 @@
 
 Answers the questions agents and shell debugging need about ``data/community/``
 without loading whole month files into context:
-thread listings, one thread with its reconstructed comment tree, and
+thread listings, one thread with its reconstructed comment tree, bounded
+selftext slices for chosen ids ("body reads"), and
 keyword/author search across a bounded month window.
 
 Month/window arguments are always explicit — this structurally enforces the
@@ -180,6 +181,15 @@ def build_parser() -> argparse.ArgumentParser:
     thread.add_argument("--id", required=True, help="Thread ID (with or without t3_ prefix)")
     thread.add_argument("--max-comments", type=int, default=50, help="Max comments rendered")
 
+    bodies = sub.add_parser("bodies", help="Bounded selftext slices for chosen post ids")
+    bodies.add_argument("--month", required=True, help="Month (YYYY-MM)")
+    bodies.add_argument(
+        "--ids", required=True, help="Comma-separated post ids (t3_ prefix optional)"
+    )
+    bodies.add_argument(
+        "--max-chars", type=int, default=1000, help="Slice each body to this many chars"
+    )
+
     search = sub.add_parser("search", help="Keyword/author search across a bounded window")
     search.add_argument("--months", required=True, help="Window YYYY-MM:YYYY-MM (inclusive)")
     search.add_argument("--query", required=True, help="Case-insensitive substring")
@@ -229,6 +239,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             elif args.command == "thread":
                 print(cmd_thread(doc, args.id, max_comments=args.max_comments, as_json=args.json))
+            elif args.command == "bodies":
+                ids = [s for s in (i.strip() for i in args.ids.split(",")) if s]
+                if not ids:
+                    raise QueryError("No ids given (--ids is comma-separated)")
+                print(cmd_bodies(doc, ids, max_chars=args.max_chars, as_json=args.json))
             else:
                 raise QueryError(f"Unknown command: {args.command}")
         return 0
@@ -294,6 +309,59 @@ def cmd_thread(doc: dict, thread_id: str, *, max_comments: int = 50, as_json: bo
     walk(f"t3_{pid}", 0)
     if truncated:
         lines.append(f"(comments after the first {max_comments} not shown)")
+    return "\n".join(lines)
+
+
+def cmd_bodies(doc: dict, ids: list, *, max_chars: int = 1000, as_json: bool = False) -> str:
+    posts = {p["id"]: p for p in doc["data"].get("posts", [])}
+    found = []
+    unknown = []
+    for raw in ids:
+        pid = raw.removeprefix("t3_")
+        post = posts.get(pid)
+        if post is None:
+            unknown.append(raw)
+        else:
+            found.append((pid, post))
+    if not found:
+        raise QueryError(
+            f"None of the requested ids exist in {doc['meta'].get('month')}: "
+            f"{', '.join(unknown or ids)}"
+        )
+
+    if as_json:
+        payload = []
+        for pid, post in found:
+            body = post.get("selftext") or ""
+            payload.append(
+                {
+                    "id": pid,
+                    "title": post.get("title"),
+                    "author": post.get("author"),
+                    "created_utc": post["created_utc"],
+                    "selftext": body[:max_chars],
+                    "truncated": len(body) > max_chars,
+                }
+            )
+        return json.dumps({"bodies": payload, "unknown_ids": unknown}, indent=2)
+
+    lines = []
+    for pid, post in found:
+        lines.append(
+            f"t3_{pid}  {post['created_utc'][:10]}  u/{post.get('author')}  {post.get('title')}"
+        )
+        body = post.get("selftext") or ""
+        if body:
+            lines.append(body[:max_chars])
+            if len(body) > max_chars:
+                lines.append(f"(truncated at {max_chars} chars)")
+        else:
+            lines.append("(no selftext)")
+        lines.append("")
+    if unknown:
+        lines.append(f"(unknown ids: {', '.join(unknown)})")
+    while lines and not lines[-1]:
+        lines.pop()
     return "\n".join(lines)
 
 

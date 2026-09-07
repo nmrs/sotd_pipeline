@@ -180,6 +180,27 @@ Data persists at each stage, enabling individual phase re-runs and debugging.
 - **Analysis Tools**: Utilities in `sotd/match/tools/` for debugging matches
 - **WebUI – WSDB Alignment Analyzer**: Two modes—**Alignment** (bidirectional pipeline vs WSDB, catalog or match files, two tabs) and **Slug finder** (pipeline scents from soaps.yaml → suggested WSDB slugs from software.json, catalog-only, single “Slug suggestions” view)
 
+## Agent tool promotion
+
+The report agents (`.claude/agents/*`) hand-code ad-hoc python/jq when the shared
+CLIs don't cover a need and report those tools in their return ("Ad-hoc tools
+used"). After an agent run, promote the reusable ones so future runs don't
+re-invent them:
+
+- **Land the code** in `sotd/report/tools/`: a new subcommand on an existing CLI
+  (e.g. `community_query bodies`, promoted from the summarizer's body reads) or a
+  new module. Month/window bounding and bounded output by design — no whole-file
+  dumps.
+- **Full repo standard**: argparse CLI (`python -m sotd.report.tools.*`), pytest
+  coverage in `tests/report/tools/`, lint/typecheck clean.
+- **Docs in the same change**: add it to `sotd/report/tools/README.md` and to the
+  workflow section of the agent `.md` that should use it — a tool isn't done until
+  agents know it exists.
+
+Agents never write source themselves (their read-only rule stays); the main
+session does the promotion. Before hand-coding a query, check
+`sotd/report/tools/README.md` — the tool may already exist.
+
 ## Agent memory
 
 This repo is tracked in the **AgentMemory** vault (`github.com/nmrs/agent-memory`; local clone `../agent-memory`). Before substantive work, read the vault's `INDEX.md` and follow its protocol: `git pull --rebase` first, attribute changes (agent-id + date), record durable knowledge only.

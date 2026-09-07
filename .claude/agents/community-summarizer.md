@@ -23,19 +23,20 @@ instead of guessing. One month per run.
 
 ## Workflow
 
-1. **Validate prerequisites.** Glob `data/community/{month}.json`. If missing, stop
-   with an error note: "No community record for {month} — fetch it first with
-   `python run.py community {month} --force` (author-run; needs praw.ini). Do not
-   fetch it yourself."
+1. **Validate prerequisites.** Glob `data/community/{month}.json` (use the Glob
+   tool; if your harness has no Glob, an `ls` via Bash is the equivalent). If
+   missing, stop with an error note: "No community record for {month} — fetch it
+   first with `python run.py community {month} --force` (author-run; needs
+   praw.ini). Do not fetch it yourself."
 2. **Check for an existing summary.** Glob `data/community/summaries/{month}.md`. If
    it exists, run one `meta --month {month}` and compare the fresh `extracted_at`
    against the one recorded in the summary header. Report "exists and current" or
    "exists and stale (source re-fetched <ts>)" and stop — never overwrite an existing
    summary unless the invoking prompt explicitly says to regenerate.
 3. **Read the meta.** `.venv/bin/python -m sotd.report.tools.community_query meta
-   --month {month}`. This is the only numeric source for the summary; it is recorded
-   verbatim under Coverage. Record completeness is assumed — the file exists, the
-   month is complete; add no completeness commentary.
+   --month {month}`. This is the only numeric source for the summary; the full
+   block is recorded verbatim under Coverage. Record completeness is assumed — the
+   file exists, the month is complete; add no completeness commentary.
 4. **Map the month** with four `threads` listings (the map, not the file):
    - `... community_query threads --month {month} --filter non-sotd --sort comments
      --top 25` — the inventory spine.
@@ -55,12 +56,25 @@ instead of guessing. One month per run.
    group buy, giveaway, meetup, winner, discontinued/RIP), the event-calendar term
    for that month (August → Austere August; June → Lather Games; …), and notable
    authors. Keep every hit's `t3_`/`t1_` id — those ids are the provenance.
+
+   Month membership is by **thread date**: a comment inside a `{month}` thread is
+   fair game even when the comment itself is dated later (late replies land in
+   Aug/Sep inside a July thread). Do not flag this as a gap or artifact in the
+   summary — it is expected behavior, not noise.
 6. **Drill.** `... community_query thread --month {month} --id <id> --max-comments
    50` for at most 8 threads: the top non-SOTD threads from the map, 2–3 SOTD
    dailies tied to events found in step 5, and any thread a search made central.
    Escalate exactly one thread — the month's clearly central storyline — to
    `--max-comments 100`, and say so in the Threads drilled section. Abandon duds
    after the first screen.
+
+   Drill budget is scarce; not every announced thread deserves one. For short
+   announcement threads whose body is the content (challenge rules, meetup posts),
+   a **body read** is the cheap alternative:
+   `community_query bodies --month {month} --ids id1,id2,id3 [--max-chars 1000]`
+   — one call prints provenance-prefixed, sliced selftext for the chosen ids
+   (3–6). Mark these "body read" — they are not drilled and don't count against
+   the drill budget.
 7. **Author follow-ups** (optional, ≤ 4): `threads --month {month} --author X
    --top 15` and `search --months {month}:{month} --author X --query <word> --top
    15` for contest organizers or users the map makes notable. Feeds User happenings.
@@ -72,6 +86,28 @@ instead of guessing. One month per run.
    off here — likely bullet-worthy"), drafted voice is not.
 9. **Report back** using the return format below.
 
+## Community JSON record shape
+
+For bounded ad-hoc python over `data/community/{month}.json` (the sanctioned
+fallback for needs the `community_query` subcommands don't cover), the structure
+is:
+
+```
+{ "meta": {...},                       # month, extracted_at, post_count,
+                                       # comment_count, in_pipeline_post_count,
+                                       # discovery{strategies, complete}, ...
+  "data": {
+    "posts":    [ { id, title, selftext, author, created_utc (ISO 8601),
+                    score, num_comments, flair, url, locked, stickied,
+                    in_pipeline }, ... ],
+    "comments": [ { id, ... }, ... ]   # full comment trees
+  } }
+```
+
+Posts are keyed `id` (t3 id without prefix), body is `selftext`, date is ISO
+`created_utc`. Print slices only (e.g. `selftext[:1000]` for chosen ids) — never
+dump the file or a full post list.
+
 ## Summary file contract
 
 ```markdown
@@ -80,10 +116,12 @@ instead of guessing. One month per run.
 _Source: `data/community/YYYY-MM.json` (extracted_at <ts>) · summarized <date> by community-summarizer_
 
 ## Coverage
-<post_count / comment_count / in_pipeline_post_count + discovery.strategies, verbatim from meta>
+<full meta block, verbatim (month / extracted_at / post_count / comment_count /
+ in_pipeline_post_count / discovery.strategies / discovery.complete)>
 
 ## Non-SOTD threads
-<inventory: id · date · author · title · one-line factual note; mark which were drilled>
+<inventory: id · date · author · title · one-line factual note; mark each
+ drilled / body read / not drilled>
 
 ## Notable SOTD-thread conversation
 <event chatter inside the daily threads; thread + comment ids>
@@ -106,9 +144,15 @@ _Source: `data/community/YYYY-MM.json` (extracted_at <ts>) · summarized <date> 
 - Bash is read-only analysis: the `community_query` CLI and bounded ad-hoc
   python/jq over `data/community/{month}.json` that print small slices only. No
   pipeline commands. Never Read or cat a community JSON whole (0.8–2.3 MB).
+  Before hand-coding python/jq, check whether an existing `sotd.report.tools`
+  CLI covers the need (`sotd/report/tools/README.md` indexes them) — prefer the
+  CLI; direct python is the fallback for needs the subcommands don't cover. If
+  you hand-code something reusable, list it under Ad-hoc tools used in your
+  return so it can be promoted.
 - Months are structurally bounded: every CLI call names its month/window
   explicitly, and every window ends at the summary month. Never query months after
-  it.
+  it. Comment timestamps inside the month's threads may fall outside the month —
+  thread date governs; that is not a completeness or windowing problem.
 - Never invent storylines, motives, in-jokes, or identities. `[removed]`/`[deleted]`
   bodies and null/`[deleted]` authors are real gaps — record them with their ids,
   don't fill them.
@@ -122,7 +166,7 @@ _Source: `data/community/YYYY-MM.json` (extracted_at <ts>) · summarized <date> 
   storyline notes only. The observations-drafter owns voice and bullets.
 - Stay inside the workflow budgets (≤ ~10 searches, ≤ 8 drilled threads, ≤ 4 author
   checks). Note whatever you could not cover under Open questions instead of blowing
-  the budget.
+  the budget. Body reads (step 6) don't count against the drill budget.
 
 ## Return format
 
@@ -137,4 +181,8 @@ Return a structured final message:
 
 ## Gaps & open questions
 <deleted/removed content, threads not drilled, author-only questions>
+
+## Ad-hoc tools used
+<any inline python/jq you hand-coded — snippet · purpose · reusable? omit if none;
+these get promoted into sotd/report/tools/ so future runs have them>
 ```
