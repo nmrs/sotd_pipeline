@@ -13,10 +13,14 @@ comments only) is never reused here — everything is fetched fresh from Reddit.
 
 from __future__ import annotations
 
+import json
 import logging
+import time
+import urllib.request
 from datetime import datetime, timezone
 from itertools import islice
 from typing import List, Optional, Sequence, Set, Tuple
+from urllib.error import HTTPError
 
 from praw.models import Comment
 from tqdm import tqdm
@@ -150,6 +154,92 @@ def fetch_all_comments(submission) -> List:
 
 
 # --------------------------------------------------------------------------- #
+# pullpush archive discovery (IDs only; Reddit is the content source)         #
+# --------------------------------------------------------------------------- #
+PULLPUSH_UA = "sotd-pipeline-community-fetch/1.0 (personal research tool)"
+PULLPUSH_SLEEP = 4.0  # seconds between archive requests; PullPush 429s hot callers
+
+
+def _pullpush_get(url: str) -> Optional[List]:
+    """GET one PullPush search page, returning its ``data`` array.
+
+    Retries a 429 twice (PullPush rate-limits hot callers hard); returns None
+    on any failure so callers treat the archive as best-effort.
+    """
+    for attempt in range(3):
+        req = urllib.request.Request(url, headers={"User-Agent": PULLPUSH_UA})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                obj = json.load(resp)
+        except HTTPError as exc:
+            if exc.code == 429 and attempt < 2:
+                logger.warning("PullPush rate limit hit (429); cooling off…")
+                time.sleep(15)
+                continue
+            logger.warning(f"PullPush request failed: {exc}")
+            return None
+        except Exception as exc:
+            logger.warning(f"PullPush request failed: {exc}")
+            return None
+        data = obj.get("data") if isinstance(obj, dict) else None
+        return data if isinstance(data, list) else None
+    return None
+
+
+def pullpush_submission_ids(year: int, month: int) -> Set[str]:
+    """Submission IDs the PullPush archive holds for the month (IDs only).
+
+    The archive is a *discovery* source: the caller converts each ID via
+    ``reddit.submission(id=...)`` — not subject to the ~1000-item listing
+    limit — and fetches comment trees fresh from Reddit.
+    """
+    start = int(datetime(year, month, 1, tzinfo=timezone.utc).timestamp())
+    end_dt = (
+        datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        if month == 12
+        else datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    )
+    end = int(end_dt.timestamp())
+
+    ids: Set[str] = set()
+    cursor = end
+    while True:
+        url = (
+            "https://api.pullpush.io/reddit/search/submission/"
+            f"?subreddit=wetshaving&after={start}&before={cursor}&size=100&sort=desc"
+        )
+        data = _pullpush_get(url)
+        if not data:
+            break
+        page_ids = {s["id"] for s in data if s.get("id") and start <= int(s["created_utc"]) < end}
+        if page_ids <= ids:
+            break  # archive served a page we already have; stop instead of looping
+        ids |= page_ids
+        oldest = min(int(s["created_utc"]) for s in data)
+        if oldest <= start or len(data) < 100:
+            break
+        cursor = oldest
+        time.sleep(PULLPUSH_SLEEP)
+    return ids
+
+
+def discover_via_pullpush(reddit, year: int, month: int) -> List:
+    """Archive-discovered posts: PullPush supplies IDs, Reddit supplies content.
+
+    IDs that no longer resolve on Reddit (deleted posts) are skipped — the same
+    dead-seed skip as thread seeding.
+    """
+    ids = pullpush_submission_ids(year, month)
+    out: List = []
+    for sid in sorted(ids):
+        sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
+        title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
+        if title:
+            out.append(sub)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # backfill discovery (months .new() cannot reach)                             #
 # --------------------------------------------------------------------------- #
 def discover_via_search(subreddit, start_ts: int, end_ts: int) -> List:
@@ -210,8 +300,9 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
 
     Strategies: known SOTD thread IDs (IDs seeded from data/threads/ — full
     trees are fetched fresh later; the pipeline's top-level-only comment store
-    is never reused), timestamp search, and active-author submission
-    histories. A strategy is listed only when it contributed at least one post.
+    is never reused), PullPush archive IDs (IDs only, converted to fresh
+    submissions), timestamp search, and active-author submission histories.
+    A strategy is listed only when it contributed at least one post.
     Returns (posts, strategies_used, per_strategy_raw_counts).
     """
     start_dt = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -241,6 +332,13 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
     if search_posts:
         strategies.append("timestamp_search")
     for sub in search_posts:
+        found.setdefault(sub.id, sub)
+
+    pullpush_posts = discover_via_pullpush(reddit, year, month)
+    per_strategy["pullpush"] = len(pullpush_posts)
+    if pullpush_posts:
+        strategies.append("pullpush")
+    for sub in pullpush_posts:
         found.setdefault(sub.id, sub)
 
     author_posts = discover_via_authors(

@@ -299,6 +299,7 @@ class TestProcessMonth:
             "discover_month_posts",
             lambda s, y, m: ([FakeSub("x", "X", ts(2026, 8, 5))], False),
         )
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
         meta, _ = community.load_community_file(tmp_path / "community" / "2026-08.json")
@@ -474,12 +475,18 @@ class TestBackfillPosts:
                 return FakeRedditor([author_hit])
 
         monkeypatch.setattr(community, "era_authors", lambda d, months, top_n=100: ["alice"])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             FakeReddit(), SearchSubreddit([search_hit]), 2025, 7, {"sotd1"}, tmp_path
         )
         assert {s.id for s in posts} == {"sotd1", "sr1", "au1"}
         assert strategies == ["thread_seed", "timestamp_search", "author_histories"]
-        assert per_strategy == {"thread_seed": 1, "timestamp_search": 1, "author_histories": 1}
+        assert per_strategy == {
+            "thread_seed": 1,
+            "timestamp_search": 1,
+            "author_histories": 1,
+            "pullpush": 0,
+        }
 
     def test_strategy_omitted_when_empty(self, monkeypatch, tmp_path):
         write_threads_fixture(tmp_path, [])
@@ -495,12 +502,13 @@ class TestBackfillPosts:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             EmptyReddit(), FakeSubreddit([]), 2025, 7, set(), tmp_path
         )
         assert posts == []
         assert strategies == []
-        assert per_strategy == {"timestamp_search": 0, "author_histories": 0}
+        assert per_strategy == {"timestamp_search": 0, "author_histories": 0, "pullpush": 0}
 
     def test_dead_seed_skipped(self, monkeypatch, tmp_path):
         class DeadSub:
@@ -523,12 +531,18 @@ class TestBackfillPosts:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         posts, strategies, per_strategy = community._backfill_posts(
             DeadReddit(), FakeSubreddit([]), 2025, 7, {"dead1"}, tmp_path
         )
         assert posts == []
         assert strategies == []
-        assert per_strategy == {"thread_seed": 0, "timestamp_search": 0, "author_histories": 0}
+        assert per_strategy == {
+            "thread_seed": 0,
+            "timestamp_search": 0,
+            "author_histories": 0,
+            "pullpush": 0,
+        }
 
 
 class TestProcessMonthBackfill:
@@ -553,6 +567,7 @@ class TestProcessMonthBackfill:
                 return FakeRedditor([])
 
         monkeypatch.setattr(community, "era_authors", lambda d, m, top_n=100: [])
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: [])
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         result = community._process_month(2025, 7, FakeArgs(tmp_path), reddit=FakeReddit())
         assert result["posts"] == 2 and result["complete"] is False
@@ -623,3 +638,97 @@ class TestDepthCappedListing:
         assert meta["discovery"]["complete"] is True
         assert meta["discovery"]["strategies"] == ["new_listing"]
         assert {p["id"] for p in data["posts"]} == {"sotd1", "sotd2"}
+
+
+class TestPullpushSubmissionIds:
+    def test_paginates_until_short_page(self, monkeypatch):
+        pages = [
+            [{"id": f"a{i:02d}", "created_utc": ts(2025, 1, 20)} for i in range(100)],
+            [{"id": "b1", "created_utc": ts(2025, 1, 10)}],
+        ]
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: pages.pop(0))
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        ids = community.pullpush_submission_ids(2025, 1)
+        assert ids == {f"a{i:02d}" for i in range(100)} | {"b1"}
+
+    def test_drops_ids_outside_month_window(self, monkeypatch):
+        page = [
+            {"id": "in1", "created_utc": ts(2025, 1, 5)},
+            {"id": "future", "created_utc": ts(2025, 2, 5)},
+        ]
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: page)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        assert community.pullpush_submission_ids(2025, 1) == {"in1"}
+
+    def test_archive_failure_yields_empty(self, monkeypatch):
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: None)
+        assert community.pullpush_submission_ids(2025, 1) == set()
+
+    def test_repeating_page_stops_without_looping(self, monkeypatch):
+        # archive serves the same full-size page twice: the loop guard must stop it
+        page = [{"id": "same", "created_utc": ts(2025, 1, 10)} for _ in range(100)]
+        monkeypatch.setattr(community, "_pullpush_get", lambda url: page)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        assert community.pullpush_submission_ids(2025, 1) == {"same"}
+
+
+class TestPullpushGet:
+    def test_429_then_success(self, monkeypatch):
+        from urllib.error import HTTPError
+
+        class FakeResp:
+            def __init__(self, payload):
+                self._p = json.dumps(payload).encode()
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return self._p
+
+        calls = []
+
+        def fake_urlopen(req, timeout=None):
+            calls.append(req)
+            if len(calls) == 1:
+                raise HTTPError("u", 429, "Too Many Requests", None, None)
+            return FakeResp({"data": [{"id": "x", "created_utc": ts(2025, 1, 1)}]})
+
+        monkeypatch.setattr(community.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        result = community._pullpush_get("https://api.pullpush.io/x")
+        assert result == [{"id": "x", "created_utc": ts(2025, 1, 1)}]
+        assert len(calls) == 2
+
+    def test_persistent_429_returns_none(self, monkeypatch):
+        from urllib.error import HTTPError
+
+        def fake_urlopen(req, timeout=None):
+            raise HTTPError("u", 429, "Too Many Requests", None, None)
+
+        monkeypatch.setattr(community.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(community.time, "sleep", lambda *_: None)
+        assert community._pullpush_get("https://api.pullpush.io/x") is None
+
+
+class TestDiscoverViaPullpush:
+    def test_ids_become_fresh_submissions_dead_seed_skipped(self, monkeypatch):
+        monkeypatch.setattr(community, "pullpush_submission_ids", lambda y, m: {"good1", "dead"})
+        good = FakeSub("good1", "Good", ts(2025, 1, 5))
+
+        class DeadSub:
+            id = "dead"
+
+            @property
+            def title(self):
+                raise RuntimeError("gone")
+
+        class FakeReddit:
+            def submission(self, *, id):
+                return good if id == "good1" else DeadSub()
+
+        posts = community.discover_via_pullpush(FakeReddit(), 2025, 1)
+        assert [s.id for s in posts] == ["good1"]
