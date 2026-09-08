@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from praw.models import Submission
-from prawcore.exceptions import RequestException, TooManyRequests
+from prawcore.exceptions import Forbidden, RequestException, ResponseException, TooManyRequests
 
 from sotd.fetch.reddit import (
     _require_env,
@@ -131,7 +131,7 @@ class TestExponentialBackoff:
     """Test exponential backoff retry logic functionality."""
 
     def test_exponential_backoff_calculation(self, monkeypatch):
-        """Test exponential backoff delay calculation."""
+        """Three failures fit inside the retry budget; the fourth call succeeds."""
         calls = 0
         attempt = 0
 
@@ -147,14 +147,11 @@ class TestExponentialBackoff:
         sleep_calls = []
         monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
 
-        # This should fail after multiple retries with exponential delays
-        with pytest.raises(TooManyRequests):
-            safe_call(failing_function)
+        result = safe_call(failing_function)
 
-        # Should have multiple sleep calls with increasing delays
-        assert len(sleep_calls) >= 2
-        # First delay should be sleep_time = 1 (with jitter)
-        assert 0.9 <= sleep_calls[0] <= 1.1
+        assert result == "success"
+        assert calls == 4  # initial + three retries
+        assert sleep_calls == [1.0, 2.0, 4.0]  # exponential floor, no jitter
 
     def test_exponential_backoff_with_configurable_parameters(self, monkeypatch):
         """Test exponential backoff with configurable retry parameters."""
@@ -176,9 +173,8 @@ class TestExponentialBackoff:
 
         # Should have exponential delays
         assert len(sleep_calls) == 2
-        # First delay: sleep_time = 5 (with jitter)
-        # Second delay: should be exponential (e.g., 10)
-        assert 4.5 <= sleep_calls[0] <= 5.5
+        # Header wait (5) can only raise the 1/2/4 exponential floor
+        assert sleep_calls == [5.0, 5.0]
 
     def test_exponential_backoff_max_attempts(self, monkeypatch):
         """Test exponential backoff respects maximum retry attempts."""
@@ -196,9 +192,9 @@ class TestExponentialBackoff:
         with pytest.raises(TooManyRequests):
             safe_call(always_failing_function)
 
-        # Should have attempted multiple times with exponential delays
-        assert calls >= 2
-        assert len(sleep_calls) >= 1
+        # Four total attempts (initial + three retries), delays 1s/2s/4s
+        assert calls == 4
+        assert sleep_calls == [1.0, 2.0, 4.0]
 
     def test_exponential_backoff_base_delay(self, monkeypatch):
         """Test exponential backoff with configurable base delay."""
@@ -265,10 +261,8 @@ class TestExponentialBackoff:
         assert result == "success"
         assert calls == 3
 
-        # Should have different delays based on rate limit response
-        assert len(sleep_calls) == 2
-        assert 1.8 <= sleep_calls[0] <= 2.2  # First: sleep_time (with jitter)
-        assert 0.9 <= sleep_calls[1] <= 1.1  # Second: sleep_time (with jitter)
+        # Delay is the exponential floor (1, 2) raised by any larger header wait
+        assert sleep_calls == [2.0, 2.0]
 
     def test_exponential_backoff_integration_with_existing_safe_call(self, monkeypatch):
         """Test exponential backoff integrates with existing safe_call functionality."""
@@ -446,7 +440,7 @@ class TestExponentialBackoff:
 
         log_output = caplog.text
         # Check for real-time feedback in the warning message
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "Reddit 429 (attempt 1/4)" in log_output
         assert "waiting 0m 8s" in log_output
 
     def test_exponential_backoff_metrics_in_output(self, monkeypatch):
@@ -533,12 +527,10 @@ class TestEnhancedRateLimitDetection:
 
         monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
 
-        # This should fail after 3 attempts (max attempts reached)
-        with pytest.raises(TooManyRequests):
-            safe_call(function_with_multiple_rate_limits)
-
-        # Should have attempted 3 times
-        assert rate_limit_hits == 3
+        # Three failures fit inside the 4-attempt budget; the fourth succeeds
+        result = safe_call(function_with_multiple_rate_limits)
+        assert result == "success"
+        assert rate_limit_hits == 4
 
     def test_enhanced_logging_for_rate_limits(self, monkeypatch, caplog):
         """Test enhanced logging for rate limit events."""
@@ -558,7 +550,7 @@ class TestEnhancedRateLimitDetection:
         assert result == "success"
 
         log_output = caplog.text
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "Reddit 429 (attempt 1/4)" in log_output
         assert "waiting 0m 10s" in log_output
 
     def test_rate_limit_detection_with_retry_after(self, monkeypatch, caplog):
@@ -579,8 +571,8 @@ class TestEnhancedRateLimitDetection:
         assert result == "success"
 
         log_output = caplog.text
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
-        assert "waiting 0m 1" in log_output  # With jitter, exact time may vary
+        assert "Reddit 429 (attempt 1/4)" in log_output
+        assert "waiting 0m 15s" in log_output  # retry_after honored exactly
 
     def test_rate_limit_detection_with_default_timing(self, monkeypatch, caplog):
         """Test rate limit detection with default timing when no attributes available."""
@@ -600,8 +592,8 @@ class TestEnhancedRateLimitDetection:
         assert result == "success"
 
         log_output = caplog.text
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
-        assert "waiting 0m 1s" in log_output
+        assert "Reddit 429 (attempt 1/4)" in log_output
+        assert "waiting 0m 1s" in log_output  # exponential floor, no header
 
     def test_rate_limit_detection_performance_metrics(self, monkeypatch):
         """Test that rate limit detection includes performance metrics."""
@@ -646,10 +638,8 @@ class TestEnhancedRateLimitDetection:
 
         log_output = caplog.text
         # Check for debugging information in the warning message
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
-        assert (
-            "waiting 0m" in log_output
-        )  # With jitter, exact time may vary (30s with jitter could be 29-31s)
+        assert "Reddit 429 (attempt 1/4)" in log_output
+        assert "waiting 0m 30s" in log_output  # header wait honored exactly
 
     def test_rate_limit_detection_integration_with_search(self, monkeypatch):
         """Test rate limit detection integration with search operations."""
@@ -746,7 +736,7 @@ class TestEnhancedRateLimitDetection:
 
         log_output = caplog.text
         # Check for real-time feedback in the warning message
-        assert "Reddit rate-limit hit (hit #1 in" in log_output
+        assert "Reddit 429 (attempt 1/4)" in log_output
         assert "waiting 0m 8s" in log_output
 
     def test_rate_limit_detection_metrics_in_output(self, monkeypatch):
@@ -840,10 +830,10 @@ def test_safe_call_rate_limit_with_sleep_time(monkeypatch, caplog):
 
     assert result == "success"
     assert calls == 2
-    assert 4.5 <= sleep_calls[0] <= 5.5  # sleep_time with jitter
+    assert sleep_calls == [5.0]  # header wait honored exactly (exponential floor 1s is lower)
 
     log_output = caplog.text
-    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "Reddit 429 (attempt 1/4)" in log_output
     assert "waiting 0m 5s" in log_output
 
 
@@ -865,10 +855,10 @@ def test_safe_call_rate_limit_with_retry_after(monkeypatch, caplog):
         result = safe_call(failing_function)
 
     assert result == "success"
-    assert 2.7 <= sleep_calls[0] <= 3.3  # retry_after with jitter
+    assert sleep_calls == [3.0]  # retry_after honored exactly
 
     log_output = caplog.text
-    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "Reddit 429 (attempt 1/4)" in log_output
     assert "waiting 0m 3s" in log_output
 
 
@@ -890,18 +880,18 @@ def test_safe_call_rate_limit_no_timing_info(monkeypatch, caplog):
         result = safe_call(failing_function)
 
     assert result == "success"
-    assert 0.9 <= sleep_calls[0] <= 1.1  # default exponential backoff with jitter
+    assert sleep_calls == [1.0]  # exponential floor, no header
 
     log_output = caplog.text
-    assert "Reddit rate-limit hit (hit #1 in" in log_output
+    assert "Reddit 429 (attempt 1/4)" in log_output
     assert "waiting 0m 1s" in log_output
 
 
 def test_safe_call_rate_limit_double_failure(monkeypatch):
     """safe_call should retry up to 3 times before giving up."""
     # Mock sleep to avoid actual sleeping during tests
-    slept: list[int] = []
-    monkeypatch.setattr(time, "sleep", lambda s: slept.append(int(s)))
+    slept: list[float] = []
+    monkeypatch.setattr(time, "sleep", slept.append)
 
     def always_failing():
         raise MockRateLimitException(sleep_time=1)
@@ -909,10 +899,9 @@ def test_safe_call_rate_limit_double_failure(monkeypatch):
     with pytest.raises(TooManyRequests):
         safe_call(always_failing)
 
-    # Verify that sleep was called multiple times with delays (with jitter)
-    assert len(slept) == 2  # 2 sleep calls: 1, 1 (no sleep on final attempt)
-    assert 0.9 <= slept[0] <= 1.1  # First attempt (with jitter from headers)
-    assert 0.9 <= slept[1] <= 1.1  # Second attempt (with jitter from headers)
+    # Four total attempts (initial + three retries); sleep_time=1 is below the
+    # exponential floor, so delays are 1, 2, 4
+    assert slept == [1, 2, 4]
 
 
 def test_safe_call_with_arguments():
@@ -1916,3 +1905,110 @@ class TestThreadOverrides:
         ids = [sub.id for sub in result]
         assert "keep" in ids
         assert "1ttrafo" not in ids
+
+
+# --------------------------------------------------------------------------- #
+# Generic 429 handling                                                        #
+# --------------------------------------------------------------------------- #
+class NewPraw429(ResponseException):
+    """A hypothetical future praw exception carrying a 429 response.
+
+    Detection must be by HTTP status, not by knowing this class name.
+    """
+
+    def __init__(self, status_code=429, retry_after=None):
+        response = requests.Response()
+        response.status_code = status_code
+        if retry_after is not None:
+            response.headers["retry-after"] = str(retry_after)
+        super().__init__(response)
+
+
+class TestGeneric429Handling:
+    """safe_call retries *any* exception carrying a 429 HTTP response.
+
+    prawcore maps 429 to TooManyRequests today, but the contract we rely on is
+    "the carried response's status is 429" — exception-class enumeration would
+    break the next time praw adds a shape.
+    """
+
+    def test_future_praw_429_shape_is_retried(self, monkeypatch):
+        calls = 0
+
+        def flaky():
+            nonlocal calls
+            calls += 1
+            if calls <= 2:
+                raise NewPraw429()
+            return "success"
+
+        sleep_calls = []
+        monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
+
+        result = safe_call(flaky)
+        assert result == "success"
+        assert sleep_calls == [1.0, 2.0]  # exponential floor honored
+
+    def test_exponential_floor_without_retry_after(self, monkeypatch):
+        calls = 0
+
+        def always_429():
+            nonlocal calls
+            calls += 1
+            raise NewPraw429(retry_after=None)
+
+        sleep_calls = []
+        monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
+
+        with pytest.raises(ResponseException):
+            safe_call(always_429)
+        assert calls == 4  # initial + three retries
+        assert sleep_calls == [1.0, 2.0, 4.0]
+
+    def test_retry_after_can_only_raise_the_floor(self, monkeypatch):
+        calls = 0
+
+        def slow_window():
+            nonlocal calls
+            calls += 1
+            raise NewPraw429(retry_after=10)
+
+        sleep_calls = []
+        monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
+
+        with pytest.raises(ResponseException):
+            safe_call(slow_window)
+        assert sleep_calls == [10.0, 10.0, 10.0]  # header wins over 1/2/4
+
+    def test_retry_after_below_floor_is_ignored(self, monkeypatch):
+        calls = 0
+
+        def tiny_header():
+            nonlocal calls
+            calls += 1
+            if calls <= 1:
+                raise MockRateLimitException(sleep_time=1)
+            return "success"
+
+        sleep_calls = []
+        monkeypatch.setattr(time, "sleep", lambda s: sleep_calls.append(s))
+
+        result = safe_call(tiny_header)
+        assert result == "success"
+        assert sleep_calls == [1.0]  # floor 1s, not header 1s twice
+
+    def test_non_429_status_is_not_retried(self, monkeypatch):
+        calls = 0
+
+        def forbidden():
+            nonlocal calls
+            calls += 1
+            raise Forbidden(requests.Response())
+
+        calls_on_sleep = []
+        monkeypatch.setattr(time, "sleep", lambda s: calls_on_sleep.append(s))
+
+        result = safe_call(forbidden)
+        assert result is None  # non-429 HTTP statuses are not retried
+        assert calls == 1
+        assert calls_on_sleep == []

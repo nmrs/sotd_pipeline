@@ -29,7 +29,7 @@ from tqdm import tqdm
 from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.cli_utils.date_span import month_span
 from sotd.fetch.merge import merge_records
-from sotd.fetch.reddit import get_reddit, safe_call
+from sotd.fetch.reddit import RETRY_429_DELAYS, _429_wait, get_reddit, safe_call
 from sotd.fetch.save import load_month_file
 from sotd.utils.data_dir import get_data_dir
 from sotd.utils.file_io import load_json_data, save_json_data
@@ -207,18 +207,46 @@ def _thread_comment_records(sub) -> List[dict]:
     return [build_comment_record(c, sub.id, sub.title) for c in fetch_all_comments(sub) or []]
 
 
-def _fetch_comment_records(posts: List) -> List[dict]:
+def _fetch_thread_with_retry(sub) -> List[dict]:
+    """Fetch one thread's comment tree, retrying 429s with exponential backoff.
+
+    Parts of the tree path run outside ``safe_call`` (``comments.list()``,
+    record building), where a 429 would otherwise escape straight to the
+    per-future skip. Detection is by HTTP status — any exception wrapping a
+    429 response is retried, regardless of its class. Delays are the
+    exponential floor 1s/2s/4s; Reddit's Retry-After can only raise them.
+    """
+    for attempt, floor in enumerate(RETRY_429_DELAYS, start=1):
+        try:
+            return _thread_comment_records(sub)
+        except Exception as exc:
+            header_wait = _429_wait(exc)
+            if header_wait is None:
+                raise
+            delay = max(floor, header_wait)
+            logger.warning(
+                f"429 fetching comments for {sub.id} "
+                f"(attempt {attempt}/{len(RETRY_429_DELAYS)}); waiting {delay:g}s…"
+            )
+            time.sleep(delay)
+    return _thread_comment_records(sub)  # final attempt; 429 propagates
+
+
+def _fetch_comment_records(posts: List) -> tuple[List[dict], List[str]]:
     """Fetch full comment trees for every post, parallel across posts.
 
     Unlike the SOTD fetch's ``fetch_top_level_comments_parallel`` there is no
     total-batch timeout: its ``as_completed(timeout=...)`` is a budget for the
     entire batch, and exceeding it discards completed work and re-fetches
     everything sequentially. Containment is per-future instead — a tree that
-    fails contributes nothing but never aborts the month.
+    fails contributes nothing but never aborts the month, and its id is
+    returned so the month can be marked incomplete rather than silently
+    partial.
     """
     out: List[dict] = []
+    failed: List[str] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=COMMENT_WORKERS) as pool:
-        futures = {pool.submit(_thread_comment_records, sub): sub for sub in posts}
+        futures = {pool.submit(_fetch_thread_with_retry, sub): sub for sub in posts}
         for fut in tqdm(
             concurrent.futures.as_completed(futures),
             total=len(futures),
@@ -229,8 +257,9 @@ def _fetch_comment_records(posts: List) -> List[dict]:
             try:
                 out.extend(fut.result())
             except Exception as e:
+                failed.append(futures[fut].id)
                 logger.warning(f"comment tree fetch failed for {futures[fut].id}: {e}")
-    return out
+    return out, failed
 
 
 # --------------------------------------------------------------------------- #
@@ -588,7 +617,7 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
     ]
 
     logger.info(f"{month_str}: fetching comment trees for {len(posts_new)} threads…")
-    new_comments = _fetch_comment_records(posts_new)
+    new_comments, fetch_failed_ids = _fetch_comment_records(posts_new)
 
     existing = None if args.force else load_community_file(out_path)
     if existing is not None:
@@ -610,8 +639,11 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         }
 
     # completeness: the listing enumerated the month, OR the archive results
-    # contained every known SOTD thread (the backfill ladder's success signal)
-    complete = boundary_reached or archive_confident
+    # contained every known SOTD thread (the backfill ladder's success signal);
+    # AND every comment tree actually fetched (a 429 that survives retries
+    # leaves the month incomplete rather than silently partial)
+    comment_fetch = {"complete": not fetch_failed_ids, "failed_thread_ids": fetch_failed_ids}
+    complete = (boundary_reached or archive_confident) and not fetch_failed_ids
     meta = {
         "month": month_str,
         "extracted_at": datetime.now(timezone.utc).isoformat(),
@@ -620,15 +652,21 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         "in_pipeline_post_count": sum(1 for p in posts if p.get("in_pipeline")),
         "discovery": {
             "strategies": strategies_used,
-            "complete": complete,
+            "complete": boundary_reached or archive_confident,
             "per_strategy": per_strategy,
         },
+        "comment_fetch": comment_fetch,
     }
     write_community_file(out_path, meta, posts, comments)
+    fetch_note = "" if comment_fetch["complete"] else (
+        f"; comment fetch INCOMPLETE: {len(fetch_failed_ids)} threads "
+        f"({', '.join(fetch_failed_ids[:5])}{'…' if len(fetch_failed_ids) > 5 else ''})"
+    )
     logger.info(
         f"{month_str}: wrote {len(posts)} posts / {len(comments)} comments "
         f"(discovery: {', '.join(strategies_used)}, "
-        f"{'complete' if complete else 'INCOMPLETE'})"
+        f"{'complete' if boundary_reached or archive_confident else 'INCOMPLETE'}"
+        f"{fetch_note})"
     )
     return {
         "year": year,

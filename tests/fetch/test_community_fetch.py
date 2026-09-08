@@ -244,7 +244,8 @@ class TestParallelCommentFetching:
             "fetch_all_comments",
             lambda s: [FakeComment(f"{s.id}-c1", "b", ts(2026, 8, 2), parent_id=f"t3_{s.id}")],
         )
-        recs = community._fetch_comment_records(posts)
+        recs, failed = community._fetch_comment_records(posts)
+        assert failed == []
         by_thread: dict = {}
         for r in recs:
             by_thread.setdefault(r["thread_id"], []).append(r["id"])
@@ -281,8 +282,9 @@ class TestParallelCommentFetching:
 
         monkeypatch.setattr(community, "fetch_all_comments", flaky)
         with caplog.at_level(logging.WARNING):
-            recs = community._fetch_comment_records(posts)
+            recs, failed = community._fetch_comment_records(posts)
         assert {r["thread_id"] for r in recs} == {"p0", "p2"}
+        assert failed == ["p1"]
         assert "p1" in caplog.text
 
 
@@ -1085,3 +1087,105 @@ class TestRedditHorizonSkip:
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
         result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
         assert result["complete"] is True
+
+
+# --------------------------------------------------------------------------- #
+# 429 retry + month completeness                                              #
+# --------------------------------------------------------------------------- #
+def _429_exc():
+    import requests as _requests
+    from prawcore.exceptions import TooManyRequests as _TMR
+
+    response = _requests.Response()
+    response.status_code = 429
+    return _TMR(response)
+
+
+class Test429CommentFetch:
+    """Comment-tree fetches retry 429s (by HTTP status, not exception class);
+    exhausted retries mark the month incomplete instead of silently skipping."""
+
+    def _posts(self, n):
+        return [FakeSub(f"p{i}", f"T{i}", ts(2026, 8, 1, 0, i)) for i in range(n)]
+
+    def test_429_thread_retried_and_included(self, monkeypatch):
+        posts = self._posts(2)
+        attempts: dict = {}
+        sleep_calls = []
+
+        def flaky(sub):
+            attempts[sub.id] = attempts.get(sub.id, 0) + 1
+            if sub.id == "p1" and attempts[sub.id] <= 2:
+                raise _429_exc()
+            return [FakeComment(f"{sub.id}-c", "b", ts(2026, 8, 2))]
+
+        monkeypatch.setattr(community, "fetch_all_comments", flaky)
+        monkeypatch.setattr(community.time, "sleep", sleep_calls.append)
+        recs, failed = community._fetch_comment_records(posts)
+        assert {r["thread_id"] for r in recs} == {"p0", "p1"}
+        assert failed == []
+        assert sleep_calls == [1.0, 2.0]  # exponential floor honored
+
+    def test_429_exhausted_thread_recorded(self, monkeypatch, caplog):
+        posts = self._posts(2)
+
+        def always_429(sub):
+            if sub.id == "p1":
+                raise _429_exc()
+            return [FakeComment(f"{sub.id}-c", "b", ts(2026, 8, 2))]
+
+        sleep_calls = []
+        monkeypatch.setattr(community, "fetch_all_comments", always_429)
+        monkeypatch.setattr(community.time, "sleep", sleep_calls.append)
+        with caplog.at_level(logging.WARNING):
+            recs, failed = community._fetch_comment_records(posts)
+        assert {r["thread_id"] for r in recs} == {"p0"}
+        assert failed == ["p1"]
+        assert sleep_calls == [1.0, 2.0, 4.0]  # three retries, then give up
+        assert "p1" in caplog.text
+
+    def test_non_429_failure_not_retried(self, monkeypatch):
+        posts = self._posts(2)
+
+        def flaky(sub):
+            if sub.id == "p1":
+                raise RuntimeError("boom")
+            return [FakeComment(f"{sub.id}-c", "b", ts(2026, 8, 2))]
+
+        sleep_calls = []
+        monkeypatch.setattr(community, "fetch_all_comments", flaky)
+        monkeypatch.setattr(community.time, "sleep", sleep_calls.append)
+        recs, failed = community._fetch_comment_records(posts)
+        assert {r["thread_id"] for r in recs} == {"p0"}
+        assert failed == ["p1"]
+        assert sleep_calls == []  # non-429 failures are not retried
+
+    def test_month_marked_incomplete_on_fetch_failure(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        posts = self._posts(2)
+
+        def always_429(sub):
+            if sub.id == "p1":
+                raise _429_exc()
+            return [FakeComment(f"{sub.id}-c", "b", ts(2026, 8, 2))]
+
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: (posts, True))
+        monkeypatch.setattr(community, "fetch_all_comments", always_429)
+        monkeypatch.setattr(community.time, "sleep", lambda s: None)
+        result = community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        assert result["complete"] is False
+        meta, _ = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        assert meta["comment_fetch"] == {"complete": False, "failed_thread_ids": ["p1"]}
+
+    def test_month_complete_when_all_trees_fetched(self, tmp_path, monkeypatch):
+        write_threads_fixture(tmp_path, [])
+        posts = self._posts(2)
+        monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: (posts, True))
+        monkeypatch.setattr(
+            community,
+            "fetch_all_comments",
+            lambda s: [FakeComment(f"{s.id}-c", "b", ts(2026, 8, 2))],
+        )
+        community._process_month(2026, 8, FakeArgs(tmp_path), reddit=FakeReddit())
+        meta, _ = community.load_community_file(tmp_path / "community" / "2026-08.json")
+        assert meta["comment_fetch"] == {"complete": True, "failed_thread_ids": []}

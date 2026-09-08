@@ -36,15 +36,14 @@ def test_safe_call_success(monkeypatch, caplog):
         result = safe_call(fn)
 
     assert result == "ok"
-    assert slept == [1]  # sleep_time with exponential backoff
+    assert slept == [1]  # header wait (1s) meets the 1s exponential floor
     log_output = caplog.text
-    # With jitter, the exact message may vary, so check for key parts
-    assert "Reddit rate-limit hit (hit #1 in 0.0s, attempt 1/3)" in log_output
+    assert "Reddit 429 (attempt 1/4)" in log_output
     assert "waiting 0m 1s" in log_output
 
 
 def test_safe_call_double_fail(monkeypatch):
-    """safe_call does not retry more than once."""
+    """safe_call gives up after the retry budget: initial + three retries."""
     # Mock sleep to avoid actual sleeping during tests
     slept: list[int] = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(int(s)))
@@ -55,7 +54,5 @@ def test_safe_call_double_fail(monkeypatch):
     with pytest.raises(TooManyRequests):
         safe_call(fn)
 
-    # Verify that sleep was called with the expected duration (with jitter)
-    assert len(slept) == 2  # Two sleep calls
-    assert 0.9 <= slept[0] <= 1.1  # First retry: ~1s with jitter (from headers)
-    assert 0.9 <= slept[1] <= 1.1  # Second retry: ~1s with jitter (from headers)
+    # sleep_time=1 is below the exponential floor, so delays are 1, 2, 4
+    assert slept == [1, 2, 4]

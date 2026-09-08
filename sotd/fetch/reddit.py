@@ -13,7 +13,7 @@ from typing import List, Sequence, TypeVar, cast
 
 import praw
 from praw.models import Comment, Submission
-from prawcore.exceptions import NotFound, RequestException, TooManyRequests
+from prawcore.exceptions import NotFound, RequestException, ResponseException
 
 logger = logging.getLogger(__name__)
 
@@ -24,117 +24,80 @@ T = TypeVar("T")
 # --------------------------------------------------------------------------- #
 # rate-limit wrapper                                                          #
 # --------------------------------------------------------------------------- #
-def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
-    """Call *fn* with enhanced rate limit detection and smart backoff.
+RETRY_429_DELAYS = (1.0, 2.0, 4.0)  # exponential floor (seconds); Retry-After can only raise
 
-    Enhanced features:
-    - Extracts wait time from Reddit's rate limit headers when available
-    - Falls back to exponential backoff with jitter when no explicit wait time
-    - Prevents thundering herd with randomized delays
-    - Tracks rate limit frequency and patterns
-    - Provides structured logging for rate limit events
 
-    Prints a human-readable warning:
+def _429_wait(exc: BaseException) -> float | None:
+    """Return Reddit's Retry-After seconds when *exc* carries a 429, else None.
 
-        [WARN] Reddit rate-limit hit; waiting 8m 20s (from headers)…
-        [WARN] Reddit rate-limit hit; waiting 1m 30s (exponential backoff)…
-
-    If the retry also fails, the exception propagates.
-    Returns None if any other exception occurs.
+    Detection is by the HTTP status on the carried response, not by exception
+    class — any future praw/prawcore exception shape that wraps a 429 response
+    is retried. An explicit ``retry_after``/``sleep_time`` attribute (set by
+    tests and some praw versions) wins over the response header.
     """
-    import random
+    response = getattr(exc, "response", None)
+    if getattr(response, "status_code", None) != 429:
+        return None
+    wait = getattr(exc, "retry_after", None)
+    if wait is None:
+        wait = getattr(exc, "sleep_time", None)
+    if wait is None:
+        wait = getattr(response, "headers", {}).get("retry-after")
+    if wait is None:
+        return 0.0
+    try:
+        return max(float(wait), 0.0)
+    except (TypeError, ValueError):
+        return 0.0
 
-    # Exponential backoff configuration
-    max_attempts = 3  # Maximum retry attempts
-    base_delay = 1.0  # Base delay in seconds
-    max_delay = 60.0  # Maximum delay in seconds
-    backoff_factor = 2.0  # Exponential backoff factor
-    jitter_factor = 0.1  # Jitter factor (10% of delay)
 
-    rate_limit_hits = 0
-    start_time = time.time()
+def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
+    """Call *fn*, retrying 429s with exponential backoff.
 
-    for attempt in range(max_attempts):
+    Any exception whose carried HTTP response has status 429 is retried —
+    detection is by status code, not exception class, so future praw exception
+    shapes need no new handling. Delays are the exponential floor
+    1s/2s/4s (three retries, four attempts total); Reddit's Retry-After can
+    only raise the floor. A 429 that survives all retries is re-raised.
+    Non-429 HTTP statuses, network errors, and other failures are not retried:
+    they log a warning and return None.
+    """
+    max_retries = len(RETRY_429_DELAYS)
+    for attempt in range(max_retries + 1):
         try:
-            # Track response time for rate limit detection
             call_start = time.time()
             result = fn(*args, **kwargs)
             call_duration = time.time() - call_start
 
             # Detect rate limits from slow response times (> 2 seconds)
             if call_duration > 2.0 and attempt > 0:
-                rate_limit_hits += 1
-                duration_str = f"{call_duration:.1f}s"
-                logger.warning(f"Slow response detected ({duration_str}); treating as rate limit")
-                # Simulate rate limit behavior for slow responses
+                logger.warning(f"Slow response detected ({call_duration:.1f}s); brief delay")
                 time.sleep(5)  # Brief delay for slow responses
                 continue
 
             return result
 
-        except TooManyRequests as exc:
-            rate_limit_hits += 1
-
-            # Calculate delay with smart backoff strategy
-            if attempt < max_attempts - 1:
-                # Try to extract wait time from Reddit's headers first
-                wait_time = None
-
-                # Check for explicit wait time in exception
-                if hasattr(exc, "sleep_time") and exc.sleep_time is not None:  # type: ignore
-                    wait_time = int(exc.sleep_time)  # type: ignore[attr-defined]
-                elif hasattr(exc, "retry_after") and exc.retry_after is not None:  # type: ignore
-                    wait_time = int(exc.retry_after)  # type: ignore[attr-defined]
-                elif hasattr(exc, "response") and exc.response is not None:
-                    # Try to extract from response headers
-                    headers = getattr(exc.response, "headers", {})
-                    retry_after = headers.get("Retry-After")
-                    if retry_after:
-                        try:
-                            wait_time = int(retry_after)
-                        except (ValueError, TypeError):
-                            pass
-
-                if wait_time is not None:
-                    # Use Reddit's explicit wait time with small jitter
-                    jitter = random.uniform(0, wait_time * jitter_factor)
-                    delay = wait_time + jitter
-                    delay_source = "headers"
-                else:
-                    # Fall back to exponential backoff with jitter
-                    base_delay_calc = base_delay * (backoff_factor**attempt)
-                    delay = min(base_delay_calc, max_delay)
-                    jitter = random.uniform(0, delay * jitter_factor)
-                    delay = delay + jitter
-                    delay_source = "exponential backoff"
-
-                mins, secs = divmod(int(delay), 60)
-
-                # Enhanced logging with rate limit statistics and attempt info
-                total_duration = time.time() - start_time
-                logger.warning(
-                    f"Reddit rate-limit hit (hit #{rate_limit_hits} in "
-                    f"{total_duration:.1f}s, attempt {attempt + 1}/{max_attempts}); "
-                    f"waiting {mins}m {secs}s ({delay_source})…"
-                )
-
-                time.sleep(delay)
-            else:
-                # Final attempt failed
-                total_duration = time.time() - start_time
-                logger.warning(
-                    f"Rate limit exceeded after {rate_limit_hits} hits in "
-                    f"{total_duration:.1f}s (max attempts reached)"
-                )
+        except ResponseException as exc:
+            header_wait = _429_wait(exc)
+            if header_wait is None:
+                logger.warning(f"Reddit API error: {exc}")
+                return None
+            if attempt >= max_retries:
+                logger.warning(f"429 persisted after {max_retries} retries (max attempts reached)")
                 raise
+            delay = max(RETRY_429_DELAYS[attempt], header_wait)
+            mins, secs = divmod(int(delay), 60)
+            logger.warning(
+                f"Reddit 429 (attempt {attempt + 1}/{max_retries + 1}); "
+                f"waiting {mins}m {secs}s…"
+            )
+            time.sleep(delay)
 
         except (ConnectionError, RuntimeError, RequestException, NotFound, ValueError) as exc:
             logger.warning(f"Reddit API error: {exc}")
             return None
 
 
-# --------------------------------------------------------------------------- #
-# auth                                                                        #
 # --------------------------------------------------------------------------- #
 def _require_env(key: str) -> str:
     val = os.getenv(key)

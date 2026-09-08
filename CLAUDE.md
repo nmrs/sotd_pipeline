@@ -94,6 +94,11 @@ Reddit serves only ~1000 items per `/new` listing (~8 months of r/wetshaving), s
 older months always need backfill — the fetch cross-checks the listing's completeness
 claim against the pipeline's known SOTD thread IDs and flips `meta.discovery.complete`
 to `false` when the listing ended mid-history (never silently partial).
+Comment-tree fetches retry 429s with an exponential backoff floor (1s/2s/4s;
+Reddit's Retry-After can only raise the delay; detection is by HTTP status, not
+exception class). When retries are exhausted the month is marked incomplete —
+`meta.comment_fetch` records `complete: false` plus the failed thread ids, and
+the month counts as INCOMPLETE in the run summary.
 Run the voice-era backfill with `python run.py community --range 2025-07:2026-08 --force`.
 
 ### Legacy Direct Phase Execution
