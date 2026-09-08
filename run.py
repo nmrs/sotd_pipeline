@@ -944,6 +944,11 @@ Examples:
         help="Date range (YYYY-MM:YYYY-MM for monthly, YYYY:YYYY for annual)",
     )
     parser.add_argument(
+        "--reverse",
+        action="store_true",
+        help="Process the date range newest-to-oldest (reverse chronological)",
+    )
+    parser.add_argument(
         "--data-dir",
         default="data",
         help="Data directory (default: data, or SOTD_DATA_DIR env var)",
@@ -1121,6 +1126,9 @@ Examples:
             common_args.extend(["--month", default_month])
             if args.debug:
                 logger.debug(f"No date arguments provided, defaulting to: {default_month}")
+
+        if args.reverse:
+            common_args.append("--reverse")
 
         if args.data_dir:
             common_args.extend(["--data-dir", args.data_dir])

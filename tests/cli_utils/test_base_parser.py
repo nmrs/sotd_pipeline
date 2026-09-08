@@ -6,8 +6,9 @@ all SOTD Pipeline phases.
 """
 
 import argparse
-import pytest
 from pathlib import Path
+
+import pytest
 
 from sotd.cli_utils.base_parser import BaseCLIParser
 
@@ -336,3 +337,15 @@ class TestBaseCLIParserIntegration:
         # Test invalid range format
         with pytest.raises(SystemExit):
             parser.parse_args(["--range", "invalid"])
+
+    def test_reverse_flag_defaults_false(self):
+        """Without --reverse the flag is False (chronological default)."""
+        parser = BaseCLIParser(description="Test", require_date_args=False)
+        args = parser.parse_args([])
+        assert args.reverse is False
+
+    def test_reverse_flag_accepted_alongside_date_args(self):
+        """--reverse is a modifier, not part of the mutually exclusive date group."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(["--range", "2025-01:2025-12", "--reverse"])
+        assert args.reverse is True

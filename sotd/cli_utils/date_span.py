@@ -27,6 +27,19 @@ def _current_ym() -> tuple[int, int]:
 
 
 def month_span(args) -> list[tuple[int, int]]:
+    """Return the ordered month list for *args*, honoring ``args.reverse``.
+
+    ``--reverse`` flips the computed span to newest-first (reverse
+    chronological) for every date specification; a single ``--month`` is a
+    no-op. Args without the attribute stay chronological.
+    """
+    months = _forward_month_span(args)
+    if getattr(args, "reverse", False):
+        months.reverse()
+    return months
+
+
+def _forward_month_span(args) -> list[tuple[int, int]]:
     if hasattr(args, "delta_months") and args.delta_months:
         # Handle delta months (comma-separated list)
         months = []
