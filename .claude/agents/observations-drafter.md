@@ -28,6 +28,13 @@ If either is missing, return an error note instead of guessing.
    - `.venv/bin/python -m sotd.report.tools.aggregate_query top --month YYYY-MM --category razors --top 10`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end YYYY-MM`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 14 --end YYYY-MM` (repeat `--name` for a side-by-side rank matrix)
+   Categories key their rows by their natural identity field — `name` for
+   razors/soaps, but `brand` for `soap_makers`/`brand_diversity`/
+   `razor_manufacturers`, `user` for `users`/`user_*`, `format`/`fiber`/
+   `knot_size_mm`/`plate`/… for hardware breakdowns (annual files re-key most to
+   `name`) — and `top`/`history` match on it directly. Composite categories
+   (e.g. `highest_use_count_per_blade`, keyed user+blade) reject `history` as
+   ambiguous; unknown shapes fail loudly rather than rendering blank names.
    Always pass `--end <report month>` to history — months after the report month
    are already aggregated on disk, and a bare `--last N` silently returns them.
    Annual data: pass `--year YYYY` to any subcommand. Pass `--min-shaves 5` when a

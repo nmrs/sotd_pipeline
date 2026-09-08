@@ -7,17 +7,16 @@ import pytest
 from sotd.report.tools.aggregate_query import main
 
 
-def make_month_file(path, month, razors, soaps, meta_extra=None):
+def make_month_file(path, month, razors, soaps, meta_extra=None, extra=None):
     meta = {"month": month, "total_shaves": 100, "unique_shavers": 5}
     meta.update(meta_extra or {})
-    doc = {
-        "meta": meta,
-        "data": {
-            "razors": razors,
-            "soaps": soaps,
-            "sample_usage_metrics": {"total_samples": 0},
-        },
+    data = {
+        "razors": razors,
+        "soaps": soaps,
+        "sample_usage_metrics": {"total_samples": 0},
     }
+    data.update(extra or {})
+    doc = {"meta": meta, "data": data}
     path.write_text(json.dumps(doc), encoding="utf-8")
 
 
@@ -44,11 +43,67 @@ def data_dir(tmp_path):
         {"rank": 1, "name": "Martin de Candre - Fougere", "shaves": 30, "unique_users": 3},
         {"rank": 2, "name": "Barrister and Mann - Seville", "shaves": 4, "unique_users": 2},
     ]
+    # Categories whose rows are keyed by something other than "name", mirroring
+    # the real aggregated shape: monthly maker tables are brand-keyed, user
+    # tables are user-keyed, composite tables share a user across rows.
+    key_field_sets = {
+        "soap_makers": {
+            "2026-01": [
+                {"rank": 1, "brand": "Stirling Soap Co.", "shaves": 200, "unique_users": 62},
+                {"rank": 2, "brand": "Stirling East", "shaves": 50, "unique_users": 10},
+                {"rank": 3, "brand": "House of Mammoth", "shaves": 41, "unique_users": 22},
+            ],
+            "2026-02": [
+                {"rank": 1, "brand": "Stirling Soap Co.", "shaves": 190, "unique_users": 60},
+                {"rank": 2, "brand": "House of Mammoth", "shaves": 130, "unique_users": 40},
+            ],
+            "2026-03": [
+                {"rank": 1, "brand": "Stirling Soap Co.", "shaves": 210, "unique_users": 65},
+                {"rank": 2, "brand": "House of Mammoth", "shaves": 150, "unique_users": 45},
+            ],
+        },
+        "brand_diversity": {
+            "2026-01": [{"rank": 1, "brand": "Stirling Soap Co.", "unique_soaps": 60}],
+            "2026-02": [{"rank": 1, "brand": "Stirling Soap Co.", "unique_soaps": 58}],
+            "2026-03": [{"rank": 1, "brand": "Stirling Soap Co.", "unique_soaps": 61}],
+        },
+        "users": {
+            "2026-01": [{"rank": 1, "user": "annuser", "shaves": 31, "missed_days": 0}],
+            "2026-02": [{"rank": 1, "user": "annuser", "shaves": 30, "missed_days": 1}],
+            "2026-03": [{"rank": 1, "user": "annuser", "shaves": 28, "missed_days": 0}],
+        },
+        "highest_use_count_per_blade": {
+            "2026-01": [
+                {"rank": 1, "user": "annuser", "blade": "Feather", "format": "DE", "uses": 5},
+                {"rank": 2, "user": "annuser", "blade": "Lord Platinum", "format": "DE", "uses": 4},
+            ],
+            "2026-02": [
+                {"rank": 1, "user": "annuser", "blade": "Feather", "format": "DE", "uses": 6},
+                {"rank": 2, "user": "annuser", "blade": "Lord Platinum", "format": "DE", "uses": 5},
+            ],
+            "2026-03": [
+                {"rank": 1, "user": "annuser", "blade": "Feather", "format": "DE", "uses": 7},
+                {"rank": 2, "user": "annuser", "blade": "Lord Platinum", "format": "DE", "uses": 6},
+            ],
+        },
+        "weird": {
+            "2026-01": [{"rank": 1, "widget": "gizmo", "shaves": 5}],
+            "2026-02": [],
+            "2026-03": [],
+        },
+    }
     for month, razors in razor_sets.items():
-        make_month_file(agg / f"{month}.json", month, razors, soaps)
+        extra = {key: months[month] for key, months in key_field_sets.items()}
+        make_month_file(agg / f"{month}.json", month, razors, soaps, extra=extra)
     annual = {
         "metadata": {"year": 2025, "total_shaves": 12000},
         "razors": [{"rank": 1, "name": "Blackland Blackbird", "shaves": 900, "unique_users": 30}],
+        # the annual engine re-keys maker tables to name; these stay brand/user-keyed
+        "soap_makers": [
+            {"rank": 1, "name": "Stirling Soap Co.", "shaves": 1200, "unique_users": 80}
+        ],
+        "brand_diversity": [{"rank": 1, "brand": "Stirling Soap Co.", "unique_soaps": 600}],
+        "users": [{"rank": 1, "user": "annuser", "shaves": 500, "missed_days": 2}],
         "sample_usage_metrics": {"total_samples": 0},
     }
     (agg / "annual").mkdir()
@@ -524,3 +579,264 @@ class TestHistoryMultiName:
         result = json.loads(out)
         assert result["name"] == "Blackland Blackbird"
         assert result["rows"][0]["rank"] == 1
+
+
+class TestKeyFieldAwareness:
+    """Categories keyed by brand/user/... (not name) render and match correctly."""
+
+    def test_top_renders_brand_key_field(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "top", "--month", "2026-01", "--category", "soap_makers"],
+        )
+        assert code == 0
+        assert "brand" in out
+        assert "Stirling Soap Co." in out
+
+    def test_top_renders_user_key_field(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            ["--data-dir", str(data_dir), "top", "--month", "2026-01", "--category", "users"],
+        )
+        assert code == 0
+        assert "annuser" in out
+        assert "missed_days" in out
+
+    def test_top_renders_unique_soaps_column(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "brand_diversity",
+            ],
+        )
+        assert code == 0
+        assert "unique_soaps" in out
+        assert "60" in out
+
+    def test_top_json_preserves_raw_fields(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "brand_diversity",
+            ],
+        )
+        assert code == 0
+        assert json.loads(out)[0] == {"rank": 1, "brand": "Stirling Soap Co.", "unique_soaps": 60}
+
+    def test_top_json_skips_key_rendering(self, data_dir, capsys):
+        # JSON mode dumps raw rows even when no key field can be derived
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "weird",
+            ],
+        )
+        assert code == 0
+        assert json.loads(out)[0]["widget"] == "gizmo"
+
+    def test_top_unrecognized_key_field_errors_loudly(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            ["--data-dir", str(data_dir), "top", "--month", "2026-01", "--category", "weird"],
+        )
+        assert code == 1
+        assert "key field" in err
+        assert "widget" in err
+
+    def test_top_min_shaves_errors_on_shavesless_category(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "brand_diversity",
+                "--min-shaves",
+                "5",
+            ],
+        )
+        assert code == 1
+        assert "shaves" in err
+
+    def test_history_matches_brand_keyed_item(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "soap_makers",
+                "--name",
+                "Stirling Soap Co.",
+                "--last",
+                "2",
+            ],
+        )
+        assert code == 0
+        assert "2026-02" in out and "2026-03" in out
+        assert "190" in out and "210" in out
+
+    def test_history_matches_user_keyed_item(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "users",
+                "--name",
+                "annuser",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 0
+        row = json.loads(out)["rows"][0]
+        assert row["rank"] == 1
+        assert row["shaves"] == 28
+        assert row["missed_days"] == 0
+
+    def test_history_matrix_brand_keyed(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "soap_makers",
+                "--name",
+                "Stirling Soap Co.",
+                "--name",
+                "House of Mammoth",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 0
+        assert "#1 210/65" in out
+        assert "#2 150/45" in out
+
+    def test_history_annual_soap_makers_name_keyed(self, data_dir, capsys):
+        # the annual engine re-keys maker tables to name; monthly is brand-keyed
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "soap_makers",
+                "--name",
+                "Stirling Soap Co.",
+                "--year",
+                "2025",
+            ],
+        )
+        assert code == 0
+        assert "1,200" in out
+
+    def test_history_annual_user_keyed(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "users",
+                "--name",
+                "annuser",
+                "--year",
+                "2025",
+            ],
+        )
+        assert code == 0
+        assert json.loads(out)["rows"][0]["shaves"] == 500
+
+    def test_history_contains_lists_brand_candidates(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "soap_makers",
+                "--name",
+                "stirling",
+                "--contains",
+                "--last",
+                "3",
+            ],
+        )
+        assert code == 1
+        assert "ambiguous name" in err
+        assert "Stirling Soap Co." in err
+        assert "Stirling East" in err
+
+    def test_history_composite_key_errors_loudly(self, data_dir, capsys):
+        # rows sharing a user across blades cannot be resolved to one item
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "highest_use_count_per_blade",
+                "--name",
+                "annuser",
+                "--last",
+                "1",
+            ],
+        )
+        assert code == 1
+        assert "ambiguous" in err
+
+    def test_history_min_shaves_errors_on_shavesless_category(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "history",
+                "--category",
+                "brand_diversity",
+                "--name",
+                "Stirling Soap Co.",
+                "--last",
+                "1",
+                "--min-shaves",
+                "5",
+            ],
+        )
+        assert code == 1
+        assert "shaves" in err

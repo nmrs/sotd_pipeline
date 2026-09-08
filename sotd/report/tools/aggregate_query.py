@@ -10,6 +10,11 @@ Monthly files (``data/aggregated/YYYY-MM.json``) wrap categories in a
 (``data/aggregated/annual/YYYY.json``) put categories at the top level with
 ``metadata``. Both shapes are normalized on load.
 
+Each category's rows are matched and rendered by their identity field —
+name, brand, user, plate, format, ... — derived from the rows themselves,
+so every report table works without a per-category lookup table. Unknown
+shapes fail loudly instead of silently rendering blanks or missing matches.
+
 Exit codes: 0 success, 1 on query errors (unknown category, ambiguous name,
 missing month).
 """
@@ -26,6 +31,27 @@ from pathlib import Path
 from typing import Any
 
 HUMAN_DEFAULT_TOP = 10
+
+# A category's identity field is the first of these present across its rows.
+KEY_FIELD_PRIORITY = (
+    "name",
+    "brand",
+    "user",
+    "format",
+    "fiber",
+    "handle_maker",
+    "knot_size_mm",
+    "plate",
+    "gap",
+    "grind",
+    "point",
+    "width",
+    "super_speed_variant",
+    "use_count",
+)
+
+# Numeric columns rendered first, in this order; the rest follow sorted.
+CANONICAL_NUMERICS = ("shaves", "unique_users", "unique_soaps")
 
 
 class QueryError(Exception):
@@ -74,7 +100,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--name",
         required=True,
         action="append",
-        help="Item name (case-insensitive exact match); repeat for a side-by-side matrix",
+        help=(
+            "Item identity — the category's key field (name, brand, user, ...); "
+            "case-insensitive exact match. Repeat for a side-by-side matrix"
+        ),
     )
     history.add_argument(
         "--contains", action="store_true", help="Match by case-insensitive substring"
@@ -199,19 +228,24 @@ def _month_range_labels(start: str, end: str) -> list[str]:
     return labels
 
 
-def _find_entry(entries: list[dict[str, Any]], name: str, contains: bool) -> dict[str, Any] | None:
-    """Match one entry by name; raise QueryError on ambiguous substring matches."""
+def _find_entry(
+    entries: list[dict[str, Any]], name: str, contains: bool, key_field: str, category: str
+) -> dict[str, Any] | None:
+    """Match one entry by its key field; raise QueryError on ambiguous matches."""
     if contains:
-        matches = [e for e in entries if name.casefold() in str(e.get("name", "")).casefold()]
+        matches = [e for e in entries if name.casefold() in str(e.get(key_field, "")).casefold()]
         if len(matches) > 1:
-            names = ", ".join(sorted(str(e.get("name", "")) for e in matches))
-            raise QueryError(f"ambiguous name {name!r} with --contains; candidates: {names}")
+            values = ", ".join(sorted(str(e.get(key_field, "")) for e in matches))
+            raise QueryError(f"ambiguous name {name!r} with --contains; candidates: {values}")
         return matches[0] if matches else None
     target = name.casefold()
-    for entry in entries:
-        if str(entry.get("name", "")).casefold() == target:
-            return entry
-    return None
+    matches = [e for e in entries if str(e.get(key_field, "")).casefold() == target]
+    if len(matches) > 1:
+        raise QueryError(
+            f"ambiguous name {name!r} in {category!r}: {len(matches)} rows share "
+            f"{key_field} {name!r}; history needs a unique key"
+        )
+    return matches[0] if matches else None
 
 
 def query_schema(args: argparse.Namespace) -> dict[str, Any]:
@@ -253,6 +287,12 @@ def query_top(args: argparse.Namespace) -> list[dict[str, Any]]:
     doc = _load(path)
     entries = _category_list(doc, args.category)
     if args.min_shaves > 0:
+        numerics = _numeric_fields(entries)
+        if entries and "shaves" not in numerics:
+            raise QueryError(
+                f"category {args.category!r} has no shaves field to filter on; "
+                f"numeric fields: {', '.join(numerics) or '(none)'}"
+            )
         entries = [e for e in entries if _entry_int(e, "shaves") >= args.min_shaves]
     return entries[: max(args.top, 0)]
 
@@ -261,6 +301,46 @@ def _entry_int(entry: dict[str, Any], key: str) -> int:
     """Return an entry's integer field, tolerating missing or non-int values."""
     value = entry.get(key, 0)
     return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def _key_field(entries: list[dict[str, Any]], category: str) -> str:
+    """Return a category's identity field (name, brand, user, ...)."""
+    if not entries:
+        return "name"
+    present: set[str] = set()
+    for entry in entries:
+        present.update(entry)
+    for candidate in KEY_FIELD_PRIORITY:
+        if candidate in present:
+            return candidate
+    raise QueryError(
+        f"category {category!r} has no recognizable key field; "
+        f"entry fields: {', '.join(sorted(present))}"
+    )
+
+
+def _numeric_fields(entries: list[dict[str, Any]]) -> list[str]:
+    """Return numeric fields present across entries (rank excluded), canonical first."""
+    union: set[str] = set()
+    for entry in entries:
+        union.update(
+            field
+            for field, value in entry.items()
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
+        )
+    union.discard("rank")
+    ordered = [field for field in CANONICAL_NUMERICS if field in union]
+    ordered += sorted(union - set(ordered))
+    return ordered
+
+
+def _format_cell(value: Any) -> str:
+    """Format a numeric cell: '-' when missing, thousands separators for ints."""
+    if value is None:
+        return "-"
+    if isinstance(value, int) and not isinstance(value, bool):
+        return f"{value:,}"
+    return str(value)
 
 
 def query_history(args: argparse.Namespace) -> dict[str, Any]:
@@ -277,20 +357,23 @@ def query_history(args: argparse.Namespace) -> dict[str, Any]:
             continue
         doc = _load(path)
         entries = _category_list(doc, args.category)
+        key_field = _key_field(entries, args.category)
+        numerics = _numeric_fields(entries)
+        if args.min_shaves > 0 and entries and "shaves" not in numerics:
+            raise QueryError(
+                f"category {args.category!r} has no shaves field to filter on; "
+                f"numeric fields: {', '.join(numerics) or '(none)'}"
+            )
         row: dict[str, Any] = {"period": label}
         for name in names:
-            entry = _find_entry(entries, name, args.contains)
+            entry = _find_entry(entries, name, args.contains, key_field, args.category)
             info = None
             if entry is not None and (
                 args.min_shaves <= 0 or _entry_int(entry, "shaves") >= args.min_shaves
             ):
-                info = {
-                    "rank": entry.get("rank"),
-                    "shaves": entry.get("shaves"),
-                    "unique_users": entry.get("unique_users"),
-                }
+                info = {"rank": entry.get("rank"), **{f: entry.get(f) for f in numerics}}
             if len(names) == 1:
-                row.update(info or {"rank": None, "shaves": None, "unique_users": None})
+                row.update(info or {"rank": None, **{f: None for f in numerics}})
             else:
                 row[name] = info
         rows.append(row)
@@ -321,15 +404,18 @@ def _render_schema(result: dict[str, Any]) -> str:
 
 
 def _render_rows(rows: list[dict[str, Any]], show_rank: bool = True) -> str:
-    """Render period/rank/shaves/unique_users rows as an aligned table."""
-    headers = ["period", "rank", "shaves", "unique_users"] if show_rank else ["period", "shaves"]
+    """Render period/rank/numeric rows as an aligned table."""
+    field_set = {key for row in rows for key in row if key not in ("period", "rank")}
+    numerics = [f for f in CANONICAL_NUMERICS if f in field_set] + sorted(
+        field_set - set(CANONICAL_NUMERICS)
+    )
+    headers = ["period", *(["rank"] if show_rank else []), *numerics]
     table: list[list[str]] = []
     for row in rows:
         cells = [str(row["period"])]
         if show_rank:
             cells.append(str(row["rank"]) if row["rank"] is not None else "-")
-        cells.append(f"{row['shaves']:,}" if row["shaves"] is not None else "-")
-        cells.append(str(row["unique_users"]) if row["unique_users"] is not None else "-")
+        cells.extend(_format_cell(row.get(field)) for field in numerics)
         table.append(cells)
     widths = [max(len(headers[i]), *(len(r[i]) for r in table)) for i in range(len(headers))]
     header_line = "  ".join(h.rjust(widths[i]) for i, h in enumerate(headers))
@@ -337,15 +423,16 @@ def _render_rows(rows: list[dict[str, Any]], show_rank: bool = True) -> str:
     return f"{header_line}\n{body}" if table else "(no rows)"
 
 
-def _render_top(entries: list[dict[str, Any]]) -> str:
-    """Render top-N entries as aligned rank/name/shaves/users rows."""
-    headers = ["rank", "name", "shaves", "unique_users"]
+def _render_top(entries: list[dict[str, Any]], category: str) -> str:
+    """Render top-N entries as aligned rank/key-field/numeric rows."""
+    key_field = _key_field(entries, category)
+    numerics = _numeric_fields(entries)
+    headers = ["rank", key_field, *numerics]
     table = [
         [
             str(e.get("rank", "")),
-            str(e.get("name", "")),
-            f"{_entry_int(e, 'shaves'):,}",
-            str(e.get("unique_users", "")),
+            str(e.get(key_field, "")),
+            *(_format_cell(e.get(field)) for field in numerics),
         ]
         for e in entries
     ]
@@ -353,6 +440,21 @@ def _render_top(entries: list[dict[str, Any]]) -> str:
     header_line = "  ".join(h.rjust(widths[i]) for i, h in enumerate(headers))
     body = "\n".join("  ".join(c.rjust(widths[i]) for i, c in enumerate(r)) for r in table)
     return f"{header_line}\n{body}" if table else "(no rows)"
+
+
+def _matrix_cell(entry: dict[str, Any]) -> str:
+    """Render one matrix cell: #rank shaves/users plus any extra numeric fields."""
+    parts = [f"#{entry.get('rank')}"]
+    shaves = entry.get("shaves")
+    users = entry.get("unique_users")
+    if shaves is not None and users is not None:
+        parts.append(f"{shaves:,}/{users}")
+    elif shaves is not None:
+        parts.append(f"{shaves:,}")
+    for field in sorted(k for k in entry if k not in ("rank", "shaves", "unique_users")):
+        if entry[field] is not None:
+            parts.append(f"{field}={_format_cell(entry[field])}")
+    return " ".join(parts)
 
 
 def _render_matrix(result: dict[str, Any]) -> str:
@@ -364,14 +466,7 @@ def _render_matrix(result: dict[str, Any]) -> str:
         cells = [str(row["period"])]
         for name in names:
             entry = row.get(name)
-            if entry is None:
-                cells.append("-")
-            else:
-                shaves = entry.get("shaves")
-                cell = f"#{entry.get('rank')}"
-                if shaves is not None:
-                    cell += f" {shaves:,}/{entry.get('unique_users')}"
-                cells.append(cell)
+            cells.append("-" if entry is None else _matrix_cell(entry))
         table.append(cells)
     widths = [max(len(headers[i]), *(len(r[i]) for r in table)) for i in range(len(headers))]
     header_line = "  ".join(h.ljust(widths[i]) for i, h in enumerate(headers))
@@ -391,7 +486,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             output = json.dumps(result, indent=2) if args.json else _render_schema(result)
         elif args.command == "top":
             entries = query_top(args)
-            output = json.dumps(entries, indent=2) if args.json else _render_top(entries)
+            output = (
+                json.dumps(entries, indent=2) if args.json else _render_top(entries, args.category)
+            )
         else:
             result = query_history(args)
             if args.json:

@@ -234,7 +234,7 @@ test-integration-dir:
 # These tests validate catalog integrity and should be run separately
 # Uses pytest marker to select only production tests
 test-production:
-	PYTHONPATH=. pytest tests/integration/test_real_catalog_integration.py -m production -v
+	PYTHONPATH=. pytest tests/integration/ -m production -v
 
 # =============================================================================
 # REACT TEST VARIATIONS (WITH SERVER MANAGEMENT)

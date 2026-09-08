@@ -28,6 +28,23 @@ Always pass `--end <report month>` to history — months after the report month 
 already aggregated on disk, and a bare `--last N` silently returns them. Repeat
 `--name` for a side-by-side rank matrix (one row per month, one column per item).
 
+**Key fields.** Each category's rows are matched and rendered by their natural
+identity field, derived from the rows themselves: `name` for razors/blades/
+brushes/soaps, but `brand` for `soap_makers`/`brand_diversity`/`razor_manufacturers`/
+`blade_manufacturers`/`brush_knot_makers`, `user` for `users` and the `user_*`/
+`*_users` tables, `format`/`fiber`/`handle_maker`/`knot_size_mm`/`plate`/`gap`/
+`grind`/`point`/`width`/`super_speed_variant`/`use_count` for the hardware
+breakdown tables. Annual files re-key most maker tables to `name` (`brand_diversity`
+and user tables keep theirs) — history resolves both shapes. Unknown shapes fail
+loudly (exit 1) instead of showing blank names or silent misses. Composite
+categories whose key repeats across rows (e.g. `highest_use_count_per_blade`,
+keyed user+blade) reject `history` as ambiguous — use `top`/`schema` for those.
+`--min-shaves` matches the report tables' `shaves:N` thresholds and errors on
+categories without a `shaves` field (`brand_diversity` thresholds on
+`unique_soaps` — use `--json` + jq for that filter). A production-marked sweep
+(`tests/integration/test_aggregate_query_real_data.py`, `make test-production`)
+verifies every real category renders and resolves.
+
 ## community_query
 
 Queries over `data/community/` month files (all posts + full comment trees):
