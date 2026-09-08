@@ -9,25 +9,17 @@ Welcome to your SOTD Lather Log for July 2026
 
 ## Observations
 
-* Mäurer & Wirtz – Tabac tops the Soaps table for the first time since October 2024 — 32 shaves from 16 users, its biggest haul since last October’s 80-shave cameo — and 8 of them landed right on July 2, the day it served as a Join Us July daily target. The grandpa’s-ashtray caucus doesn’t need a calendar, but it apparently reads one.
+* Stirling Soap Co. holds the top podium step for a third straight month with Barrister and Mann holding silver.
 
-* Don’t get used to it — Join Us July juiced these numbers. Six of the top seven soaps were daily targets — Tabac, Roman Spice, Seville, I, Rich Moose, Sea Spice Lime, and Black Watch — and the target days show up in the daily counts: Seville took 12 of its 27 shaves on July 18, Roman Spice 11 of 29 on the 23rd, Caravaggio 10 of 22 on the 22nd. The lone exception in the top seven, third-place Tonsorium, wasn’t on the calendar at all…
+* House of Mammoth, in third, makes its first podium appearance since July 2025. Is this going to become an annual thing?
 
-* Spearhead Shaving Company storms to fourth in the Soap Brands table, its best finish since March 2025, on more than triple June’s shaves (127 vs 36). The Seaforth! line did the damage: Roman Spice (2nd), Sea Spice Lime (6th), and Black Watch (7th, up 120 spots from 127th) all surged, and every Seaforth! scent on the target calendar — those three plus Heather at 16th — landed in the top 16. That surge also left second place a two-way photo finish at 29 shaves apiece — Roman Spice takes silver over Tonsorium on unique users, 19 to 1 — while Seville’s 22 shavers could manage only 27 shaves, and fourth place.
+* Catie’s Bubbles takes the tumble of the month, out of its customary third and down to sixth.
 
-* Speaking of Tonsorium — no target day, just a one-man fan club. All 29 of its shaves came from u/Glass_Procedure7497, who lathered it on 29 of his 31 shaves (Stirling – Executive Man and Chiseled Face – Guy Noir were the only respites) to give a soap he’s logged 116 times since November 2024 its best-ever finish, 118 spots up into third. The 87.7% Most Boring Shaver score completes the set; u/nofun ran the same play one notch down, contributing 21 of Ariana & Evans – The Undersea’s 22 shaves.
+* Tabac rides Join us July to the top of the Soaps table this month, its first appearance on the top step since October 2024.
 
-* Catie’s Bubbles drops off the Soap Brands podium for the first time since October 2025, ending an eight-month residency that included a March Madness crown at 248 shaves; this month’s 72 is less than a third of that. In related news, the brand’s best soap of the month was Tonsorium — all one user of it.
+* u/Glass_Procedure7497 fixation on Tonsorium this month earns him the Most Boring Shaver trophy and Tonsorium the bronze in the Soaps challenge. If he hadn't cheated on Tonsorium twice this month (with Executive Man and Guy Noir), he would have won Tonsorium the silver.
 
-* House of Mammoth returns to the podium for the first time since August 2025 — 141 shaves from 42 users, its biggest month in that span — with Sonder (9th), Shire (10th), and Kryptonite (12th) all inside the top 12.
-
-* The Brain Bowl dynasty is over. Martin de Candre – Fougère — first in four of the last five months — crashes to 50th on 8 shaves, and u/putneycj3 didn’t lather it once in July, spreading ten soaps across 22 shaves with Wooly Wash Tranquility (7) doing most of the heavy lifting. Who am I to tell a brain-bowler to diversify…
-
-* Annihilation August shoppers got an early start. Williams Mug Soap rocketed 246 spots to 26th, with 8 of its 14 shaves posted on July 28 — four days after u/tsrblke announced the unobtanium-only challenge — and five shavers logged Williams for the first time ever. House of Mammoth – Indigo, flagged in that thread as discontinued this year, climbed 102 spots, and Chiseled Face – Midnight Stag (July 24’s daily target) took 11 shaves from 11 different users ahead of its own August challenge.
-
-* Brand Diversity was the month’s quietest contest: Stirling by 15, 60 scents to Barrister and Mann’s 45, with only five brands reaching 20 scents all month. June’s eight-brand traffic jam has fully dissolved.
-
-* And after ten straight months parked between third and fifth, u/scribe__ — the sub’s premier chaos agent — finally cashed in: a shared Top Shaver crown with u/Engineered_Shave at 38 shaves, zero missed days (the Hardware Report covered that dead heat), then the software-side double — 38 different soaps in 38 shaves, every single one used exactly once, for the Soap Diversity by User title, plus 30 exclusive soaps for the other trophy. u/brokenjaw622 kept his own standard with a perfect 31-for-31 month in third.
+* At the other end of the spectrum, u/scribe__ decisively wins the Soap Diversity by User contest with 38 soaps in 38 shaves, 30 of them exclusives. 
 
 ## Notes & Caveats
 
