@@ -229,6 +229,63 @@ class TestFetchAllComments:
         assert result[0].body == "[removed]"
 
 
+class TestParallelCommentFetching:
+    """Comment records are fetched across a thread pool — a slow tree must not
+    serialize the month, and one failed tree must not abort the rest."""
+
+    @staticmethod
+    def _posts(n):
+        return [FakeSub(f"p{i}", f"T{i}", ts(2026, 8, 1, 0, i)) for i in range(n)]
+
+    def test_records_built_for_every_thread(self, monkeypatch):
+        posts = self._posts(5)
+        monkeypatch.setattr(
+            community,
+            "fetch_all_comments",
+            lambda s: [FakeComment(f"{s.id}-c1", "b", ts(2026, 8, 2), parent_id=f"t3_{s.id}")],
+        )
+        recs = community._fetch_comment_records(posts)
+        by_thread: dict = {}
+        for r in recs:
+            by_thread.setdefault(r["thread_id"], []).append(r["id"])
+        assert set(by_thread) == {s.id for s in posts}
+        assert all(len(v) == 1 for v in by_thread.values())
+
+    def test_fetches_run_concurrently(self, monkeypatch):
+        import threading
+        import time
+
+        lock = threading.Lock()
+        state = {"active": 0, "peak": 0}
+
+        def fake_comments(_sub):
+            with lock:
+                state["active"] += 1
+                state["peak"] = max(state["peak"], state["active"])
+            time.sleep(0.05)
+            with lock:
+                state["active"] -= 1
+            return []
+
+        monkeypatch.setattr(community, "fetch_all_comments", fake_comments)
+        community._fetch_comment_records(self._posts(8))
+        assert state["peak"] >= 2
+
+    def test_failed_thread_isolated_and_warned(self, monkeypatch, caplog):
+        posts = self._posts(3)
+
+        def flaky(sub):
+            if sub.id == "p1":
+                raise RuntimeError("boom")
+            return [FakeComment(f"{sub.id}-c", "b", ts(2026, 8, 2))]
+
+        monkeypatch.setattr(community, "fetch_all_comments", flaky)
+        with caplog.at_level(logging.WARNING):
+            recs = community._fetch_comment_records(posts)
+        assert {r["thread_id"] for r in recs} == {"p0", "p2"}
+        assert "p1" in caplog.text
+
+
 def write_threads_fixture(tmp_path, month_ids):
     (tmp_path / "threads").mkdir(exist_ok=True)
     (tmp_path / "threads" / "2026-08.json").write_text(
@@ -348,6 +405,21 @@ class TestMain:
         assert code == 0
         assert calls == [(2026, 8)]
 
+    def test_main_reverse_processes_newest_first(self, tmp_path, monkeypatch):
+        calls = []
+
+        def fake_process(y, m, args, *, reddit):
+            calls.append((y, m))
+            return {"year": y, "month": m, "posts": 0, "comments": 0, "complete": True}
+
+        monkeypatch.setattr(community, "_process_month", fake_process)
+        monkeypatch.setattr(community, "get_reddit", lambda: FakeReddit())
+        code = community.main(
+            ["--range", "2025-01:2025-03", "--reverse", "--force", "--data-dir", str(tmp_path)]
+        )
+        assert code == 0
+        assert calls == [(2025, 3), (2025, 2), (2025, 1)]
+
 
 class FakeRedditor:
     def __init__(self, submissions):
@@ -429,11 +501,14 @@ class TestBackfillLadder:
     @staticmethod
     def _seed_reddit(subs):
         class SeedReddit:
+            def info(self, *, fullnames):
+                for fn in fullnames:
+                    sub = subs.get(fn.removeprefix("t3_"))
+                    if sub is not None:
+                        yield sub
+
             def submission(self, **kwargs):
-                sub = subs.get(kwargs["id"])
-                if sub is None:
-                    raise RuntimeError("gone")
-                return sub
+                raise AssertionError(f"per-ID submission() fetch used for {kwargs['id']}")
 
             def subreddit(self, _name):
                 return FakeSubreddit([])
@@ -574,8 +649,8 @@ class TestProcessMonthBackfill:
         monkeypatch.setattr(community, "discover_month_posts", lambda s, y, m: ([], False))
 
         class FakeReddit:
-            def submission(self, **kwargs):
-                return sotd_sub
+            def info(self, *, fullnames):
+                return iter([sotd_sub] if "t3_sotd1" in fullnames else [])
 
             def subreddit(self, _name):
                 return SearchSubreddit([FakeSub("sr1", "S", ts(2025, 7, 11))])
@@ -614,8 +689,9 @@ class TestDepthCappedListing:
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
 
         class SeedReddit:
-            def submission(self, **kwargs):
-                return FakeSub(kwargs["id"], "S", ts(2026, 8, 5))
+            def info(self, *, fullnames):
+                for fn in fullnames:
+                    yield FakeSub(fn.removeprefix("t3_"), "S", ts(2026, 8, 5))
 
             def subreddit(self, _name):
                 return FakeSubreddit([])
@@ -732,19 +808,84 @@ class TestDiscoverViaPullpush:
         monkeypatch.setattr(community, "pullpush_submission_ids", lambda y, m: {"good1", "dead"})
         good = FakeSub("good1", "Good", ts(2025, 1, 5))
 
-        class DeadSub:
-            id = "dead"
-
-            @property
-            def title(self):
-                raise RuntimeError("gone")
-
         class FakeReddit:
-            def submission(self, *, id):
-                return good if id == "good1" else DeadSub()
+            def info(self, *, fullnames):
+                if "t3_good1" in fullnames:
+                    yield good
 
         posts = community.discover_via_pullpush(FakeReddit(), 2025, 1)
         assert [s.id for s in posts] == ["good1"]
+
+
+class TestBulkIdResolution:
+    """Archive/seed ID resolution must use ``reddit.info`` bulk fetches (100 per
+    request), not one ``reddit.submission()`` round-trip per ID — 205 sequential
+    per-ID fetches cost ~99s of a 103s month (2025-08 profile, 2026-09-07)."""
+
+    @staticmethod
+    def _bulk_reddit(subs, *, fail_call=None):
+        by_id = {s.id: s for s in subs}
+
+        class BulkReddit:
+            def __init__(self):
+                self.info_calls = []
+
+            def info(self, *, fullnames):
+                self.info_calls.append(list(fullnames))
+                if fail_call is not None and len(self.info_calls) == fail_call:
+                    raise RuntimeError("network blip")
+                for fn in fullnames:
+                    sub = by_id.get(fn.removeprefix("t3_"))
+                    if sub is not None:
+                        yield sub
+
+            def submission(self, **kwargs):
+                raise AssertionError(f"per-ID submission() fetch used for {kwargs['id']}")
+
+        return BulkReddit()
+
+    def test_resolves_via_info_batches_of_100_with_t3_prefix(self):
+        subs = [FakeSub(f"id{i:03d}", "T", ts(2025, 1, 5)) for i in range(250)]
+        reddit = self._bulk_reddit(subs)
+        posts = community._resolve_archive_posts(
+            reddit, {s.id for s in subs}, 2025, 1, "arctic_shift"
+        )
+        assert {s.id for s in posts} == {s.id for s in subs}
+        assert len(reddit.info_calls) == 3
+        assert all(len(c) <= 100 for c in reddit.info_calls)
+        assert all(fn.startswith("t3_") for c in reddit.info_calls for fn in c)
+
+    def test_dead_ids_dropped(self):
+        reddit = self._bulk_reddit([FakeSub("alive", "T", ts(2025, 1, 5))])
+        posts = community._resolve_archive_posts(reddit, {"alive", "dead"}, 2025, 1, "arctic_shift")
+        assert [s.id for s in posts] == ["alive"]
+
+    def test_failed_chunk_skipped_and_warned(self, caplog):
+        subs = [FakeSub(f"id{i:03d}", "T", ts(2025, 1, 5)) for i in range(250)]
+        reddit = self._bulk_reddit(subs, fail_call=2)
+        with caplog.at_level(logging.WARNING):
+            posts = community._resolve_archive_posts(
+                reddit, {s.id for s in subs}, 2025, 1, "arctic_shift"
+            )
+        # 250 ids chunk as 100 + 100 + 50; the failed middle chunk (id100-id199) is skipped
+        expected = {f"id{i:03d}" for i in range(250)} - {f"id{i:03d}" for i in range(100, 200)}
+        assert {s.id for s in posts} == expected
+        assert "resolve chunk failed" in caplog.text
+
+    def test_thread_seed_resolves_via_bulk_info(self, tmp_path, monkeypatch, caplog):
+        monkeypatch.setattr(community, "discover_via_search", lambda s, a, b: [])
+        monkeypatch.setattr(community, "discover_via_arctic_shift", lambda r, y, m: [])
+        monkeypatch.setattr(community, "discover_via_pullpush", lambda r, y, m: [])
+        subs = [FakeSub("sotd1", "S", ts(2026, 8, 5))]
+        reddit = self._bulk_reddit(subs)
+        with caplog.at_level(logging.INFO):
+            posts, strategies, per_strategy, _ = community._backfill_posts(
+                reddit, FakeSubreddit([]), 2026, 8, {"sotd1", "dead"}, tmp_path
+            )
+        assert {s.id for s in posts} == {"sotd1"}
+        assert per_strategy["thread_seed"] == 1
+        assert "thread_seed: resolved 1 of 2" in caplog.text
+        assert reddit.info_calls
 
 
 class TestProgressNarration:
@@ -772,8 +913,9 @@ class TestProgressNarration:
         monkeypatch.setattr(community, "discover_via_pullpush", pullpush_must_not_run)
 
         class SeedReddit:
-            def submission(self, **kwargs):
-                return FakeSub(kwargs["id"], "S", ts(2026, 8, 5))
+            def info(self, *, fullnames):
+                for fn in fullnames:
+                    yield FakeSub(fn.removeprefix("t3_"), "S", ts(2026, 8, 5))
 
             def subreddit(self, _name):
                 return FakeSubreddit([])
@@ -884,13 +1026,10 @@ class TestArcticShiftSubmissionIds:
 
     def test_discover_resolves_ids_on_reddit(self, monkeypatch):
         class ArchiveReddit:
-            def __init__(self):
-                self.n = 0
-
-            def submission(self, **kwargs):
-                if kwargs["id"] == "dead":
-                    raise RuntimeError("gone")
-                return FakeSub(kwargs["id"], "T", ts(2025, 1, 5))
+            def info(self, *, fullnames):
+                for fn in fullnames:
+                    if fn != "t3_dead":
+                        yield FakeSub(fn.removeprefix("t3_"), "T", ts(2025, 1, 5))
 
         reddit = ArchiveReddit()
         monkeypatch.setattr(
@@ -925,8 +1064,9 @@ class TestRedditHorizonSkip:
         monkeypatch.setattr(community, "fetch_all_comments", lambda s: [])
 
         class SeedReddit:
-            def submission(self, **kwargs):
-                return FakeSub(kwargs["id"], "S", ts(2025, 12, 5))
+            def info(self, *, fullnames):
+                for fn in fullnames:
+                    yield FakeSub(fn.removeprefix("t3_"), "S", ts(2025, 12, 5))
 
             def subreddit(self, _name):
                 return FakeSubreddit([])

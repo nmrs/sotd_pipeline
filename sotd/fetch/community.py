@@ -13,6 +13,7 @@ comments only) is never reused here — everything is fetched fresh from Reddit.
 
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import logging
 import time
@@ -116,6 +117,36 @@ def load_sotd_ids(data_dir, year: int, month: int) -> Optional[Set[str]]:
 
 
 # --------------------------------------------------------------------------- #
+# shared Reddit ID resolution                                                  #
+# --------------------------------------------------------------------------- #
+RESOLVE_BATCH = 100  # reddit.info accepts up to 100 fullnames per request
+COMMENT_WORKERS = 10  # parallel comment-tree fetchers (same as the SOTD fetch)
+
+
+def _resolve_ids(reddit, ids: Set[str]) -> List:
+    """Resolve bare submission IDs to hydrated Reddit submissions.
+
+    ``reddit.info(fullnames=...)`` fetches up to ``RESOLVE_BATCH`` submissions
+    per request — one ``reddit.submission(id=...)`` round-trip per ID cost
+    ~99s for a 205-ID month (profiled 2026-09-07). The info endpoint returns
+    submission attributes only (comment trees are fetched separately);
+    unmatched (dead) IDs are silently omitted by Reddit, so no per-ID title
+    check is needed. A chunk that fails after safe_call's retries is skipped
+    with a warning, matching the per-ID best-effort behavior it replaces.
+    """
+    sorted_ids = sorted(ids)
+    out: List = []
+    for start in range(0, len(sorted_ids), RESOLVE_BATCH):
+        chunk = sorted_ids[start : start + RESOLVE_BATCH]
+        batch = safe_call(lambda _c=chunk: list(reddit.info(fullnames=[f"t3_{i}" for i in _c])))
+        if batch is None:
+            logger.warning(f"resolve chunk failed; {len(chunk)} ids skipped")
+            continue
+        out.extend(batch)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # forward discovery                                                            #
 # --------------------------------------------------------------------------- #
 def discover_month_posts(subreddit, year: int, month: int) -> Tuple[List, bool]:
@@ -170,6 +201,36 @@ def fetch_all_comments(submission) -> List:
     """
     safe_call(submission.comments.replace_more, limit=None)
     return [c for c in submission.comments.list() if isinstance(c, Comment)]
+
+
+def _thread_comment_records(sub) -> List[dict]:
+    return [build_comment_record(c, sub.id, sub.title) for c in fetch_all_comments(sub) or []]
+
+
+def _fetch_comment_records(posts: List) -> List[dict]:
+    """Fetch full comment trees for every post, parallel across posts.
+
+    Unlike the SOTD fetch's ``fetch_top_level_comments_parallel`` there is no
+    total-batch timeout: its ``as_completed(timeout=...)`` is a budget for the
+    entire batch, and exceeding it discards completed work and re-fetches
+    everything sequentially. Containment is per-future instead — a tree that
+    fails contributes nothing but never aborts the month.
+    """
+    out: List[dict] = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=COMMENT_WORKERS) as pool:
+        futures = {pool.submit(_thread_comment_records, sub): sub for sub in posts}
+        for fut in tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc="Threads",
+            unit="thread",
+            disable=should_disable_tqdm(),
+        ):
+            try:
+                out.extend(fut.result())
+            except Exception as e:
+                logger.warning(f"comment tree fetch failed for {futures[fut].id}: {e}")
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -316,15 +377,10 @@ def _resolve_archive_posts(reddit, ids: Set[str], year: int, month: int, source:
     """Convert archive IDs to fresh Reddit submissions; dead IDs are skipped.
 
     The shared ID-only invariant: the archive discovers, Reddit supplies
-    content (each ID resolves via ``reddit.submission(id=...)`` — not subject
-    to the ~1000-item listing limit — and comment trees are fetched fresh).
+    content (IDs resolve via the bulk ``reddit.info`` fetch — not subject to
+    the ~1000-item listing limit — and comment trees are fetched separately).
     """
-    out: List = []
-    for sid in sorted(ids):
-        sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
-        title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
-        if title:
-            out.append(sub)
+    out = _resolve_ids(reddit, ids)
     logger.info(
         f"{year:04d}-{month:02d}: {source}: resolved {len(out)} of {len(ids)} archive ids on Reddit"
     )
@@ -400,11 +456,7 @@ def _backfill_posts(reddit, subreddit, year: int, month: int, sotd_ids, data_dir
 
     if sotd_ids:
         logger.info(f"{month_str}: thread_seed: resolving {len(sotd_ids)} known SOTD threads…")
-        for sid in sotd_ids:
-            sub = safe_call(lambda _sid=sid: reddit.submission(id=_sid))
-            title = safe_call(lambda _s=sub: _s.title) if sub is not None else None
-            if sub is not None and title:
-                found[sub.id] = sub
+        found = {sub.id: sub for sub in _resolve_ids(reddit, sotd_ids)}
         per_strategy["thread_seed"] = len(found)
         logger.info(f"{month_str}: thread_seed: resolved {len(found)} of {len(sotd_ids)}")
         if found:
@@ -535,11 +587,8 @@ def _process_month(year: int, month: int, args, *, reddit) -> dict:
         for s in posts_new
     ]
 
-    new_comments: List[dict] = []
     logger.info(f"{month_str}: fetching comment trees for {len(posts_new)} threads…")
-    for sub in tqdm(posts_new, desc="Threads", unit="thread", disable=should_disable_tqdm()):
-        for c in fetch_all_comments(sub) or []:
-            new_comments.append(build_comment_record(c, sub.id, sub.title))
+    new_comments = _fetch_comment_records(posts_new)
 
     existing = None if args.force else load_community_file(out_path)
     if existing is not None:
