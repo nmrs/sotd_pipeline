@@ -167,6 +167,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="Exclude entries with fewer shaves (use to match report-table thresholds)",
     )
+    top.add_argument(
+        "--sort",
+        choices=("hhi",),
+        help=(
+            "Re-sort as the Most Boring Shaver view (hhi desc, shaves desc, competition "
+            "ranks recomputed); the category must carry an hhi field"
+        ),
+    )
 
     history = sub.add_parser(
         "history", help="Rank history for one item (or a multi-item matrix) across months or years"
@@ -386,7 +394,47 @@ def query_top(args: argparse.Namespace) -> list[dict[str, Any]]:
                 f"numeric fields: {', '.join(numerics) or '(none)'}"
             )
         entries = [e for e in entries if _entry_int(e, "shaves") >= args.min_shaves]
+    if args.sort == "hhi":
+        entries = _sort_by_hhi(entries, args.category)
     return entries[: max(args.top, 0)]
+
+
+def _entry_float(entry: dict[str, Any], key: str) -> float:
+    """Return an entry's float field, tolerating missing or non-numeric values."""
+    value = entry.get(key, 0.0)
+    return value if isinstance(value, (int, float)) and not isinstance(value, bool) else 0.0
+
+
+def _sort_by_hhi(entries: list[dict[str, Any]], category: str) -> list[dict[str, Any]]:
+    """Re-sort entries as the report's Most Boring Shaver table and recompute ranks.
+
+    Mirrors table_generator's user-soap-brand-scent-diversity hhi view: filter
+    first (done by --min-shaves), sort hhi desc then shaves desc (file order —
+    the canonical unique_combinations ranking — breaks residual ties, matching
+    the report's stable sort), then competition-rank on the full sort key so
+    equal (hhi, shaves) rows share a rank.
+    """
+    if entries and not any(
+        isinstance(e.get("hhi"), (int, float)) and not isinstance(e.get("hhi"), bool)
+        for e in entries
+    ):
+        raise QueryError(
+            f"category {category!r} has no hhi field to sort on; "
+            f"numeric fields: {', '.join(_numeric_fields(entries)) or '(none)'}"
+        )
+    ordered = sorted(
+        entries,
+        key=lambda e: (-_entry_float(e, "hhi"), -_entry_int(e, "shaves")),
+    )
+    previous: tuple[float, int] | None = None
+    rank = 0
+    for position, entry in enumerate(ordered, start=1):
+        key = (_entry_float(entry, "hhi"), _entry_int(entry, "shaves"))
+        if key != previous:
+            rank = position
+            previous = key
+        entry["rank"] = rank
+    return ordered
 
 
 def query_ranking(args: argparse.Namespace) -> dict[str, Any]:
@@ -413,9 +461,7 @@ def query_metrics(args: argparse.Namespace) -> dict[str, Any]:
     path, _ = _resolve_period(args, data_dir)
     doc = _load(path)
     metrics = {
-        key: value
-        for key, value in _category_container(doc).items()
-        if isinstance(value, dict)
+        key: value for key, value in _category_container(doc).items() if isinstance(value, dict)
     }
     if not metrics:
         raise QueryError(f"no dict-shaped metric categories in {path}")
@@ -562,7 +608,9 @@ def _render_schema(result: dict[str, Any]) -> str:
 
 
 def _render_rows(
-    rows: list[dict[str, Any]], show_rank: bool = True, canonical: tuple[str, ...] = CANONICAL_NUMERICS
+    rows: list[dict[str, Any]],
+    show_rank: bool = True,
+    canonical: tuple[str, ...] = CANONICAL_NUMERICS,
 ) -> str:
     """Render period/rank/numeric rows as an aligned table."""
     field_set = {key for row in rows for key in row if key not in ("period", "rank")}

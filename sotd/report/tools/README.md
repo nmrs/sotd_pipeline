@@ -22,6 +22,7 @@ or field names.
 .venv/bin/python -m sotd.report.tools.aggregate_query meta --month 2026-08
 .venv/bin/python -m sotd.report.tools.aggregate_query schema --month 2026-08
 .venv/bin/python -m sotd.report.tools.aggregate_query top --month 2026-08 --category razors --top 10 --min-shaves 5
+.venv/bin/python -m sotd.report.tools.aggregate_query top --month 2026-08 --category user_soap_brand_scent_diversity --sort hhi --min-shaves 5
 .venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end 2026-08
 .venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 3 --end 2026-08
 .venv/bin/python -m sotd.report.tools.aggregate_query ranking
@@ -46,7 +47,13 @@ categories whose key repeats across rows (e.g. `highest_use_count_per_blade`,
 keyed user+blade) reject `history` as ambiguous — use `top`/`schema` for those.
 `--min-shaves` matches the report tables' `shaves:N` thresholds and errors on
 categories without a `shaves` field (`brand_diversity` thresholds on
-`unique_soaps` — use `--json` + jq for that filter). A production-marked sweep
+`unique_soaps` — use `--json` + jq for that filter). `--sort hhi` re-sorts the
+result as the report's **Most Boring Shaver** table — `hhi` desc then `shaves`
+desc, competition ranks recomputed on equal `(hhi, shaves)` — instead of the
+canonical `unique_combinations` order; the rank column is the boring-view rank,
+not the file's. It errors on categories without an `hhi` field (only
+`user_soap_brand_scent_diversity` has one today), and pairs with
+`--min-shaves 5` monthly / `50` annual to match the rendered table. A production-marked sweep
 (`tests/integration/test_aggregate_query_real_data.py`, `make test-production`)
 verifies every real category renders and resolves.
 

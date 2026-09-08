@@ -26,6 +26,7 @@ If either is missing, return an error note instead of guessing.
    - `.venv/bin/python -m sotd.report.tools.aggregate_query meta --month YYYY-MM`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query schema --month YYYY-MM` (valid categories + their fields, when a category key or field name is uncertain)
    - `.venv/bin/python -m sotd.report.tools.aggregate_query top --month YYYY-MM --category razors --top 10`
+   - `.venv/bin/python -m sotd.report.tools.aggregate_query top --month YYYY-MM --category user_soap_brand_scent_diversity --sort hhi --min-shaves 5` (the Most Boring Shaver view: hhi desc, shaves desc, boring-table ranks)
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end YYYY-MM`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 14 --end YYYY-MM` (repeat `--name` for a side-by-side rank matrix)
    - `.venv/bin/python -m sotd.report.tools.aggregate_query metrics --month YYYY-MM` (dict metric categories — sample/mashup usage)

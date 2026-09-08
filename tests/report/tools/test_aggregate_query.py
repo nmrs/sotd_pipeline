@@ -86,6 +86,79 @@ def data_dir(tmp_path):
                 {"rank": 2, "user": "annuser", "blade": "Lord Platinum", "format": "DE", "uses": 6},
             ],
         },
+        # hhi rows are in file order = canonical rank (unique_combinations desc, shaves desc)
+        "user_soap_brand_scent_diversity": {
+            "2026-01": [
+                {
+                    "rank": 1,
+                    "user": "scribe",
+                    "shaves": 38,
+                    "effective_soaps": 1,
+                    "unique_combinations": 38,
+                    "hhi": 0.05,
+                },
+                {
+                    "rank": 2,
+                    "user": "lowshave",
+                    "shaves": 2,
+                    "effective_soaps": 2,
+                    "unique_combinations": 5,
+                    "hhi": 0.99,
+                },
+                {
+                    "rank": 3,
+                    "user": "mono",
+                    "shaves": 31,
+                    "effective_soaps": 10,
+                    "unique_combinations": 3,
+                    "hhi": 0.9,
+                },
+                {
+                    "rank": 4,
+                    "user": "glass",
+                    "shaves": 29,
+                    "effective_soaps": 10,
+                    "unique_combinations": 3,
+                    "hhi": 0.877,
+                },
+                {
+                    "rank": 5,
+                    "user": "pair_a",
+                    "shaves": 6,
+                    "effective_soaps": 5,
+                    "unique_combinations": 2,
+                    "hhi": 0.8,
+                },
+                {
+                    "rank": 6,
+                    "user": "pair_b",
+                    "shaves": 6,
+                    "effective_soaps": 5,
+                    "unique_combinations": 2,
+                    "hhi": 0.8,
+                },
+            ],
+            "2026-02": [
+                {
+                    "rank": 1,
+                    "user": "annuser",
+                    "shaves": 30,
+                    "effective_soaps": 2,
+                    "unique_combinations": 2,
+                    "hhi": 0.85,
+                },
+            ],
+            "2026-03": [
+                {
+                    "rank": 1,
+                    "user": "annuser",
+                    "shaves": 28,
+                    "effective_soaps": 2,
+                    "unique_combinations": 2,
+                    "hhi": 0.86,
+                },
+            ],
+        },
         "weird": {
             "2026-01": [{"rank": 1, "widget": "gizmo", "shaves": 5}],
             "2026-02": [],
@@ -680,6 +753,77 @@ class TestKeyFieldAwareness:
         )
         assert code == 1
         assert "shaves" in err
+
+    def test_top_sort_hhi_matches_boring_table(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "user_soap_brand_scent_diversity",
+                "--sort",
+                "hhi",
+                "--min-shaves",
+                "5",
+            ],
+        )
+        assert code == 0
+        rows = [line.split() for line in out.splitlines()[1:]]
+        # hhi desc, shaves desc — the report's Most Boring Shaver view. The
+        # shaves:2 row (highest hhi) is filtered before sorting.
+        assert [r[1] for r in rows] == ["mono", "glass", "pair_a", "pair_b", "scribe"]
+        # Competition ranks on equal (hhi, shaves): 1, 2, 3, 3, 5.
+        assert [r[0] for r in rows] == ["1", "2", "3", "3", "5"]
+
+    def test_top_sort_hhi_json_reranks(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys,
+            [
+                "--json",
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "user_soap_brand_scent_diversity",
+                "--sort",
+                "hhi",
+                "--min-shaves",
+                "5",
+            ],
+        )
+        assert code == 0
+        entries = json.loads(out)
+        assert [(e["user"], e["rank"]) for e in entries] == [
+            ("mono", 1),
+            ("glass", 2),
+            ("pair_a", 3),
+            ("pair_b", 3),
+            ("scribe", 5),
+        ]
+
+    def test_top_sort_hhi_errors_without_hhi(self, data_dir, capsys):
+        code, _, err = run(
+            capsys,
+            [
+                "--data-dir",
+                str(data_dir),
+                "top",
+                "--month",
+                "2026-01",
+                "--category",
+                "users",
+                "--sort",
+                "hhi",
+            ],
+        )
+        assert code == 1
+        assert "hhi" in err
 
     def test_history_matches_brand_keyed_item(self, data_dir, capsys):
         code, out, _ = run(
