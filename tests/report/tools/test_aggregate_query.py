@@ -840,3 +840,109 @@ class TestKeyFieldAwareness:
         )
         assert code == 1
         assert "shaves" in err
+
+
+class TestRanking:
+    """ranking: the per-category sort keys behind every rendered rank."""
+
+    def test_ranking_lists_sort_rules_for_known_categories(self, capsys):
+        code, out, _ = run(capsys, ["ranking"])
+        assert code == 0
+        # product tables: shaves desc, then unique_users desc
+        assert "shaves desc, unique_users desc" in out
+        # top shaver: missed_days asc wins over raw shaves
+        assert "missed_days asc, shaves desc" in out
+        # brand diversity: unique_soaps first, alphabetical brand within
+        assert "unique_soaps desc, brand asc" in out
+        # rank styles are stated
+        assert "competition" in out
+        assert "sequential" in out
+        # dict categories are listed but not ranked
+        assert "sample_usage_metrics" in out
+
+    def test_ranking_category_filter(self, capsys):
+        code, out, _ = run(capsys, ["ranking", "--category", "users"])
+        assert code == 0
+        assert "missed_days asc, shaves desc" in out
+        assert "razors" not in out.split("\n", 1)[0]
+
+    def test_ranking_unknown_category_errors(self, capsys):
+        code, _, err = run(capsys, ["ranking", "--category", "nope"])
+        assert code == 1
+        assert "valid categories" in err
+
+    def test_ranking_json(self, capsys):
+        code, out, _ = run(capsys, ["--json", "ranking", "--category", "razors"])
+        assert code == 0
+        doc = json.loads(out)
+        entry = doc["categories"]["razors"]
+        assert entry["sort"] == [["shaves", "desc"], ["unique_users", "desc"]]
+        assert entry["ranks"] == "competition"
+
+
+class TestMetrics:
+    """metrics: dict-shaped metric categories and cross-month meta comparison."""
+
+    def test_metrics_month_renders_dict_categories(self, data_dir, capsys):
+        code, out, _ = run(capsys, ["--data-dir", str(data_dir), "metrics", "--month", "2026-01"])
+        assert code == 0
+        assert "sample_usage_metrics" in out
+        assert "total_samples" in out
+
+    def test_metrics_month_json(self, data_dir, capsys):
+        code, out, _ = run(
+            capsys, ["--data-dir", str(data_dir), "--json", "metrics", "--month", "2026-01"]
+        )
+        assert code == 0
+        doc = json.loads(out)
+        assert doc["period"] == "2026-01"
+        assert doc["metrics"]["sample_usage_metrics"]["total_samples"] == 0
+
+    def test_metrics_missing_month_errors(self, tmp_path, capsys):
+        (tmp_path / "aggregated").mkdir()
+        code, _, err = run(capsys, ["--data-dir", str(tmp_path), "metrics", "--month", "2025-01"])
+        assert code == 1
+        assert "file not found" in err
+
+    def test_metrics_range_compares_meta(self, tmp_path, capsys):
+        agg = tmp_path / "aggregated"
+        agg.mkdir()
+        inventory = (("2026-05", 531, 139), ("2026-06", 856, 215), ("2026-07", 526, 135))
+        for month, soaps, brands in inventory:
+            make_month_file(
+                agg / f"{month}.json",
+                month,
+                razors=[],
+                soaps=[],
+                meta_extra={"unique_soaps": soaps, "unique_brands": brands, "total_samples": 3},
+            )
+        code, out, _ = run(
+            capsys, ["--data-dir", str(tmp_path), "metrics", "--months", "2026-05:2026-07"]
+        )
+        assert code == 0
+        for month, _, _ in inventory:
+            assert month in out
+        assert "unique_soaps" in out
+        assert "unique_brands" in out
+        assert "total_shaves" in out
+
+    def test_metrics_range_skips_missing_months(self, tmp_path, capsys):
+        agg = tmp_path / "aggregated"
+        agg.mkdir()
+        make_month_file(agg / "2026-05.json", "2026-05", razors=[], soaps=[])
+        code, out, _ = run(
+            capsys, ["--data-dir", str(tmp_path), "metrics", "--months", "2026-05:2026-07"]
+        )
+        assert code == 0
+        assert "skipped" in out
+        assert "2026-06" in out and "2026-07" in out
+
+    def test_metrics_requires_exactly_one_period(self):
+        # no period at all -> argparse usage error
+        with pytest.raises(SystemExit) as exc:
+            main(["metrics"])
+        assert exc.value.code == 2
+        # conflicting periods -> argparse usage error too
+        with pytest.raises(SystemExit) as exc:
+            main(["metrics", "--month", "2026-01", "--months", "2026-01:2026-02"])
+        assert exc.value.code == 2

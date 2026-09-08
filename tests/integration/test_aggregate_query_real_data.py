@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from sotd.report.tools.aggregate_query import KEY_FIELD_PRIORITY, main
+from sotd.report.tools.aggregate_query import KEY_FIELD_PRIORITY, _CATEGORY_RANKING, main
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
@@ -151,3 +151,72 @@ class TestRealDataCompositeKeys:
         )
         assert code == 1
         assert "ambiguous" in err
+
+
+def _respects_spec(rows, spec):
+    """True when consecutive rows never improve along the first differing spec field."""
+    for a, b in zip(rows, rows[1:]):
+        for field, direction in spec:
+            va, vb = a.get(field), b.get(field)
+            if va is None:
+                va = 0
+            if vb is None:
+                vb = 0
+            if va == vb:
+                continue
+            if direction == "desc":
+                return va >= vb
+            return va <= vb
+    return True
+
+
+class TestRealDataRankingOrder:
+    """Real row order must satisfy the CLI's sort-key registry (drift guard).
+
+    The aggregate phase encodes table order across several sites (base
+    tie_columns, per-class overrides, standalone aggregators); this pins the
+    ``ranking`` registry to the actual outcome so the map cannot drift from
+    the code in either direction.
+    """
+
+    @staticmethod
+    def _rows(path, container_key, category):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        container = doc.get(container_key, doc)
+        return container.get(category)
+
+    def test_monthly_categories_covered(self):
+        unregistered = [c for c in month_categories if c not in _CATEGORY_RANKING]
+        assert not unregistered, (
+            f"categories missing from aggregate_query _CATEGORY_RANKING: {unregistered}"
+        )
+
+    def test_annual_categories_covered(self):
+        unregistered = [c for c in annual_categories if c not in _CATEGORY_RANKING]
+        assert not unregistered, (
+            f"categories missing from aggregate_query _CATEGORY_RANKING: {unregistered}"
+        )
+
+    @pytest.mark.parametrize(
+        "category", [c for c in month_categories if c in _CATEGORY_RANKING]
+    )
+    def test_monthly_order_matches_registry(self, category):
+        rows = self._rows(_monthly_files[-1], "data", category)
+        if rows is None:
+            pytest.skip(f"{category} absent from {month_label}")
+        assert _respects_spec(rows, _CATEGORY_RANKING[category][1]), (
+            f"{month_label} {category}: row order violates the registered sort "
+            f"{_CATEGORY_RANKING[category]}"
+        )
+
+    @pytest.mark.parametrize(
+        "category", [c for c in annual_categories if c in _CATEGORY_RANKING]
+    )
+    def test_annual_order_matches_registry(self, category):
+        rows = self._rows(annual_path, "data", category)
+        if rows is None:
+            pytest.skip(f"{category} absent from {year_label}")
+        assert _respects_spec(rows, _CATEGORY_RANKING[category][1]), (
+            f"{year_label} {category}: row order violates the registered sort "
+            f"{_CATEGORY_RANKING[category]}"
+        )

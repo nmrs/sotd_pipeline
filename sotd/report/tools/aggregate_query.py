@@ -53,6 +53,82 @@ KEY_FIELD_PRIORITY = (
 # Numeric columns rendered first, in this order; the rest follow sorted.
 CANONICAL_NUMERICS = ("shaves", "unique_users", "unique_soaps")
 
+# Meta keys rendered first, in this order, for cross-month inventory tables.
+META_CANONICAL = (
+    "total_shaves",
+    "unique_shavers",
+    "unique_soaps",
+    "unique_brands",
+    "unique_razors",
+    "unique_blades",
+    "unique_brushes",
+    "total_samples",
+)
+
+# The sort keys behind every rendered rank, audited from the aggregate phase
+# (base ``tie_columns``, per-aggregator ``tie_columns``/``_sort_and_rank``
+# overrides, and the standalone aggregators that never touch the base class).
+# Style ``competition`` shares a rank across full ties (1, 2, 2, 4) and orders
+# them alphabetically; ``sequential`` numbers rows 1..N with no tie sharing.
+# The production sweep (tests/integration/test_aggregate_query_real_data.py)
+# verifies real file row order against this registry, so editing one side
+# without the other fails a test.
+SortSpec = tuple[tuple[str, str], ...]
+
+_CATEGORY_RANKING: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
+    # Core product tables + makers/plates/straights/formats: the base sort.
+    "razors": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "blades": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brushes": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "soaps": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "soap_sample_brands": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "soap_sample_brand_scents": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "razor_manufacturers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "blade_manufacturers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "soap_makers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "razor_formats": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brush_handle_makers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brush_knot_makers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brush_fibers": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brush_knot_sizes": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "blackbird_plates": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "christopher_bradley_plates": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "game_changer_plates": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "super_speed_variants": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "straight_widths": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "straight_grinds": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "straight_points": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "razor_blade_combinations": ("competition", (("shaves", "desc"), ("unique_users", "desc"))),
+    "highest_use_count_per_blade": ("competition", (("uses", "desc"),)),
+    # brand_diversity ties are broken alphabetically, not by shaves.
+    "brand_diversity": ("competition", (("unique_soaps", "desc"), ("brand", "asc"))),
+    "user_soap_brand_diversity": ("competition", (("unique_brands", "desc"), ("shaves", "desc"))),
+    "user_soap_brand_scent_diversity": (
+        "competition",
+        (("unique_combinations", "desc"), ("shaves", "desc")),
+    ),
+    "user_single_use_soaps": ("competition", (("single_use_soaps", "desc"), ("shaves", "desc"))),
+    "users": ("competition", (("missed_days", "asc"), ("shaves", "desc"))),
+    # Sequential ranks (1, 2, 3 — no sharing).
+    "user_blade_diversity": ("sequential", (("unique_blades", "desc"), ("shaves", "desc"))),
+    "user_brush_diversity": ("sequential", (("unique_brushes", "desc"), ("shaves", "desc"))),
+    "user_razor_diversity": ("sequential", (("unique_razors", "desc"), ("shaves", "desc"))),
+    "soap_mashup_users": ("sequential", (("shaves", "desc"), ("unique_users", "desc"))),
+    "soap_sample_users": ("sequential", (("shaves", "desc"), ("unique_users", "desc"))),
+    "brush_fiber_users": (
+        "sequential within fiber",
+        (("fiber", "asc"), ("shaves", "desc"), ("unique_users", "desc")),
+    ),
+    "razor_format_users": (
+        "sequential within format",
+        (("format", "asc"), ("shaves", "desc"), ("unique_users", "desc")),
+    ),
+    "blade_usage_distribution": ("sequential", (("use_count", "asc"),)),
+    # Dict-shaped metric blocks, not ranked lists.
+    "sample_usage_metrics": ("dict", ()),
+    "mashup_usage_metrics": ("dict", ()),
+}
+
 
 class QueryError(Exception):
     """Raised for deterministic, user-facing query failures."""
@@ -117,6 +193,22 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=0,
         help="Only count months where the item clears this threshold",
+    )
+
+    ranking = sub.add_parser(
+        "ranking", help="Per-category sort keys behind every rendered rank (period-independent)"
+    )
+    ranking.add_argument("--category", help="Only this category (e.g. razors, users)")
+
+    metrics = sub.add_parser(
+        "metrics",
+        help="Dict-shaped metric categories for a period, or a cross-month meta comparison",
+    )
+    period = metrics.add_mutually_exclusive_group(required=True)
+    period.add_argument("--month", help="Monthly file (YYYY-MM): print its dict metric categories")
+    period.add_argument("--year", help="Annual file (YYYY): print its dict metric categories")
+    period.add_argument(
+        "--months", help="Range YYYY-MM:YYYY-MM — meta inventory table (the June-anomaly query)"
     )
 
     return parser
@@ -297,6 +389,72 @@ def query_top(args: argparse.Namespace) -> list[dict[str, Any]]:
     return entries[: max(args.top, 0)]
 
 
+def query_ranking(args: argparse.Namespace) -> dict[str, Any]:
+    """Return the sort-key registry, optionally narrowed to one category."""
+    if args.category:
+        if args.category not in _CATEGORY_RANKING:
+            valid = ", ".join(sorted(_CATEGORY_RANKING))
+            raise QueryError(f"unknown category {args.category!r}; valid categories: {valid}")
+        selected = {args.category: _CATEGORY_RANKING[args.category]}
+    else:
+        selected = _CATEGORY_RANKING
+    categories = {
+        key: {"ranks": style, "sort": [list(field_dir) for field_dir in spec]}
+        for key, (style, spec) in selected.items()
+    }
+    return {"categories": categories}
+
+
+def query_metrics(args: argparse.Namespace) -> dict[str, Any]:
+    """Return dict metric categories for a period, or a cross-month meta table."""
+    data_dir = Path(args.data_dir)
+    if args.months:
+        return _query_metrics_range(args, data_dir)
+    path, _ = _resolve_period(args, data_dir)
+    doc = _load(path)
+    metrics = {
+        key: value
+        for key, value in _category_container(doc).items()
+        if isinstance(value, dict)
+    }
+    if not metrics:
+        raise QueryError(f"no dict-shaped metric categories in {path}")
+    return {"file": str(path), "period": args.month or args.year, "metrics": metrics}
+
+
+def _query_metrics_range(args: argparse.Namespace, data_dir: Path) -> dict[str, Any]:
+    """Compare numeric meta blocks across a calendar month range."""
+    if not re.match(r"^\d{4}-\d{2}:\d{4}-\d{2}$", args.months):
+        raise QueryError(f"invalid range {args.months!r}; expected YYYY-MM:YYYY-MM")
+    start, end = args.months.split(":")
+    if start > end:
+        raise QueryError("--months start must not be after end")
+    rows: list[dict[str, Any]] = []
+    skipped: list[str] = []
+    for label in _month_range_labels(start, end):
+        path = data_dir / "aggregated" / f"{label}.json"
+        if not path.exists():
+            skipped.append(label)
+            continue
+        doc = _load(path)
+        meta = doc.get("meta")
+        if not isinstance(meta, dict):
+            raise QueryError(f"meta block missing in {path}")
+        rows.append(
+            {
+                "period": label,
+                **{
+                    k: v
+                    for k, v in meta.items()
+                    if isinstance(v, (int, float)) and not isinstance(v, bool)
+                },
+            }
+        )
+    if not rows:
+        raise QueryError("no aggregated files match the selected period")
+    return {"rows": rows, "skipped": skipped}
+
+
 def _entry_int(entry: dict[str, Any], key: str) -> int:
     """Return an entry's integer field, tolerating missing or non-int values."""
     value = entry.get(key, 0)
@@ -403,12 +561,12 @@ def _render_schema(result: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _render_rows(rows: list[dict[str, Any]], show_rank: bool = True) -> str:
+def _render_rows(
+    rows: list[dict[str, Any]], show_rank: bool = True, canonical: tuple[str, ...] = CANONICAL_NUMERICS
+) -> str:
     """Render period/rank/numeric rows as an aligned table."""
     field_set = {key for row in rows for key in row if key not in ("period", "rank")}
-    numerics = [f for f in CANONICAL_NUMERICS if f in field_set] + sorted(
-        field_set - set(CANONICAL_NUMERICS)
-    )
+    numerics = [f for f in canonical if f in field_set] + sorted(field_set - set(canonical))
     headers = ["period", *(["rank"] if show_rank else []), *numerics]
     table: list[list[str]] = []
     for row in rows:
@@ -421,6 +579,30 @@ def _render_rows(rows: list[dict[str, Any]], show_rank: bool = True) -> str:
     header_line = "  ".join(h.rjust(widths[i]) for i, h in enumerate(headers))
     body = "\n".join("  ".join(c.rjust(widths[i]) for i, c in enumerate(r)) for r in table)
     return f"{header_line}\n{body}" if table else "(no rows)"
+
+
+def _render_ranking(result: dict[str, Any]) -> str:
+    """Render the sort-key registry as aligned category/spec/style lines."""
+    lines = [
+        "Table sort keys — the encoding of rendered rank order (production sweep verifies",
+        "real files against this registry). competition: ties share a rank (1, 2, 2, 4),",
+        "alphabetical within a shared rank; sequential: 1, 2, 3 with no sharing. Annual",
+        "files follow the same rules; maker tables are re-keyed to name.",
+    ]
+    for key, info in result["categories"].items():
+        style = info["ranks"]
+        spec = ", ".join(f"{field} {direction}" for field, direction in info["sort"])
+        lines.append(f"{key:<32} {spec:<48} {style}" if spec else f"{key:<32} dict — not ranked")
+    return "\n".join(lines)
+
+
+def _render_metrics_month(result: dict[str, Any]) -> str:
+    """Render a period's dict metric categories as aligned key: value blocks."""
+    lines = [f"{result['period']}  {result['file']}"]
+    for key, block in result["metrics"].items():
+        lines.append(key)
+        lines.extend("  " + line for line in _render_meta(block).splitlines())
+    return "\n".join(lines)
 
 
 def _render_top(entries: list[dict[str, Any]], category: str) -> str:
@@ -489,6 +671,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             output = (
                 json.dumps(entries, indent=2) if args.json else _render_top(entries, args.category)
             )
+        elif args.command == "ranking":
+            result = query_ranking(args)
+            output = json.dumps(result, indent=2) if args.json else _render_ranking(result)
+        elif args.command == "metrics":
+            result = query_metrics(args)
+            if args.json:
+                output = json.dumps(result, indent=2)
+            elif "metrics" in result:
+                output = _render_metrics_month(result)
+            else:
+                output = _render_rows(result["rows"], show_rank=False, canonical=META_CANONICAL)
+                if result["skipped"]:
+                    output += f"\n(skipped missing files: {', '.join(result['skipped'])})"
         else:
             result = query_history(args)
             if args.json:

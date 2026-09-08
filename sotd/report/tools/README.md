@@ -13,8 +13,10 @@ below).
 ## aggregate_query
 
 Point queries over `data/aggregated/` (monthly + annual): meta block, top tables
-per category, rank history for one item — and a `schema` subcommand so nobody
-has to probe the JSON for valid categories or field names.
+per category, rank history for one item, the sort-key registry behind every
+rendered rank, dict-shaped metric blocks, and cross-month meta comparisons —
+plus a `schema` subcommand so nobody has to probe the JSON for valid categories
+or field names.
 
 ```bash
 .venv/bin/python -m sotd.report.tools.aggregate_query meta --month 2026-08
@@ -22,6 +24,9 @@ has to probe the JSON for valid categories or field names.
 .venv/bin/python -m sotd.report.tools.aggregate_query top --month 2026-08 --category razors --top 10 --min-shaves 5
 .venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end 2026-08
 .venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 3 --end 2026-08
+.venv/bin/python -m sotd.report.tools.aggregate_query ranking
+.venv/bin/python -m sotd.report.tools.aggregate_query metrics --month 2026-07
+.venv/bin/python -m sotd.report.tools.aggregate_query metrics --months 2026-05:2026-07
 ```
 
 Always pass `--end <report month>` to history — months after the report month are
@@ -44,6 +49,32 @@ categories without a `shaves` field (`brand_diversity` thresholds on
 `unique_soaps` — use `--json` + jq for that filter). A production-marked sweep
 (`tests/integration/test_aggregate_query_real_data.py`, `make test-production`)
 verifies every real category renders and resolves.
+
+**Ranking semantics.** Table order is deterministic — read ranks as data. The
+canonical, per-category map is `aggregate_query ranking` (period-independent):
+product tables sort `shaves` desc then `unique_users` desc (equal shaves is
+**not** a tie — 29/19 ranks above 29/1), diversity tables sort by their metric
+desc then shaves, Top Shaver sorts `missed_days` asc then shaves desc, and
+`brand_diversity` breaks its ties alphabetically rather than by shaves. Ties on
+the full sort key share a competition rank (1, 2, 2, 4), alphabetical within the
+shared rank; several user tables rank sequentially instead. The registry lives
+in `aggregate_query.py` (`_CATEGORY_RANKING`) and the production sweep
+(`make test-production`) verifies real file row order against it, so the map
+cannot drift from the aggregate phase in either direction.
+
+When drafting: any tie-shaped claim ("N-way photo finish", dead heat) must quote
+the tied rows' `shaves` **and** `unique_users` from a query output — equal
+shaves alone does not make a tie, and a row whose numbers don't match the
+claimed tie is excluded from it.
+
+**Dict metrics.** `metrics --month`/`--year` prints the dict-shaped categories
+the list-based subcommands can't reach (`sample_usage_metrics`,
+`mashup_usage_metrics`); `metrics --months YYYY-MM:YYYY-MM` builds the
+cross-month meta inventory table — the June-anomaly query in one line:
+
+```bash
+.venv/bin/python -m sotd.report.tools.aggregate_query metrics --months 2026-05:2026-07
+```
 
 ## community_query
 
@@ -73,10 +104,12 @@ Record shape (also shown by `schema`): `{"meta": {...}, "data": {"posts": [...],
 plus the `in_pipeline` flag; comments are a flattened list with
 `id/thread_id/thread_title/parent_id/author/created_utc/body/...`.
 
-**Recipe — daily contest target calendar** (Join Us July-style daily threads):
-search for the recurring marker, then read the matched comment bodies; each day's
-`Today's target` / `Tomorrow's target` sections carry the `Soap:`/`Brush:`/
-`Razor:` lines with difficulty tags.
+**Recipe — daily challenge target calendar** (when a month's community summary
+reveals a daily challenge thread — one-off community events come and go; search
+for whatever the month's recurring marker is): read the matched comment bodies;
+each day's `Today's target` / `Tomorrow's target` sections carry the
+`Soap:`/`Brush:`/`Razor:` lines with difficulty tags. Worked example from
+2026-07 (Join Us July):
 
 ```bash
 .venv/bin/python -m sotd.report.tools.community_query search --months 2026-07:2026-07 --query "Join Us July - July"

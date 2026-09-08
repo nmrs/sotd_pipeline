@@ -28,6 +28,8 @@ If either is missing, return an error note instead of guessing.
    - `.venv/bin/python -m sotd.report.tools.aggregate_query top --month YYYY-MM --category razors --top 10`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Blackland Blackbird" --last 6 --end YYYY-MM`
    - `.venv/bin/python -m sotd.report.tools.aggregate_query history --category razors --name "Schick Injector" --name "Merkur 37C" --last 14 --end YYYY-MM` (repeat `--name` for a side-by-side rank matrix)
+   - `.venv/bin/python -m sotd.report.tools.aggregate_query metrics --month YYYY-MM` (dict metric categories — sample/mashup usage)
+   - `.venv/bin/python -m sotd.report.tools.aggregate_query metrics --months YYYY-MM:YYYY-MM` (cross-month meta inventory — soap/brand-count anomalies, sample trends)
    Categories key their rows by their natural identity field — `name` for
    razors/soaps, but `brand` for `soap_makers`/`brand_diversity`/
    `razor_manufacturers`, `user` for `users`/`user_*`, `format`/`fiber`/
@@ -66,6 +68,14 @@ If either is missing, return an error note instead of guessing.
    summaries (step 4 — current plus prior two) alongside these when choosing bullets
    — a community event can be the story behind a number, and a two-month arc can be
    the story behind a trend.
+
+   **Ranking semantics** — the sort behind every rank you narrate (canonical,
+   per-category map: `aggregate_query ranking`). Product tables sort `shaves`
+   desc then `unique_users` desc: equal shaves is **not** a tie — unique_users
+   decides (29/19 ranks above 29/1). Diversity tables sort by their diversity
+   metric desc then shaves. Top Shaver sorts `missed_days` asc then shaves desc.
+   Full ties share a competition rank (1, 2, 2, 4), alphabetical within the
+   shared rank. Adjacent ranks are never themselves evidence of a tie.
 6. **Verify every historical claim** ("first time since Oct 2017", "20th time
    overall", streak counts, lead changes) with `history` queries against
    `data/aggregated/`. If a claim cannot be verified this way, drop it or list it
@@ -250,6 +260,15 @@ recycling this list.
 
 - Every numeric claim must match the aggregated data exactly. No rounding, no
   paraphrased counts.
+- Transcribe numbers at write time — never compose them from narrative
+  expectation. A number appears in a bullet only if the supporting query output
+  (quoted in the fact basis) contains that exact number; rank adjacency is not a
+  number. Tie-shaped claims ("N-way photo finish at X", dead heat) must quote the
+  tied rows' `shaves` **and** `unique_users` — equal shaves alone is not a tie
+  (unique_users breaks it), and a row whose numbers don't match the claimed tie
+  is excluded from it. Keep an entity's count consistent across bullets: if two
+  bullets disagree on the same entity's number, at least one is wrong —
+  reconcile before applying.
 - Historical and comparative claims must be verified against `data/aggregated/` files.
   Unverifiable → omit or open question. Archive reports are never a numeric source.
 - Never invent community storylines, in-jokes, or user motivations. The author knows
